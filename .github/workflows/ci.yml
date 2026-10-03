@@ -26,14 +26,14 @@ permissions:
 env:
   TURBO_TELEMETRY_DISABLED: 1
 
-# Supersession is per expensive job. A workflow-level cancel-in-progress group
-# would cancel this run before Report merge authority could post terminal
-# checks for the head that was superseded.
+# A newer pull-request commit cancels this in-progress run. Required-check
+# publication is publish-required-checks.yml, which is not part of this run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   lint-and-typecheck:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Lint & Typecheck
     steps:
@@ -56,9 +56,6 @@ jobs:
           TYPECHECK_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
 
   test:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Unit Tests
     services:
@@ -130,9 +127,6 @@ jobs:
           overwrite: true
 
   sage-live-postgres:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: SAGE Live PostgreSQL (records lifecycle)
     steps:
@@ -154,9 +148,6 @@ jobs:
         run: pnpm --filter @nzila/sage-core exec vitest run src/records-live-postgres.test.ts
 
   sage-postgres-concurrency:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: SAGE PostgreSQL Concurrency and RLS
     services:
@@ -187,9 +178,6 @@ jobs:
           SAGE_PG_TEST_URL: postgresql://sage_test:sage_test@localhost:5432/sage_test
 
   build:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Build All
     # `test` intentionally omitted: build is compilation, tests are runtime — they are
@@ -294,9 +282,6 @@ jobs:
   # Checkov-only merge authority. SARIF publication is the separate
   # iac-sarif-reporting job and is not a feeder for this result.
   iac-scan:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: IaC Security Validation
     needs: [lint-and-typecheck]
@@ -336,9 +321,6 @@ jobs:
   # NOT_CONFIGURED does not fail the workflow. FAILURE stays visible and
   # still does not feed Merge Authority / IaC Security.
   iac-sarif-reporting:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: IaC SARIF Reporting
     needs: [iac-scan]
@@ -355,9 +337,6 @@ jobs:
         run: node tooling/ci/merge-authority/sarif-reporting.mjs
 
   governance-gates:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Governance Gates
     needs: [lint-and-typecheck, test]
@@ -524,9 +503,6 @@ jobs:
           retention-days: 90
 
   ml-gates:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: ML Tooling Gates
     steps:
@@ -583,9 +559,6 @@ jobs:
 
   # ─── AI Eval Gate (mandatory — no "if report exists" skip) ─────────────────
   ai-eval-gate:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: AI Eval Gate
     needs: [lint-and-typecheck]
@@ -609,9 +582,6 @@ jobs:
 
   # ─── Architectural Invariants & Contract Tests ────────────────────────────
   contract-tests:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Contract Tests (Architectural Invariants)
     needs: [lint-and-typecheck]
@@ -623,9 +593,6 @@ jobs:
         run: pnpm contract-tests
 
   operating-layer-gate:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Operating Layer Gate
     needs: [lint-and-typecheck]
@@ -638,9 +605,6 @@ jobs:
 
   # ─── Ops Pack Validation ──────────────────────────────────────────────────
   ops-pack-validation:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Ops Documentation Pack
     steps:
@@ -652,9 +616,6 @@ jobs:
 
   # ─── Schema Drift Detection ───────────────────────────────────────────────
   schema-drift:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Schema Drift Detection
     steps:
@@ -675,9 +636,6 @@ jobs:
 
   # ─── Red-Team Adversarial Tests ───────────────────────────────────────────
   red-team:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Red-Team Adversarial
     needs: [lint-and-typecheck]
@@ -690,9 +648,6 @@ jobs:
 
   # ─── Hash Chain Drift Detection ───────────────────────────────────────────
   hash-chain-drift:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Hash Chain Drift
     needs: [lint-and-typecheck]
@@ -708,9 +663,6 @@ jobs:
 
   # ─── Enterprise Hardening Gate ────────────────────────────────────────────
   enterprise-hardening:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Enterprise Hardening Gate
     needs: [lint-and-typecheck, test, contract-tests]
@@ -757,9 +709,6 @@ jobs:
 
   # ─── Performance Regression Gate ──────────────────────────────────────────
   perf-regression:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     name: Performance Regression Gate
     needs: [build]
@@ -796,9 +745,6 @@ jobs:
   # Inventory lock only. The same steps remain inside Governance Gates.
   # This job is the authority source and does not collect DORA, cost, or release evidence.
   repository-inventory:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     name: Repository Inventory
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -823,9 +769,6 @@ jobs:
   # Merge-critical source-tree validators extracted from Governance Gates.
   # DORA, cost, onboarding, scorecards, release proof, and runtime evidence stay out.
   governance-integrity:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     name: Governance Integrity
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -848,74 +791,3 @@ jobs:
         run: pnpm exec tsx scripts/validate-workspace-links.ts
       - name: Control manifest validation
         run: pnpm exec tsx tooling/governance/validate-control-manifests.ts
-
-  # Canonical merge-authority contexts. This job reports; it is not itself a
-  # required context. It does not run on docs-only PRs because CI paths-ignore
-  # skips the workflow. The Merge Authority workflow covers that case and posts
-  # proven NOT_APPLICABLE contexts before CI. This reporter recomputes
-  # applicability from the same diff and does not rewrite those contexts.
-  # iac-scan and ops-pack-validation still run; a skip is not success unless
-  # the current diff proves the context irrelevant.
-  # Its concurrency group is the captured head, with cancel-in-progress false,
-  # so a newer commit can cancel expensive jobs without cancelling this post.
-  # Checks are published only for this run's head SHA.
-  report-merge-authority:
-    name: Report merge authority
-    concurrency:
-      group: ci-report-${{ github.event.pull_request.head.sha || github.sha }}
-      cancel-in-progress: false
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    needs:
-      - lint-and-typecheck
-      - test
-      - schema-drift
-      - sage-postgres-concurrency
-      - sage-live-postgres
-      - build
-      - contract-tests
-      - repository-inventory
-      - governance-integrity
-      - hash-chain-drift
-      - operating-layer-gate
-      - iac-scan
-      - ops-pack-validation
-    if: always()
-    permissions:
-      contents: read
-      checks: write
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Publish canonical merge-authority checks
-        env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-          MA_RUN_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          MA_RESULT_LINT: ${{ needs.lint-and-typecheck.result }}
-          MA_RESULT_UNIT: ${{ needs.test.result }}
-          MA_RESULT_SCHEMA: ${{ needs.schema-drift.result }}
-          MA_RESULT_RLS: ${{ needs.sage-postgres-concurrency.result }}
-          MA_RESULT_MIGRATION: ${{ needs.sage-live-postgres.result }}
-          MA_RESULT_BUILD: ${{ needs.build.result }}
-          MA_RESULT_CONTRACTS: ${{ needs.contract-tests.result }}
-          MA_RESULT_INVENTORY: ${{ needs.repository-inventory.result }}
-          MA_RESULT_GOVERNANCE: ${{ needs.governance-integrity.result }}
-          MA_RESULT_HASH: ${{ needs.hash-chain-drift.result }}
-          MA_RESULT_OPERATING: ${{ needs.operating-layer-gate.result }}
-          MA_RESULT_IAC: ${{ needs.iac-scan.result }}
-          MA_RESULT_OPS: ${{ needs.ops-pack-validation.result }}
-        run: |
-          set -euo pipefail
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
-            export MA_CHANGED_PATHS
-          fi
-          node tooling/ci/merge-authority/publish.mjs publish-ci-results

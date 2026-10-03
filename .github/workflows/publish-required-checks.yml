@@ -1,0 +1,50 @@
+name: Publish required checks
+
+# Runs after CI or Secret Scan completes, including when a newer commit
+# cancelled that run. This workflow is not in the expensive concurrency group,
+# so cancelling the superseded run does not cancel publication. Checks are
+# posted only to the frozen pull-request head from this event.
+on:
+  workflow_run:
+    workflows: ["CI", "Secret Scan"]
+    types: [completed]
+
+permissions:
+  contents: read
+  checks: write
+  actions: read
+
+concurrency:
+  group: publish-required-checks-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  publish-required-checks:
+    name: Publish required checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publish required checks for the captured head
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          SOURCE_WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+          SOURCE_EVENT: ${{ github.event.workflow_run.event }}
+          SOURCE_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          PR_HEAD_SHA: ${{ github.event.workflow_run.pull_requests[0].head.sha }}
+          PR_BASE_SHA: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$SOURCE_EVENT" = "pull_request" ]; then
+            git fetch --no-tags origin "$PR_BASE_SHA" "$PR_HEAD_SHA"
+            MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
+            export MA_CHANGED_PATHS
+          fi
+          node tooling/ci/merge-authority/publish.mjs publish-workflow-run

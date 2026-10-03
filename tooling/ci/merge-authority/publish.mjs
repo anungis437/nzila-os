@@ -7,6 +7,8 @@
  * publish-ci-results    reads MA_RESULT_* job results from the environment.
  *   MA_CHANGED_PATHS, when set, is the current diff. The reporter recomputes
  *   applicability from it and does not rewrite proven NOT_APPLICABLE contexts.
+ * publish-workflow-run  reads the completed CI or Secret Scan run's jobs.
+ *   It posts only to the frozen head and does not re-run those jobs.
  */
 import { readFileSync } from 'node:fs'
 import {
@@ -17,7 +19,14 @@ import {
   deferPublications,
   verdictToCheckRun,
 } from './surface.mjs'
-import { publicationTarget, secretTerminalPublications } from './supersession.mjs'
+import {
+  capturedPublicationHead,
+  ciResultsFromJobs,
+  publicationTarget,
+  secretCheckPublications,
+  secretResultsFromJobs,
+  secretTerminalPublications,
+} from './supersession.mjs'
 
 const RESULT_ENV = {
   'lint-and-typecheck': 'MA_RESULT_LINT',
@@ -143,6 +152,80 @@ async function publishSecretTerminals() {
   }
 }
 
+async function listRunJobs(runId) {
+  const repository = process.env.GITHUB_REPOSITORY
+  const token = process.env.GITHUB_TOKEN
+  if (!repository || !token) {
+    throw new Error('GITHUB_REPOSITORY and GITHUB_TOKEN are required to publish checks')
+  }
+  if (!runId) throw new Error('SOURCE_RUN_ID is required')
+  const jobs = []
+  for (let page = 1; page <= 20; page += 1) {
+    const response = await fetch(
+      `https://api.github.com/repos/${repository}/actions/runs/${runId}/jobs?per_page=100&page=${page}`,
+      {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${token}`,
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      },
+    )
+    if (!response.ok) {
+      const detail = await response.text()
+      throw new Error(`listing jobs for run ${runId} failed (${response.status}): ${detail.slice(0, 500)}`)
+    }
+    const body = await response.json()
+    const batch = Array.isArray(body.jobs) ? body.jobs : []
+    jobs.push(...batch)
+    if (batch.length < 100) break
+  }
+  return jobs
+}
+
+async function publishSecretChecks(results, headSha) {
+  const publications = secretCheckPublications(results)
+  if (publications.length !== 3) {
+    throw new Error(`expected 3 secret checks, got ${publications.length}`)
+  }
+  for (const publication of publications) {
+    if (publication.conclusion === 'success' && publication.evidence !== 'PASS') {
+      throw new Error(`unexecuted secret context cannot be success: ${publication.name}`)
+    }
+    await createCheckRun({
+      name: publication.name,
+      head_sha: headSha,
+      status: publication.status,
+      conclusion: publication.conclusion,
+      output: publication.output,
+    })
+    process.stdout.write(`${publication.name}: ${publication.evidence}\n`)
+  }
+}
+
+async function publishWorkflowRun() {
+  const headSha = capturedPublicationHead({
+    sourceEvent: process.env.SOURCE_EVENT,
+    workflowRunHeadSha: process.env.SOURCE_HEAD_SHA,
+    pullRequestHeadSha: process.env.PR_HEAD_SHA,
+  })
+  if (process.env.SOURCE_EVENT === 'pull_request' && process.env.MA_CHANGED_PATHS === undefined) {
+    throw new Error('MA_CHANGED_PATHS is required to publish workflow results for a pull request')
+  }
+  const jobs = await listRunJobs(process.env.SOURCE_RUN_ID)
+  const workflowName = process.env.SOURCE_WORKFLOW_NAME
+  if (workflowName === 'CI') {
+    const diffPaths = process.env.SOURCE_EVENT === 'pull_request' ? diffPathsFromEnv() : undefined
+    await publishVerdicts(evaluateCiResults(ciResultsFromJobs(jobs), diffPaths), headSha)
+    return
+  }
+  if (workflowName === 'Secret Scan') {
+    await publishSecretChecks(secretResultsFromJobs(jobs), headSha)
+    return
+  }
+  throw new Error(`unexpected workflow ${workflowName || 'missing'}`)
+}
+
 async function publishCiResults() {
   const headSha = resolveHeadSha()
   if (process.env.GITHUB_EVENT_NAME === 'pull_request' && process.env.MA_CHANGED_PATHS === undefined) {
@@ -187,9 +270,11 @@ if (command === 'classify-and-publish') {
   await publishCiResults()
 } else if (command === 'publish-secret-terminals') {
   await publishSecretTerminals()
+} else if (command === 'publish-workflow-run') {
+  await publishWorkflowRun()
 } else {
   process.stderr.write(
-    'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals\n',
+    'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run\n',
   )
   process.exit(1)
 }

@@ -1,43 +1,52 @@
 /**
  * Supersession of expensive CI work.
  *
- * Workflow-level cancel-in-progress cancels the run, and a reporter that has
- * not started does not get to post. Cancellation is therefore per expensive
- * job. The reporter for a head stays in its own group and is not cancelled
- * when a newer commit supersedes that head's scans and tests.
+ * CI and Secret Scan cancel the previous in-progress workflow run when a
+ * newer pull-request commit arrives. Required-check publication is a
+ * different workflow. Cancelling the expensive run does not cancel it, and
+ * it does not re-run inventory, tests, contracts, or secret scans.
  *
- * Check runs are addressed only to the run's captured head. An older run
- * cannot retarget them at the pull request's new head.
+ * Check runs are addressed only to the frozen head captured for that run.
+ * An older run cannot retarget them at the pull request's new head.
  */
 import { CANONICAL_CONTEXTS, SECRET_AUTHORITY_CONTEXTS, evaluateCiResults, verdictToCheckRun } from './surface.mjs'
 
-export const CI_EXPENSIVE_CONCURRENCY = {
-  group: 'ci-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}',
+export const EXPENSIVE_WORKFLOW_CONCURRENCY = {
+  group: '${{ github.workflow }}-${{ github.ref }}',
   cancelInProgress: "${{ github.event_name == 'pull_request' }}",
 }
 
-export const CI_REPORTER_JOB_ID = 'report-merge-authority'
+export const EXPENSIVE_WORKFLOW_FILES = ['ci.yml', 'secret-scan.yml']
 
-export const CI_REPORTER_CONCURRENCY = {
-  group: 'ci-report-${{ github.event.pull_request.head.sha || github.sha }}',
+export const PUBLISHER_WORKFLOW_FILE = 'publish-required-checks.yml'
+
+export const PUBLISHER_JOB_ID = 'publish-required-checks'
+
+export const PUBLISHER_CONCURRENCY = {
+  group: 'publish-required-checks-${{ github.event.workflow_run.id }}',
   cancelInProgress: false,
 }
 
-export const CI_REPORTER_IF = 'always()'
-
-export const SECRET_EXPENSIVE_CONCURRENCY = {
-  group: 'secret-scan-${{ github.workflow }}-${{ github.ref }}-${{ github.job }}',
-  cancelInProgress: "${{ github.event_name == 'pull_request' }}",
-}
-
-export const SECRET_REPORTER_JOB_ID = 'report-secret-contexts'
-
-export const SECRET_REPORTER_CONCURRENCY = {
-  group: 'secret-scan-report-${{ github.event.pull_request.head.sha || github.sha }}',
-  cancelInProgress: false,
-}
-
-export const SECRET_REPORTER_IF = 'always()'
+/**
+ * Display names of the CI jobs that feed the 13 merge-authority contexts.
+ * The publisher reads these names from the workflow-run jobs API. SARIF,
+ * governance-gates, ML, and AI eval are not in this list.
+ */
+export const CI_AUTHORITY_JOBS = [
+  { id: 'lint-and-typecheck', name: 'Lint & Typecheck' },
+  { id: 'test', name: 'Unit Tests' },
+  { id: 'schema-drift', name: 'Schema Drift Detection' },
+  { id: 'sage-postgres-concurrency', name: 'SAGE PostgreSQL Concurrency and RLS' },
+  { id: 'sage-live-postgres', name: 'SAGE Live PostgreSQL (records lifecycle)' },
+  { id: 'build', name: 'Build All' },
+  { id: 'contract-tests', name: 'Contract Tests (Architectural Invariants)' },
+  { id: 'repository-inventory', name: 'Repository Inventory' },
+  { id: 'governance-integrity', name: 'Governance Integrity' },
+  { id: 'hash-chain-drift', name: 'Hash Chain Drift' },
+  { id: 'operating-layer-gate', name: 'Operating Layer Gate' },
+  { id: 'iac-scan', name: 'IaC Security Validation' },
+  { id: 'ops-pack-validation', name: 'Ops Documentation Pack' },
+]
 
 export const MERGE_AUTHORITY_CONCURRENCY = {
   group: 'merge-authority-${{ github.event.pull_request.head.sha }}',
@@ -58,6 +67,55 @@ export function publicationTarget(runHeadSha, requestedHeadSha) {
     throw new Error(`refusing to publish checks for ${requestedHeadSha}; this run owns ${runHeadSha}`)
   }
   return runHeadSha
+}
+
+/**
+ * Pull-request publication uses the frozen head on the workflow_run event.
+ * workflow_run.head_sha is the merge commit for a pull request, so it is not
+ * the publication target. A missing frozen head fails closed. This does not
+ * look up the pull request's current head.
+ */
+export function capturedPublicationHead({ sourceEvent, workflowRunHeadSha, pullRequestHeadSha }) {
+  if (sourceEvent === 'pull_request') {
+    if (
+      typeof pullRequestHeadSha !== 'string' ||
+      pullRequestHeadSha.trim() === '' ||
+      pullRequestHeadSha !== pullRequestHeadSha.trim()
+    ) {
+      throw new Error('pull request head SHA is required; refusing to look up the live head')
+    }
+    return publicationTarget(pullRequestHeadSha, pullRequestHeadSha)
+  }
+  return publicationTarget(workflowRunHeadSha, workflowRunHeadSha)
+}
+
+function conclusionByJobName(jobs) {
+  const byName = new Map()
+  for (const job of Array.isArray(jobs) ? jobs : []) {
+    if (!job || typeof job.name !== 'string') continue
+    byName.set(job.name, job.conclusion == null ? '' : String(job.conclusion))
+  }
+  return byName
+}
+
+/** Map a CI workflow-run job list onto canonical job ids. Missing jobs stay empty. */
+export function ciResultsFromJobs(jobs) {
+  const byName = conclusionByJobName(jobs)
+  const results = {}
+  for (const job of CI_AUTHORITY_JOBS) {
+    results[job.id] = byName.has(job.name) ? byName.get(job.name) : ''
+  }
+  return results
+}
+
+/** Map a Secret Scan job list onto the three required secret check names. */
+export function secretResultsFromJobs(jobs) {
+  const byName = conclusionByJobName(jobs)
+  const results = {}
+  for (const name of SECRET_AUTHORITY_CONTEXTS) {
+    results[name] = byName.has(name) ? byName.get(name) || 'missing' : 'missing'
+  }
+  return results
 }
 
 /**
@@ -92,6 +150,46 @@ export function secretTerminalPublications(results) {
 }
 
 /**
+ * Always post the three secret checks onto the captured head. A cancelled
+ * Secret Scan run may never create the job checks. Success stays success.
+ * Failure stays failure. Cancelled, skipped, and missing are failure.
+ */
+export function secretCheckPublications(results) {
+  const source = results && typeof results === 'object' ? results : {}
+  return SECRET_AUTHORITY_CONTEXTS.map((name) => {
+    const result = source[name]
+    if (result === 'success' || result === 'failure') {
+      const evidence = result === 'success' ? 'PASS' : 'FAILURE'
+      return {
+        name,
+        evidence,
+        status: 'completed',
+        conclusion: result,
+        output: {
+          title: evidence,
+          summary: `job result: ${result}`,
+        },
+      }
+    }
+    const evidence = result === 'cancelled' ? 'SUPERSEDED' : 'UNRESOLVED'
+    return {
+      name,
+      evidence,
+      status: 'completed',
+      conclusion: 'failure',
+      output: {
+        title: evidence,
+        summary: [
+          `evidence: ${evidence}`,
+          `job result: ${result || 'missing'}`,
+          'This secret scan did not execute. The check is terminal and is not success.',
+        ].join('\n\n'),
+      },
+    }
+  })
+}
+
+/**
  * Terminal required checks for one captured head.
  * Applicable work that was cancelled or never ran is completed failure.
  * Proven NOT_APPLICABLE stays completed success. Pending is not a result.
@@ -99,29 +197,19 @@ export function secretTerminalPublications(results) {
 export function terminalChecksForHead({ results, diffPaths, secretResults, runHeadSha, requestedHeadSha }) {
   const head = publicationTarget(runHeadSha, requestedHeadSha)
   const mergeAuthority = evaluateCiResults(results, diffPaths).map((verdict) => verdictToCheckRun(verdict, head))
-  const secrets = secretTerminalPublications(secretResults).map((publication) => ({
+  const secrets = secretCheckPublications(secretResults).map((publication) => ({
     name: publication.name,
     head_sha: head,
     status: publication.status,
     conclusion: publication.conclusion,
     output: publication.output,
   }))
-  const executedSecretNames = new Set(
-    SECRET_AUTHORITY_CONTEXTS.filter((name) => EXECUTED_JOB_RESULTS.has(secretResults?.[name])),
-  )
-  const executedSecrets = SECRET_AUTHORITY_CONTEXTS.filter((name) => executedSecretNames.has(name)).map((name) => ({
-    name,
-    head_sha: head,
-    status: 'completed',
-    conclusion: secretResults[name],
-    output: {
-      title: secretResults[name] === 'success' ? 'PASS' : 'FAILURE',
-      summary: `job result: ${secretResults[name]}`,
-    },
-  }))
-  const checks = [...mergeAuthority, ...secrets, ...executedSecrets]
+  const checks = [...mergeAuthority, ...secrets]
   if (checks.length !== CANONICAL_CONTEXTS.length + SECRET_AUTHORITY_CONTEXTS.length) {
     throw new Error(`expected 16 required checks, got ${checks.length}`)
+  }
+  if (secrets.some((check) => check.conclusion === 'success' && secretResults?.[check.name] !== 'success')) {
+    throw new Error('unexecuted secret context cannot be success')
   }
   return checks
 }

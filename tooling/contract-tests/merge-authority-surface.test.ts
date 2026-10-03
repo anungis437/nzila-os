@@ -29,15 +29,13 @@ import {
 } from '../ci/merge-authority/surface.mjs'
 import { classifySarifProbe } from '../ci/merge-authority/sarif-reporting.mjs'
 import {
-  CI_EXPENSIVE_CONCURRENCY,
-  CI_REPORTER_CONCURRENCY,
-  CI_REPORTER_IF,
-  CI_REPORTER_JOB_ID,
+  CI_AUTHORITY_JOBS,
+  EXPENSIVE_WORKFLOW_CONCURRENCY,
   MERGE_AUTHORITY_CONCURRENCY,
-  SECRET_EXPENSIVE_CONCURRENCY,
-  SECRET_REPORTER_CONCURRENCY,
-  SECRET_REPORTER_IF,
-  SECRET_REPORTER_JOB_ID,
+  PUBLISHER_CONCURRENCY,
+  PUBLISHER_JOB_ID,
+  PUBLISHER_WORKFLOW_FILE,
+  capturedPublicationHead,
   publicationTarget,
   terminalChecksForHead,
 } from '../ci/merge-authority/supersession.mjs'
@@ -134,10 +132,12 @@ describe('merge authority surface', () => {
       const hits = identities.filter((identity) => identity.name === secretName)
       expect(hits.map((hit) => hit.file)).toEqual(['secret-scan.yml'])
     }
-    const reporter = identities.filter((identity) => identity.id === 'report-merge-authority')
+    const reporter = identities.filter((identity) => identity.id === PUBLISHER_JOB_ID)
     expect(reporter).toEqual([
-      { file: 'ci.yml', id: 'report-merge-authority', name: 'Report merge authority' },
+      { file: PUBLISHER_WORKFLOW_FILE, id: PUBLISHER_JOB_ID, name: 'Publish required checks' },
     ])
+    expect(identities.some((identity) => identity.id === 'report-merge-authority')).toBe(false)
+    expect(identities.some((identity) => identity.id === 'report-secret-contexts')).toBe(false)
   })
 
   it('freezes duplicate job display names so a new collision fails', () => {
@@ -325,22 +325,17 @@ describe('merge authority surface', () => {
   })
 
   it('wires the CI reporter to every canonical job result', () => {
-    const ci = readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8')
+    const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
     for (const context of CANONICAL_CONTEXTS) {
-      expect(ci).toContain(`- ${context.ciJob}`)
+      expect(ci.jobs[context.ciJob]).toBeTruthy()
+      expect(CI_AUTHORITY_JOBS.find((job) => job.id === context.ciJob)?.name).toBe(ci.jobs[context.ciJob].name)
     }
-    expect(ci).toContain('MA_RESULT_LINT:')
-    expect(ci).toContain('MA_RESULT_UNIT:')
-    expect(ci).toContain('MA_RESULT_SCHEMA:')
-    expect(ci).toContain('MA_RESULT_RLS:')
-    expect(ci).toContain('MA_RESULT_MIGRATION:')
-    expect(ci).toContain('MA_RESULT_BUILD:')
-    expect(ci).toContain('node tooling/ci/merge-authority/publish.mjs publish-ci-results')
-    expect(ci).toContain('MA_RESULT_CONTRACTS:')
-    expect(ci).toContain('MA_RESULT_INVENTORY:')
-    expect(ci).toContain('MA_RESULT_GOVERNANCE:')
-    expect(ci).toContain('MA_RESULT_HASH:')
-    expect(ci).toContain('MA_RESULT_OPERATING:')
+    const publisher = readFileSync(join(WORKFLOWS, PUBLISHER_WORKFLOW_FILE), 'utf8')
+    expect(publisher).toContain('node tooling/ci/merge-authority/publish.mjs publish-workflow-run')
+    const publisherSource = readFileSync(join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), 'utf8')
+    expect(publisherSource).toContain('evaluateCiResults(results, diffPaths)')
+    expect(publisherSource).toContain('ciResultsFromJobs(jobs)')
+    expect(publisherSource).toContain("'iac-scan': 'MA_RESULT_IAC'")
     const authority = readFileSync(join(WORKFLOWS, 'merge-authority.yml'), 'utf8')
     expect(authority).toContain('classify-and-publish')
     const classifyJob = parse(authority).jobs.classify
@@ -617,10 +612,12 @@ describe('merge authority surface', () => {
     expect(fastPathExecution(plan.classification).iac).toBe(false)
     const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
     expect(ci.jobs['iac-scan'].needs).toEqual(['lint-and-typecheck'])
-    expect(ci.jobs['report-merge-authority'].needs).toContain('iac-scan')
-    expect(ci.jobs['report-merge-authority'].needs).not.toContain('ml-gates')
-    expect(ci.jobs['report-merge-authority'].needs).not.toContain('ai-eval-gate')
-    expect(ci.jobs['report-merge-authority'].needs).not.toContain('governance-gates')
+    const consumed = CI_AUTHORITY_JOBS.map((job) => job.id)
+    expect(consumed).toContain('iac-scan')
+    expect(consumed).not.toContain('ml-gates')
+    expect(consumed).not.toContain('ai-eval-gate')
+    expect(consumed).not.toContain('governance-gates')
+    expect(ci.jobs['report-merge-authority']).toBeUndefined()
   })
 
   it('Ops applicable + pass — canonical Ops Documentation is PASS', () => {
@@ -694,7 +691,8 @@ describe('merge authority surface', () => {
     expect(fastRun).toBe(ciRun)
     expect(fastRun).toContain('pnpm tsx tooling/ops/validate-ops-pack.ts')
     expect(ci.jobs['ops-pack-validation'].needs).toBeUndefined()
-    expect(ci.jobs['report-merge-authority'].needs).toContain('ops-pack-validation')
+    expect(CI_AUTHORITY_JOBS.map((job) => job.id)).toContain('ops-pack-validation')
+    expect(ci.jobs['report-merge-authority']).toBeUndefined()
   })
 
   it('missing or cancelled IaC and Ops source results are not success', () => {
@@ -851,14 +849,13 @@ describe('IaC validation and SARIF reporting separation', () => {
 
   it('C12 — reporting presence does not feed IaC authority', () => {
     const { ci, publisher } = workflows()
-    const reporter = ci.jobs['report-merge-authority']
-    expect(reporter.needs).toContain('iac-scan')
-    expect(reporter.needs).not.toContain('iac-sarif-reporting')
-    expect(reporter.env ?? ci.jobs['report-merge-authority'].steps.at(-1).env.MA_RESULT_IAC).toBe(
-      '${{ needs.iac-scan.result }}',
-    )
+    const consumed = CI_AUTHORITY_JOBS.map((job) => job.id)
+    expect(consumed).toContain('iac-scan')
+    expect(consumed).not.toContain('iac-sarif-reporting')
+    expect(CI_AUTHORITY_JOBS.find((job) => job.id === 'iac-scan')?.name).toBe(ci.jobs['iac-scan'].name)
     expect(publisher).toContain("'iac-scan': 'MA_RESULT_IAC'")
     expect(publisher).not.toContain('iac-sarif-reporting')
+    expect(ci.jobs['report-merge-authority']).toBeUndefined()
     expect(ci.jobs['iac-sarif-reporting'].needs).toEqual(['iac-scan'])
     expect(ci.jobs['iac-scan'].permissions).toEqual({ contents: 'read' })
     expect(ci.jobs['iac-sarif-reporting'].permissions).toEqual({
@@ -1009,8 +1006,8 @@ describe('phase 1 NOT_APPLICABLE publication', () => {
       skippedWithoutDiff['Merge Authority / Ops Documentation'].conclusion !== 'success' &&
       ci.jobs['iac-scan'].if == null &&
       ci.jobs['ops-pack-validation'].if == null &&
-      ci.jobs['report-merge-authority'].needs.includes('iac-scan') &&
-      ci.jobs['report-merge-authority'].needs.includes('ops-pack-validation')
+      CI_AUTHORITY_JOBS.some((job) => job.id === 'iac-scan') &&
+      CI_AUTHORITY_JOBS.some((job) => job.id === 'ops-pack-validation')
 
     const unknownRemains =
       unknownPlan.action === 'DEFER_TO_CI' &&
@@ -1047,7 +1044,7 @@ describe('phase 1 NOT_APPLICABLE publication', () => {
         REQUIRED_CHECK_NAMES.slice(0, 13).join('\n') &&
       publisher.includes('MA_CHANGED_PATHS') &&
       publisher.includes('evaluateCiResults(results, diffPaths)') &&
-      readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8').includes(
+      readFileSync(join(WORKFLOWS, PUBLISHER_WORKFLOW_FILE), 'utf8').includes(
         'MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"',
       )
 
@@ -1213,8 +1210,7 @@ function renderConcurrencyGroup(template: string, vars: Record<string, string>) 
   return template
     .replaceAll('${{ github.workflow }}', vars.workflow)
     .replaceAll('${{ github.ref }}', vars.ref)
-    .replaceAll('${{ github.job }}', vars.job)
-    .replaceAll('${{ github.event.pull_request.head.sha || github.sha }}', vars.head)
+    .replaceAll('${{ github.event.workflow_run.id }}', vars.runId)
     .replaceAll('${{ github.event.pull_request.head.sha }}', vars.head)
 }
 
@@ -1236,83 +1232,100 @@ describe('phase 2 supersession', () => {
     const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
     const secret = parse(readFileSync(join(WORKFLOWS, 'secret-scan.yml'), 'utf8'))
     const authority = parse(readFileSync(join(WORKFLOWS, 'merge-authority.yml'), 'utf8'))
-    const reporter = ci.jobs[CI_REPORTER_JOB_ID]
-    const secretReporter = secret.jobs[SECRET_REPORTER_JOB_ID]
-    const expensiveIds = Object.keys(ci.jobs).filter((id) => id !== CI_REPORTER_JOB_ID)
-    const scanIds = ['docker-secret-policy', 'trufflehog', 'gitleaks']
+    const publisherText = readFileSync(join(WORKFLOWS, PUBLISHER_WORKFLOW_FILE), 'utf8')
+    const publisher = parse(publisherText)
+    const publisherJob = publisher.jobs[PUBLISHER_JOB_ID]
+    const ciText = readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8')
+    const secretText = readFileSync(join(WORKFLOWS, 'secret-scan.yml'), 'utf8')
 
-    const oldExpensive = renderConcurrencyGroup(CI_EXPENSIVE_CONCURRENCY.group, {
+    const oldExpensive = renderConcurrencyGroup(EXPENSIVE_WORKFLOW_CONCURRENCY.group, {
       workflow: 'CI',
       ref,
-      job: 'lint-and-typecheck',
+      runId: '111',
       head: oldHead,
     })
-    const newExpensive = renderConcurrencyGroup(CI_EXPENSIVE_CONCURRENCY.group, {
+    const newExpensive = renderConcurrencyGroup(EXPENSIVE_WORKFLOW_CONCURRENCY.group, {
       workflow: 'CI',
       ref,
-      job: 'lint-and-typecheck',
+      runId: '222',
       head: newHead,
     })
-    const oldReporterGroup = renderConcurrencyGroup(CI_REPORTER_CONCURRENCY.group, {
-      workflow: 'CI',
+    const oldPublisherGroup = renderConcurrencyGroup(PUBLISHER_CONCURRENCY.group, {
+      workflow: 'Publish required checks',
       ref,
-      job: CI_REPORTER_JOB_ID,
+      runId: '111',
       head: oldHead,
     })
-    const newReporterGroup = renderConcurrencyGroup(CI_REPORTER_CONCURRENCY.group, {
-      workflow: 'CI',
+    const newPublisherGroup = renderConcurrencyGroup(PUBLISHER_CONCURRENCY.group, {
+      workflow: 'Publish required checks',
       ref,
-      job: CI_REPORTER_JOB_ID,
+      runId: '222',
       head: newHead,
     })
+    const publisherCommands = publisherJob.steps
+      .map((step: { run?: string; uses?: string }) => `${step.run ?? ''}\n${step.uses ?? ''}`)
+      .join('\n')
+    const jobsHaveNoConcurrency = (doc: { jobs: Record<string, { concurrency?: unknown }> }) =>
+      Object.values(doc.jobs).every((job) => job.concurrency == null)
 
     const supersededRunCancelled =
-      ci.concurrency == null &&
-      secret.concurrency == null &&
-      expensiveIds.length > 0 &&
-      expensiveIds.every((id) => {
-        const job = ci.jobs[id]
-        return (
-          job.concurrency?.group === CI_EXPENSIVE_CONCURRENCY.group &&
-          job.concurrency?.['cancel-in-progress'] === CI_EXPENSIVE_CONCURRENCY.cancelInProgress
-        )
-      }) &&
-      scanIds.every((id) => {
-        const job = secret.jobs[id]
-        return (
-          SECRET_AUTHORITY_CONTEXTS.includes(job.name) &&
-          job.concurrency?.group === SECRET_EXPENSIVE_CONCURRENCY.group &&
-          job.concurrency?.['cancel-in-progress'] === SECRET_EXPENSIVE_CONCURRENCY.cancelInProgress
-        )
-      }) &&
+      ci.name === 'CI' &&
+      secret.name === 'Secret Scan' &&
+      ci.concurrency?.group === EXPENSIVE_WORKFLOW_CONCURRENCY.group &&
+      ci.concurrency?.['cancel-in-progress'] === EXPENSIVE_WORKFLOW_CONCURRENCY.cancelInProgress &&
+      secret.concurrency?.group === EXPENSIVE_WORKFLOW_CONCURRENCY.group &&
+      secret.concurrency?.['cancel-in-progress'] === EXPENSIVE_WORKFLOW_CONCURRENCY.cancelInProgress &&
+      EXPENSIVE_WORKFLOW_CONCURRENCY.group.includes('github.workflow') &&
+      EXPENSIVE_WORKFLOW_CONCURRENCY.group.includes('github.ref') &&
+      !EXPENSIVE_WORKFLOW_CONCURRENCY.group.includes('github.job') &&
+      !EXPENSIVE_WORKFLOW_CONCURRENCY.group.includes('head.sha') &&
+      EXPENSIVE_WORKFLOW_CONCURRENCY.cancelInProgress.includes('pull_request') &&
       oldExpensive === newExpensive &&
-      CI_EXPENSIVE_CONCURRENCY.cancelInProgress.includes("pull_request")
+      oldExpensive === `CI-${ref}` &&
+      jobsHaveNoConcurrency(ci) &&
+      jobsHaveNoConcurrency(secret) &&
+      ci.jobs['report-merge-authority'] == null &&
+      secret.jobs['report-secret-contexts'] == null &&
+      !ciText.includes('publish-workflow-run') &&
+      !secretText.includes('publish-workflow-run')
 
-    const reporterCommands = reporter.steps
-      .map((step: { run?: string; uses?: string }) => `${step.run ?? ''}\n${step.uses ?? ''}`)
-      .join('\n')
-    const secretCommands = secretReporter.steps
-      .map((step: { run?: string; uses?: string }) => `${step.run ?? ''}\n${step.uses ?? ''}`)
-      .join('\n')
+    const triggers = publisher.on.workflow_run
     const currentHeadReporterSurvives =
-      reporter.if === CI_REPORTER_IF &&
-      !String(reporter.if).includes('!cancelled()') &&
-      reporter.concurrency?.group === CI_REPORTER_CONCURRENCY.group &&
-      reporter.concurrency?.['cancel-in-progress'] === CI_REPORTER_CONCURRENCY.cancelInProgress &&
-      secretReporter.if === SECRET_REPORTER_IF &&
-      secretReporter.concurrency?.group === SECRET_REPORTER_CONCURRENCY.group &&
-      secretReporter.concurrency?.['cancel-in-progress'] === false &&
+      publisher.name === 'Publish required checks' &&
+      publisherText.includes(`name: Publish required checks`) &&
+      Array.isArray(triggers.workflows) &&
+      triggers.workflows.includes('CI') &&
+      triggers.workflows.includes('Secret Scan') &&
+      triggers.types.includes('completed') &&
+      !JSON.stringify(triggers).includes('conclusion') &&
+      publisher.concurrency?.group === PUBLISHER_CONCURRENCY.group &&
+      publisher.concurrency?.['cancel-in-progress'] === false &&
+      PUBLISHER_CONCURRENCY.group.includes('workflow_run.id') &&
+      !PUBLISHER_CONCURRENCY.group.includes('github.ref') &&
+      !PUBLISHER_CONCURRENCY.group.includes('github.job') &&
+      oldPublisherGroup !== newPublisherGroup &&
+      oldPublisherGroup !== oldExpensive &&
+      !oldPublisherGroup.includes(ref) &&
+      publisherJob.if == null &&
+      publisherJob.needs == null &&
+      !publisherCommands.includes('inventory:generate') &&
+      !publisherCommands.includes('pnpm ') &&
+      !publisherCommands.includes('contract-tests') &&
+      !publisherCommands.includes('trufflehog') &&
+      !publisherCommands.includes('gitleaks') &&
+      !publisherCommands.includes('audit-secrets') &&
+      !publisherCommands.includes('setup-monorepo') &&
+      publisherCommands.includes('node tooling/ci/merge-authority/publish.mjs publish-workflow-run') &&
+      publisherCommands.includes('MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"') &&
+      publisherText.includes('github.event.workflow_run.pull_requests[0].head.sha') &&
+      publisherText.includes('github.event.workflow_run.pull_requests[0].base.sha') &&
+      !publisherText.includes('github.event.pull_request.head.sha') &&
       authority.concurrency?.group === MERGE_AUTHORITY_CONCURRENCY.group &&
       authority.concurrency?.['cancel-in-progress'] === false &&
-      oldReporterGroup !== newReporterGroup &&
-      !oldReporterGroup.includes(ref) &&
-      !reporterCommands.includes('inventory:generate') &&
-      !reporterCommands.includes('pnpm ') &&
-      !reporterCommands.includes('contract-tests') &&
-      !secretCommands.includes('trufflehog') &&
-      !secretCommands.includes('gitleaks') &&
-      !secretCommands.includes('audit-secrets') &&
-      secretReporter.steps.at(-1).run === 'node tooling/ci/merge-authority/publish.mjs publish-secret-terminals'
+      CI_AUTHORITY_JOBS.length === CANONICAL_CONTEXTS.length &&
+      CANONICAL_CONTEXTS.every(
+        (context) => CI_AUTHORITY_JOBS.find((job) => job.id === context.ciJob)?.name === ci.jobs[context.ciJob].name,
+      )
 
     let refusedOverride = false
     try {
@@ -1339,9 +1352,29 @@ describe('phase 2 supersession', () => {
     } catch (error) {
       rejectedRetarget = error instanceof Error && /this run owns/.test(error.message)
     }
+    const mergeSha = 'cccccccccccccccccccccccccccccccccccccccc'
+    let refusedLiveLookup = false
+    try {
+      capturedPublicationHead({
+        sourceEvent: 'pull_request',
+        workflowRunHeadSha: newHead,
+        pullRequestHeadSha: '',
+      })
+    } catch (error) {
+      refusedLiveLookup = error instanceof Error && /refusing to look up the live head/.test(error.message)
+    }
+    const frozenOldHead = capturedPublicationHead({
+      sourceEvent: 'pull_request',
+      workflowRunHeadSha: mergeSha,
+      pullRequestHeadSha: oldHead,
+    })
     const oldHeadCannotOverride =
       refusedOverride &&
       rejectedRetarget &&
+      refusedLiveLookup &&
+      frozenOldHead === oldHead &&
+      frozenOldHead !== mergeSha &&
+      frozenOldHead !== newHead &&
       ownedByOldHead.every((check) => check.head_sha === oldHead) &&
       publicationTarget(newHead, newHead) === newHead
 
@@ -1449,5 +1482,129 @@ globalThis.fetch = async (_url, init) => {
     })
     expect(mismatch.status).not.toBe(0)
     expect(mismatch.stderr).toMatch(/refusing to publish checks for/)
+  })
+
+  function postedWorkflowRun(env: Record<string, string>, jobs: Array<{ name: string; conclusion: string | null }>) {
+    const dir = mkdtempSync(join(tmpdir(), 'merge-authority-run-'))
+    const postedPath = join(dir, 'posted.json')
+    const preload = join(dir, 'preload.mjs')
+    writeFileSync(
+      preload,
+      `import { writeFileSync } from 'node:fs'
+const posted = []
+const jobs = ${JSON.stringify(jobs)}
+globalThis.fetch = async (url, init) => {
+  if (String(url).includes('/actions/runs/') && String(url).includes('/jobs')) {
+    return new Response(JSON.stringify({ jobs }), { status: 200, headers: { 'content-type': 'application/json' } })
+  }
+  posted.push(JSON.parse(init.body))
+  writeFileSync(${JSON.stringify(postedPath)}, JSON.stringify(posted))
+  return new Response('{}', { status: 201 })
+}
+`,
+    )
+    const result = spawnSync(
+      process.execPath,
+      ['--import', preload, join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), 'publish-workflow-run'],
+      {
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          GITHUB_REPOSITORY: 'anungis437/nzila-os',
+          GITHUB_TOKEN: 'test-token',
+          SOURCE_RUN_ID: '37147876073',
+          ...env,
+        },
+      },
+    )
+    return { result, posted: result.status === 0 ? JSON.parse(readFileSync(postedPath, 'utf8')) : [] }
+  }
+
+  it('publishes the frozen head from a cancelled run without rerunning expensive work', () => {
+    const mergeSha = 'cccccccccccccccccccccccccccccccccccccccc'
+    const cancelledCi = CI_AUTHORITY_JOBS.map((job) => ({ name: job.name, conclusion: 'cancelled' }))
+    const ciRun = postedWorkflowRun(
+      {
+        SOURCE_WORKFLOW_NAME: 'CI',
+        SOURCE_EVENT: 'pull_request',
+        SOURCE_HEAD_SHA: mergeSha,
+        PR_HEAD_SHA: oldHead,
+        HEAD_SHA: newHead,
+        MA_CHANGED_PATHS: codePaths.join('\n'),
+      },
+      cancelledCi,
+    )
+    expect(ciRun.result.status, ciRun.result.stderr).toBe(0)
+    expect(ciRun.posted).toHaveLength(13)
+    expect(ciRun.posted.every((check: { head_sha: string }) => check.head_sha === oldHead)).toBe(true)
+    expect(ciRun.posted.find((check: { name: string }) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+      conclusion: 'failure',
+      output: { title: 'UNRESOLVED' },
+    })
+    expect(ciRun.posted.find((check: { name: string }) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'NOT_APPLICABLE' },
+    })
+    expect(ciRun.posted.find((check: { name: string }) => check.name === 'Merge Authority / IaC Security')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'NOT_APPLICABLE' },
+    })
+
+    const applicable = postedWorkflowRun(
+      {
+        SOURCE_WORKFLOW_NAME: 'CI',
+        SOURCE_EVENT: 'pull_request',
+        SOURCE_HEAD_SHA: mergeSha,
+        PR_HEAD_SHA: oldHead,
+        MA_CHANGED_PATHS: 'infrastructure/bicep/main.bicep',
+      },
+      cancelledCi,
+    )
+    expect(
+      applicable.posted.find((check: { name: string }) => check.name === 'Merge Authority / IaC Security'),
+    ).toMatchObject({ conclusion: 'failure', output: { title: 'UNRESOLVED' } })
+
+    const missingHead = postedWorkflowRun(
+      {
+        SOURCE_WORKFLOW_NAME: 'CI',
+        SOURCE_EVENT: 'pull_request',
+        SOURCE_HEAD_SHA: newHead,
+        MA_CHANGED_PATHS: codePaths.join('\n'),
+      },
+      cancelledCi,
+    )
+    expect(missingHead.result.status).not.toBe(0)
+    expect(missingHead.result.stderr).toMatch(/refusing to look up the live head/)
+
+    const secretRun = postedWorkflowRun(
+      {
+        SOURCE_WORKFLOW_NAME: 'Secret Scan',
+        SOURCE_EVENT: 'pull_request',
+        SOURCE_HEAD_SHA: mergeSha,
+        PR_HEAD_SHA: oldHead,
+        MA_CHANGED_PATHS: codePaths.join('\n'),
+      },
+      [
+        { name: 'Gitleaks', conclusion: 'cancelled' },
+        { name: 'TruffleHog OSS', conclusion: 'success' },
+        { name: 'Docker Secret Policy', conclusion: null },
+      ],
+    )
+    expect(secretRun.result.status, secretRun.result.stderr).toBe(0)
+    expect(secretRun.posted.map((check: { name: string }) => check.name)).toEqual(SECRET_AUTHORITY_CONTEXTS)
+    expect(secretRun.posted.find((check: { name: string }) => check.name === 'Gitleaks')).toMatchObject({
+      head_sha: oldHead,
+      conclusion: 'failure',
+      output: { title: 'SUPERSEDED' },
+    })
+    expect(secretRun.posted.find((check: { name: string }) => check.name === 'TruffleHog OSS')).toMatchObject({
+      head_sha: oldHead,
+      conclusion: 'success',
+    })
+    expect(secretRun.posted.find((check: { name: string }) => check.name === 'Docker Secret Policy')).toMatchObject({
+      head_sha: oldHead,
+      conclusion: 'failure',
+      output: { title: 'UNRESOLVED' },
+    })
   })
 })
