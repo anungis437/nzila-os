@@ -158,12 +158,19 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
     const fixture = getFixture('member');
     await gotoDashboardAsRole(page, 'member');
 
-    // Find and click the "Home" sidebar link (links to /dashboard/inbox).
-    const primarySidebar = 'aside[aria-label="Role execution navigation"]:not([role="dialog"])';
-    const homeLink = page.locator(`${primarySidebar} a[href]`).filter({ hasText: 'Home' }).first();
+    // Select the Home control by exact accessible name.
+    // hasText: 'Home' is a case-insensitive substring, so it also matches the
+    // Workspace badge "Orientation hub and role home". .first() then clicks
+    // the hub link and the URL stays on /dashboard/workspace. Home still
+    // points at /dashboard/inbox.
+    const destinations = page
+      .getByRole('complementary', { name: 'Role execution navigation', exact: true })
+      .getByRole('navigation', { name: 'Role execution destinations', exact: true });
+    const homeLink = destinations.getByRole('link', { name: 'Home', exact: true });
     await expect(homeLink).toBeVisible({ timeout: 10_000 });
 
     const hrefBefore = await homeLink.getAttribute('href');
+    expect(hrefBefore).toBe(`/${fixture.locale}/dashboard/inbox`);
 
     // Click the sidebar link and wait for the URL to change.
     // Use a 30s timeout: clicking a Next.js sidebar link triggers an RSC
@@ -175,14 +182,14 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
     // The URL must have changed and remain on a dashboard path.
     const urlAfter = page.url();
     expect(urlAfter).not.toBe(urlBefore);
-    expect(urlAfter).toContain('/dashboard/');
+    expect(urlAfter).toContain('/dashboard/inbox');
 
     // Locale must be preserved.
     expect(urlAfter).toContain(`/${fixture.locale}/`);
 
     // The clicked link must now show as active (aria-current="page")
     // OR the URL matches its href (both are valid active-state proofs).
-    const clickedLink = page.locator(`${primarySidebar} a[href="${hrefBefore}"]`).first();
+    const clickedLink = destinations.locator(`a[href="${hrefBefore}"]`);
     if (await clickedLink.count()) {
       const ariaCurrent = await clickedLink.getAttribute('aria-current').catch(() => null);
       const hrefPath = hrefBefore ? new URL(hrefBefore, urlAfter).pathname : null;
