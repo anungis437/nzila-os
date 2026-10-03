@@ -122,7 +122,7 @@ jobs:
             --build-arg BUILD_AUTH_PLACEHOLDER=ci_build_placeholder_secret_32_chars_x \
             --build-arg NEXT_PUBLIC_CONSOLE_URL=https://console.nzilaventures.com \
             --build-arg NEXT_PUBLIC_PARTNERS_URL=https://partners.nzilaventures.com \
-            --build-arg NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
+            --build-arg NEXT_PUBLIC_UNION_EYES_URL=https://app.unioneyes.app \
             --build-arg NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
             --build-arg NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
             -t ${{ env.IMAGE }}:${{ github.sha }} \

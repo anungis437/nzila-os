@@ -5,9 +5,10 @@ import { useLocale } from 'next-intl';
 import TrackedLink from './TrackedLink';
 import { MARKETING_FACTS, platformCoverageLabel } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
+import { resolveUnionEyesUrl } from '@/lib/union-eyes-url';
 
 const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:3001';
-const UNION_EYES_URL = process.env.NEXT_PUBLIC_UNION_EYES_URL ?? 'http://localhost:3003';
+const UNION_EYES_URL = resolveUnionEyesUrl(process.env.NEXT_PUBLIC_UNION_EYES_URL);
 
 const appLinks = [
   { name: 'Console', href: CONSOLE_URL, external: true },
