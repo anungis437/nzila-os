@@ -7,12 +7,15 @@
  * publish-ci-results    reads MA_RESULT_* job results from the environment.
  *   MA_CHANGED_PATHS, when set, is the current diff. The reporter recomputes
  *   applicability from it and does not rewrite proven NOT_APPLICABLE contexts.
- * publish-workflow-run  reads the completed CI or Secret Scan run's jobs.
+ * publish-pull-request  waits for the CI and Secret Scan runs of the frozen
+ *   pull-request head, then posts that head's required checks.
+ * publish-workflow-run  reads one completed CI or Secret Scan run's jobs.
  *   It posts only to the frozen head and does not re-run those jobs.
  */
 import { readFileSync } from 'node:fs'
 import {
   CANONICAL_CONTEXTS,
+  classifyChangedPaths,
   planFastPath,
   evaluateCiResults,
   applyExecution,
@@ -23,9 +26,11 @@ import {
   capturedPublicationHead,
   ciResultsFromJobs,
   publicationTarget,
+  runIsTerminal,
   secretCheckPublications,
   secretResultsFromJobs,
   secretTerminalPublications,
+  selectRunForHead,
 } from './supersession.mjs'
 
 const RESULT_ENV = {
@@ -152,24 +157,34 @@ async function publishSecretTerminals() {
   }
 }
 
-async function listRunJobs(runId) {
+function githubAuth() {
   const repository = process.env.GITHUB_REPOSITORY
   const token = process.env.GITHUB_TOKEN
   if (!repository || !token) {
     throw new Error('GITHUB_REPOSITORY and GITHUB_TOKEN are required to publish checks')
   }
-  if (!runId) throw new Error('SOURCE_RUN_ID is required')
+  return { repository, token }
+}
+
+async function githubFetch(url) {
+  const { token } = githubAuth()
+  const response = await fetch(url, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${token}`,
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+  })
+  return response
+}
+
+async function listRunJobs(runId) {
+  const { repository } = githubAuth()
+  if (!runId) throw new Error('workflow run id is required')
   const jobs = []
   for (let page = 1; page <= 20; page += 1) {
-    const response = await fetch(
+    const response = await githubFetch(
       `https://api.github.com/repos/${repository}/actions/runs/${runId}/jobs?per_page=100&page=${page}`,
-      {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: `Bearer ${token}`,
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      },
     )
     if (!response.ok) {
       const detail = await response.text()
@@ -181,6 +196,76 @@ async function listRunJobs(runId) {
     if (batch.length < 100) break
   }
   return jobs
+}
+
+async function listWorkflowRuns(workflowFile, headSha) {
+  const { repository } = githubAuth()
+  const runs = []
+  for (let page = 1; page <= 5; page += 1) {
+    const response = await githubFetch(
+      `https://api.github.com/repos/${repository}/actions/workflows/${workflowFile}/runs?head_sha=${encodeURIComponent(headSha)}&event=pull_request&per_page=50&page=${page}`,
+    )
+    if (!response.ok) {
+      const detail = await response.text()
+      throw new Error(`listing ${workflowFile} runs failed (${response.status}): ${detail.slice(0, 500)}`)
+    }
+    const body = await response.json()
+    const batch = Array.isArray(body.workflow_runs) ? body.workflow_runs : []
+    runs.push(...batch)
+    if (batch.length < 50) break
+  }
+  return runs
+}
+
+function pollIntervalMs() {
+  const value = Number(process.env.MA_POLL_INTERVAL_MS ?? 20000)
+  if (!Number.isFinite(value) || value < 0) return 20000
+  return value
+}
+
+function pollTimeoutMs() {
+  const value = Number(process.env.MA_POLL_TIMEOUT_MS ?? 110 * 60 * 1000)
+  if (!Number.isFinite(value) || value <= 0) return 110 * 60 * 1000
+  return value
+}
+
+async function waitForHeadRuns(headSha, diffPaths) {
+  const ciSkipped = classifyChangedPaths(diffPaths).ciSkippedByPathsIgnore
+  const deadline = Date.now() + pollTimeoutMs()
+  const interval = pollIntervalMs()
+  while (true) {
+    const secretRun = selectRunForHead(await listWorkflowRuns('secret-scan.yml', headSha), headSha)
+    const ciRun = ciSkipped ? null : selectRunForHead(await listWorkflowRuns('ci.yml', headSha), headSha)
+    const secretReady = runIsTerminal(secretRun)
+    const ciReady = ciSkipped || runIsTerminal(ciRun)
+    process.stdout.write(
+      `waiting head=${headSha} ci=${ciSkipped ? 'skipped-by-paths' : ciRun ? `${ciRun.status}/${ciRun.conclusion ?? 'pending'}` : 'missing'} secret=${secretRun ? `${secretRun.status}/${secretRun.conclusion ?? 'pending'}` : 'missing'}\n`,
+    )
+    if (ciReady && secretReady) return { ciSkipped, ciRun, secretRun }
+    if (Date.now() >= deadline) {
+      throw new Error(`timed out waiting for CI and Secret Scan runs for ${headSha}`)
+    }
+    if (interval > 0) await new Promise((resolve) => setTimeout(resolve, interval))
+  }
+}
+
+async function publishPullRequest() {
+  const headSha = capturedPublicationHead({
+    sourceEvent: 'pull_request',
+    workflowRunHeadSha: process.env.PR_HEAD_SHA,
+    pullRequestHeadSha: process.env.PR_HEAD_SHA,
+  })
+  if (process.env.MA_CHANGED_PATHS === undefined) {
+    throw new Error('MA_CHANGED_PATHS is required to publish pull request results')
+  }
+  const diffPaths = diffPathsFromEnv()
+  const { ciSkipped, ciRun, secretRun } = await waitForHeadRuns(headSha, diffPaths)
+  if (!ciSkipped) {
+    const jobs = await listRunJobs(ciRun.id)
+    await publishVerdicts(evaluateCiResults(ciResultsFromJobs(jobs), diffPaths), headSha)
+  }
+  const secretJobs = await listRunJobs(secretRun.id)
+  await publishSecretChecks(secretResultsFromJobs(secretJobs), headSha)
 }
 
 async function publishSecretChecks(results, headSha) {
@@ -272,9 +357,11 @@ if (command === 'classify-and-publish') {
   await publishSecretTerminals()
 } else if (command === 'publish-workflow-run') {
   await publishWorkflowRun()
+} else if (command === 'publish-pull-request') {
+  await publishPullRequest()
 } else {
   process.stderr.write(
-    'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run\n',
+    'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request\n',
   )
   process.exit(1)
 }

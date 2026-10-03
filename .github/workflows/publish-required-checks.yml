@@ -1,13 +1,15 @@
 name: Publish required checks
 
-# Runs after CI or Secret Scan completes, including when a newer commit
-# cancelled that run. This workflow is not in the expensive concurrency group,
-# so cancelling the superseded run does not cancel publication. Checks are
-# posted only to the frozen pull-request head from this event.
+# pull_request workflows run from this pull request before merge. This workflow
+# is outside the CI and Secret Scan concurrency groups, so a newer commit can
+# cancel those in-progress runs without cancelling publication for this head.
+# It waits until the CI and Secret Scan runs whose head_sha is this frozen
+# head have completed or been cancelled, then posts that head's required checks.
+# It does not read the pull request's current head and does not re-run the
+# expensive jobs.
 on:
-  workflow_run:
-    workflows: ["CI", "Secret Scan"]
-    types: [completed]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -15,36 +17,34 @@ permissions:
   actions: read
 
 concurrency:
-  group: publish-required-checks-${{ github.event.workflow_run.id }}
+  group: publish-required-checks-${{ github.event.pull_request.head.sha }}
   cancel-in-progress: false
 
 jobs:
   publish-required-checks:
     name: Publish required checks
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v5
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Publish required checks for the captured head
+      - name: Wait for this head, then publish required checks
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          SOURCE_WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
-          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
-          SOURCE_EVENT: ${{ github.event.workflow_run.event }}
-          SOURCE_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-          PR_HEAD_SHA: ${{ github.event.workflow_run.pull_requests[0].head.sha }}
-          PR_BASE_SHA: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          MA_POLL_INTERVAL_MS: "20000"
+          MA_POLL_TIMEOUT_MS: "6600000"
         run: |
           set -euo pipefail
-          if [ "$SOURCE_EVENT" = "pull_request" ]; then
-            git fetch --no-tags origin "$PR_BASE_SHA" "$PR_HEAD_SHA"
-            MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
-            export MA_CHANGED_PATHS
-          fi
-          node tooling/ci/merge-authority/publish.mjs publish-workflow-run
+          git fetch --no-tags origin "$PR_BASE_SHA" "$PR_HEAD_SHA"
+          MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
+          export MA_CHANGED_PATHS
+          node tooling/ci/merge-authority/publish.mjs publish-pull-request

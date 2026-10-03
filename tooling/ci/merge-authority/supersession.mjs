@@ -23,7 +23,7 @@ export const PUBLISHER_WORKFLOW_FILE = 'publish-required-checks.yml'
 export const PUBLISHER_JOB_ID = 'publish-required-checks'
 
 export const PUBLISHER_CONCURRENCY = {
-  group: 'publish-required-checks-${{ github.event.workflow_run.id }}',
+  group: 'publish-required-checks-${{ github.event.pull_request.head.sha }}',
   cancelInProgress: false,
 }
 
@@ -55,6 +55,39 @@ export const MERGE_AUTHORITY_CONCURRENCY = {
 
 const EXECUTED_JOB_RESULTS = new Set(['success', 'failure'])
 
+const TERMINAL_RUN_CONCLUSIONS = new Set([
+  'success',
+  'failure',
+  'cancelled',
+  'skipped',
+  'timed_out',
+  'neutral',
+  'stale',
+  'action_required',
+  'startup_failure',
+])
+
+/**
+ * The run that belongs to a frozen head is the one whose head_sha is that
+ * commit. pull_requests[].head.sha on older runs is the pull request's live
+ * head, so it must not be used to choose a run or a publication target.
+ * When several runs share the head, the newest id is the one still in progress
+ * or the rerun that replaced a cancelled attempt.
+ */
+export function selectRunForHead(runs, headSha) {
+  if (typeof headSha !== 'string' || headSha.trim() === '') return null
+  const matches = (Array.isArray(runs) ? runs : []).filter(
+    (run) => run && run.head_sha === headSha && (run.event == null || run.event === 'pull_request'),
+  )
+  if (matches.length === 0) return null
+  matches.sort((left, right) => (Number(right.id) || 0) - (Number(left.id) || 0))
+  return matches[0]
+}
+
+export function runIsTerminal(run) {
+  return Boolean(run) && run.status === 'completed' && TERMINAL_RUN_CONCLUSIONS.has(run.conclusion)
+}
+
 /**
  * The only head a run may publish to is the head captured for that run.
  * A different requested head is the new commit; refuse it.
@@ -70,10 +103,10 @@ export function publicationTarget(runHeadSha, requestedHeadSha) {
 }
 
 /**
- * Pull-request publication uses the frozen head on the workflow_run event.
- * workflow_run.head_sha is the merge commit for a pull request, so it is not
- * the publication target. A missing frozen head fails closed. This does not
- * look up the pull request's current head.
+ * Pull-request publication uses the head SHA frozen on the triggering event.
+ * A missing frozen head fails closed. This does not look up the pull request's
+ * current head. The workflow-run list's pull_requests[].head.sha follows the
+ * live head, so run selection must use each run's own head_sha.
  */
 export function capturedPublicationHead({ sourceEvent, workflowRunHeadSha, pullRequestHeadSha }) {
   if (sourceEvent === 'pull_request') {

@@ -3,10 +3,11 @@ name: Merge Authority
 # Always runs for pull requests to main, including documentation-only changes
 # that CI paths-ignore skips. Classification does not install the monorepo.
 # When CI will run, this workflow posts proven NOT_APPLICABLE contexts and leaves
-# REQUIRES_EXECUTION contexts to Publish required checks. That workflow starts
-# after the CI run completes, including when a newer commit cancelled the run,
-# recomputes applicability from the frozen diff, and does not rewrite
-# NOT_APPLICABLE. When CI will not run, this workflow publishes every context
+# REQUIRES_EXECUTION contexts to Publish required checks. That workflow runs on
+# the pull request, outside the CI concurrency group, and waits until the CI
+# run for the same frozen head completes or is cancelled. It recomputes
+# applicability from the frozen diff and does not rewrite NOT_APPLICABLE.
+# When CI will not run, this workflow publishes every context
 # and executes governance integrity, the inventory lock, the Checkov IaC scan,
 # or the ops pack validator when that invariant applies. A skipped CI workflow
 # is not a waiver.
