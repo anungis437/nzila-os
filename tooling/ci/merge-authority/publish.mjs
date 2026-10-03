@@ -66,26 +66,96 @@ function pathsFromStdin(text) {
     .filter((line) => line.length > 0)
 }
 
+const RETRYABLE_CHECK_STATUSES = new Set([408, 429, 502, 503, 504])
+
+function checkAttemptLimit() {
+  const value = Number(process.env.MA_CHECK_ATTEMPTS ?? 4)
+  if (!Number.isFinite(value) || value < 1) return 4
+  return Math.min(Math.floor(value), 8)
+}
+
+function checkRetryDelayMs(attempt, response) {
+  const header = response?.headers?.get?.('retry-after')
+  if (header) {
+    const seconds = Number(header)
+    if (Number.isFinite(seconds) && seconds >= 0) return Math.min(seconds * 1000, 8000)
+  }
+  const base = Number(process.env.MA_CHECK_RETRY_BASE_MS ?? 1000)
+  const safe = Number.isFinite(base) && base >= 0 ? base : 1000
+  return Math.min(safe * 2 ** Math.max(0, attempt - 1), 8000)
+}
+
 async function createCheckRun(body) {
-  const repository = process.env.GITHUB_REPOSITORY
-  const token = process.env.GITHUB_TOKEN
-  if (!repository || !token) {
-    throw new Error('GITHUB_REPOSITORY and GITHUB_TOKEN are required to publish checks')
-  }
-  const response = await fetch(`https://api.github.com/repos/${repository}/check-runs`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/vnd.github+json',
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-    body: JSON.stringify(body),
-  })
-  if (!response.ok) {
+  const { repository, token } = githubAuth()
+  const limit = checkAttemptLimit()
+  let lastError
+  for (let attempt = 1; attempt <= limit; attempt += 1) {
+    const response = await fetch(`https://api.github.com/repos/${repository}/check-runs`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+      body: JSON.stringify(body),
+    })
+    if (response.ok) return
     const detail = await response.text()
-    throw new Error(`check run ${body.name} failed (${response.status}): ${detail.slice(0, 500)}`)
+    lastError = new Error(`check run ${body.name} failed (${response.status}): ${detail.slice(0, 500)}`)
+    if (!RETRYABLE_CHECK_STATUSES.has(response.status) || attempt === limit) throw lastError
+    const delay = checkRetryDelayMs(attempt, response)
+    process.stderr.write(
+      `retrying check ${body.name} after HTTP ${response.status} attempt ${attempt}/${limit}\n`,
+    )
+    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay))
   }
+  throw lastError
+}
+
+function publicationFailure(body, error) {
+  const message = error instanceof Error ? error.message : String(error)
+  return {
+    name: body.name,
+    head_sha: body.head_sha,
+    status: 'completed',
+    conclusion: 'failure',
+    output: {
+      title: 'UNRESOLVED',
+      summary: [
+        'evidence: UNRESOLVED',
+        `publication error: ${message}`,
+        'This required check could not be published with its real conclusion. It is a terminal failure so the name is not left absent.',
+      ].join('\n\n'),
+    },
+  }
+}
+
+async function publishBody(body) {
+  try {
+    await createCheckRun(body)
+    process.stdout.write(`${body.name}: ${body.output?.title ?? body.conclusion}\n`)
+    return true
+  } catch (error) {
+    process.stderr.write(`${error instanceof Error ? error.message : error}\n`)
+    if (body.output?.summary?.includes('could not be published with its real conclusion')) return false
+    try {
+      await createCheckRun(publicationFailure(body, error))
+      process.stdout.write(`${body.name}: UNRESOLVED\n`)
+      return true
+    } catch (fallbackError) {
+      process.stderr.write(`${fallbackError instanceof Error ? fallbackError.message : fallbackError}\n`)
+      return false
+    }
+  }
+}
+
+async function publishNamedChecks(bodies) {
+  const missing = []
+  for (const body of bodies) {
+    if (!(await publishBody(body))) missing.push(body.name)
+  }
+  return missing
 }
 
 function resolveHeadSha() {
@@ -94,10 +164,7 @@ function resolveHeadSha() {
 }
 
 async function publishCheckRuns(verdicts, headSha) {
-  for (const verdict of verdicts) {
-    await createCheckRun(verdictToCheckRun(verdict, headSha))
-    process.stdout.write(`${verdict.name}: ${verdict.evidence}\n`)
-  }
+  return publishNamedChecks(verdicts.map((verdict) => verdictToCheckRun(verdict, headSha)))
 }
 
 async function publishVerdicts(verdicts, headSha) {
@@ -108,7 +175,8 @@ async function publishVerdicts(verdicts, headSha) {
   for (const context of CANONICAL_CONTEXTS) {
     if (!names.has(context.name)) throw new Error(`missing authority context ${context.name}`)
   }
-  await publishCheckRuns(verdicts, headSha)
+  const missing = await publishCheckRuns(verdicts, headSha)
+  if (missing.length > 0) throw new Error(`required checks still absent: ${missing.join(', ')}`)
 }
 
 async function classifyAndPublish() {
@@ -116,7 +184,8 @@ async function classifyAndPublish() {
   const plan = planFastPath(pathsFromStdin(readStdin()))
   process.stdout.write(`${JSON.stringify({ action: plan.action, classification: plan.classification })}\n`)
   if (plan.action === 'DEFER_TO_CI') {
-    await publishCheckRuns(deferPublications(plan), headSha)
+    const missing = await publishCheckRuns(deferPublications(plan), headSha)
+    if (missing.length > 0) throw new Error(`required checks still absent: ${missing.join(', ')}`)
     return
   }
   const verdicts = applyExecution(plan.verdicts, {
@@ -142,19 +211,21 @@ async function publishSecretTerminals() {
     if (value == null || value === '') throw new Error(`${envName} is required`)
     results[name] = value
   }
+  const missing = []
   for (const publication of secretTerminalPublications(results)) {
     if (publication.conclusion === 'success') {
       throw new Error(`unexecuted secret context cannot be success: ${publication.name}`)
     }
-    await createCheckRun({
+    const posted = await publishBody({
       name: publication.name,
       head_sha: headSha,
       status: publication.status,
       conclusion: publication.conclusion,
       output: publication.output,
     })
-    process.stdout.write(`${publication.name}: ${publication.evidence}\n`)
+    if (!posted) missing.push(publication.name)
   }
+  if (missing.length > 0) throw new Error(`required checks still absent: ${missing.join(', ')}`)
 }
 
 function githubAuth() {
@@ -260,12 +331,32 @@ async function publishPullRequest() {
   }
   const diffPaths = diffPathsFromEnv()
   const { ciSkipped, ciRun, secretRun } = await waitForHeadRuns(headSha, diffPaths)
+  const missing = []
   if (!ciSkipped) {
     const jobs = await listRunJobs(ciRun.id)
-    await publishVerdicts(evaluateCiResults(ciResultsFromJobs(jobs), diffPaths), headSha)
+    const verdicts = evaluateCiResults(ciResultsFromJobs(jobs), diffPaths)
+    if (verdicts.length !== CANONICAL_CONTEXTS.length) {
+      throw new Error(`expected ${CANONICAL_CONTEXTS.length} authority contexts, got ${verdicts.length}`)
+    }
+    missing.push(...(await publishCheckRuns(verdicts, headSha)))
   }
   const secretJobs = await listRunJobs(secretRun.id)
-  await publishSecretChecks(secretResultsFromJobs(secretJobs), headSha)
+  const publications = secretCheckPublications(secretResultsFromJobs(secretJobs))
+  if (publications.length !== 3) throw new Error(`expected 3 secret checks, got ${publications.length}`)
+  for (const publication of publications) {
+    if (publication.conclusion === 'success' && publication.evidence !== 'PASS') {
+      throw new Error(`unexecuted secret context cannot be success: ${publication.name}`)
+    }
+    const posted = await publishBody({
+      name: publication.name,
+      head_sha: headSha,
+      status: publication.status,
+      conclusion: publication.conclusion,
+      output: publication.output,
+    })
+    if (!posted) missing.push(publication.name)
+  }
+  if (missing.length > 0) throw new Error(`required checks still absent: ${missing.join(', ')}`)
 }
 
 async function publishSecretChecks(results, headSha) {
@@ -273,19 +364,21 @@ async function publishSecretChecks(results, headSha) {
   if (publications.length !== 3) {
     throw new Error(`expected 3 secret checks, got ${publications.length}`)
   }
+  const missing = []
   for (const publication of publications) {
     if (publication.conclusion === 'success' && publication.evidence !== 'PASS') {
       throw new Error(`unexecuted secret context cannot be success: ${publication.name}`)
     }
-    await createCheckRun({
+    const posted = await publishBody({
       name: publication.name,
       head_sha: headSha,
       status: publication.status,
       conclusion: publication.conclusion,
       output: publication.output,
     })
-    process.stdout.write(`${publication.name}: ${publication.evidence}\n`)
+    if (!posted) missing.push(publication.name)
   }
+  if (missing.length > 0) throw new Error(`required checks still absent: ${missing.join(', ')}`)
 }
 
 async function publishWorkflowRun() {

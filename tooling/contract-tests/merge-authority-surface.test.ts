@@ -1524,16 +1524,23 @@ globalThis.fetch = async (_url, init) => {
       ciJobs: Array<{ name: string; conclusion: string | null }>
       secretJobs: Array<{ name: string; conclusion: string | null }>
       delayCi?: boolean
+      /** HTTP status of the first check-run POST. Later posts return 201. */
+      firstCheckStatus?: number
+      /** Return this status for the real body of one name until retries are exhausted. */
+      exhaustName?: string
+      exhaustAttempts?: number
     },
   ) {
     const dir = mkdtempSync(join(tmpdir(), 'merge-authority-run-'))
     const postedPath = join(dir, 'posted.json')
+    const statusesPath = join(dir, 'statuses.json')
     const preload = join(dir, 'preload.mjs')
     const head = env.PR_HEAD_SHA
     writeFileSync(
       preload,
       `import { writeFileSync } from 'node:fs'
 const posted = []
+const statuses = []
 const ciJobs = ${JSON.stringify(options.ciJobs)}
 const secretJobs = ${JSON.stringify(options.secretJobs)}
 const earlyCiJobs = ciJobs.map((job) => ({ ...job, conclusion: 'success' }))
@@ -1541,6 +1548,10 @@ const head = ${JSON.stringify(head)}
 const newHead = ${JSON.stringify(newHead)}
 let ciPolls = 0
 const delayCi = ${options.delayCi ? 'true' : 'false'}
+const firstCheckStatus = ${JSON.stringify(options.firstCheckStatus ?? 201)}
+const exhaustName = ${JSON.stringify(options.exhaustName ?? null)}
+const exhaustAttempts = ${JSON.stringify(options.exhaustAttempts ?? 0)}
+const realAttempts = {}
 globalThis.fetch = async (url, init) => {
   const target = String(url)
   if (target.includes('/workflows/ci.yml/runs')) {
@@ -1566,9 +1577,16 @@ globalThis.fetch = async (url, init) => {
   if (target.includes('/pulls/')) {
     throw new Error('refusing live pull request lookup')
   }
-  posted.push(JSON.parse(init.body))
+  const body = JSON.parse(init.body)
+  posted.push(body)
+  const fallback = String(body.output?.summary ?? '').includes('could not be published with its real conclusion')
+  realAttempts[body.name] = (realAttempts[body.name] ?? 0) + (fallback ? 0 : 1)
+  let status = posted.length === 1 ? firstCheckStatus : 201
+  if (exhaustName && body.name === exhaustName && !fallback && realAttempts[body.name] <= exhaustAttempts) status = 504
+  statuses.push(status)
   writeFileSync(${JSON.stringify(postedPath)}, JSON.stringify(posted))
-  return new Response('{}', { status: 201 })
+  writeFileSync(${JSON.stringify(statusesPath)}, JSON.stringify(statuses))
+  return new Response('gateway timeout', { status })
 }
 `,
     )
@@ -1589,7 +1607,8 @@ globalThis.fetch = async (url, init) => {
     )
     return {
       result,
-      posted: result.status === 0 && existsPosted(postedPath) ? JSON.parse(readFileSync(postedPath, 'utf8')) : [],
+      posted: existsPosted(postedPath) ? JSON.parse(readFileSync(postedPath, 'utf8')) : [],
+      statuses: existsPosted(statusesPath) ? JSON.parse(readFileSync(statusesPath, 'utf8')) : [],
     }
   }
 
@@ -1679,5 +1698,91 @@ globalThis.fetch = async (url, init) => {
     expect(docsOnly.result.status, docsOnly.result.stderr).toBe(0)
     expect(docsOnly.posted.map((check: { name: string }) => check.name)).toEqual(SECRET_AUTHORITY_CONTEXTS)
     expect(docsOnly.posted.every((check: { head_sha: string }) => check.head_sha === oldHead)).toBe(true)
+  })
+
+  it('retries the first 504 and still posts every required name', () => {
+    const publishSource = readFileSync(join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), 'utf8')
+    expect(publishSource).toContain('408')
+    expect(publishSource).toContain('429')
+    expect(publishSource).toContain('502')
+    expect(publishSource).toContain('503')
+    expect(publishSource).toContain('504')
+
+    const cancelledCi = CI_AUTHORITY_JOBS.map((job) => ({ name: job.name, conclusion: 'cancelled' as const }))
+    const secretJobs = [
+      { name: 'Gitleaks', conclusion: 'cancelled' },
+      { name: 'TruffleHog OSS', conclusion: 'success' },
+      { name: 'Docker Secret Policy', conclusion: 'failure' },
+    ]
+    const env = {
+      PR_HEAD_SHA: oldHead,
+      HEAD_SHA: newHead,
+      MA_CHANGED_PATHS: codePaths.join('\n'),
+      MA_CHECK_RETRY_BASE_MS: '0',
+      MA_CHECK_ATTEMPTS: '4',
+    }
+    const retried = postedPullRequest(env, { ciJobs: cancelledCi, secretJobs, firstCheckStatus: 504 })
+    expect(retried.result.status, retried.result.stderr).toBe(0)
+    expect(retried.statuses[0]).toBe(504)
+    expect(retried.statuses.slice(1).every((status: number) => status === 201)).toBe(true)
+
+    const latest = new Map<string, { name: string; head_sha: string; conclusion: string; output: { title: string; summary: string } }>()
+    for (const check of retried.posted) latest.set(check.name, check)
+    expect([...latest.keys()]).toEqual([...REQUIRED_CHECK_NAMES])
+    expect([...latest.values()].every((check) => check.head_sha === oldHead)).toBe(true)
+    expect(latest.get('Merge Authority / Lint & Typecheck')).toMatchObject({
+      conclusion: 'failure',
+      output: { title: 'UNRESOLVED' },
+    })
+    expect(latest.get('Merge Authority / Lint & Typecheck')?.output.summary ?? '').not.toContain(
+      'could not be published with its real conclusion',
+    )
+    expect(latest.get('Merge Authority / Ops Documentation')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'NOT_APPLICABLE' },
+    })
+    expect(latest.get('Merge Authority / IaC Security')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'NOT_APPLICABLE' },
+    })
+    expect(latest.get('Gitleaks')).toMatchObject({ conclusion: 'failure', output: { title: 'SUPERSEDED' } })
+    expect(latest.get('TruffleHog OSS')).toMatchObject({ conclusion: 'success', output: { title: 'PASS' } })
+    expect(latest.get('Docker Secret Policy')).toMatchObject({ conclusion: 'failure', output: { title: 'FAILURE' } })
+
+    const exhausted = postedPullRequest(
+      { ...env, MA_CHECK_ATTEMPTS: '2' },
+      {
+        ciJobs: cancelledCi,
+        secretJobs,
+        exhaustName: 'Merge Authority / Ops Documentation',
+        exhaustAttempts: 2,
+      },
+    )
+    expect(exhausted.result.status, exhausted.result.stderr).toBe(0)
+    const afterFailure = new Map<string, { name: string; head_sha: string; conclusion: string; output: { title: string; summary: string } }>()
+    for (const check of exhausted.posted) afterFailure.set(check.name, check)
+    expect([...afterFailure.keys()]).toEqual([...REQUIRED_CHECK_NAMES])
+    expect([...afterFailure.values()].every((check) => check.head_sha === oldHead)).toBe(true)
+    expect(afterFailure.get('Merge Authority / Ops Documentation')).toMatchObject({
+      conclusion: 'failure',
+      output: { title: 'UNRESOLVED' },
+    })
+    expect(afterFailure.get('Merge Authority / Ops Documentation')?.output.summary ?? '').toContain(
+      'could not be published with its real conclusion',
+    )
+    expect(afterFailure.get('Merge Authority / Lint & Typecheck')).toMatchObject({
+      conclusion: 'failure',
+      output: { title: 'UNRESOLVED' },
+    })
+    expect(afterFailure.get('Merge Authority / Lint & Typecheck')?.output.summary ?? '').not.toContain(
+      'could not be published with its real conclusion',
+    )
+    expect(afterFailure.get('Merge Authority / IaC Security')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'NOT_APPLICABLE' },
+    })
+    expect(afterFailure.get('Gitleaks')?.conclusion).toBe('failure')
+    expect(afterFailure.get('TruffleHog OSS')?.conclusion).toBe('success')
+    expect(afterFailure.get('Docker Secret Policy')?.conclusion).toBe('failure')
   })
 })
