@@ -74,3 +74,11 @@ gstack moves from optional to required only if maintainers confirm:
   `UE_SAAS_OPERATIONAL_READINESS` reads `NO_GO`.
 - Never write `PROVEN_IN_STAGING`, `complete`, `green`, `ready`, or `delivered` for a Union Eyes
   capability unless every proof the programme requires for that claim is on file.
+
+## Cursor Cloud specific instructions
+
+- Install dependencies with `pnpm install --frozen-lockfile` (pnpm 10.33.0). The root `prepare` script runs `lefthook install`, which fails while Cursor sets `core.hooksPath`. Temporarily unset that local git config, install, then restore it. Do not leave `core.hooksPath` unset.
+- pnpm 10 skips dependency lifecycle scripts unless builds are allowed. Native packages in this repo need those scripts (`esbuild`, `swc`, `argon2`, `better-sqlite3`).
+- The public marketing app is `@nzila/web`: `pnpm dev:web` serves http://localhost:3000. Open that host. Next.js 16 blocks dev assets and hydration when the page is opened as `127.0.0.1`.
+- `apps/web/.env.local` (gitignored) needs `AUTH_SECRET` and a URL-shaped `DATABASE_URL`. The marketing pages and `POST /api/contact` do not open a database. `GET /api/health` returns `{"status":"ok","service":"web"}`.
+- Do not start Union Eyes Phase 3B while operational readiness is NO_GO. See the Union Eyes section above.
