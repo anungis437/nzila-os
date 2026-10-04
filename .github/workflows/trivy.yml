@@ -34,6 +34,7 @@ jobs:
     name: Trivy — ${{ matrix.target }}
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       security-events: write
       contents: read
 
@@ -99,6 +100,7 @@ jobs:
     name: Trivy — filesystem (repo secrets + misconfig) [BLOCKING]
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       security-events: write
       contents: read
 
