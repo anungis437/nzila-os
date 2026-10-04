@@ -1,3 +1,4 @@
+// phase4 product-code fixture: comment only
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
