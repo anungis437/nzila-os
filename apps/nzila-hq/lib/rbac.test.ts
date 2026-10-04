@@ -1,3 +1,4 @@
+// phase4 test-only fixture: comment only
 import { describe, expect, it } from 'vitest'
 import { hasCapability, assertCapability, type HqCapability } from './rbac'
 import type { HqRole } from '@nzila/hq-domain'
