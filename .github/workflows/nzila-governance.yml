@@ -46,24 +46,17 @@ env:
 # and can cancel the caller mid-run (see GitHub docs on reusable workflows).
 jobs:
   # ── Secret Scanning ──────────────────────────────────────────────────────
+  # Reporter only. Gitleaks and TruffleHog execute in secret-scan.yml.
+  # This job must not invoke either scanner under another name.
   secret-scan:
     runs-on: ubuntu-latest
     name: Secret Scan (Gitleaks + TruffleHog)
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Gitleaks
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-
-      - name: TruffleHog OSS
-        uses: trufflesecurity/trufflehog@v3.97.5 # pin to release tag, not mutable @main
-        with:
-          extra_args: --only-verified
+      - name: Report authoritative Gitleaks and TruffleHog jobs
+        run: |
+          echo "Gitleaks owner: .github/workflows/secret-scan.yml job gitleaks."
+          echo "TruffleHog OSS owner: .github/workflows/secret-scan.yml job trufflehog."
+          echo "This job does not execute either scanner."
 
   # ── Dependency Audit ─────────────────────────────────────────────────────
   dependency-audit:
@@ -164,8 +157,10 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
-      - name: Run contract tests
-        run: pnpm contract-tests
+      - name: Report authoritative architectural contract suite
+        run: |
+          echo "Architectural contract suite owner: .github/workflows/ci.yml job contract-tests."
+          echo "This job does not execute that suite."
 
       - name: Enforce strict decision coverage
         run: pnpm exec tsx scripts/check-decision-coverage.ts --strict

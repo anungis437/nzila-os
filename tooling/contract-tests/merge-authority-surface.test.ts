@@ -38,6 +38,7 @@ import {
   capturedPublicationHead,
   publicationTarget,
   runIsTerminal,
+  secretCheckPublications,
   selectRunForHead,
   terminalChecksForHead,
 } from '../ci/merge-authority/supersession.mjs'
@@ -385,7 +386,11 @@ describe('merge authority surface', () => {
     expect(integrity.join('\n')).not.toContain('cost')
     expect(omnibus).toContain('Collect DORA metrics')
     expect(omnibus).toContain('Collect cost attribution')
-    expect(omnibus).toContain('Enforce committed inventory lock')
+    expect(omnibus).not.toContain('Enforce committed inventory lock')
+    expect(omnibus).not.toContain('Regenerate inventory')
+    const inventory = ci.jobs['repository-inventory'].steps.map((step: { name?: string }) => step.name)
+    expect(inventory).toContain('Enforce committed inventory lock')
+    expect(inventory).toContain('Regenerate inventory')
   })
 
   it('scenario D2 — architectural contract failure is independent of governance gates', () => {
@@ -1794,5 +1799,255 @@ globalThis.fetch = async (url, init) => {
     expect(afterFailure.get('Gitleaks')?.conclusion).toBe('failure')
     expect(afterFailure.get('TruffleHog OSS')?.conclusion).toBe('success')
     expect(afterFailure.get('Docker Secret Policy')?.conclusion).toBe('failure')
+  })
+
+  it('phase 3 dedupe: each control has one execution owner and a removed duplicate cannot return under another name', () => {
+    const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
+    const governance = parse(readFileSync(join(WORKFLOWS, 'nzila-governance.yml'), 'utf8'))
+    const secrets = parse(readFileSync(join(WORKFLOWS, 'secret-scan.yml'), 'utf8'))
+    const inventoryCheck = parse(readFileSync(join(WORKFLOWS, 'repo-inventory-check.yml'), 'utf8'))
+    const authority = parse(readFileSync(join(WORKFLOWS, 'merge-authority.yml'), 'utf8'))
+
+    function runs(job: { steps?: Array<{ run?: string; uses?: string }> }) {
+      return (job.steps ?? []).map((step) => `${step.uses ?? ''}\n${step.run ?? ''}`).join('\n')
+    }
+
+    const gateRuns = runs(ci.jobs['governance-gates'])
+    expect(gateRuns).not.toMatch(/pnpm contract-tests\b/)
+    expect(gateRuns).not.toMatch(/inventory:generate/)
+    expect(gateRuns).not.toMatch(/gitleaks/i)
+    expect(gateRuns).not.toMatch(/trufflehog/i)
+    expect(gateRuns).toContain('CI job contract-tests')
+    expect(gateRuns).toContain('CI job repository-inventory')
+    expect(runs(ci.jobs['contract-tests'])).toContain('pnpm contract-tests')
+    expect(runs(ci.jobs['repository-inventory'])).toContain('pnpm inventory:generate')
+    expect(runs(ci.jobs['reconcile-frozen-head'])).toContain('reconcile-this-run')
+    expect(runs(ci.jobs['reconcile-frozen-head'])).not.toMatch(/pnpm contract-tests|inventory:generate|gitleaks|trufflehog/)
+
+    const ciContractRuns = Object.values(ci.jobs).flatMap((job) => (job as { steps?: Array<{ run?: string }> }).steps ?? []).map((step) => step.run ?? '')
+    expect(ciContractRuns.filter((run) => /\bpnpm contract-tests\b/.test(run))).toEqual(['pnpm contract-tests'])
+    const ciInventoryRuns = ciContractRuns.filter((run) => run.includes('inventory:generate'))
+    expect(ciInventoryRuns).toEqual(['pnpm inventory:generate'])
+
+    for (const job of Object.values(governance.jobs)) {
+      const blob = runs(job as { steps?: Array<{ run?: string; uses?: string }> })
+      expect(blob).not.toMatch(/gitleaks\/gitleaks-action|trufflesecurity\/trufflehog/)
+      expect(blob).not.toMatch(/\bpnpm contract-tests\b/)
+      expect(blob).not.toMatch(/inventory:generate/)
+    }
+    expect(runs(governance.jobs['secret-scan'])).toContain('secret-scan.yml job gitleaks')
+    expect(runs(governance.jobs['secret-scan'])).toContain('secret-scan.yml job trufflehog')
+    expect(runs(governance.jobs['contract-tests'])).toContain('ci.yml job contract-tests')
+    expect(runs(secrets.jobs.gitleaks)).toContain('gitleaks/gitleaks-action@')
+    expect(runs(secrets.jobs.trufflehog)).toContain('trufflesecurity/trufflehog@')
+    expect(runs(secrets.jobs['docker-secret-policy'])).toContain('audit-secrets.ts')
+    expect(runs(secrets.jobs['reconcile-frozen-head'])).toContain('reconcile-this-run')
+    expect(runs(secrets.jobs['reconcile-frozen-head'])).not.toMatch(/gitleaks\/gitleaks-action|trufflesecurity\/trufflehog/)
+
+    const drift = runs(inventoryCheck.jobs['drift-check'])
+    expect(drift).toContain('tooling/repo-inventory/src/check-drift.ts')
+    expect(drift).toContain('tooling/repo-inventory/src/generate.ts')
+    expect(drift).not.toContain('inventory:generate')
+
+    expect(authority.jobs['repository-inventory-if-ci-skipped'].if).toContain("needs.classify.outputs.ci_skip == 'true'")
+    expect(runs(authority.jobs['repository-inventory-if-ci-skipped'])).toContain('pnpm inventory:generate')
+
+    const actionRoot = join(ROOT, '.github', 'actions')
+    const actionFiles: string[] = []
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, entry.name)
+        if (entry.isDirectory()) walk(full)
+        else if (/\.(yml|yaml|sh|mjs|js|ts)$/.test(entry.name)) actionFiles.push(full)
+      }
+    }
+    walk(actionRoot)
+    for (const file of actionFiles) {
+      const body = readFileSync(file, 'utf8')
+      expect(body, file).not.toMatch(/gitleaks\/gitleaks-action|trufflesecurity\/trufflehog|\bpnpm contract-tests\b|inventory:generate/)
+    }
+
+    const referenced = new Set<string>()
+    for (const job of [ci.jobs['governance-gates'], governance.jobs['secret-scan'], governance.jobs['contract-tests']]) {
+      for (const step of (job as { steps?: Array<{ run?: string }> }).steps ?? []) {
+        for (const match of (step.run ?? '').matchAll(/(?:^|\s)((?:tooling|scripts)\/[A-Za-z0-9_./-]+\.(?:mjs|js|ts))/g)) {
+          referenced.add(match[1])
+        }
+      }
+    }
+    for (const relative of referenced) {
+      const body = readFileSync(join(ROOT, relative), 'utf8')
+      expect(body, relative).not.toMatch(/gitleaks\/gitleaks-action|trufflesecurity\/trufflehog|execSync\([^)]*contract-tests|spawn\([^)]*contract-tests|inventory:generate\(/)
+    }
+  })
+
+  it('phase 3 dedupe: seven synthetic change classes classify and terminate without a live Actions run', () => {
+    const classes: Array<{
+      name: string
+      paths: string[]
+      classification: string
+      ciSkipped: boolean
+      required: string[]
+    }> = [
+      {
+        name: 'docs-only',
+        paths: ['README.md'],
+        classification: 'ALL_NOT_APPLICABLE',
+        ciSkipped: true,
+        required: [],
+      },
+      {
+        name: 'inventory-lock-only',
+        paths: ['tooling/repo-inventory/output/inventory.json'],
+        classification: 'MIXED',
+        ciSkipped: false,
+        required: [
+          'Merge Authority / Lint & Typecheck',
+          'Merge Authority / Unit Tests',
+          'Merge Authority / Schema Integrity',
+          'Merge Authority / PostgreSQL RLS',
+          'Merge Authority / Migration Chain',
+          'Merge Authority / Affected Build',
+          'Merge Authority / Architectural Contracts',
+          'Merge Authority / Repository Inventory',
+          'Merge Authority / Governance Integrity',
+          'Merge Authority / Hash Chain Integrity',
+          'Merge Authority / Operating Layer',
+        ],
+      },
+      {
+        name: 'product-code',
+        paths: ['apps/union-eyes/app/api/example/route.ts'],
+        classification: 'MIXED',
+        ciSkipped: false,
+        required: [
+          'Merge Authority / Lint & Typecheck',
+          'Merge Authority / Unit Tests',
+          'Merge Authority / Schema Integrity',
+          'Merge Authority / PostgreSQL RLS',
+          'Merge Authority / Migration Chain',
+          'Merge Authority / Affected Build',
+          'Merge Authority / Architectural Contracts',
+          'Merge Authority / Repository Inventory',
+          'Merge Authority / Governance Integrity',
+          'Merge Authority / Operating Layer',
+        ],
+      },
+      {
+        name: 'test-only',
+        paths: ['apps/union-eyes/app/api/example/route.test.ts'],
+        classification: 'MIXED',
+        ciSkipped: false,
+        required: [
+          'Merge Authority / Lint & Typecheck',
+          'Merge Authority / Unit Tests',
+          'Merge Authority / Schema Integrity',
+          'Merge Authority / PostgreSQL RLS',
+          'Merge Authority / Migration Chain',
+          'Merge Authority / Affected Build',
+          'Merge Authority / Architectural Contracts',
+          'Merge Authority / Repository Inventory',
+          'Merge Authority / Governance Integrity',
+          'Merge Authority / Operating Layer',
+        ],
+      },
+      {
+        name: 'architecture-affecting',
+        paths: ['tooling/contract-tests/merge-authority-surface.test.ts'],
+        classification: 'MIXED',
+        ciSkipped: false,
+        required: [
+          'Merge Authority / Lint & Typecheck',
+          'Merge Authority / Unit Tests',
+          'Merge Authority / Schema Integrity',
+          'Merge Authority / PostgreSQL RLS',
+          'Merge Authority / Migration Chain',
+          'Merge Authority / Affected Build',
+          'Merge Authority / Architectural Contracts',
+          'Merge Authority / Repository Inventory',
+          'Merge Authority / Governance Integrity',
+          'Merge Authority / Hash Chain Integrity',
+          'Merge Authority / Operating Layer',
+        ],
+      },
+      {
+        name: 'ops-docs-affecting',
+        paths: ['ops/runbooks/README.md'],
+        classification: 'MIXED',
+        ciSkipped: true,
+        required: ['Merge Authority / Ops Documentation'],
+      },
+      {
+        name: 'workflow/governance',
+        paths: ['.github/workflows/ci.yml'],
+        classification: 'CODE_OR_UNKNOWN',
+        ciSkipped: false,
+        required: CANONICAL_CONTEXTS.map((context) => context.name),
+      },
+    ]
+
+    const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
+    for (const sample of classes) {
+      const plan = classifyChangedPaths(sample.paths)
+      expect(plan.classification, sample.name).toBe(sample.classification)
+      expect(plan.ciSkippedByPathsIgnore, sample.name).toBe(sample.ciSkipped)
+      expect(plan.secretSafety, sample.name).toBe('APPLICABLE')
+      const required = Object.entries(plan.contexts)
+        .filter(([, value]) => value === 'REQUIRES_EXECUTION')
+        .map(([name]) => name)
+        .sort()
+      expect(required, sample.name).toEqual([...sample.required].sort())
+      const fast = fastPathExecution(plan)
+      expect(fast.governance, sample.name).toBe(sample.ciSkipped && plan.contexts['Merge Authority / Governance Integrity'] === 'REQUIRES_EXECUTION')
+      expect(fast.inventory, sample.name).toBe(sample.ciSkipped && plan.contexts['Merge Authority / Repository Inventory'] === 'REQUIRES_EXECUTION')
+      expect(fast.iac, sample.name).toBe(sample.ciSkipped && plan.contexts['Merge Authority / IaC Security'] === 'REQUIRES_EXECUTION')
+      expect(fast.ops, sample.name).toBe(sample.ciSkipped && plan.contexts['Merge Authority / Ops Documentation'] === 'REQUIRES_EXECUTION')
+      if (!sample.ciSkipped) {
+        for (const context of CANONICAL_CONTEXTS) {
+          expect(ci.jobs[context.ciJob].if, `${sample.name} ${context.ciJob}`).toBeUndefined()
+        }
+      }
+
+      const passed = evaluateCiResults(
+        Object.fromEntries(CANONICAL_CONTEXTS.map((context) => [context.ciJob, 'success'])),
+        sample.paths,
+      )
+      expect(passed, sample.name).toHaveLength(13)
+      for (const verdict of passed) {
+        expect(verdict.conclusion, `${sample.name} ${verdict.name}`).toBe('success')
+        const expectNa = !sample.required.includes(verdict.name)
+        expect(verdict.evidence, `${sample.name} ${verdict.name}`).toBe(expectNa ? 'NOT_APPLICABLE' : 'PASS')
+      }
+      const secretPass = secretCheckPublications({
+        Gitleaks: 'success',
+        'TruffleHog OSS': 'success',
+        'Docker Secret Policy': 'success',
+      })
+      expect(secretPass.map((item) => item.name).sort()).toEqual([...SECRET_AUTHORITY_CONTEXTS].sort())
+      expect(secretPass.every((item) => item.status === 'completed' && item.conclusion === 'success' && item.evidence === 'PASS')).toBe(true)
+      expect(passed.length + secretPass.length).toBe(16)
+
+      const failingJob = sample.required.length > 0
+        ? CANONICAL_CONTEXTS.find((context) => context.name === sample.required[0])!.ciJob
+        : 'lint-and-typecheck'
+      const failed = evaluateCiResults(
+        Object.fromEntries(CANONICAL_CONTEXTS.map((context) => [context.ciJob, context.ciJob === failingJob ? 'failure' : 'success'])),
+        sample.paths,
+      )
+      const failedVerdict = failed.find((verdict) => verdict.ciJob === failingJob)!
+      if (sample.required.includes(failedVerdict.name)) {
+        expect(failedVerdict, sample.name).toMatchObject({ evidence: 'FAILURE', conclusion: 'failure' })
+      } else {
+        expect(failedVerdict, sample.name).toMatchObject({ evidence: 'NOT_APPLICABLE', conclusion: 'success' })
+      }
+      const secretFail = secretCheckPublications({
+        Gitleaks: 'failure',
+        'TruffleHog OSS': 'success',
+        'Docker Secret Policy': 'cancelled',
+      })
+      expect(secretFail.find((item) => item.name === 'Gitleaks')).toMatchObject({ evidence: 'FAILURE', conclusion: 'failure' })
+      expect(secretFail.find((item) => item.name === 'TruffleHog OSS')).toMatchObject({ evidence: 'PASS', conclusion: 'success' })
+      expect(secretFail.find((item) => item.name === 'Docker Secret Policy')?.conclusion).not.toBe('success')
+    }
   })
 })

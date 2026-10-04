@@ -339,7 +339,12 @@ jobs:
   governance-gates:
     runs-on: ubuntu-latest
     name: Governance Gates
-    needs: [lint-and-typecheck, test]
+    needs: [lint-and-typecheck, test, contract-tests, repository-inventory]
+    # Runs after the authoritative contract and inventory jobs so this job can
+    # report their results. It does not execute those suites. Cancellation of
+    # this job is not a new publication path; reconcile-frozen-head still
+    # publishes the CI run.
+    if: always() && needs.lint-and-typecheck.result == 'success' && needs.test.result == 'success' && !cancelled()
     steps:
       - uses: actions/checkout@v5
         with:
@@ -361,9 +366,6 @@ jobs:
 
       - name: Start governance runtime timer
         run: echo "GOVERNANCE_JOB_START_TS=$(date +%s)" >> "$GITHUB_ENV"
-
-      - name: Contract tests
-        run: pnpm contract-tests
 
       - name: Tier 1 maturity gate
         run: |
@@ -453,20 +455,6 @@ jobs:
       - name: Workspace dependency integrity
         run: pnpm exec tsx scripts/validate-workspace-links.ts
 
-      - name: Regenerate inventory
-        run: pnpm inventory:generate
-
-      - name: Enforce committed inventory lock
-        run: |
-          DIFF=$(git diff -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md)
-          SUBSTANTIVE=$(echo "$DIFF" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | grep -Ev '"generatedAt"|Auto-generated on' || true)
-          if [ -n "$SUBSTANTIVE" ]; then
-            echo "Substantive inventory drift detected:"
-            echo "$DIFF"
-            exit 1
-          fi
-          echo "Inventory check passed (date-stamp differences ignored)"
-
       - name: Control manifest validation
         run: pnpm exec tsx tooling/governance/validate-control-manifests.ts
 
@@ -484,6 +472,17 @@ jobs:
         env:
           GOVERNANCE_JOB_START_TS: "${{ env.GOVERNANCE_JOB_START_TS }}"
           GOVERNANCE_MAX_RUNTIME_MINUTES: "${{ vars.GOVERNANCE_MAX_RUNTIME_MINUTES || '55' }}"
+
+      - name: Report authoritative contract and inventory results
+        if: always()
+        run: |
+          set -euo pipefail
+          echo "Architectural contract suite owner: CI job contract-tests. This step does not execute that suite."
+          echo "Inventory lock owner: CI job repository-inventory. This step does not regenerate inventory."
+          echo "contract-tests result: ${{ needs.contract-tests.result }}"
+          echo "repository-inventory result: ${{ needs.repository-inventory.result }}"
+          test "${{ needs.contract-tests.result }}" = "success"
+          test "${{ needs.repository-inventory.result }}" = "success"
 
       - name: Upload governance gate report
         if: always()
@@ -742,8 +741,8 @@ jobs:
           path: tests/load/
           retention-days: 30
 
-  # Inventory lock only. The same steps remain inside Governance Gates.
-  # This job is the authority source and does not collect DORA, cost, or release evidence.
+  # Inventory lock owner. Governance Gates reports this job's result and does not regenerate inventory.
+  # This job does not collect DORA, cost, or release evidence.
   repository-inventory:
     name: Repository Inventory
     runs-on: ubuntu-latest

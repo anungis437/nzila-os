@@ -56,7 +56,7 @@ export const CANONICAL_CONTEXTS = [
     ciJob: 'contract-tests',
     family: 'contracts',
     evidence:
-      'Standalone CI job Contract Tests (Architectural Invariants) runs pnpm contract-tests. The copy inside Governance Gates is not this authority source.',
+      'Standalone CI job Contract Tests (Architectural Invariants) is the only pnpm contract-tests execution on the CI workflow. Governance Gates reports that job and does not execute the suite.',
   },
   {
     name: 'Merge Authority / Repository Inventory',
