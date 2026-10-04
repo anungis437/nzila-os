@@ -116,16 +116,10 @@ export const CONDITIONAL_AUTHORITY_RESIDUAL = ACCEPTABLE_AUTHORITY_RESIDUAL
 
 /**
  * Must stay identical to pull_request.paths-ignore in .github/workflows/ci.yml.
- * The contract test fails if the workflow list drifts.
+ * Phase 4 does not skip the CI workflow. Job-level classifier outputs decide
+ * which authoritative jobs run. An empty list means ciWillSkip is false.
  */
-export const CI_PATHS_IGNORE = [
-  '**/*.md',
-  'docs/**',
-  '.github/CODEOWNERS',
-  '.gitignore',
-  '.editorconfig',
-  'LICENSE',
-]
+export const CI_PATHS_IGNORE = []
 
 const EXACT_DOCUMENTATION_PATHS = new Set([
   'LICENSE',
@@ -180,17 +174,12 @@ export function normalizeRepoPath(input) {
 export function matchesCiPathsIgnore(input) {
   const path = normalizeRepoPath(input)
   if (!path) return false
-  if (
-    path === '.github/CODEOWNERS' ||
-    path === '.gitignore' ||
-    path === '.editorconfig' ||
-    path === 'LICENSE'
-  ) {
-    return true
-  }
-  if (path === 'docs' || path.startsWith('docs/')) return true
-  if (path.endsWith('.md')) return true
-  return false
+  if (CI_PATHS_IGNORE.length === 0) return false
+  return CI_PATHS_IGNORE.some((pattern) => {
+    if (pattern.endsWith('/**')) return path === pattern.slice(0, -3) || path.startsWith(pattern.slice(0, -2))
+    if (pattern.startsWith('**/')) return path.endsWith(pattern.slice(2))
+    return path === pattern
+  })
 }
 
 export function ciWillSkip(paths) {
@@ -417,11 +406,78 @@ export function classifyChangedPaths(paths) {
   return {
     classification,
     contexts,
+    signals: classifierSignals(list),
     secretSafety: 'APPLICABLE',
     ciSkippedByPathsIgnore: ciWillSkip(Array.isArray(paths) ? paths : []),
     acceptableAuthorityResidual: ACCEPTABLE_AUTHORITY_RESIDUAL,
     conditionalAuthorityResidual: CONDITIONAL_AUTHORITY_RESIDUAL,
   }
+}
+
+/**
+ * One applicability truth for a frozen head. SECURITY is always APPLICABLE:
+ * secret scanners are not waived. That is the written exception to per-path
+ * skipping. Other signals use the same family predicates as the 13 contexts.
+ */
+export function classifierSignals(paths) {
+  const list = Array.isArray(paths) ? paths : []
+  const known = list.map((path) => knownPath(path))
+  const any = (predicate) => known.length === 0 || known.some((path) => path == null || predicate(path))
+  const docs = known.some((path) => path != null && (isDocumentationOnlyPath(path) || path.startsWith('docs/') || path.endsWith('.md')))
+  return {
+    PRODUCT_CODE: any(requiresEngineering) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    TESTS: any(requiresEngineering) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    INVENTORY: any(requiresInventory) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    ARCHITECTURE: any(requiresContracts) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    OPS_DOCS: any(requiresOps) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    DOCS: docs ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    GOVERNANCE: any(requiresGovernance) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    WORKFLOWS: any((path) => path.startsWith('.github/workflows/') || path.startsWith('.github/actions/'))
+      ? 'APPLICABLE'
+      : 'NOT_APPLICABLE',
+    INFRA: any(requiresIac) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    SECURITY: 'APPLICABLE',
+  }
+}
+
+const CONTEXT_SIGNAL = {
+  engineering: 'PRODUCT_CODE',
+  governance: 'GOVERNANCE',
+  inventory: 'INVENTORY',
+  contracts: 'ARCHITECTURE',
+  'hash-chain': 'PRODUCT_CODE',
+  'operating-layer': 'PRODUCT_CODE',
+  iac: 'INFRA',
+  'ops-pack': 'OPS_DOCS',
+}
+
+/** Machine-readable ownership for the 16 required contexts. */
+export function requiredContextContract() {
+  const ci = CANONICAL_CONTEXTS.map((context) => ({
+    CONTEXT_NAME: context.name,
+    APPLICABILITY_SIGNAL: context.family === 'engineering' && context.ciJob === 'test' ? 'TESTS' : CONTEXT_SIGNAL[context.family],
+    AUTHORITATIVE_OWNER: `ci.yml#${context.ciJob}`,
+    EXECUTION_WORKFLOW: '.github/workflows/ci.yml',
+    REPORTER: 'ci.yml#reconcile-frozen-head',
+    DEPENDENCY: `needs: [classify, ${context.ciJob}]`,
+    NA_BEHAVIOR: 'skip the owner job and post completed success NOT_APPLICABLE',
+    FAILURE_BEHAVIOR: 'post completed failure; unknown, missing, and cancelled stay non-success',
+  }))
+  const secrets = [
+    ['Gitleaks', 'secret-scan.yml#gitleaks'],
+    ['TruffleHog OSS', 'secret-scan.yml#trufflehog'],
+    ['Docker Secret Policy', 'secret-scan.yml#docker-secret-policy'],
+  ].map(([name, owner]) => ({
+    CONTEXT_NAME: name,
+    APPLICABILITY_SIGNAL: 'SECURITY',
+    AUTHORITATIVE_OWNER: owner,
+    EXECUTION_WORKFLOW: '.github/workflows/secret-scan.yml',
+    REPORTER: 'secret-scan.yml#reconcile-frozen-head',
+    DEPENDENCY: 'needs: owner job; SECURITY is always APPLICABLE',
+    NA_BEHAVIOR: 'not used; SECURITY is never NOT_APPLICABLE',
+    FAILURE_BEHAVIOR: 'post completed failure; unknown, missing, and cancelled stay non-success',
+  }))
+  return [...ci, ...secrets]
 }
 
 /**

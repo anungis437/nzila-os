@@ -750,20 +750,31 @@ async function publishCiResults() {
 
 function classifyOutputs() {
   const plan = planFastPath(pathsFromStdin(readStdin()))
-  const governance = plan.classification.contexts['Merge Authority / Governance Integrity']
-  const inventory = plan.classification.contexts['Merge Authority / Repository Inventory']
-  const iac = plan.classification.contexts['Merge Authority / IaC Security']
-  const ops = plan.classification.contexts['Merge Authority / Ops Documentation']
-  process.stdout.write(
-    [
-      `ci_skip=${plan.classification.ciSkippedByPathsIgnore ? 'true' : 'false'}`,
-      `governance=${governance}`,
-      `inventory=${inventory}`,
-      `iac=${iac}`,
-      `ops=${ops}`,
-      `action=${plan.action}`,
-    ].join('\n') + '\n',
-  )
+  const contexts = plan.classification.contexts
+  const signals = plan.classification.signals
+  const lines = [
+    `ci_skip=${plan.classification.ciSkippedByPathsIgnore ? 'true' : 'false'}`,
+    `governance=${contexts['Merge Authority / Governance Integrity']}`,
+    `inventory=${contexts['Merge Authority / Repository Inventory']}`,
+    `iac=${contexts['Merge Authority / IaC Security']}`,
+    `ops=${contexts['Merge Authority / Ops Documentation']}`,
+    `action=${plan.action}`,
+  ]
+  for (const [name, value] of Object.entries(signals)) {
+    lines.push(`${name.toLowerCase()}=${value}`)
+  }
+  for (const job of CI_AUTHORITY_JOBS) {
+    const context = CANONICAL_CONTEXTS.find((item) => item.ciJob === job.id)
+    const applicable = context && contexts[context.name] === 'REQUIRES_EXECUTION'
+    lines.push(`${job.id.replaceAll('-', '_')}=${applicable ? 'APPLICABLE' : 'NOT_APPLICABLE'}`)
+  }
+  process.stdout.write(lines.join('\n') + '\n')
+}
+
+function aggregateMergeAuthority() {
+  process.stdout.write('MERGE_AUTHORITY_EXECUTION_JOBS=0\n')
+  process.stdout.write('classifier=ci.yml#classify\n')
+  process.stdout.write('absent evidence is not PASS\n')
 }
 
 
@@ -894,6 +905,8 @@ if (invokedDirectly()) {
     await classifyAndPublish()
   } else if (command === 'classify-outputs') {
     classifyOutputs()
+  } else if (command === 'aggregate-merge-authority') {
+    aggregateMergeAuthority()
   } else if (command === 'publish-ci-results') {
     await publishCiResults()
   } else if (command === 'publish-secret-terminals') {
@@ -910,7 +923,7 @@ if (invokedDirectly()) {
     await requireAuthoritativeJobs()
   } else {
     process.stderr.write(
-      'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request | republish-frozen-head | reconcile-this-run | require-authoritative-jobs\n',
+      'usage: publish.mjs classify-and-publish | classify-outputs | aggregate-merge-authority | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request | republish-frozen-head | reconcile-this-run | require-authoritative-jobs\n',
     )
     process.exit(1)
   }

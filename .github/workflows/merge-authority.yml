@@ -1,16 +1,10 @@
 name: Merge Authority
 
-# Always runs for pull requests to main, including documentation-only changes
-# that CI paths-ignore skips. Classification does not install the monorepo.
-# When CI will run, this workflow posts proven NOT_APPLICABLE contexts and leaves
-# REQUIRES_EXECUTION contexts to Publish required checks. That workflow runs on
-# the pull request, outside the CI concurrency group, and waits until the CI
-# run for the same frozen head completes or is cancelled. It recomputes
-# applicability from the frozen diff and does not rewrite NOT_APPLICABLE.
-# When CI will not run, this workflow publishes every context
-# and executes governance integrity, the inventory lock, the Checkov IaC scan,
-# or the ops pack validator when that invariant applies. A skipped CI workflow
-# is not a waiver.
+# Aggregator only. Applicability is decided by CI job classify. This workflow
+# does not classify on its own and does not execute contract tests, inventory
+# locks, Checkov, ops validation, or secret scanners. Absent evidence is not PASS.
+# Required contexts are published by CI and Secret Scan reconcile-frozen-head,
+# and by Publish required checks, from that same classifier.
 
 on:
   pull_request:
@@ -18,152 +12,29 @@ on:
 
 permissions:
   contents: read
-  checks: write
 
 concurrency:
   group: merge-authority-${{ github.event.pull_request.head.sha }}
   cancel-in-progress: false
 
 jobs:
-  classify:
-    name: Classify merge impact
+  aggregate:
+    name: Aggregate merge authority
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    outputs:
-      ci_skip: ${{ steps.plan.outputs.ci_skip }}
-      governance: ${{ steps.plan.outputs.governance }}
-      inventory: ${{ steps.plan.outputs.inventory }}
-      iac: ${{ steps.plan.outputs.iac }}
-      ops: ${{ steps.plan.outputs.ops }}
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Classify changed paths
-        id: plan
-        run: |
-          set -euo pipefail
-          files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")"
-          printf '%s\n' "$files" | node tooling/ci/merge-authority/publish.mjs classify-outputs >> "$GITHUB_OUTPUT"
-
-  governance-integrity-if-ci-skipped:
-    name: Governance integrity when CI is skipped
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: classify
-    if: needs.classify.outputs.ci_skip == 'true' && needs.classify.outputs.governance == 'REQUIRES_EXECUTION'
-    steps:
-      - uses: actions/checkout@v5
-      - uses: ./.github/actions/setup-monorepo
-      - name: Script alias regression guard
-        run: node tooling/scripts/check-script-alias-regression.mjs
-      - name: Governance fail-closed gate
-        run: pnpm exec tsx tooling/governance/validate-governance-gate.ts
-      - name: Evidence lifecycle policy gate
-        run: pnpm exec tsx scripts/validate-evidence-lifecycle-policy.ts
-      - name: Truth authority validation
-        run: pnpm exec tsx scripts/validate-truth-authority.ts
-      - name: Auth authority validation
-        run: pnpm exec tsx scripts/validate-auth-authority.ts
-      - name: GA state machine validation
-        run: pnpm exec tsx scripts/validate-ga-state.ts
-      - name: Workspace dependency integrity
-        run: pnpm exec tsx scripts/validate-workspace-links.ts
-      - name: Control manifest validation
-        run: pnpm exec tsx tooling/governance/validate-control-manifests.ts
-
-  repository-inventory-if-ci-skipped:
-    name: Repository inventory when CI is skipped
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: classify
-    if: needs.classify.outputs.ci_skip == 'true' && needs.classify.outputs.inventory == 'REQUIRES_EXECUTION'
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - uses: ./.github/actions/setup-monorepo
-      - name: Regenerate inventory
-        run: pnpm inventory:generate
-      - name: Enforce committed inventory lock
-        run: |
-          DIFF=$(git diff -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md)
-          SUBSTANTIVE=$(echo "$DIFF" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | grep -Ev '"generatedAt"|Auto-generated on' || true)
-          if [ -n "$SUBSTANTIVE" ]; then
-            echo "Substantive inventory drift detected:"
-            echo "$DIFF"
-            exit 1
-          fi
-          echo "Inventory check passed (date-stamp differences ignored)"
-
-  # Checkov-only, same command as ci.yml iac-scan. No SARIF publication.
-  iac-security-if-ci-skipped:
-    name: IaC security when CI is skipped
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: classify
-    if: needs.classify.outputs.ci_skip == 'true' && needs.classify.outputs.iac == 'REQUIRES_EXECUTION'
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install Checkov
-        run: pip install checkov
-      - name: Run Checkov on Bicep templates
-        run: |
-          checkov \
-            --directory infrastructure/bicep \
-            --framework bicep \
-            --output cli --output sarif \
-            --output-file-path console,results.sarif \
-            --skip-check CKV_AZURE_99 \
-            --skip-check CKV_AZURE_139 \
-            --skip-check CKV_AZURE_163 \
-            --skip-check CKV_AZURE_166 \
-            --skip-check CKV_AZURE_189
-
-  ops-documentation-if-ci-skipped:
-    name: Ops documentation when CI is skipped
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: classify
-    if: needs.classify.outputs.ci_skip == 'true' && needs.classify.outputs.ops == 'REQUIRES_EXECUTION'
-    steps:
-      - uses: actions/checkout@v5
-      - uses: ./.github/actions/setup-monorepo
-      - name: Validate ops pack completeness
-        run: pnpm tsx tooling/ops/validate-ops-pack.ts ${{ github.workspace }}
-
-  publish:
-    name: Publish merge authority fast path
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    needs:
-      - classify
-      - governance-integrity-if-ci-skipped
-      - repository-inventory-if-ci-skipped
-      - iac-security-if-ci-skipped
-      - ops-documentation-if-ci-skipped
-    if: always() && needs.classify.result == 'success'
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Publish proven NOT_APPLICABLE contexts or the CI-skip fast path
+      - name: Report merge authority without executing controls
         env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          MA_RUN_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          MA_EXEC_GOVERNANCE: ${{ needs.governance-integrity-if-ci-skipped.result }}
-          MA_EXEC_INVENTORY: ${{ needs.repository-inventory-if-ci-skipped.result }}
-          MA_EXEC_IAC: ${{ needs.iac-security-if-ci-skipped.result }}
-          MA_EXEC_OPS: ${{ needs.ops-documentation-if-ci-skipped.result }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEW_DECISION: ${{ github.event.pull_request.draft && 'draft' || 'opened' }}
         run: |
           set -euo pipefail
-          files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")"
-          printf '%s\n' "$files" | node tooling/ci/merge-authority/publish.mjs classify-and-publish
+          node tooling/ci/merge-authority/publish.mjs aggregate-merge-authority
+          echo "pull_request=${PR_NUMBER} review_state=${REVIEW_DECISION}"
+          echo "governance_state=consumed from CI job governance-integrity when GOVERNANCE is APPLICABLE"
