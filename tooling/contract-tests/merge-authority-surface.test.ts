@@ -1,4 +1,3 @@
-// phase4 architecture fixture: comment only
 /**
  * Contract: canonical merge-authority contexts are unique, always decided,
  * and fail closed when underlying CI evidence is missing, cancelled, or failed.
