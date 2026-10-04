@@ -1,4 +1,3 @@
-<!-- phase4 ops-docs fixture: comment only -->
 # Nzila OS — Operations (Ops)
 
 Audience: On-call engineers, platform admins, security, auditors  
