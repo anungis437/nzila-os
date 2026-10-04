@@ -11,7 +11,7 @@ name: Publish required checks
 # live head and does not re-run the expensive jobs.
 on:
   pull_request:
-    branches: [main]
+    branches: [main, proof/phase4-dag-base]
 
 permissions:
   contents: read
