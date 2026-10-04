@@ -37,6 +37,7 @@ import {
   secretCheckPublications,
   secretResultsFromJobs,
   secretTerminalPublications,
+  consumeAuthoritativeJobs,
   selectRunForHead,
 } from './supersession.mjs'
 
@@ -276,12 +277,12 @@ async function listRunJobs(runId) {
   return jobs
 }
 
-async function listWorkflowRuns(workflowFile, headSha) {
+async function listWorkflowRuns(workflowFile, headSha, event = 'pull_request') {
   const { repository } = githubAuth()
   const runs = []
   for (let page = 1; page <= 5; page += 1) {
     const response = await githubFetch(
-      `https://api.github.com/repos/${repository}/actions/workflows/${workflowFile}/runs?head_sha=${encodeURIComponent(headSha)}&event=pull_request&per_page=50&page=${page}`,
+      `https://api.github.com/repos/${repository}/actions/workflows/${workflowFile}/runs?head_sha=${encodeURIComponent(headSha)}&event=${encodeURIComponent(event)}&per_page=50&page=${page}`,
     )
     if (!response.ok) {
       const detail = await response.text()
@@ -799,6 +800,43 @@ async function withReadRetries(read) {
 }
 
 /**
+ * Fail closed unless the named jobs succeeded on the frozen head.
+ * Reads the Actions API. Does not publish checks and does not execute jobs.
+ * A different or newer head is not selected. Unknown evidence is not success.
+ */
+async function requireAuthoritativeJobs() {
+  const eventName = process.env.GITHUB_EVENT_NAME || process.env.SOURCE_EVENT || ''
+  const headSha = eventName === 'pull_request'
+    ? capturedPublicationHead({
+        sourceEvent: 'pull_request',
+        workflowRunHeadSha: process.env.PR_HEAD_SHA,
+        pullRequestHeadSha: process.env.PR_HEAD_SHA,
+      })
+    : capturedPublicationHead({
+        sourceEvent: eventName || 'push',
+        workflowRunHeadSha: process.env.SOURCE_HEAD_SHA,
+        pullRequestHeadSha: process.env.SOURCE_HEAD_SHA,
+      })
+  const workflowFile = process.env.MA_AUTHORITATIVE_WORKFLOW
+  const jobNames = String(process.env.MA_AUTHORITATIVE_JOBS || '')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean)
+  if (!workflowFile || jobNames.length === 0) {
+    throw new Error('MA_AUTHORITATIVE_WORKFLOW and MA_AUTHORITATIVE_JOBS are required')
+  }
+  const runs = await listWorkflowRuns(workflowFile, headSha, eventName === 'pull_request' ? 'pull_request' : eventName || 'pull_request')
+  const selected = selectRunForHead(runs, headSha)
+  const jobs = selected && runIsTerminal(selected) ? await listRunJobs(selected.id) : []
+  const result = consumeAuthoritativeJobs({ headSha, runs, jobs, jobNames })
+  if (!result.ok) {
+    process.stderr.write(`${result.reason}\n`)
+    process.exit(1)
+  }
+  process.stdout.write(`${result.reason}\n`)
+}
+
+/**
  * One-shot reconcile for the workflow run that just finished. Publishes only
  * that run's frozen head. Does not poll for a later head and does not
  * re-execute jobs. A different head is refused. Unknown evidence is not success.
@@ -868,9 +906,11 @@ if (invokedDirectly()) {
     await republishFrozenHead()
   } else if (command === 'reconcile-this-run') {
     await reconcileThisRun()
+  } else if (command === 'require-authoritative-jobs') {
+    await requireAuthoritativeJobs()
   } else {
     process.stderr.write(
-      'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request | republish-frozen-head | reconcile-this-run\n',
+      'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request | republish-frozen-head | reconcile-this-run | require-authoritative-jobs\n',
     )
     process.exit(1)
   }

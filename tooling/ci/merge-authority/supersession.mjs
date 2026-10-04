@@ -246,3 +246,38 @@ export function terminalChecksForHead({ results, diffPaths, secretResults, runHe
   }
   return checks
 }
+
+/**
+ * Read-only consumption of authoritative jobs for one frozen head.
+ * Does not publish checks and does not select a newer head.
+ * Success is only an exact job conclusion of success. Failure, cancelled,
+ * missing, and a non-terminal run stay non-success.
+ */
+export function consumeAuthoritativeJobs({ headSha, runs, jobs, jobNames }) {
+  if (typeof headSha !== 'string' || headSha.trim() === '' || headSha !== headSha.trim()) {
+    return { ok: false, reason: 'frozen head SHA is required; refusing to look up a newer head' }
+  }
+  const names = Array.isArray(jobNames) ? jobNames.filter((name) => typeof name === 'string' && name.trim() !== '') : []
+  if (names.length === 0) return { ok: false, reason: 'authoritative job names are required' }
+  const run = selectRunForHead(runs, headSha)
+  if (!run || run.head_sha !== headSha) {
+    return { ok: false, reason: `authoritative run is absent for ${headSha}` }
+  }
+  if (!runIsTerminal(run)) {
+    return { ok: false, reason: `authoritative run for ${headSha} is not terminal` }
+  }
+  const byName = new Map()
+  for (const job of Array.isArray(jobs) ? jobs : []) {
+    if (!job || typeof job.name !== 'string') continue
+    byName.set(job.name, job.conclusion == null || job.conclusion === '' ? 'absent' : String(job.conclusion))
+  }
+  const conclusions = {}
+  for (const name of names) {
+    const conclusion = byName.has(name) ? byName.get(name) : 'absent'
+    conclusions[name] = conclusion
+    if (conclusion !== 'success') {
+      return { ok: false, reason: `${name} is ${conclusion} for ${headSha}`, conclusions }
+    }
+  }
+  return { ok: true, reason: `authoritative jobs succeeded for ${headSha}`, conclusions }
+}

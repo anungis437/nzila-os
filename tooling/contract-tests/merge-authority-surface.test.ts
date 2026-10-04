@@ -38,6 +38,7 @@ import {
   capturedPublicationHead,
   publicationTarget,
   runIsTerminal,
+  consumeAuthoritativeJobs,
   secretCheckPublications,
   selectRunForHead,
   terminalChecksForHead,
@@ -1835,9 +1836,12 @@ globalThis.fetch = async (url, init) => {
       expect(blob).not.toMatch(/\bpnpm contract-tests\b/)
       expect(blob).not.toMatch(/inventory:generate/)
     }
-    expect(runs(governance.jobs['secret-scan'])).toContain('secret-scan.yml job gitleaks')
-    expect(runs(governance.jobs['secret-scan'])).toContain('secret-scan.yml job trufflehog')
-    expect(runs(governance.jobs['contract-tests'])).toContain('ci.yml job contract-tests')
+    expect(runs(governance.jobs['report-secret-owners'])).toContain('require-authoritative-jobs')
+    expect(governance.jobs['report-secret-owners'].steps.find((step: { env?: { MA_AUTHORITATIVE_JOBS?: string } }) => step.env?.MA_AUTHORITATIVE_JOBS).env.MA_AUTHORITATIVE_JOBS).toBe('Gitleaks,TruffleHog OSS')
+    expect(runs(governance.jobs['report-contract-owner'])).toContain('require-authoritative-jobs')
+    expect(governance.jobs['report-contract-owner'].steps.find((step: { env?: { MA_AUTHORITATIVE_JOBS?: string } }) => step.env?.MA_AUTHORITATIVE_JOBS).env.MA_AUTHORITATIVE_JOBS).toBe('Contract Tests (Architectural Invariants)')
+    expect(runs(governance.jobs['report-inventory-owner'])).toContain('require-authoritative-jobs')
+    expect(governance.jobs['report-inventory-owner'].steps.find((step: { env?: { MA_AUTHORITATIVE_JOBS?: string } }) => step.env?.MA_AUTHORITATIVE_JOBS).env.MA_AUTHORITATIVE_JOBS).toBe('Repository Inventory')
     expect(runs(secrets.jobs.gitleaks)).toContain('gitleaks/gitleaks-action@')
     expect(runs(secrets.jobs.trufflehog)).toContain('trufflesecurity/trufflehog@')
     expect(runs(secrets.jobs['docker-secret-policy'])).toContain('audit-secrets.ts')
@@ -1868,7 +1872,7 @@ globalThis.fetch = async (url, init) => {
     }
 
     const referenced = new Set<string>()
-    for (const job of [ci.jobs['governance-gates'], governance.jobs['secret-scan'], governance.jobs['contract-tests']]) {
+    for (const job of [ci.jobs['governance-gates'], governance.jobs['report-secret-owners'], governance.jobs['report-contract-owner'], governance.jobs['report-inventory-owner'], governance.jobs['decision-suite']]) {
       for (const step of (job as { steps?: Array<{ run?: string }> }).steps ?? []) {
         for (const match of (step.run ?? '').matchAll(/(?:^|\s)((?:tooling|scripts)\/[A-Za-z0-9_./-]+\.(?:mjs|js|ts))/g)) {
           referenced.add(match[1])
@@ -1879,6 +1883,103 @@ globalThis.fetch = async (url, init) => {
       const body = readFileSync(join(ROOT, relative), 'utf8')
       expect(body, relative).not.toMatch(/gitleaks\/gitleaks-action|trufflesecurity\/trufflehog|execSync\([^)]*contract-tests|spawn\([^)]*contract-tests|inventory:generate\(/)
     }
+  })
+
+  it('phase 3 repair: governance reporters consume authoritative jobs and are not always-success echoes', () => {
+    const governance = parse(readFileSync(join(WORKFLOWS, 'nzila-governance.yml'), 'utf8'))
+    const names = Object.values(governance.jobs).map((job) => (job as { name?: string }).name)
+    const ids = Object.keys(governance.jobs)
+    expect(names).not.toContain('Secret Scan (Gitleaks + TruffleHog)')
+    expect(names).not.toContain('Contract Tests')
+    expect(ids).not.toContain('secret-scan')
+    expect(ids).not.toContain('contract-tests')
+    const summary = governance.jobs['governance-gate'].steps.map((step: { run?: string }) => step.run ?? '').join('\n')
+    expect(summary).not.toContain('needs.secret-scan.result')
+    expect(summary).not.toContain('needs.contract-tests.result')
+    expect(summary).toContain('Secret Scan job gitleaks')
+    expect(summary).toContain('job trufflehog')
+    expect(summary).toContain('CI job contract-tests')
+    expect(summary).toContain('CI job repository-inventory')
+    expect(summary).toContain('needs.report-secret-owners.result')
+    expect(summary).toContain('!= "success"')
+    for (const id of ['report-secret-owners', 'report-contract-owner', 'report-inventory-owner']) {
+      const blob = (governance.jobs[id].steps ?? []).map((step: { run?: string }) => step.run ?? '').join('\n')
+      expect(blob).toContain('node tooling/ci/merge-authority/publish.mjs require-authoritative-jobs')
+      expect(blob).not.toMatch(/echo ".*success"/)
+      expect(blob).not.toMatch(/gitleaks\/gitleaks-action|trufflesecurity\/trufflehog|pnpm contract-tests|inventory:generate/)
+    }
+
+    const head = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    const newer = 'cccccccccccccccccccccccccccccccccccccccc'
+    const secretRun = { id: 9, head_sha: head, event: 'pull_request', status: 'completed', conclusion: 'failure' }
+    const failed = consumeAuthoritativeJobs({
+      headSha: head,
+      runs: [secretRun, { id: 10, head_sha: newer, event: 'pull_request', status: 'completed', conclusion: 'success' }],
+      jobs: [
+        { name: 'Gitleaks', conclusion: 'failure' },
+        { name: 'TruffleHog OSS', conclusion: 'success' },
+      ],
+      jobNames: ['Gitleaks', 'TruffleHog OSS'],
+    })
+    expect(failed.ok).toBe(false)
+    expect(failed.reason).toContain('Gitleaks is failure')
+    const truffle = consumeAuthoritativeJobs({
+      headSha: head,
+      runs: [secretRun],
+      jobs: [
+        { name: 'Gitleaks', conclusion: 'success' },
+        { name: 'TruffleHog OSS', conclusion: 'failure' },
+      ],
+      jobNames: ['Gitleaks', 'TruffleHog OSS'],
+    })
+    expect(truffle.ok).toBe(false)
+    expect(truffle.reason).toContain('TruffleHog OSS is failure')
+    for (const conclusion of ['cancelled', 'absent']) {
+      const unknown = consumeAuthoritativeJobs({
+        headSha: head,
+        runs: [{ ...secretRun, conclusion: conclusion === 'absent' ? 'success' : 'cancelled' }],
+        jobs: conclusion === 'absent'
+          ? [{ name: 'Gitleaks', conclusion: 'success' }]
+          : [
+              { name: 'Gitleaks', conclusion: 'cancelled' },
+              { name: 'TruffleHog OSS', conclusion: 'cancelled' },
+            ],
+        jobNames: ['Gitleaks', 'TruffleHog OSS'],
+      })
+      expect(unknown.ok, conclusion).toBe(false)
+      expect(unknown.reason).not.toContain('succeeded')
+    }
+    const missingRun = consumeAuthoritativeJobs({
+      headSha: head,
+      runs: [{ id: 11, head_sha: newer, event: 'pull_request', status: 'completed', conclusion: 'success' }],
+      jobs: [
+        { name: 'Gitleaks', conclusion: 'success' },
+        { name: 'TruffleHog OSS', conclusion: 'success' },
+      ],
+      jobNames: ['Gitleaks', 'TruffleHog OSS'],
+    })
+    expect(missingRun.ok).toBe(false)
+    expect(missingRun.reason).toContain('absent')
+    const open = consumeAuthoritativeJobs({
+      headSha: head,
+      runs: [{ id: 9, head_sha: head, event: 'pull_request', status: 'in_progress', conclusion: null }],
+      jobs: [
+        { name: 'Gitleaks', conclusion: 'success' },
+        { name: 'TruffleHog OSS', conclusion: 'success' },
+      ],
+      jobNames: ['Gitleaks', 'TruffleHog OSS'],
+    })
+    expect(open.ok).toBe(false)
+    const passed = consumeAuthoritativeJobs({
+      headSha: head,
+      runs: [{ id: 9, head_sha: head, event: 'pull_request', status: 'completed', conclusion: 'success' }],
+      jobs: [
+        { name: 'Gitleaks', conclusion: 'success' },
+        { name: 'TruffleHog OSS', conclusion: 'success' },
+      ],
+      jobNames: ['Gitleaks', 'TruffleHog OSS'],
+    })
+    expect(passed.ok).toBe(true)
   })
 
   it('phase 3 dedupe: seven synthetic change classes classify and terminate without a live Actions run', () => {

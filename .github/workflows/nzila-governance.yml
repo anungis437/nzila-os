@@ -46,17 +46,33 @@ env:
 # and can cancel the caller mid-run (see GitHub docs on reusable workflows).
 jobs:
   # ── Secret Scanning ──────────────────────────────────────────────────────
-  # Reporter only. Gitleaks and TruffleHog execute in secret-scan.yml.
-  # This job must not invoke either scanner under another name.
-  secret-scan:
+  # Reporter only. Execution owners are secret-scan.yml jobs gitleaks and
+  # trufflehog. This job reads those conclusions for the frozen head and
+  # fails unless both are success. It does not run either scanner.
+  report-secret-owners:
     runs-on: ubuntu-latest
-    name: Secret Scan (Gitleaks + TruffleHog)
+    name: Report Secret Scan owners
+    permissions:
+      contents: read
+      actions: read
     steps:
-      - name: Report authoritative Gitleaks and TruffleHog jobs
-        run: |
-          echo "Gitleaks owner: .github/workflows/secret-scan.yml job gitleaks."
-          echo "TruffleHog OSS owner: .github/workflows/secret-scan.yml job trufflehog."
-          echo "This job does not execute either scanner."
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Consume Secret Scan job gitleaks and job trufflehog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SOURCE_HEAD_SHA: ${{ github.sha }}
+          SOURCE_EVENT: ${{ github.event_name }}
+          MA_AUTHORITATIVE_WORKFLOW: secret-scan.yml
+          MA_AUTHORITATIVE_JOBS: Gitleaks,TruffleHog OSS
+        run: node tooling/ci/merge-authority/publish.mjs require-authoritative-jobs
 
   # ── Dependency Audit ─────────────────────────────────────────────────────
   dependency-audit:
@@ -149,18 +165,67 @@ jobs:
           path: sbom.json
           retention-days: 365
 
-  # ── Contract Tests ───────────────────────────────────────────────────────
-  contract-tests:
+  # Architectural contract suite owner is CI job contract-tests. This job only
+  # reads that conclusion for the frozen head. It does not execute the suite.
+  report-contract-owner:
     runs-on: ubuntu-latest
-    name: Contract Tests
+    name: Report CI contract owner
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Consume CI job contract-tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SOURCE_HEAD_SHA: ${{ github.sha }}
+          SOURCE_EVENT: ${{ github.event_name }}
+          MA_AUTHORITATIVE_WORKFLOW: ci.yml
+          MA_AUTHORITATIVE_JOBS: Contract Tests (Architectural Invariants)
+        run: node tooling/ci/merge-authority/publish.mjs require-authoritative-jobs
+
+  # Inventory lock owner is CI job repository-inventory. This job only reads
+  # that conclusion. It does not regenerate inventory.
+  report-inventory-owner:
+    runs-on: ubuntu-latest
+    name: Report CI inventory owner
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Consume CI job repository-inventory
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SOURCE_HEAD_SHA: ${{ github.sha }}
+          SOURCE_EVENT: ${{ github.event_name }}
+          MA_AUTHORITATIVE_WORKFLOW: ci.yml
+          MA_AUTHORITATIVE_JOBS: Repository Inventory
+        run: node tooling/ci/merge-authority/publish.mjs require-authoritative-jobs
+
+  # Decision, NAR, and policy tests. Not the architectural contract suite.
+  decision-suite:
+    runs-on: ubuntu-latest
+    name: Decision and policy tests
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
-
-      - name: Report authoritative architectural contract suite
-        run: |
-          echo "Architectural contract suite owner: .github/workflows/ci.yml job contract-tests."
-          echo "This job does not execute that suite."
 
       - name: Enforce strict decision coverage
         run: pnpm exec tsx scripts/check-decision-coverage.ts --strict
@@ -554,9 +619,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Governance Gate
     needs:
-      - secret-scan
+      - report-secret-owners
+      - report-contract-owner
+      - report-inventory-owner
       - dependency-audit
-      - contract-tests
+      - decision-suite
       - ue-evidence
       - abr-evidence
       - evidence-pack
@@ -569,9 +636,11 @@ jobs:
       - name: Check all governance jobs passed
         run: |
           echo "=== Nzila Governance Gate Summary ==="
-          echo "Secret Scan:       ${{ needs.secret-scan.result }}"
+          echo "Owner Secret Scan job gitleaks and job trufflehog: ${{ needs.report-secret-owners.result }}"
+          echo "Owner CI job contract-tests: ${{ needs.report-contract-owner.result }}"
+          echo "Owner CI job repository-inventory: ${{ needs.report-inventory-owner.result }}"
           echo "Dependency Audit:  ${{ needs.dependency-audit.result }}"
-          echo "Contract Tests:    ${{ needs.contract-tests.result }}"
+          echo "Decision and policy tests: ${{ needs.decision-suite.result }}"
           echo "UE Evidence:       ${{ needs.ue-evidence.result }}"
           echo "ABR Evidence:      ${{ needs.abr-evidence.result }}"
           echo "Evidence Pack:     ${{ needs.evidence-pack.result }}"
@@ -582,16 +651,24 @@ jobs:
           echo "======================================"
 
           # Fail if any required job failed
-          if [[ "${{ needs.secret-scan.result }}" == "failure" ]]; then
-            echo "❌ Secret scan failed"
+          if [[ "${{ needs.report-secret-owners.result }}" != "success" ]]; then
+            echo "❌ Secret Scan job gitleaks or job trufflehog is not success"
+            exit 1
+          fi
+          if [[ "${{ needs.report-contract-owner.result }}" != "success" ]]; then
+            echo "❌ CI job contract-tests is not success"
+            exit 1
+          fi
+          if [[ "${{ needs.report-inventory-owner.result }}" != "success" ]]; then
+            echo "❌ CI job repository-inventory is not success"
             exit 1
           fi
           if [[ "${{ needs.dependency-audit.result }}" == "failure" ]]; then
             echo "❌ Dependency audit failed"
             exit 1
           fi
-          if [[ "${{ needs.contract-tests.result }}" == "failure" ]]; then
-            echo "❌ Contract tests failed"
+          if [[ "${{ needs.decision-suite.result }}" != "success" ]]; then
+            echo "❌ Decision and policy tests are not success"
             exit 1
           fi
           if [[ "${{ needs.ue-evidence.result }}" == "failure" ]]; then
