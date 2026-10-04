@@ -1,3 +1,4 @@
+// proof/phase4-product-code: comment only
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
