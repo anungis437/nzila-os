@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process'
 import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { parse } from 'yaml'
 import {
@@ -172,8 +173,12 @@ describe('merge authority surface', () => {
 
   it('scenario B — application code defers to CI and a failed lint fails authority', () => {
     const plan = planFastPath(['apps/union-eyes/app/api/example/route.ts'])
-    expect(plan.classification.contexts['Merge Authority / Lint & Typecheck']).toBe('REQUIRES_EXECUTION')
-    expect(plan.classification.contexts['Merge Authority / Hash Chain Integrity']).toBe('NOT_APPLICABLE')
+    expect(plan.classification.contexts['Merge Authority / Lint & Typecheck']).toBe(
+      'REQUIRES_EXECUTION',
+    )
+    expect(plan.classification.contexts['Merge Authority / Hash Chain Integrity']).toBe(
+      'NOT_APPLICABLE',
+    )
     expect(plan.action).toBe('DEFER_TO_CI')
     expect(plan.classification.ciSkippedByPathsIgnore).toBe(false)
     const verdicts = evaluateCiResults({
@@ -199,9 +204,13 @@ describe('merge authority surface', () => {
   it('scenario C — a shared package is code and requires execution', () => {
     const plan = planFastPath(['packages/db/src/index.ts'])
     expect(plan.classification.classification).toBe('MIXED')
-    expect(plan.classification.contexts['Merge Authority / Schema Integrity']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / Schema Integrity']).toBe(
+      'REQUIRES_EXECUTION',
+    )
     expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
-    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe('NOT_APPLICABLE')
+    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe(
+      'NOT_APPLICABLE',
+    )
     expect(plan.action).toBe('DEFER_TO_CI')
   })
 
@@ -212,9 +221,15 @@ describe('merge authority surface', () => {
       'apps/union-eyes/db/migrations/0099_rls.sql',
     ])
     expect(plan.classification.classification).toBe('MIXED')
-    expect(plan.classification.contexts['Merge Authority / Schema Integrity']).toBe('REQUIRES_EXECUTION')
-    expect(plan.classification.contexts['Merge Authority / PostgreSQL RLS']).toBe('REQUIRES_EXECUTION')
-    expect(plan.classification.contexts['Merge Authority / Migration Chain']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / Schema Integrity']).toBe(
+      'REQUIRES_EXECUTION',
+    )
+    expect(plan.classification.contexts['Merge Authority / PostgreSQL RLS']).toBe(
+      'REQUIRES_EXECUTION',
+    )
+    expect(plan.classification.contexts['Merge Authority / Migration Chain']).toBe(
+      'REQUIRES_EXECUTION',
+    )
     expect(plan.action).toBe('DEFER_TO_CI')
     const verdicts = evaluateCiResults({
       'lint-and-typecheck': 'success',
@@ -295,8 +310,12 @@ describe('merge authority surface', () => {
     expect(plan.classification.classification).toBe('MIXED')
     expect(plan.classification.ciSkippedByPathsIgnore).toBe(false)
     expect(plan.action).toBe('DEFER_TO_CI')
-    expect(plan.classification.contexts['Merge Authority / Lint & Typecheck']).toBe('REQUIRES_EXECUTION')
-    expect(plan.classification.contexts['Merge Authority / Hash Chain Integrity']).toBe('NOT_APPLICABLE')
+    expect(plan.classification.contexts['Merge Authority / Lint & Typecheck']).toBe(
+      'REQUIRES_EXECUTION',
+    )
+    expect(plan.classification.contexts['Merge Authority / Hash Chain Integrity']).toBe(
+      'NOT_APPLICABLE',
+    )
   })
 
   it('scenario I — governance-consumed markdown is not waived for governance integrity', () => {
@@ -304,8 +323,12 @@ describe('merge authority surface', () => {
       'docs/categories/platform-and-operations/platform/EVIDENCE_LIFECYCLE_POLICY.md',
     ])
     expect(plan.classification.secretSafety).toBe('APPLICABLE')
-    expect(plan.classification.contexts['Merge Authority / Lint & Typecheck']).toBe('NOT_APPLICABLE')
-    expect(plan.classification.contexts['Merge Authority / Governance Integrity']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / Lint & Typecheck']).toBe(
+      'NOT_APPLICABLE',
+    )
+    expect(plan.classification.contexts['Merge Authority / Governance Integrity']).toBe(
+      'REQUIRES_EXECUTION',
+    )
     expect(plan.action).toBe('DEFER_TO_CI')
     const governance = evaluateCiResults({}, [
       'docs/categories/platform-and-operations/platform/EVIDENCE_LIFECYCLE_POLICY.md',
@@ -335,12 +358,17 @@ describe('merge authority surface', () => {
     const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
     for (const context of CANONICAL_CONTEXTS) {
       expect(ci.jobs[context.ciJob]).toBeTruthy()
-      expect(CI_AUTHORITY_JOBS.find((job) => job.id === context.ciJob)?.name).toBe(ci.jobs[context.ciJob].name)
+      expect(CI_AUTHORITY_JOBS.find((job) => job.id === context.ciJob)?.name).toBe(
+        ci.jobs[context.ciJob].name,
+      )
     }
     const publisher = readFileSync(join(WORKFLOWS, PUBLISHER_WORKFLOW_FILE), 'utf8')
     expect(publisher).toContain('node tooling/ci/merge-authority/publish.mjs publish-pull-request')
     expect(publisher).not.toContain('workflow_run')
-    const publisherSource = readFileSync(join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), 'utf8')
+    const publisherSource = readFileSync(
+      join(ROOT, 'tooling/ci/merge-authority/publish.mjs'),
+      'utf8',
+    )
     expect(publisherSource).toContain('evaluateCiResults(results, diffPaths)')
     expect(publisherSource).toContain('ciResultsFromJobs(jobs)')
     expect(publisherSource).toContain("'iac-scan': 'MA_RESULT_IAC'")
@@ -393,15 +421,18 @@ describe('merge authority surface', () => {
     expect(omnibus).toContain('Collect cost attribution')
     expect(omnibus).not.toContain('Enforce committed inventory lock')
     expect(omnibus).not.toContain('Regenerate inventory')
-    const inventory = ci.jobs['repository-inventory'].steps.map((step: { name?: string }) => step.name)
+    const inventory = ci.jobs['repository-inventory'].steps.map(
+      (step: { name?: string }) => step.name,
+    )
     expect(inventory).toContain('Enforce committed inventory lock')
     expect(inventory).toContain('Regenerate inventory')
   })
 
   it('scenario D2 — architectural contract failure is independent of governance gates', () => {
-    const contracts = withResults({ 'contract-tests': 'failure', 'governance-integrity': 'success' }).find(
-      (verdict) => verdict.name === 'Merge Authority / Architectural Contracts',
-    )
+    const contracts = withResults({
+      'contract-tests': 'failure',
+      'governance-integrity': 'success',
+    }).find((verdict) => verdict.name === 'Merge Authority / Architectural Contracts')
     expect(contracts).toMatchObject({ evidence: 'FAILURE', conclusion: 'failure' })
   })
 
@@ -430,8 +461,12 @@ describe('merge authority surface', () => {
       evidence: 'FAILURE',
       conclusion: 'failure',
     })
-    expect(byName['Merge Authority / Governance Integrity'].detail).toContain('not PostgreSQL row-level security')
-    expect(byName['Merge Authority / PostgreSQL RLS'].detail).toContain('not application or platform auth-authority')
+    expect(byName['Merge Authority / Governance Integrity'].detail).toContain(
+      'not PostgreSQL row-level security',
+    )
+    expect(byName['Merge Authority / PostgreSQL RLS'].detail).toContain(
+      'not application or platform auth-authority',
+    )
   })
 
   it('scenario H2 — RLS failure stays independent of governance integrity', () => {
@@ -447,12 +482,16 @@ describe('merge authority surface', () => {
   it('scenario J — harmless docs waive engineering and keep secret safety applicable', () => {
     const plan = planFastPath(['docs/engineering-convergence/ci-execution/CI_AUTHORITY_SURFACE.md'])
     expect(plan.classification.contexts['Merge Authority / Affected Build']).toBe('NOT_APPLICABLE')
-    expect(plan.classification.contexts['Merge Authority / Governance Integrity']).toBe('NOT_APPLICABLE')
+    expect(plan.classification.contexts['Merge Authority / Governance Integrity']).toBe(
+      'NOT_APPLICABLE',
+    )
     expect(plan.classification.secretSafety).toBe('APPLICABLE')
   })
 
   it('does not turn a skipped execution into NOT_APPLICABLE without proof', () => {
-    const plan = planFastPath(['docs/categories/platform-and-operations/platform/EVIDENCE_LIFECYCLE_POLICY.md'])
+    const plan = planFastPath([
+      'docs/categories/platform-and-operations/platform/EVIDENCE_LIFECYCLE_POLICY.md',
+    ])
     const applied = evaluateCiResults(
       {
         'governance-integrity': 'skipped',
@@ -460,7 +499,9 @@ describe('merge authority surface', () => {
       },
       ['docs/categories/platform-and-operations/platform/EVIDENCE_LIFECYCLE_POLICY.md'],
     )
-    const governance = applied.find((verdict) => verdict.name === 'Merge Authority / Governance Integrity')
+    const governance = applied.find(
+      (verdict) => verdict.name === 'Merge Authority / Governance Integrity',
+    )
     const lint = applied.find((verdict) => verdict.name === 'Merge Authority / Lint & Typecheck')
     expect(governance?.evidence).toBe('UNRESOLVED')
     expect(lint?.evidence).toBe('NOT_APPLICABLE')
@@ -487,9 +528,15 @@ describe('merge authority surface', () => {
       'Merge Authority / Ops Documentation',
     ])
     expect(new Set(names).size).toBe(13)
-    expect(SECRET_AUTHORITY_CONTEXTS).toEqual(['Gitleaks', 'TruffleHog OSS', 'Docker Secret Policy'])
+    expect(SECRET_AUTHORITY_CONTEXTS).toEqual([
+      'Gitleaks',
+      'TruffleHog OSS',
+      'Docker Secret Policy',
+    ])
     expect(ACCEPTABLE_AUTHORITY_RESIDUAL).toEqual(['ML Tooling Gates', 'AI Eval Gate'])
-    expect(names.some((name) => name.includes('ML Tooling') || name.includes('AI Eval'))).toBe(false)
+    expect(names.some((name) => name.includes('ML Tooling') || name.includes('AI Eval'))).toBe(
+      false,
+    )
     const conditional = CANONICAL_CONTEXTS.filter(
       (context) => context.authority === 'CHANGE_CONDITIONAL_MERGE_CRITICAL',
     )
@@ -509,7 +556,9 @@ describe('merge authority surface', () => {
     const requiredEnd = source.indexOf('function countWords')
     const requiredBlock = source.slice(requiredStart, requiredEnd)
     const documented = [...requiredBlock.matchAll(/path: '([^']+)'/g)].map((match) => match[1])
-    expect(documented).toEqual(OPS_PACK_CONTENT_INPUTS.filter((path) => path !== 'reports/ops/snapshot.json'))
+    expect(documented).toEqual(
+      OPS_PACK_CONTENT_INPUTS.filter((path) => path !== 'reports/ops/snapshot.json'),
+    )
     expect(source).toContain("join(repoRoot, 'reports/ops/snapshot.json')")
     expect(OPS_PACK_CONTENT_INPUTS).toContain('reports/ops/snapshot.json')
     expect(OPS_PACK_TOOLING).toContain('tooling/ops/validate-ops-pack.ts')
@@ -536,7 +585,11 @@ describe('merge authority surface', () => {
   it('IaC applicable + pass — canonical IaC is PASS', () => {
     const verdicts = withResults({ 'iac-scan': 'success' })
     const iac = verdicts.find((verdict) => verdict.name === 'Merge Authority / IaC Security')
-    expect(iac).toMatchObject({ evidence: 'PASS', conclusion: 'success', applicability: 'REQUIRES_EXECUTION' })
+    expect(iac).toMatchObject({
+      evidence: 'PASS',
+      conclusion: 'success',
+      applicability: 'REQUIRES_EXECUTION',
+    })
   })
 
   it('IaC applicable + failure — canonical IaC is FAILURE', () => {
@@ -564,7 +617,9 @@ describe('merge authority surface', () => {
     }
     const deferred = planFastPath(['something-unexpected.bin'])
     expect(deferred.action).toBe('DEFER_TO_CI')
-    expect(deferred.classification.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    expect(deferred.classification.contexts['Merge Authority / IaC Security']).toBe(
+      'REQUIRES_EXECUTION',
+    )
     expect(() =>
       verdictToCheckRun(
         {
@@ -584,10 +639,14 @@ describe('merge authority surface', () => {
   it('IaC CI skipped but applicable — fast path executes validation', () => {
     const plan = planFastPath(['docs/foo.yml'])
     expect(plan.classification.ciSkippedByPathsIgnore).toBe(false)
-    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe(
+      'REQUIRES_EXECUTION',
+    )
     expect(plan.action).toBe('DEFER_TO_CI')
     expect(fastPathExecution(plan.classification).iac).toBe(false)
-    const before = evaluateCiResults({}, ['docs/foo.yml']).find((verdict) => verdict.name === 'Merge Authority / IaC Security')
+    const before = evaluateCiResults({}, ['docs/foo.yml']).find(
+      (verdict) => verdict.name === 'Merge Authority / IaC Security',
+    )
     expect(before?.evidence).not.toBe('NOT_APPLICABLE')
     expect(before?.conclusion).not.toBe('success')
     const after = evaluateCiResults({ 'iac-scan': 'success' }, ['docs/foo.yml']).find(
@@ -613,7 +672,9 @@ describe('merge authority surface', () => {
 
   it('does not run a second IaC scan when CI will already run the authoritative job', () => {
     const plan = planFastPath(['infrastructure/bicep/main.bicep'])
-    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe(
+      'REQUIRES_EXECUTION',
+    )
     expect(plan.classification.ciSkippedByPathsIgnore).toBe(false)
     expect(plan.action).toBe('DEFER_TO_CI')
     expect(fastPathExecution(plan.classification).iac).toBe(false)
@@ -642,11 +703,19 @@ describe('merge authority surface', () => {
   it('Ops irrelevant — canonical Ops Documentation is NOT_APPLICABLE', () => {
     const plan = planFastPath(['ops/runbooks/security/keyvault-rotation.md', 'README.md'])
     expect(plan.classification.ciSkippedByPathsIgnore).toBe(false)
-    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe('NOT_APPLICABLE')
+    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe(
+      'NOT_APPLICABLE',
+    )
     expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
     expect(fastPathExecution(plan.classification).ops).toBe(false)
-    const ops = plan.verdicts.find((verdict) => verdict.name === 'Merge Authority / Ops Documentation')
-    expect(ops).toMatchObject({ evidence: 'NOT_APPLICABLE', conclusion: 'success', classifier: 'PROVEN_IRRELEVANT' })
+    const ops = plan.verdicts.find(
+      (verdict) => verdict.name === 'Merge Authority / Ops Documentation',
+    )
+    expect(ops).toMatchObject({
+      evidence: 'NOT_APPLICABLE',
+      conclusion: 'success',
+      classifier: 'PROVEN_IRRELEVANT',
+    })
   })
 
   it('Ops unknown cannot become successful NOT_APPLICABLE', () => {
@@ -656,15 +725,21 @@ describe('merge authority surface', () => {
     }
     const deferred = planFastPath(['package.json'])
     expect(deferred.action).toBe('DEFER_TO_CI')
-    expect(deferred.classification.contexts['Merge Authority / Ops Documentation']).toBe('REQUIRES_EXECUTION')
+    expect(deferred.classification.contexts['Merge Authority / Ops Documentation']).toBe(
+      'REQUIRES_EXECUTION',
+    )
   })
 
   it('Ops documentation PR skipped by CI — fast path executes Ops Pack validation', () => {
     const plan = planFastPath(['ARCHITECTURE.md', 'ops/runbooks/README.md', 'SECURITY.md'])
     expect(plan.classification.ciSkippedByPathsIgnore).toBe(false)
-    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe(
+      'REQUIRES_EXECUTION',
+    )
     expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
-    expect(plan.classification.contexts['Merge Authority / Lint & Typecheck']).toBe('NOT_APPLICABLE')
+    expect(plan.classification.contexts['Merge Authority / Lint & Typecheck']).toBe(
+      'NOT_APPLICABLE',
+    )
     expect(plan.action).toBe('DEFER_TO_CI')
     expect(fastPathExecution(plan.classification)).toEqual({
       iac: false,
@@ -673,7 +748,9 @@ describe('merge authority surface', () => {
       inventory: false,
     })
     const paths = ['ARCHITECTURE.md', 'ops/runbooks/README.md', 'SECURITY.md']
-    const before = evaluateCiResults({}, paths).find((verdict) => verdict.name === 'Merge Authority / Ops Documentation')
+    const before = evaluateCiResults({}, paths).find(
+      (verdict) => verdict.name === 'Merge Authority / Ops Documentation',
+    )
     expect(before?.evidence).not.toBe('NOT_APPLICABLE')
     expect(before?.conclusion).not.toBe('success')
     const passed = evaluateCiResults({ 'ops-pack-validation': 'success' }, paths).find(
@@ -692,7 +769,9 @@ describe('merge authority surface', () => {
     ).run
     expect(ciRun).toContain('pnpm tsx tooling/ops/validate-ops-pack.ts')
     expect(ci.jobs['ops-pack-validation'].needs).toEqual(['classify'])
-    expect(String(ci.jobs['ops-pack-validation'].if)).toContain("needs.classify.outputs.ops_pack_validation == 'APPLICABLE'")
+    expect(String(ci.jobs['ops-pack-validation'].if)).toContain(
+      "needs.classify.outputs.ops_pack_validation == 'APPLICABLE'",
+    )
     expect(CI_AUTHORITY_JOBS.map((job) => job.id)).toContain('ops-pack-validation')
     expect(ci.jobs['report-merge-authority']).toBeUndefined()
   })
@@ -721,9 +800,13 @@ describe('merge authority surface', () => {
 
   it('a generic documentation path does not waive an ops pack input', () => {
     const plan = planFastPath(['docs/readme-style.md'])
-    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe('NOT_APPLICABLE')
+    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe(
+      'NOT_APPLICABLE',
+    )
     const consumed = planFastPath(['reports/ops/snapshot.json'])
-    expect(consumed.classification.contexts['Merge Authority / Ops Documentation']).toBe('REQUIRES_EXECUTION')
+    expect(consumed.classification.contexts['Merge Authority / Ops Documentation']).toBe(
+      'REQUIRES_EXECUTION',
+    )
     expect(consumed.classification.ciSkippedByPathsIgnore).toBe(false)
     expect(consumed.action).toBe('DEFER_TO_CI')
     expect(fastPathExecution(consumed.classification).ops).toBe(false)
@@ -796,11 +879,15 @@ describe('IaC validation and SARIF reporting separation', () => {
 
   it('C8 — unknown applicability cannot take the N/A shortcut', () => {
     const plan = planFastPath(['something-unexpected.bin'])
-    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe(
+      'REQUIRES_EXECUTION',
+    )
     expect(plan.action).toBe('DEFER_TO_CI')
     const unresolved = planFastPath(['docs/foo.yml'])
     expect(unresolved.classification.ciSkippedByPathsIgnore).toBe(false)
-    expect(unresolved.classification.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    expect(unresolved.classification.contexts['Merge Authority / IaC Security']).toBe(
+      'REQUIRES_EXECUTION',
+    )
     expect(
       evaluateCiResults({ 'iac-scan': 'skipped' }, ['docs/foo.yml']).find(
         (verdict) => verdict.name === 'Merge Authority / IaC Security',
@@ -835,7 +922,9 @@ describe('IaC validation and SARIF reporting separation', () => {
     const { ci, authority } = workflows()
     expect(authority.jobs['iac-security-if-ci-skipped']).toBeUndefined()
     const validation = ci.jobs['iac-scan']
-    const ciRun = validation.steps.find((step) => step.name === 'Run Checkov on Bicep templates').run
+    const ciRun = validation.steps.find(
+      (step) => step.name === 'Run Checkov on Bicep templates',
+    ).run
     expect(ciRun).toContain('--directory infrastructure/bicep')
     expect(validation.needs).toEqual(['classify', 'lint-and-typecheck'])
     expect(String(validation.if)).toContain("needs.classify.outputs.iac_scan == 'APPLICABLE'")
@@ -857,7 +946,9 @@ describe('IaC validation and SARIF reporting separation', () => {
     const consumed = CI_AUTHORITY_JOBS.map((job) => job.id)
     expect(consumed).toContain('iac-scan')
     expect(consumed).not.toContain('iac-sarif-reporting')
-    expect(CI_AUTHORITY_JOBS.find((job) => job.id === 'iac-scan')?.name).toBe(ci.jobs['iac-scan'].name)
+    expect(CI_AUTHORITY_JOBS.find((job) => job.id === 'iac-scan')?.name).toBe(
+      ci.jobs['iac-scan'].name,
+    )
     expect(publisher).toContain("'iac-scan': 'MA_RESULT_IAC'")
     expect(publisher).not.toContain('iac-sarif-reporting')
     expect(ci.jobs['report-merge-authority']).toBeUndefined()
@@ -952,16 +1043,23 @@ describe('phase 1 NOT_APPLICABLE publication', () => {
     const unknownPlan = planFastPath(['something-unexpected.bin'])
     const unknownMissing = evaluateCiResults({}, ['something-unexpected.bin'])
     const unknownExecuted = evaluateCiResults(jobResults(), ['something-unexpected.bin'])
-    const emptyDiff = byName(evaluateCiResults(jobResults({ 'ops-pack-validation': 'failure' }), []))
-    const traversal = byName(evaluateCiResults(jobResults({ 'iac-scan': 'failure' }), ['../secrets.md']))
+    const emptyDiff = byName(
+      evaluateCiResults(jobResults({ 'ops-pack-validation': 'failure' }), []),
+    )
+    const traversal = byName(
+      evaluateCiResults(jobResults({ 'iac-scan': 'failure' }), ['../secrets.md']),
+    )
 
-    const executedChecks = evaluateCiResults(jobResults(), ['something-unexpected.bin']).map((verdict) =>
-      verdictToCheckRun(verdict, 'abc123'),
+    const executedChecks = evaluateCiResults(jobResults(), ['something-unexpected.bin']).map(
+      (verdict) => verdictToCheckRun(verdict, 'abc123'),
     )
     const secretJobNames = Object.values(secret.jobs).map((job) =>
       typeof job.name === 'string' ? job.name : '',
     )
-    const publishedNames = [...executedChecks.map((check) => check.name), ...SECRET_AUTHORITY_CONTEXTS]
+    const publishedNames = [
+      ...executedChecks.map((check) => check.name),
+      ...SECRET_AUTHORITY_CONTEXTS,
+    ]
 
     const naPosts =
       plan.action === 'DEFER_TO_CI' &&
@@ -977,7 +1075,8 @@ describe('phase 1 NOT_APPLICABLE publication', () => {
       !posted.some((verdict) => verdict.name === 'Merge Authority / Lint & Typecheck') &&
       publisher.includes('await publishCheckRuns(deferPublications(plan), headSha)') &&
       !/if \(plan\.action === 'DEFER_TO_CI'\) return/.test(publisher) &&
-      authority.includes('aggregate-merge-authority') && !authority.includes('inventory:generate') &&
+      authority.includes('aggregate-merge-authority') &&
+      !authority.includes('inventory:generate') &&
       honored['Merge Authority / IaC Security'].evidence === 'NOT_APPLICABLE' &&
       honored['Merge Authority / Ops Documentation'].evidence === 'NOT_APPLICABLE' &&
       skippedButProven['Merge Authority / Ops Documentation'].evidence === 'NOT_APPLICABLE'
@@ -1010,7 +1109,9 @@ describe('phase 1 NOT_APPLICABLE publication', () => {
       skippedWithoutDiff['Merge Authority / Ops Documentation'].evidence !== 'NOT_APPLICABLE' &&
       skippedWithoutDiff['Merge Authority / Ops Documentation'].conclusion !== 'success' &&
       String(ci.jobs['iac-scan'].if).includes("needs.classify.outputs.iac_scan == 'APPLICABLE'") &&
-      String(ci.jobs['ops-pack-validation'].if).includes("needs.classify.outputs.ops_pack_validation == 'APPLICABLE'") &&
+      String(ci.jobs['ops-pack-validation'].if).includes(
+        "needs.classify.outputs.ops_pack_validation == 'APPLICABLE'",
+      ) &&
       CI_AUTHORITY_JOBS.some((job) => job.id === 'iac-scan') &&
       CI_AUTHORITY_JOBS.some((job) => job.id === 'ops-pack-validation')
 
@@ -1039,7 +1140,9 @@ describe('phase 1 NOT_APPLICABLE publication', () => {
       new Set(publishedNames).size === 16 &&
       publishedNames.every((name) => REQUIRED_CHECK_NAMES.includes(name)) &&
       REQUIRED_CHECK_NAMES.every((name) => publishedNames.includes(name)) &&
-      executedChecks.every((check) => check.status === 'completed' && check.conclusion === 'success') &&
+      executedChecks.every(
+        (check) => check.status === 'completed' && check.conclusion === 'success',
+      ) &&
       postedChecks.every((check) => REQUIRED_CHECK_NAMES.includes(check.name)) &&
       SECRET_AUTHORITY_CONTEXTS.every((name) => {
         const job = Object.values(secret.jobs).find((item) => item.name === name)
@@ -1068,9 +1171,9 @@ describe('phase 1 NOT_APPLICABLE publication', () => {
         ],
       }),
     ).toThrow(/DEFER_TO_CI cannot publish/)
-    expect(() => evaluateCiResults(jobResults(), 'apps/union-eyes/app/api/example/route.ts')).toThrow(
-      /diff paths must be an array/,
-    )
+    expect(() =>
+      evaluateCiResults(jobResults(), 'apps/union-eyes/app/api/example/route.ts'),
+    ).toThrow(/diff paths must be an array/)
 
     expect({
       NA_CONTEXT_POSTS: naPosts ? 'YES' : 'NO',
@@ -1108,7 +1211,12 @@ globalThis.fetch = async (_url, init) => {
     )
     const result = spawnSync(
       process.execPath,
-      ['--import', preload, join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), command],
+      [
+        '--import',
+        pathToFileURL(preload).href,
+        join(ROOT, 'tooling/ci/merge-authority/publish.mjs'),
+        command,
+      ],
       {
         input,
         encoding: 'utf8',
@@ -1129,15 +1237,21 @@ globalThis.fetch = async (_url, init) => {
     const deferred = postedChecks('classify-and-publish', `${codePaths.join('\n')}\n`, {})
     expect(deferred.length).toBeGreaterThan(0)
     expect(deferred.map((check) => check.name)).not.toContain('Merge Authority / Lint & Typecheck')
-    expect(deferred.find((check) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+    expect(
+      deferred.find((check) => check.name === 'Merge Authority / Ops Documentation'),
+    ).toMatchObject({
       conclusion: 'success',
       output: { title: 'NOT_APPLICABLE' },
     })
-    expect(deferred.find((check) => check.name === 'Merge Authority / IaC Security')).toMatchObject({
-      conclusion: 'success',
-      output: { title: 'NOT_APPLICABLE' },
-    })
-    expect(deferred.every((check) => check.output.summary.includes('evidence: NOT_APPLICABLE'))).toBe(true)
+    expect(deferred.find((check) => check.name === 'Merge Authority / IaC Security')).toMatchObject(
+      {
+        conclusion: 'success',
+        output: { title: 'NOT_APPLICABLE' },
+      },
+    )
+    expect(
+      deferred.every((check) => check.output.summary.includes('evidence: NOT_APPLICABLE')),
+    ).toBe(true)
 
     const resultEnv = Object.fromEntries(
       CANONICAL_CONTEXTS.map((context) => {
@@ -1168,32 +1282,48 @@ globalThis.fetch = async (_url, init) => {
       MA_RESULT_OPS: 'failure',
     })
     expect(reported).toHaveLength(13)
-    expect(reported.map((check) => check.name)).toEqual(CANONICAL_CONTEXTS.map((context) => context.name))
-    expect(reported.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+    expect(reported.map((check) => check.name)).toEqual(
+      CANONICAL_CONTEXTS.map((context) => context.name),
+    )
+    expect(
+      reported.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toMatchObject({
       conclusion: 'failure',
       output: { title: 'FAILURE' },
     })
-    expect(reported.find((check) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+    expect(
+      reported.find((check) => check.name === 'Merge Authority / Ops Documentation'),
+    ).toMatchObject({
       conclusion: 'success',
       output: { title: 'NOT_APPLICABLE' },
     })
-    expect(reported.find((check) => check.name === 'Merge Authority / IaC Security')).toMatchObject({
-      conclusion: 'success',
-      output: { title: 'NOT_APPLICABLE' },
-    })
+    expect(reported.find((check) => check.name === 'Merge Authority / IaC Security')).toMatchObject(
+      {
+        conclusion: 'success',
+        output: { title: 'NOT_APPLICABLE' },
+      },
+    )
 
     const diffChanged = postedChecks('publish-ci-results', '', {
       ...resultEnv,
       GITHUB_EVENT_NAME: 'pull_request',
-      MA_CHANGED_PATHS: [...codePaths, 'infrastructure/bicep/main.bicep', 'ops/runbooks/README.md'].join('\n'),
+      MA_CHANGED_PATHS: [
+        ...codePaths,
+        'infrastructure/bicep/main.bicep',
+        'ops/runbooks/README.md',
+      ].join('\n'),
       MA_RESULT_IAC: 'failure',
       MA_RESULT_OPS: 'failure',
     })
-    expect(diffChanged.find((check) => check.name === 'Merge Authority / IaC Security')).toMatchObject({
+    expect(
+      diffChanged.find((check) => check.name === 'Merge Authority / IaC Security'),
+    ).toMatchObject({
       conclusion: 'failure',
       output: { title: 'FAILURE' },
     })
-    expect(diffChanged.find((check) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+    expect(
+      diffChanged.find((check) => check.name === 'Merge Authority / Ops Documentation'),
+    ).toMatchObject({
       conclusion: 'failure',
       output: { title: 'FAILURE' },
     })
@@ -1205,9 +1335,9 @@ globalThis.fetch = async (_url, init) => {
       MA_RESULT_OPS: 'skipped',
     })
     expect(unknown.every((check) => check.output.title !== 'NOT_APPLICABLE')).toBe(true)
-    expect(unknown.find((check) => check.name === 'Merge Authority / Ops Documentation')?.conclusion).not.toBe(
-      'success',
-    )
+    expect(
+      unknown.find((check) => check.name === 'Merge Authority / Ops Documentation')?.conclusion,
+    ).not.toBe('success')
   })
 })
 
@@ -1279,7 +1409,8 @@ describe('phase 2 supersession', () => {
       ci.concurrency?.group === EXPENSIVE_WORKFLOW_CONCURRENCY.group &&
       ci.concurrency?.['cancel-in-progress'] === EXPENSIVE_WORKFLOW_CONCURRENCY.cancelInProgress &&
       secret.concurrency?.group === EXPENSIVE_WORKFLOW_CONCURRENCY.group &&
-      secret.concurrency?.['cancel-in-progress'] === EXPENSIVE_WORKFLOW_CONCURRENCY.cancelInProgress &&
+      secret.concurrency?.['cancel-in-progress'] ===
+        EXPENSIVE_WORKFLOW_CONCURRENCY.cancelInProgress &&
       EXPENSIVE_WORKFLOW_CONCURRENCY.group.includes('github.workflow') &&
       EXPENSIVE_WORKFLOW_CONCURRENCY.group.includes('github.ref') &&
       !EXPENSIVE_WORKFLOW_CONCURRENCY.group.includes('github.job') &&
@@ -1327,21 +1458,30 @@ describe('phase 2 supersession', () => {
       !publisherCommands.includes('gitleaks') &&
       !publisherCommands.includes('audit-secrets') &&
       !publisherCommands.includes('setup-monorepo') &&
-      publisherCommands.includes('node tooling/ci/merge-authority/publish.mjs publish-pull-request') &&
-      publisherCommands.includes('MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"') &&
-      !readFileSync(join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), 'utf8').includes('/pulls/') &&
+      publisherCommands.includes(
+        'node tooling/ci/merge-authority/publish.mjs publish-pull-request',
+      ) &&
+      publisherCommands.includes(
+        'MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"',
+      ) &&
+      !readFileSync(join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), 'utf8').includes(
+        '/pulls/',
+      ) &&
       authority.concurrency?.group === MERGE_AUTHORITY_CONCURRENCY.group &&
       authority.concurrency?.['cancel-in-progress'] === false &&
       CI_AUTHORITY_JOBS.length === CANONICAL_CONTEXTS.length &&
       CANONICAL_CONTEXTS.every(
-        (context) => CI_AUTHORITY_JOBS.find((job) => job.id === context.ciJob)?.name === ci.jobs[context.ciJob].name,
+        (context) =>
+          CI_AUTHORITY_JOBS.find((job) => job.id === context.ciJob)?.name ===
+          ci.jobs[context.ciJob].name,
       )
 
     let refusedOverride = false
     try {
       publicationTarget(oldHead, newHead)
     } catch (error) {
-      refusedOverride = error instanceof Error && /refusing to publish checks for/.test(error.message)
+      refusedOverride =
+        error instanceof Error && /refusing to publish checks for/.test(error.message)
     }
     const ownedByOldHead = terminalChecksForHead({
       results: cancelledJobs(),
@@ -1371,7 +1511,8 @@ describe('phase 2 supersession', () => {
         pullRequestHeadSha: '',
       })
     } catch (error) {
-      refusedLiveLookup = error instanceof Error && /refusing to look up the live head/.test(error.message)
+      refusedLiveLookup =
+        error instanceof Error && /refusing to look up the live head/.test(error.message)
     }
     const frozenOldHead = capturedPublicationHead({
       sourceEvent: 'pull_request',
@@ -1452,7 +1593,9 @@ describe('phase 2 supersession', () => {
       mixed.every((check) => check.head_sha === newHead) &&
       unknown.every(
         (check) =>
-          check.status === 'completed' && check.conclusion !== 'success' && check.output.title !== 'NOT_APPLICABLE',
+          check.status === 'completed' &&
+          check.conclusion !== 'success' &&
+          check.output.title !== 'NOT_APPLICABLE',
       )
 
     expect({
@@ -1487,7 +1630,7 @@ globalThis.fetch = async (_url, init) => {
     )
     const command = [
       '--import',
-      preload,
+      pathToFileURL(preload).href,
       join(ROOT, 'tooling/ci/merge-authority/publish.mjs'),
       'publish-secret-terminals',
     ]
@@ -1594,7 +1737,12 @@ globalThis.fetch = async (url, init) => {
     )
     const result = spawnSync(
       process.execPath,
-      ['--import', preload, join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), 'publish-pull-request'],
+      [
+        '--import',
+        pathToFileURL(preload).href,
+        join(ROOT, 'tooling/ci/merge-authority/publish.mjs'),
+        'publish-pull-request',
+      ],
       {
         encoding: 'utf8',
         env: {
@@ -1624,7 +1772,10 @@ globalThis.fetch = async (url, init) => {
   }
 
   it('publishes the frozen head from a cancelled run without rerunning expensive work', () => {
-    const cancelledCi = CI_AUTHORITY_JOBS.map((job) => ({ name: job.name, conclusion: 'cancelled' as const }))
+    const cancelledCi = CI_AUTHORITY_JOBS.map((job) => ({
+      name: job.name,
+      conclusion: 'cancelled' as const,
+    }))
     const secretJobs = [
       { name: 'Gitleaks', conclusion: 'cancelled' },
       { name: 'TruffleHog OSS', conclusion: 'success' },
@@ -1640,30 +1791,50 @@ globalThis.fetch = async (url, init) => {
     )
     expect(ciRun.result.status, ciRun.result.stderr).toBe(0)
     expect(ciRun.posted).toHaveLength(16)
-    expect(ciRun.posted.every((check: { head_sha: string }) => check.head_sha === oldHead)).toBe(true)
+    expect(ciRun.posted.every((check: { head_sha: string }) => check.head_sha === oldHead)).toBe(
+      true,
+    )
     expect(new Set(ciRun.posted.map((check: { name: string }) => check.name))).toEqual(
       new Set([...CANONICAL_CONTEXTS.map((context) => context.name), ...SECRET_AUTHORITY_CONTEXTS]),
     )
-    expect(ciRun.posted.find((check: { name: string }) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+    expect(
+      ciRun.posted.find(
+        (check: { name: string }) => check.name === 'Merge Authority / Lint & Typecheck',
+      ),
+    ).toMatchObject({
       conclusion: 'failure',
       output: { title: 'UNRESOLVED' },
     })
-    expect(ciRun.posted.find((check: { name: string }) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+    expect(
+      ciRun.posted.find(
+        (check: { name: string }) => check.name === 'Merge Authority / Ops Documentation',
+      ),
+    ).toMatchObject({
       conclusion: 'success',
       output: { title: 'NOT_APPLICABLE' },
     })
-    expect(ciRun.posted.find((check: { name: string }) => check.name === 'Merge Authority / IaC Security')).toMatchObject({
+    expect(
+      ciRun.posted.find(
+        (check: { name: string }) => check.name === 'Merge Authority / IaC Security',
+      ),
+    ).toMatchObject({
       conclusion: 'success',
       output: { title: 'NOT_APPLICABLE' },
     })
-    expect(ciRun.posted.find((check: { name: string }) => check.name === 'Gitleaks')).toMatchObject({
-      conclusion: 'failure',
-      output: { title: 'SUPERSEDED' },
-    })
-    expect(ciRun.posted.find((check: { name: string }) => check.name === 'TruffleHog OSS')).toMatchObject({
+    expect(ciRun.posted.find((check: { name: string }) => check.name === 'Gitleaks')).toMatchObject(
+      {
+        conclusion: 'failure',
+        output: { title: 'SUPERSEDED' },
+      },
+    )
+    expect(
+      ciRun.posted.find((check: { name: string }) => check.name === 'TruffleHog OSS'),
+    ).toMatchObject({
       conclusion: 'success',
     })
-    expect(ciRun.posted.find((check: { name: string }) => check.name === 'Docker Secret Policy')).toMatchObject({
+    expect(
+      ciRun.posted.find((check: { name: string }) => check.name === 'Docker Secret Policy'),
+    ).toMatchObject({
       conclusion: 'failure',
       output: { title: 'UNRESOLVED' },
     })
@@ -1676,7 +1847,9 @@ globalThis.fetch = async (url, init) => {
       { ciJobs: cancelledCi, secretJobs },
     )
     expect(
-      applicable.posted.find((check: { name: string }) => check.name === 'Merge Authority / IaC Security'),
+      applicable.posted.find(
+        (check: { name: string }) => check.name === 'Merge Authority / IaC Security',
+      ),
     ).toMatchObject({ conclusion: 'failure', output: { title: 'UNRESOLVED' } })
 
     const missingHead = postedPullRequest(
@@ -1698,8 +1871,12 @@ globalThis.fetch = async (url, init) => {
     )
     expect(docsOnly.result.status, docsOnly.result.stderr).toBe(0)
     expect(docsOnly.posted).toHaveLength(16)
-    expect(new Set(docsOnly.posted.map((check: { name: string }) => check.name))).toEqual(new Set(REQUIRED_CHECK_NAMES))
-    expect(docsOnly.posted.every((check: { head_sha: string }) => check.head_sha === oldHead)).toBe(true)
+    expect(new Set(docsOnly.posted.map((check: { name: string }) => check.name))).toEqual(
+      new Set(REQUIRED_CHECK_NAMES),
+    )
+    expect(docsOnly.posted.every((check: { head_sha: string }) => check.head_sha === oldHead)).toBe(
+      true,
+    )
     expect(
       docsOnly.posted
         .filter((check: { name: string }) => check.name.startsWith('Merge Authority /'))
@@ -1718,7 +1895,10 @@ globalThis.fetch = async (url, init) => {
     expect(publishSource).toContain('503')
     expect(publishSource).toContain('504')
 
-    const cancelledCi = CI_AUTHORITY_JOBS.map((job) => ({ name: job.name, conclusion: 'cancelled' as const }))
+    const cancelledCi = CI_AUTHORITY_JOBS.map((job) => ({
+      name: job.name,
+      conclusion: 'cancelled' as const,
+    }))
     const secretJobs = [
       { name: 'Gitleaks', conclusion: 'cancelled' },
       { name: 'TruffleHog OSS', conclusion: 'success' },
@@ -1731,12 +1911,24 @@ globalThis.fetch = async (url, init) => {
       MA_CHECK_RETRY_BASE_MS: '0',
       MA_CHECK_ATTEMPTS: '4',
     }
-    const retried = postedPullRequest(env, { ciJobs: cancelledCi, secretJobs, firstCheckStatus: 504 })
+    const retried = postedPullRequest(env, {
+      ciJobs: cancelledCi,
+      secretJobs,
+      firstCheckStatus: 504,
+    })
     expect(retried.result.status, retried.result.stderr).toBe(0)
     expect(retried.statuses[0]).toBe(504)
     expect(retried.statuses.slice(1).every((status: number) => status === 201)).toBe(true)
 
-    const latest = new Map<string, { name: string; head_sha: string; conclusion: string; output: { title: string; summary: string } }>()
+    const latest = new Map<
+      string,
+      {
+        name: string
+        head_sha: string
+        conclusion: string
+        output: { title: string; summary: string }
+      }
+    >()
     for (const check of retried.posted) latest.set(check.name, check)
     expect(latest.size).toBe(16)
     expect(new Set(latest.keys())).toEqual(new Set(REQUIRED_CHECK_NAMES))
@@ -1756,9 +1948,18 @@ globalThis.fetch = async (url, init) => {
       conclusion: 'success',
       output: { title: 'NOT_APPLICABLE' },
     })
-    expect(latest.get('Gitleaks')).toMatchObject({ conclusion: 'failure', output: { title: 'SUPERSEDED' } })
-    expect(latest.get('TruffleHog OSS')).toMatchObject({ conclusion: 'success', output: { title: 'PASS' } })
-    expect(latest.get('Docker Secret Policy')).toMatchObject({ conclusion: 'failure', output: { title: 'FAILURE' } })
+    expect(latest.get('Gitleaks')).toMatchObject({
+      conclusion: 'failure',
+      output: { title: 'SUPERSEDED' },
+    })
+    expect(latest.get('TruffleHog OSS')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'PASS' },
+    })
+    expect(latest.get('Docker Secret Policy')).toMatchObject({
+      conclusion: 'failure',
+      output: { title: 'FAILURE' },
+    })
 
     const exhausted = postedPullRequest(
       { ...env, MA_CHECK_ATTEMPTS: '2' },
@@ -1770,7 +1971,15 @@ globalThis.fetch = async (url, init) => {
       },
     )
     expect(exhausted.result.status, exhausted.result.stderr).toBe(0)
-    const afterFailure = new Map<string, { name: string; head_sha: string; conclusion: string; output: { title: string; summary: string } }>()
+    const afterFailure = new Map<
+      string,
+      {
+        name: string
+        head_sha: string
+        conclusion: string
+        output: { title: string; summary: string }
+      }
+    >()
     for (const check of exhausted.posted) afterFailure.set(check.name, check)
     expect(afterFailure.size).toBe(16)
     expect(new Set(afterFailure.keys())).toEqual(new Set(REQUIRED_CHECK_NAMES))
@@ -1786,9 +1995,9 @@ globalThis.fetch = async (url, init) => {
       conclusion: 'failure',
       output: { title: 'UNRESOLVED' },
     })
-    expect(afterFailure.get('Merge Authority / Lint & Typecheck')?.output.summary ?? '').not.toContain(
-      'could not be published with its real conclusion',
-    )
+    expect(
+      afterFailure.get('Merge Authority / Lint & Typecheck')?.output.summary ?? '',
+    ).not.toContain('could not be published with its real conclusion')
     expect(afterFailure.get('Merge Authority / IaC Security')).toMatchObject({
       conclusion: 'success',
       output: { title: 'NOT_APPLICABLE' },
@@ -1819,10 +2028,16 @@ globalThis.fetch = async (url, init) => {
     expect(runs(ci.jobs['contract-tests'])).toContain('pnpm contract-tests')
     expect(runs(ci.jobs['repository-inventory'])).toContain('pnpm inventory:generate')
     expect(runs(ci.jobs['reconcile-frozen-head'])).toContain('reconcile-this-run')
-    expect(runs(ci.jobs['reconcile-frozen-head'])).not.toMatch(/pnpm contract-tests|inventory:generate|gitleaks|trufflehog/)
+    expect(runs(ci.jobs['reconcile-frozen-head'])).not.toMatch(
+      /pnpm contract-tests|inventory:generate|gitleaks|trufflehog/,
+    )
 
-    const ciContractRuns = Object.values(ci.jobs).flatMap((job) => (job as { steps?: Array<{ run?: string }> }).steps ?? []).map((step) => step.run ?? '')
-    expect(ciContractRuns.filter((run) => /\bpnpm contract-tests\b/.test(run))).toEqual(['pnpm contract-tests'])
+    const ciContractRuns = Object.values(ci.jobs)
+      .flatMap((job) => (job as { steps?: Array<{ run?: string }> }).steps ?? [])
+      .map((step) => step.run ?? '')
+    expect(ciContractRuns.filter((run) => /\bpnpm contract-tests\b/.test(run))).toEqual([
+      'pnpm contract-tests',
+    ])
     const ciInventoryRuns = ciContractRuns.filter((run) => run.includes('inventory:generate'))
     expect(ciInventoryRuns).toEqual(['pnpm inventory:generate'])
 
@@ -1842,7 +2057,9 @@ globalThis.fetch = async (url, init) => {
     expect(runs(secrets.jobs.trufflehog)).toContain('trufflesecurity/trufflehog@')
     expect(runs(secrets.jobs['docker-secret-policy'])).toContain('audit-secrets.ts')
     expect(runs(secrets.jobs['reconcile-frozen-head'])).toContain('reconcile-this-run')
-    expect(runs(secrets.jobs['reconcile-frozen-head'])).not.toMatch(/gitleaks\/gitleaks-action|trufflesecurity\/trufflehog/)
+    expect(runs(secrets.jobs['reconcile-frozen-head'])).not.toMatch(
+      /gitleaks\/gitleaks-action|trufflesecurity\/trufflehog/,
+    )
 
     const drift = runs(inventoryCheck.jobs['drift-check'])
     expect(drift).toContain('tooling/repo-inventory/src/check-drift.ts')
@@ -1865,20 +2082,32 @@ globalThis.fetch = async (url, init) => {
     walk(actionRoot)
     for (const file of actionFiles) {
       const body = readFileSync(file, 'utf8')
-      expect(body, file).not.toMatch(/gitleaks\/gitleaks-action|trufflesecurity\/trufflehog|\bpnpm contract-tests\b|inventory:generate/)
+      expect(body, file).not.toMatch(
+        /gitleaks\/gitleaks-action|trufflesecurity\/trufflehog|\bpnpm contract-tests\b|inventory:generate/,
+      )
     }
 
     const referenced = new Set<string>()
-    for (const job of [ci.jobs['governance-gates'], ci.jobs['report-contract-owner'], ci.jobs['report-inventory-owner'], secrets.jobs['report-secret-owners'], governance.jobs['decision-suite']]) {
+    for (const job of [
+      ci.jobs['governance-gates'],
+      ci.jobs['report-contract-owner'],
+      ci.jobs['report-inventory-owner'],
+      secrets.jobs['report-secret-owners'],
+      governance.jobs['decision-suite'],
+    ]) {
       for (const step of (job as { steps?: Array<{ run?: string }> }).steps ?? []) {
-        for (const match of (step.run ?? '').matchAll(/(?:^|\s)((?:tooling|scripts)\/[A-Za-z0-9_./-]+\.(?:mjs|js|ts))/g)) {
+        for (const match of (step.run ?? '').matchAll(
+          /(?:^|\s)((?:tooling|scripts)\/[A-Za-z0-9_./-]+\.(?:mjs|js|ts))/g,
+        )) {
           referenced.add(match[1])
         }
       }
     }
     for (const relative of referenced) {
       const body = readFileSync(join(ROOT, relative), 'utf8')
-      expect(body, relative).not.toMatch(/gitleaks\/gitleaks-action|trufflesecurity\/trufflehog|execSync\([^)]*contract-tests|spawn\([^)]*contract-tests|inventory:generate/)
+      expect(body, relative).not.toMatch(
+        /gitleaks\/gitleaks-action|trufflesecurity\/trufflehog|execSync\([^)]*contract-tests|spawn\([^)]*contract-tests|inventory:generate/,
+      )
     }
   })
 
@@ -1891,17 +2120,25 @@ globalThis.fetch = async (url, init) => {
     expect(names).not.toContain('Contract Tests')
     expect(Object.keys(governance.jobs)).not.toContain('secret-scan')
     expect(Object.keys(governance.jobs)).not.toContain('contract-tests')
-    const summary = governance.jobs['governance-gate'].steps.map((step: { run?: string }) => step.run ?? '').join('\n')
+    const summary = governance.jobs['governance-gate'].steps
+      .map((step: { run?: string }) => step.run ?? '')
+      .join('\n')
     expect(summary).not.toContain('needs.secret-scan.result')
     expect(summary).not.toContain('require-authoritative-jobs')
     expect(secrets.jobs['report-secret-owners'].needs).toEqual(['gitleaks', 'trufflehog'])
     expect(String(secrets.jobs['report-secret-owners'].if)).toContain('!cancelled()')
     expect(ci.jobs['report-contract-owner'].needs).toEqual(['classify', 'contract-tests'])
     expect(ci.jobs['report-inventory-owner'].needs).toEqual(['classify', 'repository-inventory'])
-    for (const job of [ci.jobs['report-contract-owner'], ci.jobs['report-inventory-owner'], secrets.jobs['report-secret-owners']]) {
+    for (const job of [
+      ci.jobs['report-contract-owner'],
+      ci.jobs['report-inventory-owner'],
+      secrets.jobs['report-secret-owners'],
+    ]) {
       const blob = (job.steps ?? []).map((step: { run?: string }) => step.run ?? '').join('\n')
       expect(blob).not.toContain('require-authoritative-jobs')
-      expect(blob).not.toMatch(/gitleaks\/gitleaks-action|trufflesecurity\/trufflehog|pnpm contract-tests|inventory:generate/)
+      expect(blob).not.toMatch(
+        /gitleaks\/gitleaks-action|trufflesecurity\/trufflehog|pnpm contract-tests|inventory:generate/,
+      )
     }
     const contractRun = ci.jobs['report-contract-owner'].steps[0].run as string
     expect(contractRun).toContain('NOT_APPLICABLE success')
@@ -1910,7 +2147,9 @@ globalThis.fetch = async (url, init) => {
     const newer = 'cccccccccccccccccccccccccccccccccccccccc'
     const nonTerminal = consumeAuthoritativeJobs({
       headSha: head,
-      runs: [{ id: 9, head_sha: head, event: 'pull_request', status: 'in_progress', conclusion: null }],
+      runs: [
+        { id: 9, head_sha: head, event: 'pull_request', status: 'in_progress', conclusion: null },
+      ],
       jobs: [
         { name: 'Gitleaks', conclusion: 'success' },
         { name: 'TruffleHog OSS', conclusion: null },
@@ -1921,7 +2160,15 @@ globalThis.fetch = async (url, init) => {
     expect(nonTerminal.reason).toContain('not terminal')
     const failed = consumeAuthoritativeJobs({
       headSha: head,
-      runs: [{ id: 9, head_sha: head, event: 'pull_request', status: 'completed', conclusion: 'failure' }],
+      runs: [
+        {
+          id: 9,
+          head_sha: head,
+          event: 'pull_request',
+          status: 'completed',
+          conclusion: 'failure',
+        },
+      ],
       jobs: [
         { name: 'Gitleaks', conclusion: 'failure' },
         { name: 'TruffleHog OSS', conclusion: 'success' },
@@ -1932,7 +2179,15 @@ globalThis.fetch = async (url, init) => {
     expect(failed.reason).toContain('Gitleaks is failure')
     const missing = consumeAuthoritativeJobs({
       headSha: head,
-      runs: [{ id: 11, head_sha: newer, event: 'pull_request', status: 'completed', conclusion: 'success' }],
+      runs: [
+        {
+          id: 11,
+          head_sha: newer,
+          event: 'pull_request',
+          status: 'completed',
+          conclusion: 'success',
+        },
+      ],
       jobs: [],
       jobNames: ['Gitleaks', 'TruffleHog OSS'],
     })
@@ -1948,17 +2203,32 @@ globalThis.fetch = async (url, init) => {
     expect(new Set(contract.map((row) => row.AUTHORITATIVE_OWNER)).size).toBe(16)
     const plan = classifyChangedPaths(['README.md'])
     expect(Object.keys(plan.signals).sort()).toEqual(
-      ['ARCHITECTURE', 'DOCS', 'GOVERNANCE', 'INFRA', 'INVENTORY', 'OPS_DOCS', 'PRODUCT_CODE', 'SECURITY', 'TESTS', 'WORKFLOWS'].sort(),
+      [
+        'ARCHITECTURE',
+        'DOCS',
+        'GOVERNANCE',
+        'INFRA',
+        'INVENTORY',
+        'OPS_DOCS',
+        'PRODUCT_CODE',
+        'SECURITY',
+        'TESTS',
+        'WORKFLOWS',
+      ].sort(),
     )
     expect(plan.signals.SECURITY).toBe('APPLICABLE')
     expect(plan.signals.PRODUCT_CODE).toBe('NOT_APPLICABLE')
     expect(plan.contexts['Merge Authority / Lint & Typecheck']).toBe('NOT_APPLICABLE')
     expect(ci.jobs.classify).toBeTruthy()
-    expect(String(ci.jobs['lint-and-typecheck'].if)).toContain("needs.classify.outputs.lint_and_typecheck == 'APPLICABLE'")
+    expect(String(ci.jobs['lint-and-typecheck'].if)).toContain(
+      "needs.classify.outputs.lint_and_typecheck == 'APPLICABLE'",
+    )
     expect(ci.jobs['lint-and-typecheck'].needs).toContain('classify')
     const aggregate = JSON.stringify(authority.jobs.aggregate)
     expect(aggregate).toContain('aggregate-merge-authority')
-    expect(aggregate).not.toMatch(/pnpm contract-tests|inventory:generate|checkov|gitleaks|trufflehog/)
+    expect(aggregate).not.toMatch(
+      /pnpm contract-tests|inventory:generate|checkov|gitleaks|trufflehog/,
+    )
     expect(authority.jobs['governance-integrity-if-ci-skipped']).toBeUndefined()
     expect(authority.jobs['repository-inventory-if-ci-skipped']).toBeUndefined()
     const na = evaluateCiResults({ 'lint-and-typecheck': 'skipped' }, ['README.md']).find(
@@ -2088,10 +2358,22 @@ globalThis.fetch = async (url, init) => {
         .sort()
       expect(required, sample.name).toEqual([...sample.required].sort())
       const fast = fastPathExecution(plan)
-      expect(fast.governance, sample.name).toBe(sample.ciSkipped && plan.contexts['Merge Authority / Governance Integrity'] === 'REQUIRES_EXECUTION')
-      expect(fast.inventory, sample.name).toBe(sample.ciSkipped && plan.contexts['Merge Authority / Repository Inventory'] === 'REQUIRES_EXECUTION')
-      expect(fast.iac, sample.name).toBe(sample.ciSkipped && plan.contexts['Merge Authority / IaC Security'] === 'REQUIRES_EXECUTION')
-      expect(fast.ops, sample.name).toBe(sample.ciSkipped && plan.contexts['Merge Authority / Ops Documentation'] === 'REQUIRES_EXECUTION')
+      expect(fast.governance, sample.name).toBe(
+        sample.ciSkipped &&
+          plan.contexts['Merge Authority / Governance Integrity'] === 'REQUIRES_EXECUTION',
+      )
+      expect(fast.inventory, sample.name).toBe(
+        sample.ciSkipped &&
+          plan.contexts['Merge Authority / Repository Inventory'] === 'REQUIRES_EXECUTION',
+      )
+      expect(fast.iac, sample.name).toBe(
+        sample.ciSkipped &&
+          plan.contexts['Merge Authority / IaC Security'] === 'REQUIRES_EXECUTION',
+      )
+      expect(fast.ops, sample.name).toBe(
+        sample.ciSkipped &&
+          plan.contexts['Merge Authority / Ops Documentation'] === 'REQUIRES_EXECUTION',
+      )
       if (!sample.ciSkipped) {
         for (const context of CANONICAL_CONTEXTS) {
           const signal = context.ciJob.replaceAll('-', '_')
@@ -2109,38 +2391,69 @@ globalThis.fetch = async (url, init) => {
       for (const verdict of passed) {
         expect(verdict.conclusion, `${sample.name} ${verdict.name}`).toBe('success')
         const expectNa = !sample.required.includes(verdict.name)
-        expect(verdict.evidence, `${sample.name} ${verdict.name}`).toBe(expectNa ? 'NOT_APPLICABLE' : 'PASS')
+        expect(verdict.evidence, `${sample.name} ${verdict.name}`).toBe(
+          expectNa ? 'NOT_APPLICABLE' : 'PASS',
+        )
       }
       const secretPass = secretCheckPublications({
         Gitleaks: 'success',
         'TruffleHog OSS': 'success',
         'Docker Secret Policy': 'success',
       })
-      expect(secretPass.map((item) => item.name).sort()).toEqual([...SECRET_AUTHORITY_CONTEXTS].sort())
-      expect(secretPass.every((item) => item.status === 'completed' && item.conclusion === 'success' && item.evidence === 'PASS')).toBe(true)
+      expect(secretPass.map((item) => item.name).sort()).toEqual(
+        [...SECRET_AUTHORITY_CONTEXTS].sort(),
+      )
+      expect(
+        secretPass.every(
+          (item) =>
+            item.status === 'completed' &&
+            item.conclusion === 'success' &&
+            item.evidence === 'PASS',
+        ),
+      ).toBe(true)
       expect(passed.length + secretPass.length).toBe(16)
 
-      const failingJob = sample.required.length > 0
-        ? CANONICAL_CONTEXTS.find((context) => context.name === sample.required[0])!.ciJob
-        : 'lint-and-typecheck'
+      const failingJob =
+        sample.required.length > 0
+          ? CANONICAL_CONTEXTS.find((context) => context.name === sample.required[0])!.ciJob
+          : 'lint-and-typecheck'
       const failed = evaluateCiResults(
-        Object.fromEntries(CANONICAL_CONTEXTS.map((context) => [context.ciJob, context.ciJob === failingJob ? 'failure' : 'success'])),
+        Object.fromEntries(
+          CANONICAL_CONTEXTS.map((context) => [
+            context.ciJob,
+            context.ciJob === failingJob ? 'failure' : 'success',
+          ]),
+        ),
         sample.paths,
       )
       const failedVerdict = failed.find((verdict) => verdict.ciJob === failingJob)!
       if (sample.required.includes(failedVerdict.name)) {
-        expect(failedVerdict, sample.name).toMatchObject({ evidence: 'FAILURE', conclusion: 'failure' })
+        expect(failedVerdict, sample.name).toMatchObject({
+          evidence: 'FAILURE',
+          conclusion: 'failure',
+        })
       } else {
-        expect(failedVerdict, sample.name).toMatchObject({ evidence: 'NOT_APPLICABLE', conclusion: 'success' })
+        expect(failedVerdict, sample.name).toMatchObject({
+          evidence: 'NOT_APPLICABLE',
+          conclusion: 'success',
+        })
       }
       const secretFail = secretCheckPublications({
         Gitleaks: 'failure',
         'TruffleHog OSS': 'success',
         'Docker Secret Policy': 'cancelled',
       })
-      expect(secretFail.find((item) => item.name === 'Gitleaks')).toMatchObject({ evidence: 'FAILURE', conclusion: 'failure' })
-      expect(secretFail.find((item) => item.name === 'TruffleHog OSS')).toMatchObject({ evidence: 'PASS', conclusion: 'success' })
-      expect(secretFail.find((item) => item.name === 'Docker Secret Policy')?.conclusion).not.toBe('success')
+      expect(secretFail.find((item) => item.name === 'Gitleaks')).toMatchObject({
+        evidence: 'FAILURE',
+        conclusion: 'failure',
+      })
+      expect(secretFail.find((item) => item.name === 'TruffleHog OSS')).toMatchObject({
+        evidence: 'PASS',
+        conclusion: 'success',
+      })
+      expect(secretFail.find((item) => item.name === 'Docker Secret Policy')?.conclusion).not.toBe(
+        'success',
+      )
     }
   })
 })

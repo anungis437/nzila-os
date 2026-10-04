@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-10-03 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-10-04 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -9,9 +9,9 @@
 | Apps | 28 |
 | Packages (packages/*) | 224 |
 | Workspace Packages (apps|packages|services|tooling) | 258 |
-| GitHub Workflows | 57 |
-| Contract Test Files | 289 |
-| TS/JS Test Files | 2689 |
+| GitHub Workflows | 58 |
+| Contract Test Files | 290 |
+| TS/JS Test Files | 2690 |
 | Python Test Files | 35 |
 
 ## Apps
@@ -97,6 +97,7 @@
 - release-train.yml
 - reliability-guard.yml
 - repo-inventory-check.yml
+- republish-required-checks.yml
 - retire-legacy-union-eyes-ca.yml
 - runtime-governance-attestation.yml
 - sbom.yml

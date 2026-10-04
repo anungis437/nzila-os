@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-03T00:00:00.000Z",
+  "generatedAt": "2026-10-04T00:00:00.000Z",
   "appCount": 28,
   "packageCount": 224,
   "workspacePackageCount": 258,
-  "workflowCount": 57,
-  "contractTestCount": 289,
-  "tsTestFileCount": 2689,
+  "workflowCount": 58,
+  "contractTestCount": 290,
+  "tsTestFileCount": 2690,
   "pythonTestFileCount": 35,
   "apps": [
     {
@@ -899,6 +899,7 @@
     "release-train.yml",
     "reliability-guard.yml",
     "repo-inventory-check.yml",
+    "republish-required-checks.yml",
     "retire-legacy-union-eyes-ca.yml",
     "runtime-governance-attestation.yml",
     "sbom.yml",

@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { parse } from 'yaml'
 import { CANONICAL_CONTEXTS, SECRET_AUTHORITY_CONTEXTS } from '../ci/merge-authority/surface.mjs'
@@ -52,7 +53,11 @@ function ciJob(id: string, status: string, conclusion: string | null): Job {
   return { name: named.name, status, conclusion }
 }
 
-function allCiJobs(status: string, conclusion: string | null, overrides: Record<string, Partial<Job>> = {}): Job[] {
+function allCiJobs(
+  status: string,
+  conclusion: string | null,
+  overrides: Record<string, Partial<Job>> = {},
+): Job[] {
   return CI_AUTHORITY_JOBS.map((job) => ({
     name: job.name,
     status,
@@ -95,7 +100,13 @@ function createClient(handlers: {
   onPost?: (body: { name: string }) => void
 }) {
   const calls: Array<Record<string, unknown>> = []
-  const posted: Array<{ name: string; head_sha: string; status: string; conclusion: string; output: { title: string } }> = []
+  const posted: Array<{
+    name: string
+    head_sha: string
+    status: string
+    conclusion: string
+    output: { title: string }
+  }> = []
   return {
     calls,
     posted,
@@ -107,8 +118,19 @@ function createClient(handlers: {
       calls.push({ op: 'listRunJobs', id })
       return handlers.jobs(id)
     },
-    async createCheckRun(body: { name: string; head_sha: string; status: string; conclusion: string; output: { title: string } }) {
-      calls.push({ op: 'createCheckRun', name: body.name, head_sha: body.head_sha, conclusion: body.conclusion })
+    async createCheckRun(body: {
+      name: string
+      head_sha: string
+      status: string
+      conclusion: string
+      output: { title: string }
+    }) {
+      calls.push({
+        op: 'createCheckRun',
+        name: body.name,
+        head_sha: body.head_sha,
+        conclusion: body.conclusion,
+      })
       posted.push(body)
       handlers.onPost?.(body)
     },
@@ -119,12 +141,17 @@ function createClient(handlers: {
   }
 }
 
-function expectSixteenTerminal(checks: Array<{ name: string; head_sha: string; status: string; conclusion: string }>, head: string) {
+function expectSixteenTerminal(
+  checks: Array<{ name: string; head_sha: string; status: string; conclusion: string }>,
+  head: string,
+) {
   expect(checks).toHaveLength(16)
   expect(new Set(checks.map((check) => check.name))).toEqual(new Set(requiredContextNames()))
   expect(checks.every((check) => check.head_sha === head)).toBe(true)
   expect(checks.every((check) => check.status === 'completed')).toBe(true)
-  expect(checks.every((check) => check.conclusion === 'success' || check.conclusion === 'failure')).toBe(true)
+  expect(
+    checks.every((check) => check.conclusion === 'success' || check.conclusion === 'failure'),
+  ).toBe(true)
   expect(checks.some((check) => check.head_sha === OLD)).toBe(false)
 }
 
@@ -144,7 +171,10 @@ describe('phase 2 required-context convergence', () => {
     expect(MAX_DURATION_MS_DEFAULT).toBeGreaterThan(110 * 60 * 1000)
     expect(maxReconciliationAttempts(20_000, MAX_DURATION_MS_DEFAULT, '')).toBe(1_081)
     expect(maxReconciliationAttempts(0, 2_000, '')).toBe(2_001)
-    const publisher = readFileSync(join(ROOT, '.github/workflows/publish-required-checks.yml'), 'utf8')
+    const publisher = readFileSync(
+      join(ROOT, '.github/workflows/publish-required-checks.yml'),
+      'utf8',
+    )
     expect(publisher).toContain('timeout-minutes: 360')
     expect(publisher).toContain('MA_POLL_TIMEOUT_MS: "21600000"')
     expect(publisher).not.toContain('6600000')
@@ -157,7 +187,8 @@ describe('phase 2 required-context convergence', () => {
         'ci.yml': [run(10, CURRENT, 'completed', 'success'), run(9, OLD, 'completed', 'success')],
         'secret-scan.yml': [run(11, CURRENT, 'completed', 'success')],
       },
-      jobs: (id) => (id === 11 ? secretJobs('completed', 'success') : allCiJobs('completed', 'success')),
+      jobs: (id) =>
+        id === 11 ? secretJobs('completed', 'success') : allCiJobs('completed', 'success'),
     })
     const result = await convergeRequiredChecks({
       headSha: CURRENT,
@@ -175,7 +206,11 @@ describe('phase 2 required-context convergence', () => {
     expectSixteenTerminal(result.checks, CURRENT)
     expect(result.checks.every((check) => check.conclusion === 'success')).toBe(true)
     expect(github.calls.some((call) => call.op === 'dispatch')).toBe(false)
-    expect(github.calls.filter((call) => call.op === 'listWorkflowRuns').every((call) => call.sha === CURRENT)).toBe(true)
+    expect(
+      github.calls
+        .filter((call) => call.op === 'listWorkflowRuns')
+        .every((call) => call.sha === CURRENT),
+    ).toBe(true)
     expect(github.calls.some((call) => call.op === 'listRunJobs' && call.id === 9)).toBe(false)
   })
 
@@ -196,7 +231,8 @@ describe('phase 2 required-context convergence', () => {
         })
       },
       onPost: (body) => {
-        if (body.name === 'Merge Authority / Ops Documentation') opsPostedAtSleeps = clock.sleeps.length
+        if (body.name === 'Merge Authority / Ops Documentation')
+          opsPostedAtSleeps = clock.sleeps.length
       },
     })
     const result = await convergeRequiredChecks({
@@ -213,21 +249,28 @@ describe('phase 2 required-context convergence', () => {
     expect(result.sleeps).toBe(0)
     expect(opsPostedAtSleeps).toBe(0)
     expectSixteenTerminal(result.checks, CURRENT)
-    expect(result.checks.find((check) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+    expect(
+      result.checks.find((check) => check.name === 'Merge Authority / Ops Documentation'),
+    ).toMatchObject({
       conclusion: 'success',
       output: { title: 'NOT_APPLICABLE' },
     })
-    expect(result.checks.find((check) => check.name === 'Merge Authority / IaC Security')).toMatchObject({
+    expect(
+      result.checks.find((check) => check.name === 'Merge Authority / IaC Security'),
+    ).toMatchObject({
       conclusion: 'success',
       output: { title: 'NOT_APPLICABLE' },
     })
-    expect(result.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+    expect(
+      result.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toMatchObject({
       conclusion: 'success',
       output: { title: 'PASS' },
     })
-    expect(CANONICAL_CONTEXTS.find((context) => context.name === 'Merge Authority / Ops Documentation')?.ciJob).toBe(
-      'ops-pack-validation',
-    )
+    expect(
+      CANONICAL_CONTEXTS.find((context) => context.name === 'Merge Authority / Ops Documentation')
+        ?.ciJob,
+    ).toBe('ops-pack-validation')
     expect(github.calls.some((call) => call.op === 'dispatch')).toBe(false)
   })
 
@@ -267,13 +310,19 @@ describe('phase 2 required-context convergence', () => {
     expect(result.sleeps).toBe(1)
     expect(clock.sleeps).toEqual([5_000])
     expectSixteenTerminal(result.checks, CURRENT)
-    expect(result.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+    expect(
+      result.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toMatchObject({
       conclusion: 'success',
       output: { title: 'PASS' },
     })
     expect(github.calls.some((call) => call.op === 'dispatch')).toBe(false)
     expect(github.calls.some((call) => call.op === 'listRunJobs' && call.id === 29)).toBe(false)
-    expect(github.calls.filter((call) => call.op === 'listWorkflowRuns').every((call) => call.sha === CURRENT)).toBe(true)
+    expect(
+      github.calls
+        .filter((call) => call.op === 'listWorkflowRuns')
+        .every((call) => call.sha === CURRENT),
+    ).toBe(true)
   })
 
   it('convergence case 4: unresolved job hits a bounded timeout and names missing contexts', async () => {
@@ -309,14 +358,27 @@ describe('phase 2 required-context convergence', () => {
     const error = caught as RequiredContextsTimeoutError
     expect(error.attempt).toBe(2)
     expect(error.missing).toEqual(['Merge Authority / Lint & Typecheck'])
-    expect(error.message).toBe('timed out waiting for required contexts: Merge Authority / Lint & Typecheck')
+    expect(error.message).toBe(
+      'timed out waiting for required contexts: Merge Authority / Lint & Typecheck',
+    )
     expect(clock.sleeps).toEqual([1_000])
-    expect(github.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toBeUndefined()
-    expect(github.posted.find((check) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+    expect(
+      github.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toBeUndefined()
+    expect(
+      github.posted.find((check) => check.name === 'Merge Authority / Ops Documentation'),
+    ).toMatchObject({
       conclusion: 'success',
       head_sha: CURRENT,
     })
-    expect(github.posted.every((check) => check.conclusion !== 'success' || check.output.title === 'NOT_APPLICABLE' || check.output.title === 'PASS')).toBe(true)
+    expect(
+      github.posted.every(
+        (check) =>
+          check.conclusion !== 'success' ||
+          check.output.title === 'NOT_APPLICABLE' ||
+          check.output.title === 'PASS',
+      ),
+    ).toBe(true)
     expect(github.calls.some((call) => call.op === 'dispatch')).toBe(false)
   })
 
@@ -325,7 +387,10 @@ describe('phase 2 required-context convergence', () => {
     const first = createClient({
       runs: {
         'ci.yml': [run(2, CURRENT, 'in_progress', null), run(999, OLD, 'completed', 'success')],
-        'secret-scan.yml': [run(3, CURRENT, 'completed', 'success'), run(998, OLD, 'completed', 'success')],
+        'secret-scan.yml': [
+          run(3, CURRENT, 'completed', 'success'),
+          run(998, OLD, 'completed', 'success'),
+        ],
       },
       jobs: (id) => {
         if (id === 998 || id === 3) return secretJobs('completed', 'success')
@@ -351,16 +416,29 @@ describe('phase 2 required-context convergence', () => {
       firstError = error
     }
     expect(firstError).toBeInstanceOf(RequiredContextsTimeoutError)
-    expect((firstError as RequiredContextsTimeoutError).missing).toContain('Merge Authority / Lint & Typecheck')
-    expect(first.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toBeUndefined()
+    expect((firstError as RequiredContextsTimeoutError).missing).toContain(
+      'Merge Authority / Lint & Typecheck',
+    )
+    expect(
+      first.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toBeUndefined()
     expect(first.posted.every((check) => check.head_sha === CURRENT)).toBe(true)
-    expect(first.calls.some((call) => call.op === 'listRunJobs' && (call.id === 999 || call.id === 998))).toBe(false)
-    expect(first.calls.filter((call) => call.op === 'listWorkflowRuns').every((call) => call.sha === CURRENT)).toBe(true)
+    expect(
+      first.calls.some((call) => call.op === 'listRunJobs' && (call.id === 999 || call.id === 998)),
+    ).toBe(false)
+    expect(
+      first.calls
+        .filter((call) => call.op === 'listWorkflowRuns')
+        .every((call) => call.sha === CURRENT),
+    ).toBe(true)
 
     const second = createClient({
       runs: {
         'ci.yml': [run(2, CURRENT, 'completed', 'failure'), run(999, OLD, 'completed', 'success')],
-        'secret-scan.yml': [run(3, CURRENT, 'completed', 'success'), run(998, OLD, 'completed', 'success')],
+        'secret-scan.yml': [
+          run(3, CURRENT, 'completed', 'success'),
+          run(998, OLD, 'completed', 'success'),
+        ],
       },
       jobs: (id) => {
         if (id === 998 || id === 3) return secretJobs('completed', 'success')
@@ -381,18 +459,27 @@ describe('phase 2 required-context convergence', () => {
       maxAttempts: 1,
     })
     expectSixteenTerminal(result.checks, CURRENT)
-    expect(result.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+    expect(
+      result.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toMatchObject({
       head_sha: CURRENT,
       conclusion: 'failure',
       output: { title: 'FAILURE' },
     })
     expect(second.posted.every((check) => check.head_sha === CURRENT)).toBe(true)
     expect(second.posted.some((check) => check.head_sha === OLD)).toBe(false)
-    expect(second.calls.some((call) => call.op === 'listRunJobs' && (call.id === 999 || call.id === 998))).toBe(false)
+    expect(
+      second.calls.some(
+        (call) => call.op === 'listRunJobs' && (call.id === 999 || call.id === 998),
+      ),
+    ).toBe(false)
   })
 
   it('convergence case 6: reporter cancellation still leaves an independent path to 16 terminal contexts', async () => {
-    const publisher = readFileSync(join(ROOT, '.github/workflows/publish-required-checks.yml'), 'utf8')
+    const publisher = readFileSync(
+      join(ROOT, '.github/workflows/publish-required-checks.yml'),
+      'utf8',
+    )
     expect(publisher).toContain('node tooling/ci/merge-authority/publish.mjs publish-pull-request')
     expect(publisher).toContain('cancel-in-progress: false')
     expect(publisher).toContain('publish-required-checks-${{ github.event.pull_request.head.sha }}')
@@ -436,8 +523,12 @@ describe('phase 2 required-context convergence', () => {
     expect(error.missing).toContain('Merge Authority / Lint & Typecheck')
     expect(error.message).toContain('Merge Authority / Lint & Typecheck')
     expect(clock.sleeps).toEqual([])
-    expect(cancelledClient.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toBeUndefined()
-    expect(cancelledClient.posted.find((check) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+    expect(
+      cancelledClient.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toBeUndefined()
+    expect(
+      cancelledClient.posted.find((check) => check.name === 'Merge Authority / Ops Documentation'),
+    ).toMatchObject({
       conclusion: 'success',
       head_sha: CURRENT,
     })
@@ -447,7 +538,8 @@ describe('phase 2 required-context convergence', () => {
         'ci.yml': [run(60, CURRENT, 'completed', 'success')],
         'secret-scan.yml': [run(61, CURRENT, 'completed', 'success')],
       },
-      jobs: (id) => (id === 61 ? secretJobs('completed', 'success') : allCiJobs('completed', 'success')),
+      jobs: (id) =>
+        id === 61 ? secretJobs('completed', 'success') : allCiJobs('completed', 'success'),
     })
     const result = await convergeRequiredChecks({
       headSha: CURRENT,
@@ -459,11 +551,18 @@ describe('phase 2 required-context convergence', () => {
       },
       intervalMs: RETRY_INTERVAL_MS_DEFAULT,
       maxDurationMs: MAX_DURATION_MS_DEFAULT,
-      maxAttempts: maxReconciliationAttempts(RETRY_INTERVAL_MS_DEFAULT, MAX_DURATION_MS_DEFAULT, ''),
+      maxAttempts: maxReconciliationAttempts(
+        RETRY_INTERVAL_MS_DEFAULT,
+        MAX_DURATION_MS_DEFAULT,
+        '',
+      ),
     })
     expect(replacement.posted).toHaveLength(16)
     expectSixteenTerminal(result.checks, CURRENT)
-    expect(result.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck')?.conclusion).toBe('success')
+    expect(
+      result.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck')
+        ?.conclusion,
+    ).toBe('success')
     expect(result.attempts).toBe(1)
     expect(cancelledClient.posted.length).toBeLessThan(16)
   })
@@ -500,8 +599,12 @@ describe('phase 2 required-context convergence', () => {
       exited = error
     }
     expect(exited).toBeInstanceOf(RequiredContextsTimeoutError)
-    expect((exited as RequiredContextsTimeoutError).missing).toContain('Merge Authority / Lint & Typecheck')
-    expect(first.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toBeUndefined()
+    expect((exited as RequiredContextsTimeoutError).missing).toContain(
+      'Merge Authority / Lint & Typecheck',
+    )
+    expect(
+      first.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toBeUndefined()
     expect(first.calls.some((call) => call.op === 'dispatch')).toBe(false)
 
     const reentry = createClient({
@@ -529,7 +632,9 @@ describe('phase 2 required-context convergence', () => {
       maxAttempts: 1,
     })
     expectSixteenTerminal(published.checks, CURRENT)
-    expect(published.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+    expect(
+      published.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toMatchObject({
       head_sha: CURRENT,
       conclusion: 'success',
       output: { title: 'PASS' },
@@ -547,13 +652,16 @@ describe('phase 2 required-context convergence', () => {
         'ci.yml': [run(80, CURRENT, 'completed', 'success')],
         'secret-scan.yml': [run(81, CURRENT, 'completed', 'success')],
       },
-      jobs: (id) => (id === 81 ? secretJobs('completed', 'success') : allCiJobs('completed', 'success')),
+      jobs: (id) =>
+        id === 81 ? secretJobs('completed', 'success') : allCiJobs('completed', 'success'),
     })
     const succeed = github.listWorkflowRuns.bind(github)
     github.listWorkflowRuns = async (file: string, sha: string) => {
       const status = failures.shift()
       if (status) {
-        throw Object.assign(new Error(`listing ${file} runs failed (${status}): gateway`), { status })
+        throw Object.assign(new Error(`listing ${file} runs failed (${status}): gateway`), {
+          status,
+        })
       }
       return succeed(file, sha)
     }
@@ -578,7 +686,9 @@ describe('phase 2 required-context convergence', () => {
       jobs: () => [],
     })
     unauthorized.listWorkflowRuns = async () => {
-      throw Object.assign(new Error('listing ci.yml runs failed (401): unauthorized'), { status: 401 })
+      throw Object.assign(new Error('listing ci.yml runs failed (401): unauthorized'), {
+        status: 401,
+      })
     }
     await expect(
       republishFrozenHead({
@@ -597,8 +707,14 @@ describe('phase 2 required-context convergence', () => {
   })
 
   it('redteam attack-5: cancelling the pull_request publisher leaves a production re-entry for that SHA', async () => {
-    const publisherText = readFileSync(join(ROOT, '.github/workflows/publish-required-checks.yml'), 'utf8')
-    const reentryText = readFileSync(join(ROOT, '.github/workflows/republish-required-checks.yml'), 'utf8')
+    const publisherText = readFileSync(
+      join(ROOT, '.github/workflows/publish-required-checks.yml'),
+      'utf8',
+    )
+    const reentryText = readFileSync(
+      join(ROOT, '.github/workflows/republish-required-checks.yml'),
+      'utf8',
+    )
     const publisher = parse(publisherText)
     const reentry = parse(reentryText)
     expect(publisher.on.pull_request.branches).toContain('main')
@@ -609,7 +725,9 @@ describe('phase 2 required-context convergence', () => {
     expect(reentry.on.schedule).toBeUndefined()
     expect(reentry.on.pull_request_review.types).toContain('submitted')
     expect(reentryText).toContain('github.event.pull_request.head.sha')
-    expect(reentryText).toContain('node tooling/ci/merge-authority/publish.mjs republish-frozen-head')
+    expect(reentryText).toContain(
+      'node tooling/ci/merge-authority/publish.mjs republish-frozen-head',
+    )
     expect(reentryText).not.toContain('publish-pull-request')
     expect(reentryText).not.toContain('workflow_run')
     expect(reentry.concurrency['cancel-in-progress']).toBe(false)
@@ -659,7 +777,9 @@ describe('phase 2 required-context convergence', () => {
         maxAttempts: 1,
       }),
     ).rejects.toBeInstanceOf(RequiredContextsTimeoutError)
-    expect(unknown.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toBeUndefined()
+    expect(
+      unknown.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toBeUndefined()
     expect(unknown.posted.some((check) => check.head_sha === OLD)).toBe(false)
     expect(unknown.calls.some((call) => call.op === 'listRunJobs' && call.id === 991)).toBe(false)
     expect(unknown.calls.some((call) => call.op === 'dispatch')).toBe(false)
@@ -676,11 +796,7 @@ describe('phase 2 required-context convergence', () => {
     return { text, doc, job, steps }
   }
 
-  function runReconcileCommand(
-    command: string,
-    env: Record<string, string>,
-    handler: string,
-  ) {
+  function runReconcileCommand(command: string, env: Record<string, string>, handler: string) {
     const dir = mkdtempSync(join(tmpdir(), 'reconcile-run-'))
     const postedPath = join(dir, 'posted.json')
     const preload = join(dir, 'preload.mjs')
@@ -701,17 +817,31 @@ globalThis.fetch = async (url, init) => {
 }
 `,
     )
-    const result = spawnSync(process.execPath, ['--import', preload, join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), command], {
-      encoding: 'utf8',
-      env: {
-        ...process.env,
-        GITHUB_REPOSITORY: 'anungis437/nzila-os',
-        GITHUB_TOKEN: 'test-token',
-        MA_CHECK_RETRY_BASE_MS: '0',
-        ...env,
+    const result = spawnSync(
+      process.execPath,
+      [
+        '--import',
+        pathToFileURL(preload).href,
+        join(ROOT, 'tooling/ci/merge-authority/publish.mjs'),
+        command,
+      ],
+      {
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          GITHUB_REPOSITORY: 'anungis437/nzila-os',
+          GITHUB_TOKEN: 'test-token',
+          MA_CHECK_RETRY_BASE_MS: '0',
+          ...env,
+        },
       },
-    })
-    let posted: Array<{ name: string; head_sha: string; conclusion: string; output: { title: string } }> = []
+    )
+    let posted: Array<{
+      name: string
+      head_sha: string
+      conclusion: string
+      output: { title: string }
+    }> = []
     try {
       posted = JSON.parse(readFileSync(postedPath, 'utf8'))
     } catch {
@@ -721,7 +851,10 @@ globalThis.fetch = async (url, init) => {
   }
 
   it('redteam re-entry: cancelling the pull_request publisher still leaves CI and Secret Scan completion jobs', () => {
-    const publisher = readFileSync(join(ROOT, '.github/workflows/publish-required-checks.yml'), 'utf8')
+    const publisher = readFileSync(
+      join(ROOT, '.github/workflows/publish-required-checks.yml'),
+      'utf8',
+    )
     expect(publisher).not.toContain('reconcile-this-run')
     expect(publisher).not.toContain('reconcile-frozen-head')
     const ci = completionJob('ci.yml', 'reconcile-frozen-head')
@@ -729,7 +862,9 @@ globalThis.fetch = async (url, init) => {
     for (const found of [ci, secret]) {
       expect(found.job.if).toBe('always()')
       expect(found.job.concurrency).toBeUndefined()
-      expect(found.steps).toContain('node tooling/ci/merge-authority/publish.mjs reconcile-this-run')
+      expect(found.steps).toContain(
+        'node tooling/ci/merge-authority/publish.mjs reconcile-this-run',
+      )
       expect(found.steps).not.toContain('publish-pull-request')
       expect(found.steps).not.toContain('republish-frozen-head')
       expect(found.steps).not.toContain('pnpm test')
@@ -740,20 +875,36 @@ globalThis.fetch = async (url, init) => {
       expect(found.steps).not.toContain('audit-secrets')
       expect(found.steps).not.toContain('setup-monorepo')
       expect(found.text).not.toContain('workflow_run')
-      expect(found.job.permissions).toMatchObject({ contents: 'read', checks: 'write', actions: 'read' })
-      const publishStep = found.job.steps.find((step: { run?: string }) => (step.run ?? '').includes('reconcile-this-run'))
+      expect(found.job.permissions).toMatchObject({
+        contents: 'read',
+        checks: 'write',
+        actions: 'read',
+      })
+      const publishStep = found.job.steps.find((step: { run?: string }) =>
+        (step.run ?? '').includes('reconcile-this-run'),
+      )
       expect(publishStep.if).toBe("github.event_name == 'pull_request'")
       expect(publishStep.env.PR_HEAD_SHA).toBe('${{ github.event.pull_request.head.sha }}')
       expect(publishStep.env.SOURCE_HEAD_SHA).toBe('${{ github.event.pull_request.head.sha }}')
       expect(publishStep.env.SOURCE_RUN_ID).toBe('${{ github.run_id }}')
       expect(publishStep.env.SOURCE_EVENT).toBe('${{ github.event_name }}')
     }
-    expect(new Set(ci.job.needs)).toEqual(new Set(Object.keys(ci.doc.jobs).filter((id: string) => id !== 'reconcile-frozen-head')))
+    expect(new Set(ci.job.needs)).toEqual(
+      new Set(Object.keys(ci.doc.jobs).filter((id: string) => id !== 'reconcile-frozen-head')),
+    )
     expect(new Set(secret.job.needs)).toEqual(
       new Set(Object.keys(secret.doc.jobs).filter((id: string) => id !== 'reconcile-frozen-head')),
     )
-    expect(ci.job.steps.find((step: { env?: { SOURCE_WORKFLOW_NAME?: string } }) => step.env?.SOURCE_WORKFLOW_NAME).env.SOURCE_WORKFLOW_NAME).toBe('CI')
-    expect(secret.job.steps.find((step: { env?: { SOURCE_WORKFLOW_NAME?: string } }) => step.env?.SOURCE_WORKFLOW_NAME).env.SOURCE_WORKFLOW_NAME).toBe('Secret Scan')
+    expect(
+      ci.job.steps.find(
+        (step: { env?: { SOURCE_WORKFLOW_NAME?: string } }) => step.env?.SOURCE_WORKFLOW_NAME,
+      ).env.SOURCE_WORKFLOW_NAME,
+    ).toBe('CI')
+    expect(
+      secret.job.steps.find(
+        (step: { env?: { SOURCE_WORKFLOW_NAME?: string } }) => step.env?.SOURCE_WORKFLOW_NAME,
+      ).env.SOURCE_WORKFLOW_NAME,
+    ).toBe('Secret Scan')
     expect(ci.job.name).toBe('Reconcile CI frozen head')
     expect(secret.job.name).toBe('Reconcile Secret Scan frozen head')
   })
@@ -778,7 +929,11 @@ globalThis.fetch = async (url, init) => {
     const command = ciCommand.split(/\s+/).pop()
     expect(command).toBe('reconcile-this-run')
 
-    const ciJobs = CI_AUTHORITY_JOBS.map((job) => ({ name: job.name, status: 'completed', conclusion: 'success' }))
+    const ciJobs = CI_AUTHORITY_JOBS.map((job) => ({
+      name: job.name,
+      status: 'completed',
+      conclusion: 'success',
+    }))
     const late = runReconcileCommand(
       command,
       {
@@ -800,7 +955,9 @@ globalThis.fetch = async (url, init) => {
     expect(late.result.status, late.result.stderr).toBe(0)
     expect(late.posted).toHaveLength(13)
     expect(late.posted.every((check) => check.head_sha === CURRENT)).toBe(true)
-    expect(late.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+    expect(
+      late.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toMatchObject({
       conclusion: 'success',
       output: { title: 'PASS' },
     })
@@ -830,11 +987,16 @@ globalThis.fetch = async (url, init) => {
   }`,
     )
     expect(unknown.result.status, unknown.result.stderr).toBe(0)
-    expect(unknown.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+    expect(
+      unknown.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck'),
+    ).toMatchObject({
       head_sha: CURRENT,
       conclusion: 'failure',
     })
-    expect(unknown.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')?.output.title).not.toBe('PASS')
+    expect(
+      unknown.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')?.output
+        .title,
+    ).not.toBe('PASS')
 
     const refused = runReconcileCommand(
       command,
@@ -903,11 +1065,16 @@ globalThis.fetch = async (url, init) => {
   }`,
     )
     expect(secrets.result.status, secrets.result.stderr).toBe(0)
-    expect(secrets.posted.map((check) => check.name).sort()).toEqual([...SECRET_AUTHORITY_CONTEXTS].sort())
+    expect(secrets.posted.map((check) => check.name).sort()).toEqual(
+      [...SECRET_AUTHORITY_CONTEXTS].sort(),
+    )
     expect(secrets.posted.every((check) => check.head_sha === CURRENT)).toBe(true)
-    expect(secrets.posted.find((check) => check.name === 'TruffleHog OSS')).toMatchObject({ conclusion: 'failure' })
+    expect(secrets.posted.find((check) => check.name === 'TruffleHog OSS')).toMatchObject({
+      conclusion: 'failure',
+    })
     expect(secrets.posted.find((check) => check.name === 'Gitleaks')?.conclusion).toBe('success')
-    expect(secrets.posted.find((check) => check.name === 'TruffleHog OSS')?.conclusion).not.toBe('success')
+    expect(secrets.posted.find((check) => check.name === 'TruffleHog OSS')?.conclusion).not.toBe(
+      'success',
+    )
   })
-
 })
