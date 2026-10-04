@@ -6,7 +6,7 @@
       "path": "apps/orchestrator-api",
       "package": "platform-shell",
       "owner": "platform-team",
-      "justification": "Fastify API server \u00e2\u20ac\u201d no browser UI, no need for platform shell components. Uses API key auth instead.",
+      "justification": "Fastify API server â€” no browser UI, no need for platform shell components. Uses API key auth instead.",
       "expiresOn": "2027-01-01"
     },
     {
@@ -20,7 +20,7 @@
       "path": "apps/web",
       "package": "platform-shell",
       "owner": "platform-team",
-      "justification": "Public marketing site \u00e2\u20ac\u201d uses a custom public layout, not the authenticated platform shell. No org-scoped context.",
+      "justification": "Public marketing site â€” uses a custom public layout, not the authenticated platform shell. No org-scoped context.",
       "expiresOn": "2027-01-01"
     },
     {

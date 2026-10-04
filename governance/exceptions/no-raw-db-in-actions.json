@@ -5,14 +5,14 @@
     {
       "path": "apps/union-eyes/actions/admin-actions.ts",
       "owner": "@nzila/union-eyes",
-      "justification": "Legacy direct @/db/db import — migration to withRLSContext tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
-      "expiresOn": "2026-09-30"
+      "justification": "Legacy direct @/db/db import — migration to withRLSContext tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
+      "expiresOn": "2026-10-18"
     },
     {
       "path": "apps/union-eyes/actions/member-segments-actions.ts",
       "owner": "@nzila/union-eyes",
-      "justification": "Legacy direct @/db import — migration to withRLSContext tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
-      "expiresOn": "2026-09-30"
+      "justification": "Legacy direct @/db import — migration to withRLSContext tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
+      "expiresOn": "2026-10-18"
     }
   ]
 }

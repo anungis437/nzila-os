@@ -49,6 +49,9 @@ jobs:
   secret-scan:
     runs-on: ubuntu-latest
     name: Secret Scan (Gitleaks + TruffleHog)
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v5
         with:

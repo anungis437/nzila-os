@@ -1,36 +1,14 @@
 #!/usr/bin/env tsx
 /**
- * access-review-generate.ts — Generate a quarterly access review attestation stub
- *   for Union Eyes.
+ * access-review-generate.ts — Prepare a quarterly access review packet.
  *
- * This script:
- *   1. Determines the current quarter
- *   2. Checks if an attestation already exists for this quarter
- *   3. Writes a structured JSON scaffold to reports/compliance/access-review/YYYY-QX.json
- *   4. Writes a markdown attestation to reports/compliance/access-review/YYYY-QX.md
- *
- * In a live environment with Azure Entra credentials, this script would call
- * the Microsoft Graph API to enumerate:
- *   - active admin / privileged-role accounts
- *   - dormant accounts (no login > 90 days)
- *   - SSO/SCIM provisioning mismatches
- *   - cross-org role anomalies
- *
- * Without Entra credentials, it generates a procedure-attesting stub that is
- * correct and honest about what was and was not checked.
+ * This creates an unsigned scaffold only. It does not enumerate identities,
+ * verify controls, record an approval, or satisfy the access-review gate.
  *
  * Usage:
  *   pnpm exec tsx scripts/ue/access-review-generate.ts
- *   pnpm exec tsx scripts/ue/access-review-generate.ts --quarter 2026-Q3   # generate specific quarter
- *   pnpm exec tsx scripts/ue/access-review-generate.ts --operator sre-team
- *
- * Output:
- *   reports/compliance/access-review/YYYY-QX.json
- *   reports/compliance/access-review/YYYY-QX.md
- *
- * Exit codes:
- *   0 = generated successfully (or already exists)
- *   1 = failure
+ *   pnpm exec tsx scripts/ue/access-review-generate.ts --quarter 2026-Q4
+ *   pnpm exec tsx scripts/ue/access-review-generate.ts --operator security-team
  */
 
 import * as fs from 'node:fs'
@@ -38,8 +16,20 @@ import * as path from 'node:path'
 
 const ROOT = path.resolve(__dirname, '..', '..')
 const ACCESS_REVIEW_DIR = path.join(ROOT, 'reports', 'compliance', 'access-review')
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
+const REVIEW_SCOPE = [
+  'privileged-admins',
+  'elevated-roles',
+  'dormant-accounts',
+  'cross-org-anomalies',
+  'sso-scim-sync',
+]
+const REQUIRED_EVIDENCE = [
+  'Current privileged account and elevated-role enumeration',
+  'Dormant and orphaned account review',
+  'SSO/SCIM provisioning and deprovisioning evidence',
+  'Cross-organization access-isolation review',
+  'Completed findings, dispositions, and remediation owners',
+]
 
 function currentQuarterLabel(): string {
   const d = new Date()
@@ -49,8 +39,8 @@ function currentQuarterLabel(): string {
 
 function nextQuarterLabel(current: string): string {
   const [year, qStr] = current.split('-Q')
-  const q = parseInt(qStr ?? '1', 10)
-  if (q === 4) return `${parseInt(year ?? '2026', 10) + 1}-Q1`
+  const q = Number.parseInt(qStr ?? '1', 10)
+  if (q === 4) return `${Number.parseInt(year ?? '2026', 10) + 1}-Q1`
   return `${year}-Q${q + 1}`
 }
 
@@ -60,185 +50,138 @@ function parseArg(name: string): string | undefined {
     return process.argv[idx + 1]
   }
   const prefix = `${name}=`
-  const match = process.argv.find((a) => a.startsWith(prefix))
+  const match = process.argv.find((arg) => arg.startsWith(prefix))
   return match ? match.slice(prefix.length) : undefined
 }
 
-function todayISO(): string {
-  return new Date().toISOString().slice(0, 10)
-}
-
-// ── Main ──────────────────────────────────────────────────────────────────────
-
 function main(): void {
   const quarter = parseArg('--quarter') ?? currentQuarterLabel()
-  const operator = parseArg('--operator') ??
-    process.env.GITHUB_ACTOR ?? process.env.USER ?? 'security-team'
-  const today = todayISO()
-  const nextQuarter = nextQuarterLabel(quarter)
+  if (!/^\d{4}-Q[1-4]$/.test(quarter)) {
+    process.stderr.write(`Invalid quarter '${quarter}'; expected YYYY-Q1 through YYYY-Q4.\n`)
+    process.exitCode = 1
+    return
+  }
 
+  const preparedBy =
+    parseArg('--operator') ??
+    process.env.GITHUB_ACTOR ??
+    process.env.USER ??
+    'unidentified-operator'
+  const preparedAt = new Date().toISOString()
+  const nextReviewDue = nextQuarterLabel(quarter)
   const jsonPath = path.join(ACCESS_REVIEW_DIR, `${quarter}.json`)
   const mdPath = path.join(ACCESS_REVIEW_DIR, `${quarter}.md`)
 
   if (fs.existsSync(jsonPath) && fs.existsSync(mdPath)) {
-    process.stdout.write(`\n  Access review for ${quarter} already exists.\n`)
-    process.stdout.write(`    ${path.relative(ROOT, jsonPath)}\n`)
-    process.stdout.write(`    ${path.relative(ROOT, mdPath)}\n\n`)
-    process.exit(0)
+    process.stdout.write(
+      `Access review packet for ${quarter} already exists; leaving it unchanged.\n`,
+    )
+    process.stdout.write(`  ${path.relative(ROOT, jsonPath)}\n`)
+    process.stdout.write(`  ${path.relative(ROOT, mdPath)}\n`)
+    return
   }
 
   fs.mkdirSync(ACCESS_REVIEW_DIR, { recursive: true })
 
-  const hasEntraAccess = !!(process.env.AZURE_ENTRA_TENANT_ID && process.env.AZURE_ENTRA_CLIENT_ID)
-
   const jsonContent = {
     schemaVersion: 1,
     quarter,
-    reviewDate: today,
-    reviewer: operator,
-    reviewerTitle: 'Security Team',
-    status: hasEntraAccess ? 'live-enumeration' : 'procedure-attested',
+    status: 'pending-review',
+    signoffStatus: 'pending-review',
     app: 'union-eyes',
-    reviewScope: [
-      'privileged-admins',
-      'elevated-roles',
-      'dormant-accounts',
-      'cross-org-anomalies',
-      'sso-scim-sync',
-    ],
-    findings: {
-      activeAdminCount: hasEntraAccess ? '(populated from Entra export)' : null,
-      privilegedRoleCount: hasEntraAccess ? '(populated from Entra export)' : null,
-      dormantElevatedAccounts: hasEntraAccess ? '(populated from Entra export)' : null,
-      orphanedAdmins: hasEntraAccess ? '(populated from Entra export)' : null,
-      ssoScimMismatches: hasEntraAccess ? '(populated from Entra export)' : null,
-      crossOrgAnomalies: null,
-      note: hasEntraAccess
-        ? 'Live Entra enumeration performed — populate numeric fields from Graph API output.'
-        : 'Live account metrics require Azure Entra read access. Attestation certifies the review procedure was followed and the access review framework is operational.',
-    },
-    controls: {
-      rbacVerified: true,
-      ssoEnforced: true,
-      mfaEnforced: true,
-      scimProvisioningActive: true,
-      dormantAccountsAudited: hasEntraAccess,
-      privilegedAccessMinimized: true,
-      crossOrgIsolationVerified: true,
-    },
-    exceptions: [],
+    preparedBy,
+    preparedAt,
+    reviewer: null,
+    reviewDate: null,
+    approvedBy: null,
+    approvedAt: null,
+    reviewScope: REVIEW_SCOPE,
+    requiredEvidence: REQUIRED_EVIDENCE,
+    evidence: [],
+    findings: null,
+    controls: null,
+    exceptions: null,
     remediationOwner: null,
     remediationTarget: null,
-    signoffStatus: hasEntraAccess ? 'pending-review' : 'attestation-framework-active',
-    nextReviewDue: nextQuarter,
+    nextReviewDue,
     automationScript: 'scripts/ue/access-review-generate.ts',
     validatorScript: 'scripts/ue/access-review-validate.ts',
     evidenceArtifact: `reports/compliance/access-review/${quarter}.json`,
   }
 
-  const mdContent = `# Union Eyes — Quarterly Privileged-Access Review Attestation
+  const mdContent = `# Union Eyes — Quarterly Privileged-Access Review
 
-> **Quarter:** ${quarter}  
-> **Review Date:** ${today}  
-> **Reviewer:** ${operator}  
-> **Status:** ${hasEntraAccess ? 'Live Enumeration — Pending Sign-Off' : 'Attestation Framework Active'}  
+> **Quarter:** ${quarter}
+> **Packet prepared:** ${preparedAt}
+> **Prepared by:** ${preparedBy}
+> **Reviewer:** Not assigned
+> **Approval:** Pending human review
 > **Classification:** Internal — CISO-Shareable
 
 ---
 
-## Purpose
+## Review status
 
-This document attests that a quarterly privileged-access review was performed
-for Union Eyes in accordance with the access review procedure.
+This is an unsigned preparation packet, not an attestation. No identities have
+been enumerated, no controls have been marked verified, and no approval has
+been recorded. This packet does not satisfy the access-review governance gate.
 
----
+## Review scope
 
-## Review Scope
+Complete each review area and link its source evidence before sign-off.
 
-| Area | Reviewed |
-|------|---------|
-| Privileged admin accounts | ${hasEntraAccess ? '✅ Enumerated' : '⏳ Live Entra export required'} |
-| Elevated role assignments | ${hasEntraAccess ? '✅ Enumerated' : '⏳ Live Entra export required'} |
-| Dormant elevated accounts (> 90 days) | ${hasEntraAccess ? '✅ Enumerated' : '⏳ Live Entra export required'} |
-| SSO / SCIM provisioning sync | ✅ SCIM active via Entra |
-| Cross-org anomalies | ✅ RLS verification passed |
-| Orphaned admin accounts | ${hasEntraAccess ? '✅ Enumerated' : '⏳ Live Entra export required'} |
+| Area | Completed | Evidence reference |
+|------|-----------|-------------------|
+| Privileged admin accounts | [ ] | |
+| Elevated role assignments | [ ] | |
+| Dormant and orphaned accounts | [ ] | |
+| SSO / SCIM provisioning and deprovisioning | [ ] | |
+| Cross-organization access anomalies | [ ] | |
 
----
+## Required evidence
 
-## Controls Verified
+${REQUIRED_EVIDENCE.map((item) => `- [ ] ${item}`).join('\n')}
 
-| Control | Status |
-|---------|--------|
-| RBAC tiers defined and enforced | ✅ |
-| SSO (Microsoft Entra) enforced | ✅ |
-| MFA enforced via Entra policy | ✅ |
-| SCIM auto-provision/deprovision active | ✅ |
-| Dormant account audit | ${hasEntraAccess ? '✅' : '⏳ Live Entra required'} |
-| Privileged access minimised | ✅ |
-| Cross-org data isolation (RLS) | ✅ |
+## Findings and remediation
 
----
+Record each finding, its disposition, and an accountable remediation owner.
+Do not record “none” until the review has been completed.
 
-## Findings
+## Human sign-off
 
-${hasEntraAccess
-  ? '_(Populate from Entra Graph API export — see structured JSON)_'
-  : '> Live account enumeration requires Azure Entra Graph API credentials.\n> This attestation certifies the review procedure was followed.'}
+| Field | Value |
+|-------|-------|
+| Reviewer | Not assigned |
+| Review date | Not completed |
+| Approver | Not provided |
+| Approval timestamp | Not provided |
+| Evidence references | Not provided |
 
-| Finding | Count | Disposition |
-|---------|-------|------------|
-| Active admin accounts | — | ${hasEntraAccess ? 'Enumerated — see JSON' : 'Requires Entra access'} |
-| Privileged role assignments | — | ${hasEntraAccess ? 'Enumerated — see JSON' : 'Requires Entra access'} |
-| Dormant elevated accounts | — | ${hasEntraAccess ? 'Enumerated — see JSON' : 'Requires Entra access'} |
-| Cross-org anomalies | None | No action needed |
+To pass validation, complete the JSON packet with a reviewer, valid review
+date, explicit approved status, approver, approval timestamp, and at least one
+evidence reference. Pending or incomplete packets remain blocked.
 
----
+## Next review
 
-## Exceptions
-
-None recorded for ${quarter}.
-
----
-
-## Sign-Off
-
-| Role | Status |
-|------|--------|
-| Security Team / CISO | ${hasEntraAccess ? '**Pending review** — add sign-off below' : 'Attestation framework active'} |
-| Platform Engineering | Access controls verified in IaC |
-
----
-
-## Next Review
-
-**Due:** ${nextQuarter}
+**Due:** ${nextReviewDue}
 
 \`\`\`bash
-pnpm exec tsx scripts/ue/access-review-generate.ts --quarter ${nextQuarter}
+pnpm exec tsx scripts/ue/access-review-generate.ts --quarter ${nextReviewDue}
 pnpm exec tsx scripts/ue/access-review-validate.ts
 \`\`\`
 
 ---
 
-_Generated: ${today} · Operator: ${operator}_
+_Prepared: ${preparedAt} · Operator: ${preparedBy}_
 `
 
   fs.writeFileSync(jsonPath, JSON.stringify(jsonContent, null, 2), 'utf-8')
   fs.writeFileSync(mdPath, mdContent, 'utf-8')
 
-  process.stdout.write(`\n── Access Review Generated ─────────────────────────\n`)
-  process.stdout.write(`  Quarter:  ${quarter}\n`)
-  process.stdout.write(`  Reviewer: ${operator}\n`)
-  process.stdout.write(`  Status:   ${hasEntraAccess ? 'live-enumeration' : 'attestation-framework-active'}\n`)
-  process.stdout.write(`\n  Files:\n`)
-  process.stdout.write(`    ${path.relative(ROOT, jsonPath)}\n`)
-  process.stdout.write(`    ${path.relative(ROOT, mdPath)}\n\n`)
-
-  if (!hasEntraAccess) {
-    process.stdout.write(`  NOTE: Run with AZURE_ENTRA_TENANT_ID + AZURE_ENTRA_CLIENT_ID set\n`)
-    process.stdout.write(`        for live account enumeration.\n\n`)
-  }
+  process.stdout.write(`\nAccess review packet prepared for ${quarter}.\n`)
+  process.stdout.write('  Status: pending human review; not an attestation.\n')
+  process.stdout.write(`  JSON: ${path.relative(ROOT, jsonPath)}\n`)
+  process.stdout.write(`  Markdown: ${path.relative(ROOT, mdPath)}\n`)
 }
 
-main()
+if (require.main === module) main()

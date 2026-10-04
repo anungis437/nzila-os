@@ -30,7 +30,10 @@ export function OrgPickerPanel({
     try {
       const res = await fetch('/api/admin/set-active-org', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Idempotency-Key': crypto.randomUUID(),
+        },
         body: JSON.stringify({ orgId }),
       })
       if (!res.ok) {
@@ -53,14 +56,13 @@ export function OrgPickerPanel({
     <div className="mx-auto max-w-2xl space-y-4 p-6">
       <h1 className="text-xl font-semibold text-gray-900">Select an organisation</h1>
       <p className="text-sm text-gray-500">
-        Platform Admin is strictly org-scoped. Pick which organisation&apos;s
-        configuration you want to view or edit.
+        Platform Admin is strictly org-scoped. Pick which organisation&apos;s configuration you want
+        to view or edit.
       </p>
       {candidates.length === 0 ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          You are not an active member of any organisation. Ask an existing
-          org admin to add you, or set <code>PLATFORM_ADMIN_USER_IDS</code>{' '}
-          for emergency access.
+          You are not an active member of any organisation. Ask an existing org admin to add you, or
+          set <code>PLATFORM_ADMIN_USER_IDS</code> for emergency access.
         </div>
       ) : (
         <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white">
@@ -99,8 +101,8 @@ export function ForbiddenPanel({ orgId }: { orgId: string }) {
       <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
         <p className="font-semibold">Access denied</p>
         <p className="mt-1">
-          You are not an active member of org <code>{orgId}</code>. Contact an
-          org admin if you believe this is in error.
+          You are not an active member of org <code>{orgId}</code>. Contact an org admin if you
+          believe this is in error.
         </p>
       </div>
       <Link href="/" className="text-sm text-blue-600 hover:underline">
