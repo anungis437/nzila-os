@@ -670,6 +670,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Schema Drift Detection
     steps:
+      - name: Proof owner failure
+        run: exit 1
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
@@ -805,6 +807,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Proof delayed owner
+        run: sleep 90
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
