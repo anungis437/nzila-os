@@ -203,3 +203,4 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical overview, [docs/archit
 - Red-team adversarial testing (nightly)
 - Game-day chaos engineering (weekly)
 - Evidence-first proof packs for buyer diligence
+<!-- proof/phase4-docs-only -->
