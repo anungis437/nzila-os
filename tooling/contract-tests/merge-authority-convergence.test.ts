@@ -6,6 +6,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { parse } from 'yaml'
 import { CANONICAL_CONTEXTS, SECRET_AUTHORITY_CONTEXTS } from '../ci/merge-authority/surface.mjs'
 import { CI_AUTHORITY_JOBS } from '../ci/merge-authority/supersession.mjs'
 import {
@@ -14,8 +15,10 @@ import {
   RETRY_INTERVAL_MS_DEFAULT,
   RequiredContextsCancelledError,
   RequiredContextsTimeoutError,
+  AUTHORITATIVE_JOB_LIMIT_MS,
   convergeRequiredChecks,
   maxReconciliationAttempts,
+  republishFrozenHead,
   requiredContextNames,
 } from '../ci/merge-authority/publish.mjs'
 
@@ -134,9 +137,15 @@ describe('phase 2 required-context convergence', () => {
     })
     expect(requiredContextNames()).toHaveLength(16)
     expect(RETRY_INTERVAL_MS_DEFAULT).toBe(20_000)
-    expect(MAX_DURATION_MS_DEFAULT).toBe(6_600_000)
-    expect(maxReconciliationAttempts(20_000, 6_600_000, '')).toBe(331)
+    expect(AUTHORITATIVE_JOB_LIMIT_MS).toBe(360 * 60 * 1000)
+    expect(MAX_DURATION_MS_DEFAULT).toBe(AUTHORITATIVE_JOB_LIMIT_MS)
+    expect(MAX_DURATION_MS_DEFAULT).toBeGreaterThan(110 * 60 * 1000)
+    expect(maxReconciliationAttempts(20_000, MAX_DURATION_MS_DEFAULT, '')).toBe(1_081)
     expect(maxReconciliationAttempts(0, 2_000, '')).toBe(2_001)
+    const publisher = readFileSync(join(ROOT, '.github/workflows/publish-required-checks.yml'), 'utf8')
+    expect(publisher).toContain('timeout-minutes: 360')
+    expect(publisher).toContain('MA_POLL_TIMEOUT_MS: "21600000"')
+    expect(publisher).not.toContain('6600000')
   })
 
   it('convergence case 1: all results already available posts 16 terminal contexts', async () => {
@@ -455,5 +464,202 @@ describe('phase 2 required-context convergence', () => {
     expect(result.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck')?.conclusion).toBe('success')
     expect(result.attempts).toBe(1)
     expect(cancelledClient.posted.length).toBeLessThan(16)
+  })
+
+  it('redteam attack-3: late terminal job is published after the first reporter exits', async () => {
+    const first = createClient({
+      runs: {
+        'ci.yml': [run(70, CURRENT, 'in_progress', null), run(999, OLD, 'completed', 'success')],
+        'secret-scan.yml': [run(71, CURRENT, 'completed', 'success')],
+      },
+      jobs: (id) => {
+        if (id === 71) return secretJobs('completed', 'success')
+        if (id === 999) return allCiJobs('completed', 'success')
+        return allCiJobs('completed', 'success', {
+          'lint-and-typecheck': { status: 'in_progress', conclusion: null },
+        })
+      },
+    })
+    let exited: unknown
+    try {
+      await convergeRequiredChecks({
+        headSha: CURRENT,
+        diffPaths: CODE_DIFF,
+        github: first,
+        now: () => 0,
+        sleep: async () => {
+          throw new Error('first reporter must exit without waiting past its budget')
+        },
+        intervalMs: 20_000,
+        maxDurationMs: 0,
+        maxAttempts: 1,
+      })
+    } catch (error) {
+      exited = error
+    }
+    expect(exited).toBeInstanceOf(RequiredContextsTimeoutError)
+    expect((exited as RequiredContextsTimeoutError).missing).toContain('Merge Authority / Lint & Typecheck')
+    expect(first.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toBeUndefined()
+    expect(first.calls.some((call) => call.op === 'dispatch')).toBe(false)
+
+    const reentry = createClient({
+      runs: {
+        'ci.yml': [run(70, CURRENT, 'completed', 'success'), run(999, OLD, 'completed', 'failure')],
+        'secret-scan.yml': [run(71, CURRENT, 'completed', 'success')],
+      },
+      jobs: (id) => {
+        if (id === 71) return secretJobs('completed', 'success')
+        if (id === 999) return allCiJobs('completed', 'failure')
+        return allCiJobs('completed', 'success')
+      },
+    })
+    const published = await republishFrozenHead({
+      frozenHeadSha: CURRENT,
+      requestedHeadSha: CURRENT,
+      diffPaths: CODE_DIFF,
+      github: reentry,
+      now: () => 0,
+      sleep: async () => {
+        throw new Error('late result was already terminal and must not re-execute the job')
+      },
+      intervalMs: 20_000,
+      maxDurationMs: 0,
+      maxAttempts: 1,
+    })
+    expectSixteenTerminal(published.checks, CURRENT)
+    expect(published.checks.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+      head_sha: CURRENT,
+      conclusion: 'success',
+      output: { title: 'PASS' },
+    })
+    expect(reentry.calls.some((call) => call.op === 'listRunJobs' && call.id === 999)).toBe(false)
+    expect(reentry.calls.some((call) => call.op === 'dispatch')).toBe(false)
+    expect(reentry.posted.every((check) => check.head_sha === CURRENT)).toBe(true)
+  })
+
+  it('redteam attack-3: HTTP 502 and 504 on list retry inside the remaining budget', async () => {
+    const clock = fakeClock()
+    const failures = [502, 504]
+    const github = createClient({
+      runs: {
+        'ci.yml': [run(80, CURRENT, 'completed', 'success')],
+        'secret-scan.yml': [run(81, CURRENT, 'completed', 'success')],
+      },
+      jobs: (id) => (id === 81 ? secretJobs('completed', 'success') : allCiJobs('completed', 'success')),
+    })
+    const succeed = github.listWorkflowRuns.bind(github)
+    github.listWorkflowRuns = async (file: string, sha: string) => {
+      const status = failures.shift()
+      if (status) {
+        throw Object.assign(new Error(`listing ${file} runs failed (${status}): gateway`), { status })
+      }
+      return succeed(file, sha)
+    }
+    const result = await republishFrozenHead({
+      frozenHeadSha: CURRENT,
+      diffPaths: ALL_APPLICABLE_DIFF,
+      github,
+      now: clock.now,
+      sleep: clock.sleep,
+      intervalMs: 1_000,
+      maxDurationMs: 10_000,
+      maxAttempts: 5,
+    })
+    expect(clock.sleeps).toEqual([1_000, 1_000])
+    expect(result.attempts).toBe(3)
+    expectSixteenTerminal(result.checks, CURRENT)
+    expect(result.checks.every((check) => check.conclusion === 'success')).toBe(true)
+    expect(github.calls.some((call) => call.op === 'dispatch')).toBe(false)
+
+    const unauthorized = createClient({
+      runs: { 'ci.yml': [], 'secret-scan.yml': [] },
+      jobs: () => [],
+    })
+    unauthorized.listWorkflowRuns = async () => {
+      throw Object.assign(new Error('listing ci.yml runs failed (401): unauthorized'), { status: 401 })
+    }
+    await expect(
+      republishFrozenHead({
+        frozenHeadSha: CURRENT,
+        diffPaths: CODE_DIFF,
+        github: unauthorized,
+        now: () => 0,
+        sleep: async () => {
+          throw new Error('401 must not be retried as a read timeout')
+        },
+        intervalMs: 1_000,
+        maxDurationMs: 60_000,
+        maxAttempts: 3,
+      }),
+    ).rejects.toThrow(/\(401\)/)
+  })
+
+  it('redteam attack-5: cancelling the pull_request publisher leaves a production re-entry for that SHA', async () => {
+    const publisherText = readFileSync(join(ROOT, '.github/workflows/publish-required-checks.yml'), 'utf8')
+    const reentryText = readFileSync(join(ROOT, '.github/workflows/republish-required-checks.yml'), 'utf8')
+    const publisher = parse(publisherText)
+    const reentry = parse(reentryText)
+    expect(publisher.on.pull_request.branches).toContain('main')
+    expect(publisher.on.workflow_run).toBeUndefined()
+    expect(reentry.on.pull_request).toBeUndefined()
+    expect(reentry.on.workflow_run).toBeUndefined()
+    expect(reentry.on.workflow_dispatch).toBeUndefined()
+    expect(reentry.on.schedule).toBeUndefined()
+    expect(reentry.on.pull_request_review.types).toContain('submitted')
+    expect(reentryText).toContain('github.event.pull_request.head.sha')
+    expect(reentryText).toContain('node tooling/ci/merge-authority/publish.mjs republish-frozen-head')
+    expect(reentryText).not.toContain('publish-pull-request')
+    expect(reentryText).not.toContain('workflow_run')
+    expect(reentry.concurrency['cancel-in-progress']).toBe(false)
+    expect(String(reentry.concurrency.group)).toContain('pull_request.head.sha')
+    expect(reentry.jobs['republish-frozen-head']['timeout-minutes']).toBe(360)
+    expect(reentryText).toContain('MA_POLL_TIMEOUT_MS: "21600000"')
+    expect(publisher.jobs['publish-required-checks']['timeout-minutes']).toBe(360)
+
+    await expect(
+      republishFrozenHead({
+        frozenHeadSha: CURRENT,
+        requestedHeadSha: OLD,
+        diffPaths: CODE_DIFF,
+        github: createClient({ runs: {}, jobs: () => [] }),
+        now: () => 0,
+        sleep: async () => {
+          throw new Error('an older head must be refused before any read')
+        },
+        maxDurationMs: 0,
+        maxAttempts: 1,
+      }),
+    ).rejects.toThrow(/refusing to publish checks for/)
+
+    const unknown = createClient({
+      runs: {
+        'ci.yml': [run(90, CURRENT, 'in_progress', null), run(991, OLD, 'completed', 'success')],
+        'secret-scan.yml': [run(91, CURRENT, 'completed', 'success')],
+      },
+      jobs: (id) => {
+        if (id === 991) return allCiJobs('completed', 'success')
+        if (id === 91) return secretJobs('completed', 'success')
+        return allCiJobs('completed', 'success', {
+          'lint-and-typecheck': { status: 'in_progress', conclusion: null },
+        })
+      },
+    })
+    await expect(
+      republishFrozenHead({
+        frozenHeadSha: CURRENT,
+        requestedHeadSha: CURRENT,
+        diffPaths: CODE_DIFF,
+        github: unknown,
+        now: () => 0,
+        sleep: async () => undefined,
+        intervalMs: 0,
+        maxDurationMs: 0,
+        maxAttempts: 1,
+      }),
+    ).rejects.toBeInstanceOf(RequiredContextsTimeoutError)
+    expect(unknown.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toBeUndefined()
+    expect(unknown.posted.some((check) => check.head_sha === OLD)).toBe(false)
+    expect(unknown.calls.some((call) => call.op === 'listRunJobs' && call.id === 991)).toBe(false)
+    expect(unknown.calls.some((call) => call.op === 'dispatch')).toBe(false)
   })
 })

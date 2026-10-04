@@ -298,8 +298,14 @@ async function listWorkflowRuns(workflowFile, headSha) {
 /** Default wait between reconciliations while any required context is not terminal. */
 export const RETRY_INTERVAL_MS_DEFAULT = 20_000
 
-/** Default wall-clock budget for one pull-request reconciliation. */
-export const MAX_DURATION_MS_DEFAULT = 110 * 60 * 1000
+/**
+ * GitHub's authoritative job limit. A shorter reporter budget exits while a
+ * job can still finish, and that result is then never read.
+ */
+export const AUTHORITATIVE_JOB_LIMIT_MS = 360 * 60 * 1000
+
+/** Poll budget covers the authoritative job limit. It does not stop at 110 minutes. */
+export const MAX_DURATION_MS_DEFAULT = AUTHORITATIVE_JOB_LIMIT_MS
 
 /**
  * Named convergence contract. These are behavior flags, not evidence that a
@@ -387,6 +393,40 @@ export class RequiredContextsCancelledError extends Error {
 
 function defaultSleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/** List/read failures that must consume the remaining poll budget instead of aborting it. */
+export function isRetryableReadError(error) {
+  const status = Number(error && error.status)
+  if (status === 502 || status === 504) return true
+  const message = error instanceof Error ? error.message : String(error)
+  return /\((502|504)\)/.test(message)
+}
+
+async function readFrozenHead(github, head, diffPaths) {
+  const classification = classifyChangedPaths(diffPaths)
+  const ciSkipped = classification.ciSkippedByPathsIgnore
+  const needsFastPath =
+    ciSkipped &&
+    CANONICAL_CONTEXTS.some(
+      (context) =>
+        classification.contexts[context.name] === 'REQUIRES_EXECUTION' && FAST_PATH_JOB_NAMES[context.ciJob],
+    )
+  const secretRun = runOwnedByHead(await github.listWorkflowRuns('secret-scan.yml', head), head)
+  const secretJobs = secretRun ? await github.listRunJobs(secretRun.id) : []
+  let ciRun = null
+  let ciJobs = []
+  if (!ciSkipped) {
+    ciRun = runOwnedByHead(await github.listWorkflowRuns('ci.yml', head), head)
+    if (ciRun) ciJobs = await github.listRunJobs(ciRun.id)
+  }
+  let fastRun = null
+  let fastJobs = []
+  if (needsFastPath) {
+    fastRun = runOwnedByHead(await github.listWorkflowRuns('merge-authority.yml', head), head)
+    if (fastRun) fastJobs = await github.listRunJobs(fastRun.id)
+  }
+  return { classification, ciSkipped, secretRun, secretJobs, ciRun, ciJobs, fastRun, fastJobs }
 }
 
 function runOwnedByHead(runs, headSha) {
@@ -480,39 +520,35 @@ export async function convergeRequiredChecks({
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     if (signal?.aborted) throw new RequiredContextsCancelledError(missingNames(), attempt)
-    const classification = classifyChangedPaths(diffPaths)
-    const ciSkipped = classification.ciSkippedByPathsIgnore
-    const needsFastPath =
-      ciSkipped &&
-      CANONICAL_CONTEXTS.some(
-        (context) =>
-          classification.contexts[context.name] === 'REQUIRES_EXECUTION' && FAST_PATH_JOB_NAMES[context.ciJob],
+    let observed = null
+    try {
+      observed = await readFrozenHead(github, head, diffPaths)
+    } catch (error) {
+      if (!isRetryableReadError(error)) throw error
+      process.stderr.write(
+        `retrying list/read after ${error instanceof Error ? error.message : error}; budget remains\n`,
       )
-
-    const secretRun = runOwnedByHead(await github.listWorkflowRuns('secret-scan.yml', head), head)
-    const secretJobs = secretRun ? await github.listRunJobs(secretRun.id) : []
-    let ciRun = null
-    let ciJobs = []
-    if (!ciSkipped) {
-      ciRun = runOwnedByHead(await github.listWorkflowRuns('ci.yml', head), head)
-      if (ciRun) ciJobs = await github.listRunJobs(ciRun.id)
     }
-    let fastRun = null
-    let fastJobs = []
-    if (needsFastPath) {
-      fastRun = runOwnedByHead(await github.listWorkflowRuns('merge-authority.yml', head), head)
-      if (fastRun) fastJobs = await github.listRunJobs(fastRun.id)
-    }
+    const classification = observed ? observed.classification : classifyChangedPaths(diffPaths)
+    const ciSkipped = observed ? observed.ciSkipped : classification.ciSkippedByPathsIgnore
+    const secretRun = observed ? observed.secretRun : null
+    const secretJobs = observed ? observed.secretJobs : []
+    const ciRun = observed ? observed.ciRun : null
+    const ciJobs = observed ? observed.ciJobs : []
+    const fastRun = observed ? observed.fastRun : null
+    const fastJobs = observed ? observed.fastJobs : []
 
     let terminalVerdicts = null
-    if (!ciSkipped && runIsTerminal(ciRun)) {
+    if (observed && !ciSkipped && runIsTerminal(ciRun)) {
       const jobs = ciJobs
       const results = ciResultsFromJobs(jobs)
       terminalVerdicts = evaluateCiResults(results, diffPaths)
     }
 
     const ready = []
-    for (const context of CANONICAL_CONTEXTS) {
+    if (!observed) {
+      // A 502/504 is not evidence. Do not publish from an unread head.
+    } else for (const context of CANONICAL_CONTEXTS) {
       if (posted.has(context.name)) continue
       if (classification.contexts[context.name] === 'NOT_APPLICABLE') {
         ready.push(checkBody(verdictForContext(context, diffPaths, ''), head))
@@ -542,7 +578,7 @@ export async function convergeRequiredChecks({
       ready.push(checkBody(verdictForContext(context, diffPaths, conclusion), head))
     }
 
-    for (const name of SECRET_AUTHORITY_CONTEXTS) {
+    if (observed) for (const name of SECRET_AUTHORITY_CONTEXTS) {
       if (posted.has(name)) continue
       const conclusion = authoritativeConclusion(latestJob(secretJobs, name), secretRun)
       if (conclusion === null) continue
@@ -607,27 +643,46 @@ export async function convergeRequiredChecks({
   throw new RequiredContextsTimeoutError(missingNames(), maxAttempts)
 }
 
-async function publishPullRequest() {
-  const headSha = capturedPublicationHead({
-    sourceEvent: 'pull_request',
-    workflowRunHeadSha: process.env.PR_HEAD_SHA,
-    pullRequestHeadSha: process.env.PR_HEAD_SHA,
+/**
+ * Production re-entry for one frozen head. A cancelled or timed-out
+ * pull_request publisher does not have to stay alive. The same SHA is
+ * reconciled again. A different requested head is refused. Unknown evidence
+ * is not published as success. This does not re-execute jobs.
+ */
+export async function republishFrozenHead(options = {}) {
+  const frozen =
+    options.frozenHeadSha ??
+    capturedPublicationHead({
+      sourceEvent: 'pull_request',
+      workflowRunHeadSha: process.env.PR_HEAD_SHA,
+      pullRequestHeadSha: process.env.PR_HEAD_SHA,
+    })
+  const requested = options.requestedHeadSha ?? (process.env.MA_REQUESTED_HEAD_SHA || frozen)
+  const headSha = publicationTarget(frozen, requested)
+  if (options.diffPaths === undefined && process.env.MA_CHANGED_PATHS === undefined) {
+    throw new Error('MA_CHANGED_PATHS is required to republish a frozen head')
+  }
+  const diffPaths = options.diffPaths ?? diffPathsFromEnv()
+  const intervalMs = options.intervalMs ?? retryIntervalMs()
+  const durationMs = options.maxDurationMs ?? maxDurationMs()
+  return convergeRequiredChecks({
+    headSha,
+    diffPaths,
+    github: options.github ?? { listWorkflowRuns, listRunJobs },
+    now: options.now,
+    sleep: options.sleep,
+    signal: options.signal,
+    intervalMs,
+    maxDurationMs: durationMs,
+    maxAttempts: options.maxAttempts ?? maxReconciliationAttempts(intervalMs, durationMs),
   })
+}
+
+async function publishPullRequest() {
   if (process.env.MA_CHANGED_PATHS === undefined) {
     throw new Error('MA_CHANGED_PATHS is required to publish pull request results')
   }
-  const diffPaths = diffPathsFromEnv()
-  await convergeRequiredChecks({
-    headSha,
-    diffPaths,
-    github: {
-      listWorkflowRuns,
-      listRunJobs,
-    },
-    intervalMs: retryIntervalMs(),
-    maxDurationMs: maxDurationMs(),
-    maxAttempts: maxReconciliationAttempts(),
-  })
+  await republishFrozenHead()
 }
 
 async function publishSecretChecks(results, headSha) {
@@ -734,9 +789,11 @@ if (invokedDirectly()) {
     await publishWorkflowRun()
   } else if (command === 'publish-pull-request') {
     await publishPullRequest()
+  } else if (command === 'republish-frozen-head') {
+    await republishFrozenHead()
   } else {
     process.stderr.write(
-      'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request\n',
+      'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request | republish-frozen-head\n',
     )
     process.exit(1)
   }

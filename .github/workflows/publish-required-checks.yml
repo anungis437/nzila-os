@@ -5,8 +5,10 @@ name: Publish required checks
 # cancel those in-progress runs without cancelling publication for this head.
 # It waits until the CI and Secret Scan runs whose head_sha is this frozen
 # head have completed or been cancelled, then posts that head's required checks.
-# It does not read the pull request's current head and does not re-run the
-# expensive jobs.
+# The poll budget is the authoritative job limit (360 minutes). A later
+# pull_request_review runs Republish frozen required checks for the same SHA
+# if this process exits or is cancelled. It does not read the pull request's
+# live head and does not re-run the expensive jobs.
 on:
   pull_request:
     branches: [main]
@@ -24,7 +26,7 @@ jobs:
   publish-required-checks:
     name: Publish required checks
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v5
         with:
@@ -41,7 +43,7 @@ jobs:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           MA_POLL_INTERVAL_MS: "20000"
-          MA_POLL_TIMEOUT_MS: "6600000"
+          MA_POLL_TIMEOUT_MS: "21600000"
         run: |
           set -euo pipefail
           git fetch --no-tags origin "$PR_BASE_SHA" "$PR_HEAD_SHA"
