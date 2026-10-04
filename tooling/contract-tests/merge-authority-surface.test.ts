@@ -1639,10 +1639,9 @@ globalThis.fetch = async (url, init) => {
     expect(ciRun.result.status, ciRun.result.stderr).toBe(0)
     expect(ciRun.posted).toHaveLength(16)
     expect(ciRun.posted.every((check: { head_sha: string }) => check.head_sha === oldHead)).toBe(true)
-    expect(ciRun.posted.map((check: { name: string }) => check.name)).toEqual([
-      ...CANONICAL_CONTEXTS.map((context) => context.name),
-      ...SECRET_AUTHORITY_CONTEXTS,
-    ])
+    expect(new Set(ciRun.posted.map((check: { name: string }) => check.name))).toEqual(
+      new Set([...CANONICAL_CONTEXTS.map((context) => context.name), ...SECRET_AUTHORITY_CONTEXTS]),
+    )
     expect(ciRun.posted.find((check: { name: string }) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
       conclusion: 'failure',
       output: { title: 'UNRESOLVED' },
@@ -1696,8 +1695,17 @@ globalThis.fetch = async (url, init) => {
       { ciJobs: cancelledCi, secretJobs },
     )
     expect(docsOnly.result.status, docsOnly.result.stderr).toBe(0)
-    expect(docsOnly.posted.map((check: { name: string }) => check.name)).toEqual(SECRET_AUTHORITY_CONTEXTS)
+    expect(docsOnly.posted).toHaveLength(16)
+    expect(new Set(docsOnly.posted.map((check: { name: string }) => check.name))).toEqual(new Set(REQUIRED_CHECK_NAMES))
     expect(docsOnly.posted.every((check: { head_sha: string }) => check.head_sha === oldHead)).toBe(true)
+    expect(
+      docsOnly.posted
+        .filter((check: { name: string }) => check.name.startsWith('Merge Authority /'))
+        .every(
+          (check: { conclusion: string; output: { title: string } }) =>
+            check.conclusion === 'success' && check.output.title === 'NOT_APPLICABLE',
+        ),
+    ).toBe(true)
   })
 
   it('retries the first 504 and still posts every required name', () => {
@@ -1728,7 +1736,8 @@ globalThis.fetch = async (url, init) => {
 
     const latest = new Map<string, { name: string; head_sha: string; conclusion: string; output: { title: string; summary: string } }>()
     for (const check of retried.posted) latest.set(check.name, check)
-    expect([...latest.keys()]).toEqual([...REQUIRED_CHECK_NAMES])
+    expect(latest.size).toBe(16)
+    expect(new Set(latest.keys())).toEqual(new Set(REQUIRED_CHECK_NAMES))
     expect([...latest.values()].every((check) => check.head_sha === oldHead)).toBe(true)
     expect(latest.get('Merge Authority / Lint & Typecheck')).toMatchObject({
       conclusion: 'failure',
@@ -1761,7 +1770,8 @@ globalThis.fetch = async (url, init) => {
     expect(exhausted.result.status, exhausted.result.stderr).toBe(0)
     const afterFailure = new Map<string, { name: string; head_sha: string; conclusion: string; output: { title: string; summary: string } }>()
     for (const check of exhausted.posted) afterFailure.set(check.name, check)
-    expect([...afterFailure.keys()]).toEqual([...REQUIRED_CHECK_NAMES])
+    expect(afterFailure.size).toBe(16)
+    expect(new Set(afterFailure.keys())).toEqual(new Set(REQUIRED_CHECK_NAMES))
     expect([...afterFailure.values()].every((check) => check.head_sha === oldHead)).toBe(true)
     expect(afterFailure.get('Merge Authority / Ops Documentation')).toMatchObject({
       conclusion: 'failure',

@@ -7,14 +7,20 @@
  * publish-ci-results    reads MA_RESULT_* job results from the environment.
  *   MA_CHANGED_PATHS, when set, is the current diff. The reporter recomputes
  *   applicability from it and does not rewrite proven NOT_APPLICABLE contexts.
- * publish-pull-request  waits for the CI and Secret Scan runs of the frozen
- *   pull-request head, then posts that head's required checks.
+ * publish-pull-request  reconciles the frozen pull-request head until all 16
+ *   required contexts are terminal or the bounded budget fails closed.
+ *   NOT_APPLICABLE is posted immediately. REQUIRES_EXECUTION waits for that
+ *   context's authoritative job and does not re-execute it. A result for a
+ *   different head cannot satisfy this head. A later invocation can finish
+ *   the same head if this process is cancelled.
  * publish-workflow-run  reads one completed CI or Secret Scan run's jobs.
  *   It posts only to the frozen head and does not re-run those jobs.
  */
 import { readFileSync } from 'node:fs'
+import { pathToFileURL } from 'node:url'
 import {
   CANONICAL_CONTEXTS,
+  SECRET_AUTHORITY_CONTEXTS,
   classifyChangedPaths,
   planFastPath,
   evaluateCiResults,
@@ -23,6 +29,7 @@ import {
   verdictToCheckRun,
 } from './surface.mjs'
 import {
+  CI_AUTHORITY_JOBS,
   capturedPublicationHead,
   ciResultsFromJobs,
   publicationTarget,
@@ -288,36 +295,316 @@ async function listWorkflowRuns(workflowFile, headSha) {
   return runs
 }
 
-function pollIntervalMs() {
-  const value = Number(process.env.MA_POLL_INTERVAL_MS ?? 20000)
-  if (!Number.isFinite(value) || value < 0) return 20000
-  return value
+/** Default wait between reconciliations while any required context is not terminal. */
+export const RETRY_INTERVAL_MS_DEFAULT = 20_000
+
+/** Default wall-clock budget for one pull-request reconciliation. */
+export const MAX_DURATION_MS_DEFAULT = 110 * 60 * 1000
+
+/**
+ * Named convergence contract. These are behavior flags, not evidence that a
+ * live pull request has already converged.
+ */
+export const CONVERGENCE_FLAGS = Object.freeze({
+  RETRY_UNTIL_ALL_16_POSTED: 'YES',
+  ALL_16_CONTEXTS_TERMINAL: 'YES',
+  CURRENT_HEAD_ONLY: 'YES',
+  OLD_HEAD_CAN_OVERRIDE_NEW_HEAD: 'NO',
+  BOUNDED_TIMEOUT: 'YES',
+})
+
+/**
+ * Fast-path jobs Merge Authority runs when CI paths-ignore skips ci.yml.
+ * The publisher only reads them. It does not re-execute them.
+ */
+const FAST_PATH_JOB_NAMES = {
+  'governance-integrity': 'Governance integrity when CI is skipped',
+  'repository-inventory': 'Repository inventory when CI is skipped',
+  'iac-scan': 'IaC security when CI is skipped',
+  'ops-pack-validation': 'Ops documentation when CI is skipped',
 }
 
-function pollTimeoutMs() {
-  const value = Number(process.env.MA_POLL_TIMEOUT_MS ?? 110 * 60 * 1000)
-  if (!Number.isFinite(value) || value <= 0) return 110 * 60 * 1000
-  return value
+const ATTEMPT_CAP = 10_000
+
+export function requiredContextNames() {
+  return [...CANONICAL_CONTEXTS.map((context) => context.name), ...SECRET_AUTHORITY_CONTEXTS]
 }
 
-async function waitForHeadRuns(headSha, diffPaths) {
-  const ciSkipped = classifyChangedPaths(diffPaths).ciSkippedByPathsIgnore
-  const deadline = Date.now() + pollTimeoutMs()
-  const interval = pollIntervalMs()
-  while (true) {
-    const secretRun = selectRunForHead(await listWorkflowRuns('secret-scan.yml', headSha), headSha)
-    const ciRun = ciSkipped ? null : selectRunForHead(await listWorkflowRuns('ci.yml', headSha), headSha)
-    const secretReady = runIsTerminal(secretRun)
-    const ciReady = ciSkipped || runIsTerminal(ciRun)
-    process.stdout.write(
-      `waiting head=${headSha} ci=${ciSkipped ? 'skipped-by-paths' : ciRun ? `${ciRun.status}/${ciRun.conclusion ?? 'pending'}` : 'missing'} secret=${secretRun ? `${secretRun.status}/${secretRun.conclusion ?? 'pending'}` : 'missing'}\n`,
-    )
-    if (ciReady && secretReady) return { ciSkipped, ciRun, secretRun }
-    if (Date.now() >= deadline) {
-      throw new Error(`timed out waiting for CI and Secret Scan runs for ${headSha}`)
-    }
-    if (interval > 0) await new Promise((resolve) => setTimeout(resolve, interval))
+export function retryIntervalMs(value = process.env.MA_POLL_INTERVAL_MS) {
+  if (value == null || value === '') return RETRY_INTERVAL_MS_DEFAULT
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed) || parsed < 0) return RETRY_INTERVAL_MS_DEFAULT
+  return parsed
+}
+
+export function maxDurationMs(value = process.env.MA_POLL_TIMEOUT_MS) {
+  if (value == null || value === '') return MAX_DURATION_MS_DEFAULT
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed) || parsed < 0) return MAX_DURATION_MS_DEFAULT
+  return parsed
+}
+
+/**
+ * Finite reconciliation attempts. An explicit MA_POLL_MAX_ATTEMPTS wins.
+ * Otherwise the budget is one attempt plus one per full retry interval that
+ * fits in the maximum duration. A zero interval cannot create an unnamed loop:
+ * it is still capped by the duration expressed in milliseconds, then by
+ * ATTEMPT_CAP.
+ */
+export function maxReconciliationAttempts(
+  interval = retryIntervalMs(),
+  duration = maxDurationMs(),
+  explicit = process.env.MA_POLL_MAX_ATTEMPTS,
+) {
+  const parsed = Number(explicit)
+  if (explicit != null && explicit !== '' && Number.isFinite(parsed) && parsed >= 1) {
+    return Math.min(Math.floor(parsed), ATTEMPT_CAP)
   }
+  const step = interval > 0 ? interval : 1
+  const span = Number.isFinite(duration) && duration >= 0 ? duration : MAX_DURATION_MS_DEFAULT
+  return Math.min(ATTEMPT_CAP, Math.floor(span / step) + 1)
+}
+
+export class RequiredContextsTimeoutError extends Error {
+  constructor(missing, attempt) {
+    const names = [...missing]
+    super(`timed out waiting for required contexts: ${names.join(', ')}`)
+    this.name = 'RequiredContextsTimeoutError'
+    this.missing = names
+    this.attempt = attempt
+  }
+}
+
+export class RequiredContextsCancelledError extends Error {
+  constructor(missing, attempt) {
+    const names = [...missing]
+    super(`required check publication cancelled; still absent: ${names.join(', ')}`)
+    this.name = 'RequiredContextsCancelledError'
+    this.missing = names
+    this.attempt = attempt
+  }
+}
+
+function defaultSleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function runOwnedByHead(runs, headSha) {
+  const selected = selectRunForHead(runs, headSha)
+  if (!selected || selected.head_sha !== headSha) return null
+  return selected
+}
+
+function latestJob(jobs, name) {
+  const matches = (Array.isArray(jobs) ? jobs : []).filter((job) => job && job.name === name)
+  return matches.length === 0 ? null : matches[matches.length - 1]
+}
+
+/**
+ * Authoritative means the job itself completed with success or failure, or
+ * the owning workflow run for this head is already terminal. A conclusion
+ * copied from a different head, or from a job that has not completed, is not
+ * authoritative. null means keep waiting.
+ */
+function authoritativeConclusion(job, run) {
+  if (job && job.status === 'completed' && (job.conclusion === 'success' || job.conclusion === 'failure')) {
+    return job.conclusion
+  }
+  if (runIsTerminal(run)) {
+    if (!job || job.conclusion == null || job.conclusion === '') return ''
+    return String(job.conclusion)
+  }
+  return null
+}
+
+function verdictForContext(context, diffPaths, conclusion) {
+  const results = { [context.ciJob]: conclusion }
+  const verdict = evaluateCiResults(results, diffPaths).find((item) => item.name === context.name)
+  if (!verdict) throw new Error(`missing authority context ${context.name}`)
+  if (verdict.applicability === 'REQUIRES_EXECUTION' && verdict.conclusion === 'success' && verdict.evidence !== 'PASS') {
+    throw new Error(`unexecuted context cannot be success: ${context.name}`)
+  }
+  return verdict
+}
+
+function checkBody(verdict, headSha) {
+  const body = verdictToCheckRun(verdict, headSha)
+  if (body.head_sha !== headSha) {
+    throw new Error(`refusing to publish ${body.name} for ${body.head_sha}; this run owns ${headSha}`)
+  }
+  return body
+}
+
+async function postNamedCheck(body, github) {
+  if (github && typeof github.createCheckRun === 'function') {
+    await github.createCheckRun(body)
+    return true
+  }
+  return publishBody(body)
+}
+
+/**
+ * Reconcile the frozen head until all 16 required contexts are terminal, or
+ * fail closed. NOT_APPLICABLE is posted on the first attempt. REQUIRES_EXECUTION
+ * waits for that context's authoritative job and does not dispatch a new run.
+ * Each call is independent: a cancelled process does not have to stay alive
+ * for a later call, with the same head and the same job evidence, to finish.
+ */
+export async function convergeRequiredChecks({
+  headSha,
+  diffPaths,
+  github,
+  now = () => Date.now(),
+  sleep = defaultSleep,
+  signal,
+  intervalMs = retryIntervalMs(),
+  maxDurationMs: durationMs = maxDurationMs(),
+  maxAttempts = maxReconciliationAttempts(intervalMs, durationMs),
+}) {
+  const head = publicationTarget(headSha, headSha)
+  if (!Array.isArray(diffPaths)) throw new Error('diff paths must be an array when provided')
+  if (!github || typeof github.listWorkflowRuns !== 'function' || typeof github.listRunJobs !== 'function') {
+    throw new Error('a github client is required to reconcile required checks')
+  }
+  const names = requiredContextNames()
+  if (names.length !== 16 || new Set(names).size !== 16) {
+    throw new Error(`expected 16 required contexts, got ${names.length}`)
+  }
+  const started = now()
+  const posted = new Map()
+  let sleeps = 0
+
+  function missingNames() {
+    return names.filter((name) => !posted.has(name))
+  }
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    if (signal?.aborted) throw new RequiredContextsCancelledError(missingNames(), attempt)
+    const classification = classifyChangedPaths(diffPaths)
+    const ciSkipped = classification.ciSkippedByPathsIgnore
+    const needsFastPath =
+      ciSkipped &&
+      CANONICAL_CONTEXTS.some(
+        (context) =>
+          classification.contexts[context.name] === 'REQUIRES_EXECUTION' && FAST_PATH_JOB_NAMES[context.ciJob],
+      )
+
+    const secretRun = runOwnedByHead(await github.listWorkflowRuns('secret-scan.yml', head), head)
+    const secretJobs = secretRun ? await github.listRunJobs(secretRun.id) : []
+    let ciRun = null
+    let ciJobs = []
+    if (!ciSkipped) {
+      ciRun = runOwnedByHead(await github.listWorkflowRuns('ci.yml', head), head)
+      if (ciRun) ciJobs = await github.listRunJobs(ciRun.id)
+    }
+    let fastRun = null
+    let fastJobs = []
+    if (needsFastPath) {
+      fastRun = runOwnedByHead(await github.listWorkflowRuns('merge-authority.yml', head), head)
+      if (fastRun) fastJobs = await github.listRunJobs(fastRun.id)
+    }
+
+    let terminalVerdicts = null
+    if (!ciSkipped && runIsTerminal(ciRun)) {
+      const jobs = ciJobs
+      const results = ciResultsFromJobs(jobs)
+      terminalVerdicts = evaluateCiResults(results, diffPaths)
+    }
+
+    const ready = []
+    for (const context of CANONICAL_CONTEXTS) {
+      if (posted.has(context.name)) continue
+      if (classification.contexts[context.name] === 'NOT_APPLICABLE') {
+        ready.push(checkBody(verdictForContext(context, diffPaths, ''), head))
+        continue
+      }
+      if (terminalVerdicts) {
+        const verdict = terminalVerdicts.find((item) => item.name === context.name)
+        if (!verdict) throw new Error(`missing authority context ${context.name}`)
+        ready.push(checkBody(verdict, head))
+        continue
+      }
+      if (ciSkipped) {
+        const fastName = FAST_PATH_JOB_NAMES[context.ciJob]
+        if (!fastName) {
+          ready.push(checkBody(verdictForContext(context, diffPaths, ''), head))
+          continue
+        }
+        const conclusion = authoritativeConclusion(latestJob(fastJobs, fastName), fastRun)
+        if (conclusion === null) continue
+        ready.push(checkBody(verdictForContext(context, diffPaths, conclusion), head))
+        continue
+      }
+      const jobName = CI_AUTHORITY_JOBS.find((job) => job.id === context.ciJob)?.name
+      if (!jobName) throw new Error(`missing authority job for ${context.name}`)
+      const conclusion = authoritativeConclusion(latestJob(ciJobs, jobName), ciRun)
+      if (conclusion === null) continue
+      ready.push(checkBody(verdictForContext(context, diffPaths, conclusion), head))
+    }
+
+    for (const name of SECRET_AUTHORITY_CONTEXTS) {
+      if (posted.has(name)) continue
+      const conclusion = authoritativeConclusion(latestJob(secretJobs, name), secretRun)
+      if (conclusion === null) continue
+      const publication = secretCheckPublications({ [name]: conclusion === '' ? 'missing' : conclusion }).find(
+        (item) => item.name === name,
+      )
+      if (!publication) throw new Error(`missing secret publication ${name}`)
+      if (publication.conclusion === 'success' && publication.evidence !== 'PASS') {
+        throw new Error(`unexecuted secret context cannot be success: ${name}`)
+      }
+      ready.push({
+        name: publication.name,
+        head_sha: head,
+        status: publication.status,
+        conclusion: publication.conclusion,
+        output: publication.output,
+      })
+    }
+
+    for (const body of ready) {
+      if (posted.has(body.name)) continue
+      if (body.head_sha !== head) {
+        throw new Error(`refusing to publish ${body.name} for ${body.head_sha}; this run owns ${head}`)
+      }
+      try {
+        if (await postNamedCheck(body, github)) posted.set(body.name, body)
+      } catch (error) {
+        process.stderr.write(`${error instanceof Error ? error.message : error}\n`)
+      }
+    }
+
+    process.stdout.write(
+      `reconcile head=${head} attempt=${attempt}/${maxAttempts} posted=${posted.size}/16 missing=${missingNames().join(', ') || 'none'}\n`,
+    )
+
+    if (posted.size === names.length) {
+      const checks = names.map((name) => posted.get(name))
+      if (
+        checks.some(
+          (check) =>
+            check.head_sha !== head ||
+            check.status !== 'completed' ||
+            (check.conclusion !== 'success' && check.conclusion !== 'failure'),
+        )
+      ) {
+        throw new Error('required contexts were posted without a terminal conclusion')
+      }
+      return { attempts: attempt, sleeps, checks, headSha: head }
+    }
+
+    const missing = missingNames()
+    const elapsed = now() - started
+    if (signal?.aborted) throw new RequiredContextsCancelledError(missing, attempt)
+    if (attempt >= maxAttempts || elapsed >= durationMs) {
+      throw new RequiredContextsTimeoutError(missing, attempt)
+    }
+    await sleep(intervalMs)
+    sleeps += 1
+    if (signal?.aborted) throw new RequiredContextsCancelledError(missingNames(), attempt)
+  }
+
+  throw new RequiredContextsTimeoutError(missingNames(), maxAttempts)
 }
 
 async function publishPullRequest() {
@@ -330,33 +617,17 @@ async function publishPullRequest() {
     throw new Error('MA_CHANGED_PATHS is required to publish pull request results')
   }
   const diffPaths = diffPathsFromEnv()
-  const { ciSkipped, ciRun, secretRun } = await waitForHeadRuns(headSha, diffPaths)
-  const missing = []
-  if (!ciSkipped) {
-    const jobs = await listRunJobs(ciRun.id)
-    const verdicts = evaluateCiResults(ciResultsFromJobs(jobs), diffPaths)
-    if (verdicts.length !== CANONICAL_CONTEXTS.length) {
-      throw new Error(`expected ${CANONICAL_CONTEXTS.length} authority contexts, got ${verdicts.length}`)
-    }
-    missing.push(...(await publishCheckRuns(verdicts, headSha)))
-  }
-  const secretJobs = await listRunJobs(secretRun.id)
-  const publications = secretCheckPublications(secretResultsFromJobs(secretJobs))
-  if (publications.length !== 3) throw new Error(`expected 3 secret checks, got ${publications.length}`)
-  for (const publication of publications) {
-    if (publication.conclusion === 'success' && publication.evidence !== 'PASS') {
-      throw new Error(`unexecuted secret context cannot be success: ${publication.name}`)
-    }
-    const posted = await publishBody({
-      name: publication.name,
-      head_sha: headSha,
-      status: publication.status,
-      conclusion: publication.conclusion,
-      output: publication.output,
-    })
-    if (!posted) missing.push(publication.name)
-  }
-  if (missing.length > 0) throw new Error(`required checks still absent: ${missing.join(', ')}`)
+  await convergeRequiredChecks({
+    headSha,
+    diffPaths,
+    github: {
+      listWorkflowRuns,
+      listRunJobs,
+    },
+    intervalMs: retryIntervalMs(),
+    maxDurationMs: maxDurationMs(),
+    maxAttempts: maxReconciliationAttempts(),
+  })
 }
 
 async function publishSecretChecks(results, headSha) {
@@ -439,22 +710,34 @@ function classifyOutputs() {
   )
 }
 
-const command = process.argv[2]
-if (command === 'classify-and-publish') {
-  await classifyAndPublish()
-} else if (command === 'classify-outputs') {
-  classifyOutputs()
-} else if (command === 'publish-ci-results') {
-  await publishCiResults()
-} else if (command === 'publish-secret-terminals') {
-  await publishSecretTerminals()
-} else if (command === 'publish-workflow-run') {
-  await publishWorkflowRun()
-} else if (command === 'publish-pull-request') {
-  await publishPullRequest()
-} else {
-  process.stderr.write(
-    'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request\n',
-  )
-  process.exit(1)
+function invokedDirectly() {
+  const entry = process.argv[1]
+  if (!entry) return false
+  try {
+    return import.meta.url === pathToFileURL(entry).href
+  } catch {
+    return false
+  }
+}
+
+if (invokedDirectly()) {
+  const command = process.argv[2]
+  if (command === 'classify-and-publish') {
+    await classifyAndPublish()
+  } else if (command === 'classify-outputs') {
+    classifyOutputs()
+  } else if (command === 'publish-ci-results') {
+    await publishCiResults()
+  } else if (command === 'publish-secret-terminals') {
+    await publishSecretTerminals()
+  } else if (command === 'publish-workflow-run') {
+    await publishWorkflowRun()
+  } else if (command === 'publish-pull-request') {
+    await publishPullRequest()
+  } else {
+    process.stderr.write(
+      'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request\n',
+    )
+    process.exit(1)
+  }
 }
