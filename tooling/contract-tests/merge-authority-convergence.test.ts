@@ -3,7 +3,9 @@
  * required contexts, or the reporter fails closed. Deterministic clock and
  * injected GitHub client. No live GitHub, Docker, or workflow run.
  */
-import { readFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { parse } from 'yaml'
@@ -662,4 +664,250 @@ describe('phase 2 required-context convergence', () => {
     expect(unknown.calls.some((call) => call.op === 'listRunJobs' && call.id === 991)).toBe(false)
     expect(unknown.calls.some((call) => call.op === 'dispatch')).toBe(false)
   })
+
+  function completionJob(file: string, id: string) {
+    const text = readFileSync(join(ROOT, '.github/workflows', file), 'utf8')
+    const doc = parse(text)
+    const job = doc.jobs[id]
+    expect(job, `${file}#${id}`).toBeTruthy()
+    const steps = (job.steps ?? [])
+      .map((step: { run?: string; uses?: string }) => `${step.run ?? ''}\n${step.uses ?? ''}`)
+      .join('\n')
+    return { text, doc, job, steps }
+  }
+
+  function runReconcileCommand(
+    command: string,
+    env: Record<string, string>,
+    handler: string,
+  ) {
+    const dir = mkdtempSync(join(tmpdir(), 'reconcile-run-'))
+    const postedPath = join(dir, 'posted.json')
+    const preload = join(dir, 'preload.mjs')
+    writeFileSync(
+      preload,
+      `import { writeFileSync } from 'node:fs'
+const posted = []
+globalThis.fetch = async (url, init) => {
+  const target = String(url)
+  ${handler}
+  if (target.includes('/check-runs')) {
+    const body = JSON.parse(init.body)
+    posted.push(body)
+    writeFileSync(${JSON.stringify(postedPath)}, JSON.stringify(posted))
+    return new Response('{}', { status: 201 })
+  }
+  throw new Error('unexpected url ' + target)
+}
+`,
+    )
+    const result = spawnSync(process.execPath, ['--import', preload, join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), command], {
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        GITHUB_REPOSITORY: 'anungis437/nzila-os',
+        GITHUB_TOKEN: 'test-token',
+        MA_CHECK_RETRY_BASE_MS: '0',
+        ...env,
+      },
+    })
+    let posted: Array<{ name: string; head_sha: string; conclusion: string; output: { title: string } }> = []
+    try {
+      posted = JSON.parse(readFileSync(postedPath, 'utf8'))
+    } catch {
+      posted = []
+    }
+    return { result, posted }
+  }
+
+  it('redteam re-entry: cancelling the pull_request publisher still leaves CI and Secret Scan completion jobs', () => {
+    const publisher = readFileSync(join(ROOT, '.github/workflows/publish-required-checks.yml'), 'utf8')
+    expect(publisher).not.toContain('reconcile-this-run')
+    expect(publisher).not.toContain('reconcile-frozen-head')
+    const ci = completionJob('ci.yml', 'reconcile-frozen-head')
+    const secret = completionJob('secret-scan.yml', 'reconcile-frozen-head')
+    for (const found of [ci, secret]) {
+      expect(found.job.if).toBe('always()')
+      expect(found.job.concurrency).toBeUndefined()
+      expect(found.steps).toContain('node tooling/ci/merge-authority/publish.mjs reconcile-this-run')
+      expect(found.steps).not.toContain('publish-pull-request')
+      expect(found.steps).not.toContain('republish-frozen-head')
+      expect(found.steps).not.toContain('pnpm test')
+      expect(found.steps).not.toContain('inventory:generate')
+      expect(found.steps).not.toContain('contract-tests')
+      expect(found.steps).not.toContain('gitleaks')
+      expect(found.steps).not.toContain('trufflehog')
+      expect(found.steps).not.toContain('audit-secrets')
+      expect(found.steps).not.toContain('setup-monorepo')
+      expect(found.text).not.toContain('workflow_run')
+      expect(found.job.permissions).toMatchObject({ contents: 'read', checks: 'write', actions: 'read' })
+      const publishStep = found.job.steps.find((step: { run?: string }) => (step.run ?? '').includes('reconcile-this-run'))
+      expect(publishStep.if).toBe("github.event_name == 'pull_request'")
+      expect(publishStep.env.PR_HEAD_SHA).toBe('${{ github.event.pull_request.head.sha }}')
+      expect(publishStep.env.SOURCE_HEAD_SHA).toBe('${{ github.event.pull_request.head.sha }}')
+      expect(publishStep.env.SOURCE_RUN_ID).toBe('${{ github.run_id }}')
+      expect(publishStep.env.SOURCE_EVENT).toBe('${{ github.event_name }}')
+    }
+    expect(new Set(ci.job.needs)).toEqual(new Set(Object.keys(ci.doc.jobs).filter((id: string) => id !== 'reconcile-frozen-head')))
+    expect(new Set(secret.job.needs)).toEqual(
+      new Set(Object.keys(secret.doc.jobs).filter((id: string) => id !== 'reconcile-frozen-head')),
+    )
+    expect(ci.job.steps.find((step: { env?: { SOURCE_WORKFLOW_NAME?: string } }) => step.env?.SOURCE_WORKFLOW_NAME).env.SOURCE_WORKFLOW_NAME).toBe('CI')
+    expect(secret.job.steps.find((step: { env?: { SOURCE_WORKFLOW_NAME?: string } }) => step.env?.SOURCE_WORKFLOW_NAME).env.SOURCE_WORKFLOW_NAME).toBe('Secret Scan')
+    expect(ci.job.name).toBe('Reconcile CI frozen head')
+    expect(secret.job.name).toBe('Reconcile Secret Scan frozen head')
+  })
+
+  it('redteam re-entry: completion job publishes a late terminal result for the frozen run SHA', () => {
+    const ci = completionJob('ci.yml', 'reconcile-frozen-head')
+    const secret = completionJob('secret-scan.yml', 'reconcile-frozen-head')
+    const ciCommand = ci.job.steps
+      .map((step: { run?: string }) => step.run ?? '')
+      .join('\n')
+      .split('\n')
+      .map((line: string) => line.trim())
+      .find((line: string) => line.includes('reconcile-this-run'))
+    const secretCommand = secret.job.steps
+      .map((step: { run?: string }) => step.run ?? '')
+      .join('\n')
+      .split('\n')
+      .map((line: string) => line.trim())
+      .find((line: string) => line.includes('reconcile-this-run'))
+    expect(ciCommand).toBe('node tooling/ci/merge-authority/publish.mjs reconcile-this-run')
+    expect(secretCommand).toBe('node tooling/ci/merge-authority/publish.mjs reconcile-this-run')
+    const command = ciCommand.split(/\s+/).pop()
+    expect(command).toBe('reconcile-this-run')
+
+    const ciJobs = CI_AUTHORITY_JOBS.map((job) => ({ name: job.name, status: 'completed', conclusion: 'success' }))
+    const late = runReconcileCommand(
+      command,
+      {
+        GITHUB_EVENT_NAME: 'pull_request',
+        SOURCE_EVENT: 'pull_request',
+        PR_HEAD_SHA: CURRENT,
+        SOURCE_HEAD_SHA: CURRENT,
+        SOURCE_RUN_ID: '4242',
+        SOURCE_WORKFLOW_NAME: 'CI',
+        MA_CHANGED_PATHS: CODE_DIFF.join('\n'),
+      },
+      `if (target.includes('/jobs')) {
+    return new Response(JSON.stringify({ jobs: ${JSON.stringify(ciJobs)} }), { status: 200, headers: { 'content-type': 'application/json' } })
+  }
+  if (target.includes('/actions/runs/4242')) {
+    return new Response(JSON.stringify({ id: 4242, head_sha: ${JSON.stringify(CURRENT)}, event: 'pull_request' }), { status: 200, headers: { 'content-type': 'application/json' } })
+  }`,
+    )
+    expect(late.result.status, late.result.stderr).toBe(0)
+    expect(late.posted).toHaveLength(13)
+    expect(late.posted.every((check) => check.head_sha === CURRENT)).toBe(true)
+    expect(late.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'PASS' },
+    })
+    expect(late.result.stdout ?? '').not.toMatch(/pnpm test|inventory:generate|gitleaks|trufflehog/)
+
+    const unknownJobs = CI_AUTHORITY_JOBS.map((job) => ({
+      name: job.name,
+      status: 'completed',
+      conclusion: job.id === 'lint-and-typecheck' ? 'cancelled' : 'success',
+    }))
+    const unknown = runReconcileCommand(
+      command,
+      {
+        GITHUB_EVENT_NAME: 'pull_request',
+        SOURCE_EVENT: 'pull_request',
+        PR_HEAD_SHA: CURRENT,
+        SOURCE_HEAD_SHA: CURRENT,
+        SOURCE_RUN_ID: '4242',
+        SOURCE_WORKFLOW_NAME: 'CI',
+        MA_CHANGED_PATHS: CODE_DIFF.join('\n'),
+      },
+      `if (target.includes('/jobs')) {
+    return new Response(JSON.stringify({ jobs: ${JSON.stringify(unknownJobs)} }), { status: 200, headers: { 'content-type': 'application/json' } })
+  }
+  if (target.includes('/actions/runs/4242')) {
+    return new Response(JSON.stringify({ id: 4242, head_sha: ${JSON.stringify(CURRENT)}, event: 'pull_request' }), { status: 200, headers: { 'content-type': 'application/json' } })
+  }`,
+    )
+    expect(unknown.result.status, unknown.result.stderr).toBe(0)
+    expect(unknown.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+      head_sha: CURRENT,
+      conclusion: 'failure',
+    })
+    expect(unknown.posted.find((check) => check.name === 'Merge Authority / Lint & Typecheck')?.output.title).not.toBe('PASS')
+
+    const refused = runReconcileCommand(
+      command,
+      {
+        GITHUB_EVENT_NAME: 'pull_request',
+        SOURCE_EVENT: 'pull_request',
+        PR_HEAD_SHA: CURRENT,
+        SOURCE_HEAD_SHA: CURRENT,
+        MA_REQUESTED_HEAD_SHA: OLD,
+        SOURCE_RUN_ID: '4242',
+        SOURCE_WORKFLOW_NAME: 'CI',
+        MA_CHANGED_PATHS: CODE_DIFF.join('\n'),
+      },
+      `if (target.includes('/jobs') || target.includes('/actions/runs/')) {
+    throw new Error('refused head must not be read')
+  }`,
+    )
+    expect(refused.result.status).not.toBe(0)
+    expect(refused.result.stderr).toMatch(/refusing to publish checks for/)
+    expect(refused.posted).toEqual([])
+
+    const ownedByOldRun = runReconcileCommand(
+      secretCommand.split(/\s+/).pop() ?? '',
+      {
+        GITHUB_EVENT_NAME: 'pull_request',
+        SOURCE_EVENT: 'pull_request',
+        PR_HEAD_SHA: CURRENT,
+        SOURCE_HEAD_SHA: CURRENT,
+        SOURCE_RUN_ID: '5252',
+        SOURCE_WORKFLOW_NAME: 'Secret Scan',
+      },
+      `if (target.includes('/jobs')) {
+    return new Response(JSON.stringify({ jobs: [
+      { name: 'Gitleaks', status: 'completed', conclusion: 'success' },
+      { name: 'TruffleHog OSS', status: 'completed', conclusion: 'cancelled' },
+      { name: 'Docker Secret Policy', status: 'completed', conclusion: 'success' },
+    ] }), { status: 200, headers: { 'content-type': 'application/json' } })
+  }
+  if (target.includes('/actions/runs/5252')) {
+    return new Response(JSON.stringify({ id: 5252, head_sha: ${JSON.stringify(OLD)}, event: 'pull_request' }), { status: 200, headers: { 'content-type': 'application/json' } })
+  }`,
+    )
+    expect(ownedByOldRun.result.status).not.toBe(0)
+    expect(ownedByOldRun.result.stderr).toMatch(/this run owns/)
+    expect(ownedByOldRun.posted).toEqual([])
+
+    const secrets = runReconcileCommand(
+      secretCommand.split(/\s+/).pop() ?? '',
+      {
+        GITHUB_EVENT_NAME: 'pull_request',
+        SOURCE_EVENT: 'pull_request',
+        PR_HEAD_SHA: CURRENT,
+        SOURCE_HEAD_SHA: CURRENT,
+        SOURCE_RUN_ID: '5252',
+        SOURCE_WORKFLOW_NAME: 'Secret Scan',
+      },
+      `if (target.includes('/jobs')) {
+    return new Response(JSON.stringify({ jobs: [
+      { name: 'Gitleaks', status: 'completed', conclusion: 'success' },
+      { name: 'TruffleHog OSS', status: 'completed', conclusion: 'cancelled' },
+      { name: 'Docker Secret Policy', status: 'completed', conclusion: 'failure' },
+    ] }), { status: 200, headers: { 'content-type': 'application/json' } })
+  }
+  if (target.includes('/actions/runs/5252')) {
+    return new Response(JSON.stringify({ id: 5252, head_sha: ${JSON.stringify(CURRENT)}, event: 'pull_request' }), { status: 200, headers: { 'content-type': 'application/json' } })
+  }`,
+    )
+    expect(secrets.result.status, secrets.result.stderr).toBe(0)
+    expect(secrets.posted.map((check) => check.name).sort()).toEqual([...SECRET_AUTHORITY_CONTEXTS].sort())
+    expect(secrets.posted.every((check) => check.head_sha === CURRENT)).toBe(true)
+    expect(secrets.posted.find((check) => check.name === 'TruffleHog OSS')).toMatchObject({ conclusion: 'failure' })
+    expect(secrets.posted.find((check) => check.name === 'Gitleaks')?.conclusion).toBe('success')
+    expect(secrets.posted.find((check) => check.name === 'TruffleHog OSS')?.conclusion).not.toBe('success')
+  })
+
 })

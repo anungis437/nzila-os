@@ -26,8 +26,8 @@ permissions:
 env:
   TURBO_TELEMETRY_DISABLED: 1
 
-# A newer pull-request commit cancels this in-progress run. Required-check
-# publication is publish-required-checks.yml, which is not part of this run.
+# A newer pull-request commit cancels this in-progress run. The final job
+# reconciles this run's frozen head once. It does not re-execute the jobs.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -791,3 +791,65 @@ jobs:
         run: pnpm exec tsx scripts/validate-workspace-links.ts
       - name: Control manifest validation
         run: pnpm exec tsx tooling/governance/validate-control-manifests.ts
+
+  # One-shot re-entry for this run's frozen head. It runs when CI finishes or
+  # is cancelled only if this job itself still runs. It reads this run's jobs
+  # and does not re-execute them. Cancelling Publish required checks does not
+  # cancel this job.
+  reconcile-frozen-head:
+    name: Reconcile CI frozen head
+    needs:
+      - lint-and-typecheck
+      - test
+      - sage-live-postgres
+      - sage-postgres-concurrency
+      - build
+      - iac-scan
+      - iac-sarif-reporting
+      - governance-gates
+      - ml-gates
+      - ai-eval-gate
+      - contract-tests
+      - operating-layer-gate
+      - ops-pack-validation
+      - schema-drift
+      - red-team
+      - hash-chain-drift
+      - enterprise-hardening
+      - perf-regression
+      - repository-inventory
+      - governance-integrity
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+        if: github.event_name == 'pull_request'
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        if: github.event_name == 'pull_request'
+        with:
+          node-version: 22
+      - name: Publish this run's frozen head once
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
+          SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SOURCE_EVENT: ${{ github.event_name }}
+          SOURCE_WORKFLOW_NAME: CI
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$PR_BASE_SHA" "$PR_HEAD_SHA"
+          MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
+          export MA_CHANGED_PATHS
+          node tooling/ci/merge-authority/publish.mjs reconcile-this-run

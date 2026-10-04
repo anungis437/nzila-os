@@ -765,6 +765,81 @@ function classifyOutputs() {
   )
 }
 
+
+async function getWorkflowRun(runId) {
+  const { repository } = githubAuth()
+  if (!runId) throw new Error('workflow run id is required')
+  const response = await githubFetch(`https://api.github.com/repos/${repository}/actions/runs/${runId}`)
+  if (!response.ok) {
+    const detail = await response.text()
+    const error = new Error(`reading run ${runId} failed (${response.status}): ${detail.slice(0, 500)}`)
+    error.status = response.status
+    throw error
+  }
+  return response.json()
+}
+
+async function withReadRetries(read) {
+  const limit = checkAttemptLimit()
+  let lastError
+  for (let attempt = 1; attempt <= limit; attempt += 1) {
+    try {
+      return await read()
+    } catch (error) {
+      lastError = error
+      if (!isRetryableReadError(error) || attempt === limit) throw error
+      const delay = checkRetryDelayMs(attempt)
+      process.stderr.write(
+        `retrying list/read after ${error instanceof Error ? error.message : error} attempt ${attempt}/${limit}\n`,
+      )
+      if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay))
+    }
+  }
+  throw lastError
+}
+
+/**
+ * One-shot reconcile for the workflow run that just finished. Publishes only
+ * that run's frozen head. Does not poll for a later head and does not
+ * re-execute jobs. A different head is refused. Unknown evidence is not success.
+ */
+async function reconcileThisRun() {
+  const eventName = process.env.GITHUB_EVENT_NAME || process.env.SOURCE_EVENT
+  if (eventName !== 'pull_request') {
+    process.stdout.write('one-shot reconcile skipped: not a pull_request run\n')
+    return
+  }
+  const headSha = capturedPublicationHead({
+    sourceEvent: 'pull_request',
+    workflowRunHeadSha: process.env.SOURCE_HEAD_SHA || process.env.PR_HEAD_SHA,
+    pullRequestHeadSha: process.env.PR_HEAD_SHA,
+  })
+  const requested = process.env.MA_REQUESTED_HEAD_SHA
+  if (requested != null && requested !== '' && requested !== headSha) {
+    publicationTarget(headSha, requested)
+  }
+  const runId = process.env.SOURCE_RUN_ID
+  if (!runId) throw new Error('workflow run id is required')
+  const workflowName = process.env.SOURCE_WORKFLOW_NAME
+  const run = await withReadRetries(() => getWorkflowRun(runId))
+  if (!run || run.head_sha !== headSha) {
+    throw new Error(`refusing to publish checks for ${headSha}; this run owns ${run && run.head_sha ? run.head_sha : 'unknown'}`)
+  }
+  const jobs = await withReadRetries(() => listRunJobs(runId))
+  if (workflowName === 'CI') {
+    if (process.env.MA_CHANGED_PATHS === undefined) {
+      throw new Error('MA_CHANGED_PATHS is required to reconcile a pull request run')
+    }
+    await publishVerdicts(evaluateCiResults(ciResultsFromJobs(jobs), diffPathsFromEnv()), headSha)
+    return
+  }
+  if (workflowName === 'Secret Scan') {
+    await publishSecretChecks(secretResultsFromJobs(jobs), headSha)
+    return
+  }
+  throw new Error(`unexpected workflow ${workflowName || 'missing'}`)
+}
+
 function invokedDirectly() {
   const entry = process.argv[1]
   if (!entry) return false
@@ -791,9 +866,11 @@ if (invokedDirectly()) {
     await publishPullRequest()
   } else if (command === 'republish-frozen-head') {
     await republishFrozenHead()
+  } else if (command === 'reconcile-this-run') {
+    await reconcileThisRun()
   } else {
     process.stderr.write(
-      'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request | republish-frozen-head\n',
+      'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals | publish-workflow-run | publish-pull-request | republish-frozen-head | reconcile-this-run\n',
     )
     process.exit(1)
   }
