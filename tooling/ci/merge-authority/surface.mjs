@@ -56,7 +56,7 @@ export const CANONICAL_CONTEXTS = [
     ciJob: 'contract-tests',
     family: 'contracts',
     evidence:
-      'Standalone CI job Contract Tests (Architectural Invariants) runs pnpm contract-tests. The copy inside Governance Gates is not this authority source.',
+      'Standalone CI job Contract Tests (Architectural Invariants) is the only pnpm contract-tests execution on the CI workflow. Governance Gates reports that job and does not execute the suite.',
   },
   {
     name: 'Merge Authority / Repository Inventory',
@@ -116,16 +116,10 @@ export const CONDITIONAL_AUTHORITY_RESIDUAL = ACCEPTABLE_AUTHORITY_RESIDUAL
 
 /**
  * Must stay identical to pull_request.paths-ignore in .github/workflows/ci.yml.
- * The contract test fails if the workflow list drifts.
+ * Phase 4 does not skip the CI workflow. Job-level classifier outputs decide
+ * which authoritative jobs run. An empty list means ciWillSkip is false.
  */
-export const CI_PATHS_IGNORE = [
-  '**/*.md',
-  'docs/**',
-  '.github/CODEOWNERS',
-  '.gitignore',
-  '.editorconfig',
-  'LICENSE',
-]
+export const CI_PATHS_IGNORE = []
 
 const EXACT_DOCUMENTATION_PATHS = new Set([
   'LICENSE',
@@ -180,17 +174,12 @@ export function normalizeRepoPath(input) {
 export function matchesCiPathsIgnore(input) {
   const path = normalizeRepoPath(input)
   if (!path) return false
-  if (
-    path === '.github/CODEOWNERS' ||
-    path === '.gitignore' ||
-    path === '.editorconfig' ||
-    path === 'LICENSE'
-  ) {
-    return true
-  }
-  if (path === 'docs' || path.startsWith('docs/')) return true
-  if (path.endsWith('.md')) return true
-  return false
+  if (CI_PATHS_IGNORE.length === 0) return false
+  return CI_PATHS_IGNORE.some((pattern) => {
+    if (pattern.endsWith('/**')) return path === pattern.slice(0, -3) || path.startsWith(pattern.slice(0, -2))
+    if (pattern.startsWith('**/')) return path.endsWith(pattern.slice(2))
+    return path === pattern
+  })
 }
 
 export function ciWillSkip(paths) {
@@ -417,11 +406,78 @@ export function classifyChangedPaths(paths) {
   return {
     classification,
     contexts,
+    signals: classifierSignals(list),
     secretSafety: 'APPLICABLE',
     ciSkippedByPathsIgnore: ciWillSkip(Array.isArray(paths) ? paths : []),
     acceptableAuthorityResidual: ACCEPTABLE_AUTHORITY_RESIDUAL,
     conditionalAuthorityResidual: CONDITIONAL_AUTHORITY_RESIDUAL,
   }
+}
+
+/**
+ * One applicability truth for a frozen head. SECURITY is always APPLICABLE:
+ * secret scanners are not waived. That is the written exception to per-path
+ * skipping. Other signals use the same family predicates as the 13 contexts.
+ */
+export function classifierSignals(paths) {
+  const list = Array.isArray(paths) ? paths : []
+  const known = list.map((path) => knownPath(path))
+  const any = (predicate) => known.length === 0 || known.some((path) => path == null || predicate(path))
+  const docs = known.some((path) => path != null && (isDocumentationOnlyPath(path) || path.startsWith('docs/') || path.endsWith('.md')))
+  return {
+    PRODUCT_CODE: any(requiresEngineering) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    TESTS: any(requiresEngineering) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    INVENTORY: any(requiresInventory) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    ARCHITECTURE: any(requiresContracts) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    OPS_DOCS: any(requiresOps) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    DOCS: docs ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    GOVERNANCE: any(requiresGovernance) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    WORKFLOWS: any((path) => path.startsWith('.github/workflows/') || path.startsWith('.github/actions/'))
+      ? 'APPLICABLE'
+      : 'NOT_APPLICABLE',
+    INFRA: any(requiresIac) ? 'APPLICABLE' : 'NOT_APPLICABLE',
+    SECURITY: 'APPLICABLE',
+  }
+}
+
+const CONTEXT_SIGNAL = {
+  engineering: 'PRODUCT_CODE',
+  governance: 'GOVERNANCE',
+  inventory: 'INVENTORY',
+  contracts: 'ARCHITECTURE',
+  'hash-chain': 'PRODUCT_CODE',
+  'operating-layer': 'PRODUCT_CODE',
+  iac: 'INFRA',
+  'ops-pack': 'OPS_DOCS',
+}
+
+/** Machine-readable ownership for the 16 required contexts. */
+export function requiredContextContract() {
+  const ci = CANONICAL_CONTEXTS.map((context) => ({
+    CONTEXT_NAME: context.name,
+    APPLICABILITY_SIGNAL: context.family === 'engineering' && context.ciJob === 'test' ? 'TESTS' : CONTEXT_SIGNAL[context.family],
+    AUTHORITATIVE_OWNER: `ci.yml#${context.ciJob}`,
+    EXECUTION_WORKFLOW: '.github/workflows/ci.yml',
+    REPORTER: 'ci.yml#reconcile-frozen-head',
+    DEPENDENCY: `needs: [classify, ${context.ciJob}]`,
+    NA_BEHAVIOR: 'skip the owner job and post completed success NOT_APPLICABLE',
+    FAILURE_BEHAVIOR: 'post completed failure; unknown, missing, and cancelled stay non-success',
+  }))
+  const secrets = [
+    ['Gitleaks', 'secret-scan.yml#gitleaks'],
+    ['TruffleHog OSS', 'secret-scan.yml#trufflehog'],
+    ['Docker Secret Policy', 'secret-scan.yml#docker-secret-policy'],
+  ].map(([name, owner]) => ({
+    CONTEXT_NAME: name,
+    APPLICABILITY_SIGNAL: 'SECURITY',
+    AUTHORITATIVE_OWNER: owner,
+    EXECUTION_WORKFLOW: '.github/workflows/secret-scan.yml',
+    REPORTER: 'secret-scan.yml#reconcile-frozen-head',
+    DEPENDENCY: 'needs: owner job; SECURITY is always APPLICABLE',
+    NA_BEHAVIOR: 'not used; SECURITY is never NOT_APPLICABLE',
+    FAILURE_BEHAVIOR: 'post completed failure; unknown, missing, and cancelled stay non-success',
+  }))
+  return [...ci, ...secrets]
 }
 
 /**
@@ -461,9 +517,32 @@ function verdictFor(context, fields) {
   }
 }
 
-export function evaluateCiResults(results) {
+/**
+ * Publish CI job results.
+ *
+ * `diffPaths` is the current changed-path evidence. When it is an array,
+ * applicability is recomputed from that diff. A context the current diff
+ * proves irrelevant stays NOT_APPLICABLE with conclusion success, including
+ * when the source job failed or was skipped. A diff that makes the context
+ * applicable uses the source-job result. Omitting the diff does not invent
+ * NOT_APPLICABLE: unknown, missing, cancelled, and skipped evidence stay
+ * non-success unless the job actually passed.
+ */
+export function evaluateCiResults(results, diffPaths) {
+  if (diffPaths !== undefined && !Array.isArray(diffPaths)) {
+    throw new Error('diff paths must be an array when provided')
+  }
   const source = results && typeof results === 'object' ? results : {}
+  const classification = Array.isArray(diffPaths) ? classifyChangedPaths(diffPaths) : null
   return CANONICAL_CONTEXTS.map((context) => {
+    if (classification && classification.contexts[context.name] === 'NOT_APPLICABLE') {
+      return verdictFor(context, {
+        classifier: 'PROVEN_IRRELEVANT',
+        applicability: 'NOT_APPLICABLE',
+        evidence: 'NOT_APPLICABLE',
+        detail: `${context.evidence} Secret safety remains APPLICABLE (${SECRET_AUTHORITY_CONTEXTS.join(', ')}).`,
+      })
+    }
     const evidence = unresolvedEvidence(source[context.ciJob])
     return verdictFor(context, {
       classifier: 'CODE_OR_UNKNOWN',
@@ -527,9 +606,35 @@ export function planFastPath(paths) {
   }
   const anyRequired = Object.values(classification.contexts).some((value) => value === 'REQUIRES_EXECUTION')
   if (anyRequired && !classification.ciSkippedByPathsIgnore) {
-    return { action: 'DEFER_TO_CI', verdicts: [], classification }
+    // CI will publish REQUIRES_EXECUTION contexts. Proven NOT_APPLICABLE
+    // contexts are already terminal and must be posted before returning.
+    return {
+      action: 'DEFER_TO_CI',
+      verdicts: verdicts.filter((verdict) => verdict.evidence === 'NOT_APPLICABLE'),
+      classification,
+    }
   }
   return { action: 'PUBLISH', verdicts, classification }
+}
+
+/**
+ * Checks classify-and-publish posts on DEFER_TO_CI.
+ * Only proven NOT_APPLICABLE verdicts. REQUIRES_EXECUTION stays with the CI reporter.
+ */
+export function deferPublications(plan) {
+  if (!plan || plan.action !== 'DEFER_TO_CI') return []
+  const verdicts = Array.isArray(plan.verdicts) ? plan.verdicts : []
+  for (const verdict of verdicts) {
+    if (
+      verdict.evidence !== 'NOT_APPLICABLE' ||
+      verdict.applicability !== 'NOT_APPLICABLE' ||
+      verdict.classifier !== 'PROVEN_IRRELEVANT' ||
+      verdict.conclusion !== 'success'
+    ) {
+      throw new Error(`DEFER_TO_CI cannot publish ${verdict.name || 'an unknown context'}`)
+    }
+  }
+  return verdicts
 }
 
 export function verdictToCheckRun(verdict, headSha) {

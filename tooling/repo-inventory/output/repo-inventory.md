@@ -9,9 +9,9 @@
 | Apps | 28 |
 | Packages (packages/*) | 224 |
 | Workspace Packages (apps|packages|services|tooling) | 258 |
-| GitHub Workflows | 56 |
-| Contract Test Files | 290 |
-| TS/JS Test Files | 2691 |
+| GitHub Workflows | 58 |
+| Contract Test Files | 291 |
+| TS/JS Test Files | 2692 |
 | Python Test Files | 35 |
 
 ## Apps
@@ -90,12 +90,14 @@
 - platform-automation.yml
 - portfolio-governance.yml
 - preview-deploy.yml
+- publish-required-checks.yml
 - reality-anti-theatre.yml
 - red-team.yml
 - release-governance.yml
 - release-train.yml
 - reliability-guard.yml
 - repo-inventory-check.yml
+- republish-required-checks.yml
 - retire-legacy-union-eyes-ca.yml
 - runtime-governance-attestation.yml
 - sbom.yml

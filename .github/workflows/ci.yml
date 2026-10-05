@@ -3,22 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "**/*.md"
-      - "docs/**"
-      - ".github/CODEOWNERS"
-      - ".gitignore"
-      - ".editorconfig"
-      - "LICENSE"
   pull_request:
     branches: [main]
-    paths-ignore:
-      - "**/*.md"
-      - "docs/**"
-      - ".github/CODEOWNERS"
-      - ".gitignore"
-      - ".editorconfig"
-      - "LICENSE"
 
 permissions:
   contents: read
@@ -26,11 +12,63 @@ permissions:
 env:
   TURBO_TELEMETRY_DISABLED: 1
 
+# A newer pull-request commit cancels this in-progress run. The final job
+# reconciles this run's frozen head once. It does not re-execute the jobs.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+  classify:
+    name: Classify pull request
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      product_code: ${{ steps.plan.outputs.product_code }}
+      tests: ${{ steps.plan.outputs.tests }}
+      inventory: ${{ steps.plan.outputs.inventory }}
+      architecture: ${{ steps.plan.outputs.architecture }}
+      ops_docs: ${{ steps.plan.outputs.ops_docs }}
+      docs: ${{ steps.plan.outputs.docs }}
+      governance: ${{ steps.plan.outputs.governance }}
+      workflows: ${{ steps.plan.outputs.workflows }}
+      infra: ${{ steps.plan.outputs.infra }}
+      security: ${{ steps.plan.outputs.security }}
+      lint_and_typecheck: ${{ steps.plan.outputs.lint_and_typecheck }}
+      test: ${{ steps.plan.outputs.test }}
+      schema_drift: ${{ steps.plan.outputs.schema_drift }}
+      sage_postgres_concurrency: ${{ steps.plan.outputs.sage_postgres_concurrency }}
+      sage_live_postgres: ${{ steps.plan.outputs.sage_live_postgres }}
+      build: ${{ steps.plan.outputs.build }}
+      contract_tests: ${{ steps.plan.outputs.contract_tests }}
+      repository_inventory: ${{ steps.plan.outputs.repository_inventory }}
+      governance_integrity: ${{ steps.plan.outputs.governance_integrity }}
+      hash_chain_drift: ${{ steps.plan.outputs.hash_chain_drift }}
+      operating_layer_gate: ${{ steps.plan.outputs.operating_layer_gate }}
+      iac_scan: ${{ steps.plan.outputs.iac_scan }}
+      ops_pack_validation: ${{ steps.plan.outputs.ops_pack_validation }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Classify changed paths once
+        id: plan
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags origin "${{ github.event.pull_request.base.sha }}"
+            files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")"
+          else
+            files="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" || true)"
+          fi
+          printf '%s\n' "$files" | node tooling/ci/merge-authority/publish.mjs classify-outputs >> "$GITHUB_OUTPUT"
+
   lint-and-typecheck:
+    needs: [classify]
+    if: needs.classify.outputs.lint_and_typecheck == 'APPLICABLE'
     runs-on: ubuntu-latest
     name: Lint & Typecheck
     steps:
@@ -53,6 +91,8 @@ jobs:
           TYPECHECK_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
 
   test:
+    needs: [classify]
+    if: needs.classify.outputs.test == 'APPLICABLE'
     runs-on: ubuntu-latest
     name: Unit Tests
     services:
@@ -124,6 +164,8 @@ jobs:
           overwrite: true
 
   sage-live-postgres:
+    needs: [classify]
+    if: needs.classify.outputs.sage_live_postgres == 'APPLICABLE'
     runs-on: ubuntu-latest
     name: SAGE Live PostgreSQL (records lifecycle)
     steps:
@@ -145,6 +187,8 @@ jobs:
         run: pnpm --filter @nzila/sage-core exec vitest run src/records-live-postgres.test.ts
 
   sage-postgres-concurrency:
+    needs: [classify]
+    if: needs.classify.outputs.sage_postgres_concurrency == 'APPLICABLE'
     runs-on: ubuntu-latest
     name: SAGE PostgreSQL Concurrency and RLS
     services:
@@ -175,12 +219,13 @@ jobs:
           SAGE_PG_TEST_URL: postgresql://sage_test:sage_test@localhost:5432/sage_test
 
   build:
+    needs: [classify, lint-and-typecheck]
+    if: needs.classify.outputs.build == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success')
     runs-on: ubuntu-latest
     name: Build All
     # `test` intentionally omitted: build is compilation, tests are runtime — they are
     # independent and can execute in parallel. Unit tests remain an independent CI gate,
     # and downstream jobs declare their own dependencies explicitly.
-    needs: [lint-and-typecheck]
     steps:
       - uses: actions/checkout@v5
         with:
@@ -279,9 +324,10 @@ jobs:
   # Checkov-only merge authority. SARIF publication is the separate
   # iac-sarif-reporting job and is not a feeder for this result.
   iac-scan:
+    needs: [classify, lint-and-typecheck]
+    if: needs.classify.outputs.iac_scan == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped')
     runs-on: ubuntu-latest
     name: IaC Security Validation
-    needs: [lint-and-typecheck]
     permissions:
       contents: read
     steps:
@@ -334,13 +380,18 @@ jobs:
         run: node tooling/ci/merge-authority/sarif-reporting.mjs
 
   governance-gates:
+    needs: [classify, lint-and-typecheck, test, contract-tests, repository-inventory]
+    if: needs.classify.outputs.governance == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success' && needs.test.result == 'success' && !cancelled())
     runs-on: ubuntu-latest
     name: Governance Gates
     permissions:
       contents: read
       issues: read
       pull-requests: read
-    needs: [lint-and-typecheck, test]
+    # Runs after the authoritative contract and inventory jobs so this job can
+    # report their results. It does not execute those suites. Cancellation of
+    # this job is not a new publication path; reconcile-frozen-head still
+    # publishes the CI run.
     steps:
       - uses: actions/checkout@v5
         with:
@@ -362,9 +413,6 @@ jobs:
 
       - name: Start governance runtime timer
         run: echo "GOVERNANCE_JOB_START_TS=$(date +%s)" >> "$GITHUB_ENV"
-
-      - name: Contract tests
-        run: pnpm contract-tests
 
       - name: Tier 1 maturity gate
         run: |
@@ -454,20 +502,6 @@ jobs:
       - name: Workspace dependency integrity
         run: pnpm exec tsx scripts/validate-workspace-links.ts
 
-      - name: Regenerate inventory
-        run: pnpm inventory:generate
-
-      - name: Enforce committed inventory lock
-        run: |
-          DIFF=$(git diff -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md)
-          SUBSTANTIVE=$(echo "$DIFF" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | grep -Ev '"generatedAt"|Auto-generated on' || true)
-          if [ -n "$SUBSTANTIVE" ]; then
-            echo "Substantive inventory drift detected:"
-            echo "$DIFF"
-            exit 1
-          fi
-          echo "Inventory check passed (date-stamp differences ignored)"
-
       - name: Control manifest validation
         run: pnpm exec tsx tooling/governance/validate-control-manifests.ts
 
@@ -485,6 +519,17 @@ jobs:
         env:
           GOVERNANCE_JOB_START_TS: "${{ env.GOVERNANCE_JOB_START_TS }}"
           GOVERNANCE_MAX_RUNTIME_MINUTES: "${{ vars.GOVERNANCE_MAX_RUNTIME_MINUTES || '55' }}"
+
+      - name: Report authoritative contract and inventory results
+        if: always()
+        run: |
+          set -euo pipefail
+          echo "Architectural contract suite owner: CI job contract-tests. This step does not execute that suite."
+          echo "Inventory lock owner: CI job repository-inventory. This step does not regenerate inventory."
+          echo "contract-tests result: ${{ needs.contract-tests.result }}"
+          echo "repository-inventory result: ${{ needs.repository-inventory.result }}"
+          case "${{ needs.contract-tests.result }}" in failure|cancelled) exit 1 ;; esac
+          case "${{ needs.repository-inventory.result }}" in failure|cancelled) exit 1 ;; esac
 
       - name: Upload governance gate report
         if: always()
@@ -504,6 +549,8 @@ jobs:
           retention-days: 90
 
   ml-gates:
+    needs: [classify]
+    if: needs.classify.outputs.product_code == 'APPLICABLE'
     runs-on: ubuntu-latest
     name: ML Tooling Gates
     steps:
@@ -560,9 +607,10 @@ jobs:
 
   # ─── AI Eval Gate (mandatory — no "if report exists" skip) ─────────────────
   ai-eval-gate:
+    needs: [classify, lint-and-typecheck]
+    if: needs.classify.outputs.product_code == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped')
     runs-on: ubuntu-latest
     name: AI Eval Gate
-    needs: [lint-and-typecheck]
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
@@ -583,9 +631,10 @@ jobs:
 
   # ─── Architectural Invariants & Contract Tests ────────────────────────────
   contract-tests:
+    needs: [classify, lint-and-typecheck]
+    if: needs.classify.outputs.contract_tests == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped')
     runs-on: ubuntu-latest
     name: Contract Tests (Architectural Invariants)
-    needs: [lint-and-typecheck]
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
@@ -594,9 +643,10 @@ jobs:
         run: pnpm contract-tests
 
   operating-layer-gate:
+    needs: [classify, lint-and-typecheck]
+    if: needs.classify.outputs.operating_layer_gate == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped')
     runs-on: ubuntu-latest
     name: Operating Layer Gate
-    needs: [lint-and-typecheck]
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
@@ -606,6 +656,8 @@ jobs:
 
   # ─── Ops Pack Validation ──────────────────────────────────────────────────
   ops-pack-validation:
+    needs: [classify]
+    if: needs.classify.outputs.ops_pack_validation == 'APPLICABLE'
     runs-on: ubuntu-latest
     name: Ops Documentation Pack
     steps:
@@ -617,6 +669,8 @@ jobs:
 
   # ─── Schema Drift Detection ───────────────────────────────────────────────
   schema-drift:
+    needs: [classify]
+    if: needs.classify.outputs.schema_drift == 'APPLICABLE'
     runs-on: ubuntu-latest
     name: Schema Drift Detection
     steps:
@@ -637,9 +691,10 @@ jobs:
 
   # ─── Red-Team Adversarial Tests ───────────────────────────────────────────
   red-team:
+    needs: [classify, lint-and-typecheck]
+    if: needs.classify.outputs.product_code == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success')
     runs-on: ubuntu-latest
     name: Red-Team Adversarial
-    needs: [lint-and-typecheck]
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
@@ -649,9 +704,10 @@ jobs:
 
   # ─── Hash Chain Drift Detection ───────────────────────────────────────────
   hash-chain-drift:
+    needs: [classify, lint-and-typecheck]
+    if: needs.classify.outputs.hash_chain_drift == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped')
     runs-on: ubuntu-latest
     name: Hash Chain Drift
-    needs: [lint-and-typecheck]
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
@@ -664,9 +720,10 @@ jobs:
 
   # ─── Enterprise Hardening Gate ────────────────────────────────────────────
   enterprise-hardening:
+    needs: [classify, lint-and-typecheck, test, contract-tests]
+    if: needs.classify.outputs.product_code == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success' && needs.test.result == 'success' && needs.contract-tests.result == 'success')
     runs-on: ubuntu-latest
     name: Enterprise Hardening Gate
-    needs: [lint-and-typecheck, test, contract-tests]
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
@@ -710,10 +767,10 @@ jobs:
 
   # ─── Performance Regression Gate ──────────────────────────────────────────
   perf-regression:
+    needs: [classify, build]
+    if: needs.classify.outputs.product_code == 'APPLICABLE' && (github.event_name == 'pull_request' && needs.build.result == 'success')
     runs-on: ubuntu-latest
     name: Performance Regression Gate
-    needs: [build]
-    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v5
 
@@ -743,9 +800,11 @@ jobs:
           path: tests/load/
           retention-days: 30
 
-  # Inventory lock only. The same steps remain inside Governance Gates.
-  # This job is the authority source and does not collect DORA, cost, or release evidence.
+  # Inventory lock owner. Governance Gates reports this job's result and does not regenerate inventory.
+  # This job does not collect DORA, cost, or release evidence.
   repository-inventory:
+    needs: [classify]
+    if: needs.classify.outputs.repository_inventory == 'APPLICABLE'
     name: Repository Inventory
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -770,6 +829,8 @@ jobs:
   # Merge-critical source-tree validators extracted from Governance Gates.
   # DORA, cost, onboarding, scorecards, release proof, and runtime evidence stay out.
   governance-integrity:
+    needs: [classify]
+    if: needs.classify.outputs.governance_integrity == 'APPLICABLE'
     name: Governance Integrity
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -793,52 +854,100 @@ jobs:
       - name: Control manifest validation
         run: pnpm exec tsx tooling/governance/validate-control-manifests.ts
 
-  # Canonical merge-authority contexts. This job reports; it is not itself a
-  # required context. It does not run on docs-only PRs because CI paths-ignore
-  # skips the workflow. The Merge Authority workflow covers that case.
-  report-merge-authority:
-    name: Report merge authority
+  # One-shot re-entry for this run's frozen head. It runs when CI finishes or
+  # is cancelled only if this job itself still runs. It reads this run's jobs
+  # and does not re-execute them. Cancelling Publish required checks does not
+  # cancel this job.
+
+  report-contract-owner:
+    name: Report CI contract owner
+    needs: [classify, contract-tests]
+    if: always() && needs.classify.result == 'success' && !cancelled()
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    steps:
+      - name: Waited for CI job contract-tests
+        run: |
+          set -euo pipefail
+          echo "Owner CI job contract-tests result: ${{ needs.contract-tests.result }}"
+          if [ "${{ needs.classify.outputs.contract_tests }}" != "APPLICABLE" ]; then
+            echo "NOT_APPLICABLE success"
+            exit 0
+          fi
+          test "${{ needs.contract-tests.result }}" = "success"
+
+  report-inventory-owner:
+    name: Report CI inventory owner
+    needs: [classify, repository-inventory]
+    if: always() && needs.classify.result == 'success' && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Waited for CI job repository-inventory
+        run: |
+          set -euo pipefail
+          echo "Owner CI job repository-inventory result: ${{ needs.repository-inventory.result }}"
+          if [ "${{ needs.classify.outputs.repository_inventory }}" != "APPLICABLE" ]; then
+            echo "NOT_APPLICABLE success"
+            exit 0
+          fi
+          test "${{ needs.repository-inventory.result }}" = "success"
+
+  reconcile-frozen-head:
+    name: Reconcile CI frozen head
     needs:
       - lint-and-typecheck
       - test
-      - schema-drift
-      - sage-postgres-concurrency
       - sage-live-postgres
+      - sage-postgres-concurrency
       - build
+      - iac-scan
+      - iac-sarif-reporting
+      - governance-gates
+      - ml-gates
+      - ai-eval-gate
       - contract-tests
+      - operating-layer-gate
+      - ops-pack-validation
+      - schema-drift
+      - red-team
+      - hash-chain-drift
+      - enterprise-hardening
+      - perf-regression
       - repository-inventory
       - governance-integrity
-      - hash-chain-drift
-      - operating-layer-gate
-      - iac-scan
-      - ops-pack-validation
-    if: always() && !cancelled()
+      - classify
+      - report-contract-owner
+      - report-inventory-owner
+    if: always()
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       checks: write
+      actions: read
     steps:
       - uses: actions/checkout@v5
+        if: github.event_name == 'pull_request'
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
+        if: github.event_name == 'pull_request'
         with:
           node-version: 22
-      - name: Publish canonical merge-authority checks
+      - name: Publish this run's frozen head once
+        if: github.event_name == 'pull_request'
         env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          MA_RESULT_LINT: ${{ needs.lint-and-typecheck.result }}
-          MA_RESULT_UNIT: ${{ needs.test.result }}
-          MA_RESULT_SCHEMA: ${{ needs.schema-drift.result }}
-          MA_RESULT_RLS: ${{ needs.sage-postgres-concurrency.result }}
-          MA_RESULT_MIGRATION: ${{ needs.sage-live-postgres.result }}
-          MA_RESULT_BUILD: ${{ needs.build.result }}
-          MA_RESULT_CONTRACTS: ${{ needs.contract-tests.result }}
-          MA_RESULT_INVENTORY: ${{ needs.repository-inventory.result }}
-          MA_RESULT_GOVERNANCE: ${{ needs.governance-integrity.result }}
-          MA_RESULT_HASH: ${{ needs.hash-chain-drift.result }}
-          MA_RESULT_OPERATING: ${{ needs.operating-layer-gate.result }}
-          MA_RESULT_IAC: ${{ needs.iac-scan.result }}
-          MA_RESULT_OPS: ${{ needs.ops-pack-validation.result }}
-        run: node tooling/ci/merge-authority/publish.mjs publish-ci-results
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
+          SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SOURCE_EVENT: ${{ github.event_name }}
+          SOURCE_WORKFLOW_NAME: CI
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$PR_BASE_SHA" "$PR_HEAD_SHA"
+          MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
+          export MA_CHANGED_PATHS
+          node tooling/ci/merge-authority/publish.mjs reconcile-this-run

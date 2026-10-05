@@ -46,29 +46,6 @@ env:
 # concurrency block here would inherit the caller's ${{ github.workflow }}
 # and can cancel the caller mid-run (see GitHub docs on reusable workflows).
 jobs:
-  # ── Secret Scanning ──────────────────────────────────────────────────────
-  secret-scan:
-    runs-on: ubuntu-latest
-    name: Secret Scan (Gitleaks + TruffleHog)
-    permissions:
-      contents: read
-      pull-requests: read
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Gitleaks
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-
-      - name: TruffleHog OSS
-        uses: trufflesecurity/trufflehog@v3.97.5 # pin to release tag, not mutable @main
-        with:
-          extra_args: --only-verified
-
   # ── Dependency Audit ─────────────────────────────────────────────────────
   dependency-audit:
     runs-on: ubuntu-latest
@@ -161,16 +138,14 @@ jobs:
           path: sbom.json
           retention-days: 365
 
-  # ── Contract Tests ───────────────────────────────────────────────────────
-  contract-tests:
+  # Decision, NAR, and policy tests.
+# Not the architectural contract suite.
+  decision-suite:
     runs-on: ubuntu-latest
-    name: Contract Tests
+    name: Decision and policy tests
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
-
-      - name: Run contract tests
-        run: pnpm contract-tests
 
       - name: Enforce strict decision coverage
         run: pnpm exec tsx scripts/check-decision-coverage.ts --strict
@@ -564,9 +539,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Governance Gate
     needs:
-      - secret-scan
       - dependency-audit
-      - contract-tests
+      - decision-suite
       - ue-evidence
       - abr-evidence
       - evidence-pack
@@ -579,9 +553,10 @@ jobs:
       - name: Check all governance jobs passed
         run: |
           echo "=== Nzila Governance Gate Summary ==="
-          echo "Secret Scan:       ${{ needs.secret-scan.result }}"
+          echo "Secret Scan job gitleaks and job trufflehog are reported by secret-scan.yml after those jobs finish."
+          echo "CI job contract-tests and CI job repository-inventory are reported by ci.yml after those jobs finish."
           echo "Dependency Audit:  ${{ needs.dependency-audit.result }}"
-          echo "Contract Tests:    ${{ needs.contract-tests.result }}"
+          echo "Decision and policy tests: ${{ needs.decision-suite.result }}"
           echo "UE Evidence:       ${{ needs.ue-evidence.result }}"
           echo "ABR Evidence:      ${{ needs.abr-evidence.result }}"
           echo "Evidence Pack:     ${{ needs.evidence-pack.result }}"
@@ -592,16 +567,12 @@ jobs:
           echo "======================================"
 
           # Fail if any required job failed
-          if [[ "${{ needs.secret-scan.result }}" == "failure" ]]; then
-            echo "❌ Secret scan failed"
-            exit 1
-          fi
           if [[ "${{ needs.dependency-audit.result }}" == "failure" ]]; then
             echo "❌ Dependency audit failed"
             exit 1
           fi
-          if [[ "${{ needs.contract-tests.result }}" == "failure" ]]; then
-            echo "❌ Contract tests failed"
+          if [[ "${{ needs.decision-suite.result }}" != "success" ]]; then
+            echo "❌ Decision and policy tests are not success"
             exit 1
           fi
           if [[ "${{ needs.ue-evidence.result }}" == "failure" ]]; then

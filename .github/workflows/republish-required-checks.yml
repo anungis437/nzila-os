@@ -1,0 +1,48 @@
+name: Republish frozen required checks
+
+# pull_request_review runs from this pull request before merge. It does not
+# wait for this file to be on the default branch.
+# Submitting a review does not move the head SHA. Cancelling Publish required
+# checks does not cancel this workflow. It reads the same frozen head again
+# and does not re-run the expensive jobs. An older head is refused.
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  checks: write
+  actions: read
+
+concurrency:
+  group: republish-required-checks-${{ github.event.pull_request.head.sha }}
+  cancel-in-progress: false
+
+jobs:
+  republish-frozen-head:
+    name: Republish frozen required checks
+    if: github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Republish required checks for this frozen head
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MA_POLL_INTERVAL_MS: "20000"
+          MA_POLL_TIMEOUT_MS: "21600000"
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$PR_BASE_SHA" "$PR_HEAD_SHA"
+          MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
+          export MA_CHANGED_PATHS
+          node tooling/ci/merge-authority/publish.mjs republish-frozen-head

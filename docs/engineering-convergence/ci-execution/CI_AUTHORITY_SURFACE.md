@@ -67,7 +67,9 @@ Applicability is per invariant.
 
 An empty change set or any path that is not proven irrelevant is `REQUIRES_EXECUTION`. Secret safety stays applicable for every pull request. Unknown does not become `NOT_APPLICABLE`.
 
-When CI will run, the reporter waits for the source jobs, including `iac-scan` and `ops-pack-validation`. It does not wait on the CI workflow as a whole, and it does not re-run those validators. When CI `paths-ignore` skips the workflow, proven-irrelevant contexts publish `NOT_APPLICABLE`. Applicable governance integrity, inventory, IaC Security, and Ops Documentation execute in the Merge Authority workflow, using the same validation commands as CI. Any other applicable invariant that CI will not run publishes `UNRESOLVED` failure. A skipped job is not `NOT_APPLICABLE` unless the classifier already proved that invariant irrelevant.
+When CI will run, classify-and-publish posts a terminal success check for every context the current diff has already proven `NOT_APPLICABLE`, then returns. It does not post `REQUIRES_EXECUTION` contexts. `Publish required checks` reads the completed CI run's jobs, including `iac-scan` and `ops-pack-validation`. It does not re-run those validators, and CI does not skip `iac-scan` or `ops-pack-validation`. It recomputes applicability from the frozen pull-request diff. A context that diff still proves irrelevant is success with evidence `NOT_APPLICABLE`, including when the source job failed, was skipped, or was cancelled. A diff that makes the context applicable uses the source-job result. Missing diff evidence does not invent `NOT_APPLICABLE`. When CI `paths-ignore` skips the workflow, proven-irrelevant contexts publish `NOT_APPLICABLE`. Applicable governance integrity, inventory, IaC Security, and Ops Documentation execute in the Merge Authority workflow, using the same validation commands as CI. Any other applicable invariant that CI will not run publishes `UNRESOLVED` failure. A skipped job is not `NOT_APPLICABLE` unless the current diff proves that invariant irrelevant.
+
+A newer pull-request commit cancels the previous in-progress CI run and the previous in-progress Secret Scan run. The concurrency group is `${{ github.workflow }}-${{ github.ref }}` with `cancel-in-progress` for `pull_request`, so the superseded workflow run itself is cancelled. `Publish required checks` is a separate `pull_request` workflow, so GitHub runs it from the pull request before merge. It is outside the CI and Secret Scan concurrency groups. Its group is the frozen head SHA and `cancel-in-progress` is false, so cancelling the expensive runs does not cancel publication and a newer commit does not cancel the publisher for the previous head. It waits until the CI and Secret Scan runs for that frozen head are completed or cancelled, then reads those runs' jobs. It matches a run by that run's `head_sha`. It does not re-run inventory, tests, contract tests, or secret scans, and it does not read the pull request's current head. Applicable work that was cancelled or never ran is a completed failure. It is not left pending and it is not success. Proven `NOT_APPLICABLE` stays success with that reason. An older run publishes only to its own frozen head SHA.
 
 ## IaC applicability
 
@@ -90,7 +92,7 @@ Proven not consumed, so `NOT_APPLICABLE` on the fast path:
 
 `docs/**` files that are not markdown stay `REQUIRES_EXECUTION`. CI `paths-ignore` skips those paths, and the fast path runs the same Checkov command. It does not publish `NOT_APPLICABLE` because CI skipped.
 
-When the scan runs: success is `PASS`, failure is `FAILURE`, and cancelled, missing, or an unexpected skip is non-success.
+When the scan is applicable: success is `PASS`, failure is `FAILURE`, and cancelled, missing, or an unexpected skip is non-success. A diff that proves the scan irrelevant publishes success with evidence `NOT_APPLICABLE` instead of the source-job result.
 
 ## Ops pack applicability
 
@@ -114,7 +116,7 @@ Other operational notes, including `ops/runbooks/security/keyvault-rotation.md`,
 
 `ARCHITECTURE.md`, `SECURITY.md`, and the required ops indexes are markdown, so CI `paths-ignore` skips the CI workflow. The Merge Authority fast path runs the same validator. A code pull request that already runs `ops-pack-validation` does not run it again.
 
-When validation runs: success is `PASS`, failure is `FAILURE`, and cancelled, missing, or an unexpected skip is non-success.
+When validation is applicable: success is `PASS`, failure is `FAILURE`, and cancelled, missing, or an unexpected skip is non-success. A diff that proves the validator irrelevant publishes success with evidence `NOT_APPLICABLE` instead of the source-job result.
 
 ## Accepted residuals
 
