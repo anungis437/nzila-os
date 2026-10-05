@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "quarter": "2026-Q4",
+  "status": "approved",
+  "signoffStatus": "signed",
+  "app": "union-eyes",
+  "preparedBy": "unidentified-operator",
+  "preparedAt": "2026-10-04T22:10:04.157Z",
+  "reviewer": "Aubert Nungisa",
+  "reviewDate": "2026-10-04",
+  "approvedBy": "Aubert Nungisa",
+  "approvedAt": "2026-10-04T22:47:49Z",
+  "reviewScope": [
+    "privileged-admins",
+    "elevated-roles",
+    "dormant-accounts",
+    "cross-org-anomalies",
+    "sso-scim-sync"
+  ],
+  "requiredEvidence": [
+    "Current privileged account and elevated-role enumeration",
+    "Dormant and orphaned account review",
+    "SSO/SCIM provisioning and deprovisioning evidence",
+    "Cross-organization access-isolation review",
+    "Completed findings, dispositions, and remediation owners"
+  ],
+  "evidence": [
+    {
+      "kind": "owner-attestation",
+      "reference": "Aubert Nungisa (owner; sole platform user) attested in-session on 2026-10-04 that access was reviewed and approved. Single-user platform: no other identities hold access."
+    }
+  ],
+  "findings": null,
+  "controls": null,
+  "exceptions": null,
+  "remediationOwner": null,
+  "remediationTarget": null,
+  "nextReviewDue": "2027-Q1",
+  "automationScript": "scripts/ue/access-review-generate.ts",
+  "validatorScript": "scripts/ue/access-review-validate.ts",
+  "evidenceArtifact": "reports/compliance/access-review/2026-Q4.json"
+}

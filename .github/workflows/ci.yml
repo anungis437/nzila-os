@@ -384,6 +384,10 @@ jobs:
     if: needs.classify.outputs.governance == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success' && needs.test.result == 'success' && !cancelled())
     runs-on: ubuntu-latest
     name: Governance Gates
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
     # Runs after the authoritative contract and inventory jobs so this job can
     # report their results. It does not execute those suites. Cancellation of
     # this job is not a new publication path; reconcile-frozen-head still

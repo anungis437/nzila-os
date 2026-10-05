@@ -34,10 +34,15 @@ pnpm --filter @nzila/nzila-hq db:migrate
 
 ## API Routes
 
-| Route | Method | Auth | Description |
-|-------|--------|------|-------------|
-| `/api/health` | GET | Public | Health probe |
-| `/api/internal/billing/sync` | POST | Bearer token | Trigger Stripe + QBO sync |
-| `/api/internal/snapshots/persist` | POST | Bearer token | Persist daily portfolio snapshot |
+| Route                             | Method | Auth         | Description                      |
+| --------------------------------- | ------ | ------------ | -------------------------------- |
+| `/api/health`                     | GET    | Public       | Health probe                     |
+| `/api/internal/billing/sync`      | POST   | Bearer token | Trigger Stripe + QBO sync        |
+| `/api/internal/snapshots/persist` | POST   | Bearer token | Persist daily portfolio snapshot |
 
-Internal routes use `NZILA_HQ_SNAPSHOT_TOKEN` bearer auth.
+Internal routes use `NZILA_HQ_SNAPSHOT_TOKEN` bearer auth and require an
+`Idempotency-Key` header. Use a unique scheduler-run ID for billing sync; for
+daily snapshot persistence use the UTC date (for example,
+`hq-snapshot-2026-10-04`) so retries replay the same result. The snapshot
+service also uses a durable UTC-day claim in Postgres to prevent duplicate
+daily writes when callers use different keys.

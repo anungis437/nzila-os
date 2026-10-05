@@ -17,6 +17,11 @@ CREATE TABLE IF NOT EXISTS hq_metrics_snapshots (
 );
 CREATE INDEX IF NOT EXISTS idx_metrics_snapshots_captured_at ON hq_metrics_snapshots (captured_at);
 
+CREATE TABLE IF NOT EXISTS hq_snapshot_runs (
+  snapshot_day date PRIMARY KEY,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS hq_dependency_scores (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   venture_slug varchar(80) NOT NULL,

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-04T00:00:00.000Z",
+  "generatedAt": "2026-10-05T00:00:00.000Z",
   "appCount": 28,
   "packageCount": 224,
   "workspacePackageCount": 258,
   "workflowCount": 58,
-  "contractTestCount": 290,
-  "tsTestFileCount": 2690,
+  "contractTestCount": 291,
+  "tsTestFileCount": 2691,
   "pythonTestFileCount": 35,
   "apps": [
     {
@@ -445,7 +445,7 @@
         "ui"
       ],
       "purpose": "",
-      "codeFileCount": 105
+      "codeFileCount": 106
     },
     {
       "name": "orchestrator-api",
@@ -542,7 +542,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 187
+      "codeFileCount": 189
     },
     {
       "name": "test-scaffold-gp",

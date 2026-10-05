@@ -12,24 +12,21 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@nzila/platform-auth/entra/server'
-import { platformDb } from '@nzila/db/platform'
-import { orgMembers } from '@nzila/db/schema'
-import { and, eq } from 'drizzle-orm'
+import {
+  buildCacheKey,
+  hashPayload,
+  IdempotencyConflictError,
+  IdempotencyInProgressError,
+  runIdempotentMutation,
+} from '@nzila/os-core/idempotency'
+import { canSetActiveOrg } from '../../../../lib/org-membership'
+import { getPlatformAdminIdempotencyCache } from '../../../../lib/idempotency-cache'
 import { ORG_COOKIE_NAME } from '../../../../lib/page-org-context'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-function platformAdminIds(): Set<string> {
-  return new Set(
-    (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean),
-  )
-}
 
 export async function POST(request: NextRequest) {
   const session = await auth()
@@ -58,23 +55,18 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  let isMember = platformAdminIds().has(session.userId)
-  if (!isMember) {
-    const [row] = await platformDb
-      .select({ id: orgMembers.id })
-      .from(orgMembers)
-      .where(
-        and(
-          eq(orgMembers.orgId, orgId),
-          eq(orgMembers.userId, session.userId),
-          eq(orgMembers.status, 'active'),
-        ),
-      )
-      .limit(1)
-    isMember = Boolean(row)
+  const idempotencyKey = request.headers.get('Idempotency-Key')
+  if (!idempotencyKey?.trim()) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: { code: 'IDEMPOTENCY_KEY_REQUIRED', message: 'Idempotency-Key header is required' },
+      },
+      { status: 400 },
+    )
   }
 
-  if (!isMember) {
+  if (!(await canSetActiveOrg(session.userId, orgId))) {
     return NextResponse.json(
       {
         ok: false,
@@ -87,7 +79,27 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const res = NextResponse.json({ ok: true, data: { orgId } })
+  let result: { orgId: string }
+  try {
+    const mutation = await runIdempotentMutation({
+      cache: getPlatformAdminIdempotencyCache(),
+      cacheKey: buildCacheKey(orgId, '/api/admin/set-active-org#' + session.userId, idempotencyKey),
+      payloadHash: hashPayload(JSON.stringify({ orgId })),
+      status: 200,
+      run: async () => ({ orgId }),
+    })
+    result = mutation.response
+  } catch (error) {
+    if (error instanceof IdempotencyConflictError || error instanceof IdempotencyInProgressError) {
+      return NextResponse.json(
+        { ok: false, error: { code: error.code, message: error.message } },
+        { status: 409 },
+      )
+    }
+    throw error
+  }
+
+  const res = NextResponse.json({ ok: true, data: { orgId: result.orgId } })
   res.cookies.set(ORG_COOKIE_NAME, orgId, {
     httpOnly: true,
     sameSite: 'lax',
