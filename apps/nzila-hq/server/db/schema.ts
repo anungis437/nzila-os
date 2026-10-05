@@ -24,6 +24,7 @@
 import { sql } from 'drizzle-orm'
 import {
   bigint,
+  date,
   index,
   jsonb,
   pgTable,
@@ -82,9 +83,7 @@ export const dependencyScores = pgTable(
     factors: jsonb('factors').$type<Record<string, unknown>>().notNull(),
     createdAt: createdAt(),
   },
-  (t) => [
-    index('idx_dependency_scores_venture_captured').on(t.ventureSlug, t.capturedAt),
-  ],
+  (t) => [index('idx_dependency_scores_venture_captured').on(t.ventureSlug, t.capturedAt)],
 )
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -102,9 +101,7 @@ export const allocationsHistory = pgTable(
     axes: jsonb('axes').$type<Record<string, unknown>>().notNull(),
     createdAt: createdAt(),
   },
-  (t) => [
-    index('idx_allocations_history_venture_captured').on(t.ventureSlug, t.capturedAt),
-  ],
+  (t) => [index('idx_allocations_history_venture_captured').on(t.ventureSlug, t.capturedAt)],
 )
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -202,3 +199,11 @@ export const auditLog = pgTable(
     index('idx_audit_log_resource').on(t.resourceKind, t.resourceId),
   ],
 )
+
+// ─────────────────────────────────────────────────────────────────────────
+// snapshot_runs — atomic day-level claim for portfolio snapshot persistence
+// ─────────────────────────────────────────────────────────────────────────
+export const snapshotRuns = pgTable('hq_snapshot_runs', {
+  snapshotDay: date('snapshot_day').primaryKey(),
+  createdAt: createdAt(),
+})

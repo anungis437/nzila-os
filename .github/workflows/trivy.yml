@@ -34,6 +34,7 @@ jobs:
     name: Trivy — ${{ matrix.target }}
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       security-events: write
       contents: read
 
@@ -90,6 +91,7 @@ jobs:
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true # code scanning (GHAS) unavailable on private repo; blocking scans still gate
         if: always() && hashFiles(format('trivy-{0}.sarif', matrix.target)) != ''
         with:
           sarif_file: trivy-${{ matrix.target }}.sarif
@@ -99,6 +101,7 @@ jobs:
     name: Trivy — filesystem (repo secrets + misconfig) [BLOCKING]
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       security-events: write
       contents: read
 
@@ -136,6 +139,7 @@ jobs:
 
       - name: Upload filesystem SARIF
         uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true # code scanning (GHAS) unavailable on private repo; blocking scans still gate
         if: always() && hashFiles('trivy-fs.sarif') != ''
         with:
           sarif_file: trivy-fs.sarif

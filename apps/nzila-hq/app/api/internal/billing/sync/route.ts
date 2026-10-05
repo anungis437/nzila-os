@@ -10,7 +10,15 @@
  */
 import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
+import {
+  buildCacheKey,
+  hashPayload,
+  IdempotencyConflictError,
+  IdempotencyInProgressError,
+  runIdempotentMutation,
+} from '@nzila/os-core/idempotency'
 import { syncAll } from '@/server/integrations/billing-sync'
+import { getHqIdempotencyCache } from '@/server/idempotency-cache'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -20,22 +28,43 @@ function hasValidBearerToken(req: Request, expected: string): boolean {
   const presentedBytes = Buffer.from(presented)
   const expectedBytes = Buffer.from(expected)
   return (
-    presentedBytes.length === expectedBytes.length &&
-    timingSafeEqual(presentedBytes, expectedBytes)
+    presentedBytes.length === expectedBytes.length && timingSafeEqual(presentedBytes, expectedBytes)
   )
 }
 
 export async function POST(req: Request) {
   const CRON_SECRET = process.env.NZILA_HQ_SNAPSHOT_TOKEN
   if (!CRON_SECRET) {
-    return NextResponse.json(
-      { ok: false, reason: 'snapshot-endpoint-disabled' },
-      { status: 503 },
-    )
+    return NextResponse.json({ ok: false, reason: 'snapshot-endpoint-disabled' }, { status: 503 })
   }
   if (!hasValidBearerToken(req, CRON_SECRET)) {
     return NextResponse.json({ ok: false, reason: 'unauthorized' }, { status: 401 })
   }
-  const result = await syncAll()
-  return NextResponse.json({ ok: true, ...result })
+  const idempotencyKey = req.headers.get('Idempotency-Key')
+  if (!idempotencyKey?.trim()) {
+    return NextResponse.json(
+      { ok: false, code: 'IDEMPOTENCY_KEY_REQUIRED', reason: 'idempotency-key-required' },
+      { status: 400 },
+    )
+  }
+
+  try {
+    const body = await req.text()
+    const mutation = await runIdempotentMutation({
+      cache: getHqIdempotencyCache(),
+      cacheKey: buildCacheKey('nzila-hq', '/api/internal/billing/sync', idempotencyKey),
+      payloadHash: hashPayload(body),
+      status: 200,
+      run: syncAll,
+    })
+    return NextResponse.json({ ok: true, ...mutation.response })
+  } catch (error) {
+    if (error instanceof IdempotencyConflictError || error instanceof IdempotencyInProgressError) {
+      return NextResponse.json(
+        { ok: false, reason: error.code, message: error.message },
+        { status: 409 },
+      )
+    }
+    throw error
+  }
 }
