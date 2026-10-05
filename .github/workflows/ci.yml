@@ -336,6 +336,10 @@ jobs:
   governance-gates:
     runs-on: ubuntu-latest
     name: Governance Gates
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
     needs: [lint-and-typecheck, test]
     steps:
       - uses: actions/checkout@v5
