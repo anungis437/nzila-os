@@ -78,16 +78,59 @@ export function getDashboardExperience(role?: string | null): DashboardExperienc
   return 'member';
 }
 
-export function getRoleLandingPath(role?: string | null): string {
+/**
+ * Doctrine orientation hub (Club360 seven-tab Workspace).
+ * This is not the post-login role execution home, except for `member`,
+ * where the two routes coincide. EC-G03 labels that split; it does not
+ * retarget either surface.
+ */
+export const WORKSPACE_ORIENTATION_HUB_PATH = '/dashboard/workspace' as const;
+
+/**
+ * Role execution homes — the routes `getRoleLandingPath` returns.
+ * Targets are unchanged by EC-G03. Staff, executive, governance, and admin
+ * land off the Workspace hub on purpose. Do not silently rewrite these to
+ * the hub (that redirect belongs to G-04, which is out of this slice).
+ */
+export const ROLE_EXECUTION_HOME_BY_EXPERIENCE = {
+  member: WORKSPACE_ORIENTATION_HUB_PATH,
+  staff: '/dashboard/workbench',
+  executive: '/dashboard/intelligence',
+  governance: '/dashboard/governance',
+  admin: '/dashboard/admin/organizations',
+} as const satisfies Record<DashboardExperience, string>;
+
+export type DualNavHomes = {
+  experience: DashboardExperience;
+  /** Post-login role execution home. Same string `getRoleLandingPath` returns. */
+  roleHomeHref: string;
+  /** Workspace orientation hub. Always `/dashboard/workspace`. */
+  orientationHubHref: typeof WORKSPACE_ORIENTATION_HUB_PATH;
+  /** True only for member, where landing and the hub are the same route. */
+  roleHomeIsOrientationHub: boolean;
+};
+
+/**
+ * Honesty metadata for UI. Does not change landing targets or allow-lists.
+ * Sidebar copy should read `roleHomeHref` as the role execution home and
+ * `orientationHubHref` as the orientation hub — never as two undifferentiated
+ * primaries.
+ */
+export function getDualNavHomes(role?: string | null): DualNavHomes {
   const experience = getDashboardExperience(role);
-  if (experience === 'member') return '/dashboard/workspace';
-  // Each role lands on its primary surface (not the shared "Workspace" hub,
-  // which is the first sidebar entry). The sidebar highlights the nav item
-  // whose href matches this landing path via `isActive`.
-  if (experience === 'staff') return '/dashboard/workbench';
-  if (experience === 'executive') return '/dashboard/intelligence';
-  if (experience === 'governance') return '/dashboard/governance';
-  return '/dashboard/admin/organizations';
+  const roleHomeHref = ROLE_EXECUTION_HOME_BY_EXPERIENCE[experience];
+  return {
+    experience,
+    roleHomeHref,
+    orientationHubHref: WORKSPACE_ORIENTATION_HUB_PATH,
+    roleHomeIsOrientationHub: roleHomeHref === WORKSPACE_ORIENTATION_HUB_PATH,
+  };
+}
+
+export function getRoleLandingPath(role?: string | null): string {
+  // Role execution home. Not rewritten to the Workspace orientation hub.
+  // The sidebar highlights the nav item whose href matches this path.
+  return ROLE_EXECUTION_HOME_BY_EXPERIENCE[getDashboardExperience(role)];
 }
 
 export function getNavigationForExperience(experience: DashboardExperience): NavigationItem[] {

@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 
-const PRIMARY_SIDEBAR = 'aside[aria-label="Primary navigation"]:not([role="dialog"])';
+// EC-G03: desktop chrome landmark is "Role execution navigation", not "Primary navigation".
+const PRIMARY_SIDEBAR = 'aside[aria-label="Role execution navigation"]:not([role="dialog"])';
 const TRANSIENT_NAVIGATION_ERROR_PATTERN =
   /net::ERR_ABORTED|ERR_NETWORK_IO_SUSPENDED|ERR_CONNECTION_RESET|ERR_CONNECTION_REFUSED|net::ERR_FAILED|Timeout .* exceeded|ERR_HTTP2_PROTOCOL_ERROR/i;
 
