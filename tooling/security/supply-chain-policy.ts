@@ -128,6 +128,28 @@ export interface VulnerabilityWaiver {
  */
 export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
   {
+    // node-forge RSA PKCS#1 v1.5 signature verification (npm advisory 1240912). No patched version published.
+    // Path: apps/union-eyes > firebase-admin > node-forge. Review by 2026-11-04.
+    id: '1240912',
+    package: 'node-forge',
+    reason: 'No patched version exists upstream. Transitive via firebase-admin; app does not verify untrusted RSA PKCS#1 v1.5 signatures with node-forge. Re-review when upstream fix ships.',
+    approvedBy: 'Aubert Nungisa',
+    approvedAt: '2026-10-04',
+    expiresAt: '2026-11-04',
+    severity: 'high',
+  },
+  {
+    // braces stack-exhaustion DoS (npm advisory 1240992). No patched version published.
+    // Path: @changesets/cli > @changesets/config > micromatch > braces (dev tooling only).
+    id: '1240992',
+    package: 'braces',
+    reason: 'No patched version exists upstream. Dev-only changesets tooling; never shipped in a runtime and no untrusted input reaches it.',
+    approvedBy: 'Aubert Nungisa',
+    approvedAt: '2026-10-04',
+    expiresAt: '2026-11-04',
+    severity: 'high',
+  },
+  {
     // minimatch ReDoS via repeated wildcards (CVE-2026-26996 / GHSA-3ppc-4f35-3m26 / npm advisory 1113371)
     // Affected paths: devDependency chains only (eslint > minimatch, eslint-config-next > typescript-eslint > minimatch)
     // No user-controlled input ever reaches minimatch in production — only in local lint tooling.

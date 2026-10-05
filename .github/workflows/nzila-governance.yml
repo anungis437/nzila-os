@@ -36,6 +36,7 @@ on:
 permissions:
   contents: read
   security-events: write
+  actions: read
 
 env:
   TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
@@ -49,6 +50,9 @@ jobs:
   secret-scan:
     runs-on: ubuntu-latest
     name: Secret Scan (Gitleaks + TruffleHog)
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v5
         with:
@@ -125,6 +129,7 @@ jobs:
 
       - name: Upload Trivy SARIF
         if: always()
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif

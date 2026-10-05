@@ -18,6 +18,11 @@ jobs:
   governance-baseline:
     name: Governance Baseline
     uses: ./.github/workflows/nzila-governance.yml
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+      security-events: write
     secrets: inherit
 
   ga-truth-hardening:

@@ -3,8 +3,9 @@
  *
  * Two flows:
  *  - `persistCurrentSnapshot(repo)` writes today's portfolio KPIs, per-venture
- *    dependency scores, and per-venture allocation rows. Idempotent on the
- *    `(captured_at, …)` indexes — running twice in one day is harmless.
+ *    dependency scores, and per-venture allocation rows. A transaction claims
+ *    the UTC date in `hq_snapshot_runs`, so concurrent or repeated calls write
+ *    no more than one complete daily snapshot.
  *  - `readPersistedHistory({ days })` returns the persisted history rows the
  *    cockpit can use *instead of* the deterministic synthesis when the table
  *    has data. The repository's `metricsHistory()` checks this first.
@@ -16,12 +17,8 @@ import 'server-only'
 import { sql } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core/telemetry'
 import { getHqDb } from './client'
-import { allocationsHistory, dependencyScores, metricsSnapshots } from './schema'
-import type {
-  AllocationScore,
-  DependencyScore,
-  PortfolioSnapshot,
-} from '@nzila/hq-domain'
+import { allocationsHistory, dependencyScores, metricsSnapshots, snapshotRuns } from './schema'
+import type { AllocationScore, DependencyScore, PortfolioSnapshot } from '@nzila/hq-domain'
 
 const logger = createLogger('nzila-hq:snapshots')
 
@@ -40,41 +37,52 @@ export async function persistCurrentSnapshot(
   if (!db) return { written: false, reason: 'no-db' }
 
   try {
-    await db.insert(metricsSnapshots).values({
-      capturedAt: new Date(input.capturedAt),
-      activeVentures: input.snapshot.activeVentures,
-      totalMrrCents: input.snapshot.totalMrrCents,
-      weightedPipelineCents: input.snapshot.weightedPipelineCents,
-      founderBottleneckScore: input.snapshot.founderBottleneckScore,
-      cashRunwayMonths: input.cashRunwayMonths ?? null,
+    const snapshotDay = new Date(input.capturedAt).toISOString().slice(0, 10)
+    const capturedAt = new Date(`${snapshotDay}T00:00:00.000Z`)
+    return await db.transaction(async (tx) => {
+      const [claim] = await tx
+        .insert(snapshotRuns)
+        .values({ snapshotDay })
+        .onConflictDoNothing()
+        .returning({ snapshotDay: snapshotRuns.snapshotDay })
+      if (!claim) return { written: false, reason: 'already-exists' }
+
+      await tx.insert(metricsSnapshots).values({
+        capturedAt,
+        activeVentures: input.snapshot.activeVentures,
+        totalMrrCents: input.snapshot.totalMrrCents,
+        weightedPipelineCents: input.snapshot.weightedPipelineCents,
+        founderBottleneckScore: input.snapshot.founderBottleneckScore,
+        cashRunwayMonths: input.cashRunwayMonths ?? null,
+      })
+
+      if (input.dependency.length > 0) {
+        await tx.insert(dependencyScores).values(
+          input.dependency.map((d) => ({
+            ventureSlug: d.ventureSlug,
+            capturedAt,
+            score: d.score,
+            signal: d.signal,
+            factors: { reasons: d.reasons } as Record<string, unknown>,
+          })),
+        )
+      }
+
+      if (input.allocations.length > 0) {
+        await tx.insert(allocationsHistory).values(
+          input.allocations.map((a) => ({
+            ventureSlug: a.ventureSlug,
+            capturedAt,
+            composite: a.composite,
+            recommendation: a.recommendation,
+            confidence: 'medium',
+            axes: a.axes as unknown as Record<string, unknown>,
+          })),
+        )
+      }
+
+      return { written: true }
     })
-
-    if (input.dependency.length > 0) {
-      await db.insert(dependencyScores).values(
-        input.dependency.map((d) => ({
-          ventureSlug: d.ventureSlug,
-          capturedAt: new Date(input.capturedAt),
-          score: d.score,
-          signal: d.signal,
-          factors: { reasons: d.reasons } as Record<string, unknown>,
-        })),
-      )
-    }
-
-    if (input.allocations.length > 0) {
-      await db.insert(allocationsHistory).values(
-        input.allocations.map((a) => ({
-          ventureSlug: a.ventureSlug,
-          capturedAt: new Date(input.capturedAt),
-          composite: a.composite,
-          recommendation: a.recommendation,
-          confidence: 'medium',
-          axes: a.axes as unknown as Record<string, unknown>,
-        })),
-      )
-    }
-
-    return { written: true }
   } catch (err) {
     logger.error('persist failed', err instanceof Error ? err : { error: String(err) })
     return { written: false, reason: String(err) }
@@ -110,7 +118,7 @@ export async function readPersistedHistory(opts: {
       where captured_at >= ${opts.sinceIso}::timestamptz
       order by captured_at asc
     `)
-    return (rows as readonly typeof rows[number][]).map((r) => ({
+    return (rows as readonly (typeof rows)[number][]).map((r) => ({
       capturedAt:
         typeof r.captured_at === 'string' ? r.captured_at : new Date(r.captured_at).toISOString(),
       activeVentures: Number(r.active_ventures),

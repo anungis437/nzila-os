@@ -1,15 +1,13 @@
 ##
 # Access Review Governance Gate
 #
-# Validates that the current quarter's privileged-access review attestation
-# exists and is signed before allowing merge to main.
+# Validates that the current quarter's privileged-access review is complete,
+# approved, signed, dated, and supported by referenced evidence.
 #
 # Fails if:
 #   - reports/compliance/access-review/<current-quarter>.json is missing
-#   - signoffStatus is 'unsigned' or 'missing'
-#
-# Bypass:
-#   Set ACCESS_REVIEW_BYPASS=true (requires CISO approval — logged loudly).
+#   - review or approval fields are incomplete or pending
+#   - no review evidence is referenced
 #
 # Related docs:
 #   docs/union-eyes/dr/continuity-matrix.md
@@ -22,16 +20,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      bypass:
-        description: 'Bypass access review gate (CISO approval required)'
-        required: false
-        type: boolean
-        default: false
-      bypass_reason:
-        description: 'Reason for bypass (required if bypass=true)'
-        required: false
-        type: string
 
 permissions:
   contents: read
@@ -49,7 +37,4 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Validate access review attestation
-        env:
-          ACCESS_REVIEW_BYPASS: ${{ (github.event.inputs.bypass == 'true' || vars.ACCESS_REVIEW_BYPASS) && 'true' || 'false' }}
-          ACCESS_REVIEW_BYPASS_REASON: ${{ github.event.inputs.bypass_reason || vars.ACCESS_REVIEW_BYPASS_REASON || '(no reason provided)' }}
         run: pnpm exec tsx scripts/ue/access-review-validate.ts
