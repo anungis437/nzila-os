@@ -227,7 +227,7 @@ jobs:
 
           PROD_DNS_TARGET="${{ vars.DNS_PROD_ORIGIN }}"
           if [ -z "$PROD_DNS_TARGET" ]; then
-            PROD_DNS_TARGET="nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
+            PROD_DNS_TARGET="nzila-os-union-eyes-prod.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io"
           fi
 
           STAGING_DNS_TARGET="${{ vars.DNS_STAGING_ORIGIN }}"
