@@ -9,7 +9,7 @@
 | Apps | 28 |
 | Packages (packages/*) | 224 |
 | Workspace Packages (apps|packages|services|tooling) | 258 |
-| GitHub Workflows | 58 |
+| GitHub Workflows | 59 |
 | Contract Test Files | 291 |
 | TS/JS Test Files | 2692 |
 | Python Test Files | 35 |
@@ -74,6 +74,7 @@
 - deploy-production.yml
 - deploy-staging.yml
 - deploy-union-eyes.yml
+- deploy-web-production.yml
 - deploy-web.yml
 - doc-hygiene.yml
 - dr-drill-reminder.yml
