@@ -19,6 +19,7 @@ jobs:
     name: Governance Baseline
     uses: ./.github/workflows/nzila-governance.yml
     permissions:
+      actions: read
       contents: read
       pull-requests: read
       security-events: write
