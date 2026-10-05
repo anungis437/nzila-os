@@ -1,0 +1,36 @@
+{
+  "change_id": "CHG-2026-0109",
+  "title": "EMERGENCY: restore union-eyes production (ImagePullBackOff outage since 2026-09-19)",
+  "description": "Production union-eyes revision nzila-os-union-eyes-prod--0000247 has been in ImagePullBackOff since 2026-09-19: the image index prod-continuity-managed-20260918-1245 references an amd64 child manifest that no longer exists in nzilacanadaacr, and every earlier prod image digest is also missing (soft-delete disabled, no recovery path). unioneyes.app, www and app return 504 or time out. This change rebuilds and deploys union-eyes to production from main through deploy-union-eyes.yml (digest-pinned) to restore service. Authorized by the platform owner on 2026-10-05. A post-implementation review is required, including root-causing the ACR manifest purge. Approval recorded for role service_owner by Aubert Nungisa (anungis437), platform owner, 2026-10-05.",
+  "service": "union-eyes",
+  "environment": "PROD",
+  "change_type": "EMERGENCY",
+  "risk_level": "HIGH",
+  "impact_summary": "Restores a fully unavailable production service. Deploys current main (about 16 days of drift from the last running prod build); the pipeline applies the mandatory ICRA capability migration and Django migrations. Customer-facing availability is currently zero, so deploy risk is accepted over continued outage.",
+  "requested_by": "anungis437",
+  "approvers_required": [
+    "service_owner"
+  ],
+  "approved_by": [
+    "service_owner"
+  ],
+  "approval_status": "APPROVED",
+  "implementation_window_start": "2026-10-05T00:00:00Z",
+  "implementation_window_end": "2026-10-07T23:59:59Z",
+  "rollback_plan": "No prior prod image is recoverable from ACR. If the new revision is unhealthy, keep the failed revision out of traffic and re-run the deploy from a corrected commit; the app is already down so there is no healthy state to roll back to. Do not delete the new image digest.",
+  "test_evidence_refs": [
+    "https://github.com/anungis437/nzila-os/pull/908",
+    "https://github.com/anungis437/nzila-os/pull/896"
+  ],
+  "linked_prs": [
+    "#908",
+    "#896",
+    "#909"
+  ],
+  "linked_commits": [
+    "11952b592c23ac32d9f786194a69c479b4ed6153"
+  ],
+  "status": "APPROVED",
+  "created_at": "2026-10-05T14:45:00Z",
+  "updated_at": "2026-10-05T14:45:00Z"
+}
