@@ -284,7 +284,7 @@ jobs:
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_WEB_URL=https://nzilaventures.com"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CONSOLE_URL=https://console.nzilaventures.com"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_PARTNERS_URL=https://partners.nzilaventures.com"
-          BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes.${DOMAIN}"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes-staging.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.${DOMAIN}"
@@ -727,7 +727,7 @@ jobs:
             --name "nzila-canada-${ENV}-env" \
             --resource-group "nzila-canada-${ENV}-rg" \
             --query "properties.defaultDomain" -o tsv 2>/dev/null || echo "jollydune-88c1e97f.canadacentral.azurecontainerapps.io")
-          BASE_URL="https://nzila-os-union-eyes.${DEFAULT_DOMAIN}"
+          BASE_URL="https://nzila-os-union-eyes-staging.${DEFAULT_DOMAIN}"
 
           if [ "$ENV" = "production" ]; then
             BASE_URL="https://unioneyes.app"

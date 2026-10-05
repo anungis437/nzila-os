@@ -119,7 +119,7 @@ pnpm exec tsx scripts/db/restore-drill.ts -- --execute
 pnpm exec tsx scripts/dr/drill-report.ts
 
 # 4. Post-drill: verify app health
-curl -s https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready | jq .
+curl -s https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready | jq .
 \`\`\`
 
 ---

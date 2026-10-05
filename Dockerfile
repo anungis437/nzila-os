@@ -87,7 +87,7 @@ ARG AZURE_AD_TENANT_ID=
 ARG NEXT_PUBLIC_WEB_URL=https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 ARG NEXT_PUBLIC_CONSOLE_URL=https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 ARG NEXT_PUBLIC_PARTNERS_URL=https://nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
-ARG NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+ARG NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 ARG NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 # Union Eyes custom domain (GoDaddy → Azure Container Apps)
 ARG NEXT_PUBLIC_SITE_URL=https://unioneyes.app
