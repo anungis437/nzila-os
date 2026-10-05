@@ -23,3 +23,8 @@ CVE-2026-44902   # opentelemetry sdk-node Prometheus exporter crash — patched 
 # upstream Node.js publishes a base-image rebuild that bundles a newer npm/node-tar.
 # Review: 2026-09-04 — re-check node:20-slim and node:22-alpine bundled npm tar version.
 CVE-2026-59873   # node-tar DoS via crafted gzip bomb — bundled in npm inside base image, not our dep graph
+
+# No-patch HIGH advisories (same governed exceptions as tooling/security/supply-chain-policy.ts ACTIVE_WAIVERS).
+# Findings remain reported by the scanners; only these two IDs are ignored. Review/expiry: 2026-11-04.
+CVE-2026-93687   # braces DoS via stack overflow - no fixed version (dev tooling via @changesets/cli)
+CVE-2026-85393   # node-forge signature forgery - no fixed version (apps/union-eyes via firebase-admin)
