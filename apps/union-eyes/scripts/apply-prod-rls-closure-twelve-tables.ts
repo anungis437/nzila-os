@@ -54,7 +54,7 @@ export function isUnenforced(rows: readonly TableState[]): boolean {
 
 class DryRunRollback extends Error {}
 
-async function snapshot(sql: postgres.Sql | postgres.TransactionSql): Promise<TableState[]> {
+async function snapshot(sql: postgres.Sql): Promise<TableState[]> {
   const tables = [...RLS_CLOSURE_TABLES]
   const rows = await sql<TableState[]>`
     SELECT c.relname AS tbl,
@@ -104,10 +104,10 @@ async function main() {
     let after: TableState[] = []
     try {
       await sql.begin(async (tx) => {
-        const before = await snapshot(tx)
+        const before = await snapshot(tx as unknown as postgres.Sql)
         print('BEFORE', before)
         await tx.unsafe(text)
-        after = await snapshot(tx)
+        after = await snapshot(tx as unknown as postgres.Sql)
         print('AFTER', after)
         const ok = rollback ? isUnenforced(after) : isFullyEnforced(after)
         if (!ok) throw new Error('post-state assertion failed; transaction rolled back')
