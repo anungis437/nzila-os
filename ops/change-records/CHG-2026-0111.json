@@ -1,0 +1,31 @@
+{
+  "change_id": "CHG-2026-0111",
+  "title": "Web production: governed prod-specific build path and link correction (Union Eyes -> app.unioneyes.app)",
+  "description": "nzila-os-web-prod ran the mutable nzila/web:latest, which the staging pipeline overwrites. A cold start of the prod app therefore pulled a staging artifact (staging Union Eyes link, staging URLs); before that it embedded a nonexistent Union Eyes host. This change adds .github/workflows/deploy-web-production.yml: source SHA must be on main, prod-specific build args (NEXT_PUBLIC_UNION_EYES_URL=https://app.unioneyes.app), artifact inspected before push (must contain the prod URL and no retired or staging Union Eyes host), immutable nzila/web:prod-<sha> tag (never latest), digest-pinned deploy through the production environment, health and link proof, automatic rollback to the previous image. First production run replaces latest with the digest-pinned prod artifact. Approver: Aubert Nungisa (anungis437), platform owner, sole platform user, holding service_owner and change_manager; authorized 2026-10-05.",
+  "service": "web",
+  "environment": "PROD",
+  "change_type": "NORMAL",
+  "risk_level": "LOW",
+  "impact_summary": "Public marketing/portal web app. One container image swap on nzila-os-web-prod (min replicas 0, single revision). No schema, secret, role or network change. The only user-visible change is the Union Eyes link target (staging container -> app.unioneyes.app).",
+  "requested_by": "anungis437",
+  "approvers_required": [
+    "service_owner",
+    "change_manager"
+  ],
+  "approved_by": [
+    "service_owner",
+    "change_manager"
+  ],
+  "approval_status": "APPROVED",
+  "implementation_window_start": "2026-10-05T00:00:00.000Z",
+  "implementation_window_end": "2026-10-12T23:59:59.000Z",
+  "rollback_plan": "The deploy job captures the previous revision and image and, if the post-deploy proof fails, runs az containerapp update back to that image automatically. Manual rollback: az containerapp update --name nzila-os-web-prod --resource-group nzila-canada-prod-rg --image <previous image or digest from the run summary>. Note: for this first release the previous image is the mutable :latest tag (a staging build); every later release is digest-pinned and rolls back to a real prior artifact.",
+  "test_evidence_refs": [
+    "https://github.com/anungis437/nzila-os/pull/910"
+  ],
+  "linked_prs": [],
+  "linked_commits": [],
+  "status": "APPROVED",
+  "created_at": "2026-10-05T21:10:00.000Z",
+  "updated_at": "2026-10-05T21:10:00.000Z"
+}
