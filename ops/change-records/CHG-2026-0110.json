@@ -1,0 +1,33 @@
+{
+  "change_id": "CHG-2026-0110",
+  "title": "Union Eyes production: enforce RLS on the 12 tables failing rls-verify preflight",
+  "description": "Business justification: the production deploy gate (rls-verify preflight) fails 12 of 1167 checks, so production cannot pass its own isolation gate. Security rationale: 12 manifest-required public-schema tables have RLS off, FORCE off and no policies; union_eyes_runtime (NOSUPERUSER, NOBYPASSRLS) currently holds no privileges on them and they hold 0 rows, so there is no current cross-tenant exposure, but any future grant would be unisolated. Affected tables: workbooks, workbook_modules, workbook_purchases, workbook_memory_holders, workbook_governance_lineage_entries, audit_logs, organization_users, compliance_snapshots, domain_events, evidence_packs, integration_idempotency_keys, integration_registry. Desired state: RLS + FORCE + runtime and system policies on all 12. Migration plan: apply db/migrations/20261005_prod_rls_closure_twelve_tables.sql once via scripts/apply-prod-rls-closure-twelve-tables.ts as union_eyes_migration_admin, in one transaction with in-transaction assertions. Validation plan: dry-run and apply on a schema-faithful clone of production (1167/1167), idempotency re-apply, 94/94 cross-tenant isolation tests, rollback validated; then rls-verify preflight against production must be 1167/1167. No grants, roles, functions or other tables are touched. Approver: Aubert Nungisa (anungis437), platform owner, sole platform user, holding both the service_owner and change_manager roles; authorized 2026-10-05. Detail: ops/change-records/CHG-2026-0110.md.",
+  "service": "union-eyes",
+  "environment": "PROD",
+  "change_type": "NORMAL",
+  "risk_level": "MEDIUM",
+  "impact_summary": "Blast radius: 12 empty public-schema tables on which union_eyes_runtime has no privileges; no application path reads or writes them today. One transaction, auto-rolled back on any failed assertion. No grants, role, function or other table changes. Application behavior unchanged.",
+  "requested_by": "anungis437",
+  "approvers_required": [
+    "service_owner",
+    "change_manager"
+  ],
+  "approved_by": [
+    "service_owner",
+    "change_manager"
+  ],
+  "approval_status": "APPROVED",
+  "implementation_window_start": "2026-10-05T00:00:00.000Z",
+  "implementation_window_end": "2026-10-09T23:59:59.000Z",
+  "rollback_plan": "Run apps/union-eyes scripts/apply-prod-rls-closure-twelve-tables.ts --rollback (db/migrations/20261005_prod_rls_closure_twelve_tables_rollback.sql): drops the created policies and disables RLS/FORCE on the same 12 tables, restoring the captured pre-change state. Validated on the production-schema clone (returns to 1155/1167). Safe because the tables hold 0 rows and the runtime role has no privileges on them.",
+  "test_evidence_refs": [
+    "apps/union-eyes/scripts/__tests__/rls-closure-twelve-tables.test.ts",
+    "apps/union-eyes/scripts/rls-closure-twelve-tables-isolation.sql",
+    "https://github.com/anungis437/nzila-os/actions/runs/37346351177"
+  ],
+  "linked_prs": [],
+  "linked_commits": [],
+  "status": "APPROVED",
+  "created_at": "2026-10-05T20:20:00.000Z",
+  "updated_at": "2026-10-05T20:20:00.000Z"
+}
