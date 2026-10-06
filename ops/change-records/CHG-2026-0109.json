@@ -20,17 +20,30 @@
   "rollback_plan": "No prior prod image is recoverable from ACR. If the new revision is unhealthy, keep the failed revision out of traffic and re-run the deploy from a corrected commit; the app is already down so there is no healthy state to roll back to. Do not delete the new image digest.",
   "test_evidence_refs": [
     "https://github.com/anungis437/nzila-os/pull/908",
-    "https://github.com/anungis437/nzila-os/pull/896"
+    "https://github.com/anungis437/nzila-os/pull/896",
+    "https://github.com/anungis437/nzila-os/actions/runs/37346351177"
   ],
   "linked_prs": [
     "#908",
     "#896",
-    "#909"
+    "#909",
+    "#910",
+    "#911"
   ],
   "linked_commits": [
-    "11952b592c23ac32d9f786194a69c479b4ed6153"
+    "11952b592c23ac32d9f786194a69c479b4ed6153",
+    "c890d1a2d4b4d9c0090cdfb254e2642754321f8f"
   ],
-  "status": "APPROVED",
+  "status": "COMPLETED",
   "created_at": "2026-10-05T14:45:00Z",
-  "updated_at": "2026-10-05T14:45:00Z"
+  "updated_at": "2026-10-05T19:30:00.000Z",
+  "completed_at": "2026-10-05T17:43:30.000Z",
+  "post_implementation_review": {
+    "outcome": "PARTIAL_SUCCESS",
+    "incidents_triggered": true,
+    "incident_refs": [
+      "Union Eyes production unavailable 2026-09-19 to 2026-10-05"
+    ],
+    "observations": "Service restored: revision nzila-os-union-eyes-prod--0000249 healthy at 100% traffic, /api/ready 200, database health ok. Not fully successful: the post-deploy rls-verify preflight failed with 12 manifest-required tables unenforced in production (see CHG-2026-0109.pir.md), and nzila-os-web-prod still embeds the retired Union Eyes hostname. Both need separate change authority. Full review: ops/change-records/CHG-2026-0109.pir.md."
+  }
 }
