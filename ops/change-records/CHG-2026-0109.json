@@ -36,14 +36,14 @@
   ],
   "status": "COMPLETED",
   "created_at": "2026-10-05T14:45:00Z",
-  "updated_at": "2026-10-05T19:30:00.000Z",
-  "completed_at": "2026-10-05T17:43:30.000Z",
+  "updated_at": "2026-10-07T03:00:00.000Z",
+  "completed_at": "2026-10-05T17:43:30Z",
   "post_implementation_review": {
     "outcome": "PARTIAL_SUCCESS",
     "incidents_triggered": true,
     "incident_refs": [
       "Union Eyes production unavailable 2026-09-19 to 2026-10-05"
     ],
-    "observations": "Service restored: revision nzila-os-union-eyes-prod--0000249 healthy at 100% traffic, /api/ready 200, database health ok. Not fully successful: the post-deploy rls-verify preflight failed with 12 manifest-required tables unenforced in production (see CHG-2026-0109.pir.md), and nzila-os-web-prod still embeds the retired Union Eyes hostname. Both need separate change authority. Full review: ops/change-records/CHG-2026-0109.pir.md."
+    "observations": "Service restored: revision nzila-os-union-eyes-prod--0000249 healthy at 100% traffic, /api/ready 200, database health ok. Follow-ups since: RLS closure applied and verified 1167/1167 (CHG-2026-0110); prod web link corrected with an immutable digest-pinned artifact (CHG-2026-0111). Remaining open and keeping this outcome at PARTIAL_SUCCESS: (1) no prior Union Eyes prod image exists, so this release has no rollback target (the current image is SHA-tagged and becomes the next release's rollback target); (2) the registry purge cause is UNKNOWN and ACR diagnostics, tag retention and rollback-image retention are not implemented; (3) customer impact (2026-09-19 to 2026-10-05) is not quantified. Full review: ops/change-records/CHG-2026-0109.pir.md."
   }
 }
