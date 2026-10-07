@@ -295,21 +295,26 @@ jobs:
         run: |
           set -uo pipefail
           FQDN=$(az containerapp show --name "${PROD_APP}" --resource-group "${PROD_RG}" --query properties.configuration.ingress.fqdn -o tsv)
+          # The previous revision keeps serving until the new one is ready, so a bare
+          # HTTP 200 proves nothing. Require a NEW ready revision AND the expected content.
           OK=0
-          for i in $(seq 1 30); do
+          CODE=000
+          for i in $(seq 1 45); do
+            READY=$(az containerapp show --name "${PROD_APP}" --resource-group "${PROD_RG}" --query properties.latestReadyRevisionName -o tsv 2>/dev/null || echo "")
             CODE=$(curl -sS -o /tmp/home.html -w '%{http_code}' --max-time 30 "https://${FQDN}/" || echo 000)
-            if [ "$CODE" = "200" ]; then OK=1; break; fi
+            if [ -n "$READY" ] && [ "$READY" != "$PREV_REV" ] && [ "$CODE" = "200" ] \
+               && grep -qF "${PROD_UNION_EYES_URL}" /tmp/home.html \
+               && ! grep -qE 'nzila-os-union-eyes(-staging)?\.jollydune' /tmp/home.html; then
+              OK=1
+              break
+            fi
             sleep 20
           done
-          if [ "$OK" = "1" ]; then
-            grep -qF "${PROD_UNION_EYES_URL}" /tmp/home.html || OK=0
-            if grep -qE 'nzila-os-union-eyes(-staging)?\.jollydune' /tmp/home.html; then OK=0; fi
-          fi
           UE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "${PROD_UNION_EYES_URL}/api/ready" || echo 000)
           if [ "$UE" != "200" ]; then OK=0; fi
           if [ "$OK" != "1" ]; then
-            echo "::error::Post-deploy proof failed (home=${CODE:-000}, union-eyes ready=${UE}). Rolling back to ${PREV_IMAGE} (was revision ${PREV_REV})."
+            echo "::error::Post-deploy proof failed (home=${CODE}, ready revision=${READY:-none}, previous=${PREV_REV}, union-eyes ready=${UE}). Rolling back to ${PREV_IMAGE}."
             az containerapp update --name "${PROD_APP}" --resource-group "${PROD_RG}" --image "${PREV_IMAGE}" --output none || true
             exit 1
           fi
-          echo "- Verified: prod web serves 200, links to ${PROD_UNION_EYES_URL}, and ${PROD_UNION_EYES_URL}/api/ready is 200." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Verified: new revision ${READY} serves 200, links to ${PROD_UNION_EYES_URL}, and ${PROD_UNION_EYES_URL}/api/ready is 200." >> "$GITHUB_STEP_SUMMARY"
