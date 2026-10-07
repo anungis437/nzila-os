@@ -1,0 +1,320 @@
+name: Deploy Web (Production)
+
+# Governed production web build + deploy (CHG-2026-0111).
+#
+# Why this exists: nzila-os-web-prod used to run the mutable `nzila/web:latest`,
+# which the staging pipeline (gitops-deploy.yml) overwrites on every build. A
+# cold start of the prod app therefore silently pulled a STAGING artifact
+# (staging Union Eyes link, staging URLs). This workflow builds a prod-specific
+# artifact, tags it with the source SHA only (it never pushes `latest`), and
+# deploys it by immutable digest.
+#
+# Properties: immutable `prod-<sha>` tag, source SHA must be on main,
+# environment-specific build args, artifact inspected BEFORE push (must contain
+# the production Union Eyes URL and no retired/staging Union Eyes host),
+# `build` environment for push authority, `production` environment (main-only
+# branch policy) for deploy authority, change-window gate, health proof and
+# automatic rollback to the previous revision.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Commit on main to build (defaults to the dispatched ref SHA)
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-web-production
+  cancel-in-progress: false
+
+env:
+  ACR_NAME: nzilacanadaacr
+  IMAGE_REPO: nzilacanadaacr.azurecr.io/nzila/web
+  PROD_APP: nzila-os-web-prod
+  PROD_RG: nzila-canada-prod-rg
+  PROD_UNION_EYES_URL: https://app.unioneyes.app
+
+jobs:
+  plan:
+    name: Web Prod · Plan
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.plan.outputs.sha }}
+      tag: ${{ steps.plan.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: plan
+        shell: bash
+        env:
+          INPUT_SHA: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          SHA="${INPUT_SHA}"
+          if [ -z "$SHA" ]; then SHA="${GITHUB_SHA}"; fi
+          if ! [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::source_sha must be a full 40-character commit SHA (got '$SHA')."
+            exit 1
+          fi
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$SHA" origin/main; then
+            echo "::error::$SHA is not contained in origin/main. Production builds must come from main."
+            exit 1
+          fi
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "tag=prod-$SHA" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Plan"
+            echo "- Source SHA: \`$SHA\`"
+            echo "- Immutable tag: \`prod-$SHA\` (no \`latest\` is ever pushed)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  gates:
+    name: Web Prod · Gates
+    needs: plan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+      - uses: ./.github/actions/setup-monorepo
+      - name: Governance checks
+        run: pnpm exec tsx scripts/governance-check.ts
+      - name: Change window (PROD web)
+        run: node --import tsx scripts/validate-change-window.ts --env=PROD --service=web --commit=${{ needs.plan.outputs.sha }}
+
+      - name: Run contract tests (fail closed)
+        id: contract_tests
+        run: pnpm contract-tests
+
+      - name: SLO gate (fail closed)
+        id: slo_gate
+        run: node --import tsx scripts/slo-gate.ts --env=prod
+
+      - name: Generate SLO summary
+        if: always()
+        run: node --import tsx scripts/slo-gate.ts --env=prod > slo-summary.txt 2>&1 || true
+
+      - name: Upload SLO summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slo-summary-web-prod
+          path: slo-summary.txt
+          retention-days: 90
+
+      - name: Generate release attestation
+        if: always()
+        run: |
+          CONTRACT_FLAG="--contract-pass"
+          SLO_FLAG="--slo-pass"
+          if [ "${{ steps.contract_tests.outcome }}" = "failure" ]; then
+            CONTRACT_FLAG="--contract-fail"
+          fi
+          if [ "${{ steps.slo_gate.outcome }}" = "failure" ]; then
+            SLO_FLAG="--slo-fail"
+          fi
+          node --import tsx scripts/release-attestation.ts \
+            --sha ${{ needs.plan.outputs.sha }} \
+            $CONTRACT_FLAG $SLO_FLAG \
+            --env prod
+
+      - name: Upload release attestation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-attestation-web-prod
+          path: release-attestation.json
+          retention-days: 365
+  build:
+    name: Web Prod · Build, inspect, push
+    needs: [plan, gates]
+    runs-on: ubuntu-latest
+    # Push authority only: the `build` environment resolves the nzila-os-build
+    # identity (AcrPush on the registry, no deploy RBAC).
+    environment: build
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+
+      - name: Assert build identity is configured (fail-closed)
+        env:
+          BUILD_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          BUILD_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          BUILD_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUILD_CLIENT_ID}" ] || [ -z "${BUILD_TENANT_ID}" ] || [ -z "${BUILD_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No dedicated build identity configured on the 'build' GitHub Environment. Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, build identity)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ACR login
+        run: az acr login --name "${ACR_NAME}"
+
+      - name: Build prod web image (local, not pushed yet)
+        env:
+          SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          set -euo pipefail
+          docker build \
+            --target web \
+            --tag "local/web-prod-inspect:${SHA}" \
+            --build-arg APP_NAME=web \
+            --build-arg "TURBO_FILTER=--filter=@nzila/web" \
+            --build-arg BUILD_AUTH_PLACEHOLDER=ci_build_placeholder_secret_32_chars_x \
+            --build-arg NEXT_PUBLIC_APP_ENV=production \
+            --build-arg NEXT_PUBLIC_WEB_URL=https://nzilaventures.com \
+            --build-arg NEXT_PUBLIC_CONSOLE_URL=https://console.nzilaventures.com \
+            --build-arg NEXT_PUBLIC_PARTNERS_URL=https://partners.nzilaventures.com \
+            --build-arg "NEXT_PUBLIC_UNION_EYES_URL=${PROD_UNION_EYES_URL}" \
+            --build-arg NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
+            --build-arg NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
+            --build-arg NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
+            --build-arg NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
+            --build-arg "GITHUB_SHA=${SHA}" \
+            --build-arg "BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --build-arg "ARTIFACT_ID=${SHA}-web-prod" \
+            --build-arg "RELEASE_ID=${SHA}" \
+            .
+
+      - name: Inspect artifact before push (fail-closed)
+        env:
+          SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          set -euo pipefail
+          IMG="local/web-prod-inspect:${SHA}"
+          CID=$(docker create "$IMG")
+          mkdir -p /tmp/web-fs
+          docker export "$CID" | tar -x -C /tmp/web-fs app
+          docker rm "$CID" >/dev/null
+          test -d /tmp/web-fs/app
+          if ! grep -rIl --include='*.js' --include='*.html' --include='*.json' -F "${PROD_UNION_EYES_URL}" /tmp/web-fs/app >/dev/null 2>&1; then
+            echo "::error::Built artifact does not contain ${PROD_UNION_EYES_URL}."
+            exit 1
+          fi
+          BAD=$(grep -rIlE --include='*.js' --include='*.html' --include='*.json' 'nzila-os-union-eyes(-staging)?\.jollydune|staging\.unioneyes\.app/?"|staging-app\.unioneyes\.app/?"' /tmp/web-fs/app 2>/dev/null | head -5 || true)
+          if [ -n "$BAD" ]; then
+            echo "::error::Built artifact still references a retired or staging Union Eyes host:"
+            echo "$BAD"
+            exit 1
+          fi
+          echo "- Artifact contains \`${PROD_UNION_EYES_URL}\` and no retired/staging Union Eyes host." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push immutable tag and resolve digest
+        id: push
+        env:
+          SHA: ${{ needs.plan.outputs.sha }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if az acr repository show --name "${ACR_NAME}" --image "nzila/web:${TAG}" >/dev/null 2>&1; then
+            echo "::error::Tag nzila/web:${TAG} already exists. Production tags are immutable; refusing to overwrite."
+            exit 1
+          fi
+          docker tag "local/web-prod-inspect:${SHA}" "${IMAGE_REPO}:${TAG}"
+          docker push "${IMAGE_REPO}:${TAG}"
+          DIGEST=$(az acr repository show --name "${ACR_NAME}" --image "nzila/web:${TAG}" --query digest -o tsv)
+          case "$DIGEST" in sha256:*) : ;; *) echo "::error::Pushed image did not resolve to a sha256 digest (got '${DIGEST:-}')."; exit 1 ;; esac
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "- Pushed \`${IMAGE_REPO}:${TAG}\` = \`${DIGEST}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Web Prod · Deploy
+    needs: [plan, build]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Assert production deploy identity is configured (fail-closed)
+        env:
+          C: ${{ secrets.AZURE_CLIENT_ID }}
+          T: ${{ secrets.AZURE_TENANT_ID }}
+          S: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "$C" ] || [ -z "$T" ] || [ -z "$S" ]; then
+            echo "::error::No environment-scoped deployment identity for 'production'. Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, production identity)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Capture rollback target
+        id: before
+        run: |
+          set -euo pipefail
+          PREV_REV=$(az containerapp show --name "${PROD_APP}" --resource-group "${PROD_RG}" --query properties.latestRevisionName -o tsv)
+          PREV_IMAGE=$(az containerapp show --name "${PROD_APP}" --resource-group "${PROD_RG}" --query "properties.template.containers[0].image" -o tsv)
+          echo "prev_rev=${PREV_REV}" >> "$GITHUB_OUTPUT"
+          echo "prev_image=${PREV_IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "- Rollback target: revision \`${PREV_REV}\`, image \`${PREV_IMAGE}\`" >> "$GITHUB_STEP_SUMMARY"
+          case "$PREV_IMAGE" in
+            *@sha256:*) : ;;
+            *) echo "::warning::Previous image ${PREV_IMAGE} is not digest-pinned (first release off a mutable tag). Rollback by tag may not restore the previous artifact; every later release is digest-pinned."
+               echo "- WARNING: previous image is not digest-pinned; the rollback target is only as good as that tag." >> "$GITHUB_STEP_SUMMARY" ;;
+          esac
+
+      - name: Deploy by digest
+        env:
+          DIGEST: ${{ needs.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          case "$DIGEST" in sha256:*) : ;; *) echo "::error::Refusing to deploy a non-digest image reference (got '${DIGEST:-}')."; exit 1 ;; esac
+          az containerapp update \
+            --name "${PROD_APP}" \
+            --resource-group "${PROD_RG}" \
+            --image "${IMAGE_REPO}@${DIGEST}" \
+            --output none
+
+      - name: Health proof and Union Eyes link proof (auto-rollback on failure)
+        env:
+          PREV_REV: ${{ steps.before.outputs.prev_rev }}
+          PREV_IMAGE: ${{ steps.before.outputs.prev_image }}
+        run: |
+          set -uo pipefail
+          FQDN=$(az containerapp show --name "${PROD_APP}" --resource-group "${PROD_RG}" --query properties.configuration.ingress.fqdn -o tsv)
+          # The previous revision keeps serving until the new one is ready, so a bare
+          # HTTP 200 proves nothing. Require a NEW ready revision AND the expected content.
+          OK=0
+          CODE=000
+          for i in $(seq 1 45); do
+            READY=$(az containerapp show --name "${PROD_APP}" --resource-group "${PROD_RG}" --query properties.latestReadyRevisionName -o tsv 2>/dev/null || echo "")
+            CODE=$(curl -sS -o /tmp/home.html -w '%{http_code}' --max-time 30 "https://${FQDN}/" || echo 000)
+            if [ -n "$READY" ] && [ "$READY" != "$PREV_REV" ] && [ "$CODE" = "200" ] \
+               && grep -qF "${PROD_UNION_EYES_URL}" /tmp/home.html \
+               && ! grep -qE 'nzila-os-union-eyes(-staging)?\.jollydune' /tmp/home.html; then
+              OK=1
+              break
+            fi
+            sleep 20
+          done
+          UE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "${PROD_UNION_EYES_URL}/api/ready" || echo 000)
+          if [ "$UE" != "200" ]; then OK=0; fi
+          if [ "$OK" != "1" ]; then
+            echo "::error::Post-deploy proof failed (home=${CODE}, ready revision=${READY:-none}, previous=${PREV_REV}, union-eyes ready=${UE}). Rolling back to ${PREV_IMAGE}."
+            az containerapp update --name "${PROD_APP}" --resource-group "${PROD_RG}" --image "${PREV_IMAGE}" --output none || true
+            exit 1
+          fi
+          echo "- Verified: new revision ${READY} serves 200, links to ${PROD_UNION_EYES_URL}, and ${PROD_UNION_EYES_URL}/api/ready is 200." >> "$GITHUB_STEP_SUMMARY"
