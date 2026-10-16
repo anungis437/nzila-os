@@ -13,9 +13,9 @@ import {
 } from './replay-fake-django-baseline'
 
 const repositoryRoot = resolve(import.meta.dirname, '../../../..')
-const wheelhouse =
-  process.env.UE_FAKE_DJANGO_WHEELHOUSE ??
-  'C:\\Users\\AubertNungisa\\.copilot\\session-state\\72f80c17-f5ba-4bac-bc6c-35d3f4d306dd\\files\\w1\\wheelhouse'
+// The frozen Django wheelhouse is an operator-local artifact; without it the suite is skipped.
+const wheelhouse = process.env.UE_FAKE_DJANGO_WHEELHOUSE ?? ''
+const describeWithWheelhouse = wheelhouse ? describe : describe.skip
 const request = { repositoryRoot, wheelhouse }
 let baseline: SourceBoundDjangoBaseline
 
@@ -65,7 +65,7 @@ const example = `migrations.CreateModel(name="Example", fields=[
  ("quantity", models.PositiveIntegerField(default=0, db_index=True))],
  options={"db_table":"example"})`
 
-describe('source-bound incoming Django physical subset;not live/full graph authority', () => {
+describeWithWheelhouse('source-bound incoming Django physical subset;not live/full graph authority', () => {
   beforeAll(() => {
     baseline = loadSourceBoundDjangoBaseline(request)
   })
