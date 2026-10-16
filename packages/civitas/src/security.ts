@@ -1,8 +1,7 @@
 /**
- * Personal-data work stays closed until tenancy, authorization, encryption,
- * audit, retention, secrets, logging, backups, export, deletion, provenance,
- * and least privilege have been evaluated for that purpose.
- * This phase does not perform that evaluation and does not store personal data.
+ * Personal-data work stays closed. Phase 2.5 evaluated the platform controls
+ * and recorded HOLD. The evaluation does not open Phase 3 and does not store
+ * personal data. Findings live in privacy-readiness.ts and the doctrine docs.
  */
 
 export const PERSONAL_DATA_CONTROLS = [
@@ -24,16 +23,18 @@ export type PersonalDataControl = (typeof PERSONAL_DATA_CONTROLS)[number]
 
 export interface ControlEvaluation {
   readonly control: PersonalDataControl
-  readonly status: 'NOT_EVALUATED_FOR_PERSONAL_DATA'
+  readonly status: 'EVALUATED_INSUFFICIENT_FOR_PHASE_3'
 }
 
 export const PERSONAL_DATA_GATE = {
   personalDataWorkPermitted: false,
-  evaluationStatus: 'NOT_PERFORMED',
+  evaluationStatus: 'EVALUATED_HOLD',
+  phase3: 'CLOSED',
+  disposition: 'HOLD',
   controls: PERSONAL_DATA_CONTROLS.map(
     (control): ControlEvaluation => ({
       control,
-      status: 'NOT_EVALUATED_FOR_PERSONAL_DATA',
+      status: 'EVALUATED_INSUFFICIENT_FOR_PHASE_3',
     }),
   ),
 } as const

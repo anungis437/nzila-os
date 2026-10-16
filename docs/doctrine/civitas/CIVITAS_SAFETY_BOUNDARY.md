@@ -51,3 +51,14 @@ RED matters:
 ## What this phase does not do
 
 No deployment. No merge authority. No financial transaction. No personal data. No standing register. No scenario engine. No change to any other fleet member's permissions.
+
+## Phase 2.5 privacy
+
+Absence of a known pseudolaw indicator is not evidence that an unknown mechanism is lawful. An unrecognized free-text mechanism stays `UNRESOLVED` and does not become GREEN or AMBER. GREEN and AMBER still require the analysis contract.
+
+Personal-data readiness is HOLD. Phase 3 stays closed. The evaluation, the tier mapping, the threat model, and the entry conditions are in:
+
+- `CIVITAS_PRIVACY_READINESS.md`
+- `CIVITAS_DATA_CLASSIFICATION.md`
+- `CIVITAS_PERSONAL_DATA_THREAT_MODEL.md`
+- `CIVITAS_PHASE_3_ENTRY_GATE.md`

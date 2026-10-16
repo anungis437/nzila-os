@@ -17,13 +17,23 @@ export {
   BLACK_MECHANISM_IDS,
   FAULTY_DOCTRINES,
   KNOWN_PSEUDOLAW_INDICATORS,
+  MECHANISM_DISPOSITIONS,
+  evaluateMechanism,
   findFaultyDoctrine,
+  indicatorAbsenceIsLawfulEvidence,
   indicatorsAreExhaustive,
   proposeDoctrine,
   rejectFaultyDoctrine,
   rejectProhibitedMechanism,
 } from './pseudolaw'
-export type { DoctrineProposal, DoctrineRecognition, DoctrineRejection, ProhibitedMechanismId } from './pseudolaw'
+export type {
+  DoctrineProposal,
+  DoctrineRecognition,
+  DoctrineRejection,
+  MechanismDisposition,
+  MechanismEvaluation,
+  ProhibitedMechanismId,
+} from './pseudolaw'
 
 export { EVIDENCE_TIER_RULES, supportForProposition } from './evidence'
 export type {
@@ -74,6 +84,30 @@ export type { ConceptPhase, FutureConcept } from './concepts'
 
 export { PERSONAL_DATA_CONTROLS, PERSONAL_DATA_GATE, personalDataWorkAllowed } from './security'
 export type { ControlEvaluation, PersonalDataControl } from './security'
+
+export {
+  CIVITAS_TIER_MAPPING,
+  CREDENTIAL_REFERENCE_FIELDS,
+  PHASE_3_ENTRY_CONDITIONS,
+  PHASE_3_STATUS,
+  PLATFORM_DATA_TIERS,
+  PRIVACY_READINESS,
+  PRIVACY_READINESS_DISPOSITION,
+  REDTEAM_FINDINGS,
+  SECRET_MATERIAL_KINDS,
+  SYNTHETIC_GRAPH_PREVIEW,
+  acceptCredentialRecord,
+  acceptEvidencePayload,
+  authorizeAgentPersonalAccess,
+  authorizeFamilyRead,
+  civitasLogMeta,
+  grantIncapacityAccess,
+  personalDataMayEnterModelContext,
+  phase3Open,
+  readCivitasPersonalData,
+  syntheticPrincipalRead,
+} from './privacy-readiness'
+export type { AgentAccessDecision, PlatformDataTier, SecretMaterialKind, SyntheticReadDecision } from './privacy-readiness'
 
 export { FLEET_ARCHITECTURE_DEBT } from './fleet-debt'
 

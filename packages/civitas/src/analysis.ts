@@ -17,8 +17,8 @@ import type { CivitasEvidence, EpistemicLabel } from './evidence'
 import { supportForProposition } from './evidence'
 import type { DecisionClass, ProfessionalRole } from './decisions'
 import { classifyMatter } from './decisions'
-import { findFaultyDoctrine, rejectFaultyDoctrine, rejectProhibitedMechanism } from './pseudolaw'
-import type { DoctrineRejection, ProhibitedMechanismId } from './pseudolaw'
+import { evaluateMechanism, findFaultyDoctrine, rejectFaultyDoctrine, rejectProhibitedMechanism } from './pseudolaw'
+import type { DoctrineRejection, MechanismDisposition, ProhibitedMechanismId } from './pseudolaw'
 
 export interface ControlEffects {
   readonly control: string
@@ -98,6 +98,8 @@ export interface AnalysisResult {
   readonly projection: AdvisoryDecisionProjection | null
   readonly approvalOccurred: false
   readonly gateImpliesApproval: false
+  readonly mechanismDisposition: MechanismDisposition
+  readonly indicatorAbsenceIsLawfulEvidence: false
 }
 
 const JURISDICTION_CODE = /^[A-Z]{2}(-[A-Z0-9]{1,3})?$/
@@ -111,6 +113,7 @@ function blocked(input: {
   readonly lawfulPathway?: string | null
   readonly verifierReviewRequired?: boolean
   readonly professionalGate?: readonly ProfessionalRole[]
+  readonly mechanismDisposition?: MechanismDisposition
 }): AnalysisResult {
   return {
     ok: false,
@@ -131,6 +134,8 @@ function blocked(input: {
     projection: null,
     approvalOccurred: false,
     gateImpliesApproval: false,
+    mechanismDisposition: input.mechanismDisposition ?? 'UNRESOLVED',
+    indicatorAbsenceIsLawfulEvidence: false,
   }
 }
 
@@ -172,6 +177,7 @@ export function analyze(input: AnalysisInput): AnalysisResult {
       lawfulPathway: rejection.lawfulMechanism,
       verifierReviewRequired: true,
       professionalGate: ['lawyer'],
+      mechanismDisposition: 'PROHIBITED',
     })
   }
 
@@ -186,6 +192,22 @@ export function analyze(input: AnalysisInput): AnalysisResult {
       lawfulPathway: rejection.lawfulMechanism,
       verifierReviewRequired: true,
       professionalGate: ['lawyer'],
+      mechanismDisposition: 'PROHIBITED',
+    })
+  }
+
+  const unrecognized = evaluateMechanism({
+    mechanismText: input.mechanismText,
+    affirmativeLawfulBasis: true,
+  })
+  if ((input.mechanismText?.trim() ?? '').length > 0 && unrecognized.disposition === 'UNRESOLVED') {
+    return blocked({
+      code: 'MECHANISM_UNRESOLVED',
+      decisionClass: null,
+      jurisdiction: resolveJurisdiction(input),
+      uncertainty: input.uncertainty,
+      verifierReviewRequired: true,
+      mechanismDisposition: 'UNRESOLVED',
     })
   }
 
@@ -322,5 +344,10 @@ export function analyze(input: AnalysisInput): AnalysisResult {
     projection,
     approvalOccurred: false,
     gateImpliesApproval: false,
+    mechanismDisposition: evaluateMechanism({
+      mechanismText: input.mechanismText,
+      affirmativeLawfulBasis: classified.decisionClass === 'GREEN' || classified.decisionClass === 'AMBER',
+    }).disposition,
+    indicatorAbsenceIsLawfulEvidence: false,
   }
 }

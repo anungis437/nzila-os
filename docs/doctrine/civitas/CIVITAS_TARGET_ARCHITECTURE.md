@@ -1,6 +1,6 @@
 # CIVITAS Target Architecture
 
-Level 8 is a target: Personal Institutional Sovereignty Intelligence. It is not implemented. Phase 0–1 is the foundation. Phase 2 adds a legal-authority substrate and does not store a personal record, run a scenario engine, or open a standing register.
+Level 8 is a target: Personal Institutional Sovereignty Intelligence. It is not implemented. Phase 0–1 is the foundation. Phase 2 adds a legal-authority substrate. Phase 2.5 evaluated privacy readiness as HOLD and left Phase 3 closed. This does not store a personal record, run a scenario engine, or open a standing register.
 
 Personal data stays separated from doctrine. Doctrine and the analysis contract contain no personal record.
 
@@ -10,8 +10,9 @@ Personal data stays separated from doctrine. Doctrine and the analysis contract 
 | --- | --- | --- |
 | 0 | Fleet registration | Foundation, still in force |
 | 1 | Doctrine, analysis contract, evidence hierarchy | Foundation, still in force |
-| 2 | Authority intelligence substrate | This change. Not a reasoning engine |
-| 3 | Personal institutional graph | Target, after the privacy evaluation below |
+| 2 | Authority intelligence substrate | In force. Not a reasoning engine |
+| 2.5 | Personal-data and privacy readiness | Evaluated. Disposition HOLD. Phase 3 stays closed |
+| 3 | Personal institutional graph | CLOSED. See `CIVITAS_PHASE_3_ENTRY_GATE.md` |
 | 4 | Obligations and rights | Target |
 | 5 | Asset and dependency | Target |
 | 6 | Continuity | Target |
@@ -79,6 +80,6 @@ A handoff, when a later phase produces one, carries the objective, jurisdiction,
 
 ## Privacy evaluation before any personal-data work
 
-The following controls exist elsewhere in the platform and have not been evaluated for a personal institutional record: tenancy, authorization, encryption, audit, retention, secrets, logging, backups, export, deletion, provenance, and least privilege. Until that evaluation is done, personal-data work stays closed. This phase stores nothing personal and logs nothing personal.
+Phase 2.5 evaluated tenancy, authorization, encryption, audit, retention, secrets, logging, backups, export, deletion, provenance, and least privilege for the max-risk personal envelope. The disposition is HOLD. Those controls are not sufficient to open a personal institutional graph. Personal-data work stays closed. This phase stores nothing personal and logs nothing personal. Detail is in `CIVITAS_PRIVACY_READINESS.md` and `CIVITAS_PHASE_3_ENTRY_GATE.md`.
 
 Anti-surveillance doctrine still applies. CIVITAS does not rank individuals, profile behavior, or score performance. A future self-directed record would still have to pass that doctrine. It is not authorized here.

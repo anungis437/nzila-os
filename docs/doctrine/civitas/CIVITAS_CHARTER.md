@@ -4,7 +4,7 @@ CIVITAS is a specialist agent for lawful autonomy, jurisdiction, and continuity.
 
 Package: `@nzila/civitas` (`packages/civitas`).
 
-Phase in force: 2, on the Phase 0–1 foundation. Later phases in `CIVITAS_TARGET_ARCHITECTURE.md` are targets. Phase 2 adds a legal-authority substrate. It does not add execution authority.
+Phase in force: 2, on the Phase 0–1 foundation. Phase 2.5 evaluated personal-data readiness and left Phase 3 closed. Phase 2 adds a legal-authority substrate. It does not add execution authority.
 
 ## Mission
 

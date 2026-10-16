@@ -208,6 +208,79 @@ export function indicatorsAreExhaustive(): false {
   return false
 }
 
+export const MECHANISM_DISPOSITIONS = [
+  'PROHIBITED',
+  'AFFIRMATIVELY_EVALUATED_LAWFUL',
+  'UNRESOLVED',
+] as const
+
+export type MechanismDisposition = (typeof MECHANISM_DISPOSITIONS)[number]
+
+/**
+ * Absence of an indicator or a prohibited-mechanism id is not evidence of lawfulness.
+ * This function always returns false.
+ */
+export function indicatorAbsenceIsLawfulEvidence(): false {
+  return false
+}
+
+export interface MechanismEvaluation {
+  readonly disposition: MechanismDisposition
+  readonly indicatorAbsenceIsLawfulEvidence: false
+  readonly matchedIndicator: boolean
+}
+
+/**
+ * Deterministic sentinel check. No classifier.
+ * An unrecognized free-text mechanism stays UNRESOLVED even if the caller
+ * asserts an affirmative lawful basis. That basis is accepted only when
+ * there is no free-text mechanism to excuse.
+ */
+export function evaluateMechanism(input: {
+  readonly mechanismText?: string | null
+  readonly prohibitedMechanismId?: ProhibitedMechanismId | null
+  readonly affirmativeLawfulBasis: boolean
+}): MechanismEvaluation {
+  if (input.prohibitedMechanismId) {
+    return {
+      disposition: 'PROHIBITED',
+      indicatorAbsenceIsLawfulEvidence: false,
+      matchedIndicator: false,
+    }
+  }
+
+  const text = input.mechanismText?.trim() ?? ''
+  if (text.length > 0 && findFaultyDoctrine(text)) {
+    return {
+      disposition: 'PROHIBITED',
+      indicatorAbsenceIsLawfulEvidence: false,
+      matchedIndicator: true,
+    }
+  }
+
+  if (text.length > 0) {
+    return {
+      disposition: 'UNRESOLVED',
+      indicatorAbsenceIsLawfulEvidence: false,
+      matchedIndicator: false,
+    }
+  }
+
+  if (input.affirmativeLawfulBasis) {
+    return {
+      disposition: 'AFFIRMATIVELY_EVALUATED_LAWFUL',
+      indicatorAbsenceIsLawfulEvidence: false,
+      matchedIndicator: false,
+    }
+  }
+
+  return {
+    disposition: 'UNRESOLVED',
+    indicatorAbsenceIsLawfulEvidence: false,
+    matchedIndicator: false,
+  }
+}
+
 const PROHIBITED_MECHANISM_DOCTRINE: Record<
   ProhibitedMechanismId,
   {
