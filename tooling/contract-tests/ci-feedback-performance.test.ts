@@ -100,6 +100,59 @@ describe('parallel lint/typecheck merge authority', () => {
   )
 })
 
+describe('parallel unit coverage authority', () => {
+  const ci = parse(read('.github/workflows/ci.yml'))
+  const worker = ci.jobs['test-workers']
+  const gate = ci.jobs.test
+  const coverage = worker.steps.find((step: { name?: string }) => step.name === 'Run tests with coverage')
+  const bash = process.platform === 'win32'
+    ? join(process.env.ProgramFiles ?? 'C:\\Program Files', 'Git', 'bin', 'bash.exe')
+    : 'bash'
+
+  it('starts both complete coverage lanes after classification with isolated migrated databases', () => {
+    expect(worker.needs).toEqual(['classify'])
+    expect(worker.if).toBe("needs.classify.outputs.test == 'APPLICABLE'")
+    expect(worker.strategy['fail-fast']).toBe(false)
+    expect(worker.strategy.matrix.lane).toEqual(['shared', 'union-eyes'])
+    expect(worker.services.postgres.image).toBe('postgres:16')
+    expect(worker.steps.find((step: { name?: string }) => step.name === 'Run migrations').run)
+      .toBe('pnpm --filter @nzila/db db:migrate')
+    expect(worker.steps.find((step: { name?: string }) => step.name === 'Run transferred orphan merge-correctness tests').if)
+      .toBe("matrix.lane == 'shared'")
+    expect(gate.name).toBe('Unit Tests')
+    expect(gate.needs).toEqual(['classify', 'test-workers'])
+    expect(gate.if).toBe("always() && needs.classify.outputs.test == 'APPLICABLE'")
+    expect(ci.jobs['reconcile-frozen-head'].needs).toContain('test-workers')
+    const upload = worker.steps.find((step: { name?: string }) => step.name === 'Upload coverage reports')
+    expect(upload.with.name).toContain('${{ matrix.lane }}')
+  })
+
+  it.each(['shared', 'union-eyes', 'unknown'])('executes only the exact %s lane and rejects unknown lanes', (lane) => {
+    const result = spawnSync(bash, ['-e', '-c', 'pnpm() { printf "%s\\n" "$*"; }; export -f pnpm;\n' + coverage.run], {
+      cwd: ROOT, env: { ...process.env, UNIT_LANE: lane }, encoding: 'utf8',
+    })
+    expect(result.error).toBeUndefined()
+    expect(result.status).toBe(lane === 'unknown' ? 1 : 0)
+    if (lane !== 'unknown') {
+      expect(result.stdout.trim()).toBe(`test:coverage --force --filter=${lane === 'shared' ? '!' : ''}@nzila/union-eyes`)
+    }
+  })
+
+  it.each(['success', 'failure', 'cancelled', 'skipped'])('requires successful coverage workers: %s', (outcome) => {
+    const result = spawnSync(bash, ['-e', '-c', gate.steps[0].run], {
+      cwd: ROOT, env: { ...process.env, UNIT_RESULT: outcome }, encoding: 'utf8',
+    })
+    expect(result.status).toBe(outcome === 'success' ? 0 : 1)
+  })
+
+  it('propagates coverage command failures', () => {
+    const result = spawnSync(bash, ['-e', '-c', 'pnpm() { return 7; }; export -f pnpm;\n' + coverage.run], {
+      cwd: ROOT, env: { ...process.env, UNIT_LANE: 'union-eyes' }, encoding: 'utf8',
+    })
+    expect(result.status).toBe(7)
+  })
+})
+
 describe('owner-declared routine build scope', () => {
   it('retains the seven chosen apps and partitions the entire selected build universe', () => {
     const plan = scopedBuildPlan(ROOT)

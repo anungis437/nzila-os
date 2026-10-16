@@ -134,11 +134,15 @@ jobs:
           test "$LINT_RESULT" = success
           test "$TYPECHECK_RESULT" = success
 
-  test:
+  test-workers:
     needs: [classify]
     if: needs.classify.outputs.test == 'APPLICABLE'
     runs-on: ubuntu-latest
-    name: Unit Tests
+    name: Unit coverage (${{ matrix.lane }})
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [shared, union-eyes]
     services:
       postgres:
         image: postgres:16
@@ -163,8 +167,17 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
       - name: Run tests with coverage
-        run: pnpm test:coverage
+        run: |
+          set -euo pipefail
+          # Keep the existing root coverage command, concurrency and package thresholds.
+          node -e 'const p=require("./package.json"); if(p.scripts["test:coverage"]!=="turbo test:coverage --concurrency=4" || p.scripts["pretest:coverage"] || p.scripts["posttest:coverage"]) process.exit(1)'
+          case "$UNIT_LANE" in
+            shared) pnpm test:coverage --force '--filter=!@nzila/union-eyes' ;;
+            union-eyes) pnpm test:coverage --force '--filter=@nzila/union-eyes' ;;
+            *) exit 1 ;;
+          esac
         env:
+          UNIT_LANE: ${{ matrix.lane }}
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           P3_2_MIGRATION_TEST_URL: postgresql://postgres:postgres@localhost:5432/test_db
           UE_0108_MIGRATION_TEST_URL: postgresql://postgres:postgres@localhost:5432/test_db
@@ -173,6 +186,7 @@ jobs:
       # E5-E: transfer TEST_FAST_ONLY orphan merge-correctness projects into Unit Tests job.
       # Preserves vitest project configs/aliases/timeouts/assertions; does not alter RG.
       - name: Run transferred orphan merge-correctness tests
+        if: matrix.lane == 'shared'
         run: |
           set -euo pipefail
           pnpm exec vitest run --project system-boundary-tests --project e2e-platform
@@ -188,24 +202,36 @@ jobs:
       - name: Package coverage
         if: always()
         run: |
-          set -e
-          tar --exclude='node_modules' --exclude='.pnpm-store' --exclude='.git' --exclude='.turbo' \
-              -czf coverage-reports.tar.gz \
-              $( [ -d coverage ]       && echo coverage       || true ) \
-              $( [ -f coverage.xml ]   && echo coverage.xml   || true ) \
-              $( [ -d coverage_html ]  && echo coverage_html  || true ) || true
-          ls -lh coverage-reports.tar.gz || true
+          set -euo pipefail
+          find . -type d \( -name node_modules -o -name .pnpm-store -o -name .git -o -name .turbo \) -prune -o \
+            -type d \( -name coverage -o -name coverage_html \) -print0 -prune -o \
+            -type f -name coverage.xml -print0 > coverage-paths.txt
+          if [ -s coverage-paths.txt ]; then
+            tar --null -T coverage-paths.txt -czf coverage-reports.tar.gz
+            ls -lh coverage-reports.tar.gz
+          fi
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-reports-${{ github.run_id }}
+          name: coverage-reports-${{ github.run_id }}-${{ matrix.lane }}
           path: coverage-reports.tar.gz
           if-no-files-found: warn
           retention-days: 30
           compression-level: 0
           overwrite: true
+
+  test:
+    needs: [classify, test-workers]
+    if: always() && needs.classify.outputs.test == 'APPLICABLE'
+    runs-on: ubuntu-latest
+    name: Unit Tests
+    steps:
+      - name: Require all unit coverage workers
+        env:
+          UNIT_RESULT: ${{ needs.test-workers.result }}
+        run: test "$UNIT_RESULT" = success
 
   sage-live-postgres:
     needs: [classify]
@@ -972,6 +998,7 @@ jobs:
       - typecheck
       - lint-and-typecheck
       - test
+      - test-workers
       - sage-live-postgres
       - sage-postgres-concurrency
       - build
