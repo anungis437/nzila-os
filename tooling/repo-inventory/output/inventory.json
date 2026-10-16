@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-06T00:00:00.000Z",
+  "generatedAt": "2026-10-16T00:00:00.000Z",
   "appCount": 28,
   "packageCount": 224,
   "workspacePackageCount": 258,
   "workflowCount": 59,
   "contractTestCount": 291,
-  "tsTestFileCount": 2693,
+  "tsTestFileCount": 2700,
   "pythonTestFileCount": 35,
   "apps": [
     {
@@ -122,7 +122,7 @@
       "dependsOnPlatformAuth": false,
       "nzilaDeps": [],
       "purpose": "",
-      "codeFileCount": 0
+      "codeFileCount": 24
     },
     {
       "name": "console",

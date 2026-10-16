@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-10-06 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-10-16 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -11,7 +11,7 @@
 | Workspace Packages (apps|packages|services|tooling) | 258 |
 | GitHub Workflows | 59 |
 | Contract Test Files | 291 |
-| TS/JS Test Files | 2693 |
+| TS/JS Test Files | 2700 |
 | Python Test Files | 35 |
 
 ## Apps
@@ -21,7 +21,7 @@
 | abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 304 | CourtLens — governed access-to-justice and legal matter-intelligence platform. |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 106 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 238 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
-| civic | Next.js | — | ✅ | ✅ | ❌ | ❌ | 0 |  |
+| civic | Next.js | — | ✅ | ✅ | ❌ | ❌ | 24 |  |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 448 | Internal operations console — platform governance, compliance, analytics, integr |
 | control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 332 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 43 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |

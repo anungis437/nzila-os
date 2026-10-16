@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "ignoreDeprecations": "6.0",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@nzila/platform-contracts/identity": ["../../packages/platform-contracts/src/identity.ts"],
+      "@nzila/platform-contracts/org-scope": ["../../packages/platform-contracts/src/org-scope.ts"],
+      "@nzila/platform-contracts/role": ["../../packages/platform-contracts/src/role.ts"],
+      "@nzila/platform-contracts/audit-event": ["../../packages/platform-contracts/src/audit-event.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts", "vitest.config.ts"]
+}
