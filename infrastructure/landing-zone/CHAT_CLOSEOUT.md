@@ -161,3 +161,21 @@ authorized by merging this archive.
 The known census serialization defect requires a separately scoped repair and
 qualification decision. No unused allowance is inferred from the failed
 pre-consumption dispatch. The full outer transaction remains unexecuted.
+
+## CI follow-up: ops evidence and branch naming
+
+The initial closeout PR used the historical `g2/synthetic-health-source` branch,
+which the existing branch policy does not accept. The replacement closeout uses
+`ops/institutional-infra-chat-closeout`; no naming-policy exception was added.
+
+The ops-pack check also rejected the generated snapshot after its seven-day
+freshness window. `pnpm ops:evidence` regenerated the JSON and Markdown snapshot
+using the existing generator. This is a fresh assembly of the committed inputs,
+not new telemetry: DORA and cost inputs still have their original 2026-08-25
+collection times. Numeric values are unchanged; unavailable metrics remain
+`null` with their original source requirements. No GitHub build-metrics token,
+Azure API, product rollout, or infrastructure qualification was used.
+
+The ops-pack validator and the branch-policy validator both passed locally on
+the replacement branch. This does not waive any other CI check or change the
+blocked runtime and product dispositions above.
