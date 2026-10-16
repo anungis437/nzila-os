@@ -42,6 +42,11 @@ describe('CI feedback caching', () => {
     expect(cache.with.key).toContain("hashFiles('pnpm-lock.yaml')")
     expect(cache.with['restore-keys'].trim().split('\n')).toHaveLength(1)
     expect(cache.with['restore-keys']).toContain("hashFiles('pnpm-lock.yaml')")
+    expect(cache.env.SEGMENT_DOWNLOAD_TIMEOUT_MINS).toBe('1')
+    const nodeSetup = setup.runs.steps.find(
+      (step: { uses?: string }) => step.uses === 'actions/setup-node@v6',
+    )
+    expect(nodeSetup.env.SEGMENT_DOWNLOAD_TIMEOUT_MINS).toBe('1')
   })
 
   it('hashes all tracked package inputs, including actions, database and CLI sources', () => {
