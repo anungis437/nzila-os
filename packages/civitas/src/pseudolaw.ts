@@ -1,5 +1,9 @@
 /**
- * Pseudolaw and prohibited-mechanism rejection.
+ * Pseudolaw indicators and prohibited-mechanism rejection.
+ *
+ * KNOWN_PSEUDOLAW_INDICATORS is a fixed, supplemental list. It is not
+ * exhaustive detection. BLACK comes from the prohibited-mechanism doctrine.
+ * A premise can be BLACK when none of the indicator strings are present.
  *
  * Response pattern: name the faulty doctrine, explain why it fails,
  * identify the legitimate underlying issue, and redirect to a lawful mechanism.
@@ -39,7 +43,7 @@ interface FaultyDoctrine {
   readonly lawfulMechanism: string
 }
 
-export const FAULTY_DOCTRINES = [
+export const KNOWN_PSEUDOLAW_INDICATORS = [
   {
     id: 'sovereign-citizen',
     name: 'Sovereign-citizen doctrine',
@@ -186,6 +190,9 @@ export const FAULTY_DOCTRINES = [
   },
 ] as const satisfies readonly FaultyDoctrine[]
 
+/** Prior name of the indicator list. The list is supplemental, not exhaustive. */
+export const FAULTY_DOCTRINES = KNOWN_PSEUDOLAW_INDICATORS
+
 export const BLACK_MECHANISM_IDS = [
   'fraud',
   'concealment',
@@ -195,11 +202,80 @@ export const BLACK_MECHANISM_IDS = [
   'misrepresentation',
 ] as const
 
+export type ProhibitedMechanismId = (typeof BLACK_MECHANISM_IDS)[number]
+
+export function indicatorsAreExhaustive(): false {
+  return false
+}
+
+const PROHIBITED_MECHANISM_DOCTRINE: Record<
+  ProhibitedMechanismId,
+  {
+    readonly name: string
+    readonly whyItFails: string
+    readonly legitimateUnderlyingIssue: string
+    readonly lawfulMechanism: string
+  }
+> = {
+  fraud: {
+    name: 'Fraud',
+    whyItFails: 'A false statement made to obtain an advantage is fraud. A lawful structure cannot depend on it.',
+    legitimateUnderlyingIssue: 'A wish to achieve the underlying outcome by a true account of the facts.',
+    lawfulMechanism: 'An accurate filing or agreement, and a lawyer where the consequence is material.',
+  },
+  concealment: {
+    name: 'Concealment',
+    whyItFails: 'Hiding a fact that the law requires to be disclosed is concealment. Privacy does not authorize it.',
+    legitimateUnderlyingIssue: 'A question about what must be disclosed and what privacy law still protects.',
+    lawfulMechanism: 'The disclosure regime that applies, with privacy limited to what that regime allows.',
+  },
+  evasion: {
+    name: 'Evasion',
+    whyItFails: 'Defeating a mandatory duty by non-disclosure or disguise is evasion. Optimization that depends on that defeat is prohibited.',
+    legitimateUnderlyingIssue: 'A wish to reduce or dispute an obligation within the law.',
+    lawfulMechanism: 'The statute that imposes the duty, and the objection or review process it provides, with a professional where the matter is professional-risk.',
+  },
+  pseudolaw: {
+    name: 'Pseudolaw',
+    whyItFails: 'A self-declared exemption does not displace the statute, code, or court that applies. Courts decide jurisdiction from law.',
+    legitimateUnderlyingIssue: 'A real dispute about a debt, charge, tax, status, or obligation.',
+    lawfulMechanism: 'The statute or civil code that applies and the competent court or administrative process.',
+  },
+  obstruction: {
+    name: 'Obstruction',
+    whyItFails: 'Autonomy does not include interfering with a lawful process.',
+    legitimateUnderlyingIssue: 'A wish to contest or comply with a process.',
+    lawfulMechanism: 'Participation in the process, the disclosure the law requires, and counsel where the matter is professional-risk.',
+  },
+  misrepresentation: {
+    name: 'Misrepresentation',
+    whyItFails: 'A material untruth in a filing, contract, or disclosure is misrepresentation.',
+    legitimateUnderlyingIssue: 'A wish to present a structure that will be believed.',
+    lawfulMechanism: 'Disclosure that matches the substance of the arrangement.',
+  },
+}
+
 export function findFaultyDoctrine(text: string): FaultyDoctrine | undefined {
   const normalized = normalize(text)
-  return FAULTY_DOCTRINES.find((doctrine) =>
+  return KNOWN_PSEUDOLAW_INDICATORS.find((doctrine) =>
     doctrine.patterns.some((pattern) => normalized.includes(normalize(pattern))),
   )
+}
+
+/**
+ * BLACK from the closed mechanism doctrine. Indicator strings are not consulted.
+ * Scores, preferences, recommendations, sources, and review markers cannot flip it.
+ */
+export function rejectProhibitedMechanism(mechanismId: ProhibitedMechanismId): DoctrineRejection {
+  const doctrine = PROHIBITED_MECHANISM_DOCTRINE[mechanismId]
+  return {
+    accepted: false,
+    decisionClass: 'BLACK',
+    faultyDoctrine: doctrine.name,
+    whyItFails: doctrine.whyItFails,
+    legitimateUnderlyingIssue: doctrine.legitimateUnderlyingIssue,
+    lawfulMechanism: doctrine.lawfulMechanism,
+  }
 }
 
 export function rejectFaultyDoctrine(doctrine: FaultyDoctrine): DoctrineRejection {

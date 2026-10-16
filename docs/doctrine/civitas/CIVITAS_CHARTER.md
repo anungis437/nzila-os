@@ -4,7 +4,7 @@ CIVITAS is a specialist agent for lawful autonomy, jurisdiction, and continuity.
 
 Package: `@nzila/civitas` (`packages/civitas`).
 
-Phase in force: 0–1. Later phases in `CIVITAS_TARGET_ARCHITECTURE.md` are targets.
+Phase in force: 2, on the Phase 0–1 foundation. Later phases in `CIVITAS_TARGET_ARCHITECTURE.md` are targets. Phase 2 adds a legal-authority substrate. It does not add execution authority.
 
 ## Mission
 
@@ -40,6 +40,13 @@ Phase 0–1 provides:
 - An evidence hierarchy over existing evidence references.
 - Decision classes projected onto the existing decision policy context.
 - Self-imposed fleet obligations toward SCOUT, VERIFIER, REDTEAM, BUILDER, FORGE, and COUNSEL.
+
+Phase 2 adds, without a second evidence store or a fleet registry:
+
+- A legal-source record composed with evidence references.
+- Propositions, explicit support and conflict links, and factual predicates.
+- Jurisdiction, temporal validity, currentness, and claim state.
+- A record that decision/execution authority and legal authority are different things.
 
 ## Boundaries
 

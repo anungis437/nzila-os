@@ -8,7 +8,9 @@
  * decisioning, and no self-representation as counsel of record.
  */
 
-export const CIVITAS_PHASE = '0-1' as const
+export const CIVITAS_FOUNDATION_PHASE = '0-1' as const
+
+export const CIVITAS_PHASE = '2' as const
 
 export const DEFAULT_JURISDICTION = 'CA-QC' as const
 
@@ -36,6 +38,7 @@ export const CIVITAS_IDENTITY = {
   executionAuthority: 'none',
   counselOfRecord: false,
   phase: CIVITAS_PHASE,
+  foundationPhase: CIVITAS_FOUNDATION_PHASE,
   personalDataStored: false,
   deploymentCapability: false,
   inheritsGovernanceControls: [

@@ -17,8 +17,8 @@ import type { CivitasEvidence, EpistemicLabel } from './evidence'
 import { supportForProposition } from './evidence'
 import type { DecisionClass, ProfessionalRole } from './decisions'
 import { classifyMatter } from './decisions'
-import { findFaultyDoctrine, rejectFaultyDoctrine } from './pseudolaw'
-import type { DoctrineRejection } from './pseudolaw'
+import { findFaultyDoctrine, rejectFaultyDoctrine, rejectProhibitedMechanism } from './pseudolaw'
+import type { DoctrineRejection, ProhibitedMechanismId } from './pseudolaw'
 
 export interface ControlEffects {
   readonly control: string
@@ -49,6 +49,14 @@ export interface AnalysisInput {
   readonly recommendation: string
   readonly matterKind?: string
   readonly mechanismText?: string
+  readonly prohibitedMechanism?: ProhibitedMechanismId
+  readonly benefitScore?: unknown
+  readonly autonomyScore?: unknown
+  readonly confidenceScore?: unknown
+  readonly userPreference?: unknown
+  readonly agentRecommendation?: unknown
+  readonly professionalReviewMarker?: unknown
+  readonly sourceMetadata?: unknown
 }
 
 export interface AdvisoryDecisionProjection {
@@ -88,6 +96,8 @@ export interface AnalysisResult {
   readonly lawfulPathway: string | null
   readonly rejection: DoctrineRejection | null
   readonly projection: AdvisoryDecisionProjection | null
+  readonly approvalOccurred: false
+  readonly gateImpliesApproval: false
 }
 
 const JURISDICTION_CODE = /^[A-Z]{2}(-[A-Z0-9]{1,3})?$/
@@ -119,6 +129,8 @@ function blocked(input: {
     lawfulPathway: input.lawfulPathway ?? null,
     rejection: input.rejection ?? null,
     projection: null,
+    approvalOccurred: false,
+    gateImpliesApproval: false,
   }
 }
 
@@ -142,6 +154,27 @@ function scanText(input: AnalysisInput): DoctrineRejection | null {
 }
 
 export function analyze(input: AnalysisInput): AnalysisResult {
+  if (input.prohibitedMechanism) {
+    const rejection = rejectProhibitedMechanism(input.prohibitedMechanism)
+    void input.benefitScore
+    void input.autonomyScore
+    void input.confidenceScore
+    void input.userPreference
+    void input.agentRecommendation
+    void input.professionalReviewMarker
+    void input.sourceMetadata
+    return blocked({
+      code: 'BLACK_MECHANISM',
+      decisionClass: 'BLACK',
+      jurisdiction: resolveJurisdiction(input),
+      uncertainty: input.uncertainty,
+      rejection,
+      lawfulPathway: rejection.lawfulMechanism,
+      verifierReviewRequired: true,
+      professionalGate: ['lawyer'],
+    })
+  }
+
   const rejection = scanText(input)
   if (rejection) {
     return blocked({
@@ -287,5 +320,7 @@ export function analyze(input: AnalysisInput): AnalysisResult {
     lawfulPathway: input.recommendation,
     rejection: null,
     projection,
+    approvalOccurred: false,
+    gateImpliesApproval: false,
   }
 }

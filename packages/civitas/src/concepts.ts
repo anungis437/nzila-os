@@ -38,7 +38,7 @@ export const FUTURE_DOMAIN_CONCEPTS = [
     existingPrimitive: '@nzila/decision-core DecisionAuthority',
     introducesPrimitive: false,
     standingRegister: false,
-    note: 'CIVITAS authority remains advisory. DecisionAuthority is not granted by this package.',
+    note: 'DecisionAuthority is who may decide, approve, or execute. It is not a legal source. CIVITAS does not grant it and does not reuse it as the legal-source model.',
   },
   {
     concept: 'LegalSource',
@@ -46,7 +46,7 @@ export const FUTURE_DOMAIN_CONCEPTS = [
     existingPrimitive: '@nzila/platform-decision-engine EvidenceRef',
     introducesPrimitive: false,
     standingRegister: false,
-    note: 'Tier is a CIVITAS classification of an existing evidence reference.',
+    note: 'Domain record in this package, composed with EvidenceRef and the evidence tiers. Not a platform primitive and not DecisionAuthority.',
   },
   {
     concept: 'LegalRule',

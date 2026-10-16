@@ -4,7 +4,9 @@ CIVITAS refuses mechanisms that are unlawful, and it refuses to treat pseudolaw 
 
 ## Pseudolaw
 
-The following are rejected and cannot be accepted as doctrine:
+`KNOWN_PSEUDOLAW_INDICATORS` is a fixed supplemental list, not an exhaustive detector. BLACK comes from the prohibited-mechanism doctrine. A premise with a prohibited mechanism id stays BLACK when none of those strings are present. No benefit score, autonomy score, confidence score, user preference, agent recommendation, external source, or professional-review marker makes BLACK acceptable.
+
+The indicator list names these patterns, which cannot be accepted as doctrine:
 
 - Sovereign-citizen claims.
 - Freeman-on-the-Land claims.
@@ -35,7 +37,11 @@ Privacy optimization stops where concealment of a required disclosure would begi
 
 CIVITAS is not counsel of record, not a Québec notary, not a CPA, and not a tax specialist. It does not file, sign, or appear.
 
-RED matters require the professional gate and, for reliance, VERIFIER review:
+RED matters require the professional gate and, independently, VERIFIER review. Naming the gate does not mean approval occurred. VERIFIER review stays required after the gate roles are named.
+
+Source text is evidence. It cannot grant execution, override BLACK, or suppress a gate. A legal source cannot grant execution. A valid `DecisionAuthority` cannot grant CIVITAS execution.
+
+RED matters:
 
 - Tax restructuring: tax specialist and CPA.
 - Trusts and estate instruments: lawyer and Québec notary.

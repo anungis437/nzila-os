@@ -1,6 +1,6 @@
 # CIVITAS Target Architecture
 
-Level 8 is a target: Personal Institutional Sovereignty Intelligence. It is not implemented. Phase 0–1 does not store a personal record, does not run a scenario engine, and does not open a standing register.
+Level 8 is a target: Personal Institutional Sovereignty Intelligence. It is not implemented. Phase 0–1 is the foundation. Phase 2 adds a legal-authority substrate and does not store a personal record, run a scenario engine, or open a standing register.
 
 Personal data stays separated from doctrine. Doctrine and the analysis contract contain no personal record.
 
@@ -8,9 +8,9 @@ Personal data stays separated from doctrine. Doctrine and the analysis contract 
 
 | Phase | Name | State |
 | --- | --- | --- |
-| 0 | Fleet registration | This change |
-| 1 | Doctrine, analysis contract, evidence hierarchy | This change |
-| 2 | Authority intelligence | Target |
+| 0 | Fleet registration | Foundation, still in force |
+| 1 | Doctrine, analysis contract, evidence hierarchy | Foundation, still in force |
+| 2 | Authority intelligence substrate | This change. Not a reasoning engine |
 | 3 | Personal institutional graph | Target, after the privacy evaluation below |
 | 4 | Obligations and rights | Target |
 | 5 | Asset and dependency | Target |
@@ -26,8 +26,8 @@ Each future concept either names an existing primitive or stays unmapped. None o
 | --- | --- | --- |
 | Person | Ontology `Person` | Target. No personal data in this phase |
 | Jurisdiction | Organization jurisdiction code, for example `CA-QC` | The Africa jurisdiction policy package is a different concern |
-| Authority | `DecisionAuthority` in `@nzila/decision-core` | Not granted by CIVITAS |
-| LegalSource | `EvidenceRef` | Tier is a classification, not a new reference type |
+| Authority | `DecisionAuthority` in `@nzila/decision-core` | Permission to decide or execute. Not a legal source. Not granted by CIVITAS |
+| LegalSource | `EvidenceRef` plus a CIVITAS domain record | Source identity, status, and weight. Not a platform primitive |
 | LegalRule | None | Ontology `Policy` is not a statute |
 | LegalPosition | None | The analysis contract is the Phase 1 shape |
 | Right | None | Target |
@@ -57,7 +57,17 @@ Each future concept either names an existing primitive or stays unmapped. None o
 | Risk | Decision severity | Dimensions are named, not scored |
 | Dependency | Ontology `DEPENDS_ON` | Target |
 
-Two decision records already exist. Phase 0–1 projects into the decision-engine record because it already carries evidence references and an execution flag. `@nzila/decision-core` remains the enforcement registry and is not extended.
+Two decision records already exist. The analysis projects into the decision-engine record because it already carries evidence references and an execution flag. `@nzila/decision-core` remains the enforcement registry and is not extended. `DecisionAuthority` stays a permission-scope result. It is not the legal-source model.
+
+## Legal authority graph
+
+Ceiling, in order: jurisdiction, authority source, version and effective period, proposition, factual predicate, support or conflict, right or obligation or remedy, decision, evidence, professional gate.
+
+The Phase 2 substrate records jurisdiction, source, version and effective period, proposition, factual predicate, support and conflict, evidence references, the existing advisory decision projection, and the professional gate. Right, obligation, and remedy are not built. Relations are stored only when supplied. Court hierarchy and stare decisis are not automated.
+
+## Fleet architecture debt
+
+There is no canonical machine-readable registry of SCOUT, VERIFIER, REDTEAM, BUILDER, FORGE, or COUNSEL. `FLEET_ARCHITECTURE_DEBT` records that gap for a fleet-wide fix. CIVITAS does not create an agent registry and does not grant those names permissions.
 
 ## Scenario engine
 

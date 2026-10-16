@@ -163,7 +163,7 @@
     "mobility-family":                      { "tier": "INCUBATING", "product": "mobility" },
     "mobility-programs":                    { "tier": "INCUBATING", "product": "mobility" },
     "nacp-core":                            { "tier": "INCUBATING", "product": "nacp-exams" },
-    "civitas":                              { "tier": "INCUBATING", "notes": "Phase 0-1 advisory specialist. No execution authority." },
+    "civitas":                              { "tier": "INCUBATING", "notes": "Phase 2 authority substrate on the Phase 0-1 foundation. Advisory only. No execution authority." },
 
     "cli":                                  { "tier": "INFRASTRUCTURE" },
     "scripts-book":                         { "tier": "INFRASTRUCTURE" },
