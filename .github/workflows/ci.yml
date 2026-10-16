@@ -66,11 +66,11 @@ jobs:
           fi
           printf '%s\n' "$files" | node tooling/ci/merge-authority/publish.mjs classify-outputs >> "$GITHUB_OUTPUT"
 
-  lint-and-typecheck:
+  lint:
     needs: [classify]
     if: needs.classify.outputs.lint_and_typecheck == 'APPLICABLE'
     runs-on: ubuntu-latest
-    name: Lint & Typecheck
+    name: Workspace Lint
     steps:
       - uses: actions/checkout@v5
         with:
@@ -82,13 +82,57 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+  typecheck:
+    needs: [classify]
+    if: needs.classify.outputs.lint_and_typecheck == 'APPLICABLE'
+    runs-on: ubuntu-latest
+    name: Workspace Typecheck (${{ matrix.shard }}/4)
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-monorepo
+        with:
+          turbo-cache-key: typecheck-${{ matrix.shard }}
+
       # E6-C: prove an affected closure or run pnpm typecheck. Lint stays full-workspace.
       - name: Typecheck affected packages or full universe
         run: bash tooling/ci/run-affected-typecheck.sh
         env:
-          NODE_OPTIONS: "--max-old-space-size=8192"
+          NODE_OPTIONS: '--max-old-space-size=8192'
           TYPECHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           TYPECHECK_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          TYPECHECK_SHARD_INDEX: ${{ matrix.shard }}
+          TYPECHECK_SHARD_TOTAL: '4'
+
+      - name: Upload typecheck coverage receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-coverage-${{ matrix.shard }}
+          overwrite: true
+          path: ${{ runner.temp }}/affected-typecheck-plan.json.shard-${{ matrix.shard }}.json
+          if-no-files-found: error
+
+  # Keep the merge-authority identity. A failure, cancellation or skipped
+  # applicable worker (including any typecheck shard) must fail this check.
+  lint-and-typecheck:
+    needs: [classify, lint, typecheck]
+    if: always() && needs.classify.outputs.lint_and_typecheck == 'APPLICABLE'
+    runs-on: ubuntu-latest
+    name: Lint & Typecheck
+    steps:
+      - name: Require both checks
+        env:
+          LINT_RESULT: ${{ needs.lint.result }}
+          TYPECHECK_RESULT: ${{ needs.typecheck.result }}
+        run: |
+          test "$LINT_RESULT" = success
+          test "$TYPECHECK_RESULT" = success
 
   test:
     needs: [classify]
@@ -218,34 +262,42 @@ jobs:
         env:
           SAGE_PG_TEST_URL: postgresql://sage_test:sage_test@localhost:5432/sage_test
 
-  build:
-    needs: [classify, lint-and-typecheck]
-    if: needs.classify.outputs.build == 'APPLICABLE' && (needs.lint-and-typecheck.result == 'success')
+  build-worker:
+    needs: [classify]
+    if: needs.classify.outputs.build == 'APPLICABLE'
     runs-on: ubuntu-latest
-    name: Build All
-    # `test` intentionally omitted: build is compilation, tests are runtime — they are
-    # independent and can execute in parallel. Unit tests remain an independent CI gate,
-    # and downstream jobs declare their own dependencies explicitly.
+    name: Active Build (${{ matrix.shard }}/4)
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    # Compile alongside lint/typecheck instead of adding its duration after them.
+    # Lint, all typecheck shards, and tests remain independent merge requirements.
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-monorepo
         with:
-          turbo-cache-key: build
+          turbo-cache-key: build-${{ matrix.shard }}
 
-      - name: Build affected packages or full portfolio
+      - name: Build active CI scope
         run: |
           BASE="${{ github.event.pull_request.base.sha || github.event.before }}"
           HEAD="${{ github.event.pull_request.head.sha || github.sha }}"
+
+          run_scoped_build() {
+            BUILD_BASE="$BASE" BUILD_HEAD="$HEAD" node tooling/ci/run-scoped-build-shard.mjs \
+              "${BUILD_SHARD_INDEX:-1}" "${BUILD_SHARD_TOTAL:-1}"
+          }
 
           if [ -z "$BASE" ] || [[ "$BASE" =~ ^0+$ ]] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
             BASE="${HEAD}^"
           fi
 
           if ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
-            echo "SCM base unavailable; running full portfolio build"
-            pnpm build
+            echo "SCM base unavailable; compiling the complete active CI scope"
+            run_scoped_build
             exit $?
           fi
 
@@ -253,14 +305,11 @@ jobs:
           echo "affected-build mode=$MODE"
 
           case "$MODE" in
-            full)
-              # Root/global inputs and any path that is not a proven documentation
-              # change or a workspace-package change. `pnpm build` is `turbo build`.
-              pnpm build
-              ;;
-            affected)
-              TURBO_SCM_BASE="$BASE" TURBO_SCM_HEAD="$HEAD" \
-                pnpm exec turbo run build --affected
+            full|affected)
+              # The owner-declared scope includes active apps and shared package
+              # builds. Unchanged targets reuse their source-validated Turbo cache.
+              # Do not expand --affected through dormant application consumers.
+              run_scoped_build
               ;;
             not_applicable)
               echo "Build All: every changed path is proven irrelevant to compilation"
@@ -271,11 +320,13 @@ jobs:
               ;;
           esac
         env:
+          BUILD_SHARD_INDEX: ${{ matrix.shard }}
+          BUILD_SHARD_TOTAL: '4'
           NEXT_PUBLIC_CONSOLE_URL: https://console.nzila.app
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
           AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
-          NODE_OPTIONS: "--max-old-space-size=8192"
+          NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Check bundle sizes
         run: |
@@ -312,14 +363,37 @@ jobs:
           fi
 
       - name: Generate OpenAPI specs
+        if: matrix.shard == 1
         run: npx tsx tooling/openapi-gen/src/cli.ts
 
       - name: Upload OpenAPI specs
+        if: matrix.shard == 1
         uses: actions/upload-artifact@v4
         with:
           name: openapi-specs-${{ github.run_id }}
+          overwrite: true
           path: docs/api/specs/
           retention-days: 90
+
+      - name: Upload active build coverage receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: active-build-coverage-${{ matrix.shard }}
+          overwrite: true
+          path: ${{ runner.temp }}/scoped-build-shard-${{ matrix.shard }}.json
+          if-no-files-found: ignore
+
+  build:
+    needs: [classify, build-worker]
+    if: always() && needs.classify.outputs.build == 'APPLICABLE'
+    runs-on: ubuntu-latest
+    name: Build All
+    steps:
+      - name: Require all build runners
+        env:
+          BUILD_RESULT: ${{ needs.build-worker.result }}
+        run: test "$BUILD_RESULT" = success
 
   # Checkov-only merge authority. SARIF publication is the separate
   # iac-sarif-reporting job and is not a feeder for this result.
@@ -468,15 +542,15 @@ jobs:
           # comment for rationale). A 1.0/week floor is a reasonable "we are
           # shipping" signal without being self-referentially unblockable —
           # the trailing-30d average is currently ~2.5/week.
-          DORA_MIN_DEPLOYS_PER_WEEK: "1"
-          DORA_MAX_LEAD_TIME_HOURS: "720"
-          DORA_MAX_CHANGE_FAILURE_RATE_PCT: "15"
+          DORA_MIN_DEPLOYS_PER_WEEK: '1'
+          DORA_MAX_LEAD_TIME_HOURS: '720'
+          DORA_MAX_CHANGE_FAILURE_RATE_PCT: '15'
 
       - name: Collect cost attribution
         run: node tooling/scripts/collect-cost-attribution.mjs
         env:
           COST_ENABLE_AZURE_API: "${{ vars.COST_ENABLE_AZURE_API || '0' }}"
-          AZURE_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          AZURE_SUBSCRIPTION_ID: '${{ secrets.AZURE_SUBSCRIPTION_ID }}'
 
       - name: Collect onboarding KPIs
         run: node tooling/scripts/collect-onboarding-kpis.mjs
@@ -517,7 +591,7 @@ jobs:
       - name: Enforce governance runtime budget
         run: node tooling/scripts/check-governance-runtime-budget.mjs --enforce
         env:
-          GOVERNANCE_JOB_START_TS: "${{ env.GOVERNANCE_JOB_START_TS }}"
+          GOVERNANCE_JOB_START_TS: '${{ env.GOVERNANCE_JOB_START_TS }}'
           GOVERNANCE_MAX_RUNTIME_MINUTES: "${{ vars.GOVERNANCE_MAX_RUNTIME_MINUTES || '55' }}"
 
       - name: Report authoritative contract and inventory results
@@ -894,11 +968,14 @@ jobs:
   reconcile-frozen-head:
     name: Reconcile CI frozen head
     needs:
+      - lint
+      - typecheck
       - lint-and-typecheck
       - test
       - sage-live-postgres
       - sage-postgres-concurrency
       - build
+      - build-worker
       - iac-scan
       - iac-sarif-reporting
       - governance-gates

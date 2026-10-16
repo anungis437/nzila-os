@@ -1,7 +1,7 @@
-import { defineConfig, devices } from '@playwright/test';
-import { getE2EEnv } from './tests/e2e/e2e-env';
+import { defineConfig, devices } from '@playwright/test'
+import { getE2EEnv } from './tests/e2e/e2e-env'
 
-process.env.PLAYWRIGHT_TEST_AUTH ??= 'true';
+process.env.PLAYWRIGHT_TEST_AUTH ??= 'true'
 
 /**
  * Union-Eyes Playwright E2E Configuration
@@ -38,7 +38,15 @@ export default defineConfig({
 
   projects: [
     {
+      name: 'auth-preflight',
+      testMatch: 'e2e/auth.preflight.ts',
+      retries: 0,
+      timeout: 60_000,
+      use: { ...devices['Desktop Chrome'], trace: 'retain-on-failure' },
+    },
+    {
       name: 'chromium',
+      dependencies: ['auth-preflight'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],
@@ -69,4 +77,4 @@ export default defineConfig({
           },
         },
       }),
-});
+})

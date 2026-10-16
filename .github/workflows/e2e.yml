@@ -47,12 +47,6 @@ jobs:
             port: 3001
           - app: union-eyes
             port: 3002
-          - app: flow
-            port: 3003
-          - app: partners
-            port: 3004
-          - app: cfo
-            port: 3005
           - app: control-plane
             port: 3010
     steps:
