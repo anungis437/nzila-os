@@ -1,0 +1,726 @@
+{
+  "ledgerId": "UE_FINAL_ACCEPTANCE_LEDGER",
+  "contractVersion": "2.0",
+  "lineage": "PROSPECTIVE_UE_BOOTSTRAP_V2",
+  "authority": "Product-owner FINAL ACCEPTANCE RESET (control-based, risk-based acceptance)",
+  "definitionFrozen": true,
+  "newGatePolicy": "PROHIBITED unless execution discovers a PRODUCT_DEFECT, SECURITY_DEFECT or DATA_INTEGRITY_DEFECT",
+  "abandonedDenominators": [
+    "901/901 independent full runtime security matrices",
+    "795/795 independent financial caller matrices"
+  ],
+  "findingClasses": {
+    "A": "actual product defect",
+    "B": "actual security or data-integrity defect",
+    "C": "evidence improvement (backlog)",
+    "D": "future enhancement (backlog)"
+  },
+  "gates": {
+    "G1_CURRENT_APP_BUILD_AND_RUNTIME": {
+      "status": "PASS_ON_FROZEN_CANDIDATE",
+      "applicationTypecheck": "PASS",
+      "strictProofTypechecks": "PASS (application-typecheck, manifest-typecheck)",
+      "cleanRoom": {
+        "freshBootstrap": "CREATED 19863 objects",
+        "secondRunNoop": "NOOP created=0 same catalog digest",
+        "minimumInstaller": "PASS",
+        "authBoundary": "PASS",
+        "frameworkBoundary": "PASS",
+        "componentMatrix": "352/352",
+        "systemMutationMatrix": "51/51",
+        "modelCompatibility": "PASS 542 tables 3541 columns",
+        "containersRemoved": true,
+        "externalConnections": 0
+      },
+      "nextBuild": {
+        "exitCode": 0,
+        "artifactDigest": "3c5272264e9eeb9872eefe0d1a43c276cacbb85b14b3b13be8e21061a1f9404a"
+      },
+      "nextRuntimeReady": "PASS",
+      "httpSmoke": {
+        "result": "PASS",
+        "observations": 33,
+        "note": "Includes the G5 critical journeys."
+      },
+      "externalConnectionTargets": 0,
+      "rawSyntheticSecretsPersisted": 0,
+      "mandatorySecurityBypasses": [],
+      "receipt": "artifacts/ue-v2-next-receipt-965fed51-7bee-4d48-b9cc-ad4b236bcc23.json",
+      "receiptSha256": "8bd2e1d9a7651ed4d6670330f8689bd79be893a9246f5cff478340b1d14194f8",
+      "note": "clean-room.ts still exits non-zero because its legacy readiness field reports full per-table actor qualification as not proven; this is the same on the previous candidate and is not the G1 criterion.",
+      "disposition": "PASS"
+    },
+    "G2_SHARED_AUTHORIZATION_CONTROLS": {
+      "status": "PASS_CONTROL_TABLE_BOUND",
+      "controlTable": "UE_V2_ACCEPTANCE_CONTROLS.json#controlTable",
+      "controls": 11,
+      "runtimeEvidence": {
+        "nativeSuites": "25 files / 629 tests passed (bootstrap-v2 + acceptance, native flags, sequential)",
+        "testFast": "38215 passed, 114 skipped, 0 failed (native flags)",
+        "testFastWithoutNativeFlags": "37766 passed, 563 skipped, 0 failed (449 native-gated tests are run in the native suites above)",
+        "componentMatrix": "352/352",
+        "systemMutationMatrix": "51/51"
+      },
+      "hardening": "CRON secret comparison is now constant-time (lib/api/secret-compare.ts) in withApi and verifyCronAuth.",
+      "note": "Counts are overlapping component matrices and are not summed.",
+      "disposition": "PASS"
+    },
+    "G3_CALLER_TO_CONTROL_COVERAGE": {
+      "status": "PASS_ALL_MUTATING_CALLERS_BOUND",
+      "method": "Static source-derived binding (caller-control-graph.ts bindControl): recognised wrapper, delegated guarded route, or an explicit path binding with a written basis; generation fails for any unbound mutating caller. Not runtime proof per caller.",
+      "rootCallers": 901,
+      "mutatingRootCallers": 512,
+      "mutatingBoundToControl": 512,
+      "unmappedMutatingCallers": 0,
+      "controlBindingCounts": {
+        "AUTH_TOKEN_FLOW": 5,
+        "CANONICAL_SESSION_INLINE": 87,
+        "CAPABILITY_OR_PUBLIC_INTAKE_SYSTEM_CONTRACT": 11,
+        "CRON_CREDENTIAL": 6,
+        "DELEGATED_TO_GUARDED_ROUTE": 14,
+        "ENVIRONMENT_GATE": 1,
+        "EXTERNAL_MATTER_GRANT": 1,
+        "ROLE_AUTHORIZATION": 93,
+        "SEPARATE_SERVICE_BOUNDARY": 1,
+        "TENANT_RLS_TRANSACTION": 34,
+        "WEBHOOK_SIGNATURE": 4,
+        "WITH_API": 255
+      },
+      "graphSha256": "f92722406ffca21f6f57ca0ddb2643eb558355143e340f565ccdb536477e1445",
+      "disposition": "PASS"
+    },
+    "G4_EXCEPTION_AND_BYPASS_CALLERS": {
+      "status": "PASS_CLASSES_WITH_REPRESENTATIVE_EVIDENCE",
+      "mutatingExceptionCallers": 158,
+      "classes": 10,
+      "classCounts": {
+        "E1_CRON_SYSTEM": 6,
+        "E2_SIGNED_WEBHOOK": 4,
+        "E3_TOKEN_FLOW": 5,
+        "E4_CAPABILITY_OR_PUBLIC_INTAKE": 11,
+        "E5_DELEGATED_WRAPPER": 14,
+        "E6_ENVIRONMENT_OR_SERVICE_BOUNDARY": 2,
+        "E7_IDENTITY_OR_MEMBERSHIP_MUTATION": 8,
+        "E8_TENANT_ACTOR_SYSTEM_CONTEXT": 54,
+        "E9_INLINE_SESSION_HANDLER": 9,
+        "E10_FINANCIAL_MUTATION": 45
+      },
+      "evidence": "Representative evidence per class is listed in UE_V2_ACCEPTANCE_CONTROLS.json#exceptionClasses (existing route, native and component tests that passed in the final run, plus the 33-step HTTP smoke and the 135-route diagnostics).",
+      "limitation": "Class evidence is representative; it is not a per-caller runtime proof and does not claim all five proof dimensions for every class beyond what the cited tests assert.",
+      "disposition": "PASS"
+    },
+    "G5_CRITICAL_PRODUCT_JOURNEYS": {
+      "status": "PASS",
+      "observations": 33,
+      "journeys": {
+        "authAndMfa": "password + real TOTP, replay and wrong-code denied",
+        "organizationSelection": "canonical membership list, foreign selection denied, switch",
+        "membershipRoleChange": "member denied claim create; role raised to steward in the canonical membership table; claim created and persisted with canonical actor and organization; role revoked; create denied",
+        "grievanceClaim": "POST /api/claims persisted exactly once (organization_id, member_id verified in the database)",
+        "notification": "preferences write persisted and reloaded with canonical actor/organization; inactive membership denied",
+        "duesFinancial": "portal dues payment: foreign organization 403; own organization 200 and persisted (organization, user verified)",
+        "document": "legacy documents endpoint is explicitly 501; repository endpoint is entitlement-gated (403) and persisted no row",
+        "scheduledSystemFlow": "cron deadline-reminders: no credential 401; credential 200",
+        "sessionRevocation": "logout then the old cookie is denied 401",
+        "systemWrite": "organization create denied for ordinary actor, authorized for the platform administrator and persisted"
+      },
+      "externalGate": "Positive document upload requires external object storage (resolveStoredBlob) and the grievance_case_suite entitlement; classified EXTERNAL_GATE.",
+      "disposition": "PASS"
+    },
+    "G6_FINANCIAL_AUTHORITY": {
+      "status": "PASS_CLASSES_BOUND",
+      "financialMutatingCallers": 52,
+      "classes": {
+        "F1_DUES": 11,
+        "F2_INVOICE_BILLING": 12,
+        "F3_PAYMENT_REMITTANCE": 16,
+        "F4_EXPENSE_BUDGET": 14,
+        "F5_DONATION": 1,
+        "F6_RECONCILIATION_LEDGER_SYSTEM": 30
+      },
+      "note": "A caller may belong to more than one class. Every financial caller is bound to a shared control (generation asserts none unclassified). Representative proof: financial-http-boundary native test, the dues/billing/finance route suites, the dues payment journey, and the 51/51 SYSTEM mutation matrix.",
+      "securityFix": "portal/dues/pay accepted the organization from the request without membership verification and used the bare database proxy; it now requires canonical membership (403 otherwise) and runs in the tenant RLS transaction (both GET and POST).",
+      "billingLifecycle": "cron/billing-lifecycle returns 501: invoice generation and state changes are cross-organization financial writes that D1 does not authorize.",
+      "disposition": "PASS"
+    },
+    "G7_FINAL_COHERENT_REGRESSION": {
+      "status": "PASS",
+      "testFastNativeFlags": "38215 passed | 114 skipped | 0 failed (2271 files passed, 13 skipped)",
+      "testFastWithoutNativeFlags": "37766 passed | 563 skipped | 0 failed",
+      "nativeSuites": "25 files / 629 tests passed",
+      "typecheck": "PASS (app, application, manifest)",
+      "planCheck": "PASS",
+      "lint": "0 errors on changed files; pre-existing no-explicit-any warnings preserved",
+      "diagnostics": "135 routes: 0 internal 5xx",
+      "disposition": "PASS"
+    },
+    "G8_EXTERNAL_PRODUCTION_GATES": {
+      "status": "OPEN_BY_DESIGN",
+      "gates": [
+        "Resend configuration",
+        "Stripe webhook configuration",
+        "PayPal webhook configuration",
+        "Microsoft Calendar OAuth configuration",
+        "Object storage for positive document upload",
+        "PKI separate-database capability (digital_signatures lives in the financial-service database)",
+        "CUPE pilot fixture (absent from the repository)",
+        "Billing lifecycle SYSTEM write authority (deliberate product-authority hold; 501)",
+        "Staging execution",
+        "Production execution",
+        "Azure and customer-data execution"
+      ],
+      "disposition": "OPEN_BY_DESIGN",
+      "classification": "EXTERNAL_OR_DEFERRED_NOT_KNOWN_CRITICAL_NOT_KNOWN_HIGH_SECURITY_DEFECTS",
+      "stagingUpdate": "Staging execution passed for the application and both providers (Resend and Stripe test mode, including provider-originated Stripe webhook delivery). Production execution and customer-data execution remain open by design."
+    }
+  },
+  "remediationThisPass": {
+    "authenticated5xxBefore": 114,
+    "authenticated5xxAfter": 31,
+    "diagnosticRoutes": 135,
+    "statusHistogramAfter": {
+      "200": 21,
+      "201": 3,
+      "400": 26,
+      "403": 45,
+      "404": 9,
+      "500": 31
+    },
+    "beforeEvidence": "UE_V2_AUTHENTICATED_500_DIAGNOSTICS.BEFORE_D1_D2.json",
+    "afterEvidence": "UE_V2_AUTHENTICATED_500_DIAGNOSTICS.json",
+    "fixes": [
+      {
+        "id": "D1",
+        "class": "A",
+        "title": "withOrganizationAuth V2 branch ran the handler outside the canonical tenant RLS transaction",
+        "source": "apps/union-eyes/lib/organization-middleware.ts",
+        "sha256": "d6d59fb4e3d994d3742740d14ccf16cc166703e4c1b07ed5e6213a0e0997207e",
+        "change": "Handler now runs inside withRLSContext({ organizationId: canonical.organizationId }) with return await; ENTITLEMENT_REQUIRED maps to 403. Canonical actor and membership checks and DB privileges are unchanged.",
+        "regression": "lib/__tests__/organization-middleware.test.ts (transaction wrapping, 403 mapping, canonical-context denial, unexpected failure stays 500)"
+      },
+      {
+        "id": "D2",
+        "class": "B",
+        "title": "V2 audit events were silently lost: writer targeted the excluded audit_security.audit_logs",
+        "source": "apps/union-eyes/lib/audit-logger.ts, apps/union-eyes/lib/audit/canonical-audit-chain.ts",
+        "sha256": {
+          "audit-logger.ts": "3bad693ba32415d9bde3eb530c9609994196c44c40b70673636c0452e6c73c88",
+          "canonical-audit-chain.ts": "195b7a690b95f0b62a38b038a7aade73010d27dc40a7d86279542a32906c6123"
+        },
+        "change": "V2 writes the canonical public.audit_logs under the tenant transaction using the existing hash chain (sorted-key JSON with Python separators, per-organization previous hash, advisory lock, created_at assigned after the lock). Persistence failure is no longer swallowed.",
+        "regression": [
+          "lib/audit/__tests__/canonical-audit-chain.test.ts: hash parity with real Python compute_content_hash, 3/3",
+          "lib/__tests__/audit-logger-canonical.test.ts: 3/3",
+          "scripts/bootstrap-v2/audit-chain-native.test.ts on real PostgreSQL: 4/4 (12 concurrent writers verified by the Python verification rule, per-organization isolation, tamper detection, rollback of chain head)"
+        ]
+      },
+      {
+        "id": "D3",
+        "class": "A",
+        "title": "Body has already been read: withApi pre-read request.json(), then legacy wrappers delegating to it in V2 read it again (14 routes)",
+        "source": "apps/union-eyes/lib/api/with-api.ts",
+        "sha256": "21e493d4fd3c4e913c17ee8b4fce7976474fbd403ba8cc343f64a12d0f816de6",
+        "change": "Body is parsed from a clone so the original stream remains readable. Validation is unchanged.",
+        "regression": "lib/api/__tests__/with-api.test.ts (re-read with and without a body schema), 18/18; lib/api 95/95"
+      },
+      {
+        "id": "S1",
+        "class": "A",
+        "title": "Live operational Drizzle declarations imported directly but omitted from the schema barrel produced stub or absent V2 tables",
+        "source": "apps/union-eyes/scripts/bootstrap-v2/source.ts",
+        "change": "Added ingestion, SSO/SCIM, integration, workbook and chart-of-accounts declaration files as direct current-caller operational sources (the established pattern for mobile and policy). Plan grew from 681 to 692 tables and 8,291 to 8,414 statements with 0 security blockers. All non-latent outside-barrel tables are now covered.",
+        "evidence": "apps/union-eyes/scripts/bootstrap-v2/live-declarations.ts"
+      },
+      {
+        "id": "S2",
+        "class": "A",
+        "title": "Seven ICRA tables had SYSTEM_ONLY authority with empty SYSTEM privileges although every ICRA route runs under the SYSTEM role",
+        "source": "apps/union-eyes/db/rls-storage-authority/*.ts",
+        "change": "SYSTEM privileges derived from source operations per table. SYSTEM mutation census is now 48 relations (39 + 7 ICRA + workbooks and workbook_purchases) with source-bound callers; native proof 48/48."
+      },
+      {
+        "id": "S3",
+        "class": "A",
+        "title": "Security compiler ignored the recorded PARENT_VIA_USER override for a child with two foreign keys",
+        "source": "apps/union-eyes/scripts/bootstrap-v2/security.ts",
+        "change": "Override now narrows the parent path; regression test added. Component matrix 350/350."
+      },
+      {
+        "id": "S4",
+        "class": "A",
+        "title": "Application queries and declarations contradicted canonical types and columns",
+        "change": "text/uuid joins on organization members and dues (4 routes); stale organization_members columns trimmed per the recorded TRIM_DRIZZLE disposition and member search computed from canonical columns; cms_pages gained 5 nullable content columns; content training route derives completion count, label and materials URL from canonical columns."
+      },
+      {
+        "id": "S5",
+        "class": "A",
+        "title": "Authorization denials surfaced as 500 and V2 audit emission outlived its transaction",
+        "source": "apps/union-eyes/lib/api/with-api.ts, apps/union-eyes/lib/api-auth-guard.ts",
+        "change": "Entitlement and role denials thrown inside handlers map to 403; unhandled-error logging now records cause and SQLSTATE; legacy wrapper audits are awaited inside the tenant transaction in V2 (fire-and-forget retained for legacy mode)."
+      },
+      {
+        "id": "S6",
+        "class": "A",
+        "title": "Tenant-owned ingestion tables used under SYSTEM context; params Promise unresolved in legacy wrappers; audit reads on excluded table; bare-connection reads; client errors as 500",
+        "change": "org-owned context helper (V2 keeps tenant RLS) for 5 ingestion routes; withApiAuth resolves Next 16 params promise; activities and admin ai-usage read canonical public.audit_logs under tenant RLS (ai-usage no longer reads every organization); users/me/profile canonical branch without email self-heal; case studies public read via SYSTEM SELECT; cbas list and create run in tenant context; location_tracking and geofence_events consent-revocation deletes authorized; ZodError maps to 400; empty notification update 400."
+      }
+    ],
+    "authenticated5xxHistory": {
+      "initial": 114,
+      "afterD1D2D3": 66,
+      "afterSchemaAndAuthority": 47,
+      "afterContextAndAuthority": 35,
+      "final": 31
+    }
+  },
+  "remainingFiveXxRootCauses": {
+    "INTERNAL_5XX": 0,
+    "diagnosticRoutes": 135,
+    "finalStatusCounts": {
+      "200": 28,
+      "201": 3,
+      "400": 27,
+      "403": 54,
+      "404": 15,
+      "415": 1,
+      "501": 3,
+      "503": 4
+    },
+    "externalConfiguration503": [
+      "communications/webhooks/resend",
+      "payments/webhooks/paypal",
+      "payments/webhooks/stripe",
+      "calendar-sync/microsoft/auth"
+    ],
+    "notImplemented501": [
+      "admin/pki/signatures/[id]/verify (relation not provisioned in canonical V2)",
+      "admin/seed-cupe-pilot (fixture absent)",
+      "cron/billing-lifecycle (write authority not authorized)"
+    ],
+    "history": {
+      "previous": 114,
+      "afterD1D2": 66,
+      "afterReset2": 31,
+      "final": 0
+    }
+  },
+  "applicationSchemaCompatibility": {
+    "evidence": "UE_V2_APP_SCHEMA_COMPATIBILITY.json",
+    "method": "Static comparison of every Drizzle table exported by apps/union-eyes/db/schema/index.ts with the Canonical V2 plan tables",
+    "ok": 373,
+    "absentInV2": 49,
+    "excludedInV2": 2,
+    "columnsMissingInV2": 237,
+    "boundary": "Counts tables, not live-caller reachability; tables declared outside db/schema/index.ts (for example ingestion-schema) are not in this comparison, and the actor-map cross-check found 41 further relations queried by 71 root callers that are absent from V2.",
+    "operationalAfterAuthorityClassification": {
+      "driftedTablesWithOperationalAuthority": 4,
+      "tables": [
+        "chart_of_accounts",
+        "clc_chart_of_accounts",
+        "donations",
+        "user_management.users (security-sensitive columns, never restored by recorded decision)"
+      ],
+      "latentOrContainedDriftTables": 233,
+      "absentBarrelTables": 49,
+      "absentBarrelLatent": 47,
+      "absentBarrelSupersededAuthTables": 2,
+      "note": "233 of 237 drifted tables and 47 of 49 absent tables have no live product path by recorded authority. After S1, no non-latent outside-barrel declaration is absent or drifted."
+    }
+  },
+  "knownDefects": {
+    "KNOWN_CRITICAL_DEFECTS": 0,
+    "KNOWN_HIGH_SECURITY_DEFECTS": 0,
+    "openClassADefects": 0,
+    "openClassBDefects": 0,
+    "note": "External/deferred G8 gates are not defects. Billing lifecycle is a deliberate product-authority hold."
+  },
+  "readiness": {
+    "UE_ENGINEERING_READINESS": "PASS",
+    "UE_PRODUCTION_SECURITY_READINESS": "PASS_WITH_EXTERNAL_GATES",
+    "UE_SAAS_READINESS": "NO_GO",
+    "UE_DONE": "YES",
+    "KNOWN_CRITICAL_DEFECTS": 0,
+    "KNOWN_HIGH_SECURITY_DEFECTS": 0,
+    "MERGE_AUTHORIZED": "NO",
+    "DEPLOY_AUTHORIZED": "NO",
+    "meaning": {
+      "UE_ENGINEERING_READINESS": "The frozen local synthetic-data engineering/security acceptance definition (G1-G7) is satisfied.",
+      "UE_PRODUCTION_SECURITY_READINESS": "No known internal security blocker remains under the accepted control-based model; production dependencies and production execution remain outstanding (G8).",
+      "UE_SAAS_READINESS": "NO_GO: production/customer-data enablement, external service configuration and deployment authorization are outside this completed engineering mission.",
+      "UE_DONE": "This engineering acceptance mission is closed. It does not mean deployed SaaS is live."
+    },
+    "LEGACY_READINESS_FIELD": "HISTORICAL_NON_BINDING_RESULT",
+    "CURRENT_BINDING_ACCEPTANCE_MODEL": "CONTROL_BASED_ACCEPTANCE",
+    "stagingReopening": {
+      "reopenedBy": "Staging defects A-D (2026-10-15)",
+      "restoredBy": "stagingDefectClosureSprint (local requalification plus 23/23 staging journeys)",
+      "UE_ENGINEERING_READINESS": "PASS",
+      "UE_PRODUCTION_SECURITY_READINESS": "PASS_WITH_EXTERNAL_GATES",
+      "UE_SAAS_READINESS": "NO_GO",
+      "UE_DONE": "YES",
+      "STAGING_READY": "YES",
+      "PRODUCTION_READY": "NO",
+      "STRIPE_READY": "YES_TEST_MODE",
+      "RESEND_READY": "YES",
+      "STRIPE_PROVIDER_ENDPOINT_DELIVERY": "PASS",
+      "RESEND_STAGING_SPECIFIC_KEY": "NO",
+      "STAGING_PROVIDER_READY": "YES",
+      "SOURCE_CHANGED": "NO"
+    },
+    "productionHardeningDisposition": {
+      "PRODUCTION_READY": "YES_WITH_OPERATIONAL_GATES",
+      "INTERNAL_RELEASE_BLOCKERS": 0,
+      "MERGE_AUTHORIZED": "NO",
+      "PRODUCTION_DEPLOY_AUTHORIZED": "NO",
+      "CUSTOMER_DATA_AUTHORIZED": "NO"
+    }
+  },
+  "preserved": {
+    "G3_PRIVATE_CONTROL_PLANE": "CLOSED",
+    "W5": "CLOSED_BLOCKED_TERMINAL_STATIC",
+    "W6": "NOT_AUTHORIZED",
+    "bootstrapV2Floor": "Not re-proven; unchanged boundaries (schema, security compiler, installer) were not touched in this pass."
+  },
+  "frozenCandidate": {
+    "sourcePlanDigest": "93fd3cd07e79f5485a0d412fb74c48f274212b5a4713f4998439415806f1f6cd",
+    "tables": 694,
+    "statements": 8422,
+    "decisions": 297,
+    "exclusions": 54,
+    "securityBlockers": 0,
+    "currentSchemaObjects": 19863,
+    "catalogDigest": "cd4fd330f154e2de4d26d112a9aa167018c7a11980f15be8ef79926985b016df",
+    "buildArtifactDigest": "3c5272264e9eeb9872eefe0d1a43c276cacbb85b14b3b13be8e21061a1f9404a",
+    "nextReceipt": "artifacts/ue-v2-next-receipt-965fed51-7bee-4d48-b9cc-ad4b236bcc23.json",
+    "nextReceiptSha256": "8bd2e1d9a7651ed4d6670330f8689bd79be893a9246f5cff478340b1d14194f8",
+    "runtimeEvidenceSha256": "5b72e6214778f852e034d993715441b6453b07d1dd937672919d3847c8fbedad",
+    "callerControlGraphSha256": "f92722406ffca21f6f57ca0ddb2643eb558355143e340f565ccdb536477e1445",
+    "acceptanceControlsSha256": "2e1f495db370ed7e78cf1b9c0553bc66fb6366a9b7a5348a3f2c3fe612c9dba5",
+    "diagnosticsSha256": "a9a02f839abdb07cf32bd2e8d26662908204c434ed9921c4511c6c0c00d9d3b5",
+    "supersedes": ["c804b85f (previous candidate)"],
+    "note": "The clean-room and plan evidence ran on plan digest 93fd3cd0. The Next build, HTTP smoke and the 135-route diagnostics ran on the final application source (last edit: admin/pki/workflows/[id]/route.ts 404/409 mapping, which is outside the plan-committed set). test:fast, native suites, typechecks and lint ran on the same source."
+  },
+  "knownEvidenceBoundaries": [
+    "G3 binding is static source analysis, not per-caller runtime proof.",
+    "G4/G6 class evidence is representative (existing tests plus HTTP journeys); not every caller or every proof dimension is executed.",
+    "Organization/session selector counts (818/818) belong to an earlier candidate; the current native suites re-ran organization-selection-native.test.ts and passed.",
+    "Seven legacy touched files still fail whole-file Prettier at HEAD and are preserved; several app route files were reformatted by Prettier when edited, which enlarges their diffs.",
+    "Nothing was committed, merged or deployed; Azure, staging and production were not touched."
+  ],
+  "finalClosureSprint": {
+    "decisions": {
+      "D1": "OWNER_CONFIRMED (see D1_OWNER_CONFIRMATION). Original implementation note: relation-specific SYSTEM SELECT for claims, org_subscriptions, grievances, ml_predictions, ingestion_batches, platform_invoices; the three deadline-engine work-state relations as listed in the confirmation.",
+      "D2": "OWNER_CONFIRMED (see D2_OWNER_CONFIRMATION).",
+      "D1_OWNER_CONFIRMATION": {
+        "status": "OWNER_CONFIRMED",
+        "date": "2026-10-15",
+        "systemAuthority": {
+          "deadline_reminders": "SELECT, INSERT, UPDATE",
+          "deadline_reassignment_convergence": "SELECT, INSERT, UPDATE",
+          "deadline_reminder_executions": "SELECT, INSERT"
+        },
+        "nature": "Scheduled deadline-engine platform work-state relations; not tenant business-authority expansion.",
+        "SYSTEM_DELETE": "NOT_AUTHORIZED",
+        "SYSTEM_BUSINESS_TABLE_WRITES": "NOT_AUTHORIZED",
+        "notAuthorized": [
+          "claims",
+          "grievances",
+          "org_subscriptions",
+          "ml_predictions",
+          "platform invoices",
+          "tenant financial records",
+          "other tenant business relations"
+        ],
+        "billingLifecycle": "cron/billing-lifecycle remains fail-closed at 501 until a separate product-owner authorization exists for its cross-organization financial mutations; none is granted."
+      },
+      "D2_OWNER_CONFIRMATION": {
+        "status": "OWNER_CONFIRMED",
+        "date": "2026-10-15",
+        "userIdentity": {
+          "member_dues_ledger.user_id": "TEXT",
+          "member_arrears.user_id": "TEXT"
+        },
+        "rule": "No UUID casts, no surrogate UUIDs, no parallel user-identity mapping. member_arrears is the same canonical identity-domain correction required by the arrears join."
+      }
+    },
+    "driftClassification": {
+      "chart_of_accounts": "CLC declaration (account_code) matches V2 and is used by services/clc; the drifted general-ledger declaration (account_number) is imported only by general-ledger-service.ts, which has no importer outside its test. Latent; class C.",
+      "donations": "No main-application caller; only services/financial-service (separate database) uses it and compliance-reports.ts records it as not wired. Latent; class C."
+    },
+    "findings": [
+      "A: PKI admin routes read digital_signatures, which exists only in the financial-service database; routes now answer 501 instead of 500.",
+      "A: admin/pki/workflows/[id] reported unknown or settled workflows as 500; now 404/409.",
+      "A: cases export/audit threw entitlement errors outside the route catch (500); now 403.",
+      "B: portal/dues/pay organization taken from the request without membership check; fixed.",
+      "B: cron secret compared with !==; now constant-time.",
+      "C: next-acceptance now sets CRON_SECRET for the synthetic server so the scheduled flow can be exercised."
+    ],
+    "tooling": "PowerShell/node text replacement was used instead of the edit tool for bounded textual edits, per the product-owner authorization; no commit, PR, merge or deploy."
+  },
+  "terminalAcceptanceNormalization": {
+    "date": "2026-10-15",
+    "scope": "Documentation/governance normalization only. No application, schema-authority or plan change; no refreeze; no qualification rerun.",
+    "UNION_EYES_ENGINEERING_ACCEPTANCE": "CLOSED_PASS",
+    "frozenCandidate": {
+      "FINAL_SOURCE_PLAN_DIGEST": "93fd3cd07e79f5485a0d412fb74c48f274212b5a4713f4998439415806f1f6cd",
+      "TABLES": 694,
+      "STATEMENTS": 8422,
+      "VERIFIED_OBJECTS": 19863,
+      "NEXT_BUILD_ARTIFACT": "3c5272264e9eeb9872eefe0d1a43c276cacbb85b14b3b13be8e21061a1f9404a"
+    },
+    "LEGACY_READINESS_FIELD": "HISTORICAL_NON_BINDING_RESULT",
+    "legacyReadinessNote": "The clean-room legacy readiness field keeps its original FAIL output; its criterion is the superseded per-table actor qualification model. It is not reinterpreted as PASS and does not override G1-G7.",
+    "CURRENT_BINDING_ACCEPTANCE_MODEL": "CONTROL_BASED_ACCEPTANCE",
+    "evidenceBoundaries": {
+      "G3": "STATIC_BINDING_FOR_ALL_MUTATING_CALLERS",
+      "G4": "REPRESENTATIVE_RUNTIME_EVIDENCE_BY_EXCEPTION_CLASS",
+      "G6": "REPRESENTATIVE_RUNTIME_EVIDENCE_BY_FINANCIAL_AUTHORITY_CLASS"
+    },
+    "counts": {
+      "MUTATING_CALLERS": 512,
+      "MUTATING_CALLERS_BOUND": 512,
+      "UNMAPPED_MUTATING_CALLERS": 0,
+      "EXCEPTION_CALLERS": 158,
+      "EXCEPTION_CLASSES": 10,
+      "FINANCIAL_MUTATING_CALLERS": 52,
+      "FINANCIAL_AUTHORITY_CLASSES": 6,
+      "INTERNAL_5XX": 0
+    }
+  },
+  "stagingDefectClosureSprint": {
+    "date": "2026-10-15",
+    "scope": "Synthetic-data-only Azure staging (nzila-os-union-eyes-v2-staging). No merge, PR, production deploy, customer data or live Stripe keys.",
+    "trigger": "Acceptance was reopened because deployed staging exposed launch-scope defects the local control-based model did not.",
+    "status": "CLOSED_PASS",
+    "defects": [
+      {
+        "id": "A",
+        "class": "A",
+        "title": "claim_number was globally unique but numbered per organization (second organization first claim returned 500, SQLSTATE 23505)",
+        "fix": "Unique (organization_id, claim_number) in the Django model, Drizzle declaration and migration 0006; race-safe allocation (per-organization/day advisory lock plus numeric MAX) in lib/claims/claim-number.ts.",
+        "proof": [
+          "launch-defects-native.test.ts: uniqueness per organization and 12-way concurrent numbering",
+          "staging: two organizations each issued CLM-20261015-0001"
+        ]
+      },
+      {
+        "id": "B",
+        "class": "B",
+        "title": "Authenticated application user ids are text but 45 identity columns were uuid (document download, grievance access returned 500)",
+        "fix": "APPLICATION_USER_ID=TEXT: one static identity census, 43 Drizzle declarations and 7 Django columns converted (migrations auth_core 0006, billing 0003, grievances 0006); entity UUIDs untouched; validators for grievance access userId and organization member user_id accept text ids.",
+        "proof": [
+          "UE_APPLICATION_IDENTITY_CONTRACT.json/.md: 77 candidates, 45 APPLICATION_USER_ID, 18 DOMAIN_ENTITY_UUID, 14 DEAD_OR_UNREACHABLE, UNCLASSIFIED=0, violations=0",
+          "launch-defects-native.test.ts: columns are text in the real catalog",
+          "staging: grievance access read and grant with text user ids, document download"
+        ]
+      },
+      {
+        "id": "C",
+        "class": "B",
+        "title": "cases/[id]/audit read non-canonical audit columns (500) and mandatory mutations produced no canonical audit rows",
+        "fix": "lib/audit/mandatory-audit.ts appends to public.audit_logs inside the mutation transaction (claim create, document upload and download, membership create/role/status/remove, dues settlement, SYSTEM deadline processing); failure rolls the mutation back and an orphan Blob is deleted on upload failure; the case audit timeline reads the canonical sink.",
+        "proof": [
+          "unit and native audit-chain suites",
+          "staging: all required audit actions present, one chain head per organization"
+        ]
+      },
+      {
+        "id": "D",
+        "class": "B",
+        "title": "Stripe webhook never settled member dues and portal/dues/pay let a member self-credit the ledger",
+        "fix": "Server-owned initiation (PENDING dues_transactions plus Stripe PaymentIntent); only a signature-verified webhook settles (SYSTEM transaction, FOR UPDATE, org/member/amount/currency/processor id validated, guarded pending to paid update, ledger payment insert, canonical audit); duplicate delivery is a no-op; tampering returns 422 with a denial audit.",
+        "proof": [
+          "dues unit and native tests",
+          "staging: self-credit attempt left the ledger unchanged; tampered metadata 422, still pending; signed event settled once; duplicate and redelivery 200 with one ledger payment"
+        ]
+      },
+      {
+        "id": "E1",
+        "class": "A",
+        "title": "organization_members.exempt_from_per_capita is NOT NULL without a database default and the ORM omitted it (membership create returned 500 on staging)",
+        "fix": "db/schema-organizations.ts supplies the value with $defaultFn(() => false), covering every insert path (route, SCIM, import, services).",
+        "proof": [
+          "db/__tests__/organization-members-insert-defaults.test.ts",
+          "staging: membership create 201 with canonical audit row"
+        ]
+      }
+    ],
+    "notNullDefaultCensus": {
+      "tool": "apps/union-eyes/scripts/staging/notnull-default-census.ts",
+      "dbRequiredNoDefaultColumns": 2108,
+      "ormMayOmitColumns": 108,
+      "tables": 34,
+      "launchScopeTables": ["organization_members (fixed, E1)"],
+      "remaining": "The other 33 tables (compliance firewall, immigration, federation, address and accessibility reference tables) are outside the launch scope; their inserts fail closed (500) rather than writing NULL. Classified C/D backlog, not a launch blocker."
+    },
+    "provenanceOfPreviousCandidate": {
+      "FINAL_SOURCE_PLAN_DIGEST": "93fd3cd07e79f5485a0d412fb74c48f274212b5a4713f4998439415806f1f6cd",
+      "NEXT_BUILD_ARTIFACT": "3c5272264e9eeb9872eefe0d1a43c276cacbb85b14b3b13be8e21061a1f9404a",
+      "catalogDigest": "cd4fd330f154e2de4d26d112a9aa167018c7a11980f15be8ef79926985b016df",
+      "objects": 19863,
+      "statements": 8422
+    },
+    "frozenCandidate": {
+      "NEW_PLAN_DIGEST": "4f9732e25ce07fc953648d5275c1901d674c833c78631b814f389bb90cc4c748",
+      "tables": 694,
+      "statements": 8420,
+      "securityBlockers": 0,
+      "currentSchemaObjects": 19865,
+      "catalogDigest": "863de854d655321d3c639bd41dfbc0938cbe04d13bf0c91d1c8fa341e857cc2c",
+      "NEW_BUILD_ARTIFACT": "461d952ed1bef43ab9a580e80bd70485d2dcebbdc9b5c312c6464c45f0c5c6d5",
+      "identityContractSha256": "e1dfce09aed72b944d016c57077cfb04b2a28ddb425cdedc40bae65cdb7392b0",
+      "stagingImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-v2@sha256:80527acf39f1046d4f2eb4e2c72968578c78cbca8c7aab4e3be574f83351baa1",
+      "stagingRevision": "nzila-os-union-eyes-v2-staging--r4"
+    },
+    "localRequalification": {
+      "typecheck": "PASS (application)",
+      "lint": "0 errors on changed files",
+      "plan": "self-test deterministic; check PASS",
+      "cleanRoom": "fresh bootstrap CREATED 19865, second run NOOP same catalog digest, rollback/recreate/drift/partial-state PASS, minimum installer PASS, auth and framework boundaries PASS, runtime component matrix 352/352, SYSTEM mutation matrix 53/53, model compatibility PASS (the legacy readiness field is still FAIL and remains historical and non-binding)",
+      "nextAcceptance": "build PASS, runtime ready PASS, HTTP smoke PASS (dues initiation fails closed without a rate-limit store and a member assertion cannot credit the ledger)",
+      "nativeSuites": "audit-chain 4, auth 18, framework 6, launch-defects 6, manifest 1, organization-selection 36, runtime-security 336, system-mutation 54: all passed sequentially",
+      "testFast": "38258 passed | 114 skipped | 0 failed (2280 files passed, 13 skipped; native flags)",
+      "docsValidation": "pnpm validate:docs: 0 errors"
+    },
+    "azureCatalogRestore": {
+      "expectedObjects": 19865,
+      "missing": 0,
+      "extra": "28 role_membership entries (the three staging login roles ue_stg_runtime, ue_stg_system and ue_stg_auth)",
+      "expectedCatalogDigest": "863de854d655321d3c639bd41dfbc0938cbe04d13bf0c91d1c8fa341e857cc2c",
+      "azureCatalogDigest": "a82fa3a81be06607f753b09fe66ee934fb8112311957e2b186c5ffc02b9cfc0f",
+      "classification": "Environmental and non-blocking: pgvector 0.8.2 (Azure) vs 0.8.1 (qualified), extension owner and function ACLs, public schema owner, default-equivalent ACL rendering, PostgreSQL constraint and policy text rendering. No objects missing or extra; both digests preserved."
+    },
+    "stagingProof": {
+      "script": "apps/union-eyes/scripts/staging/run-staging-closure-proof.ts",
+      "criticalJourneys": "23/23 PASS (rerun with working Resend) plus 8/8 real Stripe test-mode journeys",
+      "unexpectedInternal5xx": 0,
+      "journeys": [
+        "health",
+        "representative smoke (password + real TOTP, org selection, cross-organization denial, role change, claim create, cron credential, logout and revocation)",
+        "same-day claims in two organizations",
+        "case audit timeline",
+        "grievance access read and grant",
+        "document upload clean / foreign organization 403 / EICAR blocked / download / anonymous 401",
+        "membership create",
+        "member self-credit rejected",
+        "Stripe webhook unsigned 400 / bad signature 401 / tampered 422 / settlement once / duplicate and redelivery no double credit",
+        "dues ledger and balance reload",
+        "deadline-reminder cron with SYSTEM audit",
+        "required audit actions and single chain head per organization"
+      ],
+      "additional": [
+        "ClamAV unavailable: upload returned 503, no document row, no Blob stored",
+        "revision restart: health and version 200 on the same image",
+        "Redis present as a required runtime dependency (rate-limited routes functional)"
+      ],
+      "residueCleanup": "The earlier scanner-down document row disappeared with the recreated database; the four synthetic residue Blobs in ue-v2-staging-documents were deleted.",
+      "stripeRealProvider": {
+        "script": "apps/union-eyes/scripts/staging/run-staging-stripe-proof.ts",
+        "result": "8/8 PASS",
+        "mode": "Stripe TEST mode, synthetic data"
+      },
+      "stripeProviderDelivery": {
+        "script": "apps/union-eyes/scripts/staging/run-staging-stripe-delivery-proof.ts",
+        "result": "8/8 PASS",
+        "mode": "Stripe TEST mode, provider-originated event, synthetic data"
+      }
+    },
+    "providerGates": {
+      "Resend": "PROVEN_IN_STAGING. Owner-authorized (2026-10-15): the enabled version of the production Resend key was copied into nzila-staging-kv (resend-api-key and resend-key) and into the staging app secret (revision r7). Resend accepted a test send (HTTP 200) and the deadline worker recorded the reminder as sent (outcome sent, deadline.reminder.sent SYSTEM audit row) to the Resend sink address delivered@resend.dev. Closure proof rerun: 23/23. FOLLOW-UP: this is a production credential in a staging vault; replace it with a staging-specific send-only key before production enablement and keep production and staging keys separate.",
+      "Stripe": "PROVEN_IN_STAGING_TEST_MODE. Stripe test-mode webhook endpoint we_1UQxUg3z6DvwO4gqUDUodGvr (enabled; payment_intent.succeeded, payment_intent.payment_failed, payment_intent.canceled) targets the staging /api/payments/webhooks/stripe route; its signing secret is held only in the staging app secret and nzila-staging-kv/ue-v2-stripe-webhook-secret. Provider-originated delivery (script builds and signs nothing): app created a real PaymentIntent, Stripe test card succeeded, Stripe itself delivered the event and the dues row was paid 3s later; ledger credits = 1, dues.settle audits = 1 (also after a 15s redelivery window); the audited event id evt_3UQxcT3z6DvwO4gq0Jb1p5Uo is retrievable from Stripe (payment_intent.succeeded, livemode false, pending_webhooks 0); balance reload paid_up. Earlier locally-signed events covered tamper and duplicate cases. Live-mode keys were never used."
+    },
+    "productionHardeningGates": [
+      "PostgreSQL network exposure (public endpoint with Azure-services firewall rule)",
+      "ACR admin credentials",
+      "storage account keys",
+      "live Stripe and Resend credentials",
+      "staging network isolation",
+      "Replace the production Resend key copied into staging with a staging-specific key"
+    ],
+    "costContainment": "App, ClamAV and Redis scaled to min 0; PostgreSQL server stopped (Azure restarts a stopped flexible server after 7 days); operator firewall rule and seed grants removed; local temporary secrets deleted. Nothing deleted.",
+    "restartInstructions": "az postgres flexible-server start -g nzila-canada-staging-rg -n nzila-ue-v2-staging-db; then set min replicas to 1 on nzila-ue-v2-redis, nzila-ue-v2-clamav and nzila-os-union-eyes-v2-staging.",
+    "decisionClassification": "Every finding was classified A or B and fixed; C/D items are backlog only.",
+    "MERGE_AUTHORIZED": "NO",
+    "PRODUCTION_DEPLOY_AUTHORIZED": "NO",
+    "providerGateCorrection": "An earlier statement that no Stripe credentials existed was wrong: credentials are in the vault but both are dead.",
+    "securityDebt": {
+      "RESEND_PROD_KEY_IN_STAGING": "TEMPORARY_SECURITY_DEBT: replace with a Nzila-controlled staging-specific restricted/send-only Resend key before production enablement; not removed now to avoid disturbing the working staging proof."
+    }
+  },
+  "productionHardening": {
+    "date": "2026-10-15",
+    "record": "docs/union-eyes/production/UE_PRODUCTION_HARDENING_PACKAGE.json",
+    "readme": "docs/union-eyes/production/README.md",
+    "PRODUCTION_READY": "YES_WITH_OPERATIONAL_GATES",
+    "PRODUCTION_DEPLOY_AUTHORIZED": "NO",
+    "CUSTOMER_DATA_AUTHORIZED": "NO",
+    "MERGE_AUTHORIZED": "NO",
+    "sourceChanged": "YES: lib/rate-limiter.ts and tests; lib/dues/member-dues-flag.ts with three route gates and tests; capability registry note; operator tools in scripts/production/. No schema authority change.",
+    "stagingProofImage": "sha256:c1a206c17450581a8c8b21685343f753ce7ade2c8cbf7ccf720b93cc3ce2a7ec",
+    "productionImage": "PENDING_CI_MERGED_SOURCE (NEXT_PUBLIC_* values are build-time inputs; a local uncommitted build has no release authority). The staging proof image sha256:c1a206c17450581a8c8b21685343f753ce7ade2c8cbf7ccf720b93cc3ce2a7ec is evidence only.",
+    "goLiveBlockers": ["R-4", "R-5", "R-6", "R-7", "R-9", "R-10", "R-18", "R-19"],
+    "note": "UE_ENGINEERING_READINESS stays PASS; no acceptance suite was repeated.",
+    "INTERNAL_RELEASE_BLOCKERS": 0,
+    "PRODUCTION_IMAGE_DIGEST": "PENDING_CI_MERGED_SOURCE",
+    "scope": {
+      "MEMBER_DUES_PAYMENT": "OUT_OF_INITIAL_LAUNCH_SCOPE",
+      "MEMBER_DUES_PAYMENT_UI": "NOT_REQUIRED",
+      "MEMBER_DUES_STRIPE_FLOW": "DORMANT_OPTIONAL_CAPABILITY (501 unless UE_MEMBER_DUES_PAYMENTS=1)",
+      "STRIPE_PRIMARY_PURPOSE": "CLIENT_COMMERCIAL_MANAGEMENT",
+      "STRIPE_CLIENT_BILLING": "OPTIONAL / POST_LAUNCH",
+      "STRIPE_INITIAL_LAUNCH_REQUIREMENT": "NO",
+      "COMMERCIAL_STRIPE_CONTRACT": "docs/union-eyes/production/COMMERCIAL_STRIPE_BOUNDARY.md",
+      "PRODUCTION_SERVER_PROFILE": "internal",
+      "INITIAL_CUTOVER": "RUN_ALONGSIDE"
+    },
+    "risks": {
+      "R-4": "OPERATIONAL_GATE: private PostgreSQL connectivity (template prepared, not deployed)",
+      "R-5": "OPERATIONAL_GATE: Front Door Premium, WAF and private origin",
+      "R-6": "OPERATIONAL_GATE: registry admin credentials disabled",
+      "R-7": "OPERATIONAL_GATE: CI release build from merged source",
+      "R-9": "PROCEDURE_APPROVED, EXECUTION_PENDING (RUNBOOK_DATABASE_BOOTSTRAP.md)",
+      "R-10": "ENGINEERING_PASS, PRODUCTION_EXECUTION_PENDING (RUNBOOK_FIRST_ADMIN_BOOTSTRAP.md)",
+      "R-13": "POST_LAUNCH_COMMERCIAL_ENABLEMENT (not an engineering blocker)",
+      "R-18": "DECISION_CLOSED (RUN_ALONGSIDE), EXECUTION_PENDING",
+      "R-19": "CLOSED_PRODUCT_DECISION (internal)"
+    },
+    "finalReleaseCandidate": {
+      "FINAL_SOURCE_GIT_STATUS": "HEAD 1c337567635bb86ea0df7831557d8d2d22df1e6f on main; 230 modified and 1,142 untracked files (docs/ and reports/ excluded, generated artifacts/ excluded from the digest), nothing committed",
+      "FINAL_SOURCE_DIGEST": "c5f4510100e61443330a2cfd7728340d56e99d407480c5d51ce506c3a4b03e17",
+      "FINAL_SOURCE_DIGEST_DEFINITION": "sha256 over the HEAD commit and, for every modified or untracked file outside docs/, reports/ and artifacts/ (generated test evidence), its path and sha256, sorted; 1,328 files. Identical before and after the final regression.",
+      "FINAL_PLAN_DIGEST": "0a5ee060e7c3e3e373192ca8a4a1d58a47b44bfe490c6a7f8587f05127553ef4",
+      "PREVIOUS_QUALIFIED_PLAN_DIGEST": "4f9732e25ce07fc953648d5275c1901d674c833c78631b814f389bb90cc4c748",
+      "PLAN_STATUS": "REFROZEN_FOR_RELEASE",
+      "PLAN_UNCHANGED": "SUPERSEDED at release reconstruction: one controlled re-freeze; 694 tables, 8,420 statements and all DDL are identical, only source commitments changed (docs/union-eyes/production/UE_RELEASE_PLAN_REFREEZE.md). The acceptance evidence above was produced against the previous plan digest.",
+      "regression": {
+        "typecheck": "pnpm --filter @nzila/union-eyes typecheck: PASS",
+        "lint": "ESLint 0 errors on all changed files",
+        "targeted": "96 tests in 11 files: rate limiter, member dues gate, dues settlement, Stripe dues webhook, first-admin unit and native, restore tool, capability registry",
+        "FINAL_TEST_FAST_PASS": 38285,
+        "FINAL_TEST_FAST_FAIL": 0,
+        "FINAL_TEST_FAST_SKIP": 114,
+        "testFiles": "2,283 passed, 13 skipped (2,296)",
+        "conditions": "exact frozen source; native flags set; ran 27 minutes with no image build or other heavy job started by this lane",
+        "runExitCode": 1,
+        "runExitCodeReason": "Vitest reported 1 unhandled error, not a failed test: \"[vitest-pool]: Failed to start forks worker for test files lib/__tests__/api.test.ts ... Timeout waiting for worker to respond\". All 38,285 tests passed and 0 failed.",
+        "classification": "INFRASTRUCTURE_FLAKE",
+        "isolatedRerun": "lib/__tests__/api.test.ts rerun once in isolation: 6 of 6 passed (2.1 s). No product code was changed for it.",
+        "caveat": "The final run did not exit 0. Whether this one file executed inside that run is not separately evidenced; its tests are covered by the isolated pass. A clean exit-0 run in CI before merge is still recommended."
+      }
+    },
+    "goLiveOperationalGates": [
+      "R-4 network deployment",
+      "R-5 Front Door Premium and WAF",
+      "R-6 registry hardening",
+      "R-7 CI release build",
+      "R-9 database bootstrap execution",
+      "R-10 first administrator execution",
+      "R-18 controlled cutover execution",
+      "production secret provisioning",
+      "production DNS and provider setup",
+      "deployment authorization",
+      "customer-data authorization"
+    ],
+    "MEMBER_DUES_IS_NOT_A_GATE": true
+  }
+}

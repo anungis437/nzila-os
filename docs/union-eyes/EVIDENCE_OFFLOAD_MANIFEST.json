@@ -1,0 +1,1318 @@
+{
+  "schema": "ue-evidence-offload/v2",
+  "classification": "HISTORICAL_EVIDENCE",
+  "reason": "Historical generated acceptance/remediation evidence. No test or script in this release reads these files. They are retained outside Git and pinned by logical id, byte size and SHA-256 so their identity stays verifiable.",
+  "count": 218,
+  "totalBytes": 928870851,
+  "source": "integration-discovery PR #921 (feat/union-eyes-v2-release-candidate) tree",
+  "files": [
+    {
+      "path": "docs/union-eyes/ASSURANCE_REMEDIATION_LEDGER.md",
+      "logicalId": "ASSURANCE_REMEDIATION_LEDGER",
+      "bytes": 42564,
+      "sha256": "5ff9abb131807331b829cd3f55fe003b7f9ac40b7476e1eb23d7360f618277d7"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_BOOTSTRAP_V2_RUNTIME_EVIDENCE.json",
+      "logicalId": "UE_BOOTSTRAP_V2_RUNTIME_EVIDENCE",
+      "bytes": 15662733,
+      "sha256": "fe07399eb4aa470c70693cf45018f30a024686f58be36f5f54dc92f6176c2555"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.json",
+      "logicalId": "UE_CANONICAL_SCHEMA_V2",
+      "bytes": 129809822,
+      "sha256": "d8113c2906e646568cddb9ee20df72ca7c57016f1d6da64ada7d3b9bec04c332"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md",
+      "logicalId": "UE_CANONICAL_SCHEMA_V2",
+      "bytes": 39313506,
+      "sha256": "0865ebdd8b8853a578a3e53c94e0c9b71124b1824cd03bce3c2c6922d2c12c0f"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_FINANCIAL_SCOPE_AUTHORITY.json",
+      "logicalId": "UE_V2_FINANCIAL_SCOPE_AUTHORITY",
+      "bytes": 12344920,
+      "sha256": "047e33af6565932ad154ea7f3fd3800cfe262dacd797616b0550c25faf751497"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_MUTATING_CALLER_INVENTORY.json",
+      "logicalId": "UE_V2_MUTATING_CALLER_INVENTORY",
+      "bytes": 23407704,
+      "sha256": "0c1f01131e01f1cb3fa393b42d6e6edb49f183d3d629a4febf5672e637f6c9fd"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1_AUTHORITATIVE_INDEXES.md",
+      "logicalId": "PHASE_1_AUTHORITATIVE_INDEXES",
+      "bytes": 36319,
+      "sha256": "44711cb5d81aea887acac994cc48967fbca33d6cdfb2c8b246c6a6d92f4f9f16"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1A_1_PAGE_AND_DISCOVERABILITY_INDEX.json",
+      "logicalId": "PHASE_1A_1_PAGE_AND_DISCOVERABILITY_INDEX",
+      "bytes": 2517209,
+      "sha256": "987305b701472c04e08f866d78493ae376ead4d69f98c88e66f3b6cab21f98e1"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1A_1_PAGE_AND_DISCOVERABILITY_INDEX.md",
+      "logicalId": "PHASE_1A_1_PAGE_AND_DISCOVERABILITY_INDEX",
+      "bytes": 15153,
+      "sha256": "7bdd54d4d1514b0e2abed99ec100a5dbb312c5e16cb2c2b5b00357efcaf6b2ed"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1A_2_EFFECT_BOUNDARY_INDEX.json",
+      "logicalId": "PHASE_1A_2_EFFECT_BOUNDARY_INDEX",
+      "bytes": 2862985,
+      "sha256": "fa58c8682fc5063f4a106d59aa7719a1bf894ccfa8ca3bf3e79f2a310ce042f1"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1A_2_EFFECT_BOUNDARY_INDEX.md",
+      "logicalId": "PHASE_1A_2_EFFECT_BOUNDARY_INDEX",
+      "bytes": 8936,
+      "sha256": "7a3af3f85525514c91aaa20ec3e14c7b6b8e2286eecdb8ec80a0509d435c509c"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1A_2_EXECUTABLE_ACTION_INDEX.json",
+      "logicalId": "PHASE_1A_2_EXECUTABLE_ACTION_INDEX",
+      "bytes": 2921681,
+      "sha256": "8904f1c2811f330aafe4e6abaeb80f7d95b9e3677984d3bb36f3928c14b0ca06"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1A_2_EXECUTABLE_ACTION_INDEX.md",
+      "logicalId": "PHASE_1A_2_EXECUTABLE_ACTION_INDEX",
+      "bytes": 4661,
+      "sha256": "cbcd1515a1ac2a7e19b33d78b310a6668bded8b0c8502ef4243a712bbaf0fa44"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1A_2_SERVER_EFFECT_INDEX.json",
+      "logicalId": "PHASE_1A_2_SERVER_EFFECT_INDEX",
+      "bytes": 1406613,
+      "sha256": "791823951b87189a4001a5f39d0a8aac70dfba57d6acf16902288b514f45a519"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1A_2_SERVER_EFFECT_INDEX.md",
+      "logicalId": "PHASE_1A_2_SERVER_EFFECT_INDEX",
+      "bytes": 4450,
+      "sha256": "0093405e7522a0950a06653bd635603d941da2a2300042d4be810657582d5b62"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1A_USER_SURFACE_CENSUS.json",
+      "logicalId": "PHASE_1A_USER_SURFACE_CENSUS",
+      "bytes": 1393804,
+      "sha256": "b4bf9e0d91e3d72cc5dfe6acd626c19777e5fa238ba4134e73c26fb5eaae92f4"
+    },
+    {
+      "path": "docs/union-eyes/PHASE_1A_USER_SURFACE_CENSUS.md",
+      "logicalId": "PHASE_1A_USER_SURFACE_CENSUS",
+      "bytes": 6317,
+      "sha256": "9a23c97611cdf4fe10c4b8729df59f10df60b4ea9de2c1cbd5d3cc7f7cb47272"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2_FINAL_SOURCE_CLOSEOUT.json",
+      "logicalId": "PHASE_1A_2_FINAL_SOURCE_CLOSEOUT",
+      "bytes": 5618000,
+      "sha256": "ee1320ef74ebd28676711be839073123d39fb55cfe92115c27bb2f530160f00a"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2_FINAL_SOURCE_CLOSEOUT.md",
+      "logicalId": "PHASE_1A_2_FINAL_SOURCE_CLOSEOUT",
+      "bytes": 8065,
+      "sha256": "ddf13f6f837ee2592e9c8d172ce398880b6b035a71e2a5a4b9b97568eccda634"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2B1_R1_CALLBACK_PROVENANCE.json",
+      "logicalId": "PHASE_1A_2B1_R1_CALLBACK_PROVENANCE",
+      "bytes": 93280,
+      "sha256": "53191ab346925299c55bb9099949615a457e78af7d0704b13b5e8ffd5151fe6e"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2B1_R1_CALLBACK_PROVENANCE.md",
+      "logicalId": "PHASE_1A_2B1_R1_CALLBACK_PROVENANCE",
+      "bytes": 45486,
+      "sha256": "62f4478b212ac92eb5be266d829420e3d7d32a0c6e51ddee457c899dc30a1c5c"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2B2_R1_TERMINAL_EFFECT_CLOSURE.json",
+      "logicalId": "PHASE_1A_2B2_R1_TERMINAL_EFFECT_CLOSURE",
+      "bytes": 1685429,
+      "sha256": "1bde52b3b08601195e93f40f1e585d66f8b8d878565200bcbc7191f5db3cb34b"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2B2_R1_TERMINAL_EFFECT_CLOSURE.md",
+      "logicalId": "PHASE_1A_2B2_R1_TERMINAL_EFFECT_CLOSURE",
+      "bytes": 4265,
+      "sha256": "3df9955d3dc064bdb0de5e16b30415a4ef32a0ee1ae85d7a0b75b40502f8b311"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2B2_R2_EXACT_TERMINAL_DISPOSITIONS.json",
+      "logicalId": "PHASE_1A_2B2_R2_EXACT_TERMINAL_DISPOSITIONS",
+      "bytes": 2916158,
+      "sha256": "8965c2eff5fb5da5d225570f1fa71137d0a73013c848eb526a66597c6257ddd6"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2B2_R2_EXACT_TERMINAL_DISPOSITIONS.md",
+      "logicalId": "PHASE_1A_2B2_R2_EXACT_TERMINAL_DISPOSITIONS",
+      "bytes": 5860,
+      "sha256": "d32ddecc7ae8017263af0600cc7e0ec2e3850c838bc2d82c4acbfe8ed4dd6628"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2B2_R2E_EXISTING_EVIDENCE_BACKFILL.json",
+      "logicalId": "PHASE_1A_2B2_R2E_EXISTING_EVIDENCE_BACKFILL",
+      "bytes": 643506,
+      "sha256": "01496e37ad4555d6225be038553d9686c083cf48af952c2fa0a2ab5f300be073"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2B2_R2E_EXISTING_EVIDENCE_BACKFILL.md",
+      "logicalId": "PHASE_1A_2B2_R2E_EXISTING_EVIDENCE_BACKFILL",
+      "bytes": 8646,
+      "sha256": "2849039b96d33cdbb510c28706051ff0eafd460bd9b463099b9e55fd5899b05f"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2B2_R2N_CANONICAL_EFFECT_NORMALIZATION.json",
+      "logicalId": "PHASE_1A_2B2_R2N_CANONICAL_EFFECT_NORMALIZATION",
+      "bytes": 2440136,
+      "sha256": "a0196d5fcb64fc4ddcf0fa5c0423402e270ba11155f1a940d54fefb8fccf43a8"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_2B2_R2N_CANONICAL_EFFECT_NORMALIZATION.md",
+      "logicalId": "PHASE_1A_2B2_R2N_CANONICAL_EFFECT_NORMALIZATION",
+      "bytes": 9693,
+      "sha256": "ce627a94e6fe2339b8f76c844988505bfe177b76d01c6e435097737ff29d257b"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_3A_BUSINESS_CAPABILITY_MODEL.json",
+      "logicalId": "PHASE_1A_3A_BUSINESS_CAPABILITY_MODEL",
+      "bytes": 964102,
+      "sha256": "057019c8658e1d3f2ab614c0f4e3c8736d8c0979956b986e39ccb13c5328f193"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_3A_BUSINESS_CAPABILITY_MODEL.md",
+      "logicalId": "PHASE_1A_3A_BUSINESS_CAPABILITY_MODEL",
+      "bytes": 21728,
+      "sha256": "b7557cacc613d0ac41aaa312a9a6234648fbc36802929d3ea1f57315ea3539ea"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_3B_CAPABILITY_COHERENCE_REVIEW.json",
+      "logicalId": "PHASE_1A_3B_CAPABILITY_COHERENCE_REVIEW",
+      "bytes": 905353,
+      "sha256": "557c6617f3b867cf06d4cb15cfdd407da0d4d08ba8e50f6fc9b97014fb81e3b0"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_3B_CAPABILITY_COHERENCE_REVIEW.md",
+      "logicalId": "PHASE_1A_3B_CAPABILITY_COHERENCE_REVIEW",
+      "bytes": 34046,
+      "sha256": "7a675c5593179278ed7ba24242bae969d44afcc9cf755b96200e1908325b4cae"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_4A_CORE_PERSONA_JOURNEY_RECONCILIATION.json",
+      "logicalId": "PHASE_1A_4A_CORE_PERSONA_JOURNEY_RECONCILIATION",
+      "bytes": 109019,
+      "sha256": "90a24f731454b1ee88bf6c9c0633dc404c15d6a8c62d462ac740008704f7d8b1"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_4A_CORE_PERSONA_JOURNEY_RECONCILIATION.md",
+      "logicalId": "PHASE_1A_4A_CORE_PERSONA_JOURNEY_RECONCILIATION",
+      "bytes": 12528,
+      "sha256": "91f1b2f070e08ecfd434a723ede45815e73e367ecd37fcb8619f0c9f227fcd0b"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_4B_SPECIAL_JOURNEY_BOUNDARY_RECONCILIATION.json",
+      "logicalId": "PHASE_1A_4B_SPECIAL_JOURNEY_BOUNDARY_RECONCILIATION",
+      "bytes": 157981,
+      "sha256": "30cac76b3f72d388055774080ae7a3d569a7372c53f2a81f0d7671f3c27aec7c"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_4B_SPECIAL_JOURNEY_BOUNDARY_RECONCILIATION.md",
+      "logicalId": "PHASE_1A_4B_SPECIAL_JOURNEY_BOUNDARY_RECONCILIATION",
+      "bytes": 18235,
+      "sha256": "48b2e9a932464ead3ac530e01d7490f0f1bcedc58c7a6d8676135063b320fddd"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_FINAL_SOURCE_RECONCILIATION.json",
+      "logicalId": "PHASE_1A_FINAL_SOURCE_RECONCILIATION",
+      "bytes": 3186490,
+      "sha256": "c28f68be0c2acb47c695b2fe7a7d6df311da5affe9ff04cd3a363c09eecdb2af"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1A_FINAL_SOURCE_RECONCILIATION.md",
+      "logicalId": "PHASE_1A_FINAL_SOURCE_RECONCILIATION",
+      "bytes": 17649,
+      "sha256": "72b12ae5b5c8aabac1a328268d58a48986289ae60503e1de89c328c1e7e68d78"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_CANONICAL_DATA_AUTHORITY_CENSUS.json",
+      "logicalId": "PHASE_1B_1_CANONICAL_DATA_AUTHORITY_CENSUS",
+      "bytes": 14075714,
+      "sha256": "8a0ab63ebfcba1590a64668d86200b696447892d7e400f82551ed8364800d5ef"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_CANONICAL_DATA_AUTHORITY_CENSUS.md",
+      "logicalId": "PHASE_1B_1_CANONICAL_DATA_AUTHORITY_CENSUS",
+      "bytes": 8277,
+      "sha256": "ead35d1d3609b9f5456dec32e50c638e2b5147adda4987de38b0ba3803a256cc"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R1_AUTHORITY_CONFLICT_ADJUDICATION.json",
+      "logicalId": "PHASE_1B_1_R1_AUTHORITY_CONFLICT_ADJUDICATION",
+      "bytes": 21662,
+      "sha256": "a3f38df38d25d751c14fb0ccd3b21b1574626dd6640738b301c1ae2662929e0e"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R2_RESIDUAL_AUTHORITY_CLOSEOUT.json",
+      "logicalId": "PHASE_1B_1_R2_RESIDUAL_AUTHORITY_CLOSEOUT",
+      "bytes": 2068369,
+      "sha256": "bee9abc433e008bef75e491a91510bd47b4597441462dbbcdc4518ad57cefa32"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R2_RESIDUAL_AUTHORITY_CLOSEOUT.md",
+      "logicalId": "PHASE_1B_1_R2_RESIDUAL_AUTHORITY_CLOSEOUT",
+      "bytes": 770702,
+      "sha256": "0d1399cae32a1df1209e0fc99bcb29fb6fad5499ae1c0089089d717d24b222be"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R2A_IMPORT_RESOLUTION_CLOSEOUT.json",
+      "logicalId": "PHASE_1B_1_R2A_IMPORT_RESOLUTION_CLOSEOUT",
+      "bytes": 2800010,
+      "sha256": "4423d504fb481f72e7dbe5a1d140f57dd4db19990c7c225ae4b7c6d0648d5502"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R2A_IMPORT_RESOLUTION_CLOSEOUT.md",
+      "logicalId": "PHASE_1B_1_R2A_IMPORT_RESOLUTION_CLOSEOUT",
+      "bytes": 3733,
+      "sha256": "f0cf151b8032471b7ae7501405e3fcb92dd0f17b162af8933ec200601ff5cd65"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R2B_AUTHORITY_OBJECT_CLOSEOUT.json",
+      "logicalId": "PHASE_1B_1_R2B_AUTHORITY_OBJECT_CLOSEOUT",
+      "bytes": 730436,
+      "sha256": "55c8524404ef06c310b25e24f0acb96f270221d8a0351c770a4c2e7bed8a000d"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R2B_AUTHORITY_OBJECT_CLOSEOUT.md",
+      "logicalId": "PHASE_1B_1_R2B_AUTHORITY_OBJECT_CLOSEOUT",
+      "bytes": 95870,
+      "sha256": "a44f56ea89cc7265d77ba654ffad1d3fe0517b04de4d894b28b21c219aa35da9"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R2C_TARGETLESS_EFFECT_CLOSEOUT.json",
+      "logicalId": "PHASE_1B_1_R2C_TARGETLESS_EFFECT_CLOSEOUT",
+      "bytes": 1652825,
+      "sha256": "57cb807cc0a43d091fb4bc8a03dbb43cff9b26a557576fc3af915f7a38214bc7"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R2C_TARGETLESS_EFFECT_CLOSEOUT.md",
+      "logicalId": "PHASE_1B_1_R2C_TARGETLESS_EFFECT_CLOSEOUT",
+      "bytes": 175065,
+      "sha256": "4c68add89606fe9d46420a49220a4ffffa60586bcb5368892a73a8eae822327d"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R2N_DENOMINATOR_AND_CEILING_AUDIT.json",
+      "logicalId": "PHASE_1B_1_R2N_DENOMINATOR_AND_CEILING_AUDIT",
+      "bytes": 5604626,
+      "sha256": "f7d8b705f630ba100f9e4aac8b98dbfa79fe17bf36ebfb9e04853e1bf7a8e022"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_1_R2N_DENOMINATOR_AND_CEILING_AUDIT.md",
+      "logicalId": "PHASE_1B_1_R2N_DENOMINATOR_AND_CEILING_AUDIT",
+      "bytes": 10210757,
+      "sha256": "365743bff4e8c5376c97ef7f5424a54269509dc43ed918bffea637b28b8dfa3e"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2A_SERVER_AUTH_BOUNDARY_CENSUS.json",
+      "logicalId": "PHASE_1B_2A_SERVER_AUTH_BOUNDARY_CENSUS",
+      "bytes": 4351655,
+      "sha256": "089823c216c5f845740c1da1cb64f4fed1b6c3edb19c65ca0fd9931a48b3caa9"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2A_SERVER_AUTH_BOUNDARY_CENSUS.md",
+      "logicalId": "PHASE_1B_2A_SERVER_AUTH_BOUNDARY_CENSUS",
+      "bytes": 6707,
+      "sha256": "e7d6e3a2e3baaa02682d073c5e264482306e79e66e43bffdebd0ca61b2ccfdd6"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2B1_ENFORCEMENT_PRIMITIVE_SEMANTICS.json",
+      "logicalId": "PHASE_1B_2B1_ENFORCEMENT_PRIMITIVE_SEMANTICS",
+      "bytes": 221055,
+      "sha256": "6a0c4bfa7971b481df9d5c48ab47a19f204ee58e7de2d88580a8d9c670ac7312"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2B1_ENFORCEMENT_PRIMITIVE_SEMANTICS.md",
+      "logicalId": "PHASE_1B_2B1_ENFORCEMENT_PRIMITIVE_SEMANTICS",
+      "bytes": 10463,
+      "sha256": "ab6bb5a4247bfe6fe815787a7a1a658481c891554c368c25a3cd043cfa23f029"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2B2A_ENTRY_ENFORCEMENT_PARTITION.json",
+      "logicalId": "PHASE_1B_2B2A_ENTRY_ENFORCEMENT_PARTITION",
+      "bytes": 5894494,
+      "sha256": "af1420262a73e9dd4a678aa8efa773a284be465d8bd362eccc9fd70b9c8adcee"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2B2A_ENTRY_ENFORCEMENT_PARTITION.md",
+      "logicalId": "PHASE_1B_2B2A_ENTRY_ENFORCEMENT_PARTITION",
+      "bytes": 5449,
+      "sha256": "03221ce9c07aa35d05f1ba0f9f699da64acc4e782465adf70987d1cf2864e469"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2B2B1_SHARED_COHORT_ENFORCEMENT_ADJUDICATION.json",
+      "logicalId": "PHASE_1B_2B2B1_SHARED_COHORT_ENFORCEMENT_ADJUDICATION",
+      "bytes": 30434640,
+      "sha256": "1837ceac544b0bddc4eaf0a2c4a5be55f93e755f12aebc0ed23e87f1c656a024"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2B2B1_SHARED_COHORT_ENFORCEMENT_ADJUDICATION.md",
+      "logicalId": "PHASE_1B_2B2B1_SHARED_COHORT_ENFORCEMENT_ADJUDICATION",
+      "bytes": 5611,
+      "sha256": "fb30cb9cf95357512e642ad7d8d3455959637e2b70d66adba268193835afe572"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2B2B2A_ENTRY_LOCAL_ENFORCEMENT_EVIDENCE.json",
+      "logicalId": "PHASE_1B_2B2B2A_ENTRY_LOCAL_ENFORCEMENT_EVIDENCE",
+      "bytes": 7603222,
+      "sha256": "f6f5f8836b4656f20feff68941733509a23af91d114b4c56f38cec3ae0f079c7"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2B2B2A_ENTRY_LOCAL_ENFORCEMENT_EVIDENCE.md",
+      "logicalId": "PHASE_1B_2B2B2A_ENTRY_LOCAL_ENFORCEMENT_EVIDENCE",
+      "bytes": 3793,
+      "sha256": "a14d2524f04c98bb33d29cd1ccb04b0ddc1f4c44b4d895da3a8bf7c23c47e6b1"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2B2B2B_ENTRY_LOCAL_ENFORCEMENT_ADJUDICATION.json",
+      "logicalId": "PHASE_1B_2B2B2B_ENTRY_LOCAL_ENFORCEMENT_ADJUDICATION",
+      "bytes": 44369621,
+      "sha256": "6199022b0cb3732b7a573b74613e8b6d0527862d8909fd23b084124d4fce7712"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_2B2B2B_ENTRY_LOCAL_ENFORCEMENT_ADJUDICATION.md",
+      "logicalId": "PHASE_1B_2B2B2B_ENTRY_LOCAL_ENFORCEMENT_ADJUDICATION",
+      "bytes": 8425,
+      "sha256": "b944e3aa7e7f13d202041ecbb3d367e20b626b099e359cc0c40db0ced5b72406"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3A_RLS_TENANT_ISOLATION_SURFACE_CENSUS.json",
+      "logicalId": "PHASE_1B_3A_RLS_TENANT_ISOLATION_SURFACE_CENSUS",
+      "bytes": 74446160,
+      "sha256": "5755b17e89fbb81b3afb1b6fda4e18ba107153cd52680bad21041e466c13a883"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3A_RLS_TENANT_ISOLATION_SURFACE_CENSUS.md",
+      "logicalId": "PHASE_1B_3A_RLS_TENANT_ISOLATION_SURFACE_CENSUS",
+      "bytes": 7908,
+      "sha256": "c1d3d501c40a52c5f34ca25b90f049505f703534db3d1a2f557041c0ed9ac380"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3B_STATIC_RLS_POLICY_CORRECTNESS_RECONCILIATION.json",
+      "logicalId": "PHASE_1B_3B_STATIC_RLS_POLICY_CORRECTNESS_RECONCILIATION",
+      "bytes": 85129966,
+      "sha256": "d65dea976c169acb795c71e5c3491d6478d4dbe0859e9b3b17c6be4691c7f84b"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3B_STATIC_RLS_POLICY_CORRECTNESS_RECONCILIATION.md",
+      "logicalId": "PHASE_1B_3B_STATIC_RLS_POLICY_CORRECTNESS_RECONCILIATION",
+      "bytes": 8130,
+      "sha256": "bd33fdfa48939d47bd9d7cf84edf9deb26ff8151f7cc8bedb081e5879a973c72"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A_RUNTIME_PROOF_PREFLIGHT.json",
+      "logicalId": "PHASE_1B_3C_A_RUNTIME_PROOF_PREFLIGHT",
+      "bytes": 20102474,
+      "sha256": "bf6a6e2c1f73f3d56b035b3b1705f298d34d7ff738095eefff8249c6bd6144d0"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A_RUNTIME_PROOF_PREFLIGHT.md",
+      "logicalId": "PHASE_1B_3C_A_RUNTIME_PROOF_PREFLIGHT",
+      "bytes": 6665,
+      "sha256": "f974058c9ebc0b2a3e0f73f542d714f01ab27ad9b1d828a2988477d4b05bb28d"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1_CANONICAL_SCHEMA_BOOTSTRAP_LINEAGE.json",
+      "logicalId": "PHASE_1B_3C_A1_CANONICAL_SCHEMA_BOOTSTRAP_LINEAGE",
+      "bytes": 19132416,
+      "sha256": "1174c864e09fc68f42dca882bb26b6e82cdf4cd3dc58411bd8136e32e317d28d"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1_CANONICAL_SCHEMA_BOOTSTRAP_LINEAGE.md",
+      "logicalId": "PHASE_1B_3C_A1_CANONICAL_SCHEMA_BOOTSTRAP_LINEAGE",
+      "bytes": 10216,
+      "sha256": "f86f93165a04e8d358978853010c8793ade01fa9532761d7052dcf1c75069606"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1D_RUNTIME_SCHEMA_BOOTSTRAP_AUTHORITY_CONTRACT.json",
+      "logicalId": "PHASE_1B_3C_A1D_RUNTIME_SCHEMA_BOOTSTRAP_AUTHORITY_CONTRACT",
+      "bytes": 2499177,
+      "sha256": "84a357fa94bb5a951016c7b58ad975bfe3e92c43bd0bf81c2ed8bc2a44052dfe"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1D_RUNTIME_SCHEMA_BOOTSTRAP_AUTHORITY_CONTRACT.md",
+      "logicalId": "PHASE_1B_3C_A1D_RUNTIME_SCHEMA_BOOTSTRAP_AUTHORITY_CONTRACT",
+      "bytes": 11966,
+      "sha256": "12f089a8784a11f658a36c2148cd65453fd3571b532cbca8b1af5d2abf881a0e"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1E_OPERATIONAL_BOOTSTRAP_BINDING_CLOSURE.json",
+      "logicalId": "PHASE_1B_3C_A1E_OPERATIONAL_BOOTSTRAP_BINDING_CLOSURE",
+      "bytes": 3975275,
+      "sha256": "8a8aed72458720fe6ebaff1eec1227ec3c816d4f44747bc7b509c4736401e8f5"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1E_OPERATIONAL_BOOTSTRAP_BINDING_CLOSURE.md",
+      "logicalId": "PHASE_1B_3C_A1E_OPERATIONAL_BOOTSTRAP_BINDING_CLOSURE",
+      "bytes": 8613,
+      "sha256": "d04f6ed24c9b894b27056206eeee3e79fa5aee2ab5dd20034dc2b718bffff387"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1G_BOOTSTRAP_REMEDIATION_SPECIFICATION.md",
+      "logicalId": "PHASE_1B_3C_A1G_BOOTSTRAP_REMEDIATION_SPECIFICATION",
+      "bytes": 25671,
+      "sha256": "7eb295a0b8c2ca39663b1fbcdb267921c31b5c13344487fb20aa37caea882f61"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1_DJANGO_DEPENDENCY_MIGRATION_LOCK.json",
+      "logicalId": "PHASE_1B_3C_A1I_W1_DJANGO_DEPENDENCY_MIGRATION_LOCK",
+      "bytes": 1384735,
+      "sha256": "1e74413a98722c042888a5cd0e135f34719778e78407129a4c6821f2f7fc3b52"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1_DJANGO_DEPENDENCY_MIGRATION_LOCK.md",
+      "logicalId": "PHASE_1B_3C_A1I_W1_DJANGO_DEPENDENCY_MIGRATION_LOCK",
+      "bytes": 7483,
+      "sha256": "9c4d771b8851a8380577543b4636ed68b973af36b9a10c17f235a57e4515def7"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION",
+      "bytes": 1585823,
+      "sha256": "9e5572df4ddfa735de29df42639a45117ce4c377a5ffcd6e9776d7c667cf1a51"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION",
+      "bytes": 6669,
+      "sha256": "ace6acd55e5b64312ceb81251b85a66a1c5c228e3fc8258c921efd5cd232716c"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W2_DATABASE_TARGET_SEARCH_PATH.json",
+      "logicalId": "PHASE_1B_3C_A1I_W2_DATABASE_TARGET_SEARCH_PATH",
+      "bytes": 104060,
+      "sha256": "b7a2b94be4f6a819baa801683d2d89bf5da2d0f8a8ca432a2d71021c1b33948b"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W2_DATABASE_TARGET_SEARCH_PATH.md",
+      "logicalId": "PHASE_1B_3C_A1I_W2_DATABASE_TARGET_SEARCH_PATH",
+      "bytes": 14294,
+      "sha256": "23fd5383e054d26db4d6a3000cf16406ea32b326e023674b797aaaeb456132fe"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3_ROLE_EXTENSION_PROVISIONING.json",
+      "logicalId": "PHASE_1B_3C_A1I_W3_ROLE_EXTENSION_PROVISIONING",
+      "bytes": 138080,
+      "sha256": "74b50c76cf6ab3f89062e75ad3d49b84dbb14d3ac149773a63d728446436b2aa"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3_ROLE_EXTENSION_PROVISIONING.md",
+      "logicalId": "PHASE_1B_3C_A1I_W3_ROLE_EXTENSION_PROVISIONING",
+      "bytes": 5842,
+      "sha256": "4c55a5b3f4b668f2d7c1824c79af859446129e3e632eee20d6ef2136c25188f1"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3D_GOVERNANCE_DECISION_COMPATIBILITY.json",
+      "logicalId": "PHASE_1B_3C_A1I_W3D_GOVERNANCE_DECISION_COMPATIBILITY",
+      "bytes": 55221,
+      "sha256": "654dabf9d5b3b4a4eb6d46081d3a8239d3bcb22cba84dd8d6ddc2b8966ca35c4"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3D_GOVERNANCE_DECISION_COMPATIBILITY.md",
+      "logicalId": "PHASE_1B_3C_A1I_W3D_GOVERNANCE_DECISION_COMPATIBILITY",
+      "bytes": 5132,
+      "sha256": "e32716b7aa37f8d01dc895aa787ae4411587e9c9addb9feb9641aa5c1c68109a"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT.json",
+      "logicalId": "PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT",
+      "bytes": 248827,
+      "sha256": "725a253dcb8c77b3891fc6cbb97cc0fd36c4ca36893af55cfa10eec3e4c25afb"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT.md",
+      "logicalId": "PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT",
+      "bytes": 5839,
+      "sha256": "e45ca49db7525011f903b9edfb21ea414dd35cbbd6eea9d2dd22956c394960c5"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4_PRECONSUMER_PHYSICAL_PRODUCERS.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4_PRECONSUMER_PHYSICAL_PRODUCERS",
+      "bytes": 5362105,
+      "sha256": "28eb0d823d81c05992cf7f4b19e92f6c2120883b884d97ac69bcce279e147bf4"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4_PRECONSUMER_PHYSICAL_PRODUCERS.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4_PRECONSUMER_PHYSICAL_PRODUCERS",
+      "bytes": 6112,
+      "sha256": "bd3752e44f7d661799ffaae142bdc3f6d2a3328885489ef97e3deb2ce3ca312c"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4C_CONSTRAINT_TIMING_CLOSURE.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4C_CONSTRAINT_TIMING_CLOSURE",
+      "bytes": 73821,
+      "sha256": "2bda4359c389a92e1b9d6a4685fb9bd85528c28ce872812977ae7d7cd732887f"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4C_CONSTRAINT_TIMING_CLOSURE.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4C_CONSTRAINT_TIMING_CLOSURE",
+      "bytes": 12388,
+      "sha256": "ea72b5dc6a3600f46b4cdf30f9e5ffa82a457114bc08754e3988d786fbb00a59"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4D_PHYSICAL_OWNERSHIP_ADJUDICATION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4D_PHYSICAL_OWNERSHIP_ADJUDICATION",
+      "bytes": 8010712,
+      "sha256": "532ad46329ee72edb98d95814d5692b5530682454c6529d0920a12c0a1bb05cc"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4D_PHYSICAL_OWNERSHIP_ADJUDICATION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4D_PHYSICAL_OWNERSHIP_ADJUDICATION",
+      "bytes": 5505,
+      "sha256": "268a6bce61e19eff272eb5b8eda4bbdbaa2dfb9357d05089693df79bb0e09ca2"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4F_CANONICAL_DEFINITION_AUTHORING.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4F_CANONICAL_DEFINITION_AUTHORING",
+      "bytes": 25795961,
+      "sha256": "70a7c068648437aca9d04be3b784af16e29c084064e8fccdb06f815c9268fcc9"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4F_CANONICAL_DEFINITION_AUTHORING.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4F_CANONICAL_DEFINITION_AUTHORING",
+      "bytes": 5716,
+      "sha256": "aab8f7ce7caf72d1abbc1df08937c3462cb705197b5afe0fa4eb2472b34a2184"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR_CANONICAL_DEFINITION_REGENERATION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4FR_CANONICAL_DEFINITION_REGENERATION",
+      "bytes": 117324,
+      "sha256": "b8fef92a25d7c9c0bbc14c5770aca25c086405a85239508d309da69c00d8fe54"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR_CANONICAL_DEFINITION_REGENERATION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4FR_CANONICAL_DEFINITION_REGENERATION",
+      "bytes": 9459,
+      "sha256": "46dac5a212477ccf929a34f2e215703155373df0cd5bc7e292738c7d7307709a"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR2_CANONICAL_DEFINITION_REGENERATION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4FR2_CANONICAL_DEFINITION_REGENERATION",
+      "bytes": 675968,
+      "sha256": "d5dc722a6de31693ea08272fdd6487db700ea9d46a00eb033215d896a8e07e29"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR2_CANONICAL_DEFINITION_REGENERATION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4FR2_CANONICAL_DEFINITION_REGENERATION",
+      "bytes": 7498,
+      "sha256": "7c7825981d43df698a54c6f9854651fc3b19b155b67e49837f95ea3c4f0344c4"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR3_MINIMAL_BASELINE_AUTHORING.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4FR3_MINIMAL_BASELINE_AUTHORING",
+      "bytes": 47622,
+      "sha256": "4aa75ae8909552d68aee01d78bd09c3b55935554c97e3446b1319cdc6dc1d9dc"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR3_MINIMAL_BASELINE_AUTHORING.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4FR3_MINIMAL_BASELINE_AUTHORING",
+      "bytes": 6314,
+      "sha256": "02f3effd15af1397c7e2cea4b6952be51961cee9c7d42d7cfd5f99379a6b01a5"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING",
+      "bytes": 275155,
+      "sha256": "feca82ce999454257dfd3157011684a829731bedab070d07890bc2f39d00f1c6"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING",
+      "bytes": 6018,
+      "sha256": "e80618f5be4bfed104dd57b823b85ae2580d5aeeed372d8454bc7d3d464dc7ad"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION",
+      "bytes": 8595991,
+      "sha256": "50bc30927199ff75307eb8b27d5c9bb4a8faa3e7fb5b600a132fe22e9cd53328"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION",
+      "bytes": 4965,
+      "sha256": "26635e8f5b957bdb817e0d072d562e4ff21140ef53f197cf92f6f2da457ed75e"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE",
+      "bytes": 31489306,
+      "sha256": "58df0c17be136de8ecb2e42590c637530db9bf6d4c1423c03ddb40f80c28d63a"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE",
+      "bytes": 4032,
+      "sha256": "9b1b255878248797857a9fd035c49b0cf40b127965aeadcfe296af8097f7dd5d"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H1_RESIDUAL_BLUEPRINT_CLOSURE.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4H1_RESIDUAL_BLUEPRINT_CLOSURE",
+      "bytes": 345766,
+      "sha256": "20b9cbe13d06465472c389e328d8f455ad9a17ff3bff9c0e07a5a067d97c63b6"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H1_RESIDUAL_BLUEPRINT_CLOSURE.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4H1_RESIDUAL_BLUEPRINT_CLOSURE",
+      "bytes": 14721,
+      "sha256": "41edc06bd91d0df2f15717ba937c6ecc4df003ddbaa0ca0dde4cbecd34ccff67"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H2_TRUE_BLUEPRINT_DECISION_PACKET.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4H2_TRUE_BLUEPRINT_DECISION_PACKET",
+      "bytes": 9387,
+      "sha256": "a25c3660e32123d445176292ed0e5732d4ce778f0d6f459501967a7d6201164f"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H2_TRUE_BLUEPRINT_DECISION_PACKET.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4H2_TRUE_BLUEPRINT_DECISION_PACKET",
+      "bytes": 1734,
+      "sha256": "d5543c6cf717ce3b0334807470aad937ed67b9aa1558d2d0cb426432addc4ace"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H3_FINAL_BLUEPRINT_SELECTION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4H3_FINAL_BLUEPRINT_SELECTION",
+      "bytes": 798676,
+      "sha256": "3baf30e0af81a84d42e428ddf4a2e0cda56b41029c4c5afe88f6b0770758e1d8"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H3_FINAL_BLUEPRINT_SELECTION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4H3_FINAL_BLUEPRINT_SELECTION",
+      "bytes": 5964,
+      "sha256": "8b9325d51965585789ad78e92d93f588da4efa23c7cd5f78ebdda2216f41dd4f"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LB_SUPPLEMENTAL_OPERAND_BINDING.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4LB_SUPPLEMENTAL_OPERAND_BINDING",
+      "bytes": 25796,
+      "sha256": "40ab8780f42b87389345cd3c5191f525ad5470e173f02d9eb946835bfbc3b1e0"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LB_SUPPLEMENTAL_OPERAND_BINDING.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4LB_SUPPLEMENTAL_OPERAND_BINDING",
+      "bytes": 13165,
+      "sha256": "6ec8c7235f93d785e99225a7cc1e8303abeca31d003713087d06351da991613e"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LC_COMPATIBILITY_GATE_NORMALIZATION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4LC_COMPATIBILITY_GATE_NORMALIZATION",
+      "bytes": 108423,
+      "sha256": "fef8528dda5467bb742cd4987b449809f3143099648ec42381b665ecb7cc3ab8"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LC_COMPATIBILITY_GATE_NORMALIZATION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4LC_COMPATIBILITY_GATE_NORMALIZATION",
+      "bytes": 15712,
+      "sha256": "54131f71cf1f255cb10b7ec94dae0e3ca272894df77d629b726031222ad2a5fb"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4P_PLATFORM_BASELINE_PROMOTION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4P_PLATFORM_BASELINE_PROMOTION",
+      "bytes": 123220,
+      "sha256": "9405b0b03e3966816605199a04244e7ffe41af6c2d03af31f25e7c2836d9bbfb"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4P_PLATFORM_BASELINE_PROMOTION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4P_PLATFORM_BASELINE_PROMOTION",
+      "bytes": 4014,
+      "sha256": "b76bea505884edf870e39a929aa8bd11ba86933831f3e351ddf38a2cde2b34c0"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4PG_PROMOTION_GATE_NORMALIZATION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4PG_PROMOTION_GATE_NORMALIZATION",
+      "bytes": 8364,
+      "sha256": "e391b68a8e387180ac32d2e1f1d2353f4b155858e4b833f95a3105b2e87a3feb"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4PG_PROMOTION_GATE_NORMALIZATION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4PG_PROMOTION_GATE_NORMALIZATION",
+      "bytes": 4842,
+      "sha256": "e0e753bd299e29229f73a9cc2c0e39904871d75cd740260aeb200e9a8589d717"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4S_PHYSICAL_AUTHORING_SCOPE_NORMALIZATION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4S_PHYSICAL_AUTHORING_SCOPE_NORMALIZATION",
+      "bytes": 3559121,
+      "sha256": "7d3bc5413a3a177ad26c7f02aae7c93caba99549ee35e9d9db7b5c2ccb396efa"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4S_PHYSICAL_AUTHORING_SCOPE_NORMALIZATION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4S_PHYSICAL_AUTHORING_SCOPE_NORMALIZATION",
+      "bytes": 5592,
+      "sha256": "c39e3112fc1ec2cb608ad8b0e5cd3d7b00c17476a79c4eb2baecc56435d03ae4"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4T_NAMED_TYPE_PRODUCTION_CLOSURE.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4T_NAMED_TYPE_PRODUCTION_CLOSURE",
+      "bytes": 35258,
+      "sha256": "2e422dc1ae5aa221588e66dabc8fa9cbf5398f575b3fd9a70e2f51af03488721"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4T_NAMED_TYPE_PRODUCTION_CLOSURE.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4T_NAMED_TYPE_PRODUCTION_CLOSURE",
+      "bytes": 15579,
+      "sha256": "098cd0dad100e9785cc2f0ae7fcee8bb69e1bf5c107e98f05d5597768c886c22"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4T1_FINAL_TYPE_DEFINITION_SELECTION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W4T1_FINAL_TYPE_DEFINITION_SELECTION",
+      "bytes": 419444,
+      "sha256": "c3c3940c33e08b297068fdfe66a52e1b869d9fd91276b8f22ed9eeb5568e06a2"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4T1_FINAL_TYPE_DEFINITION_SELECTION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W4T1_FINAL_TYPE_DEFINITION_SELECTION",
+      "bytes": 9426,
+      "sha256": "ca80ac86792df195c0430a0030fd6f4d4eeef82d99fc3d0b7b273fae82773853"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W5A_REPLAY_ORDERING_GRAPH.json",
+      "logicalId": "PHASE_1B_3C_A1I_W5A_REPLAY_ORDERING_GRAPH",
+      "bytes": 13980,
+      "sha256": "5682f325a266b2f3fcccd1f735198bd06e6e623c96b8ea263d42122d339cc585"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W5A_REPLAY_ORDERING_GRAPH.md",
+      "logicalId": "PHASE_1B_3C_A1I_W5A_REPLAY_ORDERING_GRAPH",
+      "bytes": 5207,
+      "sha256": "6b6fa069af4a82f4a5cc7e733ce8c1d22d4367a6aafd343c6af3f1c0bd752c3e"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W5B_REPLAY_IMPLEMENTATION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W5B_REPLAY_IMPLEMENTATION",
+      "bytes": 266155,
+      "sha256": "6d3224f61762e77d2345042c0e9d6efaafdc27d74027b0176d55292f96b6b243"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W5B_REPLAY_IMPLEMENTATION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W5B_REPLAY_IMPLEMENTATION",
+      "bytes": 13191,
+      "sha256": "182974c4bfcb06f114048dad431771bbb0319f05957a9480d8bf872f2e6c6e76"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json",
+      "logicalId": "UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT",
+      "bytes": 8012063,
+      "sha256": "5e105985d6b99fbdb118b87454543f92e0053ae1b574c3dfe6417f9bbbc81e2d"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.md",
+      "logicalId": "UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT",
+      "bytes": 17722,
+      "sha256": "f125588d8130911572f67aa1757ee09a78e95d4d092e6779f22edb41d2cae486"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_DATABASE_TARGET_SCHEMA_SEARCH_PATH_CONTRACT.json",
+      "logicalId": "UE_DATABASE_TARGET_SCHEMA_SEARCH_PATH_CONTRACT",
+      "bytes": 100740,
+      "sha256": "7d45cfc927ec6e8b1909098785d2e7dd0fc58fc195890ad81b9c00a61a455610"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_DATABASE_TARGET_SCHEMA_SEARCH_PATH_CONTRACT.md",
+      "logicalId": "UE_DATABASE_TARGET_SCHEMA_SEARCH_PATH_CONTRACT",
+      "bytes": 14286,
+      "sha256": "f25c1e451cb70a3b9bf268b1f965f827b7e4738137d094acb8601dcb65bdedd9"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_FINAL.json",
+      "logicalId": "UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_FINAL",
+      "bytes": 58618562,
+      "sha256": "8f9dd85f0bcf11604c4f0261cd71a9ec62dd12c3ba003559901c69c70c3b92ed"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_FINAL.md",
+      "logicalId": "UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_FINAL",
+      "bytes": 648,
+      "sha256": "698a328f2a49e73c0c3739524a2845ca47a95dc7e3e13f9977ffce23eb81e93d"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_RESOLVED.json",
+      "logicalId": "UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_RESOLVED",
+      "bytes": 43916241,
+      "sha256": "b3b2427ec07afad6e28448910c8f4f50423182a0f36e03f3b1940ddce0c3016a"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_RESOLVED.md",
+      "logicalId": "UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_RESOLVED",
+      "bytes": 559,
+      "sha256": "462faca69e992000fd026270c692c2f83d0d21f47c2bcc8632a243b89d2aad40"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR3.json",
+      "logicalId": "UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR3",
+      "bytes": 61388689,
+      "sha256": "bfb77a69904c6f0cbb6ffad5c103676bacf22cf2287b8dcfb23c05893ac90c5d"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR3.md",
+      "logicalId": "UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR3",
+      "bytes": 461,
+      "sha256": "d2ce055c6c1c07c5453b861d406a9d878e64dd9b6c65a2f769b6582401ae2ed4"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4.json",
+      "logicalId": "UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4",
+      "bytes": 15530469,
+      "sha256": "b84d75a98fec07e86ad68689a93ceebbdb262eee143de2a8f8eee6ba8562784d"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4.md",
+      "logicalId": "UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4",
+      "bytes": 398,
+      "sha256": "39b12dbd9e1ddef1893ccea06f781d1e78d7db163978510ce25a122d560344e5"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS.json",
+      "logicalId": "UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS",
+      "bytes": 24601049,
+      "sha256": "4404f6b17c63af569852d71c180923fa07a186ba7b42cdc62806e2d7c7b35a76"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS.md",
+      "logicalId": "UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS",
+      "bytes": 5716,
+      "sha256": "aab8f7ce7caf72d1abbc1df08937c3462cb705197b5afe0fa4eb2472b34a2184"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_FINAL.json",
+      "logicalId": "UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_FINAL",
+      "bytes": 166035,
+      "sha256": "68bee0ee40507e4dc13cb3acfc9bab3563bd61367959396ca9f74789d8ad1772"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_FINAL.md",
+      "logicalId": "UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_FINAL",
+      "bytes": 491,
+      "sha256": "460ff4da7196a04bd6d89b385b5d4544bda61d7554208ec4188d402bfc755a60"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR3.json",
+      "logicalId": "UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR3",
+      "bytes": 212019,
+      "sha256": "8101e9b2c4a5bcb1953fd11e7e3f223768b0ee9a8e54fec61fab4119d0c25ac1"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR3.md",
+      "logicalId": "UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR3",
+      "bytes": 330,
+      "sha256": "00aa2a015b6a1f85886a39f032e3ec6b9b742782820589f59d645c4da67d83d9"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR4.json",
+      "logicalId": "UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR4",
+      "bytes": 158770,
+      "sha256": "6f81fde1377714e0fb63177cd976a010ec6db197bb8365ad340b8b40d4629e2b"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR4.md",
+      "logicalId": "UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR4",
+      "bytes": 367,
+      "sha256": "396c150019f03bb2897e1c1cd53cd2fb0fdf14e6ab6835433b9e88fac55166e5"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS.json",
+      "logicalId": "UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS",
+      "bytes": 30904,
+      "sha256": "bfc352ea26a8fbe12219fa8b8bf4815b2f93f4381359629ad2cd91c7188dc3ce"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS.md",
+      "logicalId": "UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS",
+      "bytes": 462,
+      "sha256": "6b594abc502390b7ac9eb2cbc23dd576a51f86df5b0c33e6615ae7748609474f"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_POST_W4P_COMPATIBILITY_OBLIGATIONS.json",
+      "logicalId": "UE_POST_W4P_COMPATIBILITY_OBLIGATIONS",
+      "bytes": 1964471,
+      "sha256": "2e10f3e40761c6b93bca473b263c262c2222f7b3a875e41ab268fa1b4448e043"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_POST_W4P_COMPATIBILITY_OBLIGATIONS.md",
+      "logicalId": "UE_POST_W4P_COMPATIBILITY_OBLIGATIONS",
+      "bytes": 39615,
+      "sha256": "11a86cd0e04945945d2f2bccf2dc5bf99e33964709d071ca157db2ad36688e41"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json",
+      "logicalId": "UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT",
+      "bytes": 6773213,
+      "sha256": "b2db0a4924188facc243965b0de11cd921200ce8dda811c543263abdd84dc3aa"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.md",
+      "logicalId": "UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT",
+      "bytes": 9213,
+      "sha256": "c7749871676f9848672a22e2e1771d7ff0ba3128831682ffc1fe3af7a10cbe81"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json",
+      "logicalId": "UE_ROLE_EXTENSION_PROVISIONING_CONTRACT",
+      "bytes": 135330,
+      "sha256": "3fceff4a7bbade51255e421c977cc768dd30a98b1093006d9b3a2727da9b6fda"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.md",
+      "logicalId": "UE_ROLE_EXTENSION_PROVISIONING_CONTRACT",
+      "bytes": 5852,
+      "sha256": "e38cdbf8382a45261a9db8d74be81e5aa9f5faed8d80518390fff804ee01f92c"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_DEFERRED_CONSTRAINT_COMPATIBILITY_CLASSIFICATION.json",
+      "logicalId": "UE_W4_DEFERRED_CONSTRAINT_COMPATIBILITY_CLASSIFICATION",
+      "bytes": 69341,
+      "sha256": "51700b9b0d5860ee9218fabc43ba1aeeb09b96cd6d0b908998e046d724ee05ec"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_DEFERRED_CONSTRAINT_COMPATIBILITY_CLASSIFICATION.md",
+      "logicalId": "UE_W4_DEFERRED_CONSTRAINT_COMPATIBILITY_CLASSIFICATION",
+      "bytes": 7298,
+      "sha256": "ae89e08a8843a2139be0b1d67d53decadf26791098b4f1bf5f0e2a7da03bfea8"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_DEFERRED_MIXED_AUTHORITY_CONSTRAINTS.json",
+      "logicalId": "UE_W4_DEFERRED_MIXED_AUTHORITY_CONSTRAINTS",
+      "bytes": 55307,
+      "sha256": "ce57db581afbee96a9a9017b76cebf309b5741216a7df32d4b80d8f216c9c367"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_DEFERRED_MIXED_AUTHORITY_CONSTRAINTS.md",
+      "logicalId": "UE_W4_DEFERRED_MIXED_AUTHORITY_CONSTRAINTS",
+      "bytes": 6052,
+      "sha256": "36cfd67ab2974ae7d9ed186b96d558d779385f98c500880424e9e960af8b5d4c"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_LATE_PRODUCER_COMPATIBILITY_CLASSIFICATION.json",
+      "logicalId": "UE_W4_LATE_PRODUCER_COMPATIBILITY_CLASSIFICATION",
+      "bytes": 1392962,
+      "sha256": "fc98ce059a4e4d26caadecb7ed9a686db81d324e8e597477f55064d74b76ed98"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_LATE_PRODUCER_COMPATIBILITY_CLASSIFICATION.md",
+      "logicalId": "UE_W4_LATE_PRODUCER_COMPATIBILITY_CLASSIFICATION",
+      "bytes": 29212,
+      "sha256": "552c97949ae620f7d61ba54eda3088cbd4f1b929ba62a0123d073e9cc1abb0d3"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+      "logicalId": "UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY",
+      "bytes": 326400,
+      "sha256": "31a8d6ea71de4ed896f8b465b5093dc67a4a53a72e326858ef01be6a4f791c73"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.md",
+      "logicalId": "UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY",
+      "bytes": 987,
+      "sha256": "ad7c797015379ff33405036a52e44cf6f33e76d68eadc35061fcd1ed094562b9"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_PHYSICAL_OWNERSHIP_HUMAN_DECISION_PACKET.json",
+      "logicalId": "UE_W4_PHYSICAL_OWNERSHIP_HUMAN_DECISION_PACKET",
+      "bytes": 4802845,
+      "sha256": "8412b5a76c90ac01ce166590d53cd39183a4bfee6421cf5551cd08fbc14b07c6"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION.json",
+      "logicalId": "UE_W4_PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION",
+      "bytes": 238001,
+      "sha256": "6f651aaa3f76a82192c5050e2400498d4f66a58c0aa0af2639770ccf52183c49"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION.md",
+      "logicalId": "UE_W4_PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION",
+      "bytes": 33146,
+      "sha256": "e78f104fd7eae6a7cec15d2a9168ec87ab33ad1bd39ce2cc3c37651c2795a219"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_PLAN.json",
+      "logicalId": "UE_W4_PLATFORM_BASELINE_PROMOTION_PLAN",
+      "bytes": 1014879,
+      "sha256": "f58319b792dc62cf6ac06bcf8be070ca6020084f41e468add7d64217aba0b4d5"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_PLAN.md",
+      "logicalId": "UE_W4_PLATFORM_BASELINE_PROMOTION_PLAN",
+      "bytes": 29512,
+      "sha256": "a4e2b80f44fbcdf036d94b7a2adca87c8bd062483aeab55bded8a97b1790d398"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_CONSTRAINT_BINDINGS.json",
+      "logicalId": "UE_W4_SUPPLEMENTAL_CONSTRAINT_BINDINGS",
+      "bytes": 61996,
+      "sha256": "2bfbbf5b3762d7bc4604b5e403210fb4162f0af8a667436454e3053b45bc8f6b"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_CONSTRAINT_BINDINGS.md",
+      "logicalId": "UE_W4_SUPPLEMENTAL_CONSTRAINT_BINDINGS",
+      "bytes": 2763,
+      "sha256": "965e6bc09e0f53e4e4747db98087225cdabd0a503d148b7f34d674dbdc083b99"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_OPERAND_PRODUCER_BINDINGS.json",
+      "logicalId": "UE_W4_SUPPLEMENTAL_OPERAND_PRODUCER_BINDINGS",
+      "bytes": 224445,
+      "sha256": "8ed7eb94b12d2d4b172e5a608d972ce93cbd4334e3cd4a4dfc31cfbffab15fb6"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_OPERAND_PRODUCER_BINDINGS.md",
+      "logicalId": "UE_W4_SUPPLEMENTAL_OPERAND_PRODUCER_BINDINGS",
+      "bytes": 8263,
+      "sha256": "758e9883fc3c442ac900388320d0e7f7cfbbb526c6586c2d15a41a30568b343a"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4F_CANONICAL_DEFINITION_DECISION_PACKET.json",
+      "logicalId": "UE_W4F_CANONICAL_DEFINITION_DECISION_PACKET",
+      "bytes": 650404,
+      "sha256": "a9ca6a0d8c795e0e624465e1e3076d55409b175fff8ee98f1d4b0ab63bcf896f"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4H_RESIDUAL_DEFINITION_DECISION_PACKET.json",
+      "logicalId": "UE_W4H_RESIDUAL_DEFINITION_DECISION_PACKET",
+      "bytes": 38168,
+      "sha256": "1f9af5a083dc824c2e3cfe9439487850e92c4c558e9b7451a351e8e34fa3e9b1"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4H2_TRUE_BLUEPRINT_HUMAN_DECISION_PACKET.json",
+      "logicalId": "UE_W4H2_TRUE_BLUEPRINT_HUMAN_DECISION_PACKET",
+      "bytes": 897309,
+      "sha256": "b41e782d02dfb3e8d8cb9660082ff0dd9ecd0e287f7ec2f54dc37b96452f8354"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4H2_TRUE_BLUEPRINT_HUMAN_DECISION_PACKET.md",
+      "logicalId": "UE_W4H2_TRUE_BLUEPRINT_HUMAN_DECISION_PACKET",
+      "bytes": 11055,
+      "sha256": "9fa70ac044f1c2c08da195f536f820033811cee52334d7abae06576eabde7401"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4P_PROMOTION_DEPENDENCY_CUT.json",
+      "logicalId": "UE_W4P_PROMOTION_DEPENDENCY_CUT",
+      "bytes": 6817358,
+      "sha256": "57a593f2a1a617d7a26bb54d7eca673094d02d639bc1028140e88d59de55127b"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4P_PROMOTION_DEPENDENCY_CUT.md",
+      "logicalId": "UE_W4P_PROMOTION_DEPENDENCY_CUT",
+      "bytes": 112702,
+      "sha256": "430328a8b6446be68c9c928a0e9286343edd9c390880618f091c5ead690797ef"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W4T_NAMED_TYPE_HUMAN_DECISION_PACKET.json",
+      "logicalId": "UE_W4T_NAMED_TYPE_HUMAN_DECISION_PACKET",
+      "bytes": 22701,
+      "sha256": "5202d0fb78a1365ae84f70b309f1129962a2ada13dd3f06a70d79c454092f352"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_ORIGINAL_BOUNDARY_CLOSURE.json",
+      "logicalId": "UE_W5_ORIGINAL_BOUNDARY_CLOSURE",
+      "bytes": 89456,
+      "sha256": "004edf398e489beaa864f44db7edd45f6570ee401a4cceb2aab1be676db07b2e"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_ORIGINAL_BOUNDARY_CLOSURE.md",
+      "logicalId": "UE_W5_ORIGINAL_BOUNDARY_CLOSURE",
+      "bytes": 13191,
+      "sha256": "182974c4bfcb06f114048dad431771bbb0319f05957a9480d8bf872f2e6c6e76"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_ORIGINAL_BOUNDARY_EFFECT_LEDGER.json",
+      "logicalId": "UE_W5_ORIGINAL_BOUNDARY_EFFECT_LEDGER",
+      "bytes": 3716266,
+      "sha256": "41ff4487e83c831dd94c6dbc50a2fe48de3f26af6b3c31453a188e975e423787"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_ORIGINAL_BOUNDARY_EFFECT_LEDGER.md",
+      "logicalId": "UE_W5_ORIGINAL_BOUNDARY_EFFECT_LEDGER",
+      "bytes": 130112,
+      "sha256": "d2dac8451116da8cff9510e8d81cfe334d9e943e9f9f6b690bcbc644b009127e"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_PARENT_KEY_AUTHORITY.json",
+      "logicalId": "UE_W5_PARENT_KEY_AUTHORITY",
+      "bytes": 27048,
+      "sha256": "11c1f0b988f5cb8d345149be3363c51695037ceab1286ccbef55781e7a9bf679"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_PARENT_KEY_AUTHORITY.md",
+      "logicalId": "UE_W5_PARENT_KEY_AUTHORITY",
+      "bytes": 24600,
+      "sha256": "ba0d3f2d06acca40c872a9cded450c604a83f4425ddffe5ebca5f44850b38aa3"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_PARENT_KEY_PRODUCER_PLAN.json",
+      "logicalId": "UE_W5_PARENT_KEY_PRODUCER_PLAN",
+      "bytes": 32035,
+      "sha256": "cf49770b8ba3bcd2c7d95e4b2b91966a446437085c80292dbaa1e17665c731af"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_PARENT_KEY_PRODUCER_PLAN.md",
+      "logicalId": "UE_W5_PARENT_KEY_PRODUCER_PLAN",
+      "bytes": 24600,
+      "sha256": "ba0d3f2d06acca40c872a9cded450c604a83f4425ddffe5ebca5f44850b38aa3"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_POST_W4P_REPLAY_GRAPH.json",
+      "logicalId": "UE_W5_POST_W4P_REPLAY_GRAPH",
+      "bytes": 2857750,
+      "sha256": "0e26428a255d91c8aeb8d8ae1e5cd95683ef437730908f35e7af911d4cb3bd30"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_POST_W4P_REPLAY_GRAPH.md",
+      "logicalId": "UE_W5_POST_W4P_REPLAY_GRAPH",
+      "bytes": 51265,
+      "sha256": "9d923a751458f8539522adda365b9e5030a01dc88c43183ccb45cedb797414e7"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_PRE_REPLAY_PARENT_KEY_SUPPLEMENT.json",
+      "logicalId": "UE_W5_PRE_REPLAY_PARENT_KEY_SUPPLEMENT",
+      "bytes": 17885,
+      "sha256": "f22afcae11edfb3cdd202696337e6650cd8ebaa5a9e7b597a7c8f439872c4eb2"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_PRE_REPLAY_PARENT_KEY_SUPPLEMENT.md",
+      "logicalId": "UE_W5_PRE_REPLAY_PARENT_KEY_SUPPLEMENT",
+      "bytes": 24600,
+      "sha256": "ba0d3f2d06acca40c872a9cded450c604a83f4425ddffe5ebca5f44850b38aa3"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_REPLAY_IMPLEMENTATION_PLAN.json",
+      "logicalId": "UE_W5_REPLAY_IMPLEMENTATION_PLAN",
+      "bytes": 177605,
+      "sha256": "6f923d5e76a3c9f69aad058557d349919dff6ce5a2f7403cf6355fd7f2954e46"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_REPLAY_IMPLEMENTATION_PLAN.md",
+      "logicalId": "UE_W5_REPLAY_IMPLEMENTATION_PLAN",
+      "bytes": 13191,
+      "sha256": "182974c4bfcb06f114048dad431771bbb0319f05957a9480d8bf872f2e6c6e76"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_REPLAY_IMPLEMENTATION_REGISTRY.json",
+      "logicalId": "UE_W5_REPLAY_IMPLEMENTATION_REGISTRY",
+      "bytes": 4179518,
+      "sha256": "c7dfc76b04099201f40d8183db45d5b6b9987073c36cd10d81ef4a20a44a2af8"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_REPLAY_IMPLEMENTATION_REGISTRY.md",
+      "logicalId": "UE_W5_REPLAY_IMPLEMENTATION_REGISTRY",
+      "bytes": 27826,
+      "sha256": "1479e5c2296b7a6683d92f508d55bfde4d8126d99d883deb0036e07c5b870163"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_REPLAY_TOPOLOGICAL_PLAN.json",
+      "logicalId": "UE_W5_REPLAY_TOPOLOGICAL_PLAN",
+      "bytes": 152463,
+      "sha256": "b896029e9f2eba4665956dbb3e36e1633183581f2e82f075eb424ac3305afcce"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_REPLAY_TOPOLOGICAL_PLAN.md",
+      "logicalId": "UE_W5_REPLAY_TOPOLOGICAL_PLAN",
+      "bytes": 28072,
+      "sha256": "6c2ce85dabf54899cd1fb45dd8c78f72f8a6d6f0c4e0ec891591aeb5260754d6"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_TERMINAL_STATIC_DISPOSITION.json",
+      "logicalId": "UE_W5_TERMINAL_STATIC_DISPOSITION",
+      "bytes": 42923,
+      "sha256": "3a79ac5bca798432318d26c75998451150e35190efaea2c6ef227b2f9a2e045c"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_TERMINAL_STATIC_DISPOSITION.md",
+      "logicalId": "UE_W5_TERMINAL_STATIC_DISPOSITION",
+      "bytes": 3822,
+      "sha256": "0cc084bead194b017932a4c2ff59971c11433e0ab06898b65cb47eba1b8dfef3"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_TERMINAL_STATIC_LOCAL_VALIDATION.json",
+      "logicalId": "UE_W5_TERMINAL_STATIC_LOCAL_VALIDATION",
+      "bytes": 3320,
+      "sha256": "b1602027f23f561a39fd69171eac2f9f96f3beeab91b724ee09b68df84f0a833"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_TERMINAL_STATIC_PRESERVATION.json",
+      "logicalId": "UE_W5_TERMINAL_STATIC_PRESERVATION",
+      "bytes": 22570,
+      "sha256": "ba648a08e44690e2e39d97bc44d5961f9017d1aa8ce3e1df9d59a26de5c38f4a"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_W4P_COMPATIBILITY_CENSUS.json",
+      "logicalId": "UE_W5_W4P_COMPATIBILITY_CENSUS",
+      "bytes": 940989,
+      "sha256": "4164d8e920241d3d9620ae530491938c12a5be990255af9e8cb8ae98eaf5579b"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_W4P_COMPATIBILITY_CENSUS.md",
+      "logicalId": "UE_W5_W4P_COMPATIBILITY_CENSUS",
+      "bytes": 7269,
+      "sha256": "601fcf6f0d0dbc4bf3fbb1442a73f787c43917bccf9d7d00eb82c34e41cd8aea"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_W4P_COMPATIBILITY_LOCAL_VALIDATION.json",
+      "logicalId": "UE_W5_W4P_COMPATIBILITY_LOCAL_VALIDATION",
+      "bytes": 8130,
+      "sha256": "b7bb1724f13af62e512c2aacbbd522a8229d44d99951663de479893536bc57c7"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_W4P_COMPATIBILITY_SUPERSESSION.json",
+      "logicalId": "UE_W5_W4P_COMPATIBILITY_SUPERSESSION",
+      "bytes": 206575,
+      "sha256": "6622f2c50360fed7f8cda946d55d646b11943d147f34af5669f58d53dbd9f8d5"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/UE_W5_W4P_COMPATIBILITY_SUPERSESSION.md",
+      "logicalId": "UE_W5_W4P_COMPATIBILITY_SUPERSESSION",
+      "bytes": 7269,
+      "sha256": "601fcf6f0d0dbc4bf3fbb1442a73f787c43917bccf9d7d00eb82c34e41cd8aea"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/w5-compat/PHASE_1B_3C_A1I_W5B_REPLAY_IMPLEMENTATION.json",
+      "logicalId": "PHASE_1B_3C_A1I_W5B_REPLAY_IMPLEMENTATION",
+      "bytes": 115012,
+      "sha256": "a97a556fbd8e2cc69e9bd3ba59b68646f515d1f4d3f12495ef32d8a2345f9507"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/w5-compat/PHASE_1B_3C_A1I_W5B_REPLAY_IMPLEMENTATION.md",
+      "logicalId": "PHASE_1B_3C_A1I_W5B_REPLAY_IMPLEMENTATION",
+      "bytes": 7265,
+      "sha256": "6a81c6ef9ee7e4a4a1e795504b98c35d4b937d3348feab1467c88b33f5b0a560"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/w5-compat/UE_W5_REPLAY_IMPLEMENTATION_PLAN.json",
+      "logicalId": "UE_W5_REPLAY_IMPLEMENTATION_PLAN",
+      "bytes": 115160,
+      "sha256": "c99e2ef19874e3e146dd6d6307ed7c535d43cba80d680ecce82e6bffca665807"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/w5-compat/UE_W5_REPLAY_IMPLEMENTATION_PLAN.md",
+      "logicalId": "UE_W5_REPLAY_IMPLEMENTATION_PLAN",
+      "bytes": 7265,
+      "sha256": "6a81c6ef9ee7e4a4a1e795504b98c35d4b937d3348feab1467c88b33f5b0a560"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/w5-compat/UE_W5_REPLAY_IMPLEMENTATION_REGISTRY.json",
+      "logicalId": "UE_W5_REPLAY_IMPLEMENTATION_REGISTRY",
+      "bytes": 171189,
+      "sha256": "ff818cbcda7783cca44f369743d519cb1d894ebcfdd7a079ab6222f2fb0ef37f"
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/w5-compat/UE_W5_REPLAY_IMPLEMENTATION_REGISTRY.md",
+      "logicalId": "UE_W5_REPLAY_IMPLEMENTATION_REGISTRY",
+      "bytes": 7265,
+      "sha256": "6a81c6ef9ee7e4a4a1e795504b98c35d4b937d3348feab1467c88b33f5b0a560"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "lineage": "PROSPECTIVE_UE_BOOTSTRAP_V2",
+  "contractVersion": "2.0",
+  "scope": "LOCAL_SYNTHETIC_CURRENT_CALLER_DEFAULTS",
+  "missingServerDefaultReproduced": "PASS",
+  "actualDrizzleInsertWithOmittedIdentityAndAuditFields": "PASS",
+  "scalarAndJsonDefaults": "PASS",
+  "nonOwnerNonBypassCaller": "PASS",
+  "sourceDigest": "d64b2cb7ed384f3b7fb5ee045c6ba3ec6d897da0b4743c3af167b5f745ace158",
+  "sourceDigests": {
+    "apps/union-eyes/scripts/bootstrap-v2/source.ts": "5e0f37fc38eb22331417d41b5ea4dc35dfe6afeccf857fa8b8cb47acdc127bdf",
+    "apps/union-eyes/scripts/bootstrap-v2/current_models.py": "86d886f7daf675ea8887c8ef9adfb7b282013ff4263062551dd78e89f555bc3c",
+    "apps/union-eyes/scripts/bootstrap-v2/defaults-native.ts": "96d6867600afb1c5df7dcae118faf6bce81c5e9f1ff2d5b0b992adee0474b4bf",
+    "apps/union-eyes/db/schema/mobile-devices-schema.ts": "432625bbb0332071f0e985d6f2f1baf4f31981671e7de61fda36ff67d9be82dd",
+    "apps/union-eyes/backend/notifications/models.py": "d64b2cb7ed384f3b7fb5ee045c6ba3ec6d897da0b4743c3af167b5f745ace158"
+  },
+  "modelDefaultSqlDigest": "a9b39d796ac00b0bf2c2cc0f96ce2dca510b129a77146f16976013fda170e9ca",
+  "callerDefaultSqlDigest": "a3a40bdc7ac29ecbd48577c84e34dd73beac83bc077e2fe91950dfebdfea404e",
+  "sourceModelChecks": "PASS",
+  "historicalMigrationReplay": false,
+  "tenantIsolationQualification": "NOT_PROVEN",
+  "wholeApplicationQualification": "NOT_PROVEN",
+  "databaseScope": "EPHEMERAL_DEFAULT_PROBE_ONLY",
+  "productionOrStagingConnections": 0
+}
