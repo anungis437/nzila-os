@@ -238,7 +238,16 @@ Organization (org)
 | link_metadata | jsonb | |
 | created_at | timestamp | |
 
-## Intelligence Tables (Cora-writable)
+## Existing Shared Intelligence Tables (Ownership Unresolved)
+
+The following historical table shapes do not establish Cora ownership or
+write authority. The Phase 0B audit found no live Cora app caller and
+identified the product ownership of these tables as unresolved. In
+particular, the former “Cora-writable” label is not an authorization
+contract. Do not write these tables from Cora unless a separately reviewed
+ownership, data-lineage, tenant-isolation, and authorization contract
+resolves the issue. See [ADR-AGRI-002](ADR/ADR-AGRI-002-cora-food-economy-ceiling.md)
+and the [Cora domain ownership matrix](CORA_DOMAIN_OWNERSHIP_MATRIX.md).
 
 ### agri_forecasts
 

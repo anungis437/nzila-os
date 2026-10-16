@@ -1,6 +1,6 @@
 # Portfolio Investor View
 
-Generated: 2026-09-01
+Generated: 2026-10-16
 Authority: governance/portfolio/product-catalog.json
 
 ## Active Revenue Wedges
@@ -19,7 +19,7 @@ Authority: governance/portfolio/product-catalog.json
 | Flow | pilot | Second flagship revenue wedge for SMB operations and commerce. | internal-proof | KEEP |
 | Partners | pilot | Partner workflow option with selective growth value if external demand appears. | none | HOLD |
 | Agrimo | incubating | Agtech option retained for future demand, not current capital concentration. Staging/internal-validation only — not pilot-ready; tier-2 in deployment-inventory reflects promotion-track only, not portfolio strategic tier. | none | HOLD |
-| Cora | incubating | Early-stage concept kept as an option rather than a current operating priority. | none | HOLD |
+| Cora | incubating | First-class product direction: food-economy intelligence and coordination for Canada and data-rich agricultural environments. The accepted product ceiling is not evidence of implemented capability; current status, proof level, and go-to-market posture remain unchanged. | none | HOLD |
 | Maestria | incubating | Premium Canadian SME operating system built on Flow Engine for Boutique, Comptoir, Atelier, and Réseau operating packs. | internal-proof | HOLD |
 | Mobility | incubating | Mobility option retained for future demand rather than current execution focus. | none | HOLD |
 | NACP Exams | incubating | DRC-native national education and examination infrastructure modeled on the Congolese schooling hierarchy (national → province → subdivision → pool → examination centre → school → candidate); examination integrity, anomaly detection, and anti-corruption controls are capabilities within the education product, not its category. | none | HOLD |

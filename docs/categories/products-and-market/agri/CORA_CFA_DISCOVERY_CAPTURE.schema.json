@@ -1,0 +1,1064 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:cora:cfa-discovery:capture:1.0",
+  "title": "Cora CFA discovery preparation and attributed capture",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "captureKind",
+    "humanEvidence",
+    "externalDocuments",
+    "frozenState",
+    "session",
+    "claims",
+    "workflowSteps",
+    "handoffBCandidates",
+    "recipients",
+    "producers",
+    "netValueHypotheses",
+    "verificationQueue",
+    "corrections",
+    "postSession",
+    "entryTemplates"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "captureKind": { "enum": ["PRE_SESSION_TEMPLATE", "SESSION_CAPTURE"] },
+    "humanEvidence": { "type": "boolean" },
+    "externalDocuments": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "availability", "reference", "lineByLineComparisonClaimed"],
+        "properties": {
+          "name": {
+            "enum": ["NLI_CFA_Discovery_Brief_v3_Oct2026", "CORA_Stress_Test_Playbook_v3_Oct2026"]
+          },
+          "availability": { "enum": ["NOT_AVAILABLE_IN_INSPECTED_REPO_SESSION", "AVAILABLE"] },
+          "reference": { "$ref": "#/definitions/nullableText" },
+          "lineByLineComparisonClaimed": { "const": false }
+        }
+      }
+    },
+    "frozenState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "CORA_STRESS_TEST_REPO_SYNC",
+        "GATE_A_DOCTRINE_CONSISTENCY",
+        "GATE_B_BEACHHEAD_CONSISTENCY",
+        "HANDOFF_A",
+        "HANDOFF_B",
+        "GATE_C_EXECUTION",
+        "CORA_ORGANIC_FIRST_LIVE_SOURCE",
+        "PUBLIC_SOURCE_RUNTIME_PROOF",
+        "PRODUCTION_ACTIVATION",
+        "COMMERCIAL_PILOT_COMMITMENT"
+      ],
+      "properties": {
+        "CORA_STRESS_TEST_REPO_SYNC": { "const": "PASS" },
+        "GATE_A_DOCTRINE_CONSISTENCY": { "const": "CLOSED" },
+        "GATE_B_BEACHHEAD_CONSISTENCY": { "const": "IN_PROGRESS" },
+        "HANDOFF_A": { "const": "CANADA_ORGANIC_EVIDENCE" },
+        "HANDOFF_B": { "const": "PENDING_CFA_SELECTION" },
+        "GATE_C_EXECUTION": { "const": "NOT_AUTHORIZED" },
+        "CORA_ORGANIC_FIRST_LIVE_SOURCE": { "const": "BLOCKED_RIGHTS_CONFIRMATION" },
+        "PUBLIC_SOURCE_RUNTIME_PROOF": { "const": "NOT_YET_PROVEN" },
+        "PRODUCTION_ACTIVATION": { "const": "BLOCKED_STRESS_TEST" },
+        "COMMERCIAL_PILOT_COMMITMENT": { "const": "BLOCKED_STRESS_TEST" }
+      }
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sessionId",
+        "status",
+        "authorizationRef",
+        "handlingPolicyRef",
+        "facilitatorRef",
+        "startedAt",
+        "endedAt",
+        "speakerContexts",
+        "recordReliability",
+        "reliabilityReason"
+      ],
+      "properties": {
+        "sessionId": { "$ref": "#/definitions/nullableText" },
+        "status": { "enum": ["NOT_CONDUCTED", "IN_PROGRESS", "COMPLETED", "INTERRUPTED"] },
+        "authorizationRef": { "$ref": "#/definitions/nullableText" },
+        "handlingPolicyRef": { "$ref": "#/definitions/nullableText" },
+        "facilitatorRef": { "$ref": "#/definitions/nullableText" },
+        "startedAt": { "$ref": "#/definitions/nullableDateTime" },
+        "endedAt": { "$ref": "#/definitions/nullableDateTime" },
+        "speakerContexts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["speakerRef", "roleContext", "mandateVerified"],
+            "properties": {
+              "speakerRef": { "$ref": "#/definitions/text" },
+              "roleContext": { "$ref": "#/definitions/nullableText" },
+              "mandateVerified": { "type": ["boolean", "null"] }
+            }
+          }
+        },
+        "recordReliability": {
+          "enum": ["NOT_ASSESSED", "SUFFICIENT_FOR_DISCOVERY_REVIEW", "MATERIAL_GAPS"]
+        },
+        "reliabilityReason": { "$ref": "#/definitions/nullableText" }
+      }
+    },
+    "claims": { "type": "array", "items": { "$ref": "#/definitions/recordedClaim" } },
+    "workflowSteps": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/definitions/step" },
+          {
+            "properties": {
+              "stepId": { "$ref": "#/definitions/text" },
+              "claimIds": { "minItems": 1 }
+            }
+          }
+        ]
+      }
+    },
+    "handoffBCandidates": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/definitions/candidate" },
+          {
+            "properties": {
+              "candidateId": { "$ref": "#/definitions/text" },
+              "claimIds": { "minItems": 1 }
+            }
+          }
+        ]
+      }
+    },
+    "recipients": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/definitions/recipient" },
+          {
+            "properties": {
+              "recipientId": { "$ref": "#/definitions/text" },
+              "claimIds": { "minItems": 1 }
+            }
+          }
+        ]
+      }
+    },
+    "producers": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/definitions/producer" },
+          {
+            "properties": {
+              "producerRef": { "$ref": "#/definitions/text" },
+              "claimIds": { "minItems": 1 }
+            }
+          }
+        ]
+      }
+    },
+    "netValueHypotheses": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/definitions/netValue" },
+          {
+            "properties": {
+              "claimIds": { "minItems": 1 },
+              "route": { "enum": ["ROUTE_A", "ROUTE_B"] }
+            }
+          }
+        ]
+      }
+    },
+    "verificationQueue": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/definitions/verification" },
+          {
+            "properties": {
+              "verificationId": { "$ref": "#/definitions/text" },
+              "claimIds": { "minItems": 1 },
+              "category": { "not": { "type": "null" } },
+              "question": { "$ref": "#/definitions/text" }
+            }
+          }
+        ]
+      }
+    },
+    "corrections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claimId", "at", "ownerRef", "reason", "correction", "originalRecordRef"],
+        "properties": {
+          "claimId": { "$ref": "#/definitions/text" },
+          "at": { "$ref": "#/definitions/dateTime" },
+          "ownerRef": { "$ref": "#/definitions/text" },
+          "reason": { "$ref": "#/definitions/text" },
+          "correction": { "$ref": "#/definitions/text" },
+          "originalRecordRef": { "$ref": "#/definitions/text" }
+        }
+      }
+    },
+    "postSession": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "handoffBDiscovery",
+        "discoveryHandoffBState",
+        "credibleCandidateIds",
+        "candidateRanking",
+        "handoffAChallenge",
+        "handoffAFinding",
+        "handoffAClaimIds",
+        "directSourceBaselineSufficient",
+        "noGoFinding",
+        "noGoApprovalRef",
+        "essentialGaps",
+        "phase0PreparationPlanRef",
+        "disposition",
+        "reason",
+        "decisionOwner",
+        "decisionAt",
+        "evidenceClaimIds",
+        "nextAuthorizedAction"
+      ],
+      "properties": {
+        "handoffBDiscovery": {
+          "enum": ["NOT_ASSESSED", "CANDIDATE_IDENTIFIED", "MULTIPLE_CANDIDATES", "NOT_IDENTIFIED"]
+        },
+        "discoveryHandoffBState": { "enum": ["PENDING_CFA_SELECTION", "PENDING_VALIDATION"] },
+        "credibleCandidateIds": { "$ref": "#/definitions/refs" },
+        "candidateRanking": { "$ref": "#/definitions/nullableText" },
+        "handoffAChallenge": {
+          "enum": ["UNASSESSED", "NONE_RECORDED", "MATERIAL_CHALLENGE_RECORDED"]
+        },
+        "handoffAFinding": { "$ref": "#/definitions/nullableText" },
+        "handoffAClaimIds": { "$ref": "#/definitions/refs" },
+        "directSourceBaselineSufficient": { "enum": ["SUPPORTED", "CHALLENGED", "UNKNOWN"] },
+        "noGoFinding": { "$ref": "#/definitions/nullableText" },
+        "noGoApprovalRef": { "$ref": "#/definitions/nullableText" },
+        "essentialGaps": { "$ref": "#/definitions/refs" },
+        "phase0PreparationPlanRef": { "$ref": "#/definitions/nullableText" },
+        "disposition": {
+          "enum": [
+            "NOT_ASSESSED",
+            "PROCEED_TO_PHASE_0_PREPARATION",
+            "MORE_DISCOVERY_REQUIRED",
+            "ORGANIC_ROUTE_REASSESSMENT",
+            "HANDOFF_B_NOT_IDENTIFIED",
+            "STRESS_TEST_NO_GO"
+          ]
+        },
+        "reason": { "$ref": "#/definitions/nullableText" },
+        "decisionOwner": { "$ref": "#/definitions/nullableText" },
+        "decisionAt": { "$ref": "#/definitions/nullableDateTime" },
+        "evidenceClaimIds": { "$ref": "#/definitions/refs" },
+        "nextAuthorizedAction": { "const": "NONE_AUTHORIZED_BY_THIS_PACKAGE" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "disposition": { "not": { "const": "NOT_ASSESSED" } } } },
+          "then": {
+            "properties": {
+              "reason": { "$ref": "#/definitions/text" },
+              "decisionOwner": { "$ref": "#/definitions/text" },
+              "decisionAt": { "$ref": "#/definitions/dateTime" },
+              "evidenceClaimIds": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "disposition": { "const": "STRESS_TEST_NO_GO" } } },
+          "then": {
+            "properties": {
+              "noGoFinding": { "$ref": "#/definitions/text" },
+              "noGoApprovalRef": { "$ref": "#/definitions/text" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "handoffAChallenge": { "const": "MATERIAL_CHALLENGE_RECORDED" } }
+          },
+          "then": {
+            "properties": {
+              "handoffAFinding": { "$ref": "#/definitions/text" },
+              "handoffAClaimIds": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "directSourceBaselineSufficient": { "const": "SUPPORTED" } } },
+          "then": {
+            "properties": { "handoffAChallenge": { "const": "MATERIAL_CHALLENGE_RECORDED" } }
+          }
+        },
+        {
+          "if": { "properties": { "handoffBDiscovery": { "const": "CANDIDATE_IDENTIFIED" } } },
+          "then": {
+            "properties": {
+              "credibleCandidateIds": { "minItems": 1, "maxItems": 1 },
+              "discoveryHandoffBState": { "const": "PENDING_VALIDATION" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "handoffBDiscovery": { "const": "MULTIPLE_CANDIDATES" } } },
+          "then": {
+            "properties": {
+              "credibleCandidateIds": { "minItems": 2 },
+              "discoveryHandoffBState": { "const": "PENDING_VALIDATION" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "handoffBDiscovery": { "enum": ["NOT_ASSESSED", "NOT_IDENTIFIED"] } }
+          },
+          "then": {
+            "properties": {
+              "credibleCandidateIds": { "maxItems": 0 },
+              "discoveryHandoffBState": { "const": "PENDING_CFA_SELECTION" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "disposition": { "const": "PROCEED_TO_PHASE_0_PREPARATION" } } },
+          "then": {
+            "properties": {
+              "handoffBDiscovery": { "const": "CANDIDATE_IDENTIFIED" },
+              "handoffAChallenge": { "const": "NONE_RECORDED" },
+              "directSourceBaselineSufficient": { "enum": ["CHALLENGED", "UNKNOWN"] },
+              "phase0PreparationPlanRef": { "$ref": "#/definitions/text" },
+              "noGoFinding": { "type": "null" },
+              "essentialGaps": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "disposition": { "const": "ORGANIC_ROUTE_REASSESSMENT" } } },
+          "then": {
+            "properties": { "handoffAChallenge": { "const": "MATERIAL_CHALLENGE_RECORDED" } }
+          }
+        },
+        {
+          "if": { "properties": { "disposition": { "const": "HANDOFF_B_NOT_IDENTIFIED" } } },
+          "then": {
+            "properties": {
+              "handoffBDiscovery": { "const": "NOT_IDENTIFIED" },
+              "handoffAChallenge": { "const": "NONE_RECORDED" }
+            }
+          }
+        }
+      ]
+    },
+    "entryTemplates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim",
+        "workflowStep",
+        "handoffBCandidate",
+        "recipient",
+        "producer",
+        "netValueHypothesis",
+        "verification"
+      ],
+      "properties": {
+        "claim": { "$ref": "#/definitions/claim" },
+        "workflowStep": { "$ref": "#/definitions/step" },
+        "handoffBCandidate": { "$ref": "#/definitions/candidate" },
+        "recipient": { "$ref": "#/definitions/recipient" },
+        "producer": { "$ref": "#/definitions/producer" },
+        "netValueHypothesis": { "$ref": "#/definitions/netValue" },
+        "verification": { "$ref": "#/definitions/verification" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "captureKind": { "const": "PRE_SESSION_TEMPLATE" } } },
+      "then": {
+        "properties": {
+          "humanEvidence": { "const": false },
+          "session": {
+            "properties": {
+              "sessionId": { "type": "null" },
+              "status": { "const": "NOT_CONDUCTED" },
+              "authorizationRef": { "type": "null" },
+              "handlingPolicyRef": { "type": "null" },
+              "facilitatorRef": { "type": "null" },
+              "startedAt": { "type": "null" },
+              "endedAt": { "type": "null" },
+              "speakerContexts": { "maxItems": 0 },
+              "recordReliability": { "const": "NOT_ASSESSED" }
+            }
+          },
+          "claims": { "maxItems": 0 },
+          "workflowSteps": { "maxItems": 0 },
+          "handoffBCandidates": { "maxItems": 0 },
+          "recipients": { "maxItems": 0 },
+          "producers": { "maxItems": 0 },
+          "netValueHypotheses": { "maxItems": 0 },
+          "verificationQueue": { "maxItems": 0 },
+          "corrections": { "maxItems": 0 },
+          "postSession": {
+            "properties": {
+              "handoffBDiscovery": { "const": "NOT_ASSESSED" },
+              "handoffAChallenge": { "const": "UNASSESSED" },
+              "directSourceBaselineSufficient": { "const": "UNKNOWN" },
+              "disposition": { "const": "NOT_ASSESSED" },
+              "handoffAFinding": { "type": "null" },
+              "noGoFinding": { "type": "null" },
+              "noGoApprovalRef": { "type": "null" },
+              "reason": { "type": "null" },
+              "decisionOwner": { "type": "null" },
+              "decisionAt": { "type": "null" },
+              "evidenceClaimIds": { "maxItems": 0 },
+              "handoffAClaimIds": { "maxItems": 0 }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "humanEvidence": { "const": true },
+          "session": {
+            "properties": {
+              "sessionId": { "$ref": "#/definitions/text" },
+              "status": { "enum": ["IN_PROGRESS", "COMPLETED", "INTERRUPTED"] },
+              "authorizationRef": { "$ref": "#/definitions/text" },
+              "handlingPolicyRef": { "$ref": "#/definitions/text" },
+              "facilitatorRef": { "$ref": "#/definitions/text" },
+              "startedAt": { "$ref": "#/definitions/dateTime" },
+              "speakerContexts": { "minItems": 1 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "session": { "properties": { "status": { "const": "COMPLETED" } } } }
+      },
+      "then": {
+        "properties": {
+          "session": { "properties": { "endedAt": { "$ref": "#/definitions/dateTime" } } }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "postSession": {
+                "properties": { "disposition": { "not": { "const": "NOT_ASSESSED" } } }
+              }
+            }
+          },
+          {
+            "properties": {
+              "postSession": {
+                "properties": { "handoffBDiscovery": { "not": { "const": "NOT_ASSESSED" } } }
+              }
+            }
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "captureKind": { "const": "SESSION_CAPTURE" },
+          "session": {
+            "properties": {
+              "status": { "const": "COMPLETED" },
+              "recordReliability": { "const": "SUFFICIENT_FOR_DISCOVERY_REVIEW" },
+              "reliabilityReason": { "$ref": "#/definitions/text" }
+            }
+          },
+          "claims": { "minItems": 1 }
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "text": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "nullableText": { "anyOf": [{ "$ref": "#/definitions/text" }, { "type": "null" }] },
+    "dateTime": { "type": "string", "format": "date-time" },
+    "nullableDateTime": { "anyOf": [{ "$ref": "#/definitions/dateTime" }, { "type": "null" }] },
+    "refs": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/definitions/text" } },
+    "route": { "enum": ["ROUTE_A", "ROUTE_B", "CROSS_ROUTE", "UNKNOWN"] },
+    "readiness": {
+      "enum": [
+        "STRUCTURED_SYSTEM_DATA",
+        "SPREADSHEET_DATABASE",
+        "PDF_DOCUMENT",
+        "EMAIL",
+        "ADVISOR_HELD",
+        "PAPER",
+        "MIXED",
+        "UNKNOWN"
+      ]
+    },
+    "measure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "value", "unit", "basisClaimIds", "sampleAndPeriod", "limitation"],
+      "properties": {
+        "status": { "enum": ["UNKNOWN_TO_BE_BASELINED", "ATTRIBUTED_ESTIMATE"] },
+        "value": { "type": ["number", "null"] },
+        "unit": { "$ref": "#/definitions/nullableText" },
+        "basisClaimIds": { "$ref": "#/definitions/refs" },
+        "sampleAndPeriod": { "$ref": "#/definitions/nullableText" },
+        "limitation": { "$ref": "#/definitions/nullableText" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "ATTRIBUTED_ESTIMATE" } } },
+          "then": {
+            "properties": {
+              "value": { "type": "number" },
+              "unit": { "$ref": "#/definitions/text" },
+              "basisClaimIds": { "minItems": 1 },
+              "sampleAndPeriod": { "$ref": "#/definitions/text" },
+              "limitation": { "$ref": "#/definitions/text" }
+            }
+          },
+          "else": { "properties": { "value": { "type": "null" } } }
+        }
+      ]
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claimId",
+        "speaker",
+        "roleContext",
+        "claimType",
+        "route",
+        "handoffStep",
+        "claim",
+        "wordingKind",
+        "example",
+        "evidenceBasis",
+        "confidence",
+        "needsVerification",
+        "possibleInstitution",
+        "possibleRecipientRole",
+        "possibleProducerImpact",
+        "authorityQuestion",
+        "verificationQuestion",
+        "followUpOwner",
+        "followUpNeeded",
+        "sourceSession",
+        "capturedAt"
+      ],
+      "properties": {
+        "claimId": { "$ref": "#/definitions/nullableText" },
+        "speaker": { "$ref": "#/definitions/nullableText" },
+        "roleContext": { "$ref": "#/definitions/nullableText" },
+        "claimType": {
+          "enum": [
+            "DIRECT_EXPERIENCE",
+            "OBSERVED_EXAMPLE",
+            "INSTITUTIONAL_KNOWLEDGE",
+            "OPINION",
+            "HYPOTHESIS",
+            "REFERRAL",
+            "DOCUMENTARY_EVIDENCE",
+            null
+          ]
+        },
+        "route": { "$ref": "#/definitions/route" },
+        "handoffStep": { "$ref": "#/definitions/nullableText" },
+        "claim": { "$ref": "#/definitions/nullableText" },
+        "wordingKind": { "enum": ["QUOTE", "PARAPHRASE", null] },
+        "example": { "$ref": "#/definitions/nullableText" },
+        "evidenceBasis": { "$ref": "#/definitions/nullableText" },
+        "confidence": { "enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN"] },
+        "needsVerification": { "type": ["boolean", "null"] },
+        "possibleInstitution": { "$ref": "#/definitions/nullableText" },
+        "possibleRecipientRole": { "$ref": "#/definitions/nullableText" },
+        "possibleProducerImpact": { "$ref": "#/definitions/nullableText" },
+        "authorityQuestion": { "$ref": "#/definitions/nullableText" },
+        "verificationQuestion": { "$ref": "#/definitions/nullableText" },
+        "followUpOwner": { "$ref": "#/definitions/nullableText" },
+        "followUpNeeded": { "type": ["boolean", "null"] },
+        "sourceSession": { "$ref": "#/definitions/nullableText" },
+        "capturedAt": { "$ref": "#/definitions/nullableDateTime" }
+      }
+    },
+    "recordedClaim": {
+      "allOf": [
+        { "$ref": "#/definitions/claim" },
+        {
+          "properties": {
+            "claimId": { "$ref": "#/definitions/text" },
+            "speaker": { "$ref": "#/definitions/text" },
+            "claimType": { "not": { "type": "null" } },
+            "claim": { "$ref": "#/definitions/text" },
+            "wordingKind": { "not": { "type": "null" } },
+            "evidenceBasis": { "$ref": "#/definitions/text" },
+            "sourceSession": { "$ref": "#/definitions/text" },
+            "capturedAt": { "$ref": "#/definitions/dateTime" }
+          }
+        }
+      ]
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepId",
+        "route",
+        "candidateId",
+        "claimIds",
+        "actor",
+        "source",
+        "subject",
+        "recipient",
+        "evidenceRequested",
+        "recipientDecision",
+        "transferMechanism",
+        "verificationMethod",
+        "verificationReason",
+        "frictionClass",
+        "classificationVerified",
+        "authorityMechanism",
+        "producerEffort",
+        "institutionalEffort",
+        "elapsedTime",
+        "failureReworkPoints",
+        "bestCurrentBaseline",
+        "remainingQuestions"
+      ],
+      "properties": {
+        "stepId": { "$ref": "#/definitions/nullableText" },
+        "route": { "$ref": "#/definitions/route" },
+        "candidateId": { "$ref": "#/definitions/nullableText" },
+        "claimIds": { "$ref": "#/definitions/refs" },
+        "actor": { "$ref": "#/definitions/nullableText" },
+        "source": { "$ref": "#/definitions/nullableText" },
+        "subject": { "$ref": "#/definitions/nullableText" },
+        "recipient": { "$ref": "#/definitions/nullableText" },
+        "evidenceRequested": { "$ref": "#/definitions/nullableText" },
+        "recipientDecision": { "$ref": "#/definitions/nullableText" },
+        "transferMechanism": { "$ref": "#/definitions/nullableText" },
+        "verificationMethod": { "$ref": "#/definitions/nullableText" },
+        "verificationReason": { "$ref": "#/definitions/nullableText" },
+        "frictionClass": {
+          "enum": [
+            "PURE_FRICTION_CANDIDATE",
+            "CURRENCY_CHECK",
+            "MANDATED_VERIFICATION",
+            "INDEPENDENT_JUDGMENT",
+            "INSTITUTIONAL_RISK_PRACTICE",
+            "CONTRACTUAL_REQUIREMENT",
+            "UNKNOWN_PENDING_VERIFICATION"
+          ]
+        },
+        "classificationVerified": { "const": false },
+        "authorityMechanism": { "$ref": "#/definitions/nullableText" },
+        "producerEffort": { "$ref": "#/definitions/measure" },
+        "institutionalEffort": { "$ref": "#/definitions/measure" },
+        "elapsedTime": { "$ref": "#/definitions/measure" },
+        "failureReworkPoints": { "$ref": "#/definitions/nullableText" },
+        "bestCurrentBaseline": { "$ref": "#/definitions/nullableText" },
+        "remainingQuestions": { "$ref": "#/definitions/refs" }
+      }
+    },
+    "criterionAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "claimIds", "reason"],
+      "properties": {
+        "status": { "enum": ["MET", "NOT_MET", "UNKNOWN"] },
+        "claimIds": { "$ref": "#/definitions/refs" },
+        "reason": { "$ref": "#/definitions/nullableText" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "enum": ["MET", "NOT_MET"] } } },
+          "then": {
+            "properties": {
+              "claimIds": { "minItems": 1 },
+              "reason": { "$ref": "#/definitions/text" }
+            }
+          }
+        }
+      ]
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "claimIds",
+        "commodityContext",
+        "producerType",
+        "originatingInstitution",
+        "evidenceData",
+        "currentHolder",
+        "recipientInstitution",
+        "recipientDecision",
+        "currentTransferMechanism",
+        "repeatedProducerAction",
+        "reasonForReverification",
+        "frequency",
+        "elapsedTime",
+        "producerTimeBurden",
+        "directCost",
+        "decisionDelay",
+        "marketAccessConsequence",
+        "digitalReadiness",
+        "privacySensitivity",
+        "authorityMechanism",
+        "regulatoryObligation",
+        "auditObligation",
+        "contractualObligation",
+        "independentJudgmentRequirement",
+        "habitualManualProcess",
+        "candidateBehaviouralDelta",
+        "shadowRecipientId",
+        "captureWorkstreamCandidate",
+        "captureBurdenSeparate",
+        "authorityQuestions",
+        "criteria",
+        "defeatingContradiction"
+      ],
+      "properties": {
+        "candidateId": { "$ref": "#/definitions/nullableText" },
+        "claimIds": { "$ref": "#/definitions/refs" },
+        "commodityContext": { "$ref": "#/definitions/nullableText" },
+        "producerType": { "$ref": "#/definitions/nullableText" },
+        "originatingInstitution": { "$ref": "#/definitions/nullableText" },
+        "evidenceData": { "$ref": "#/definitions/nullableText" },
+        "currentHolder": { "$ref": "#/definitions/nullableText" },
+        "recipientInstitution": { "$ref": "#/definitions/nullableText" },
+        "recipientDecision": { "$ref": "#/definitions/nullableText" },
+        "currentTransferMechanism": { "$ref": "#/definitions/nullableText" },
+        "repeatedProducerAction": { "$ref": "#/definitions/nullableText" },
+        "reasonForReverification": { "$ref": "#/definitions/nullableText" },
+        "frequency": { "$ref": "#/definitions/measure" },
+        "elapsedTime": { "$ref": "#/definitions/measure" },
+        "producerTimeBurden": { "$ref": "#/definitions/measure" },
+        "directCost": { "$ref": "#/definitions/measure" },
+        "decisionDelay": { "$ref": "#/definitions/measure" },
+        "marketAccessConsequence": { "$ref": "#/definitions/nullableText" },
+        "digitalReadiness": { "$ref": "#/definitions/readiness" },
+        "privacySensitivity": { "$ref": "#/definitions/nullableText" },
+        "authorityMechanism": { "$ref": "#/definitions/nullableText" },
+        "regulatoryObligation": { "$ref": "#/definitions/nullableText" },
+        "auditObligation": { "$ref": "#/definitions/nullableText" },
+        "contractualObligation": { "$ref": "#/definitions/nullableText" },
+        "independentJudgmentRequirement": { "$ref": "#/definitions/nullableText" },
+        "habitualManualProcess": { "$ref": "#/definitions/nullableText" },
+        "candidateBehaviouralDelta": { "$ref": "#/definitions/nullableText" },
+        "shadowRecipientId": { "$ref": "#/definitions/nullableText" },
+        "captureWorkstreamCandidate": { "enum": ["YES", "NO", "UNKNOWN"] },
+        "captureBurdenSeparate": { "$ref": "#/definitions/nullableText" },
+        "authorityQuestions": {
+          "type": "object",
+          "minProperties": 10,
+          "maxProperties": 10,
+          "propertyNames": {
+            "enum": [
+              "ORIGINATOR",
+              "ACCESS_GOVERNANCE",
+              "CONSENT_RELEVANCE",
+              "INSTRUCTION",
+              "CONTRACTUAL_AUTHORITY",
+              "INSTITUTIONAL_MANDATE",
+              "LEGAL_REGULATORY_BASIS",
+              "RECIPIENT_INDEPENDENT_VERIFICATION",
+              "WRONG_STALE_LIABILITY",
+              "NON_REUSABLE_EVIDENCE"
+            ]
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["question", "proposedAnswer", "claimIds", "status"],
+            "properties": {
+              "question": { "$ref": "#/definitions/text" },
+              "proposedAnswer": { "$ref": "#/definitions/nullableText" },
+              "claimIds": { "$ref": "#/definitions/refs" },
+              "status": { "const": "UNVERIFIED_PHASE_0_REQUIRED" }
+            }
+          }
+        },
+        "criteria": {
+          "type": "object",
+          "minProperties": 9,
+          "maxProperties": 9,
+          "propertyNames": {
+            "enum": [
+              "producerBurden",
+              "handoffIdentifiable",
+              "recipientIdentifiable",
+              "decisionConsequence",
+              "differentFromOrganic",
+              "measurableFriction",
+              "verificationCulture",
+              "authorityQuestionsIdentified",
+              "shadowParticipantsPlausible"
+            ]
+          },
+          "additionalProperties": { "$ref": "#/definitions/criterionAssessment" }
+        },
+        "defeatingContradiction": { "$ref": "#/definitions/nullableText" }
+      }
+    },
+    "contactAuthorization": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reference", "at", "scope"],
+          "properties": {
+            "reference": { "$ref": "#/definitions/text" },
+            "at": { "$ref": "#/definitions/dateTime" },
+            "scope": { "$ref": "#/definitions/text" }
+          }
+        }
+      ]
+    },
+    "recipient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recipientId",
+        "claimIds",
+        "institution",
+        "route",
+        "recipientFunction",
+        "decisionBeingMade",
+        "evidenceCurrentlyRequested",
+        "currentVerificationMethod",
+        "reasonForVerification",
+        "possibleBehaviouralDelta",
+        "thresholdStatus",
+        "authorityToParticipate",
+        "contactRoute",
+        "relationshipSource",
+        "contactAuthorization",
+        "status"
+      ],
+      "properties": {
+        "recipientId": { "$ref": "#/definitions/nullableText" },
+        "claimIds": { "$ref": "#/definitions/refs" },
+        "institution": { "$ref": "#/definitions/nullableText" },
+        "route": { "$ref": "#/definitions/route" },
+        "recipientFunction": { "$ref": "#/definitions/nullableText" },
+        "decisionBeingMade": { "$ref": "#/definitions/nullableText" },
+        "evidenceCurrentlyRequested": { "$ref": "#/definitions/nullableText" },
+        "currentVerificationMethod": { "$ref": "#/definitions/nullableText" },
+        "reasonForVerification": { "$ref": "#/definitions/nullableText" },
+        "possibleBehaviouralDelta": { "$ref": "#/definitions/nullableText" },
+        "thresholdStatus": { "const": "DRAFT_DISCOVERY_ONLY" },
+        "authorityToParticipate": { "$ref": "#/definitions/nullableText" },
+        "contactRoute": { "$ref": "#/definitions/nullableText" },
+        "relationshipSource": { "$ref": "#/definitions/nullableText" },
+        "contactAuthorization": { "$ref": "#/definitions/contactAuthorization" },
+        "status": {
+          "enum": [
+            "MENTIONED",
+            "CANDIDATE",
+            "INTRODUCTION_OFFERED",
+            "CONTACT_AUTHORIZED",
+            "DECLINED",
+            "NOT_VERIFIED"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "CONTACT_AUTHORIZED" } } },
+          "then": {
+            "properties": {
+              "contactAuthorization": { "type": "object" },
+              "contactRoute": { "$ref": "#/definitions/text" }
+            }
+          }
+        }
+      ]
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "producerRef",
+        "claimIds",
+        "commodityContext",
+        "recordReadiness",
+        "candidateRoute",
+        "experienceRelevantToHandoff",
+        "introductionReferralSource",
+        "participationInterest",
+        "compensationExpectations",
+        "consentEthicsRequirements",
+        "contactAuthorization",
+        "status"
+      ],
+      "properties": {
+        "producerRef": { "$ref": "#/definitions/nullableText" },
+        "claimIds": { "$ref": "#/definitions/refs" },
+        "commodityContext": { "$ref": "#/definitions/nullableText" },
+        "recordReadiness": { "$ref": "#/definitions/readiness" },
+        "candidateRoute": { "$ref": "#/definitions/route" },
+        "experienceRelevantToHandoff": { "$ref": "#/definitions/nullableText" },
+        "introductionReferralSource": { "$ref": "#/definitions/nullableText" },
+        "participationInterest": { "enum": ["UNKNOWN", "REPORTED_INTEREST", "REPORTED_DECLINE"] },
+        "compensationExpectations": { "$ref": "#/definitions/nullableText" },
+        "consentEthicsRequirements": { "$ref": "#/definitions/nullableText" },
+        "contactAuthorization": { "$ref": "#/definitions/contactAuthorization" },
+        "status": {
+          "enum": [
+            "MENTIONED",
+            "CANDIDATE",
+            "INTRODUCTION_OFFERED",
+            "CONTACT_AUTHORIZED",
+            "DECLINED",
+            "NOT_VERIFIED"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "CONTACT_AUTHORIZED" } } },
+          "then": { "properties": { "contactAuthorization": { "type": "object" } } }
+        }
+      ]
+    },
+    "netValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["route", "candidateId", "claimIds", "thresholdStatus", "dimensions"],
+      "properties": {
+        "route": { "$ref": "#/definitions/route" },
+        "candidateId": { "$ref": "#/definitions/nullableText" },
+        "claimIds": { "$ref": "#/definitions/refs" },
+        "thresholdStatus": { "const": "DRAFT_DISCOVERY_ONLY" },
+        "dimensions": {
+          "type": "object",
+          "minProperties": 10,
+          "maxProperties": 10,
+          "propertyNames": {
+            "enum": [
+              "producerTime",
+              "directCost",
+              "administrativeBurden",
+              "risk",
+              "optionality",
+              "switchingAbility",
+              "marketAccess",
+              "decisionLatency",
+              "privacyExposure",
+              "liabilityExposure"
+            ]
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["hypothesis", "measure"],
+            "properties": {
+              "hypothesis": { "$ref": "#/definitions/nullableText" },
+              "measure": { "$ref": "#/definitions/measure" }
+            }
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verificationId",
+        "claimIds",
+        "category",
+        "question",
+        "proposedSource",
+        "status",
+        "evidenceRefs",
+        "verifiedScope",
+        "verifier",
+        "verifiedAt",
+        "limitationReason",
+        "followUpOwner",
+        "actionAuthorizationRef"
+      ],
+      "properties": {
+        "verificationId": { "$ref": "#/definitions/nullableText" },
+        "claimIds": { "$ref": "#/definitions/refs" },
+        "category": {
+          "enum": [
+            "REGULATORY_CLAIM",
+            "PROGRAM_REQUIREMENT",
+            "STANDARD",
+            "CONTRACTUAL_PRACTICE",
+            "RECIPIENT_VERIFICATION_POLICY",
+            "BURDEN_ESTIMATE",
+            "MARKET_ACCESS_CONSEQUENCE",
+            "INSTITUTIONAL_PROCESS",
+            null
+          ]
+        },
+        "question": { "$ref": "#/definitions/nullableText" },
+        "proposedSource": { "$ref": "#/definitions/nullableText" },
+        "status": {
+          "enum": [
+            "VERIFIED",
+            "UNVERIFIED",
+            "NOT_PUBLICLY_VERIFIABLE",
+            "REQUIRES_INSTITUTION_CONFIRMATION"
+          ]
+        },
+        "evidenceRefs": { "$ref": "#/definitions/refs" },
+        "verifiedScope": { "$ref": "#/definitions/nullableText" },
+        "verifier": { "$ref": "#/definitions/nullableText" },
+        "verifiedAt": { "$ref": "#/definitions/nullableDateTime" },
+        "limitationReason": { "$ref": "#/definitions/nullableText" },
+        "followUpOwner": { "$ref": "#/definitions/nullableText" },
+        "actionAuthorizationRef": { "$ref": "#/definitions/nullableText" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "VERIFIED" } } },
+          "then": {
+            "properties": {
+              "evidenceRefs": { "minItems": 1 },
+              "claimIds": { "minItems": 1 },
+              "verifiedScope": { "$ref": "#/definitions/text" },
+              "verifier": { "$ref": "#/definitions/text" },
+              "verifiedAt": { "$ref": "#/definitions/dateTime" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "NOT_PUBLICLY_VERIFIABLE" } } },
+          "then": { "properties": { "limitationReason": { "$ref": "#/definitions/text" } } }
+        }
+      ]
+    }
+  }
+}

@@ -50,6 +50,12 @@ export interface AuthSessionResult {
   userId: string | null
   orgId: string | null
   orgRole: string | null
+  /** Authenticated provider namespace, not an application permission source. */
+  identityProvider?: string | null
+  /** Provider-owned subject; never interpreted as the platform user id. */
+  providerSubject?: string | null
+  /** Describes legacy org selectors so consumers do not trust them as authority. */
+  orgSelectionSource?: 'entra-group-legacy' | 'legacy-membership-default' | null
   sessionId: string | null
   sessionClaims: Record<string, unknown> | null
   getToken: (options?: Record<string, unknown>) => Promise<string | null>
@@ -85,6 +91,9 @@ export async function auth(): Promise<AuthSessionResult> {
         userId: acceptanceUser.id,
         orgId: acceptanceUser.organizationId,
         orgRole: null,
+        identityProvider: 'union-eyes-acceptance',
+        providerSubject: null,
+        orgSelectionSource: null,
         sessionId: acceptanceUser.sessionId,
         sessionClaims: {
           email: acceptanceUser.email,
@@ -183,6 +192,9 @@ export async function auth(): Promise<AuthSessionResult> {
           userId: pgUser.id,
           orgId: pgUser.organizationId,
           orgRole,
+          identityProvider: 'nzila-password',
+          providerSubject: pgUser.id,
+          orgSelectionSource: pgUser.organizationId ? 'legacy-membership-default' : null,
           sessionId: pgUser.sessionId,
           sessionClaims: {
             email: pgUser.email,
@@ -218,6 +230,12 @@ export async function auth(): Promise<AuthSessionResult> {
     userId: entra?.entraObjectId ?? session.user.id ?? null,
     orgId: entra?.activeOrgId ?? null,
     orgRole: entra?.orgRole ?? null,
+    identityProvider: entra?.entraObjectId && entra?.tenantId ? 'entra' : null,
+    providerSubject:
+      entra?.entraObjectId && entra?.tenantId
+        ? `${entra.tenantId}:${entra.entraObjectId}`
+        : null,
+    orgSelectionSource: entra?.activeOrgSource ?? null,
     sessionId: entra?.entraObjectId ?? session.user.id ?? null,
     sessionClaims: {
       roles: entra?.roles ?? [],

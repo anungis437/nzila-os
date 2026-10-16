@@ -1,6 +1,12 @@
 import { defineProject } from 'vitest/config'
+import { fileURLToPath } from 'node:url'
 
 export default defineProject({
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('.', import.meta.url)),
+    },
+  },
   test: {
     // Dynamic-import barrel/route tests can exceed the 5s vitest default under
     // monorepo-scale parallel runners on Windows; 30s provides comfortable headroom.

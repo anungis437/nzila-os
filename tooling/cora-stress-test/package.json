@@ -1,0 +1,8 @@
+{
+  "name": "cora-stress-test-governance-local",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "ajv": "^8.20.0"
+  }
+}

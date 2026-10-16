@@ -1,11 +1,16 @@
-import { createHash } from 'node:crypto';
+import { sql } from 'drizzle-orm'
 
-import { sql } from 'drizzle-orm';
+import {
+  CANONICAL_HASH_VERSION as SHARED_CANONICAL_HASH_VERSION,
+  CANONICAL_KEY_ORDER as SHARED_CANONICAL_KEY_ORDER,
+  buildCanonicalPayload as buildSharedCanonicalPayload,
+  canonicalStringify as sharedCanonicalStringify,
+  computeCanonicalHash as computeSharedCanonicalHash,
+} from '@nzila/db/audit-hash'
+import { platformDb } from '@nzila/db/platform'
+import { createLogger } from '@nzila/os-core'
 
-import { platformDb } from '@nzila/db/platform';
-import { createLogger } from '@nzila/os-core';
-
-const logger = createLogger('abr-audit');
+const logger = createLogger('abr-audit')
 
 /**
  * Canonical hash version tag persisted in `audit_events.hash_version` for
@@ -20,15 +25,15 @@ const logger = createLogger('abr-audit');
  * did not persist the ephemeral timestamp it hashed. See migration
  * `0032_audit_events_canonical_hash.sql`.
  */
-export const CANONICAL_HASH_VERSION = 'canonical-v1' as const;
+export const CANONICAL_HASH_VERSION = SHARED_CANONICAL_HASH_VERSION
 
 export interface AbrAuditEvent {
-  action: string;
-  actorUserId: string;
-  orgId: string;
-  entityType: string;
-  recordId?: string;
-  details?: Record<string, unknown>;
+  action: string
+  actorUserId: string
+  orgId: string
+  entityType: string
+  recordId?: string
+  details?: Record<string, unknown>
 }
 
 /**
@@ -61,42 +66,33 @@ export interface AbrAuditEvent {
  * key order `{ payload, previousHash }`.
  */
 export interface CanonicalAuditPayload {
-  action: string;
-  actorClerkUserId: string;
-  actorRole: string | null;
-  afterJson: Record<string, unknown> | null;
-  hashTimestamp: string;
-  hashVersion: typeof CANONICAL_HASH_VERSION;
-  orgId: string;
-  targetId: string | null;
-  targetType: string;
+  action: string
+  actorClerkUserId: string
+  actorRole: string | null
+  afterJson: Record<string, unknown> | null
+  hashTimestamp: string
+  hashVersion: typeof CANONICAL_HASH_VERSION
+  orgId: string
+  targetId: string | null
+  targetType: string
 }
 
 /**
  * Fixed ASCII-sorted key order for {@link CanonicalAuditPayload}. Do not
  * reorder without bumping {@link CANONICAL_HASH_VERSION}.
  */
-export const CANONICAL_KEY_ORDER: readonly (keyof CanonicalAuditPayload)[] = [
-  'action',
-  'actorClerkUserId',
-  'actorRole',
-  'afterJson',
-  'hashTimestamp',
-  'hashVersion',
-  'orgId',
-  'targetId',
-  'targetType',
-] as const;
+export const CANONICAL_KEY_ORDER: readonly (keyof CanonicalAuditPayload)[] =
+  SHARED_CANONICAL_KEY_ORDER
 
 export interface CanonicalPayloadInput {
-  action: string;
-  actorClerkUserId: string;
-  actorRole: string | null;
-  afterJson: Record<string, unknown> | null;
-  hashTimestamp: string;
-  orgId: string;
-  targetId: string | null;
-  targetType: string;
+  action: string
+  actorClerkUserId: string
+  actorRole: string | null
+  afterJson: Record<string, unknown> | null
+  hashTimestamp: string
+  orgId: string
+  targetId: string | null
+  targetType: string
 }
 
 /**
@@ -106,19 +102,7 @@ export interface CanonicalPayloadInput {
  * regardless of the caller's field-construction order.
  */
 export function buildCanonicalPayload(input: CanonicalPayloadInput): CanonicalAuditPayload {
-  const payload = {} as CanonicalAuditPayload;
-  // Deliberate explicit key-by-key assignment in sorted order. Do not
-  // replace with a spread — spread order depends on the input object.
-  payload.action = input.action;
-  payload.actorClerkUserId = input.actorClerkUserId;
-  payload.actorRole = input.actorRole;
-  payload.afterJson = input.afterJson;
-  payload.hashTimestamp = input.hashTimestamp;
-  payload.hashVersion = CANONICAL_HASH_VERSION;
-  payload.orgId = input.orgId;
-  payload.targetId = input.targetId;
-  payload.targetType = input.targetType;
-  return payload;
+  return buildSharedCanonicalPayload(input)
 }
 
 /**
@@ -154,8 +138,7 @@ export function computeCanonicalHash(
   payload: CanonicalAuditPayload,
   previousHash: string | null,
 ): string {
-  const wrapper = { payload, previousHash };
-  return createHash('sha256').update(canonicalStringify(wrapper), 'utf8').digest('hex');
+  return computeSharedCanonicalHash(payload, previousHash)
 }
 
 /**
@@ -171,38 +154,23 @@ export function computeCanonicalHash(
  * inside arrays) and never appears in a canonical audit payload.
  */
 export function canonicalStringify(value: unknown): string {
-  if (value === undefined) {
-    throw new Error('canonicalStringify: undefined is not a valid canonical value');
-  }
-  if (value === null || typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') {
-    return JSON.stringify(value);
-  }
-  if (Array.isArray(value)) {
-    return `[${value.map((item) => canonicalStringify(item ?? null)).join(',')}]`;
-  }
-  if (typeof value === 'object') {
-    const entries = Object.entries(value as Record<string, unknown>)
-      .filter(([, v]) => v !== undefined)
-      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
-    return `{${entries
-      .map(([k, v]) => `${JSON.stringify(k)}:${canonicalStringify(v)}`)
-      .join(',')}}`;
-  }
-  throw new Error(`canonicalStringify: unsupported value type ${typeof value}`);
+  return sharedCanonicalStringify(value)
 }
 
-type AuditWriter = (event: AbrAuditEvent) => Promise<{ id: string; hash: string; previousHash: string | null }>;
+type AuditWriter = (
+  event: AbrAuditEvent,
+) => Promise<{ id: string; hash: string; previousHash: string | null }>
 
-let auditWriterOverride: AuditWriter | null = null;
+let auditWriterOverride: AuditWriter | null = null
 function isUuid(value: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
 }
 
 async function resolveAuditOrgId(event: AbrAuditEvent): Promise<string> {
-  const candidateOrgId = isUuid(event.orgId) ? event.orgId : null;
+  const candidateOrgId = isUuid(event.orgId) ? event.orgId : null
   const runtimeAllowsFallback =
     (process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true' ||
-    (process.env.NODE_ENV ?? '').toLowerCase() !== 'production';
+    (process.env.NODE_ENV ?? '').toLowerCase() !== 'production'
 
   if (candidateOrgId) {
     const exists = await platformDb.execute(sql`
@@ -210,12 +178,12 @@ async function resolveAuditOrgId(event: AbrAuditEvent): Promise<string> {
       from orgs
       where id = ${candidateOrgId}::uuid
       limit 1
-    `);
+    `)
     if ((exists[0] as { id?: string } | undefined)?.id) {
-      return candidateOrgId;
+      return candidateOrgId
     }
     if (!runtimeAllowsFallback) {
-      throw new Error('Audit org UUID is not present in orgs');
+      throw new Error('Audit org UUID is not present in orgs')
     }
   }
 
@@ -226,8 +194,9 @@ async function resolveAuditOrgId(event: AbrAuditEvent): Promise<string> {
       and is_active = true
     order by is_primary desc, created_at asc
     limit 1
-  `);
-  const membershipOrgId = (membershipRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
+  `)
+  const membershipOrgId =
+    (membershipRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null
 
   if (membershipOrgId && isUuid(membershipOrgId)) {
     const membershipOrgExists = await platformDb.execute(sql`
@@ -235,12 +204,12 @@ async function resolveAuditOrgId(event: AbrAuditEvent): Promise<string> {
       from orgs
       where id = ${membershipOrgId}::uuid
       limit 1
-    `);
+    `)
     if ((membershipOrgExists[0] as { id?: string } | undefined)?.id) {
-      return membershipOrgId;
+      return membershipOrgId
     }
     if (!runtimeAllowsFallback) {
-      throw new Error('Membership org UUID is not present in orgs');
+      throw new Error('Membership org UUID is not present in orgs')
     }
   }
 
@@ -249,17 +218,17 @@ async function resolveAuditOrgId(event: AbrAuditEvent): Promise<string> {
     from orgs
     order by created_at asc
     limit 1
-  `);
-  const fallbackOrgId = (fallbackRows[0] as { id?: string } | undefined)?.id ?? null;
+  `)
+  const fallbackOrgId = (fallbackRows[0] as { id?: string } | undefined)?.id ?? null
   if (fallbackOrgId) {
-    return fallbackOrgId;
+    return fallbackOrgId
   }
 
-  throw new Error('Unable to resolve platform org UUID for audit event');
+  throw new Error('Unable to resolve platform org UUID for audit event')
 }
 
 const defaultAuditWriter: AuditWriter = async (event) => {
-  const resolvedOrgId = await resolveAuditOrgId(event);
+  const resolvedOrgId = await resolveAuditOrgId(event)
 
   const previousRows = await platformDb.execute(sql`
     select hash
@@ -267,8 +236,8 @@ const defaultAuditWriter: AuditWriter = async (event) => {
     where org_id = ${resolvedOrgId}
     order by created_at desc
     limit 1
-  `);
-  const previousHash = (previousRows[0] as { hash?: string } | undefined)?.hash ?? null;
+  `)
+  const previousHash = (previousRows[0] as { hash?: string } | undefined)?.hash ?? null
 
   // Generate the canonical timestamp EXACTLY ONCE. This same string is
   // (a) included in the SHA-256 payload and (b) persisted in
@@ -276,9 +245,9 @@ const defaultAuditWriter: AuditWriter = async (event) => {
   // an independent verifier to recompute the hash from the row later.
   // Do not read `new Date().toISOString()` twice — the values would differ
   // by milliseconds and canonical recomputation would fail.
-  const hashTimestamp = new Date().toISOString();
-  const normalisedTargetId = event.recordId && isUuid(event.recordId) ? event.recordId : null;
-  const normalisedAfterJson = event.details ?? null;
+  const hashTimestamp = new Date().toISOString()
+  const normalisedTargetId = event.recordId && isUuid(event.recordId) ? event.recordId : null
+  const normalisedAfterJson = event.details ?? null
 
   const canonicalPayload = buildCanonicalPayload({
     action: event.action,
@@ -289,8 +258,8 @@ const defaultAuditWriter: AuditWriter = async (event) => {
     orgId: resolvedOrgId,
     targetId: normalisedTargetId,
     targetType: event.entityType,
-  });
-  const hash = computeCanonicalHash(canonicalPayload, previousHash);
+  })
+  const hash = computeCanonicalHash(canonicalPayload, previousHash)
 
   const inserted = await platformDb.execute(sql`
     insert into audit_events (
@@ -318,35 +287,39 @@ const defaultAuditWriter: AuditWriter = async (event) => {
       ${hashTimestamp}::timestamptz,
       ${CANONICAL_HASH_VERSION}
     ) returning id, hash, previous_hash
-  `);
+  `)
 
-  const row = inserted[0] as { id?: string; hash?: string; previous_hash?: string | null } | undefined;
+  const row = inserted[0] as
+    | { id?: string; hash?: string; previous_hash?: string | null }
+    | undefined
   if (!row?.id || !row.hash) {
-    throw new Error('Audit persistence returned no row');
+    throw new Error('Audit persistence returned no row')
   }
 
-  return { id: row.id, hash: row.hash, previousHash: row.previous_hash ?? previousHash };
-};
-
-export function setAuditLogWriter(writer: AuditWriter | null): void {
-  auditWriterOverride = writer;
+  return { id: row.id, hash: row.hash, previousHash: row.previous_hash ?? previousHash }
 }
 
-async function persistAuditEvent(event: AbrAuditEvent): Promise<{ id: string; hash: string; previousHash: string | null }> {
-  return (auditWriterOverride ?? defaultAuditWriter)(event);
+export function setAuditLogWriter(writer: AuditWriter | null): void {
+  auditWriterOverride = writer
+}
+
+async function persistAuditEvent(
+  event: AbrAuditEvent,
+): Promise<{ id: string; hash: string; previousHash: string | null }> {
+  return (auditWriterOverride ?? defaultAuditWriter)(event)
 }
 
 export async function logAuditEvent(event: AbrAuditEvent): Promise<string> {
-  const auditId = `abr_audit_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const auditId = `abr_audit_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 
-  const result = await persistAuditEvent(event);
+  const result = await persistAuditEvent(event)
   logger.info('ABR audit event', {
     auditId,
     ...event,
     persistedId: result.id,
     hash: result.hash.slice(0, 12) + '…',
     timestamp: new Date().toISOString(),
-  });
+  })
 
-  return auditId;
+  return auditId
 }

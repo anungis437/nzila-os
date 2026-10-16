@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-06T00:00:00.000Z",
+  "generatedAt": "2026-10-16T00:00:00.000Z",
   "appCount": 28,
   "packageCount": 224,
-  "workspacePackageCount": 258,
+  "workspacePackageCount": 259,
   "workflowCount": 59,
   "contractTestCount": 291,
-  "tsTestFileCount": 2693,
+  "tsTestFileCount": 2729,
   "pythonTestFileCount": 35,
   "apps": [
     {
@@ -276,14 +276,16 @@
         "db",
         "evidence",
         "governed-workflow",
+        "org",
         "os-core",
         "platform-auth",
+        "platform-policy-engine",
         "platform-shell",
         "schema-core",
         "ui"
       ],
-      "purpose": "Agricultural intelligence dashboard — yield forecasting, price signals, risk analysis, cooperative performance, and impact traceability.",
-      "codeFileCount": 43
+      "purpose": "Cora is Agricultural Institutional Infrastructure.",
+      "codeFileCount": 129
     },
     {
       "name": "flow",

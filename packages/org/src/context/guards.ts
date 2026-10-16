@@ -8,8 +8,8 @@
  *
  * @invariant FAIL_CLOSED_001
  */
-import type { OrgContext, DbContext } from './types.js'
-import { isOrgContext } from './types.js'
+import type { OrgContext, DbContext } from './types'
+import { isOrgContext } from './types'
 
 // ── Error Types ─────────────────────────────────────────────────────────────
 

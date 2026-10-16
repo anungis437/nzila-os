@@ -1,5 +1,13 @@
 # Agrotech Product Roadmap 2025–2028
 > Feature roadmap for CORA (supply chain matching) and AgrimoOps (farm ERP) platforms under Nzila Corp.
+>
+> **Historical planning draft — not current product doctrine, implementation
+> evidence, or an approved delivery roadmap.** Its former convergence and
+> product-role assumptions are superseded by
+> [ADR-AGRI-001](../../../../../docs/categories/products-and-market/agri/ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md)
+> and [ADR-AGRI-002](../../../../../docs/categories/products-and-market/agri/ADR/ADR-AGRI-002-cora-food-economy-ceiling.md).
+> Capability truth is maintained in
+> [CORA_CEILING_CAPABILITY_TRUTH.md](../../../../../docs/categories/products-and-market/agri/CORA_CEILING_CAPABILITY_TRUTH.md).
 
 ---
 

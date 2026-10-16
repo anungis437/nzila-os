@@ -1045,12 +1045,18 @@ importers:
       '@nzila/governed-workflow':
         specifier: workspace:*
         version: link:../../packages/governed-workflow
+      '@nzila/org':
+        specifier: workspace:*
+        version: link:../../packages/org
       '@nzila/os-core':
         specifier: workspace:*
         version: link:../../packages/os-core
       '@nzila/platform-auth':
         specifier: workspace:*
         version: link:../../packages/platform-auth
+      '@nzila/platform-policy-engine':
+        specifier: workspace:*
+        version: link:../../packages/platform-policy-engine
       '@nzila/platform-shell':
         specifier: workspace:*
         version: link:../../packages/platform-shell
@@ -8484,6 +8490,12 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.9.8)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.5(@types/node@25.9.8)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.51.2)(tsx@4.21.0)(yaml@2.8.3))
+
+  tooling/cora-stress-test:
+    devDependencies:
+      ajv:
+        specifier: ^8.20.0
+        version: 8.20.0
 
   tooling/openapi-gen:
     dependencies:

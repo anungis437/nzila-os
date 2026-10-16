@@ -1,6 +1,12 @@
-# App Alignment: CORA (Compliance & Operations Risk Assessment)
+# Historical App Alignment Draft: CORA (Compliance & Operations Risk Assessment)
 
-> Status: **PLANNED** — App not yet created. Defines required conventions.
+> Status: **SUPERSEDED — 2026-10-07**. This was a planned compliance/risk
+> portal with an acronym expansion and is not the current Cora agricultural
+> product. Retained as a historical record; do not use as active product
+> doctrine. The canonical boundary is
+> [ADR-AGRI-001](../../../products-and-market/agri/ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md).
+
+The content below is retained unchanged as historical context.
 
 ## Overview
 

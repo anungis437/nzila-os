@@ -1,14 +1,15 @@
 /**
  * Contract Test — Cora Read-Only Enforcement
  *
- * Cora is a cooperative intelligence dashboard. It MUST be strictly read-only
- * with respect to operational/transactional data stores.
+ * Cora is read-only with respect to operational/transactional data stores.
+ * The Farmer 360 persistence adapter is the sole exception: it may write
+ * org-scoped Cora-owned records and canonical audit/evidence records.
  *
  * Three invariants enforced:
  *
  * CORA_NO_ACTIONS_FOLDER_001 — No server actions directory may exist in Cora
  * CORA_NO_MUTATION_IMPORTS_002 — No write-capable repo/service imports from operational DB packages
- * CORA_NO_SQL_MUTATIONS_003 — No SQL mutation keywords (INSERT, UPDATE, DELETE) in app code
+ * CORA_NO_SQL_MUTATIONS_003 — No operational SQL mutations in app code; Cora-owned Farmer 360 persistence is narrowly allowed
  *
  * @invariant CORA_NO_ACTIONS_FOLDER_001
  * @invariant CORA_NO_MUTATION_IMPORTS_002
@@ -217,11 +218,19 @@ describe('CORA_NO_MUTATION_IMPORTS_002 — No write-capable imports in Cora', ()
 
 // ── CORA_NO_SQL_MUTATIONS_003 ──────────────────────────────────────────────
 
-describe('CORA_NO_SQL_MUTATIONS_003 — No SQL mutation strings in Cora', () => {
+describe('CORA_NO_SQL_MUTATIONS_003 — No operational SQL mutations in Cora', () => {
   // Matches SQL DML mutation keywords (case-insensitive) in string literals,
   // template literals, or raw SQL-like content.
   const SQL_MUTATION_PATTERN =
     /\b(INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|\.insert\s*\(|\.update\s*\(|\.delete\s*\()/i
+  const FARMER360_PERSISTENCE_PATH = '/apps/cora/lib/farmer-360/adapters.ts'
+  const FARMER360_WRITE_TARGETS = new Set([
+    'auditEvents',
+    'coraEvidenceRecords',
+    'coraFarmer360Assertions',
+    'coraFarmer360ContextVersions',
+    'coraFarmer360Profiles',
+  ])
 
   it('no INSERT/UPDATE/DELETE SQL strings in Cora source (excluding tests/fixtures)', () => {
     const sourceFiles = walkSync(CORA_ROOT)
@@ -241,6 +250,7 @@ describe('CORA_NO_SQL_MUTATIONS_003 — No SQL mutation strings in Cora', () => 
 
       const content = readContent(file)
       if (!content) continue
+      if (rel === FARMER360_PERSISTENCE_PATH) continue
 
       // Check line by line for better error messages
       const lines = content.split('\n')
@@ -263,6 +273,21 @@ describe('CORA_NO_SQL_MUTATIONS_003 — No SQL mutation strings in Cora', () => 
         'Cora is a read-only intelligence surface. All data mutations must happen ' +
         'in other apps/services, not in Cora.',
     ).toEqual([])
+  })
+
+  it('limits Farmer 360 persistence to Cora-owned records and canonical evidence/audit', () => {
+    const adapterPath = join(CORA_ROOT, 'lib', 'farmer-360', 'adapters.ts')
+    const content = readContent(adapterPath)
+    const writes = [...content.matchAll(
+      /\b(?:tx|db)\s*\.\s*(insert|update|delete)\s*\(\s*([A-Za-z_$][\w$]*)/g,
+    )].map(([, operation, target]) => ({ operation, target }))
+
+    expect(content).not.toMatch(/\b(?:INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM)\b/i)
+    expect(writes.length).toBeGreaterThan(0)
+    expect(writes.every(({ operation, target }) =>
+      operation !== 'delete' && FARMER360_WRITE_TARGETS.has(target),
+    )).toBe(true)
+    expect(writes.some(({ target }) => target.startsWith('agri'))).toBe(false)
   })
 
   it('no "use server" directives in Cora (no server actions)', () => {

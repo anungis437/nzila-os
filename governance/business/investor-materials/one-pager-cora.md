@@ -1,3 +1,12 @@
+# Historical Draft — Cora Investor One-Pager
+
+> **SUPERSEDED — 2026-10-07.** Retained as a historical draft; do not use
+> its readiness, market, integration, or product-boundary claims as current
+> evidence. The accepted product boundary is recorded in
+> [ADR-AGRI-001](../../../docs/categories/products-and-market/agri/ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md).
+
+<!-- Historical content follows; it has not been revalidated. -->
+
 # 🏆 CORA — AgTech Flagship
 ## Canada's Comprehensive Agricultural Supply Chain Platform
 
