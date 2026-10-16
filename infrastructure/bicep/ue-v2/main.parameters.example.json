@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "env": { "value": "prod" },
+    "logAnalyticsName": { "value": "nzila-canada-prod-law" },
+    "logAnalyticsResourceGroup": { "value": "nzila-canada-prod-rg" },
+    "actionGroupId": {
+      "value": "/subscriptions/<subscription-id>/resourceGroups/nzila-canada-prod-rg/providers/microsoft.insights/actionGroups/ue-prod-ops-alerts"
+    },
+    "acrName": { "value": "<production registry name>" },
+    "acrResourceGroup": { "value": "<registry resource group>" },
+    "appImageDigest": { "value": "sha256:<release-built app image digest>" },
+    "clamavImageDigest": { "value": "sha256:<clamav adapter image digest>" },
+    "cronImageDigest": { "value": "sha256:<curl image digest imported into the registry>" },
+    "publicHostName": { "value": "app.unioneyes.app" }
+  }
+}
