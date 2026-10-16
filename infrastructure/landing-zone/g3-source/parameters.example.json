@@ -1,0 +1,232 @@
+{
+  "lineage": "PROSPECTIVE_G3R2",
+  "deployable": false,
+  "exampleOnly": true,
+  "parameters": {
+    "provisionResources": false,
+    "location": "canadacentral",
+    "names": {
+      "resourceGroup": "nzila-shared-test-g3-001-rg",
+      "environment": "nzila-g3-env-95086e2f",
+      "application": "nzila-g3-proof-95086e2f",
+      "pullIdentity": "nzila-g3-pull-95086e2f",
+      "runtimeIdentity": "nzila-g3-runtime-95086e2f",
+      "keyVault": "nzg3kv95086e2f",
+      "vnet": "nzila-g3-vnet-95086e2f",
+      "acaSubnet": "G3ContainerAppsSubnet",
+      "privateEndpointSubnet": "G3PrivateEndpointSubnet",
+      "builderSubnet": "G3BuilderSubnet",
+      "nsg": "nzila-g3-aca-nsg-95086e2f",
+      "routeTable": "nzila-g3-aca-rt-95086e2f",
+      "keyVaultEndpoint": "nzila-g3-kv-pe-95086e2f",
+      "keyVaultDnsZone": "privatelink.vaultcore.azure.net",
+      "keyVaultDnsLink": "nzila-g3-kv-link-95086e2f",
+      "workspace": "nzila-g3-logs-95086e2f"
+    },
+    "tags": {
+      "mission": "NZ-20261008-INFRA-001",
+      "environment": "integration-test",
+      "product": "shared",
+      "component": "g3-synthetic",
+      "owner": "HUMAN_BINDING_REQUIRED",
+      "dataClassification": "synthetic"
+    },
+    "networkRules": {
+      "inbound": [
+        {
+          "name": "in-0",
+          "properties": {
+            "priority": 100,
+            "direction": "Inbound",
+            "access": "Allow",
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "AzureLoadBalancer",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "10.91.1.0/24",
+            "destinationPortRange": "30000-32767"
+          }
+        },
+        {
+          "name": "in-1",
+          "properties": {
+            "priority": 110,
+            "direction": "Inbound",
+            "access": "Allow",
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "10.91.3.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "10.91.1.0/24",
+            "destinationPortRanges": ["443", "31443"]
+          }
+        },
+        {
+          "name": "in-2",
+          "properties": {
+            "priority": 120,
+            "direction": "Inbound",
+            "access": "Allow",
+            "protocol": "*",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "10.91.1.0/24",
+            "destinationPortRange": "*"
+          }
+        },
+        {
+          "name": "in-3",
+          "properties": {
+            "priority": 900,
+            "direction": "Inbound",
+            "access": "Deny",
+            "protocol": "*",
+            "sourceAddressPrefix": "*",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "10.91.1.0/24",
+            "destinationPortRange": "*"
+          }
+        }
+      ],
+      "outbound": [
+        {
+          "name": "out-0",
+          "properties": {
+            "priority": 100,
+            "direction": "Outbound",
+            "access": "Allow",
+            "protocol": "*",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "10.91.1.0/24",
+            "destinationPortRange": "*"
+          }
+        },
+        {
+          "name": "out-1",
+          "properties": {
+            "priority": 110,
+            "direction": "Outbound",
+            "access": "Allow",
+            "protocol": "*",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "AzurePlatformDNS",
+            "destinationPortRange": "53"
+          }
+        },
+        {
+          "name": "out-2-0",
+          "properties": {
+            "priority": 130,
+            "direction": "Outbound",
+            "access": "Allow",
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "MicrosoftContainerRegistry",
+            "destinationPortRange": "443"
+          }
+        },
+        {
+          "name": "out-2-1",
+          "properties": {
+            "priority": 131,
+            "direction": "Outbound",
+            "access": "Allow",
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "AzureFrontDoorFirstParty",
+            "destinationPortRange": "443"
+          }
+        },
+        {
+          "name": "out-2-2",
+          "properties": {
+            "priority": 132,
+            "direction": "Outbound",
+            "access": "Allow",
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "AzureContainerRegistry",
+            "destinationPortRange": "443"
+          }
+        },
+        {
+          "name": "out-2-3",
+          "properties": {
+            "priority": 133,
+            "direction": "Outbound",
+            "access": "Allow",
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "AzureActiveDirectory",
+            "destinationPortRange": "443"
+          }
+        },
+        {
+          "name": "out-2-4",
+          "properties": {
+            "priority": 134,
+            "direction": "Outbound",
+            "access": "Allow",
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "AzureKeyVault",
+            "destinationPortRange": "443"
+          }
+        },
+        {
+          "name": "out-2-5",
+          "properties": {
+            "priority": 135,
+            "direction": "Outbound",
+            "access": "Allow",
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "AzureMonitor",
+            "destinationPortRange": "443"
+          }
+        },
+        {
+          "name": "out-2-6",
+          "properties": {
+            "priority": 136,
+            "direction": "Outbound",
+            "access": "Allow",
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "Storage.CanadaCentral",
+            "destinationPortRange": "443"
+          }
+        },
+        {
+          "name": "out-3",
+          "properties": {
+            "priority": 900,
+            "direction": "Outbound",
+            "access": "Deny",
+            "protocol": "*",
+            "sourceAddressPrefix": "10.91.1.0/24",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "*",
+            "destinationPortRange": "*"
+          }
+        }
+      ]
+    },
+    "g2VnetId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+    "keyVaultPurgeProtection": false,
+    "discoveredEndpointIps": [],
+    "approvedPlatformPrefixes": [],
+    "immutableImage": "",
+    "quotaEvidenceId": "",
+    "availableConsumptionMilliCores": 0,
+    "workloadActivationAuthorized": false,
+    "rbacAuthorized": false
+  }
+}

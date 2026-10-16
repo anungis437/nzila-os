@@ -1,0 +1,93 @@
+{
+  "mission": "NZ-20261008-INFRA-001",
+  "phase": "G3R3D",
+  "G3R3D": "FAIL",
+  "ROOT_1": "CLOSED",
+  "BUILDER_A_LIVE_QUALIFICATION": "FAIL",
+  "BUILDER_A": "DISQUALIFIED",
+  "BUILDER_B": "PARKED_NOT_SELECTED",
+  "SELECTED_PRIVATE_BUILD_MODEL": "NONE",
+  "CURRENT_G3_PROOF_EXECUTION_ARCHITECTURE": "EXHAUSTED",
+  "G3_EXECUTION_READINESS": "BLOCKED",
+  "G3A": "NOT_AUTHORIZED",
+  "G3B": "NOT_AUTHORIZED",
+  "targetValidation": "PASS",
+  "currentOperatorAuthority": "EXISTING_SESSION;NO_GRANT",
+  "observedFailures": [
+    "PRE_EXISTING_ROOTLESS_ACCOUNT_ABSENT",
+    "DEDICATED_ACCOUNT_NO_LOGIN_CONTRACT_NOT_MET",
+    "ROOTLESS_SUBUID_OR_SUBGID_ABSENT",
+    "PRE_EXISTING_TOOL_ABSENT:docker",
+    "PRE_EXISTING_TOOL_ABSENT:dockerd-rootless.sh",
+    "PRE_EXISTING_TOOL_ABSENT:rootlesskit",
+    "PRE_EXISTING_TOOL_ABSENT:slirp4netns",
+    "PRE_EXISTING_TOOL_ABSENT:newuidmap",
+    "PRE_EXISTING_TOOL_ABSENT:newgidmap",
+    "PRE_EXISTING_BUILDX_ABSENT",
+    "SYSTEMD_NOT_HEALTHY"
+  ],
+  "composite": {
+    "CORE_PACKET_DIGEST": "9cfcda0c4bced61e302128d8455867214f7b64c8b5b101bf5e52f632e8984198",
+    "SUPPLEMENT_DIGEST": "51fe60768d6042c765828ca01382a25f95cec408fcc8229fabda7f5a9ef0076b",
+    "TOTAL_RECORDED_CHANGE_ENTRIES": 9,
+    "DISTINCT_FINAL_DESIRED_STATE_ENTRIES": 8,
+    "overlapResolution": "Core Writer condition is normalized before grant,not two sequential RBAC writes. Three firewall property/collection entries target one resource;physical PUT batching must be explicitly rendered/approved,not inferred from entry count.",
+    "PHYSICAL_MUTATION_COUNT": null,
+    "SELECTED_BUILDER": "NONE",
+    "STATUS": "INCOMPLETE_NOT_APPROVABLE;LINKAGE_ONLY",
+    "method": "SHA256 sorted canonical JSON before COMPOSITE_G2_AUTHORIZATION_DIGEST",
+    "COMPOSITE_G2_AUTHORIZATION_DIGEST": "9e8af91b43633a4b2a500038f5c3bd2d3626db47af1b33f4e230793f7b97c128"
+  },
+  "repositoryAbac": "PARENT_STATIC_CONTRACT_PRESERVED;NO_GRANT",
+  "builderScript": {
+    "sha256": "6a05455e5f3bd3e5992697106c696e6e645b0d54c258beb069add379ba3e06b8",
+    "state": "PARENT_FROZEN_UNQUALIFIED;NOT_EXECUTED"
+  },
+  "recommendedExecutionOperator": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+  "recommendedOperatorStatus": "NOT_APPOINTED",
+  "RECOMMENDED_EXECUTION_CEILING_CAD": "UNSUPPORTED",
+  "HUMAN_APPROVED_EXECUTION_CEILING_CAD": "UNBOUND",
+  "finalHumanPacket": "NOT_ISSUED;RUNTIME_PASS_AND_NUMERIC_CEILING_REQUIRED",
+  "reservedHumanDecisions": {
+    "A": "ACCOUNTABILITY;owner/operator/separate approver unbound",
+    "B": "COMPOSITE G2 MUTATION AUTHORIZATION;unbound",
+    "C": "EXECUTION COST CEILING;unsupported/unbound"
+  },
+  "accounting": {
+    "totalOperations": 17,
+    "readOnlyOperations": 13,
+    "successfulCliOperations": 17,
+    "failedCliOperations": 0,
+    "childCreationRequests": 2,
+    "childDeletionRequests": 2,
+    "successfulChildCreations": 2,
+    "successfulChildDeletions": 2,
+    "uniqueChildResourceIds": [
+      "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97"
+    ],
+    "guestExecutions": {
+      "q1TransportAttempt": "FAILED_BEFORE_SCRIPT_EXECUTION_EXIT_127;WINDOWS_CRLF_CAUSE_PRESERVED",
+      "q1LfRetry": "SUCCEEDED_EXIT_0;OBSERVED_GUEST_PREREQUISITES_FAIL",
+      "q2": "NOT_EXECUTED",
+      "q3": "NOT_EXECUTED"
+    },
+    "AZURE_MUTATIONS_OTHER_THAN_RUN_COMMAND_CHILDREN": 0,
+    "RBAC_MUTATIONS": 0,
+    "G2_NETWORK_MUTATIONS": 0,
+    "IMAGE_PUSHES": 0,
+    "IMAGE_PULLS": 0,
+    "BUILDS": 0,
+    "REAL_TOKEN_CREATIONS": 0,
+    "FAKE_CREDENTIAL_GENERATIONS": 0,
+    "fakeCredentialSha256": null,
+    "FAKE_CREDENTIAL_PERSISTENCE": "NOT_APPLICABLE_NOT_GENERATED;Q2_STOPPED",
+    "G3A_EXECUTED": false,
+    "G3B_EXECUTED": false,
+    "rollbackDeleteResult": "OWNED_CHILD_ABSENT_CONFIRMED",
+    "semantics": "Two Q1 create/delete lifecycles at one unique child ID;both count against the3-create/3-delete budget. Control-plane CLI success is not guest qualification success. DELETE completion is verified separately after asynchronous Deleting observations."
+  },
+  "localValidation": {
+    "file": "G3R3D_LOCAL_VALIDATION.json",
+    "sha256": "e970e681f31b181e9840b1e6f580685ea757c54b624c0b8ae36218e6e6549b8a"
+  }
+}

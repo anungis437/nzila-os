@@ -1,0 +1,5019 @@
+{
+  "capturedAtUtc": "2026-10-08T06:12:47.5341189Z",
+  "subscriptionId": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+  "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+  "scope": "Visible subscription RBAC principals, visible workload identities and credential metadata; not all tenant application dependencies",
+  "tenantCatalogCounts": {
+    "servicePrincipals": 876,
+    "applications": 27
+  },
+  "resourceGroups": [
+    {
+      "location": "eastus2",
+      "name": "NetworkWatcherRG",
+      "tags": null
+    },
+    {
+      "location": "eastus",
+      "name": "cloud-shell-storage-eastus",
+      "tags": null
+    },
+    {
+      "location": "eastus",
+      "name": "DefaultResourceGroup-EUS",
+      "tags": null
+    },
+    {
+      "location": "eastus",
+      "name": "nzila-staging-rg",
+      "tags": {
+        "Application": "NzilaTradeOS",
+        "Environment": "Staging"
+      }
+    },
+    {
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-rg",
+      "tags": null
+    },
+    {
+      "location": "canadacentral",
+      "name": "nzila-canada-demo-rg",
+      "tags": null
+    },
+    {
+      "location": "canadacentral",
+      "name": "nzila-canada-pilot-rg",
+      "tags": null
+    },
+    {
+      "location": "canadacentral",
+      "name": "nzila-canada-prod-rg",
+      "tags": {
+        "env": "prod",
+        "managed-by": "bicep",
+        "product": "union-eyes"
+      }
+    }
+  ],
+  "deploymentHistoryMetadata": [
+    {
+      "resourceGroup": "NetworkWatcherRG",
+      "deployments": []
+    },
+    {
+      "resourceGroup": "cloud-shell-storage-eastus",
+      "deployments": []
+    },
+    {
+      "resourceGroup": "DefaultResourceGroup-EUS",
+      "deployments": []
+    },
+    {
+      "resourceGroup": "nzila-staging-rg",
+      "deployments": []
+    },
+    {
+      "resourceGroup": "nzila-canada-staging-rg",
+      "deployments": []
+    },
+    {
+      "resourceGroup": "nzila-canada-demo-rg",
+      "deployments": [
+        {
+          "mode": "Incremental",
+          "name": "union-eyes-env",
+          "provisioningState": "Failed",
+          "templateHash": "5579743914590363483",
+          "timestamp": "2026-05-09T06:50:37.728606-04:00"
+        }
+      ]
+    },
+    {
+      "resourceGroup": "nzila-canada-pilot-rg",
+      "deployments": []
+    },
+    {
+      "resourceGroup": "nzila-canada-prod-rg",
+      "deployments": [
+        {
+          "mode": "Incremental",
+          "name": "ue-prod-bootstrap",
+          "provisioningState": "Failed",
+          "templateHash": "12346169636215505794",
+          "timestamp": "2026-05-11T02:09:51.555898-04:00"
+        }
+      ]
+    }
+  ],
+  "roleAssignments": [
+    {
+      "principalId": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+      "principalType": "User",
+      "roleDefinitionName": "Owner",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    },
+    {
+      "principalId": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+      "principalType": "User",
+      "roleDefinitionName": "Foundry User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    },
+    {
+      "principalId": "48fefde6-00da-456d-b6b9-d014daefc268",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    },
+    {
+      "principalId": "27ffa4c8-8e5a-4d16-ba30-ac13b5340413",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    },
+    {
+      "principalId": "80f65cfd-5655-46f3-aab3-7691087db625",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    },
+    {
+      "principalId": "636cdd4c-500f-4465-a7f4-0790f510811c",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    },
+    {
+      "principalId": "03c9b54b-65f8-4107-90e4-245ffad8d644",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    },
+    {
+      "principalId": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+      "principalType": "User",
+      "roleDefinitionName": "Key Vault Secrets Officer",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv"
+    },
+    {
+      "principalId": "c2cde012-3b1a-4e94-ae0c-a2b4c619e6cd",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv"
+    },
+    {
+      "principalId": "05621c47-2914-4dc8-8db1-4e725f425817",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    },
+    {
+      "principalId": "87321708-6150-4ea7-9d09-b26cd5080221",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg"
+    },
+    {
+      "principalId": "87321708-6150-4ea7-9d09-b26cd5080221",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPush",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "87321708-6150-4ea7-9d09-b26cd5080221",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg"
+    },
+    {
+      "principalId": "bf2fd081-37a3-4d5b-b43c-eb0b25cfe1cb",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "fd18a1a4-2837-4636-915a-76b3f9df27ca",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "d0d0247a-7a42-4988-85f6-e5f4b2905233",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "e90efc42-1006-4289-9968-07490a685d54",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "97304f4d-11d0-4405-9f22-8ef32939a703",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "c26c5cff-635f-4cb7-a042-29ce9879b1d6",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "aab9ea86-a44b-4018-b63f-2b8eafc7f891",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "29f883c1-465d-410a-b7c4-56260d522133",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+      "principalType": "User",
+      "roleDefinitionName": "Key Vault Secrets Officer",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-demo-kv"
+    },
+    {
+      "principalId": "29f883c1-465d-410a-b7c4-56260d522133",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv"
+    },
+    {
+      "principalId": "29f883c1-465d-410a-b7c4-56260d522133",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-demo-kv"
+    },
+    {
+      "principalId": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+      "principalType": "User",
+      "roleDefinitionName": "Key Vault Administrator",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-pilot-kv"
+    },
+    {
+      "principalId": "c5636777-b248-4284-ab01-1d3d9091e971",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "c5636777-b248-4284-ab01-1d3d9091e971",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-pilot-kv"
+    },
+    {
+      "principalId": "451de3d3-5634-4065-9940-9a805715f139",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-pilot-kv"
+    },
+    {
+      "principalId": "87321708-6150-4ea7-9d09-b26cd5080221",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg"
+    },
+    {
+      "principalId": "87321708-6150-4ea7-9d09-b26cd5080221",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg"
+    },
+    {
+      "principalId": "87321708-6150-4ea7-9d09-b26cd5080221",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg"
+    },
+    {
+      "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+      "principalType": "User",
+      "roleDefinitionName": "Key Vault Secrets Officer",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv"
+    },
+    {
+      "principalId": "52f8fa31-c000-4459-aa75-0f78a2f72b8c",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg"
+    },
+    {
+      "principalId": "52f8fa31-c000-4459-aa75-0f78a2f72b8c",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "66ec0cdf-ff35-42bd-9104-f424f7c8a455",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg"
+    },
+    {
+      "principalId": "66ec0cdf-ff35-42bd-9104-f424f7c8a455",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "4d38a271-c8e8-4994-bd46-ed91b2d65700",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg"
+    },
+    {
+      "principalId": "4d38a271-c8e8-4994-bd46-ed91b2d65700",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "6fd23298-4708-47ce-88cb-a813765ca3d0",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg"
+    },
+    {
+      "principalId": "6fd23298-4708-47ce-88cb-a813765ca3d0",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPull",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "AcrPush",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr"
+    },
+    {
+      "principalId": "20d5f517-1f03-4ced-ae19-cfc32c4c2c13",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv"
+    },
+    {
+      "principalId": "66ec0cdf-ff35-42bd-9104-f424f7c8a455",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv"
+    },
+    {
+      "principalId": "66ec0cdf-ff35-42bd-9104-f424f7c8a455",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-staging-db"
+    },
+    {
+      "principalId": "4d38a271-c8e8-4994-bd46-ed91b2d65700",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv"
+    },
+    {
+      "principalId": "6fd23298-4708-47ce-88cb-a813765ca3d0",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv"
+    },
+    {
+      "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/upstash-redis-url"
+    },
+    {
+      "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/evidence-storage-key"
+    },
+    {
+      "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/upstash-redis-token"
+    },
+    {
+      "principalId": "52f8fa31-c000-4459-aa75-0f78a2f72b8c",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/union-eyes-migration-admin-database-url"
+    },
+    {
+      "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/union-eyes-runtime-database-url"
+    },
+    {
+      "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/union-eyes-system-database-url"
+    },
+    {
+      "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv"
+    },
+    {
+      "principalId": "66ec0cdf-ff35-42bd-9104-f424f7c8a455",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Storage Blob Data Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilastagingstore/blobServices/default/containers/nzila-staging-snapshots"
+    },
+    {
+      "principalId": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+      "principalType": "User",
+      "roleDefinitionName": "Storage Blob Data Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilastagingstore"
+    },
+    {
+      "principalId": "66ec0cdf-ff35-42bd-9104-f424f7c8a455",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Storage Blob Data Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilastagingstore"
+    },
+    {
+      "principalId": "87321708-6150-4ea7-9d09-b26cd5080221",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Storage Blob Data Contributor",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilastagingstore"
+    },
+    {
+      "principalId": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+      "principalType": "User",
+      "roleDefinitionName": "Storage Blob Data Owner",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilastagingstore/blobServices/default/containers/nzila-staging-snapshots"
+    },
+    {
+      "principalId": "52f8fa31-c000-4459-aa75-0f78a2f72b8c",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/union-eyes-runtime-database-url"
+    },
+    {
+      "principalId": "52f8fa31-c000-4459-aa75-0f78a2f72b8c",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/union-eyes-system-database-url"
+    },
+    {
+      "principalId": "52f8fa31-c000-4459-aa75-0f78a2f72b8c",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/resend-api-key"
+    },
+    {
+      "principalId": "52f8fa31-c000-4459-aa75-0f78a2f72b8c",
+      "principalType": "ServicePrincipal",
+      "roleDefinitionName": "Key Vault Secrets User",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/resend-webhook-secret"
+    },
+    {
+      "principalId": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+      "principalType": "User",
+      "roleDefinitionName": "User Access Administrator",
+      "scope": "/"
+    }
+  ],
+  "subscriptionPrincipals": [
+    {
+      "objectId": "48fefde6-00da-456d-b6b9-d014daefc268",
+      "appId": "090f6a46-298d-408e-b43c-da20695f2cb5",
+      "displayName": "nzila-ventures-NATO-MEL-MIL-a59db86b-5d44-4053-9808-46facc2063a8",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [
+        {
+          "audiences": [
+            "api://AzureADTokenExchange"
+          ],
+          "issuer": "https://login.microsoftonline.com/5082b8be-b04d-4a13-b61c-b6397670177b/v2.0",
+          "name": "a59db86b-5d44-4053-9808-46facc2063a8",
+          "subject": "/eid1/c/pub/t/vriCUE2wE0q2HLY5dnAXew/a/rISbSSETf0KqFyZ8ppdXmA/sc/a3e27173-740d-4da6-ace3-54fc05fed10c/a59db86b-5d44-4053-9808-46facc2063a8"
+        }
+      ],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "27ffa4c8-8e5a-4d16-ba30-ac13b5340413",
+      "appId": "683c1691-4a01-4c8c-bce6-bfcecd6cea71",
+      "displayName": "nzila-ventures-DiasporaCore-78d48d12-7ad2-4f6b-a35b-162886dfa2ab",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [
+        {
+          "audiences": [
+            "api://AzureADTokenExchange"
+          ],
+          "issuer": "https://login.microsoftonline.com/5082b8be-b04d-4a13-b61c-b6397670177b/v2.0",
+          "name": "78d48d12-7ad2-4f6b-a35b-162886dfa2ab",
+          "subject": "/eid1/c/pub/t/vriCUE2wE0q2HLY5dnAXew/a/rISbSSETf0KqFyZ8ppdXmA/sc/a3e27173-740d-4da6-ace3-54fc05fed10c/78d48d12-7ad2-4f6b-a35b-162886dfa2ab"
+        }
+      ],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "80f65cfd-5655-46f3-aab3-7691087db625",
+      "appId": "233984f7-529d-4102-b855-4877899c5bb6",
+      "displayName": "Azure-CourtLens-Production-SP",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [
+        {
+          "endDateTime": "2026-10-27T08:17:11Z",
+          "keyId": "e49a7a4d-b95f-4cfd-9574-f6332363dc84"
+        }
+      ],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "636cdd4c-500f-4465-a7f4-0790f510811c",
+      "appId": "17ef399d-6a53-4e7e-abff-80e7e077df22",
+      "displayName": "nzila-ventures-FinePrint-98fc00e5-6e18-4a48-ad0e-f02b8a34a78a",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [
+        {
+          "audiences": [
+            "api://AzureADTokenExchange"
+          ],
+          "issuer": "https://login.microsoftonline.com/5082b8be-b04d-4a13-b61c-b6397670177b/v2.0",
+          "name": "98fc00e5-6e18-4a48-ad0e-f02b8a34a78a",
+          "subject": "/eid1/c/pub/t/vriCUE2wE0q2HLY5dnAXew/a/rISbSSETf0KqFyZ8ppdXmA/sc/a3e27173-740d-4da6-ace3-54fc05fed10c/98fc00e5-6e18-4a48-ad0e-f02b8a34a78a"
+        }
+      ],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "03c9b54b-65f8-4107-90e4-245ffad8d644",
+      "appId": "9a0f58fd-9cae-49ba-9676-d2711d4e8f52",
+      "displayName": "CourtLens-GitHub-Actions",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [
+        {
+          "endDateTime": "2026-10-31T21:36:58Z",
+          "keyId": "88ec3bc1-d117-41ec-9d53-0524c6e4c583"
+        }
+      ],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "c2cde012-3b1a-4e94-ae0c-a2b4c619e6cd",
+      "lookupStatus": "UNRESOLVED_IN_VISIBLE_ENTRA_CATALOG",
+      "dependencies": "UNKNOWN_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "05621c47-2914-4dc8-8db1-4e725f425817",
+      "appId": "9100c3f5-dfb3-4728-9e86-034a4b6458b7",
+      "displayName": "github-actions-congowave",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [
+        {
+          "endDateTime": "2027-01-21T20:31:54Z",
+          "keyId": "2039e101-bec3-4254-a157-e16a20d2e369"
+        }
+      ],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "87321708-6150-4ea7-9d09-b26cd5080221",
+      "appId": "f79055d7-d32b-4068-a01a-3cd3aa814697",
+      "displayName": "nzila-os-cicd",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [
+        {
+          "endDateTime": "2027-02-20T05:21:55Z",
+          "keyId": "250c98c1-317e-4500-9b22-a6a7b18c7a2f"
+        }
+      ],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "bf2fd081-37a3-4d5b-b43c-eb0b25cfe1cb",
+      "appId": "a4f8f0a9-a3cd-458d-93e4-25a1452a8f99",
+      "displayName": "nzila-os-partners",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "fd18a1a4-2837-4636-915a-76b3f9df27ca",
+      "appId": "8afbc4ff-32fc-4719-bdc3-11929cc143d6",
+      "displayName": "nzila-os-console",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "d0d0247a-7a42-4988-85f6-e5f4b2905233",
+      "appId": "b0857d0e-b68a-4ed0-9e91-4a9b45ceea88",
+      "displayName": "nzila-os-web",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "e90efc42-1006-4289-9968-07490a685d54",
+      "lookupStatus": "UNRESOLVED_IN_VISIBLE_ENTRA_CATALOG",
+      "dependencies": "UNKNOWN_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "97304f4d-11d0-4405-9f22-8ef32939a703",
+      "appId": "9a9fe199-def8-4aea-8c79-4a2239418959",
+      "displayName": "nzila-os-zonga",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "c26c5cff-635f-4cb7-a042-29ce9879b1d6",
+      "appId": "94e95038-e5b8-4fec-ab6f-c51c45e2a6bd",
+      "displayName": "nzila-os-control-plane",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "aab9ea86-a44b-4018-b63f-2b8eafc7f891",
+      "appId": "49bb3e2e-414e-4617-87cb-56576bce9ae9",
+      "displayName": "nzila-os-platform-admin",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "29f883c1-465d-410a-b7c4-56260d522133",
+      "appId": "f7fc25fb-48a7-481e-9c03-e1c1716ede70",
+      "displayName": "nzila-os-union-eyes-demo",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "c5636777-b248-4284-ab01-1d3d9091e971",
+      "appId": "cd90d169-7e9b-487b-b6e6-af70714b05a1",
+      "displayName": "nzila-os-union-eyes-pilot",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "451de3d3-5634-4065-9940-9a805715f139",
+      "appId": "5e93b159-ff44-49b7-9cc3-6ca2f795a99b",
+      "displayName": "nzila-os-union-eyes-django-pilot",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+      "appId": "4d17081c-7201-46af-b839-c8e9693de550",
+      "displayName": "nzila-os-union-eyes-prod",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "52f8fa31-c000-4459-aa75-0f78a2f72b8c",
+      "appId": "5d05ed4c-0b9e-4650-9087-3277c4b99d27",
+      "displayName": "nzila-os-deploy-prod",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [
+        {
+          "audiences": [
+            "api://AzureADTokenExchange"
+          ],
+          "issuer": "https://token.actions.githubusercontent.com",
+          "name": "gha-production",
+          "subject": "repo:anungis437/nzila-os:environment:production"
+        }
+      ],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "66ec0cdf-ff35-42bd-9104-f424f7c8a455",
+      "appId": "8bfc2641-827c-4acd-8350-22434d64bcf1",
+      "displayName": "nzila-os-deploy-staging",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [
+        {
+          "audiences": [
+            "api://AzureADTokenExchange"
+          ],
+          "issuer": "https://token.actions.githubusercontent.com",
+          "name": "gha-staging",
+          "subject": "repo:anungis437/nzila-os:environment:staging"
+        }
+      ],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "4d38a271-c8e8-4994-bd46-ed91b2d65700",
+      "appId": "cd210867-5095-4035-a554-0e0ee2c66771",
+      "displayName": "nzila-os-deploy-demo",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [
+        {
+          "audiences": [
+            "api://AzureADTokenExchange"
+          ],
+          "issuer": "https://token.actions.githubusercontent.com",
+          "name": "gha-demo",
+          "subject": "repo:anungis437/nzila-os:environment:demo"
+        }
+      ],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "6fd23298-4708-47ce-88cb-a813765ca3d0",
+      "appId": "d31401b1-b3b8-4794-b9ae-41d562e2ff5b",
+      "displayName": "nzila-os-deploy-pilot",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [
+        {
+          "audiences": [
+            "api://AzureADTokenExchange"
+          ],
+          "issuer": "https://token.actions.githubusercontent.com",
+          "name": "gha-pilot",
+          "subject": "repo:anungis437/nzila-os:environment:pilot"
+        }
+      ],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "appId": "5c02d25b-cbdc-412f-8c2a-9ed43b73ac20",
+      "displayName": "nzila-os-build",
+      "type": "Application",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [
+        {
+          "audiences": [
+            "api://AzureADTokenExchange"
+          ],
+          "issuer": "https://token.actions.githubusercontent.com",
+          "name": "github-env-build",
+          "subject": "repo:anungis437/nzila-os:environment:build"
+        }
+      ],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    },
+    {
+      "objectId": "20d5f517-1f03-4ced-ae19-cfc32c4c2c13",
+      "appId": "cf9e5848-74d9-498b-9097-33cb453732ea",
+      "displayName": "nzila-os-union-eyes-staging",
+      "type": "ManagedIdentity",
+      "applicationOwners": [],
+      "passwordCredentialMetadata": [],
+      "certificateCredentialMetadata": [],
+      "federatedCredentials": [],
+      "lookupStatus": "OBSERVED",
+      "dependencies": "OWNER_AND_RUNTIME_VERIFICATION_REQUIRED_DO_NOT_REMOVE"
+    }
+  ],
+  "userAssignedIdentities": [],
+  "workloads": [
+    {
+      "name": "nzila-os-web",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "d0d0247a-7a42-4988-85f6-e5f4b2905233",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/web@sha256:3ef53cc6303161f913cc3675746ffd09d45cca6e74cfe4b3ac3ded5d2eeffa71"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "ROLLBACK_MARKER",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-console",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "fd18a1a4-2837-4636-915a-76b3f9df27ca",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/console@sha256:49c536a0da10525cea5bd59a129eb6bb9aa8ef1c4252845f7016dd2299439ff4"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "prod-auth-secret"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_NAME",
+          "secretRef": null
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_KEY",
+          "secretRef": null
+        },
+        {
+          "name": "AI_DEFAULT_PROVIDER",
+          "secretRef": null
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "secretRef": "openai-api-key"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "prod-azure-ad-client-secret"
+        },
+        {
+          "name": "CONTROL_PLANE_URL",
+          "secretRef": null
+        },
+        {
+          "name": "CONTROL_PLANE_API_KEY",
+          "secretRef": "prod-control-plane-api-key"
+        },
+        {
+          "name": "ORCHESTRATOR_API_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_CONTROL_PLANE_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_PLATFORM_ADMIN_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "openai-api-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-control-plane-api-key"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-partners",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "bf2fd081-37a3-4d5b-b43c-eb0b25cfe1cb",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/partners@sha256:2f44c8b56e3ffee87122f59767fbc6b26625e1bf85d9530f0e44869811b9a71d"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "prod-auth-secret"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_NAME",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_KEY",
+          "secretRef": "azure-storage-account-key"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "prod-azure-ad-client-secret"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-storage-account-key"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-zonga",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "97304f4d-11d0-4405-9f22-8ef32939a703",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/zonga@sha256:3024162923aa16d73b39982d23bc48a2518670dcd57053d48c9b6fa2ca68df64"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "prod-auth-secret"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_WEB_URL",
+          "secretRef": null
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "PGHOST",
+          "secretRef": null
+        },
+        {
+          "name": "PGDATABASE",
+          "secretRef": null
+        },
+        {
+          "name": "PGUSER",
+          "secretRef": null
+        },
+        {
+          "name": "PGPASSWORD",
+          "secretRef": "db-password"
+        },
+        {
+          "name": "PGPORT",
+          "secretRef": null
+        },
+        {
+          "name": "PGSSLMODE",
+          "secretRef": null
+        },
+        {
+          "name": "STRIPE_SECRET_KEY",
+          "secretRef": "stripe-key"
+        },
+        {
+          "name": "FALLBACK_ENCRYPTION_KEY",
+          "secretRef": "enc-key"
+        },
+        {
+          "name": "CRON_SECRET",
+          "secretRef": "cron-secret"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "prod-azure-ad-client-secret"
+        },
+        {
+          "name": "AUTH_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_TRUST_HOST",
+          "secretRef": null
+        },
+        {
+          "name": "INTERNAL_WORKER_BEARER_TOKEN",
+          "secretRef": "prod-internal-worker-bearer-token"
+        },
+        {
+          "name": "AWS_REGION",
+          "secretRef": null
+        },
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "secretRef": "prod-aws-secret-access-key"
+        },
+        {
+          "name": "ZONGA_S3_RAW_BUCKET",
+          "secretRef": null
+        },
+        {
+          "name": "ZONGA_S3_OUTPUT_BUCKET",
+          "secretRef": null
+        },
+        {
+          "name": "ZONGA_MEDIACONVERT_ENDPOINT",
+          "secretRef": null
+        },
+        {
+          "name": "ZONGA_MEDIACONVERT_ROLE_ARN",
+          "secretRef": null
+        },
+        {
+          "name": "ZONGA_MEDIACONVERT_OUTPUT_PREFIX",
+          "secretRef": null
+        },
+        {
+          "name": "ZONGA_CLOUDFRONT_DOMAIN",
+          "secretRef": null
+        },
+        {
+          "name": "ZONGA_CLOUDFRONT_DISTRIBUTION_ID",
+          "secretRef": null
+        },
+        {
+          "name": "ZONGA_CLOUDFRONT_TTL_SEC",
+          "secretRef": null
+        },
+        {
+          "name": "ZONGA_CLOUDFRONT_KEY_PAIR_ID",
+          "secretRef": null
+        },
+        {
+          "name": "ZONGA_CLOUDFRONT_PRIVATE_KEY_PEM",
+          "secretRef": "prod-zonga-cloudfront-private-key-pem"
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_NAME",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_KEY",
+          "secretRef": "azure-storage-account-key"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-zonga-cloudfront-private-key-pem"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "stripe-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-storage-account-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "db-password"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "enc-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-aws-secret-access-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-internal-worker-bearer-token"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "cron-secret"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-control-plane",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "c26c5cff-635f-4cb7-a042-29ce9879b1d6",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/control-plane@sha256:3b172268c739050058395e312b54a403a417b1b66854e5c03f6a531d535a9ea0"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "prod-auth-secret"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "prod-azure-ad-client-secret"
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "secretRef": "openai-api-key"
+        },
+        {
+          "name": "CONTROL_PLANE_API_KEY",
+          "secretRef": "prod-control-plane-api-key"
+        },
+        {
+          "name": "UNION_EYES_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-control-plane-api-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "control-plane-api-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "openai-api-key"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-platform-admin",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "aab9ea86-a44b-4018-b63f-2b8eafc7f891",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/platform-admin@sha256:fda7ad4bed4b034ac62dc102b49794d6d0c018c5687c05ca55a42b57dd4675b3"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "prod-auth-secret"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "prod-azure-ad-client-secret"
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "secretRef": "openai-api-key"
+        },
+        {
+          "name": "CONTROL_PLANE_URL",
+          "secretRef": null
+        },
+        {
+          "name": "CONTROL_PLANE_API_KEY",
+          "secretRef": "prod-control-plane-api-key"
+        },
+        {
+          "name": "ORCHESTRATOR_API_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "openai-api-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-control-plane-api-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-flow",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "6fbbdd06-c2c1-477d-8b2e-889b902ff231",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/flow@sha256:233c3c69d188f90aba1ac651175366d4fb01dadc681afcc26d61fd2018c78d5f"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "ROLLBACK_MARKER",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-cfo",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "3bd9e9a2-fc49-4755-b720-2b5ab466a31d",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/cfo@sha256:4bb550143eaed004b18089952ad609f848b58f48fc8d6017aa6ae2cdc73fe7e4"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "ROLLBACK_MARKER",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_NAME",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_KEY",
+          "secretRef": "azure-storage-account-key"
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-storage-account-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-agrimo",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "4637719e-85df-475d-8686-1751667c051f",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/agrimo@sha256:62614fd1efe467bbdc2b6881f76180417f55ae4e71db44d1e78c8769736da302"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "ROLLBACK_MARKER",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-cora",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "b617ba62-26e6-483c-933e-bf60c5671325",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/cora@sha256:3e71395da7a6327daeeab19e17b1bd323bda8ca0d40a2a86bd389636f15c5be8"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "ROLLBACK_MARKER",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-trade",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "33af94e8-7042-4616-8ba1-d486752bb621",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/trade@sha256:9160950ca40b8a9039af1f54044737bac282facdfaab6bb6ddee5ed479f20d3c"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "ROLLBACK_MARKER",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-mobility",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "7ba34ced-346c-4f4b-a935-215d21b8446f",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/mobility@sha256:3e04b24ab31ae6b4f7128115517ab1323b0fbc897d6dab1d2d4590616b33dc16"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "ROLLBACK_MARKER",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-orchestrator-api",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "83f78b56-78df-4b0a-99e4-843007bd5af1",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/orchestrator-api@sha256:fb98e01674babc45996906155ff55e70f85fb27acabe1adfe4cad79637806e6e"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "ROLLBACK_MARKER",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "ORCHESTRATOR_API_KEY",
+          "secretRef": "orchestrator-api-key"
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "orchestrator-api-key"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-abr",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "66154c3d-875c-49fa-bcef-6fccb652a025",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/abr@sha256:5f0ec13f93c5d3027d60b26d3019a4e107437e0a4ffaf3ba4baf20e7acf412ad"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "ROLLBACK_MARKER",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-union-eyes-demo",
+      "resourceGroup": "nzila-canada-demo-rg",
+      "identity": {
+        "principalId": "29f883c1-465d-410a-b7c4-56260d522133",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:34507dd6e4cb66b6fdbc7f60a883183b3da126d86884843c4f711edb10f5909f",
+        "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:60405ead050393aa8ee94c9ff27d99de50430d9fb9b6a49f0fc9c69de335de51"
+      ],
+      "aiConfiguration": [
+        {
+          "name": "AZURE_OPENAI_ENDPOINT",
+          "secretRef": null,
+          "endpointOrProvider": "https://eastus.api.cognitive.microsoft.com/"
+        },
+        {
+          "name": "AZURE_OPENAI_DEPLOYMENT",
+          "secretRef": null,
+          "endpointOrProvider": null
+        },
+        {
+          "name": "AZURE_OPENAI_WHISPER_ENDPOINT",
+          "secretRef": null,
+          "endpointOrProvider": "https://eastus2.api.cognitive.microsoft.com/"
+        },
+        {
+          "name": "AZURE_OPENAI_WHISPER_DEPLOYMENT",
+          "secretRef": null,
+          "endpointOrProvider": null
+        },
+        {
+          "name": "AZURE_OPENAI_API_KEY",
+          "secretRef": "openai-key-demo",
+          "endpointOrProvider": null
+        },
+        {
+          "name": "AZURE_OPENAI_WHISPER_API_KEY",
+          "secretRef": "openai-whisper-key-demo",
+          "endpointOrProvider": null
+        }
+      ],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "UE_ENVIRONMENT",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NZILA_MODE",
+          "secretRef": null
+        },
+        {
+          "name": "UE_DEPLOYMENT_TYPE",
+          "secretRef": null
+        },
+        {
+          "name": "UE_FEATURE_PROFILE",
+          "secretRef": null
+        },
+        {
+          "name": "PGHOST",
+          "secretRef": null
+        },
+        {
+          "name": "PGUSER",
+          "secretRef": null
+        },
+        {
+          "name": "PGDATABASE",
+          "secretRef": null
+        },
+        {
+          "name": "PGSSLMODE",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_DEBUG",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_ALLOWED_HOSTS",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_API_URL",
+          "secretRef": null
+        },
+        {
+          "name": "PLATFORM_ADMIN_USER_IDS",
+          "secretRef": null
+        },
+        {
+          "name": "REVISION_TAG",
+          "secretRef": null
+        },
+        {
+          "name": "PGPORT",
+          "secretRef": null
+        },
+        {
+          "name": "STRIPE_CONNECT_ENABLED",
+          "secretRef": null
+        },
+        {
+          "name": "RESEND_FROM_EMAIL",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_KEY_VAULT_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AI_SDK_BASE_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_TRUST_HOST",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_OPENAI_ENDPOINT",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_OPENAI_DEPLOYMENT",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_OPENAI_WHISPER_ENDPOINT",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_OPENAI_WHISPER_DEPLOYMENT",
+          "secretRef": null
+        },
+        {
+          "name": "UE_MARKETING_URL",
+          "secretRef": null
+        },
+        {
+          "name": "UE_APP_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_SITE_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_URL",
+          "secretRef": null
+        },
+        {
+          "name": "GITHUB_SHA",
+          "secretRef": null
+        },
+        {
+          "name": "RELEASE_ID",
+          "secretRef": null
+        },
+        {
+          "name": "BUILD_TIME",
+          "secretRef": null
+        },
+        {
+          "name": "BUILD_TIMESTAMP",
+          "secretRef": null
+        },
+        {
+          "name": "ARTIFACT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "SECRET_TOPOLOGY",
+          "secretRef": null
+        },
+        {
+          "name": "SECRET_AUTHORITY",
+          "secretRef": null
+        },
+        {
+          "name": "ENVIRONMENT_ISOLATION",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret-demo"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret-demo"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "PGPASSWORD",
+          "secretRef": "db-password"
+        },
+        {
+          "name": "STRIPE_SECRET_KEY",
+          "secretRef": "stripe-key-demo"
+        },
+        {
+          "name": "RESEND_API_KEY",
+          "secretRef": "resend-key-demo"
+        },
+        {
+          "name": "FALLBACK_ENCRYPTION_KEY",
+          "secretRef": "fallback-encryption-key-demo"
+        },
+        {
+          "name": "EVIDENCE_SEAL_KEY",
+          "secretRef": "pii-key-demo"
+        },
+        {
+          "name": "CRON_SECRET",
+          "secretRef": "cron-secret-demo"
+        },
+        {
+          "name": "STRIPE_WEBHOOK_SECRET",
+          "secretRef": "stripe-webhook-secret-demo"
+        },
+        {
+          "name": "UPSTASH_REDIS_REST_URL",
+          "secretRef": "upstash-redis-url-demo"
+        },
+        {
+          "name": "UPSTASH_REDIS_REST_TOKEN",
+          "secretRef": "upstash-redis-token-demo"
+        },
+        {
+          "name": "AZURE_OPENAI_API_KEY",
+          "secretRef": "openai-key-demo"
+        },
+        {
+          "name": "AZURE_OPENAI_WHISPER_API_KEY",
+          "secretRef": "openai-whisper-key-demo"
+        },
+        {
+          "name": "DJANGO_SECRET_KEY",
+          "secretRef": "django-secret-demo"
+        },
+        {
+          "name": "AUTH_WEBHOOK_SECRET",
+          "secretRef": "auth-webhook-secret-demo"
+        },
+        {
+          "name": "RUNTIME_FAIL_CLOSED",
+          "secretRef": null
+        },
+        {
+          "name": "UE_DEMO_APP_DOMAIN",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_UE_FEATURE_PROFILE",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_SITE_URL_STAGING",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL_STAGING",
+          "secretRef": null
+        },
+        {
+          "name": "SUPER_ADMIN_ORG_ID",
+          "secretRef": null
+        },
+        {
+          "name": "UE_DEMO_PROFILE",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_UE_DEMO_PROFILE",
+          "secretRef": null
+        },
+        {
+          "name": "UE_DEMO_ORG_ID",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_UE_DEMO_ORG_SLUG",
+          "secretRef": null
+        },
+        {
+          "name": "UE_E2E_RISK_BYPASS",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_DJANGO_API_URL",
+          "secretRef": null
+        },
+        {
+          "name": "READY_REQUIRE_QUEUE",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_JWKS_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_WEBHOOK_SECRET",
+          "secretRef": "auth-webhook-secret"
+        },
+        {
+          "name": "DJANGO_ALLOWED_HOSTS",
+          "secretRef": null
+        },
+        {
+          "name": "CORS_ALLOWED_ORIGINS",
+          "secretRef": null
+        },
+        {
+          "name": "PGHOST",
+          "secretRef": null
+        },
+        {
+          "name": "PGUSER",
+          "secretRef": null
+        },
+        {
+          "name": "PGDATABASE",
+          "secretRef": null
+        },
+        {
+          "name": "PGPORT",
+          "secretRef": null
+        },
+        {
+          "name": "PGSSLMODE",
+          "secretRef": null
+        },
+        {
+          "name": "PGPASSWORD",
+          "secretRef": "db-password"
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/resend-key-demo",
+          "name": "resend-key-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/fallback-encryption-key-demo",
+          "name": "fallback-encryption-key-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/stripe-webhook-secret-demo",
+          "name": "stripe-webhook-secret-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/auth-secret-demo",
+          "name": "auth-secret-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/upstash-redis-url-demo",
+          "name": "upstash-redis-url-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/database-url",
+          "name": "database-url"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/pii-key-demo",
+          "name": "pii-key-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/django-secret-demo",
+          "name": "django-secret-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/stripe-key-demo",
+          "name": "stripe-key-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/cron-secret-demo",
+          "name": "cron-secret-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/openai-whisper-key-demo",
+          "name": "openai-whisper-key-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/azure-ad-client-secret-demo",
+          "name": "azure-ad-client-secret-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/enc-key-demo",
+          "name": "enc-key-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/auth-webhook-secret-demo",
+          "name": "auth-webhook-secret-demo"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "db-password"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/upstash-redis-token-demo",
+          "name": "upstash-redis-token-demo"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-demo-kv.vault.azure.net/secrets/openai-key-demo",
+          "name": "openai-key-demo"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-webhook-secret"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-union-eyes-pilot",
+      "resourceGroup": "nzila-canada-pilot-rg",
+      "identity": {
+        "principalId": "c5636777-b248-4284-ab01-1d3d9091e971",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:e819bc31209f6788b6d5ada50e3c36db619448beacae7ebe64722f1fca05a30a",
+        "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:ac49b00bf054318e55dc31fdba2612c36f3cba4c5a12fc0e156936115fb0f716"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NZILA_MODE",
+          "secretRef": null
+        },
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "ENVIRONMENT_ISOLATION",
+          "secretRef": null
+        },
+        {
+          "name": "SECRET_TOPOLOGY",
+          "secretRef": null
+        },
+        {
+          "name": "SECRET_AUTHORITY",
+          "secretRef": null
+        },
+        {
+          "name": "RUNTIME_FAIL_CLOSED",
+          "secretRef": null
+        },
+        {
+          "name": "REVISION_TAG",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_ALLOWED_HOSTS",
+          "secretRef": null
+        },
+        {
+          "name": "UE_PILOT_APP_DOMAIN",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "AUTH_WEBHOOK_SECRET",
+          "secretRef": "auth-webhook-secret"
+        },
+        {
+          "name": "DJANGO_SECRET_KEY",
+          "secretRef": "django-secret"
+        },
+        {
+          "name": "CRON_SECRET",
+          "secretRef": "cron-secret"
+        },
+        {
+          "name": "FIELD_ENC_KEY",
+          "secretRef": "enc-key"
+        },
+        {
+          "name": "FALLBACK_ENCRYPTION_KEY",
+          "secretRef": "fallback-encryption-key"
+        },
+        {
+          "name": "PII_KEY",
+          "secretRef": "pii-key"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "secretRef": "openai-key"
+        },
+        {
+          "name": "RESEND_API_KEY",
+          "secretRef": "resend-key"
+        },
+        {
+          "name": "STRIPE_SECRET_KEY",
+          "secretRef": "stripe-key"
+        },
+        {
+          "name": "STRIPE_WEBHOOK_SECRET",
+          "secretRef": "stripe-webhook-secret"
+        },
+        {
+          "name": "DJANGO_API_URL",
+          "secretRef": null
+        },
+        {
+          "name": "HEALTH_REQUIRE_QUEUE",
+          "secretRef": null
+        },
+        {
+          "name": "UPSTASH_REDIS_REST_URL",
+          "secretRef": "upstash-redis-rest-url"
+        },
+        {
+          "name": "UPSTASH_REDIS_REST_TOKEN",
+          "secretRef": "upstash-redis-rest-token"
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "UE_ENVIRONMENT",
+          "secretRef": null
+        },
+        {
+          "name": "UE_DEPLOYMENT_TYPE",
+          "secretRef": null
+        },
+        {
+          "name": "UE_FEATURE_PROFILE",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_UE_FEATURE_PROFILE",
+          "secretRef": null
+        },
+        {
+          "name": "GITHUB_SHA",
+          "secretRef": null
+        },
+        {
+          "name": "RELEASE_ID",
+          "secretRef": null
+        },
+        {
+          "name": "BUILD_TIME",
+          "secretRef": null
+        },
+        {
+          "name": "BUILD_TIMESTAMP",
+          "secretRef": null
+        },
+        {
+          "name": "ARTIFACT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "UE_MARKETING_URL",
+          "secretRef": null
+        },
+        {
+          "name": "UE_APP_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_SITE_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_SITE_URL_STAGING",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL_STAGING",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_TRUST_HOST",
+          "secretRef": null
+        },
+        {
+          "name": "PLATFORM_ADMIN_USER_IDS",
+          "secretRef": null
+        },
+        {
+          "name": "SUPER_ADMIN_ORG_ID",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_DJANGO_API_URL",
+          "secretRef": null
+        },
+        {
+          "name": "READY_REQUIRE_QUEUE",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_JWKS_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_WEBHOOK_SECRET",
+          "secretRef": "auth-webhook-secret"
+        },
+        {
+          "name": "DJANGO_ALLOWED_HOSTS",
+          "secretRef": null
+        },
+        {
+          "name": "CORS_ALLOWED_ORIGINS",
+          "secretRef": null
+        },
+        {
+          "name": "PGHOST",
+          "secretRef": null
+        },
+        {
+          "name": "PGUSER",
+          "secretRef": null
+        },
+        {
+          "name": "PGDATABASE",
+          "secretRef": null
+        },
+        {
+          "name": "PGPORT",
+          "secretRef": null
+        },
+        {
+          "name": "PGSSLMODE",
+          "secretRef": null
+        },
+        {
+          "name": "PGPASSWORD",
+          "secretRef": "db-password"
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "db-password"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/stripe-key-pilot",
+          "name": "stripe-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/enc-key-pilot",
+          "name": "enc-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/openai-key-pilot",
+          "name": "openai-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/auth-secret-pilot",
+          "name": "auth-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/auth-webhook-secret-pilot",
+          "name": "auth-webhook-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/UPSTASH-REDIS-REST-TOKEN",
+          "name": "upstash-redis-rest-token"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/cron-secret-pilot",
+          "name": "cron-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/azure-ad-client-secret-pilot",
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/django-secret-pilot",
+          "name": "django-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/database-url",
+          "name": "database-url"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/fallback-encryption-key-pilot",
+          "name": "fallback-encryption-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/UPSTASH-REDIS-REST-URL",
+          "name": "upstash-redis-rest-url"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/pii-key-pilot",
+          "name": "pii-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/stripe-webhook-secret-pilot",
+          "name": "stripe-webhook-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/resend-key-pilot",
+          "name": "resend-key"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-union-eyes-django-pilot",
+      "resourceGroup": "nzila-canada-pilot-rg",
+      "identity": {
+        "principalId": "451de3d3-5634-4065-9940-9a805715f139",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend:e37c430dca24fc15887f41061007755464f2c55c"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NZILA_MODE",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_DEBUG",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_ALLOWED_HOSTS",
+          "secretRef": null
+        },
+        {
+          "name": "PGHOST",
+          "secretRef": null
+        },
+        {
+          "name": "PGPORT",
+          "secretRef": null
+        },
+        {
+          "name": "PGUSER",
+          "secretRef": null
+        },
+        {
+          "name": "PGDATABASE",
+          "secretRef": null
+        },
+        {
+          "name": "CORS_ALLOWED_ORIGINS",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_SECRET_KEY",
+          "secretRef": "django-secret-key"
+        },
+        {
+          "name": "PGPASSWORD",
+          "secretRef": "pgpassword"
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "PGSSLMODE",
+          "secretRef": null
+        },
+        {
+          "name": "WEB_CONCURRENCY",
+          "secretRef": null
+        },
+        {
+          "name": "REDIS_URL",
+          "secretRef": "redis-url"
+        },
+        {
+          "name": "CELERY_BROKER_URL",
+          "secretRef": "redis-url"
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/auth-secret-pilot",
+          "name": "auth-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/django-secret-pilot",
+          "name": "django-secret-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/PILOT-PG-ADMIN-PASSWORD",
+          "name": "pgpassword"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-pilot-kv.vault.azure.net/secrets/UPSTASH-REDIS-URL",
+          "name": "redis-url"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-union-eyes-prod",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "identity": {
+        "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:2836e47af44d7d3edcd1cff3c99c210164e3978c9f386cf944b3f9d8d881ee0f",
+        "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:fce323fe773f70d42ff3d7a39d87653df4becdab0a312cdb8006d4366330dd0d"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "UE_ENVIRONMENT",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NZILA_MODE",
+          "secretRef": null
+        },
+        {
+          "name": "UE_DEPLOYMENT_TYPE",
+          "secretRef": null
+        },
+        {
+          "name": "UE_FEATURE_PROFILE",
+          "secretRef": null
+        },
+        {
+          "name": "PGHOST",
+          "secretRef": null
+        },
+        {
+          "name": "PGUSER",
+          "secretRef": null
+        },
+        {
+          "name": "PGDATABASE",
+          "secretRef": null
+        },
+        {
+          "name": "PGSSLMODE",
+          "secretRef": null
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "union-eyes-runtime-database-url"
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "enc-key"
+        },
+        {
+          "name": "VOTING_SECRET",
+          "secretRef": "voting-secret"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_SITE_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "GITHUB_SHA",
+          "secretRef": null
+        },
+        {
+          "name": "RELEASE_ID",
+          "secretRef": null
+        },
+        {
+          "name": "BUILD_TIME",
+          "secretRef": null
+        },
+        {
+          "name": "BUILD_TIMESTAMP",
+          "secretRef": null
+        },
+        {
+          "name": "ARTIFACT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "UE_MARKETING_URL",
+          "secretRef": null
+        },
+        {
+          "name": "UE_APP_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_SITE_URL_STAGING",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL_STAGING",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_TRUST_HOST",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_API_URL",
+          "secretRef": null
+        },
+        {
+          "name": "PLATFORM_ADMIN_USER_IDS",
+          "secretRef": null
+        },
+        {
+          "name": "SUPER_ADMIN_ORG_ID",
+          "secretRef": null
+        },
+        {
+          "name": "UPSTASH_REDIS_REST_URL",
+          "secretRef": "upstash-redis-url"
+        },
+        {
+          "name": "UPSTASH_REDIS_REST_TOKEN",
+          "secretRef": "upstash-redis-token"
+        },
+        {
+          "name": "FALLBACK_ENCRYPTION_KEY",
+          "secretRef": "enc-key"
+        },
+        {
+          "name": "EVIDENCE_SEAL_KEY",
+          "secretRef": "pii-key"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "AUTH_WEBHOOK_SECRET",
+          "secretRef": "auth-webhook-secret"
+        },
+        {
+          "name": "DJANGO_SECRET_KEY",
+          "secretRef": "django-secret"
+        },
+        {
+          "name": "SECRET_TOPOLOGY",
+          "secretRef": null
+        },
+        {
+          "name": "SECRET_AUTHORITY",
+          "secretRef": null
+        },
+        {
+          "name": "ENVIRONMENT_ISOLATION",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_EVIDENCE_STORAGE_ACCOUNT",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_EVIDENCE_STORAGE_CONTAINER",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_EVIDENCE_STORAGE_KEY",
+          "secretRef": "evidence-storage-key"
+        },
+        {
+          "name": "NEXT_PUBLIC_UE_FEATURE_PROFILE",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_DJANGO_API_URL",
+          "secretRef": null
+        },
+        {
+          "name": "READY_REQUIRE_QUEUE",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_NAME",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_KEY",
+          "secretRef": "document-storage-key"
+        },
+        {
+          "name": "AZURE_BLOB_CONTAINER",
+          "secretRef": null
+        },
+        {
+          "name": "READY_REQUIRE_STORAGE",
+          "secretRef": null
+        },
+        {
+          "name": "STRIPE_SECRET_KEY",
+          "secretRef": "stripe-key"
+        },
+        {
+          "name": "STRIPE_WEBHOOK_SECRET",
+          "secretRef": "stripe-webhook"
+        },
+        {
+          "name": "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+          "secretRef": "stripe-publishable"
+        },
+        {
+          "name": "STRIPE_DEFAULT_CURRENCY",
+          "secretRef": null
+        },
+        {
+          "name": "STRIPE_PRICE_ICRA_BRIEF",
+          "secretRef": null
+        },
+        {
+          "name": "STRIPE_PRICE_ICRA_DIAGNOSTIC",
+          "secretRef": null
+        },
+        {
+          "name": "RESEND_API_KEY",
+          "secretRef": "resend-api-key"
+        },
+        {
+          "name": "RESEND_FROM_EMAIL",
+          "secretRef": null
+        },
+        {
+          "name": "EMAIL_FROM",
+          "secretRef": null
+        },
+        {
+          "name": "EMAIL_REPLY_TO",
+          "secretRef": null
+        },
+        {
+          "name": "EMAIL_PROVIDER",
+          "secretRef": null
+        },
+        {
+          "name": "SYSTEM_DATABASE_URL",
+          "secretRef": "union-eyes-system-database-url"
+        },
+        {
+          "name": "AZURE_KEY_VAULT_URL",
+          "secretRef": null
+        },
+        {
+          "name": "RESEND_WEBHOOK_SECRET",
+          "secretRef": "resend-webhook-secret"
+        },
+        {
+          "name": "READY_REQUIRE_EMAIL_DELIVERY",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_JWKS_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_WEBHOOK_SECRET",
+          "secretRef": "auth-webhook-secret"
+        },
+        {
+          "name": "DJANGO_ALLOWED_HOSTS",
+          "secretRef": null
+        },
+        {
+          "name": "CORS_ALLOWED_ORIGINS",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_SECRET_KEY",
+          "secretRef": "django-secret"
+        },
+        {
+          "name": "PGDATABASE",
+          "secretRef": null
+        },
+        {
+          "name": "PGUSER",
+          "secretRef": null
+        },
+        {
+          "name": "PGPASSWORD",
+          "secretRef": "db-password"
+        },
+        {
+          "name": "PGHOST",
+          "secretRef": null
+        },
+        {
+          "name": "PGPORT",
+          "secretRef": null
+        },
+        {
+          "name": "PGSSLMODE",
+          "secretRef": null
+        },
+        {
+          "name": "WEB_CONCURRENCY",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_DEBUG",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "enc-key"
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "voting-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "db-password"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/stripe-secret-key/8fa5084abe754741940cfe023a493ddb",
+          "name": "stripe-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/stripe-webhook-secret/4d94241c399b4543905eaa4f9c648ecd",
+          "name": "stripe-webhook"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "pii-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/union-eyes-system-database-url/17c6853a7a5d4b7fa3905de7cd5efb39",
+          "name": "system-db-url"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/upstash-redis-token/e6f3f755cba54d33ac3d4d5e7e50889b",
+          "name": "upstash-redis-token"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "enc-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/resend-api-key/0cf474c206464cd393d92ff75a30fc64",
+          "name": "resend-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/resend-webhook-secret",
+          "name": "resend-webhook-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/upstash-redis-url/e281334250f64b9388cd6d9de2b27540",
+          "name": "upstash-redis-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "django-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "document-storage-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-webhook-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/resend-api-key",
+          "name": "resend-api-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/stripe-publishable-key/a2e4c2f73a7f4977bca219b2552ebfe2",
+          "name": "stripe-publishable"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/union-eyes-runtime-database-url",
+          "name": "union-eyes-runtime-database-url"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/evidence-storage-key/3131545712f442018ec1072a645035f0",
+          "name": "evidence-storage-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/union-eyes-system-database-url",
+          "name": "union-eyes-system-database-url"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-union-eyes-staging",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "identity": {
+        "principalId": "20d5f517-1f03-4ced-ae19-cfc32c4c2c13",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:48e6a0295df45f3cb4727bf0b46edab09a55a8c1a414279cc9d2be94e18e3501",
+        "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:e16fe822e9d50b5137c1919778e26fdd055ffe707157ac009abf5cc7d980a32c"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "UE_ENVIRONMENT",
+          "secretRef": null
+        },
+        {
+          "name": "UE_DEPLOYMENT_TYPE",
+          "secretRef": null
+        },
+        {
+          "name": "UE_FEATURE_PROFILE",
+          "secretRef": null
+        },
+        {
+          "name": "NZILA_MODE",
+          "secretRef": null
+        },
+        {
+          "name": "GITHUB_SHA",
+          "secretRef": null
+        },
+        {
+          "name": "RELEASE_ID",
+          "secretRef": null
+        },
+        {
+          "name": "BUILD_TIME",
+          "secretRef": null
+        },
+        {
+          "name": "BUILD_TIMESTAMP",
+          "secretRef": null
+        },
+        {
+          "name": "ARTIFACT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "UE_MARKETING_URL",
+          "secretRef": null
+        },
+        {
+          "name": "UE_APP_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_SITE_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_SITE_URL_STAGING",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL_STAGING",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_TRUST_HOST",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_API_URL",
+          "secretRef": null
+        },
+        {
+          "name": "PLATFORM_ADMIN_USER_IDS",
+          "secretRef": null
+        },
+        {
+          "name": "SUPER_ADMIN_ORG_ID",
+          "secretRef": null
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "union-eyes-runtime-database-url"
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "enc-key"
+        },
+        {
+          "name": "VOTING_SECRET",
+          "secretRef": "voting-secret"
+        },
+        {
+          "name": "FALLBACK_ENCRYPTION_KEY",
+          "secretRef": "enc-key"
+        },
+        {
+          "name": "EVIDENCE_SEAL_KEY",
+          "secretRef": "pii-key"
+        },
+        {
+          "name": "UPSTASH_REDIS_REST_URL",
+          "secretRef": "upstash-redis-url"
+        },
+        {
+          "name": "UPSTASH_REDIS_REST_TOKEN",
+          "secretRef": "upstash-redis-token"
+        },
+        {
+          "name": "AUTH_WEBHOOK_SECRET",
+          "secretRef": "auth-webhook-secret"
+        },
+        {
+          "name": "DJANGO_SECRET_KEY",
+          "secretRef": "django-secret"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        },
+        {
+          "name": "PGHOST",
+          "secretRef": null
+        },
+        {
+          "name": "PGUSER",
+          "secretRef": null
+        },
+        {
+          "name": "PGDATABASE",
+          "secretRef": null
+        },
+        {
+          "name": "PGSSLMODE",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_EVIDENCE_STORAGE_CONTAINER",
+          "secretRef": null
+        },
+        {
+          "name": "SECRET_TOPOLOGY",
+          "secretRef": null
+        },
+        {
+          "name": "SECRET_AUTHORITY",
+          "secretRef": null
+        },
+        {
+          "name": "ENVIRONMENT_ISOLATION",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_UE_FEATURE_PROFILE",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_DJANGO_API_URL",
+          "secretRef": null
+        },
+        {
+          "name": "READY_REQUIRE_QUEUE",
+          "secretRef": null
+        },
+        {
+          "name": "RESEND_API_KEY",
+          "secretRef": "resend-api-key"
+        },
+        {
+          "name": "CRON_SECRET_KEY",
+          "secretRef": "cron-secret"
+        },
+        {
+          "name": "RESEND_FROM_EMAIL",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_NAME",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_KEY",
+          "secretRef": "document-storage-key"
+        },
+        {
+          "name": "AZURE_BLOB_CONTAINER",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_EVIDENCE_STORAGE_ACCOUNT",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_EVIDENCE_STORAGE_KEY",
+          "secretRef": "evidence-storage-key"
+        },
+        {
+          "name": "READY_REQUIRE_STORAGE",
+          "secretRef": null
+        },
+        {
+          "name": "SYSTEM_DATABASE_URL",
+          "secretRef": "union-eyes-system-database-url"
+        },
+        {
+          "name": "UNION_EYES_ACCEPTANCE_AUTH_ENABLED",
+          "secretRef": null
+        },
+        {
+          "name": "UNION_EYES_ACCEPTANCE_AUTH_SECRET",
+          "secretRef": "union-eyes-acceptance-auth-secret"
+        },
+        {
+          "name": "UNION_EYES_ACCEPTANCE_AUTH_USER_IDS",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_JWKS_URL",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_WEBHOOK_SECRET",
+          "secretRef": "auth-webhook-secret"
+        },
+        {
+          "name": "DJANGO_ALLOWED_HOSTS",
+          "secretRef": null
+        },
+        {
+          "name": "CORS_ALLOWED_ORIGINS",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_SECRET_KEY",
+          "secretRef": "django-secret"
+        },
+        {
+          "name": "PGDATABASE",
+          "secretRef": null
+        },
+        {
+          "name": "PGUSER",
+          "secretRef": null
+        },
+        {
+          "name": "PGPASSWORD",
+          "secretRef": "db-password"
+        },
+        {
+          "name": "PGHOST",
+          "secretRef": null
+        },
+        {
+          "name": "PGPORT",
+          "secretRef": null
+        },
+        {
+          "name": "PGSSLMODE",
+          "secretRef": null
+        },
+        {
+          "name": "WEB_CONCURRENCY",
+          "secretRef": null
+        },
+        {
+          "name": "DJANGO_DEBUG",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "enc-key"
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "evidence-storage-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-staging-kv.vault.azure.net/secrets/union-eyes-runtime-database-url",
+          "name": "union-eyes-runtime-database-url"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-staging-kv.vault.azure.net/secrets/union-eyes-system-database-url",
+          "name": "union-eyes-system-database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "db-password"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "pii-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "enc-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "upstash-redis-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "union-eyes-acceptance-auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-webhook-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "django-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "voting-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-staging-kv.vault.azure.net/secrets/resend-api-key",
+          "name": "resend-api-key"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-staging-kv.vault.azure.net/secrets/cron-secret",
+          "name": "cron-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "document-storage-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "upstash-redis-token"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-web-prod",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "identity": {
+        "type": "None"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/web@sha256:d2237c188a8733a36bd0ebafd37f50dff22e055a46f16c7b0ab6174a38321c37"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "auth-secret"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "azure-ad-client-secret"
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        }
+      ]
+    },
+    {
+      "name": "nzila-os-partners-prod",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "identity": {
+        "type": "None"
+      },
+      "images": [
+        "nzilacanadaacr.azurecr.io/nzila/partners@sha256:d49e064aa21b79597bd8dc574ad728c3303e050f8c58261c3f2bd34816a11f4f"
+      ],
+      "aiConfiguration": [],
+      "environmentVariableMetadata": [
+        {
+          "name": "NODE_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_ENV",
+          "secretRef": null
+        },
+        {
+          "name": "PORT",
+          "secretRef": null
+        },
+        {
+          "name": "NEXT_TELEMETRY_DISABLED",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_CLIENT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_AD_TENANT_ID",
+          "secretRef": null
+        },
+        {
+          "name": "AUTH_SECRET",
+          "secretRef": "prod-auth-secret"
+        },
+        {
+          "name": "DATABASE_URL",
+          "secretRef": "database-url"
+        },
+        {
+          "name": "AZURE_AD_CLIENT_SECRET",
+          "secretRef": "prod-azure-ad-client-secret"
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_NAME",
+          "secretRef": null
+        },
+        {
+          "name": "AZURE_STORAGE_ACCOUNT_KEY",
+          "secretRef": "azure-storage-account-key"
+        }
+      ],
+      "secretReferences": [
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "azure-storage-account-key"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "database-url"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-auth-secret"
+        },
+        {
+          "identity": null,
+          "keyVaultUrl": null,
+          "name": "prod-azure-ad-client-secret"
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2",
+      "identity": null,
+      "location": "eastus2",
+      "name": "NetworkWatcher_eastus2",
+      "resourceGroup": "NetworkWatcherRG",
+      "tags": null,
+      "type": "Microsoft.Network/networkWatchers"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_canadacentral",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "NetworkWatcher_canadacentral",
+      "resourceGroup": "NetworkWatcherRG",
+      "tags": null,
+      "type": "Microsoft.Network/networkWatchers"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus",
+      "identity": null,
+      "location": "eastus",
+      "name": "NetworkWatcher_eastus",
+      "resourceGroup": "NetworkWatcherRG",
+      "tags": null,
+      "type": "Microsoft.Network/networkWatchers"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/cloud-shell-storage-eastus/providers/Microsoft.Storage/storageAccounts/cs210032000d23f28ec",
+      "identity": null,
+      "location": "eastus",
+      "name": "cs210032000d23f28ec",
+      "resourceGroup": "cloud-shell-storage-eastus",
+      "tags": {
+        "ms-resource-usage": "azure-cloud-shell"
+      },
+      "type": "Microsoft.Storage/storageAccounts"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Network/virtualNetworks/nzila-staging-vnet",
+      "identity": null,
+      "location": "eastus",
+      "name": "nzila-staging-vnet",
+      "resourceGroup": "nzila-staging-rg",
+      "tags": null,
+      "type": "Microsoft.Network/virtualNetworks"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-staging-db",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-staging-db",
+      "resourceGroup": "nzila-staging-rg",
+      "tags": null,
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilastagingstore",
+      "identity": null,
+      "location": "eastus",
+      "name": "nzilastagingstore",
+      "resourceGroup": "nzila-staging-rg",
+      "tags": {},
+      "type": "Microsoft.Storage/storageAccounts"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv",
+      "identity": null,
+      "location": "eastus",
+      "name": "nzila-staging-kv",
+      "resourceGroup": "nzila-staging-rg",
+      "tags": {},
+      "type": "Microsoft.KeyVault/vaults"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Insights/metricalerts/zonga-db-connections-high",
+      "identity": null,
+      "location": "global",
+      "name": "zonga-db-connections-high",
+      "resourceGroup": "nzila-staging-rg",
+      "tags": null,
+      "type": "Microsoft.Insights/metricalerts"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzilacanadaacr",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": {},
+      "type": "Microsoft.ContainerRegistry/registries"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/workspace-nzilacanadastagingrgLHi9",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "workspace-nzilacanadastagingrgLHi9",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.OperationalInsights/workspaces"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilacanadastore",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzilacanadastore",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": {},
+      "type": "Microsoft.Storage/storageAccounts"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-web",
+      "identity": {
+        "principalId": "d0d0247a-7a42-4988-85f6-e5f4b2905233",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-web",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-console",
+      "identity": {
+        "principalId": "fd18a1a4-2837-4636-915a-76b3f9df27ca",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-console",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-partners",
+      "identity": {
+        "principalId": "bf2fd081-37a3-4d5b-b43c-eb0b25cfe1cb",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-partners",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-zonga",
+      "identity": {
+        "principalId": "97304f4d-11d0-4405-9f22-8ef32939a703",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-zonga",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.CognitiveServices/accounts/nzila-openai-eastus",
+      "identity": null,
+      "location": "eastus",
+      "name": "nzila-openai-eastus",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.CognitiveServices/accounts"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.CognitiveServices/accounts/nzila-openai-eastus2",
+      "identity": null,
+      "location": "eastus2",
+      "name": "nzila-openai-eastus2",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.CognitiveServices/accounts"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Insights/actiongroups/zonga-ops-alerts",
+      "identity": null,
+      "location": "global",
+      "name": "zonga-ops-alerts",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.Insights/actiongroups"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Insights/metricalerts/zonga-cpu-high",
+      "identity": null,
+      "location": "global",
+      "name": "zonga-cpu-high",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.Insights/metricalerts"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Insights/metricalerts/zonga-5xx-errors",
+      "identity": null,
+      "location": "global",
+      "name": "zonga-5xx-errors",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.Insights/metricalerts"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-app-unioneyes-ap-7837",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-app-unioneyes-ap-7837",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-www-unioneyes-ap-5122",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-www-unioneyes-ap-5122",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-staging-app",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-staging-app",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-staging",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-staging",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-unioneyes-app-2191",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-unioneyes-app-2191",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-nzilaventures-co-3814",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-nzilaventures-co-3814",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-www-nzilaventure-5316",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-www-nzilaventure-5316",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-console-nzilaven-4713",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-console-nzilaven-4713",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-partners-nzilave-8944",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-partners-nzilave-8944",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-control-plane",
+      "identity": {
+        "principalId": "c26c5cff-635f-4cb7-a042-29ce9879b1d6",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-control-plane",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-platform-admin",
+      "identity": {
+        "principalId": "aab9ea86-a44b-4018-b63f-2b8eafc7f891",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-platform-admin",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-flow",
+      "identity": {
+        "principalId": "6fbbdd06-c2c1-477d-8b2e-889b902ff231",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-flow",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-cfo",
+      "identity": {
+        "principalId": "3bd9e9a2-fc49-4755-b720-2b5ab466a31d",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-cfo",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-agrimo",
+      "identity": {
+        "principalId": "4637719e-85df-475d-8686-1751667c051f",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-agrimo",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-cora",
+      "identity": {
+        "principalId": "b617ba62-26e6-483c-933e-bf60c5671325",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-cora",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-trade",
+      "identity": {
+        "principalId": "33af94e8-7042-4616-8ba1-d486752bb621",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-trade",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-mobility",
+      "identity": {
+        "principalId": "7ba34ced-346c-4f4b-a935-215d21b8446f",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-mobility",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-orchestrator-api",
+      "identity": {
+        "principalId": "83f78b56-78df-4b0a-99e4-843007bd5af1",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-orchestrator-api",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-abr",
+      "identity": {
+        "principalId": "66154c3d-875c-49fa-bcef-6fccb652a025",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-abr",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-zonga-nzilaventu-7994",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-zonga-nzilaventu-7994",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-control-nzilaven-3427",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-control-nzilaven-3427",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-admin-nzilaventu-9620",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-admin-nzilaventu-9620",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-staging-console--5137",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-staging-console--5137",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-staging-zonga-nz-0500",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-staging-zonga-nz-0500",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-staging-partners-4653",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-staging-partners-4653",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-staging-control--7202",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-staging-control--7202",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-staging-admin-nz-5673",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-staging-admin-nz-5673",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env/managedCertificates/mc-nzila-canada-s-staging-flow-nzi-7160",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-env/mc-nzila-canada-s-staging-flow-nzi-7160",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-demo-kv",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-demo-kv",
+      "resourceGroup": "nzila-canada-demo-rg",
+      "tags": {},
+      "type": "Microsoft.KeyVault/vaults"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-os-union-eyes-demo-db",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-os-union-eyes-demo-db",
+      "resourceGroup": "nzila-canada-demo-rg",
+      "tags": null,
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-canada-demo-law",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-demo-law",
+      "resourceGroup": "nzila-canada-demo-rg",
+      "tags": null,
+      "type": "Microsoft.OperationalInsights/workspaces"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-demo-env",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-demo-env",
+      "resourceGroup": "nzila-canada-demo-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg/providers/Microsoft.App/containerApps/nzila-os-union-eyes-demo",
+      "identity": {
+        "principalId": "29f883c1-465d-410a-b7c4-56260d522133",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-union-eyes-demo",
+      "resourceGroup": "nzila-canada-demo-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-demo-env/managedCertificates/mc-nzila-canada-d-demo-unioneyes-a-9040",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-demo-env/mc-nzila-canada-d-demo-unioneyes-a-9040",
+      "resourceGroup": "nzila-canada-demo-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-canada-pilot-db",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-pilot-db",
+      "resourceGroup": "nzila-canada-pilot-rg",
+      "tags": null,
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-pilot-kv",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-pilot-kv",
+      "resourceGroup": "nzila-canada-pilot-rg",
+      "tags": {},
+      "type": "Microsoft.KeyVault/vaults"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-canada-pilot-logs",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-pilot-logs",
+      "resourceGroup": "nzila-canada-pilot-rg",
+      "tags": null,
+      "type": "Microsoft.OperationalInsights/workspaces"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-pilot-env",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-pilot-env",
+      "resourceGroup": "nzila-canada-pilot-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.App/containerApps/nzila-os-union-eyes-pilot",
+      "identity": {
+        "principalId": "c5636777-b248-4284-ab01-1d3d9091e971",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-union-eyes-pilot",
+      "resourceGroup": "nzila-canada-pilot-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-pilot-env/managedCertificates/mc-nzila-canada-p-pilot-unioneyes--9483",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-pilot-env/mc-nzila-canada-p-pilot-unioneyes--9483",
+      "resourceGroup": "nzila-canada-pilot-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.App/containerApps/nzila-os-union-eyes-django-pilot",
+      "identity": {
+        "principalId": "451de3d3-5634-4065-9940-9a805715f139",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-union-eyes-django-pilot",
+      "resourceGroup": "nzila-canada-pilot-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-os-union-eyes-prod-db",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-os-union-eyes-prod-db",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-prod-kv",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": {},
+      "type": "Microsoft.KeyVault/vaults"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-canada-prod-law",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-prod-law",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.OperationalInsights/workspaces"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-prod-env",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-prod-env",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/containerApps/nzila-os-union-eyes-prod",
+      "identity": {
+        "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-union-eyes-prod",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-prod-env/managedCertificates/mc-nzila-canada-p-app-unioneyes-ap-1545",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-prod-env/mc-nzila-canada-p-app-unioneyes-ap-1545",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Insights/scheduledqueryrules/ue-prod-health-503-sustained",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "ue-prod-health-503-sustained",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.Insights/scheduledqueryrules"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Insights/scheduledqueryrules/ue-prod-high-error-rate",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "ue-prod-high-error-rate",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.Insights/scheduledqueryrules"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Insights/scheduledqueryrules/ue-prod-governance-events-zero",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "ue-prod-governance-events-zero",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.Insights/scheduledqueryrules"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Insights/actiongroups/ue-prod-ops-alerts",
+      "identity": null,
+      "location": "global",
+      "name": "ue-prod-ops-alerts",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.Insights/actiongroups"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Storage/storageAccounts/nzilacanadaprodev",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzilacanadaprodev",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": {},
+      "type": "Microsoft.Storage/storageAccounts"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Cdn/profiles/nzila-ue-afd-prod",
+      "identity": null,
+      "location": "global",
+      "name": "nzila-ue-afd-prod",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": {},
+      "type": "Microsoft.Cdn/profiles"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Cdn/profiles/nzila-ue-afd-prod/afdendpoints/ue-prod",
+      "identity": null,
+      "location": "global",
+      "name": "nzila-ue-afd-prod/ue-prod",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": {
+        "rescueTouch": "20260918142950"
+      },
+      "type": "Microsoft.Cdn/profiles/afdendpoints"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Network/frontdoorWebApplicationFirewallPolicies/nzilauewafdprod",
+      "identity": null,
+      "location": "global",
+      "name": "nzilauewafdprod",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": {},
+      "type": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-union-eyes-staging",
+      "identity": {
+        "principalId": "20d5f517-1f03-4ced-ae19-cfc32c4c2c13",
+        "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-union-eyes-staging",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/containerApps/nzila-os-web-prod",
+      "identity": {
+        "principalId": null,
+        "tenantId": null,
+        "type": "None",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-web-prod",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/containerApps/nzila-os-partners-prod",
+      "identity": {
+        "principalId": null,
+        "tenantId": null,
+        "type": "None",
+        "userAssignedIdentities": null
+      },
+      "location": "canadacentral",
+      "name": "nzila-os-partners-prod",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.App/containerApps"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-prod-env/managedCertificates/mc-nzila-canada-p-www-nzilaventure-0219",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-prod-env/mc-nzila-canada-p-www-nzilaventure-0219",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-prod-env/managedCertificates/mc-nzila-canada-p-partners-nzilave-4216",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-prod-env/mc-nzila-canada-p-partners-nzilave-4216",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-prod-env/managedCertificates/mc-nzila-canada-p-nzilaventures-co-0239",
+      "identity": null,
+      "location": "canadacentral",
+      "name": "nzila-canada-prod-env/mc-nzila-canada-p-nzilaventures-co-0239",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "tags": null,
+      "type": "Microsoft.App/managedEnvironments/managedCertificates"
+    }
+  ],
+  "aiAccounts": [
+    {
+      "location": "eastus",
+      "name": "nzila-openai-eastus",
+      "publicNetworkAccess": "Enabled",
+      "resourceGroup": "nzila-canada-staging-rg"
+    },
+    {
+      "location": "eastus2",
+      "name": "nzila-openai-eastus2",
+      "publicNetworkAccess": "Enabled",
+      "resourceGroup": "nzila-canada-staging-rg"
+    }
+  ],
+  "canadianAiCandidates": [
+    {
+      "kind": "OpenAI",
+      "name": "whisper",
+      "skuNames": [],
+      "version": "001"
+    },
+    {
+      "kind": "OpenAI",
+      "name": "text-embedding-3-small",
+      "skuNames": [
+        "GlobalStandard"
+      ],
+      "version": "1"
+    },
+    {
+      "kind": "OpenAI",
+      "name": "gpt-4.1-mini",
+      "skuNames": [
+        "GlobalStandard",
+        "DeveloperTier",
+        "GlobalProvisionedManaged"
+      ],
+      "version": "2025-04-14"
+    },
+    {
+      "kind": "AIServices",
+      "name": "whisper",
+      "skuNames": [],
+      "version": "001"
+    },
+    {
+      "kind": "AIServices",
+      "name": "text-embedding-3-small",
+      "skuNames": [
+        "GlobalStandard"
+      ],
+      "version": "1"
+    },
+    {
+      "kind": "AIServices",
+      "name": "gpt-4.1-mini",
+      "skuNames": [
+        "GlobalStandard",
+        "DeveloperTier",
+        "GlobalProvisionedManaged"
+      ],
+      "version": "2025-04-14"
+    }
+  ],
+  "limitations": [
+    "Secret values, tokens, keys and connection strings were not read or exported.",
+    "Workload use is configuration evidence, not observed request/data-class evidence.",
+    "Unresolved principal IDs must not be treated as removable.",
+    "Owners and role scopes do not prove exercised least privilege.",
+    "Resource existence does not prove IaC reconciliation or runtime gate closure."
+  ]
+}

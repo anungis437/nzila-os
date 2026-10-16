@@ -1,0 +1,119 @@
+{
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "subscription",
+      "actual": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+      "expected": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+      "matched": true
+    },
+    {
+      "name": "tenant",
+      "actual": "5082b8be-b04d-4a13-b61c-b6397670177b",
+      "expected": "5082b8be-b04d-4a13-b61c-b6397670177b",
+      "matched": true
+    },
+    {
+      "name": "accountState",
+      "actual": "Enabled",
+      "expected": "Enabled",
+      "matched": true
+    },
+    {
+      "name": "vmId",
+      "actual": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+      "expected": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+      "matched": true
+    },
+    {
+      "name": "vmName",
+      "actual": "nzila-g2-builder-y3koaeijzi6mu",
+      "expected": "nzila-g2-builder-y3koaeijzi6mu",
+      "matched": true
+    },
+    {
+      "name": "location",
+      "actual": "canadacentral",
+      "expected": "canadacentral",
+      "matched": true
+    },
+    {
+      "name": "vmSize",
+      "actual": "Standard_B2s",
+      "expected": "Standard_B2s",
+      "matched": true
+    },
+    {
+      "name": "uniqueVmId",
+      "actual": "81d34950-d46d-4026-95ff-c0308ccdd5d1",
+      "expected": "81d34950-d46d-4026-95ff-c0308ccdd5d1",
+      "matched": true
+    },
+    {
+      "name": "NIC",
+      "actual": [
+        "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/networkInterfaces/nzila-g2-builder-nic-y3koaeijzi6mu"
+      ],
+      "expected": [
+        "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/networkInterfaces/nzila-g2-builder-nic-y3koaeijzi6mu"
+      ],
+      "matched": true
+    },
+    {
+      "name": "NICResourceId",
+      "actual": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/networkInterfaces/nzila-g2-builder-nic-y3koaeijzi6mu",
+      "expected": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/networkInterfaces/nzila-g2-builder-nic-y3koaeijzi6mu",
+      "matched": true
+    },
+    {
+      "name": "subnets",
+      "actual": [
+        "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/subnets/BuilderSubnet"
+      ],
+      "expected": [
+        "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/subnets/BuilderSubnet"
+      ],
+      "matched": true
+    },
+    {
+      "name": "agentVersion",
+      "actual": "2.16.0.2",
+      "expected": "2.16.0.2",
+      "matched": true
+    },
+    {
+      "name": "agentHealthy",
+      "actual": true,
+      "expected": true,
+      "matched": true
+    },
+    {
+      "name": "powerRunning",
+      "actual": true,
+      "expected": true,
+      "matched": true
+    },
+    {
+      "name": "identity",
+      "actual": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ManagedIdentity/userAssignedIdentities/nzila-g2-builder-y3koaeijzi6mu": {
+            "clientId": "d4775ade-6d53-419a-a80f-c17ffbaa125f",
+            "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2"
+          }
+        }
+      },
+      "expected": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ManagedIdentity/userAssignedIdentities/nzila-g2-builder-y3koaeijzi6mu": {
+            "clientId": "d4775ade-6d53-419a-a80f-c17ffbaa125f",
+            "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2"
+          }
+        }
+      },
+      "matched": true
+    }
+  ]
+}

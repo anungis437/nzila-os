@@ -1,0 +1,66 @@
+{
+  "scope": "PROSPECTIVE_G3R2_LOCAL_ONLY",
+  "sourceExecutionAuthority": "NOT_AUTHORIZED",
+  "checks": [
+    {
+      "command": "node --test --test-skip-pattern \"history recovery has deterministic|exact Git historical blob digest\" infrastructure\\landing-zone\\g3-readiness-report.test.mjs infrastructure\\landing-zone\\g3r1-local-closure.test.mjs infrastructure\\landing-zone\\g3r2-source-closure.test.mjs",
+      "result": "PASS",
+      "testsPassed": 237,
+      "testsFailed": 0,
+      "exclusions": "77 historical-recovery/blob-inspection cases filtered before execution; no further recovery search. Node reports zero skipped because nonmatching tests were not registered for execution."
+    },
+    {
+      "command": "& .\\infrastructure\\landing-zone\\g3-readiness-census.test.ps1; & .\\infrastructure\\landing-zone\\g3r1-account-controls.test.ps1",
+      "result": "PASS",
+      "offlineRejectionCases": 27,
+      "azureCalls": 0,
+      "ledgerChanges": 0
+    },
+    {
+      "command": "node --check infrastructure\\landing-zone\\g3r2-source-closure.mjs; node --check infrastructure\\landing-zone\\g3r2-secret-scan.mjs; node --check infrastructure\\landing-zone\\g3r2-source-closure.test.mjs; node --check infrastructure\\landing-zone\\g3-source\\controllers\\local-plan.mjs",
+      "result": "PASS",
+      "controllerCliExecuted": false
+    },
+    {
+      "command": "pnpm exec prettier --check infrastructure\\landing-zone\\g3r2-source-closure.mjs infrastructure\\landing-zone\\g3r2-secret-scan.mjs infrastructure\\landing-zone\\g3r2-source-closure.test.mjs infrastructure\\landing-zone\\g3-source infrastructure\\landing-zone\\g3-readiness-evidence\\G3R2*.json infrastructure\\landing-zone\\g3-readiness-evidence\\G3R2*.md",
+      "result": "PASS"
+    },
+    {
+      "command": "node infrastructure\\landing-zone\\g3r2-source-closure.mjs --write",
+      "result": "PASS",
+      "localBicepEntrypoints": 9,
+      "bicepWarnings": 0,
+      "bicepErrors": 0,
+      "repeatedGeneration": "42 existing prospective source/build/evidence files byte-identical across regeneration before this validation record was added; no controller or cloud execution."
+    },
+    {
+      "command": "node infrastructure\\landing-zone\\g3r2-source-closure.mjs --check",
+      "result": "PASS",
+      "coverage": "Historical evidence, G2 source, source file set/hashes, generator hash, accepted local input hashes, all nine build hashes, all five requested output hashes, manifest Markdown and parameter validation."
+    },
+    {
+      "command": "node infrastructure\\landing-zone\\g3r2-secret-scan.mjs",
+      "result": "PASS_EXACT_NONSECRET_ADJUDICATION_NOT_RAW_SCANNER_PASS",
+      "rawGitleaksExitCode": 1,
+      "rawFindings": 5,
+      "unresolvedFindings": 0,
+      "details": "G3R2_SECRET_SCAN.json binds scanned source and unchanged scanner configuration. No blanket exception, baseline suppression or file omission was added."
+    },
+    {
+      "command": "pnpm validate:docs",
+      "result": "PASS",
+      "filesScanned": 2638,
+      "errors": 0,
+      "warnings": 1215,
+      "info": 1700,
+      "limitations": "Existing warnings/info retained; this is not a whole-workspace lint, typecheck, PR review or deployment validation."
+    }
+  ],
+  "overall": "PASS_LOCAL_CHECKS;G3R2_BLOCKED_BY_EXACT_IMAGE_QUALIFICATION_DEFICIENCIES",
+  "azureMutations": 0,
+  "imageBuilt": false,
+  "imagePushed": false,
+  "controllerCliExecuted": false,
+  "g3aExecuted": false,
+  "g3bExecuted": false
+}

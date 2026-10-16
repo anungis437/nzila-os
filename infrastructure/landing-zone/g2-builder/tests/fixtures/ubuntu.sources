@@ -1,0 +1,19 @@
+# Modeled Ubuntu 24.04 syntax; not a raw guest-file capture.
+# Comments must not be parsed as fields.
+Types: deb
+URIs: http://azure.archive.ubuntu.com/ubuntu/
+Suites: noble noble-updates noble-backports
+Components: main universe restricted multiverse
+Architectures: amd64
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+# Security stanza, same observed endpoint.
+Types: deb
+URIs: http://azure.archive.ubuntu.com/ubuntu/
+Suites: noble-security
+Components: main universe restricted multiverse
+Signed-By:
+ -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ modeled-key-material-not-an-endpoint
+ -----END PGP PUBLIC KEY BLOCK-----

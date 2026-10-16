@@ -1,0 +1,57 @@
+{
+  "lineage": "PROSPECTIVE_G3R2",
+  "execution": "NOT_EXECUTED",
+  "nodes": [
+    {
+      "id": "retain-evidence",
+      "dependsOn": [],
+      "action": "Persistcommands/resourceownership/digests/correlations;nevertokens/cleartextsecret"
+    },
+    {
+      "id": "disable-workload",
+      "dependsOn": ["retain-evidence"],
+      "action": "RemoveonlyG3-ownedapp afterseparateauthority;quota failure keepsappabsent"
+    },
+    {
+      "id": "remove-bindings",
+      "dependsOn": ["disable-workload"],
+      "action": "RemoveonlyG3-createdsecretrole andexternallyapprovedregistryassignments;noexistingG2grants"
+    },
+    {
+      "id": "remove-environment-dns",
+      "dependsOn": ["disable-workload"],
+      "action": "RemoveG3internalzone/records/link andemptyenvironment;do notmodifyME_managedRGmanually"
+    },
+    {
+      "id": "remove-vault-endpoint",
+      "dependsOn": ["remove-bindings", "disable-workload"],
+      "action": "RemoveG3KVPE/zonegroup/DNSlinks andvault accordingto approvedsoftdelete/purgeprotection;noautomaticpurge"
+    },
+    {
+      "id": "external-g2-rollback",
+      "dependsOn": ["remove-environment-dns"],
+      "action": "Separatehumanauthority restoresonlyG3-addedG2peering/DNSlink/firewalldiff againstsealedbaseline"
+    },
+    {
+      "id": "remove-identities",
+      "dependsOn": ["remove-bindings", "remove-environment-dns"],
+      "action": "RemoveonlytwoG3-ownedUAMIs afterreferencescleared;Entrasoftdeleteevidence retained"
+    },
+    {
+      "id": "remove-network",
+      "dependsOn": ["external-g2-rollback", "remove-vault-endpoint", "remove-environment-dns"],
+      "action": "G3-sidepeering/subnets/NSGs/UDR/VNet only;builderabsenceverified"
+    },
+    {
+      "id": "retain-workspace",
+      "dependsOn": ["retain-evidence"],
+      "action": "Logevidenceretentionseparatelygoverned;neverautodeletebeforeexport"
+    },
+    {
+      "id": "remove-rg-if-authorized",
+      "dependsOn": ["remove-network", "remove-identities"],
+      "action": "Ownershipinventory andworkspaceevidence dispositionrequired;no broadRGdeletefromthiscontroller"
+    }
+  ],
+  "G2_EXTERNAL_ROLLBACK_DEPENDENCY": "SEPARATE_EXPLICIT_HUMAN_AUTHORITY_REQUIRED"
+}

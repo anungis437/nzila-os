@@ -1,0 +1,14 @@
+#cloud-config
+write_files:
+  - path: /opt/nzila-g2/discovery.py
+    owner: root:root
+    permissions: '0700'
+    encoding: b64
+    content: __DISCOVERY_SCRIPT_BASE64__
+runcmd:
+  - |
+    if command -v python3 >/dev/null 2>&1; then
+      exec python3 /opt/nzila-g2/discovery.py
+    fi
+    printf '%s\n' 'NZILA_G2_DISCOVERY_STARTED' 'NZILA_G2_DISCOVERY_RESULT={"marker":"NZILA_G2_STAGE1_DISCOVERY_V1","status":"DISCOVERY_INCOMPLETE","stage":"python3-unavailable","componentStatuses":{"aptSourceObservation":"NOT_RUN","imdsIdentity":"NOT_RUN","imdsAccessToken":"NOT_RUN","privateAcrDns":"NOT_RUN","privateAcrHttps":"NOT_RUN","acrTokenExchange":"NOT_RUN"},"aptUpdate":"NOT_ATTEMPTED","packageInstall":"NOT_ATTEMPTED","imagePush":"NOT_ATTEMPTED"}' >> /dev/ttyS0
+    exit 78

@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1.0",
+  "MISSION_ID": "NZ-20261008-INFRA-001",
+  "MISSION_DISPOSITION": "CLOSED_NO_GO_CURRENT_PROOF_ARCHITECTURE",
+  "validation": "PASS",
+  "scope": "LOCAL_TERMINAL_GOVERNANCE_CLOSURE_ONLY",
+  "tests": {
+    "command": "node --test infrastructure\\landing-zone\\g3-terminal-closure.test.mjs",
+    "exitCode": 0,
+    "total": 116,
+    "passed": 116,
+    "failed": 0,
+    "skipped": 0,
+    "coverage": [
+      "strict terminal-disposition schema and exact states",
+      "twelve required G3R3D evidence SHA256 bindings",
+      "all historical evidence/tool and prospective source-asset preservation",
+      "live-ledger two-create/two-delete accounting",
+      "recorded zero-child residual and zero-other-mutation assertions",
+      "unexecuted Q2/Q3 and no inferred runtime PASS",
+      "no G3A/G3B authorization",
+      "new-human-architecture-charter reopening rule",
+      "deterministic pure generation and local --check",
+      "rejection of execution/nonclosure CLI flags"
+    ]
+  },
+  "preservation": {
+    "result": "PASS",
+    "historicalEvidenceFiles": 520,
+    "historicalToolFiles": 33,
+    "prospectiveSourceBuildWorkloadFiles": 40,
+    "requiredLiveFailureBindings": 12,
+    "historicalFindingsRewritten": false,
+    "historicalWritersOrCollectorsRerun": false,
+    "qualifiedSourceOrImageRebuilt": false
+  },
+  "determinism": {
+    "command": "SHA256 each G3_TERMINAL file; node infrastructure\\landing-zone\\g3-terminal-closure.mjs --write; compare every SHA256",
+    "result": "PASS",
+    "comparedFiles": 4,
+    "byteIdenticalFiles": 4,
+    "measurementPhase": "AFTER_LOCAL_VALIDATION_BINDING"
+  },
+  "checker": {
+    "command": "node infrastructure\\landing-zone\\g3-terminal-closure.mjs --check",
+    "result": "PASS",
+    "cloudCalls": 0
+  },
+  "syntax": {
+    "commands": [
+      "node --check infrastructure\\landing-zone\\g3-terminal-closure.mjs",
+      "node --check infrastructure\\landing-zone\\g3-terminal-closure.test.mjs"
+    ],
+    "result": "PASS"
+  },
+  "formatting": {
+    "command": "pnpm exec prettier --check infrastructure\\landing-zone\\g3-terminal-closure.mjs infrastructure\\landing-zone\\g3-terminal-closure.test.mjs \"infrastructure\\landing-zone\\g3-readiness-evidence\\G3_TERMINAL*.json\" \"infrastructure\\landing-zone\\g3-readiness-evidence\\G3_TERMINAL*.md\"",
+    "result": "PASS",
+    "historicalEvidenceFormatted": false
+  },
+  "documentation": {
+    "command": "pnpm validate:docs",
+    "exitCode": 0,
+    "filesScanned": 2638,
+    "errors": 0,
+    "warnings": 1215,
+    "info": 1700
+  },
+  "closureOperations": {
+    "azureCalls": 0,
+    "azureMutations": 0,
+    "guestExecutions": 0,
+    "rbacChanges": 0,
+    "g2Changes": 0,
+    "builds": 0,
+    "pushes": 0,
+    "costRecalculations": 0,
+    "newArchitectureCharters": 0
+  },
+  "limitations": [
+    "This terminal validation verifies recorded evidence;it does not perform a fresh Azure residual query or add missing runtime proof.",
+    "The preserved historical806-test record validates evidence integrity,not rootless runtime,descendant IMDS denial,watchdog or timeout cleanup.",
+    "The current proof architecture alone is NO_GO;the broader Azure private-control-plane strategy is not declared failed.",
+    "Further G3 engineering requires a new explicit human architecture charter;no continuation is authorized here."
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "executionState": "Failed",
+  "exitCode": 127,
+  "error": "/bin/bash: line 1: /var/lib/waagent/run-command-handler/download/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97/0/script.sh: cannot execute: required file not found\n",
+  "cause": "Locally authored Windows CRLF shebang caused interpreter path rejection before observational script ran;successor transport normalizes LF. Not a VM tooling/capacity qualification result.",
+  "preservedRawResponse": "G3R3D_READ_8_q1-state-0.json",
+  "childDeletionConfirmed": true
+}

@@ -1,0 +1,86 @@
+{
+  "SELECTED_PRIVATE_BUILD_MODEL": "NONE",
+  "rationale": "Neither candidate meets every material criterion;no third model introduced and no convenience selection",
+  "score": [
+    {
+      "model": "EXISTING_G2_BUILDER_VM",
+      "PASS": 6,
+      "FAIL": 0,
+      "BLOCKED_EXACT_FACT": 5,
+      "materialResiduals": [
+        {
+          "criterion": "LEAST_PRIVILEGE",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Existing guest UAMI has synthetic-health writer and g2-tooling reader grants;RunCommand executes guest commands with broad host authority. No bound isolation/IMDS fence proves builder can write only G3 repository"
+        },
+        {
+          "criterion": "DETERMINISTIC_ROLLBACK",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Ownership-scoped desired cleanup is enumerated,but daemon/credential cleanup under failures is not authority-bound"
+        },
+        {
+          "criterion": "CLEANUP_ENFORCEMENT",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Server RunCommand timeout does not establish external engine/credential cleanup after agent/controller failure"
+        },
+        {
+          "criterion": "COST_BOUNDABILITY",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Disk hourly cap gives a conditional cost only;total billable transaction windows and byte limits require cleanup/enforcement"
+        },
+        {
+          "criterion": "OPERATOR_PRIVILEGE_COMPLETENESS",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Real plural child-command actions catalog-bound;identity-isolation/cleanup permission extension cannot be finalized without isolation contract"
+        }
+      ]
+    },
+    {
+      "model": "ACR_DEDICATED_AGENT_POOL_S1",
+      "PASS": 5,
+      "FAIL": 0,
+      "BLOCKED_EXACT_FACT": 6,
+      "materialResiduals": [
+        {
+          "criterion": "LEAST_PRIVILEGE",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Candidate task-control roles and core ABAC writer identified;target quick-task credential and cleanup contract incomplete"
+        },
+        {
+          "criterion": "DETERMINISTIC_ROLLBACK",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Named pool/cancel/scale-zero/delete sequence defined;source staging disposal and allocation failure rollback not yet bound"
+        },
+        {
+          "criterion": "CLEANUP_ENFORCEMENT",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "No server-side pool TTL;task timeout does not cap allocation when controller/credentials fail"
+        },
+        {
+          "criterion": "COST_METER_COMPLETENESS",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Dedicated allocation-second CAD applicability not established;Task vCPU Duration is not silently substituted"
+        },
+        {
+          "criterion": "COST_BOUNDABILITY",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Both applicable allocation tariff and enforceable maximum allocation window are unbound"
+        },
+        {
+          "criterion": "OPERATOR_PRIVILEGE_COMPLETENESS",
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Candidate pool/run/upload actions catalog-bound;independent cleanup authority/scopes remain unbound"
+        }
+      ]
+    }
+  ],
+  "preferenceOrderIfBothPass": [
+    "LOWEST_G2_MUTATION_SURFACE",
+    "STRONGEST_DETERMINISTIC_CLEANUP",
+    "NARROWEST_OPERATOR_PRIVILEGE",
+    "MOST_COMPLETELY_BOUNDED_INCREMENTAL_COST",
+    "NO_PREVIEW_DEPENDENCY"
+  ],
+  "neitherProvenImpossible": true,
+  "newArchitectureAuthorized": false
+}

@@ -1,0 +1,84 @@
+{
+  "scope": "PROSPECTIVE_G3R2_IMAGE_QUALIFICATION_LOCAL_ONLY",
+  "status": "PASS_LOCAL_QUALIFICATION_NOT_AZURE_EXECUTION_AUTHORITY",
+  "checks": [
+    {
+      "command": "node infrastructure\\landing-zone\\g3r2i-local-qualification.mjs",
+      "result": "PASS",
+      "record": "G3R2I_LOCAL_EXECUTION.json",
+      "coverage": "Verified public builder manifest bytes; pinned Go 1.26.9 compiler; bounded public Go version advisory queries; Docker source builds; two byte-identical static binaries; 26 Go tests/subtests rerun without test cache; go vet and gofmt; actual kernel process UID/GID; actual listening sockets; read-only root; network none/no host port; health; independent fake HMAC; changed nonce/key; missing-secret and malformed-input denials; response/stdout/stderr/log/error non-disclosure; graceful SIGTERM.",
+      "compilerTestTemporaryStorage": "Bounded 128 MiB executable /tmp and 256 MiB Go-cache tmpfs for compiler tests only. Runtime has no tmpfs and requires no writes.",
+      "limitations": "Public version advisory checks are not a full builder OS scan. Local injection does not prove Azure Key Vault injection, identity/RBAC or private Azure network paths.",
+      "imagePushed": false,
+      "azureImageBuild": false
+    },
+    {
+      "command": "node --test --test-skip-pattern \"history recovery has deterministic|exact Git historical blob digest\" infrastructure\\landing-zone\\g3-readiness-report.test.mjs infrastructure\\landing-zone\\g3r1-local-closure.test.mjs infrastructure\\landing-zone\\g3r2-source-closure.test.mjs infrastructure\\landing-zone\\g3r2i-source-closure.test.mjs",
+      "result": "PASS",
+      "testsPassed": 296,
+      "testsFailed": 0,
+      "historicalSearchExclusions": "77 historical recovery/blob-inspection cases filtered before execution. Existing G3R2 regressions validate the byte-preserved frozen source/build snapshot, while new regressions validate the current amended source. No further historical-module search."
+    },
+    {
+      "command": "& .\\infrastructure\\landing-zone\\g3-readiness-census.test.ps1; & .\\infrastructure\\landing-zone\\g3r1-account-controls.test.ps1",
+      "result": "PASS",
+      "offlineRejectionCases": 27,
+      "azureCalls": 0,
+      "readLedgerChanges": 0
+    },
+    {
+      "command": "node --check infrastructure\\landing-zone\\g3r2i-local-qualification.mjs; node --check infrastructure\\landing-zone\\g3r2i-preservation.mjs; node --check infrastructure\\landing-zone\\g3r2i-secret-scan.mjs; node --check infrastructure\\landing-zone\\g3r2i-source-closure.mjs; node --check infrastructure\\landing-zone\\g3r2i-source-closure.test.mjs",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec prettier --check infrastructure\\landing-zone\\g3r2i*.mjs infrastructure\\landing-zone\\g3r2-source-closure.test.mjs infrastructure\\landing-zone\\g3-source infrastructure\\landing-zone\\g3-readiness-evidence\\G3R2I*.json infrastructure\\landing-zone\\g3-readiness-evidence\\G3R2I*.md",
+      "result": "PASS",
+      "goFormatting": "Pinned compiler gofmt -l main.go main_test.go returned no files; Bicep compiler formatter used on both affected entrypoints."
+    },
+    {
+      "command": "node infrastructure\\landing-zone\\g3r2i-source-closure.mjs --write",
+      "result": "PASS",
+      "localBicepEntrypoints": 9,
+      "bicepWarnings": 0,
+      "bicepErrors": 0,
+      "scannerRecord": "G3R2I_SECRET_SCAN.json",
+      "unresolvedSecretFindings": 0,
+      "rawSourceScannerExit": 1,
+      "rawSourceFindings": 5,
+      "rawToolingFindings": 1,
+      "scannerDisposition": "Six exact public-name/built-in-role-ID false positives adjudicated individually, including the scanner adjudication code itself. No suppression, baseline or scanner-configuration weakening."
+    },
+    {
+      "command": "node infrastructure\\landing-zone\\g3r2i-source-closure.mjs --check; node infrastructure\\landing-zone\\g3r2i-preservation.mjs --check",
+      "result": "PASS",
+      "preservedCandidateFiles": 4,
+      "preservedOriginalEvidenceFiles": 255,
+      "archivedOriginalSourceBuildFiles": 34,
+      "g2SourceChanged": false,
+      "coverage": "Exact candidate/evidence/frozen-source/G2/accepted-input preservation; qualified workload tree/context; all current source, Bicep template, manifest, generator, scanner and output bindings."
+    },
+    {
+      "command": "node infrastructure\\landing-zone\\g3r2i-source-closure.mjs --write; node infrastructure\\landing-zone\\g3r2i-source-closure.mjs --check",
+      "result": "PASS_BYTE_IDENTICAL_REGENERATION",
+      "method": "SHA256 comparison of every current g3-source file and every G3R2I evidence file before/after regeneration. Writer/checker execute no local image/container/controller or cloud actions; local execution proof is retained immutable input to generation."
+    },
+    {
+      "command": "pnpm validate:docs",
+      "result": "PASS",
+      "filesScanned": 2638,
+      "errors": 0,
+      "warnings": 1215,
+      "info": 1700
+    }
+  ],
+  "azureResourceMutations": 0,
+  "azureRbacMutations": 0,
+  "azureRegistryMutations": 0,
+  "g2Mutations": 0,
+  "liveSecretChallengeExecuted": false,
+  "controllerExecuted": false,
+  "g3aExecuted": false,
+  "g3bExecuted": false,
+  "localImageBuilt": true,
+  "localContainerTested": true
+}

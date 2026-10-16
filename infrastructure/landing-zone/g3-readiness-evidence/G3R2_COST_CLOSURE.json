@@ -1,0 +1,524 @@
+{
+  "currency": "CAD",
+  "status": "DETERMINISTIC_TO_CAPTURED_PRICING_CEILING_WITH_UNRESOLVED_METERS",
+  "meters": {
+    "activeCpu": {
+      "meterId": "c064b5f6-a623-55d5-8f04-942be79fc8e7",
+      "productName": "Azure Container Apps",
+      "skuName": "Standard",
+      "meterName": "Standard vCPU Active Usage",
+      "armRegionName": "canadacentral",
+      "currency": "CAD",
+      "unitOfMeasure": "1 Second",
+      "retailPrice": 0.000048,
+      "effectiveStartDate": "2022-06-01T00:00:00Z",
+      "sourceFile": "pricing-Azure-Container-Apps.json"
+    },
+    "activeMemory": {
+      "meterId": "4113d31b-2df1-5456-86de-3b5ef8ed27f4",
+      "productName": "Azure Container Apps",
+      "skuName": "Standard",
+      "meterName": "Standard Memory Active Usage",
+      "armRegionName": "canadacentral",
+      "currency": "CAD",
+      "unitOfMeasure": "1 GiB Second",
+      "retailPrice": 0.000006,
+      "effectiveStartDate": "2022-06-01T00:00:00Z",
+      "sourceFile": "pricing-Azure-Container-Apps.json"
+    },
+    "requests": {
+      "meterId": "9d5ac783-0d6a-5ced-812a-e31662edde9e",
+      "productName": "Azure Container Apps",
+      "skuName": "Standard",
+      "meterName": "Standard Requests",
+      "armRegionName": "canadacentral",
+      "currency": "CAD",
+      "unitOfMeasure": "1M",
+      "retailPrice": 0.56662,
+      "effectiveStartDate": "2022-06-01T00:00:00Z",
+      "sourceFile": "pricing-Azure-Container-Apps.json"
+    },
+    "logIngestion": {
+      "meterId": "6c00b68b-125b-42cf-9085-af9f4ab7a044",
+      "productName": "Log Analytics",
+      "skuName": "Analytics Logs",
+      "meterName": "Analytics Logs Data Ingestion",
+      "armRegionName": "canadacentral",
+      "currency": "CAD",
+      "unitOfMeasure": "1 GB",
+      "retailPrice": 3.909678,
+      "effectiveStartDate": "2018-02-01T00:00:00Z",
+      "sourceFile": "pricing-Log-Analytics.json"
+    },
+    "vaultPrivateEndpoint": {
+      "meterId": "e6ab7238-e433-4fe0-a2b2-2b2564df2cdb",
+      "productName": "Virtual Network Private Link",
+      "skuName": "Standard",
+      "meterName": "Standard Private Endpoint",
+      "armRegionName": "Global",
+      "currency": "CAD",
+      "unitOfMeasure": "1 Hour",
+      "retailPrice": 0.014166,
+      "effectiveStartDate": "2020-02-01T00:00:00Z",
+      "sourceFile": "pricing-Virtual-Network-global-fallback.json"
+    },
+    "privateEndpointData": {
+      "meterId": "10caa28b-6479-4852-9eb7-610870cb6417",
+      "productName": "Virtual Network Private Link",
+      "skuName": "Standard",
+      "meterName": "Standard Data Processed - Ingress",
+      "armRegionName": "Global",
+      "currency": "CAD",
+      "unitOfMeasure": "1 GB",
+      "retailPrice": 0.014166,
+      "effectiveStartDate": "2021-11-01T00:00:00Z",
+      "sourceFile": "pricing-Virtual-Network-global-fallback.json"
+    },
+    "privateDnsZone": {
+      "meterId": "0b608a26-f611-4232-8192-ce81b6b57194",
+      "productName": "Azure DNS",
+      "skuName": "Private",
+      "meterName": "Private Zone",
+      "armRegionName": "",
+      "currency": "CAD",
+      "unitOfMeasure": "1",
+      "retailPrice": 0.708275,
+      "effectiveStartDate": "2019-12-01T00:00:00Z",
+      "sourceFile": "pricing-Azure-DNS-global-fallback.json"
+    },
+    "privateDnsQueries": {
+      "meterId": "46cff9cb-4b15-4af0-bf41-25143827fef8",
+      "productName": "Azure DNS",
+      "skuName": "Private",
+      "meterName": "Private Queries",
+      "armRegionName": "",
+      "currency": "CAD",
+      "unitOfMeasure": "1M",
+      "retailPrice": 0.56662,
+      "effectiveStartDate": "2019-12-01T00:00:00Z",
+      "sourceFile": "pricing-Azure-DNS-global-fallback.json"
+    },
+    "loadBalancer": {
+      "meterId": "27827eb0-7f60-4928-940b-f5fe15e7a4cb",
+      "productName": "Load Balancer",
+      "skuName": "Standard",
+      "meterName": "Standard Included LB Rules and Outbound Rules",
+      "armRegionName": "Global",
+      "currency": "CAD",
+      "unitOfMeasure": "1 Hour",
+      "retailPrice": 0.035414,
+      "effectiveStartDate": "2018-04-11T00:00:00Z",
+      "sourceFile": "pricing-Load-Balancer-global-fallback.json"
+    },
+    "loadBalancerData": {
+      "meterId": "dfc7cc11-fbe2-41c8-b6fa-24a574223938",
+      "productName": "Load Balancer",
+      "skuName": "Standard",
+      "meterName": "Standard Data Processed",
+      "armRegionName": "Global",
+      "currency": "CAD",
+      "unitOfMeasure": "1 GB",
+      "retailPrice": 0.007083,
+      "effectiveStartDate": "2018-04-11T00:00:00Z",
+      "sourceFile": "pricing-Load-Balancer-global-fallback.json"
+    },
+    "firewallData": {
+      "meterId": "ff9d9feb-e6a5-5070-98dd-864487cdf2a6",
+      "productName": "Azure Firewall",
+      "skuName": "Basic",
+      "meterName": "Basic Data Processed",
+      "armRegionName": "Global",
+      "currency": "CAD",
+      "unitOfMeasure": "1 GB",
+      "retailPrice": 0.092076,
+      "effectiveStartDate": "2023-03-01T00:00:00Z",
+      "sourceFile": "pricing-Azure-Firewall-global-fallback.json"
+    },
+    "potentialPlatformEgressIp": {
+      "meterId": "9c150bf9-2bad-430e-a53c-c213804f49ef",
+      "productName": "IP Addresses",
+      "skuName": "Standard",
+      "meterName": "Standard IPv4 Static Public IP",
+      "armRegionName": "Global",
+      "currency": "CAD",
+      "unitOfMeasure": "1 Hour",
+      "retailPrice": 0.007083,
+      "effectiveStartDate": "2018-06-01T00:00:00Z",
+      "sourceFile": "pricing-Virtual-Network-global-fallback.json"
+    },
+    "unselectedBuilderCpu": {
+      "meterId": "85216dda-f99d-460a-a16a-9e4ccf9b53dd",
+      "productName": "Virtual Machines BS Series",
+      "skuName": "B1s",
+      "meterName": "B1s",
+      "armRegionName": "canadacentral",
+      "currency": "CAD",
+      "unitOfMeasure": "1 Hour",
+      "retailPrice": 0.016432,
+      "effectiveStartDate": "2025-10-01T00:00:00Z",
+      "sourceFile": "pricing-Virtual-Machines.json"
+    },
+    "unselectedBuilderDisk": {
+      "meterId": "316238ae-c700-4729-b00b-3f436f0b177c",
+      "productName": "Standard SSD Managed Disks",
+      "skuName": "E4 LRS",
+      "meterName": "E4 LRS Disk",
+      "armRegionName": "canadacentral",
+      "currency": "CAD",
+      "unitOfMeasure": "1/Month",
+      "retailPrice": 3.739692,
+      "effectiveStartDate": "2020-01-01T00:00:00Z",
+      "sourceFile": "pricing-Storage.json"
+    },
+    "privateEndpointEgress": {
+      "meterId": "e7f162f6-7cb8-4cea-ad4f-12cdb5dda25b",
+      "productName": "Virtual Network Private Link",
+      "skuName": "Standard",
+      "meterName": "Standard Data Processed - Egress",
+      "armRegionName": "Global",
+      "currency": "CAD",
+      "unitOfMeasure": "1 GB",
+      "retailPrice": 0.014166,
+      "effectiveStartDate": "2021-11-01T00:00:00Z",
+      "sourceFile": "pricing-Virtual-Network-global-fallback.json"
+    },
+    "intraRegionPeeringIngress": {
+      "meterId": "59bc01e3-9d3e-4b9f-baef-35e696aad6c4",
+      "productName": "Virtual Network Peering",
+      "skuName": "Intra-Region",
+      "meterName": "Intra-Region Ingress",
+      "armRegionName": "Global",
+      "currency": "CAD",
+      "unitOfMeasure": "1 GB",
+      "retailPrice": 0.014166,
+      "effectiveStartDate": "2016-11-01T00:00:00Z",
+      "sourceFile": "pricing-Virtual-Network-global-fallback.json"
+    },
+    "intraRegionPeeringEgress": {
+      "meterId": "bbe2e768-80fd-44f3-b76c-dc4a13bb4e64",
+      "productName": "Virtual Network Peering",
+      "skuName": "Intra-Region",
+      "meterName": "Intra-Region Egress",
+      "armRegionName": "Global",
+      "currency": "CAD",
+      "unitOfMeasure": "1 GB",
+      "retailPrice": 0.014166,
+      "effectiveStartDate": "2016-11-01T00:00:00Z",
+      "sourceFile": "pricing-Virtual-Network-global-fallback.json"
+    }
+  },
+  "provenance": "Captured primaryCAD price snapshots only;no new retailqueries;raw ledger hashes and summaryitems checked",
+  "designQuantities": {
+    "incrementalPrivateDnsZones": 2,
+    "zones": [
+      "privatelink.azurecr.io",
+      "privatelink.vaultcore.azure.net",
+      "<G3_ENVIRONMENT_DEFAULT_DOMAIN>"
+    ],
+    "rationale": "New KV and INTERNAL ACA defaultDomain zones billed;existing G2 ACR zone reused so no incrementalACR zonebase. Bill two full periods conservatively for shortproof;no unsupported hourlyDNS proration.",
+    "minReplicasIdle": 0,
+    "maxReplicas": 1,
+    "cpu": 0.25,
+    "memoryGiB": 0.5,
+    "hoursPerMonth": 730,
+    "freeAllowances": "NOT_ASSUMED",
+    "managedEgressIp": "One documented platformmanaged egressIPv4 included conservatively despiteUDR;no user-managedG3 publicIP",
+    "existingG2FirewallBase": "EXCLUDED_INCREMENTAL_ZERO_ONLY_FOR_ALREADY_RETAINED_BASE",
+    "ACA_PRIVATE_ENDPOINT": "NOT_SELECTED_NO_COST",
+    "dedicatedManagement": "NOT_SELECTED_NO_DEDICATED_PROFILE_OR_ACA_PE_OR_PLANNED_MAINTENANCE"
+  },
+  "scenarios": [
+    {
+      "name": "G3_PROOF_RUN_COST",
+      "quantities": {
+        "name": "G3_PROOF_RUN_COST",
+        "retainedHours": 2,
+        "activeHours": 2,
+        "requestsMillion": 0.001,
+        "dnsMillion": 0.001,
+        "logsGB": 0.1,
+        "privateEndpointGB": 0.1,
+        "loadBalancerGB": 0.1,
+        "firewallGB": 0.1
+      },
+      "peeringQuantities": {
+        "g2RegistryTransferGB": 0.1,
+        "firewallTransitGB": 0.1,
+        "totalTransferredGB": 0.2,
+        "billing": "Eachonewaybyte incurs sourceegress+destinationingress;inputGB includesbothtrafficdirections,no extra2x. LocalG3KV PE traffic doesnot traverseG2peering."
+      },
+      "quantitiesAuthority": "LOCAL_SCENARIO_PROPOSAL_NOT_APPROVED_BUDGET_OR_MEASURED_USAGE",
+      "currency": "CAD",
+      "knownComponents": {
+        "FIXED_COSTS": 1.41655,
+        "PRIVATE_ENDPOINT_COSTS": 0.031165,
+        "LOAD_BALANCER_COSTS": 0.071536,
+        "PLATFORM_MANAGED_EGRESS_IP": 0.014166,
+        "ACA_USAGE_COSTS": 0.108567,
+        "DNS_USAGE_COSTS": 0.000567,
+        "LOG_INGESTION_COSTS": 0.390968,
+        "FIREWALL_COSTS": 0.009208,
+        "PEERING_COSTS": 0.005666
+      },
+      "knownSubtotalCAD": 2.048393,
+      "completeTotalCAD": null,
+      "COST_STATUS": "UNRESOLVED_METER",
+      "omissions": [
+        "Vault ordinarysecretoperations",
+        "ACR nonreplicatedexcessstorage beyondincludedheadroom",
+        "Any separately chargeableplatform/publicnetworkegress",
+        "QualifiedG3A ephemeralbuilder/tooling/disk/transactions"
+      ],
+      "upperBoundMeaning": null
+    },
+    {
+      "name": "G3_IDLE_MONTHLY_COST",
+      "quantities": {
+        "name": "G3_IDLE_MONTHLY_COST",
+        "retainedHours": 730,
+        "activeHours": 0,
+        "requestsMillion": 0,
+        "dnsMillion": 0.001,
+        "logsGB": 0.1,
+        "privateEndpointGB": 0,
+        "loadBalancerGB": 0.1,
+        "firewallGB": 0.1
+      },
+      "peeringQuantities": {
+        "g2RegistryTransferGB": 0,
+        "firewallTransitGB": 0.1,
+        "totalTransferredGB": 0.1,
+        "billing": "Eachonewaybyte incurs sourceegress+destinationingress;inputGB includesbothtrafficdirections,no extra2x. LocalG3KV PE traffic doesnot traverseG2peering."
+      },
+      "quantitiesAuthority": "LOCAL_SCENARIO_PROPOSAL_NOT_APPROVED_BUDGET_OR_MEASURED_USAGE",
+      "currency": "CAD",
+      "knownComponents": {
+        "FIXED_COSTS": 1.41655,
+        "PRIVATE_ENDPOINT_COSTS": 10.34118,
+        "LOAD_BALANCER_COSTS": 25.852928,
+        "PLATFORM_MANAGED_EGRESS_IP": 5.17059,
+        "ACA_USAGE_COSTS": 0,
+        "DNS_USAGE_COSTS": 0.000567,
+        "LOG_INGESTION_COSTS": 0.390968,
+        "FIREWALL_COSTS": 0.009208,
+        "PEERING_COSTS": 0.002833
+      },
+      "knownSubtotalCAD": 43.184824,
+      "completeTotalCAD": null,
+      "COST_STATUS": "UNRESOLVED_METER",
+      "omissions": [
+        "Vault ordinarysecretoperations",
+        "ACR nonreplicatedexcessstorage beyondincludedheadroom",
+        "Any separately chargeableplatform/publicnetworkegress",
+        "QualifiedG3A ephemeralbuilder/tooling/disk/transactions"
+      ],
+      "upperBoundMeaning": null
+    },
+    {
+      "name": "G3_LOW_USAGE_MONTHLY_COST",
+      "quantities": {
+        "name": "G3_LOW_USAGE_MONTHLY_COST",
+        "retainedHours": 730,
+        "activeHours": 4,
+        "requestsMillion": 0.01,
+        "dnsMillion": 0.01,
+        "logsGB": 0.5,
+        "privateEndpointGB": 1,
+        "loadBalancerGB": 1,
+        "firewallGB": 1
+      },
+      "peeringQuantities": {
+        "g2RegistryTransferGB": 1,
+        "firewallTransitGB": 1,
+        "totalTransferredGB": 2,
+        "billing": "Eachonewaybyte incurs sourceegress+destinationingress;inputGB includesbothtrafficdirections,no extra2x. LocalG3KV PE traffic doesnot traverseG2peering."
+      },
+      "quantitiesAuthority": "LOCAL_SCENARIO_PROPOSAL_NOT_APPROVED_BUDGET_OR_MEASURED_USAGE",
+      "currency": "CAD",
+      "knownComponents": {
+        "FIXED_COSTS": 1.41655,
+        "PRIVATE_ENDPOINT_COSTS": 10.369512,
+        "LOAD_BALANCER_COSTS": 25.859303,
+        "PLATFORM_MANAGED_EGRESS_IP": 5.17059,
+        "ACA_USAGE_COSTS": 0.221666,
+        "DNS_USAGE_COSTS": 0.005666,
+        "LOG_INGESTION_COSTS": 1.954839,
+        "FIREWALL_COSTS": 0.092076,
+        "PEERING_COSTS": 0.056664
+      },
+      "knownSubtotalCAD": 45.146866,
+      "completeTotalCAD": null,
+      "COST_STATUS": "UNRESOLVED_METER",
+      "omissions": [
+        "Vault ordinarysecretoperations",
+        "ACR nonreplicatedexcessstorage beyondincludedheadroom",
+        "Any separately chargeableplatform/publicnetworkegress",
+        "QualifiedG3A ephemeralbuilder/tooling/disk/transactions"
+      ],
+      "upperBoundMeaning": null
+    },
+    {
+      "name": "G3_EXPECTED_MONTHLY_COST",
+      "quantities": {
+        "name": "G3_EXPECTED_MONTHLY_COST",
+        "retainedHours": 730,
+        "activeHours": 24,
+        "requestsMillion": 0.1,
+        "dnsMillion": 0.1,
+        "logsGB": 2,
+        "privateEndpointGB": 5,
+        "loadBalancerGB": 5,
+        "firewallGB": 5
+      },
+      "peeringQuantities": {
+        "g2RegistryTransferGB": 5,
+        "firewallTransitGB": 5,
+        "totalTransferredGB": 10,
+        "billing": "Eachonewaybyte incurs sourceegress+destinationingress;inputGB includesbothtrafficdirections,no extra2x. LocalG3KV PE traffic doesnot traverseG2peering."
+      },
+      "quantitiesAuthority": "LOCAL_SCENARIO_PROPOSAL_NOT_APPROVED_BUDGET_OR_MEASURED_USAGE",
+      "currency": "CAD",
+      "knownComponents": {
+        "FIXED_COSTS": 1.41655,
+        "PRIVATE_ENDPOINT_COSTS": 10.48284,
+        "LOAD_BALANCER_COSTS": 25.887635,
+        "PLATFORM_MANAGED_EGRESS_IP": 5.17059,
+        "ACA_USAGE_COSTS": 1.352662,
+        "DNS_USAGE_COSTS": 0.056662,
+        "LOG_INGESTION_COSTS": 7.819356,
+        "FIREWALL_COSTS": 0.46038,
+        "PEERING_COSTS": 0.28332
+      },
+      "knownSubtotalCAD": 52.929995,
+      "completeTotalCAD": null,
+      "COST_STATUS": "UNRESOLVED_METER",
+      "omissions": [
+        "Vault ordinarysecretoperations",
+        "ACR nonreplicatedexcessstorage beyondincludedheadroom",
+        "Any separately chargeableplatform/publicnetworkegress",
+        "QualifiedG3A ephemeralbuilder/tooling/disk/transactions"
+      ],
+      "upperBoundMeaning": null
+    },
+    {
+      "name": "G3_UPPER_BOUND_SCENARIO",
+      "quantities": {
+        "name": "G3_UPPER_BOUND_SCENARIO",
+        "retainedHours": 730,
+        "activeHours": 730,
+        "requestsMillion": 1,
+        "dnsMillion": 1,
+        "logsGB": 20,
+        "privateEndpointGB": 50,
+        "loadBalancerGB": 50,
+        "firewallGB": 50
+      },
+      "peeringQuantities": {
+        "g2RegistryTransferGB": 50,
+        "firewallTransitGB": 50,
+        "totalTransferredGB": 100,
+        "billing": "Eachonewaybyte incurs sourceegress+destinationingress;inputGB includesbothtrafficdirections,no extra2x. LocalG3KV PE traffic doesnot traverseG2peering."
+      },
+      "quantitiesAuthority": "LOCAL_SCENARIO_PROPOSAL_NOT_APPROVED_BUDGET_OR_MEASURED_USAGE",
+      "currency": "CAD",
+      "knownComponents": {
+        "FIXED_COSTS": 1.41655,
+        "PRIVATE_ENDPOINT_COSTS": 11.75778,
+        "LOAD_BALANCER_COSTS": 26.20637,
+        "PLATFORM_MANAGED_EGRESS_IP": 5.17059,
+        "ACA_USAGE_COSTS": 39.98662,
+        "DNS_USAGE_COSTS": 0.56662,
+        "LOG_INGESTION_COSTS": 78.19356,
+        "FIREWALL_COSTS": 4.6038,
+        "PEERING_COSTS": 2.8332
+      },
+      "knownSubtotalCAD": 170.73509,
+      "completeTotalCAD": null,
+      "COST_STATUS": "UNRESOLVED_METER",
+      "omissions": [
+        "Vault ordinarysecretoperations",
+        "ACR nonreplicatedexcessstorage beyondincludedheadroom",
+        "Any separately chargeableplatform/publicnetworkegress",
+        "QualifiedG3A ephemeralbuilder/tooling/disk/transactions"
+      ],
+      "upperBoundMeaning": "Upper usage scenario for priced components only;not an actual hardupper bound with unknowncharges"
+    }
+  ],
+  "PER_HOUR_PROOF_COSTS": { "standingKnownCAD": 0.056663, "activeAllocationKnownCAD": 0.054 },
+  "PER_GB_COSTS": {
+    "vaultPEIngressCAD": 0.014166,
+    "vaultPEEgressCAD": 0.014166,
+    "intraRegionPeeringIngressCAD": 0.014166,
+    "intraRegionPeeringEgressCAD": 0.014166,
+    "lbProcessedCAD": 0.007083,
+    "basicFirewallProcessedCAD": 0.092076,
+    "logIngestionCAD": 3.909678,
+    "doubleCountingRule": "PE/LB/firewall quantities explicitlydistinct surfaces;private endpoint directpath neednottraversefirewall. privateEndpointGB islocalKVprocessedGB;G2registry PE processing isincremental separately. Bothsplit50%ingress/50%egress underscenario. ExistingG2PE hourlybase isalreadyretained,notnewG3incremental."
+  },
+  "NETWORK_EGRESS_COSTS": {
+    "status": "UNRESOLVED_METER",
+    "missingFact": "Applicablegeneralpublic/platformegress meter isnot in capturedCanadaCentralBandwidth results;China/interregion meters are notsubstituted. Same-regionpeering usescapturedGlobal Intra-Region meters and ispricedseparately."
+  },
+  "BUILDER_EPHEMERAL_COSTS": {
+    "status": "BLOCKED_DOWNSTREAM_FROZEN_AUTHORITY",
+    "authoritativeCAD": null,
+    "nonAuthoritativeProxy": {
+      "sku": "LinuxB1s+E4LRS",
+      "computeCADPerHour": 0.016432,
+      "diskCADPerMonth": 3.739692,
+      "exampleTwoHourComputePlusFullDiskCAD": 3.772556,
+      "status": "SCENARIO_PROXY_ONLY_NOT_QUALIFIED_OR_SELECTED",
+      "excludedFromAuthoritativeTotals": true
+    }
+  },
+  "unresolvedMeters": [
+    {
+      "component": "VAULT_ORDINARY_SECRET_OPERATIONS",
+      "COST_STATUS": "UNRESOLVED_METER",
+      "missingFact": "ApplicableStandard secretoperations meter cannot be mapped from capturedprimaryCAD evidence;PremiumOperations/AdvancedKeyOperations are not substituted."
+    },
+    {
+      "component": "ACR_EXCESS_NONREPLICATED_STORAGE",
+      "COST_STATUS": "UNRESOLVED_METER",
+      "missingFact": "CanadaCentralPremium nonreplicatedexcessstorage meter and currentincludedstorageheadroom missing;replication/otherregion/SKU not authoritativeproxy."
+    },
+    {
+      "component": "PLATFORM_OR_PUBLIC_NETWORK_EGRESS",
+      "COST_STATUS": "UNRESOLVED_METER",
+      "missingFact": "Applicablegeneralpublic/platformegress meter/quantities are notbound;China/interregion meters are notsubstituted. Intra-regionpeering isclosedtoGlobalmeter evidence."
+    }
+  ],
+  "RECOMMENDED_EXECUTION_CEILING_CAD": "UNRESOLVED_FULL_CEILING_REQUIRES_UNKNOWN_COMPONENTS",
+  "pricedComponentRecommendationCAD": 9.022101,
+  "recommendation": {
+    "proofRunAllowanceKnownCAD": 2.048393,
+    "rollbackAllowanceKnownCAD": 0.056663,
+    "unexpectedDiagnosticLogsAllowanceCAD": 3.909678,
+    "bufferPercentage": 50,
+    "formula": "1.5*(completeproofrun + completerollback + diagnostics);known-componentamount isnot an executableceiling",
+    "requiredAdditions": [
+      "Qualifiedbuilder",
+      "Ordinaryvaultoperations",
+      "ACRexcessstorage",
+      "Platform/publicnetworkegress",
+      "Rollback/diagnosticunknowncharges"
+    ]
+  },
+  "HUMAN_APPROVED_EXECUTION_CEILING_CAD": "UNBOUND",
+  "localCostCompletion": "COMPLETE_FORMULAE_AND_EXACT_UNKNOWNS;not all-in numericclosure",
+  "humanApprovalImplied": false,
+  "lineage": "PROSPECTIVE_G3R2",
+  "derivedFromBomSha256": "0737c9f7763646f9dbda5f2490346ae4250ec64f8f7e6564e1b3dc93a323b4e7",
+  "recomputation": "Scenarioformulas reevaluated againstcanonicalBOM countchecks andcapturedmeterprovenance;notoldsubtotalcopy",
+  "builder": {
+    "model": "UNRESOLVED_PRIVATE_ARTIFACT_PRODUCTION;committedbinarybuildcontractincomplete",
+    "skuOrService": "UNBOUND",
+    "expectedRuntimeMinutes": null,
+    "bootDisk": null,
+    "dataTransferGB": null,
+    "buildCount": 1,
+    "priceSource": "CapturedCADB1s/E4isnon-authoritativeproxy only",
+    "BUILDER_COST": "UNRESOLVED"
+  },
+  "RECOMMENDED_FULL_PROOF_EXECUTION_CEILING_CAD": "UNRESOLVED"
+}

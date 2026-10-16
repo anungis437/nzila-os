@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-10-06 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-10-16 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -10,8 +10,8 @@
 | Packages (packages/*) | 224 |
 | Workspace Packages (apps|packages|services|tooling) | 258 |
 | GitHub Workflows | 59 |
-| Contract Test Files | 291 |
-| TS/JS Test Files | 2693 |
+| Contract Test Files | 292 |
+| TS/JS Test Files | 2694 |
 | Python Test Files | 35 |
 
 ## Apps

@@ -1,0 +1,228 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.48.1.52935",
+      "templateHash": "11441379224537826046"
+    }
+  },
+  "parameters": {
+    "provisionResources": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    },
+    "location": {
+      "type": "string"
+    },
+    "names": {
+      "type": "object"
+    },
+    "tags": {
+      "type": "object"
+    },
+    "acaSubnetId": {
+      "type": "string"
+    },
+    "vnetId": {
+      "type": "string"
+    },
+    "workspaceId": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2025-07-01",
+      "name": "[parameters('names').environment]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "vnetConfiguration": {
+          "internal": true,
+          "infrastructureSubnetId": "[parameters('acaSubnetId')]"
+        },
+        "publicNetworkAccess": "Disabled",
+        "workloadProfiles": [
+          {
+            "name": "Consumption",
+            "workloadProfileType": "Consumption"
+          }
+        ],
+        "appLogsConfiguration": {
+          "destination": "azure-monitor"
+        },
+        "zoneRedundant": false
+      }
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Insights/diagnosticSettings",
+      "apiVersion": "2021-05-01-preview",
+      "scope": "[resourceId('Microsoft.App/managedEnvironments', parameters('names').environment)]",
+      "name": "g3-console-system-logs",
+      "properties": {
+        "workspaceId": "[parameters('workspaceId')]",
+        "logs": [
+          {
+            "category": "ContainerAppConsoleLogs",
+            "enabled": true
+          },
+          {
+            "category": "ContainerAppSystemLogs",
+            "enabled": true
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', parameters('names').environment)]"
+      ]
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "g3-internal-dns",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "provisionResources": {
+            "value": "[parameters('provisionResources')]"
+          },
+          "environmentName": {
+            "value": "[parameters('names').environment]"
+          },
+          "defaultDomain": {
+            "value": "[reference(resourceId('Microsoft.App/managedEnvironments', parameters('names').environment), '2025-07-01').defaultDomain]"
+          },
+          "staticIp": {
+            "value": "[reference(resourceId('Microsoft.App/managedEnvironments', parameters('names').environment), '2025-07-01').staticIp]"
+          },
+          "vnetId": {
+            "value": "[parameters('vnetId')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.48.1.52935",
+              "templateHash": "14649924398031530607"
+            }
+          },
+          "parameters": {
+            "provisionResources": {
+              "type": "bool",
+              "defaultValue": false,
+              "allowedValues": [
+                false
+              ]
+            },
+            "environmentName": {
+              "type": "string"
+            },
+            "defaultDomain": {
+              "type": "string"
+            },
+            "staticIp": {
+              "type": "string"
+            },
+            "vnetId": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/privateDnsZones",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('defaultDomain')]",
+              "location": "global",
+              "tags": "[parameters('tags')]"
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+              "apiVersion": "2020-06-01",
+              "name": "[format('{0}/{1}', parameters('defaultDomain'), format('{0}-link', parameters('environmentName')))]",
+              "location": "global",
+              "properties": {
+                "registrationEnabled": false,
+                "virtualNetwork": {
+                  "id": "[parameters('vnetId')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+              ]
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/privateDnsZones/A",
+              "apiVersion": "2020-06-01",
+              "name": "[format('{0}/{1}', parameters('defaultDomain'), '@')]",
+              "properties": {
+                "ttl": 60,
+                "aRecords": [
+                  {
+                    "ipv4Address": "[parameters('staticIp')]"
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+              ]
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/privateDnsZones/A",
+              "apiVersion": "2020-06-01",
+              "name": "[format('{0}/{1}', parameters('defaultDomain'), '*')]",
+              "properties": {
+                "ttl": 60,
+                "aRecords": [
+                  {
+                    "ipv4Address": "[parameters('staticIp')]"
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', parameters('names').environment)]"
+      ]
+    }
+  ],
+  "outputs": {
+    "environmentId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.App/managedEnvironments', parameters('names').environment)]"
+    },
+    "quotaGate": {
+      "type": "string",
+      "value": "POST_CREATE_PRE_WORKLOAD_ACTIVATION;NO_ASSUMED_QUOTA"
+    }
+  }
+}

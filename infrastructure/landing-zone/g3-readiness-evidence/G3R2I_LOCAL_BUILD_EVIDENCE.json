@@ -1,0 +1,143 @@
+{
+  "status": "PASS_LOCAL_ONLY_NOT_DEPLOYED",
+  "entrypointCount": 9,
+  "warnings": 0,
+  "errors": 0,
+  "entries": [
+    {
+      "source": "main.bicep",
+      "sourceSha256": "e76613c7654b7619ad094de25ab928178863a12c8786e59f375c421199ec50f9",
+      "templatePath": "build/main.json",
+      "templateSha256": "2065fc8503c6543262d53e265f79fae5eb24b9c0635a966dead4f50a5db4afad",
+      "command": [
+        "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe",
+        "build",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\main.bicep",
+        "--outfile",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\build\\main.json"
+      ],
+      "result": "PASS",
+      "stderr": ""
+    },
+    {
+      "source": "modules/network.bicep",
+      "sourceSha256": "c28ff961bc124c64f89711d045df0d29d0dd046563d8186b0a0322297b8b9302",
+      "templatePath": "build/modules-network.json",
+      "templateSha256": "64720a49cd94ed83298fea7e6b3e3531c4ba331ae75200bc454210bad0f37c2c",
+      "command": [
+        "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe",
+        "build",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\network.bicep",
+        "--outfile",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\build\\modules-network.json"
+      ],
+      "result": "PASS",
+      "stderr": ""
+    },
+    {
+      "source": "modules/identities.bicep",
+      "sourceSha256": "386b65cf3100482cc70bfdfdb06b9fb3a16042d00d7955daf13a5881a07bb437",
+      "templatePath": "build/modules-identities.json",
+      "templateSha256": "16777d0878a800efab21735a863ef0b89b29da637071a89353bda8d5cfc171eb",
+      "command": [
+        "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe",
+        "build",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\identities.bicep",
+        "--outfile",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\build\\modules-identities.json"
+      ],
+      "result": "PASS",
+      "stderr": ""
+    },
+    {
+      "source": "modules/observability.bicep",
+      "sourceSha256": "bddf62fcebce555a293f4bc703443cde797ef5ea2343b9ced0d2c24d5d0a1178",
+      "templatePath": "build/modules-observability.json",
+      "templateSha256": "8eec6fbdeb69a9b07617397fef0ebea39e9ba2d13375bdf0ba61114cb845d4ea",
+      "command": [
+        "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe",
+        "build",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\observability.bicep",
+        "--outfile",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\build\\modules-observability.json"
+      ],
+      "result": "PASS",
+      "stderr": ""
+    },
+    {
+      "source": "modules/vault.bicep",
+      "sourceSha256": "5d19df8996f63e38fbb37aa8538df6591b387a58fef3ce828ba14e86d6b68552",
+      "templatePath": "build/modules-vault.json",
+      "templateSha256": "e49a8c26ac54c07214d78436c7aa297606dee50eaa530363359299a2009d7a9e",
+      "command": [
+        "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe",
+        "build",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\vault.bicep",
+        "--outfile",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\build\\modules-vault.json"
+      ],
+      "result": "PASS",
+      "stderr": ""
+    },
+    {
+      "source": "modules/environment.bicep",
+      "sourceSha256": "97770eed925903f0c1e6a10aca52a9d31a13944deea05429d578918ea92e607b",
+      "templatePath": "build/modules-environment.json",
+      "templateSha256": "c863335211a87850ed0f1f3b4a687c22685fc9907acc15a32a7074e6115a0281",
+      "command": [
+        "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe",
+        "build",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\environment.bicep",
+        "--outfile",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\build\\modules-environment.json"
+      ],
+      "result": "PASS",
+      "stderr": ""
+    },
+    {
+      "source": "modules/internal-dns.bicep",
+      "sourceSha256": "ba216118a14ac96d30524001d9490c99c20cde3309e9e6ae030aa86b67e3e686",
+      "templatePath": "build/modules-internal-dns.json",
+      "templateSha256": "3eefffbf10d8129c61c90bf9c85219310d5271cab0901cee4ba5f1be8bc5b78f",
+      "command": [
+        "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe",
+        "build",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\internal-dns.bicep",
+        "--outfile",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\build\\modules-internal-dns.json"
+      ],
+      "result": "PASS",
+      "stderr": ""
+    },
+    {
+      "source": "modules/workload.bicep",
+      "sourceSha256": "3598128bb4f4fd39016b0b913a9a0f9b79c43460ac3f4a87a31750e98c66afef",
+      "templatePath": "build/modules-workload.json",
+      "templateSha256": "ebc7f2240dd9e8de58e80a16955e9bf4a6c74c671cb523b4f95bbe513347d87b",
+      "command": [
+        "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe",
+        "build",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\workload.bicep",
+        "--outfile",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\build\\modules-workload.json"
+      ],
+      "result": "PASS",
+      "stderr": ""
+    },
+    {
+      "source": "modules/bindings.bicep",
+      "sourceSha256": "2ea704931e63658353fc3090e0e6976e4d75c16beb02379e397d32157240a13e",
+      "templatePath": "build/modules-bindings.json",
+      "templateSha256": "e880b0403bf2e15b5b1ce45cad53f43654600f92d9e8b49e217bc50e61e005d9",
+      "command": [
+        "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe",
+        "build",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\bindings.bicep",
+        "--outfile",
+        "C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\build\\modules-bindings.json"
+      ],
+      "result": "PASS",
+      "stderr": ""
+    }
+  ]
+}

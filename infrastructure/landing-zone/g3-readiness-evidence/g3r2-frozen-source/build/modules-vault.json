@@ -1,0 +1,145 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.48.1.52935",
+      "templateHash": "11712098076821462125"
+    }
+  },
+  "parameters": {
+    "provisionResources": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    },
+    "location": {
+      "type": "string"
+    },
+    "names": {
+      "type": "object"
+    },
+    "tags": {
+      "type": "object"
+    },
+    "vnetId": {
+      "type": "string"
+    },
+    "endpointSubnetId": {
+      "type": "string"
+    },
+    "purgeProtection": {
+      "type": "bool"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2024-11-01",
+      "name": "[parameters('names').keyVault]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "tenantId": "[tenant().tenantId]",
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "enableRbacAuthorization": true,
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": 7,
+        "enablePurgeProtection": "[parameters('purgeProtection')]",
+        "publicNetworkAccess": "Disabled",
+        "networkAcls": {
+          "bypass": "None",
+          "defaultAction": "Deny"
+        }
+      }
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2020-06-01",
+      "name": "privatelink.vaultcore.azure.net",
+      "location": "global",
+      "tags": "[parameters('tags')]"
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2020-06-01",
+      "name": "[format('{0}/{1}', 'privatelink.vaultcore.azure.net', parameters('names').keyVaultDnsLink)]",
+      "location": "global",
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "[parameters('vnetId')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.vaultcore.azure.net')]"
+      ]
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/privateEndpoints",
+      "apiVersion": "2024-05-01",
+      "name": "[parameters('names').keyVaultEndpoint]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "subnet": {
+          "id": "[parameters('endpointSubnetId')]"
+        },
+        "privateLinkServiceConnections": [
+          {
+            "name": "g3-vault",
+            "properties": {
+              "privateLinkServiceId": "[resourceId('Microsoft.KeyVault/vaults', parameters('names').keyVault)]",
+              "groupIds": [
+                "vault"
+              ]
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('names').keyVault)]"
+      ]
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+      "apiVersion": "2024-05-01",
+      "name": "[format('{0}/{1}', parameters('names').keyVaultEndpoint, 'default')]",
+      "properties": {
+        "privateDnsZoneConfigs": [
+          {
+            "name": "vault",
+            "properties": {
+              "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.vaultcore.azure.net')]"
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateEndpoints', parameters('names').keyVaultEndpoint)]",
+        "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.vaultcore.azure.net')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "secretReference": {
+      "type": "string",
+      "value": "[format('https://{0}{1}/secrets/g3-proof-secret', parameters('names').keyVault, environment().suffixes.keyvaultDns)]"
+    },
+    "secretSeeding": {
+      "type": "string",
+      "value": "EXTERNAL_EXPLICIT_AUTHORITY_REQUIRED;NO_SECRET_VALUE_PARAMETER_OR_RESOURCE"
+    }
+  }
+}

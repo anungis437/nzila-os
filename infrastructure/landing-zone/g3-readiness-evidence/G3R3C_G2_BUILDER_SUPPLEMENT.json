@@ -1,0 +1,121 @@
+{
+  "PARENT_G2_PACKET_SHA256": "9cfcda0c4bced61e302128d8455867214f7b64c8b5b101bf5e52f632e8984198",
+  "parentFileSha256": "78f10736f3a839b921111c0fd0d654caeaf2d87639be4da5210868abc3c6c6c6",
+  "parentG3R3BSupplement": "4d580a7de2f7f65f43477e9786e42083653fa7ff5cd97e6b2bed20023993385e",
+  "SELECTED_BUILDER": "NONE",
+  "SUPPLEMENT_CHANGE_COUNT": 2,
+  "changes": [
+    {
+      "id": "g3r3c-request-abac-normalization",
+      "resourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "action": "Microsoft.Authorization/roleAssignments/write",
+      "kind": "SUPERSEDES_CORE_DESIRED_CONDITION_ONLY_BEFORE_CREATION;NO_PARENT_REWRITE",
+      "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "roleDefinitionId": "2a1e307c-b015-4ebd-883e-5b7698a07328",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "parentCondition": {
+        "version": "2.0",
+        "expression": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+      },
+      "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'})) OR (@Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))",
+      "conditionVersion": "2.0",
+      "beforeGrant": "Execute composite desired-state resolution,not core@Resource grant followed by a permissive interval",
+      "rollback": "Delete only owned temporary proposed G3 repository Writer assignment;do not revoke standing unrelated grants"
+    },
+    {
+      "id": "g3r3c-base-pull-egress",
+      "resourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+      "action": "Microsoft.Network/azureFirewalls/write",
+      "property": "properties.applicationRuleCollections",
+      "currentAfterCore": {
+        "value": [
+          {
+            "name": "g3r3-applications",
+            "properties": {
+              "priority": 220,
+              "action": { "type": "Allow" },
+              "rules": [
+                {
+                  "name": "g3-2-aks-cni-binaries",
+                  "sourceAddresses": ["10.91.1.0/24"],
+                  "targetFqdns": ["packages.aks.azure.com", "acs-mirror.azureedge.net"],
+                  "protocols": [{ "protocolType": "Https", "port": 443 }]
+                },
+                {
+                  "name": "g3-5-managed-identity",
+                  "sourceAddresses": ["10.91.1.0/24", "10.91.3.0/24"],
+                  "targetFqdns": [
+                    "*.identity.azure.net",
+                    "login.microsoftonline.com",
+                    "*.login.microsoftonline.com",
+                    "*.login.microsoft.com",
+                    "login.microsoft.com"
+                  ],
+                  "protocols": [{ "protocolType": "Https", "port": 443 }]
+                },
+                {
+                  "name": "g3-7-private-key-vault-host",
+                  "sourceAddresses": ["10.91.1.0/24", "10.91.3.0/24"],
+                  "targetFqdns": ["nzg3kv95086e2f.vault.azure.net"],
+                  "protocols": [{ "protocolType": "Https", "port": 443 }]
+                },
+                {
+                  "name": "g3-9-acr-platform-storage",
+                  "sourceAddresses": ["10.91.1.0/24", "10.91.3.0/24"],
+                  "targetFqdns": ["*.blob.core.windows.net"],
+                  "protocols": [{ "protocolType": "Https", "port": 443 }]
+                }
+              ]
+            }
+          }
+        ],
+        "preservation": "Read fresh complete resource;modify only this property;retain sku,IPs,subnets,natRules,all unrelated fields;no replacement with partial body"
+      },
+      "appendCollection": {
+        "name": "g3r3c-builder-base",
+        "priority": 230,
+        "action": { "type": "Allow" },
+        "rules": [
+          {
+            "name": "g3r3c-pinned-builder-pull",
+            "sourceAddresses": ["10.90.1.4/32"],
+            "targetFqdns": [
+              "auth.docker.io",
+              "auth.docker.com",
+              "registry-1.docker.io",
+              "production.cloudfront.docker.com"
+            ],
+            "protocols": [{ "protocolType": "Https", "port": 443 }]
+          }
+        ]
+      },
+      "destinationCatchall": "NONE",
+      "sourceGuard": "Re-read exact G2 NIC privateIP10.90.1.4 and expected subnet;deny drift before authorization render",
+      "mutation": "GUARDED_WHOLE_FIREWALL_PUT_PRESERVE_CORE_AND_FOREIGN_PROPERTIES;freshETagReadRequired",
+      "rollback": "Remove only owned exact named collection with fresh etag and foreign-drift guards;never restore stale whole resource"
+    }
+  ],
+  "STATUS": "PROPOSED_NOT_AUTHORIZED",
+  "builderQualification": "INCOMPLETE;NO_EXECUTION",
+  "rollback": "STATIC_OWNERSHIP_AND_ETAG_CONTRACT;GUEST_FAILURE_CLEANUP_NOT_PROVEN",
+  "unchanged": [
+    "VM/NIC/disk/UAMI identity",
+    "Existing NSG/route/DNS",
+    "Frozen seven-change core bytes",
+    "Public ACR Disabled"
+  ],
+  "digestMethod": "SHA256 sorted canonical JSON excluding SUPPLEMENT_DIGEST",
+  "SUPPLEMENT_DIGEST": "51fe60768d6042c765828ca01382a25f95cec408fcc8229fabda7f5a9ef0076b",
+  "composite": {
+    "CORE_PACKET_DIGEST": "9cfcda0c4bced61e302128d8455867214f7b64c8b5b101bf5e52f632e8984198",
+    "SUPPLEMENT_DIGEST": "51fe60768d6042c765828ca01382a25f95cec408fcc8229fabda7f5a9ef0076b",
+    "TOTAL_RECORDED_CHANGE_ENTRIES": 9,
+    "DISTINCT_FINAL_DESIRED_STATE_ENTRIES": 8,
+    "overlapResolution": "Core Writer condition is normalized before grant,not two sequential RBAC writes. Three firewall property/collection entries target one resource;physical PUT batching must be explicitly rendered/approved,not inferred from entry count.",
+    "PHYSICAL_MUTATION_COUNT": null,
+    "SELECTED_BUILDER": "NONE",
+    "STATUS": "INCOMPLETE_NOT_APPROVABLE;LINKAGE_ONLY",
+    "method": "SHA256 sorted canonical JSON before COMPOSITE_G2_AUTHORIZATION_DIGEST",
+    "COMPOSITE_G2_AUTHORIZATION_DIGEST": "9e8af91b43633a4b2a500038f5c3bd2d3626db47af1b33f4e230793f7b97c128"
+  }
+}

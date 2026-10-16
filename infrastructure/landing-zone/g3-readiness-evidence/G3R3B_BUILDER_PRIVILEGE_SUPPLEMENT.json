@@ -1,0 +1,179 @@
+{
+  "PARENT_OPERATOR_PACKET_DIGEST": "3f0f19194ac1b22abde704e9e81aa02ea753f5a5c5cde48636d5ecf1d80f76fb",
+  "SELECTED_BUILDER": "NONE",
+  "ADDITIONAL_ACTIONS": [],
+  "ADDITIONAL_SCOPES": [],
+  "candidateRequirements": {
+    "EXISTING_G2_BUILDER_VM": [
+      {
+        "AZURE_ACTION": "Microsoft.Compute/virtualMachines/runCommands/read",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+        "WHY_REQUIRED": "Only owned G3 managed RunCommand child;parent VM scope is required to create a nonexistent child;guest command authority remains broad and cannot be repository-scoped by ARM RBAC",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.Compute/virtualMachines/runCommands/write",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+        "WHY_REQUIRED": "Only owned G3 managed RunCommand child;parent VM scope is required to create a nonexistent child;guest command authority remains broad and cannot be repository-scoped by ARM RBAC",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.Compute/virtualMachines/runCommands/delete",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+        "WHY_REQUIRED": "Only owned G3 managed RunCommand child;parent VM scope is required to create a nonexistent child;guest command authority remains broad and cannot be repository-scoped by ARM RBAC",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.Network/networkInterfaces/read",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/networkInterfaces/nzila-g2-builder-nic-y3koaeijzi6mu",
+        "WHY_REQUIRED": "Recheck exact existing NIC/subnet in fail-closed ARM preflight;no NIC write",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/read",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "WHY_REQUIRED": "Resolve exact private registry login contract for future short-lived operator authentication;repository data Writer is separate",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.Compute/virtualMachines/read",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+        "WHY_REQUIRED": "Verify exact VM contract",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.Compute/virtualMachines/instanceView/read",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+        "WHY_REQUIRED": "Agent/power readiness;no guest execution",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.Compute/disks/read",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/disks/nzila-g2-builder-y3koaeijzi6mu_OsDisk_1_50cfc12f1bfb422ca576ad15e790b725",
+        "WHY_REQUIRED": "Verify owned existing disk SKU;no resize/create/delete",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      }
+    ],
+    "ACR_DEDICATED_AGENT_POOL_S1": [
+      {
+        "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/agentPools/read",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "WHY_REQUIRED": "Named owned S1 agent pool lifecycle;existing registry parent scope needed before pool exists",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/agentPools/write",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "WHY_REQUIRED": "Named owned S1 agent pool lifecycle;existing registry parent scope needed before pool exists",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/agentPools/delete",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "WHY_REQUIRED": "Named owned S1 agent pool lifecycle;existing registry parent scope needed before pool exists",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/read",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "WHY_REQUIRED": "Verify Premium/private/ABAC registry before pool or source upload",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/scheduleRun/action",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "WHY_REQUIRED": "Schedule only approved proof local context;task scheduling grants cannot be repository-conditioned by ABAC",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/listBuildSourceUploadUrl/action",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "WHY_REQUIRED": "Obtain future bounded source-upload URI;not called now",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/runs/read",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "WHY_REQUIRED": "Read owned run terminal state",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/runs/cancel/action",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "WHY_REQUIRED": "Cancel owned proof run on failure/deadline",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/runs/listLogSasUrl/action",
+        "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "WHY_REQUIRED": "Retain sanitized owned run logs;not called now",
+        "STATUS": "PROPOSED_NOT_GRANTED"
+      }
+    ]
+  },
+  "ROLE_OPTIONS": [
+    {
+      "builder": "A",
+      "builtIn": "Virtual Machine Contributor",
+      "disposition": "REJECTED_OVERBROAD_VM_LIFECYCLE;custom child-command/read actions preferred"
+    },
+    {
+      "builder": "B",
+      "builtIn": "Container Registry Tasks Contributor",
+      "disposition": "TASK_CONTROL_ONLY_BUT_BROADER_THAN_SINGLE_PROOF;custom exact task surfaces preferred"
+    }
+  ],
+  "CUSTOM_PERMISSION_OPTION": "Candidate action lists only;no selected role definition or grant until selection;repository Writer remains separate conditioned data role from frozen core",
+  "documentedSingularAction": {
+    "value": "Microsoft.Compute/virtualMachines/runCommand/write",
+    "status": "NOT_IN_CURRENT_PROVIDER_CATALOG",
+    "resolution": "Managed child-resource contract uses plural runCommands/write;do not grant nonexistent singular spelling",
+    "source": {
+      "SOURCE": "https://learn.microsoft.com/en-us/azure/virtual-machines/linux/run-command-managed",
+      "CAPTURE": "G3R3B_PUBLIC_11_doc-managed-run-command.html",
+      "SHA256": "a8085617555d09d298c13889bfda7608c32c017e1b94b83f36f9dd239adcf9c4",
+      "READ_AT_UTC": "2026-10-12T04:43:08.753Z"
+    }
+  },
+  "repository": {
+    "name": "g3-synthetic-runtime",
+    "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+    "writer": {
+      "assignmentId": "operator-repository-writer",
+      "PRINCIPAL_ID": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "ROLE": {
+        "id": "2a1e307c-b015-4ebd-883e-5b7698a07328",
+        "name": "Container Registry Repository Writer",
+        "permissions": [
+          {
+            "actions": [],
+            "dataActions": [
+              "Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+              "Microsoft.ContainerRegistry/registries/repositories/content/read",
+              "Microsoft.ContainerRegistry/registries/repositories/metadata/write",
+              "Microsoft.ContainerRegistry/registries/repositories/content/write"
+            ],
+            "notActions": [],
+            "notDataActions": []
+          }
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "CONDITION": {
+        "version": "2.0",
+        "expression": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+      },
+      "PURPOSE": "Exact G3 repository write/read only",
+      "LIFETIME": "TEMPORARY;revoke on proof completion or rollback;maximum2h subject to enforced TTL",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    },
+    "REGISTRY_WIDE_ADMIN": "NO"
+  },
+  "candidateBSubnetJoin": {
+    "action": "Microsoft.Network/virtualNetworks/subnets/join/action",
+    "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f/subnets/G3BuilderSubnet",
+    "delta": "ALREADY_IN_PROPOSED_CORE_RG_ROLE;NOT_ALREADY_GRANTED"
+  },
+  "STATUS": "PROPOSED_NOT_GRANTED",
+  "RENDERING_STATUS": "NO_SELECTED_BUILDER_DELTA"
+}

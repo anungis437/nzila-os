@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.48.1.52935",
+      "templateHash": "4457455633200707408"
+    }
+  },
+  "parameters": {
+    "provisionResources": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    },
+    "location": {
+      "type": "string"
+    },
+    "names": {
+      "type": "object"
+    },
+    "tags": {
+      "type": "object"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2023-09-01",
+      "name": "[parameters('names').workspace]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30,
+        "workspaceCapping": {
+          "dailyQuotaGb": 1
+        },
+        "features": {
+          "disableLocalAuth": true,
+          "enableLogAccessUsingOnlyResourcePermissions": true
+        },
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    }
+  ],
+  "outputs": {
+    "workspaceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('names').workspace)]"
+    }
+  }
+}

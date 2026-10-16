@@ -1,0 +1,203 @@
+{
+  "mission": "NZ-20261008-INFRA-001",
+  "phase": "G3R3",
+  "G3R3_GATE": "BLOCKED",
+  "ROOT_1": "CLOSED_BY_PROSPECTIVE_SUPERSESSION",
+  "ROOT_1_REOPENED": "NO",
+  "ROOT_2_TECHNICAL_PACKET": "CORE_COMPLETE;ADJUNCT_PRIVILEGE_EXTENSION_BLOCKED_BY_ROOT_4_BUILDER_MODEL",
+  "ROOT_2_HUMAN_AUTHORIZATION": "PENDING",
+  "ROOT_3_TECHNICAL_PACKET": "CORE_CHANGESET_ROLLBACK_COMPLETE;BUILDER_NETWORK_ADJUNCT_UNBOUND",
+  "ROOT_3_HUMAN_AUTHORIZATION": "PENDING",
+  "ROOT_4_COST_MODEL": "INCOMPLETE_EXACT_MATERIAL_ITEMS",
+  "ROOT_4_HUMAN_AUTHORIZATION": "PENDING",
+  "G3_EXECUTION_READINESS": "BLOCKED",
+  "G3A": "NOT_AUTHORIZED_PENDING_HUMAN_DECISIONS",
+  "G3B": "NOT_AUTHORIZED",
+  "remainingRoots": [
+    "ROOT-2_ACCOUNTABILITY",
+    "ROOT-3_G2_MUTATION_AUTHORITY",
+    "ROOT-4_EXECUTION_ENVELOPE_AND_HUMAN_CEILING"
+  ],
+  "exactTechnicalResiduals": [
+    {
+      "id": "BUILDER-BOOTSTRAP",
+      "root": "ROOT-4",
+      "fact": "Qualified local image exists,but no authority-bound offline OCI courier/toolchain/guest bootstrap artifact and credential delivery contract is in accepted source. Run Command is execution,not a read-only tool-installation proof.",
+      "required": "Bind digest-qualified receiver/tooling,source/OCI transport,payload bounds,non-disclosing operator federation,private endpoint readback and retained artifacts before future builder start"
+    },
+    {
+      "id": "BUILDER-NETWORK",
+      "root": "ROOT-3",
+      "fact": "Frozen G3 builder NSG denies all ingress/egress until separately approved adjunct rules;source intentionally does not claim production-path readiness.",
+      "required": "Bind adjunct exact ACR private-IP443,AzurePlatformDNS53,identity/control and private proof-IP443 allowances;no root architecture change or Internet catchall;include additional G2 rule changes only if exact bootstrap facts require them"
+    },
+    {
+      "id": "BUILDER-TTL",
+      "root": "ROOT-4",
+      "fact": "No independent authenticated watchdog/lease/deallocate-delete guarantee is bound. Guest shutdown or RunCommand timeout does not deallocate VM or delete disk/NIC and cannot guarantee billed-lifetime cap.",
+      "required": "Bound controller/watchdog owner,minimum permissions,lease expiry,credential failure behavior and deterministic deletion;abort before creating/starting builder when TTL enforcement cannot be proved"
+    },
+    {
+      "id": "VAULT-STANDARD-OPERATIONS-METER",
+      "root": "ROOT-4",
+      "fact": "Current CanadaCentral and complete primary Global CAD catalog has no Standard Key Vault ordinary Operations meter. Premium Global Operations0f824807... and foreign regional Standard Operations exist but are not silently substituted.",
+      "required": "Authoritative applicable Standard secret-operation CAD meter or documented cross-SKU applicability and exact source/rate;renewal/rotation/HSM are not ordinary secret operations",
+      "quantity": 100
+    },
+    {
+      "id": "BUILDER-DISK-TRANSACTIONS-AND-COURIER",
+      "root": "ROOT-4",
+      "fact": "E4 disk capacity/mount rates captured,but disk-I/O/transport/staging/independent watchdog resources remain model-dependent and not fully priced",
+      "required": "Bind selected model first,then exact meters and bounded operations;no guessed total"
+    },
+    {
+      "id": "CAP-ENFORCEMENT",
+      "root": "ROOT-4",
+      "fact": "Proof cleanup/diagnostic cutoff and network byte ceilings have no bound independent enforcement mechanism. Current workspace quota is delayed and fixed sourceflags prevent any execution.",
+      "required": "Bound watchdog,lease,circuit-breaker,retention deadlines and conservative overrun accounting before numerical ceiling;cost alerts alone are not a hard cap"
+    }
+  ],
+  "builder": {
+    "BUILDER_EXECUTION_MODEL": "EPHEMERAL_G3_PRIVATE_LINUX_VM_RECEIVING_QUALIFIED_OFFLINE_OCI;PROPOSED_SINGLE_CANDIDATE_NOT_SELECTED_FOR_EXECUTION",
+    "BUILDER_MODEL_STATUS": "BLOCKED_EXACT_REASON",
+    "selectedExecutableModel": null,
+    "candidate": {
+      "resourceGroup": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "subnet": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f/subnets/G3BuilderSubnet",
+      "vmSkuCandidate": "Standard_B2s",
+      "diskCandidate": "E4 StandardSSD_LRS32GiB",
+      "publicIp": "NONE",
+      "credentials": "Recommended execution operator GitHub build federation;no long-lived keys;token delivery mechanism UNBOUND;no third G3 UAMI invented",
+      "production": "Receive exact qualified local OCI/source;push privately only after verification;local config digest never future registry manifest",
+      "invocation": "Prospective Managed Run Command;no SSH/RDP",
+      "references": [
+        "https://learn.microsoft.com/en-us/azure/virtual-machines/run-command-overview",
+        "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-endpoints"
+      ]
+    },
+    "temporaryResourcesIfBound": [
+      {
+        "type": "Microsoft.Compute/virtualMachines",
+        "candidateId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Compute/virtualMachines/nzila-g3-proof-builder-95086e2f",
+        "deleteRequired": true
+      },
+      {
+        "type": "Microsoft.Network/networkInterfaces",
+        "candidateId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/networkInterfaces/nzila-g3-proof-builder-95086e2f-nic",
+        "deleteRequired": true
+      },
+      {
+        "type": "Microsoft.Compute/disks",
+        "candidateId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Compute/disks/nzila-g3-proof-builder-95086e2f-os",
+        "deleteRequired": true
+      },
+      {
+        "type": "Microsoft.Compute/virtualMachines/runCommands",
+        "candidateId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Compute/virtualMachines/nzila-g3-proof-builder-95086e2f/runCommands/g3-offline-receiver",
+        "deleteRequired": true
+      },
+      {
+        "type": "INDEPENDENT_TTL_WATCHDOG",
+        "candidateId": "UNBOUND;do not fabricate managed resource or role",
+        "deleteRequired": true
+      }
+    ],
+    "BUILDER_MAX_LIFETIME_MINUTES": 30,
+    "AUTO_TEARDOWN_EXPECTATION": "At lease expiry stop work,deallocate VM,delete owned RunCommand/VM/NIC/disk,revoke temporary roles;retain sanitized proof externally",
+    "FAIL_CLOSED_IF_TTL_CANNOT_BE_ENFORCED": true,
+    "startAllowed": false,
+    "exactResiduals": [
+      {
+        "id": "BUILDER-BOOTSTRAP",
+        "root": "ROOT-4",
+        "fact": "Qualified local image exists,but no authority-bound offline OCI courier/toolchain/guest bootstrap artifact and credential delivery contract is in accepted source. Run Command is execution,not a read-only tool-installation proof.",
+        "required": "Bind digest-qualified receiver/tooling,source/OCI transport,payload bounds,non-disclosing operator federation,private endpoint readback and retained artifacts before future builder start"
+      },
+      {
+        "id": "BUILDER-NETWORK",
+        "root": "ROOT-3",
+        "fact": "Frozen G3 builder NSG denies all ingress/egress until separately approved adjunct rules;source intentionally does not claim production-path readiness.",
+        "required": "Bind adjunct exact ACR private-IP443,AzurePlatformDNS53,identity/control and private proof-IP443 allowances;no root architecture change or Internet catchall;include additional G2 rule changes only if exact bootstrap facts require them"
+      },
+      {
+        "id": "BUILDER-TTL",
+        "root": "ROOT-4",
+        "fact": "No independent authenticated watchdog/lease/deallocate-delete guarantee is bound. Guest shutdown or RunCommand timeout does not deallocate VM or delete disk/NIC and cannot guarantee billed-lifetime cap.",
+        "required": "Bound controller/watchdog owner,minimum permissions,lease expiry,credential failure behavior and deterministic deletion;abort before creating/starting builder when TTL enforcement cannot be proved"
+      }
+    ],
+    "alternativeEvaluation": [
+      {
+        "model": "REUSE_EXISTING_G2_VM",
+        "disposition": "NOT_SELECTED",
+        "evidence": {
+          "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+          "sku": "Standard_B2s",
+          "osImage": {
+            "exactVersion": "24.04.202609040",
+            "offer": "ubuntu-24_04-lts",
+            "publisher": "Canonical",
+            "sku": "server",
+            "version": "24.04.202609040"
+          },
+          "identity": [
+            "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ManagedIdentity/userAssignedIdentities/nzila-g2-builder-y3koaeijzi6mu"
+          ]
+        },
+        "reason": "Retained G2 resource/identity,broad existing NSG and unproven guest tools;would require additional G2 guest/identity/lifecycle authority and risk accepted baseline. No VM command executed."
+      },
+      {
+        "model": "LOCAL_OR_GITHUB_PUBLIC_RUNNER_PUSH_DIRECTLY",
+        "disposition": "REJECTED",
+        "reason": "No observed private network connection to ACR;public network disabled. No public-ACR or public-registry workaround."
+      },
+      {
+        "model": "ACR_TASK_PRIVATE_AGENT_POOL",
+        "disposition": "NOT_SELECTED",
+        "reason": "No accepted pool/network/SKU/bootstrap/identity/lifecycle contract;inventing one does not close evidence. No Azure build."
+      }
+    ]
+  },
+  "G2_MUTATION_PACKET_DIGEST": "9cfcda0c4bced61e302128d8455867214f7b64c8b5b101bf5e52f632e8984198",
+  "RECOMMENDED_EXECUTION_CEILING_CAD": "UNSUPPORTED",
+  "HUMAN_APPROVED_EXECUTION_CEILING_CAD": "UNBOUND",
+  "executionGraphAcyclic": true,
+  "postEnvironmentQuotaGatePreserved": true,
+  "hiddenG2SourceMutations": 0,
+  "localValidation": {
+    "file": "G3R3_LOCAL_VALIDATION.json",
+    "sha256": "e0e9e5ef47ba48cdfc4ee0285dd15cd8806578982b310f185ba52c3b196366be",
+    "scope": "LOCAL_PACKET_VALIDATION_ONLY;NOT_EXECUTION_AUTHORITY_OR_LIVE_PROOF"
+  },
+  "readOnlyEvidence": {
+    "azureCalls": 26,
+    "azureSucceeded": 26,
+    "azureFailed": 0,
+    "publicPricingCalls": 12,
+    "publicSucceeded": 11,
+    "publicFailed": 1,
+    "publicFailureDisposition": "One bandwidth catalog429 retained;successful bounded retry captured;no silent replacement of failed response",
+    "azureLedgerSha256": "d11e5ddfc69da30d4e04bbff535af5e5f044d190ad267036da392adc0c39b271",
+    "publicLedgerSha256": "251d55491495236296e8eec7254686611c63bb156d8852dd6ee32a6fd4692c24"
+  },
+  "preservation": {
+    "manifest": "G3R3_HISTORICAL_PRESERVATION.json",
+    "sha256": "36ff843b5933cf253e8a55f479cb4034a4b2e06d4ad128bb4b031d3a09515f6c",
+    "unchanged": true
+  },
+  "boundaries": {
+    "AZURE_RESOURCE_MUTATIONS": 0,
+    "AZURE_RBAC_MUTATIONS": 0,
+    "AZURE_REGISTRY_MUTATIONS": 0,
+    "G2_MUTATIONS": 0,
+    "IMAGE_PUSHED": "NO",
+    "LIVE_SECRET_CHALLENGE_EXECUTED": "NO",
+    "G3_CONTROLLER_EXECUTED": "NO",
+    "G3A_EXECUTED": "NO",
+    "G3B_EXECUTED": "NO",
+    "PRIVATE_BUILDER_EXECUTED": "NO",
+    "NEW_LOCAL_IMAGE_BUILD": "NO",
+    "ACCOUNTABLE_HUMANS_APPOINTED": "NO",
+    "COST_CEILING_APPROVED": "NO"
+  }
+}

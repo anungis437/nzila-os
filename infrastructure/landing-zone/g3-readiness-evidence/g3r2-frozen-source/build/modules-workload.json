@@ -1,0 +1,142 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.48.1.52935",
+      "templateHash": "6933406748987804891"
+    }
+  },
+  "parameters": {
+    "workloadActivationAuthorized": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    },
+    "location": {
+      "type": "string"
+    },
+    "names": {
+      "type": "object"
+    },
+    "tags": {
+      "type": "object"
+    },
+    "environmentId": {
+      "type": "string"
+    },
+    "buildIdentityId": {
+      "type": "string"
+    },
+    "runtimeIdentityId": {
+      "type": "string"
+    },
+    "immutableImage": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[parameters('workloadActivationAuthorized')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2025-07-01",
+      "name": "[parameters('names').application]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[format('{0}', parameters('buildIdentityId'))]": {},
+          "[format('{0}', parameters('runtimeIdentityId'))]": {}
+        }
+      },
+      "properties": {
+        "environmentId": "[parameters('environmentId')]",
+        "workloadProfileName": "Consumption",
+        "configuration": {
+          "activeRevisionsMode": "Single",
+          "identitySettings": [
+            {
+              "identity": "[parameters('buildIdentityId')]",
+              "lifecycle": "None"
+            },
+            {
+              "identity": "[parameters('runtimeIdentityId')]",
+              "lifecycle": "Main"
+            }
+          ],
+          "registries": [
+            {
+              "server": "nzilag2tzo75uuozprbo.azurecr.io",
+              "identity": "[parameters('buildIdentityId')]"
+            }
+          ],
+          "ingress": {
+            "external": true,
+            "targetPort": 3000,
+            "transport": "http",
+            "allowInsecure": false
+          },
+          "secrets": [
+            {
+              "name": "g3-proof-secret",
+              "keyVaultUrl": "[format('https://{0}{1}/secrets/g3-proof-secret', parameters('names').keyVault, environment().suffixes.keyvaultDns)]",
+              "identity": "[parameters('runtimeIdentityId')]"
+            }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "g3-synthetic-runtime",
+              "image": "[parameters('immutableImage')]",
+              "env": [
+                {
+                  "name": "G3_PROOF_SECRET",
+                  "secretRef": "g3-proof-secret"
+                }
+              ],
+              "resources": {
+                "cpu": "[json('0.25')]",
+                "memory": "0.5Gi"
+              },
+              "probes": [
+                {
+                  "type": "Readiness",
+                  "httpGet": {
+                    "path": "/health/readiness",
+                    "port": 3000
+                  },
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 10
+                },
+                {
+                  "type": "Liveness",
+                  "httpGet": {
+                    "path": "/health/liveness",
+                    "port": 3000
+                  },
+                  "initialDelaySeconds": 10,
+                  "periodSeconds": 10
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": 0,
+            "maxReplicas": 1
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "authorityStatus": {
+      "type": "string",
+      "value": "DENY;PROSPECTIVE_SOURCE_ONLY"
+    }
+  }
+}

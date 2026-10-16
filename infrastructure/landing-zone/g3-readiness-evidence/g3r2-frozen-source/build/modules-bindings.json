@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.48.1.52935",
+      "templateHash": "14948447535474921577"
+    }
+  },
+  "parameters": {
+    "rbacAuthorized": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    },
+    "vaultName": {
+      "type": "string"
+    },
+    "runtimePrincipalId": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[parameters('rbacAuthorized')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('vaultName'), 'g3-proof-secret')]",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('vaultName'), 'g3-proof-secret'), parameters('runtimePrincipalId'), '4633458b-17de-408a-b874-0445c86b69e6')]",
+      "properties": {
+        "principalId": "[parameters('runtimePrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]"
+      }
+    }
+  ],
+  "outputs": {
+    "status": {
+      "type": "string",
+      "value": "PROPOSED_NOT_AUTHORIZED"
+    },
+    "externalRegistryBinding": {
+      "type": "string",
+      "value": "EXTERNAL_G2_MUTATION_DEPENDENCY;EXACT_REPOSITORY_ABAC_READER_AND_OPERATOR_WRITER;NO_ACRPULL_FALLBACK"
+    }
+  }
+}

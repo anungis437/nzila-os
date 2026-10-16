@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "canadacentral"
+    },
+    "previewOnly": {
+      "value": true
+    },
+    "approvedAptSources": {
+      "value": []
+    },
+    "ubuntuImageVersion": {
+      "value": "24.04.202609040"
+    },
+    "sourceCommit": {
+      "value": "7bec20aad11d43eeae8099c14e021b3074154b27"
+    },
+    "sourceArchiveSha256": {
+      "value": "DF81CAE6D23555FC43AD1D96EF38CBA0BA67FB06D551A5183168FF151AD2528E"
+    }
+  }
+}

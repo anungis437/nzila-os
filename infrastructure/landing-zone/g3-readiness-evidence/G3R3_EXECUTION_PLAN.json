@@ -1,0 +1,364 @@
+{
+  "status": "DETERMINISTIC_NONEXECUTABLE_PLAN_WITH_EXACT_BUILDER_AND_COST_STOP_GATES",
+  "steps": [
+    {
+      "STEP": 1,
+      "id": "human-decisions",
+      "OWNER": "PROOF",
+      "RESOURCE": "Three-decision packet",
+      "ACTION": "Bind A/B/C only after technical residuals close;approve exact packet digests",
+      "dependsOn": [],
+      "PRECONDITIONS": ["ROOT-1 closed", "G3R3 technical gate PASS required;currently BLOCKED"],
+      "POSTCONDITIONS": ["Human operator != approver;scope/cost bound"],
+      "ROLLBACK": "No resources yet",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 2,
+      "id": "human-rg-bootstrap",
+      "OWNER": "G3",
+      "RESOURCE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "ACTION": "Create exact empty RG through separately verified existing human authority",
+      "dependsOn": ["human-decisions"],
+      "PRECONDITIONS": ["No operator subscription grant", "No collision"],
+      "POSTCONDITIONS": ["RG exists;owned tags"],
+      "ROLLBACK": "Delete empty owned RG only",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 3,
+      "id": "scoped-rbac",
+      "OWNER": "RBAC",
+      "RESOURCE": "Exact proposed RG/G2 grants",
+      "ACTION": "Define/grant approved custom roles;deny broader grants",
+      "dependsOn": ["human-rg-bootstrap"],
+      "PRECONDITIONS": ["Human RBAC authority", "Exact condition/principal bindings"],
+      "POSTCONDITIONS": ["Readback;minimum roles;expiry enforcement"],
+      "ROLLBACK": "Revoke only created assignments;do not revoke existing staging grant",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 4,
+      "id": "authorized-render",
+      "OWNER": "G3",
+      "RESOURCE": "Frozen qualified module source/templates",
+      "ACTION": "Review authority-specific provisioning/RBAC/activation rendering;do not execute current false-only package or silently unlock it",
+      "dependsOn": ["scoped-rbac"],
+      "PRECONDITIONS": [
+        "Exact signed approvals",
+        "No source architecture/protocol/root1 reopening"
+      ],
+      "POSTCONDITIONS": ["Execution package hash bound to approval"],
+      "ROLLBACK": "Discard unexecuted render;retain frozen source",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 5,
+      "id": "g3-foundation",
+      "OWNER": "G3",
+      "RESOURCE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg:network,identities,observability,vault,DNS",
+      "ACTION": "Deploy owned RG modules and G3-side peer;no G2 writes from source",
+      "dependsOn": ["authorized-render"],
+      "PRECONDITIONS": [
+        "Network predeploy checks",
+        "Directory identities strictlybelow98%",
+        "Exact platform-IP prefix binding before activation"
+      ],
+      "POSTCONDITIONS": ["Exactly2 UAMIs;KV private;peering pending until reciprocal"],
+      "ROLLBACK": "Reverse owned DAG only;preserve unrelated G2",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 6,
+      "id": "g2-preparation",
+      "OWNER": "G2",
+      "RESOURCE": [
+        "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3",
+        "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f",
+        "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+        "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo"
+      ],
+      "ACTION": "Apply exact approved G2 packet changes except post-identity-dependent role grants deferred below",
+      "dependsOn": ["g3-foundation"],
+      "PRECONDITIONS": ["Fresh etag/hash baseline accepted by human", "No packet-target collision"],
+      "POSTCONDITIONS": ["Peers Connected;firewall/DNS exact diff"],
+      "ROLLBACK": "Remove owned link/peer/collections with conflict guards",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 7,
+      "id": "empty-environment",
+      "OWNER": "G3",
+      "RESOURCE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.App/managedEnvironments/nzila-g3-env-95086e2f",
+      "ACTION": "Create INTERNAL Consumption environment and returned-domain DNS,without workload",
+      "dependsOn": ["g2-preparation"],
+      "PRECONDITIONS": ["Platform NSG/DNS/firewall paths ready"],
+      "POSTCONDITIONS": ["DefaultDomain/staticIP recorded;no workload"],
+      "ROLLBACK": "Delete owned env/DNS after artifacts retained",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 8,
+      "id": "quota-query",
+      "OWNER": "PROOF",
+      "RESOURCE": "Actual managed environment usages",
+      "ACTION": "GET Consumption core quota for exact returned environmentId",
+      "dependsOn": ["empty-environment"],
+      "PRECONDITIONS": ["Environment exists;same ID as later activation"],
+      "POSTCONDITIONS": ["Quota evidence/time/environment bound"],
+      "ROLLBACK": "No quota mutation",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 9,
+      "id": "quota-gate",
+      "OWNER": "PROOF",
+      "RESOURCE": "Capacity evidence",
+      "ACTION": "Require availableConsumptionMilliCores>=250;deny on missing,wrong-environment,insufficient/stale evidence",
+      "dependsOn": ["quota-query"],
+      "PRECONDITIONS": ["Explicit quota record"],
+      "POSTCONDITIONS": ["Gate PASS or STOP/no builder/activation"],
+      "ROLLBACK": "Leave idle owned environment only until authorized cleanup deadline;no automatic quota request",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 10,
+      "id": "private-production",
+      "OWNER": "REGISTRY",
+      "RESOURCE": [
+        {
+          "type": "Microsoft.Compute/virtualMachines",
+          "candidateId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Compute/virtualMachines/nzila-g3-proof-builder-95086e2f",
+          "deleteRequired": true
+        },
+        {
+          "type": "Microsoft.Network/networkInterfaces",
+          "candidateId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/networkInterfaces/nzila-g3-proof-builder-95086e2f-nic",
+          "deleteRequired": true
+        },
+        {
+          "type": "Microsoft.Compute/disks",
+          "candidateId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Compute/disks/nzila-g3-proof-builder-95086e2f-os",
+          "deleteRequired": true
+        },
+        {
+          "type": "Microsoft.Compute/virtualMachines/runCommands",
+          "candidateId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Compute/virtualMachines/nzila-g3-proof-builder-95086e2f/runCommands/g3-offline-receiver",
+          "deleteRequired": true
+        },
+        {
+          "type": "INDEPENDENT_TTL_WATCHDOG",
+          "candidateId": "UNBOUND;do not fabricate managed resource or role",
+          "deleteRequired": true
+        }
+      ],
+      "ACTION": "Execute only bound private production model;current model BLOCKED so this step cannot start",
+      "dependsOn": ["quota-gate"],
+      "PRECONDITIONS": [
+        "Builder model BOUND",
+        "Hard TTL/credential/courier/network artifacts verified",
+        "Operator Writer exact repo"
+      ],
+      "POSTCONDITIONS": [
+        "Private push;source/config/platform preserved;receiver artifacts retained"
+      ],
+      "ROLLBACK": "Independent TTL,deallocate/delete owned adjunct resources,revoke temporary writer",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 11,
+      "id": "bind-registry-manifest",
+      "OWNER": "REGISTRY",
+      "RESOURCE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/repositories/g3-synthetic-runtime",
+      "ACTION": "Read exact authorized new registry manifest digest and verify content/source/platform",
+      "dependsOn": ["private-production"],
+      "PRECONDITIONS": ["No public ACR change", "No local config-id substitution"],
+      "POSTCONDITIONS": ["Immutable repository@sha256 runtime binding"],
+      "ROLLBACK": "Delete only newly owned manifest via separate cleaner authority",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 12,
+      "id": "runtime-roles-and-secret",
+      "OWNER": "RBAC",
+      "RESOURCE": [
+        "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+        "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo"
+      ],
+      "ACTION": "Private human-seed synthetic value,grant exact platform pull/runtime secret reader roles",
+      "dependsOn": ["bind-registry-manifest"],
+      "PRECONDITIONS": [
+        "Actual2 UAMI principal IDs",
+        "Human seeder/RBAC authority;no secret in evidence"
+      ],
+      "POSTCONDITIONS": ["Secret logical/version metadata;exact grants"],
+      "ROLLBACK": "Revoke owned roles;delete synthetic secret only;no purge",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 13,
+      "id": "workload-activation",
+      "OWNER": "G3",
+      "RESOURCE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.App/containerApps/nzila-g3-proof-95086e2f",
+      "ACTION": "Activate max1 replica/revision immutable qualified source",
+      "dependsOn": ["runtime-roles-and-secret", "quota-gate"],
+      "PRECONDITIONS": [
+        "Quota refreshed if stale",
+        "Explicit workload human authority",
+        "Immutable registry digest",
+        "Proof/cost/TTL enforcement active"
+      ],
+      "POSTCONDITIONS": ["Private health ready;Main/None identity separation"],
+      "ROLLBACK": "Disable/delete owned workload before secret/network rollback",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 14,
+      "id": "private-secret-proof",
+      "OWNER": "PROOF",
+      "RESOURCE": "Private /healthz and /proof/secret",
+      "ACTION": "Execute future authorized HMAC proof with independently held secret",
+      "dependsOn": ["workload-activation"],
+      "PRECONDITIONS": ["No live challenge until explicit authority", "Private proof client bound"],
+      "POSTCONDITIONS": ["Retain only nonce,proof,status,time,registry digest,revision,secret IDs"],
+      "ROLLBACK": "On disclosure/mismatch STOP and contain within authority",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 15,
+      "id": "negative-controls",
+      "OWNER": "PROOF",
+      "RESOURCE": "Ten accepted negative probe specifications",
+      "ACTION": "Execute only separately authorized bounded negatives",
+      "dependsOn": ["private-secret-proof"],
+      "PRECONDITIONS": [
+        "Connectivity controls discriminate403 vs404/timeout",
+        "No mutation probe beyond authority"
+      ],
+      "POSTCONDITIONS": ["All authorization/network/capacity denials evidenced"],
+      "ROLLBACK": "Unexpected success STOP;preserve sanitized evidence;scoped revoke/contain",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 16,
+      "id": "reconcile",
+      "OWNER": "PROOF",
+      "RESOURCE": "G3 owned resources and retained G2 baseline",
+      "ACTION": "Read ownership,network,RBAC,image/log/secret reference and accepted baselines",
+      "dependsOn": ["negative-controls"],
+      "PRECONDITIONS": ["Artifacts retained", "No silent defaults"],
+      "POSTCONDITIONS": ["No hidden G2 mutations or residual credentials"],
+      "ROLLBACK": "STOP on foreign drift;do not overwrite foreign changes",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    },
+    {
+      "STEP": 17,
+      "id": "teardown",
+      "OWNER": "G3",
+      "RESOURCE": "Owned mission resources/grants and exact G2 additions",
+      "ACTION": "By deadline remove adjunct and proof resources in reverse dependency order;retain sanitized evidence",
+      "dependsOn": ["reconcile"],
+      "PRECONDITIONS": [
+        "Human-approved retained-vs-delete decision within A/B/C",
+        "Independent cleanup enforcement"
+      ],
+      "POSTCONDITIONS": [
+        "VM deallocated/deleted,NIC/disk removed,temporary grants revoked,G2 owned changes rolled back as approved"
+      ],
+      "ROLLBACK": "Conflict-aware rollback;no stale full-resource restore",
+      "HUMAN_AUTHORITY_REQUIRED": "Explicit human Decision A/B/C and subsequent bounded execution authorization",
+      "execution": "NOT_EXECUTED"
+    }
+  ],
+  "graph": [
+    { "from": "human-decisions", "to": "human-rg-bootstrap" },
+    { "from": "human-rg-bootstrap", "to": "scoped-rbac" },
+    { "from": "scoped-rbac", "to": "authorized-render" },
+    { "from": "authorized-render", "to": "g3-foundation" },
+    { "from": "g3-foundation", "to": "g2-preparation" },
+    { "from": "g2-preparation", "to": "empty-environment" },
+    { "from": "empty-environment", "to": "quota-query" },
+    { "from": "quota-query", "to": "quota-gate" },
+    { "from": "quota-gate", "to": "private-production" },
+    { "from": "private-production", "to": "bind-registry-manifest" },
+    { "from": "bind-registry-manifest", "to": "runtime-roles-and-secret" },
+    { "from": "runtime-roles-and-secret", "to": "workload-activation" },
+    { "from": "quota-gate", "to": "workload-activation" },
+    { "from": "workload-activation", "to": "private-secret-proof" },
+    { "from": "private-secret-proof", "to": "negative-controls" },
+    { "from": "negative-controls", "to": "reconcile" },
+    { "from": "reconcile", "to": "teardown" }
+  ],
+  "currentMutationFlags": "ALL_FALSE_AND_ALLOWED_FALSE;unchanged",
+  "postEnvironmentQuotaGate": [
+    "ENVIRONMENT_CREATE",
+    "QUERY_MANAGED_ENVIRONMENT_CONSUMPTION_CORE_QUOTA",
+    "VERIFY_AVAILABLE_MILLICORES>=250",
+    "WORKLOAD_ACTIVATION"
+  ],
+  "missingOrInsufficientQuota": "DENY_WORKLOAD_ACTIVATION;NO_AUTOMATIC_QUOTA_REQUEST",
+  "orderedRollback": [
+    { "id": "teardown", "rollback": "Conflict-aware rollback;no stale full-resource restore" },
+    { "id": "reconcile", "rollback": "STOP on foreign drift;do not overwrite foreign changes" },
+    {
+      "id": "negative-controls",
+      "rollback": "Unexpected success STOP;preserve sanitized evidence;scoped revoke/contain"
+    },
+    {
+      "id": "private-secret-proof",
+      "rollback": "On disclosure/mismatch STOP and contain within authority"
+    },
+    {
+      "id": "workload-activation",
+      "rollback": "Disable/delete owned workload before secret/network rollback"
+    },
+    {
+      "id": "runtime-roles-and-secret",
+      "rollback": "Revoke owned roles;delete synthetic secret only;no purge"
+    },
+    {
+      "id": "bind-registry-manifest",
+      "rollback": "Delete only newly owned manifest via separate cleaner authority"
+    },
+    {
+      "id": "private-production",
+      "rollback": "Independent TTL,deallocate/delete owned adjunct resources,revoke temporary writer"
+    },
+    {
+      "id": "quota-gate",
+      "rollback": "Leave idle owned environment only until authorized cleanup deadline;no automatic quota request"
+    },
+    { "id": "quota-query", "rollback": "No quota mutation" },
+    { "id": "empty-environment", "rollback": "Delete owned env/DNS after artifacts retained" },
+    {
+      "id": "g2-preparation",
+      "rollback": "Remove owned link/peer/collections with conflict guards"
+    },
+    { "id": "g3-foundation", "rollback": "Reverse owned DAG only;preserve unrelated G2" },
+    { "id": "authorized-render", "rollback": "Discard unexecuted render;retain frozen source" },
+    {
+      "id": "scoped-rbac",
+      "rollback": "Revoke only created assignments;do not revoke existing staging grant"
+    },
+    { "id": "human-rg-bootstrap", "rollback": "Delete empty owned RG only" },
+    { "id": "human-decisions", "rollback": "No resources yet" }
+  ],
+  "authorization": "NOT_AUTHORIZED",
+  "root1Reopened": false
+}

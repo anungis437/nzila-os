@@ -1,0 +1,921 @@
+{
+  "status": "COMPLETE_CORE_G2_CHANGESET;NO_BUILDER_BOOTSTRAP_EXCEPTION_INCLUDED",
+  "changes": [
+    {
+      "CHANGE_ID": "G2-PEERING",
+      "CURRENT_STATE": {
+        "exists": false,
+        "capturedParentEtag": "W/\"342ee64a-f159-4047-94d2-48a91ede6ab2\""
+      },
+      "DESIRED_STATE": {
+        "remoteVirtualNetwork": {
+          "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f"
+        },
+        "allowVirtualNetworkAccess": true,
+        "allowForwardedTraffic": true,
+        "allowGatewayTransit": false,
+        "useRemoteGateways": false
+      },
+      "RESOURCE_ID": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3",
+      "RESOURCE_GROUP": "nzila-g2-proof-xre47vggs5uhw",
+      "RESOURCE_TYPE": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "PROPERTY_PATH": "properties",
+      "MUTATION_OPERATION": "PUT_CHILD_WITH_PARENT_ETAG_RECHECK",
+      "WHY_REQUIRED": "Reverse link required;G3 source owns only g3-to-g2",
+      "G3_DEPENDENCY": "Private G3 platform/pull/runtime proof preparation",
+      "SECURITY_EFFECT": "Permits forwarded firewall return traffic;no gateway transit or remote gateways",
+      "ROLLBACK_OPERATION": {
+        "method": "DELETE",
+        "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3",
+        "guard": "Only if created by this packet;stop workload first;never delete preexisting foreign peer"
+      },
+      "VALIDATION_AFTER_CHANGE": [
+        "Both peering states Connected",
+        "Effective G3 default route to10.90.0.4",
+        "Private10.90/16 routes via peering"
+      ],
+      "STATUS": "PROPOSED_NOT_AUTHORIZED",
+      "OWNER": "G2_OWNED"
+    },
+    {
+      "CHANGE_ID": "G2-ACR-DNS-LINK",
+      "CURRENT_STATE": {
+        "exists": false,
+        "existingLinks": [
+          {
+            "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/nzila-g2-builder-vnet-link",
+            "virtualNetwork": {
+              "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu"
+            },
+            "registrationEnabled": false
+          }
+        ]
+      },
+      "DESIRED_STATE": {
+        "location": "global",
+        "virtualNetwork": {
+          "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f"
+        },
+        "registrationEnabled": false
+      },
+      "RESOURCE_ID": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f",
+      "RESOURCE_GROUP": "nzila-g2-proof-xre47vggs5uhw",
+      "RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "PROPERTY_PATH": "properties",
+      "MUTATION_OPERATION": "PUT_EXACT_RESOURCE_AFTER_APPROVAL",
+      "WHY_REQUIRED": "Azure-provided G3 DNS must resolve registry and data private endpoints",
+      "G3_DEPENDENCY": "Private G3 platform/pull/runtime proof preparation",
+      "SECURITY_EFFECT": "Read resolution only;no autoregistration or record changes",
+      "ROLLBACK_OPERATION": {
+        "method": "DELETE",
+        "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f",
+        "guard": "Remove only owned link after workload/image consumers stop;retain existing G2 link and all records"
+      },
+      "VALIDATION_AFTER_CHANGE": [
+        "Both ACR hostnames resolve recorded10.90.2.x IPs in G3",
+        "Independent public path remains denied"
+      ],
+      "STATUS": "PROPOSED_NOT_AUTHORIZED",
+      "OWNER": "G2_OWNED"
+    },
+    {
+      "CHANGE_ID": "G2-FIREWALL-networkRuleCollections",
+      "CURRENT_STATE": { "etag": "W/\"6b794403-599c-4fdb-9d45-06d404419788\"", "value": [] },
+      "DESIRED_STATE": {
+        "value": [
+          {
+            "name": "g3r3-network",
+            "properties": {
+              "priority": 210,
+              "action": { "type": "Allow" },
+              "rules": [
+                {
+                  "name": "g3-0-microsoftcontainerregistry",
+                  "protocols": ["TCP"],
+                  "sourceAddresses": ["10.91.1.0/24"],
+                  "destinationAddresses": ["MicrosoftContainerRegistry"],
+                  "destinationPorts": ["443"]
+                },
+                {
+                  "name": "g3-1-azurefrontdoorfirstparty",
+                  "protocols": ["TCP"],
+                  "sourceAddresses": ["10.91.1.0/24"],
+                  "destinationAddresses": ["AzureFrontDoorFirstParty"],
+                  "destinationPorts": ["443"]
+                },
+                {
+                  "name": "g3-3-azurecontainerregistry",
+                  "protocols": ["TCP"],
+                  "sourceAddresses": ["10.91.1.0/24", "10.91.3.0/24"],
+                  "destinationAddresses": ["AzureContainerRegistry"],
+                  "destinationPorts": ["443"]
+                },
+                {
+                  "name": "g3-4-azureactivedirectory",
+                  "protocols": ["TCP"],
+                  "sourceAddresses": ["10.91.1.0/24", "10.91.3.0/24"],
+                  "destinationAddresses": ["AzureActiveDirectory"],
+                  "destinationPorts": ["443"]
+                },
+                {
+                  "name": "g3-6-azurekeyvault",
+                  "protocols": ["TCP"],
+                  "sourceAddresses": ["10.91.1.0/24", "10.91.3.0/24"],
+                  "destinationAddresses": ["AzureKeyVault"],
+                  "destinationPorts": ["443"]
+                },
+                {
+                  "name": "g3-8-azuremonitor",
+                  "protocols": ["TCP"],
+                  "sourceAddresses": ["10.91.1.0/24"],
+                  "destinationAddresses": ["AzureMonitor"],
+                  "destinationPorts": ["443"]
+                }
+              ]
+            }
+          }
+        ],
+        "preservation": "Read fresh complete resource;modify only this property;retain sku,IPs,subnets,natRules,all unrelated fields;no replacement with partial body"
+      },
+      "RESOURCE_ID": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+      "RESOURCE_GROUP": "nzila-g2-proof-xre47vggs5uhw",
+      "RESOURCE_TYPE": "Microsoft.Network/azureFirewalls",
+      "PROPERTY_PATH": "properties.networkRuleCollections",
+      "MUTATION_OPERATION": "CONDITIONAL_FIREWALL_READ_MODIFY_WRITE;two property changes one PUT",
+      "WHY_REQUIRED": "Accepted ACA platform dependency egress over G2 UDR/firewall",
+      "G3_DEPENDENCY": "Private G3 platform/pull/runtime proof preparation",
+      "SECURITY_EFFECT": "Named G3 source allowlist only;documented platform wildcard FQDNs remain accepted,not tenant-exclusive;default deny unchanged",
+      "ROLLBACK_OPERATION": {
+        "method": "PUT",
+        "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+        "restoreProperty": "properties.networkRuleCollections",
+        "originalValue": [],
+        "guard": "Compare-and-swap fresh etag;remove only owned named collection;preserve concurrently added foreign collections;stop if foreign edit conflicts;no stale whole-resource restore"
+      },
+      "VALIDATION_AFTER_CHANGE": [
+        "Collection diff only",
+        "No Internet/AzureCloud destination catchall",
+        "Private ACR/KV traffic not misclassified as firewall transit",
+        "AzurePlatformDNS NSG exemption retained",
+        "G2-only original configuration unchanged outside approved named collections"
+      ],
+      "STATUS": "PROPOSED_NOT_AUTHORIZED",
+      "OWNER": "G2_OWNED"
+    },
+    {
+      "CHANGE_ID": "G2-FIREWALL-applicationRuleCollections",
+      "CURRENT_STATE": { "etag": "W/\"6b794403-599c-4fdb-9d45-06d404419788\"", "value": [] },
+      "DESIRED_STATE": {
+        "value": [
+          {
+            "name": "g3r3-applications",
+            "properties": {
+              "priority": 220,
+              "action": { "type": "Allow" },
+              "rules": [
+                {
+                  "name": "g3-2-aks-cni-binaries",
+                  "sourceAddresses": ["10.91.1.0/24"],
+                  "targetFqdns": ["packages.aks.azure.com", "acs-mirror.azureedge.net"],
+                  "protocols": [{ "protocolType": "Https", "port": 443 }]
+                },
+                {
+                  "name": "g3-5-managed-identity",
+                  "sourceAddresses": ["10.91.1.0/24", "10.91.3.0/24"],
+                  "targetFqdns": [
+                    "*.identity.azure.net",
+                    "login.microsoftonline.com",
+                    "*.login.microsoftonline.com",
+                    "*.login.microsoft.com",
+                    "login.microsoft.com"
+                  ],
+                  "protocols": [{ "protocolType": "Https", "port": 443 }]
+                },
+                {
+                  "name": "g3-7-private-key-vault-host",
+                  "sourceAddresses": ["10.91.1.0/24", "10.91.3.0/24"],
+                  "targetFqdns": ["nzg3kv95086e2f.vault.azure.net"],
+                  "protocols": [{ "protocolType": "Https", "port": 443 }]
+                },
+                {
+                  "name": "g3-9-acr-platform-storage",
+                  "sourceAddresses": ["10.91.1.0/24", "10.91.3.0/24"],
+                  "targetFqdns": ["*.blob.core.windows.net"],
+                  "protocols": [{ "protocolType": "Https", "port": 443 }]
+                }
+              ]
+            }
+          }
+        ],
+        "preservation": "Read fresh complete resource;modify only this property;retain sku,IPs,subnets,natRules,all unrelated fields;no replacement with partial body"
+      },
+      "RESOURCE_ID": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+      "RESOURCE_GROUP": "nzila-g2-proof-xre47vggs5uhw",
+      "RESOURCE_TYPE": "Microsoft.Network/azureFirewalls",
+      "PROPERTY_PATH": "properties.applicationRuleCollections",
+      "MUTATION_OPERATION": "CONDITIONAL_FIREWALL_READ_MODIFY_WRITE;two property changes one PUT",
+      "WHY_REQUIRED": "Accepted ACA platform dependency egress over G2 UDR/firewall",
+      "G3_DEPENDENCY": "Private G3 platform/pull/runtime proof preparation",
+      "SECURITY_EFFECT": "Named G3 source allowlist only;documented platform wildcard FQDNs remain accepted,not tenant-exclusive;default deny unchanged",
+      "ROLLBACK_OPERATION": {
+        "method": "PUT",
+        "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+        "restoreProperty": "properties.applicationRuleCollections",
+        "originalValue": [],
+        "guard": "Compare-and-swap fresh etag;remove only owned named collection;preserve concurrently added foreign collections;stop if foreign edit conflicts;no stale whole-resource restore"
+      },
+      "VALIDATION_AFTER_CHANGE": [
+        "Collection diff only",
+        "No Internet/AzureCloud destination catchall",
+        "Private ACR/KV traffic not misclassified as firewall transit",
+        "AzurePlatformDNS NSG exemption retained",
+        "G2-only original configuration unchanged outside approved named collections"
+      ],
+      "STATUS": "PROPOSED_NOT_AUTHORIZED",
+      "OWNER": "G2_OWNED"
+    },
+    {
+      "CHANGE_ID": "G2-RBAC-operator-repository-writer",
+      "CURRENT_STATE": {
+        "registryMode": "AbacRepositoryPermissions",
+        "existingAssignments": [
+          {
+            "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/ba1fd686-3000-51dc-8fa6-1cfdedf67d20",
+            "name": "ba1fd686-3000-51dc-8fa6-1cfdedf67d20",
+            "properties": {
+              "condition": "      (\r\n        (\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'})\r\n        )\r\n        OR\r\n        (\r\n          @Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'synthetic-health'\r\n        )\r\n      )\r\n    ",
+              "conditionVersion": "2.0",
+              "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "createdOn": "2026-10-10T04:14:17.0442608Z",
+              "delegatedManagedIdentityResourceId": null,
+              "description": "G2 synthetic builder write access limited to the synthetic-health repository.",
+              "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2",
+              "principalType": "ServicePrincipal",
+              "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/2a1e307c-b015-4ebd-883e-5b7698a07328",
+              "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+              "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "updatedOn": "2026-10-10T18:02:48.3586257Z"
+            },
+            "type": "Microsoft.Authorization/roleAssignments"
+          },
+          {
+            "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/1caf1212-c9f0-5165-a0b7-9827ab84df7b",
+            "name": "1caf1212-c9f0-5165-a0b7-9827ab84df7b",
+            "properties": {
+              "condition": "      (\r\n        (\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})\r\n        )\r\n        OR\r\n        (\r\n          @Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'synthetic-health'\r\n        )\r\n      )\r\n    ",
+              "conditionVersion": "2.0",
+              "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "createdOn": "2026-10-10T04:14:17.0558398Z",
+              "delegatedManagedIdentityResourceId": null,
+              "description": "Runtime identity read access limited to the synthetic-health repository.",
+              "principalId": "b150b19a-645d-493f-9bb4-0aa81cb0c449",
+              "principalType": "ServicePrincipal",
+              "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/b93aa761-3e63-49ed-ac28-beffa264f7ac",
+              "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+              "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "updatedOn": "2026-10-10T18:02:48.5433558Z"
+            },
+            "type": "Microsoft.Authorization/roleAssignments"
+          },
+          {
+            "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/6628bb3e-5e59-5dcb-9f7b-80b421a7a7f8",
+            "name": "6628bb3e-5e59-5dcb-9f7b-80b421a7a7f8",
+            "properties": {
+              "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})) OR (@Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'g2-tooling'))",
+              "conditionVersion": "2.0",
+              "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "createdOn": "2026-10-11T14:45:19.3127681Z",
+              "delegatedManagedIdentityResourceId": null,
+              "description": null,
+              "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2",
+              "principalType": "ServicePrincipal",
+              "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/b93aa761-3e63-49ed-ac28-beffa264f7ac",
+              "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+              "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "updatedOn": "2026-10-11T14:45:19.3127681Z"
+            },
+            "type": "Microsoft.Authorization/roleAssignments"
+          }
+        ]
+      },
+      "DESIRED_STATE": {
+        "principalId": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+        "roleDefinitionId": "2a1e307c-b015-4ebd-883e-5b7698a07328",
+        "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))",
+        "conditionVersion": "2.0",
+        "assignmentIdBinding": "UUIDv5(mission,registry,principalId,roleId);bind actual UAMI/human IDs before authorization-specific execution manifest"
+      },
+      "RESOURCE_ID": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "RESOURCE_GROUP": "nzila-g2-proof-xre47vggs5uhw",
+      "RESOURCE_TYPE": "Microsoft.Authorization/roleAssignments",
+      "PROPERTY_PATH": "scope-bound roleAssignment",
+      "MUTATION_OPERATION": "PUT_NEW_ROLE_ASSIGNMENT_AFTER_EXACT_PRINCIPAL_BINDING",
+      "WHY_REQUIRED": "Exact G3 repository write/read only",
+      "G3_DEPENDENCY": "Private G3 platform/pull/runtime proof preparation",
+      "SECURITY_EFFECT": "Exact g3-synthetic-runtime repository;no catalog/delete for reader/writer;temporary cleaner explicitly permits deletion",
+      "ROLLBACK_OPERATION": {
+        "method": "DELETE",
+        "resource": "EXACT_CREATED_ROLE_ASSIGNMENT_ID_FROM_OWNERSHIP_LEDGER",
+        "guard": "Revoke only owned mission assignment;never remove preexisting/foreign grants;metadata hash and principal/condition must match"
+      },
+      "VALIDATION_AFTER_CHANGE": [
+        "Exact role/principal/condition readback",
+        "Repository-scoped positive read/push only after authority",
+        "Other repository access denied",
+        "Runtime no push;pull identity no secret access"
+      ],
+      "STATUS": "PROPOSED_NOT_AUTHORIZED",
+      "OWNER": "G2_OWNED"
+    },
+    {
+      "CHANGE_ID": "G2-RBAC-platform-repository-reader",
+      "CURRENT_STATE": {
+        "registryMode": "AbacRepositoryPermissions",
+        "existingAssignments": [
+          {
+            "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/ba1fd686-3000-51dc-8fa6-1cfdedf67d20",
+            "name": "ba1fd686-3000-51dc-8fa6-1cfdedf67d20",
+            "properties": {
+              "condition": "      (\r\n        (\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'})\r\n        )\r\n        OR\r\n        (\r\n          @Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'synthetic-health'\r\n        )\r\n      )\r\n    ",
+              "conditionVersion": "2.0",
+              "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "createdOn": "2026-10-10T04:14:17.0442608Z",
+              "delegatedManagedIdentityResourceId": null,
+              "description": "G2 synthetic builder write access limited to the synthetic-health repository.",
+              "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2",
+              "principalType": "ServicePrincipal",
+              "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/2a1e307c-b015-4ebd-883e-5b7698a07328",
+              "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+              "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "updatedOn": "2026-10-10T18:02:48.3586257Z"
+            },
+            "type": "Microsoft.Authorization/roleAssignments"
+          },
+          {
+            "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/1caf1212-c9f0-5165-a0b7-9827ab84df7b",
+            "name": "1caf1212-c9f0-5165-a0b7-9827ab84df7b",
+            "properties": {
+              "condition": "      (\r\n        (\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})\r\n        )\r\n        OR\r\n        (\r\n          @Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'synthetic-health'\r\n        )\r\n      )\r\n    ",
+              "conditionVersion": "2.0",
+              "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "createdOn": "2026-10-10T04:14:17.0558398Z",
+              "delegatedManagedIdentityResourceId": null,
+              "description": "Runtime identity read access limited to the synthetic-health repository.",
+              "principalId": "b150b19a-645d-493f-9bb4-0aa81cb0c449",
+              "principalType": "ServicePrincipal",
+              "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/b93aa761-3e63-49ed-ac28-beffa264f7ac",
+              "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+              "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "updatedOn": "2026-10-10T18:02:48.5433558Z"
+            },
+            "type": "Microsoft.Authorization/roleAssignments"
+          },
+          {
+            "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/6628bb3e-5e59-5dcb-9f7b-80b421a7a7f8",
+            "name": "6628bb3e-5e59-5dcb-9f7b-80b421a7a7f8",
+            "properties": {
+              "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})) OR (@Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'g2-tooling'))",
+              "conditionVersion": "2.0",
+              "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "createdOn": "2026-10-11T14:45:19.3127681Z",
+              "delegatedManagedIdentityResourceId": null,
+              "description": null,
+              "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2",
+              "principalType": "ServicePrincipal",
+              "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/b93aa761-3e63-49ed-ac28-beffa264f7ac",
+              "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+              "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "updatedOn": "2026-10-11T14:45:19.3127681Z"
+            },
+            "type": "Microsoft.Authorization/roleAssignments"
+          }
+        ]
+      },
+      "DESIRED_STATE": {
+        "principalId": "<G3_PULL_UAMI_PRINCIPAL_ID_AFTER_AUTHORIZED_CREATION>",
+        "roleDefinitionId": "b93aa761-3e63-49ed-ac28-beffa264f7ac",
+        "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))",
+        "conditionVersion": "2.0",
+        "assignmentIdBinding": "UUIDv5(mission,registry,principalId,roleId);bind actual UAMI/human IDs before authorization-specific execution manifest"
+      },
+      "RESOURCE_ID": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "RESOURCE_GROUP": "nzila-g2-proof-xre47vggs5uhw",
+      "RESOURCE_TYPE": "Microsoft.Authorization/roleAssignments",
+      "PROPERTY_PATH": "scope-bound roleAssignment",
+      "MUTATION_OPERATION": "PUT_NEW_ROLE_ASSIGNMENT_AFTER_EXACT_PRINCIPAL_BINDING",
+      "WHY_REQUIRED": "Pull-only platform identity None",
+      "G3_DEPENDENCY": "Private G3 platform/pull/runtime proof preparation",
+      "SECURITY_EFFECT": "Exact g3-synthetic-runtime repository;no catalog/delete for reader/writer;temporary cleaner explicitly permits deletion",
+      "ROLLBACK_OPERATION": {
+        "method": "DELETE",
+        "resource": "EXACT_CREATED_ROLE_ASSIGNMENT_ID_FROM_OWNERSHIP_LEDGER",
+        "guard": "Revoke only owned mission assignment;never remove preexisting/foreign grants;metadata hash and principal/condition must match"
+      },
+      "VALIDATION_AFTER_CHANGE": [
+        "Exact role/principal/condition readback",
+        "Repository-scoped positive read/push only after authority",
+        "Other repository access denied",
+        "Runtime no push;pull identity no secret access"
+      ],
+      "STATUS": "PROPOSED_NOT_AUTHORIZED",
+      "OWNER": "G2_OWNED"
+    },
+    {
+      "CHANGE_ID": "G2-RBAC-rollback-repository-cleaner",
+      "CURRENT_STATE": {
+        "registryMode": "AbacRepositoryPermissions",
+        "existingAssignments": [
+          {
+            "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/ba1fd686-3000-51dc-8fa6-1cfdedf67d20",
+            "name": "ba1fd686-3000-51dc-8fa6-1cfdedf67d20",
+            "properties": {
+              "condition": "      (\r\n        (\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'})\r\n        )\r\n        OR\r\n        (\r\n          @Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'synthetic-health'\r\n        )\r\n      )\r\n    ",
+              "conditionVersion": "2.0",
+              "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "createdOn": "2026-10-10T04:14:17.0442608Z",
+              "delegatedManagedIdentityResourceId": null,
+              "description": "G2 synthetic builder write access limited to the synthetic-health repository.",
+              "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2",
+              "principalType": "ServicePrincipal",
+              "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/2a1e307c-b015-4ebd-883e-5b7698a07328",
+              "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+              "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "updatedOn": "2026-10-10T18:02:48.3586257Z"
+            },
+            "type": "Microsoft.Authorization/roleAssignments"
+          },
+          {
+            "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/1caf1212-c9f0-5165-a0b7-9827ab84df7b",
+            "name": "1caf1212-c9f0-5165-a0b7-9827ab84df7b",
+            "properties": {
+              "condition": "      (\r\n        (\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})\r\n        )\r\n        OR\r\n        (\r\n          @Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'synthetic-health'\r\n        )\r\n      )\r\n    ",
+              "conditionVersion": "2.0",
+              "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "createdOn": "2026-10-10T04:14:17.0558398Z",
+              "delegatedManagedIdentityResourceId": null,
+              "description": "Runtime identity read access limited to the synthetic-health repository.",
+              "principalId": "b150b19a-645d-493f-9bb4-0aa81cb0c449",
+              "principalType": "ServicePrincipal",
+              "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/b93aa761-3e63-49ed-ac28-beffa264f7ac",
+              "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+              "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "updatedOn": "2026-10-10T18:02:48.5433558Z"
+            },
+            "type": "Microsoft.Authorization/roleAssignments"
+          },
+          {
+            "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/6628bb3e-5e59-5dcb-9f7b-80b421a7a7f8",
+            "name": "6628bb3e-5e59-5dcb-9f7b-80b421a7a7f8",
+            "properties": {
+              "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})) OR (@Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'g2-tooling'))",
+              "conditionVersion": "2.0",
+              "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "createdOn": "2026-10-11T14:45:19.3127681Z",
+              "delegatedManagedIdentityResourceId": null,
+              "description": null,
+              "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2",
+              "principalType": "ServicePrincipal",
+              "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/b93aa761-3e63-49ed-ac28-beffa264f7ac",
+              "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+              "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+              "updatedOn": "2026-10-11T14:45:19.3127681Z"
+            },
+            "type": "Microsoft.Authorization/roleAssignments"
+          }
+        ]
+      },
+      "DESIRED_STATE": {
+        "principalId": "<SEPARATELY_APPOINTED_ROLLBACK_HUMAN_OR_PRINCIPAL>",
+        "roleDefinitionId": "2efddaa5-3f1f-4df3-97df-af3f13818f4c",
+        "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/delete'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/delete'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))",
+        "conditionVersion": "2.0",
+        "assignmentIdBinding": "UUIDv5(mission,registry,principalId,roleId);bind actual UAMI/human IDs before authorization-specific execution manifest"
+      },
+      "RESOURCE_ID": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "RESOURCE_GROUP": "nzila-g2-proof-xre47vggs5uhw",
+      "RESOURCE_TYPE": "Microsoft.Authorization/roleAssignments",
+      "PROPERTY_PATH": "scope-bound roleAssignment",
+      "MUTATION_OPERATION": "PUT_NEW_ROLE_ASSIGNMENT_AFTER_EXACT_PRINCIPAL_BINDING",
+      "WHY_REQUIRED": "Remove only mission-owned manifest after independent approval and usage reconciliation",
+      "G3_DEPENDENCY": "Private G3 platform/pull/runtime proof preparation",
+      "SECURITY_EFFECT": "Exact g3-synthetic-runtime repository;no catalog/delete for reader/writer;temporary cleaner explicitly permits deletion",
+      "ROLLBACK_OPERATION": {
+        "method": "DELETE",
+        "resource": "EXACT_CREATED_ROLE_ASSIGNMENT_ID_FROM_OWNERSHIP_LEDGER",
+        "guard": "Revoke only owned mission assignment;never remove preexisting/foreign grants;metadata hash and principal/condition must match"
+      },
+      "VALIDATION_AFTER_CHANGE": [
+        "Exact role/principal/condition readback",
+        "Repository-scoped positive read/push only after authority",
+        "Other repository access denied",
+        "Runtime no push;pull identity no secret access"
+      ],
+      "STATUS": "PROPOSED_NOT_AUTHORIZED",
+      "OWNER": "G2_OWNED"
+    }
+  ],
+  "firewallRules": [
+    {
+      "RULE_ID": "g3-0-microsoftcontainerregistry",
+      "RULE_COLLECTION": "g3r3-network",
+      "SOURCE": ["10.91.1.0/24"],
+      "DESTINATION": ["MicrosoftContainerRegistry"],
+      "PORT": [443],
+      "PROTOCOL": "TCP",
+      "SERVICE_TAG_OR_FQDN": "NETWORK",
+      "PURPOSE": "Microsoft platform artifact retrieval",
+      "PLATFORM_OR_WORKLOAD": "PLATFORM;workload data uses direct private endpoint routes",
+      "EVIDENCE_SOURCE": {
+        "acceptedContract": "G3R1_NETWORK_CONTRACT.json",
+        "uri": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall"
+      }
+    },
+    {
+      "RULE_ID": "g3-1-azurefrontdoorfirstparty",
+      "RULE_COLLECTION": "g3r3-network",
+      "SOURCE": ["10.91.1.0/24"],
+      "DESTINATION": ["AzureFrontDoorFirstParty"],
+      "PORT": [443],
+      "PROTOCOL": "TCP",
+      "SERVICE_TAG_OR_FQDN": "NETWORK",
+      "PURPOSE": "Microsoft platform registry front-door dependency",
+      "PLATFORM_OR_WORKLOAD": "PLATFORM;workload data uses direct private endpoint routes",
+      "EVIDENCE_SOURCE": {
+        "acceptedContract": "G3R1_NETWORK_CONTRACT.json",
+        "uri": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall"
+      }
+    },
+    {
+      "RULE_ID": "g3-2-aks-cni-binaries",
+      "RULE_COLLECTION": "g3r3-applications",
+      "SOURCE": ["10.91.1.0/24"],
+      "DESTINATION": ["packages.aks.azure.com", "acs-mirror.azureedge.net"],
+      "PORT": [443],
+      "PROTOCOL": "HTTPS",
+      "SERVICE_TAG_OR_FQDN": "APPLICATION",
+      "PURPOSE": "Underlying ACA platform AKS/CNI binary bootstrap",
+      "PLATFORM_OR_WORKLOAD": "PLATFORM;workload data uses direct private endpoint routes",
+      "EVIDENCE_SOURCE": {
+        "acceptedContract": "G3R1_NETWORK_CONTRACT.json",
+        "uri": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall"
+      }
+    },
+    {
+      "RULE_ID": "g3-3-azurecontainerregistry",
+      "RULE_COLLECTION": "g3r3-network",
+      "SOURCE": ["10.91.1.0/24", "10.91.3.0/24"],
+      "DESTINATION": ["AzureContainerRegistry"],
+      "PORT": [443],
+      "PROTOCOL": "TCP",
+      "SERVICE_TAG_OR_FQDN": "NETWORK",
+      "PURPOSE": "Microsoft-documented registry platform dependency;private registry/data DNS endpoints still mandatory",
+      "PLATFORM_OR_WORKLOAD": "PLATFORM;workload data uses direct private endpoint routes",
+      "EVIDENCE_SOURCE": {
+        "acceptedContract": "G3R1_NETWORK_CONTRACT.json",
+        "uri": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall"
+      }
+    },
+    {
+      "RULE_ID": "g3-4-azureactivedirectory",
+      "RULE_COLLECTION": "g3r3-network",
+      "SOURCE": ["10.91.1.0/24", "10.91.3.0/24"],
+      "DESTINATION": ["AzureActiveDirectory"],
+      "PORT": [443],
+      "PROTOCOL": "TCP",
+      "SERVICE_TAG_OR_FQDN": "NETWORK",
+      "PURPOSE": "ACR/managed identity/Key Vault authentication",
+      "PLATFORM_OR_WORKLOAD": "PLATFORM;workload data uses direct private endpoint routes",
+      "EVIDENCE_SOURCE": {
+        "acceptedContract": "G3R1_NETWORK_CONTRACT.json",
+        "uri": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall"
+      }
+    },
+    {
+      "RULE_ID": "g3-5-managed-identity",
+      "RULE_COLLECTION": "g3r3-applications",
+      "SOURCE": ["10.91.1.0/24", "10.91.3.0/24"],
+      "DESTINATION": [
+        "*.identity.azure.net",
+        "login.microsoftonline.com",
+        "*.login.microsoftonline.com",
+        "*.login.microsoft.com",
+        "login.microsoft.com"
+      ],
+      "PORT": [443],
+      "PROTOCOL": "HTTPS",
+      "SERVICE_TAG_OR_FQDN": "APPLICATION",
+      "PURPOSE": "Platform managed-identity dependencies",
+      "PLATFORM_OR_WORKLOAD": "PLATFORM;workload data uses direct private endpoint routes",
+      "EVIDENCE_SOURCE": {
+        "acceptedContract": "G3R1_NETWORK_CONTRACT.json",
+        "uri": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall"
+      }
+    },
+    {
+      "RULE_ID": "g3-6-azurekeyvault",
+      "RULE_COLLECTION": "g3r3-network",
+      "SOURCE": ["10.91.1.0/24", "10.91.3.0/24"],
+      "DESTINATION": ["AzureKeyVault"],
+      "PORT": [443],
+      "PROTOCOL": "TCP",
+      "SERVICE_TAG_OR_FQDN": "NETWORK",
+      "PURPOSE": "Documented platform Key Vault dependency;synthetic secret data path exclusively private endpoint",
+      "PLATFORM_OR_WORKLOAD": "PLATFORM;workload data uses direct private endpoint routes",
+      "EVIDENCE_SOURCE": {
+        "acceptedContract": "G3R1_NETWORK_CONTRACT.json",
+        "uri": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall"
+      }
+    },
+    {
+      "RULE_ID": "g3-7-private-key-vault-host",
+      "RULE_COLLECTION": "g3r3-applications",
+      "SOURCE": ["10.91.1.0/24", "10.91.3.0/24"],
+      "DESTINATION": ["nzg3kv95086e2f.vault.azure.net"],
+      "PORT": [443],
+      "PROTOCOL": "HTTPS",
+      "SERVICE_TAG_OR_FQDN": "APPLICATION",
+      "PURPOSE": "Vault TLS hostname retained even when resolving to local private endpoint",
+      "PLATFORM_OR_WORKLOAD": "PLATFORM;workload data uses direct private endpoint routes",
+      "EVIDENCE_SOURCE": {
+        "acceptedContract": "G3R1_NETWORK_CONTRACT.json",
+        "uri": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall"
+      }
+    },
+    {
+      "RULE_ID": "g3-8-azuremonitor",
+      "RULE_COLLECTION": "g3r3-network",
+      "SOURCE": ["10.91.1.0/24"],
+      "DESTINATION": ["AzureMonitor"],
+      "PORT": [443],
+      "PROTOCOL": "TCP",
+      "SERVICE_TAG_OR_FQDN": "NETWORK",
+      "PURPOSE": "Selected Log Analytics console/system log destination",
+      "PLATFORM_OR_WORKLOAD": "PLATFORM;workload data uses direct private endpoint routes",
+      "EVIDENCE_SOURCE": {
+        "acceptedContract": "G3R1_NETWORK_CONTRACT.json",
+        "uri": "https://learn.microsoft.com/en-us/azure/container-apps/firewall-integration"
+      }
+    },
+    {
+      "RULE_ID": "g3-9-acr-platform-storage",
+      "RULE_COLLECTION": "g3r3-applications",
+      "SOURCE": ["10.91.1.0/24", "10.91.3.0/24"],
+      "DESTINATION": ["*.blob.core.windows.net"],
+      "PORT": [443],
+      "PROTOCOL": "HTTPS",
+      "SERVICE_TAG_OR_FQDN": "APPLICATION",
+      "PURPOSE": "Microsoft-documented platform-managed storage dependency;accepted synthetic breadth only",
+      "PLATFORM_OR_WORKLOAD": "PLATFORM;workload data uses direct private endpoint routes",
+      "EVIDENCE_SOURCE": {
+        "acceptedContract": "G3R1_NETWORK_CONTRACT.json",
+        "uri": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall"
+      }
+    }
+  ],
+  "ownership": [
+    {
+      "operation": "g3-to-g2",
+      "owner": "G3_OWNED",
+      "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f/virtualNetworkPeerings/g3-to-g2"
+    },
+    {
+      "operation": "g2-to-g3",
+      "owner": "G2_OWNED",
+      "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3"
+    },
+    {
+      "operation": "G3-default-UDR/NSG/subnets/KV-DNS/internal-DNS",
+      "owner": "G3_OWNED",
+      "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f"
+    },
+    {
+      "operation": "G2-ACR-DNS-LINK",
+      "owner": "G2_OWNED",
+      "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f"
+    },
+    {
+      "operation": "G2-FIREWALL-networkRuleCollections",
+      "owner": "G2_OWNED",
+      "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu"
+    },
+    {
+      "operation": "G2-FIREWALL-applicationRuleCollections",
+      "owner": "G2_OWNED",
+      "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu"
+    },
+    {
+      "operation": "G2-RBAC-operator-repository-writer",
+      "owner": "G2_OWNED",
+      "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo"
+    },
+    {
+      "operation": "G2-RBAC-platform-repository-reader",
+      "owner": "G2_OWNED",
+      "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo"
+    },
+    {
+      "operation": "G2-RBAC-rollback-repository-cleaner",
+      "owner": "G2_OWNED",
+      "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo"
+    },
+    {
+      "operation": "effective routes/DNS/peer/private endpoint/registry/RBAC reconciliation",
+      "owner": "CROSS_BOUNDARY_VALIDATION_ONLY",
+      "resource": "G3+G2"
+    },
+    {
+      "operation": "Existing G2 route table/firewall transit settings",
+      "owner": "CROSS_BOUNDARY_VALIDATION_ONLY",
+      "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/routeTables/nzila-g2-builder-rt-y3koaeijzi6mu"
+    }
+  ],
+  "HIDDEN_G2_MUTATIONS_IN_G3_SOURCE": 0,
+  "peeringContract": [
+    {
+      "SOURCE_VNET": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+      "REMOTE_VNET": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+      "ALLOW_VNET_ACCESS": true,
+      "ALLOW_FORWARD_TRAFFIC": true,
+      "ALLOW_GATEWAY_TRANSIT": false,
+      "USE_REMOTE_GATEWAYS": false,
+      "SECURITY_RATIONALE": "Accepted two-way peering supports firewall forwarding/return path;gateway transit intentionally absent",
+      "ROLLBACK": "Delete only newly owned directional child after consumers stop"
+    },
+    {
+      "SOURCE_VNET": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+      "REMOTE_VNET": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+      "ALLOW_VNET_ACCESS": true,
+      "ALLOW_FORWARD_TRAFFIC": true,
+      "ALLOW_GATEWAY_TRANSIT": false,
+      "USE_REMOTE_GATEWAYS": false,
+      "SECURITY_RATIONALE": "Accepted two-way peering supports firewall forwarding/return path;gateway transit intentionally absent",
+      "ROLLBACK": "Delete only newly owned directional child after consumers stop"
+    }
+  ],
+  "routeTransit": {
+    "existingG2Route": [
+      {
+        "etag": "W/\"f48ecf90-35ab-4019-8e66-bd0106105423\"",
+        "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/routeTables/nzila-g2-builder-rt-y3koaeijzi6mu/routes/DefaultToAzureFirewall",
+        "name": "DefaultToAzureFirewall",
+        "properties": {
+          "addressPrefix": "0.0.0.0/0",
+          "hasBgpOverride": false,
+          "nextHopIpAddress": "10.90.0.4",
+          "nextHopType": "VirtualAppliance",
+          "provisioningState": "Succeeded"
+        },
+        "type": "Microsoft.Network/routeTables/routes"
+      }
+    ],
+    "requiredG2RouteMutation": false,
+    "reason": "G3 peered prefix more specific than G2 builder0/0;firewall system route returns via peering;both forwarding flags true;validate effective routes before workload",
+    "ACA_PRIVATE_ENDPOINT": "NOT_REQUIRED"
+  },
+  "privateDns": {
+    "zone": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io",
+    "link": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f",
+    "vnet": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+    "registrationEnabled": false,
+    "records": [
+      {
+        "name": "@",
+        "type": "Microsoft.Network/privateDnsZones/SOA",
+        "properties": {
+          "fqdn": "privatelink.azurecr.io.",
+          "isAutoRegistered": false,
+          "soaRecord": {
+            "email": "azureprivatedns-host.microsoft.com",
+            "expireTime": 2419200,
+            "host": "azureprivatedns.net",
+            "minimumTtl": 10,
+            "refreshTime": 3600,
+            "retryTime": 300,
+            "serialNumber": 1
+          },
+          "ttl": 3600
+        }
+      },
+      {
+        "name": "nzilag2tzo75uuozprbo.canadacentral.data",
+        "type": "Microsoft.Network/privateDnsZones/A",
+        "properties": {
+          "aRecords": [{ "ipv4Address": "10.90.2.4" }],
+          "fqdn": "nzilag2tzo75uuozprbo.canadacentral.data.privatelink.azurecr.io.",
+          "isAutoRegistered": false,
+          "metadata": {
+            "creator": "created by private endpoint nzila-g2-acr-pe-y3koaeijzi6mu with resource guid b5920298-283f-4062-9a6d-e931df5eebae"
+          },
+          "ttl": 10
+        }
+      },
+      {
+        "name": "nzilag2tzo75uuozprbo",
+        "type": "Microsoft.Network/privateDnsZones/A",
+        "properties": {
+          "aRecords": [{ "ipv4Address": "10.90.2.5" }],
+          "fqdn": "nzilag2tzo75uuozprbo.privatelink.azurecr.io.",
+          "isAutoRegistered": false,
+          "metadata": {
+            "creator": "created by private endpoint nzila-g2-acr-pe-y3koaeijzi6mu with resource guid b5920298-283f-4062-9a6d-e931df5eebae"
+          },
+          "ttl": 10
+        }
+      }
+    ],
+    "resourceDependency": "Existing G2 ACR PE;new G3 VNet",
+    "rollback": "Owned link DELETE;retain zone/records/G2 link"
+  },
+  "baseline": {
+    "freshReadHashes": [
+      {
+        "responseFile": "G3R3_READ_10_g2-vnet-page-1.json",
+        "responseSha256": "5a5c70afac59b60720ac349d959ece8ad3da05eebee5ca351b3ff2a7b47913b5"
+      },
+      {
+        "responseFile": "G3R3_READ_11_g2-firewall-page-1.json",
+        "responseSha256": "1f00fba215764c96e1d2d3e9cd3ecfec105253fb3ce65249325931355a9055cc"
+      },
+      {
+        "responseFile": "G3R3_READ_12_g2-registry-page-1.json",
+        "responseSha256": "121a59c74f8ad045239239517f95c7901f3fa4f75944e07175e10ed16a7dbbde"
+      },
+      {
+        "responseFile": "G3R3_READ_13_g2-registry-usage-page-1.json",
+        "responseSha256": "8d76812494e26c4f563d3b12868a21b1d31bbc8fcf5d62be302527fab1e12b6b"
+      },
+      {
+        "responseFile": "G3R3_READ_14_g2-dns-links-page-1.json",
+        "responseSha256": "08ba93274f13d1bc94121ce467c30c9f9aab3c9aea4f18614a37c36d7e8a68de"
+      },
+      {
+        "responseFile": "G3R3_READ_15_g2-dns-records-page-1.json",
+        "responseSha256": "b12678a833ac1d62fd41cd05cd69368715c9550baa245dcc575a53160a8d9b4d"
+      },
+      {
+        "responseFile": "G3R3_READ_16_g2-builder-page-1.json",
+        "responseSha256": "32e15fa5f795980e1f8f14fa4d1bd9d67ce222fdd77960ac01f4270364271e92"
+      },
+      {
+        "responseFile": "G3R3_READ_17_g2-builder-nsg-page-1.json",
+        "responseSha256": "4859b2eaf30a2c0ce49247775abcbce9cc5fc59ae3c15e289802edd076ca4ffb"
+      },
+      {
+        "responseFile": "G3R3_READ_18_g2-builder-nic-page-1.json",
+        "responseSha256": "7e94355993a9d4f209b565dd14abfbe702337824769ab682558bcc086baece68"
+      },
+      {
+        "responseFile": "G3R3_READ_19_g2-builder-route-page-1.json",
+        "responseSha256": "4cdad0d22f7d3650fa7c972606127fc02dc8d87302a2a69219156e6033f5ff0e"
+      }
+    ],
+    "historicalSealedG2Packet": "NOT_FOUND_PRESERVED;fresh resource snapshots are not reconstructed historical authority;human must accept exact captured baseline in Decision B"
+  },
+  "approval": {
+    "CHANGE_COUNT": 7,
+    "RESOURCES_AFFECTED": [
+      "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3",
+      "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f",
+      "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+      "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo"
+    ],
+    "SECURITY_IMPACT": "Peered private path,G3-source platform egress,DNS resolution and repo-only roles;public ACR remains disabled",
+    "ROLLBACK_COMPLETE": "CORE_PACKET_COMPLETE_WITH_OWNERSHIP_AND_ETAG_GUARDS;CONFLICT_STOPS_UNAUTHORIZED_OVERWRITE",
+    "ESTIMATED_EXECUTION_DURATION": "30-minute engineering scheduling cap;not measured SLA;STOP if exceeded",
+    "VALIDATION_STEPS": [
+      "Both peering states Connected",
+      "Effective G3 default route to10.90.0.4",
+      "Private10.90/16 routes via peering",
+      "Both ACR hostnames resolve recorded10.90.2.x IPs in G3",
+      "Independent public path remains denied",
+      "Collection diff only",
+      "No Internet/AzureCloud destination catchall",
+      "Private ACR/KV traffic not misclassified as firewall transit",
+      "AzurePlatformDNS NSG exemption retained",
+      "G2-only original configuration unchanged outside approved named collections",
+      "Collection diff only",
+      "No Internet/AzureCloud destination catchall",
+      "Private ACR/KV traffic not misclassified as firewall transit",
+      "AzurePlatformDNS NSG exemption retained",
+      "G2-only original configuration unchanged outside approved named collections",
+      "Exact role/principal/condition readback",
+      "Repository-scoped positive read/push only after authority",
+      "Other repository access denied",
+      "Runtime no push;pull identity no secret access",
+      "Exact role/principal/condition readback",
+      "Repository-scoped positive read/push only after authority",
+      "Other repository access denied",
+      "Runtime no push;pull identity no secret access",
+      "Exact role/principal/condition readback",
+      "Repository-scoped positive read/push only after authority",
+      "Other repository access denied",
+      "Runtime no push;pull identity no secret access"
+    ],
+    "APPROVAL_STATUS": "UNBOUND",
+    "G2_MUTATION_PACKET_DIGEST": "9cfcda0c4bced61e302128d8455867214f7b64c8b5b101bf5e52f632e8984198"
+  },
+  "digestMethod": "SHA256 UTF-8 JSON packet before adding digestMethod and G2_MUTATION_PACKET_DIGEST;no circular self-hash"
+}

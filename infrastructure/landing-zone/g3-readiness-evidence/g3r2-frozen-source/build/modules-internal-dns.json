@@ -1,0 +1,95 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.48.1.52935",
+      "templateHash": "14649924398031530607"
+    }
+  },
+  "parameters": {
+    "provisionResources": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    },
+    "environmentName": {
+      "type": "string"
+    },
+    "defaultDomain": {
+      "type": "string"
+    },
+    "staticIp": {
+      "type": "string"
+    },
+    "vnetId": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "object"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('defaultDomain')]",
+      "location": "global",
+      "tags": "[parameters('tags')]"
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2020-06-01",
+      "name": "[format('{0}/{1}', parameters('defaultDomain'), format('{0}-link', parameters('environmentName')))]",
+      "location": "global",
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "[parameters('vnetId')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/privateDnsZones/A",
+      "apiVersion": "2020-06-01",
+      "name": "[format('{0}/{1}', parameters('defaultDomain'), '@')]",
+      "properties": {
+        "ttl": 60,
+        "aRecords": [
+          {
+            "ipv4Address": "[parameters('staticIp')]"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/privateDnsZones/A",
+      "apiVersion": "2020-06-01",
+      "name": "[format('{0}/{1}', parameters('defaultDomain'), '*')]",
+      "properties": {
+        "ttl": 60,
+        "aRecords": [
+          {
+            "ipv4Address": "[parameters('staticIp')]"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+      ]
+    }
+  ]
+}

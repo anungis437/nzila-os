@@ -1,0 +1,131 @@
+{
+  "compilerVersion": "Bicep CLI version 0.48.1 (cec7951cf6)",
+  "commands": [
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\main.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\network.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\identities.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\observability.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\vault.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\environment.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\internal-dns.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\workload.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\bindings.bicep --stdout"
+  ],
+  "entries": [
+    {
+      "source": "main.bicep",
+      "sourceSha256": "c3a21482cb4cfe37655bd74528edcab01d63b7734f7f38827365684d339afd18",
+      "templatePath": "build/main.json",
+      "templateSha256": "2e2428874db79c8cd07924dd12f9e7f24ccac85a1c0e10ad6e3a99417af0e39a",
+      "result": "PASS",
+      "stderr": "",
+      "requiredParameters": ["names", "tags", "networkRules", "g2VnetId", "keyVaultPurgeProtection"]
+    },
+    {
+      "source": "modules/network.bicep",
+      "sourceSha256": "c28ff961bc124c64f89711d045df0d29d0dd046563d8186b0a0322297b8b9302",
+      "templatePath": "build/modules-network.json",
+      "templateSha256": "64720a49cd94ed83298fea7e6b3e3531c4ba331ae75200bc454210bad0f37c2c",
+      "result": "PASS",
+      "stderr": "",
+      "requiredParameters": [
+        "location",
+        "names",
+        "tags",
+        "networkRules",
+        "g2VnetId",
+        "discoveredEndpointIps",
+        "approvedPlatformPrefixes"
+      ]
+    },
+    {
+      "source": "modules/identities.bicep",
+      "sourceSha256": "386b65cf3100482cc70bfdfdb06b9fb3a16042d00d7955daf13a5881a07bb437",
+      "templatePath": "build/modules-identities.json",
+      "templateSha256": "16777d0878a800efab21735a863ef0b89b29da637071a89353bda8d5cfc171eb",
+      "result": "PASS",
+      "stderr": "",
+      "requiredParameters": ["location", "names", "tags"]
+    },
+    {
+      "source": "modules/observability.bicep",
+      "sourceSha256": "bddf62fcebce555a293f4bc703443cde797ef5ea2343b9ced0d2c24d5d0a1178",
+      "templatePath": "build/modules-observability.json",
+      "templateSha256": "8eec6fbdeb69a9b07617397fef0ebea39e9ba2d13375bdf0ba61114cb845d4ea",
+      "result": "PASS",
+      "stderr": "",
+      "requiredParameters": ["location", "names", "tags"]
+    },
+    {
+      "source": "modules/vault.bicep",
+      "sourceSha256": "5d19df8996f63e38fbb37aa8538df6591b387a58fef3ce828ba14e86d6b68552",
+      "templatePath": "build/modules-vault.json",
+      "templateSha256": "e49a8c26ac54c07214d78436c7aa297606dee50eaa530363359299a2009d7a9e",
+      "result": "PASS",
+      "stderr": "",
+      "requiredParameters": [
+        "location",
+        "names",
+        "tags",
+        "vnetId",
+        "endpointSubnetId",
+        "purgeProtection"
+      ]
+    },
+    {
+      "source": "modules/environment.bicep",
+      "sourceSha256": "97770eed925903f0c1e6a10aca52a9d31a13944deea05429d578918ea92e607b",
+      "templatePath": "build/modules-environment.json",
+      "templateSha256": "c863335211a87850ed0f1f3b4a687c22685fc9907acc15a32a7074e6115a0281",
+      "result": "PASS",
+      "stderr": "",
+      "requiredParameters": ["location", "names", "tags", "acaSubnetId", "vnetId", "workspaceId"]
+    },
+    {
+      "source": "modules/internal-dns.bicep",
+      "sourceSha256": "ba216118a14ac96d30524001d9490c99c20cde3309e9e6ae030aa86b67e3e686",
+      "templatePath": "build/modules-internal-dns.json",
+      "templateSha256": "3eefffbf10d8129c61c90bf9c85219310d5271cab0901cee4ba5f1be8bc5b78f",
+      "result": "PASS",
+      "stderr": "",
+      "requiredParameters": ["environmentName", "defaultDomain", "staticIp", "vnetId", "tags"]
+    },
+    {
+      "source": "modules/workload.bicep",
+      "sourceSha256": "cf8865fa6d088cdf87677906b18818db471e0f8aabfe5b8a4b453e8e66e44dee",
+      "templatePath": "build/modules-workload.json",
+      "templateSha256": "feb586bbb29d2b5441f0790437666447b42107b9b385ffa02b78eb14f705d2a5",
+      "result": "PASS",
+      "stderr": "",
+      "requiredParameters": [
+        "location",
+        "names",
+        "tags",
+        "environmentId",
+        "buildIdentityId",
+        "runtimeIdentityId",
+        "immutableImage"
+      ]
+    },
+    {
+      "source": "modules/bindings.bicep",
+      "sourceSha256": "2ea704931e63658353fc3090e0e6976e4d75c16beb02379e397d32157240a13e",
+      "templatePath": "build/modules-bindings.json",
+      "templateSha256": "e880b0403bf2e15b5b1ce45cad53f43654600f92d9e8b49e217bc50e61e005d9",
+      "result": "PASS",
+      "stderr": "",
+      "requiredParameters": ["vaultName", "runtimePrincipalId"]
+    }
+  ],
+  "buildErrors": 0,
+  "unresolvedModules": 0,
+  "generatedTemplatesAreAuthority": false,
+  "azureCalls": 0,
+  "unboundRequiredParameters": 0,
+  "unboundHumanOrRuntimeValues": "EXPLICIT_SCHEMA_CLASSES;notclaimeddeploymentready",
+  "localValidationRecord": {
+    "path": "G3R2_LOCAL_VALIDATION.json",
+    "sha256": "b29fd030ebae8310df6d21b7f4b1270d354fd76b1458d4b2f847898bb5ff2e82",
+    "status": "PASS_LOCAL_CHECKS;G3R2_BLOCKED_BY_EXACT_IMAGE_QUALIFICATION_DEFICIENCIES"
+  }
+}

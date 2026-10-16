@@ -1,0 +1,33 @@
+{
+  "totalOperations": 17,
+  "readOnlyOperations": 13,
+  "successfulCliOperations": 17,
+  "failedCliOperations": 0,
+  "childCreationRequests": 2,
+  "childDeletionRequests": 2,
+  "successfulChildCreations": 2,
+  "successfulChildDeletions": 2,
+  "uniqueChildResourceIds": [
+    "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97"
+  ],
+  "guestExecutions": {
+    "q1TransportAttempt": "FAILED_BEFORE_SCRIPT_EXECUTION_EXIT_127;WINDOWS_CRLF_CAUSE_PRESERVED",
+    "q1LfRetry": "SUCCEEDED_EXIT_0;OBSERVED_GUEST_PREREQUISITES_FAIL",
+    "q2": "NOT_EXECUTED",
+    "q3": "NOT_EXECUTED"
+  },
+  "AZURE_MUTATIONS_OTHER_THAN_RUN_COMMAND_CHILDREN": 0,
+  "RBAC_MUTATIONS": 0,
+  "G2_NETWORK_MUTATIONS": 0,
+  "IMAGE_PUSHES": 0,
+  "IMAGE_PULLS": 0,
+  "BUILDS": 0,
+  "REAL_TOKEN_CREATIONS": 0,
+  "FAKE_CREDENTIAL_GENERATIONS": 0,
+  "fakeCredentialSha256": null,
+  "FAKE_CREDENTIAL_PERSISTENCE": "NOT_APPLICABLE_NOT_GENERATED;Q2_STOPPED",
+  "G3A_EXECUTED": false,
+  "G3B_EXECUTED": false,
+  "rollbackDeleteResult": "OWNED_CHILD_ABSENT_CONFIRMED",
+  "semantics": "Two Q1 create/delete lifecycles at one unique child ID;both count against the3-create/3-delete budget. Control-plane CLI success is not guest qualification success. DELETE completion is verified separately after asynchronous Deleting observations."
+}

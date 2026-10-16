@@ -1,0 +1,1236 @@
+{
+  "SELECTED_BUILDER": "NONE",
+  "status": "PARTIAL_FACT_CLOSURE;NO_SELECTED_BUILDER_OR_ENFORCEABLE_ALL_IN_MAXIMUM",
+  "currency": "CAD",
+  "priceFacts": {
+    "vault": {
+      "status": "BOUND",
+      "meter": {
+        "currencyCode": "CAD",
+        "tierMinimumUnits": 0,
+        "retailPrice": 0.042497,
+        "unitPrice": 0.042497,
+        "armRegionName": "Global",
+        "location": "Global",
+        "effectiveStartDate": "2015-08-01T00:00:00Z",
+        "meterId": "0f824807-2376-435c-95c9-f992b67a07b0",
+        "meterName": "Operations",
+        "productId": "DZH318Z0BQG0",
+        "skuId": "DZH318Z0BQG0/002D",
+        "productName": "Key Vault",
+        "skuName": "Standard",
+        "serviceName": "Key Vault",
+        "serviceId": "DZH3157JCZ2M",
+        "serviceFamily": "Security",
+        "unitOfMeasure": "10K",
+        "type": "Consumption",
+        "isPrimaryMeterRegion": false,
+        "armSkuName": "",
+        "sourceFile": "G3R3B_PRICE_key-vault-all.json",
+        "sourceSha256": "fbb152d99e752d24744f7a3c68eef33c54782c1ba97a4bc2910a010442ea6fad",
+        "rawSources": [
+          "G3R3B_PUBLIC_28_price-key-vault-all-page-1.json",
+          "G3R3B_PUBLIC_29_price-key-vault-all-page-2.json"
+        ]
+      },
+      "appliesTo": "Ordinary synthetic secret REST operations on Standard vault",
+      "applicability": "Exact Standard Global and CanadaCentral rows share meterId/rate;both are non-primary. Primary-only filtering hid these applicable rows;no foreign/Premium SKU substitution.",
+      "pricing": {
+        "SOURCE": "https://azure.microsoft.com/en-ca/pricing/details/key-vault/",
+        "CAPTURE": "G3R3B_PUBLIC_22_doc-key-vault-pricing.html",
+        "SHA256": "e9ad103ed86a06c8dd128ae4b9a42451ecf3294a6a3e7bf98a3dfb73024ffc84",
+        "READ_AT_UTC": "2026-10-12T04:44:05.333Z"
+      }
+    },
+    "disk": {
+      "status": "BOUND_RATE_AND_EXISTING_SKU",
+      "meter": {
+        "currencyCode": "CAD",
+        "tierMinimumUnits": 0,
+        "retailPrice": 0.0034,
+        "unitPrice": 0.0034,
+        "armRegionName": "canadacentral",
+        "location": "CA Central",
+        "effectiveStartDate": "2024-09-01T00:00:00Z",
+        "meterId": "df249cf3-71c9-5327-8738-56f65fa3fcda",
+        "meterName": "Disk Transactions LRS Disk Operations",
+        "productId": "DZH318Z0BP88",
+        "skuId": "DZH318Z0BP88/033C",
+        "productName": "Standard SSD Managed Disks",
+        "skuName": "Disk Transactions LRS",
+        "serviceName": "Storage",
+        "serviceId": "DZH317F1HKN0",
+        "serviceFamily": "Storage",
+        "unitOfMeasure": "10K",
+        "type": "Consumption",
+        "isPrimaryMeterRegion": true,
+        "armSkuName": "Disk Transactions",
+        "sourceFile": "G3R3B_PRICE_ssd-transactions.json",
+        "sourceSha256": "64592b44eb7ba4162b2e7b14bccf5ccbf802a5086a8b4fd249af63ca9161c765",
+        "rawSources": ["G3R3B_PUBLIC_31_price-ssd-transactions-page-1.json"]
+      },
+      "diskResource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/disks/nzila-g2-builder-y3koaeijzi6mu_OsDisk_1_50cfc12f1bfb422ca576ad15e790b725",
+      "actualSku": "StandardSSD_LRS",
+      "actualSizeGiB": 32,
+      "hourlyPaidTransactionCap": 43400,
+      "pricing": {
+        "SOURCE": "https://azure.microsoft.com/en-ca/pricing/details/managed-disks/",
+        "CAPTURE": "G3R3B_PUBLIC_24_doc-standard-ssd-pricing.html",
+        "SHA256": "eb673ef376d4f19752ef1ba5debaa216ec723a606011867294c3dcff60b84985",
+        "READ_AT_UTC": "2026-10-12T04:44:06.106Z"
+      },
+      "transactionUnit": "Each<=256KiB I/O is one transaction;larger I/O counts multiple transactions",
+      "durationBound": "UNBOUND_UNTIL_BUILD_AND_CLEANUP_ENFORCEMENT_BINDS"
+    },
+    "agentPool": {
+      "status": "BLOCKED_EXACT_FACT",
+      "allocationMeter": null,
+      "catalogs": [
+        {
+          "sourceFile": "G3R3B_PRICE_registry-all.json",
+          "sha256": "4d11d12404a0bbb25bb3e5390a54df460799803d41bd9f1121d9179a60a21683",
+          "itemCount": 968,
+          "matches": []
+        },
+        {
+          "sourceFile": "G3R3B_PRICE_registry-products.json",
+          "sha256": "be9be71101e8fb523e04113c82030b1e66b533265b34fca63502b6a71b23006a",
+          "itemCount": 968,
+          "matches": []
+        }
+      ],
+      "required": "Applicable S1 dedicated2-vCPU allocation-second CAD rate,or authoritative explicit mapping of Task vCPU Duration meter to allocation billing",
+      "pricing": {
+        "SOURCE": "https://azure.microsoft.com/en-ca/pricing/details/container-registry/",
+        "CAPTURE": "G3R3B_PUBLIC_23_doc-registry-pricing.html",
+        "SHA256": "b112ff3a7c04cd2d13f22fac8167ceac3d5a63a48552414e562d37763a1b1aec",
+        "READ_AT_UTC": "2026-10-12T04:44:05.538Z"
+      },
+      "rejectedProxy": "Task vCPU Duration has paid0.000142CAD/vCPU-second plus6000-second free tier;pricing distinguishes task duration from dedicated allocation. Neither task-duration tariff nor free tier is silently substituted."
+    }
+  },
+  "keyVault": {
+    "status": "BOUND",
+    "meter": {
+      "currencyCode": "CAD",
+      "tierMinimumUnits": 0,
+      "retailPrice": 0.042497,
+      "unitPrice": 0.042497,
+      "armRegionName": "Global",
+      "location": "Global",
+      "effectiveStartDate": "2015-08-01T00:00:00Z",
+      "meterId": "0f824807-2376-435c-95c9-f992b67a07b0",
+      "meterName": "Operations",
+      "productId": "DZH318Z0BQG0",
+      "skuId": "DZH318Z0BQG0/002D",
+      "productName": "Key Vault",
+      "skuName": "Standard",
+      "serviceName": "Key Vault",
+      "serviceId": "DZH3157JCZ2M",
+      "serviceFamily": "Security",
+      "unitOfMeasure": "10K",
+      "type": "Consumption",
+      "isPrimaryMeterRegion": false,
+      "armSkuName": "",
+      "sourceFile": "G3R3B_PRICE_key-vault-all.json",
+      "sourceSha256": "fbb152d99e752d24744f7a3c68eef33c54782c1ba97a4bc2910a010442ea6fad",
+      "rawSources": [
+        "G3R3B_PUBLIC_28_price-key-vault-all-page-1.json",
+        "G3R3B_PUBLIC_29_price-key-vault-all-page-2.json"
+      ]
+    },
+    "appliesTo": "Ordinary synthetic secret REST operations on Standard vault",
+    "applicability": "Exact Standard Global and CanadaCentral rows share meterId/rate;both are non-primary. Primary-only filtering hid these applicable rows;no foreign/Premium SKU substitution.",
+    "pricing": {
+      "SOURCE": "https://azure.microsoft.com/en-ca/pricing/details/key-vault/",
+      "CAPTURE": "G3R3B_PUBLIC_22_doc-key-vault-pricing.html",
+      "SHA256": "e9ad103ed86a06c8dd128ae4b9a42451ecf3294a6a3e7bf98a3dfb73024ffc84",
+      "READ_AT_UTC": "2026-10-12T04:44:05.333Z"
+    },
+    "MAX_SECRET_CREATES": 1,
+    "MAX_SECRET_GETS": 40,
+    "MAX_SECRET_LISTS": 10,
+    "MAX_SECRET_DELETES": 1,
+    "MAX_SECRET_PURGES_IF_USED": 0,
+    "CONTROLLED_NEGATIVE_AUTHENTICATED_CALLS": 10,
+    "BOUNDED_RETRY_CONTINGENCY_CALLS": 38,
+    "MAX_AUTHENTICATED_REST_CALLS": 100,
+    "MAX_SECRET_TRANSACTION_COST_CAD": 0.00042497,
+    "planDerivation": "Secret seeding1;one revision/replica injection/restart attempts up to40 gets;metadata/version audit up to10 calls;cleanup1 delete;ten authenticated negative controls;38 retries across these steps;all retries consume same shared100-call counter",
+    "hmacRequests": "No per-HMAC Key Vault call;environment-injected synthetic key",
+    "purge": "Not used;purge protection remains enabled;secret values are never generated/read in G3R3B"
+  },
+  "acrStorage": {
+    "CURRENT_BYTES_USED": 4681097,
+    "INCLUDED_STORAGE_BYTES": 536870912000,
+    "G3_RESERVED_IMAGE_BYTES": 214748365,
+    "RESULTING_MAXIMUM_BYTES": 219429462,
+    "INCREMENTAL_STORAGE_COST_CAD": 0,
+    "prePushGate": "Fresh usage GET and bounded image size/reservation assertion required before push;headroom is captured evidence,not reservation or future guarantee"
+  },
+  "sharedCostsExcluded": [
+    "Existing G2 VM compute",
+    "Existing disk capacity/mount",
+    "Existing Premium ACR base500GiB included",
+    "Existing ACR PE hourly base",
+    "Existing G2 firewall hourly base",
+    "Existing G2 DNS zone base"
+  ],
+  "logging": {
+    "MAX_LOG_INGESTION_GB": 0.25,
+    "PRICE_PER_GB": 3.909678,
+    "MAX_LOG_COST_CAD_CONDITIONAL": 0.9774195,
+    "meter": {
+      "meterId": "6c00b68b-125b-42cf-9085-af9f4ab7a044",
+      "productName": "Log Analytics",
+      "skuName": "Analytics Logs",
+      "meterName": "Analytics Logs Data Ingestion",
+      "armRegionName": "canadacentral",
+      "currency": "CAD",
+      "unitOfMeasure": "1 GB",
+      "retailPrice": 3.909678,
+      "effectiveStartDate": "2018-02-01T00:00:00Z",
+      "sourceFile": "pricing-Log-Analytics.json"
+    },
+    "ENFORCEMENT": "SOFT_WORKSPACE_QUOTA_DELAYED;NO_HARD_CAP",
+    "proposedDiagnosticContingencyGB": 0.25,
+    "contingencyCoversAllPossibleOverrun": false,
+    "missing": "Independent cleanup/diagnostic cutoff under controller failure;finite arbitrary contingency is not a hard guarantee"
+  },
+  "candidateTraffic": [
+    {
+      "model": "EXISTING_G2_BUILDER_VM",
+      "paths": [
+        {
+          "id": "SOURCE_CONTEXT",
+          "direction": "Inline ARM/VM-agent delivery",
+          "aggregateGB": 0.001,
+          "firewallGB": 0,
+          "privateEndpointGB": 0,
+          "peeringGB": 0,
+          "azurePublicOutboundGB": 0,
+          "note": "Operator upload is Azure inbound,not Azure public egress;VM agent/control-plane transfer not fictional ACR PE traffic"
+        },
+        {
+          "id": "PINNED_PUBLIC_BASE",
+          "direction": "Public builder download,inbound plus requests",
+          "aggregateGB": 2,
+          "firewallGB": 2,
+          "privateEndpointGB": 0,
+          "peeringGB": 0,
+          "azurePublicOutboundGB": 0.01,
+          "note": "Inbound base-image bytes charged at firewall,not public outbound;outbound request/control budget separately included;no compilation-network dependency"
+        },
+        {
+          "id": "FINAL_IMAGE_PUSH",
+          "direction": "G2 VM->same-VNet G2 ACR PE",
+          "aggregateGB": 0.2,
+          "firewallGB": 0,
+          "privateEndpointGB": 0.2,
+          "peeringGB": 0,
+          "azurePublicOutboundGB": 0
+        },
+        {
+          "id": "ACA_IMAGE_PULL",
+          "direction": "G2 ACR PE->G3 ACA",
+          "aggregateGB": 0.4,
+          "firewallGB": 0,
+          "privateEndpointGB": 0.4,
+          "peeringGB": 0.4,
+          "azurePublicOutboundGB": 0,
+          "note": "Includes bounded initial/retry pulls;each crossing byte charged once per endpoint,not multiplied transfers"
+        },
+        {
+          "id": "G3_LOCAL_KV",
+          "direction": "ACA->G3 KV PE",
+          "aggregateGB": 0.02,
+          "firewallGB": 0,
+          "privateEndpointGB": 0.02,
+          "peeringGB": 0,
+          "azurePublicOutboundGB": 0
+        },
+        {
+          "id": "PLATFORM_PUBLIC",
+          "direction": "Platform/control dependencies",
+          "aggregateGB": 1,
+          "firewallGB": 1,
+          "privateEndpointGB": 0,
+          "peeringGB": 0,
+          "azurePublicOutboundGB": 0.25
+        }
+      ],
+      "surfaces": {
+        "firewallGB": 3,
+        "privateEndpointGB": 0.6200000000000001,
+        "peeringGB": 0.4,
+        "azurePublicOutboundGB": 0.26
+      }
+    },
+    {
+      "model": "ACR_DEDICATED_AGENT_POOL_S1",
+      "paths": [
+        {
+          "id": "SOURCE_CONTEXT",
+          "direction": "Operator upload to task Storage then download into G3 pool",
+          "aggregateGB": 0.001,
+          "firewallGB": 0.001,
+          "privateEndpointGB": 0,
+          "peeringGB": 0,
+          "azurePublicOutboundGB": 0,
+          "note": "Operator upload is Azure inbound,not Azure public egress;VM agent/control-plane transfer not fictional ACR PE traffic"
+        },
+        {
+          "id": "PINNED_PUBLIC_BASE",
+          "direction": "Public builder download,inbound plus requests",
+          "aggregateGB": 2,
+          "firewallGB": 2,
+          "privateEndpointGB": 0,
+          "peeringGB": 0,
+          "azurePublicOutboundGB": 0.01,
+          "note": "Inbound base-image bytes charged at firewall,not public outbound;outbound request/control budget separately included;no compilation-network dependency"
+        },
+        {
+          "id": "FINAL_IMAGE_PUSH",
+          "direction": "G3 pool->G2 ACR PE",
+          "aggregateGB": 0.2,
+          "firewallGB": 0,
+          "privateEndpointGB": 0.2,
+          "peeringGB": 0.2,
+          "azurePublicOutboundGB": 0
+        },
+        {
+          "id": "ACA_IMAGE_PULL",
+          "direction": "G2 ACR PE->G3 ACA",
+          "aggregateGB": 0.4,
+          "firewallGB": 0,
+          "privateEndpointGB": 0.4,
+          "peeringGB": 0.4,
+          "azurePublicOutboundGB": 0,
+          "note": "Includes bounded initial/retry pulls;each crossing byte charged once per endpoint,not multiplied transfers"
+        },
+        {
+          "id": "G3_LOCAL_KV",
+          "direction": "ACA->G3 KV PE",
+          "aggregateGB": 0.02,
+          "firewallGB": 0,
+          "privateEndpointGB": 0.02,
+          "peeringGB": 0,
+          "azurePublicOutboundGB": 0
+        },
+        {
+          "id": "PLATFORM_PUBLIC",
+          "direction": "Platform/control dependencies",
+          "aggregateGB": 1,
+          "firewallGB": 1,
+          "privateEndpointGB": 0,
+          "peeringGB": 0,
+          "azurePublicOutboundGB": 0.25
+        }
+      ],
+      "surfaces": {
+        "firewallGB": 3.001,
+        "privateEndpointGB": 0.6200000000000001,
+        "peeringGB": 0.6000000000000001,
+        "azurePublicOutboundGB": 0.26
+      }
+    }
+  ],
+  "candidateConditionalReconstruction": [
+    {
+      "model": "EXISTING_G2_BUILDER_VM",
+      "lines": [
+        {
+          "id": "ACA_CPU",
+          "meter": {
+            "meterId": "c064b5f6-a623-55d5-8f04-942be79fc8e7",
+            "productName": "Azure Container Apps",
+            "skuName": "Standard",
+            "meterName": "Standard vCPU Active Usage",
+            "armRegionName": "canadacentral",
+            "currency": "CAD",
+            "unitOfMeasure": "1 Second",
+            "retailPrice": 0.000048,
+            "effectiveStartDate": "2022-06-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-Container-Apps.json",
+            "sourceSha256": "40c51ed16bd480ee5e78b5fc44d1c3b01dd423235c5d27e217a59eb44a2247f7"
+          },
+          "quantity": 1800,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0864,
+          "reason": ""
+        },
+        {
+          "id": "ACA_MEMORY",
+          "meter": {
+            "meterId": "4113d31b-2df1-5456-86de-3b5ef8ed27f4",
+            "productName": "Azure Container Apps",
+            "skuName": "Standard",
+            "meterName": "Standard Memory Active Usage",
+            "armRegionName": "canadacentral",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GiB Second",
+            "retailPrice": 0.000006,
+            "effectiveStartDate": "2022-06-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-Container-Apps.json",
+            "sourceSha256": "40c51ed16bd480ee5e78b5fc44d1c3b01dd423235c5d27e217a59eb44a2247f7"
+          },
+          "quantity": 3600,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0216,
+          "reason": ""
+        },
+        {
+          "id": "ACA_REQUESTS",
+          "meter": {
+            "meterId": "9d5ac783-0d6a-5ced-812a-e31662edde9e",
+            "productName": "Azure Container Apps",
+            "skuName": "Standard",
+            "meterName": "Standard Requests",
+            "armRegionName": "canadacentral",
+            "currency": "CAD",
+            "unitOfMeasure": "1M",
+            "retailPrice": 0.56662,
+            "effectiveStartDate": "2022-06-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-Container-Apps.json",
+            "sourceSha256": "40c51ed16bd480ee5e78b5fc44d1c3b01dd423235c5d27e217a59eb44a2247f7"
+          },
+          "quantity": 1000,
+          "divisor": 1000000,
+          "conditionalMaximumCAD": 0.00056662,
+          "reason": ""
+        },
+        {
+          "id": "LOGS",
+          "meter": {
+            "meterId": "6c00b68b-125b-42cf-9085-af9f4ab7a044",
+            "productName": "Log Analytics",
+            "skuName": "Analytics Logs",
+            "meterName": "Analytics Logs Data Ingestion",
+            "armRegionName": "canadacentral",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 3.909678,
+            "effectiveStartDate": "2018-02-01T00:00:00Z",
+            "sourceFile": "pricing-Log-Analytics.json",
+            "sourceSha256": "2928e22d8b3e252312f7dd5d8ed3638934d2b7ddfaf81b55336561b0b3b5c457"
+          },
+          "quantity": 0.25,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.9774195,
+          "reason": ""
+        },
+        {
+          "id": "KV_PE_HOURS",
+          "meter": {
+            "meterId": "e6ab7238-e433-4fe0-a2b2-2b2564df2cdb",
+            "productName": "Virtual Network Private Link",
+            "skuName": "Standard",
+            "meterName": "Standard Private Endpoint",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 Hour",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2020-02-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 2,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.028332,
+          "reason": ""
+        },
+        {
+          "id": "KV_PE_INGRESS",
+          "meter": {
+            "meterId": "10caa28b-6479-4852-9eb7-610870cb6417",
+            "productName": "Virtual Network Private Link",
+            "skuName": "Standard",
+            "meterName": "Standard Data Processed - Ingress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2021-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.01,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.00014166,
+          "reason": ""
+        },
+        {
+          "id": "KV_PE_EGRESS",
+          "meter": {
+            "meterId": "e7f162f6-7cb8-4cea-ad4f-12cdb5dda25b",
+            "productName": "Virtual Network Private Link",
+            "skuName": "Standard",
+            "meterName": "Standard Data Processed - Egress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2021-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.01,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.00014166,
+          "reason": ""
+        },
+        {
+          "id": "ACR_PE_INGRESS",
+          "meter": {
+            "meterId": "10caa28b-6479-4852-9eb7-610870cb6417",
+            "productName": "Virtual Network Private Link",
+            "skuName": "Standard",
+            "meterName": "Standard Data Processed - Ingress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2021-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.3,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0042498,
+          "reason": ""
+        },
+        {
+          "id": "ACR_PE_EGRESS",
+          "meter": {
+            "meterId": "e7f162f6-7cb8-4cea-ad4f-12cdb5dda25b",
+            "productName": "Virtual Network Private Link",
+            "skuName": "Standard",
+            "meterName": "Standard Data Processed - Egress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2021-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.3,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0042498,
+          "reason": ""
+        },
+        {
+          "id": "PEERING_SOURCE",
+          "meter": {
+            "meterId": "bbe2e768-80fd-44f3-b76c-dc4a13bb4e64",
+            "productName": "Virtual Network Peering",
+            "skuName": "Intra-Region",
+            "meterName": "Intra-Region Egress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2016-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.4,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0056664,
+          "reason": ""
+        },
+        {
+          "id": "PEERING_DESTINATION",
+          "meter": {
+            "meterId": "59bc01e3-9d3e-4b9f-baef-35e696aad6c4",
+            "productName": "Virtual Network Peering",
+            "skuName": "Intra-Region",
+            "meterName": "Intra-Region Ingress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2016-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.4,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0056664,
+          "reason": ""
+        },
+        {
+          "id": "FIREWALL_PROCESSING",
+          "meter": {
+            "meterId": "ff9d9feb-e6a5-5070-98dd-864487cdf2a6",
+            "productName": "Azure Firewall",
+            "skuName": "Basic",
+            "meterName": "Basic Data Processed",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.092076,
+            "effectiveStartDate": "2023-03-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-Firewall-global-fallback.json",
+            "sourceSha256": "2a32cef3983da41861f6f63570c5807d407e51c2bed201e25db47a5fd6877523"
+          },
+          "quantity": 3,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.27622800000000003,
+          "reason": ""
+        },
+        {
+          "id": "DNS_ZONES",
+          "meter": {
+            "meterId": "0b608a26-f611-4232-8192-ce81b6b57194",
+            "productName": "Azure DNS",
+            "skuName": "Private",
+            "meterName": "Private Zone",
+            "armRegionName": "",
+            "currency": "CAD",
+            "unitOfMeasure": "1",
+            "retailPrice": 0.708275,
+            "effectiveStartDate": "2019-12-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-DNS-global-fallback.json",
+            "sourceSha256": "eca1c41844fdebe0769e3a3ca1340efa05c3db87e0c419b0bd72e775134e4c5e"
+          },
+          "quantity": 2,
+          "divisor": 1,
+          "conditionalMaximumCAD": 1.41655,
+          "reason": "Conservative full catalog month unit for two new zones;existing G2 zone base not duplicated"
+        },
+        {
+          "id": "DNS_QUERIES",
+          "meter": {
+            "meterId": "46cff9cb-4b15-4af0-bf41-25143827fef8",
+            "productName": "Azure DNS",
+            "skuName": "Private",
+            "meterName": "Private Queries",
+            "armRegionName": "",
+            "currency": "CAD",
+            "unitOfMeasure": "1M",
+            "retailPrice": 0.56662,
+            "effectiveStartDate": "2019-12-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-DNS-global-fallback.json",
+            "sourceSha256": "eca1c41844fdebe0769e3a3ca1340efa05c3db87e0c419b0bd72e775134e4c5e"
+          },
+          "quantity": 10000,
+          "divisor": 1000000,
+          "conditionalMaximumCAD": 0.005666200000000001,
+          "reason": ""
+        },
+        {
+          "id": "LOAD_BALANCER_HOURS",
+          "meter": {
+            "meterId": "27827eb0-7f60-4928-940b-f5fe15e7a4cb",
+            "productName": "Load Balancer",
+            "skuName": "Standard",
+            "meterName": "Standard Included LB Rules and Outbound Rules",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 Hour",
+            "retailPrice": 0.035414,
+            "effectiveStartDate": "2018-04-11T00:00:00Z",
+            "sourceFile": "pricing-Load-Balancer-global-fallback.json",
+            "sourceSha256": "9f5ed206f67eea1aa1332a3f841cf0bf13f160463235d04d830028c42a6cbfd6"
+          },
+          "quantity": 2,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.070828,
+          "reason": ""
+        },
+        {
+          "id": "LOAD_BALANCER_DATA",
+          "meter": {
+            "meterId": "dfc7cc11-fbe2-41c8-b6fa-24a574223938",
+            "productName": "Load Balancer",
+            "skuName": "Standard",
+            "meterName": "Standard Data Processed",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.007083,
+            "effectiveStartDate": "2018-04-11T00:00:00Z",
+            "sourceFile": "pricing-Load-Balancer-global-fallback.json",
+            "sourceSha256": "9f5ed206f67eea1aa1332a3f841cf0bf13f160463235d04d830028c42a6cbfd6"
+          },
+          "quantity": 0.02,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.00014166,
+          "reason": ""
+        },
+        {
+          "id": "PLATFORM_IP",
+          "meter": {
+            "meterId": "9c150bf9-2bad-430e-a53c-c213804f49ef",
+            "productName": "IP Addresses",
+            "skuName": "Standard",
+            "meterName": "Standard IPv4 Static Public IP",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 Hour",
+            "retailPrice": 0.007083,
+            "effectiveStartDate": "2018-06-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 2,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.014166,
+          "reason": ""
+        },
+        {
+          "id": "PUBLIC_OUTBOUND",
+          "meter": {
+            "currencyCode": "CAD",
+            "tierMinimumUnits": 100,
+            "retailPrice": 0.12324,
+            "unitPrice": 0.12324,
+            "armRegionName": "Global",
+            "location": "Global",
+            "effectiveStartDate": "2022-05-01T00:00:00Z",
+            "meterId": "9995d93a-7d35-4d3f-9c69-7a7fea447ef4",
+            "meterName": "Standard Data Transfer Out",
+            "productId": "DZH318Z0BNVX",
+            "skuId": "DZH318Z0BNVX/005J",
+            "productName": "Rtn Preference: MGN",
+            "skuName": "Standard",
+            "serviceName": "Bandwidth",
+            "serviceId": "DZH318FHKQ5W",
+            "serviceFamily": "Networking",
+            "unitOfMeasure": "1 GB",
+            "type": "Consumption",
+            "isPrimaryMeterRegion": true,
+            "armSkuName": "",
+            "sourceFile": "G3R3_PRICE_bandwidth-catalog.json",
+            "sourceSha256": "f68a1728ba201bea2428ff62f63157761d32c8bc7035b4d1b891cdc960a926d9"
+          },
+          "quantity": 0.26,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0320424,
+          "reason": "Paid Global MGN rate;no free allowance;public download inbound is not outbound"
+        },
+        {
+          "id": "VAULT_OPERATIONS",
+          "meter": {
+            "currencyCode": "CAD",
+            "tierMinimumUnits": 0,
+            "retailPrice": 0.042497,
+            "unitPrice": 0.042497,
+            "armRegionName": "Global",
+            "location": "Global",
+            "effectiveStartDate": "2015-08-01T00:00:00Z",
+            "meterId": "0f824807-2376-435c-95c9-f992b67a07b0",
+            "meterName": "Operations",
+            "productId": "DZH318Z0BQG0",
+            "skuId": "DZH318Z0BQG0/002D",
+            "productName": "Key Vault",
+            "skuName": "Standard",
+            "serviceName": "Key Vault",
+            "serviceId": "DZH3157JCZ2M",
+            "serviceFamily": "Security",
+            "unitOfMeasure": "10K",
+            "type": "Consumption",
+            "isPrimaryMeterRegion": false,
+            "armSkuName": "",
+            "sourceFile": "G3R3B_PRICE_key-vault-all.json",
+            "sourceSha256": "fbb152d99e752d24744f7a3c68eef33c54782c1ba97a4bc2910a010442ea6fad",
+            "rawSources": [
+              "G3R3B_PUBLIC_28_price-key-vault-all-page-1.json",
+              "G3R3B_PUBLIC_29_price-key-vault-all-page-2.json"
+            ]
+          },
+          "quantity": 100,
+          "divisor": 10000,
+          "conditionalMaximumCAD": 0.00042497,
+          "reason": ""
+        },
+        {
+          "id": "EXISTING_E4_DISK_TRANSACTIONS",
+          "meter": {
+            "currencyCode": "CAD",
+            "tierMinimumUnits": 0,
+            "retailPrice": 0.0034,
+            "unitPrice": 0.0034,
+            "armRegionName": "canadacentral",
+            "location": "CA Central",
+            "effectiveStartDate": "2024-09-01T00:00:00Z",
+            "meterId": "df249cf3-71c9-5327-8738-56f65fa3fcda",
+            "meterName": "Disk Transactions LRS Disk Operations",
+            "productId": "DZH318Z0BP88",
+            "skuId": "DZH318Z0BP88/033C",
+            "productName": "Standard SSD Managed Disks",
+            "skuName": "Disk Transactions LRS",
+            "serviceName": "Storage",
+            "serviceId": "DZH317F1HKN0",
+            "serviceFamily": "Storage",
+            "unitOfMeasure": "10K",
+            "type": "Consumption",
+            "isPrimaryMeterRegion": true,
+            "armSkuName": "Disk Transactions",
+            "sourceFile": "G3R3B_PRICE_ssd-transactions.json",
+            "sourceSha256": "64592b44eb7ba4162b2e7b14bccf5ccbf802a5086a8b4fd249af63ca9161c765",
+            "rawSources": ["G3R3B_PUBLIC_31_price-ssd-transactions-page-1.json"]
+          },
+          "quantity": 86800,
+          "divisor": 10000,
+          "conditionalMaximumCAD": 0.029511999999999997,
+          "reason": "One proposed hour can cross two billing-hour windows;charge both hourly caps conservatively;not a hard lifetime bound"
+        }
+      ],
+      "conditionalSubtotalCAD": 2.97999307,
+      "selectedBuilderMaximumCAD": null,
+      "applicableAllocatedCpuSeconds": 0,
+      "excludedUnboundLines": ["IDENTITY_ISOLATION_AND_CLEANUP_ENFORCEMENT"],
+      "allIn": false,
+      "hardBound": false,
+      "parentSubtotalReused": false
+    },
+    {
+      "model": "ACR_DEDICATED_AGENT_POOL_S1",
+      "lines": [
+        {
+          "id": "ACA_CPU",
+          "meter": {
+            "meterId": "c064b5f6-a623-55d5-8f04-942be79fc8e7",
+            "productName": "Azure Container Apps",
+            "skuName": "Standard",
+            "meterName": "Standard vCPU Active Usage",
+            "armRegionName": "canadacentral",
+            "currency": "CAD",
+            "unitOfMeasure": "1 Second",
+            "retailPrice": 0.000048,
+            "effectiveStartDate": "2022-06-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-Container-Apps.json",
+            "sourceSha256": "40c51ed16bd480ee5e78b5fc44d1c3b01dd423235c5d27e217a59eb44a2247f7"
+          },
+          "quantity": 1800,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0864,
+          "reason": ""
+        },
+        {
+          "id": "ACA_MEMORY",
+          "meter": {
+            "meterId": "4113d31b-2df1-5456-86de-3b5ef8ed27f4",
+            "productName": "Azure Container Apps",
+            "skuName": "Standard",
+            "meterName": "Standard Memory Active Usage",
+            "armRegionName": "canadacentral",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GiB Second",
+            "retailPrice": 0.000006,
+            "effectiveStartDate": "2022-06-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-Container-Apps.json",
+            "sourceSha256": "40c51ed16bd480ee5e78b5fc44d1c3b01dd423235c5d27e217a59eb44a2247f7"
+          },
+          "quantity": 3600,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0216,
+          "reason": ""
+        },
+        {
+          "id": "ACA_REQUESTS",
+          "meter": {
+            "meterId": "9d5ac783-0d6a-5ced-812a-e31662edde9e",
+            "productName": "Azure Container Apps",
+            "skuName": "Standard",
+            "meterName": "Standard Requests",
+            "armRegionName": "canadacentral",
+            "currency": "CAD",
+            "unitOfMeasure": "1M",
+            "retailPrice": 0.56662,
+            "effectiveStartDate": "2022-06-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-Container-Apps.json",
+            "sourceSha256": "40c51ed16bd480ee5e78b5fc44d1c3b01dd423235c5d27e217a59eb44a2247f7"
+          },
+          "quantity": 1000,
+          "divisor": 1000000,
+          "conditionalMaximumCAD": 0.00056662,
+          "reason": ""
+        },
+        {
+          "id": "LOGS",
+          "meter": {
+            "meterId": "6c00b68b-125b-42cf-9085-af9f4ab7a044",
+            "productName": "Log Analytics",
+            "skuName": "Analytics Logs",
+            "meterName": "Analytics Logs Data Ingestion",
+            "armRegionName": "canadacentral",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 3.909678,
+            "effectiveStartDate": "2018-02-01T00:00:00Z",
+            "sourceFile": "pricing-Log-Analytics.json",
+            "sourceSha256": "2928e22d8b3e252312f7dd5d8ed3638934d2b7ddfaf81b55336561b0b3b5c457"
+          },
+          "quantity": 0.25,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.9774195,
+          "reason": ""
+        },
+        {
+          "id": "KV_PE_HOURS",
+          "meter": {
+            "meterId": "e6ab7238-e433-4fe0-a2b2-2b2564df2cdb",
+            "productName": "Virtual Network Private Link",
+            "skuName": "Standard",
+            "meterName": "Standard Private Endpoint",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 Hour",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2020-02-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 2,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.028332,
+          "reason": ""
+        },
+        {
+          "id": "KV_PE_INGRESS",
+          "meter": {
+            "meterId": "10caa28b-6479-4852-9eb7-610870cb6417",
+            "productName": "Virtual Network Private Link",
+            "skuName": "Standard",
+            "meterName": "Standard Data Processed - Ingress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2021-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.01,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.00014166,
+          "reason": ""
+        },
+        {
+          "id": "KV_PE_EGRESS",
+          "meter": {
+            "meterId": "e7f162f6-7cb8-4cea-ad4f-12cdb5dda25b",
+            "productName": "Virtual Network Private Link",
+            "skuName": "Standard",
+            "meterName": "Standard Data Processed - Egress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2021-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.01,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.00014166,
+          "reason": ""
+        },
+        {
+          "id": "ACR_PE_INGRESS",
+          "meter": {
+            "meterId": "10caa28b-6479-4852-9eb7-610870cb6417",
+            "productName": "Virtual Network Private Link",
+            "skuName": "Standard",
+            "meterName": "Standard Data Processed - Ingress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2021-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.3,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0042498,
+          "reason": ""
+        },
+        {
+          "id": "ACR_PE_EGRESS",
+          "meter": {
+            "meterId": "e7f162f6-7cb8-4cea-ad4f-12cdb5dda25b",
+            "productName": "Virtual Network Private Link",
+            "skuName": "Standard",
+            "meterName": "Standard Data Processed - Egress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2021-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.3,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0042498,
+          "reason": ""
+        },
+        {
+          "id": "PEERING_SOURCE",
+          "meter": {
+            "meterId": "bbe2e768-80fd-44f3-b76c-dc4a13bb4e64",
+            "productName": "Virtual Network Peering",
+            "skuName": "Intra-Region",
+            "meterName": "Intra-Region Egress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2016-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.6000000000000001,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.008499600000000001,
+          "reason": ""
+        },
+        {
+          "id": "PEERING_DESTINATION",
+          "meter": {
+            "meterId": "59bc01e3-9d3e-4b9f-baef-35e696aad6c4",
+            "productName": "Virtual Network Peering",
+            "skuName": "Intra-Region",
+            "meterName": "Intra-Region Ingress",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.014166,
+            "effectiveStartDate": "2016-11-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 0.6000000000000001,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.008499600000000001,
+          "reason": ""
+        },
+        {
+          "id": "FIREWALL_PROCESSING",
+          "meter": {
+            "meterId": "ff9d9feb-e6a5-5070-98dd-864487cdf2a6",
+            "productName": "Azure Firewall",
+            "skuName": "Basic",
+            "meterName": "Basic Data Processed",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.092076,
+            "effectiveStartDate": "2023-03-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-Firewall-global-fallback.json",
+            "sourceSha256": "2a32cef3983da41861f6f63570c5807d407e51c2bed201e25db47a5fd6877523"
+          },
+          "quantity": 3.001,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.276320076,
+          "reason": ""
+        },
+        {
+          "id": "DNS_ZONES",
+          "meter": {
+            "meterId": "0b608a26-f611-4232-8192-ce81b6b57194",
+            "productName": "Azure DNS",
+            "skuName": "Private",
+            "meterName": "Private Zone",
+            "armRegionName": "",
+            "currency": "CAD",
+            "unitOfMeasure": "1",
+            "retailPrice": 0.708275,
+            "effectiveStartDate": "2019-12-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-DNS-global-fallback.json",
+            "sourceSha256": "eca1c41844fdebe0769e3a3ca1340efa05c3db87e0c419b0bd72e775134e4c5e"
+          },
+          "quantity": 2,
+          "divisor": 1,
+          "conditionalMaximumCAD": 1.41655,
+          "reason": "Conservative full catalog month unit for two new zones;existing G2 zone base not duplicated"
+        },
+        {
+          "id": "DNS_QUERIES",
+          "meter": {
+            "meterId": "46cff9cb-4b15-4af0-bf41-25143827fef8",
+            "productName": "Azure DNS",
+            "skuName": "Private",
+            "meterName": "Private Queries",
+            "armRegionName": "",
+            "currency": "CAD",
+            "unitOfMeasure": "1M",
+            "retailPrice": 0.56662,
+            "effectiveStartDate": "2019-12-01T00:00:00Z",
+            "sourceFile": "pricing-Azure-DNS-global-fallback.json",
+            "sourceSha256": "eca1c41844fdebe0769e3a3ca1340efa05c3db87e0c419b0bd72e775134e4c5e"
+          },
+          "quantity": 10000,
+          "divisor": 1000000,
+          "conditionalMaximumCAD": 0.005666200000000001,
+          "reason": ""
+        },
+        {
+          "id": "LOAD_BALANCER_HOURS",
+          "meter": {
+            "meterId": "27827eb0-7f60-4928-940b-f5fe15e7a4cb",
+            "productName": "Load Balancer",
+            "skuName": "Standard",
+            "meterName": "Standard Included LB Rules and Outbound Rules",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 Hour",
+            "retailPrice": 0.035414,
+            "effectiveStartDate": "2018-04-11T00:00:00Z",
+            "sourceFile": "pricing-Load-Balancer-global-fallback.json",
+            "sourceSha256": "9f5ed206f67eea1aa1332a3f841cf0bf13f160463235d04d830028c42a6cbfd6"
+          },
+          "quantity": 2,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.070828,
+          "reason": ""
+        },
+        {
+          "id": "LOAD_BALANCER_DATA",
+          "meter": {
+            "meterId": "dfc7cc11-fbe2-41c8-b6fa-24a574223938",
+            "productName": "Load Balancer",
+            "skuName": "Standard",
+            "meterName": "Standard Data Processed",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 GB",
+            "retailPrice": 0.007083,
+            "effectiveStartDate": "2018-04-11T00:00:00Z",
+            "sourceFile": "pricing-Load-Balancer-global-fallback.json",
+            "sourceSha256": "9f5ed206f67eea1aa1332a3f841cf0bf13f160463235d04d830028c42a6cbfd6"
+          },
+          "quantity": 0.02,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.00014166,
+          "reason": ""
+        },
+        {
+          "id": "PLATFORM_IP",
+          "meter": {
+            "meterId": "9c150bf9-2bad-430e-a53c-c213804f49ef",
+            "productName": "IP Addresses",
+            "skuName": "Standard",
+            "meterName": "Standard IPv4 Static Public IP",
+            "armRegionName": "Global",
+            "currency": "CAD",
+            "unitOfMeasure": "1 Hour",
+            "retailPrice": 0.007083,
+            "effectiveStartDate": "2018-06-01T00:00:00Z",
+            "sourceFile": "pricing-Virtual-Network-global-fallback.json",
+            "sourceSha256": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4"
+          },
+          "quantity": 2,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.014166,
+          "reason": ""
+        },
+        {
+          "id": "PUBLIC_OUTBOUND",
+          "meter": {
+            "currencyCode": "CAD",
+            "tierMinimumUnits": 100,
+            "retailPrice": 0.12324,
+            "unitPrice": 0.12324,
+            "armRegionName": "Global",
+            "location": "Global",
+            "effectiveStartDate": "2022-05-01T00:00:00Z",
+            "meterId": "9995d93a-7d35-4d3f-9c69-7a7fea447ef4",
+            "meterName": "Standard Data Transfer Out",
+            "productId": "DZH318Z0BNVX",
+            "skuId": "DZH318Z0BNVX/005J",
+            "productName": "Rtn Preference: MGN",
+            "skuName": "Standard",
+            "serviceName": "Bandwidth",
+            "serviceId": "DZH318FHKQ5W",
+            "serviceFamily": "Networking",
+            "unitOfMeasure": "1 GB",
+            "type": "Consumption",
+            "isPrimaryMeterRegion": true,
+            "armSkuName": "",
+            "sourceFile": "G3R3_PRICE_bandwidth-catalog.json",
+            "sourceSha256": "f68a1728ba201bea2428ff62f63157761d32c8bc7035b4d1b891cdc960a926d9"
+          },
+          "quantity": 0.26,
+          "divisor": 1,
+          "conditionalMaximumCAD": 0.0320424,
+          "reason": "Paid Global MGN rate;no free allowance;public download inbound is not outbound"
+        },
+        {
+          "id": "VAULT_OPERATIONS",
+          "meter": {
+            "currencyCode": "CAD",
+            "tierMinimumUnits": 0,
+            "retailPrice": 0.042497,
+            "unitPrice": 0.042497,
+            "armRegionName": "Global",
+            "location": "Global",
+            "effectiveStartDate": "2015-08-01T00:00:00Z",
+            "meterId": "0f824807-2376-435c-95c9-f992b67a07b0",
+            "meterName": "Operations",
+            "productId": "DZH318Z0BQG0",
+            "skuId": "DZH318Z0BQG0/002D",
+            "productName": "Key Vault",
+            "skuName": "Standard",
+            "serviceName": "Key Vault",
+            "serviceId": "DZH3157JCZ2M",
+            "serviceFamily": "Security",
+            "unitOfMeasure": "10K",
+            "type": "Consumption",
+            "isPrimaryMeterRegion": false,
+            "armSkuName": "",
+            "sourceFile": "G3R3B_PRICE_key-vault-all.json",
+            "sourceSha256": "fbb152d99e752d24744f7a3c68eef33c54782c1ba97a4bc2910a010442ea6fad",
+            "rawSources": [
+              "G3R3B_PUBLIC_28_price-key-vault-all-page-1.json",
+              "G3R3B_PUBLIC_29_price-key-vault-all-page-2.json"
+            ]
+          },
+          "quantity": 100,
+          "divisor": 10000,
+          "conditionalMaximumCAD": 0.00042497,
+          "reason": ""
+        }
+      ],
+      "conditionalSubtotalCAD": 2.956239546,
+      "selectedBuilderMaximumCAD": null,
+      "applicableAllocatedCpuSeconds": 7200,
+      "excludedUnboundLines": [
+        "DEDICATED_POOL_ALLOCATION",
+        "SOURCE_STAGING_RETENTION",
+        "INDEPENDENT_CLEANUP_ENFORCEMENT"
+      ],
+      "allIn": false,
+      "hardBound": false,
+      "parentSubtotalReused": false
+    }
+  ],
+  "SELECTED_BUILDER_MAX_COST_CAD": null,
+  "EXPECTED_PROOF_RUN_COST_CAD": null,
+  "BOUNDED_MAX_PROOF_RUN_COST_CAD": null,
+  "ROLLBACK_ALLOWANCE_CAD": null,
+  "DIAGNOSTIC_CONTINGENCY_CAD": null,
+  "UNCERTAINTY_BUFFER_CAD": null,
+  "RECOMMENDED_EXECUTION_CEILING_CAD": "UNSUPPORTED",
+  "HUMAN_APPROVED_EXECUTION_CEILING_CAD": "UNBOUND",
+  "numericCeilingRule": [
+    { "name": "BUILDER", "status": "UNBOUND_MATERIAL_FACT" },
+    { "name": "KEY_VAULT_OPERATIONS", "status": "BOUND" },
+    { "name": "ACR_STORAGE", "status": "BOUND" },
+    { "name": "LOGGING", "status": "UNBOUND_MATERIAL_FACT" },
+    { "name": "NETWORK", "status": "UNBOUND_MATERIAL_FACT" },
+    { "name": "COMPUTE", "status": "UNBOUND_MATERIAL_FACT" },
+    { "name": "ROLLBACK", "status": "UNBOUND_MATERIAL_FACT" }
+  ],
+  "parentConditionalMaximum": "6.9849_RETIRED_AS_CURRENT_BASIS;NO_NEW_VM_OR_NEW_DISK_CHARGE",
+  "exactResiduals": [
+    "No candidate meets every material criterion;see comparison",
+    "B dedicated allocation-second CAD mapping absent",
+    "Independent builder/credential/source and proof cleanup enforcement unbound",
+    "Logging/network/proof-lived-resource quantities are conditional;soft quotas and alerts do not enforce lifetime ceilings"
+  ]
+}

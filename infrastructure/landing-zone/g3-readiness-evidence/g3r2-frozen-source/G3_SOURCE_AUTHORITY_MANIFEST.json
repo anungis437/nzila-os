@@ -1,0 +1,382 @@
+{
+  "SOURCE_AUTHORITY_ID": "NZ-20261008-INFRA-001:G3_SOURCE_AUTHORITY_V1",
+  "VERSION": "G3_SOURCE_AUTHORITY_V1",
+  "LINEAGE_CLASS": "PROSPECTIVE_G3R2",
+  "CREATED_FROM_CONTRACTS": [
+    {
+      "name": "G3R1_account.json",
+      "sha256": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae"
+    },
+    {
+      "name": "G3R1_account.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "G3R1_AUTHORITY_RECOVERY.json",
+      "sha256": "db1b7db98b9d4014322c85762ad083d12807fe953b5b8d66bc15b0ed271142a1"
+    },
+    {
+      "name": "G3R1_AZURE_READ_LEDGER.json",
+      "sha256": "bd3f9b9d7fb43b65c996b7a16c400ba66112936b58f93ba13ebfd8f3297e3a6e"
+    },
+    {
+      "name": "G3R1_BLOCKER_NORMALIZATION.json",
+      "sha256": "724c143bcd21ad78ba9650094d05cd18df3998aac4845c1c5d9f116edfaafc5b"
+    },
+    {
+      "name": "G3R1_BLOCKER_NORMALIZATION.md",
+      "sha256": "ee77011cbc92120e183e04f021c9a63f9e0fcea3b96798623edc7b6728b25b13"
+    },
+    {
+      "name": "G3R1_COST_MODEL.json",
+      "sha256": "27be8a19e2afab5815e01af073a8f9ddc793025e60a3a4b27945ce97e673f093"
+    },
+    {
+      "name": "G3R1_denyAssignments-page-1.json",
+      "sha256": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92"
+    },
+    {
+      "name": "G3R1_denyAssignments-page-1.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "G3R1_directory-capacity.json",
+      "sha256": "d1688f60cd7ba88eacf87c2d9381c96d4594800bb6d726faf900120ad3b6b11b"
+    },
+    {
+      "name": "G3R1_directory-capacity.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "G3R1_HUMAN_AUTHORITY_PACKET.md",
+      "sha256": "a231f36e48ead80241a6e613ccbe434ef935c8e550cced4826e694d5d6ef715e"
+    },
+    {
+      "name": "G3R1_NETWORK_CONTRACT.json",
+      "sha256": "e25cf331bb6322e38877a9c7d98bef3b24a89a834dd22c7eab354f697c0f4360"
+    },
+    {
+      "name": "G3R1_policyAssignments-page-1.json",
+      "sha256": "e8d34a47c4cd7e3c3f4f2da8d828e96740716b32992942c705afaa054d95725b"
+    },
+    {
+      "name": "G3R1_policyAssignments-page-1.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "G3R1_west-europe-policy-definition.json",
+      "sha256": "7bc0e7d1b63bb77b74900e5b566b427a0a5cfae30034d5c711d84999147ed59f"
+    },
+    {
+      "name": "G3R1_west-europe-policy-definition.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "G3_EXECUTION_READINESS.json",
+      "sha256": "0085248a64f7aec837a303fab66cbfc66b925d674b3395f3919a131dd80c6467"
+    },
+    {
+      "name": "G3_EXECUTION_READINESS.md",
+      "sha256": "9a2eaa56d070a30f8af241834b0287b875af4f969440db16f2610ace573d3452"
+    }
+  ],
+  "acceptedLocalInputs": [
+    {
+      "name": "README.md",
+      "sha256": "87308f77dc0f196423baf4a5494444cb22ae182446e34462bf8d644ddc018478"
+    },
+    {
+      "name": "naming.json",
+      "sha256": "80d6aca0837f67af298108b5523963d002cf1bd5c4dc6666d61909f6d070ce12"
+    },
+    {
+      "name": "G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+      "sha256": "8417e1c2def05aa20aca98f415c7014351e144a7ae2091a91a8343c71e96e356"
+    }
+  ],
+  "HISTORICAL_PACKAGE_RECOVERY_STATUS": "NOT_FOUND_IN_BOUNDED_RECOVERY_UNIVERSE",
+  "HISTORICAL_EXPECTED_MODULE_COUNT": 7,
+  "HISTORICAL_RECOVERED_MODULE_COUNT": 0,
+  "NEW_CANONICAL_MODULE_COUNT": 8,
+  "MODULES": [
+    {
+      "id": "network",
+      "responsibility": "G3 network/subnets/NSGs/UDR and G3-side peering;G2 dependencies external",
+      "path": "modules/network.bicep",
+      "scope": "resourceGroup"
+    },
+    {
+      "id": "identities",
+      "responsibility": "Exactly two separate platform-pull/build-slot and runtime UAMIs;no credentials",
+      "path": "modules/identities.bicep",
+      "scope": "resourceGroup"
+    },
+    {
+      "id": "observability",
+      "responsibility": "Log Analytics lifecycle/retention/capping separate from identities",
+      "path": "modules/observability.bicep",
+      "scope": "resourceGroup"
+    },
+    {
+      "id": "vault",
+      "responsibility": "Private RBAC Key Vault,endpoint and DNS;secret seeding external",
+      "path": "modules/vault.bicep",
+      "scope": "resourceGroup"
+    },
+    {
+      "id": "environment",
+      "responsibility": "Empty INTERNAL Consumption workload-profiles environment and diagnostics",
+      "path": "modules/environment.bicep",
+      "scope": "resourceGroup"
+    },
+    {
+      "id": "internal-dns",
+      "responsibility": "Post-create defaultDomain/staticIP DNS dependency boundary",
+      "path": "modules/internal-dns.bicep",
+      "scope": "resourceGroup"
+    },
+    {
+      "id": "workload",
+      "responsibility": "Digest-pinned synthetic app with capacity/identity gates",
+      "path": "modules/workload.bicep",
+      "scope": "resourceGroup"
+    },
+    {
+      "id": "bindings",
+      "responsibility": "Explicitly locked secret-scoped runtime assignment;registry grants external",
+      "path": "modules/bindings.bicep",
+      "scope": "resourceGroup"
+    }
+  ],
+  "decompositionRationale": "Eightindependentboundaries:network,identities,observability,privatevault,emptyenvironment,post-createinternalDNS,activationgatedworkload,explicitRBAC. DNSruntime-namecannotbeinlineenvironmentresource;identity/workspacelifecyclesseparate. Countnotderivedfromhistoricalseven.",
+  "rootScope": "subscription",
+  "CONTROLLERS": [
+    {
+      "path": "controllers/local-plan.mjs",
+      "lineage": "PROSPECTIVE_G3R2",
+      "actions": [
+        "PLAN",
+        "LOCAL_VALIDATE",
+        "PROOF_MANIFEST",
+        "ROLLBACK_PLAN",
+        "RECONCILIATION_PLAN"
+      ],
+      "AZURE_EXECUTION_ALLOWED": "NO",
+      "executionStatus": "NOT_EXECUTED"
+    }
+  ],
+  "IMAGE_SOURCE": {
+    "decision": "BLOCKED",
+    "candidateId": "G3_SYNTHETIC_HEALTH_V1_CANDIDATE_NOT_QUALIFIED",
+    "lineage": "PROSPECTIVE_G3R2",
+    "sourceCommit": "7bec20aad11d43eeae8099c14e021b3074154b27",
+    "sourceFiles": [
+      {
+        "name": ".dockerignore",
+        "original": "infrastructure/landing-zone/synthetic-health/.dockerignore",
+        "sha256": "73af6862941f3d7948ba5344b7d657325b2c94a1c6261ffc003e9432351f900e"
+      },
+      {
+        "name": "Dockerfile",
+        "original": "infrastructure/landing-zone/synthetic-health/Dockerfile",
+        "sha256": "a12eef5e93e0e4c70c40748f14dbc1522e4ac277f2f2331aa254cb34047b6471"
+      },
+      {
+        "name": "go.mod",
+        "original": "infrastructure/landing-zone/synthetic-health/go.mod",
+        "sha256": "7c0ebaa93f7f36d37e82b942b49d1902f8426829f1d5971d715b8578e052f639"
+      },
+      {
+        "name": "main.go",
+        "original": "infrastructure/landing-zone/synthetic-health/main.go",
+        "sha256": "cada5bcf57edfeda2b9bf5db27cd1d3f04be7c9b748ce5b49b9d29edc084b699"
+      },
+      {
+        "name": "main_test.go",
+        "original": "infrastructure/landing-zone/synthetic-health/main_test.go",
+        "sha256": "690daa9805ef9ae3e158b628d6886123e08139132ee7bddbba2ba47f5578791e"
+      }
+    ],
+    "buildContextDigest": "155a9a5c2a0da330d2718b8c370f7ca003ad56a1d8e4cf20efe1beb0b00f6ba5",
+    "digestMethod": "SHA256(sorted ordered candidate name+fileSHA manifest);not OCI image digest",
+    "dockerfileDigest": "a12eef5e93e0e4c70c40748f14dbc1522e4ac277f2f2331aa254cb34047b6471",
+    "review": {
+      "base": "scratch;no runtimebasepull",
+      "dependencySurface": "Go standardlibrary only;go1.22 language directive isnot an exactcompilerpin",
+      "runtimeUser": "65532:65532",
+      "listeningPort": 3000,
+      "healthRoutes": ["/health/readiness", "/health/liveness"],
+      "healthBehavior": "GET200 staticstatus;othermethods405;otherpaths404;PORTvalidated",
+      "runtimeNetwork": "No sourceinitiatedoutboundrequests;ACAplatform dependencies stillrequired",
+      "secretUsage": "NONE;doesnotconsumeG3_PROOF_SECRET orrequestruntimeMI/KVtoken",
+      "networkChallengeObservationImplemented": false,
+      "containerContext": "Dockerfile copies health-server;binary isnot committed and build recipe/compilerqualification isnot in committedcandidate",
+      "workingTreeDifference": "Current visible directory contains Node server.mjs,not the selectedcommittedGo tree. It ispreserved,not silentlyoverwritten.",
+      "healthSourceEvidence": true
+    },
+    "exactDeficiencies": [
+      {
+        "id": "IMAGE-1",
+        "fact": "Committedcandidate has no non-disclosingruntime secretchallenge observation.",
+        "needed": "Explicit prospectiveimage amendment or accepted artifact-preservingobserver design;do notsilentlyfixhistorical/currentsource."
+      },
+      {
+        "id": "IMAGE-2",
+        "fact": "Dockercontext requires health-server,but exactpinnedcompiler/buildrecipe/binaryprovenance are absent.",
+        "needed": "Explicit reproducibleprospectivebinary-production contract before imagequalification;no build performed."
+      }
+    ],
+    "expectedRepository": "g3-synthetic-runtime",
+    "tagPolicy": "g3r2-source-<canonicalsourcehash>;tag not finalauthority",
+    "futureImmutableDigestBinding": "REQUIRED_AFTER_FUTURE_AUTHORIZED_BUILD;new prospectiveimage mustnot claim historicalmanifest",
+    "historicalManifestReused": false,
+    "imageBuilt": false,
+    "imagePushed": false
+  },
+  "NETWORK_CONTRACT_DIGEST": "e25cf331bb6322e38877a9c7d98bef3b24a89a834dd22c7eab354f697c0f4360",
+  "IDENTITY_CONTRACT": {
+    "build": "nzila-g3-pull-95086e2f",
+    "buildPurpose": "Platformpullonly,None;operatorwritesseparately",
+    "runtime": "nzila-g3-runtime-95086e2f",
+    "runtimePurpose": "Main,exactsyntheticsecretscope,noACR/buildroles",
+    "count": 2,
+    "roleAssignments": "PROPOSED_NOT_AUTHORIZED",
+    "operatorCandidate": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+    "humanSlots": {
+      "operatorPrincipal": "HUMAN_BINDING_REQUIRED",
+      "lifecycleOwner": "HUMAN_BINDING_REQUIRED",
+      "separateHumanApprover": "HUMAN_BINDING_REQUIRED",
+      "purgeProtection": "HUMAN_BINDING_REQUIRED;examplefalseisnotdecision"
+    }
+  },
+  "COST_BOM": {
+    "path": "G3_BILL_OF_MATERIALS.json",
+    "sha256": "0737c9f7763646f9dbda5f2490346ae4250ec64f8f7e6564e1b3dc93a323b4e7"
+  },
+  "BUILD_COMMANDS": [
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\main.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\network.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\identities.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\observability.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\vault.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\environment.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\internal-dns.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\workload.bicep --stdout",
+    "C:\\Users\\AubertNungisa\\.azure\\bin\\bicep.exe build C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-source\\modules\\bindings.bicep --stdout"
+  ],
+  "VALIDATION_COMMANDS": [
+    "node --test infrastructure\\landing-zone\\g3r2-source-closure.test.mjs",
+    "node infrastructure\\landing-zone\\g3r2-source-closure.mjs --check",
+    "pnpm validate:docs"
+  ],
+  "DEPLOYMENT_STATUS": "NOT_AUTHORIZED",
+  "AZURE_MUTATION_ALLOWED": "NO",
+  "sourceFiles": [
+    {
+      "path": "controllers/local-plan.mjs",
+      "sha256": "a635924d7ed4539f46e11d434c4cb135949fe10edf2d6979b2540d8c6471ddd2"
+    },
+    {
+      "path": "EXTERNAL_G2_MUTATION_DEPENDENCIES.json",
+      "sha256": "ec7fc099ecde88e7ca38fa919fc8315c3b7f92ba9a7946049b407a687c05e4c7"
+    },
+    {
+      "path": "G3_BILL_OF_MATERIALS.json",
+      "sha256": "0737c9f7763646f9dbda5f2490346ae4250ec64f8f7e6564e1b3dc93a323b4e7"
+    },
+    {
+      "path": "image-candidate/.dockerignore",
+      "sha256": "73af6862941f3d7948ba5344b7d657325b2c94a1c6261ffc003e9432351f900e"
+    },
+    {
+      "path": "image-candidate/Dockerfile",
+      "sha256": "a12eef5e93e0e4c70c40748f14dbc1522e4ac277f2f2331aa254cb34047b6471"
+    },
+    {
+      "path": "image-candidate/go.mod",
+      "sha256": "7c0ebaa93f7f36d37e82b942b49d1902f8426829f1d5971d715b8578e052f639"
+    },
+    {
+      "path": "image-candidate/main_test.go",
+      "sha256": "690daa9805ef9ae3e158b628d6886123e08139132ee7bddbba2ba47f5578791e"
+    },
+    {
+      "path": "image-candidate/main.go",
+      "sha256": "cada5bcf57edfeda2b9bf5db27cd1d3f04be7c9b748ce5b49b9d29edc084b699"
+    },
+    {
+      "path": "main.bicep",
+      "sha256": "c3a21482cb4cfe37655bd74528edcab01d63b7734f7f38827365684d339afd18"
+    },
+    {
+      "path": "modules/bindings.bicep",
+      "sha256": "2ea704931e63658353fc3090e0e6976e4d75c16beb02379e397d32157240a13e"
+    },
+    {
+      "path": "modules/environment.bicep",
+      "sha256": "97770eed925903f0c1e6a10aca52a9d31a13944deea05429d578918ea92e607b"
+    },
+    {
+      "path": "modules/identities.bicep",
+      "sha256": "386b65cf3100482cc70bfdfdb06b9fb3a16042d00d7955daf13a5881a07bb437"
+    },
+    {
+      "path": "modules/internal-dns.bicep",
+      "sha256": "ba216118a14ac96d30524001d9490c99c20cde3309e9e6ae030aa86b67e3e686"
+    },
+    {
+      "path": "modules/network.bicep",
+      "sha256": "c28ff961bc124c64f89711d045df0d29d0dd046563d8186b0a0322297b8b9302"
+    },
+    {
+      "path": "modules/observability.bicep",
+      "sha256": "bddf62fcebce555a293f4bc703443cde797ef5ea2343b9ced0d2c24d5d0a1178"
+    },
+    {
+      "path": "modules/vault.bicep",
+      "sha256": "5d19df8996f63e38fbb37aa8538df6591b387a58fef3ce828ba14e86d6b68552"
+    },
+    {
+      "path": "modules/workload.bicep",
+      "sha256": "cf8865fa6d088cdf87677906b18818db471e0f8aabfe5b8a4b453e8e66e44dee"
+    },
+    {
+      "path": "parameters.example.json",
+      "sha256": "05e8074e1123a927164bcd097df667c6cc8aaccaf7e0fc0392aa003b39b01a3f"
+    },
+    {
+      "path": "parameters.schema.json",
+      "sha256": "2a8984bbae8980c81b71c2832b4d58563e73b0f1c57a759af92339c49fff5728"
+    },
+    {
+      "path": "proof/G3_NEGATIVE_PROBES.json",
+      "sha256": "03a1fdd5904e9a22b450d7014a5e31aeef2a838ef6c257d8d38e202186f3b1d2"
+    },
+    {
+      "path": "proof/G3_PROOF_MANIFEST.json",
+      "sha256": "e9cc24331a41c35de980be334bb7fe49790cd7aaf059c59dedc99ffc4080c8ae"
+    },
+    {
+      "path": "proof/G3_RECONCILIATION_PLAN.json",
+      "sha256": "3abcf40d5c82c578d488f3810ae469650b05cfdc8e513f57d4eea0389a784403"
+    },
+    {
+      "path": "proof/G3_ROLLBACK_PLAN.json",
+      "sha256": "a1247c7aadbc645beaf6438f70c39a68fba6a18ec44fb25207c998e008c90a3b"
+    }
+  ],
+  "controllerExecution": "NOT_EXECUTED;pureparameter/gatefunctions onlytestableoffline;noCLIinvocation",
+  "sourceCompleteness": "LOCAL_INFRASTRUCTURE_COMPILES;IMAGE_DEPENDENT_PROOF_EXACTLY_BLOCKED",
+  "localTooling": {
+    "generator": {
+      "path": "g3r2-source-closure.mjs",
+      "sha256": "1e81893fe6f7ec77db9618ce05b27b77885874d077372d1b19f4efb638cea84f"
+    },
+    "parameterValidation": "Purelocalcontrollerhelpercalls only;no controllerCLI/planningorchestrator execution"
+  },
+  "requiredParameterAccounting": {
+    "required": ["names", "tags", "networkRules", "g2VnetId", "keyVaultPurgeProtection"],
+    "unaccounted": [],
+    "humanOrDiscoveryValuesAreNotDeploymentReady": true
+  }
+}

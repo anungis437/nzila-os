@@ -1,0 +1,268 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.48.1.52935",
+      "templateHash": "17374867630100491894"
+    }
+  },
+  "parameters": {
+    "provisionResources": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    },
+    "location": {
+      "type": "string"
+    },
+    "names": {
+      "type": "object"
+    },
+    "tags": {
+      "type": "object"
+    },
+    "networkRules": {
+      "type": "object"
+    },
+    "g2VnetId": {
+      "type": "string"
+    },
+    "discoveredEndpointIps": {
+      "type": "array"
+    },
+    "approvedPlatformPrefixes": {
+      "type": "array"
+    }
+  },
+  "variables": {
+    "acaPrefix": "10.91.1.0/24",
+    "builderPrefix": "10.91.3.0/24",
+    "rules": "[concat(parameters('networkRules').inbound, parameters('networkRules').outbound, if(not(empty(parameters('discoveredEndpointIps'))), createArray(), createArray()), if(not(empty(parameters('approvedPlatformPrefixes'))), createArray(createObject('name', 'private-endpoints', 'properties', createObject('priority', 120, 'direction', 'Outbound', 'access', 'Allow', 'protocol', 'Tcp', 'sourceAddressPrefix', variables('acaPrefix'), 'sourcePortRange', '*', 'destinationAddressPrefixes', parameters('discoveredEndpointIps'), 'destinationPortRange', '443')), createObject('name', 'bounded-platform-fqdns', 'properties', createObject('priority', 140, 'direction', 'Outbound', 'access', 'Allow', 'protocol', 'Tcp', 'sourceAddressPrefix', variables('acaPrefix'), 'sourcePortRange', '*', 'destinationAddressPrefixes', parameters('approvedPlatformPrefixes'), 'destinationPortRange', '443'))), createArray()))]"
+  },
+  "resources": [
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2024-05-01",
+      "name": "[parameters('names').nsg]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "securityRules": "[variables('rules')]"
+      }
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2024-05-01",
+      "name": "[format('{0}-builder', parameters('names').nsg)]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "deny-unapproved-ingress",
+            "properties": {
+              "priority": 900,
+              "direction": "Inbound",
+              "access": "Deny",
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "[variables('builderPrefix')]",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*"
+            }
+          },
+          {
+            "name": "deny-unapproved-egress",
+            "properties": {
+              "priority": 900,
+              "direction": "Outbound",
+              "access": "Deny",
+              "protocol": "*",
+              "sourceAddressPrefix": "[variables('builderPrefix')]",
+              "destinationAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2024-05-01",
+      "name": "[format('{0}-pe', parameters('names').nsg)]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "private-vault-consumers",
+            "properties": {
+              "priority": 100,
+              "direction": "Inbound",
+              "access": "Allow",
+              "protocol": "Tcp",
+              "sourceAddressPrefixes": [
+                "[variables('acaPrefix')]",
+                "[variables('builderPrefix')]"
+              ],
+              "destinationAddressPrefix": "10.91.2.0/24",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "deny-other-pe-ingress",
+            "properties": {
+              "priority": 900,
+              "direction": "Inbound",
+              "access": "Deny",
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "10.91.2.0/24",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2024-05-01",
+      "name": "[parameters('names').routeTable]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "disableBgpRoutePropagation": true,
+        "routes": [
+          {
+            "name": "g3-default-to-g2-firewall",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "10.90.0.4"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2024-05-01",
+      "name": "[parameters('names').vnet]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.91.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('names').acaSubnet]",
+            "properties": {
+              "addressPrefix": "[variables('acaPrefix')]",
+              "delegations": [
+                {
+                  "name": "aca",
+                  "properties": {
+                    "serviceName": "Microsoft.App/environments"
+                  }
+                }
+              ],
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('names').nsg)]"
+              },
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('names').routeTable)]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('names').privateEndpointSubnet]",
+            "properties": {
+              "addressPrefix": "10.91.2.0/24",
+              "privateEndpointNetworkPolicies": "NetworkSecurityGroupEnabled",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-pe', parameters('names').nsg))]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('names').builderSubnet]",
+            "properties": {
+              "addressPrefix": "[variables('builderPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-builder', parameters('names').nsg))]"
+              },
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('names').routeTable)]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('names').nsg)]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-builder', parameters('names').nsg))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-pe', parameters('names').nsg))]",
+        "[resourceId('Microsoft.Network/routeTables', parameters('names').routeTable)]"
+      ]
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "apiVersion": "2024-05-01",
+      "name": "[format('{0}/{1}', parameters('names').vnet, 'g3-to-g2')]",
+      "properties": {
+        "remoteVirtualNetwork": {
+          "id": "[parameters('g2VnetId')]"
+        },
+        "allowVirtualNetworkAccess": true,
+        "allowForwardedTraffic": true,
+        "allowGatewayTransit": false,
+        "useRemoteGateways": false
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('names').vnet)]"
+      ]
+    }
+  ],
+  "outputs": {
+    "vnetId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('names').vnet)]"
+    },
+    "acaSubnetId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('names').vnet, parameters('names').acaSubnet)]"
+    },
+    "endpointSubnetId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('names').vnet, parameters('names').privateEndpointSubnet)]"
+    },
+    "externalG2Dependencies": {
+      "type": "array",
+      "value": [
+        "G2_SIDE_PEERING",
+        "G2_ACR_DNS_LINK",
+        "G2_FIREWALL_RULES"
+      ]
+    },
+    "builderActivation": {
+      "type": "string",
+      "value": "DENY_UNTIL_EXACT_BUILD_MODEL_AND_NETWORK_BINDINGS_APPROVED"
+    }
+  }
+}

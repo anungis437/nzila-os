@@ -1,0 +1,65 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.48.1.52935",
+      "templateHash": "17778532292555384580"
+    }
+  },
+  "parameters": {
+    "provisionResources": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    },
+    "location": {
+      "type": "string"
+    },
+    "names": {
+      "type": "object"
+    },
+    "tags": {
+      "type": "object"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[parameters('names').pullIdentity]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]"
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[parameters('names').runtimeIdentity]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]"
+    }
+  ],
+  "outputs": {
+    "buildIdentityId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('names').pullIdentity)]"
+    },
+    "runtimeIdentityId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('names').runtimeIdentity)]"
+    },
+    "runtimePrincipalId": {
+      "type": "string",
+      "value": "[if(parameters('provisionResources'), reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('names').runtimeIdentity), '2023-01-31').principalId, '')]"
+    },
+    "buildIdentityPurpose": {
+      "type": "string",
+      "value": "PLATFORM_PULL_ONLY_NONE;G3A_PUSH_REMAINS_SEPARATE_OPERATOR_NOT_THIS_UAMI"
+    }
+  }
+}

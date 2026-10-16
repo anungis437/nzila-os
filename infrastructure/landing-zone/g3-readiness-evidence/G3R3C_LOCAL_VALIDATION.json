@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "authority": "NZ-20261008-INFRA-001/G3R3C",
+  "validationClass": "OFFLINE_STATIC_ONLY",
+  "result": "PASS",
+  "executionGate": "BLOCKED",
+  "regression": {
+    "command": "node --test --test-skip-pattern \"history recovery has deterministic|exact Git historical blob digest\" infrastructure\\landing-zone\\g3-readiness-report.test.mjs infrastructure\\landing-zone\\g3r1-local-closure.test.mjs infrastructure\\landing-zone\\g3r2-source-closure.test.mjs infrastructure\\landing-zone\\g3r2i-source-closure.test.mjs infrastructure\\landing-zone\\g3r3-execution-envelope.test.mjs infrastructure\\landing-zone\\g3r3b-builder-closure.test.mjs infrastructure\\landing-zone\\g3r3c-builder-closure.test.mjs",
+    "exitCode": 0,
+    "tests": 736,
+    "passed": 736,
+    "failed": 0,
+    "cancelled": 0,
+    "reportedSkipped": 0,
+    "newSuccessorTests": 131,
+    "historicalRecoveryExcludedBeforeExecution": true
+  },
+  "documentation": {
+    "command": "pnpm validate:docs",
+    "exitCode": 0,
+    "filesScanned": 2638,
+    "errors": 0,
+    "warnings": 1215,
+    "info": 1700
+  },
+  "preservation": {
+    "commands": [
+      "node infrastructure\\landing-zone\\g3r3c-contract-evidence.mjs --check",
+      "node infrastructure\\landing-zone\\g3r2i-source-closure.mjs --check"
+    ],
+    "result": "PASS",
+    "frozenEvidenceFiles": 459,
+    "frozenToolFiles": 21,
+    "parentWritersOrCollectorsRerun": false,
+    "qualifiedSourceOrImageRebuilt": false
+  },
+  "syntax": {
+    "nodeCommand": "node --check <each of the three infrastructure\\landing-zone\\g3r3c*.mjs files>",
+    "bashCommands": [
+      "\"C:\\Program Files\\Git\\bin\\bash.exe\" -n \"C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3r3c-builder-template.sh\"",
+      "\"C:\\Program Files\\Git\\bin\\bash.exe\" -n \"C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-readiness-evidence\\G3R3C_BUILDER_SCRIPT.sh\""
+    ],
+    "result": "PASS",
+    "shellExecution": false
+  },
+  "formatting": {
+    "command": "pnpm exec prettier --check infrastructure\\landing-zone\\g3r3c-contract-evidence.mjs infrastructure\\landing-zone\\g3r3c-builder-closure.mjs infrastructure\\landing-zone\\g3r3c-builder-closure.test.mjs \"infrastructure\\landing-zone\\g3-readiness-evidence\\G3R3C*.json\" \"infrastructure\\landing-zone\\g3-readiness-evidence\\G3R3C*.md\"",
+    "exitCode": 0
+  },
+  "determinism": {
+    "command": "SHA256 each G3R3C evidence/output file; node infrastructure\\landing-zone\\g3r3c-builder-closure.mjs --write; compare all SHA256 values",
+    "result": "PASS",
+    "comparedFiles": 23,
+    "measurementPhase": "AFTER_LOCAL_VALIDATION_BINDING",
+    "byteIdenticalFiles": 23
+  },
+  "ledger": {
+    "newPublicGets": 7,
+    "successful": 7,
+    "failed": 0,
+    "newAzureCalls": 0,
+    "guestCalls": 0,
+    "builderBResearchCalls": 0,
+    "mutations": 0,
+    "tokenCreation": 0,
+    "roleAssignments": 0,
+    "builds": 0,
+    "pushes": 0,
+    "runCommandExecutions": 0,
+    "g3aOrG3bExecutions": 0
+  },
+  "limitations": [
+    "ABAC evaluation and failure-path cleanup tests are static/abstract models,not live Azure authorization or guest/rootless/systemd proof.",
+    "Cgroup policy/attachment checks have not qualified effective descendant IMDS denial or watchdog behavior under real failures.",
+    "Pre-existing tooling,8 GiB volatile capacity and6G memory policy are unqualified prerequisites,not verified capabilities of the existing B2s VM.",
+    "Protected-parameter ordering,guest argv/storage remanence and bounded raw-token residual require future authorized non-secret qualification.",
+    "The proposed10000 disk-transaction allowance is not enforced;whole-proof lifetime/cost cleanup remains unbound.",
+    "All-in maximum and recommended numeric ceiling remain null/UNSUPPORTED;final human authorization packet is NOT_ISSUED."
+  ]
+}

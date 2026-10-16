@@ -1,0 +1,264 @@
+{
+  "schemaVersion": "1.0",
+  "MISSION_ID": "NZ-20261008-INFRA-001",
+  "MISSION_DISPOSITION": "CLOSED_NO_GO_CURRENT_PROOF_ARCHITECTURE",
+  "SOURCE_AUTHORITY": "COMPLETE",
+  "LOCAL_INFRASTRUCTURE": "COMPLETE_NOT_DEPLOYED",
+  "QUALIFIED_SYNTHETIC_IMAGE": "COMPLETE_LOCAL_NOT_PUSHED",
+  "LIVE_BUILDER_QUALIFICATION": "FAIL",
+  "SELECTED_BUILDER": "NONE",
+  "G3A_AUTHORIZED": "NO",
+  "G3B_AUTHORIZED": "NO",
+  "G3_PRIVATE_CONTROL_PLANE_SOURCE_AUTHORITY": "PASS",
+  "G3_LOCAL_INFRASTRUCTURE_BUILD": "PASS",
+  "G3_SYNTHETIC_IMAGE_QUALIFICATION": "PASS",
+  "ROOT_1_SOURCE_AUTHORITY": "CLOSED",
+  "BUILDER_A": "DISQUALIFIED_BY_LIVE_EVIDENCE",
+  "BUILDER_B": "PARKED_NOT_SELECTED",
+  "SELECTED_PRIVATE_BUILD_MODEL": "NONE",
+  "CURRENT_G3_PROOF_EXECUTION_ARCHITECTURE": "EXHAUSTED",
+  "G3_EXECUTION_READINESS": "NO_GO_CURRENT_ARCHITECTURE",
+  "G3A": "NOT_AUTHORIZED",
+  "G3B": "NOT_AUTHORIZED",
+  "RECOMMENDED_EXECUTION_CEILING_CAD": "UNSUPPORTED",
+  "HUMAN_APPROVED_EXECUTION_CEILING_CAD": "UNBOUND",
+  "FINAL_HUMAN_AUTHORIZATION_PACKET": "NOT_ISSUED",
+  "FINAL_THREE_DECISION_PACKET": "NOT_ISSUED",
+  "FURTHER_G3_BUILDER_ENGINEERING": "PROHIBITED_WITHOUT_NEW_HUMAN_ARCHITECTURE_CHARTER",
+  "REOPEN_REQUIRES": "NEW_HUMAN_ARCHITECTURE_AUTHORIZATION",
+  "acceptance": "Human explicitly accepted G3R3D FAIL as terminal and authorized only this repository governance/documentation closure on2026-10-12.",
+  "phaseDispositions": {
+    "G3R1": "PASS",
+    "G3R2": "PASS_BY_PROSPECTIVE_SUPERSESSION",
+    "G3R2I": "PASS",
+    "G3R3": "BLOCKED",
+    "G3R3B": "BLOCKED",
+    "G3R3C": "BLOCKED",
+    "G3R3D": "FAIL"
+  },
+  "failureBasis": {
+    "DEDICATED_ROOTLESS_ACCOUNT": "ABSENT",
+    "SUBORDINATE_UID_GID_RANGES": "ABSENT",
+    "DOCKER": "ABSENT",
+    "ROOTLESS_DOCKER_HELPERS": "ABSENT",
+    "UID_MAPPING_TOOLS": "ABSENT",
+    "BUILDX": "ABSENT",
+    "SYSTEMD_STATE": "DEGRADED"
+  },
+  "passedObservations": {
+    "PRIVATE_ACR_DNS": "PASS",
+    "PRIVATE_ACR_TCP_443": "PASS",
+    "VM_AGENT": "HEALTHY",
+    "TARGET_IDENTITY": "15 / 15 MATCH"
+  },
+  "unexecutedProof": {
+    "Q2": "NOT_EXECUTED",
+    "DESCENDANT_IMDS_DENIAL": "NOT_PROVEN",
+    "ROOTLESS_RUNTIME": "NOT_PROVEN",
+    "WATCHDOG_CLEANUP": "NOT_PROVEN",
+    "RUN_COMMAND_TIMEOUT_CLEANUP": "NOT_PROVEN",
+    "Q3": "NOT_EXECUTED",
+    "FAKE_CREDENTIAL_CREATED": "NO"
+  },
+  "mutationAccounting": {
+    "MANAGED_RUN_COMMAND_CREATES": 2,
+    "MANAGED_RUN_COMMAND_DELETES": 2,
+    "QUALIFICATION_CHILDREN_REMAINING": 0,
+    "OTHER_AZURE_MUTATIONS": 0,
+    "RBAC_MUTATIONS": 0,
+    "G2_NETWORK_MUTATIONS": 0,
+    "IMAGE_PULLS": 0,
+    "IMAGE_BUILDS": 0,
+    "IMAGE_PUSHES": 0,
+    "G3A_EXECUTIONS": 0,
+    "G3B_EXECUTIONS": 0
+  },
+  "scope": {
+    "currentProofPathOnly": true,
+    "broaderAzureArchitectureDisproven": false,
+    "networkFailure": false,
+    "sourceAuthorityFailure": false,
+    "interpretation": "The available G2 execution substrate is not qualified for Builder A under the accepted governance constraints. This is a clean failed experiment,not a declaration that the broader Nzila Azure private-control-plane strategy failed."
+  },
+  "proofLimitations": [
+    "Q1 observed indispensable guest prerequisites absent;private ACR DNS/TCP and VM Agent passed.",
+    "Q2/Q3 were not executed;no inferred rootless,IMDS-denial,watchdog,timeout-cleanup or credential-remanence PASS.",
+    "First Q1 CRLF transport failure and LF retry remain historical;both create/delete lifecycles count against the authorization budget.",
+    "Zero-child assertion is bound to the recorded post-delete list,not a new Azure query or a VM-wide artifact-removal claim.",
+    "806 prior offline tests support evidence integrity,not missing runtime qualification.",
+    "Terminal status supersedes historical execution-readiness labels without rewriting any historical finding or cost."
+  ],
+  "liveFailureBindings": [
+    {
+      "path": "G3R3D_LIVE_QUALIFICATION_AUTHORIZATION.json",
+      "sha256": "1bf638aa7534a0a08519207f82158f5bb9d092e0677a3ee774231a1ab9a33445"
+    },
+    {
+      "path": "G3R3D_Q1_PREFLIGHT.json",
+      "sha256": "bf3da571fef0031da868c06a5f64c113346507d49afb9e451b4b4879c3ac25d6"
+    },
+    {
+      "path": "G3R3D_Q2_FAULT_QUALIFICATION.json",
+      "sha256": "104696ae2daf7d292b89ebd690b36dab85c2cb039beea55d9e093b95e1a46f97"
+    },
+    {
+      "path": "G3R3D_Q3_POSTCHECK.json",
+      "sha256": "ba0ca7226d070980ced0ab7a2e97831a3978d02b00ffc2ef6897504bc26b4019"
+    },
+    {
+      "path": "G3R3D_BUILDER_RUNTIME_QUALIFICATION.json",
+      "sha256": "6534eb5b477d4c257bb498398c62381fb19d093a0e20803f205b3acd38504d23"
+    },
+    {
+      "path": "G3R3D_LIVE_LEDGER.json",
+      "sha256": "3908d9483b111e05e6a2c8dbac35e9732c720a1e254adc42d28513e4b29b836a"
+    },
+    {
+      "path": "G3R3D_RUN_COMMAND_CLEANUP.json",
+      "sha256": "724ec2f693c594e9ea5c686adb4eb22a93e30eb1788db688ccbd6babd8b58e8f"
+    },
+    {
+      "path": "G3R3D_COST_CLOSURE.json",
+      "sha256": "9a2e1f0282f4df769daa590de873508bea30c340dccaf939678a790d5d519f09"
+    },
+    {
+      "path": "G3R3D_EXECUTION_PLAN.json",
+      "sha256": "81da3664457cae45d57eb557f6f331d8c42eeafdd531fe6023a9ac927dfcfaec"
+    },
+    {
+      "path": "G3R3D_EXECUTION_READINESS.json",
+      "sha256": "917aadf88ca5a3ffb9dff1650f91f09cc1893d25b59c83d194166961664becdd"
+    },
+    {
+      "path": "G3R3D_EXECUTION_READINESS.md",
+      "sha256": "7ee519e3560e0feb510f5fcde1e03b45384eb72896864c1dc0758b5b8923db45"
+    },
+    {
+      "path": "G3R3D_LOCAL_VALIDATION.json",
+      "sha256": "e970e681f31b181e9840b1e6f580685ea757c54b624c0b8ae36218e6e6549b8a"
+    }
+  ],
+  "preservedAssets": [
+    {
+      "id": "G3_SOURCE_AUTHORITY_V1",
+      "status": "PRESERVED_NOT_AUTHORIZED_FOR_EXECUTION",
+      "bindings": [
+        {
+          "path": "g3-source/G3_SOURCE_AUTHORITY_MANIFEST.json",
+          "sha256": "6fac9cdbe7827ea52b475675adab3c397682bdac2a814a21e256f65a5c45dd44"
+        }
+      ]
+    },
+    {
+      "id": "G3_SYNTHETIC_PROOF_V1",
+      "status": "PRESERVED_NOT_AUTHORIZED_FOR_EXECUTION",
+      "bindings": [
+        {
+          "path": "g3-readiness-evidence/G3R2I_IMAGE_QUALIFICATION.json",
+          "sha256": "b7291ee6714494f298f6fd20a75c2bff8e67a9063e9111f18613ad93c7829d21"
+        },
+        {
+          "path": "g3-source/workload/synthetic-proof/.dockerignore",
+          "sha256": "0e736bee763bbb11fab05e3fb3b990be56438b1efe327d76fc476ebc3d170a69"
+        },
+        {
+          "path": "g3-source/workload/synthetic-proof/Dockerfile",
+          "sha256": "96eb04f564a60154c11e16793afe5f4a73af0d904d7c98b69e666cce48cd32c8"
+        },
+        {
+          "path": "g3-source/workload/synthetic-proof/go.mod",
+          "sha256": "0e4b2c72b43150985ef1023487b7faa90945909f00b1e75de52be0e15ba51406"
+        },
+        {
+          "path": "g3-source/workload/synthetic-proof/main_test.go",
+          "sha256": "7671f20e81e740303783e049c2cb078896fab3f81dd08095a0d41a5c672c8461"
+        },
+        {
+          "path": "g3-source/workload/synthetic-proof/main.go",
+          "sha256": "1466e36d31c18c946a20eb4af6842d4309d18c1746a8971c19ad075ca87a6bd9"
+        },
+        {
+          "path": "g3-source/workload/synthetic-proof/README.md",
+          "sha256": "f13aa60d4ff791404b84ff7cbaad63245d7652ae1c686f5cc0fdf801529ff4c0"
+        }
+      ]
+    },
+    {
+      "id": "G3R1_NETWORK_CONTRACT",
+      "status": "PRESERVED_NOT_AUTHORIZED_FOR_EXECUTION",
+      "bindings": [
+        {
+          "path": "g3-readiness-evidence/G3R1_NETWORK_CONTRACT.json",
+          "sha256": "e25cf331bb6322e38877a9c7d98bef3b24a89a834dd22c7eab354f697c0f4360"
+        }
+      ]
+    },
+    {
+      "id": "G3R3_OPERATOR_PRIVILEGE_PACKET",
+      "status": "PRESERVED_NOT_AUTHORIZED_FOR_EXECUTION",
+      "bindings": [
+        {
+          "path": "g3-readiness-evidence/G3R3_OPERATOR_PRIVILEGE_PACKET.json",
+          "sha256": "3f0f19194ac1b22abde704e9e81aa02ea753f5a5c5cde48636d5ecf1d80f76fb"
+        }
+      ]
+    },
+    {
+      "id": "G3R3_G2_MUTATION_PACKET",
+      "status": "PRESERVED_NOT_AUTHORIZED_FOR_EXECUTION",
+      "bindings": [
+        {
+          "path": "g3-readiness-evidence/G3R3_G2_MUTATION_PACKET.json",
+          "sha256": "78f10736f3a839b921111c0fd0d654caeaf2d87639be4da5210868abc3c6c6c6"
+        }
+      ]
+    }
+  ],
+  "preservation": {
+    "file": "G3_TERMINAL_PRESERVATION.json",
+    "sha256": "25d7e47c8b414b76384450b84134b8248864766ff1d6a4eaf3f0597a57a22e8b",
+    "historicalEvidenceFiles": 520,
+    "prospectiveSourceFiles": 40,
+    "historicalToolFiles": 33
+  },
+  "historicalQualification": {
+    "sourceTreeSha256": "63851138029b8081b680f9e3b59e5a07d7ef8689fc308a19604ad78f13134958",
+    "sourceAuthority": "G3_SOURCE_AUTHORITY_V1",
+    "root1Status": "CLOSED",
+    "evidenceIntegrityValidation": {
+      "file": "G3R3D_LOCAL_VALIDATION.json",
+      "tests": 806,
+      "result": "PASS_OFFLINE_ONLY"
+    }
+  },
+  "reopenRule": {
+    "requirement": "NEW_HUMAN_ARCHITECTURE_AUTHORIZATION",
+    "newExplicitHumanArchitectureCharterRequired": true,
+    "examples": [
+      "Prepare/modify the G2 VM as a qualified builder",
+      "Authorize a new dedicated builder resource",
+      "Reopen an ACR dedicated agent-pool path",
+      "Select a different artifact-production architecture"
+    ],
+    "noneAuthorizedByClosure": true,
+    "noFurtherEngineeringWithoutCharter": true
+  },
+  "governanceRegistry": {
+    "status": "NO_CANONICAL_MISSION_STATUS_REGISTRY_FOUND",
+    "searchScope": "Repository mission/status-registry filename searches and mission references in governance/docs/infrastructure;gate-authority-registry describes release validators,not this mission.",
+    "currentMissionAuthority": "G3_TERMINAL_DISPOSITION.json;linked from landing-zone README",
+    "unrelatedRegistriesModified": false
+  },
+  "closureOperations": {
+    "azureCalls": 0,
+    "azureMutations": 0,
+    "guestExecutions": 0,
+    "builds": 0,
+    "pushes": 0,
+    "costRecalculated": false
+  },
+  "terminalValidation": {
+    "file": "G3_TERMINAL_LOCAL_VALIDATION.json",
+    "sha256": "c4e8475263d851cc2fca7489630e15f21705fc1bfbec58bc3e405b8f696542b0"
+  }
+}

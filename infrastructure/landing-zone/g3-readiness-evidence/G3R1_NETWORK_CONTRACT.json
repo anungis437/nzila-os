@@ -1,0 +1,574 @@
+{
+  "status": "DETERMINISTIC_DESIGN_ONLY_WITH_EXPLICIT_LATE_BINDINGS",
+  "designChoice": "Two-way G3/G2 peering;Azure-provided DNS;private ACA INTERNAL Consumption/workload-profiles;no ACA private endpoint",
+  "selectedBy": "G3R1_LOCAL_PROPOSAL_NOT_A_FROZEN_PACKAGE_REPLACEMENT",
+  "addresses": {
+    "vnet": "10.91.0.0/16",
+    "aca": "10.91.1.0/24",
+    "privateEndpoint": "10.91.2.0/24",
+    "builder": "10.91.3.0/24",
+    "liveRangesChecked": [
+      {
+        "vnet": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Network/virtualNetworks/nzila-staging-vnet",
+        "cidr": "10.1.0.0/16"
+      },
+      {
+        "vnet": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+        "cidr": "10.90.0.0/16"
+      }
+    ],
+    "noCollision": true
+  },
+  "vnetId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+  "g2VnetId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+  "acaDelegation": "Microsoft.App/environments",
+  "routes": [
+    {
+      "name": "g3-default-to-g2-firewall",
+      "prefix": "0.0.0.0/0",
+      "nextHopType": "VirtualAppliance",
+      "nextHopIp": "10.90.0.4",
+      "routeTable": "nzila-g3-aca-rt-95086e2f",
+      "associateWith": ["G3ContainerAppsSubnet", "G3BuilderSubnet"]
+    }
+  ],
+  "privateEndpointRouting": "G2 VNet prefix10.90.0.0/16 via peering and localG3 VNet routes are more specific than0/0;private ACR/KV traffic stays private,not assumed to traverse firewall. PE subnet has no forced default route selected.",
+  "peering": [
+    {
+      "name": "g3-to-g2",
+      "parent": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+      "remote": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+      "allowVirtualNetworkAccess": true,
+      "allowForwardedTraffic": true,
+      "allowGatewayTransit": false,
+      "useRemoteGateways": false
+    },
+    {
+      "name": "g2-to-g3",
+      "parent": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+      "remote": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+      "allowVirtualNetworkAccess": true,
+      "allowForwardedTraffic": true,
+      "allowGatewayTransit": false,
+      "useRemoteGateways": false
+    }
+  ],
+  "G2_PEERING_CHANGE": "SEPARATE_EXPLICIT_HUMAN_AUTHORITY_REQUIRED",
+  "g2AdditionalMutations": [
+    "Existing ACR private DNS zone G3 link",
+    "G2 firewall rule collection changes"
+  ],
+  "ingress": {
+    "path": "G3 private proof builder -> exact environment defaultDomain DNS -> INTERNAL staticIP:443 -> app port3000",
+    "allowPublic": false,
+    "allowInsecure": false,
+    "appIngressExternal": "true within INTERNAL environment only;external-to-app != public-to-Internet",
+    "clientCidrs": ["10.91.3.0/24"]
+  },
+  "builderAndEndpointNsg": {
+    "builder": {
+      "source": "10.91.3.0/24",
+      "publicIp": "NOT_SELECTED",
+      "inbound": "DENY;exactprivatecontrolchannel downstreamfrozenG3A sourceauthority",
+      "outbound": [
+        "AzurePlatformDNS TCP/UDP53",
+        "ExactprivateACR endpoints TCP443 viaG2peering",
+        "G3KV privateendpoint TCP443",
+        "InternalACA staticIP TCP443",
+        "ExplicitAAD identity/platformcontrol endpoints only viaUDR/firewall"
+      ],
+      "sourceSpecificTooling": "BLOCKED_ROOT_1;no genericInternet/download allowlist"
+    },
+    "privateEndpoint": {
+      "subnet": "10.91.2.0/24",
+      "delegation": "NONE",
+      "defaultUdr": "NOT_SELECTED",
+      "nsgPolicy": "Only approved ACA and privateproofbuilder sources TCP443 toKV endpoint;bindprivateEndpointNetworkPolicies explicitlyinrecoveredtemplate before claiming enforcement"
+    },
+    "firewallSources": {
+      "PLATFORM_REQUIRED": ["10.91.1.0/24"],
+      "REGISTRY": ["10.91.1.0/24", "10.91.3.0/24"],
+      "IDENTITY": ["10.91.1.0/24", "10.91.3.0/24"],
+      "KEY_VAULT": ["10.91.1.0/24", "10.91.3.0/24"],
+      "TELEMETRY": ["10.91.1.0/24"],
+      "DNS": "Azure-provided platform resolver exemption,not firewall transit",
+      "PROOF_ONLY": ["10.91.3.0/24"]
+    }
+  },
+  "egress": {
+    "path": "ACA/builder -> explicit private local/peered routes OR0/0 UDR -> retained G2 firewall -> selected Microsoft dependencies",
+    "internetShortcut": "PROHIBITED",
+    "dockerHubRuntime": "PROHIBITED",
+    "finalFirewallDefault": "DENY",
+    "builderBootstrap": "DOWNSTREAM_FROZEN_SOURCE_AUTHORITY;no genericInternet or guessed tooling endpoints allowed"
+  },
+  "dns": {
+    "resolver": "AZURE_PROVIDED_168.63.129.16",
+    "zones": [
+      {
+        "zone": "privatelink.azurecr.io",
+        "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "vnetLink": {
+          "target": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+          "name": "g3-acr-nzg3kv95086e2f",
+          "registrationEnabled": false
+        },
+        "resolutionDirection": "Azure-provided DNS inside G3 VNet -> private zone -> endpoint private IP",
+        "authority": "Existing G2 zone;new G3 VNet link is a G2-zone mutation requiring separate authority",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "zone": "privatelink.vaultcore.azure.net",
+        "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f",
+        "vnetLink": {
+          "target": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+          "name": "nzila-g3-kv-link-95086e2f",
+          "registrationEnabled": false
+        },
+        "resolutionDirection": "Azure-provided DNS inside G3 VNet -> private zone -> endpoint private IP",
+        "authority": "New G3 private DNS zone/endpoint zone group;G3-scoped future authority",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "zone": "<G3_ENVIRONMENT_DEFAULT_DOMAIN>",
+        "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.App/managedEnvironments/nzila-g3-env-95086e2f",
+        "vnetLink": {
+          "target": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+          "name": "nzila-g3-kv-link-95086e2f",
+          "registrationEnabled": false
+        },
+        "resolutionDirection": "Azure-provided DNS inside G3 VNet -> private zone -> endpoint private IP",
+        "authority": "Internal ACA custom DNS private zone named exact returned defaultDomain;apex and wildcard A -> returned staticIP,late binding before ingress proof",
+        "status": "DESIGN_ONLY"
+      }
+    ],
+    "ACA_PRIVATE_ENDPOINT": "NOT_REQUIRED",
+    "ACA_PRIVATE_ENDPOINT_DNS_ZONE": "NOT_APPLICABLE;privatelink.canadacentral.azurecontainerapps.io not selected for INTERNAL environment",
+    "lateBindings": [
+      "Environment defaultDomain and staticIP returned after authorized empty environment creation",
+      "Private endpoint NIC IPs after authorized creation"
+    ]
+  },
+  "telemetry": {
+    "selected": "Log Analytics console/system logs to proposed G3 workspace",
+    "networkAllow": "AzureMonitor TCP443 service-tag route;no generic logging wildcard",
+    "workspace": "nzila-g3-logs-95086e2f",
+    "workspaceId": "POST_CREATE_NONSECRET_LATE_BINDING",
+    "applicationInsights": "NOT_SELECTED",
+    "serviceBus": "NOT_SELECTED",
+    "aspire": "NOT_SELECTED",
+    "source": "https://learn.microsoft.com/en-us/azure/container-apps/log-options"
+  },
+  "nsg": {
+    "source": "https://learn.microsoft.com/en-us/azure/container-apps/firewall-integration",
+    "spellingConflict": "firewall-integration page uses AzureFrontDoor.FirstParty;canonical AzureFrontDoorFirstParty follows use-azure-firewall and previous accepted doctrine",
+    "inbound": [
+      {
+        "priority": 100,
+        "source": "AzureLoadBalancer",
+        "ports": ["30000-32767"],
+        "destination": "10.91.1.0/24",
+        "protocol": "TCP",
+        "action": "Allow"
+      },
+      {
+        "priority": 110,
+        "source": "10.91.3.0/24",
+        "ports": [443, 31443],
+        "destination": "10.91.1.0/24",
+        "protocol": "TCP",
+        "action": "Allow"
+      },
+      {
+        "priority": 120,
+        "source": "10.91.1.0/24",
+        "ports": ["*"],
+        "destination": "10.91.1.0/24",
+        "protocol": "*",
+        "action": "Allow"
+      },
+      {
+        "priority": 900,
+        "source": "*",
+        "destination": "10.91.1.0/24",
+        "ports": ["*"],
+        "protocol": "*",
+        "action": "Deny"
+      }
+    ],
+    "outbound": [
+      {
+        "priority": 100,
+        "source": "10.91.1.0/24",
+        "destination": "10.91.1.0/24",
+        "ports": ["*"],
+        "protocol": "*",
+        "action": "Allow"
+      },
+      {
+        "priority": 110,
+        "source": "10.91.1.0/24",
+        "destination": "AzurePlatformDNS",
+        "ports": [53],
+        "protocol": "TCP_AND_UDP",
+        "action": "Allow"
+      },
+      {
+        "priority": 120,
+        "source": "10.91.1.0/24",
+        "destination": ["<G3_KV_PE_PRIVATE_IP>", "<G2_ACR_PE_NIC_PRIVATE_IPS>"],
+        "ports": [443],
+        "protocol": "TCP",
+        "action": "Allow"
+      },
+      {
+        "priority": 130,
+        "source": "10.91.1.0/24",
+        "destination": [
+          "MicrosoftContainerRegistry",
+          "AzureFrontDoorFirstParty",
+          "AzureContainerRegistry",
+          "AzureActiveDirectory",
+          "AzureKeyVault",
+          "AzureMonitor",
+          "Storage.CanadaCentral"
+        ],
+        "ports": [443],
+        "protocol": "TCP",
+        "action": "Allow_DOCUMENTED_PLATFORM_TAGS_VIA_UDR_FIREWALL"
+      },
+      {
+        "priority": 140,
+        "source": "10.91.1.0/24",
+        "destination": "<EXACT_IP_PREFIX_SET_FOR_SELECTED_PLATFORM_APPLICATION_FQDNS>",
+        "ports": [443],
+        "protocol": "TCP",
+        "action": "Allow_ONLY_AFTER_NONMUTATING_DESTINATION_BINDING;noInternet_or_AzureCloud_catchall",
+        "binding": "Addresses must correspond to the selectedAKS/CNI/identity/platformstorage dependencies and be refreshed underexplicitauthority;unknown IPset failsclosed beforeactivation"
+      },
+      {
+        "priority": 900,
+        "source": "10.91.1.0/24",
+        "destination": "*",
+        "ports": ["*"],
+        "protocol": "*",
+        "action": "Deny"
+      }
+    ],
+    "activationGates": [
+      "Peering+UDR+firewall rules approved and inspected before outboundNSG activation",
+      "AzurePlatformDNS never denied",
+      "Exact platformFQDN destinationprefix set bound before NSGactivation;no genericInternet/AzureCloud destination"
+    ]
+  },
+  "firewall": {
+    "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+    "sku": { "name": "AZFW_VNet", "tier": "Basic" },
+    "nextHop": "10.90.0.4",
+    "currentEmptyCollections": true,
+    "dnsProxy": "NOT_SELECTED_BASIC_SKU;do not rely on network-ruleFQDN DNS proxy",
+    "groups": [
+      "PLATFORM_REQUIRED",
+      "REGISTRY",
+      "IDENTITY",
+      "KEY_VAULT",
+      "TELEMETRY",
+      "DNS",
+      "PROOF_ONLY"
+    ],
+    "rules": [
+      {
+        "dependency": "MicrosoftContainerRegistry",
+        "group": "PLATFORM_REQUIRED",
+        "source": "10.91.1.0/24",
+        "destinations": ["MicrosoftContainerRegistry"],
+        "ports": [443],
+        "protocol": "TCP",
+        "networkRuleOrApplicationRule": "NETWORK",
+        "requiredForPlatformOrWorkload": "Microsoft platform artifact retrieval",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "AzureFrontDoorFirstParty",
+        "group": "PLATFORM_REQUIRED",
+        "source": "10.91.1.0/24",
+        "destinations": ["AzureFrontDoorFirstParty"],
+        "ports": [443],
+        "protocol": "TCP",
+        "networkRuleOrApplicationRule": "NETWORK",
+        "requiredForPlatformOrWorkload": "Microsoft platform registry front-door dependency",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "AKS_CNI_BINARIES",
+        "group": "PLATFORM_REQUIRED",
+        "source": "10.91.1.0/24",
+        "destinations": ["packages.aks.azure.com", "acs-mirror.azureedge.net"],
+        "ports": [443],
+        "protocol": "HTTPS",
+        "networkRuleOrApplicationRule": "APPLICATION",
+        "requiredForPlatformOrWorkload": "Underlying ACA platform AKS/CNI binary bootstrap",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "AzureContainerRegistry",
+        "group": "REGISTRY",
+        "source": "10.91.1.0/24",
+        "destinations": ["AzureContainerRegistry"],
+        "ports": [443],
+        "protocol": "TCP",
+        "networkRuleOrApplicationRule": "NETWORK",
+        "requiredForPlatformOrWorkload": "Microsoft-documented registry platform dependency;private registry/data DNS endpoints still mandatory",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "AzureActiveDirectory",
+        "group": "IDENTITY",
+        "source": "10.91.1.0/24",
+        "destinations": ["AzureActiveDirectory"],
+        "ports": [443],
+        "protocol": "TCP",
+        "networkRuleOrApplicationRule": "NETWORK",
+        "requiredForPlatformOrWorkload": "ACR/managed identity/Key Vault authentication",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "MANAGED_IDENTITY",
+        "group": "IDENTITY",
+        "source": "10.91.1.0/24",
+        "destinations": [
+          "*.identity.azure.net",
+          "login.microsoftonline.com",
+          "*.login.microsoftonline.com",
+          "*.login.microsoft.com",
+          "login.microsoft.com"
+        ],
+        "ports": [443],
+        "protocol": "HTTPS",
+        "networkRuleOrApplicationRule": "APPLICATION",
+        "requiredForPlatformOrWorkload": "Platform managed-identity dependencies",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "AzureKeyVault",
+        "group": "KEY_VAULT",
+        "source": "10.91.1.0/24",
+        "destinations": ["AzureKeyVault"],
+        "ports": [443],
+        "protocol": "TCP",
+        "networkRuleOrApplicationRule": "NETWORK",
+        "requiredForPlatformOrWorkload": "Documented platform Key Vault dependency;synthetic secret data path exclusively private endpoint",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "PRIVATE_KEY_VAULT_HOST",
+        "group": "KEY_VAULT",
+        "source": "10.91.1.0/24",
+        "destinations": ["nzg3kv95086e2f.vault.azure.net"],
+        "ports": [443],
+        "protocol": "HTTPS",
+        "networkRuleOrApplicationRule": "APPLICATION",
+        "requiredForPlatformOrWorkload": "Vault TLS hostname retained even when resolving to local private endpoint",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "AzureMonitor",
+        "group": "TELEMETRY",
+        "source": "10.91.1.0/24",
+        "destinations": ["AzureMonitor"],
+        "ports": [443],
+        "protocol": "TCP",
+        "networkRuleOrApplicationRule": "NETWORK",
+        "requiredForPlatformOrWorkload": "Selected Log Analytics console/system log destination",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/firewall-integration",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "AzurePlatformDNS",
+        "group": "DNS",
+        "source": "10.91.1.0/24",
+        "destinations": ["168.63.129.16"],
+        "serviceTagEvaluation": "ALLOW AzurePlatformDNS UDP/TCP53 at NSG;never deny this tag. Azure-provided DNS is not routed through firewall by UDR.",
+        "ports": [53],
+        "protocol": "UDP_AND_TCP",
+        "networkRuleOrApplicationRule": "NSG_PLATFORM_DNS_EXEMPTION",
+        "requiredForPlatformOrWorkload": "Azure-provided recursive/private-zone resolution",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/firewall-integration",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "PRIVATE_ACR",
+        "group": "REGISTRY",
+        "source": "10.91.1.0/24",
+        "destinations": [
+          "nzilag2tzo75uuozprbo.azurecr.io",
+          "nzilag2tzo75uuozprbo.canadacentral.data.azurecr.io"
+        ],
+        "ports": [443],
+        "networkRuleOrApplicationRule": "DIRECT_PRIVATE_PEERED_ENDPOINT;not default-route firewall",
+        "requiredForPlatformOrWorkload": "Private image pull and data transfer",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "ACR_PLATFORM_STORAGE",
+        "group": "REGISTRY",
+        "source": "10.91.1.0/24",
+        "destinations": ["*.blob.core.windows.net"],
+        "ports": [443],
+        "protocol": "HTTPS",
+        "networkRuleOrApplicationRule": "APPLICATION",
+        "requiredForPlatformOrWorkload": "Microsoft-documented platform-managed storage dependency;accepted synthetic breadth only",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "dependency": "PRIVATE_PROOF_CLIENT",
+        "group": "PROOF_ONLY",
+        "source": "10.91.3.0/24",
+        "destinations": ["<G3_ENVIRONMENT_STATIC_IP>"],
+        "ports": [443],
+        "networkRuleOrApplicationRule": "PRIVATE_INGRESS_NSG",
+        "requiredForPlatformOrWorkload": "Private TLS health/challenge proof;no public client path",
+        "selected": true,
+        "provenance": "https://learn.microsoft.com/en-us/azure/container-apps/firewall-integration",
+        "status": "DESIGN_ONLY"
+      }
+    ],
+    "acceptedBreadth": "Microsoft platform service tags/storage/identity documented wildcards only;synthetic proof not tenant-exclusive isolation",
+    "mutated": false
+  },
+  "rbac": {
+    "grants": [
+      {
+        "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+        "role": "CUSTOM_G3_RESOURCE_DEPLOYER_NOT_CREATED",
+        "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+        "purpose": "Deploy/delete only recovered authorized G3 resources,without RBAC/secret data access",
+        "whyRequired": "Deploy/delete only recovered authorized G3 resources,without RBAC/secret data access",
+        "whyNarrowerScopeIsInsufficient": "Creating multiple new G3 resources needs RG-level control-plane scope;resource creation cannot rely on grants to resources not yet present",
+        "condition": null,
+        "status": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+        "role": "Container Registry Repository Writer:2a1e307c-b015-4ebd-883e-5b7698a07328",
+        "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "purpose": "One bounded G3A image push and read-back verification",
+        "whyRequired": "One bounded G3A image push and read-back verification",
+        "whyNarrowerScopeIsInsufficient": "ACR repository is a data-plane child,not an ARM RBAC scope;registry assignment requires repository condition",
+        "condition": {
+          "version": "2.0",
+          "expression": "(((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'}))) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+        },
+        "status": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "principal": "<G3_PULL_UAMI_PRINCIPAL_ID_FROM_AUTHORIZED_CREATION>",
+        "role": "Container Registry Repository Reader:b93aa761-3e63-49ed-ac28-beffa264f7ac",
+        "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "purpose": "Platform-only image pull,lifecycle None",
+        "whyRequired": "Platform-only image pull,lifecycle None",
+        "whyNarrowerScopeIsInsufficient": "Registry ARM scope with exact repository condition is required;no catalog/delete/AcrPull fallback",
+        "condition": {
+          "version": "2.0",
+          "expression": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+        },
+        "status": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "principal": "<G3_RUNTIME_UAMI_PRINCIPAL_ID_FROM_AUTHORIZED_CREATION>",
+        "role": "Key Vault Secrets User:4633458b-17de-408a-b874-0445c86b69e6",
+        "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+        "purpose": "Runtime lifecycle Main reads only the one synthetic secret",
+        "whyRequired": "Runtime lifecycle Main reads only the one synthetic secret",
+        "whyNarrowerScopeIsInsufficient": "Exact secret is the minimum supported built-in scope;no vault-wide assignment",
+        "condition": null,
+        "status": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+        "role": "CUSTOM_G3_PRIVATE_NETWORK_LINK_WRITER_NOT_CREATED",
+        "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3",
+        "purpose": "Create/reconcile only approved G2-side peering",
+        "whyRequired": "Create/reconcile only approved G2-side peering",
+        "whyNarrowerScopeIsInsufficient": "This exact peering child scope suffices;no VNet/RG Contributor proposed",
+        "condition": null,
+        "status": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+        "role": "CUSTOM_G3_PRIVATE_NETWORK_LINK_WRITER_NOT_CREATED",
+        "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f",
+        "purpose": "Link G3 VNet to retained ACR private zone",
+        "whyRequired": "Link G3 VNet to retained ACR private zone",
+        "whyNarrowerScopeIsInsufficient": "Exact DNS link child scope suffices;zone-wide DNS mutation unnecessary",
+        "condition": null,
+        "status": "PROPOSED_NOT_GRANTED"
+      },
+      {
+        "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+        "role": "CUSTOM_G3_FIREWALL_RULE_WRITER_NOT_CREATED",
+        "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+        "purpose": "Update only separately approved firewall rule collections",
+        "whyRequired": "Update only separately approved firewall rule collections",
+        "whyNarrowerScopeIsInsufficient": "Collections reside on firewall resource;child collection RBAC granularity is unavailable for this property update",
+        "condition": null,
+        "status": "PROPOSED_NOT_GRANTED"
+      }
+    ],
+    "deploymentRole": {
+      "name": "CUSTOM_G3_RESOURCE_DEPLOYER_NOT_CREATED",
+      "allowedResourceTypes": [
+        "Microsoft.App/managedEnvironments",
+        "Microsoft.App/containerApps",
+        "Microsoft.ManagedIdentity/userAssignedIdentities",
+        "Microsoft.KeyVault/vaults",
+        "Microsoft.Network/virtualNetworks",
+        "Microsoft.Network/networkSecurityGroups",
+        "Microsoft.Network/routeTables",
+        "Microsoft.Network/privateEndpoints",
+        "Microsoft.Network/privateDnsZones",
+        "Microsoft.OperationalInsights/workspaces",
+        "Microsoft.Resources/deployments"
+      ],
+      "operations": ["read", "write", "delete"],
+      "requiredAdditionalActions": [
+        "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ],
+      "definitionReadiness": "DESIGN_ONLY_NOT_CREATED;expandexactchild-resourceactions andvalidateagainstrecoveredG3 modules before anygrant. Builder/secret/RBACbootstrappermissionsremainseparate.",
+      "excludes": [
+        "Microsoft.Authorization/roleAssignments/write",
+        "Microsoft.Authorization/roleDefinitions/write",
+        "KeyVault secret value read",
+        "Registry-wide data access"
+      ],
+      "builderExtensions": "Require recovered exactG3A substrate before adding any Compute/guest rights"
+    },
+    "bootstrap": "Future RG create/secret seeding/narrow role assignment tasks require separate human-appointed bootstrap operator;no subscription Contributor shortcut. Assignment must restrict exact principal+role IDs and scopes after identities exist;no broadUserAccessAdministrator proposed.",
+    "rolesCreated": false
+  },
+  "lateBindingContract": "Deterministic contracts accept only returned resource IDs/defaultDomain/staticIP/workspaceId and exactboundedplatformFQDN addressbindings;unresolved source-specific builder endpoints stay downstream blocked,not guessed.",
+  "mutations": 0
+}

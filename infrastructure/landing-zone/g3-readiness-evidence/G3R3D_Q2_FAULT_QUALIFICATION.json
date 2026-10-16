@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "phase": "Q2_FAULT_QUALIFICATION",
+  "status": "NOT_EXECUTED_Q1_STOP",
+  "reason": "Observed existing VM lacks the required pre-existing dedicated rootless account and container tooling. User Q1 stop conditions prohibit installation or proceeding to Q2.",
+  "childResourceId": null,
+  "transientObjectsCreated": 0,
+  "fakeCredentialGenerated": false,
+  "FAKE_CREDENTIAL_SHA256": null,
+  "rootlessExecution": "NOT_TESTED",
+  "descendantImdsDenial": "NOT_TESTED",
+  "normalCleanup": "NOT_TESTED",
+  "watchdogCleanup": "NOT_TESTED",
+  "RUN_COMMAND_TIMEOUT_QUALIFICATION": "NOT_EXECUTED_WITH_REASON:Q1_INDISPENSABLE_PREREQUISITES_ABSENT"
+}

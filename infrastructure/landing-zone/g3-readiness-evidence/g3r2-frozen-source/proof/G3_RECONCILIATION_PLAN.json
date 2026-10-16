@@ -1,0 +1,160 @@
+{
+  "lineage": "PROSPECTIVE_G3R2",
+  "execution": "NOT_EXECUTED",
+  "expectedResources": "G3_BILL_OF_MATERIALS.json;ownership tags andexactIDs",
+  "expectedIdentities": [
+    {
+      "name": "nzila-g3-pull-95086e2f",
+      "lifecycle": "None",
+      "role": "RepositoryReader exactg3-synthetic-runtime",
+      "runtimeAvailability": "DENIED"
+    },
+    {
+      "name": "nzila-g3-runtime-95086e2f",
+      "lifecycle": "Main",
+      "role": "Exactsecret-scopedKeyVaultSecretsUser",
+      "registryRoles": []
+    }
+  ],
+  "expectedRbac": [
+    {
+      "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "role": "CUSTOM_G3_RESOURCE_DEPLOYER_NOT_CREATED",
+      "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "purpose": "Deploy/delete only recovered authorized G3 resources,without RBAC/secret data access",
+      "whyRequired": "Deploy/delete only recovered authorized G3 resources,without RBAC/secret data access",
+      "whyNarrowerScopeIsInsufficient": "Creating multiple new G3 resources needs RG-level control-plane scope;resource creation cannot rely on grants to resources not yet present",
+      "condition": null,
+      "status": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "role": "Container Registry Repository Writer:2a1e307c-b015-4ebd-883e-5b7698a07328",
+      "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "purpose": "One bounded G3A image push and read-back verification",
+      "whyRequired": "One bounded G3A image push and read-back verification",
+      "whyNarrowerScopeIsInsufficient": "ACR repository is a data-plane child,not an ARM RBAC scope;registry assignment requires repository condition",
+      "condition": {
+        "version": "2.0",
+        "expression": "(((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'}))) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+      },
+      "status": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "principal": "<G3_PULL_UAMI_PRINCIPAL_ID_FROM_AUTHORIZED_CREATION>",
+      "role": "Container Registry Repository Reader:b93aa761-3e63-49ed-ac28-beffa264f7ac",
+      "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "purpose": "Platform-only image pull,lifecycle None",
+      "whyRequired": "Platform-only image pull,lifecycle None",
+      "whyNarrowerScopeIsInsufficient": "Registry ARM scope with exact repository condition is required;no catalog/delete/AcrPull fallback",
+      "condition": {
+        "version": "2.0",
+        "expression": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+      },
+      "status": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "principal": "<G3_RUNTIME_UAMI_PRINCIPAL_ID_FROM_AUTHORIZED_CREATION>",
+      "role": "Key Vault Secrets User:4633458b-17de-408a-b874-0445c86b69e6",
+      "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "purpose": "Runtime lifecycle Main reads only the one synthetic secret",
+      "whyRequired": "Runtime lifecycle Main reads only the one synthetic secret",
+      "whyNarrowerScopeIsInsufficient": "Exact secret is the minimum supported built-in scope;no vault-wide assignment",
+      "condition": null,
+      "status": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "role": "CUSTOM_G3_PRIVATE_NETWORK_LINK_WRITER_NOT_CREATED",
+      "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3",
+      "purpose": "Create/reconcile only approved G2-side peering",
+      "whyRequired": "Create/reconcile only approved G2-side peering",
+      "whyNarrowerScopeIsInsufficient": "This exact peering child scope suffices;no VNet/RG Contributor proposed",
+      "condition": null,
+      "status": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "role": "CUSTOM_G3_PRIVATE_NETWORK_LINK_WRITER_NOT_CREATED",
+      "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f",
+      "purpose": "Link G3 VNet to retained ACR private zone",
+      "whyRequired": "Link G3 VNet to retained ACR private zone",
+      "whyNarrowerScopeIsInsufficient": "Exact DNS link child scope suffices;zone-wide DNS mutation unnecessary",
+      "condition": null,
+      "status": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "principal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "role": "CUSTOM_G3_FIREWALL_RULE_WRITER_NOT_CREATED",
+      "exactScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+      "purpose": "Update only separately approved firewall rule collections",
+      "whyRequired": "Update only separately approved firewall rule collections",
+      "whyNarrowerScopeIsInsufficient": "Collections reside on firewall resource;child collection RBAC granularity is unavailable for this property update",
+      "condition": null,
+      "status": "PROPOSED_NOT_GRANTED"
+    }
+  ],
+  "expectedNetworkPaths": [
+    {
+      "name": "g3-default-to-g2-firewall",
+      "prefix": "0.0.0.0/0",
+      "nextHopType": "VirtualAppliance",
+      "nextHopIp": "10.90.0.4",
+      "routeTable": "nzila-g3-aca-rt-95086e2f",
+      "associateWith": ["G3ContainerAppsSubnet", "G3BuilderSubnet"]
+    }
+  ],
+  "expectedDns": {
+    "resolver": "AZURE_PROVIDED_168.63.129.16",
+    "zones": [
+      {
+        "zone": "privatelink.azurecr.io",
+        "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+        "vnetLink": {
+          "target": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+          "name": "g3-acr-nzg3kv95086e2f",
+          "registrationEnabled": false
+        },
+        "resolutionDirection": "Azure-provided DNS inside G3 VNet -> private zone -> endpoint private IP",
+        "authority": "Existing G2 zone;new G3 VNet link is a G2-zone mutation requiring separate authority",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "zone": "privatelink.vaultcore.azure.net",
+        "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f",
+        "vnetLink": {
+          "target": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+          "name": "nzila-g3-kv-link-95086e2f",
+          "registrationEnabled": false
+        },
+        "resolutionDirection": "Azure-provided DNS inside G3 VNet -> private zone -> endpoint private IP",
+        "authority": "New G3 private DNS zone/endpoint zone group;G3-scoped future authority",
+        "status": "DESIGN_ONLY"
+      },
+      {
+        "zone": "<G3_ENVIRONMENT_DEFAULT_DOMAIN>",
+        "resource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.App/managedEnvironments/nzila-g3-env-95086e2f",
+        "vnetLink": {
+          "target": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+          "name": "nzila-g3-kv-link-95086e2f",
+          "registrationEnabled": false
+        },
+        "resolutionDirection": "Azure-provided DNS inside G3 VNet -> private zone -> endpoint private IP",
+        "authority": "Internal ACA custom DNS private zone named exact returned defaultDomain;apex and wildcard A -> returned staticIP,late binding before ingress proof",
+        "status": "DESIGN_ONLY"
+      }
+    ],
+    "ACA_PRIVATE_ENDPOINT": "NOT_REQUIRED",
+    "ACA_PRIVATE_ENDPOINT_DNS_ZONE": "NOT_APPLICABLE;privatelink.canadacentral.azurecontainerapps.io not selected for INTERNAL environment",
+    "lateBindings": [
+      "Environment defaultDomain and staticIP returned after authorized empty environment creation",
+      "Private endpoint NIC IPs after authorized creation"
+    ]
+  },
+  "expectedLogs": ["ContainerAppConsoleLogs", "ContainerAppSystemLogs;capturedsafeproofevents"],
+  "expectedImageDigest": "Newprospectiveimmutablemanifest afterfuturebuild;historicaldigestnotasserted",
+  "expectedSecretReference": "https://nzg3kv95086e2f.vault.azure.net/secrets/g3-proof-secret",
+  "expectedPublicExposure": "NONE_FOR_ACA_KV_ACR;workspacepublicAzureMonitoringestion isselectedplatformtelemetrynotworkloadpublicingress",
+  "effectivePermissionProof": "Freshprincipal/roleconditions+controllednegatives;assignmentexistenceisnotaccessproof",
+  "residualState": "G2sealedrootpacketnotrecovered;externalhumanmustbind acceptedterminalbaselinebeforemutation"
+}

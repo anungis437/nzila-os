@@ -1,0 +1,37 @@
+{
+  "PARENT_G2_PACKET_SHA256": "9cfcda0c4bced61e302128d8455867214f7b64c8b5b101bf5e52f632e8984198",
+  "PARENT_G2_FILE_SHA256": "78f10736f3a839b921111c0fd0d654caeaf2d87639be4da5210868abc3c6c6c6",
+  "SELECTED_BUILDER": "NONE",
+  "SUPPLEMENT_CHANGE_COUNT": 0,
+  "BUILDER_CHANGE_IDS": [],
+  "changes": [],
+  "absenceMeaning": "No selected-builder changes rendered;NOT a claim either candidate needs zero G2 changes",
+  "candidateDeltasNotAuthorized": [
+    {
+      "builder": "A",
+      "surface": "Owned Managed RunCommand child plus owned guest staging/cleanup and temporary finite public-base firewall allowance;identity fence remains unbound",
+      "rollback": "Remove only owned command/guest files/images/credentials/firewall rules;retain G2 VM/NIC/disk/UAMI/foreign state;etag and guest ownership/conflict guards"
+    },
+    {
+      "builder": "B",
+      "surface": "Owned S1 agent pool on existing G2 registry;bounded local-source staging;G2 firewall agent dependencies443/12000 plus finite Docker base hosts;G3 adjunct NSG rules outside G2",
+      "rollback": "Cancel owned task;scale owned pool0/delete;verify stopped allocation;delete source staging and owned collection entries only;etag/conflict guards"
+    }
+  ],
+  "ROLLBACK": "NOT_COMPLETE_FOR_EITHER_CANDIDATE;CORE_G2_ROLLBACK_UNCHANGED",
+  "SECURITY_IMPACT": "No supplemental authorization issued;candidate surfaces disclosed only;public ACR stays disabled",
+  "STATUS": "PROPOSED_NOT_AUTHORIZED",
+  "RENDERING_STATUS": "INCOMPLETE_NO_SELECTED_BUILDER",
+  "digestMethod": "SHA256 sorted-key canonical JSON UTF-8 excluding SUPPLEMENT_DIGEST and appended composite linkage manifest",
+  "SUPPLEMENT_DIGEST": "bbb00e27adeeee6eb2b4e4e131426bed3a9cf5017e77298792b75dae4b74259d",
+  "composite": {
+    "CORE_PACKET_DIGEST": "9cfcda0c4bced61e302128d8455867214f7b64c8b5b101bf5e52f632e8984198",
+    "CORE_PACKET_FILE_SHA256": "78f10736f3a839b921111c0fd0d654caeaf2d87639be4da5210868abc3c6c6c6",
+    "SUPPLEMENT_DIGEST": "bbb00e27adeeee6eb2b4e4e131426bed3a9cf5017e77298792b75dae4b74259d",
+    "SELECTED_BUILDER": "NONE",
+    "TOTAL_CHANGE_COUNT": 7,
+    "STATUS": "DETERMINISTIC_LINKAGE_ONLY;NOT_COMPLETE_OR_APPROVABLE_WITH_NO_SELECTED_BUILDER",
+    "digestMethod": "SHA256 sorted-key canonical JSON UTF-8 excluding COMPOSITE_AUTHORIZATION_DIGEST",
+    "COMPOSITE_AUTHORIZATION_DIGEST": "5f31bd44d8c7a3679b683351e3af28865726e5b0bd9eb4ad8a582133cefda055"
+  }
+}

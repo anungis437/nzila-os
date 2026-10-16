@@ -1,0 +1,88 @@
+{
+  "phase": "G3R3B",
+  "result": "PASS_LOCAL_PACKET_VALIDATION_ONLY",
+  "G3R3B_GATE": "BLOCKED",
+  "executionAuthorized": false,
+  "checks": [
+    {
+      "command": "node --test --test-skip-pattern \"history recovery has deterministic|exact Git historical blob digest\" infrastructure\\landing-zone\\g3-readiness-report.test.mjs infrastructure\\landing-zone\\g3r1-local-closure.test.mjs infrastructure\\landing-zone\\g3r2-source-closure.test.mjs infrastructure\\landing-zone\\g3r2i-source-closure.test.mjs infrastructure\\landing-zone\\g3r3-execution-envelope.test.mjs infrastructure\\landing-zone\\g3r3b-builder-closure.test.mjs",
+      "result": "PASS",
+      "tests": 605,
+      "passed": 605,
+      "failed": 0,
+      "newG3R3BTests": 94,
+      "skippedReportedByRunner": 0,
+      "exclusion": "Historical-recovery cases filtered before execution;no new historical recovery"
+    },
+    {
+      "command": "node --check on every infrastructure\\landing-zone\\g3r3b*.mjs",
+      "result": "PASS",
+      "files": 3
+    },
+    {
+      "command": "pnpm exec prettier --check on G3R3B scripts,nine requested outputs,output binding and local validation",
+      "result": "PASS"
+    },
+    {
+      "command": "node infrastructure\\landing-zone\\g3r3b-builder-closure.mjs --write then --check;SHA256 comparison of every G3R3B evidence file before/after generation",
+      "result": "PASS",
+      "byteIdenticalFiles": 78
+    },
+    {
+      "command": "node infrastructure\\landing-zone\\g3r3b-read-evidence.mjs --check;node infrastructure\\landing-zone\\g3r2i-source-closure.mjs --check",
+      "result": "PASS",
+      "acceptedParentEvidenceToolsSourceImageCandidateAndG2Hashes": "UNCHANGED",
+      "frozenCoreG2Digest": "9cfcda0c4bced61e302128d8455867214f7b64c8b5b101bf5e52f632e8984198"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "result": "PASS",
+      "filesScanned": 2638,
+      "errors": 0,
+      "warnings": 1215,
+      "info": 1700
+    }
+  ],
+  "readLedger": {
+    "ledger": "G3R3B_READ_LEDGER.json",
+    "evidenceCaptureCalls": 44,
+    "succeeded": 41,
+    "failed": 3,
+    "failureDisposition": "Rejected stable agentPool GET version and two obsolete public contract paths retained;server-supported preview GET and current discovered RegistryTasks OpenAPI succeeded",
+    "methods": ["GET", "ACCOUNT_SHOW_READ_ONLY"]
+  },
+  "coverage": [
+    "Two-builder contract checks and exact current OpenAPI limits",
+    "Measured inline source bytes/hash/base64/protected-parameter model",
+    "Current provider action validation and singular-action typo rejection",
+    "Material criterion selection and ordered both-pass preference tests",
+    "Frozen core semantic digest,file digest,supplement/composite linkage and drift rejection",
+    "Applicable non-primary Standard Global/CanadaCentral vault CAD transaction meter",
+    "Plan-derived100-call secret budget;zero purges/per-HMAC vault calls",
+    "Actual existing E4 SSD SKU,transaction rate and conservative hourly-window scenario",
+    "Agent allocation tariff proxy rejection",
+    "ACR exact storage bytes/headroom and invalid/excess reservation rejection",
+    "Soft log enforcement disclosure and conditional-only cost reconstruction",
+    "Candidate-specific traffic surfaces,double-count/public-private rejection",
+    "Parent17-step acyclic DAG,post-environment quota250mCPU and immutable registry image authority",
+    "Exactly three reserved human groups;final approval packet withheld while BLOCKED",
+    "Ledger response/error hashes,Azure/public-price allowlists and execution flag rejection"
+  ],
+  "boundaries": {
+    "ROOT_1_REOPENED": "NO",
+    "azureResourceMutations": 0,
+    "azureRbacMutations": 0,
+    "azureRegistryMutations": 0,
+    "g2Mutations": 0,
+    "imagePushes": 0,
+    "privateBuilds": 0,
+    "runCommandsExecuted": 0,
+    "agentPoolsCreated": 0,
+    "sourceUploads": 0,
+    "builderRegistryCredentialsAcquiredOrSent": 0,
+    "liveProofs": 0,
+    "humanAppointments": 0,
+    "ceilingApprovals": 0
+  },
+  "limitations": "Local packet validation does not prove future guest tooling/DNS/available space,isolation/IMDS fencing,credential/daemon cleanup,agent allocation expiry,hard network/log cost limits,effective human authorization or live proof success"
+}

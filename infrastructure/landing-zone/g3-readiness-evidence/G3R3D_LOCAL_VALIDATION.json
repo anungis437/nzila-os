@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0",
+  "mission": "NZ-20261008-INFRA-001",
+  "phase": "G3R3D",
+  "validationClass": "OFFLINE_VALIDATION_OF_CAPTURED_LIVE_Q1_EVIDENCE",
+  "localValidation": "PASS",
+  "liveQualification": "FAIL",
+  "executionReadiness": "BLOCKED",
+  "regression": {
+    "command": "node --test --test-skip-pattern \"history recovery has deterministic|exact Git historical blob digest\" infrastructure\\landing-zone\\g3-readiness-report.test.mjs infrastructure\\landing-zone\\g3r1-local-closure.test.mjs infrastructure\\landing-zone\\g3r2-source-closure.test.mjs infrastructure\\landing-zone\\g3r2i-source-closure.test.mjs infrastructure\\landing-zone\\g3r3-execution-envelope.test.mjs infrastructure\\landing-zone\\g3r3b-builder-closure.test.mjs infrastructure\\landing-zone\\g3r3c-builder-closure.test.mjs infrastructure\\landing-zone\\g3r3d-qualification-closure.test.mjs",
+    "exitCode": 0,
+    "tests": 806,
+    "passed": 806,
+    "failed": 0,
+    "cancelled": 0,
+    "reportedSkipped": 0,
+    "newSuccessorTests": 70,
+    "historicalRecoveryExcludedBeforeExecution": true,
+    "guestReplayDuringTests": false
+  },
+  "documentation": {
+    "command": "pnpm validate:docs",
+    "exitCode": 0,
+    "filesScanned": 2638,
+    "errors": 0,
+    "warnings": 1215,
+    "info": 1700
+  },
+  "syntax": {
+    "node": "node --check <each of the three infrastructure\\landing-zone\\g3r3d*.mjs files>",
+    "bash": "\"C:\\Program Files\\Git\\bin\\bash.exe\" -n \"C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3r3d-q1-preflight.sh\"",
+    "result": "PASS"
+  },
+  "formatting": {
+    "command": "pnpm exec prettier --check infrastructure\\landing-zone\\g3r3d-live-qualification.mjs infrastructure\\landing-zone\\g3r3d-qualification-closure.mjs infrastructure\\landing-zone\\g3r3d-qualification-closure.test.mjs <authored G3R3D JSON excluding raw READ,REQUEST,INITIAL_CAPTURE,INITIAL_INTERPRETATION snapshots> \"infrastructure\\landing-zone\\g3-readiness-evidence\\G3R3D*.md\"",
+    "exitCode": 0,
+    "rawSnapshotsFormatted": false
+  },
+  "preservation": {
+    "command": "node infrastructure\\landing-zone\\g3r3d-live-qualification.mjs --check",
+    "result": "PASS",
+    "frozenEvidenceFiles": 482,
+    "frozenToolFiles": 25,
+    "parentWritersOrCollectorsRerun": false,
+    "qualifiedSourceOrImageRebuilt": false
+  },
+  "determinism": {
+    "command": "SHA256 each G3R3D file; node infrastructure\\landing-zone\\g3r3d-qualification-closure.mjs --write; compare every SHA256",
+    "result": "PASS",
+    "comparedFiles": 38,
+    "byteIdenticalFiles": 38,
+    "measurementPhase": "AFTER_LOCAL_VALIDATION_BINDING"
+  },
+  "liveEvidence": {
+    "targetIdentityChecks": 15,
+    "targetIdentityMatched": 15,
+    "currentPermissionGate": "PASS",
+    "q1TransportAttempt": "FAILED_BEFORE_SCRIPT_EXECUTION_EXIT127;CRLF_CAUSE_PRESERVED",
+    "q1LfRetry": "GUEST_OBSERVATION_SUCCEEDED_EXIT0;PREREQUISITES_FAIL",
+    "q2": "NOT_EXECUTED_Q1_STOP",
+    "q3": "NOT_EXECUTED_Q2_NOT_RUN",
+    "fakeCredentialGenerated": false,
+    "boundedRemanenceMatches": null,
+    "ledgerOperations": 17,
+    "readOnlyOperations": 13,
+    "childCreations": 2,
+    "childDeletions": 2,
+    "uniqueChildResourceIds": 1,
+    "childrenRemaining": 0,
+    "otherAzureMutations": 0,
+    "rbacMutations": 0,
+    "networkMutations": 0,
+    "imagePulls": 0,
+    "imagePushes": 0,
+    "builds": 0,
+    "realTokenCreations": 0,
+    "g3aOrG3bExecutions": 0
+  },
+  "limitations": [
+    "Live Q1 observed missing dedicated rootless account and required pre-existing tooling;qualification FAIL is not a permission BLOCKED result.",
+    "No Q2 rootless,descendant IMDS,normal cleanup,watchdog,TERM-resistant descendant or Managed Run Command timeout proof exists.",
+    "Q3 is not executed because Q2 was not run;no zero-residual guest postcheck or bounded credential-remanence measurement is fabricated.",
+    "One broad G3 process match may include the Q1 agent/script path;not asserted as an unrelated conflict. Original raw evidence and initial interpretation are retained.",
+    "Synthetic limits256MiB memory/48MiB workspace/64tasks are derived only;future build/workspace limits remain null,not qualified.",
+    "Exact child absence was observed after asynchronous deletion;Managed Run Command agent logs/download artifacts are not asserted absent.",
+    "Cost closure is not recomputed without runtime PASS;recommended ceiling UNSUPPORTED,packetNOT_ISSUED,G3executionBLOCKED."
+  ]
+}

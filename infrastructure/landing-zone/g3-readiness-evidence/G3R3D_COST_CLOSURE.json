@@ -1,0 +1,25 @@
+{
+  "status": "NOT_RECOMPUTED_RUNTIME_QUALIFICATION_FAIL",
+  "reason": "G3R3D cost closure is allowed only after runtime PASS;Builder A is disqualified. No new proof ceiling is justified.",
+  "capturedRateBindings": {
+    "source": "G3R3C_COST_CLOSURE.json",
+    "sha256": "a462763c295cc53271e457b30b2df271f9ab80266ec734816b85767d53b817e3",
+    "keyVaultMeterId": "0f824807-2376-435c-95c9-f992b67a07b0",
+    "diskMeterId": "df249cf3-71c9-5327-8738-56f65fa3fcda"
+  },
+  "inheritedConditionalSubtotalCAD": 2.95388107,
+  "inheritedSubtotalIsAllIn": false,
+  "LIVE_QUALIFICATION_COST_CAD": null,
+  "liveQualificationCostReason": "No invoice/usage cost measurement;existing VM remains shared. Do not equate zero non-child mutations with zero billing.",
+  "BUILDER_A_MAX_INCREMENTAL_COST_CAD": null,
+  "EXPECTED_PROOF_RUN_COST_CAD": null,
+  "BOUNDED_MAX_PROOF_RUN_COST_CAD": null,
+  "ROLLBACK_ALLOWANCE_CAD": null,
+  "DIAGNOSTIC_CONTINGENCY_CAD": null,
+  "UNCERTAINTY_BUFFER_CAD": null,
+  "RECOMMENDED_EXECUTION_CEILING_CAD": "UNSUPPORTED",
+  "HUMAN_APPROVED_EXECUTION_CEILING_CAD": "UNBOUND",
+  "ceilingSemantics": "HUMAN_FINANCIAL_AUTHORIZATION_ENVELOPE;not guaranteed Azure billing stop",
+  "TECHNICAL_HARD_LOG_CAP": "NO",
+  "serviceTransactionMaximumAlternative": "Allowed prospective modeling method after runtime PASS;not modeled for disqualified Builder A"
+}

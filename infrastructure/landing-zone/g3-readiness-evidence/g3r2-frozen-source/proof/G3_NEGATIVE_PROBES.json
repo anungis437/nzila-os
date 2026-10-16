@@ -1,0 +1,42 @@
+{
+  "lineage": "PROSPECTIVE_G3R2",
+  "probes": [
+    {
+      "id": "RUNTIME_CANNOT_PUSH_IMAGE",
+      "acceptance": "KnownexistingG3repository,connectivitycontrol,runtimeprincipal;authorization403/denialnot404/timeout",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "BUILD_CANNOT_READ_RUNTIME_SECRET",
+      "acceptance": "Knownexistingsecret,buildprincipal,directprivateTLSconnectivitycontrol;explicitauthorization403",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "UNAUTHORIZED_PRINCIPAL_CANNOT_DEPLOY",
+      "acceptance": "No futurewriteprobe withoutseparateauthority;read-onlypermissionevidence orisolatedcontrollednegativeaction;no successcleanup omitted",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "PUBLIC_PATH_CANNOT_REACH_PRIVATE_ENDPOINT",
+      "acceptance": "Independentpublic-origin DNS/networkdenial;notmisclassifiedasRBAC403",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "WORKLOAD_DENIED_BEFORE_CAPACITY_GATE",
+      "acceptance": "Localpolicydeniesmissing/wrongenvironmentquotaevidence;noactivation",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "UNAPPROVED_G2_MUTATION_REJECTED",
+      "acceptance": "G3source hasnoG2resourcemutator;separateauthority+G2root reconciliationrequired",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    }
+  ],
+  "execution": "NOT_EXECUTED"
+}

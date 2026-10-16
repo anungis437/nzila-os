@@ -1,0 +1,2125 @@
+{
+  "status": "COMPLETE_CORE_PRIVILEGE_PACKET;BUILDER_ADJUNCT_PERMISSION_BINDING_PENDING_MODEL",
+  "recommendedPrincipal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+  "recommendationIsAppointment": false,
+  "servicePrincipal": {
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#servicePrincipals(id,appId,displayName,servicePrincipalType,accountEnabled)/$entity",
+    "accountEnabled": true,
+    "appId": "5c02d25b-cbdc-412f-8c2a-9ed43b73ac20",
+    "displayName": "nzila-os-build",
+    "id": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+    "servicePrincipalType": "Application"
+  },
+  "application": {
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#applications(id,appId,displayName)/$entity",
+    "appId": "5c02d25b-cbdc-412f-8c2a-9ed43b73ac20",
+    "displayName": "nzila-os-build",
+    "id": "3594a951-fcff-4877-a52f-043ed52a9eb0"
+  },
+  "federation": [
+    {
+      "audiences": ["api://AzureADTokenExchange"],
+      "id": "94decdaf-b17f-43ef-a875-795099068221",
+      "issuer": "https://token.actions.githubusercontent.com",
+      "name": "github-env-build",
+      "subject": "repo:anungis437/nzila-os:environment:build"
+    }
+  ],
+  "transitiveGroups": [],
+  "currentDirectAndVisibleInheritedAssignments": [
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr/providers/Microsoft.Authorization/roleAssignments/456bd3f1-4ee2-423b-bc1a-8b99e8338e19",
+      "name": "456bd3f1-4ee2-423b-bc1a-8b99e8338e19",
+      "properties": {
+        "condition": null,
+        "conditionVersion": null,
+        "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+        "createdOn": "2026-06-29T14:42:57.3114790Z",
+        "delegatedManagedIdentityResourceId": null,
+        "description": null,
+        "principalId": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/8311e382-0749-4cb8-b61a-304f252e45ec",
+        "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+        "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+        "updatedOn": "2026-06-29T14:42:57.3114790Z"
+      },
+      "type": "Microsoft.Authorization/roleAssignments"
+    }
+  ],
+  "scopeVerification": {
+    "subscriptionAndDescendantAssignmentsRead": true,
+    "subscriptionAncestorAtScopeRead": true,
+    "transitiveSecurityGroupsRead": true,
+    "inheritedCandidateAssignments": [],
+    "visibleDenyAssignments": [],
+    "limitations": "Current active visible ARM/Graph assignments only;not future PIM activation,unreadable external tenants or token authorization simulation. No impersonation/token acquisition/execution."
+  },
+  "requiredOperations": [
+    {
+      "OPERATION_ID": "subscription-root.group:read",
+      "AZURE_ACTION": "Microsoft.Resources/resourceGroups/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Resources/resourceGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "EXISTING_HUMAN_BOOTSTRAP_AUTHORITY;no new subscription operator grant",
+      "PRINCIPAL_CLASS": "HUMAN_LIFECYCLE_OWNER",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Human creates exact empty G3 RG before RG-level role assignment;delete only after owned-resource reconciliation",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "subscription-root.group:write",
+      "AZURE_ACTION": "Microsoft.Resources/resourceGroups/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Resources/resourceGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "EXISTING_HUMAN_BOOTSTRAP_AUTHORITY;no new subscription operator grant",
+      "PRINCIPAL_CLASS": "HUMAN_LIFECYCLE_OWNER",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Human creates exact empty G3 RG before RG-level role assignment;delete only after owned-resource reconciliation",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "subscription-root.group:delete",
+      "AZURE_ACTION": "Microsoft.Resources/resourceGroups/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Resources/resourceGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "EXISTING_HUMAN_BOOTSTRAP_AUTHORITY;no new subscription operator grant",
+      "PRINCIPAL_CLASS": "HUMAN_LIFECYCLE_OWNER",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Human creates exact empty G3 RG before RG-level role assignment;delete only after owned-resource reconciliation",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.acaNsg:read",
+      "AZURE_ACTION": "Microsoft.Network/networkSecurityGroups/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/networkSecurityGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.acaNsg:write",
+      "AZURE_ACTION": "Microsoft.Network/networkSecurityGroups/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/networkSecurityGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.acaNsg:delete",
+      "AZURE_ACTION": "Microsoft.Network/networkSecurityGroups/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/networkSecurityGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.builderNsg:read",
+      "AZURE_ACTION": "Microsoft.Network/networkSecurityGroups/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/networkSecurityGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.builderNsg:write",
+      "AZURE_ACTION": "Microsoft.Network/networkSecurityGroups/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/networkSecurityGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.builderNsg:delete",
+      "AZURE_ACTION": "Microsoft.Network/networkSecurityGroups/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/networkSecurityGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.endpointNsg:read",
+      "AZURE_ACTION": "Microsoft.Network/networkSecurityGroups/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/networkSecurityGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.endpointNsg:write",
+      "AZURE_ACTION": "Microsoft.Network/networkSecurityGroups/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/networkSecurityGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.endpointNsg:delete",
+      "AZURE_ACTION": "Microsoft.Network/networkSecurityGroups/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/networkSecurityGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.route:read",
+      "AZURE_ACTION": "Microsoft.Network/routeTables/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/routeTables",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.route:write",
+      "AZURE_ACTION": "Microsoft.Network/routeTables/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/routeTables",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.route:delete",
+      "AZURE_ACTION": "Microsoft.Network/routeTables/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/routeTables",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.vnet:read",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.vnet:write",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.vnet:delete",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.peering:read",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.peering:write",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "network.peering:delete",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective network resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "identities.buildIdentity:read",
+      "AZURE_ACTION": "Microsoft.ManagedIdentity/userAssignedIdentities/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective identities resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "identities.buildIdentity:write",
+      "AZURE_ACTION": "Microsoft.ManagedIdentity/userAssignedIdentities/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective identities resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "identities.buildIdentity:delete",
+      "AZURE_ACTION": "Microsoft.ManagedIdentity/userAssignedIdentities/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective identities resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "identities.runtimeIdentity:read",
+      "AZURE_ACTION": "Microsoft.ManagedIdentity/userAssignedIdentities/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective identities resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "identities.runtimeIdentity:write",
+      "AZURE_ACTION": "Microsoft.ManagedIdentity/userAssignedIdentities/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective identities resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "identities.runtimeIdentity:delete",
+      "AZURE_ACTION": "Microsoft.ManagedIdentity/userAssignedIdentities/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective identities resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "observability.workspace:read",
+      "AZURE_ACTION": "Microsoft.OperationalInsights/workspaces/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.OperationalInsights/workspaces",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective observability resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "observability.workspace:write",
+      "AZURE_ACTION": "Microsoft.OperationalInsights/workspaces/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.OperationalInsights/workspaces",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective observability resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "observability.workspace:delete",
+      "AZURE_ACTION": "Microsoft.OperationalInsights/workspaces/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.OperationalInsights/workspaces",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective observability resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.vault:read",
+      "AZURE_ACTION": "Microsoft.KeyVault/vaults/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.KeyVault/vaults",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.vault:write",
+      "AZURE_ACTION": "Microsoft.KeyVault/vaults/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.KeyVault/vaults",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.vault:delete",
+      "AZURE_ACTION": "Microsoft.KeyVault/vaults/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.KeyVault/vaults",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.zone:read",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.zone:write",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.zone:delete",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.link:read",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.link:write",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.link:delete",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.endpoint:read",
+      "AZURE_ACTION": "Microsoft.Network/privateEndpoints/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateEndpoints",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.endpoint:write",
+      "AZURE_ACTION": "Microsoft.Network/privateEndpoints/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateEndpoints",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.endpoint:delete",
+      "AZURE_ACTION": "Microsoft.Network/privateEndpoints/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateEndpoints",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.zoneGroup:read",
+      "AZURE_ACTION": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.zoneGroup:write",
+      "AZURE_ACTION": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault.zoneGroup:delete",
+      "AZURE_ACTION": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective vault resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "environment.environment:read",
+      "AZURE_ACTION": "Microsoft.App/managedEnvironments/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.App/managedEnvironments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective environment resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "environment.environment:write",
+      "AZURE_ACTION": "Microsoft.App/managedEnvironments/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.App/managedEnvironments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective environment resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "environment.environment:delete",
+      "AZURE_ACTION": "Microsoft.App/managedEnvironments/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.App/managedEnvironments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective environment resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "environment.diagnostics:read",
+      "AZURE_ACTION": "Microsoft.Insights/diagnosticSettings/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Insights/diagnosticSettings",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective environment resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "environment.diagnostics:write",
+      "AZURE_ACTION": "Microsoft.Insights/diagnosticSettings/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Insights/diagnosticSettings",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective environment resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "environment.diagnostics:delete",
+      "AZURE_ACTION": "Microsoft.Insights/diagnosticSettings/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Insights/diagnosticSettings",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective environment resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.zone:read",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.zone:write",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.zone:delete",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.link:read",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.link:write",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.link:delete",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.apex:read",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/A/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/A",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.apex:write",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/A/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/A",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.apex:delete",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/A/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/A",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.wildcard:read",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/A/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/A",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.wildcard:write",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/A/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/A",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "internal-dns.wildcard:delete",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/A/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/A",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective internal-dns resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "workload.app:read",
+      "AZURE_ACTION": "Microsoft.App/containerApps/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.App/containerApps",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective workload resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "workload.app:write",
+      "AZURE_ACTION": "Microsoft.App/containerApps/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.App/containerApps",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective workload resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "workload.app:delete",
+      "AZURE_ACTION": "Microsoft.App/containerApps/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.App/containerApps",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Prospective workload resource lifecycle",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "deployments:read",
+      "AZURE_ACTION": "Microsoft.Resources/deployments/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Resources/deployments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "RG-scope module deployment/readback/cleanup;human runs subscription root,operator receives no subscription deployment role",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "deployments:write",
+      "AZURE_ACTION": "Microsoft.Resources/deployments/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Resources/deployments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "RG-scope module deployment/readback/cleanup;human runs subscription root,operator receives no subscription deployment role",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "deployments:delete",
+      "AZURE_ACTION": "Microsoft.Resources/deployments/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Resources/deployments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "RG-scope module deployment/readback/cleanup;human runs subscription root,operator receives no subscription deployment role",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "deployments:validate/action",
+      "AZURE_ACTION": "Microsoft.Resources/deployments/validate/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Resources/deployments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "RG-scope module deployment/readback/cleanup;human runs subscription root,operator receives no subscription deployment role",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "environment-join",
+      "AZURE_ACTION": "Microsoft.App/managedEnvironments/join/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.App/managedEnvironments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Linked environment authorization when creating the container app",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vault-private-endpoint-approval",
+      "AZURE_ACTION": "Microsoft.KeyVault/vaults/PrivateEndpointConnectionsApproval/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.KeyVault/vaults",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Automatic approval of the owned vault private endpoint;vault write alone is insufficient",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "nsg-join",
+      "AZURE_ACTION": "Microsoft.Network/networkSecurityGroups/join/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/networkSecurityGroups",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Attach owned subnet NSGs",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "route-table-join",
+      "AZURE_ACTION": "Microsoft.Network/routeTables/join/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/routeTables",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Attach owned route table to subnet",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "vnet-join",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/join/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Link owned VNet to private DNS zones",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g3-dns-zone-join",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/join/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Associate private endpoint DNS zone groups with owned private zones",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "subnet-join",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/subnets/join/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks/subnets",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "ACA/PE and conditional builder NIC subnet attachment",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "subnet-read",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/subnets/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks/subnets",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Read exact subnet contract",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "identity-assign",
+      "AZURE_ACTION": "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Assign two existing prospective UAMIs without credentials or extra identities",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g2-peer-read",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Read remote peering target",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g2-peer-authorize",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/peer/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Linked remote VNet authorization;child peering write alone is not sufficient",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g3-peer-authorize",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/peer/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Authorize reciprocal peering link",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "quota-query",
+      "AZURE_ACTION": "Microsoft.App/managedEnvironments/usages/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.App/managedEnvironments/usages",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.App/managedEnvironments/nzila-g3-env-95086e2f",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Post-create quota read;no automatic quota request",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "scoped-role-read",
+      "AZURE_ACTION": "Microsoft.Authorization/roleAssignments/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Authorization/roleAssignments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "SCOPED_CUSTOM_PERMISSION",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Read owned role bindings without granting",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "secret-role-grant",
+      "AZURE_ACTION": "Microsoft.Authorization/roleAssignments/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Authorization/roleAssignments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "EXISTING_SEPARATELY_VERIFIED_HUMAN_RBAC_AUTHORITY",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_RBAC_AUTHORITY",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Grant exact runtime secret reader after secret exists",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "secret-role-revoke",
+      "AZURE_ACTION": "Microsoft.Authorization/roleAssignments/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Authorization/roleAssignments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "EXISTING_SEPARATELY_VERIFIED_HUMAN_RBAC_AUTHORITY",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_RBAC_AUTHORITY",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Revoke owned runtime role on rollback",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "seeder-role-grant",
+      "AZURE_ACTION": "Microsoft.Authorization/roleAssignments/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Authorization/roleAssignments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "EXISTING_SEPARATELY_VERIFIED_HUMAN_RBAC_AUTHORITY",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_RBAC_AUTHORITY",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Temporary data-only bootstrap authority on the newly created empty proof vault;an exact-secret role cannot bootstrap a nonexistent secret",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "seeder-role-revoke",
+      "AZURE_ACTION": "Microsoft.Authorization/roleAssignments/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Authorization/roleAssignments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "EXISTING_SEPARATELY_VERIFIED_HUMAN_RBAC_AUTHORITY",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_RBAC_AUTHORITY",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Revoke bootstrap seeder authority after owned synthetic-secret cleanup",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g2-peering:read",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_G2-PEERING_WRITER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Only exact separately approved G2 packet;firewall whole-resource PUT cannot be property-isolated by RBAC",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g2-peering:write",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_G2-PEERING_WRITER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Only exact separately approved G2 packet;firewall whole-resource PUT cannot be property-isolated by RBAC",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g2-peering:delete",
+      "AZURE_ACTION": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_G2-PEERING_WRITER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Only exact separately approved G2 packet;firewall whole-resource PUT cannot be property-isolated by RBAC",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g2-dns-link:read",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_G2-DNS-LINK_WRITER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Only exact separately approved G2 packet;firewall whole-resource PUT cannot be property-isolated by RBAC",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g2-dns-link:write",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_G2-DNS-LINK_WRITER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Only exact separately approved G2 packet;firewall whole-resource PUT cannot be property-isolated by RBAC",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g2-dns-link:delete",
+      "AZURE_ACTION": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_G2-DNS-LINK_WRITER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Only exact separately approved G2 packet;firewall whole-resource PUT cannot be property-isolated by RBAC",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g2-firewall:read",
+      "AZURE_ACTION": "Microsoft.Network/azureFirewalls/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/azureFirewalls",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_G2-FIREWALL_WRITER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Only exact separately approved G2 packet;firewall whole-resource PUT cannot be property-isolated by RBAC",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "g2-firewall:write",
+      "AZURE_ACTION": "Microsoft.Network/azureFirewalls/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Network/azureFirewalls",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_G2-FIREWALL_WRITER",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Only exact separately approved G2 packet;firewall whole-resource PUT cannot be property-isolated by RBAC",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Writer:Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Writer",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Private exact-repository push/readback;not deletion",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Writer:Microsoft.ContainerRegistry/registries/repositories/content/read",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/content/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Writer",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Private exact-repository push/readback;not deletion",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Writer:Microsoft.ContainerRegistry/registries/repositories/metadata/write",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/metadata/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Writer",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Private exact-repository push/readback;not deletion",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Writer:Microsoft.ContainerRegistry/registries/repositories/content/write",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/content/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Writer",
+      "PRINCIPAL_CLASS": "EXECUTION_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Private exact-repository push/readback;not deletion",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Reader:Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Reader",
+      "PRINCIPAL_CLASS": "PLATFORM_PULL_UAMI",
+      "TEMPORARY_OR_PERSISTENT": "PERSISTENT_UNTIL_AUTHORIZED_TEARDOWN",
+      "RATIONALE": "Persistent platform pull,lifecycle None",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Reader:Microsoft.ContainerRegistry/registries/repositories/content/read",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/content/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Reader",
+      "PRINCIPAL_CLASS": "PLATFORM_PULL_UAMI",
+      "TEMPORARY_OR_PERSISTENT": "PERSISTENT_UNTIL_AUTHORIZED_TEARDOWN",
+      "RATIONALE": "Persistent platform pull,lifecycle None",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Contributor:Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Contributor",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_ROLLBACK_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Temporary exact-repository cleanup;writer cannot delete",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Contributor:Microsoft.ContainerRegistry/registries/repositories/content/read",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/content/read",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Contributor",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_ROLLBACK_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Temporary exact-repository cleanup;writer cannot delete",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Contributor:Microsoft.ContainerRegistry/registries/repositories/metadata/write",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/metadata/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Contributor",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_ROLLBACK_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Temporary exact-repository cleanup;writer cannot delete",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Contributor:Microsoft.ContainerRegistry/registries/repositories/content/write",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/content/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Contributor",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_ROLLBACK_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Temporary exact-repository cleanup;writer cannot delete",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Contributor:Microsoft.ContainerRegistry/registries/repositories/metadata/delete",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/metadata/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Contributor",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_ROLLBACK_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Temporary exact-repository cleanup;writer cannot delete",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "Container Registry Repository Contributor:Microsoft.ContainerRegistry/registries/repositories/content/delete",
+      "AZURE_ACTION": "Microsoft.ContainerRegistry/registries/repositories/content/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.ContainerRegistry/registries/repositories",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Container Registry Repository Contributor",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_ROLLBACK_OPERATOR",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Temporary exact-repository cleanup;writer cannot delete",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "runtime:Microsoft.KeyVault/vaults/secrets/getSecret/action",
+      "AZURE_ACTION": "Microsoft.KeyVault/vaults/secrets/getSecret/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.KeyVault/vaults/secrets",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Key Vault Secrets User",
+      "PRINCIPAL_CLASS": "RUNTIME_UAMI",
+      "TEMPORARY_OR_PERSISTENT": "PERSISTENT_UNTIL_AUTHORIZED_TEARDOWN",
+      "RATIONALE": "Exact secret data read for platform injection;no image writes",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "runtime:Microsoft.KeyVault/vaults/secrets/readMetadata/action",
+      "AZURE_ACTION": "Microsoft.KeyVault/vaults/secrets/readMetadata/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.KeyVault/vaults/secrets",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "Key Vault Secrets User",
+      "PRINCIPAL_CLASS": "RUNTIME_UAMI",
+      "TEMPORARY_OR_PERSISTENT": "PERSISTENT_UNTIL_AUTHORIZED_TEARDOWN",
+      "RATIONALE": "Exact secret data read for platform injection;no image writes",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "seeder:setSecret/action",
+      "AZURE_ACTION": "Microsoft.KeyVault/vaults/secrets/setSecret/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.KeyVault/vaults/secrets",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_EXACT_SECRET_SEEDER_CUSTOM_DATA_ROLE",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_SECRET_SEEDER",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Create/read expected proof/delete only synthetic secret;no purge,real secrets or values here",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "seeder:getSecret/action",
+      "AZURE_ACTION": "Microsoft.KeyVault/vaults/secrets/getSecret/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.KeyVault/vaults/secrets",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_EXACT_SECRET_SEEDER_CUSTOM_DATA_ROLE",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_SECRET_SEEDER",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Create/read expected proof/delete only synthetic secret;no purge,real secrets or values here",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "seeder:readMetadata/action",
+      "AZURE_ACTION": "Microsoft.KeyVault/vaults/secrets/readMetadata/action",
+      "TARGET_RESOURCE_TYPE": "Microsoft.KeyVault/vaults/secrets",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_EXACT_SECRET_SEEDER_CUSTOM_DATA_ROLE",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_SECRET_SEEDER",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Create/read expected proof/delete only synthetic secret;no purge,real secrets or values here",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "seeder:delete",
+      "AZURE_ACTION": "Microsoft.KeyVault/vaults/secrets/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.KeyVault/vaults/secrets",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "G3R3_EXACT_SECRET_SEEDER_CUSTOM_DATA_ROLE",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_SECRET_SEEDER",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Create/read expected proof/delete only synthetic secret;no purge,real secrets or values here",
+      "plane": "DATA"
+    },
+    {
+      "OPERATION_ID": "registry-grant:write",
+      "AZURE_ACTION": "Microsoft.Authorization/roleAssignments/write",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Authorization/roleAssignments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "EXISTING_SEPARATELY_VERIFIED_HUMAN_RBAC_AUTHORITY",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_RBAC_AUTHORITY",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Repository ABAC grants for exact writer/reader/rollback principals",
+      "plane": "CONTROL"
+    },
+    {
+      "OPERATION_ID": "registry-grant:delete",
+      "AZURE_ACTION": "Microsoft.Authorization/roleAssignments/delete",
+      "TARGET_RESOURCE_TYPE": "Microsoft.Authorization/roleAssignments",
+      "TARGET_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "REQUIRED_ROLE_OR_CUSTOM_PERMISSION": "EXISTING_SEPARATELY_VERIFIED_HUMAN_RBAC_AUTHORITY",
+      "PRINCIPAL_CLASS": "SEPARATE_HUMAN_RBAC_AUTHORITY",
+      "TEMPORARY_OR_PERSISTENT": "TEMPORARY",
+      "RATIONALE": "Repository ABAC grants for exact writer/reader/rollback principals",
+      "plane": "CONTROL"
+    }
+  ],
+  "linkedAuthorizationCatalogs": [
+    {
+      "name": "keyvault-operations-page-1",
+      "responseFile": "G3R3_READ_24_keyvault-operations-page-1.json",
+      "responseSha256": "8275787be39017e059195a2b97c1deeb1fe8a18cde439cd53eab21c95c097211"
+    },
+    {
+      "name": "app-operations-page-1",
+      "responseFile": "G3R3_READ_25_app-operations-page-1.json",
+      "responseSha256": "de835bcf8f46b4124cbd4ae1758220be9d4b866d55a98d39bd07fef5aacc1fbd"
+    },
+    {
+      "name": "network-operations-page-1",
+      "responseFile": "G3R3_READ_26_network-operations-page-1.json",
+      "responseSha256": "e06071b0ad2ec383d76a0f75d5179c9059afcd08d54dde4b22b101399e9b0ba7"
+    }
+  ],
+  "ALREADY_SUFFICIENT": [],
+  "MISSING_PRIVILEGES": [
+    {
+      "id": "network.acaNsg:read",
+      "action": "Microsoft.Network/networkSecurityGroups/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.acaNsg:write",
+      "action": "Microsoft.Network/networkSecurityGroups/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.acaNsg:delete",
+      "action": "Microsoft.Network/networkSecurityGroups/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.builderNsg:read",
+      "action": "Microsoft.Network/networkSecurityGroups/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.builderNsg:write",
+      "action": "Microsoft.Network/networkSecurityGroups/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.builderNsg:delete",
+      "action": "Microsoft.Network/networkSecurityGroups/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.endpointNsg:read",
+      "action": "Microsoft.Network/networkSecurityGroups/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.endpointNsg:write",
+      "action": "Microsoft.Network/networkSecurityGroups/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.endpointNsg:delete",
+      "action": "Microsoft.Network/networkSecurityGroups/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.route:read",
+      "action": "Microsoft.Network/routeTables/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.route:write",
+      "action": "Microsoft.Network/routeTables/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.route:delete",
+      "action": "Microsoft.Network/routeTables/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.vnet:read",
+      "action": "Microsoft.Network/virtualNetworks/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.vnet:write",
+      "action": "Microsoft.Network/virtualNetworks/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.vnet:delete",
+      "action": "Microsoft.Network/virtualNetworks/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.peering:read",
+      "action": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.peering:write",
+      "action": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "network.peering:delete",
+      "action": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "identities.buildIdentity:read",
+      "action": "Microsoft.ManagedIdentity/userAssignedIdentities/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "identities.buildIdentity:write",
+      "action": "Microsoft.ManagedIdentity/userAssignedIdentities/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "identities.buildIdentity:delete",
+      "action": "Microsoft.ManagedIdentity/userAssignedIdentities/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "identities.runtimeIdentity:read",
+      "action": "Microsoft.ManagedIdentity/userAssignedIdentities/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "identities.runtimeIdentity:write",
+      "action": "Microsoft.ManagedIdentity/userAssignedIdentities/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "identities.runtimeIdentity:delete",
+      "action": "Microsoft.ManagedIdentity/userAssignedIdentities/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "observability.workspace:read",
+      "action": "Microsoft.OperationalInsights/workspaces/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "observability.workspace:write",
+      "action": "Microsoft.OperationalInsights/workspaces/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "observability.workspace:delete",
+      "action": "Microsoft.OperationalInsights/workspaces/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.vault:read",
+      "action": "Microsoft.KeyVault/vaults/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.vault:write",
+      "action": "Microsoft.KeyVault/vaults/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.vault:delete",
+      "action": "Microsoft.KeyVault/vaults/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.zone:read",
+      "action": "Microsoft.Network/privateDnsZones/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.zone:write",
+      "action": "Microsoft.Network/privateDnsZones/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.zone:delete",
+      "action": "Microsoft.Network/privateDnsZones/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.link:read",
+      "action": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.link:write",
+      "action": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.link:delete",
+      "action": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.endpoint:read",
+      "action": "Microsoft.Network/privateEndpoints/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.endpoint:write",
+      "action": "Microsoft.Network/privateEndpoints/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.endpoint:delete",
+      "action": "Microsoft.Network/privateEndpoints/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.zoneGroup:read",
+      "action": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.zoneGroup:write",
+      "action": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault.zoneGroup:delete",
+      "action": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "environment.environment:read",
+      "action": "Microsoft.App/managedEnvironments/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "environment.environment:write",
+      "action": "Microsoft.App/managedEnvironments/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "environment.environment:delete",
+      "action": "Microsoft.App/managedEnvironments/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "environment.diagnostics:read",
+      "action": "Microsoft.Insights/diagnosticSettings/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "environment.diagnostics:write",
+      "action": "Microsoft.Insights/diagnosticSettings/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "environment.diagnostics:delete",
+      "action": "Microsoft.Insights/diagnosticSettings/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.zone:read",
+      "action": "Microsoft.Network/privateDnsZones/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.zone:write",
+      "action": "Microsoft.Network/privateDnsZones/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.zone:delete",
+      "action": "Microsoft.Network/privateDnsZones/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.link:read",
+      "action": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.link:write",
+      "action": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.link:delete",
+      "action": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.apex:read",
+      "action": "Microsoft.Network/privateDnsZones/A/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.apex:write",
+      "action": "Microsoft.Network/privateDnsZones/A/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.apex:delete",
+      "action": "Microsoft.Network/privateDnsZones/A/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.wildcard:read",
+      "action": "Microsoft.Network/privateDnsZones/A/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.wildcard:write",
+      "action": "Microsoft.Network/privateDnsZones/A/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "internal-dns.wildcard:delete",
+      "action": "Microsoft.Network/privateDnsZones/A/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "workload.app:read",
+      "action": "Microsoft.App/containerApps/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "workload.app:write",
+      "action": "Microsoft.App/containerApps/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "workload.app:delete",
+      "action": "Microsoft.App/containerApps/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "deployments:read",
+      "action": "Microsoft.Resources/deployments/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "deployments:write",
+      "action": "Microsoft.Resources/deployments/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "deployments:delete",
+      "action": "Microsoft.Resources/deployments/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "deployments:validate/action",
+      "action": "Microsoft.Resources/deployments/validate/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "environment-join",
+      "action": "Microsoft.App/managedEnvironments/join/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vault-private-endpoint-approval",
+      "action": "Microsoft.KeyVault/vaults/PrivateEndpointConnectionsApproval/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "nsg-join",
+      "action": "Microsoft.Network/networkSecurityGroups/join/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "route-table-join",
+      "action": "Microsoft.Network/routeTables/join/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "vnet-join",
+      "action": "Microsoft.Network/virtualNetworks/join/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "g3-dns-zone-join",
+      "action": "Microsoft.Network/privateDnsZones/join/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "subnet-join",
+      "action": "Microsoft.Network/virtualNetworks/subnets/join/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "subnet-read",
+      "action": "Microsoft.Network/virtualNetworks/subnets/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "identity-assign",
+      "action": "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "g2-peer-read",
+      "action": "Microsoft.Network/virtualNetworks/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu"
+    },
+    {
+      "id": "g2-peer-authorize",
+      "action": "Microsoft.Network/virtualNetworks/peer/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu"
+    },
+    {
+      "id": "g3-peer-authorize",
+      "action": "Microsoft.Network/virtualNetworks/peer/action",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f"
+    },
+    {
+      "id": "quota-query",
+      "action": "Microsoft.App/managedEnvironments/usages/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.App/managedEnvironments/nzila-g3-env-95086e2f"
+    },
+    {
+      "id": "scoped-role-read",
+      "action": "Microsoft.Authorization/roleAssignments/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+    },
+    {
+      "id": "g2-peering:read",
+      "action": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3"
+    },
+    {
+      "id": "g2-peering:write",
+      "action": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3"
+    },
+    {
+      "id": "g2-peering:delete",
+      "action": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings/g2-to-g3"
+    },
+    {
+      "id": "g2-dns-link:read",
+      "action": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f"
+    },
+    {
+      "id": "g2-dns-link:write",
+      "action": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f"
+    },
+    {
+      "id": "g2-dns-link:delete",
+      "action": "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io/virtualNetworkLinks/g3-acr-nzg3kv95086e2f"
+    },
+    {
+      "id": "g2-firewall:read",
+      "action": "Microsoft.Network/azureFirewalls/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu"
+    },
+    {
+      "id": "g2-firewall:write",
+      "action": "Microsoft.Network/azureFirewalls/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu"
+    },
+    {
+      "id": "Container Registry Repository Writer:Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+      "action": "Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo"
+    },
+    {
+      "id": "Container Registry Repository Writer:Microsoft.ContainerRegistry/registries/repositories/content/read",
+      "action": "Microsoft.ContainerRegistry/registries/repositories/content/read",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo"
+    },
+    {
+      "id": "Container Registry Repository Writer:Microsoft.ContainerRegistry/registries/repositories/metadata/write",
+      "action": "Microsoft.ContainerRegistry/registries/repositories/metadata/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo"
+    },
+    {
+      "id": "Container Registry Repository Writer:Microsoft.ContainerRegistry/registries/repositories/content/write",
+      "action": "Microsoft.ContainerRegistry/registries/repositories/content/write",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo"
+    }
+  ],
+  "EXCESS_EXISTING_PRIVILEGES": [
+    {
+      "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/8311e382-0749-4cb8-b61a-304f252e45ec",
+      "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+      "condition": null,
+      "reason": "Unrelated staging-registry authority;not used,revoked or widened by G3R3"
+    }
+  ],
+  "proposedAssignments": [
+    {
+      "assignmentId": "operator-g3-rg",
+      "PRINCIPAL_ID": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "ROLE": {
+        "customRole": "G3R3_SCOPED_RESOURCE_DEPLOYER",
+        "actions": [
+          "Microsoft.Network/networkSecurityGroups/read",
+          "Microsoft.Network/networkSecurityGroups/write",
+          "Microsoft.Network/networkSecurityGroups/delete",
+          "Microsoft.Network/routeTables/read",
+          "Microsoft.Network/routeTables/write",
+          "Microsoft.Network/routeTables/delete",
+          "Microsoft.Network/virtualNetworks/read",
+          "Microsoft.Network/virtualNetworks/write",
+          "Microsoft.Network/virtualNetworks/delete",
+          "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/read",
+          "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/write",
+          "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/delete",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/read",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/write",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/delete",
+          "Microsoft.OperationalInsights/workspaces/read",
+          "Microsoft.OperationalInsights/workspaces/write",
+          "Microsoft.OperationalInsights/workspaces/delete",
+          "Microsoft.KeyVault/vaults/read",
+          "Microsoft.KeyVault/vaults/write",
+          "Microsoft.KeyVault/vaults/delete",
+          "Microsoft.Network/privateDnsZones/read",
+          "Microsoft.Network/privateDnsZones/write",
+          "Microsoft.Network/privateDnsZones/delete",
+          "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+          "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write",
+          "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete",
+          "Microsoft.Network/privateEndpoints/read",
+          "Microsoft.Network/privateEndpoints/write",
+          "Microsoft.Network/privateEndpoints/delete",
+          "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/read",
+          "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/write",
+          "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/delete",
+          "Microsoft.App/managedEnvironments/read",
+          "Microsoft.App/managedEnvironments/write",
+          "Microsoft.App/managedEnvironments/delete",
+          "Microsoft.Insights/diagnosticSettings/read",
+          "Microsoft.Insights/diagnosticSettings/write",
+          "Microsoft.Insights/diagnosticSettings/delete",
+          "Microsoft.Network/privateDnsZones/A/read",
+          "Microsoft.Network/privateDnsZones/A/write",
+          "Microsoft.Network/privateDnsZones/A/delete",
+          "Microsoft.App/containerApps/read",
+          "Microsoft.App/containerApps/write",
+          "Microsoft.App/containerApps/delete",
+          "Microsoft.Resources/deployments/read",
+          "Microsoft.Resources/deployments/write",
+          "Microsoft.Resources/deployments/delete",
+          "Microsoft.Resources/deployments/validate/action",
+          "Microsoft.App/managedEnvironments/join/action",
+          "Microsoft.KeyVault/vaults/PrivateEndpointConnectionsApproval/action",
+          "Microsoft.Network/networkSecurityGroups/join/action",
+          "Microsoft.Network/routeTables/join/action",
+          "Microsoft.Network/virtualNetworks/join/action",
+          "Microsoft.Network/privateDnsZones/join/action",
+          "Microsoft.Network/virtualNetworks/subnets/join/action",
+          "Microsoft.Network/virtualNetworks/subnets/read",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
+          "Microsoft.Network/virtualNetworks/peer/action",
+          "Microsoft.App/managedEnvironments/usages/read",
+          "Microsoft.Authorization/roleAssignments/read"
+        ],
+        "notActions": [],
+        "dataActions": [],
+        "assignableScopes": [
+          "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg"
+        ],
+        "exclusions": [
+          "RBAC writes",
+          "secret data",
+          "quota requests",
+          "listKeys",
+          "unrelated resource types"
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "CONDITION": null,
+      "PURPOSE": "Exact G3 resource/module lifecycle;no Owner/Contributor",
+      "LIFETIME": "TEMPORARY;revoke on proof completion or rollback;maximum2h subject to enforced TTL",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "assignmentId": "operator-g2-peering",
+      "PRINCIPAL_ID": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "ROLE": {
+        "customRole": "G3R3_G2_PEERING_WRITER",
+        "actions": [
+          "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/read",
+          "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/write",
+          "Microsoft.Network/virtualNetworks/virtualNetworkPeerings/delete"
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+      "CONDITION": null,
+      "PURPOSE": "Existing G2 VNet child-peering lifecycle only;RBAC cannot name-isolate the future child before creation;digest/ownership guards restrict use to g2-to-g3;no VNet write",
+      "LIFETIME": "TEMPORARY;revoke on proof completion or rollback;maximum2h subject to enforced TTL",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "assignmentId": "operator-g2-remote-peer",
+      "PRINCIPAL_ID": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "ROLE": {
+        "customRole": "G3R3_REMOTE_PEER_AUTHORIZER",
+        "actions": [
+          "Microsoft.Network/virtualNetworks/read",
+          "Microsoft.Network/virtualNetworks/peer/action"
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+      "CONDITION": null,
+      "PURPOSE": "Linked-resource peering permission;no VNet write",
+      "LIFETIME": "TEMPORARY;revoke on proof completion or rollback;maximum2h subject to enforced TTL",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "assignmentId": "operator-g2-dns",
+      "PRINCIPAL_ID": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "ROLE": {
+        "customRole": "G3R3_DNS_LINK_WRITER",
+        "actions": [
+          "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+          "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write",
+          "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete"
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io",
+      "CONDITION": null,
+      "PURPOSE": "Existing exact G2 private zone child-link lifecycle only;RBAC cannot name-isolate the future child before creation;digest/ownership guards restrict use to g3-acr-nzg3kv95086e2f;no record/zone write",
+      "LIFETIME": "TEMPORARY;revoke on proof completion or rollback;maximum2h subject to enforced TTL",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "assignmentId": "operator-g2-firewall",
+      "PRINCIPAL_ID": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "ROLE": {
+        "customRole": "G3R3_FIREWALL_PROPERTY_WRITER",
+        "actions": [
+          "Microsoft.Network/azureFirewalls/read",
+          "Microsoft.Network/azureFirewalls/write"
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+      "CONDITION": null,
+      "PURPOSE": "Whole-resource firewall PUT surface;review exact preserved-body patch;no delete",
+      "LIFETIME": "TEMPORARY;revoke on proof completion or rollback;maximum2h subject to enforced TTL",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "assignmentId": "operator-repository-writer",
+      "PRINCIPAL_ID": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+      "ROLE": {
+        "id": "2a1e307c-b015-4ebd-883e-5b7698a07328",
+        "name": "Container Registry Repository Writer",
+        "permissions": [
+          {
+            "actions": [],
+            "dataActions": [
+              "Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+              "Microsoft.ContainerRegistry/registries/repositories/content/read",
+              "Microsoft.ContainerRegistry/registries/repositories/metadata/write",
+              "Microsoft.ContainerRegistry/registries/repositories/content/write"
+            ],
+            "notActions": [],
+            "notDataActions": []
+          }
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "CONDITION": {
+        "version": "2.0",
+        "expression": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+      },
+      "PURPOSE": "Exact G3 repository write/read only",
+      "LIFETIME": "TEMPORARY;revoke on proof completion or rollback;maximum2h subject to enforced TTL",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "assignmentId": "platform-repository-reader",
+      "PRINCIPAL_ID": "<G3_PULL_UAMI_PRINCIPAL_ID_AFTER_AUTHORIZED_CREATION>",
+      "ROLE": {
+        "id": "b93aa761-3e63-49ed-ac28-beffa264f7ac",
+        "name": "Container Registry Repository Reader",
+        "permissions": [
+          {
+            "actions": [],
+            "dataActions": [
+              "Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+              "Microsoft.ContainerRegistry/registries/repositories/content/read"
+            ],
+            "notActions": [],
+            "notDataActions": []
+          }
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "CONDITION": {
+        "version": "2.0",
+        "expression": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+      },
+      "PURPOSE": "Pull-only platform identity None",
+      "LIFETIME": "PERSISTENT_UNTIL_AUTHORIZED_TEARDOWN",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "assignmentId": "runtime-secret-reader",
+      "PRINCIPAL_ID": "<G3_RUNTIME_UAMI_PRINCIPAL_ID_AFTER_AUTHORIZED_CREATION>",
+      "ROLE": {
+        "id": "4633458b-17de-408a-b874-0445c86b69e6",
+        "name": "Key Vault Secrets User",
+        "permissions": [
+          {
+            "actions": [],
+            "dataActions": [
+              "Microsoft.KeyVault/vaults/secrets/getSecret/action",
+              "Microsoft.KeyVault/vaults/secrets/readMetadata/action"
+            ],
+            "notActions": [],
+            "notDataActions": []
+          }
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "CONDITION": null,
+      "PURPOSE": "One secret only;runtime Main",
+      "LIFETIME": "PERSISTENT_UNTIL_AUTHORIZED_TEARDOWN",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "assignmentId": "rollback-repository-cleaner",
+      "PRINCIPAL_ID": "<SEPARATELY_APPOINTED_ROLLBACK_HUMAN_OR_PRINCIPAL>",
+      "ROLE": {
+        "id": "2efddaa5-3f1f-4df3-97df-af3f13818f4c",
+        "name": "Container Registry Repository Contributor",
+        "permissions": [
+          {
+            "actions": [],
+            "dataActions": [
+              "Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+              "Microsoft.ContainerRegistry/registries/repositories/content/read",
+              "Microsoft.ContainerRegistry/registries/repositories/metadata/write",
+              "Microsoft.ContainerRegistry/registries/repositories/content/write",
+              "Microsoft.ContainerRegistry/registries/repositories/metadata/delete",
+              "Microsoft.ContainerRegistry/registries/repositories/content/delete"
+            ],
+            "notActions": [],
+            "notDataActions": []
+          }
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+      "CONDITION": {
+        "version": "2.0",
+        "expression": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/delete'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/delete'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+      },
+      "PURPOSE": "Remove only mission-owned manifest after independent approval and usage reconciliation",
+      "LIFETIME": "TEMPORARY_ROLLBACK_WINDOW",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    },
+    {
+      "assignmentId": "synthetic-secret-seeder",
+      "PRINCIPAL_ID": "<SEPARATELY_APPOINTED_HUMAN_SECRET_SEEDER>",
+      "ROLE": {
+        "customRole": "G3R3_EXACT_SECRET_SEEDER",
+        "actions": [],
+        "dataActions": [
+          "Microsoft.KeyVault/vaults/secrets/setSecret/action",
+          "Microsoft.KeyVault/vaults/secrets/getSecret/action",
+          "Microsoft.KeyVault/vaults/secrets/readMetadata/action",
+          "Microsoft.KeyVault/vaults/secrets/delete"
+        ]
+      },
+      "EXACT_SCOPE": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.KeyVault/vaults/nzg3kv95086e2f",
+      "CONDITION": null,
+      "PURPOSE": "Temporary bootstrap on newly created empty proof-only vault;verify empty before grant and only owned synthetic secret afterward;scope permits all vault secrets,not name-isolated;no purge;private channel only",
+      "LIFETIME": "TEMPORARY_PROOF_WINDOW",
+      "STATUS": "PROPOSED_NOT_GRANTED"
+    }
+  ],
+  "subscriptionWideOperatorGrantProposed": false,
+  "bootstrap": "Separate existing human authority creates exact empty RG,defines custom roles/assignments and runs subscription root;operator executes RG modules only after reviewed authorization-specific rendering of currently locked-false flags. No automatic unlocking.",
+  "humanRoles": {
+    "G3_LIFECYCLE_OWNER": "HUMAN_BINDING_REQUIRED",
+    "G3_EXECUTION_OPERATOR": "RECOMMENDED_CANDIDATE_NOT_APPOINTED",
+    "G3_HUMAN_APPROVER": "HUMAN_BINDING_REQUIRED",
+    "requirement": "G3_EXECUTION_OPERATOR != G3_HUMAN_APPROVER",
+    "seederAndRbacRollbackDelegation": "Explicit duties within Decision A;no implicit appointment"
+  },
+  "ROOT_2_TECHNICAL_PACKET": "CORE_COMPLETE;ADJUNCT_PRIVILEGE_EXTENSION_BLOCKED_BY_ROOT_4_BUILDER_MODEL",
+  "ROOT_2_HUMAN_BINDING": "PENDING"
+}

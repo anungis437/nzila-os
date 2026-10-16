@@ -1,0 +1,66 @@
+{
+  "phase": "G3R3",
+  "result": "PASS_LOCAL_PACKET_VALIDATION_ONLY",
+  "G3R3_GATE": "BLOCKED",
+  "executionAuthorized": false,
+  "checks": [
+    {
+      "command": "node --test --test-skip-pattern \"history recovery has deterministic|exact Git historical blob digest\" infrastructure\\landing-zone\\g3-readiness-report.test.mjs infrastructure\\landing-zone\\g3r1-local-closure.test.mjs infrastructure\\landing-zone\\g3r2-source-closure.test.mjs infrastructure\\landing-zone\\g3r2i-source-closure.test.mjs infrastructure\\landing-zone\\g3r3-execution-envelope.test.mjs",
+      "result": "PASS",
+      "tests": 511,
+      "passed": 511,
+      "failed": 0,
+      "skippedReportedByRunner": 0,
+      "exclusion": "Historical-recovery cases filtered before execution;no new history search"
+    },
+    {
+      "command": "node --check on each infrastructure\\landing-zone\\g3r3*.mjs",
+      "result": "PASS",
+      "files": 4
+    },
+    {
+      "command": "pnpm exec prettier --check on four G3R3 scripts,seven requested outputs,output binding and local validation",
+      "result": "PASS"
+    },
+    {
+      "command": "node infrastructure\\landing-zone\\g3r3-execution-envelope.mjs --write followed by --check;SHA256 comparison of every G3R3 evidence file before/after generation",
+      "result": "PASS",
+      "byteIdenticalFiles": 84
+    },
+    {
+      "command": "node infrastructure\\landing-zone\\g3r3-read-census.mjs --check",
+      "result": "PASS",
+      "acceptedHistoricalSourceEvidenceCandidateAndG2Hashes": "UNCHANGED"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "result": "PASS",
+      "filesScanned": 2638,
+      "errors": 0,
+      "warnings": 1215,
+      "info": 1700
+    }
+  ],
+  "readLedger": {
+    "azureCalls": 26,
+    "azureSucceeded": 26,
+    "azureFailed": 0,
+    "publicPricingCalls": 12,
+    "publicSucceeded": 11,
+    "publicFailed": 1,
+    "failureDisposition": "Bandwidth429 preserved;successful bounded retry separately captured"
+  },
+  "boundaries": {
+    "ROOT_1_REOPENED": "NO",
+    "azureMutations": 0,
+    "g2Mutations": 0,
+    "rbacGrants": 0,
+    "imagePushes": 0,
+    "privateBuilderExecutions": 0,
+    "controllerExecutions": 0,
+    "liveProofExecutions": 0,
+    "humanAppointments": 0,
+    "ceilingApprovals": 0
+  },
+  "limitations": "Local checks validate packet arithmetic,action catalogs,proposed coverage,ABAC,digests,rollback ownership,DAG,read hashes,preservation and rejection boundaries;they do not establish future effective authorization,builder operability,hard cost enforcement or proof success"
+}

@@ -74,8 +74,11 @@ var kvSecretsUserRoleId = '4633458b-17de-408a-b874-0445c86b69e6'
 // Built-in role: AcrPull
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 
-@description('Container image tag deployed to every Container App. Override per release.')
+@description('Nonproduction container image tag. Production ignores this and requires per-app imageDigests.')
 param imageTag string = 'latest'
+
+@description('Production SHA256 digest hex values keyed by app name. Missing entries fail template evaluation; there is no tag fallback.')
+param imageDigests object = {}
 
 @description('Expiration applied to Key Vault connection secrets, as Unix epoch seconds. Defaults to two years from deployment time.')
 param secretExpiryEpoch int = dateTimeToEpoch(dateTimeAdd(utcNow(), 'P2Y'))
@@ -202,6 +205,8 @@ module containerApps 'modules/container-apps.bicep' = {
     databaseReadUrlSecretName: dbReadReplicas > 0 ? 'database-read-url' : ''
     acrLoginServer: acr.outputs.loginServer
     imageTag: imageTag
+    environment: env
+    imageDigests: imageDigests
   }
   dependsOn: [acaKvSecretsUser, dbUrlSecret]
 }
@@ -309,6 +314,8 @@ module containerAppsSecondary 'modules/container-apps.bicep' = if (enableMultiRe
     databaseReadUrlSecretName: dbReadReplicas > 0 ? 'database-read-url' : ''
     acrLoginServer: acr.outputs.loginServer
     imageTag: imageTag
+    environment: env
+    imageDigests: imageDigests
   }
 }
 

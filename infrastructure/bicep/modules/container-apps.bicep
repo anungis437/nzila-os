@@ -48,8 +48,14 @@ param databaseReadUrlSecretName string = 'database-read-url'
 @description('ACR login server (e.g. nzilaprodacr.azurecr.io). When set, the user-assigned identity is used for AcrPull and image refs are prefixed.')
 param acrLoginServer string = ''
 
-@description('Image tag applied to every app container. Override per-environment / per-deploy.')
+@description('Nonproduction image tag. Not used when environment is prod.')
 param imageTag string = 'latest'
+
+@allowed(['dev', 'staging', 'prod'])
+param environment string = 'dev'
+
+@description('Production SHA256 digest hex values keyed by app name. No default image when a production entry is absent.')
+param imageDigests object = {}
 
 var hasVnet = !empty(infrastructureSubnetId)
 var hasKvSecrets = !empty(keyVaultUri) && !empty(userAssignedIdentityId)
@@ -141,7 +147,9 @@ resource containerApps 'Microsoft.App/containerApps@2024-03-01' = [
         containers: [
           {
             name: app.name
-            image: hasAcr ? '${acrLoginServer}/${app.image}:${imageTag}' : '${app.image}:${imageTag}'
+            image: environment == 'prod'
+              ? (hasAcr ? '${acrLoginServer}/${app.image}@sha256:${imageDigests[app.name]}' : '${app.image}@sha256:${imageDigests[app.name]}')
+              : (hasAcr ? '${acrLoginServer}/${app.image}:${imageTag}' : '${app.image}:${imageTag}')
             resources: {
               cpu: json(containerCpu)
               memory: containerMemory

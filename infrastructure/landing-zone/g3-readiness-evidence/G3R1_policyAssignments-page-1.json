@@ -1,0 +1,68 @@
+{
+  "value": [
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/policyAssignments/SecurityCenterBuiltIn",
+      "name": "SecurityCenterBuiltIn",
+      "properties": {
+        "description": "This is the default set of policies monitored by Azure Security Center. It was automatically assigned as part of onboarding to Security Center. The default assignment contains only audit policies. For more information please visit https://aka.ms/ascpolicies",
+        "displayName": "ASC Default (subscription: 5d819f33-d16f-429c-a3c0-5b0e94740ba3)",
+        "enforcementMode": "Default",
+        "metadata": {
+          "assignedBy": "Security Center",
+          "createdBy": "70ab1bb3-a064-48c0-9475-442f52489303",
+          "createdOn": "2025-10-26T00:18:24.1362304Z",
+          "updatedBy": null,
+          "updatedOn": null
+        },
+        "parameters": {},
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8",
+        "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+      },
+      "systemData": {
+        "createdAt": "2025-10-26T00:18:22.5619441Z",
+        "createdBy": "8edd93e1-2103-40b4-bd70-6e34e586362d",
+        "createdByType": "Application",
+        "lastModifiedAt": "2025-10-26T00:18:22.5619441Z",
+        "lastModifiedBy": "8edd93e1-2103-40b4-bd70-6e34e586362d",
+        "lastModifiedByType": "Application"
+      },
+      "type": "Microsoft.Authorization/policyAssignments"
+    },
+    {
+      "id": "/providers/Microsoft.Management/managementGroups/5082b8be-b04d-4a13-b61c-b6397670177b/providers/Microsoft.Authorization/policyAssignments/sys.blockwesteurope",
+      "name": "sys.blockwesteurope",
+      "properties": {
+        "displayName": "Microsoft Azure region access restriction blocking West Europe region",
+        "enforcementMode": "Default",
+        "metadata": {
+          "createdBy": "5536d702-9255-4f09-829c-2d39ce23d214",
+          "createdOn": "2026-01-15T09:21:43.1283031Z",
+          "updatedBy": "5536d702-9255-4f09-829c-2d39ce23d214",
+          "updatedOn": "2026-10-03T05:16:32.1849248Z"
+        },
+        "nonComplianceMessages": [
+          {
+            "message": "The selected region is currently not accepting new customers: https://aka.ms/locationineligible"
+          }
+        ],
+        "overrides": [
+          {
+            "kind": "policyEffect",
+            "value": "deny"
+          }
+        ],
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7509877f-d414-4d79-8d1f-d600ea78d087",
+        "scope": "/providers/Microsoft.Management/managementGroups/5082b8be-b04d-4a13-b61c-b6397670177b"
+      },
+      "systemData": {
+        "createdAt": "2026-01-15T09:21:43.1032813Z",
+        "createdBy": "56841561-dc28-442b-94a8-f8e4fd8b6fa4",
+        "createdByType": "Application",
+        "lastModifiedAt": "2026-10-03T05:16:32.1682782Z",
+        "lastModifiedBy": "56841561-dc28-442b-94a8-f8e4fd8b6fa4",
+        "lastModifiedByType": "Application"
+      },
+      "type": "Microsoft.Authorization/policyAssignments"
+    }
+  ]
+}

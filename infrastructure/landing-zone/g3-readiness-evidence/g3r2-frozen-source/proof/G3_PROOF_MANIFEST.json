@@ -1,0 +1,44 @@
+{
+  "lineage": "PROSPECTIVE_G3R2",
+  "execution": "NOT_EXECUTED",
+  "specificationReadiness": "COMPLETE_WITH_EXACT_IMAGE_OBSERVER_BLOCKER",
+  "sequence": [
+    "Localcompile/parameter/digestcheck",
+    "Humanappointroles andapproveG2changes/cost",
+    "SeparateG3Aimageproductionauthority",
+    "Bindnewimmutablemanifest",
+    "SeparateemptyG3environmentauthority",
+    "Queryactualenvironmentconsumptioncores",
+    "Separateworkloadactivationauthority",
+    "Privatehealth/secret/negativeproofs",
+    "ReconcileownershipandretainedG2state"
+  ],
+  "secretChallenge": {
+    "input": "SyntheticsecretlogicalID+nonsecretchallengeID;secretvalueprovidedonlybyfuturehumancontrolledseed,neverstoredhere",
+    "expectedRuntimeObservation": "Safenonreversiblechallengeboundattestationfromruntime usingonlyruntimeMI andprivateKV path;no token/secretreturn",
+    "nonDisclosure": "Nevercleartextsecret/token;onlysanitizedstatus/digest/correlation",
+    "unauthorizedPrincipalProbe": {
+      "id": "BUILD_CANNOT_READ_RUNTIME_SECRET",
+      "acceptance": "Knownexistingsecret,buildprincipal,directprivateTLSconnectivitycontrol;explicitauthorization403",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    "artifactRetention": "Immutableimage bytesmustnotchange;retainproofmetadata outsidecontainerimage",
+    "rollback": {
+      "id": "retain-evidence",
+      "dependsOn": [],
+      "action": "Persistcommands/resourceownership/digests/correlations;nevertokens/cleartextsecret"
+    },
+    "implementedObserver": false,
+    "blocker": {
+      "id": "IMAGE-1",
+      "fact": "Committedcandidate has no non-disclosingruntime secretchallenge observation.",
+      "needed": "Explicit prospectiveimage amendment or accepted artifact-preservingobserver design;do notsilentlyfixhistorical/currentsource."
+    }
+  },
+  "negativeProbeCount": 6,
+  "capacityRequirementMilliCores": 250,
+  "missingQuotaBehavior": "DENY_WORKLOAD_ACTIVATION",
+  "imageBinding": "REQUIRED_AFTER_FUTURE_AUTHORIZED_BUILD;new prospectiveimage mustnot claim historicalmanifest",
+  "noPublicFallback": true
+}

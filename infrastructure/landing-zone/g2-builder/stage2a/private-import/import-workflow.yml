@@ -1,0 +1,33 @@
+name: G2 Exact Transactional ACR Import
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    environment: build
+    timeout-minutes: 10
+    steps:
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Import one immutable approved source artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(az account show --query user.name -o tsv)" = '5c02d25b-cbdc-412f-8c2a-9ed43b73ac20'
+          test "$(az account show --query tenantId -o tsv)" = '5082b8be-b04d-4a13-b61c-b6397670177b'
+          test "$(az account show --query id -o tsv)" = '5d819f33-d16f-429c-a3c0-5b0e94740ba3'
+          az acr import \
+            --name nzilag2tzo75uuozprbo \
+            --resource-group nzila-g2-proof-xre47vggs5uhw \
+            --subscription 5d819f33-d16f-429c-a3c0-5b0e94740ba3 \
+            --registry /subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr \
+            --source g2-tooling@sha256:644f66c67367de24eeb3c5d921d7cd31c59afe3d3965e7e82c41e104fdcc2f0f \
+            --image g2-tooling:oras-1.3.4-linux-amd64 \
+            --output json
+          echo 'NZILA_G2_ACR_IMPORT_RESULT={"status":"PASS","sourceManifestDigest":"sha256:644f66c67367de24eeb3c5d921d7cd31c59afe3d3965e7e82c41e104fdcc2f0f"}'

@@ -1,0 +1,1961 @@
+{
+  "mission": "NZ-20261008-INFRA-001",
+  "phase": "G3R1",
+  "search": {
+    "refScope": "ALL_LOCAL_REACHABLE_REFS;no fetch,reflog or dangling-object claim",
+    "totalReachableCommits": 3030,
+    "revisions": [
+      "7bec20aad11d43eeae8099c14e021b3074154b27",
+      "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+      "92f706b61a2077eeda5d8ac733ee361d51a2d3b9",
+      "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+      "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+      "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+      "78c4a83e5a999ab313349c9348bf677f4b87f787",
+      "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+      "1418668317b6619a1b05fe296b62a781660de2cd",
+      "954679e08864909dbc6128b648dd0cd86e1d7d50",
+      "289371efa4fdca305b35452cc49910438e82c682",
+      "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+      "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+      "9fe3edc04855f70d84183f4c264b0a81135190f8",
+      "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+      "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+      "49d393e1220ad0d701e93a525001755de230f014",
+      "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+      "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+      "d3171d4697ce41856402433869b3bfe985968b7d",
+      "f7a5167f3c41871afadcbe34ff7dd10ab25b7754",
+      "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+      "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+      "557e37baea0d35475d21386355f5fe250ece18a1",
+      "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21",
+      "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+      "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+      "a270a11b4770b7e076e17a547e425d6e6711018c",
+      "98de53706f2b86f9a67624dcf8df0958b5f20e11",
+      "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+      "c678da106ec344834341e0dbc3e7ad19cd302c53",
+      "ff8faa6e27aea59d6eb3b539c7ae72babfd85495",
+      "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+    ],
+    "bounds": {
+      "pathRevisions": 80,
+      "candidateObjects": 300,
+      "perBlobBytes": 2097152
+    },
+    "identifiers": [
+      "NZ-20261008-INFRA-001",
+      "G3A",
+      "G3B",
+      "G3_EXECUTION_READINESS",
+      "G2_TERMINAL_ROOT",
+      "G2_PRIVATE_CONTROL_PLANE",
+      "g3-synthetic-runtime",
+      "synthetic-health"
+    ],
+    "candidateObjects": 80,
+    "inspectedBlobs": 76,
+    "inspected": [
+      {
+        "oid": "a0c222b0672b4a76711088a012ad8db8dbd2e3a2",
+        "sourcePath": "infrastructure/landing-zone/G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+        "sha256": "3168190771449ce4b3d43d246787257826966c84e932b6bbafd1f15bb493fe3d",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a"
+        ],
+        "byteLength": 46263,
+        "identifiers": [
+          "NZ-20261008-INFRA-001",
+          "synthetic-health"
+        ],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "0edaadcfc19699811e1c40c2c2a72ee62823be08",
+        "sourcePath": "infrastructure/landing-zone/README.md",
+        "sha256": "b7de2f173a31b95a775457fa123f4305056815406589e994b4389902899ab1f9",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a"
+        ],
+        "byteLength": 31517,
+        "identifiers": [
+          "NZ-20261008-INFRA-001"
+        ],
+        "standaloneG3": true,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "f10877c5df0ba8f79dddd1acf9c1ab440a6af25d",
+        "sourcePath": "infrastructure/landing-zone/artifact-registry.bicep",
+        "sha256": "052fc0e2da6405b6f67cf1908651270ca7cfd8d5db4c3de9f8918d51e9928587",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8"
+        ],
+        "byteLength": 2395,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "29a3d0b3818f6ecfca291460f39a640cc24708c0",
+        "sourcePath": "infrastructure/landing-zone/capture-inventory.ps1",
+        "sha256": "3f756d656ce7222cca9965971793b9d40a8cab51461e70ff4e04624b468fa680",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754",
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21",
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11",
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495"
+        ],
+        "byteLength": 6410,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "a20b391e6ccb98c0a7f4f27074104adb9b41db33",
+        "sourcePath": "infrastructure/landing-zone/edge.bicep",
+        "sha256": "84fc222604866f7ba45c1b7e85a20ac6959f25889efb31e362f6801eb0b09023",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754",
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21"
+        ],
+        "byteLength": 4210,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "06e6f502961167ff840edd67fad4bb385dcfff4a",
+        "sourcePath": "infrastructure/landing-zone/foundation.bicep",
+        "sha256": "70d14e129a6e29734d7723ad1f20a0abbe7bc0cf6bfed6e4c20490d2422e2279",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754"
+        ],
+        "byteLength": 9097,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "bab62093b0e8615b31e14b8dbfd547ca73b17901",
+        "sourcePath": "infrastructure/landing-zone/g2-artifact-foundation.bicep",
+        "sha256": "04d7cc01fbd110dd8796c3752a09f5d5fcdb0674d1569095f98f597d1451d500",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8"
+        ],
+        "byteLength": 2004,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "7ad901ba17ac2e895a0bee06a96e84bfe77fa674",
+        "sourcePath": "infrastructure/landing-zone/g2-artifact-network.bicep",
+        "sha256": "c3eabf86e10713e23e439023a0b7ea6a62552087884a9ef3e6d380f21ece9ede",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8"
+        ],
+        "byteLength": 3514,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "86b3b0bc9c51fc31aeb3226b74bc62d4aaab901e",
+        "sourcePath": "infrastructure/landing-zone/g2-proof.bicep",
+        "sha256": "8ea2341a013c973c4309daa13c2e9f5a0367ba93fa283687ab4e45348f806348",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8"
+        ],
+        "byteLength": 4528,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "9b94cb6a6d8c85e5df10ca184d0af1b88f4e60e5",
+        "sourcePath": "infrastructure/landing-zone/landing-zone.bicep",
+        "sha256": "490e63398aa0a0ff0aa23a7f79f493154b3187b5cb70e7e38a64b999879dd491",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d"
+        ],
+        "byteLength": 3911,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "173c60b8b679971e3ba327e298a09841d3fcccfa",
+        "sourcePath": "infrastructure/landing-zone/live-inventory-2026-10-08.json",
+        "sha256": "5665ec157adefa3a6283ec9bbf290ad5f5466734f40b6d34be63ab661af7ea90",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754",
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21",
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11",
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495"
+        ],
+        "byteLength": 160905,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "79b69012b6d40b548f49f12f8114081481037752",
+        "sourcePath": "infrastructure/landing-zone/naming.json",
+        "sha256": "0442e15d2c96e0829d41d53a4d6c41be5b1b388b75f33639dd69c41ad24fed4b",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754",
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21",
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11",
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495"
+        ],
+        "byteLength": 137,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "d990542a2e3e0fa09590cc2121e065aec3f8d011",
+        "sourcePath": "infrastructure/landing-zone/operations.bicep",
+        "sha256": "dd8ed17ab4b2b0cf69b0a4587a8c3df5c134e008faab70d2be0e41f3af47bfb9",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754",
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21"
+        ],
+        "byteLength": 973,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "7da4ec894dd97b338bb10bf957e501001f302723",
+        "sourcePath": "infrastructure/landing-zone/private-endpoint.bicep",
+        "sha256": "5366caf7db515b115243e413445166286c464b13c4ddc944b44d0ab5f156e4d9",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754"
+        ],
+        "byteLength": 834,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "9a064b8802f3deea212ea4ed3a67d7c55395ad70",
+        "sourcePath": "infrastructure/landing-zone/runtime.bicep",
+        "sha256": "9977bfffec225f29ccf9d938c99afffee4df6568aa3e6ccfdc78dd52159e9bd0",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754"
+        ],
+        "byteLength": 4626,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "35286e7e47901a6b9c7947afdc299e80f2912baf",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/.dockerignore",
+        "sha256": "f5efdb2489933ad1f207a4ba602d76e72f9f157a3c1d9a20596f958243aefcff",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "92f706b61a2077eeda5d8ac733ee361d51a2d3b9",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839"
+        ],
+        "byteLength": 17,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "4398de5ca5fbb5aba6276f809b135c5d669b0c92",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/Dockerfile",
+        "sha256": "47dc94abef663513d199ecd805421078f1569229dd52bb9c1bf7be9171ec9e7c",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "92f706b61a2077eeda5d8ac733ee361d51a2d3b9",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839"
+        ],
+        "byteLength": 449,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "bd44bd63c47309fa2c06f8f3c67c3f456071a052",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/server.mjs",
+        "sha256": "f5068c0b6208a2dd0c0d03f5ae78f63ebc8d83117bd44de8d01731c52133329e",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "92f706b61a2077eeda5d8ac733ee361d51a2d3b9",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839"
+        ],
+        "byteLength": 1238,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "d016be90c884bedbb2245f6463a68dee19c5b6b8",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/server.test.mjs",
+        "sha256": "adb2bb468142f1ceb8f42b8f7ee82ceb65c98f6c114afc1b60678aba01bb55fd",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "92f706b61a2077eeda5d8ac733ee361d51a2d3b9",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a"
+        ],
+        "byteLength": 1533,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "c27cc1a707a10800c3aeebfad181a0577ad6ff93",
+        "sourcePath": "infrastructure/landing-zone/validate.d.mts",
+        "sha256": "e256518a38e1cd5a7a471571c4c951dcc6a497a87c76d5f1381c92ee4e9d683f",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754",
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21",
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11",
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495"
+        ],
+        "byteLength": 335,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "5a9085041f8b536555dfab8e6ed31212591049a7",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "3e2b02c5dafb13cea551728ca496fb43e9776f948e071917bbb06fcb44ccf842",
+        "sourceCommits": [
+          "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+          "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+          "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8"
+        ],
+        "byteLength": 28170,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "3c702f2d67e9ee2a6843ccaf39be4e54cb8384ca",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/.dockerignore",
+        "sha256": "73af6862941f3d7948ba5344b7d657325b2c94a1c6261ffc003e9432351f900e",
+        "sourceCommits": [
+          "7bec20aad11d43eeae8099c14e021b3074154b27"
+        ],
+        "byteLength": 29,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "e1efe6d919d51c4654541821e89489b4f2f64896",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/Dockerfile",
+        "sha256": "a12eef5e93e0e4c70c40748f14dbc1522e4ac277f2f2331aa254cb34047b6471",
+        "sourceCommits": [
+          "7bec20aad11d43eeae8099c14e021b3074154b27"
+        ],
+        "byteLength": 106,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "e3ed4d1a6f6e6125ea525a75e4839a1e16eb7d11",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/go.mod",
+        "sha256": "7c0ebaa93f7f36d37e82b942b49d1902f8426829f1d5971d715b8578e052f639",
+        "sourceCommits": [
+          "7bec20aad11d43eeae8099c14e021b3074154b27"
+        ],
+        "byteLength": 51,
+        "identifiers": [
+          "synthetic-health"
+        ],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "982ee1d2797fd9d5bb03dd5218ec319043997f3c",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/main.go",
+        "sha256": "cada5bcf57edfeda2b9bf5db27cd1d3f04be7c9b748ce5b49b9d29edc084b699",
+        "sourceCommits": [
+          "7bec20aad11d43eeae8099c14e021b3074154b27"
+        ],
+        "byteLength": 999,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "6be90abba157e0d68f3edd7ca306e3b952691119",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/main_test.go",
+        "sha256": "690daa9805ef9ae3e158b628d6886123e08139132ee7bddbba2ba47f5578791e",
+        "sourceCommits": [
+          "7bec20aad11d43eeae8099c14e021b3074154b27"
+        ],
+        "byteLength": 2533,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "92e999d7cf51ebf7584635c971316135a9511bf9",
+        "sourcePath": "infrastructure/landing-zone/G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+        "sha256": "44f71f92bc4d7363aedd12d82538264185998a9eaafda6e373311987cff654bf",
+        "sourceCommits": [
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f"
+        ],
+        "byteLength": 35654,
+        "identifiers": [
+          "NZ-20261008-INFRA-001",
+          "synthetic-health"
+        ],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "252d625513436650be2c2dcb47aeeedd57fbc1c9",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/.dockerignore",
+        "sha256": "2b23cb64dc8e9886c80a1542b435628ebcdf2092ff49a1196a1a5a769418c790",
+        "sourceCommits": [
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+        ],
+        "byteLength": 14,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "b5a080bb92baacbda9bcd9f7f82aa94129bb87a4",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/Dockerfile",
+        "sha256": "0b4d0ea4ccc385e06301ad146b84b5c59c78b159179e103d24c21a1790e8507a",
+        "sourceCommits": [
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+        ],
+        "byteLength": 453,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "e600fceb3054280757088e8c86fc3d220fa0ab12",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/server.mjs",
+        "sha256": "f387bc83f7bf712fab5355c5c6c18623711cf20ebe484bfe28cd370d7d078542",
+        "sourceCommits": [
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+        ],
+        "byteLength": 1246,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "bd8ad4a088cf545c01003624868c6efea443a3db",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/server.test.mjs",
+        "sha256": "4b4d56e044b840cd2021e7b6c73a816e8a1aa572830789bdb65f7fcb6e328ad5",
+        "sourceCommits": [
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+          "1418668317b6619a1b05fe296b62a781660de2cd",
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "289371efa4fdca305b35452cc49910438e82c682",
+          "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+        ],
+        "byteLength": 1448,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "04d72ea0c6652b485efa3b87b7010c94f552e28d",
+        "sourcePath": "infrastructure/landing-zone/G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+        "sha256": "032b330c3713553757d117dbde2f42a63d82915619453429c399a8413dd6a766",
+        "sourceCommits": [
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839",
+          "78c4a83e5a999ab313349c9348bf677f4b87f787",
+          "5f0138374823f21d20a9d56a9f5b729bb8087e18"
+        ],
+        "byteLength": 39387,
+        "identifiers": [
+          "NZ-20261008-INFRA-001",
+          "synthetic-health"
+        ],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "5b04368a862c3107d2f93d3f83cd26805c5546ed",
+        "sourcePath": "infrastructure/landing-zone/synthetic-health/server.test.mjs",
+        "sha256": "8aacc56cc718588a9943f2280147be9427cf18ae6b798ace0532b23e8fa0e385",
+        "sourceCommits": [
+          "a19b298cd5ed76865f908accfa24be0a9c3bc839"
+        ],
+        "byteLength": 1436,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "08c4991afac9fc91c38bdb7c945a32a881975c43",
+        "sourcePath": "infrastructure/landing-zone/G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+        "sha256": "1f3ced9021396292e9f06610646bf5573c6a706ca75e9aab23f205e77227b21d",
+        "sourceCommits": [
+          "954679e08864909dbc6128b648dd0cd86e1d7d50",
+          "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a"
+        ],
+        "byteLength": 35380,
+        "identifiers": [
+          "NZ-20261008-INFRA-001",
+          "synthetic-health"
+        ],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "e2a5861538d528d8b09c15935788dc80227ed54c",
+        "sourcePath": "infrastructure/landing-zone/G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+        "sha256": "6e7f13bcc00c3e550e590983687cf7a630b542374bcd18d204de5a8b09147ba8",
+        "sourceCommits": [
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "49d393e1220ad0d701e93a525001755de230f014"
+        ],
+        "byteLength": 31495,
+        "identifiers": [
+          "NZ-20261008-INFRA-001",
+          "synthetic-health"
+        ],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "0f13708c9584250fef6f799b9dba9c4e4b2f21d2",
+        "sourcePath": "infrastructure/landing-zone/README.md",
+        "sha256": "cf70bd35ff5f36a4776c6e3e19a8356cc7c37404c0ecd3e34e3b41bfe1d9ab92",
+        "sourceCommits": [
+          "9fe3edc04855f70d84183f4c264b0a81135190f8",
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "49d393e1220ad0d701e93a525001755de230f014"
+        ],
+        "byteLength": 30858,
+        "identifiers": [
+          "NZ-20261008-INFRA-001"
+        ],
+        "standaloneG3": true,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "97540809812a46703debbcf5fdc057d2c3cb3c10",
+        "sourcePath": "infrastructure/landing-zone/artifact-registry.bicep",
+        "sha256": "c4e5cf88c62849c124ec09f4ce0327918a24858734c0dc216c9f18e5a790ac57",
+        "sourceCommits": [
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754"
+        ],
+        "byteLength": 1520,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "4d7b5fbe9b132c28cfcff7864f4bf183b4cb8949",
+        "sourcePath": "infrastructure/landing-zone/g2-artifact-foundation.bicep",
+        "sha256": "e8a29c0b109afb9869c6dc8af8ccd55947a86d8a4c42320de4c8a7ee8759ce9f",
+        "sourceCommits": [
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+        ],
+        "byteLength": 1854,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "f5bbc2c984322b819eacee90ece80c6acebc3394",
+        "sourcePath": "infrastructure/landing-zone/g2-artifact-network.bicep",
+        "sha256": "ca4a03ca9f2e5ae448785cd7217d76f9e6955de05e2a56ffd55d902023a11f1f",
+        "sourceCommits": [
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+        ],
+        "byteLength": 2560,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "d22617531e8b6a5cb4409b6e3c0ae27d95879921",
+        "sourcePath": "infrastructure/landing-zone/g2-proof.bicep",
+        "sha256": "cd098f5097534477a7ad3d3eb668a8550b4ece574bac7dcd94d4dd666e5b3790",
+        "sourceCommits": [
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754"
+        ],
+        "byteLength": 4447,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "b27cd7322ee29c69c9e107c17964c1c7a7b93c98",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "f74ca89beb69ad48cd7a2efc2fafafb0db9124ed5ccfbbb04588b07c216eaf58",
+        "sourceCommits": [
+          "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "49d393e1220ad0d701e93a525001755de230f014"
+        ],
+        "byteLength": 26435,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "159218a30dd3bcdca4f96f56f49d6ea39031e918",
+        "sourcePath": "infrastructure/landing-zone/G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+        "sha256": "458d1817dcef4c23476ed98d5adfb8620dfa78809c002d0b36e08522e9294496",
+        "sourceCommits": [
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "d3171d4697ce41856402433869b3bfe985968b7d"
+        ],
+        "byteLength": 27760,
+        "identifiers": [
+          "NZ-20261008-INFRA-001"
+        ],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "b9771044386acbe1032231353c068a241137d389",
+        "sourcePath": "infrastructure/landing-zone/README.md",
+        "sha256": "9b05a42d00be561c993f965b841aa6d5b50d6d84eae7bdc9ebd8f3e461dc5f89",
+        "sourceCommits": [
+          "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c",
+          "d3171d4697ce41856402433869b3bfe985968b7d"
+        ],
+        "byteLength": 30396,
+        "identifiers": [
+          "NZ-20261008-INFRA-001"
+        ],
+        "standaloneG3": true,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "4f332f135414c6df0784ac41e9eb4a9ee6ff55de",
+        "sourcePath": "infrastructure/landing-zone/g2-artifact-foundation.bicep",
+        "sha256": "b6c2f1c63dfe40fb966a84ee99782be76277563ec5a5a8f607ece58c468072da",
+        "sourceCommits": [
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "d3171d4697ce41856402433869b3bfe985968b7d",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754"
+        ],
+        "byteLength": 1994,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "faba7edb1f03582829c93a0037cc63eb3fa52500",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "5ae660338e75de58d3d588e7e94194f1cd38e334da85ec5cc69a9ffcfcc66125",
+        "sourceCommits": [
+          "d3171d4697ce41856402433869b3bfe985968b7d"
+        ],
+        "byteLength": 19959,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "46b575d72a0a139d9b2e1952a8968c07b5717686",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "d4277bb511136976255e72927cb9feb60da0f0e8dc6303b74ed97418a05c7dd9",
+        "sourceCommits": [
+          "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+        ],
+        "byteLength": 24919,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "57b12d85007d154e05e2038d26860f536e2b3850",
+        "sourcePath": "infrastructure/landing-zone/G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+        "sha256": "6295f79cd4da61bd58d45f6cd9c6c906f87b257735bf6bfd99abe8d57511d3ed",
+        "sourceCommits": [
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754",
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1"
+        ],
+        "byteLength": 23616,
+        "identifiers": [
+          "NZ-20261008-INFRA-001"
+        ],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "8bf31c5fd0ca1bce8fe46e5d953bc25cb92aefd1",
+        "sourcePath": "infrastructure/landing-zone/README.md",
+        "sha256": "0dbac27abaa1e22f2cdfba6b8ba3f55564705b83967939a7db42a9c886bad9ab",
+        "sourceCommits": [
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47",
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754",
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21",
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11",
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495"
+        ],
+        "byteLength": 28786,
+        "identifiers": [
+          "NZ-20261008-INFRA-001"
+        ],
+        "standaloneG3": true,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "54bf437ec769328bf381f518ddb0cd367c8b0f26",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "50369d299fbb6e094dd38071fe02e237ffcf914982212c9de10fa64decbce476",
+        "sourceCommits": [
+          "f7ee70d6da3b95fabb8689b2b0032d47b3bb0e47"
+        ],
+        "byteLength": 19704,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "44fbb9815dee1f276c1d0d7f7ceee10a2129a4bd",
+        "sourcePath": "infrastructure/landing-zone/foundation.bicep",
+        "sha256": "8f35caff8052e843439ddc53f6d7ad86cb68016091c81b7fcbdbfbb16f6939c6",
+        "sourceCommits": [
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21"
+        ],
+        "byteLength": 9019,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "2486c1a3b532ae812053fbb39c0b70c3ce3c8d6f",
+        "sourcePath": "infrastructure/landing-zone/g2-proof.bicep",
+        "sha256": "007cdbd4a0f3c33ff40e4884db78d390bfeffe8181319fc9a883e677d90efc1f",
+        "sourceCommits": [
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21"
+        ],
+        "byteLength": 3783,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "e405f2d0496279b1b004e647be0e6ca122739132",
+        "sourcePath": "infrastructure/landing-zone/landing-zone.bicep",
+        "sha256": "5b7971ce5ab41cc57f29c0674e5d2398d8aa93a1342fd4b4df81a895de1f8c59",
+        "sourceCommits": [
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754",
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21"
+        ],
+        "byteLength": 3826,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "a25aa136f0abfba0bc4773279d5dbd9c65d33900",
+        "sourcePath": "infrastructure/landing-zone/private-endpoint.bicep",
+        "sha256": "8f95ea242e172da9cfd145791171a4d3f90b144ada547fcc5b284e5db7a90000",
+        "sourceCommits": [
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21",
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11",
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495",
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 822,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "003650c1a1da8f8ddb700ebe860aea984cc66d56",
+        "sourcePath": "infrastructure/landing-zone/runtime.bicep",
+        "sha256": "328769630b23d937817a832e908bbe2b4ecb0667051e3f5f24def13277ca2c86",
+        "sourceCommits": [
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1",
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21"
+        ],
+        "byteLength": 4655,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "fe64bfb9ec04287572c5651295e867c16aa4c991",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "8b9af38e3cdce707703845f7477c07272133f8be777971c1c9f0f99d06b2a06e",
+        "sourceCommits": [
+          "76b0219c8c833c9a584c4d19447f310faa61bfb6",
+          "ff88fb86937a90f08f95939fbe4ad9d7b60291ed",
+          "557e37baea0d35475d21386355f5fe250ece18a1"
+        ],
+        "byteLength": 14875,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "9cb55082ac7b2166995a5d5e2580605fe82e98f2",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "dd871cc9cf505037b20f8711021f91e2652bb4a21821e06b5af5a8021db8cc5b",
+        "sourceCommits": [
+          "f7a5167f3c41871afadcbe34ff7dd10ab25b7754"
+        ],
+        "byteLength": 19380,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "eb756ebeaa074cf370e00d420cfc32652626e609",
+        "sourcePath": "infrastructure/landing-zone/G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+        "sha256": "d26be8c3c1e18c7d1222e92766fa62e696de801b0bb639906c01e920b1a5ebc3",
+        "sourceCommits": [
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21",
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c"
+        ],
+        "byteLength": 18603,
+        "identifiers": [
+          "NZ-20261008-INFRA-001",
+          "G2_PRIVATE_CONTROL_PLANE"
+        ],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "e6887c17d2c138c811ce6b3980ebe4eddbc6dad9",
+        "sourcePath": "infrastructure/landing-zone/edge.bicep",
+        "sha256": "c121bbda04fd700a1bae15e36b278d457968aa7aa1d3b15e8d01e22e54839758",
+        "sourceCommits": [
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11"
+        ],
+        "byteLength": 4116,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "76d1aa8a88bd6af0a1fe888833896100b1cdd8dc",
+        "sourcePath": "infrastructure/landing-zone/foundation.bicep",
+        "sha256": "907ebd43736d4ab0a7205a114326fbee7a72c00837ba5ca7ff2d560f06c49923",
+        "sourceCommits": [
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11",
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495"
+        ],
+        "byteLength": 8925,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "dd1c2f94d0eb47de77c209fa3b125978c0a9c17d",
+        "sourcePath": "infrastructure/landing-zone/landing-zone.bicep",
+        "sha256": "6902ca9d4a92799d3d9f71e67fa46c4e70e72654e3228b9fb729307d094713d3",
+        "sourceCommits": [
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11",
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81"
+        ],
+        "byteLength": 3604,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "dfd15fcdbe80f58bbe70a617814ce9340c77cca6",
+        "sourcePath": "infrastructure/landing-zone/operations.bicep",
+        "sha256": "e1a5162db0c4209235f064b741b0a1216eb7b6ad63890fe29dd8e09475a48113",
+        "sourceCommits": [
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11",
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495",
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 877,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "af5c5915e0ffd167613d9ec1bfa500af674d00b3",
+        "sourcePath": "infrastructure/landing-zone/runtime.bicep",
+        "sha256": "796ae4394d59439036c53f213e75c9bf357906b71520c5f1863bd51f28ae9303",
+        "sourceCommits": [
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11"
+        ],
+        "byteLength": 4381,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "dc5b392e0daea78e128f368c47446f25e362b0f0",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "9595e6502e076dfa360480ac05839f8f65e93ce203b9863abd20f8f6c9b7e85d",
+        "sourceCommits": [
+          "6c857c3959a5d5005e10078ed7ae19c1dda7b37d",
+          "d44040cbbbb3fea836235e68e3fa99640ed27a59",
+          "a270a11b4770b7e076e17a547e425d6e6711018c",
+          "98de53706f2b86f9a67624dcf8df0958b5f20e11"
+        ],
+        "byteLength": 12146,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "d15cf7da4f9db3ba0f39a9e3b1c7ea8d61e47bb4",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "9be16f0d4f916e668f5687d49bc703c716fb20c8194511bc57c3271b2ecbe02a",
+        "sourceCommits": [
+          "ac5f52f0dcb88a83dfbbbf29566cdc6b41e9af21"
+        ],
+        "byteLength": 14752,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "66c69dbea201c5171e31cd0110dd5c192ad61376",
+        "sourcePath": "infrastructure/landing-zone/edge.bicep",
+        "sha256": "f2daca21c51270fe5fdfb5cf678b30a3d642109a5bce7b3773f71107b9e55c8a",
+        "sourceCommits": [
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495"
+        ],
+        "byteLength": 4123,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "25ee00f5939b1a4990949a6fddd1a8f06c45c7c4",
+        "sourcePath": "infrastructure/landing-zone/landing-zone.bicep",
+        "sha256": "34254daf18a08304d1a3ad7125f80f74cbf3f1f166c6ad51238dabb12d7fe07b",
+        "sourceCommits": [
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495",
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 3049,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "4c4118fed37d1e652dafc1338cee43a351d2b82d",
+        "sourcePath": "infrastructure/landing-zone/runtime.bicep",
+        "sha256": "abf0fb1dad804fdbc3957ab2b41e6324df01e42f59c1bdeb9b1f45d1ebf0081b",
+        "sourceCommits": [
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495"
+        ],
+        "byteLength": 4382,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "df10bc17ae231e2c3ff8d0b89660d6861948487b",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "f7996112b23d4b7aa23638a08a3e7b4f4dec514c67ce7fc4a96b83bd29b0ff01",
+        "sourceCommits": [
+          "72874b48ebdbd5f9b9d19aef25a929de3a377a81",
+          "c678da106ec344834341e0dbc3e7ad19cd302c53",
+          "ff8faa6e27aea59d6eb3b539c7ae72babfd85495"
+        ],
+        "byteLength": 9048,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "58708ecddbc562b6c36a18e61777c24cf7c6e753",
+        "sourcePath": "infrastructure/landing-zone/README.md",
+        "sha256": "2829084f08b00f01d808ecda626de3cebdafc21aade55c65646919492058580d",
+        "sourceCommits": [
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 16149,
+        "identifiers": [
+          "NZ-20261008-INFRA-001"
+        ],
+        "standaloneG3": true,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "2387ace1ad115ceacd3cdab6d91d2c1dc6fb173d",
+        "sourcePath": "infrastructure/landing-zone/capture-inventory.ps1",
+        "sha256": "3d4aa21cf5bee21c83552917bdb43669049726eb5f7867c56d046672194e2222",
+        "sourceCommits": [
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 5730,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "adcabb3031f5d21785a7f02ce3b30c529cc65e53",
+        "sourcePath": "infrastructure/landing-zone/edge.bicep",
+        "sha256": "8afdcd6b8e944d05218f5d7487869fdd9c6135001e19bf6425fd8b042ffb1377",
+        "sourceCommits": [
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 4054,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "dae7ac5917c1f2b76c6394510f15f1041bbd0c3b",
+        "sourcePath": "infrastructure/landing-zone/foundation.bicep",
+        "sha256": "ab4d3819d604e0cdcb8a3fe2d36871f864d719c556df498c5d0c015af979ce4e",
+        "sourceCommits": [
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 8879,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "85bd879238d45c501280a7072ae10faf94a7cce9",
+        "sourcePath": "infrastructure/landing-zone/live-inventory-2026-10-08.json",
+        "sha256": "ddc3fd7c76958e39e28f5b37776f3705d7afd7ce9453fafaf9039354e8d08ae4",
+        "sourceCommits": [
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 104844,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "726e9bb2bb7eb30dec1c14d243f49a193b44de4c",
+        "sourcePath": "infrastructure/landing-zone/runtime.bicep",
+        "sha256": "3fc6d482ea1fca92642af93271091490eea48e731ab4226e824636af60f074e7",
+        "sourceCommits": [
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 4298,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "db2c6bdc6287497d761ce319cfab2e4e5dbdd77f",
+        "sourcePath": "infrastructure/landing-zone/validate.d.mts",
+        "sha256": "269323ed89eb186895be74e4a37a2a54b0712faf19df6ebab9b172d78965609a",
+        "sourceCommits": [
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 217,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      },
+      {
+        "oid": "de283c95fac6857337796111a646e1ed700bb870",
+        "sourcePath": "infrastructure/landing-zone/validate.mjs",
+        "sha256": "7528211681dd6a096d5e9fd3ef697e734448955b723fca342b84d1b482fc00ad",
+        "sourceCommits": [
+          "958e3b1a290b4f356bca5abe9d15143fe79d34e5"
+        ],
+        "byteLength": 5940,
+        "identifiers": [],
+        "standaloneG3": false,
+        "qualifiedDigestMention": false
+      }
+    ]
+  },
+  "FROZEN_G3_PACKAGE_GIT_HISTORY_RESULT": "NOT_FOUND",
+  "authorityMatches": [],
+  "EXPECTED_G3_MODULES": 7,
+  "RECOVERED_G3_MODULES": 0,
+  "MISSING_G3_MODULES": {
+    "count": 7,
+    "exactPaths": null,
+    "reason": "Original seven path names are not in the supplied authority or searched committed evidence;require the seven-path manifest,not invented paths."
+  },
+  "CONTROLLER_AUTHORITY": "NOT_FOUND",
+  "controllers": [],
+  "EXECUTION_STATUS": "NOT_EXECUTED",
+  "SEALED_G2_TERMINAL_PACKET": "NOT_FOUND",
+  "terminalCandidates": [],
+  "QUALIFIED_IMAGE_SOURCE": "BLOCKED",
+  "supportingSyntheticSource": [
+    {
+      "oid": "35286e7e47901a6b9c7947afdc299e80f2912baf",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/.dockerignore",
+      "sha256": "f5efdb2489933ad1f207a4ba602d76e72f9f157a3c1d9a20596f958243aefcff",
+      "sourceCommits": [
+        "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+        "92f706b61a2077eeda5d8ac733ee361d51a2d3b9",
+        "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+        "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+        "a19b298cd5ed76865f908accfa24be0a9c3bc839"
+      ],
+      "byteLength": 17,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "4398de5ca5fbb5aba6276f809b135c5d669b0c92",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/Dockerfile",
+      "sha256": "47dc94abef663513d199ecd805421078f1569229dd52bb9c1bf7be9171ec9e7c",
+      "sourceCommits": [
+        "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+        "92f706b61a2077eeda5d8ac733ee361d51a2d3b9",
+        "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+        "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+        "a19b298cd5ed76865f908accfa24be0a9c3bc839"
+      ],
+      "byteLength": 449,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "bd44bd63c47309fa2c06f8f3c67c3f456071a052",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/server.mjs",
+      "sha256": "f5068c0b6208a2dd0c0d03f5ae78f63ebc8d83117bd44de8d01731c52133329e",
+      "sourceCommits": [
+        "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+        "92f706b61a2077eeda5d8ac733ee361d51a2d3b9",
+        "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+        "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a",
+        "a19b298cd5ed76865f908accfa24be0a9c3bc839"
+      ],
+      "byteLength": 1238,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "d016be90c884bedbb2245f6463a68dee19c5b6b8",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/server.test.mjs",
+      "sha256": "adb2bb468142f1ceb8f42b8f7ee82ceb65c98f6c114afc1b60678aba01bb55fd",
+      "sourceCommits": [
+        "44a1ac8af58e7478e2f2effa2afa729e71b5632a",
+        "92f706b61a2077eeda5d8ac733ee361d51a2d3b9",
+        "5ab438df36baa6c16f370823957d6eb427dbbd7f",
+        "af7619d7dfa087eb44c0ff8a9ee47e33a6e2ac6a"
+      ],
+      "byteLength": 1533,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "3c702f2d67e9ee2a6843ccaf39be4e54cb8384ca",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/.dockerignore",
+      "sha256": "73af6862941f3d7948ba5344b7d657325b2c94a1c6261ffc003e9432351f900e",
+      "sourceCommits": [
+        "7bec20aad11d43eeae8099c14e021b3074154b27"
+      ],
+      "byteLength": 29,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "e1efe6d919d51c4654541821e89489b4f2f64896",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/Dockerfile",
+      "sha256": "a12eef5e93e0e4c70c40748f14dbc1522e4ac277f2f2331aa254cb34047b6471",
+      "sourceCommits": [
+        "7bec20aad11d43eeae8099c14e021b3074154b27"
+      ],
+      "byteLength": 106,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "e3ed4d1a6f6e6125ea525a75e4839a1e16eb7d11",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/go.mod",
+      "sha256": "7c0ebaa93f7f36d37e82b942b49d1902f8426829f1d5971d715b8578e052f639",
+      "sourceCommits": [
+        "7bec20aad11d43eeae8099c14e021b3074154b27"
+      ],
+      "byteLength": 51,
+      "identifiers": [
+        "synthetic-health"
+      ],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "982ee1d2797fd9d5bb03dd5218ec319043997f3c",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/main.go",
+      "sha256": "cada5bcf57edfeda2b9bf5db27cd1d3f04be7c9b748ce5b49b9d29edc084b699",
+      "sourceCommits": [
+        "7bec20aad11d43eeae8099c14e021b3074154b27"
+      ],
+      "byteLength": 999,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "6be90abba157e0d68f3edd7ca306e3b952691119",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/main_test.go",
+      "sha256": "690daa9805ef9ae3e158b628d6886123e08139132ee7bddbba2ba47f5578791e",
+      "sourceCommits": [
+        "7bec20aad11d43eeae8099c14e021b3074154b27"
+      ],
+      "byteLength": 2533,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "252d625513436650be2c2dcb47aeeedd57fbc1c9",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/.dockerignore",
+      "sha256": "2b23cb64dc8e9886c80a1542b435628ebcdf2092ff49a1196a1a5a769418c790",
+      "sourceCommits": [
+        "78c4a83e5a999ab313349c9348bf677f4b87f787",
+        "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+        "1418668317b6619a1b05fe296b62a781660de2cd",
+        "954679e08864909dbc6128b648dd0cd86e1d7d50",
+        "289371efa4fdca305b35452cc49910438e82c682",
+        "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+        "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+        "9fe3edc04855f70d84183f4c264b0a81135190f8",
+        "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+        "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+        "49d393e1220ad0d701e93a525001755de230f014",
+        "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+      ],
+      "byteLength": 14,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "b5a080bb92baacbda9bcd9f7f82aa94129bb87a4",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/Dockerfile",
+      "sha256": "0b4d0ea4ccc385e06301ad146b84b5c59c78b159179e103d24c21a1790e8507a",
+      "sourceCommits": [
+        "78c4a83e5a999ab313349c9348bf677f4b87f787",
+        "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+        "1418668317b6619a1b05fe296b62a781660de2cd",
+        "954679e08864909dbc6128b648dd0cd86e1d7d50",
+        "289371efa4fdca305b35452cc49910438e82c682",
+        "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+        "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+        "9fe3edc04855f70d84183f4c264b0a81135190f8",
+        "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+        "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+        "49d393e1220ad0d701e93a525001755de230f014",
+        "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+      ],
+      "byteLength": 453,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "e600fceb3054280757088e8c86fc3d220fa0ab12",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/server.mjs",
+      "sha256": "f387bc83f7bf712fab5355c5c6c18623711cf20ebe484bfe28cd370d7d078542",
+      "sourceCommits": [
+        "78c4a83e5a999ab313349c9348bf677f4b87f787",
+        "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+        "1418668317b6619a1b05fe296b62a781660de2cd",
+        "954679e08864909dbc6128b648dd0cd86e1d7d50",
+        "289371efa4fdca305b35452cc49910438e82c682",
+        "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+        "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+        "9fe3edc04855f70d84183f4c264b0a81135190f8",
+        "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+        "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+        "49d393e1220ad0d701e93a525001755de230f014",
+        "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+      ],
+      "byteLength": 1246,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "bd8ad4a088cf545c01003624868c6efea443a3db",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/server.test.mjs",
+      "sha256": "4b4d56e044b840cd2021e7b6c73a816e8a1aa572830789bdb65f7fcb6e328ad5",
+      "sourceCommits": [
+        "78c4a83e5a999ab313349c9348bf677f4b87f787",
+        "5f0138374823f21d20a9d56a9f5b729bb8087e18",
+        "1418668317b6619a1b05fe296b62a781660de2cd",
+        "954679e08864909dbc6128b648dd0cd86e1d7d50",
+        "289371efa4fdca305b35452cc49910438e82c682",
+        "769ee7e9b38ae772eee0bfc25ee401279b55642f",
+        "aefd50d240b7bcaaf6334eeb6ce55597da82bd7a",
+        "9fe3edc04855f70d84183f4c264b0a81135190f8",
+        "c3f6c479ed156ae801bf374aea7fc6cf9a86f689",
+        "6d7fdc30f99c8a132df3faa541cae2f63e089dd3",
+        "49d393e1220ad0d701e93a525001755de230f014",
+        "9a8751f2304ddb6877b11a2fbe54d1aa84de3c2c"
+      ],
+      "byteLength": 1448,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    },
+    {
+      "oid": "5b04368a862c3107d2f93d3f83cd26805c5546ed",
+      "sourcePath": "infrastructure/landing-zone/synthetic-health/server.test.mjs",
+      "sha256": "8aacc56cc718588a9943f2280147be9427cf18ae6b798ace0532b23e8fa0e385",
+      "sourceCommits": [
+        "a19b298cd5ed76865f908accfa24be0a9c3bc839"
+      ],
+      "byteLength": 1436,
+      "identifiers": [],
+      "standaloneG3": false,
+      "qualifiedDigestMention": false
+    }
+  ],
+  "supportingSourceInterpretation": "Historical Node and static Go health sources exist,but no exact G3 source-to-qualified-manifest binding is found. Neither is substituted for the frozen image or counted as a G3 module/controller.",
+  "recoveredArtifacts": [],
+  "extraction": "NONE_NO_QUALIFYING_FROZEN_AUTHORITY_FOUND",
+  "historicalBytesChanged": false,
+  "workingTreeOverwrite": false,
+  "preservation": {
+    "042-account.json": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+    "042-account.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "043-service-principals-page-1.json": "2bee4f7b1f234fb9cd712bb757b0737588e45d8d061c75dc5636accfd53fb808",
+    "043-service-principals-page-1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "044-service-principals-page-2.json": "d68caf73fcbe1a96793ed3a76a3ed945287cd7e1167dccef7e395c3c5b1fd399",
+    "044-service-principals-page-2.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "045-service-principals-page-3.json": "48a3a5fa0a3454e9bd5d2da58c4b689cb2eed59aa94e781f868af88b85e08338",
+    "045-service-principals-page-3.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "046-service-principals-page-4.json": "d3f6f31fc557883bc2179fc3b1f2437255db31063e1e77d5dcb7ff31e3984acd",
+    "046-service-principals-page-4.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "047-service-principals-page-5.json": "59edcf37156d6ad029aecd6e8028ce9c7c0cdbae94d2ee8af6a1b68ef45b2ff4",
+    "047-service-principals-page-5.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "048-service-principals-page-6.json": "865f008c993c3db4969534ca1a1ddc0cfc7514bd544ca3fd79d7e374b0a9782d",
+    "048-service-principals-page-6.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "049-service-principals-page-7.json": "9925945a38ce48a2a28caf9ef1c91540a8179db286c9ccd0f74b38c0b961f46b",
+    "049-service-principals-page-7.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "050-service-principals-page-8.json": "1926c0b6ac00a223508510f53c8abf0ac0ac1aee7e88d3c5e2350ea72789ff89",
+    "050-service-principals-page-8.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "051-service-principals-page-9.json": "68d68445f30da2a405ec41b7f6316ae2cc3386dba906f91c3267596b27f8a5aa",
+    "051-service-principals-page-9.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "052-deployment-applications-page-1.json": "19478f8a77c93723bc1df224582a0638e92427a5347287ec9630c2ef2b804f35",
+    "052-deployment-applications-page-1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "053-federation-03c9b54b-65f8-4107-90e4-245ffad8d644.json": "f4992ae04a6bb85621f7bf8b56777ac8b104c4787dea383d140eb2e100fdd5d6",
+    "053-federation-03c9b54b-65f8-4107-90e4-245ffad8d644.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "054-federation-05621c47-2914-4dc8-8db1-4e725f425817.json": "499e99e989ab897f5b48a6aff48accb633450f395d62b2784ed96d3822238db0",
+    "054-federation-05621c47-2914-4dc8-8db1-4e725f425817.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "055-federation-27ffa4c8-8e5a-4d16-ba30-ac13b5340413.json": "b7eea447b8e7f5704fd6de4344ab2bbf04d80e89582ab8bdb99f6a7e193bbe56",
+    "055-federation-27ffa4c8-8e5a-4d16-ba30-ac13b5340413.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "056-federation-48fefde6-00da-456d-b6b9-d014daefc268.json": "21a24cd6bd9c43107e3fa59681a60f86e0bd9d6ae461b3cb534096e327f4ce93",
+    "056-federation-48fefde6-00da-456d-b6b9-d014daefc268.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "057-federation-4d38a271-c8e8-4994-bd46-ed91b2d65700.json": "a5fda8897d68e0f292c4ffecfdc2268b2340bf11bd048f719e076b90899c0433",
+    "057-federation-4d38a271-c8e8-4994-bd46-ed91b2d65700.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "058-federation-52f8fa31-c000-4459-aa75-0f78a2f72b8c.json": "63bdd964f6148ac675d686087e6387d9242b0f7595922009974e600c3e3f8816",
+    "058-federation-52f8fa31-c000-4459-aa75-0f78a2f72b8c.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "059-federation-636cdd4c-500f-4465-a7f4-0790f510811c.json": "fe87a80fbd2e184508d02015a3de2a6b9fcc54efd7f69fd6c68f4a6961393649",
+    "059-federation-636cdd4c-500f-4465-a7f4-0790f510811c.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "060-federation-66ec0cdf-ff35-42bd-9104-f424f7c8a455.json": "8bb9e4cc50558d9d06da78ca70c02462ebb52888838b23614204306219b1a329",
+    "060-federation-66ec0cdf-ff35-42bd-9104-f424f7c8a455.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "061-federation-6fd23298-4708-47ce-88cb-a813765ca3d0.json": "320bc162bfe1f6ccc8feae79392742f38c82fced2fe9d7557fe467bea6897aed",
+    "061-federation-6fd23298-4708-47ce-88cb-a813765ca3d0.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "062-federation-80f65cfd-5655-46f3-aab3-7691087db625.json": "26273f0a18402a660efa129dbbaf31a3c7330561ad71aeb204a8e3cca8e37f3b",
+    "062-federation-80f65cfd-5655-46f3-aab3-7691087db625.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "063-federation-87321708-6150-4ea7-9d09-b26cd5080221.json": "0490202e38cf1bc9c23225afa863824db4e95b386cadbea3191c03d3cdb43678",
+    "063-federation-87321708-6150-4ea7-9d09-b26cd5080221.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "064-federation-bfa4a851-696a-4d3f-927b-5fb1526f79f2.json": "d0a83aa8d385f2e3dfc08453cce576ab79cb61698e682f416df58ae556cd1efb",
+    "064-federation-bfa4a851-696a-4d3f-927b-5fb1526f79f2.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "065-g2-peering-corrected.json": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+    "065-g2-peering-corrected.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "066-g2-registry-detail-corrected.json": "6029739e060da7830688683ee4ecc2934d207455cddf6c36638dfeac62dfc025",
+    "066-g2-registry-detail-corrected.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "067-deleted-key-vaults.json": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+    "067-deleted-key-vaults.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "068-account.json": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+    "068-account.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "069-g3-key-vault-global-name.json": "aea394960063e937ee421030de065008bfa72f7d3049c14aa3443b367360aab6",
+    "069-g3-key-vault-global-name.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "070-account.json": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+    "070-account.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "071-g2-registry-mode-latest-stable.json": "121a59c74f8ad045239239517f95c7901f3fa4f75944e07175e10ed16a7dbbde",
+    "071-g2-registry-mode-latest-stable.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "aca-apps.json": "89064ef2db005e3d35344d3f815dcf2a17476079cee3b5c9797ead746bc387a3",
+    "aca-apps.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "aca-environments.json": "7ba341650864c80a5e84b87eb9796d4ae14be9a50d0578e65b167d9966a8d708",
+    "aca-environments.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "aca-regional-usage.json": "76b04492a410208fcde31cabd173775188851fadb47a3551d568326504d77eb1",
+    "aca-regional-usage.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "aca-subscription-usage.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "aca-subscription-usage.stderr.txt": "1b980ceac16a1018b7d6b9f66458b71109935048c25327b2152f2bc0ca3c1554",
+    "aca-workload-profile-support.json": "c52057093d28ad109f106499f8e5ddbd306c55382bf39a235d248cbf78125a98",
+    "aca-workload-profile-support.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "account.json": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+    "account.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "azure-read-only-ledger.json": "8f81cda596444d3239afe293c659da741e2cc406b472365755d6e7d66435fe78",
+    "compute-regional-usage.json": "ab7ad63d00e53801c3847a5c9e30fdd66687ed39f74ac8056970cd61a03201f0",
+    "compute-regional-usage.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "deleted-key-vaults.json": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+    "deleted-key-vaults.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "deployment-applications-page-1.json": "19478f8a77c93723bc1df224582a0638e92427a5347287ec9630c2ef2b804f35",
+    "deployment-applications-page-1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "deployment-applications.json": "fa24d0db73a0f661b6b709b05bae96f704e75a6b2d60b63bb79d21469f453bce",
+    "deployment-applications.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-03c9b54b-65f8-4107-90e4-245ffad8d644.json": "f4992ae04a6bb85621f7bf8b56777ac8b104c4787dea383d140eb2e100fdd5d6",
+    "federation-03c9b54b-65f8-4107-90e4-245ffad8d644.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-05621c47-2914-4dc8-8db1-4e725f425817.json": "499e99e989ab897f5b48a6aff48accb633450f395d62b2784ed96d3822238db0",
+    "federation-05621c47-2914-4dc8-8db1-4e725f425817.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-27ffa4c8-8e5a-4d16-ba30-ac13b5340413.json": "b7eea447b8e7f5704fd6de4344ab2bbf04d80e89582ab8bdb99f6a7e193bbe56",
+    "federation-27ffa4c8-8e5a-4d16-ba30-ac13b5340413.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-48fefde6-00da-456d-b6b9-d014daefc268.json": "21a24cd6bd9c43107e3fa59681a60f86e0bd9d6ae461b3cb534096e327f4ce93",
+    "federation-48fefde6-00da-456d-b6b9-d014daefc268.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-4d38a271-c8e8-4994-bd46-ed91b2d65700.json": "a5fda8897d68e0f292c4ffecfdc2268b2340bf11bd048f719e076b90899c0433",
+    "federation-4d38a271-c8e8-4994-bd46-ed91b2d65700.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-52f8fa31-c000-4459-aa75-0f78a2f72b8c.json": "63bdd964f6148ac675d686087e6387d9242b0f7595922009974e600c3e3f8816",
+    "federation-52f8fa31-c000-4459-aa75-0f78a2f72b8c.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-636cdd4c-500f-4465-a7f4-0790f510811c.json": "fe87a80fbd2e184508d02015a3de2a6b9fcc54efd7f69fd6c68f4a6961393649",
+    "federation-636cdd4c-500f-4465-a7f4-0790f510811c.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-66ec0cdf-ff35-42bd-9104-f424f7c8a455.json": "8bb9e4cc50558d9d06da78ca70c02462ebb52888838b23614204306219b1a329",
+    "federation-66ec0cdf-ff35-42bd-9104-f424f7c8a455.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-6fd23298-4708-47ce-88cb-a813765ca3d0.json": "320bc162bfe1f6ccc8feae79392742f38c82fced2fe9d7557fe467bea6897aed",
+    "federation-6fd23298-4708-47ce-88cb-a813765ca3d0.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-80f65cfd-5655-46f3-aab3-7691087db625.json": "26273f0a18402a660efa129dbbaf31a3c7330561ad71aeb204a8e3cca8e37f3b",
+    "federation-80f65cfd-5655-46f3-aab3-7691087db625.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-87321708-6150-4ea7-9d09-b26cd5080221.json": "0490202e38cf1bc9c23225afa863824db4e95b386cadbea3191c03d3cdb43678",
+    "federation-87321708-6150-4ea7-9d09-b26cd5080221.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-bfa4a851-696a-4d3f-927b-5fb1526f79f2.json": "d0a83aa8d385f2e3dfc08453cce576ab79cb61698e682f416df58ae556cd1efb",
+    "federation-bfa4a851-696a-4d3f-927b-5fb1526f79f2.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "firewalls.json": "da76c080c03b6bb21b208a1d33f3061f6a74722f548b152f7c446eb352adadc7",
+    "firewalls.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "g2-peering-corrected.json": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+    "g2-peering-corrected.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "g2-peering.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "g2-peering.stderr.txt": "e8bdade399b86b76079a089cf5335d91de712d38e0f8431721f23bf50bba8d31",
+    "g2-registry-detail-corrected.json": "6029739e060da7830688683ee4ecc2934d207455cddf6c36638dfeac62dfc025",
+    "g2-registry-detail-corrected.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "g2-registry-detail.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "g2-registry-detail.stderr.txt": "ea789a029eb825b187997cdbb28d66b11ca9894cd52ba4cf6b805bd8a2e36c1a",
+    "g2-registry-mode-latest-stable.json": "121a59c74f8ad045239239517f95c7901f3fa4f75944e07175e10ed16a7dbbde",
+    "g2-registry-mode-latest-stable.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "g3-key-vault-global-name.json": "aea394960063e937ee421030de065008bfa72f7d3049c14aa3443b367360aab6",
+    "g3-key-vault-global-name.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "g3-resource-group.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "g3-resource-group.stderr.txt": "8990a7502c4434fc616d75b15ae2cda6c6e51ec22c765dedd42489b62f77db2b",
+    "G3_EXECUTION_READINESS.json": "0085248a64f7aec837a303fab66cbfc66b925d674b3395f3919a131dd80c6467",
+    "G3_EXECUTION_READINESS.md": "9a2eaa56d070a30f8af241834b0287b875af4f969440db16f2610ace573d3452",
+    "key-vaults.json": "8004d9a5189891abdb899ee14606f181a7570fa34e6cba23334a07b74e722485",
+    "key-vaults.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "log-workspaces.json": "f461c55f3bda4f0f4987c4252fcd2909827aca6d750548da9d3d1d8d3bb63279",
+    "log-workspaces.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "managed-identities.json": "e4f3f4c8cafe35eebf656e314370c0b020ec76d85d5f8384015a533b6bbf5052",
+    "managed-identities.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "managed-identity-regional-usage.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "managed-identity-regional-usage.stderr.txt": "84ecb976f454390de6b141e1f712b90336b1551ba5c95b7caa15584b7f41a7cc",
+    "network-regional-usage.json": "c29e1b35b608886809cef419e59ee5f16857f92640d5167339cdc88f099e0f7b",
+    "network-regional-usage.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pricing-Azure-Container-Apps.json": "40c51ed16bd480ee5e78b5fc44d1c3b01dd423235c5d27e217a59eb44a2247f7",
+    "pricing-Azure-DNS-global-fallback.json": "eca1c41844fdebe0769e3a3ca1340efa05c3db87e0c419b0bd72e775134e4c5e",
+    "pricing-Azure-DNS.json": "eca1c41844fdebe0769e3a3ca1340efa05c3db87e0c419b0bd72e775134e4c5e",
+    "pricing-Azure-Firewall-global-fallback.json": "2a32cef3983da41861f6f63570c5807d407e51c2bed201e25db47a5fd6877523",
+    "pricing-Azure-Firewall.json": "d4feb8d5808dacbf05877649f8c04e1a15efd3a95eb1f5f46c60f6e9f330e704",
+    "pricing-Azure-Monitor.json": "bed62baa6455e9e4d71fa8dbe750ba917b8aa03a4553f1551e9fbb991fe0d8c9",
+    "pricing-Azure-Private-Link-global-fallback.json": "a14e6bae26e857ce1051bda467b8da63897b403371f20e41efc89bfa9dde221a",
+    "pricing-Bandwidth.json": "8d5917f251b83c4a875fa008f367da723cee241837b8700696961c8f5e44ffd9",
+    "pricing-Container-Registry-global-fallback.json": "85c43f2c131cc08bbd743e6cb57bf0789d7e9edec31fd9ae6026833a80e06d99",
+    "pricing-Container-Registry.json": "15958c4a4149f7e853f008a7531c08d81282dd63d3270ee4d07984a90d933f0d",
+    "pricing-IP-Addresses-global-fallback.json": "5d157eac2f3c26e84388ae23b37a08c3240fd614bba7b34ed00f7d97a2da5086",
+    "pricing-Key-Vault-global-fallback.json": "e6f36c474f7f55fd7c555ad47c6f4c46fa5dce2d9a601e99df43a26d78e43880",
+    "pricing-Key-Vault.json": "78dac5aa11b4c3575ce6eef756d8858777b1935e48f051069c99451c5b5536b1",
+    "pricing-Load-Balancer-global-fallback.json": "9f5ed206f67eea1aa1332a3f841cf0bf13f160463235d04d830028c42a6cbfd6",
+    "pricing-Load-Balancer.json": "f42380957a564e4624cf01d9174934d35687f143523e62a0e866cc3e1a7c133a",
+    "pricing-Log-Analytics.json": "2928e22d8b3e252312f7dd5d8ed3638934d2b7ddfaf81b55336561b0b3b5c457",
+    "pricing-response-1.json": "1c66d95ae011ef1a5653c75b96381f652795a3fa30e49b01917d73041175dc72",
+    "pricing-response-10.json": "ca0ee16b2227908ab0aabaa17a248487be7d7ff97240d2385af49bc63010f8db",
+    "pricing-response-11.json": "add25c8c62916a24b76e9f9d1fc5417799d64c0ab5c8d82eefccdcc4c5b9acdf",
+    "pricing-response-12.json": "fd799d5d6ed865f0664049a1dcba0422328be94acb45c8dffdb62f0da3111707",
+    "pricing-response-13.json": "4c7190722d5de432cbae437822eb5fe050d26ed62f8221943410ae96d37fb1ae",
+    "pricing-response-14.json": "6fd8e2554dfd5f3a8cfd53cbcdfad0f126559609fdb3806b164cd44ce594a1ec",
+    "pricing-response-15.json": "db9b173a39347c336f619531096553616271d3974665a65fadb7b7e72ef1e84b",
+    "pricing-response-16.json": "7bea83c7d27d0adbed53226b107e7023c40408de7d5c19a41a71daa06c00126c",
+    "pricing-response-17.json": "7bea83c7d27d0adbed53226b107e7023c40408de7d5c19a41a71daa06c00126c",
+    "pricing-response-18.json": "a93fb120f1403ad8aa3f8ad037af2e789e8f449d09bfa9d09fe73bfa87c478c2",
+    "pricing-response-19.json": "a14bb0c0e525bffd46a94f427edc9f8e9866d22f3dfe86e3d21cac8d64b198a3",
+    "pricing-response-2.json": "c8815521a6b747fe1a9bf3563315119e152e186f7984dd0e89327b013fa3f750",
+    "pricing-response-20.json": "43b7f7cfa79068a02d84c6f54378e5471d11da9b5123642c793f67e4ae0210a7",
+    "pricing-response-21.json": "ff46b7766c374dac25ec8cb762f4527d0618395d83b812cce4f501b68c7ae41e",
+    "pricing-response-3.json": "ee1315dc6fa787b25710c68c16374e7576621c74e63058b4471affbee0b7c807",
+    "pricing-response-4.json": "acf1a3d1126770c15c74304fee90c1d8402025c6d9d9e63de5e6251714edba37",
+    "pricing-response-5.json": "ff46b7766c374dac25ec8cb762f4527d0618395d83b812cce4f501b68c7ae41e",
+    "pricing-response-6.json": "cd5fb363a497ab92ebbb5475c4f309eab4a3ce12aca064f4b231eb334ed337b8",
+    "pricing-response-7.json": "7bea83c7d27d0adbed53226b107e7023c40408de7d5c19a41a71daa06c00126c",
+    "pricing-response-8.json": "b87d0cf10b1800963f2d5caacea895f93f65e2a3fe439d83352f44301d096293",
+    "pricing-response-9.json": "58de738b205dc538b514ded0294b3480200eb3ff1bae087b9d8b4a4cabd5864f",
+    "pricing-Storage.json": "dfde3cd1de1feeda21a52862c5d9e963d11fe05f4b09c406a01035a9774b2030",
+    "pricing-Virtual-Machines.json": "f8c9c4ebdbd5e1b852c774bcbbe6561966eb5c041524b02c0100b5a8e4fa0a45",
+    "pricing-Virtual-Network-global-fallback.json": "ac21f06062fe0b530b04328b24337cefbddf2d73478a46fa75594b72552a89b4",
+    "pricing-Virtual-Network.json": "ccbce0c78ddaa6ec8d19179f95e0ea22984d08031138ae9491d4aa8b29c1d17a",
+    "private-dns-zones.json": "fdaebd335135c77c78d28f32f2679bab19d3265fe42fb4a81f7615dbc03b41fe",
+    "private-dns-zones.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private-endpoints.json": "3f8541d9979fdb45bd400e9bcbe6d746252e6c4df11a9a7de73c7f3afca4d27e",
+    "private-endpoints.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provider-Microsoft.App.json": "af6525d598e5cf2a440c26e53736e31247aab0b6bd2193b5a1c39ccf5ddff721",
+    "provider-Microsoft.App.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provider-Microsoft.Authorization.json": "f944eac3291f261355bc7c047f477e1832c8366d67963975f70514d5a670d977",
+    "provider-Microsoft.Authorization.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provider-Microsoft.ContainerRegistry.json": "7287ec4d3183087a178d372b7252a186c85bfdb77698a377cefb444aa405550b",
+    "provider-Microsoft.ContainerRegistry.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provider-Microsoft.Insights.json": "1163897d476c2ab96b60691e02e8edef75cc37be7b9aba46daadb0197d3f6118",
+    "provider-Microsoft.Insights.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provider-Microsoft.KeyVault.json": "4df220c9bc50a643d61d05fa764be53debbb5589586bccc433ded0505d137c04",
+    "provider-Microsoft.KeyVault.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provider-Microsoft.ManagedIdentity.json": "ceacad4656badd70e894b18664b5f8bdad6f3b1ca45c890e946abf3742064812",
+    "provider-Microsoft.ManagedIdentity.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provider-Microsoft.Network.json": "3956e9ed271065447eb519383c7d7824b5be77f8ab2807f9d230d849ce105982",
+    "provider-Microsoft.Network.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provider-Microsoft.OperationalInsights.json": "24883aa36105f3f28401dca85811adbde72063fa8fdff27c543284dd24dcbba1",
+    "provider-Microsoft.OperationalInsights.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public-pricing-read-ledger.json": "867e2f1893a4516d3132640f119d95de2d86b09af378542ebba696a3faaa2ce0",
+    "registries.json": "1e9dc6fb7242646ab944e5e5835736a3f64ce6bcc4d972f4bcca2f1c5da596ff",
+    "registries.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resource-groups.json": "381eb83671c111f3fe95284ac948a85f5884e7a03e5fa64d104d4201e8a6f4fd",
+    "resource-groups.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resources.json": "e6578317911ea26ff80ae068c775f8e69009b532dc038634d32f151f4b3b9df9",
+    "resources.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "role-assignments.json": "f3d407123b8613c5f356cb84fa9a9ef18231b440e7dc2884e5f5180447e0318d",
+    "role-assignments.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "role-definitions.json": "50297a2c66071c7e36db8bfb518f34097f8d9f949c3385fb1f1b229bd57cf9d0",
+    "role-definitions.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "route-tables.json": "22ed75da7a81c90a501b1012587e5bdecc0fec60061cf3ebc9b08e9193b6d103",
+    "route-tables.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "service-principals-page-1.json": "2bee4f7b1f234fb9cd712bb757b0737588e45d8d061c75dc5636accfd53fb808",
+    "service-principals-page-1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "service-principals-page-2.json": "d68caf73fcbe1a96793ed3a76a3ed945287cd7e1167dccef7e395c3c5b1fd399",
+    "service-principals-page-2.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "service-principals-page-3.json": "48a3a5fa0a3454e9bd5d2da58c4b689cb2eed59aa94e781f868af88b85e08338",
+    "service-principals-page-3.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "service-principals-page-4.json": "d3f6f31fc557883bc2179fc3b1f2437255db31063e1e77d5dcb7ff31e3984acd",
+    "service-principals-page-4.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "service-principals-page-5.json": "59edcf37156d6ad029aecd6e8028ce9c7c0cdbae94d2ee8af6a1b68ef45b2ff4",
+    "service-principals-page-5.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "service-principals-page-6.json": "865f008c993c3db4969534ca1a1ddc0cfc7514bd544ca3fd79d7e374b0a9782d",
+    "service-principals-page-6.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "service-principals-page-7.json": "9925945a38ce48a2a28caf9ef1c91540a8179db286c9ccd0f74b38c0b961f46b",
+    "service-principals-page-7.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "service-principals-page-8.json": "1926c0b6ac00a223508510f53c8abf0ac0ac1aee7e88d3c5e2350ea72789ff89",
+    "service-principals-page-8.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "service-principals-page-9.json": "68d68445f30da2a405ec41b7f6316ae2cc3386dba906f91c3267596b27f8a5aa",
+    "service-principals-page-9.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "service-principals.json": "f99e8b060fd62b2887b233cb20fe1814c5272a2156914e93a22988df4376250e",
+    "service-principals.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "vnets.json": "683bf9cebc2661a34c58e5a56e075d74284cdc155e610daa014a4345a921216b",
+    "vnets.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

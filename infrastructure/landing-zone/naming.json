@@ -1,0 +1,8 @@
+{
+  "environmentCodes": {
+    "development": "dev",
+    "integration-test": "test",
+    "staging": "stg",
+    "production": "prod"
+  }
+}

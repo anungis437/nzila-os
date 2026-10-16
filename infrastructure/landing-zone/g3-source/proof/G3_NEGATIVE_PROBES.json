@@ -1,0 +1,71 @@
+{
+  "lineage": "PROSPECTIVE_G3R2",
+  "probes": [
+    {
+      "id": "RUNTIME_CANNOT_PUSH_IMAGE",
+      "acceptance": "KnownexistingG3repository,connectivitycontrol,runtimeprincipal;authorization403/denialnot404/timeout",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "BUILD_CANNOT_READ_RUNTIME_SECRET",
+      "acceptance": "Knownexistingsecret,buildprincipal,directprivateTLSconnectivitycontrol;explicitauthorization403",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "UNAUTHORIZED_PRINCIPAL_CANNOT_DEPLOY",
+      "acceptance": "No futurewriteprobe withoutseparateauthority;read-onlypermissionevidence orisolatedcontrollednegativeaction;no successcleanup omitted",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "PUBLIC_PATH_CANNOT_REACH_PRIVATE_ENDPOINT",
+      "acceptance": "Independentpublic-origin DNS/networkdenial;notmisclassifiedasRBAC403",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "WORKLOAD_DENIED_BEFORE_CAPACITY_GATE",
+      "acceptance": "Localpolicydeniesmissing/wrongenvironmentquotaevidence;noactivation",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "UNAPPROVED_G2_MUTATION_REJECTED",
+      "acceptance": "G3source hasnoG2resourcemutator;separateauthority+G2root reconciliationrequired",
+      "execution": "NOT_EXECUTED",
+      "expectedUnexpectedSuccessHandling": "STOP,revokeexactfutureauthority,contain/rollbackonlywithinexplicitpermission,preserveevidence;notcontinue"
+    },
+    {
+      "id": "RUNTIME_WITHOUT_SECRET_PROOF_DENIED",
+      "acceptance": "Valid nonce;runtime absent injected secret;HTTP503 generic unavailable;no source/value disclosure",
+      "localResult": "PASS_LOCAL_APP_ONLY",
+      "execution": "NOT_EXECUTED_IN_AZURE",
+      "expectedUnexpectedSuccessHandling": "STOP;preserve sanitized evidence;contain/revoke only within explicit separate authority;never continue proof"
+    },
+    {
+      "id": "WRONG_SECRET_PROOF_MISMATCH",
+      "acceptance": "Valid nonce;different fake key produces HMAC mismatch against expected key;no false health200 inference",
+      "localResult": "PASS_LOCAL_APP_ONLY",
+      "execution": "NOT_EXECUTED_IN_AZURE",
+      "expectedUnexpectedSuccessHandling": "STOP;preserve sanitized evidence;contain/revoke only within explicit separate authority;never continue proof"
+    },
+    {
+      "id": "UNAUTHORIZED_PRINCIPAL_CANNOT_RETRIEVE_RUNTIME_SECRET",
+      "acceptance": "Known existing secret,private TLS connectivity control,unauthorized principal;explicit authorization403 not timeout/404",
+      "localResult": "NOT_EXECUTED",
+      "execution": "NOT_EXECUTED_IN_AZURE",
+      "expectedUnexpectedSuccessHandling": "STOP;preserve sanitized evidence;contain/revoke only within explicit separate authority;never continue proof"
+    },
+    {
+      "id": "PUBLIC_PATH_CANNOT_REACH_PRIVATE_WORKLOAD",
+      "acceptance": "Independent public-origin DNS/network denial for INTERNAL environment/workload;not RBAC403 inference",
+      "localResult": "NOT_EXECUTED",
+      "execution": "NOT_EXECUTED_IN_AZURE",
+      "expectedUnexpectedSuccessHandling": "STOP;preserve sanitized evidence;contain/revoke only within explicit separate authority;never continue proof"
+    }
+  ],
+  "execution": "NOT_EXECUTED",
+  "amendmentLineage": "PROSPECTIVE_G3R2_IMAGE_QUALIFICATION"
+}

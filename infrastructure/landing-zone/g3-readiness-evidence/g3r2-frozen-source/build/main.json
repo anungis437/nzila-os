@@ -1,0 +1,1313 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.48.1.52935",
+      "templateHash": "17249109435821169600"
+    }
+  },
+  "parameters": {
+    "provisionResources": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "canadacentral",
+      "allowedValues": [
+        "canadacentral"
+      ]
+    },
+    "names": {
+      "type": "object"
+    },
+    "tags": {
+      "type": "object"
+    },
+    "networkRules": {
+      "type": "object"
+    },
+    "g2VnetId": {
+      "type": "string"
+    },
+    "keyVaultPurgeProtection": {
+      "type": "bool"
+    },
+    "discoveredEndpointIps": {
+      "type": "array",
+      "defaultValue": []
+    },
+    "approvedPlatformPrefixes": {
+      "type": "array",
+      "defaultValue": []
+    },
+    "immutableImage": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "quotaEvidenceId": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "availableConsumptionMilliCores": {
+      "type": "int",
+      "defaultValue": 0
+    },
+    "workloadActivationAuthorized": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    },
+    "rbacAuthorized": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        false
+      ]
+    }
+  },
+  "resources": [
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2024-03-01",
+      "name": "[parameters('names').resourceGroup]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]"
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "g3-network",
+      "resourceGroup": "[parameters('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "provisionResources": {
+            "value": "[parameters('provisionResources')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "names": {
+            "value": "[parameters('names')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          },
+          "networkRules": {
+            "value": "[parameters('networkRules')]"
+          },
+          "g2VnetId": {
+            "value": "[parameters('g2VnetId')]"
+          },
+          "discoveredEndpointIps": {
+            "value": "[parameters('discoveredEndpointIps')]"
+          },
+          "approvedPlatformPrefixes": {
+            "value": "[parameters('approvedPlatformPrefixes')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.48.1.52935",
+              "templateHash": "17374867630100491894"
+            }
+          },
+          "parameters": {
+            "provisionResources": {
+              "type": "bool",
+              "defaultValue": false,
+              "allowedValues": [
+                false
+              ]
+            },
+            "location": {
+              "type": "string"
+            },
+            "names": {
+              "type": "object"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "networkRules": {
+              "type": "object"
+            },
+            "g2VnetId": {
+              "type": "string"
+            },
+            "discoveredEndpointIps": {
+              "type": "array"
+            },
+            "approvedPlatformPrefixes": {
+              "type": "array"
+            }
+          },
+          "variables": {
+            "acaPrefix": "10.91.1.0/24",
+            "builderPrefix": "10.91.3.0/24",
+            "rules": "[concat(parameters('networkRules').inbound, parameters('networkRules').outbound, if(not(empty(parameters('discoveredEndpointIps'))), createArray(), createArray()), if(not(empty(parameters('approvedPlatformPrefixes'))), createArray(createObject('name', 'private-endpoints', 'properties', createObject('priority', 120, 'direction', 'Outbound', 'access', 'Allow', 'protocol', 'Tcp', 'sourceAddressPrefix', variables('acaPrefix'), 'sourcePortRange', '*', 'destinationAddressPrefixes', parameters('discoveredEndpointIps'), 'destinationPortRange', '443')), createObject('name', 'bounded-platform-fqdns', 'properties', createObject('priority', 140, 'direction', 'Outbound', 'access', 'Allow', 'protocol', 'Tcp', 'sourceAddressPrefix', variables('acaPrefix'), 'sourcePortRange', '*', 'destinationAddressPrefixes', parameters('approvedPlatformPrefixes'), 'destinationPortRange', '443'))), createArray()))]"
+          },
+          "resources": [
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "apiVersion": "2024-05-01",
+              "name": "[parameters('names').nsg]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "securityRules": "[variables('rules')]"
+              }
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}-builder', parameters('names').nsg)]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "securityRules": [
+                  {
+                    "name": "deny-unapproved-ingress",
+                    "properties": {
+                      "priority": 900,
+                      "direction": "Inbound",
+                      "access": "Deny",
+                      "protocol": "*",
+                      "sourceAddressPrefix": "*",
+                      "destinationAddressPrefix": "[variables('builderPrefix')]",
+                      "sourcePortRange": "*",
+                      "destinationPortRange": "*"
+                    }
+                  },
+                  {
+                    "name": "deny-unapproved-egress",
+                    "properties": {
+                      "priority": 900,
+                      "direction": "Outbound",
+                      "access": "Deny",
+                      "protocol": "*",
+                      "sourceAddressPrefix": "[variables('builderPrefix')]",
+                      "destinationAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationPortRange": "*"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}-pe', parameters('names').nsg)]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "securityRules": [
+                  {
+                    "name": "private-vault-consumers",
+                    "properties": {
+                      "priority": 100,
+                      "direction": "Inbound",
+                      "access": "Allow",
+                      "protocol": "Tcp",
+                      "sourceAddressPrefixes": [
+                        "[variables('acaPrefix')]",
+                        "[variables('builderPrefix')]"
+                      ],
+                      "destinationAddressPrefix": "10.91.2.0/24",
+                      "sourcePortRange": "*",
+                      "destinationPortRange": "443"
+                    }
+                  },
+                  {
+                    "name": "deny-other-pe-ingress",
+                    "properties": {
+                      "priority": 900,
+                      "direction": "Inbound",
+                      "access": "Deny",
+                      "protocol": "*",
+                      "sourceAddressPrefix": "*",
+                      "destinationAddressPrefix": "10.91.2.0/24",
+                      "sourcePortRange": "*",
+                      "destinationPortRange": "*"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/routeTables",
+              "apiVersion": "2024-05-01",
+              "name": "[parameters('names').routeTable]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "disableBgpRoutePropagation": true,
+                "routes": [
+                  {
+                    "name": "g3-default-to-g2-firewall",
+                    "properties": {
+                      "addressPrefix": "0.0.0.0/0",
+                      "nextHopType": "VirtualAppliance",
+                      "nextHopIpAddress": "10.90.0.4"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2024-05-01",
+              "name": "[parameters('names').vnet]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "addressSpace": {
+                  "addressPrefixes": [
+                    "10.91.0.0/16"
+                  ]
+                },
+                "subnets": [
+                  {
+                    "name": "[parameters('names').acaSubnet]",
+                    "properties": {
+                      "addressPrefix": "[variables('acaPrefix')]",
+                      "delegations": [
+                        {
+                          "name": "aca",
+                          "properties": {
+                            "serviceName": "Microsoft.App/environments"
+                          }
+                        }
+                      ],
+                      "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('names').nsg)]"
+                      },
+                      "routeTable": {
+                        "id": "[resourceId('Microsoft.Network/routeTables', parameters('names').routeTable)]"
+                      }
+                    }
+                  },
+                  {
+                    "name": "[parameters('names').privateEndpointSubnet]",
+                    "properties": {
+                      "addressPrefix": "10.91.2.0/24",
+                      "privateEndpointNetworkPolicies": "NetworkSecurityGroupEnabled",
+                      "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-pe', parameters('names').nsg))]"
+                      }
+                    }
+                  },
+                  {
+                    "name": "[parameters('names').builderSubnet]",
+                    "properties": {
+                      "addressPrefix": "[variables('builderPrefix')]",
+                      "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-builder', parameters('names').nsg))]"
+                      },
+                      "routeTable": {
+                        "id": "[resourceId('Microsoft.Network/routeTables', parameters('names').routeTable)]"
+                      }
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('names').nsg)]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-builder', parameters('names').nsg))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-pe', parameters('names').nsg))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('names').routeTable)]"
+              ]
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}/{1}', parameters('names').vnet, 'g3-to-g2')]",
+              "properties": {
+                "remoteVirtualNetwork": {
+                  "id": "[parameters('g2VnetId')]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "allowGatewayTransit": false,
+                "useRemoteGateways": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('names').vnet)]"
+              ]
+            }
+          ],
+          "outputs": {
+            "vnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('names').vnet)]"
+            },
+            "acaSubnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('names').vnet, parameters('names').acaSubnet)]"
+            },
+            "endpointSubnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('names').vnet, parameters('names').privateEndpointSubnet)]"
+            },
+            "externalG2Dependencies": {
+              "type": "array",
+              "value": [
+                "G2_SIDE_PEERING",
+                "G2_ACR_DNS_LINK",
+                "G2_FIREWALL_RULES"
+              ]
+            },
+            "builderActivation": {
+              "type": "string",
+              "value": "DENY_UNTIL_EXACT_BUILD_MODEL_AND_NETWORK_BINDINGS_APPROVED"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('names').resourceGroup)]"
+      ]
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "g3-identities",
+      "resourceGroup": "[parameters('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "provisionResources": {
+            "value": "[parameters('provisionResources')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "names": {
+            "value": "[parameters('names')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.48.1.52935",
+              "templateHash": "17778532292555384580"
+            }
+          },
+          "parameters": {
+            "provisionResources": {
+              "type": "bool",
+              "defaultValue": false,
+              "allowedValues": [
+                false
+              ]
+            },
+            "location": {
+              "type": "string"
+            },
+            "names": {
+              "type": "object"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2023-01-31",
+              "name": "[parameters('names').pullIdentity]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]"
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2023-01-31",
+              "name": "[parameters('names').runtimeIdentity]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]"
+            }
+          ],
+          "outputs": {
+            "buildIdentityId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('names').pullIdentity)]"
+            },
+            "runtimeIdentityId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('names').runtimeIdentity)]"
+            },
+            "runtimePrincipalId": {
+              "type": "string",
+              "value": "[if(parameters('provisionResources'), reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('names').runtimeIdentity), '2023-01-31').principalId, '')]"
+            },
+            "buildIdentityPurpose": {
+              "type": "string",
+              "value": "PLATFORM_PULL_ONLY_NONE;G3A_PUSH_REMAINS_SEPARATE_OPERATOR_NOT_THIS_UAMI"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('names').resourceGroup)]"
+      ]
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "g3-observability",
+      "resourceGroup": "[parameters('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "provisionResources": {
+            "value": "[parameters('provisionResources')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "names": {
+            "value": "[parameters('names')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.48.1.52935",
+              "templateHash": "4457455633200707408"
+            }
+          },
+          "parameters": {
+            "provisionResources": {
+              "type": "bool",
+              "defaultValue": false,
+              "allowedValues": [
+                false
+              ]
+            },
+            "location": {
+              "type": "string"
+            },
+            "names": {
+              "type": "object"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2023-09-01",
+              "name": "[parameters('names').workspace]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "sku": {
+                  "name": "PerGB2018"
+                },
+                "retentionInDays": 30,
+                "workspaceCapping": {
+                  "dailyQuotaGb": 1
+                },
+                "features": {
+                  "disableLocalAuth": true,
+                  "enableLogAccessUsingOnlyResourcePermissions": true
+                },
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled"
+              }
+            }
+          ],
+          "outputs": {
+            "workspaceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('names').workspace)]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('names').resourceGroup)]"
+      ]
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "g3-private-vault",
+      "resourceGroup": "[parameters('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "provisionResources": {
+            "value": "[parameters('provisionResources')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "names": {
+            "value": "[parameters('names')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          },
+          "vnetId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-network'), '2025-04-01').outputs.vnetId.value]"
+          },
+          "endpointSubnetId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-network'), '2025-04-01').outputs.endpointSubnetId.value]"
+          },
+          "purgeProtection": {
+            "value": "[parameters('keyVaultPurgeProtection')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.48.1.52935",
+              "templateHash": "11712098076821462125"
+            }
+          },
+          "parameters": {
+            "provisionResources": {
+              "type": "bool",
+              "defaultValue": false,
+              "allowedValues": [
+                false
+              ]
+            },
+            "location": {
+              "type": "string"
+            },
+            "names": {
+              "type": "object"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "vnetId": {
+              "type": "string"
+            },
+            "endpointSubnetId": {
+              "type": "string"
+            },
+            "purgeProtection": {
+              "type": "bool"
+            }
+          },
+          "resources": [
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.KeyVault/vaults",
+              "apiVersion": "2024-11-01",
+              "name": "[parameters('names').keyVault]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "tenantId": "[tenant().tenantId]",
+                "sku": {
+                  "family": "A",
+                  "name": "standard"
+                },
+                "enableRbacAuthorization": true,
+                "enableSoftDelete": true,
+                "softDeleteRetentionInDays": 7,
+                "enablePurgeProtection": "[parameters('purgeProtection')]",
+                "publicNetworkAccess": "Disabled",
+                "networkAcls": {
+                  "bypass": "None",
+                  "defaultAction": "Deny"
+                }
+              }
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/privateDnsZones",
+              "apiVersion": "2020-06-01",
+              "name": "privatelink.vaultcore.azure.net",
+              "location": "global",
+              "tags": "[parameters('tags')]"
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+              "apiVersion": "2020-06-01",
+              "name": "[format('{0}/{1}', 'privatelink.vaultcore.azure.net', parameters('names').keyVaultDnsLink)]",
+              "location": "global",
+              "properties": {
+                "registrationEnabled": false,
+                "virtualNetwork": {
+                  "id": "[parameters('vnetId')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.vaultcore.azure.net')]"
+              ]
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/privateEndpoints",
+              "apiVersion": "2024-05-01",
+              "name": "[parameters('names').keyVaultEndpoint]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "subnet": {
+                  "id": "[parameters('endpointSubnetId')]"
+                },
+                "privateLinkServiceConnections": [
+                  {
+                    "name": "g3-vault",
+                    "properties": {
+                      "privateLinkServiceId": "[resourceId('Microsoft.KeyVault/vaults', parameters('names').keyVault)]",
+                      "groupIds": [
+                        "vault"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('names').keyVault)]"
+              ]
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}/{1}', parameters('names').keyVaultEndpoint, 'default')]",
+              "properties": {
+                "privateDnsZoneConfigs": [
+                  {
+                    "name": "vault",
+                    "properties": {
+                      "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.vaultcore.azure.net')]"
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateEndpoints', parameters('names').keyVaultEndpoint)]",
+                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.vaultcore.azure.net')]"
+              ]
+            }
+          ],
+          "outputs": {
+            "secretReference": {
+              "type": "string",
+              "value": "[format('https://{0}{1}/secrets/g3-proof-secret', parameters('names').keyVault, environment().suffixes.keyvaultDns)]"
+            },
+            "secretSeeding": {
+              "type": "string",
+              "value": "EXTERNAL_EXPLICIT_AUTHORITY_REQUIRED;NO_SECRET_VALUE_PARAMETER_OR_RESOURCE"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('names').resourceGroup)]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-network')]"
+      ]
+    },
+    {
+      "condition": "[parameters('provisionResources')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "g3-empty-environment",
+      "resourceGroup": "[parameters('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "provisionResources": {
+            "value": "[parameters('provisionResources')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "names": {
+            "value": "[parameters('names')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          },
+          "acaSubnetId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-network'), '2025-04-01').outputs.acaSubnetId.value]"
+          },
+          "vnetId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-network'), '2025-04-01').outputs.vnetId.value]"
+          },
+          "workspaceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-observability'), '2025-04-01').outputs.workspaceId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.48.1.52935",
+              "templateHash": "11441379224537826046"
+            }
+          },
+          "parameters": {
+            "provisionResources": {
+              "type": "bool",
+              "defaultValue": false,
+              "allowedValues": [
+                false
+              ]
+            },
+            "location": {
+              "type": "string"
+            },
+            "names": {
+              "type": "object"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "acaSubnetId": {
+              "type": "string"
+            },
+            "vnetId": {
+              "type": "string"
+            },
+            "workspaceId": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.App/managedEnvironments",
+              "apiVersion": "2025-07-01",
+              "name": "[parameters('names').environment]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "vnetConfiguration": {
+                  "internal": true,
+                  "infrastructureSubnetId": "[parameters('acaSubnetId')]"
+                },
+                "publicNetworkAccess": "Disabled",
+                "workloadProfiles": [
+                  {
+                    "name": "Consumption",
+                    "workloadProfileType": "Consumption"
+                  }
+                ],
+                "appLogsConfiguration": {
+                  "destination": "azure-monitor"
+                },
+                "zoneRedundant": false
+              }
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[resourceId('Microsoft.App/managedEnvironments', parameters('names').environment)]",
+              "name": "g3-console-system-logs",
+              "properties": {
+                "workspaceId": "[parameters('workspaceId')]",
+                "logs": [
+                  {
+                    "category": "ContainerAppConsoleLogs",
+                    "enabled": true
+                  },
+                  {
+                    "category": "ContainerAppSystemLogs",
+                    "enabled": true
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.App/managedEnvironments', parameters('names').environment)]"
+              ]
+            },
+            {
+              "condition": "[parameters('provisionResources')]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2025-04-01",
+              "name": "g3-internal-dns",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "provisionResources": {
+                    "value": "[parameters('provisionResources')]"
+                  },
+                  "environmentName": {
+                    "value": "[parameters('names').environment]"
+                  },
+                  "defaultDomain": {
+                    "value": "[reference(resourceId('Microsoft.App/managedEnvironments', parameters('names').environment), '2025-07-01').defaultDomain]"
+                  },
+                  "staticIp": {
+                    "value": "[reference(resourceId('Microsoft.App/managedEnvironments', parameters('names').environment), '2025-07-01').staticIp]"
+                  },
+                  "vnetId": {
+                    "value": "[parameters('vnetId')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.48.1.52935",
+                      "templateHash": "14649924398031530607"
+                    }
+                  },
+                  "parameters": {
+                    "provisionResources": {
+                      "type": "bool",
+                      "defaultValue": false,
+                      "allowedValues": [
+                        false
+                      ]
+                    },
+                    "environmentName": {
+                      "type": "string"
+                    },
+                    "defaultDomain": {
+                      "type": "string"
+                    },
+                    "staticIp": {
+                      "type": "string"
+                    },
+                    "vnetId": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "condition": "[parameters('provisionResources')]",
+                      "type": "Microsoft.Network/privateDnsZones",
+                      "apiVersion": "2020-06-01",
+                      "name": "[parameters('defaultDomain')]",
+                      "location": "global",
+                      "tags": "[parameters('tags')]"
+                    },
+                    {
+                      "condition": "[parameters('provisionResources')]",
+                      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                      "apiVersion": "2020-06-01",
+                      "name": "[format('{0}/{1}', parameters('defaultDomain'), format('{0}-link', parameters('environmentName')))]",
+                      "location": "global",
+                      "properties": {
+                        "registrationEnabled": false,
+                        "virtualNetwork": {
+                          "id": "[parameters('vnetId')]"
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+                      ]
+                    },
+                    {
+                      "condition": "[parameters('provisionResources')]",
+                      "type": "Microsoft.Network/privateDnsZones/A",
+                      "apiVersion": "2020-06-01",
+                      "name": "[format('{0}/{1}', parameters('defaultDomain'), '@')]",
+                      "properties": {
+                        "ttl": 60,
+                        "aRecords": [
+                          {
+                            "ipv4Address": "[parameters('staticIp')]"
+                          }
+                        ]
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+                      ]
+                    },
+                    {
+                      "condition": "[parameters('provisionResources')]",
+                      "type": "Microsoft.Network/privateDnsZones/A",
+                      "apiVersion": "2020-06-01",
+                      "name": "[format('{0}/{1}', parameters('defaultDomain'), '*')]",
+                      "properties": {
+                        "ttl": 60,
+                        "aRecords": [
+                          {
+                            "ipv4Address": "[parameters('staticIp')]"
+                          }
+                        ]
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.App/managedEnvironments', parameters('names').environment)]"
+              ]
+            }
+          ],
+          "outputs": {
+            "environmentId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.App/managedEnvironments', parameters('names').environment)]"
+            },
+            "quotaGate": {
+              "type": "string",
+              "value": "POST_CREATE_PRE_WORKLOAD_ACTIVATION;NO_ASSUMED_QUOTA"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('names').resourceGroup)]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-network')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-observability')]"
+      ]
+    },
+    {
+      "condition": "[and(parameters('provisionResources'), parameters('rbacAuthorized'))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "g3-runtime-secret-binding",
+      "resourceGroup": "[parameters('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "rbacAuthorized": {
+            "value": "[parameters('rbacAuthorized')]"
+          },
+          "vaultName": {
+            "value": "[parameters('names').keyVault]"
+          },
+          "runtimePrincipalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-identities'), '2025-04-01').outputs.runtimePrincipalId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.48.1.52935",
+              "templateHash": "14948447535474921577"
+            }
+          },
+          "parameters": {
+            "rbacAuthorized": {
+              "type": "bool",
+              "defaultValue": false,
+              "allowedValues": [
+                false
+              ]
+            },
+            "vaultName": {
+              "type": "string"
+            },
+            "runtimePrincipalId": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "condition": "[parameters('rbacAuthorized')]",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('vaultName'), 'g3-proof-secret')]",
+              "name": "[guid(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('vaultName'), 'g3-proof-secret'), parameters('runtimePrincipalId'), '4633458b-17de-408a-b874-0445c86b69e6')]",
+              "properties": {
+                "principalId": "[parameters('runtimePrincipalId')]",
+                "principalType": "ServicePrincipal",
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]"
+              }
+            }
+          ],
+          "outputs": {
+            "status": {
+              "type": "string",
+              "value": "PROPOSED_NOT_AUTHORIZED"
+            },
+            "externalRegistryBinding": {
+              "type": "string",
+              "value": "EXTERNAL_G2_MUTATION_DEPENDENCY;EXACT_REPOSITORY_ABAC_READER_AND_OPERATOR_WRITER;NO_ACRPULL_FALLBACK"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-identities')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('names').resourceGroup)]"
+      ]
+    },
+    {
+      "condition": "[and(and(and(parameters('provisionResources'), parameters('workloadActivationAuthorized')), not(empty(parameters('quotaEvidenceId')))), greaterOrEquals(parameters('availableConsumptionMilliCores'), 250))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "g3-synthetic-workload",
+      "resourceGroup": "[parameters('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "workloadActivationAuthorized": {
+            "value": "[parameters('workloadActivationAuthorized')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "names": {
+            "value": "[parameters('names')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          },
+          "environmentId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-empty-environment'), '2025-04-01').outputs.environmentId.value]"
+          },
+          "buildIdentityId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-identities'), '2025-04-01').outputs.buildIdentityId.value]"
+          },
+          "runtimeIdentityId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-identities'), '2025-04-01').outputs.runtimeIdentityId.value]"
+          },
+          "immutableImage": {
+            "value": "[parameters('immutableImage')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.48.1.52935",
+              "templateHash": "6933406748987804891"
+            }
+          },
+          "parameters": {
+            "workloadActivationAuthorized": {
+              "type": "bool",
+              "defaultValue": false,
+              "allowedValues": [
+                false
+              ]
+            },
+            "location": {
+              "type": "string"
+            },
+            "names": {
+              "type": "object"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "environmentId": {
+              "type": "string"
+            },
+            "buildIdentityId": {
+              "type": "string"
+            },
+            "runtimeIdentityId": {
+              "type": "string"
+            },
+            "immutableImage": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "condition": "[parameters('workloadActivationAuthorized')]",
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2025-07-01",
+              "name": "[parameters('names').application]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', parameters('buildIdentityId'))]": {},
+                  "[format('{0}', parameters('runtimeIdentityId'))]": {}
+                }
+              },
+              "properties": {
+                "environmentId": "[parameters('environmentId')]",
+                "workloadProfileName": "Consumption",
+                "configuration": {
+                  "activeRevisionsMode": "Single",
+                  "identitySettings": [
+                    {
+                      "identity": "[parameters('buildIdentityId')]",
+                      "lifecycle": "None"
+                    },
+                    {
+                      "identity": "[parameters('runtimeIdentityId')]",
+                      "lifecycle": "Main"
+                    }
+                  ],
+                  "registries": [
+                    {
+                      "server": "nzilag2tzo75uuozprbo.azurecr.io",
+                      "identity": "[parameters('buildIdentityId')]"
+                    }
+                  ],
+                  "ingress": {
+                    "external": true,
+                    "targetPort": 3000,
+                    "transport": "http",
+                    "allowInsecure": false
+                  },
+                  "secrets": [
+                    {
+                      "name": "g3-proof-secret",
+                      "keyVaultUrl": "[format('https://{0}{1}/secrets/g3-proof-secret', parameters('names').keyVault, environment().suffixes.keyvaultDns)]",
+                      "identity": "[parameters('runtimeIdentityId')]"
+                    }
+                  ]
+                },
+                "template": {
+                  "containers": [
+                    {
+                      "name": "g3-synthetic-runtime",
+                      "image": "[parameters('immutableImage')]",
+                      "env": [
+                        {
+                          "name": "G3_PROOF_SECRET",
+                          "secretRef": "g3-proof-secret"
+                        }
+                      ],
+                      "resources": {
+                        "cpu": "[json('0.25')]",
+                        "memory": "0.5Gi"
+                      },
+                      "probes": [
+                        {
+                          "type": "Readiness",
+                          "httpGet": {
+                            "path": "/health/readiness",
+                            "port": 3000
+                          },
+                          "initialDelaySeconds": 5,
+                          "periodSeconds": 10
+                        },
+                        {
+                          "type": "Liveness",
+                          "httpGet": {
+                            "path": "/health/liveness",
+                            "port": 3000
+                          },
+                          "initialDelaySeconds": 10,
+                          "periodSeconds": 10
+                        }
+                      ]
+                    }
+                  ],
+                  "scale": {
+                    "minReplicas": 0,
+                    "maxReplicas": 1
+                  }
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "authorityStatus": {
+              "type": "string",
+              "value": "DENY;PROSPECTIVE_SOURCE_ONLY"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-empty-environment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('names').resourceGroup), 'Microsoft.Resources/deployments', 'g3-identities')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('names').resourceGroup)]"
+      ]
+    }
+  ],
+  "outputs": {
+    "deploymentStatus": {
+      "type": "string",
+      "value": "NOT_AUTHORIZED_PROSPECTIVE_G3R2"
+    },
+    "g2MutationAllowed": {
+      "type": "bool",
+      "value": false
+    },
+    "postCreateGate": {
+      "type": "string",
+      "value": "QUERY_ENVIRONMENT_CONSUMPTION_CORES_BEFORE_WORKLOAD_ACTIVATION"
+    }
+  }
+}

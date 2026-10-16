@@ -1,0 +1,465 @@
+[
+  {
+    "name": "account",
+    "timestamp": "2026-10-12T05:48:08.963Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "account show",
+    "targetResourceId": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+    "cliAction": ["account", "show", "--query", "{id:id,tenantId:tenantId,state:state,user:user}"],
+    "requestDigest": "cdf0eb8a9835a66e9d0e6a60814ce812077adb6e7c5fc4638fab84c78ef255d8",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_1_account.json",
+    "completedAtUtc": "2026-10-12T05:48:11.638Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "635f7f978bdf85175d5fef2b030c9270022e2baa4d4c390c7e8ad86fe4b8c91d",
+    "cliArgumentsSha256": "2e3d87965a889e73597fb02eeef7240123a4bc019dd07428ba84d94b562c070d",
+    "requestBodySha256": null
+  },
+  {
+    "name": "vm",
+    "timestamp": "2026-10-12T05:48:17.754Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu?api-version=2024-07-01"
+    ],
+    "requestDigest": "78b4116ee4af334850cb390afa12cfbc52ebb0978f9d32d68fa18f09511aad26",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_2_vm.json",
+    "completedAtUtc": "2026-10-12T05:48:22.597Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "32e15fa5f795980e1f8f14fa4d1bd9d67ce222fdd77960ac01f4270364271e92",
+    "cliArgumentsSha256": "c2b8b36414f1183ef32cdcdfbfae40f44617ac5a633249ce3aa613c35d9f059b",
+    "requestBodySha256": null
+  },
+  {
+    "name": "vm-instance-view",
+    "timestamp": "2026-10-12T05:48:30.203Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/instanceView?api-version=2024-07-01"
+    ],
+    "requestDigest": "3800b5e5a05faac1d40b6aa7fad64cd5bb8cf243fd3a9d40f7931df468804d77",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_3_vm-instance-view.json",
+    "completedAtUtc": "2026-10-12T05:48:32.599Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "e91dcce6addb9843149300f17ca4b7957e836bdfcb27a4314090f63a7fa1e236",
+    "cliArgumentsSha256": "09658d04711b9c94adfb1e01d86d53ecdfa5afd45ba73b6ffb16825c6d7fbd67",
+    "requestBodySha256": null
+  },
+  {
+    "name": "nic",
+    "timestamp": "2026-10-12T05:48:38.185Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/networkInterfaces/nzila-g2-builder-nic-y3koaeijzi6mu",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/networkInterfaces/nzila-g2-builder-nic-y3koaeijzi6mu?api-version=2024-05-01"
+    ],
+    "requestDigest": "6ca17ade603ccfd5f9c35ea9f3759c493407c618c2cbdc59845ffe46168dca17",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_4_nic.json",
+    "completedAtUtc": "2026-10-12T05:48:40.395Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "7e94355993a9d4f209b565dd14abfbe702337824769ab682558bcc086baece68",
+    "cliArgumentsSha256": "fa88ed1afcd69069113033341dba8a4433e28ab1321885c3f3a683eefe72018e",
+    "requestBodySha256": null
+  },
+  {
+    "name": "permissions",
+    "timestamp": "2026-10-12T05:48:45.794Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/providers/Microsoft.Authorization/permissions?api-version=2022-04-01"
+    ],
+    "requestDigest": "dde0ad12bd35ddcb76db93aaf03d6a43fe8a600360be5c814e8d10a0f23c82a1",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_5_permissions.json",
+    "completedAtUtc": "2026-10-12T05:48:47.883Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "f4fa0939386c7c0a02ad98d36c94372c9b8ea4487d6a9ab6d669d8612ddc0600",
+    "cliArgumentsSha256": "ccba69734c4896ca8424e0848121716a2695485f532b19f789067c958ddff162",
+    "requestBodySha256": null
+  },
+  {
+    "name": "children-before-q1",
+    "timestamp": "2026-10-12T05:50:31.104Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands?api-version=2024-07-01"
+    ],
+    "requestDigest": "78ef9b2ab23252edbdd31904dcd7b8530d899288109238c9bf4f6b12aa19f16a",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_6_children-before-q1.json",
+    "completedAtUtc": "2026-10-12T05:50:34.194Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+    "cliArgumentsSha256": "3817c18944a68de6801cf948e273a3dff165de3e75b9b6186e1834e11d270bda",
+    "requestBodySha256": null
+  },
+  {
+    "name": "q1-create",
+    "timestamp": "2026-10-12T05:50:40.629Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "PUT",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97",
+    "cliAction": [
+      "rest",
+      "--method",
+      "put",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97?api-version=2024-07-01",
+      "--body",
+      "@C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-readiness-evidence\\G3R3D_Q1_REQUEST.json"
+    ],
+    "requestDigest": "e5ab3c0ad55c2681fd3f328182ce838dfbaad2cf6ffd40d7db5bca6e767d5bf7",
+    "mutationClass": "MANAGED_RUN_COMMAND_CHILD_CREATE",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_7_q1-create.json",
+    "completedAtUtc": "2026-10-12T05:50:43.297Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "f37c3f511b27283995b232903fa8991cec118857ee2d722796e0de129ee3522a",
+    "cliArgumentsSha256": "fb23ced74ee15a3d19443c6a84b8eb16e39aeae0ce6ec54e936feb2057417091",
+    "requestBodySha256": "ef534296daa7bedd14fcbc33e5e2ac1a5daf605fcabf05c1ed57e90a9d75d810"
+  },
+  {
+    "name": "q1-state-0",
+    "timestamp": "2026-10-12T05:50:51.093Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97?api-version=2024-07-01&$expand=instanceView"
+    ],
+    "requestDigest": "e5de9b35e5e62f00fe35100400b878f67acca389991cfdb8fcd2d62b05814fac",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_8_q1-state-0.json",
+    "completedAtUtc": "2026-10-12T05:50:54.166Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "fbfd2673681cac67dab0b82ca03a49a32d315981262af62187147056d87307ef",
+    "cliArgumentsSha256": "68dbc894b47a05f0f71add1cd5dc3b3a1c9d3f3bf167d6ea677d0bec738ddfad",
+    "requestBodySha256": null
+  },
+  {
+    "name": "q1-delete",
+    "timestamp": "2026-10-12T05:51:01.474Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "DELETE",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97",
+    "cliAction": [
+      "rest",
+      "--method",
+      "delete",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97?api-version=2024-07-01"
+    ],
+    "requestDigest": "460a7f19652fcd1927e38389f2aaf0e346f1281bbc5ab605cce5d6026dad6158",
+    "mutationClass": "MANAGED_RUN_COMMAND_CHILD_DELETE",
+    "responseStatus": "SUCCEEDED",
+    "completedAtUtc": "2026-10-12T05:51:04.165Z",
+    "exitCode": 0,
+    "error": null,
+    "cliArgumentsSha256": "e857eec3b42ed3f04b066b0e39608ab16f9faa37f08a9efbba00cde7cb89ee3a",
+    "requestBodySha256": null,
+    "rollbackDeleteResult": {
+      "accepted": true,
+      "finalResult": "OWNED_CHILD_ABSENT_CONFIRMED",
+      "evidence": "G3R3D_RUN_COMMAND_CLEANUP.json"
+    }
+  },
+  {
+    "name": "children-after-q1-delete",
+    "timestamp": "2026-10-12T05:51:09.645Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands?api-version=2024-07-01"
+    ],
+    "requestDigest": "78ef9b2ab23252edbdd31904dcd7b8530d899288109238c9bf4f6b12aa19f16a",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_10_children-after-q1-delete.json",
+    "completedAtUtc": "2026-10-12T05:51:11.811Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "1f5739a9461d168d83fc3b525969cd941db84a0906a5b2a6dfee6d56e99dfdbc",
+    "cliArgumentsSha256": "3817c18944a68de6801cf948e273a3dff165de3e75b9b6186e1834e11d270bda",
+    "requestBodySha256": null
+  },
+  {
+    "name": "children-deletion-confirm-first-transport-0",
+    "timestamp": "2026-10-12T05:52:24.160Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands?api-version=2024-07-01"
+    ],
+    "requestDigest": "78ef9b2ab23252edbdd31904dcd7b8530d899288109238c9bf4f6b12aa19f16a",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_11_children-deletion-confirm-first-transport-0.json",
+    "completedAtUtc": "2026-10-12T05:52:26.521Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+    "cliArgumentsSha256": "3817c18944a68de6801cf948e273a3dff165de3e75b9b6186e1834e11d270bda",
+    "requestBodySha256": null
+  },
+  {
+    "name": "children-before-q1-lf-retry",
+    "timestamp": "2026-10-12T05:52:40.363Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands?api-version=2024-07-01"
+    ],
+    "requestDigest": "78ef9b2ab23252edbdd31904dcd7b8530d899288109238c9bf4f6b12aa19f16a",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_12_children-before-q1-lf-retry.json",
+    "completedAtUtc": "2026-10-12T05:52:42.595Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+    "cliArgumentsSha256": "3817c18944a68de6801cf948e273a3dff165de3e75b9b6186e1834e11d270bda",
+    "requestBodySha256": null
+  },
+  {
+    "name": "q1-create-lf-retry",
+    "timestamp": "2026-10-12T05:52:48.418Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "PUT",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97",
+    "cliAction": [
+      "rest",
+      "--method",
+      "put",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97?api-version=2024-07-01",
+      "--body",
+      "@C:\\APPS\\nzila-os\\infrastructure\\landing-zone\\g3-readiness-evidence\\G3R3D_Q1_REQUEST_LF_RETRY.json"
+    ],
+    "requestDigest": "d4f9484ec3b59c66fb67559ee2828b38ca013f22a907fd355db10e9b25102698",
+    "mutationClass": "MANAGED_RUN_COMMAND_CHILD_CREATE",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_13_q1-create-lf-retry.json",
+    "completedAtUtc": "2026-10-12T05:52:50.743Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "89decfa640fa70f4b36c847706fe44438c9f7d18e31b883db8e9f93b97c562d1",
+    "cliArgumentsSha256": "aec6ea2e8b6472e5d72d65cc37ba5f465e9440ce07ae4debd2fddadeae7254e1",
+    "requestBodySha256": "8647f1c44213953e2260c763344ecf0663c9c170dccac617252b647cb8b55350"
+  },
+  {
+    "name": "q1-state-0-lf-retry",
+    "timestamp": "2026-10-12T05:52:57.418Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97?api-version=2024-07-01&$expand=instanceView"
+    ],
+    "requestDigest": "e5de9b35e5e62f00fe35100400b878f67acca389991cfdb8fcd2d62b05814fac",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_14_q1-state-0-lf-retry.json",
+    "completedAtUtc": "2026-10-12T05:52:59.937Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "5d9d19d97a13bca3629c0276b18f5053bde895de7def0ea8d9bee6e499f1bb77",
+    "cliArgumentsSha256": "68dbc894b47a05f0f71add1cd5dc3b3a1c9d3f3bf167d6ea677d0bec738ddfad",
+    "requestBodySha256": null
+  },
+  {
+    "name": "q1-delete-lf-retry",
+    "timestamp": "2026-10-12T05:53:06.171Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "DELETE",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97",
+    "cliAction": [
+      "rest",
+      "--method",
+      "delete",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands/nzila-g3r3d-q1-7bdfdf981f7b68c73fb2429cb9f28c97?api-version=2024-07-01"
+    ],
+    "requestDigest": "460a7f19652fcd1927e38389f2aaf0e346f1281bbc5ab605cce5d6026dad6158",
+    "mutationClass": "MANAGED_RUN_COMMAND_CHILD_DELETE",
+    "responseStatus": "SUCCEEDED",
+    "completedAtUtc": "2026-10-12T05:53:08.371Z",
+    "exitCode": 0,
+    "error": null,
+    "cliArgumentsSha256": "e857eec3b42ed3f04b066b0e39608ab16f9faa37f08a9efbba00cde7cb89ee3a",
+    "requestBodySha256": null,
+    "rollbackDeleteResult": {
+      "accepted": true,
+      "finalResult": "OWNED_CHILD_ABSENT_CONFIRMED",
+      "evidence": "G3R3D_RUN_COMMAND_CLEANUP.json"
+    }
+  },
+  {
+    "name": "children-deletion-confirm-lf-retry-0",
+    "timestamp": "2026-10-12T05:53:14.533Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands?api-version=2024-07-01"
+    ],
+    "requestDigest": "78ef9b2ab23252edbdd31904dcd7b8530d899288109238c9bf4f6b12aa19f16a",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_16_children-deletion-confirm-lf-retry-0.json",
+    "completedAtUtc": "2026-10-12T05:53:16.710Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "49f4397faad822393976f82a5f822b2972aea22aeff7a505998d46a714e04b88",
+    "cliArgumentsSha256": "3817c18944a68de6801cf948e273a3dff165de3e75b9b6186e1834e11d270bda",
+    "requestBodySha256": null
+  },
+  {
+    "name": "children-deletion-confirm-lf-retry-1",
+    "timestamp": "2026-10-12T05:53:28.606Z",
+    "operatorIdentity": {
+      "name": "support@onelabtech.com",
+      "type": "user"
+    },
+    "operation": "GET",
+    "targetResourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+    "cliAction": [
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu/runCommands?api-version=2024-07-01"
+    ],
+    "requestDigest": "78ef9b2ab23252edbdd31904dcd7b8530d899288109238c9bf4f6b12aa19f16a",
+    "mutationClass": "READ_ONLY",
+    "responseStatus": "SUCCEEDED",
+    "responseFile": "G3R3D_READ_17_children-deletion-confirm-lf-retry-1.json",
+    "completedAtUtc": "2026-10-12T05:53:31.186Z",
+    "exitCode": 0,
+    "error": null,
+    "responseSha256": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+    "cliArgumentsSha256": "3817c18944a68de6801cf948e273a3dff165de3e75b9b6186e1834e11d270bda",
+    "requestBodySha256": null
+  }
+]

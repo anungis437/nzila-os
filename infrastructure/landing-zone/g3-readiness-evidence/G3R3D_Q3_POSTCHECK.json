@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "phase": "Q3_POSTCHECK",
+  "status": "NOT_EXECUTED_Q2_NOT_RUN",
+  "reason": "Q3 is permitted only after Q2 terminates or times out;Q2 was stopped by Q1. No guest postcheck results are fabricated.",
+  "childResourceId": null,
+  "RUN_OWNED_PROCESSES": null,
+  "RUN_OWNED_ACTIVE_UNITS": null,
+  "RUN_OWNED_TIMERS": null,
+  "RUN_OWNED_WORKSPACE_EXISTS": "NOT_OBSERVED;Q2_WORKSPACE_NOT_CREATED",
+  "FAKE_CREDENTIAL_FILE_EXISTS": "NOT_CREATED",
+  "TEMP_DOCKER_CONFIG_EXISTS": "NOT_CREATED",
+  "TEMP_DAEMON_EXISTS": "NOT_CREATED",
+  "BOUNDED_AGENT_GUEST_TOKEN_MATCHES": null,
+  "boundedRemanenceSearch": "NOT_EXECUTED_NO_FAKE_CREDENTIAL",
+  "remediation": "NOT_NEEDED;NO_Q2_TRANSIENT_STATE",
+  "azureChildCleanup": {
+    "childrenCreated": 2,
+    "childrenDeleted": 2,
+    "QUALIFICATION_RUN_COMMAND_CHILDREN_REMAINING": 0,
+    "result": "PASS",
+    "targetVmMutated": false,
+    "finalEvidenceFile": "G3R3D_READ_17_children-deletion-confirm-lf-retry-1.json",
+    "rollbackDeleteResult": "OWNED_CHILD_ABSENT_CONFIRMED"
+  }
+}

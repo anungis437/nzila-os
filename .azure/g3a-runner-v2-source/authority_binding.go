@@ -1,0 +1,4 @@
+package main
+
+const boundAuthorityPolicySHA256 = "1ff31f2f52fb74756aabc9082d2458a07e44f58957a87f91b450f0bf845ecc8c"
+const boundRunnerSourceSHA256 = "a89e752e70b611c46b112ee4adcd26d1776cd60bc9768c855358757460c93ef7"

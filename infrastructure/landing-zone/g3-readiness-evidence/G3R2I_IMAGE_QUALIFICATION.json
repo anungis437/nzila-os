@@ -1,0 +1,345 @@
+{
+  "IMAGE_AUTHORITY_ID": "G3_SYNTHETIC_PROOF_V1",
+  "SOURCE_LINEAGE": "PROSPECTIVE_G3R2_IMAGE_QUALIFICATION",
+  "SOURCE_DIGESTS": {
+    "method": "SHA256(JSON UTF-8 sorted {path,sha256} arrays);source/context digests are not OCI digests",
+    "SOURCE_TREE_SHA256": "63851138029b8081b680f9e3b59e5a07d7ef8689fc308a19604ad78f13134958",
+    "BUILD_CONTEXT_SHA256": "6ed3b437256c0a7a891a6a72ba8b004dd3d4b76a51faf400d872c768549ee434",
+    "GO_MOD_SHA256": "0e4b2c72b43150985ef1023487b7faa90945909f00b1e75de52be0e15ba51406",
+    "GO_SUM_SHA256_IF_PRESENT": null,
+    "GO_SUM_STATUS": "NOT_REQUIRED_STANDARD_LIBRARY_ONLY",
+    "MAIN_SOURCE_SHA256": "1466e36d31c18c946a20eb4af6842d4309d18c1746a8971c19ad075ca87a6bd9",
+    "DOCKERFILE_SHA256": "96eb04f564a60154c11e16793afe5f4a73af0d904d7c98b69e666cce48cd32c8",
+    "DOCKERIGNORE_SHA256": "0e736bee763bbb11fab05e3fb3b990be56438b1efe327d76fc476ebc3d170a69",
+    "files": [
+      {
+        "path": ".dockerignore",
+        "sha256": "0e736bee763bbb11fab05e3fb3b990be56438b1efe327d76fc476ebc3d170a69"
+      },
+      {
+        "path": "Dockerfile",
+        "sha256": "96eb04f564a60154c11e16793afe5f4a73af0d904d7c98b69e666cce48cd32c8"
+      },
+      {
+        "path": "go.mod",
+        "sha256": "0e4b2c72b43150985ef1023487b7faa90945909f00b1e75de52be0e15ba51406"
+      },
+      {
+        "path": "main_test.go",
+        "sha256": "7671f20e81e740303783e049c2cb078896fab3f81dd08095a0d41a5c672c8461"
+      },
+      {
+        "path": "main.go",
+        "sha256": "1466e36d31c18c946a20eb4af6842d4309d18c1746a8971c19ad075ca87a6bd9"
+      },
+      {
+        "path": "README.md",
+        "sha256": "f13aa60d4ff791404b84ff7cbaad63245d7652ae1c686f5cc0fdf801529ff4c0"
+      }
+    ],
+    "buildContext": [
+      {
+        "path": ".dockerignore",
+        "sha256": "0e736bee763bbb11fab05e3fb3b990be56438b1efe327d76fc476ebc3d170a69"
+      },
+      {
+        "path": "Dockerfile",
+        "sha256": "96eb04f564a60154c11e16793afe5f4a73af0d904d7c98b69e666cce48cd32c8"
+      },
+      {
+        "path": "go.mod",
+        "sha256": "0e4b2c72b43150985ef1023487b7faa90945909f00b1e75de52be0e15ba51406"
+      },
+      {
+        "path": "main_test.go",
+        "sha256": "7671f20e81e740303783e049c2cb078896fab3f81dd08095a0d41a5c672c8461"
+      },
+      {
+        "path": "main.go",
+        "sha256": "1466e36d31c18c946a20eb4af6842d4309d18c1746a8971c19ad075ca87a6bd9"
+      }
+    ]
+  },
+  "PUBLIC_READ_PROVENANCE": {
+    "builderManifestRead": {
+      "method": "GET",
+      "url": "https://registry-1.docker.io/v2/library/golang/manifests/sha256:bcef992b77b1e2031aaaa51da75cebc32da8e9c182e12e633ea79023c79d9eff",
+      "digestHeader": "sha256:bcef992b77b1e2031aaaa51da75cebc32da8e9c182e12e633ea79023c79d9eff",
+      "verifiedBytesSha256": "bcef992b77b1e2031aaaa51da75cebc32da8e9c182e12e633ea79023c79d9eff",
+      "configDigest": "sha256:6880d90c0623e6e55560894ff82266f5a06c0f7b1c9ee7f6e2def900d9bc2956",
+      "layerDigests": [
+        "sha256:8cb71386cfcfc55b27b559f73c6d5c0cdcb93b83be8281314116e271cc42cea6",
+        "sha256:a4edf9c328e814bd91b20c8e2211065489ebf15a16c7663d68a880660dfc897d",
+        "sha256:c6c71fff0869aa9bd48cf80d66e30b83adc9a3fe5e77dd9aaf266282c6ec64ff",
+        "sha256:ada79c65054a69ecd092ea2a3fa0623fd4eef87537bba5d01cf9a6a7f573f2af",
+        "sha256:8f7a3eec6e089822d07fd6e1e518d72c4348dab2c944e2d31f4a3f3b0e21a1d7",
+        "sha256:ec83989ce073f957ad7172108d1c3619ab31fc8515f0b8268cacf1d08e2947d4",
+        "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1"
+      ]
+    },
+    "boundedVersionVulnerabilityCheck": {
+      "method": "POST_PUBLIC_READ_ONLY_QUERY",
+      "url": "https://api.osv.dev/v1/querybatch",
+      "queries": [
+        { "package": { "name": "stdlib", "ecosystem": "Go" }, "version": "1.26.9" },
+        { "package": { "name": "toolchain", "ecosystem": "Go" }, "version": "1.26.9" }
+      ],
+      "advisories": [],
+      "status": "PASS_ZERO_VERSION_MATCHES;not a full container OS vulnerability scan",
+      "sourceOrSecretUploaded": false
+    }
+  },
+  "BUILD_TOOLCHAIN": {
+    "compilerVersion": "go version go1.26.9 linux/amd64",
+    "dockerVersion": {
+      "Client": {
+        "Version": "29.2.0",
+        "ApiVersion": "1.53",
+        "DefaultAPIVersion": "1.53",
+        "GitCommit": "0b9d198",
+        "GoVersion": "go1.25.6",
+        "Os": "windows",
+        "Arch": "amd64",
+        "BuildTime": "Mon Jan 26 19:28:56 2026",
+        "Context": "desktop-linux"
+      },
+      "Server": {
+        "Platform": { "Name": "Docker Desktop 4.60.1 (218372)" },
+        "Version": "29.2.0",
+        "ApiVersion": "1.53",
+        "MinAPIVersion": "1.44",
+        "Os": "linux",
+        "Arch": "amd64",
+        "Components": [
+          {
+            "Name": "Engine",
+            "Version": "29.2.0",
+            "Details": {
+              "ApiVersion": "1.53",
+              "Arch": "amd64",
+              "BuildTime": "Mon Jan 26 19:26:07 2026",
+              "Experimental": "false",
+              "GitCommit": "9c62384",
+              "GoVersion": "go1.25.6",
+              "KernelVersion": "6.6.87.2-microsoft-standard-WSL2",
+              "MinAPIVersion": "1.44",
+              "Os": "linux"
+            }
+          },
+          {
+            "Name": "containerd",
+            "Version": "v2.2.1",
+            "Details": { "GitCommit": "dea7da592f5d1d2b7755e3a161be07f43fad8f75" }
+          },
+          { "Name": "runc", "Version": "1.3.4", "Details": { "GitCommit": "v1.3.4-0-gd6d73eb8" } },
+          { "Name": "docker-init", "Version": "0.19.0", "Details": { "GitCommit": "de40ad0" } }
+        ],
+        "GitCommit": "9c62384",
+        "GoVersion": "go1.25.6",
+        "KernelVersion": "6.6.87.2-microsoft-standard-WSL2",
+        "BuildTime": "2026-01-26T19:26:07.000000000+00:00"
+      }
+    },
+    "builder": "docker.io/library/golang@sha256:bcef992b77b1e2031aaaa51da75cebc32da8e9c182e12e633ea79023c79d9eff",
+    "compilerImageId": "sha256:720ee26a8abab9853b810c5f30425d91d96508e18e34c5f853c70ab4dadaa825",
+    "buildFlags": [
+      "CGO_ENABLED=0",
+      "GOOS=linux",
+      "GOARCH=amd64",
+      "GOTOOLCHAIN=local",
+      "GOPROXY=off",
+      "GOSUMDB=off",
+      "-a",
+      "-trimpath",
+      "-buildvcs=false",
+      "-ldflags=-s -w -buildid="
+    ],
+    "dependencySurface": "STANDARD_LIBRARY_ONLY"
+  },
+  "BASE_IMAGE_DIGESTS": {
+    "BUILDER_BASE_DIGEST": "sha256:bcef992b77b1e2031aaaa51da75cebc32da8e9c182e12e633ea79023c79d9eff",
+    "RUNTIME_BASE_DIGEST": "SCRATCH_NO_BASE_IMAGE_DIGEST"
+  },
+  "BINARY_REPRODUCIBILITY": {
+    "REPEAT_BINARY_SHA256_MATCH": "YES",
+    "firstSha256": "a4580e13a03bacce4e36ecfbd6090dcfc81eaedee8c5c3f57c172f9af7dfe341",
+    "secondSha256": "a4580e13a03bacce4e36ecfbd6090dcfc81eaedee8c5c3f57c172f9af7dfe341",
+    "binaryBytes": 6082686,
+    "independentInvocations": 2,
+    "conditions": "Same source/compiler/OS/arch/flags;both builds -a force rebuild;no network;Dockerfile cmp and host byte comparison"
+  },
+  "GO_UNIT_TESTS": {
+    "command": "docker run --rm --network none --read-only [bounded tmpfs] <qualified compiler image> go test -count=1 -json ./...",
+    "result": "PASS",
+    "passedTests": [
+      "TestProofSemantics",
+      "TestHealthAndRoutes/GET/healthz",
+      "TestHealthAndRoutes/POST/healthz",
+      "TestHealthAndRoutes/GET/proof/secret",
+      "TestHealthAndRoutes/GET/unknown",
+      "TestHealthAndRoutes/GET/health/readiness",
+      "TestHealthAndRoutes/GET/health/liveness",
+      "TestHealthAndRoutes",
+      "TestInvalidNonceAndBody/empty",
+      "TestInvalidNonceAndBody/short",
+      "TestInvalidNonceAndBody/noncanonical",
+      "TestInvalidNonceAndBody/wrongtype",
+      "TestInvalidNonceAndBody/null",
+      "TestInvalidNonceAndBody/missing",
+      "TestInvalidNonceAndBody/unknown",
+      "TestInvalidNonceAndBody/duplicate",
+      "TestInvalidNonceAndBody/trailing",
+      "TestInvalidNonceAndBody/malformed",
+      "TestInvalidNonceAndBody/oversize",
+      "TestInvalidNonceAndBody/oversizewhitespace",
+      "TestInvalidNonceAndBody/wrongcontent",
+      "TestInvalidNonceAndBody/missingcontent",
+      "TestInvalidNonceAndBody/wrongcharset",
+      "TestInvalidNonceAndBody",
+      "TestMissingSecret",
+      "TestNonDisclosureIncludingErrors"
+    ],
+    "testAndSubtestCount": 26,
+    "failedTests": 0,
+    "outputSha256": "b75b5c437d8c896b1d74177e1da46da52246283c7af25025678e38322fac1a24",
+    "gofmtResult": "PASS_NO_FORMAT_DRIFT",
+    "vetResult": "PASS_DOCKERFILE_BUILD_STAGE"
+  },
+  "LOCAL_BUILD_RESULT": "PASS",
+  "LOCAL_IMAGE_ID": "sha256:76f0a7294abf7b6dcf25a717362077bb8f5df72dd4f47b5efa8ab980ddf6e4cf",
+  "LOCAL_IMAGE_CONFIG_DIGEST": "sha256:76f0a7294abf7b6dcf25a717362077bb8f5df72dd4f47b5efa8ab980ddf6e4cf",
+  "LOCAL_IMAGE_ID_SEMANTICS": "Docker image inspect .Id is local config digest;not registry manifest or future ACR authority",
+  "BUILD_LOG_DIGESTS": {
+    "compiler": "08939acefffedecce37dfa2c9ba988f6487aadefd1428d72aa953bdf8910d106",
+    "runtime": "84984a7ec1cb852138c5bdeb13731d552ff499f115dd73438e296e06c4fb8a0c"
+  },
+  "LOCAL_RUNTIME_RESULT": "PASS",
+  "LOCAL_HEALTH_RESULT": "PASS",
+  "LOCAL_SECRET_OBSERVER_PROOF": "PASS",
+  "MISSING_SECRET_BEHAVIOR": "PASS_GENERIC_503",
+  "WRONG_SECRET_BEHAVIOR": "PASS_EXPECTED_PROOF_MISMATCH",
+  "FAKE_SECRET_DISCLOSED": "NO",
+  "nonDisclosureSurfaces": [
+    "HTTP responses",
+    "stdout",
+    "stderr",
+    "captured container logs",
+    "unit-test simulated response/server error logs"
+  ],
+  "runtimeUid": 65532,
+  "runtimeGid": 65532,
+  "readOnlyRootFilesystem": true,
+  "networkMode": "none;read-only nonroot client shares runtime network namespace",
+  "hostBinding": "NONE_NO_PUBLISHED_PORT",
+  "listeningPorts": [3000],
+  "gracefulSigterm": "PASS",
+  "localChallengeArtifacts": [
+    {
+      "nonce": "JXRT4GQvVd_8bXUkobViSK42tRpDAEyJEmG4Sa0iepM",
+      "expectedProofDigest": "2d27451ef1c18677dffe48617b9b65fc9bb52b8b5c8f79176bc84540e130ed40",
+      "observedProofDigest": "2d27451ef1c18677dffe48617b9b65fc9bb52b8b5c8f79176bc84540e130ed40",
+      "httpStatus": 200,
+      "timestamp": "2026-10-12T03:46:10.376Z",
+      "imageRegistryDigest": "REQUIRED_AFTER_AUTHORIZED_BUILD_AND_PUSH",
+      "runtimeRevision": "LOCAL_CONTAINER_ONLY",
+      "secretLogicalId": "FAKE_LOCAL_ONLY",
+      "secretVersionIdentifier": "NOT_APPLICABLE",
+      "rawSecretRetained": false
+    }
+  ],
+  "liveAzureSecretChallengeExecuted": false,
+  "FUTURE_ACR_IMAGE_DIGEST": "REQUIRED_AFTER_AUTHORIZED_BUILD_AND_PUSH",
+  "IMAGE_PUSHED": "NO",
+  "AZURE_IMAGE_BUILD": "NO",
+  "AZURE_MUTATIONS": 0,
+  "CONTROLLER_EXECUTED": "NO",
+  "CURRENT_CANDIDATE_BYTES_CHANGED": "NO",
+  "priorG3R2EvidenceChanged": false,
+  "localValidationRecord": {
+    "path": "G3R2I_LOCAL_VALIDATION.json",
+    "sha256": "e3e8fb697858f8b1a66a15b0df06e9707c08fde593d9242d42bc96d622c8b994"
+  },
+  "SCANNER_RESULT": {
+    "status": "PASS_ZERO_UNRESOLVED_FINDINGS;EXACT_NONSECRET_ADJUDICATION_NOT_RAW_SOURCE_SCANNER_PASS",
+    "rawSourceScannerExit": 1,
+    "rawSourceFindings": 5,
+    "unresolvedFindings": 0,
+    "reportPath": "G3R2I_SECRET_SCAN.json"
+  },
+  "LOCAL_BICEP_BUILD": {
+    "status": "PASS_LOCAL_ONLY_NOT_DEPLOYED",
+    "entrypoints": 9,
+    "errors": 0,
+    "warnings": 0
+  },
+  "LOCAL_PROOF_PACKAGE": "COMPLETE_LOCAL_SPECIFICATION;AZURE_PROOFS_NOT_EXECUTED",
+  "ROOT_1_SOURCE_AUTHORITY": "CLOSED_BY_PROSPECTIVE_SUPERSESSION",
+  "G3R2": "PASS",
+  "G3R2DispositionBasis": "PROSPECTIVE_G3R2I_SUPERSESSION;FROZEN_G3R2_BLOCKED_RECORD_UNCHANGED",
+  "G3R2I_GATE": "PASS",
+  "G3_EXECUTION_READINESS": "BLOCKED",
+  "G3A": "NOT_AUTHORIZED",
+  "G3B": "NOT_AUTHORIZED",
+  "remainingRoots": [
+    "ROOT-2_ACCOUNTABLE_OPERATOR_AND_SEPARATE_HUMAN_APPROVER",
+    "ROOT-3_EXPLICIT_G2_NETWORK_MUTATION_AUTHORITY",
+    "ROOT-4_COMPLETE_COST_MODEL_AND_HUMAN_COST_CEILING"
+  ],
+  "costModelImpact": {
+    "status": "NO_MATERIAL_RESOURCE_OR_RUNTIME_COST_CHANGE",
+    "bomSha256": "0737c9f7763646f9dbda5f2490346ae4250ec64f8f7e6564e1b3dc93a323b4e7",
+    "priorBomSha256": "0737c9f7763646f9dbda5f2490346ae4250ec64f8f7e6564e1b3dc93a323b4e7",
+    "resources": 23,
+    "inlineSubnets": 3,
+    "runtime": { "cpu": 0.25, "memoryGiB": 0.5, "minReplicas": 0, "maxReplicas": 1 },
+    "localQualificationIsNotFuturePrivateBuilderQualification": true,
+    "futureUnresolvedCosts": [
+      "authorized private builder",
+      "ordinary vault operations",
+      "registry storage/headroom",
+      "applicable external/platform egress"
+    ],
+    "scenarios": [
+      { "name": "G3_PROOF_RUN_COST", "knownSubtotalCAD": 2.048393, "completeTotalCAD": null },
+      { "name": "G3_IDLE_MONTHLY_COST", "knownSubtotalCAD": 43.184824, "completeTotalCAD": null },
+      {
+        "name": "G3_LOW_USAGE_MONTHLY_COST",
+        "knownSubtotalCAD": 45.146866,
+        "completeTotalCAD": null
+      },
+      {
+        "name": "G3_EXPECTED_MONTHLY_COST",
+        "knownSubtotalCAD": 52.929995,
+        "completeTotalCAD": null
+      },
+      { "name": "G3_UPPER_BOUND_SCENARIO", "knownSubtotalCAD": 170.73509, "completeTotalCAD": null }
+    ],
+    "fullProofCeiling": "UNRESOLVED",
+    "humanCeiling": "UNBOUND"
+  },
+  "sourceManifestSha256": "6fac9cdbe7827ea52b475675adab3c397682bdac2a814a21e256f65a5c45dd44",
+  "historicalPreservation": {
+    "path": "G3R2I_HISTORICAL_PRESERVATION.json",
+    "sha256": "4546245ad0f01ba34696a9afc76edddd6a1a5f3c92822defbce201c3856c82f5"
+  },
+  "proofBoundaries": {
+    "AZURE_RESOURCE_MUTATIONS": 0,
+    "AZURE_RBAC_MUTATIONS": 0,
+    "AZURE_REGISTRY_MUTATIONS": 0,
+    "G2_MUTATIONS": 0,
+    "G3_RESOURCE_GROUP_CREATED": "NO",
+    "G3_ENVIRONMENT_CREATED": "NO",
+    "UAMI_CREATED": "NO",
+    "PEERING_CREATED": "NO",
+    "FIREWALL_RULES_CHANGED": "NO",
+    "PRIVATE_DNS_CHANGED": "NO",
+    "AZURE_IMAGE_BUILD": "NO",
+    "IMAGE_PUSHED": "NO",
+    "LIVE_SECRET_CHALLENGE_EXECUTED": "NO",
+    "G3_CONTROLLER_EXECUTED": "NO",
+    "G3A_EXECUTED": "NO",
+    "G3B_EXECUTED": "NO",
+    "LOCAL_IMAGE_BUILT": "YES",
+    "LOCAL_CONTAINER_TESTED": "YES"
+  }
+}

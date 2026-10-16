@@ -1,0 +1,51 @@
+{
+  "result": "PASS_STATIC_REQUEST_ATTRIBUTE_CONTRACT;NOT_A_LIVE_AUTHORIZATION_TEST",
+  "recommendedPrincipal": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+  "principalAppointed": false,
+  "role": {
+    "id": "2a1e307c-b015-4ebd-883e-5b7698a07328",
+    "name": "Container Registry Repository Writer",
+    "permissions": [
+      {
+        "actions": [],
+        "dataActions": [
+          "Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+          "Microsoft.ContainerRegistry/registries/repositories/content/read",
+          "Microsoft.ContainerRegistry/registries/repositories/metadata/write",
+          "Microsoft.ContainerRegistry/registries/repositories/content/write"
+        ],
+        "notActions": [],
+        "notDataActions": []
+      }
+    ]
+  },
+  "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+  "repository": "g3-synthetic-runtime",
+  "conditionVersion": "2.0",
+  "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'})) OR (@Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))",
+  "grant": {
+    "principalId": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+    "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+    "roleId": "2a1e307c-b015-4ebd-883e-5b7698a07328",
+    "conditionVersion": "2.0",
+    "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'})) OR (@Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+  },
+  "frozenParentCondition": {
+    "version": "2.0",
+    "expression": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'})) OR (@Resource[Microsoft.ContainerRegistry/registries/repositories:name] StringEquals 'g3-synthetic-runtime'))"
+  },
+  "normalization": "Frozen core uses@Resource. Current Microsoft ACR example uses@Request. Supplemental desired-state instruction replaces condition before future core grant;parent bytes/digest are not rewritten. This is a G2/RBAC-side supplement,not ROOT-1 source engineering.",
+  "source": {
+    "url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-rbac-abac-repository-permissions",
+    "file": "G3R3C_PUBLIC_1_abac.html",
+    "sha256": "5a5fd1b749b912339545e6d81bd6b599bf395ecf0b759041cd68ebed13deeeb4"
+  },
+  "REGISTRY_WIDE_WRITER": "NO",
+  "CATALOG_LISTER": "NO",
+  "EXISTING_VM_ACR_AUTHORITY_USED_FOR_G3_PUSH": "NO",
+  "guestIsolation": "BLOCKED_EFFECTIVE_FENCE_AND_ENGINE_LIFECYCLE_QUALIFICATION",
+  "tokenScope": "repository:g3-synthetic-runtime:pull,push",
+  "legacyAcrPush": "REJECTED",
+  "actionRoleEvaluator": "Exact proposed contract evaluator;not Azure token/deny/PIM simulation",
+  "applicableBoundary": "Exact G2 registry/repository only;unrelated staging assignment is not silently revoked and is not claimed globally absent"
+}

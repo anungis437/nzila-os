@@ -1,0 +1,238 @@
+{
+  "status": "STATIC_INDEPENDENT_GUARD_DESIGN;FAILURE_SAFE_PROOF_BLOCKED",
+  "BUILDER_SCRIPT_SHA256": "6a05455e5f3bd3e5992697106c696e6e645b0d54c258beb069add379ba3e06b8",
+  "mainTrap": "trap cleanup EXIT INT TERM HUP",
+  "independentGuard": {
+    "facility": "Already-present systemd transient timer/service",
+    "beforeCredentialStaging": true,
+    "beforeBuild": true,
+    "deadlineSeconds": 1900,
+    "accuracySec": 1,
+    "cleanupTimeoutSeconds": 60,
+    "parentShellIndependent": true,
+    "service": "nzila-g3-<32hexrun>-guard.service",
+    "timer": "nzila-g3-<32hexrun>-guard.timer",
+    "daemonRuntimeSeconds": 1860,
+    "buildRuntimeSeconds": 1800,
+    "receipt": "/run/nzila-g3-receipts/<run-id>.json",
+    "G3_BUILD_RUN_ID": "Canonical32lowercasehex;workspace,engine/build/guard units,image tag and receipt all derive from same ID"
+  },
+  "workspace": {
+    "path": "/run/nzila-g3-build/<run-id>",
+    "mustBeTmpfs": true,
+    "hostSwapMustBeAbsent": true,
+    "token": "Root-only temporary file;worker systemdLoadCredential copy;temporaryDOCKER_CONFIG in volatile runtime",
+    "existingGuestAccount": "nzila-g3-rootless;must already exist with subuid/subgid>=65536;no account or tooling installation",
+    "noPersistentHomeConfig": true,
+    "daemon": "Dedicated rootless engine with volatile data/exec roots;never host shared Docker socket",
+    "scopeDeviation": "Dedicated pre-existing rootless engine is an isolation requirement on same VM,not a new VM/agent pool;availability and kernel semantics are unproven and missing prerequisites deny"
+  },
+  "removal": [
+    "Stop only run-owned worker/daemon cgroups",
+    "Exact-registry logout through temporary config",
+    "Destroy source/config/token/owned daemon data in exact run tmpfs directory",
+    "Prove named workspace absent before rawTokenResidualInWorkspace0 receipt",
+    "Timer becomes inert;retain only sanitized receipt",
+    "Retain pushed registry manifest;do not prune unrelated Docker or G2 resources"
+  ],
+  "failurePaths": [
+    {
+      "failure": "source hash mismatch",
+      "CLEANUP_EXPECTED": "YES",
+      "outcome": "PASS_MODEL_ONLY",
+      "rawTokenResidual": 0,
+      "scope": "Abstract transition proof under responsive systemd,armed timer/effective fence assumptions;no Bash/systemd/Docker execution",
+      "steps": [
+        "Shell trap or independent timer fires",
+        "Lock exact owned cleanup",
+        "Stop exact build cgroup",
+        "Logout exact registry through owned rootless socket",
+        "Stop exact engine cgroup",
+        "VerifyMainPID/ControlPID zero",
+        "Delete only named volatile workspace",
+        "ProveWorkspaceAbsent",
+        "Write sanitized receipt",
+        "Stop or expire timer"
+      ]
+    },
+    {
+      "failure": "DNS failure",
+      "CLEANUP_EXPECTED": "YES",
+      "outcome": "PASS_MODEL_ONLY",
+      "rawTokenResidual": 0,
+      "scope": "Abstract transition proof under responsive systemd,armed timer/effective fence assumptions;no Bash/systemd/Docker execution",
+      "steps": ["Preflight denied", "No workspace credential/build exists"]
+    },
+    {
+      "failure": "ACR connection failure",
+      "CLEANUP_EXPECTED": "YES",
+      "outcome": "PASS_MODEL_ONLY",
+      "rawTokenResidual": 0,
+      "scope": "Abstract transition proof under responsive systemd,armed timer/effective fence assumptions;no Bash/systemd/Docker execution",
+      "steps": ["Preflight denied", "No workspace credential/build exists"]
+    },
+    {
+      "failure": "token failure",
+      "CLEANUP_EXPECTED": "YES",
+      "outcome": "PASS_MODEL_ONLY",
+      "rawTokenResidual": 0,
+      "scope": "Abstract transition proof under responsive systemd,armed timer/effective fence assumptions;no Bash/systemd/Docker execution",
+      "steps": ["Preflight denied", "No workspace credential/build exists"]
+    },
+    {
+      "failure": "base pull failure",
+      "CLEANUP_EXPECTED": "YES",
+      "outcome": "PASS_MODEL_ONLY",
+      "rawTokenResidual": 0,
+      "scope": "Abstract transition proof under responsive systemd,armed timer/effective fence assumptions;no Bash/systemd/Docker execution",
+      "steps": [
+        "Shell trap or independent timer fires",
+        "Lock exact owned cleanup",
+        "Stop exact build cgroup",
+        "Logout exact registry through owned rootless socket",
+        "Stop exact engine cgroup",
+        "VerifyMainPID/ControlPID zero",
+        "Delete only named volatile workspace",
+        "ProveWorkspaceAbsent",
+        "Write sanitized receipt",
+        "Stop or expire timer"
+      ]
+    },
+    {
+      "failure": "compile failure",
+      "CLEANUP_EXPECTED": "YES",
+      "outcome": "PASS_MODEL_ONLY",
+      "rawTokenResidual": 0,
+      "scope": "Abstract transition proof under responsive systemd,armed timer/effective fence assumptions;no Bash/systemd/Docker execution",
+      "steps": [
+        "Shell trap or independent timer fires",
+        "Lock exact owned cleanup",
+        "Stop exact build cgroup",
+        "Logout exact registry through owned rootless socket",
+        "Stop exact engine cgroup",
+        "VerifyMainPID/ControlPID zero",
+        "Delete only named volatile workspace",
+        "ProveWorkspaceAbsent",
+        "Write sanitized receipt",
+        "Stop or expire timer"
+      ]
+    },
+    {
+      "failure": "push failure",
+      "CLEANUP_EXPECTED": "YES",
+      "outcome": "PASS_MODEL_ONLY",
+      "rawTokenResidual": 0,
+      "scope": "Abstract transition proof under responsive systemd,armed timer/effective fence assumptions;no Bash/systemd/Docker execution",
+      "steps": [
+        "Shell trap or independent timer fires",
+        "Lock exact owned cleanup",
+        "Stop exact build cgroup",
+        "Logout exact registry through owned rootless socket",
+        "Stop exact engine cgroup",
+        "VerifyMainPID/ControlPID zero",
+        "Delete only named volatile workspace",
+        "ProveWorkspaceAbsent",
+        "Write sanitized receipt",
+        "Stop or expire timer"
+      ]
+    },
+    {
+      "failure": "Run Command timeout",
+      "CLEANUP_EXPECTED": "YES",
+      "outcome": "PASS_MODEL_ONLY",
+      "rawTokenResidual": 0,
+      "scope": "Abstract transition proof under responsive systemd,armed timer/effective fence assumptions;no Bash/systemd/Docker execution",
+      "steps": [
+        "Shell trap or independent timer fires",
+        "Lock exact owned cleanup",
+        "Stop exact build cgroup",
+        "Logout exact registry through owned rootless socket",
+        "Stop exact engine cgroup",
+        "VerifyMainPID/ControlPID zero",
+        "Delete only named volatile workspace",
+        "ProveWorkspaceAbsent",
+        "Write sanitized receipt",
+        "Stop or expire timer"
+      ]
+    },
+    {
+      "failure": "SIGTERM",
+      "CLEANUP_EXPECTED": "YES",
+      "outcome": "PASS_MODEL_ONLY",
+      "rawTokenResidual": 0,
+      "scope": "Abstract transition proof under responsive systemd,armed timer/effective fence assumptions;no Bash/systemd/Docker execution",
+      "steps": [
+        "Shell trap or independent timer fires",
+        "Lock exact owned cleanup",
+        "Stop exact build cgroup",
+        "Logout exact registry through owned rootless socket",
+        "Stop exact engine cgroup",
+        "VerifyMainPID/ControlPID zero",
+        "Delete only named volatile workspace",
+        "ProveWorkspaceAbsent",
+        "Write sanitized receipt",
+        "Stop or expire timer"
+      ]
+    },
+    {
+      "failure": "unexpected shell exit",
+      "CLEANUP_EXPECTED": "YES",
+      "outcome": "PASS_MODEL_ONLY",
+      "rawTokenResidual": 0,
+      "scope": "Abstract transition proof under responsive systemd,armed timer/effective fence assumptions;no Bash/systemd/Docker execution",
+      "steps": [
+        "Shell trap or independent timer fires",
+        "Lock exact owned cleanup",
+        "Stop exact build cgroup",
+        "Logout exact registry through owned rootless socket",
+        "Stop exact engine cgroup",
+        "VerifyMainPID/ControlPID zero",
+        "Delete only named volatile workspace",
+        "ProveWorkspaceAbsent",
+        "Write sanitized receipt",
+        "Stop or expire timer"
+      ]
+    }
+  ],
+  "missingIndependentGuarantees": [
+    "Systemd documentation explicitly says IPAddressDeny may have no effect without BPF support. Script now denies absent ingress/egress attachments and mismatched link-local policy,but unqualified bpftool observations/source scans do not prove actual kernel/rootless-descendant enforcement.",
+    "No offline guest/systemd/rootless engine qualification was authorized/performed;static traces cannot prove engine descendant termination and transient credential removal on real timeout/kill failures.",
+    "Guest/systemd hang can delay monotonic timer and daemon RuntimeMax;host reboot stops tmpfs work but does not prove timed cleanup while stuck. Guard is not an independent Azure billed-lifetime or whole-G3 teardown controller.",
+    "Protected RunCommand parameter storage/agent memory outside bounded workspace is not covered by workspace-zero receipt;no VM-wide credential-remanence claim."
+  ],
+  "sources": [
+    {
+      "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd-run.html",
+      "file": "G3R3C_PUBLIC_2_systemd-run.html",
+      "sha256": "fab8afcc7b547de54a3329ef80e6bddefeebe351c1aa7892a328a98b808e555a"
+    },
+    {
+      "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html",
+      "file": "G3R3C_PUBLIC_3_systemd-exec.html",
+      "sha256": "a1710bc7b196f3fbdb072661791503a4117f6d980036d9b6063ac11e1f952fe1"
+    },
+    {
+      "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.resource-control.html",
+      "file": "G3R3C_PUBLIC_4_systemd-resource-control.html",
+      "sha256": "aa70dfdfd46df925d40d8b33c9ce37de8df915fb3bd2896a2658a4d4e1be134f"
+    },
+    {
+      "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html",
+      "file": "G3R3C_PUBLIC_5_systemd-timer.html",
+      "sha256": "393ec35e3e58013ac7b9356ef850dbbfbe8be8eaeb4b0e1fe76d7e54908b5caa"
+    },
+    {
+      "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html",
+      "file": "G3R3C_PUBLIC_6_systemd-service.html",
+      "sha256": "8b9e04d13a18329c395d9088ee32898fa3c27cc296d7bd84baa549f7344f5aea"
+    },
+    {
+      "url": "https://docs.docker.com/engine/security/rootless/",
+      "file": "G3R3C_PUBLIC_7_rootless-docker.html",
+      "sha256": "71c84ffc8d9bee1cfd36b7c0ae4e73f2d0efa1c8baf5a61fc99c092c77286083"
+    }
+  ],
+  "RAW_TOKEN_RESIDUAL": "REQUIRED_FUTURE_MEASURED_ZERO_IN_BOUNDED_WORKSPACE;NOT_OBSERVED_NOW",
+  "broadPrune": "PROHIBITED",
+  "guestMutationsNow": 0
+}

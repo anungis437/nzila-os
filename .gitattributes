@@ -40,3 +40,10 @@
 *.ps1 text eol=crlf
 *.bat text eol=crlf
 *.cmd text eol=crlf
+
+# Preserve raw-byte identities in the institutional landing-zone proof archive.
+.azure/** -text
+infrastructure/landing-zone/** -text
+infrastructure/bicep/main.bicep -text
+infrastructure/bicep/modules/container-apps.bicep -text
+tooling/contract-tests/landing-zone-foundation.test.ts -text

@@ -1,0 +1,3 @@
+package main
+
+const hardProofContractSHA256 = "043faf5dc2eab0d14b1ecd06fd6f0b3c33ae27d25e2dbc2e1238ecdc7c5f32e9"

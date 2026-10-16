@@ -1,0 +1,21 @@
+{
+  "mission": "NZ-20261008-INFRA-001",
+  "phase": "G3R3D",
+  "authorization": "Aubert explicitly authorizes bounded live Builder A qualification in the attached instruction;not G3A",
+  "instructionSha256": "8702e7712e9a6df22391cb4733e344446ff59843ec56bfe87da29ca6488ac6b7",
+  "recordedAtUtc": "2026-10-12T05:48:02.739Z",
+  "runId": "7bdfdf981f7b68c73fb2429cb9f28c97",
+  "target": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+  "maxChildrenCreated": 3,
+  "maxChildrenDeleted": 3,
+  "allowedCommands": ["Q1_PREFLIGHT", "Q2_FAULT_QUALIFICATION", "Q3_POSTCHECK"],
+  "otherAzureMutations": 0,
+  "rbacChanges": 0,
+  "networkChanges": 0,
+  "realTokens": 0,
+  "builds": 0,
+  "pushes": 0,
+  "g3a": "NOT_AUTHORIZED",
+  "g3b": "NOT_AUTHORIZED",
+  "fakeCredential": "Q2 only;locally generated,in memory,protectedParameters;only SHA256 retained"
+}

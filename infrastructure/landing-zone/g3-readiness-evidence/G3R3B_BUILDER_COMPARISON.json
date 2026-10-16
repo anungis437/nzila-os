@@ -1,0 +1,762 @@
+{
+  "candidateUniverse": ["EXISTING_G2_BUILDER_VM", "ACR_DEDICATED_AGENT_POOL_S1"],
+  "candidates": [
+    {
+      "model": "EXISTING_G2_BUILDER_VM",
+      "invocation": "VIA_MANAGED_RUN_COMMAND",
+      "disposition": "BLOCKED_EXACT_FACT",
+      "resource": {
+        "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/virtualMachines/nzila-g2-builder-y3koaeijzi6mu",
+        "nic": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/networkInterfaces/nzila-g2-builder-nic-y3koaeijzi6mu",
+        "subnet": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/subnets/BuilderSubnet",
+        "agent": {
+          "bootDiagnostics": {},
+          "computerName": "nzila-g2-builder",
+          "disks": [
+            {
+              "name": "nzila-g2-builder-y3koaeijzi6mu_OsDisk_1_50cfc12f1bfb422ca576ad15e790b725",
+              "statuses": [
+                {
+                  "code": "ProvisioningState/succeeded",
+                  "displayStatus": "Provisioning succeeded",
+                  "level": "Info",
+                  "time": "2026-10-10T19:34:12.9545408+00:00"
+                }
+              ]
+            }
+          ],
+          "hyperVGeneration": "V2",
+          "osName": "ubuntu",
+          "osVersion": "24.04",
+          "statuses": [
+            {
+              "code": "ProvisioningState/succeeded",
+              "displayStatus": "Provisioning succeeded",
+              "level": "Info",
+              "time": "2026-10-11T23:39:18.2024342+00:00"
+            },
+            { "code": "PowerState/running", "displayStatus": "VM running", "level": "Info" }
+          ],
+          "vmAgent": {
+            "extensionHandlers": [],
+            "statuses": [
+              {
+                "code": "ProvisioningState/succeeded",
+                "displayStatus": "Ready",
+                "level": "Info",
+                "message": "Guest Agent is running",
+                "time": "2026-10-12T04:42:07+00:00"
+              }
+            ],
+            "vmAgentVersion": "2.16.0.2"
+          }
+        },
+        "disk": {
+          "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/disks/nzila-g2-builder-y3koaeijzi6mu_OsDisk_1_50cfc12f1bfb422ca576ad15e790b725",
+          "sku": "StandardSSD_LRS",
+          "sizeGiB": 32
+        },
+        "newVM": false
+      },
+      "preflight": [
+        {
+          "check": "VM_EXISTS",
+          "state": "CAPTURED_CONTROL_PLANE;RECHECK_BEFORE_EXECUTION",
+          "onFailure": "DENY_BEFORE_BUILD_OR_PUSH;NO_TOOL_INSTALLATION"
+        },
+        {
+          "check": "VM_AGENT_READY",
+          "state": "CAPTURED_CONTROL_PLANE;RECHECK_BEFORE_EXECUTION",
+          "onFailure": "DENY_BEFORE_BUILD_OR_PUSH;NO_TOOL_INSTALLATION"
+        },
+        {
+          "check": "EXPECTED_VM_RESOURCE_ID",
+          "state": "CAPTURED_CONTROL_PLANE;RECHECK_BEFORE_EXECUTION",
+          "onFailure": "DENY_BEFORE_BUILD_OR_PUSH;NO_TOOL_INSTALLATION"
+        },
+        {
+          "check": "EXPECTED_NETWORK_INTERFACE",
+          "state": "CAPTURED_CONTROL_PLANE;RECHECK_BEFORE_EXECUTION",
+          "onFailure": "DENY_BEFORE_BUILD_OR_PUSH;NO_TOOL_INSTALLATION"
+        },
+        {
+          "check": "EXPECTED_SUBNET",
+          "state": "RUNTIME_PREFLIGHT_REQUIRED",
+          "onFailure": "DENY_BEFORE_BUILD_OR_PUSH;NO_TOOL_INSTALLATION"
+        },
+        {
+          "check": "PRIVATE_ACR_DNS_RESOLVES",
+          "state": "RUNTIME_PREFLIGHT_REQUIRED",
+          "onFailure": "DENY_BEFORE_BUILD_OR_PUSH;NO_TOOL_INSTALLATION"
+        },
+        {
+          "check": "PRIVATE_ACR_TCP_443_REACHABLE",
+          "state": "RUNTIME_PREFLIGHT_REQUIRED",
+          "onFailure": "DENY_BEFORE_BUILD_OR_PUSH;NO_TOOL_INSTALLATION"
+        },
+        {
+          "check": "CONTAINER_ENGINE_PRESENT",
+          "state": "RUNTIME_PREFLIGHT_REQUIRED",
+          "onFailure": "DENY_BEFORE_BUILD_OR_PUSH;NO_TOOL_INSTALLATION"
+        },
+        {
+          "check": "SUFFICIENT_TEMP_DISK",
+          "state": "RUNTIME_PREFLIGHT_REQUIRED",
+          "onFailure": "DENY_BEFORE_BUILD_OR_PUSH;NO_TOOL_INSTALLATION"
+        },
+        {
+          "check": "NO_ACTIVE_CONFLICTING_BUILD",
+          "state": "RUNTIME_PREFLIGHT_REQUIRED",
+          "onFailure": "DENY_BEFORE_BUILD_OR_PUSH;NO_TOOL_INSTALLATION"
+        }
+      ],
+      "sourceDelivery": {
+        "SOURCE_FILE_COUNT": 6,
+        "BUILD_CONTEXT_FILE_COUNT": 5,
+        "SOURCE_TOTAL_BYTES": 14502,
+        "ENCODED_PAYLOAD_BYTES": 19344,
+        "INLINE_SCRIPT_BYTES": 20456,
+        "REPRESENTATIVE_REQUEST_BYTES": 20741,
+        "REQUEST_MODEL": "Microsoft.Compute/virtualMachines/runCommands@2024-07-01;properties.source.script:string;protectedParameters;JSON UTF-8",
+        "SOURCE_TREE_SHA256": "63851138029b8081b680f9e3b59e5a07d7ef8689fc308a19604ad78f13134958",
+        "EXPECTED_ON_VM_SOURCE_SHA256": "63851138029b8081b680f9e3b59e5a07d7ef8689fc308a19604ad78f13134958",
+        "BUILD_CONTEXT_SHA256": "6ed3b437256c0a7a891a6a72ba8b004dd3d4b76a51faf400d872c768549ee434",
+        "perFile": [
+          {
+            "path": ".dockerignore",
+            "sha256": "0e736bee763bbb11fab05e3fb3b990be56438b1efe327d76fc476ebc3d170a69",
+            "bytes": 67
+          },
+          {
+            "path": "Dockerfile",
+            "sha256": "96eb04f564a60154c11e16793afe5f4a73af0d904d7c98b69e666cce48cd32c8",
+            "bytes": 818
+          },
+          {
+            "path": "go.mod",
+            "sha256": "0e4b2c72b43150985ef1023487b7faa90945909f00b1e75de52be0e15ba51406",
+            "bytes": 52
+          },
+          {
+            "path": "main_test.go",
+            "sha256": "7671f20e81e740303783e049c2cb078896fab3f81dd08095a0d41a5c672c8461",
+            "bytes": 5801
+          },
+          {
+            "path": "main.go",
+            "sha256": "1466e36d31c18c946a20eb4af6842d4309d18c1746a8971c19ad075ca87a6bd9",
+            "bytes": 4410
+          },
+          {
+            "path": "README.md",
+            "sha256": "f13aa60d4ff791404b84ff7cbaad63245d7652ae1c686f5cc0fdf801529ff4c0",
+            "bytes": 3354
+          }
+        ],
+        "schema": {
+          "SOURCE": "https://learn.microsoft.com/en-us/azure/templates/microsoft.compute/2024-07-01/virtualmachines/runcommands",
+          "CAPTURE": "G3R3B_PUBLIC_13_doc-run-command-schema.html",
+          "SHA256": "5fda8b24752651457157ed1b91fbdea1648149b25c9e27719f9a0866c5b060da",
+          "READ_AT_UTC": "2026-10-12T04:43:10.246Z"
+        },
+        "sizeEvidence": {
+          "SOURCE": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits",
+          "CAPTURE": "G3R3B_PUBLIC_26_doc-arm-limits.html",
+          "SHA256": "8ae9ca3ccfdf85c16cde9e45873b821cef89000eba2b50ab85f32e9468f6a578",
+          "READ_AT_UTC": "2026-10-12T04:44:06.403Z"
+        },
+        "sizeInterpretation": "Inline string is supported with no documented schema maxLength;measured request is below documented ARM4MB deployment request limit. ARM deployment limit is not advertised as a Compute inline-script guarantee;future request rejection denies build. No undocumented script-size ceiling invented.",
+        "scope": "Source transport shape only;not an executable build/credential/cleanup controller;no script sent or executed"
+      },
+      "requiredTooling": {
+        "policy": "Missing Docker/Podman,compatibleBuildKit,base64,sha256sum,timeout,flock or cleanup isolation => DENY;no package manager/Docker/Go installation",
+        "selfContained": "CONDITIONAL_ON_EXISTING_GUEST_PREFLIGHT;unknown guest state is not itself an authorization blocker"
+      },
+      "credentialModel": {
+        "status": "SUPPORTED_FUTURE_SHORT_LIVED_MODEL",
+        "authority": "Recommended operator federation and frozen repository Writer ABAC",
+        "delivery": "protectedParameters;no public script URI,password in arguments,build args,stdout,stderr or retained resource properties",
+        "use": "password-stdin with isolated tmpfs Docker config;no set-x/debug;unset credentials;delete config and revoke temporary grant at cleanup",
+        "validity": "ACR Entra login contract3h;future token must have enough remaining lifetime for bounded build,no refresh/long-lived key in VM",
+        "source": {
+          "SOURCE": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication",
+          "CAPTURE": "G3R3B_PUBLIC_21_doc-acr-authentication.html",
+          "SHA256": "c0644a0704e6ecf7ff699ab247679ae4c0a1d81891e1fd68eaa7e0c0cba97a40",
+          "READ_AT_UTC": "2026-10-12T04:44:04.900Z"
+        },
+        "credentialAcquiredOrSent": false
+      },
+      "basePull": {
+        "immutableImage": "docker.io/library/golang@sha256:bcef992b77b1e2031aaaa51da75cebc32da8e9c182e12e633ea79023c79d9eff",
+        "FQDNS": [
+          "auth.docker.io",
+          "auth.docker.com",
+          "registry-1.docker.io",
+          "production.cloudfront.docker.com"
+        ],
+        "PORTS": [443],
+        "TEMPORARY_OR_PERSISTENT": "TEMPORARY_PROOF_WINDOW",
+        "source": {
+          "SOURCE": "https://docs.docker.com/desktop/setup/allow-list/",
+          "CAPTURE": "G3R3B_PUBLIC_25_doc-docker-domains.html",
+          "SHA256": "b6498b6596691ac7ede3ccecb3af87ade9f732f8aafcc3ecda4880dbf5467b64",
+          "READ_AT_UTC": "2026-10-12T04:44:06.298Z"
+        },
+        "rollback": "Remove only owned temporary allow rules after base pull;deny any unlisted redirect before fetching;no wildcard Internet/AzureCloud/0/0",
+        "limitation": "Finite documented pull/auth hosts;redirect destinations must be preflight inspected and allowlisted before build;no assumption that undocumented CDN destinations work"
+      },
+      "cleanup": {
+        "desired": "Lock unique owned staging namespace;timeout1800s;trap signals/errors;cancel owned engine operation;delete owned containers/images/temp files and credential config;delete owned RunCommand;verify no owned active processes;retain G2 VM/NIC/disk/UAMI and foreign artifacts",
+        "enforced": false,
+        "exactGap": "No qualified guest/independent cleanup contract currently binds daemon-side build cancellation,credential destruction and workload isolation after agent/controller failure;RunCommand timeout/deletion alone is not a Docker lifecycle or billed-operation fence",
+        "newVMWatchdogRequired": false,
+        "existingVMDeallocation": "PROHIBITED_AS_SHARED_RESOURCE;not an ephemeral VM TTL requirement"
+      },
+      "costs": {
+        "EXISTING_VM_BASE_COST": "SHARED_PLATFORM_COST",
+        "G3_INCREMENTAL_COMPUTE_COST_CAD": 0,
+        "diskCapacityAndMount": "EXISTING_SHARED_FIXED_CAPACITY;NO_NEW_DISK",
+        "diskTransactions": {
+          "status": "BOUND_RATE_AND_EXISTING_SKU",
+          "meter": {
+            "currencyCode": "CAD",
+            "tierMinimumUnits": 0,
+            "retailPrice": 0.0034,
+            "unitPrice": 0.0034,
+            "armRegionName": "canadacentral",
+            "location": "CA Central",
+            "effectiveStartDate": "2024-09-01T00:00:00Z",
+            "meterId": "df249cf3-71c9-5327-8738-56f65fa3fcda",
+            "meterName": "Disk Transactions LRS Disk Operations",
+            "productId": "DZH318Z0BP88",
+            "skuId": "DZH318Z0BP88/033C",
+            "productName": "Standard SSD Managed Disks",
+            "skuName": "Disk Transactions LRS",
+            "serviceName": "Storage",
+            "serviceId": "DZH317F1HKN0",
+            "serviceFamily": "Storage",
+            "unitOfMeasure": "10K",
+            "type": "Consumption",
+            "isPrimaryMeterRegion": true,
+            "armSkuName": "Disk Transactions",
+            "sourceFile": "G3R3B_PRICE_ssd-transactions.json",
+            "sourceSha256": "64592b44eb7ba4162b2e7b14bccf5ccbf802a5086a8b4fd249af63ca9161c765",
+            "rawSources": ["G3R3B_PUBLIC_31_price-ssd-transactions-page-1.json"]
+          },
+          "diskResource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/disks/nzila-g2-builder-y3koaeijzi6mu_OsDisk_1_50cfc12f1bfb422ca576ad15e790b725",
+          "actualSku": "StandardSSD_LRS",
+          "actualSizeGiB": 32,
+          "hourlyPaidTransactionCap": 43400,
+          "pricing": {
+            "SOURCE": "https://azure.microsoft.com/en-ca/pricing/details/managed-disks/",
+            "CAPTURE": "G3R3B_PUBLIC_24_doc-standard-ssd-pricing.html",
+            "SHA256": "eb673ef376d4f19752ef1ba5debaa216ec723a606011867294c3dcff60b84985",
+            "READ_AT_UTC": "2026-10-12T04:44:06.106Z"
+          },
+          "transactionUnit": "Each<=256KiB I/O is one transaction;larger I/O counts multiple transactions",
+          "durationBound": "UNBOUND_UNTIL_BUILD_AND_CLEANUP_ENFORCEMENT_BINDS"
+        },
+        "network": "RATE_BOUND;BOUNDED_SCENARIO_ONLY_UNTIL_ENFORCEMENT",
+        "acrStorage": "HEADROOM_CHECKED"
+      },
+      "criteria": {
+        "PRIVATE_ACR_REACHABILITY": {
+          "status": "PASS",
+          "fact": "Existing private G2 network/ACR contract;actual guest DNS/TCP is fail-closed runtime preflight,not an unknown-guest blocker"
+        },
+        "SOURCE_DELIVERY": {
+          "status": "PASS",
+          "fact": "Supported measured inline script/protected parameter model;no external courier"
+        },
+        "NO_LONG_LIVED_CREDENTIALS": {
+          "status": "PASS",
+          "fact": "Short-lived operator Entra token delivery contract;no credential acquired"
+        },
+        "LEAST_PRIVILEGE": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Existing guest UAMI has synthetic-health writer and g2-tooling reader grants;RunCommand executes guest commands with broad host authority. No bound isolation/IMDS fence proves builder can write only G3 repository"
+        },
+        "NO_GENERIC_PUBLIC_EGRESS": {
+          "status": "PASS",
+          "fact": "Finite documented Docker hosts443 and private ACR;unlisted redirects deny;future exact temporary firewall supplement required"
+        },
+        "DETERMINISTIC_ROLLBACK": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Ownership-scoped desired cleanup is enumerated,but daemon/credential cleanup under failures is not authority-bound"
+        },
+        "CLEANUP_ENFORCEMENT": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Server RunCommand timeout does not establish external engine/credential cleanup after agent/controller failure"
+        },
+        "COST_METER_COMPLETENESS": {
+          "status": "PASS",
+          "fact": "Existing compute/disk base shared;applicable LRS transaction CAD meter and network/ACR rates captured"
+        },
+        "COST_BOUNDABILITY": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Disk hourly cap gives a conditional cost only;total billable transaction windows and byte limits require cleanup/enforcement"
+        },
+        "SOURCE_PROVENANCE": {
+          "status": "PASS",
+          "fact": "Accepted source hashes/pinned public compiler unchanged;future registry digest required"
+        },
+        "OPERATOR_PRIVILEGE_COMPLETENESS": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Real plural child-command actions catalog-bound;identity-isolation/cleanup permission extension cannot be finalized without isolation contract"
+        }
+      },
+      "standingGuestIdentityAssignments": [
+        {
+          "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/ba1fd686-3000-51dc-8fa6-1cfdedf67d20",
+          "condition": "      (\r\n        (\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'})\r\n        )\r\n        OR\r\n        (\r\n          @Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'synthetic-health'\r\n        )\r\n      )\r\n    ",
+          "conditionVersion": "2.0",
+          "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+          "createdOn": "2026-10-10T04:14:17.0442608Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": "G2 synthetic builder write access limited to the synthetic-health repository.",
+          "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/2a1e307c-b015-4ebd-883e-5b7698a07328",
+          "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+          "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+          "updatedOn": "2026-10-10T18:02:48.3586257Z"
+        },
+        {
+          "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/providers/Microsoft.Authorization/roleAssignments/6628bb3e-5e59-5dcb-9f7b-80b421a7a7f8",
+          "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})) OR (@Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'g2-tooling'))",
+          "conditionVersion": "2.0",
+          "createdBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+          "createdOn": "2026-10-11T14:45:19.3127681Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions/b93aa761-3e63-49ed-ac28-beffa264f7ac",
+          "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+          "updatedBy": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+          "updatedOn": "2026-10-11T14:45:19.3127681Z"
+        }
+      ],
+      "noStandingGrantRevoked": true,
+      "preferenceMetrics": {
+        "g2MutationSurface": null,
+        "cleanupStrength": null,
+        "operatorPrivilegeBreadth": null,
+        "boundedIncrementalCostCAD": null,
+        "preview": false
+      }
+    },
+    {
+      "model": "ACR_DEDICATED_AGENT_POOL_S1",
+      "disposition": "BLOCKED_EXACT_FACT",
+      "FEATURE_STATUS": "PREVIEW",
+      "USE_SCOPE": "ONE_SYNTHETIC_G3_PROOF",
+      "PRODUCTION_RUNTIME_DEPENDENCY": "NO",
+      "LONG_TERM_PRODUCTION_DEPENDENCY": "NO",
+      "support": {
+        "CANADA_CENTRAL_SUPPORTED": true,
+        "PREMIUM_ACR_REQUIRED": true,
+        "CURRENT_G2_ACR_TIER_COMPATIBLE": true,
+        "VNET_AGENT_POOL_SUPPORTED": true,
+        "LOCAL_SOURCE_CONTEXT_SUPPORTED": true,
+        "PRIVATE_ACR_BUILD_PATH_SUPPORTED": true,
+        "sources": [
+          {
+            "SOURCE": "https://learn.microsoft.com/en-us/azure/container-registry/tasks-agent-pools",
+            "CAPTURE": "G3R3B_PUBLIC_14_doc-agent-pools.html",
+            "SHA256": "6d6701c0c759fdab41b1adbfcc0668de07e02b8ad61086dbf25847c9ecceb51a",
+            "READ_AT_UTC": "2026-10-12T04:43:10.347Z"
+          },
+          {
+            "SOURCE": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-endpoints",
+            "CAPTURE": "G3R3B_PUBLIC_15_doc-private-acr.html",
+            "SHA256": "3fc82ed74fdf0db1e28850b5f295506cb2d7c79f6582b0bc29ad3e67e80aee6b",
+            "READ_AT_UTC": "2026-10-12T04:43:10.495Z"
+          },
+          {
+            "SOURCE": "https://learn.microsoft.com/en-us/cli/azure/acr?view=azure-cli-latest",
+            "CAPTURE": "G3R3B_PUBLIC_17_doc-acr-build.html",
+            "SHA256": "69367d13ba2f422c44a2e7ecbceec26c484acabf8749fb055f9c392cee67bfc0",
+            "READ_AT_UTC": "2026-10-12T04:43:10.989Z"
+          }
+        ]
+      },
+      "pool": {
+        "resourceId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo/agentPools/g3-proof-s1",
+        "tier": "S1",
+        "cpus": 2,
+        "memoryGB": 3,
+        "location": "canadacentral",
+        "subnet": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg/providers/Microsoft.Network/virtualNetworks/nzila-g3-vnet-95086e2f/subnets/G3BuilderSubnet",
+        "AGENT_POOL_COUNT_BEFORE": 0,
+        "AGENT_POOL_COUNT_DURING": 1,
+        "AGENT_POOL_COUNT_AFTER": 0,
+        "currentlyCapturedPools": [],
+        "existsNow": false
+      },
+      "sourceDelivery": {
+        "model": "az acr build --agent-pool g3-proof-s1 --source-acr-auth-id [caller] --timeout1800 <local qualified source context>",
+        "provenance": {
+          "SOURCE_FILE_COUNT": 6,
+          "BUILD_CONTEXT_FILE_COUNT": 5,
+          "SOURCE_TOTAL_BYTES": 14502,
+          "ENCODED_PAYLOAD_BYTES": 19344,
+          "INLINE_SCRIPT_BYTES": 20456,
+          "REPRESENTATIVE_REQUEST_BYTES": 20741,
+          "REQUEST_MODEL": "Microsoft.Compute/virtualMachines/runCommands@2024-07-01;properties.source.script:string;protectedParameters;JSON UTF-8",
+          "SOURCE_TREE_SHA256": "63851138029b8081b680f9e3b59e5a07d7ef8689fc308a19604ad78f13134958",
+          "EXPECTED_ON_VM_SOURCE_SHA256": "63851138029b8081b680f9e3b59e5a07d7ef8689fc308a19604ad78f13134958",
+          "BUILD_CONTEXT_SHA256": "6ed3b437256c0a7a891a6a72ba8b004dd3d4b76a51faf400d872c768549ee434",
+          "perFile": [
+            {
+              "path": ".dockerignore",
+              "sha256": "0e736bee763bbb11fab05e3fb3b990be56438b1efe327d76fc476ebc3d170a69",
+              "bytes": 67
+            },
+            {
+              "path": "Dockerfile",
+              "sha256": "96eb04f564a60154c11e16793afe5f4a73af0d904d7c98b69e666cce48cd32c8",
+              "bytes": 818
+            },
+            {
+              "path": "go.mod",
+              "sha256": "0e4b2c72b43150985ef1023487b7faa90945909f00b1e75de52be0e15ba51406",
+              "bytes": 52
+            },
+            {
+              "path": "main_test.go",
+              "sha256": "7671f20e81e740303783e049c2cb078896fab3f81dd08095a0d41a5c672c8461",
+              "bytes": 5801
+            },
+            {
+              "path": "main.go",
+              "sha256": "1466e36d31c18c946a20eb4af6842d4309d18c1746a8971c19ad075ca87a6bd9",
+              "bytes": 4410
+            },
+            {
+              "path": "README.md",
+              "sha256": "f13aa60d4ff791404b84ff7cbaad63245d7652ae1c686f5cc0fdf801529ff4c0",
+              "bytes": 3354
+            }
+          ],
+          "schema": {
+            "SOURCE": "https://learn.microsoft.com/en-us/azure/templates/microsoft.compute/2024-07-01/virtualmachines/runcommands",
+            "CAPTURE": "G3R3B_PUBLIC_13_doc-run-command-schema.html",
+            "SHA256": "5fda8b24752651457157ed1b91fbdea1648149b25c9e27719f9a0866c5b060da",
+            "READ_AT_UTC": "2026-10-12T04:43:10.246Z"
+          },
+          "sizeEvidence": {
+            "SOURCE": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits",
+            "CAPTURE": "G3R3B_PUBLIC_26_doc-arm-limits.html",
+            "SHA256": "8ae9ca3ccfdf85c16cde9e45873b821cef89000eba2b50ab85f32e9468f6a578",
+            "READ_AT_UTC": "2026-10-12T04:44:06.403Z"
+          },
+          "sizeInterpretation": "Inline string is supported with no documented schema maxLength;measured request is below documented ARM4MB deployment request limit. ARM deployment limit is not advertised as a Compute inline-script guarantee;future request rejection denies build. No undocumented script-size ceiling invented.",
+          "scope": "Source transport shape only;not an executable build/credential/cleanup controller;no script sent or executed"
+        },
+        "transport": "CLI packages local context;future authorized upload-URL action and bounded blob upload,not Git/public repository or courier VM",
+        "source": {
+          "SOURCE": "https://learn.microsoft.com/en-us/cli/azure/acr?view=azure-cli-latest",
+          "CAPTURE": "G3R3B_PUBLIC_17_doc-acr-build.html",
+          "SHA256": "69367d13ba2f422c44a2e7ecbceec26c484acabf8749fb055f9c392cee67bfc0",
+          "READ_AT_UTC": "2026-10-12T04:43:10.989Z"
+        },
+        "dynamicUriGate": "Inspect returned upload URI before uploading;require approved HTTPS Storage dependency,no arbitrary redirect;record payload digest and source deletion/retention contract"
+      },
+      "credentialModel": {
+        "sourceLogin": "[caller]",
+        "authority": "Core repository-conditioned writer for recommended operator;task control role does not itself confer repository data access",
+        "noLongLivedCredential": true,
+        "noNewIdentity": true,
+        "source": {
+          "SOURCE": "https://learn.microsoft.com/en-us/cli/azure/acr?view=azure-cli-latest",
+          "CAPTURE": "G3R3B_PUBLIC_17_doc-acr-build.html",
+          "SHA256": "69367d13ba2f422c44a2e7ecbceec26c484acabf8749fb055f9c392cee67bfc0",
+          "READ_AT_UTC": "2026-10-12T04:43:10.989Z"
+        },
+        "residual": "Quick-task target push/source-upload retention and caller credential destruction contract must be bound without granting registry-wide data authority"
+      },
+      "BUILD_TIMEOUT_SECONDS": 1800,
+      "TASK_API_MINIMUM": 300,
+      "TASK_API_MAXIMUM": 28800,
+      "timeoutRationale": "Conservative30-minute engineering scheduling ceiling for stdlib-only qualified workload/two full compilations;not a measured remote SLA. Local qualification proves completion but does not record wall-clock timing;timeout aborts rather than extending.",
+      "FAIL_CLOSED_ON_TIMEOUT": "YES",
+      "timeoutSource": {
+        "SOURCE": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/containerregistry/resource-manager/Microsoft.ContainerRegistry/RegistryTasks/preview/2025-03-01-preview/containerregistry_build.json",
+        "CAPTURE": "G3R3B_PUBLIC_44_doc-task-openapi.html",
+        "SHA256": "c76ca489295c599fac39622c67bf0b573cd6c514c7e1ef3918d21b324ccb0c3e",
+        "READ_AT_UTC": "2026-10-12T04:53:23.928Z"
+      },
+      "MAX_ALLOCATION_SECONDS_PROPOSED": 3600,
+      "cleanup": {
+        "desired": "Scale0->1 for owned single run;cancel on failure/deadline;scale1->0 then delete owned pool;read terminal deallocation/deletion;delete owned source staging and temporary roles",
+        "BUILDER_B_CLEANUP_ENFORCEMENT": "UNBOUND",
+        "serverSidePoolTtl": "No allocation-expiry property in agent-pool schema;task timeout stops run,not allocation billing",
+        "exactGap": "No independent authority-bound scale-down/delete observer/controller failure path;one-hour allocation window is proposed,not a hard cap",
+        "sources": [
+          {
+            "SOURCE": "https://learn.microsoft.com/en-us/azure/templates/microsoft.containerregistry/2025-03-01-preview/registries/agentpools",
+            "CAPTURE": "G3R3B_PUBLIC_27_doc-agent-pool-api.html",
+            "SHA256": "bbd3b87ade5dbdcd862458edafd983caf586f305dc10a1caa8b512cf7487fd45",
+            "READ_AT_UTC": "2026-10-12T04:44:06.594Z"
+          },
+          {
+            "SOURCE": "https://azure.microsoft.com/en-ca/pricing/details/container-registry/",
+            "CAPTURE": "G3R3B_PUBLIC_23_doc-registry-pricing.html",
+            "SHA256": "b112ff3a7c04cd2d13f22fac8167ceac3d5a63a48552414e562d37763a1b1aec",
+            "READ_AT_UTC": "2026-10-12T04:44:05.538Z"
+          }
+        ]
+      },
+      "network": {
+        "sourceCidr": "10.91.3.0/24",
+        "privateAcr": "Existing G2 ACR PE over approved core peering;no public access",
+        "dependencies": [
+          { "destination": "AzureKeyVault", "ports": [443] },
+          { "destination": "Storage", "ports": [443] },
+          { "destination": "EventHub", "ports": [443] },
+          { "destination": "AzureActiveDirectory", "ports": [443] },
+          { "destination": "AzureMonitor", "ports": [443, 12000] }
+        ],
+        "basePull": {
+          "immutableImage": "docker.io/library/golang@sha256:bcef992b77b1e2031aaaa51da75cebc32da8e9c182e12e633ea79023c79d9eff",
+          "FQDNS": [
+            "auth.docker.io",
+            "auth.docker.com",
+            "registry-1.docker.io",
+            "production.cloudfront.docker.com"
+          ],
+          "PORTS": [443],
+          "TEMPORARY_OR_PERSISTENT": "TEMPORARY_PROOF_WINDOW",
+          "source": {
+            "SOURCE": "https://docs.docker.com/desktop/setup/allow-list/",
+            "CAPTURE": "G3R3B_PUBLIC_25_doc-docker-domains.html",
+            "SHA256": "b6498b6596691ac7ede3ccecb3af87ade9f732f8aafcc3ecda4880dbf5467b64",
+            "READ_AT_UTC": "2026-10-12T04:44:06.298Z"
+          },
+          "rollback": "Remove only owned temporary allow rules after base pull;deny any unlisted redirect before fetching;no wildcard Internet/AzureCloud/0/0",
+          "limitation": "Finite documented pull/auth hosts;redirect destinations must be preflight inspected and allowlisted before build;no assumption that undocumented CDN destinations work"
+        },
+        "source": {
+          "SOURCE": "https://learn.microsoft.com/en-us/azure/container-registry/tasks-agent-pools",
+          "CAPTURE": "G3R3B_PUBLIC_14_doc-agent-pools.html",
+          "SHA256": "6d6701c0c759fdab41b1adbfcc0668de07e02b8ad61086dbf25847c9ecceb51a",
+          "READ_AT_UTC": "2026-10-12T04:43:10.347Z"
+        },
+        "delta": "Frozen G3 builder NSG denies traffic;separately governed G3 adjunct allowances and exact G2 firewall source10.91.3.0/24 dependency collections required;core collections are ACA-only,do not silently widen"
+      },
+      "costs": {
+        "status": "BLOCKED_EXACT_FACT",
+        "allocationMeter": null,
+        "catalogs": [
+          {
+            "sourceFile": "G3R3B_PRICE_registry-all.json",
+            "sha256": "4d11d12404a0bbb25bb3e5390a54df460799803d41bd9f1121d9179a60a21683",
+            "itemCount": 968,
+            "matches": []
+          },
+          {
+            "sourceFile": "G3R3B_PRICE_registry-products.json",
+            "sha256": "be9be71101e8fb523e04113c82030b1e66b533265b34fca63502b6a71b23006a",
+            "itemCount": 968,
+            "matches": []
+          }
+        ],
+        "required": "Applicable S1 dedicated2-vCPU allocation-second CAD rate,or authoritative explicit mapping of Task vCPU Duration meter to allocation billing",
+        "pricing": {
+          "SOURCE": "https://azure.microsoft.com/en-ca/pricing/details/container-registry/",
+          "CAPTURE": "G3R3B_PUBLIC_23_doc-registry-pricing.html",
+          "SHA256": "b112ff3a7c04cd2d13f22fac8167ceac3d5a63a48552414e562d37763a1b1aec",
+          "READ_AT_UTC": "2026-10-12T04:44:05.538Z"
+        },
+        "rejectedProxy": "Task vCPU Duration has paid0.000142CAD/vCPU-second plus6000-second free tier;pricing distinguishes task duration from dedicated allocation. Neither task-duration tariff nor free tier is silently substituted."
+      },
+      "preferenceMetrics": {
+        "g2MutationSurface": null,
+        "cleanupStrength": null,
+        "operatorPrivilegeBreadth": null,
+        "boundedIncrementalCostCAD": null,
+        "preview": true
+      },
+      "criteria": {
+        "PRIVATE_ACR_REACHABILITY": {
+          "status": "PASS",
+          "fact": "Current Microsoft dedicated-pool VNet/private-ACR service contract;Premium compatible"
+        },
+        "SOURCE_DELIVERY": {
+          "status": "PASS",
+          "fact": "Local context supported;future bounded Storage upload gates,no courier/Git workaround"
+        },
+        "NO_LONG_LIVED_CREDENTIALS": {
+          "status": "PASS",
+          "fact": "Explicit caller identity source-auth supported;no registry admin/password"
+        },
+        "LEAST_PRIVILEGE": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Candidate task-control roles and core ABAC writer identified;target quick-task credential and cleanup contract incomplete"
+        },
+        "NO_GENERIC_PUBLIC_EGRESS": {
+          "status": "PASS",
+          "fact": "Documented five Azure service dependencies and finite Docker hosts;no Internet/AzureCloud/0/0;requires supplemental rules"
+        },
+        "DETERMINISTIC_ROLLBACK": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Named pool/cancel/scale-zero/delete sequence defined;source staging disposal and allocation failure rollback not yet bound"
+        },
+        "CLEANUP_ENFORCEMENT": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "No server-side pool TTL;task timeout does not cap allocation when controller/credentials fail"
+        },
+        "COST_METER_COMPLETENESS": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Dedicated allocation-second CAD applicability not established;Task vCPU Duration is not silently substituted"
+        },
+        "COST_BOUNDABILITY": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Both applicable allocation tariff and enforceable maximum allocation window are unbound"
+        },
+        "SOURCE_PROVENANCE": {
+          "status": "PASS",
+          "fact": "Same qualified source/build context/digest-pinned compiler;no rebuild or mutable authority"
+        },
+        "OPERATOR_PRIVILEGE_COMPLETENESS": {
+          "status": "BLOCKED_EXACT_FACT",
+          "fact": "Candidate pool/run/upload actions catalog-bound;independent cleanup authority/scopes remain unbound"
+        }
+      }
+    }
+  ],
+  "evaluation": "Unknown guest tooling/DNS/free disk/conflicting-build checks are runtime deny gates,not standalone blockers;only material isolation/cleanup/allocation/cost gaps block selection",
+  "sourceAuthority": "G3_SYNTHETIC_PROOF_V1;QUALIFIED_LOCAL_NOT_PUSHED",
+  "G3R2I_IMAGE_QUALIFICATION": "PRESERVED",
+  "ROOT_1_REOPENED": "NO",
+  "EPHEMERAL_B2S_OFFLINE_OCI_RECEIVER": "SUPERSEDED_AS_DEFAULT_NOT_SELECTED",
+  "retiredReason": "Historical unbound courier/tooling/identity/disk/watchdog/TTL design preserved,not deleted",
+  "prices": {
+    "vault": {
+      "status": "BOUND",
+      "meter": {
+        "currencyCode": "CAD",
+        "tierMinimumUnits": 0,
+        "retailPrice": 0.042497,
+        "unitPrice": 0.042497,
+        "armRegionName": "Global",
+        "location": "Global",
+        "effectiveStartDate": "2015-08-01T00:00:00Z",
+        "meterId": "0f824807-2376-435c-95c9-f992b67a07b0",
+        "meterName": "Operations",
+        "productId": "DZH318Z0BQG0",
+        "skuId": "DZH318Z0BQG0/002D",
+        "productName": "Key Vault",
+        "skuName": "Standard",
+        "serviceName": "Key Vault",
+        "serviceId": "DZH3157JCZ2M",
+        "serviceFamily": "Security",
+        "unitOfMeasure": "10K",
+        "type": "Consumption",
+        "isPrimaryMeterRegion": false,
+        "armSkuName": "",
+        "sourceFile": "G3R3B_PRICE_key-vault-all.json",
+        "sourceSha256": "fbb152d99e752d24744f7a3c68eef33c54782c1ba97a4bc2910a010442ea6fad",
+        "rawSources": [
+          "G3R3B_PUBLIC_28_price-key-vault-all-page-1.json",
+          "G3R3B_PUBLIC_29_price-key-vault-all-page-2.json"
+        ]
+      },
+      "appliesTo": "Ordinary synthetic secret REST operations on Standard vault",
+      "applicability": "Exact Standard Global and CanadaCentral rows share meterId/rate;both are non-primary. Primary-only filtering hid these applicable rows;no foreign/Premium SKU substitution.",
+      "pricing": {
+        "SOURCE": "https://azure.microsoft.com/en-ca/pricing/details/key-vault/",
+        "CAPTURE": "G3R3B_PUBLIC_22_doc-key-vault-pricing.html",
+        "SHA256": "e9ad103ed86a06c8dd128ae4b9a42451ecf3294a6a3e7bf98a3dfb73024ffc84",
+        "READ_AT_UTC": "2026-10-12T04:44:05.333Z"
+      }
+    },
+    "disk": {
+      "status": "BOUND_RATE_AND_EXISTING_SKU",
+      "meter": {
+        "currencyCode": "CAD",
+        "tierMinimumUnits": 0,
+        "retailPrice": 0.0034,
+        "unitPrice": 0.0034,
+        "armRegionName": "canadacentral",
+        "location": "CA Central",
+        "effectiveStartDate": "2024-09-01T00:00:00Z",
+        "meterId": "df249cf3-71c9-5327-8738-56f65fa3fcda",
+        "meterName": "Disk Transactions LRS Disk Operations",
+        "productId": "DZH318Z0BP88",
+        "skuId": "DZH318Z0BP88/033C",
+        "productName": "Standard SSD Managed Disks",
+        "skuName": "Disk Transactions LRS",
+        "serviceName": "Storage",
+        "serviceId": "DZH317F1HKN0",
+        "serviceFamily": "Storage",
+        "unitOfMeasure": "10K",
+        "type": "Consumption",
+        "isPrimaryMeterRegion": true,
+        "armSkuName": "Disk Transactions",
+        "sourceFile": "G3R3B_PRICE_ssd-transactions.json",
+        "sourceSha256": "64592b44eb7ba4162b2e7b14bccf5ccbf802a5086a8b4fd249af63ca9161c765",
+        "rawSources": ["G3R3B_PUBLIC_31_price-ssd-transactions-page-1.json"]
+      },
+      "diskResource": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Compute/disks/nzila-g2-builder-y3koaeijzi6mu_OsDisk_1_50cfc12f1bfb422ca576ad15e790b725",
+      "actualSku": "StandardSSD_LRS",
+      "actualSizeGiB": 32,
+      "hourlyPaidTransactionCap": 43400,
+      "pricing": {
+        "SOURCE": "https://azure.microsoft.com/en-ca/pricing/details/managed-disks/",
+        "CAPTURE": "G3R3B_PUBLIC_24_doc-standard-ssd-pricing.html",
+        "SHA256": "eb673ef376d4f19752ef1ba5debaa216ec723a606011867294c3dcff60b84985",
+        "READ_AT_UTC": "2026-10-12T04:44:06.106Z"
+      },
+      "transactionUnit": "Each<=256KiB I/O is one transaction;larger I/O counts multiple transactions",
+      "durationBound": "UNBOUND_UNTIL_BUILD_AND_CLEANUP_ENFORCEMENT_BINDS"
+    },
+    "agentPool": {
+      "status": "BLOCKED_EXACT_FACT",
+      "allocationMeter": null,
+      "catalogs": [
+        {
+          "sourceFile": "G3R3B_PRICE_registry-all.json",
+          "sha256": "4d11d12404a0bbb25bb3e5390a54df460799803d41bd9f1121d9179a60a21683",
+          "itemCount": 968,
+          "matches": []
+        },
+        {
+          "sourceFile": "G3R3B_PRICE_registry-products.json",
+          "sha256": "be9be71101e8fb523e04113c82030b1e66b533265b34fca63502b6a71b23006a",
+          "itemCount": 968,
+          "matches": []
+        }
+      ],
+      "required": "Applicable S1 dedicated2-vCPU allocation-second CAD rate,or authoritative explicit mapping of Task vCPU Duration meter to allocation billing",
+      "pricing": {
+        "SOURCE": "https://azure.microsoft.com/en-ca/pricing/details/container-registry/",
+        "CAPTURE": "G3R3B_PUBLIC_23_doc-registry-pricing.html",
+        "SHA256": "b112ff3a7c04cd2d13f22fac8167ceac3d5a63a48552414e562d37763a1b1aec",
+        "READ_AT_UTC": "2026-10-12T04:44:05.538Z"
+      },
+      "rejectedProxy": "Task vCPU Duration has paid0.000142CAD/vCPU-second plus6000-second free tier;pricing distinguishes task duration from dedicated allocation. Neither task-duration tariff nor free tier is silently substituted."
+    }
+  },
+  "schemaEvidence": [
+    {
+      "SOURCE": "https://learn.microsoft.com/en-us/azure/virtual-machines/linux/run-command-managed",
+      "CAPTURE": "G3R3B_PUBLIC_11_doc-managed-run-command.html",
+      "SHA256": "a8085617555d09d298c13889bfda7608c32c017e1b94b83f36f9dd239adcf9c4",
+      "READ_AT_UTC": "2026-10-12T04:43:08.753Z"
+    },
+    {
+      "SOURCE": "https://learn.microsoft.com/en-us/azure/templates/microsoft.compute/2024-07-01/virtualmachines/runcommands",
+      "CAPTURE": "G3R3B_PUBLIC_13_doc-run-command-schema.html",
+      "SHA256": "5fda8b24752651457157ed1b91fbdea1648149b25c9e27719f9a0866c5b060da",
+      "READ_AT_UTC": "2026-10-12T04:43:10.246Z"
+    },
+    {
+      "SOURCE": "https://learn.microsoft.com/en-us/javascript/api/@azure/arm-containerregistrytasks/dockerbuildrequest?view=azure-node-preview",
+      "CAPTURE": "G3R3B_PUBLIC_20_doc-schedule-run-api.html",
+      "SHA256": "46aaac1956a12e2d08564f0c3e6904fa80385974396fc3064215495d486347e5",
+      "READ_AT_UTC": "2026-10-12T04:44:04.719Z"
+    }
+  ]
+}

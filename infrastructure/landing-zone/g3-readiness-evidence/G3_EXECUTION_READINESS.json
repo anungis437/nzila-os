@@ -1,0 +1,3141 @@
+{
+  "mission": "NZ-20261008-INFRA-001",
+  "gate": "G3_PRIVATE_APPLICATION_SUBSTRATE",
+  "capturedAtUtc": "2026-10-12T02:26:14.5725747Z",
+  "subscriptionId": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+  "status": {
+    "G2_PRIVATE_CONTROL_PLANE": "PASS_ACCEPTED_FROM_USER_NOT_REEXECUTED",
+    "G3_EXECUTION_READINESS": "BLOCKED",
+    "G3_PROVIDER_REGISTRATION": "PASS",
+    "G3_REGION_AVAILABILITY": "PASS",
+    "G3_QUOTA_STATUS": "BLOCKED",
+    "G3_RESOURCE_GROUP_COLLISION": "PASS",
+    "G3_NAME_COLLISION_CHECK": "PASS",
+    "G3_NETWORK_ADDRESS_PLAN": "PASS",
+    "G3_FIREWALL_UDR_MODEL": "BLOCKED",
+    "G3_OPERATOR_PRINCIPAL_CANDIDATE": "NONE",
+    "G3_GOVERNANCE_APPROVER": "UNBOUND_NO_PERSONAL_IDENTIFIERS_STORED",
+    "G3_PULL_IDENTITY_CONTRACT": "BLOCKED",
+    "G3_RUNTIME_IDENTITY_CONTRACT": "BLOCKED",
+    "G3_SECRET_PROOF_CONTRACT": "BLOCKED",
+    "G3A_PRODUCTION_SUBSTRATE": "BLOCKED",
+    "G3A_BICEP_LOCAL_BUILD": "FAIL",
+    "G3B_BICEP_LOCAL_BUILD": "FAIL",
+    "G3_PROOF_COST_CEILING_CAD": "UNRESOLVED",
+    "G3_CANDIDATE_IDLE_MONTHLY_COST_CAD": "UNRESOLVED",
+    "G3_PLATFORM_EGRESS_BREADTH": "ACCEPTED_FOR_SYNTHETIC_PROOF",
+    "G3_SERVICE_TAG_EGRESS_LIMITATION": "ACCEPTED_AND_DOCUMENTED",
+    "G3_ACA_PRIVATE_ENDPOINT": "NOT_REQUIRED",
+    "G3_ARTIFACT_EXECUTION_SPLIT": "G3A_G3B",
+    "TARGET_REGISTRY_IMAGE_PRESENT": "NOT_PROVEN",
+    "G3_TECHNICAL_EXECUTION_AUTHORIZED": "NO",
+    "APPLICATION_ROLLOUT_AUTHORIZED": "NO",
+    "PRODUCTION_DATA_AUTHORIZED": "NO",
+    "AZURE_MUTATIONS": 0,
+    "REGISTRY_MUTATIONS": 0,
+    "G2_TERMINAL_ROOT_UNCHANGED": "NOT_PROVEN_SEALED_ROOT_PACKET_NOT_PRESENT;noG2mutation",
+    "UE_INFRA": "INFRA_NO_GO",
+    "CORA_INFRA": "INFRA_NO_GO"
+  },
+  "frozenDesign": {
+    "runtime": "AZURE_CONTAINER_APPS",
+    "environmentType": "WORKLOAD_PROFILES",
+    "workloadProfile": "CONSUMPTION",
+    "accessibility": "INTERNAL",
+    "acaPrivateEndpoint": "NOT_REQUIRED",
+    "distinction": "INTERNAL_ENVIRONMENT != PUBLIC_ENVIRONMENT_WITH_PRIVATE_ENDPOINT",
+    "image": {
+      "repository": "g3-synthetic-runtime",
+      "tag": "g3-2f0866acebb61f7aaa7216c2b8e952b934f04b835e93f49178d884a71040c1ad",
+      "manifest": "sha256:1a6085926ff5fd78cc81bb2fb6df8ceb9bc62660e3222bbe088e47807a91bb61",
+      "platform": "linux/amd64",
+      "blobSize": 3271902,
+      "qualification": "FROZEN_USER_ASSERTION;local source/provenance authority unavailable",
+      "registryPresence": "NOT_PROVEN",
+      "pushed": false
+    },
+    "capacityCandidate": {
+      "cpu": 0.25,
+      "memoryGiB": 0.5,
+      "minReplicas": 0,
+      "maxReplicas": 1,
+      "verification": "Keep one replica active during future proof;scale-to-zero only after validation. Qualified-image resource compatibility not re-proven."
+    },
+    "pullIdentity": "SEPARATE_PULL_UAMI_PLATFORM_ONLY_LIFECYCLE_NONE",
+    "runtimeIdentity": "SEPARATE_RUNTIME_UAMI_MAIN_ONLY_SECRET_SCOPED_NO_ACR",
+    "resourceGroup": "nzila-shared-test-g3-001-rg"
+  },
+  "ledger": {
+    "azureCalls": 71,
+    "successful": 64,
+    "failed": 7,
+    "source": "azure-read-only-ledger.json",
+    "audit": [
+      {
+        "ledgerIndex": 1,
+        "name": "account",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "account",
+          "show",
+          "--query",
+          "{id:id,tenantId:tenantId,state:state}",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+        "retainedMatchingResponse": "account.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 2,
+        "name": "account",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "account",
+          "show",
+          "--query",
+          "{id:id,tenantId:tenantId,state:state}",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+        "retainedMatchingResponse": "account.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 3,
+        "name": "provider-Microsoft.App",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.App?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "af6525d598e5cf2a440c26e53736e31247aab0b6bd2193b5a1c39ccf5ddff721",
+        "retainedMatchingResponse": "provider-Microsoft.App.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 4,
+        "name": "provider-Microsoft.ContainerRegistry",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.ContainerRegistry?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "7287ec4d3183087a178d372b7252a186c85bfdb77698a377cefb444aa405550b",
+        "retainedMatchingResponse": "provider-Microsoft.ContainerRegistry.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 5,
+        "name": "provider-Microsoft.ManagedIdentity",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.ManagedIdentity?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "ceacad4656badd70e894b18664b5f8bdad6f3b1ca45c890e946abf3742064812",
+        "retainedMatchingResponse": "provider-Microsoft.ManagedIdentity.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 6,
+        "name": "provider-Microsoft.Network",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Network?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "3956e9ed271065447eb519383c7d7824b5be77f8ab2807f9d230d849ce105982",
+        "retainedMatchingResponse": "provider-Microsoft.Network.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 7,
+        "name": "provider-Microsoft.KeyVault",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.KeyVault?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "4df220c9bc50a643d61d05fa764be53debbb5589586bccc433ded0505d137c04",
+        "retainedMatchingResponse": "provider-Microsoft.KeyVault.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 8,
+        "name": "provider-Microsoft.OperationalInsights",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.OperationalInsights?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "24883aa36105f3f28401dca85811adbde72063fa8fdff27c543284dd24dcbba1",
+        "retainedMatchingResponse": "provider-Microsoft.OperationalInsights.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 9,
+        "name": "provider-Microsoft.Insights",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Insights?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "1163897d476c2ab96b60691e02e8edef75cc37be7b9aba46daadb0197d3f6118",
+        "retainedMatchingResponse": "provider-Microsoft.Insights.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 10,
+        "name": "provider-Microsoft.Authorization",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "f944eac3291f261355bc7c047f477e1832c8366d67963975f70514d5a670d977",
+        "retainedMatchingResponse": "provider-Microsoft.Authorization.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 11,
+        "name": "resources",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resources?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "e6578317911ea26ff80ae068c775f8e69009b532dc038634d32f151f4b3b9df9",
+        "retainedMatchingResponse": "resources.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 12,
+        "name": "resource-groups",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "381eb83671c111f3fe95284ac948a85f5884e7a03e5fa64d104d4201e8a6f4fd",
+        "retainedMatchingResponse": "resource-groups.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 13,
+        "name": "g3-resource-group",
+        "status": "FAILED",
+        "exitCode": 1,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-shared-test-g3-001-rg?api-version=2021-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "retainedMatchingResponse": "g3-resource-group.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 14,
+        "name": "aca-regional-usage",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.App/locations/canadacentral/usages?api-version=2025-07-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "76b04492a410208fcde31cabd173775188851fadb47a3551d568326504d77eb1",
+        "retainedMatchingResponse": "aca-regional-usage.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 15,
+        "name": "aca-subscription-usage",
+        "status": "FAILED",
+        "exitCode": 1,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.App/usages?api-version=2025-07-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "retainedMatchingResponse": "aca-subscription-usage.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 16,
+        "name": "network-regional-usage",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Network/locations/canadacentral/usages?api-version=2024-05-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "c29e1b35b608886809cef419e59ee5f16857f92640d5167339cdc88f099e0f7b",
+        "retainedMatchingResponse": "network-regional-usage.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 17,
+        "name": "compute-regional-usage",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Compute/locations/canadacentral/usages?api-version=2024-03-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "ab7ad63d00e53801c3847a5c9e30fdd66687ed39f74ac8056970cd61a03201f0",
+        "retainedMatchingResponse": "compute-regional-usage.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 18,
+        "name": "aca-workload-profile-support",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.App/locations/canadacentral/availableManagedEnvironmentsWorkloadProfileTypes?api-version=2025-07-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "c52057093d28ad109f106499f8e5ddbd306c55382bf39a235d248cbf78125a98",
+        "retainedMatchingResponse": "aca-workload-profile-support.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 19,
+        "name": "vnets",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Network/virtualNetworks?api-version=2024-05-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "683bf9cebc2661a34c58e5a56e075d74284cdc155e610daa014a4345a921216b",
+        "retainedMatchingResponse": "vnets.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 20,
+        "name": "firewalls",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Network/azureFirewalls?api-version=2024-05-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "da76c080c03b6bb21b208a1d33f3061f6a74722f548b152f7c446eb352adadc7",
+        "retainedMatchingResponse": "firewalls.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 21,
+        "name": "route-tables",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Network/routeTables?api-version=2024-05-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "22ed75da7a81c90a501b1012587e5bdecc0fec60061cf3ebc9b08e9193b6d103",
+        "retainedMatchingResponse": "route-tables.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 22,
+        "name": "private-endpoints",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Network/privateEndpoints?api-version=2024-05-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "3f8541d9979fdb45bd400e9bcbe6d746252e6c4df11a9a7de73c7f3afca4d27e",
+        "retainedMatchingResponse": "private-endpoints.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 23,
+        "name": "private-dns-zones",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Network/privateDnsZones?api-version=2020-06-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "fdaebd335135c77c78d28f32f2679bab19d3265fe42fb4a81f7615dbc03b41fe",
+        "retainedMatchingResponse": "private-dns-zones.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 24,
+        "name": "managed-identities",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.ManagedIdentity/userAssignedIdentities?api-version=2023-01-31",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "e4f3f4c8cafe35eebf656e314370c0b020ec76d85d5f8384015a533b6bbf5052",
+        "retainedMatchingResponse": "managed-identities.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 25,
+        "name": "role-assignments",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleAssignments?api-version=2022-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "f3d407123b8613c5f356cb84fa9a9ef18231b440e7dc2884e5f5180447e0318d",
+        "retainedMatchingResponse": "role-assignments.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 26,
+        "name": "role-definitions",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.Authorization/roleDefinitions?api-version=2022-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "50297a2c66071c7e36db8bfb518f34097f8d9f949c3385fb1f1b229bd57cf9d0",
+        "retainedMatchingResponse": "role-definitions.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 27,
+        "name": "registries",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.ContainerRegistry/registries?api-version=2023-07-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "1e9dc6fb7242646ab944e5e5835736a3f64ce6bcc4d972f4bcca2f1c5da596ff",
+        "retainedMatchingResponse": "registries.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 28,
+        "name": "key-vaults",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.KeyVault/vaults?api-version=2023-07-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "8004d9a5189891abdb899ee14606f181a7570fa34e6cba23334a07b74e722485",
+        "retainedMatchingResponse": "key-vaults.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 29,
+        "name": "log-workspaces",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.OperationalInsights/workspaces?api-version=2023-09-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "f461c55f3bda4f0f4987c4252fcd2909827aca6d750548da9d3d1d8d3bb63279",
+        "retainedMatchingResponse": "log-workspaces.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 30,
+        "name": "aca-environments",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.App/managedEnvironments?api-version=2025-07-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "7ba341650864c80a5e84b87eb9796d4ae14be9a50d0578e65b167d9966a8d708",
+        "retainedMatchingResponse": "aca-environments.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 31,
+        "name": "aca-apps",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.App/containerApps?api-version=2025-07-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "89064ef2db005e3d35344d3f815dcf2a17476079cee3b5c9797ead746bc387a3",
+        "retainedMatchingResponse": "aca-apps.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 32,
+        "name": "account",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "account",
+          "show",
+          "--query",
+          "{id:id,tenantId:tenantId,state:state}",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+        "retainedMatchingResponse": "account.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 33,
+        "name": "service-principals",
+        "status": "FAILED",
+        "exitCode": 1,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id,appId,displayName,servicePrincipalType&$top=999",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "09004976fb35f41a11095b6c1f4d067ba8e63a993d445249eca7cdf31d941f7f",
+        "retainedMatchingResponse": null,
+        "retentionStatus": "HISTORICAL_RESPONSE_NOT_RETAINED",
+        "limitation": "Initial collector reused response aliases before unique sequence filenames were introduced;this earlier failed transport response was overwritten. Recorded call,exit status and original SHA remain;do not fabricate its bytes."
+      },
+      {
+        "ledgerIndex": 34,
+        "name": "deployment-applications",
+        "status": "FAILED",
+        "exitCode": 1,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications?$select=id,appId,displayName&$top=999",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "19478f8a77c93723bc1df224582a0638e92427a5347287ec9630c2ef2b804f35",
+        "retainedMatchingResponse": "052-deployment-applications-page-1.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 35,
+        "name": "g2-peering",
+        "status": "FAILED",
+        "exitCode": 1,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/f-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings?api-version=2024-05-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "retainedMatchingResponse": "g2-peering.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 36,
+        "name": "g2-registry-detail",
+        "status": "FAILED",
+        "exitCode": 1,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/f-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo?api-version=2025-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "retainedMatchingResponse": "g2-registry-detail.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 37,
+        "name": "deleted-key-vaults",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.KeyVault/deletedVaults?api-version=2023-07-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+        "retainedMatchingResponse": "deleted-key-vaults.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 38,
+        "name": "managed-identity-regional-usage",
+        "status": "FAILED",
+        "exitCode": 1,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.ManagedIdentity/locations/canadacentral/usages?api-version=2023-01-31",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "retainedMatchingResponse": "managed-identity-regional-usage.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 39,
+        "name": "account",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "account",
+          "show",
+          "--query",
+          "{id:id,tenantId:tenantId,state:state}",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+        "retainedMatchingResponse": "account.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 40,
+        "name": "service-principals",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id,appId,displayName,servicePrincipalType&$top=999",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "2bee4f7b1f234fb9cd712bb757b0737588e45d8d061c75dc5636accfd53fb808",
+        "retainedMatchingResponse": "043-service-principals-page-1.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 41,
+        "name": "deployment-applications",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications?$select=id,appId,displayName&$top=999",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "19478f8a77c93723bc1df224582a0638e92427a5347287ec9630c2ef2b804f35",
+        "retainedMatchingResponse": "052-deployment-applications-page-1.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 42,
+        "name": "account",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "account",
+          "show",
+          "--query",
+          "{id:id,tenantId:tenantId,state:state}",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+        "retainedMatchingResponse": "042-account.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 43,
+        "name": "service-principals-page-1",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id,appId,displayName,servicePrincipalType&$top=999",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "2bee4f7b1f234fb9cd712bb757b0737588e45d8d061c75dc5636accfd53fb808",
+        "retainedMatchingResponse": "043-service-principals-page-1.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 44,
+        "name": "service-principals-page-2",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id%2cappId%2cdisplayName%2cservicePrincipalType&$top=999&$skiptoken=RFNwdAIAAQAAADVTZXJ2aWNlUHJpbmNpcGFsXzIwY2JjZWMyLTQ2OTctNDY1Yi1hYTQ4LTdiMTFiNTFiZDM2YTVTZXJ2aWNlUHJpbmNpcGFsXzIwY2JjZWMyLTQ2OTctNDY1Yi1hYTQ4LTdiMTFiNTFiZDM2YQAAAAAAAAAAAAAA",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "d68caf73fcbe1a96793ed3a76a3ed945287cd7e1167dccef7e395c3c5b1fd399",
+        "retainedMatchingResponse": "044-service-principals-page-2.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 45,
+        "name": "service-principals-page-3",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id%2cappId%2cdisplayName%2cservicePrincipalType&$top=999&$skiptoken=RFNwdAIAADVTZXJ2aWNlUHJpbmNpcGFsXzIwZDVmNTE3LTFmMDMtNGNlZC1hZTE5LWNmYzMyYzRjMmMxMzVTZXJ2aWNlUHJpbmNpcGFsXzIwZDVmNTE3LTFmMDMtNGNlZC1hZTE5LWNmYzMyYzRjMmMxMwA1U2VydmljZVByaW5jaXBhbF80MDMxY2Q1Zi0yOWViLTRkYzUtYTk5YS01OTFjNmYwZWI0MDY1U2VydmljZVByaW5jaXBhbF80MDMxY2Q1Zi0yOWViLTRkYzUtYTk5YS01OTFjNmYwZWI0MDYAAAAAAAAAAAAAAA",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "48a3a5fa0a3454e9bd5d2da58c4b689cb2eed59aa94e781f868af88b85e08338",
+        "retainedMatchingResponse": "045-service-principals-page-3.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 46,
+        "name": "service-principals-page-4",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id%2cappId%2cdisplayName%2cservicePrincipalType&$top=999&$skiptoken=RFNwdAIAADVTZXJ2aWNlUHJpbmNpcGFsXzQwMzkzYjU3LWJiODQtNDg4ZS04NTM4LTZmNWU4MTg4M2JhZTVTZXJ2aWNlUHJpbmNpcGFsXzQwMzkzYjU3LWJiODQtNDg4ZS04NTM4LTZmNWU4MTg4M2JhZQA1U2VydmljZVByaW5jaXBhbF81Y2ExN2Y4My0wMjNjLTQ0YTctOGU4Zi01ZmZlZDc2MDEwNDI1U2VydmljZVByaW5jaXBhbF81Y2ExN2Y4My0wMjNjLTQ0YTctOGU4Zi01ZmZlZDc2MDEwNDIAAAAAAAAAAAAAAA",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "d3f6f31fc557883bc2179fc3b1f2437255db31063e1e77d5dcb7ff31e3984acd",
+        "retainedMatchingResponse": "046-service-principals-page-4.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 47,
+        "name": "service-principals-page-5",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id%2cappId%2cdisplayName%2cservicePrincipalType&$top=999&$skiptoken=RFNwdAIAADVTZXJ2aWNlUHJpbmNpcGFsXzVkNWYwYWJkLTE0M2MtNDE5YS1hMjkzLTJhYWY5ZmE2MjhiYTVTZXJ2aWNlUHJpbmNpcGFsXzVkNWYwYWJkLTE0M2MtNDE5YS1hMjkzLTJhYWY5ZmE2MjhiYQA1U2VydmljZVByaW5jaXBhbF83YTdjMmRkNS04ZTYzLTQzZmQtODQwOC01ZGFiZTg4NDMxNTY1U2VydmljZVByaW5jaXBhbF83YTdjMmRkNS04ZTYzLTQzZmQtODQwOC01ZGFiZTg4NDMxNTYAAAAAAAAAAAAAAA",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "59edcf37156d6ad029aecd6e8028ce9c7c0cdbae94d2ee8af6a1b68ef45b2ff4",
+        "retainedMatchingResponse": "047-service-principals-page-5.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 48,
+        "name": "service-principals-page-6",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id%2cappId%2cdisplayName%2cservicePrincipalType&$top=999&$skiptoken=RFNwdAIAADVTZXJ2aWNlUHJpbmNpcGFsXzdhODI1N2I4LTA0OWMtNDZiNi1iMTJiLWNmNWYwZjA0YTkzMTVTZXJ2aWNlUHJpbmNpcGFsXzdhODI1N2I4LTA0OWMtNDZiNi1iMTJiLWNmNWYwZjA0YTkzMQA1U2VydmljZVByaW5jaXBhbF85MmUyNzM5MS1mODQ5LTQzNWMtOWU4Yi0wOTNjNjcwZDg5MmE1U2VydmljZVByaW5jaXBhbF85MmUyNzM5MS1mODQ5LTQzNWMtOWU4Yi0wOTNjNjcwZDg5MmEAAAAAAAAAAAAAAA",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "865f008c993c3db4969534ca1a1ddc0cfc7514bd544ca3fd79d7e374b0a9782d",
+        "retainedMatchingResponse": "048-service-principals-page-6.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 49,
+        "name": "service-principals-page-7",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id%2cappId%2cdisplayName%2cservicePrincipalType&$top=999&$skiptoken=RFNwdAIAADVTZXJ2aWNlUHJpbmNpcGFsXzkyZWI0N2RlLWQzZTQtNGVjMS05MGU3LWNmNzEwZWRmMWNhZDVTZXJ2aWNlUHJpbmNpcGFsXzkyZWI0N2RlLWQzZTQtNGVjMS05MGU3LWNmNzEwZWRmMWNhZAA1U2VydmljZVByaW5jaXBhbF9iMGM3MWNjMi0wNjFhLTRlOGYtYjAzNC01ZjVmN2ViNTNkYjk1U2VydmljZVByaW5jaXBhbF9iMGM3MWNjMi0wNjFhLTRlOGYtYjAzNC01ZjVmN2ViNTNkYjkAAAAAAAAAAAAAAA",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "9925945a38ce48a2a28caf9ef1c91540a8179db286c9ccd0f74b38c0b961f46b",
+        "retainedMatchingResponse": "049-service-principals-page-7.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 50,
+        "name": "service-principals-page-8",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id%2cappId%2cdisplayName%2cservicePrincipalType&$top=999&$skiptoken=RFNwdAIAADVTZXJ2aWNlUHJpbmNpcGFsX2IwYzcyYzJiLTM3ODktNDI5NS04NzU5LTgxMGYxNmI2MGJkOTVTZXJ2aWNlUHJpbmNpcGFsX2IwYzcyYzJiLTM3ODktNDI5NS04NzU5LTgxMGYxNmI2MGJkOQA1U2VydmljZVByaW5jaXBhbF9jYmMxYmU0Yy0xYzJmLTRlNTQtYWQ5YS1mNTE3MTc0NTEyOTI1U2VydmljZVByaW5jaXBhbF9jYmMxYmU0Yy0xYzJmLTRlNTQtYWQ5YS1mNTE3MTc0NTEyOTIAAAAAAAAAAAAAAA",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "1926c0b6ac00a223508510f53c8abf0ac0ac1aee7e88d3c5e2350ea72789ff89",
+        "retainedMatchingResponse": "050-service-principals-page-8.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 51,
+        "name": "service-principals-page-9",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/servicePrincipals?$select=id%2cappId%2cdisplayName%2cservicePrincipalType&$top=999&$skiptoken=RFNwdAIAADVTZXJ2aWNlUHJpbmNpcGFsX2NiZTczNjA2LTcxOWItNGVhNi1iNTg1LTk0NGRmMmE4NTMzMDVTZXJ2aWNlUHJpbmNpcGFsX2NiZTczNjA2LTcxOWItNGVhNi1iNTg1LTk0NGRmMmE4NTMzMAA1U2VydmljZVByaW5jaXBhbF9lOTA0M2Y1ZC01ZDNiLTRjYTUtYWI5NC1kNTA2ZTlhYmZjMTU1U2VydmljZVByaW5jaXBhbF9lOTA0M2Y1ZC01ZDNiLTRjYTUtYWI5NC1kNTA2ZTlhYmZjMTUAAAAAAAAAAAAAAA",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "68d68445f30da2a405ec41b7f6316ae2cc3386dba906f91c3267596b27f8a5aa",
+        "retainedMatchingResponse": "051-service-principals-page-9.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 52,
+        "name": "deployment-applications-page-1",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications?$select=id,appId,displayName&$top=999",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "19478f8a77c93723bc1df224582a0638e92427a5347287ec9630c2ef2b804f35",
+        "retainedMatchingResponse": "052-deployment-applications-page-1.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 53,
+        "name": "federation-03c9b54b-65f8-4107-90e4-245ffad8d644",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/f4cca081-69ac-43f0-b4b3-1ca1d7173f25/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "f4992ae04a6bb85621f7bf8b56777ac8b104c4787dea383d140eb2e100fdd5d6",
+        "retainedMatchingResponse": "053-federation-03c9b54b-65f8-4107-90e4-245ffad8d644.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 54,
+        "name": "federation-05621c47-2914-4dc8-8db1-4e725f425817",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/499430d8-245f-493f-bac9-80bac237d9d5/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "499e99e989ab897f5b48a6aff48accb633450f395d62b2784ed96d3822238db0",
+        "retainedMatchingResponse": "054-federation-05621c47-2914-4dc8-8db1-4e725f425817.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 55,
+        "name": "federation-27ffa4c8-8e5a-4d16-ba30-ac13b5340413",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/e0f8475f-5506-403a-b393-1f4bbf5c8168/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "b7eea447b8e7f5704fd6de4344ab2bbf04d80e89582ab8bdb99f6a7e193bbe56",
+        "retainedMatchingResponse": "055-federation-27ffa4c8-8e5a-4d16-ba30-ac13b5340413.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 56,
+        "name": "federation-48fefde6-00da-456d-b6b9-d014daefc268",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/130f9d47-b1a5-451f-b70c-feaa9675c30c/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "21a24cd6bd9c43107e3fa59681a60f86e0bd9d6ae461b3cb534096e327f4ce93",
+        "retainedMatchingResponse": "056-federation-48fefde6-00da-456d-b6b9-d014daefc268.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 57,
+        "name": "federation-4d38a271-c8e8-4994-bd46-ed91b2d65700",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/0572a5ae-18b5-4eaa-b118-b1805fc6b901/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "a5fda8897d68e0f292c4ffecfdc2268b2340bf11bd048f719e076b90899c0433",
+        "retainedMatchingResponse": "057-federation-4d38a271-c8e8-4994-bd46-ed91b2d65700.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 58,
+        "name": "federation-52f8fa31-c000-4459-aa75-0f78a2f72b8c",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/470ecb4d-3d68-492c-a8e1-f446aa21ea0b/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "63bdd964f6148ac675d686087e6387d9242b0f7595922009974e600c3e3f8816",
+        "retainedMatchingResponse": "058-federation-52f8fa31-c000-4459-aa75-0f78a2f72b8c.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 59,
+        "name": "federation-636cdd4c-500f-4465-a7f4-0790f510811c",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/7fdd6516-8d75-49a4-b791-3f80b7541009/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "fe87a80fbd2e184508d02015a3de2a6b9fcc54efd7f69fd6c68f4a6961393649",
+        "retainedMatchingResponse": "059-federation-636cdd4c-500f-4465-a7f4-0790f510811c.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 60,
+        "name": "federation-66ec0cdf-ff35-42bd-9104-f424f7c8a455",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/b0d785d9-2916-4301-b567-d45cef727e77/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "8bb9e4cc50558d9d06da78ca70c02462ebb52888838b23614204306219b1a329",
+        "retainedMatchingResponse": "060-federation-66ec0cdf-ff35-42bd-9104-f424f7c8a455.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 61,
+        "name": "federation-6fd23298-4708-47ce-88cb-a813765ca3d0",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/2cc19327-3620-4445-8617-dbbd0d6baefe/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "320bc162bfe1f6ccc8feae79392742f38c82fced2fe9d7557fe467bea6897aed",
+        "retainedMatchingResponse": "061-federation-6fd23298-4708-47ce-88cb-a813765ca3d0.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 62,
+        "name": "federation-80f65cfd-5655-46f3-aab3-7691087db625",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/e99c6384-5545-45b6-9beb-be6432a350b9/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "26273f0a18402a660efa129dbbaf31a3c7330561ad71aeb204a8e3cca8e37f3b",
+        "retainedMatchingResponse": "062-federation-80f65cfd-5655-46f3-aab3-7691087db625.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 63,
+        "name": "federation-87321708-6150-4ea7-9d09-b26cd5080221",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/6a69a5ca-79c1-4072-b3db-1ed22c91905a/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "0490202e38cf1bc9c23225afa863824db4e95b386cadbea3191c03d3cdb43678",
+        "retainedMatchingResponse": "063-federation-87321708-6150-4ea7-9d09-b26cd5080221.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 64,
+        "name": "federation-bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://graph.microsoft.com/v1.0/applications/3594a951-fcff-4877-a52f-043ed52a9eb0/federatedIdentityCredentials",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "d0a83aa8d385f2e3dfc08453cce576ab79cb61698e682f416df58ae556cd1efb",
+        "retainedMatchingResponse": "064-federation-bfa4a851-696a-4d3f-927b-5fb1526f79f2.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 65,
+        "name": "g2-peering-corrected",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu/virtualNetworkPeerings?api-version=2024-05-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+        "retainedMatchingResponse": "065-g2-peering-corrected.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 66,
+        "name": "g2-registry-detail-corrected",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo?api-version=2025-04-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "6029739e060da7830688683ee4ecc2934d207455cddf6c36638dfeac62dfc025",
+        "retainedMatchingResponse": "066-g2-registry-detail-corrected.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 67,
+        "name": "deleted-key-vaults",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.KeyVault/deletedVaults?api-version=2023-07-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "6cc5f0b62a8d505d7c0844c2e90322f4385fe9e6be45addff485c801744aed92",
+        "retainedMatchingResponse": "067-deleted-key-vaults.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 68,
+        "name": "account",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "account",
+          "show",
+          "--query",
+          "{id:id,tenantId:tenantId,state:state}",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+        "retainedMatchingResponse": "068-account.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 69,
+        "name": "g3-key-vault-global-name",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "post",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/providers/Microsoft.KeyVault/checkNameAvailability?api-version=2024-11-01",
+          "--body",
+          "{\"type\":\"Microsoft.KeyVault/vaults\",\"name\":\"nzg3kv95086e2f\"}",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "aea394960063e937ee421030de065008bfa72f7d3049c14aa3443b367360aab6",
+        "retainedMatchingResponse": "069-g3-key-vault-global-name.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 70,
+        "name": "account",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "account",
+          "show",
+          "--query",
+          "{id:id,tenantId:tenantId,state:state}",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "2a41d1ec8c330d426b4d8a6d18ed594b203bcb5a0cea252ef4532c154c0067ae",
+        "retainedMatchingResponse": "070-account.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      },
+      {
+        "ledgerIndex": 71,
+        "name": "g2-registry-mode-latest-stable",
+        "status": "SUCCEEDED",
+        "exitCode": 0,
+        "command": [
+          "az",
+          "rest",
+          "--method",
+          "get",
+          "--url",
+          "https://management.azure.com/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo?api-version=2025-11-01",
+          "--output",
+          "json",
+          "--only-show-errors"
+        ],
+        "mutation": false,
+        "responseSha256": "121a59c74f8ad045239239517f95c7901f3fa4f75944e07175e10ed16a7dbbde",
+        "retainedMatchingResponse": "071-g2-registry-mode-latest-stable.json",
+        "retentionStatus": "DIGEST_VERIFIED_RETAINED",
+        "limitation": null
+      }
+    ],
+    "publicPricingCalls": 21,
+    "publicPricingSource": "public-pricing-read-ledger.json",
+    "unretainedHistoricalResponses": 1,
+    "noAzureValidationOrWhatIfPerformed": true,
+    "noCredentialsOrSecretValuesQueried": true,
+    "nonReservingNameCheckPost": {
+      "endpoint": "Microsoft.KeyVault/checkNameAvailability",
+      "apiVersion": "2024-11-01",
+      "mutation": false,
+      "result": { "nameAvailable": true },
+      "documentation": "https://learn.microsoft.com/en-us/rest/api/keyvault/keyvault/vaults/check-name-availability?view=rest-keyvault-keyvault-2024-11-01"
+    },
+    "initialTransportLimitation": "First Windows cmd transport split Graph URLs at ampersands. All attempted calls/status/originalSHA are retained;one earlier failed stdout alias was overwritten. Corrected paginated GET responses have unique snapshots. This is a declared retention limitation,not a successful capacity or permission proof."
+  },
+  "live": {
+    "providers": [
+      { "namespace": "Microsoft.App", "registration": "Registered" },
+      { "namespace": "Microsoft.ContainerRegistry", "registration": "Registered" },
+      { "namespace": "Microsoft.ManagedIdentity", "registration": "Registered" },
+      { "namespace": "Microsoft.Network", "registration": "Registered" },
+      { "namespace": "Microsoft.KeyVault", "registration": "Registered" },
+      { "namespace": "Microsoft.OperationalInsights", "registration": "Registered" },
+      { "namespace": "Microsoft.Insights", "registration": "Registered" },
+      { "namespace": "Microsoft.Authorization", "registration": "Registered" }
+    ],
+    "regionResources": [
+      {
+        "namespace": "Microsoft.App",
+        "type": "managedEnvironments",
+        "subscriptionVisibleCanadaCentral": true,
+        "evidence": "provider-Microsoft.App.json"
+      },
+      {
+        "namespace": "Microsoft.App",
+        "type": "containerApps",
+        "subscriptionVisibleCanadaCentral": true,
+        "evidence": "provider-Microsoft.App.json"
+      },
+      {
+        "namespace": "Microsoft.KeyVault",
+        "type": "vaults",
+        "subscriptionVisibleCanadaCentral": true,
+        "evidence": "provider-Microsoft.KeyVault.json"
+      },
+      {
+        "namespace": "Microsoft.Network",
+        "type": "privateEndpoints",
+        "subscriptionVisibleCanadaCentral": true,
+        "evidence": "provider-Microsoft.Network.json"
+      },
+      {
+        "namespace": "Microsoft.Network",
+        "type": "virtualNetworks",
+        "subscriptionVisibleCanadaCentral": true,
+        "evidence": "provider-Microsoft.Network.json"
+      },
+      {
+        "namespace": "Microsoft.Network",
+        "type": "networkSecurityGroups",
+        "subscriptionVisibleCanadaCentral": true,
+        "evidence": "provider-Microsoft.Network.json"
+      },
+      {
+        "namespace": "Microsoft.Network",
+        "type": "routeTables",
+        "subscriptionVisibleCanadaCentral": true,
+        "evidence": "provider-Microsoft.Network.json"
+      },
+      {
+        "namespace": "Microsoft.ManagedIdentity",
+        "type": "userAssignedIdentities",
+        "subscriptionVisibleCanadaCentral": true,
+        "evidence": "provider-Microsoft.ManagedIdentity.json"
+      },
+      {
+        "namespace": "Microsoft.OperationalInsights",
+        "type": "workspaces",
+        "subscriptionVisibleCanadaCentral": true,
+        "evidence": "provider-Microsoft.OperationalInsights.json"
+      }
+    ],
+    "regionSupportCeiling": "Provider metadata/existingConsumption environments prove subscription-visible regional support,not reserved capacity for a new environment.",
+    "existingCanadaCentralConsumptionProfiles": [
+      {
+        "name": "nzila-canada-staging-env",
+        "profiles": [
+          { "enableFips": false, "name": "Consumption", "workloadProfileType": "Consumption" }
+        ]
+      },
+      {
+        "name": "nzila-canada-pilot-env",
+        "profiles": [
+          { "enableFips": false, "name": "Consumption", "workloadProfileType": "Consumption" }
+        ]
+      }
+    ],
+    "managedEnvironmentQuota": { "current": 4, "limit": 20, "required": 1, "headroom": 16 },
+    "consumptionCoreQuota": {
+      "scope": "One managed environment",
+      "targetEnvironmentExists": false,
+      "current": null,
+      "limit": null,
+      "required": 0.25,
+      "status": "NOT_QUERYABLE_BEFORE_TARGET_ENVIRONMENT_EXISTS",
+      "source": "https://learn.microsoft.com/en-us/azure/container-apps/quotas"
+    },
+    "networkQuota": [
+      {
+        "name": "VirtualNetworks",
+        "current": 1,
+        "limit": 1000,
+        "required": 1,
+        "headroom": 999,
+        "sufficient": true
+      },
+      {
+        "name": "NetworkSecurityGroups",
+        "current": 2,
+        "limit": 5000,
+        "required": 1,
+        "headroom": 4998,
+        "sufficient": true
+      },
+      {
+        "name": "RouteTables",
+        "current": 1,
+        "limit": 600,
+        "required": 1,
+        "headroom": 599,
+        "sufficient": true
+      },
+      {
+        "name": "PrivateEndpoints",
+        "current": 1,
+        "limit": 65536,
+        "required": 1,
+        "headroom": 65535,
+        "sufficient": true
+      },
+      {
+        "name": "NetworkInterfaces",
+        "current": 6,
+        "limit": 65536,
+        "required": 2,
+        "headroom": 65530,
+        "sufficient": true
+      },
+      {
+        "name": "StandardSkuLoadBalancers",
+        "current": 2,
+        "limit": 1000,
+        "required": 1,
+        "headroom": 998,
+        "sufficient": true
+      },
+      {
+        "name": "PublicIPAddresses",
+        "current": 2,
+        "limit": 20,
+        "required": 0,
+        "headroom": 18,
+        "sufficient": true
+      }
+    ],
+    "managedIdentityQuota": {
+      "existingSubscriptionCount": 2,
+      "required": 2,
+      "limit": null,
+      "note": "Microsoft.ManagedIdentity regional usages request returned InvalidResourceType;inventory count is not quota assurance."
+    },
+    "currentVnets": [
+      {
+        "vnet": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Network/virtualNetworks/nzila-staging-vnet",
+        "cidr": "10.1.0.0/16"
+      },
+      {
+        "vnet": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+        "cidr": "10.90.0.0/16"
+      }
+    ],
+    "g2Firewall": [
+      {
+        "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/azureFirewalls/nzila-g2-egress-fw-y3koaeijzi6mu",
+        "sku": { "name": "AZFW_VNet", "tier": "Basic" },
+        "ips": ["10.90.0.4"],
+        "applicationRules": [],
+        "networkRules": []
+      }
+    ],
+    "g2Peerings": [],
+    "operatorCandidates": [
+      {
+        "principalId": "48fefde6-00da-456d-b6b9-d014daefc268",
+        "appId": "090f6a46-298d-408e-b43c-da20695f2cb5",
+        "type": "Application",
+        "displayName": "nzila-ventures-NATO-MEL-MIL-a59db86b-5d44-4053-9808-46facc2063a8",
+        "federation": [
+          {
+            "issuer": "https://login.microsoftonline.com/5082b8be-b04d-4a13-b61c-b6397670177b/v2.0",
+            "subject": "/eid1/c/pub/t/vriCUE2wE0q2HLY5dnAXew/a/rISbSSETf0KqFyZ8ppdXmA/sc/a3e27173-740d-4da6-ace3-54fc05fed10c/a59db86b-5d44-4053-9808-46facc2063a8",
+            "audiences": ["api://AzureADTokenExchange"]
+          }
+        ],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [
+          "/eid1/c/pub/t/vriCUE2wE0q2HLY5dnAXew/a/rISbSSETf0KqFyZ8ppdXmA/sc/a3e27173-740d-4da6-ace3-54fc05fed10c/a59db86b-5d44-4053-9808-46facc2063a8"
+        ],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "27ffa4c8-8e5a-4d16-ba30-ac13b5340413",
+        "appId": "683c1691-4a01-4c8c-bce6-bfcecd6cea71",
+        "type": "Application",
+        "displayName": "nzila-ventures-DiasporaCore-78d48d12-7ad2-4f6b-a35b-162886dfa2ab",
+        "federation": [
+          {
+            "issuer": "https://login.microsoftonline.com/5082b8be-b04d-4a13-b61c-b6397670177b/v2.0",
+            "subject": "/eid1/c/pub/t/vriCUE2wE0q2HLY5dnAXew/a/rISbSSETf0KqFyZ8ppdXmA/sc/a3e27173-740d-4da6-ace3-54fc05fed10c/78d48d12-7ad2-4f6b-a35b-162886dfa2ab",
+            "audiences": ["api://AzureADTokenExchange"]
+          }
+        ],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [
+          "/eid1/c/pub/t/vriCUE2wE0q2HLY5dnAXew/a/rISbSSETf0KqFyZ8ppdXmA/sc/a3e27173-740d-4da6-ace3-54fc05fed10c/78d48d12-7ad2-4f6b-a35b-162886dfa2ab"
+        ],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "80f65cfd-5655-46f3-aab3-7691087db625",
+        "appId": "233984f7-529d-4102-b855-4877899c5bb6",
+        "type": "Application",
+        "displayName": "Azure-CourtLens-Production-SP",
+        "federation": [],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "636cdd4c-500f-4465-a7f4-0790f510811c",
+        "appId": "17ef399d-6a53-4e7e-abff-80e7e077df22",
+        "type": "Application",
+        "displayName": "nzila-ventures-FinePrint-98fc00e5-6e18-4a48-ad0e-f02b8a34a78a",
+        "federation": [
+          {
+            "issuer": "https://login.microsoftonline.com/5082b8be-b04d-4a13-b61c-b6397670177b/v2.0",
+            "subject": "/eid1/c/pub/t/vriCUE2wE0q2HLY5dnAXew/a/rISbSSETf0KqFyZ8ppdXmA/sc/a3e27173-740d-4da6-ace3-54fc05fed10c/98fc00e5-6e18-4a48-ad0e-f02b8a34a78a",
+            "audiences": ["api://AzureADTokenExchange"]
+          }
+        ],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [
+          "/eid1/c/pub/t/vriCUE2wE0q2HLY5dnAXew/a/rISbSSETf0KqFyZ8ppdXmA/sc/a3e27173-740d-4da6-ace3-54fc05fed10c/98fc00e5-6e18-4a48-ad0e-f02b8a34a78a"
+        ],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "03c9b54b-65f8-4107-90e4-245ffad8d644",
+        "appId": "9a0f58fd-9cae-49ba-9676-d2711d4e8f52",
+        "type": "Application",
+        "displayName": "CourtLens-GitHub-Actions",
+        "federation": [],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "c2cde012-3b1a-4e94-ae0c-a2b4c619e6cd",
+        "appId": null,
+        "type": "NOT_RESOLVED",
+        "displayName": "NOT_RESOLVED",
+        "federation": [],
+        "grants": [
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "05621c47-2914-4dc8-8db1-4e725f425817",
+        "appId": "9100c3f5-dfb3-4728-9e86-034a4b6458b7",
+        "type": "Application",
+        "displayName": "github-actions-congowave",
+        "federation": [],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "87321708-6150-4ea7-9d09-b26cd5080221",
+        "appId": "f79055d7-d32b-4068-a01a-3cd3aa814697",
+        "type": "Application",
+        "displayName": "nzila-os-cicd",
+        "federation": [],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg",
+            "condition": null
+          },
+          {
+            "role": "AcrPush",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          },
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg",
+            "condition": null
+          },
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg",
+            "condition": null
+          },
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg",
+            "condition": null
+          },
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg",
+            "condition": null
+          },
+          {
+            "role": "Storage Blob Data Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilastagingstore",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "bf2fd081-37a3-4d5b-b43c-eb0b25cfe1cb",
+        "appId": "a4f8f0a9-a3cd-458d-93e4-25a1452a8f99",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-partners",
+        "federation": [],
+        "grants": [
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "fd18a1a4-2837-4636-915a-76b3f9df27ca",
+        "appId": "8afbc4ff-32fc-4719-bdc3-11929cc143d6",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-console",
+        "federation": [],
+        "grants": [
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "d0d0247a-7a42-4988-85f6-e5f4b2905233",
+        "appId": "b0857d0e-b68a-4ed0-9e91-4a9b45ceea88",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-web",
+        "federation": [],
+        "grants": [
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "e90efc42-1006-4289-9968-07490a685d54",
+        "appId": null,
+        "type": "NOT_RESOLVED",
+        "displayName": "NOT_RESOLVED",
+        "federation": [],
+        "grants": [
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "97304f4d-11d0-4405-9f22-8ef32939a703",
+        "appId": "9a9fe199-def8-4aea-8c79-4a2239418959",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-zonga",
+        "federation": [],
+        "grants": [
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "c26c5cff-635f-4cb7-a042-29ce9879b1d6",
+        "appId": "94e95038-e5b8-4fec-ab6f-c51c45e2a6bd",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-control-plane",
+        "federation": [],
+        "grants": [
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "aab9ea86-a44b-4018-b63f-2b8eafc7f891",
+        "appId": "49bb3e2e-414e-4617-87cb-56576bce9ae9",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-platform-admin",
+        "federation": [],
+        "grants": [
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "29f883c1-465d-410a-b7c4-56260d522133",
+        "appId": "f7fc25fb-48a7-481e-9c03-e1c1716ede70",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-union-eyes-demo",
+        "federation": [],
+        "grants": [
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-demo-kv",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "c5636777-b248-4284-ab01-1d3d9091e971",
+        "appId": "cd90d169-7e9b-487b-b6e6-af70714b05a1",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-union-eyes-pilot",
+        "federation": [],
+        "grants": [
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-pilot-kv",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "451de3d3-5634-4065-9940-9a805715f139",
+        "appId": "5e93b159-ff44-49b7-9cc3-6ca2f795a99b",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-union-eyes-django-pilot",
+        "federation": [],
+        "grants": [
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-pilot-kv",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+        "appId": "4d17081c-7201-46af-b839-c8e9693de550",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-union-eyes-prod",
+        "federation": [],
+        "grants": [
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/upstash-redis-url",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/evidence-storage-key",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/upstash-redis-token",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/union-eyes-runtime-database-url",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/union-eyes-system-database-url",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "52f8fa31-c000-4459-aa75-0f78a2f72b8c",
+        "appId": "5d05ed4c-0b9e-4650-9087-3277c4b99d27",
+        "type": "Application",
+        "displayName": "nzila-os-deploy-prod",
+        "federation": [
+          {
+            "issuer": "https://token.actions.githubusercontent.com",
+            "subject": "repo:anungis437/nzila-os:environment:production",
+            "audiences": ["api://AzureADTokenExchange"]
+          }
+        ],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg",
+            "condition": null
+          },
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/union-eyes-migration-admin-database-url",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/union-eyes-runtime-database-url",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/union-eyes-system-database-url",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/resend-api-key",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv/secrets/resend-webhook-secret",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": ["repo:anungis437/nzila-os:environment:production"],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "66ec0cdf-ff35-42bd-9104-f424f7c8a455",
+        "appId": "8bfc2641-827c-4acd-8350-22434d64bcf1",
+        "type": "Application",
+        "displayName": "nzila-os-deploy-staging",
+        "federation": [
+          {
+            "issuer": "https://token.actions.githubusercontent.com",
+            "subject": "repo:anungis437/nzila-os:environment:staging",
+            "audiences": ["api://AzureADTokenExchange"]
+          }
+        ],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg",
+            "condition": null
+          },
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv",
+            "condition": null
+          },
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-staging-db",
+            "condition": null
+          },
+          {
+            "role": "Storage Blob Data Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilastagingstore/blobServices/default/containers/nzila-staging-snapshots",
+            "condition": null
+          },
+          {
+            "role": "Storage Blob Data Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilastagingstore",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": ["repo:anungis437/nzila-os:environment:staging"],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "4d38a271-c8e8-4994-bd46-ed91b2d65700",
+        "appId": "cd210867-5095-4035-a554-0e0ee2c66771",
+        "type": "Application",
+        "displayName": "nzila-os-deploy-demo",
+        "federation": [
+          {
+            "issuer": "https://token.actions.githubusercontent.com",
+            "subject": "repo:anungis437/nzila-os:environment:demo",
+            "audiences": ["api://AzureADTokenExchange"]
+          }
+        ],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg",
+            "condition": null
+          },
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv",
+            "condition": "((!(ActionMatches{'Microsoft.KeyVault/vaults/secrets/getSecret/action'} OR ActionMatches{'Microsoft.KeyVault/vaults/secrets/readMetadata/action'}))OR(@Resource[Microsoft.KeyVault/vaults/secrets:name] StringEqualsIgnoreCase 'union-eyes-migration-admin-database-url'))"
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": ["repo:anungis437/nzila-os:environment:demo"],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "6fd23298-4708-47ce-88cb-a813765ca3d0",
+        "appId": "d31401b1-b3b8-4794-b9ae-41d562e2ff5b",
+        "type": "Application",
+        "displayName": "nzila-os-deploy-pilot",
+        "federation": [
+          {
+            "issuer": "https://token.actions.githubusercontent.com",
+            "subject": "repo:anungis437/nzila-os:environment:pilot",
+            "audiences": ["api://AzureADTokenExchange"]
+          }
+        ],
+        "grants": [
+          {
+            "role": "Contributor",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg",
+            "condition": null
+          },
+          {
+            "role": "AcrPull",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          },
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv",
+            "condition": "((!(ActionMatches{'Microsoft.KeyVault/vaults/secrets/getSecret/action'} OR ActionMatches{'Microsoft.KeyVault/vaults/secrets/readMetadata/action'}))OR(@Resource[Microsoft.KeyVault/vaults/secrets:name] StringEqualsIgnoreCase 'union-eyes-migration-admin-database-url'))"
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": ["repo:anungis437/nzila-os:environment:pilot"],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "bfa4a851-696a-4d3f-927b-5fb1526f79f2",
+        "appId": "5c02d25b-cbdc-412f-8c2a-9ed43b73ac20",
+        "type": "Application",
+        "displayName": "nzila-os-build",
+        "federation": [
+          {
+            "issuer": "https://token.actions.githubusercontent.com",
+            "subject": "repo:anungis437/nzila-os:environment:build",
+            "audiences": ["api://AzureADTokenExchange"]
+          }
+        ],
+        "grants": [
+          {
+            "role": "AcrPush",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": ["repo:anungis437/nzila-os:environment:build"],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "20d5f517-1f03-4ced-ae19-cfc32c4c2c13",
+        "appId": "cf9e5848-74d9-498b-9097-33cb453732ea",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-os-union-eyes-staging",
+        "federation": [],
+        "grants": [
+          {
+            "role": "Key Vault Secrets User",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv",
+            "condition": null
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "c59571aa-66ea-47c5-83d5-59946b318ae2",
+        "appId": "d4775ade-6d53-419a-a80f-c17ffbaa125f",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-g2-builder-y3koaeijzi6mu",
+        "federation": [],
+        "grants": [
+          {
+            "role": "Container Registry Repository Writer",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+            "condition": "      (\r\n        (\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/write'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/write'})\r\n        )\r\n        OR\r\n        (\r\n          @Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'synthetic-health'\r\n        )\r\n      )\r\n    "
+          },
+          {
+            "role": "Container Registry Repository Reader",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+            "condition": "((!(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'}) AND !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})) OR (@Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'g2-tooling'))"
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      },
+      {
+        "principalId": "b150b19a-645d-493f-9bb4-0aa81cb0c449",
+        "appId": "ccea7b0f-a4ec-4665-ba9d-ab5071e165aa",
+        "type": "ManagedIdentity",
+        "displayName": "nzila-g2-runtime-y3koaeijzi6mu",
+        "federation": [],
+        "grants": [
+          {
+            "role": "Container Registry Repository Reader",
+            "scope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourcegroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.ContainerRegistry/registries/nzilag2tzo75uuozprbo",
+            "condition": "      (\r\n        (\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})\r\n          AND\r\n          !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})\r\n        )\r\n        OR\r\n        (\r\n          @Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase 'synthetic-health'\r\n        )\r\n      )\r\n    "
+          }
+        ],
+        "lifecycleOwner": "NOT_BOUND_IN_G3_AUTHORITY",
+        "currentUse": [],
+        "selectedForG3": false
+      }
+    ],
+    "g3RoleAssignmentsReturned": 0,
+    "managementGroupOrPimOrDirectoryGroupEffectiveGrants": "NOT_FULLY_RESOLVED;subscription assignments and directprincipal metadata are not complete effective-permission proof",
+    "registryMode": {
+      "responseFile": "g2-registry-mode-latest-stable.json",
+      "apiVersion": "2025-11-01",
+      "explicitRoleAssignmentMode": "AbacRepositoryPermissions",
+      "conclusion": "ABAC_MODE_PROVEN_BY_EXPLICIT_ARM_GET"
+    }
+  },
+  "candidateNames": {
+    "resourceGroup": "nzila-shared-test-g3-001-rg",
+    "environment": "nzila-g3-env-95086e2f",
+    "application": "nzila-g3-proof-95086e2f",
+    "pullIdentity": "nzila-g3-pull-95086e2f",
+    "runtimeIdentity": "nzila-g3-runtime-95086e2f",
+    "keyVault": "nzg3kv95086e2f",
+    "vnet": "nzila-g3-vnet-95086e2f",
+    "acaSubnet": "G3ContainerAppsSubnet",
+    "privateEndpointSubnet": "G3PrivateEndpointSubnet",
+    "builderSubnet": "G3BuilderSubnet",
+    "nsg": "nzila-g3-aca-nsg-95086e2f",
+    "routeTable": "nzila-g3-aca-rt-95086e2f",
+    "keyVaultEndpoint": "nzila-g3-kv-pe-95086e2f",
+    "keyVaultDnsZone": "privatelink.vaultcore.azure.net",
+    "keyVaultDnsLink": "nzila-g3-kv-link-95086e2f",
+    "workspace": "nzila-g3-logs-95086e2f"
+  },
+  "nameChecks": [
+    {
+      "kind": "environment",
+      "name": "nzila-g3-env-95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": "NOT_APPLICABLE_OR_PARENT_SCOPED",
+      "globalCheckEvidence": null
+    },
+    {
+      "kind": "application",
+      "name": "nzila-g3-proof-95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": "NOT_APPLICABLE_OR_PARENT_SCOPED",
+      "globalCheckEvidence": null
+    },
+    {
+      "kind": "pullIdentity",
+      "name": "nzila-g3-pull-95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": "NOT_APPLICABLE_OR_PARENT_SCOPED",
+      "globalCheckEvidence": null
+    },
+    {
+      "kind": "runtimeIdentity",
+      "name": "nzila-g3-runtime-95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": "NOT_APPLICABLE_OR_PARENT_SCOPED",
+      "globalCheckEvidence": null
+    },
+    {
+      "kind": "keyVault",
+      "name": "nzg3kv95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": true,
+      "globalCheckEvidence": "g3-key-vault-global-name.json;documented non-reserving checkNameAvailability POST"
+    },
+    {
+      "kind": "vnet",
+      "name": "nzila-g3-vnet-95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": "NOT_APPLICABLE_OR_PARENT_SCOPED",
+      "globalCheckEvidence": null
+    },
+    {
+      "kind": "nsg",
+      "name": "nzila-g3-aca-nsg-95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": "NOT_APPLICABLE_OR_PARENT_SCOPED",
+      "globalCheckEvidence": null
+    },
+    {
+      "kind": "routeTable",
+      "name": "nzila-g3-aca-rt-95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": "NOT_APPLICABLE_OR_PARENT_SCOPED",
+      "globalCheckEvidence": null
+    },
+    {
+      "kind": "keyVaultEndpoint",
+      "name": "nzila-g3-kv-pe-95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": "NOT_APPLICABLE_OR_PARENT_SCOPED",
+      "globalCheckEvidence": null
+    },
+    {
+      "kind": "keyVaultDnsLink",
+      "name": "nzila-g3-kv-link-95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": "NOT_APPLICABLE_OR_PARENT_SCOPED",
+      "globalCheckEvidence": null
+    },
+    {
+      "kind": "workspace",
+      "name": "nzila-g3-logs-95086e2f",
+      "subscriptionInventoryMatch": [],
+      "globalNamespaceAvailable": "NOT_APPLICABLE_OR_PARENT_SCOPED",
+      "globalCheckEvidence": null
+    }
+  ],
+  "cidrs": {
+    "vnet": "10.91.0.0/16",
+    "acaSubnet": "10.91.1.0/24",
+    "privateEndpointSubnet": "10.91.2.0/24",
+    "builderSubnet": "10.91.3.0/24",
+    "existingRangesChecked": [
+      {
+        "vnet": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Network/virtualNetworks/nzila-staging-vnet",
+        "cidr": "10.1.0.0/16"
+      },
+      {
+        "vnet": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-g2-proof-xre47vggs5uhw/providers/Microsoft.Network/virtualNetworks/nzila-g2-builder-vnet-y3koaeijzi6mu",
+        "cidr": "10.90.0.0/16"
+      }
+    ],
+    "noOverlap": true,
+    "contained": true,
+    "siblingOverlap": false,
+    "scopeCeiling": "Visible subscription;no all-tenant/on-prem claim",
+    "acaDelegation": "Microsoft.App/environments",
+    "acaDedicatedSubnet": true
+  },
+  "platformEgress": {
+    "G3_PLATFORM_EGRESS_BREADTH": "ACCEPTED_FOR_SYNTHETIC_PROOF",
+    "G3_SERVICE_TAG_EGRESS_LIMITATION": "ACCEPTED_AND_DOCUMENTED",
+    "scope": "Only Microsoft-documented dependencies for this synthetic ACA proof;not arbitrary Internet egress,tenant-exclusive isolation,exfiltration-proofing or production certification.",
+    "source": "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+    "PLATFORM_MANDATORY": {
+      "serviceTags": ["MicrosoftContainerRegistry", "AzureFrontDoorFirstParty"],
+      "applicationFqdns": [
+        "mcr.microsoft.com",
+        "*.data.mcr.microsoft.com",
+        "packages.aks.azure.com",
+        "acs-mirror.azureedge.net"
+      ],
+      "ruleChoice": "MCR service tags or its documented application FQDN equivalent;AKS/CNI FQDN dependencies separately evaluated."
+    },
+    "IDENTITY": {
+      "serviceTags": ["AzureActiveDirectory"],
+      "applicationFqdns": [
+        "*.identity.azure.net",
+        "login.microsoftonline.com",
+        "*.login.microsoftonline.com",
+        "*.login.microsoft.com",
+        "login.microsoft.com"
+      ]
+    },
+    "ACR": {
+      "serviceTags": ["AzureContainerRegistry", "AzureActiveDirectory"],
+      "applicationFqdns": [
+        "nzilag2tzo75uuozprbo.azurecr.io",
+        "nzilag2tzo75uuozprbo.canadacentral.data.azurecr.io",
+        "login.microsoft.com"
+      ],
+      "documentedStorageDependency": "*.blob.core.windows.net",
+      "storageLimitation": "Documented storage wildcard is broader than one tenant/storage account;recorded for synthetic platform use only,not a product data-plane allowlist.",
+      "privateDnsZone": "privatelink.azurecr.io",
+      "runtimeDockerHub": "PROHIBITED"
+    },
+    "KEY_VAULT": {
+      "serviceTags": ["AzureKeyVault", "AzureActiveDirectory"],
+      "applicationFqdns": ["nzg3kv95086e2f.vault.azure.net", "login.microsoft.com"],
+      "privateDnsZone": "privatelink.vaultcore.azure.net",
+      "publicFallback": "PROHIBITED"
+    },
+    "TELEMETRY": {
+      "serviceTags": ["AzureMonitor"],
+      "status": "Exact workspace ingestion/control endpoints must be bound in the recovered G3 package;not a generic wildcard approval."
+    },
+    "DNS": { "destination": "168.63.129.16", "protocols": ["UDP", "TCP"], "port": 53 },
+    "serviceTagSpelling": "The documented network service tag is AzureFrontDoorFirstParty;AzureFrontDoor.FirstParty is not substituted into NSG/firewall rules.",
+    "deployedRules": "NO"
+  },
+  "futureContracts": {
+    "pull": {
+      "role": "Container Registry Repository Reader",
+      "roleId": "b93aa761-3e63-49ed-ac28-beffa264f7ac",
+      "conditionVersion": "2.0",
+      "repositoryEquals": "g3-synthetic-runtime",
+      "conditionMustCover": [
+        "Microsoft.ContainerRegistry/registries/repositories/metadata/read",
+        "Microsoft.ContainerRegistry/registries/repositories/content/read"
+      ],
+      "lifecycle": "None",
+      "acrPullFallback": "PROHIBITED",
+      "ACA_ABAC_IMAGE_PULL": "MUST_PROVE",
+      "applicationTokenAccess": "DENIED_MUST_PROVE"
+    },
+    "runtime": {
+      "lifecycle": "Main",
+      "acrRoles": [],
+      "buildRoles": [],
+      "role": "Key Vault Secrets User",
+      "roleId": "4633458b-17de-408a-b874-0445c86b69e6",
+      "scope": ".../vaults/nzg3kv95086e2f/secrets/g3-proof-secret",
+      "note": "Microsoft supports individual-secret RBAC scopes;this intentional synthetic-proof exception must be tested. No claim that the builtin forces vault-level scope. No vault-level fallback.",
+      "stricterCustomRoleOption": "Only Microsoft.KeyVault/vaults/secrets/getSecret/action;if its creation/design is explicitly governed,not created here"
+    },
+    "vault": {
+      "name": "nzg3kv95086e2f",
+      "location": "canadacentral",
+      "purpose": "NEW_G3_SYNTHETIC_KEY_VAULT",
+      "rbac": true,
+      "publicNetworkAccess": "Disabled",
+      "privateEndpoint": true,
+      "privateDns": "privatelink.vaultcore.azure.net",
+      "softDelete": true,
+      "purgeProtectionDecision": "UNBOUND;irreversible enablement/teardown retention must be chosen with cost/lifecycle governance",
+      "secretName": "g3-proof-secret",
+      "secretCount": 1,
+      "productSecrets": "PROHIBITED",
+      "secretValuePersisted": false
+    },
+    "secretChallenge": {
+      "protocol": "Future cryptographically random single synthetic secret;fresh nonce and HMAC challenge over authenticated proof endpoint. Secret stays inside memory,never health/log/evidence. Bind source support without changing frozen artifact.",
+      "evidenceFields": [
+        "KV_PRIVATE_DNS",
+        "KV_PRIVATE_IP",
+        "KV_TLS",
+        "KV_AUTHORIZATION",
+        "SECRET_CHALLENGE",
+        "secretIdentifier",
+        "nonce",
+        "safeHmacResult",
+        "PASS_OR_FAIL"
+      ],
+      "privatePath": "runtime -> private DNS -> KV private endpoint -> TLS hostname validation -> identity authorization",
+      "publicFallback": "PROHIBITED",
+      "wrongReference": "404 may demonstrate an incorrect reference,not authorization denial;an existing protected secret with wrong identity must yield explicit403."
+    },
+    "g3A": {
+      "writerRole": "Container Registry Repository Writer",
+      "roleId": "2a1e307c-b015-4ebd-883e-5b7698a07328",
+      "repositoryEquals": "g3-synthetic-runtime",
+      "conditionMustCover": ["metadata/read", "content/read", "metadata/write", "content/write"],
+      "catalogLister": "NOT_GRANTED",
+      "registryWideAcrPush": "PROHIBITED",
+      "operator": "NOT_BOUND",
+      "substrate": "NOT_BOUND_NO_G2_EXECUTION_AUTHORITY_REUSE",
+      "oneBoundedPush": "REQUIRED_NOT_IMPLEMENTED",
+      "transientVmIfSelected": "PrivateNIC,disk,identity,noPublicIP,noSSH,governed bounded execution channel and exact teardown;not yet selected/implemented"
+    },
+    "g3B": {
+      "operator": "NOT_BOUND",
+      "deploymentScope": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-shared-test-g3-001-rg",
+      "subscriptionContributorOrOwner": "PROHIBITED",
+      "futurePermissionCategories": [
+        "Exact transaction-created ACA/identity/network/KV/PE/DNS/LogAnalytics resource management withinG3RG",
+        "ManagedIdentity attach permission for exactG3UAMIs",
+        "Constrained role-assignment write/delete for exact principals and approved Reader/SecretsUser roles",
+        "Read exact evidence and clean only transaction-owned resources"
+      ],
+      "broadBuiltinGap": "ContainerApps/Network/ManagedIdentity/KeyVault/LogAnalytics contributor roles are broader than individual owned resources;exact least-privilege/customrole set cannot be finalized without the controller/resource-ownership manifest. No subscription-wide substitution.",
+      "retainedG2Changes": "Require explicit terminal-state reconciliation and fresh authority before any network/DNS/registry alteration"
+    },
+    "negativeProofs": [
+      {
+        "name": "IMAGE_PULL_IDENTITY_OTHER_REPOSITORY_READ",
+        "identity": "PULL_UAMI",
+        "request": "GET /v2/<existingOtherRepository>/manifests/<boundDigest>",
+        "endpoint": "private target ACR",
+        "expected": "403or insufficient_scope,never404-only",
+        "missing": "Other existing repository/digest fixture and exact token/evidence mechanics"
+      },
+      {
+        "name": "IMAGE_PULL_IDENTITY_REGISTRY_WRITE",
+        "identity": "PULL_UAMI",
+        "request": "POST /v2/g3-synthetic-runtime/blobs/uploads/",
+        "endpoint": "private target ACR",
+        "expected": "explicitauthorization denial",
+        "missing": "Unexpectedsuccess cleanup and one-shot mutation-containment authority in future controller"
+      },
+      {
+        "name": "RUNTIME_IDENTITY_ACR_READ",
+        "identity": "RUNTIME_UAMI",
+        "request": "GET approvedrepository manifest by frozen digest",
+        "endpoint": "private target ACR",
+        "expected": "explicitauthorization denial,notnetwork timeout"
+      },
+      {
+        "name": "RUNTIME_IDENTITY_ACR_WRITE",
+        "identity": "RUNTIME_UAMI",
+        "request": "POST approvedrepository upload initiation",
+        "endpoint": "private target ACR",
+        "expected": "explicitauthorization denial;unexpectedsuccess isFAIL/containment"
+      },
+      {
+        "name": "RUNTIME_IDENTITY_BUILD_REPOSITORY_ACCESS",
+        "identity": "RUNTIME_UAMI",
+        "request": "GET existingg2-tooling manifest byboundDigest",
+        "endpoint": "private target ACR",
+        "expected": "explicitauthorization denial;fixture mustexist"
+      },
+      {
+        "name": "RUNTIME_IDENTITY_UNAUTHORIZED_SECRET_READ",
+        "identity": "RUNTIME_UAMI plusseparate unauthorizedidentity control",
+        "request": "GET /secrets/<unauthorizedReference>?api-version=<boundVersion>;wrongidentityGET existingg3-proof-secret",
+        "endpoint": "private KeyVaultTLSendpoint",
+        "expected": "403withKeyVaultauthorizationcode forwrongidentity;404fornonexistentreference isnotpermissionproof"
+      },
+      {
+        "name": "PUBLIC_CONTAINER_APP_ACCESS",
+        "identity": "untrustedexternalprobe",
+        "request": "HTTPS GET health on bound internalappFQDN fromoutsideVNet",
+        "endpoint": "internalACA",
+        "expected": "noreachablepublicroute;privateDNS/IPandtimeout/refusal evidence;notanRBAC403claim"
+      }
+    ],
+    "denialEvidence": [
+      "identityResourceId",
+      "requestMethod",
+      "sanitizedEndpoint",
+      "knownExistingFixture",
+      "DNS/IP",
+      "TLS/connectivityControl",
+      "HTTPstatus",
+      "authorizationErrorCode",
+      "correlationId",
+      "safeBodyDigest",
+      "PASS_OR_FAIL;never tokens/secretvalues"
+    ]
+  },
+  "costs": {
+    "status": "UNRESOLVED_NO_HARD_CEILING_APPROVED",
+    "currency": "CAD",
+    "prices": {
+      "activeCpu": {
+        "meterId": "c064b5f6-a623-55d5-8f04-942be79fc8e7",
+        "productName": "Azure Container Apps",
+        "skuName": "Standard",
+        "meterName": "Standard vCPU Active Usage",
+        "armRegionName": "canadacentral",
+        "currency": "CAD",
+        "unitOfMeasure": "1 Second",
+        "retailPrice": 0.000048,
+        "effectiveStartDate": "2022-06-01T00:00:00Z",
+        "sourceFile": "pricing-Azure-Container-Apps.json"
+      },
+      "activeMemory": {
+        "meterId": "4113d31b-2df1-5456-86de-3b5ef8ed27f4",
+        "productName": "Azure Container Apps",
+        "skuName": "Standard",
+        "meterName": "Standard Memory Active Usage",
+        "armRegionName": "canadacentral",
+        "currency": "CAD",
+        "unitOfMeasure": "1 GiB Second",
+        "retailPrice": 0.000006,
+        "effectiveStartDate": "2022-06-01T00:00:00Z",
+        "sourceFile": "pricing-Azure-Container-Apps.json"
+      },
+      "requests": {
+        "meterId": "9d5ac783-0d6a-5ced-812a-e31662edde9e",
+        "productName": "Azure Container Apps",
+        "skuName": "Standard",
+        "meterName": "Standard Requests",
+        "armRegionName": "canadacentral",
+        "currency": "CAD",
+        "unitOfMeasure": "1M",
+        "retailPrice": 0.56662,
+        "effectiveStartDate": "2022-06-01T00:00:00Z",
+        "sourceFile": "pricing-Azure-Container-Apps.json"
+      },
+      "logIngestion": {
+        "meterId": "6c00b68b-125b-42cf-9085-af9f4ab7a044",
+        "productName": "Log Analytics",
+        "skuName": "Analytics Logs",
+        "meterName": "Analytics Logs Data Ingestion",
+        "armRegionName": "canadacentral",
+        "currency": "CAD",
+        "unitOfMeasure": "1 GB",
+        "retailPrice": 3.909678,
+        "effectiveStartDate": "2018-02-01T00:00:00Z",
+        "sourceFile": "pricing-Log-Analytics.json"
+      },
+      "vaultPrivateEndpoint": {
+        "meterId": "e6ab7238-e433-4fe0-a2b2-2b2564df2cdb",
+        "productName": "Virtual Network Private Link",
+        "skuName": "Standard",
+        "meterName": "Standard Private Endpoint",
+        "armRegionName": "Global",
+        "currency": "CAD",
+        "unitOfMeasure": "1 Hour",
+        "retailPrice": 0.014166,
+        "effectiveStartDate": "2020-02-01T00:00:00Z",
+        "sourceFile": "pricing-Virtual-Network-global-fallback.json"
+      },
+      "privateEndpointData": {
+        "meterId": "10caa28b-6479-4852-9eb7-610870cb6417",
+        "productName": "Virtual Network Private Link",
+        "skuName": "Standard",
+        "meterName": "Standard Data Processed - Ingress",
+        "armRegionName": "Global",
+        "currency": "CAD",
+        "unitOfMeasure": "1 GB",
+        "retailPrice": 0.014166,
+        "effectiveStartDate": "2021-11-01T00:00:00Z",
+        "sourceFile": "pricing-Virtual-Network-global-fallback.json"
+      },
+      "privateDnsZone": {
+        "meterId": "0b608a26-f611-4232-8192-ce81b6b57194",
+        "productName": "Azure DNS",
+        "skuName": "Private",
+        "meterName": "Private Zone",
+        "armRegionName": "",
+        "currency": "CAD",
+        "unitOfMeasure": "1",
+        "retailPrice": 0.708275,
+        "effectiveStartDate": "2019-12-01T00:00:00Z",
+        "sourceFile": "pricing-Azure-DNS-global-fallback.json"
+      },
+      "privateDnsQueries": {
+        "meterId": "46cff9cb-4b15-4af0-bf41-25143827fef8",
+        "productName": "Azure DNS",
+        "skuName": "Private",
+        "meterName": "Private Queries",
+        "armRegionName": "",
+        "currency": "CAD",
+        "unitOfMeasure": "1M",
+        "retailPrice": 0.56662,
+        "effectiveStartDate": "2019-12-01T00:00:00Z",
+        "sourceFile": "pricing-Azure-DNS-global-fallback.json"
+      },
+      "loadBalancer": {
+        "meterId": "27827eb0-7f60-4928-940b-f5fe15e7a4cb",
+        "productName": "Load Balancer",
+        "skuName": "Standard",
+        "meterName": "Standard Included LB Rules and Outbound Rules",
+        "armRegionName": "Global",
+        "currency": "CAD",
+        "unitOfMeasure": "1 Hour",
+        "retailPrice": 0.035414,
+        "effectiveStartDate": "2018-04-11T00:00:00Z",
+        "sourceFile": "pricing-Load-Balancer-global-fallback.json"
+      },
+      "loadBalancerData": {
+        "meterId": "dfc7cc11-fbe2-41c8-b6fa-24a574223938",
+        "productName": "Load Balancer",
+        "skuName": "Standard",
+        "meterName": "Standard Data Processed",
+        "armRegionName": "Global",
+        "currency": "CAD",
+        "unitOfMeasure": "1 GB",
+        "retailPrice": 0.007083,
+        "effectiveStartDate": "2018-04-11T00:00:00Z",
+        "sourceFile": "pricing-Load-Balancer-global-fallback.json"
+      },
+      "firewallData": {
+        "meterId": "ff9d9feb-e6a5-5070-98dd-864487cdf2a6",
+        "productName": "Azure Firewall",
+        "skuName": "Basic",
+        "meterName": "Basic Data Processed",
+        "armRegionName": "Global",
+        "currency": "CAD",
+        "unitOfMeasure": "1 GB",
+        "retailPrice": 0.092076,
+        "effectiveStartDate": "2023-03-01T00:00:00Z",
+        "sourceFile": "pricing-Azure-Firewall-global-fallback.json"
+      },
+      "potentialPlatformEgressIp": {
+        "meterId": "9c150bf9-2bad-430e-a53c-c213804f49ef",
+        "productName": "IP Addresses",
+        "skuName": "Standard",
+        "meterName": "Standard IPv4 Static Public IP",
+        "armRegionName": "Global",
+        "currency": "CAD",
+        "unitOfMeasure": "1 Hour",
+        "retailPrice": 0.007083,
+        "effectiveStartDate": "2018-06-01T00:00:00Z",
+        "sourceFile": "pricing-Virtual-Network-global-fallback.json"
+      },
+      "unselectedBuilderCpu": {
+        "meterId": "85216dda-f99d-460a-a16a-9e4ccf9b53dd",
+        "productName": "Virtual Machines BS Series",
+        "skuName": "B1s",
+        "meterName": "B1s",
+        "armRegionName": "canadacentral",
+        "currency": "CAD",
+        "unitOfMeasure": "1 Hour",
+        "retailPrice": 0.016432,
+        "effectiveStartDate": "2025-10-01T00:00:00Z",
+        "sourceFile": "pricing-Virtual-Machines.json"
+      },
+      "unselectedBuilderDisk": {
+        "meterId": "316238ae-c700-4729-b00b-3f436f0b177c",
+        "productName": "Standard SSD Managed Disks",
+        "skuName": "E4 LRS",
+        "meterName": "E4 LRS Disk",
+        "armRegionName": "canadacentral",
+        "currency": "CAD",
+        "unitOfMeasure": "1/Month",
+        "retailPrice": 3.739692,
+        "effectiveStartDate": "2020-01-01T00:00:00Z",
+        "sourceFile": "pricing-Storage.json"
+      }
+    },
+    "noFreeAllowanceAssumed": true,
+    "ACA_PRIVATE_ENDPOINT_COST": "EXCLUDED_NOT_SELECTED",
+    "DEDICATED_MANAGEMENT_CHARGE": "NOT_TRIGGERED_BY_SELECTED_CONSUMPTION_ONLY_INTERNAL_ENVIRONMENT;do not adddedicatedprofile/ACAprivateendpoint/plannedmaintenance",
+    "existingG2FirewallBaseIncremental": 0,
+    "incrementalG2FirewallData": {
+      "meterId": "ff9d9feb-e6a5-5070-98dd-864487cdf2a6",
+      "productName": "Azure Firewall",
+      "skuName": "Basic",
+      "meterName": "Basic Data Processed",
+      "armRegionName": "Global",
+      "currency": "CAD",
+      "unitOfMeasure": "1 GB",
+      "retailPrice": 0.092076,
+      "effectiveStartDate": "2023-03-01T00:00:00Z",
+      "sourceFile": "pricing-Azure-Firewall-global-fallback.json"
+    },
+    "idleKnownStandingSubtotalCAD": 37.60995,
+    "idleSubtotalDefinition": "Illustrative subtotal:730h * (1KVPE + 1standardLB<=5rules) + 2newly-billed privateDNSzones. Not the selected candidate total;reusing the existing G2 ACR DNS zone does not add another zone base charge. Scalezero ACA compute=0;all unknown charges remain unresolved.",
+    "potentialPlatformEgressPublicIpMonthlyCAD": 5.17059,
+    "publicIpDecision": "No user-managed G3publicIP selected. Microsoft custom-VNet docs also list a managed egressIP charge;exact UDR/internal deployment charge treatment must be resolved,not silently zeroed.",
+    "missing": [
+      "Exact standardsecretoperation primarymeter mapping",
+      "Nonreplicated ACR excessstorage meter and includedstorageheadroom;replication meter isnot a substitute",
+      "Qualified G3A builder and source/tooling/network/disktransaction budgets",
+      "Proof resource duration,requests,DNS,logs,data processing/peeringtraffic quantities and enforcedtermination",
+      "G3-specific platformmanaged publicIP charges under UDR",
+      "Human acceptable hard proof ceiling with contingency"
+    ],
+    "contingencyRule": "Propose >=1.5 * complete expected proofcost;human approval is not implied by arithmetic"
+  },
+  "localValidation": {
+    "scope": "READ_ONLY_COLLECTORS_AND_OFFLINE_REPORT_ONLY;not G3A/G3B executable-package validation",
+    "nodeRegression": {
+      "command": "node --test infrastructure\\landing-zone\\g3-readiness-report.test.mjs",
+      "result": "PASS",
+      "tests": 75
+    },
+    "powershellPolicy": {
+      "command": "& .\\infrastructure\\landing-zone\\g3-readiness-census.test.ps1",
+      "result": "PASS",
+      "rejectedCommandsAndStages": 15,
+      "azureCalls": 0
+    },
+    "syntax": {
+      "commands": [
+        "node --check infrastructure\\landing-zone\\g3-public-pricing.mjs",
+        "node --check infrastructure\\landing-zone\\g3-readiness-report.mjs",
+        "node --check infrastructure\\landing-zone\\g3-readiness-report.test.mjs"
+      ],
+      "result": "PASS"
+    },
+    "formatting": {
+      "command": "pnpm exec prettier --check infrastructure\\landing-zone\\g3-public-pricing.mjs infrastructure\\landing-zone\\g3-readiness-report.mjs infrastructure\\landing-zone\\g3-readiness-report.test.mjs",
+      "result": "PASS"
+    },
+    "generation": {
+      "command": "node infrastructure\\landing-zone\\g3-readiness-report.mjs --check --self-test",
+      "result": "PASS"
+    },
+    "documentation": {
+      "command": "pnpm validate:docs",
+      "result": "PASS_NO_CRITICAL_ERRORS;existing warnings/info remain"
+    },
+    "scopedLint": {
+      "command": "pnpm exec eslint infrastructure\\landing-zone\\g3-public-pricing.mjs infrastructure\\landing-zone\\g3-readiness-report.mjs infrastructure\\landing-zone\\g3-readiness-report.test.mjs",
+      "result": "FAILED_CONFIGURATION_NOT_FOUND",
+      "detail": "Installed ESLint9 has no root eslint.config.*. No new lint configuration was introduced and no lint pass is claimed."
+    }
+  },
+  "preservation": {
+    "localG2SourceHashes": {
+      "G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md": "8417e1c2def05aa20aca98f415c7014351e144a7ae2091a91a8343c71e96e356",
+      "g2-proof.bicep": "482b6e017eb21fe4d157233bf7f382b8d1b61dfe98c07727e8a68cdc2c674f88",
+      "g2-artifact-foundation.bicep": "7a82dfe8470afbfc7224ccd1238a6a8dbfe06733db3c637294c1f90d2c7f2dd8",
+      "g2-artifact-network.bicep": "336daef7cd0211440ab56934b181593b2f50d607ac546823f7b9038567a6c546",
+      "synthetic-health/server.mjs": "f218e68391b87049585f211b0333dd9a0ae96cf5c8ecc5595ab2becec7932c45",
+      "synthetic-health/Dockerfile": "db13c7ec24ec1ae80b564fa03d0a664edf7cb9b1bef797a4172b32c821bb9fda"
+    },
+    "localG2FilesEdited": 0,
+    "sealedG2TerminalRoot": "NOT_AVAILABLE_IN_THIS_WORKSPACE",
+    "noG2ExecutionAuthorityReused": true,
+    "noG3ControllerExecuted": true,
+    "noImageBuildPushImport": true,
+    "noAzureDeploymentValidationWhatIf": true,
+    "noEntraOrRbacMutation": true,
+    "g3aLocalBuildAttempt": "NOT_RUN_FROZEN_PACKAGE_NOT_AVAILABLE",
+    "g3bLocalBuildAttempt": "NOT_RUN_FROZEN_PACKAGE_NOT_AVAILABLE",
+    "buildStatusMeaning": "Required PASS|FAIL output uses FAIL because no passing build evidence exists;not an observed Bicep compiler failure."
+  },
+  "documents": [
+    "https://learn.microsoft.com/en-us/azure/container-apps/use-azure-firewall",
+    "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity",
+    "https://learn.microsoft.com/en-us/azure/container-apps/custom-virtual-networks",
+    "https://learn.microsoft.com/en-us/azure/container-apps/networking",
+    "https://learn.microsoft.com/en-us/azure/container-apps/quotas",
+    "https://learn.microsoft.com/en-us/azure/container-apps/billing",
+    "https://learn.microsoft.com/en-us/azure/container-apps/containers",
+    "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-rbac-abac-repository-permissions",
+    "https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide",
+    "https://prices.azure.com/api/retail/prices?api-version=2023-01-01-preview"
+  ],
+  "blockers": [
+    {
+      "id": "G3-PRIOR-AUTHORITY-PACKAGE-MISSING",
+      "fact": "The visible workspace contains G2 templates and an older synthetic-health source, but none of the referenced seven G3 modules, G3A/G3B controllers, qualified 3,271,902-byte image source/provenance, or sealed G2 terminal-root packet.",
+      "needed": "Bind read-only paths/digests for the existing frozen G3 readiness/source/controller/module packet and sealed G2 terminal record. Do not rebuild another artifact and claim the supplied digest."
+    },
+    {
+      "id": "G3-CAPACITY-LIMITS-NOT-PREPROVEN",
+      "fact": "Regional managed-environment quota and network quotas have headroom. The new environment consumption-core limit is environment-scoped and cannot be read for an environment that does not exist. Microsoft.ManagedIdentity regional usages is not an exposed resource type at the attempted API.",
+      "needed": "An accepted pre-execution capacity assurance path for 0.25 Consumption vCPU and two UAMIs; record documented limits/support/capacity evidence rather than treating inventory count or missing API as unlimited quota."
+    },
+    {
+      "id": "G3-OPERATOR-GRANTS-AND-ACCOUNTABILITY-UNBOUND",
+      "fact": "Existing GitHub-federated build/staging principals are visible, but their grants target legacy resources. No G3 scope grants were returned. Subscription-wide Contributors are unsuitable shortcuts. Nonpersonal lifecycle ownership and the accountable G3 human governance approver are not bound by this packet.",
+      "needed": "Select an appropriate existing nonpersonal operator with its lifecycle owner and separate human approver; approve exact future G3A/G3B scoped grants. No grants created here."
+    },
+    {
+      "id": "G3-FIREWALL-TRANSIT-AND-DNS-UNBOUND",
+      "fact": "The retained G2 firewall is Basic at 10.90.0.4; the returned application/network rule collections are empty and no G2 VNet peerings exist. A G3 VNet 10.91.0.0/16 route to that private firewall is not currently reachable. Private ACR DNS/link/transit and exact ACA platform/telemetry egress are not wired.",
+      "needed": "Bind a governed routing/peering/DNS/allowlist design and reconcile any future changes to retained G2 against its sealed terminal authority;no associations or rules changed now."
+    },
+    {
+      "id": "G3-CONTROLLERS-BICEP-AND-PROOF-MECHANICS-INCOMPLETE",
+      "fact": "The supplied qualified image cannot be inspected locally from its authority packet. Existing visible G2 health code has only two health routes and no secret challenge. No G3 top-level transaction/controllers are available to compile or to prove ownership, one bounded push, negative authorization, rollback and retained-state reconciliation.",
+      "needed": "Complete the existing G3A/G3B package from its recovered source authority, including the private builder, artifact-preserving secret proof, repository-conditioned pull/write bindings, lifecycle None/Main, secret-scoped runtime role, and negative probes. Do not execute it."
+    },
+    {
+      "id": "G3-COST-TOTAL-AND-HUMAN-CEILING-UNRESOLVED",
+      "fact": "Current CAD compute/network/DNS/logging meters are captured. Exact applicable normal-vault secret-operation and nonreplicated ACR excess-storage meter mappings are not finalized; builder selection, proof durations/log/traffic budgets and platform-managed egress-IP billing treatment are unbound. No acceptable hard cost ceiling was supplied by the human risk owner.",
+      "needed": "Finalize all material incremental quantities/meters and complete proof/idle totals; propose at least 1.5x contingency for explicit human approval. Do not count existing G2 firewall base cost or ACA Private Endpoint charges."
+    }
+  ],
+  "smallestFurtherReadinessAuthority": {
+    "subject": "READ_ONLY_G3_AUTHORITY_BINDING_AND_LOCAL_PACKAGE_COMPLETION",
+    "needs": [
+      "Supply frozen priorG3 package and sealedG2 terminalroot paths/digests",
+      "Bind nonpersonal lifecycle/operator selection and separate accountable humanapprover",
+      "Bind capacity assurance path",
+      "Bind exact G2 transit/DNS and G3 repository-scoped grant authority without consuming G2 execution",
+      "Complete local controllers/top-levelBicep/challenge/negativefixtures and CAD totals",
+      "Approve proposed proofcostceiling after complete model"
+    ],
+    "azureResourceMutations": "NOT_AUTHORIZED",
+    "g3AExecution": "NOT_AUTHORIZED",
+    "g3BExecution": "NOT_AUTHORIZED",
+    "productionDataAndProductDeployment": "NOT_AUTHORIZED"
+  }
+}

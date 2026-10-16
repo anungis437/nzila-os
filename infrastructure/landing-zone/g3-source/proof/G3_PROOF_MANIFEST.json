@@ -1,0 +1,83 @@
+{
+  "lineage": "PROSPECTIVE_G3R2",
+  "execution": "NOT_EXECUTED",
+  "specificationReadiness": "COMPLETE_LOCAL_PROTOCOL;LIVE_AZURE_PROOFS_NOT_EXECUTED",
+  "sequence": [
+    "Localcompile/parameter/digestcheck",
+    "Humanappointroles andapproveG2changes/cost",
+    "SeparateG3Aimageproductionauthority",
+    "Bindnewimmutablemanifest",
+    "SeparateemptyG3environmentauthority",
+    "Queryactualenvironmentconsumptioncores",
+    "Separateworkloadactivationauthority",
+    "Privatehealth/secret/negativeproofs",
+    "ReconcileownershipandretainedG2state"
+  ],
+  "secretChallenge": {
+    "protocol": "g3-secret-proof-v1",
+    "endpoint": "POST /proof/secret",
+    "nonceGeneration": "32 CSPRNG bytes encoded canonical unpadded base64url;exactly 43 ASCII characters",
+    "request": {
+      "contentType": "application/json;optional charset=utf-8",
+      "shape": { "nonce": "<43-character canonical base64url>" },
+      "maximumBodyBytes": 256,
+      "rejectUnknownOrDuplicateProperties": true
+    },
+    "algorithm": "HMAC-SHA256",
+    "key": "UTF-8 platform-injected high-entropy synthetic secret;never retained",
+    "message": "UTF-8 encoded nonce string;not decoded nonce bytes",
+    "responseShape": {
+      "protocol": "g3-secret-proof-v1",
+      "algorithm": "HMAC-SHA256",
+      "proof": "<64 lowercase hexadecimal characters>"
+    },
+    "verificationAlgorithm": "Compute expected HMAC independently;decode expected/observed hex and compare constant-time;wrong secret must mismatch",
+    "nonDisclosureAssertions": [
+      "No raw secret or length/prefix/suffix",
+      "No environment/token/path/URI details",
+      "No nonce in runtime logs",
+      "No sensitive metrics",
+      "No raw secret in retained evidence"
+    ],
+    "failureBehavior": {
+      "missingSecret": "503 generic unavailable",
+      "invalidNonceOrBodyOrContentType": "400 generic invalid_request",
+      "unexpectedMethod": "405 generic method_not_allowed",
+      "unexpectedRoute": "404 generic not_found"
+    },
+    "implementedObserver": true,
+    "localResult": "PASS_FAKE_MATERIAL_ONLY",
+    "liveExecution": "NOT_EXECUTED",
+    "evidenceToRetain": [
+      "nonce",
+      "expected proof digest",
+      "observed proof digest",
+      "HTTP status",
+      "timestamp",
+      "authorized registry image digest",
+      "runtime revision",
+      "secret logical ID",
+      "secret version identifier if safely obtainable"
+    ],
+    "neverRetain": ["raw secret", "identity token", "full environment/container inspect"],
+    "authorizationLimit": "HMAC proves injected-value possession only;Key Vault injection,managed identity,RBAC and private paths require separate future live proofs",
+    "secretEntropyRequirement": "Human-authorized CSPRNG-generated high-entropy synthetic secret;HMAC permits offline guesses against weak keys"
+  },
+  "negativeProbeCount": 10,
+  "capacityRequirementMilliCores": 250,
+  "missingQuotaBehavior": "DENY_WORKLOAD_ACTIVATION",
+  "imageBinding": "Future nzilag2tzo75uuozprbo.azurecr.io/g3-synthetic-runtime@sha256:<authorized registry manifest digest>;local config digest prohibited as authority",
+  "noPublicFallback": true,
+  "amendmentLineage": "PROSPECTIVE_G3R2_IMAGE_QUALIFICATION",
+  "imageSourceAuthority": "G3_SYNTHETIC_PROOF_V1",
+  "secretBinding": {
+    "SECRET_LOGICAL_ID": "g3-proof-secret",
+    "CONTAINER_SECRET_REFERENCE": "g3-proof-secret",
+    "ENVIRONMENT_BINDING_NAME": "G3_PROOF_SECRET",
+    "CONSUMER": "G3_RUNTIME_IDENTITY / G3_SYNTHETIC_PROOF_V1",
+    "VALUE_SOURCE": "KEY_VAULT_OR_AUTHORIZED_SECRET_INJECTION",
+    "SECRET_VALUE_IN_REPOSITORY": "NO",
+    "identityLifecycle": "Main;build-slot platform-pull identity None"
+  },
+  "healthEndpoint": "GET /healthz"
+}

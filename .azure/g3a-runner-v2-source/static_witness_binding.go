@@ -1,0 +1,3 @@
+package main
+
+const hardProofExecutableSHA256 = "4f97651acf19ea73b028308dd2ed1103c879ffe94838b4708a5f74429481b926"
