@@ -1,0 +1,75 @@
+{
+  "SCHEMA_VERSION": "1.0",
+  "DISPOSITION": "CLOSED_BLOCKED_TERMINAL_STATIC",
+  "VALIDATION_KIND": "TERMINAL_GOVERNANCE_CLOSURE_ONLY",
+  "RESULTS": [
+    {
+      "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts scripts\\ue\\close-w5-terminal-static.test.ts",
+      "RESULT": "PASS",
+      "TESTS_PASSED": 20,
+      "TESTS_FAILED": 0,
+      "TESTS_SKIPPED": 0,
+      "ASSERTIONS": [
+        "terminal-state schema and rejection of changed/missing fields",
+        "exact three independent contradictions and seven unresolved operand sets",
+        "162-payload post-overlay census and first prospective promotion denial",
+        "E048 UTF-8 exact source-byte range and digest preservation",
+        "frozen W5A inputs, graph, 231 edges, 127 compatibility and 86 handoff records",
+        "ten-key authority and supplement preservation",
+        "seven deferred constraints and nine downstream operands unchanged",
+        "historical active failing acceptance and recorded test results preserved",
+        "zero-runtime assertions and new-architecture reopening rule",
+        "deterministic generation and persisted output equality"
+      ]
+    },
+    {
+      "COMMAND": "pnpm exec tsx scripts\\ue\\close-w5-terminal-static.ts --write --self-test",
+      "RESULT": "PASS"
+    },
+    {
+      "COMMAND": "pnpm exec tsx scripts\\ue\\close-w5-terminal-static.ts --check --self-test",
+      "RESULT": "PASS"
+    },
+    {
+      "COMMAND": "node infrastructure\\landing-zone\\g3-terminal-closure.mjs --check",
+      "RESULT": "PASS",
+      "MISSION_DISPOSITION": "CLOSED_NO_GO_CURRENT_PROOF_ARCHITECTURE",
+      "AZURE_CALLS": 0
+    },
+    {
+      "COMMAND": "pnpm exec tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution Bundler --types node --esModuleInterop --strict scripts\\ue\\close-w5-terminal-static.ts scripts\\ue\\close-w5-terminal-static.test.ts",
+      "RESULT": "PASS"
+    },
+    {
+      "COMMAND": "pnpm exec eslint --config apps\\union-eyes\\eslint.config.mjs scripts\\ue\\close-w5-terminal-static.ts scripts\\ue\\close-w5-terminal-static.test.ts --max-warnings 0 --rule '@next/next/no-html-link-for-pages: off'",
+      "RESULT": "PASS",
+      "WARNINGS": 0,
+      "CONFIGURATION_NOTE": "Existing UE config used for root CLI files; only irrelevant Next pages-directory rule disabled for this non-UI selection."
+    },
+    {
+      "COMMAND": "pnpm exec prettier --check scripts\\ue\\close-w5-terminal-static.ts scripts\\ue\\close-w5-terminal-static.test.ts docs\\union-eyes\\PHASE_1_AUTHORITATIVE_INDEXES.md 'docs\\union-eyes\\reality-remediation\\UE_W5_TERMINAL_STATIC_*.{json,md}'",
+      "RESULT": "PASS"
+    },
+    {
+      "COMMAND": "pnpm validate:docs",
+      "RESULT": "PASS",
+      "FILES_SCANNED": 2649,
+      "ERRORS": 0,
+      "WARNINGS": 1215,
+      "INFO": 1702
+    }
+  ],
+  "HISTORICAL_CANONICAL_TEXT_ACCEPTANCE": "FAIL_EXPECTED_PRESERVED_CONTRADICTION",
+  "HISTORICAL_FAILURE_TEST_CHANGED": false,
+  "HISTORICAL_FULL_REPLAY_SUITE_RERUN_REQUIRED": false,
+  "W5_PASS_CLAIMED": false,
+  "DATABASE_CONNECTIONS": 0,
+  "DATABASE_SQL_EXECUTED": 0,
+  "PRODUCTION_MUTATIONS": 0,
+  "W6_STARTED": "NO",
+  "G3_REOPENED": "NO",
+  "PR_CREATED": "NO",
+  "MERGED": "NO",
+  "DEPLOYED": "NO",
+  "COMMAND": "RELEASED_TO_NORMAL_NZILA_OS_DELIVERY_OPERATIONS"
+}

@@ -1,0 +1,6858 @@
+{
+  "generatedFromSourcePlanDigest": "see plan",
+  "summary": {
+    "OK": 373,
+    "ABSENT_IN_V2": 49,
+    "EXCLUDED_IN_V2": 2,
+    "COLUMNS_MISSING_IN_V2": 237
+  },
+  "entries": [
+    {
+      "table": "access_justification_requests",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "accessibility_audits",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "audit_name",
+        "audit_type",
+        "target_url",
+        "target_environment",
+        "wcag_version",
+        "conformance_level",
+        "status",
+        "tools_used",
+        "total_issues",
+        "critical_issues",
+        "serious_issues",
+        "moderate_issues",
+        "minor_issues",
+        "accessibility_score",
+        "pages_scanned",
+        "elements_scanned",
+        "scan_duration_ms",
+        "report_url",
+        "report_data",
+        "triggered_by",
+        "scheduled_by",
+        "started_at",
+        "completed_at"
+      ]
+    },
+    {
+      "table": "accessibility_issues",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "organization_id",
+        "issue_title",
+        "issue_description",
+        "severity",
+        "wcag_criteria",
+        "wcag_level",
+        "wcag_title",
+        "wcag_url",
+        "page_url",
+        "element_selector",
+        "element_html",
+        "element_xpath",
+        "context",
+        "fix_suggestion",
+        "code_example",
+        "impacted_users",
+        "affects_screen_readers",
+        "affects_keyboard_nav",
+        "affects_color_blindness",
+        "status",
+        "assigned_to",
+        "priority",
+        "resolved_at",
+        "resolved_by",
+        "resolution_notes",
+        "verified_at",
+        "first_seen_at",
+        "last_seen_at",
+        "occurrence_count"
+      ]
+    },
+    {
+      "table": "accessibility_test_suites",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "suite_name",
+        "suite_description",
+        "suite_type",
+        "url_patterns",
+        "exclude_patterns",
+        "enabled_rules",
+        "disabled_rules",
+        "custom_rules",
+        "is_scheduled",
+        "schedule_expression",
+        "notify_on_failure",
+        "notify_emails",
+        "notify_slack_channel",
+        "is_active",
+        "last_run_at",
+        "last_run_status",
+        "created_by"
+      ]
+    },
+    {
+      "table": "accessibility_user_testing",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "session_name",
+        "session_date",
+        "participant_name",
+        "participant_email",
+        "assistive_technology",
+        "assistive_tech_version",
+        "disability",
+        "features_tested",
+        "task_list",
+        "overall_rating",
+        "issues_found",
+        "positive_findings",
+        "recording_url",
+        "transcript_url",
+        "notes",
+        "follow_up_required",
+        "follow_up_notes",
+        "conducted_by"
+      ]
+    },
+    {
+      "table": "account_balance_reconciliation",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "address_change_history",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "change_type",
+        "changed_by",
+        "previous_value",
+        "new_value",
+        "change_reason",
+        "change_source"
+      ]
+    },
+    {
+      "table": "address_validation_cache",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["address_line_1"]
+    },
+    {
+      "table": "ai_budgets",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "monthly_limit_usd",
+        "current_spend_usd",
+        "alert_threshold",
+        "hard_limit",
+        "billing_period_start",
+        "billing_period_end"
+      ]
+    },
+    {
+      "table": "ai_clause_reasonings",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "ai_copilot_sessions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "ai_grievance_triages",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "ai_insight_reports",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "ai_rate_limits",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "limit_type",
+        "limit_value",
+        "current_value",
+        "window_start",
+        "window_duration"
+      ]
+    },
+    {
+      "table": "ai_safety_filters",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "ai_usage_metrics",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "alert_actions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "action_type",
+        "action_config",
+        "order_index",
+        "execute_if_condition",
+        "max_retries",
+        "retry_delay_seconds"
+      ]
+    },
+    {
+      "table": "alert_conditions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "field_path",
+        "operator",
+        "value",
+        "condition_group",
+        "is_or_condition",
+        "order_index"
+      ]
+    },
+    {
+      "table": "alert_escalations",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "alert_rule_id",
+        "name",
+        "description",
+        "escalation_levels",
+        "current_level",
+        "status",
+        "started_at",
+        "next_escalation_at",
+        "resolved_at",
+        "resolved_by",
+        "resolution_notes"
+      ]
+    },
+    {
+      "table": "alert_executions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "alert_recipients",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "recipient_type",
+        "recipient_id",
+        "recipient_value",
+        "delivery_methods",
+        "quiet_hours_start",
+        "quiet_hours_end"
+      ]
+    },
+    {
+      "table": "alert_rules",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "allocation_basis_snapshots",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "allocation_rule_versions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "allocation_rules",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "allocation_run_lines",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "allocation_runs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "analytics_metrics",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "analytics_scheduled_reports",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "report_name",
+        "report_type",
+        "report_description",
+        "report_parameters",
+        "schedule_type",
+        "cron_expression",
+        "timezone",
+        "next_run_at",
+        "last_run_at",
+        "recipients",
+        "delivery_format",
+        "include_attachments",
+        "email_subject",
+        "email_body",
+        "is_active",
+        "run_count",
+        "last_run_status",
+        "last_run_error",
+        "created_by"
+      ]
+    },
+    {
+      "table": "anti_scab_violations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "arbitration_decisions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "arbitration_precedents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "arbitrations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "arbitrator_profiles",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "total_decisions",
+        "grievor_success_rate",
+        "employer_success_rate",
+        "average_award_amount",
+        "median_award_amount",
+        "highest_award_amount",
+        "common_remedies",
+        "specializations",
+        "primary_sectors",
+        "jurisdictions",
+        "avg_decision_days",
+        "median_decision_days",
+        "decision_range_min",
+        "decision_range_max",
+        "decision_patterns",
+        "contact_info",
+        "biography",
+        "credentials",
+        "is_active",
+        "last_decision_date"
+      ]
+    },
+    {
+      "table": "arms_length_verification",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "transaction_amount",
+        "from_party",
+        "to_party",
+        "relationship_exists",
+        "relationship_type",
+        "relationship_description",
+        "arms_length_status",
+        "arms_length_justification",
+        "verification_method",
+        "comparable_transactions",
+        "reviewed_by",
+        "reviewed_at",
+        "review_decision",
+        "review_notes",
+        "compliant",
+        "compliance_notes"
+      ]
+    },
+    {
+      "table": "audit_security.audit_logs",
+      "status": "EXCLUDED_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "audit_security.failed_login_attempts",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "audit_security.rate_limit_events",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "audit_security.security_events",
+      "status": "EXCLUDED_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "automation_execution_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "trigger_type",
+        "target_entity_type",
+        "target_entity_id",
+        "status",
+        "error_message",
+        "error_details",
+        "actions_executed",
+        "started_at",
+        "completed_at",
+        "duration_ms"
+      ]
+    },
+    {
+      "table": "automation_rules",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "automation_schedules",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["schedule_config", "next_run_at", "last_run_at", "status"]
+    },
+    {
+      "table": "autopay_settings",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "enabled",
+        "stripe_customer_id",
+        "stripe_payment_method_id",
+        "payment_method_last4",
+        "payment_method_brand",
+        "payment_method_type",
+        "max_amount",
+        "frequency",
+        "day_of_month",
+        "last_payment_date",
+        "last_payment_amount",
+        "last_payment_status",
+        "next_payment_date",
+        "failure_count",
+        "last_failure_reason",
+        "notify_before_payment",
+        "notify_days_before",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "award_history",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "recipient_name",
+        "recipient_email",
+        "points_awarded",
+        "monetary_value",
+        "badge_awarded",
+        "giver_id",
+        "giver_name",
+        "reason",
+        "visibility",
+        "status",
+        "approved_by",
+        "approved_at",
+        "redeemed_at",
+        "redemption_notes",
+        "awarded_at"
+      ]
+    },
+    {
+      "table": "award_templates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "description",
+        "message",
+        "category",
+        "type",
+        "points_value",
+        "monetary_value",
+        "currency",
+        "badge_name",
+        "badge_icon",
+        "badge_color",
+        "tags",
+        "use_count",
+        "max_uses",
+        "per_user_limit",
+        "valid_from",
+        "valid_until",
+        "status",
+        "organization_id",
+        "requires_approval",
+        "approver_roles",
+        "total_awarded",
+        "total_value_awarded",
+        "created_by"
+      ]
+    },
+    {
+      "table": "band_council_consent",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "consent_given",
+        "bcr_number",
+        "bcr_date",
+        "bcr_document",
+        "purpose_of_collection",
+        "data_categories",
+        "intended_use",
+        "expires_at",
+        "restricted_to_members",
+        "anonymization_required",
+        "revoked_at",
+        "revocation_reason",
+        "approved_by"
+      ]
+    },
+    {
+      "table": "band_councils",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "province",
+        "region",
+        "chief_name",
+        "admin_contact_name",
+        "admin_contact_email",
+        "admin_contact_phone",
+        "on_reserve_storage_enabled",
+        "storage_location",
+        "data_residency_required",
+        "third_party_access_allowed",
+        "aggregation_allowed"
+      ]
+    },
+    {
+      "table": "bank_accounts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "bank_of_canada_rates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "noon_rate",
+        "buy_rate",
+        "sell_rate",
+        "source",
+        "data_quality",
+        "imported_at",
+        "imported_by"
+      ]
+    },
+    {
+      "table": "bank_reconciliation",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "bank_reconciliations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "bank_transactions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "transaction_date",
+        "posting_date",
+        "description",
+        "amount",
+        "type",
+        "balance",
+        "reference",
+        "payee",
+        "category",
+        "is_reconciled",
+        "reconciled_at",
+        "matched_transaction_id",
+        "metadata"
+      ]
+    },
+    {
+      "table": "bargaining_notes",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "bargaining_proposals",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "bargaining_team_members",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "member_id",
+        "name",
+        "email",
+        "phone",
+        "role",
+        "is_chief",
+        "organization",
+        "title",
+        "worksite",
+        "is_active",
+        "start_date",
+        "end_date",
+        "expertise",
+        "notes",
+        "created_by"
+      ]
+    },
+    {
+      "table": "bargaining_units",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "benchmark_categories",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "benchmark_data",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "union_type",
+        "union_size_bracket",
+        "region",
+        "period_start",
+        "period_end",
+        "period_type",
+        "metric_value",
+        "sample_size",
+        "min_value",
+        "max_value",
+        "percentile_25",
+        "percentile_50",
+        "percentile_75",
+        "standard_deviation",
+        "data_quality_score",
+        "is_projected",
+        "confidence_level",
+        "data_source"
+      ]
+    },
+    {
+      "table": "benefit_comparisons",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "clause_id",
+        "benefit_type",
+        "benefit_name",
+        "coverage_details",
+        "monthly_premium",
+        "annual_cost",
+        "industry_benchmark",
+        "effective_date",
+        "end_date"
+      ]
+    },
+    {
+      "table": "billing_accounts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "billing_adjustments",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "billing_invoices",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "billing_payments",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "billing_periods",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "billing_subscriptions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "billing_terms",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "blind_trust_registry",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "full_name",
+        "role",
+        "trust_status",
+        "trust_established_date",
+        "trustee_name",
+        "trustee_contact",
+        "trustee_relationship",
+        "trust_type",
+        "trust_document",
+        "trust_account_number",
+        "assets_transferred",
+        "estimated_value",
+        "verified_by",
+        "verified_at",
+        "verification_notes",
+        "last_review_date",
+        "next_review_due",
+        "compliant",
+        "compliance_notes"
+      ]
+    },
+    {
+      "table": "board_packet_distributions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "board_packet_sections",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "section_type",
+        "title",
+        "order_index",
+        "content",
+        "summary",
+        "data_source",
+        "data_query",
+        "generated_at",
+        "is_confidential",
+        "required_role"
+      ]
+    },
+    {
+      "table": "board_packet_templates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "description",
+        "packet_type",
+        "organization_id",
+        "sections",
+        "default_recipients",
+        "is_active",
+        "is_default",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "board_packets",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "break_glass_activations",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "signature_1_user_id",
+        "signature_1_timestamp",
+        "signature_1_ip_address",
+        "signature_2_user_id",
+        "signature_2_timestamp",
+        "signature_2_ip_address",
+        "signature_3_user_id",
+        "signature_3_timestamp",
+        "signature_3_ip_address",
+        "recovery_actions_log",
+        "swiss_cold_storage_accessed",
+        "cold_storage_accessed_at",
+        "incident_report_url",
+        "lessons_learned_url",
+        "system_updates_required",
+        "audited_at",
+        "audited_by",
+        "audit_report"
+      ]
+    },
+    {
+      "table": "break_glass_system",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "scenario_description",
+        "recovery_plan_document",
+        "estimated_recovery_time",
+        "shamir_threshold",
+        "shamir_total_shares",
+        "key_holder_id_1",
+        "key_holder_id_2",
+        "key_holder_id_3",
+        "key_holder_id_4",
+        "key_holder_id_5",
+        "emergency_contact_1_name",
+        "emergency_contact_1_phone",
+        "emergency_contact_1_email",
+        "emergency_contact_2_name",
+        "emergency_contact_2_phone",
+        "emergency_contact_2_email",
+        "last_tested_at",
+        "testing_frequency",
+        "next_test_due",
+        "status"
+      ]
+    },
+    {
+      "table": "break_policies",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "budget_pool",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "budget_reservations",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["reference_type", "reference_id", "expires_at"]
+    },
+    {
+      "table": "calendar_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "calendar_sharing",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "organization_id",
+        "shared_with_user_id",
+        "shared_with_email",
+        "shared_with_role",
+        "permission",
+        "can_create_events",
+        "can_edit_events",
+        "can_delete_events",
+        "can_share",
+        "invited_by",
+        "invited_at",
+        "accepted_at",
+        "is_active"
+      ]
+    },
+    {
+      "table": "calendars",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "campaigns",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "card_signing_events",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "campaign_id",
+        "contact_id",
+        "signed_date",
+        "signed_time",
+        "signing_location",
+        "witnessed_by",
+        "witness_signature_data",
+        "card_photo_url",
+        "card_type",
+        "card_status",
+        "invalidation_reason",
+        "voluntary_signature",
+        "signature_obtained_properly",
+        "date_accurate",
+        "meets_legal_requirements",
+        "submitted_to_nlrb_clrb",
+        "submission_date",
+        "submission_batch_id",
+        "notes",
+        "created_by"
+      ]
+    },
+    {
+      "table": "case_documents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "case_studies",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_clauses",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_contacts",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "contact_type",
+        "name",
+        "title",
+        "organization",
+        "email",
+        "phone",
+        "is_primary",
+        "is_active"
+      ]
+    },
+    {
+      "table": "cba_footnotes",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "target_clause_id",
+        "target_decision_id",
+        "footnote_number",
+        "footnote_text",
+        "context",
+        "link_type",
+        "start_offset",
+        "end_offset",
+        "click_count",
+        "created_by"
+      ]
+    },
+    {
+      "table": "cba_intel_agreements",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_intel_benchmark_snapshots",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_intel_clauses",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_intel_documents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_intel_extraction_runs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_intel_findings",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_intel_freshness_log",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_intel_ingestion_jobs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_intel_review_decisions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_intel_sources",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_intel_wage_adjustments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_rule_set_items",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_rule_versions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cba_version_history",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "version",
+        "change_description",
+        "change_type",
+        "previous_data",
+        "new_data",
+        "created_by"
+      ]
+    },
+    {
+      "table": "certification_alerts",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "alert_type",
+        "alert_date",
+        "expiry_date",
+        "days_until_expiry",
+        "notification_sent",
+        "notification_sent_at",
+        "notification_method",
+        "resolved",
+        "resolved_at",
+        "resolved_by",
+        "resolution_notes"
+      ]
+    },
+    {
+      "table": "certification_audit_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "action_description",
+        "certification_id",
+        "user_id",
+        "performed_by",
+        "performed_by_role",
+        "compliance_impact",
+        "metadata",
+        "ip_address"
+      ]
+    },
+    {
+      "table": "certification_compliance_reports",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "total_staff",
+        "total_certifications_required",
+        "total_certifications_current",
+        "total_certifications_expired",
+        "total_certifications_pending_renewal",
+        "total_ce_hours_required",
+        "total_ce_hours_completed",
+        "compliance_rate",
+        "expired_certifications",
+        "upcoming_renewals",
+        "generated_by",
+        "report_format",
+        "report_url"
+      ]
+    },
+    {
+      "table": "certification_types",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "issuing_authority",
+        "requires_renewal",
+        "renewal_frequency_months",
+        "continuing_education_required",
+        "ce_hours_required",
+        "required_for_roles",
+        "mandatory",
+        "description",
+        "application_url"
+      ]
+    },
+    {
+      "table": "chargeback_statements",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "chart_of_accounts",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "account_number",
+        "type",
+        "sub_type",
+        "parent_account_id",
+        "status",
+        "normal_balance",
+        "is_sub_account",
+        "allow_transactions",
+        "require_cost_center",
+        "require_department",
+        "require_approval",
+        "require_invoice",
+        "is_reconciled_daily",
+        "last_reconciled_at",
+        "last_reconciled_balance",
+        "gl_code",
+        "sap_code",
+        "quickbooks_code",
+        "opening_balance",
+        "opening_balance_date"
+      ]
+    },
+    {
+      "table": "chat_messages",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "chat_sessions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "chatbot_analytics",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "period_start",
+        "period_end",
+        "total_sessions",
+        "total_messages",
+        "unique_users",
+        "avg_response_time_ms",
+        "avg_tokens_per_message",
+        "avg_messages_per_session",
+        "helpful_responses",
+        "unhelpful_responses",
+        "satisfaction_rate",
+        "total_tokens_used",
+        "estimated_cost_usd",
+        "top_categories",
+        "top_questions"
+      ]
+    },
+    {
+      "table": "chatbot_suggestions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "category",
+        "title",
+        "prompt",
+        "description",
+        "icon",
+        "display_order",
+        "show_in_contexts",
+        "required_tags",
+        "use_count",
+        "is_active"
+      ]
+    },
+    {
+      "table": "claim_deadlines",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "claim_precedent_analysis",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "confidence_level",
+        "suggested_strategy",
+        "potential_remedies",
+        "arbitrator_tendencies",
+        "relevant_cba_clause_ids",
+        "analyzed_at",
+        "analyzed_by",
+        "last_updated"
+      ]
+    },
+    {
+      "table": "claim_updates",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "claims",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "clause_comparisons",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "clause_comparisons_history",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["organization_id", "clause_ids", "comparison_notes"]
+    },
+    {
+      "table": "clause_embeddings",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "clause_library_tags",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "clc_api_config",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "api_url",
+        "api_key_encrypted",
+        "api_secret",
+        "is_enabled",
+        "sync_frequency",
+        "last_sync_at",
+        "next_sync_at",
+        "webhook_url_local",
+        "webhook_secret_encrypted",
+        "is_webhook_verified",
+        "sync_members_enabled",
+        "sync_remittances_enabled",
+        "sync_disputes_enabled",
+        "configured_by"
+      ]
+    },
+    {
+      "table": "clc_bargaining_trends",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "sub_sector",
+        "bargaining_unit_size",
+        "year",
+        "quarter",
+        "total_agreements",
+        "settled_agreements",
+        "unsettled_agreements",
+        "strikes_lockouts",
+        "average_wage_increase",
+        "median_wage_increase",
+        "range_low",
+        "range_high",
+        "average_duration_months",
+        "cola_settlements",
+        "sync_id",
+        "source"
+      ]
+    },
+    {
+      "table": "clc_chart_of_accounts",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "account_name",
+        "account_type",
+        "parent_account_code",
+        "is_active",
+        "description",
+        "financial_statement_line",
+        "statistics_canada_code"
+      ]
+    },
+    {
+      "table": "clc_oauth_tokens",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["scopes", "expires_at", "refresh_expires_at", "is_active", "last_used_at"]
+    },
+    {
+      "table": "clc_organization_sync_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "clc_per_capita_benchmarks",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "organization_name",
+        "organization_type",
+        "fiscal_year",
+        "quarter",
+        "period_start",
+        "period_end",
+        "total_members",
+        "dues_paying_members",
+        "active_members",
+        "per_capita_rate",
+        "total_remittance",
+        "currency",
+        "national_average_rate",
+        "provincial_average_rate",
+        "percentile_rank",
+        "size_category_comparison",
+        "sector_comparison",
+        "is_verified",
+        "verification_date",
+        "sync_id",
+        "source"
+      ]
+    },
+    {
+      "table": "clc_remittance_mapping",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "clc_sync_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "clc_union_density",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "sub_sector",
+        "industry_code",
+        "jurisdiction",
+        "region_name",
+        "year",
+        "month",
+        "total_workforce",
+        "union_members",
+        "union_covered",
+        "density_percent",
+        "coverage_percent",
+        "year_over_year_change",
+        "month_over_month_change",
+        "national_density",
+        "provincial_density",
+        "sync_id",
+        "source"
+      ]
+    },
+    {
+      "table": "clc_webhook_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "type",
+        "affiliate_code",
+        "payload",
+        "status",
+        "message",
+        "processing_duration",
+        "received_at",
+        "processed_at"
+      ]
+    },
+    {
+      "table": "cms_blocks",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "block_type",
+        "category",
+        "content",
+        "styles",
+        "is_reusable",
+        "thumbnail_url",
+        "created_by"
+      ]
+    },
+    {
+      "table": "cms_media_library",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cms_navigation_menus",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["name", "location", "items", "is_active"]
+    },
+    {
+      "table": "cms_pages",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cms_templates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "description",
+        "template_type",
+        "category",
+        "thumbnail_url",
+        "layout_config",
+        "is_system",
+        "is_published",
+        "created_by"
+      ]
+    },
+    {
+      "table": "cnesst_filings",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "collective_agreements",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "commercial_contracts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "committee_action_items",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "committee_documents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "committee_intelligence_snapshots",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "committee_meeting_attendees",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "committee_meetings",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "committee_memberships",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "member_id",
+        "role",
+        "status",
+        "start_date",
+        "end_date",
+        "term_number",
+        "appointment_method",
+        "appointed_by",
+        "election_date",
+        "votes_received",
+        "meetings_attended",
+        "meetings_total",
+        "notes",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "committees",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "communication_channels",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "type",
+        "provider",
+        "config",
+        "is_active",
+        "is_primary",
+        "daily_limit",
+        "monthly_limit",
+        "current_daily_count",
+        "current_monthly_count",
+        "last_health_check",
+        "health_status",
+        "metadata"
+      ]
+    },
+    {
+      "table": "communication_preferences",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "communication_templates",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "comparative_analyses",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "analysis_name",
+        "comparison_type",
+        "organization_ids",
+        "metrics",
+        "time_range",
+        "results",
+        "benchmarks",
+        "organization_ranking",
+        "gaps",
+        "strengths",
+        "recommendations",
+        "visualization_data",
+        "is_public",
+        "created_by"
+      ]
+    },
+    {
+      "table": "compliance_alerts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "conflict_audit_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "action_description",
+        "subject_user_id",
+        "related_disclosure_id",
+        "related_transaction_id",
+        "performed_by",
+        "performed_by_role",
+        "compliance_impact",
+        "metadata",
+        "ip_address"
+      ]
+    },
+    {
+      "table": "conflict_disclosures",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "full_name",
+        "role",
+        "disclosure_type",
+        "disclosure_year",
+        "conflict_type",
+        "conflict_description",
+        "related_parties",
+        "related_transaction_ids",
+        "financial_interest_amount",
+        "ownership_percentage",
+        "mitigation_plan",
+        "recusal_required",
+        "recusal_documented",
+        "review_status",
+        "review_notes",
+        "reviewed_by",
+        "review_completed_at",
+        "disclosure_deadline",
+        "submitted_at",
+        "overdue"
+      ]
+    },
+    {
+      "table": "conflict_of_interest_policy",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "significant_interest_threshold",
+        "arms_length_verification_required",
+        "covered_roles",
+        "review_committee_required",
+        "minimum_reviewers",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "conflict_review_committee",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "full_name",
+        "role",
+        "committee_role",
+        "appointed_by",
+        "appointed_at",
+        "term_start_date",
+        "term_end_date",
+        "status"
+      ]
+    },
+    {
+      "table": "conflict_training",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "full_name",
+        "role",
+        "training_type",
+        "training_date",
+        "training_provider",
+        "completion_status",
+        "completed_at",
+        "certificate_url",
+        "next_training_due"
+      ]
+    },
+    {
+      "table": "congress_memberships",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "consent_records",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "continuing_education",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "certification_id",
+        "course_title",
+        "course_provider",
+        "course_date",
+        "ce_hours_earned",
+        "ce_category",
+        "certificate_of_completion",
+        "verified_by",
+        "verified_at",
+        "applicable_period_start",
+        "applicable_period_end"
+      ]
+    },
+    {
+      "table": "contract_amendments",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "contract_covered_orgs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "contract_line_items",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "contract_rate_cards",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "contribution_rates",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cookie_consents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "corrective_actions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "source_type",
+        "source_id",
+        "source_reference",
+        "action_type",
+        "priority",
+        "status",
+        "title",
+        "description",
+        "root_cause",
+        "problem_statement",
+        "immediate_actions",
+        "proposed_action",
+        "implementation_plan",
+        "required_resources",
+        "estimated_cost",
+        "actual_cost",
+        "assigned_to_id",
+        "assigned_to_name",
+        "assigned_date",
+        "responsible_person_id",
+        "responsible_person_name",
+        "identified_date",
+        "due_date",
+        "target_completion_date",
+        "actual_completion_date",
+        "verification_date",
+        "closed_date",
+        "progress_percentage",
+        "progress_notes",
+        "milestones_updates",
+        "completion_notes",
+        "completion_evidence",
+        "verified_by_id",
+        "verified_by_name",
+        "verification_method",
+        "verification_notes",
+        "verification_passed",
+        "effectiveness_review_required",
+        "effectiveness_review_date",
+        "effectiveness_reviewed_by",
+        "effectiveness_rating",
+        "effectiveness_notes",
+        "preventive_measures",
+        "system_changes_required",
+        "system_changes_description",
+        "document_ids",
+        "notifications_sent",
+        "reminders_sent",
+        "last_reminder_date",
+        "metadata",
+        "tags",
+        "notes",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "correspondence",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "correspondence_audit_trail",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "correspondence_recipients",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cost_centers",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cost_of_living_data",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "council_elections",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "country_address_formats",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "course_registrations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "course_sessions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "cpi_adjusted_pricing",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "original_price_date",
+        "original_cpi",
+        "adjusted_price",
+        "adjustment_date",
+        "current_cpi",
+        "cpi_change_percentage",
+        "adjustment_amount",
+        "adjustment_approved",
+        "approved_by",
+        "approved_at"
+      ]
+    },
+    {
+      "table": "cpi_data",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "period_month",
+        "period_date",
+        "cpi_value",
+        "cpi_change",
+        "cpi_year_over_year",
+        "base_year",
+        "source",
+        "data_quality",
+        "imported_at",
+        "imported_by"
+      ]
+    },
+    {
+      "table": "cross_border_transactions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "cad_equivalent_cents",
+        "from_country_code",
+        "to_country_code",
+        "from_party_type",
+        "to_party_type",
+        "cra_reporting_status",
+        "requires_t106",
+        "t106_filed",
+        "t106_filing_date",
+        "transaction_type",
+        "counterparty_name",
+        "description"
+      ]
+    },
+    {
+      "table": "cross_org_access_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "currency_enforcement_audit",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "action_description",
+        "transaction_id",
+        "affected_currency",
+        "affected_amount",
+        "performed_by",
+        "performed_by_role",
+        "compliance_impact",
+        "metadata",
+        "ip_address"
+      ]
+    },
+    {
+      "table": "currency_enforcement_policy",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "allow_foreign_currency",
+        "foreign_currency_reason",
+        "fx_rate_source",
+        "fx_rate_update_frequency",
+        "t106_filing_required",
+        "t106_threshold_cad",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "currency_enforcement_violations",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "violation_description",
+        "transaction_id",
+        "attempted_currency",
+        "attempted_amount",
+        "attempted_by",
+        "attempted_at",
+        "status",
+        "resolution",
+        "resolved_by",
+        "resolved_at",
+        "ip_address",
+        "user_agent"
+      ]
+    },
+    {
+      "table": "currency_exchange_rates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "base_currency",
+        "target_currency",
+        "rate",
+        "effective_date",
+        "source",
+        "metadata"
+      ]
+    },
+    {
+      "table": "customer_nps_surveys",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "customer_onboarding_milestones",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "data_aggregation_consent",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "data_anonymization_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "operation_type",
+        "reason",
+        "request_id",
+        "tables_affected",
+        "executed_at",
+        "executed_by",
+        "verified_at",
+        "verified_by",
+        "can_reverse",
+        "backup_location"
+      ]
+    },
+    {
+      "table": "data_classification_policy",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "data_classification_registry",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "data_processing_records",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "activity_name",
+        "processing_purpose",
+        "legal_basis",
+        "data_categories",
+        "data_subjects",
+        "recipients",
+        "retention_period",
+        "deletion_procedure",
+        "security_measures",
+        "dpo_contact",
+        "last_reviewed",
+        "next_review_due"
+      ]
+    },
+    {
+      "table": "data_retention_policies",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "policy_name",
+        "data_type",
+        "retention_period_days",
+        "conditions",
+        "action_on_expiry",
+        "archive_location",
+        "legal_requirement",
+        "is_active",
+        "last_executed",
+        "next_execution"
+      ]
+    },
+    {
+      "table": "data_subject_access_requests",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "deadline_alerts",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "alert_type",
+        "alert_severity",
+        "alert_trigger",
+        "recipient_id",
+        "recipient_role",
+        "delivery_method",
+        "sent_at",
+        "delivered_at",
+        "delivery_status",
+        "delivery_error",
+        "viewed_at",
+        "acknowledged_at",
+        "action_taken",
+        "action_taken_at",
+        "subject",
+        "message",
+        "action_url"
+      ]
+    },
+    {
+      "table": "deadline_audit_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "deadline_extensions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "requested_by",
+        "requested_at",
+        "requested_days",
+        "request_reason",
+        "status",
+        "requires_approval",
+        "approved_by",
+        "approval_decision_at",
+        "approval_notes",
+        "new_deadline",
+        "days_granted"
+      ]
+    },
+    {
+      "table": "deadline_reassignment_convergence",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "deadline_reminder_executions",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "deadline_reminders",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "deadline_rules",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "defensibility_packs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "disaster_recovery_drills",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "scenario_type",
+        "scheduled_date",
+        "actual_start_time",
+        "actual_end_time",
+        "duration",
+        "participants",
+        "participant_count",
+        "objectives",
+        "objectives_met",
+        "status",
+        "overall_score",
+        "target_recovery_time",
+        "actual_recovery_time",
+        "recovery_time_objective_met",
+        "issues_identified",
+        "remediation_actions",
+        "remediation_deadline",
+        "drill_report_url",
+        "video_recording_url",
+        "conducted_by",
+        "approved_by",
+        "approved_at"
+      ]
+    },
+    {
+      "table": "dispatch_assignments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "dispatch_requests",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "dispatch_rules",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "document_access_grants",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "document_folders",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "document_links",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "document_search_index",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "document_signers",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "document_versions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "documents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "donation_campaigns",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "donation_receipts",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "donation_id",
+        "receipt_number",
+        "receipt_type",
+        "amount",
+        "issue_date",
+        "pdf_url",
+        "sent_at"
+      ]
+    },
+    {
+      "table": "donations",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "campaign_id",
+        "donor_name",
+        "donor_email",
+        "donor_phone",
+        "amount",
+        "currency",
+        "is_recurring",
+        "recurring_interval",
+        "is_anonymous",
+        "message",
+        "custom_data",
+        "stripe_payment_intent_id",
+        "stripe_customer_id",
+        "stripe_subscription_id",
+        "payment_status",
+        "payment_method",
+        "receipt_sent",
+        "receipt_url",
+        "tax_receipt_number",
+        "tax_receipt_issued_at"
+      ]
+    },
+    {
+      "table": "dues_policies",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "dues_rates",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "dues_transactions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "dunning_cases",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "dunning_policies",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "dunning_steps",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "emergency_declarations",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "severity_level",
+        "declared_by_user_id",
+        "declared_at",
+        "notes",
+        "affected_locations",
+        "affected_member_count",
+        "resolved_at",
+        "status",
+        "notification_sent",
+        "break_glass_activated"
+      ]
+    },
+    {
+      "table": "employer_access_attempts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_communications",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_contacts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_execution_artifacts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_execution_compliance_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_execution_evidence_links",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_execution_profiles",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_execution_replays",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_payroll_adjustments",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_payroll_run_items",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_payroll_runs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_remittance_run_items",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_remittance_runs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_remittances",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_reports",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_responses",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "campaign_id",
+        "response_date",
+        "response_type",
+        "response_summary",
+        "response_severity",
+        "meeting_attendance_mandatory",
+        "meeting_location",
+        "meeting_date_time",
+        "speakers",
+        "talking_points",
+        "materials_distributed",
+        "material_urls",
+        "material_content_summary",
+        "anti_union_consultant_name",
+        "consultant_firm",
+        "consultant_tactics",
+        "employee_disciplined",
+        "employee_terminated",
+        "affected_contact_id",
+        "alleged_reason",
+        "suspected_retaliation",
+        "surveillance_reported",
+        "surveillance_description",
+        "intimidation_tactics",
+        "potential_ulp",
+        "ulp_filed",
+        "ulp_case_number",
+        "nlrb_clrb_complaint_filed",
+        "union_counter_strategy",
+        "union_action_taken",
+        "organizers_assigned_response",
+        "impact_on_campaign",
+        "contacts_influenced",
+        "estimated_support_lost",
+        "evidence_documents",
+        "witness_statements",
+        "notes",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "employer_risk_scores",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_timesheet_batches",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employer_timesheet_entries",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employers",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "employment_history",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "effective_date",
+        "previous_values",
+        "new_values",
+        "reason",
+        "notes",
+        "created_by"
+      ]
+    },
+    {
+      "table": "entitlement_usage_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "erp_connectors",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "system_type",
+        "is_active",
+        "is_primary",
+        "encrypted_credentials",
+        "config",
+        "last_sync_at",
+        "last_error_at",
+        "last_error_message",
+        "metadata",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "erp_invoices",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "event_attendees",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "organization_id",
+        "user_id",
+        "email",
+        "name",
+        "status",
+        "is_optional",
+        "is_organizer",
+        "responded_at",
+        "response_comment",
+        "notification_sent",
+        "last_notification_at",
+        "external_attendee_id"
+      ]
+    },
+    {
+      "table": "event_check_ins",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "event_id",
+        "registration_id",
+        "check_in_method",
+        "checked_in_by",
+        "check_in_location",
+        "notes"
+      ]
+    },
+    {
+      "table": "event_registrations",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "event_id",
+        "profile_id",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "member_number",
+        "ticket_type",
+        "ticket_price",
+        "number_of_guests",
+        "guest_names",
+        "custom_data",
+        "registration_status",
+        "payment_status",
+        "stripe_payment_intent_id",
+        "payment_method",
+        "confirmation_sent",
+        "reminder_sent",
+        "checked_in",
+        "checked_in_at",
+        "checked_in_by",
+        "qr_code",
+        "registration_source",
+        "registered_at"
+      ]
+    },
+    {
+      "table": "event_reminders",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "user_id",
+        "organization_id",
+        "reminder_minutes",
+        "reminder_type",
+        "scheduled_for",
+        "sent_at",
+        "status",
+        "error",
+        "metadata"
+      ]
+    },
+    {
+      "table": "exchange_rates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "to_currency",
+        "exchange_rate",
+        "rate_source",
+        "effective_date",
+        "rate_timestamp",
+        "provider",
+        "data_quality"
+      ]
+    },
+    {
+      "table": "exit_interview_documents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "exit_interview_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "exit_interview_sessions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "exit_interviews",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_accounts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_benefit_coverage",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_benefit_dependents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_benefit_enrollments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_benefit_plans",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_benefit_utilization",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_calendar_attendees",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "external_calendar_connections",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_calendar_events",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "external_calendar_recurring_patterns",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "external_calendars",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "external_communication_channels",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_communication_files",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_communication_messages",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_communication_users",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_customers",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_data_sync_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_departments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_document_access_grants",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_document_files",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "external_provider",
+        "external_id",
+        "library_id",
+        "file_name",
+        "file_url",
+        "file_size",
+        "mime_type",
+        "is_folder",
+        "folder_child_count",
+        "created_by",
+        "created_by_email",
+        "last_modified_at",
+        "last_modified_by",
+        "parent_path",
+        "last_synced_at"
+      ]
+    },
+    {
+      "table": "external_document_libraries",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "external_provider",
+        "external_id",
+        "site_id",
+        "library_name",
+        "library_url",
+        "description",
+        "drive_type",
+        "created_by",
+        "last_synced_at"
+      ]
+    },
+    {
+      "table": "external_document_permissions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "external_provider",
+        "external_id",
+        "file_id",
+        "user_id",
+        "group_id",
+        "roles",
+        "permission_type",
+        "scope",
+        "granted_to",
+        "last_synced_at"
+      ]
+    },
+    {
+      "table": "external_document_sites",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "external_provider",
+        "external_id",
+        "site_name",
+        "site_url",
+        "description",
+        "last_modified_at",
+        "last_synced_at"
+      ]
+    },
+    {
+      "table": "external_employees",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_insurance_beneficiaries",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_insurance_claims",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_insurance_policies",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_invoices",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_lms_completions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_lms_courses",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_lms_enrollments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_lms_learners",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_lms_progress",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_matter_access_grants",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_payments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "external_pension_beneficiaries",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "external_pension_contributions",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "external_pension_estimates",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "external_pension_members",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "external_pension_plans",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "external_pension_service_credits",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "external_positions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "feature_flags",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "federation_campaigns",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "slug",
+        "campaign_type",
+        "description",
+        "start_date",
+        "end_date",
+        "target_completion_date",
+        "target_sector",
+        "target_employer",
+        "target_region",
+        "target_workers",
+        "goal_description",
+        "workers_reached",
+        "workers_organized",
+        "cards_signed_count",
+        "events_held",
+        "volunteers_involved",
+        "status",
+        "progress_percentage",
+        "lead_organizer_id",
+        "lead_organizer_name",
+        "coordinating_union_id",
+        "participating_union_count",
+        "budget",
+        "actual_spend",
+        "currency",
+        "is_public",
+        "public_page_url",
+        "social_media_hashtags",
+        "success_level",
+        "outcome_description",
+        "lessons_learned",
+        "resources_url",
+        "report_url",
+        "notes",
+        "metadata",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "federation_communications",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "slug",
+        "communication_type",
+        "subject",
+        "content",
+        "summary",
+        "author_user_id",
+        "author_name",
+        "author_title",
+        "status",
+        "published_at",
+        "scheduled_for",
+        "expires_at",
+        "send_to_all_members",
+        "target_audience",
+        "sent_count",
+        "delivered_count",
+        "opened_count",
+        "click_count",
+        "priority",
+        "is_pinned",
+        "is_public",
+        "featured_image",
+        "related_campaign_id",
+        "related_meeting_id",
+        "related_event_id",
+        "attachments",
+        "call_to_action",
+        "action_url",
+        "action_button_text",
+        "tags",
+        "notes",
+        "metadata",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "federation_executives",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "union_organization_id",
+        "position",
+        "position_type",
+        "portfolio_area",
+        "term_start",
+        "term_end",
+        "current_term",
+        "term_number",
+        "elected_date",
+        "election_type",
+        "votes_received",
+        "executive_email",
+        "executive_phone",
+        "office_location",
+        "signing_authority",
+        "budget_authority",
+        "can_approve_remittances",
+        "can_manage_campaigns",
+        "compensation_type",
+        "compensation_amount",
+        "status",
+        "is_active",
+        "biography",
+        "photo",
+        "notes",
+        "metadata",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "federation_meetings",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "meeting_type",
+        "description",
+        "start_date",
+        "end_date",
+        "timezone",
+        "location_type",
+        "venue_name",
+        "venue_address",
+        "virtual_meeting_url",
+        "virtual_meeting_platform",
+        "expected_attendees",
+        "actual_attendees",
+        "quorum_required",
+        "quorum_met",
+        "status",
+        "minutes_url",
+        "recording_url",
+        "resolutions_passed",
+        "decisions_url",
+        "registration_required",
+        "registration_deadline",
+        "registration_url",
+        "max_capacity",
+        "agenda_url",
+        "materials_url",
+        "organizer_user_id",
+        "organizer_name",
+        "organizer_email",
+        "notes",
+        "metadata",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "federation_memberships",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "joined_date",
+        "effective_date",
+        "suspended_date",
+        "terminated_date",
+        "last_renewal_date",
+        "next_renewal_date",
+        "membership_type",
+        "voting_rights",
+        "executive_eligibility",
+        "per_capita_rate",
+        "monthly_dues",
+        "currency",
+        "dues_in_arrears",
+        "arrears_amount",
+        "last_payment_date",
+        "delegate_count",
+        "executive_seats",
+        "primary_contact_user_id",
+        "primary_contact_name",
+        "primary_contact_email",
+        "primary_contact_phone",
+        "suspension_reason",
+        "termination_reason",
+        "notes",
+        "metadata",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "federation_remittances",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "total_amount",
+        "currency",
+        "status",
+        "payment_status",
+        "amount_paid",
+        "amount_outstanding",
+        "paid_date",
+        "payment_method",
+        "payment_reference",
+        "cheque_number",
+        "approval_status",
+        "submitted_date",
+        "submitted_by",
+        "approved_date",
+        "approved_by",
+        "rejected_date",
+        "rejected_by",
+        "rejection_reason",
+        "invoice_url",
+        "receipt_url",
+        "remittance_file_url",
+        "gl_account",
+        "fiscal_period",
+        "late_fee_amount",
+        "adjustment_amount",
+        "adjustment_reason",
+        "notes",
+        "metadata",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "federation_resources",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "slug",
+        "resource_type",
+        "description",
+        "category",
+        "sub_category",
+        "topics",
+        "target_audience",
+        "skill_level",
+        "file_url",
+        "file_type",
+        "file_size",
+        "thumbnail_url",
+        "preview_url",
+        "additional_files",
+        "version",
+        "previous_version_id",
+        "is_current_version",
+        "status",
+        "published_at",
+        "archived_at",
+        "author_user_id",
+        "author_name",
+        "author_organization",
+        "contributors",
+        "is_public",
+        "access_level",
+        "download_count",
+        "view_count",
+        "rating",
+        "rating_count",
+        "language",
+        "available_languages",
+        "license",
+        "license_url",
+        "related_resource_ids",
+        "related_campaign_id",
+        "tags",
+        "search_keywords",
+        "notes",
+        "usage_instructions",
+        "credits",
+        "metadata",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "federations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "fee_adjustments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "fee_settlement_batches",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "fee_settlement_lines",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "field_notes",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "member_id",
+        "author_id",
+        "note_type",
+        "subject",
+        "content",
+        "sentiment",
+        "engagement_level",
+        "follow_up_date",
+        "follow_up_completed",
+        "follow_up_completed_at",
+        "related_case_id",
+        "related_grievance_id",
+        "interaction_date",
+        "tags",
+        "is_private",
+        "is_confidential",
+        "metadata"
+      ]
+    },
+    {
+      "table": "field_organizer_activities",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "campaign_id",
+        "organizer_id",
+        "contact_id",
+        "activity_date",
+        "activity_type",
+        "activity_duration_minutes",
+        "activity_location",
+        "gps_latitude",
+        "gps_longitude",
+        "offline_mode_used",
+        "contact_made",
+        "commitment_level_before",
+        "commitment_level_after",
+        "card_signed",
+        "follow_up_needed",
+        "follow_up_date",
+        "issues_discussed",
+        "concerns_raised",
+        "questions_asked",
+        "materials_distributed",
+        "interaction_quality",
+        "likely_to_vote_yes",
+        "willing_to_help_organize",
+        "potential_leader",
+        "detailed_notes",
+        "organizer_observations",
+        "next_steps",
+        "synced_at",
+        "created_by"
+      ]
+    },
+    {
+      "table": "financial_audit_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "entity_type",
+        "org_id",
+        "action",
+        "user_id",
+        "user_name",
+        "changes",
+        "metadata",
+        "ip_address",
+        "user_agent",
+        "timestamp"
+      ]
+    },
+    {
+      "table": "financial_periods",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "firewall_access_rules",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "firewall_compliance_audit",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "firewall_violations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "fmv_audit_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "action_description",
+        "procurement_request_id",
+        "bid_id",
+        "appraisal_id",
+        "performed_by",
+        "performed_by_role",
+        "compliance_impact",
+        "metadata",
+        "ip_address"
+      ]
+    },
+    {
+      "table": "fmv_benchmarks",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "item_description",
+        "item_specifications",
+        "fmv_low",
+        "fmv_high",
+        "fmv_median",
+        "region",
+        "city",
+        "effective_from",
+        "effective_to",
+        "data_sources",
+        "comparable_transactions",
+        "cpi_adjusted",
+        "original_fmv",
+        "cpi_adjustment_factor",
+        "reviewed_by",
+        "reviewed_at"
+      ]
+    },
+    {
+      "table": "fmv_policy",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "minimum_bids_required",
+        "cpi_escalator_enabled",
+        "cpi_update_frequency",
+        "cpi_base_year",
+        "appraisal_required",
+        "appraisal_threshold",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "fmv_violations",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "violation_description",
+        "procurement_request_id",
+        "transaction_id",
+        "severity",
+        "status",
+        "resolution",
+        "resolved_by",
+        "resolved_at",
+        "detected_by",
+        "detected_at"
+      ]
+    },
+    {
+      "table": "foreign_workers",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "fx_rate_audit_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "action_description",
+        "currency",
+        "rate_date",
+        "old_rate",
+        "new_rate",
+        "performed_by",
+        "performed_by_role",
+        "metadata"
+      ]
+    },
+    {
+      "table": "gdpr_data_requests",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "geofence_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "geofences",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "gl_account_mappings",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "gl_transaction_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "gl_trial_balance",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "golden_shares",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "governance_bylaws",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "governance_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "governance_policies",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "governance_signatories",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "grievance_approvals",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "approver_user_id",
+        "approver_role",
+        "action",
+        "reviewed_at",
+        "comment",
+        "rejection_reason",
+        "metadata"
+      ]
+    },
+    {
+      "table": "grievance_assignments",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "role",
+        "status",
+        "assigned_by",
+        "assigned_at",
+        "accepted_at",
+        "completed_at",
+        "estimated_hours",
+        "actual_hours",
+        "assignment_reason",
+        "notes",
+        "metadata"
+      ]
+    },
+    {
+      "table": "grievance_case_access_assignments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "grievance_communications",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "direction",
+        "from_user_id",
+        "from_external",
+        "to_user_ids",
+        "to_external",
+        "subject",
+        "body",
+        "summary",
+        "communication_date",
+        "duration_minutes",
+        "attachment_ids",
+        "email_message_id",
+        "sms_message_id",
+        "calendar_event_id",
+        "is_important",
+        "requires_followup",
+        "followup_date",
+        "followup_completed",
+        "recorded_by",
+        "metadata"
+      ]
+    },
+    {
+      "table": "grievance_deadlines",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "grievance_documents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "grievance_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "grievance_responses",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "responder_name",
+        "responder_title",
+        "response",
+        "position",
+        "response_date",
+        "received_date",
+        "accepted_by_grievant",
+        "accepted_by_employer",
+        "next_deadline",
+        "next_step",
+        "attachments"
+      ]
+    },
+    {
+      "table": "grievance_settlements",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "grievance_stages",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "stage_type",
+        "description",
+        "order_index",
+        "is_required",
+        "sla_days",
+        "auto_transition",
+        "require_approval",
+        "next_stage_id",
+        "conditions",
+        "entry_actions",
+        "exit_actions",
+        "notify_on_entry",
+        "notify_on_deadline",
+        "notification_template_id",
+        "metadata"
+      ]
+    },
+    {
+      "table": "grievance_timeline",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "grievance_transitions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "grievance_workflows",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "description",
+        "grievance_type",
+        "contract_id",
+        "is_default",
+        "status",
+        "auto_assign",
+        "require_approval",
+        "sla_days",
+        "stages",
+        "metadata",
+        "created_by"
+      ]
+    },
+    {
+      "table": "grievances",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "gss_applications",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["met_2_week_target"]
+    },
+    {
+      "table": "hazard_reports",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "holidays",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "icra_anonymized_metrics",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "icra_assessment_answers",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "icra_assessments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "icra_benchmark_groups",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "icra_continuity_scores",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "icra_followup_recommendations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "icra_governance_flags",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "icra_maturity_profiles",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "icra_operational_indicators",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "icra_organizations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "impact_metrics",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "metric_type",
+        "value",
+        "comparison_value",
+        "unit",
+        "period",
+        "visibility",
+        "anonymized"
+      ]
+    },
+    {
+      "table": "in_app_notifications",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "independent_appraisals",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "item_description",
+        "item_specifications",
+        "procurement_request_id",
+        "appraiser_name",
+        "appraiser_company",
+        "appraiser_credentials",
+        "appraiser_contact",
+        "appraised_value",
+        "appraisal_method",
+        "appraisal_date",
+        "appraisal_valid_until",
+        "appraisal_report",
+        "appraisal_notes",
+        "reviewed_by",
+        "reviewed_at",
+        "review_notes"
+      ]
+    },
+    {
+      "table": "indigenous_data_access_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "accessed_by",
+        "band_council_id",
+        "access_type",
+        "access_purpose",
+        "data_categories",
+        "authorized_by",
+        "authorization_reference",
+        "ip_address",
+        "user_agent"
+      ]
+    },
+    {
+      "table": "indigenous_data_sharing_agreements",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "agreement_title",
+        "agreement_description",
+        "agreement_document",
+        "signed_date",
+        "data_sharing_scope",
+        "purpose_limitation",
+        "anonymization_required",
+        "valid_from",
+        "valid_until",
+        "auto_renewal",
+        "approved_by",
+        "bcr_number",
+        "status",
+        "terminated_at",
+        "termination_reason"
+      ]
+    },
+    {
+      "table": "indigenous_member_data",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "indigenous_status",
+        "band_council_id",
+        "treaty_number",
+        "cultural_data_sensitivity",
+        "traditional_knowledge_holder",
+        "elder_status",
+        "data_control_preference",
+        "allow_aggregation",
+        "allow_third_party_access",
+        "on_reserve_data_only",
+        "preferred_storage_location"
+      ]
+    },
+    {
+      "table": "injury_logs",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "incident_id",
+        "claim_id",
+        "worker_id",
+        "worker_name",
+        "worker_employee_id",
+        "worker_date_of_birth",
+        "worker_job_title",
+        "worker_department",
+        "worker_hire_date",
+        "injury_date",
+        "injury_time",
+        "reported_date",
+        "body_parts_affected",
+        "injury_types",
+        "injury_severity",
+        "first_aid_provided",
+        "first_aid_description",
+        "medical_attention_required",
+        "treated_at_location",
+        "treating_physician",
+        "hospital_name",
+        "hospitalized",
+        "hospitalization_days",
+        "lost_time_injury",
+        "first_day_missed",
+        "return_to_work_date",
+        "days_away",
+        "days_restricted",
+        "days_transferred",
+        "modified_duties_assigned",
+        "modified_duties_description",
+        "permanent_impairment",
+        "impairment_description",
+        "impairment_rating_percentage",
+        "wsib_claim_filed",
+        "wsib_claim_number",
+        "wsib_claim_date",
+        "wsib_claim_status",
+        "wsib_decision",
+        "wsib_decision_date",
+        "benefits_approved",
+        "benefit_start_date",
+        "benefit_amount",
+        "medical_costs",
+        "wage_loss_costs",
+        "rehabilitation_costs",
+        "total_costs",
+        "osha_recordable",
+        "osha_form_number",
+        "osha_classification",
+        "provincial_report_required",
+        "provincial_report_filed",
+        "provincial_report_number",
+        "document_ids",
+        "medical_records",
+        "status",
+        "closed_date",
+        "closure_notes",
+        "metadata",
+        "notes",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "insight_recommendations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "integration_api_keys",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "integration_configs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "integration_partners",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "integration_sync_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "integration_sync_schedules",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "provider",
+        "sync_type",
+        "orgs",
+        "schedule",
+        "enabled",
+        "last_run_at",
+        "next_run_at"
+      ]
+    },
+    {
+      "table": "integration_webhooks",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "international_addresses",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "user_id",
+        "address_type",
+        "status",
+        "country_code",
+        "country_name",
+        "address_line_1",
+        "address_line_2",
+        "address_line_3",
+        "locality",
+        "locality_type",
+        "administrative_area",
+        "administrative_area_type",
+        "postal_code",
+        "postal_code_type",
+        "sub_administrative_area",
+        "dependent_locality",
+        "sorting_code",
+        "formatted_address",
+        "local_format",
+        "latitude",
+        "longitude",
+        "geocoded_at",
+        "geocode_provider",
+        "geocode_accuracy",
+        "is_validated",
+        "validated_by",
+        "validated_at",
+        "validation_result",
+        "is_standardized",
+        "standardized_by",
+        "standardized_at",
+        "standardized_data",
+        "deliverability",
+        "delivery_point",
+        "carrier_route",
+        "metadata",
+        "is_primary",
+        "notes"
+      ]
+    },
+    {
+      "table": "job_applications",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "job_posting_id",
+        "profile_id",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "resume_url",
+        "cover_letter_url",
+        "cover_letter_text",
+        "linkedin_url",
+        "portfolio_url",
+        "years_experience",
+        "current_employer",
+        "current_position",
+        "availability_date",
+        "salary_expectation",
+        "willing_to_relocate",
+        "is_union_member",
+        "union_local",
+        "custom_responses",
+        "application_status",
+        "status_notes",
+        "viewed_by",
+        "viewed_at",
+        "interview_scheduled_for",
+        "rejection_reason",
+        "source",
+        "applied_at"
+      ]
+    },
+    {
+      "table": "job_classifications",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "job_title",
+        "job_family",
+        "job_level",
+        "minimum_rate",
+        "maximum_rate",
+        "standard_rate",
+        "description",
+        "requirements",
+        "is_active",
+        "effective_date",
+        "expiry_date",
+        "created_by"
+      ]
+    },
+    {
+      "table": "job_postings",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "title",
+        "slug",
+        "employer_name",
+        "employer_logo",
+        "employer_website",
+        "job_type",
+        "category",
+        "description",
+        "responsibilities",
+        "qualifications",
+        "benefits",
+        "salary_min",
+        "salary_max",
+        "salary_currency",
+        "salary_period",
+        "salary_display",
+        "location_type",
+        "city",
+        "province",
+        "country",
+        "remote_allowed",
+        "experience_level",
+        "education_required",
+        "union_affiliation_required",
+        "union_name",
+        "contact_name",
+        "contact_email",
+        "contact_phone",
+        "application_method",
+        "application_email",
+        "application_url",
+        "application_instructions",
+        "requires_resume",
+        "requires_cover_letter",
+        "custom_questions",
+        "status",
+        "featured",
+        "views_count",
+        "applications_count",
+        "posted_date",
+        "closing_date",
+        "filled_date",
+        "seo_config",
+        "tags",
+        "created_by"
+      ]
+    },
+    {
+      "table": "job_saved",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["profile_id", "job_posting_id", "notes"]
+    },
+    {
+      "table": "joint_hs_committees",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "journal_entries",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "connector_id",
+        "external_id",
+        "entry_number",
+        "entry_date",
+        "posting_date",
+        "description",
+        "reference",
+        "currency",
+        "total_debit",
+        "total_credit",
+        "is_posted",
+        "is_reversed",
+        "reversal_entry_id",
+        "created_by",
+        "approved_by",
+        "approved_at",
+        "metadata",
+        "synced_at"
+      ]
+    },
+    {
+      "table": "journal_entry_lines",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "line_number",
+        "account_id",
+        "debit_amount",
+        "credit_amount",
+        "description",
+        "member_id",
+        "bargaining_unit_id",
+        "department_id",
+        "location_id",
+        "project_id",
+        "metadata"
+      ]
+    },
+    {
+      "table": "key_holder_registry",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "role",
+        "key_holder_number",
+        "shamir_share_encrypted",
+        "shamir_share_fingerprint",
+        "key_issued_at",
+        "key_expires_at",
+        "key_rotation_due",
+        "break_glass_training_completed",
+        "training_completed_at",
+        "training_expires_at",
+        "emergency_phone",
+        "emergency_email",
+        "backup_contact_name",
+        "backup_contact_phone",
+        "status",
+        "last_verified_at",
+        "next_verification_due"
+      ]
+    },
+    {
+      "table": "knowledge_base",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "knowledge_base_articles",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "slug",
+        "summary",
+        "content",
+        "category",
+        "subcategory",
+        "tags",
+        "status",
+        "visibility",
+        "view_count",
+        "helpful_count",
+        "not_helpful_count",
+        "meta_description",
+        "meta_keywords",
+        "version",
+        "published_at",
+        "last_reviewed_at",
+        "author_user_id",
+        "author_name",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "kpi_configurations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "license_renewals",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "renewal_due_date",
+        "renewal_submitted_date",
+        "renewal_approved_date",
+        "renewal_status",
+        "ce_requirements_met",
+        "fee_paid",
+        "application_complete",
+        "renewal_application",
+        "payment_receipt",
+        "approval_letter",
+        "notes"
+      ]
+    },
+    {
+      "table": "lmbp_compliance_alerts",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["email_sent", "email_sent_at", "dashboard_notified"]
+    },
+    {
+      "table": "lmbp_compliance_reports",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "compliance_rating",
+        "ircc_feedback",
+        "corrective_actions_required",
+        "report_pdf_url",
+        "supporting_documents_urls",
+        "created_by"
+      ]
+    },
+    {
+      "table": "lmbp_letters",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "location_deletion_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "location_tracking",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "location_tracking_audit",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "location_tracking_config",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "lrb_agreements",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "source_id",
+        "employer_name",
+        "employer_address",
+        "union_name",
+        "union_code",
+        "bargaining_unit",
+        "bargaining_unit_size",
+        "agreement_date",
+        "effective_date",
+        "expiry_date",
+        "ratification_date",
+        "status",
+        "sector",
+        "industry_code",
+        "industry_name",
+        "geographic_scope",
+        "jurisdiction",
+        "hourly_wage_range",
+        "annual_salary_range",
+        "pdf_url",
+        "html_url",
+        "json_url",
+        "extracted_content",
+        "key_terms",
+        "search_keywords",
+        "noc_codes",
+        "occupation_category",
+        "embedding_vector",
+        "ai_summary",
+        "sentiment_score",
+        "last_synced_at",
+        "sync_id"
+      ]
+    },
+    {
+      "table": "lrb_employers",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "employer_name_alt",
+        "jurisdiction",
+        "city",
+        "province",
+        "industry_code",
+        "industry_name",
+        "total_agreements",
+        "active_agreements",
+        "last_agreement_date",
+        "first_seen_at",
+        "last_synced_at"
+      ]
+    },
+    {
+      "table": "lrb_sync_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "sync_id",
+        "started_at",
+        "completed_at",
+        "status",
+        "pages_processed",
+        "agreements_found",
+        "agreements_inserted",
+        "agreements_updated",
+        "agreements_failed",
+        "error_message",
+        "error_details",
+        "sync_type",
+        "parameters",
+        "initiated_by"
+      ]
+    },
+    {
+      "table": "lrb_unions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "union_code",
+        "acronym",
+        "parent_organization",
+        "affiliation_level",
+        "primary_jurisdiction",
+        "total_agreements",
+        "active_agreements",
+        "total_members",
+        "last_agreement_date",
+        "first_seen_at",
+        "last_synced_at"
+      ]
+    },
+    {
+      "table": "meeting_rooms",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "member_addresses",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "organization_id",
+        "address_type",
+        "street_address",
+        "city",
+        "province",
+        "postal_code",
+        "country",
+        "is_primary",
+        "effective_date"
+      ]
+    },
+    {
+      "table": "member_arrears",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "member_breaks",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "member_certifications",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "member_documents",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "document_type",
+        "document_name",
+        "document_number",
+        "mime_type",
+        "file_hash",
+        "issue_date",
+        "expiry_date",
+        "is_expired",
+        "verified",
+        "verified_by",
+        "verified_at",
+        "verification_notes",
+        "confidentiality_level",
+        "tags",
+        "metadata",
+        "uploaded_by"
+      ]
+    },
+    {
+      "table": "member_dues_issues",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "member_dues_ledger",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "member_employment",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "member_jurisdiction_preferences",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "member_leaves",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "approved_at",
+        "affects_seniority",
+        "seniority_adjustment_days",
+        "affects_dues",
+        "dues_waiver_approved",
+        "reason",
+        "notes",
+        "documents",
+        "created_by"
+      ]
+    },
+    {
+      "table": "member_location_consent",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "member_relationship_scores",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "member_id",
+        "overall_score",
+        "engagement_score",
+        "relationship_score",
+        "activity_score",
+        "last_contact_date",
+        "total_interactions",
+        "interactions_last_30_days",
+        "field_notes_count",
+        "positive_notes_count",
+        "negative_notes_count",
+        "average_sentiment",
+        "current_sentiment",
+        "is_at_risk",
+        "at_risk_reason",
+        "calculated_at"
+      ]
+    },
+    {
+      "table": "member_segments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "mentorships",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "message_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "message_notifications",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["thread_id", "is_read", "read_at", "notified_at"]
+    },
+    {
+      "table": "message_participants",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["user_id", "role", "is_active", "last_read_at", "joined_at", "left_at"]
+    },
+    {
+      "table": "message_read_receipts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "message_templates",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "message_threads",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "messages",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "mission_audits",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "ml_predictions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "model_metadata",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "movement_trends",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "negotiation_sessions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "session_number",
+        "session_type",
+        "title",
+        "scheduled_date",
+        "scheduled_end_date",
+        "actual_start_date",
+        "actual_end_date",
+        "location",
+        "is_virtual",
+        "meeting_link",
+        "union_attendees",
+        "employer_attendees",
+        "agenda",
+        "outcomes",
+        "summary",
+        "next_steps",
+        "proposals_discussed",
+        "bargaining_note_id",
+        "status",
+        "cancelled",
+        "cancellation_reason",
+        "attachments",
+        "created_by",
+        "last_modified_by"
+      ]
+    },
+    {
+      "table": "negotiations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "newsletter_campaigns",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "newsletter_distribution_lists",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "newsletter_engagement",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "recipient_id",
+        "profile_id",
+        "event_type",
+        "event_data",
+        "ip_address",
+        "user_agent",
+        "occurred_at"
+      ]
+    },
+    {
+      "table": "newsletter_list_subscribers",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "newsletter_recipients",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "newsletter_templates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "description",
+        "category",
+        "thumbnail_url",
+        "html_content",
+        "json_structure",
+        "variables",
+        "is_system",
+        "is_active",
+        "usage_count",
+        "created_by"
+      ]
+    },
+    {
+      "table": "nlrb_clrb_filings",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "campaign_id",
+        "filing_type",
+        "filing_number",
+        "jurisdiction",
+        "filed_date",
+        "filed_by",
+        "employer_notified_date",
+        "bargaining_unit_description",
+        "unit_size_claimed",
+        "unit_job_classifications",
+        "excluded_positions",
+        "showing_of_interest_percentage",
+        "cards_submitted_count",
+        "card_submission_batch_ids",
+        "status",
+        "hearing_date",
+        "hearing_location",
+        "hearing_outcome",
+        "election_scheduled_date",
+        "election_location",
+        "election_type",
+        "election_conducted",
+        "petition_document_url",
+        "showing_of_interest_document_url",
+        "hearing_transcripts_url",
+        "decision_document_url",
+        "employer_contested",
+        "employer_objections",
+        "employer_counter_arguments",
+        "employer_representation",
+        "decision_date",
+        "decision_summary",
+        "unit_approved",
+        "approved_unit_size",
+        "approved_job_classifications",
+        "appeal_filed",
+        "appeal_status",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "notification_bounces",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "email",
+        "bounce_type",
+        "bounce_sub_type",
+        "first_bounced_at",
+        "last_bounced_at",
+        "bounce_count",
+        "is_active",
+        "suppress_until",
+        "suppression_reason"
+      ]
+    },
+    {
+      "table": "notification_delivery_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "notification_history",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "recipient",
+        "channel",
+        "subject",
+        "template",
+        "status",
+        "error",
+        "sent_at",
+        "delivered_at",
+        "opened_at",
+        "clicked_at",
+        "metadata"
+      ]
+    },
+    {
+      "table": "notification_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "priority",
+        "channel",
+        "recipients",
+        "success_count",
+        "failure_count",
+        "message_ids",
+        "errors",
+        "sent_at"
+      ]
+    },
+    {
+      "table": "notification_queue",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "notification_templates",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "notification_tracking",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "notifications",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "org_configurations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "org_entitlements",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "org_subscriptions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "org_usage",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "organization_benchmark_snapshots",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "benchmark_category_id",
+        "period_start",
+        "period_end",
+        "period_type",
+        "metric_value",
+        "benchmark_value",
+        "variance_from_benchmark",
+        "variance_percentage",
+        "percentile_rank",
+        "performance_indicator",
+        "previous_period_value",
+        "period_over_period_change",
+        "period_over_period_percentage",
+        "trend_direction",
+        "data_completeness_percentage",
+        "calculation_notes",
+        "calculated_at"
+      ]
+    },
+    {
+      "table": "organization_billing_config",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "organization_contacts",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "role",
+        "name",
+        "email",
+        "phone",
+        "is_primary",
+        "receive_reminders",
+        "receive_reports",
+        "is_active"
+      ]
+    },
+    {
+      "table": "organization_members",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "organization_relationships",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "organization_sharing_grants",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "grantee_org_id",
+        "resource_type",
+        "all_resources",
+        "specific_resource_ids",
+        "grant_reason",
+        "expires_at",
+        "revoked_at",
+        "revoked_by",
+        "revoke_reason",
+        "granted_by"
+      ]
+    },
+    {
+      "table": "organization_sharing_settings",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "allow_federation_sharing",
+        "allow_sector_sharing",
+        "allow_province_sharing",
+        "allow_congress_sharing",
+        "auto_share_clauses",
+        "auto_share_precedents",
+        "require_anonymization",
+        "default_sharing_level",
+        "allowed_sharing_levels",
+        "sharing_approval_required",
+        "sharing_approver_role",
+        "max_shared_clauses",
+        "max_shared_precedents"
+      ]
+    },
+    {
+      "table": "organizations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "organizer_impacts",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "cases_handled",
+        "cases_won",
+        "avg_resolution_time",
+        "member_satisfaction_avg",
+        "escalations_avoided",
+        "democratic_participation_rate",
+        "recognition_events",
+        "period_start",
+        "period_end"
+      ]
+    },
+    {
+      "table": "organizer_tasks",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "organizing_campaign_milestones",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "campaign_id",
+        "milestone_name",
+        "milestone_type",
+        "target_date",
+        "completed",
+        "completed_date",
+        "target_metric",
+        "target_value",
+        "current_value",
+        "progress_percentage",
+        "status",
+        "days_until_deadline",
+        "reminder_sent",
+        "reminder_date",
+        "notes",
+        "created_by"
+      ]
+    },
+    {
+      "table": "organizing_campaigns",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "organizing_contacts",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "campaign_id",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "preferred_contact_method",
+        "job_title",
+        "department",
+        "shift",
+        "hire_date",
+        "seniority_years",
+        "work_location",
+        "supervisor",
+        "immediate_coworkers",
+        "influence_level",
+        "commitment_level",
+        "union_sentiment",
+        "card_signed",
+        "card_signed_date",
+        "willing_to_organize",
+        "issues_concerned_about",
+        "first_contact_date",
+        "last_contact_date",
+        "total_contacts",
+        "house_visit_completed",
+        "house_visit_date",
+        "likely_to_vote_yes",
+        "employer_loyalist",
+        "potential_risks",
+        "notes",
+        "tags",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "outreach_enrollments",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "sequence_id",
+        "member_id",
+        "enrolled_by",
+        "current_step",
+        "total_steps",
+        "completed_steps",
+        "status",
+        "enrolled_at",
+        "completed_at",
+        "cancelled_at",
+        "next_step_at",
+        "metadata"
+      ]
+    },
+    {
+      "table": "outreach_sequences",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "description",
+        "trigger_type",
+        "trigger_conditions",
+        "steps",
+        "status",
+        "is_active",
+        "stats",
+        "metadata",
+        "tags",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "outreach_steps_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "enrollment_id",
+        "step_number",
+        "action_type",
+        "status",
+        "scheduled_at",
+        "executed_at",
+        "message_log_id",
+        "task_id",
+        "error_message",
+        "retry_count",
+        "metadata"
+      ]
+    },
+    {
+      "table": "pack_download_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "organization_id",
+        "downloaded_at",
+        "downloaded_by",
+        "downloaded_by_role",
+        "download_purpose",
+        "ip_address",
+        "user_agent",
+        "export_format",
+        "file_size_bytes",
+        "integrity_verified",
+        "download_success",
+        "error_message"
+      ]
+    },
+    {
+      "table": "pack_verification_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "verified_at",
+        "verified_by",
+        "verification_passed",
+        "expected_hash",
+        "actual_hash",
+        "failure_reason",
+        "tampered_fields",
+        "verification_trigger"
+      ]
+    },
+    {
+      "table": "page_analytics",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "page_id",
+        "event_id",
+        "job_id",
+        "campaign_id",
+        "metric_date",
+        "page_views",
+        "unique_visitors",
+        "avg_time_on_page",
+        "bounce_rate",
+        "traffic_sources",
+        "device_breakdown",
+        "conversion_count"
+      ]
+    },
+    {
+      "table": "pay_equity_exercises",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "payment_allocations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "payment_classification_policy",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "payment_cycles",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "payment_disputes",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "payment_methods",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "payment_plans",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "payment_routing_rules",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "payments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "payroll_deductions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pci_dss_cardholder_data_flow",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "system_name",
+        "data_flow_description",
+        "storage_location",
+        "encryption_method",
+        "last_reviewed_at"
+      ]
+    },
+    {
+      "table": "pci_dss_encryption_keys",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "key_type",
+        "key_identifier",
+        "rotated_at",
+        "expires_at",
+        "rotation_reason",
+        "metadata"
+      ]
+    },
+    {
+      "table": "pci_dss_quarterly_scans",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "scan_date",
+        "vendor_name",
+        "scan_status",
+        "vulnerabilities_found",
+        "critical_issues",
+        "report_url",
+        "notes"
+      ]
+    },
+    {
+      "table": "pci_dss_requirements",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "requirement_number",
+        "requirement_description",
+        "compliance_status",
+        "evidence",
+        "remediation_notes",
+        "last_reviewed_at"
+      ]
+    },
+    {
+      "table": "pci_dss_saq_assessments",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "assessment_date",
+        "sqa_level",
+        "overall_status",
+        "attestation_of_compliance",
+        "attestation_date",
+        "metadata"
+      ]
+    },
+    {
+      "table": "pending_profiles",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pension_benefit_claims",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pension_contributions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pension_members",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pension_plans",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pension_t4a_records",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pension_trustee_meetings",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pension_trustees",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "per_capita_remittances",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pilot_applications",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pilot_checklist_items",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pilot_demo_seeds",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pilot_enrollments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pilot_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pilot_feedback",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pilot_metrics",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pilot_milestones",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "platform_cost_ledger_entries",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "platform_invoice_line_items",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "platform_invoices",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "platform_payments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "poll_votes",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "polls",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "ppe_equipment",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "precedent_citations",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "citing_claim_id",
+        "citing_precedent_id",
+        "citing_organization_id",
+        "citation_context",
+        "citation_type",
+        "cited_by",
+        "cited_at"
+      ]
+    },
+    {
+      "table": "precedent_tags",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["tag_name"]
+    },
+    {
+      "table": "preventive_withdrawals",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "pricing_discount_rules",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "pricing_regional_deployments",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "pricing_template_modules",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "pricing_templates",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "privacy_breaches",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "severity",
+        "affected_province",
+        "affected_user_count",
+        "data_types",
+        "breach_description",
+        "discovered_at",
+        "contained_at",
+        "user_notification_required",
+        "regulator_notification_required",
+        "users_notified_at",
+        "regulator_notified_at",
+        "notification_deadline",
+        "deadline_met",
+        "mitigation_steps",
+        "mitigation_completed_at",
+        "incident_report",
+        "reported_by"
+      ]
+    },
+    {
+      "table": "procurement_bids",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "bidder_phone",
+        "bid_amount",
+        "bid_documents",
+        "bid_notes",
+        "bid_valid_until",
+        "fmv_benchmark_id",
+        "within_fmv_range",
+        "fmv_variance_percentage",
+        "evaluation_score",
+        "evaluation_notes",
+        "evaluated_by",
+        "evaluated_at",
+        "bid_status",
+        "submitted_at"
+      ]
+    },
+    {
+      "table": "procurement_requests",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "request_title",
+        "request_description",
+        "requested_by",
+        "requested_by_department",
+        "requested_at",
+        "estimated_value",
+        "budget_approved",
+        "approved_by",
+        "approved_at",
+        "procurement_type",
+        "procurement_method",
+        "minimum_bids_required",
+        "bids_received",
+        "bidding_deadline",
+        "status",
+        "awarded_to",
+        "awarded_amount",
+        "awarded_at",
+        "award_justification"
+      ]
+    },
+    {
+      "table": "profiles",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "program_enrollments",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "program_id",
+        "enrollment_date",
+        "enrollment_status",
+        "courses_completed",
+        "courses_completed_count",
+        "electives_completed_count",
+        "progress_percentage",
+        "completed",
+        "completion_date",
+        "certification_id",
+        "notes"
+      ]
+    },
+    {
+      "table": "provincial_consent",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "provincial_data_handling",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "provincial_privacy_config",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "public_content",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "slug",
+        "title",
+        "excerpt",
+        "body",
+        "metadata",
+        "tags",
+        "is_published",
+        "published_at"
+      ]
+    },
+    {
+      "table": "public_events",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "title",
+        "slug",
+        "description",
+        "event_type",
+        "start_date",
+        "end_date",
+        "timezone",
+        "location_type",
+        "venue_name",
+        "venue_address",
+        "venue_city",
+        "venue_state",
+        "venue_postal_code",
+        "venue_country",
+        "virtual_link",
+        "virtual_platform",
+        "featured_image",
+        "capacity",
+        "registered_count",
+        "waitlist_enabled",
+        "registration_opens",
+        "registration_closes",
+        "registration_status",
+        "is_free",
+        "ticket_price",
+        "member_price",
+        "currency",
+        "custom_fields",
+        "confirmation_email_template",
+        "reminder_email_template",
+        "page_content",
+        "seo_config",
+        "tags",
+        "organizer_name",
+        "organizer_email",
+        "organizer_phone",
+        "stripe_product_id",
+        "stripe_price_id",
+        "created_by"
+      ]
+    },
+    {
+      "table": "push_deliveries",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "device_id",
+        "status",
+        "fcm_message_id",
+        "sent_at",
+        "delivered_at",
+        "clicked_at",
+        "dismissed_at",
+        "error_code",
+        "error_message",
+        "retry_count",
+        "event_data"
+      ]
+    },
+    {
+      "table": "push_devices",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "push_notification_templates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "description",
+        "category",
+        "title",
+        "body",
+        "icon_url",
+        "image_url",
+        "badge_count",
+        "sound",
+        "click_action",
+        "action_buttons",
+        "variables",
+        "priority",
+        "ttl",
+        "is_system",
+        "created_by"
+      ]
+    },
+    {
+      "table": "push_notifications",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "recognition_award_types",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "recognition_awards",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "recognition_programs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "reconciliation_exceptions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "reconciliation_matches",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "reconciliation_runs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "recovery_time_objectives",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "component_description",
+        "rto_hours",
+        "rpo_hours",
+        "depends_on",
+        "criticality_level",
+        "last_tested_at",
+        "last_test_result",
+        "actual_recovery_time"
+      ]
+    },
+    {
+      "table": "recusal_tracking",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "full_name",
+        "role",
+        "recusal_type",
+        "recusal_reason",
+        "related_matter",
+        "related_meeting_id",
+        "related_vote_id",
+        "related_transaction_id",
+        "recusal_documented",
+        "documentation_url",
+        "documented_by",
+        "documented_at",
+        "recusal_start_date",
+        "recusal_end_date",
+        "verified_by",
+        "verified_at"
+      ]
+    },
+    {
+      "table": "remittance_approvals",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "remittance_exceptions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "remittance_line_items",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "report_delivery_history",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "scheduled_report_id",
+        "report_name",
+        "report_type",
+        "delivery_method",
+        "recipients",
+        "delivery_format",
+        "file_url",
+        "file_size_bytes",
+        "file_hash",
+        "expires_at",
+        "status",
+        "delivered_at",
+        "failed_at",
+        "error_message",
+        "retry_count",
+        "email_subject",
+        "email_opened",
+        "email_opened_at",
+        "email_clicked",
+        "email_clicked_at",
+        "generation_time_ms",
+        "delivery_time_ms",
+        "triggered_by"
+      ]
+    },
+    {
+      "table": "report_executions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "executed_by",
+        "executed_at",
+        "format",
+        "parameters",
+        "result_count",
+        "execution_time_ms",
+        "file_url",
+        "file_size",
+        "status",
+        "error_message"
+      ]
+    },
+    {
+      "table": "report_shares",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["shared_by", "shared_with", "can_edit", "can_execute", "expires_at"]
+    },
+    {
+      "table": "report_templates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "description",
+        "category",
+        "config",
+        "is_system",
+        "is_active",
+        "thumbnail",
+        "tags",
+        "created_by"
+      ]
+    },
+    {
+      "table": "reports",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "representation_authorities",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "reserved_matter_votes",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "reward_budget_envelopes",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "reward_redemptions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "reward_wallet_ledger",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "right_of_refusal_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "rl1_tax_slips",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "tax_year",
+        "payer_name",
+        "payer_quebec_enterprise_number",
+        "payer_address",
+        "payer_city",
+        "payer_postal_code",
+        "recipient_name",
+        "recipient_sin",
+        "recipient_address",
+        "recipient_city",
+        "recipient_postal_code",
+        "box_o_other_income",
+        "box_e_quebec_income_tax_deducted",
+        "generated_at",
+        "generated_by",
+        "filed_with_revenu_quebec",
+        "revenu_quebec_filing_date",
+        "revenu_quebec_confirmation_number",
+        "delivered_to_member",
+        "delivery_method",
+        "delivered_at",
+        "pdf_url",
+        "xml_url",
+        "is_amendment",
+        "original_slip_id",
+        "amendment_reason"
+      ]
+    },
+    {
+      "table": "role_tenure_history",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "member_id",
+        "role_type",
+        "role_title",
+        "role_level",
+        "related_entity_type",
+        "related_entity_id",
+        "start_date",
+        "end_date",
+        "is_current_role",
+        "appointment_method",
+        "election_date",
+        "votes_received",
+        "vote_total",
+        "term_length",
+        "term_number",
+        "end_reason",
+        "ended_by",
+        "notes",
+        "achievements",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "room_bookings",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "event_id",
+        "organization_id",
+        "booked_by",
+        "booked_for",
+        "purpose",
+        "start_time",
+        "end_time",
+        "setup_required",
+        "setup_time",
+        "catering_required",
+        "catering_notes",
+        "special_requests",
+        "status",
+        "requires_approval",
+        "approved_by",
+        "approved_at",
+        "approval_notes",
+        "checked_in_at",
+        "checked_in_by",
+        "checked_out_at",
+        "actual_end_time",
+        "cancelled_at",
+        "cancelled_by",
+        "cancellation_reason",
+        "attendee_count",
+        "metadata"
+      ]
+    },
+    {
+      "table": "safety_audits",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "audit_type",
+        "status",
+        "planned_date",
+        "scheduled_start_date",
+        "scheduled_end_date",
+        "actual_start_date",
+        "actual_end_date",
+        "audit_scope",
+        "audit_objectives",
+        "standards_referenced",
+        "workplace_ids",
+        "workplace_names",
+        "departments_audited",
+        "lead_auditor_id",
+        "lead_auditor_name",
+        "lead_auditor_certification",
+        "auditor_ids",
+        "auditor_names",
+        "is_external_audit",
+        "auditing_organization",
+        "audit_plan",
+        "documents_reviewed",
+        "areas_inspected",
+        "staff_interviewed",
+        "total_findings",
+        "critical_findings",
+        "major_findings",
+        "minor_findings",
+        "observations",
+        "findings_detail",
+        "overall_compliance_rating",
+        "compliance_percentage",
+        "strengths",
+        "weaknesses",
+        "opportunities_for_improvement",
+        "executive_summary",
+        "audit_report",
+        "report_url",
+        "report_issue_date",
+        "corrective_actions_required",
+        "corrective_action_plan",
+        "corrective_action_ids",
+        "follow_up_audit_required",
+        "follow_up_audit_date",
+        "follow_up_completed",
+        "certification_awarded",
+        "certification_type",
+        "certificate_number",
+        "certification_valid_from",
+        "certification_valid_until",
+        "document_ids",
+        "metadata",
+        "notes",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "safety_certifications",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "holder_id",
+        "holder_name",
+        "holder_employee_id",
+        "holder_job_title",
+        "holder_department",
+        "certification_type",
+        "certification_name",
+        "certification_level",
+        "issuing_organization",
+        "issuing_body",
+        "certification_standard",
+        "certificate_number",
+        "issue_date",
+        "expiry_date",
+        "validity_period_years",
+        "status",
+        "renewal_required",
+        "renewal_date",
+        "renewal_in_progress",
+        "renewal_application_date",
+        "reminder_sent_date",
+        "reminder_frequency_days",
+        "training_record_id",
+        "course_id",
+        "training_completed_date",
+        "examination_required",
+        "examination_date",
+        "examination_score",
+        "examination_passed",
+        "competency_assessed",
+        "competency_level",
+        "competency_assessment_date",
+        "authorized_activities",
+        "restrictions",
+        "regulatory_requirement",
+        "legislation_reference",
+        "compliance_notes",
+        "suspended_date",
+        "suspension_reason",
+        "revoked_date",
+        "revocation_reason",
+        "reinstatement_date",
+        "reinstatement_conditions",
+        "document_ids",
+        "certificate_url",
+        "continuing_education_required",
+        "continuing_education_hours_required",
+        "continuing_education_hours_completed",
+        "metadata",
+        "notes",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "safety_committee_meetings",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "meeting_type",
+        "meeting_date",
+        "start_time",
+        "end_time",
+        "duration_minutes",
+        "location",
+        "is_virtual",
+        "meeting_link",
+        "committee_name",
+        "chairperson_id",
+        "chairperson_name",
+        "secretary_id",
+        "secretary_name",
+        "member_ids",
+        "member_names",
+        "attendee_ids",
+        "attendee_names",
+        "absent_ids",
+        "absent_names",
+        "guest_ids",
+        "guest_names",
+        "quorum_met",
+        "attendance_count",
+        "agenda",
+        "agenda_items",
+        "minutes",
+        "discussion_summary",
+        "key_points",
+        "previous_minutes_approved",
+        "action_items_reviewed",
+        "action_items_from_previous",
+        "incidents_reviewed",
+        "hazards_reviewed",
+        "inspections_reviewed",
+        "action_items_created",
+        "recommendations",
+        "training_needs",
+        "policy_reviews",
+        "next_meeting_date",
+        "next_meeting_agenda",
+        "document_ids",
+        "minutes_document_id",
+        "recording_url",
+        "status",
+        "minutes_approved",
+        "minutes_approved_date",
+        "metadata",
+        "notes",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "safety_inspections",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "safety_policies",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "policy_title",
+        "policy_category",
+        "policy_type",
+        "policy_description",
+        "purpose",
+        "scope",
+        "applicability",
+        "responsibilities",
+        "procedures",
+        "definitions",
+        "references",
+        "document_id",
+        "document_url",
+        "version",
+        "revision_history",
+        "effective_date",
+        "review_date",
+        "next_review_date",
+        "expiry_date",
+        "review_frequency_months",
+        "status",
+        "drafted_by_id",
+        "drafted_by_name",
+        "drafted_date",
+        "reviewed_by_id",
+        "reviewed_by_name",
+        "reviewed_date",
+        "review_comments",
+        "approved_by_id",
+        "approved_by_name",
+        "approval_date",
+        "approval_comments",
+        "regulatory_requirement",
+        "regulatory_reference",
+        "legislation_citation",
+        "training_required",
+        "training_course_ids",
+        "communication_plan",
+        "affected_employees",
+        "affected_departments",
+        "acknowledgement_required",
+        "acknowledged_by",
+        "related_policy_ids",
+        "superseded_policy_ids",
+        "metadata",
+        "tags",
+        "keywords",
+        "notes",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "table": "safety_training_records",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "satisfaction_surveys",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "scheduled_reports",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "frequency",
+        "day_of_week",
+        "day_of_month",
+        "time_of_day",
+        "timezone",
+        "format",
+        "recipients",
+        "parameters",
+        "is_active",
+        "last_executed_at",
+        "next_execution_at",
+        "created_by"
+      ]
+    },
+    {
+      "table": "security_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "security_posture_checks",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "segment_executions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "executed_by",
+        "executed_at",
+        "result_count",
+        "execution_time_ms",
+        "filters_snapshot"
+      ]
+    },
+    {
+      "table": "segment_exports",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "exported_by",
+        "exported_at",
+        "format",
+        "include_fields",
+        "member_count",
+        "filters_used",
+        "watermark",
+        "export_hash",
+        "purpose",
+        "approved_by",
+        "file_url",
+        "file_size",
+        "data_retention_days",
+        "deleted_at"
+      ]
+    },
+    {
+      "table": "separated_payment_transactions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "settlements",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "shared_clause_library",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "shopify_config",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "shop_domain",
+        "storefront_token_secret_ref",
+        "admin_token_secret_ref",
+        "allowed_collections",
+        "webhook_secret_ref"
+      ]
+    },
+    {
+      "table": "signature_audit_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "signer_id",
+        "event_type",
+        "event_description",
+        "ip_address",
+        "user_agent",
+        "location",
+        "timestamp",
+        "external_event_id",
+        "provider_data",
+        "signature_id",
+        "certificate_info"
+      ]
+    },
+    {
+      "table": "signature_audit_trail",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "signature_documents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "signature_templates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "description",
+        "category",
+        "template_file_url",
+        "template_file_name",
+        "provider",
+        "provider_template_id",
+        "signature_fields",
+        "default_settings",
+        "signer_roles",
+        "is_active",
+        "usage_count",
+        "last_used_at",
+        "created_by"
+      ]
+    },
+    {
+      "table": "signature_verification",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "signer_id",
+        "signature_hash",
+        "certificate_hash",
+        "is_verified",
+        "verification_method",
+        "verification_result",
+        "certificate_chain",
+        "certificate_valid_from",
+        "certificate_valid_to",
+        "certificate_issuer",
+        "tamper_detected",
+        "tamper_details",
+        "signature_file",
+        "verified_at",
+        "verified_by"
+      ]
+    },
+    {
+      "table": "signature_webhooks_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "provider_document_id",
+        "payload",
+        "headers",
+        "received_at",
+        "processed_at",
+        "processing_status",
+        "error_message",
+        "signature",
+        "signature_verified"
+      ]
+    },
+    {
+      "table": "signature_workflows",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "document_id",
+        "name",
+        "description",
+        "status",
+        "provider",
+        "external_envelope_id",
+        "external_workflow_id",
+        "total_signers",
+        "completed_signatures",
+        "sent_at",
+        "expires_at",
+        "completed_at",
+        "reminder_frequency_days",
+        "last_reminder_sent_at",
+        "auto_reminders_enabled",
+        "workflow_data",
+        "created_by",
+        "voided_at",
+        "voided_by",
+        "void_reason"
+      ]
+    },
+    {
+      "table": "signers",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "member_id",
+        "email",
+        "name",
+        "signer_order",
+        "status",
+        "signed_at",
+        "declined_at",
+        "decline_reason",
+        "external_signer_id",
+        "signing_url",
+        "signature_image",
+        "ip_address",
+        "user_agent",
+        "last_reminder_sent_at",
+        "reminder_count"
+      ]
+    },
+    {
+      "table": "sla_policies",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "description",
+        "is_active",
+        "is_default",
+        "priority",
+        "category",
+        "organization_tier",
+        "response_time_minutes",
+        "resolution_time_minutes",
+        "business_hours_only",
+        "timezone",
+        "escalation_enabled",
+        "escalation_threshold_minutes",
+        "escalation_to_user_id",
+        "created_by"
+      ]
+    },
+    {
+      "table": "sms_campaign_recipients",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "user_id",
+        "phone_number",
+        "message_id",
+        "status",
+        "error_message",
+        "sent_at",
+        "delivered_at"
+      ]
+    },
+    {
+      "table": "sms_campaigns",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "sms_conversations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "sms_messages",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "sms_opt_outs",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["user_id", "phone_number", "opted_out_at", "opted_out_via", "reason"]
+    },
+    {
+      "table": "sms_rate_limits",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["messages_sent", "window_start", "window_end"]
+    },
+    {
+      "table": "sms_templates",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "description",
+        "message_template",
+        "variables",
+        "category",
+        "is_active",
+        "created_by"
+      ]
+    },
+    {
+      "table": "social_accounts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "social_analytics",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "social_campaigns",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "social_engagement",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "post_id",
+        "engagement_type",
+        "platform_engagement_id",
+        "platform_user_id",
+        "username",
+        "display_name",
+        "profile_image_url",
+        "content",
+        "sentiment",
+        "sentiment_score",
+        "engaged_at",
+        "fetched_at",
+        "engagement_metadata"
+      ]
+    },
+    {
+      "table": "social_feeds",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "account_id",
+        "platform_item_id",
+        "item_type",
+        "content",
+        "media_urls",
+        "author_id",
+        "author_name",
+        "author_username",
+        "author_image_url",
+        "likes_count",
+        "comments_count",
+        "shares_count",
+        "published_at",
+        "fetched_at",
+        "feed_metadata"
+      ]
+    },
+    {
+      "table": "social_posts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "staff_certifications",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "full_name",
+        "role",
+        "certification_type_id",
+        "certification_number",
+        "issued_date",
+        "expiry_date",
+        "last_renewal_date",
+        "next_renewal_due",
+        "status",
+        "certificate_document",
+        "verification_document",
+        "verified_by",
+        "verified_at",
+        "verification_notes",
+        "compliant",
+        "compliance_notes"
+      ]
+    },
+    {
+      "table": "steward_assignments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "stewards",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "strategic_goals",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "strike_fund_disbursements",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "strike_fund_payment_audit",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "stripe_connect_accounts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "stripe_webhook_events",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "stripe_event_id",
+        "event_type",
+        "stripe_payment_intent_id",
+        "stripe_customer_id",
+        "event_data",
+        "processed",
+        "processed_at",
+        "processing_error"
+      ]
+    },
+    {
+      "table": "subscription_events_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "subscription_plans",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "support_tickets",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "survey_answers",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "survey_questions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "survey_responses",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "surveys",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "swiss_cold_storage",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "vault_location",
+        "vault_account_number",
+        "storage_type",
+        "data_category",
+        "last_updated",
+        "encryption_algorithm",
+        "encrypted_by",
+        "access_requires_multi_sig",
+        "minimum_signatures",
+        "total_key_holders",
+        "last_accessed_at",
+        "last_accessed_by"
+      ]
+    },
+    {
+      "table": "sync_jobs",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "connector_id",
+        "entity_type",
+        "direction",
+        "status",
+        "started_at",
+        "completed_at",
+        "records_processed",
+        "records_succeeded",
+        "records_failed",
+        "errors",
+        "metadata"
+      ]
+    },
+    {
+      "table": "t106_filing_tracking",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "total_foreign_transactions",
+        "total_cad_equivalent",
+        "t106_threshold_exceeded",
+        "t106_filing_required",
+        "reportable_transaction_count",
+        "reportable_transaction_ids",
+        "filing_status",
+        "filing_due_date",
+        "filed_date",
+        "confirmation_number",
+        "prepared_by",
+        "reviewed_by",
+        "filed_by"
+      ]
+    },
+    {
+      "table": "t4a_tax_slips",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "tax_year",
+        "payer_name",
+        "payer_business_number",
+        "payer_address",
+        "payer_city",
+        "payer_province",
+        "payer_postal_code",
+        "recipient_name",
+        "recipient_sin",
+        "recipient_address",
+        "recipient_city",
+        "recipient_province",
+        "recipient_postal_code",
+        "box_028_other_income",
+        "box_022_income_tax_deducted",
+        "generated_at",
+        "generated_by",
+        "filed_with_cra",
+        "cra_filing_date",
+        "cra_confirmation_number",
+        "delivered_to_member",
+        "delivery_method",
+        "delivered_at",
+        "pdf_url",
+        "xml_url",
+        "is_amendment",
+        "original_slip_id",
+        "amendment_reason"
+      ]
+    },
+    {
+      "table": "task_comments",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["task_id", "author_id", "content", "metadata"]
+    },
+    {
+      "table": "tax_year_end_processing",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "processing_started_at",
+        "processing_completed_at",
+        "t4a_slips_generated",
+        "t4a_total_amount",
+        "t4a_filing_deadline",
+        "t4a_filed_at",
+        "t4a_filing_confirmed",
+        "rl1_slips_generated",
+        "rl1_total_amount",
+        "rl1_filing_deadline",
+        "rl1_filed_at",
+        "rl1_filing_confirmed",
+        "member_delivery_started_at",
+        "member_delivery_completed_at",
+        "slips_delivered_to_members",
+        "compliance_status",
+        "deadline_missed",
+        "processed_by",
+        "notes"
+      ]
+    },
+    {
+      "table": "tentative_agreements",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "testimonials",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "ticket_comments",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "comment",
+        "is_internal",
+        "is_automated",
+        "author_user_id",
+        "author_email",
+        "author_name",
+        "attachments"
+      ]
+    },
+    {
+      "table": "ticket_history",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "action",
+        "field",
+        "old_value",
+        "new_value",
+        "changed_by_user_id",
+        "changed_by_name",
+        "metadata"
+      ]
+    },
+    {
+      "table": "traditional_knowledge_registry",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "knowledge_title",
+        "knowledge_description",
+        "sensitivity_level",
+        "gender_restricted",
+        "age_restricted",
+        "primary_keeper_user_id",
+        "secondary_keepers",
+        "public_access",
+        "member_only_access",
+        "elder_approval_required",
+        "documentation_url",
+        "video_url",
+        "audio_url"
+      ]
+    },
+    {
+      "table": "training_courses",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "training_programs",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "transaction_currency_conversions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "original_currency",
+        "original_amount",
+        "cad_amount",
+        "fx_rate_used",
+        "fx_rate_date",
+        "fx_rate_source",
+        "exception_approved",
+        "exception_reason",
+        "approved_by",
+        "approved_at",
+        "conversion_method"
+      ]
+    },
+    {
+      "table": "transaction_fee_events",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "transaction_fee_rules",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "transfer_pricing_documentation",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "from_party",
+        "to_party",
+        "arms_length_required",
+        "arms_length_confirmed",
+        "arms_length_method",
+        "cad_amount",
+        "pricing_justification",
+        "comparable_transactions",
+        "supporting_documents",
+        "documented_by",
+        "documented_at",
+        "review_required",
+        "reviewed_by",
+        "reviewed_at",
+        "review_notes"
+      ]
+    },
+    {
+      "table": "trend_analyses",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "ue_governance_job_cancellation_audit_event",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "ue_governance_job_cancellation_request",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "ue_governance_job_execution_state",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "ue_governance_job_reconciliation_pass",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "ue_policy_bindings",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "union_density",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "union_dues_receipts",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "union_dues_year_end",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "union_only_data_tags",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "union_representation_votes",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "campaign_id",
+        "filing_id",
+        "vote_date",
+        "vote_type",
+        "voting_method",
+        "eligible_voters",
+        "ballots_cast",
+        "voter_turnout_percentage",
+        "votes_for_union",
+        "votes_against_union",
+        "challenged_ballots",
+        "void_ballots",
+        "union_vote_percentage",
+        "result",
+        "certification_issued",
+        "certification_date",
+        "vote_breakdown_by_department",
+        "vote_breakdown_by_shift",
+        "union_filed_objections",
+        "employer_filed_objections",
+        "objections_summary",
+        "objections_resolved",
+        "objections_resolution",
+        "recount_requested",
+        "recount_date",
+        "recount_result",
+        "certification_number",
+        "bargaining_unit_certified",
+        "union_representative_name",
+        "notes",
+        "created_by"
+      ]
+    },
+    {
+      "table": "usage_aggregates",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "usage_events",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "usage_meters",
+      "status": "ABSENT_IN_V2",
+      "missingColumns": []
+    },
+    {
+      "table": "user_consents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "user_management.auth_audit_log",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "user_management.oauth_providers",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "user_management.organization_users",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "user_management.password_reset_tokens",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "user_management.users",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "phone_verified_at",
+        "two_factor_secret",
+        "two_factor_backup_codes",
+        "encrypted_sin",
+        "encrypted_ssn",
+        "encrypted_bank_account"
+      ]
+    },
+    {
+      "table": "user_notification_preferences",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "user_sessions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "organization_id",
+        "session_token",
+        "refresh_token",
+        "device_info",
+        "ip_address",
+        "user_agent",
+        "expires_at",
+        "is_active",
+        "last_used_at"
+      ]
+    },
+    {
+      "table": "user_signatures",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "user_uuid_mapping",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": ["entra_oid"]
+    },
+    {
+      "table": "voter_eligibility",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "votes",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "voting_audit_log",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "receipt_id",
+        "vote_hash",
+        "signature",
+        "audit_hash",
+        "previous_audit_hash",
+        "voted_at",
+        "verification_code",
+        "is_anonymous",
+        "chain_valid",
+        "tampered_indicators",
+        "audit_metadata"
+      ]
+    },
+    {
+      "table": "voting_notifications",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "type",
+        "title",
+        "message",
+        "recipient_id",
+        "priority",
+        "delivery_method",
+        "is_read",
+        "sent_at",
+        "read_at",
+        "metadata"
+      ]
+    },
+    {
+      "table": "voting_options",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "voting_sessions",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "wage_benchmarks",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "wage_progressions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "clause_id",
+        "classification",
+        "classification_code",
+        "step",
+        "hourly_rate",
+        "annual_salary",
+        "effective_date",
+        "end_date",
+        "premiums",
+        "notes"
+      ]
+    },
+    {
+      "table": "wcag_success_criteria",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "wcb_claims",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "wcb_employer_assessments",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "webhook_deliveries",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "event_type",
+        "payload",
+        "status_code",
+        "response_body",
+        "error",
+        "attempt_number",
+        "delivered_at",
+        "duration"
+      ]
+    },
+    {
+      "table": "webhook_events",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "provider",
+        "event_type",
+        "payload",
+        "signature",
+        "verified",
+        "status",
+        "error",
+        "received_at",
+        "processed_at"
+      ]
+    },
+    {
+      "table": "webhook_receipts",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "website_settings",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "site_name",
+        "site_tagline",
+        "site_description",
+        "logo_url",
+        "favicon_url",
+        "primary_color",
+        "secondary_color",
+        "font_family",
+        "footer_text",
+        "footer_links",
+        "social_links",
+        "contact_email",
+        "contact_phone",
+        "contact_address",
+        "google_analytics_id",
+        "facebook_pixel_id",
+        "custom_css",
+        "custom_js",
+        "maintenance_mode",
+        "maintenance_message"
+      ]
+    },
+    {
+      "table": "weekly_threshold_tracking",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "tax_year",
+        "week_number",
+        "week_start_date",
+        "week_end_date",
+        "payment_count",
+        "weekly_total",
+        "exceeds_threshold",
+        "threshold_amount",
+        "requires_t4a",
+        "requires_rl1"
+      ]
+    },
+    {
+      "table": "whiplash_prevention_audit",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "whiplash_violations",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "workflow_definitions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "name",
+        "description",
+        "category",
+        "trigger_type",
+        "trigger_config",
+        "workflow_steps",
+        "is_enabled",
+        "is_deleted",
+        "version",
+        "last_executed_at",
+        "execution_count",
+        "success_count",
+        "failure_count",
+        "created_by"
+      ]
+    },
+    {
+      "table": "workflow_executions",
+      "status": "COLUMNS_MISSING_IN_V2",
+      "missingColumns": [
+        "organization_id",
+        "triggered_by",
+        "trigger_data",
+        "status",
+        "current_step",
+        "started_at",
+        "completed_at",
+        "paused_at",
+        "resumed_at",
+        "step_results",
+        "variables",
+        "error_message",
+        "error_details",
+        "failed_step",
+        "total_execution_time_ms"
+      ]
+    },
+    {
+      "table": "workplace_incidents",
+      "status": "OK",
+      "missingColumns": []
+    },
+    {
+      "table": "worksites",
+      "status": "OK",
+      "missingColumns": []
+    }
+  ]
+}

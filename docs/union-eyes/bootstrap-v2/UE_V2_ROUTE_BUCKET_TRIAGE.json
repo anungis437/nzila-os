@@ -1,0 +1,1861 @@
+{
+  "generatedAt": "2026-10-15T00:21:55.978Z",
+  "reports": [
+    {
+      "file": "UE_V2_ROUTE_BUCKET_EXECUTION.HTTP_GET_NEEDS_EXPLICIT_FIXTURE.json",
+      "bucket": {
+        "bucket": "HTTP_GET_NEEDS_EXPLICIT_FIXTURE",
+        "count": 415,
+        "reason": "HTTP GET route is not trivially classifiable as read-only false positive or 501; it needs generic authenticated/unauthenticated execution and possible explicit fixture follow-up."
+      },
+      "candidateDigest": "a8b17a0d3d0a112d78c4959892079f582acb8173a00802e00cb2b40310a5435d",
+      "sourcePlanDigest": "2cd70d70bd1f94cc6a8f7f37f32a94ae17a9ea1c441d8a12aaf1538d74601847",
+      "executedRoutes": 415,
+      "passCount": 356,
+      "failCount": 59,
+      "failureKinds": {
+        "HARNESS_FIXTURE_OR_BODY_GAP": 56,
+        "HARNESS_ENVIRONMENT_GAP": 3
+      },
+      "sampleFailures": [
+        {
+          "id": "apps/union-eyes/app/api/admin/members/stats/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/admin/members/stats/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/admin/seed-test-data/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/admin/seed-test-data/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/analytics/operational/derived-case-metrics/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/analytics/operational/derived-case-metrics/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/auth/policy/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/auth/policy/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/case-studies/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/case-studies/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cases/[caseId]/audit/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/audit/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cases/[caseId]/export/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/export/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cases/[caseId]/next-actions/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/next-actions/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cbas/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cbas/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/claims/[id]/evidence/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/claims/[id]/evidence/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/cases/[id]/risk/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cognition/cases/[id]/risk/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/engagement/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cognition/engagement/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/executive-summary/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cognition/executive-summary/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/kpis/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cognition/kpis/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/workload/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cognition/workload/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/compliance/alerts/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/compliance/alerts/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/compliance/reports/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/compliance/reports/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/continuity/archives/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/continuity/archives/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/dashboard/leadership/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/dashboard/leadership/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/dispatch/queue/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/dispatch/queue/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/[id]/download/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/repository/[id]/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/documents/repository/[id]/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/repository/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/documents/repository/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/employers/communications/contacts/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/employers/communications/contacts/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        }
+      ]
+    },
+    {
+      "file": "UE_V2_ROUTE_BUCKET_EXECUTION.HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE.json",
+      "bucket": {
+        "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+        "count": 86,
+        "reason": "HTTP mutating route is not yet covered by the shared-guard generic bucket and needs route-specific fixture/body generation."
+      },
+      "candidateDigest": "98e83a79b995e840199837bd1c65ac7c793c847e89f6832f99d51c083920383a",
+      "sourcePlanDigest": "2cd70d70bd1f94cc6a8f7f37f32a94ae17a9ea1c441d8a12aaf1538d74601847",
+      "executedRoutes": 86,
+      "passCount": 69,
+      "failCount": 17,
+      "failureKinds": {
+        "HARNESS_FIXTURE_OR_BODY_GAP": 14,
+        "HARNESS_ENVIRONMENT_GAP": 3
+      },
+      "sampleFailures": [
+        {
+          "id": "apps/union-eyes/app/api/admin/users/[userId]/route.ts#DELETE",
+          "sourcePath": "apps/union-eyes/app/api/admin/users/[userId]/route.ts",
+          "method": "DELETE",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/admin/users/[userId]/route.ts#PUT",
+          "sourcePath": "apps/union-eyes/app/api/admin/users/[userId]/route.ts",
+          "method": "PUT",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/communications/webhooks/resend/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/icra/[assessmentId]/submit/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/icra/[assessmentId]/submit/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/icra/start/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/icra/start/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/oci/intake/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/oci/intake/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/ocra/[assessmentId]/submit/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/ocra/[assessmentId]/submit/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/ocra/start/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/ocra/start/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/payments/webhooks/paypal/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/payments/webhooks/paypal/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/privacy/consent/route.ts#DELETE",
+          "sourcePath": "apps/union-eyes/app/api/privacy/consent/route.ts",
+          "method": "DELETE",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/privacy/consent/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/privacy/consent/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/signatures/sign/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/signatures/sign/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/whop/create-checkout/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/whop/create-checkout/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts#DELETE",
+          "sourcePath": "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+          "method": "DELETE",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 503,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 503,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_ENVIRONMENT_GAP",
+          "reason": "Route depends on an unavailable local authority/provider in the generic harness and needs environment fixture expansion."
+        },
+        {
+          "id": "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts#PATCH",
+          "sourcePath": "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+          "method": "PATCH",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 503,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 503,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_ENVIRONMENT_GAP",
+          "reason": "Route depends on an unavailable local authority/provider in the generic harness and needs environment fixture expansion."
+        },
+        {
+          "id": "apps/union-eyes/app/api/workbook/start/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/workbook/start/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 503,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 503,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_ENVIRONMENT_GAP",
+          "reason": "Route depends on an unavailable local authority/provider in the generic harness and needs environment fixture expansion."
+        }
+      ]
+    },
+    {
+      "file": "UE_V2_ROUTE_BUCKET_EXECUTION.HTTP_SHARED_GUARD_MUTATION.json",
+      "bucket": {
+        "bucket": "HTTP_SHARED_GUARD_MUTATION",
+        "count": 292,
+        "reason": "HTTP mutator wrapped by a shared auth/organization guard; generic harness should derive cases from the route source and validation shape."
+      },
+      "candidateDigest": "f039c0e52593187f3544a317977aa88077d5c371d2f4364d430f4459a1cc6d43",
+      "sourcePlanDigest": "2cd70d70bd1f94cc6a8f7f37f32a94ae17a9ea1c441d8a12aaf1538d74601847",
+      "executedRoutes": 292,
+      "passCount": 265,
+      "failCount": 27,
+      "failureKinds": {
+        "HARNESS_FIXTURE_OR_BODY_GAP": 27
+      },
+      "sampleFailures": [
+        {
+          "id": "apps/union-eyes/app/api/admin/seed-test-data/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/admin/seed-test-data/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/precedents/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/cognition/precedents/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/dispatch/assign/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/dispatch/assign/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/dispatch/requests/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/dispatch/requests/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/repository/[id]/route.ts#PATCH",
+          "sourcePath": "apps/union-eyes/app/api/documents/repository/[id]/route.ts",
+          "method": "PATCH",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/repository/[id]/versions/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/documents/repository/[id]/versions/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/repository/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/documents/repository/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/employers/communications/contacts/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/employers/communications/contacts/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/employers/communications/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/employers/communications/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievance-deadlines/[id]/confirmation/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/grievance-deadlines/[id]/confirmation/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/[id]/access/route.ts#PATCH",
+          "sourcePath": "apps/union-eyes/app/api/grievances/[id]/access/route.ts",
+          "method": "PATCH",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/[id]/access/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/grievances/[id]/access/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/[id]/assign/route.ts#PATCH",
+          "sourcePath": "apps/union-eyes/app/api/grievances/[id]/assign/route.ts",
+          "method": "PATCH",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/[id]/convert/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/grievances/[id]/convert/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/[id]/documents/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/grievances/[id]/documents/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/[id]/priority-override/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/grievances/[id]/priority-override/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/[id]/recommend-steward/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/grievances/[id]/recommend-steward/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/[id]/status/route.ts#PATCH",
+          "sourcePath": "apps/union-eyes/app/api/grievances/[id]/status/route.ts",
+          "method": "PATCH",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/[id]/suggest-clauses/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/grievances/[id]/suggest-clauses/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/import/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/grievances/import/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/grievances/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/grievances/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/onboarding/discover-federation/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/onboarding/discover-federation/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/onboarding/events/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/onboarding/events/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/onboarding/suggest-clauses/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/onboarding/suggest-clauses/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/pilot/demo-data/route.ts#DELETE",
+          "sourcePath": "apps/union-eyes/app/api/pilot/demo-data/route.ts",
+          "method": "DELETE",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        }
+      ]
+    },
+    {
+      "file": "UE_V2_ROUTE_BUCKET_EXECUTION.NOT_IMPLEMENTED_501.json",
+      "bucket": {
+        "bucket": "NOT_IMPLEMENTED_501",
+        "count": 16,
+        "reason": "Route source explicitly returns a 501/NOT_IMPLEMENTED path and qualifies via actual 501 response."
+      },
+      "candidateDigest": "a8b17a0d3d0a112d78c4959892079f582acb8173a00802e00cb2b40310a5435d",
+      "sourcePlanDigest": "2cd70d70bd1f94cc6a8f7f37f32a94ae17a9ea1c441d8a12aaf1538d74601847",
+      "executedRoutes": 16,
+      "passCount": 0,
+      "failCount": 16,
+      "failureKinds": {
+        "HARNESS_FIXTURE_OR_BODY_GAP": 1,
+        "HARNESS_AUTHORIZATION_EXPECTATION_GAP": 15
+      },
+      "sampleFailures": [
+        {
+          "id": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 401,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cron/monthly-dues/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cron/monthly-dues/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 401,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cron/overdue-notifications/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cron/overdue-notifications/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 401,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cron/process-messages/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cron/process-messages/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 401,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cron/process-notifications/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cron/process-notifications/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 401,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cron/scheduled-reports/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cron/scheduled-reports/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 401,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/dashboard/export-csv/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/dashboard/export-csv/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 403,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/[id]/route.ts#DELETE",
+          "sourcePath": "apps/union-eyes/app/api/documents/[id]/route.ts",
+          "method": "DELETE",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 403,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/[id]/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/documents/[id]/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 403,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/[id]/route.ts#PATCH",
+          "sourcePath": "apps/union-eyes/app/api/documents/[id]/route.ts",
+          "method": "PATCH",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 403,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/bulk/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/documents/bulk/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 403,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/folders/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/documents/folders/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 403,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/folders/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/documents/folders/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 403,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/documents/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 403,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        },
+        {
+          "id": "apps/union-eyes/app/api/documents/route.ts#POST",
+          "sourcePath": "apps/union-eyes/app/api/documents/route.ts",
+          "method": "POST",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 403,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_AUTHORIZATION_EXPECTATION_GAP",
+          "reason": "501 route was exercised without route-specific authorized actor or cron secret; auth/role denial preempted the capability body."
+        }
+      ]
+    },
+    {
+      "file": "UE_V2_ROUTE_BUCKET_EXECUTION.READ_ONLY_FALSE_POSITIVE_GET.json",
+      "bucket": {
+        "bucket": "READ_ONLY_FALSE_POSITIVE_GET",
+        "count": 267,
+        "reason": "GET route whose transitive mutations are limited to shared auth/session/audit side-effects; requires actual GET execution to confirm non-mutating business behavior."
+      },
+      "candidateDigest": "98e83a79b995e840199837bd1c65ac7c793c847e89f6832f99d51c083920383a",
+      "sourcePlanDigest": "2cd70d70bd1f94cc6a8f7f37f32a94ae17a9ea1c441d8a12aaf1538d74601847",
+      "executedRoutes": 267,
+      "passCount": 203,
+      "failCount": 64,
+      "failureKinds": {
+        "HARNESS_FIXTURE_OR_BODY_GAP": 61,
+        "HARNESS_ENVIRONMENT_GAP": 3
+      },
+      "sampleFailures": [
+        {
+          "id": "apps/union-eyes/app/api/activities/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/activities/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/admin/ai-usage/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/admin/ai-usage/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/admin/dues/overview/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/admin/dues/overview/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/admin/ingest/batches/[id]/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/admin/ingest/batches/[id]/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/admin/ingest/batches/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/admin/ingest/batches/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/admin/seed-test-data/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/admin/seed-test-data/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/admin/stats/activity/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/admin/stats/activity/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/admin/users/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/admin/users/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/analytics/operational/derived-case-metrics/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/analytics/operational/derived-case-metrics/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/calendar-sync/microsoft/auth/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/calendar-sync/microsoft/auth/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/case-studies/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/case-studies/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cases/[caseId]/audit/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/audit/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cases/[caseId]/next-actions/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/next-actions/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cbas/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cbas/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/chatbot/sessions/[sessionId]/messages/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/chatbot/sessions/[sessionId]/messages/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/claims/[id]/evidence/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/claims/[id]/evidence/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "unauthenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "unselected-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/claims/[id]/workflow/history/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/claims/[id]/workflow/history/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/cases/[id]/risk/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cognition/cases/[id]/risk/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/engagement/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cognition/engagement/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/executive-summary/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cognition/executive-summary/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/kpis/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cognition/kpis/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/cognition/workload/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/cognition/workload/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        },
+        {
+          "id": "apps/union-eyes/app/api/compliance/alerts/route.ts#GET",
+          "sourcePath": "apps/union-eyes/app/api/compliance/alerts/route.ts",
+          "method": "GET",
+          "failingCases": [
+            {
+              "name": "authenticated",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "wrong-org",
+              "status": 500,
+              "outcome": "FAIL"
+            },
+            {
+              "name": "inactive-member",
+              "status": 500,
+              "outcome": "FAIL"
+            }
+          ],
+          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
+          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
+        }
+      ]
+    }
+  ]
+}

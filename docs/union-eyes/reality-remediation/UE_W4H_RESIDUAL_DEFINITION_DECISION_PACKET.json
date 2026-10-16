@@ -1,0 +1,725 @@
+{
+  "PHASE": "PHASE_1B_3C_A1I_W4H",
+  "residualDecisions": [
+    {
+      "DESIGN_CHOICE_ID": "UE-W4F-DESIGN-71fba14faea517bb",
+      "AFFECTED_OBLIGATIONS": ["UE-W4G-DEFINITION-44595805fe306f09"],
+      "AFFECTED_PHYSICAL_IDENTITIES": [
+        "union-eyes::COLUMN::public.consent_records.organization_id"
+      ],
+      "EXACT_UNRESOLVED_PROPERTY": [
+        {
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-44595805fe306f09",
+          "PROPERTY": "CANONICAL_COLUMN_SET",
+          "VALUE": null,
+          "PROVENANCE": null,
+          "RULE": "RULE_4_INCONSISTENT_CURRENT_DECLARATION_SHAPES",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/data-governance-schema.ts",
+              "DIGEST": "f52c62f1ea6ad04391cc425c2191e0bf853e7cd370ea13a943bbd520b64d15e5",
+              "RANGE": [164, 212]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/communications/campaigns.ts",
+              "DIGEST": "ad13f730d28d8723386142e5da7fcc6f35d3d1140c0493d3eaa424d9c0e6e37e",
+              "RANGE": [363, 396]
+            }
+          ],
+          "STATUS": "RESIDUAL_HUMAN_DECISION_REQUIRED",
+          "RATIONALE": "Current declarations describe different column sets for the same physical relation:[\"consent_date\",\"consent_given\",\"consent_method\",\"consent_text\",\"consent_version\",\"created_at\",\"evidence_url\",\"expiry_date\",\"id\",\"ip_address\",\"legal_basis\",\"metadata\",\"organization_id\",\"purpose_description\",\"purpose_type\",\"subject_id\",\"subject_type\",\"updated_at\",\"user_agent\",\"withdrawal_method\",\"withdrawn\",\"withdrawn_at\"] versus [\"channel\",\"consent_text\",\"consent_type\",\"created_at\",\"expires_at\",\"id\",\"ip_address\",\"metadata\",\"method\",\"organization_id\",\"status\",\"user_agent\",\"user_id\"]. Combining them creates a hybrid product schema not authorized by minimum commitment."
+        }
+      ],
+      "WHY_W4H_DOCTRINE_CANNOT_SELECT_IT": "The current referenced declarations describe different physical column sets for the same relation. Permissive null/default/constraint rules cannot choose which product blueprint is intended or authorize their union. Exact alternatives and evidence references are enumerated below.",
+      "VALID_OPTIONS": [
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-44595805fe306f09",
+          "RELATION_NAME": "consent_records",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/data-governance-schema.ts",
+            "DIGEST": "f52c62f1ea6ad04391cc425c2191e0bf853e7cd370ea13a943bbd520b64d15e5",
+            "RANGE": [164, 212]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "subject_type",
+            "subject_id",
+            "organization_id",
+            "purpose_type",
+            "purpose_description",
+            "legal_basis",
+            "consent_given",
+            "consent_method",
+            "consent_text",
+            "consent_version",
+            "consent_date",
+            "expiry_date",
+            "withdrawn",
+            "withdrawn_at",
+            "withdrawal_method",
+            "ip_address",
+            "user_agent",
+            "evidence_url",
+            "created_at",
+            "updated_at",
+            "metadata"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": null
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-44595805fe306f09",
+          "RELATION_NAME": "consent_records",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/domains/communications/campaigns.ts",
+            "DIGEST": "ad13f730d28d8723386142e5da7fcc6f35d3d1140c0493d3eaa424d9c0e6e37e",
+            "RANGE": [363, 396]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "user_id",
+            "consent_type",
+            "channel",
+            "status",
+            "method",
+            "consent_text",
+            "ip_address",
+            "user_agent",
+            "expires_at",
+            "metadata",
+            "created_at"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => ({\n  orgIdx: index('idx_consent_records_org').on(table.organizationId),\n  userIdx: index('idx_consent_records_user').on(table.userId),\n  channelIdx: index('idx_consent_records_channel').on(table.channel),\n  statusIdx: index('idx_consent_records_status').on(table.status),\n  createdAtIdx: index('idx_consent_records_created').on(table.createdAt),\n})"
+        }
+      ],
+      "PRODUCT_OR_BUSINESS_SEMANTIC_IMPACT": "Competing column sets and constraint/index blueprints describe different feature/storage structures. Combining them adds product schema; selecting one affects compatibility with the other. No automatic hybrid or platform-preference choice.",
+      "MINIMUM_HUMAN_DECISION_REQUIRED": "Approve exact values for the enumerated residual properties only; already approved governance properties and ownership remain settled"
+    },
+    {
+      "DESIGN_CHOICE_ID": "UE-W4F-DESIGN-23354a99ca9a879a",
+      "AFFECTED_OBLIGATIONS": ["UE-W4G-DEFINITION-ab2e5559d33568a9"],
+      "AFFECTED_PHYSICAL_IDENTITIES": ["union-eyes::COLUMN::public.ml_predictions.organization_id"],
+      "EXACT_UNRESOLVED_PROPERTY": [
+        {
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ab2e5559d33568a9",
+          "PROPERTY": "CANONICAL_COLUMN_SET",
+          "VALUE": null,
+          "PROVENANCE": null,
+          "RULE": "RULE_4_INCONSISTENT_CURRENT_DECLARATION_SHAPES",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/analytics.ts",
+              "DIGEST": "26146e05cccba9d8de8c9a349685c75873ed2f61c931f045ec603e0be8eced37",
+              "RANGE": [66, 86]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/analytics/analytics.ts",
+              "DIGEST": "26146e05cccba9d8de8c9a349685c75873ed2f61c931f045ec603e0be8eced37",
+              "RANGE": [66, 86]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+              "DIGEST": "489bfd41236215cecac47ab147f71150a9873784b82b3a7e2a15fad0d372d7d1",
+              "RANGE": [23, 41]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/ml-predictions-schema.ts",
+              "DIGEST": "489bfd41236215cecac47ab147f71150a9873784b82b3a7e2a15fad0d372d7d1",
+              "RANGE": [23, 41]
+            }
+          ],
+          "STATUS": "RESIDUAL_HUMAN_DECISION_REQUIRED",
+          "RATIONALE": "Current declarations describe different column sets for the same physical relation:[\"accuracy\",\"actual_value\",\"confidence_interval\",\"confidence_score\",\"created_at\",\"features\",\"id\",\"metadata\",\"model_name\",\"model_version\",\"organization_id\",\"predicted_value\",\"prediction_type\",\"target_date\",\"validated_at\"] versus [\"confidence\",\"created_at\",\"granularity\",\"horizon\",\"id\",\"lower_bound\",\"organization_id\",\"predicted_value\",\"prediction_date\",\"prediction_type\",\"upper_bound\"]. Combining them creates a hybrid product schema not authorized by minimum commitment."
+        }
+      ],
+      "WHY_W4H_DOCTRINE_CANNOT_SELECT_IT": "The current referenced declarations describe different physical column sets for the same relation. Permissive null/default/constraint rules cannot choose which product blueprint is intended or authorize their union. Exact alternatives and evidence references are enumerated below.",
+      "VALID_OPTIONS": [
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ab2e5559d33568a9",
+          "RELATION_NAME": "ml_predictions",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/analytics.ts",
+            "DIGEST": "26146e05cccba9d8de8c9a349685c75873ed2f61c931f045ec603e0be8eced37",
+            "RANGE": [66, 86]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "prediction_type",
+            "model_name",
+            "model_version",
+            "target_date",
+            "predicted_value",
+            "confidence_interval",
+            "confidence_score",
+            "features",
+            "actual_value",
+            "accuracy",
+            "metadata",
+            "created_at",
+            "validated_at"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => ({\n  orgIdx: index('ml_predictions_org_idx').on(table.organizationId),\n  typeIdx: index('ml_predictions_type_idx').on(table.predictionType),\n  dateIdx: index('ml_predictions_date_idx').on(table.targetDate),\n})"
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ab2e5559d33568a9",
+          "RELATION_NAME": "ml_predictions",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/domains/analytics/analytics.ts",
+            "DIGEST": "26146e05cccba9d8de8c9a349685c75873ed2f61c931f045ec603e0be8eced37",
+            "RANGE": [66, 86]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "prediction_type",
+            "model_name",
+            "model_version",
+            "target_date",
+            "predicted_value",
+            "confidence_interval",
+            "confidence_score",
+            "features",
+            "actual_value",
+            "accuracy",
+            "metadata",
+            "created_at",
+            "validated_at"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => ({\n  orgIdx: index('ml_predictions_org_idx').on(table.organizationId),\n  typeIdx: index('ml_predictions_type_idx').on(table.predictionType),\n  dateIdx: index('ml_predictions_date_idx').on(table.targetDate),\n})"
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ab2e5559d33568a9",
+          "RELATION_NAME": "ml_predictions",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+            "DIGEST": "489bfd41236215cecac47ab147f71150a9873784b82b3a7e2a15fad0d372d7d1",
+            "RANGE": [23, 41]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "prediction_type",
+            "prediction_date",
+            "predicted_value",
+            "lower_bound",
+            "upper_bound",
+            "confidence",
+            "horizon",
+            "granularity",
+            "created_at"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => ({\n  organizationIdx: index(\"idx_ml_predictions_organization\").on(table.organizationId),\n  typeIdx: index(\"idx_ml_predictions_type\").on(table.predictionType),\n  dateIdx: index(\"idx_ml_predictions_date\").on(table.predictionDate),\n  // Unique constraint for organization + type + date + horizon\n  uniquePrediction: unique(\"unique_prediction\").on(table.organizationId, table.predictionType, table.predictionDate, table.horizon),\n})"
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ab2e5559d33568a9",
+          "RELATION_NAME": "ml_predictions",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/ml-predictions-schema.ts",
+            "DIGEST": "489bfd41236215cecac47ab147f71150a9873784b82b3a7e2a15fad0d372d7d1",
+            "RANGE": [23, 41]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "prediction_type",
+            "prediction_date",
+            "predicted_value",
+            "lower_bound",
+            "upper_bound",
+            "confidence",
+            "horizon",
+            "granularity",
+            "created_at"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => ({\n  organizationIdx: index(\"idx_ml_predictions_organization\").on(table.organizationId),\n  typeIdx: index(\"idx_ml_predictions_type\").on(table.predictionType),\n  dateIdx: index(\"idx_ml_predictions_date\").on(table.predictionDate),\n  // Unique constraint for organization + type + date + horizon\n  uniquePrediction: unique(\"unique_prediction\").on(table.organizationId, table.predictionType, table.predictionDate, table.horizon),\n})"
+        }
+      ],
+      "PRODUCT_OR_BUSINESS_SEMANTIC_IMPACT": "Competing column sets and constraint/index blueprints describe different feature/storage structures. Combining them adds product schema; selecting one affects compatibility with the other. No automatic hybrid or platform-preference choice.",
+      "MINIMUM_HUMAN_DECISION_REQUIRED": "Approve exact values for the enumerated residual properties only; already approved governance properties and ownership remain settled"
+    },
+    {
+      "DESIGN_CHOICE_ID": "UE-W4F-DESIGN-3fa69b01260f33dc",
+      "AFFECTED_OBLIGATIONS": ["UE-W4G-DEFINITION-58c31d877505428b"],
+      "AFFECTED_PHYSICAL_IDENTITIES": [
+        "union-eyes::COLUMN::public.automation_rules.organization_id"
+      ],
+      "EXACT_UNRESOLVED_PROPERTY": [
+        {
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-58c31d877505428b",
+          "PROPERTY": "CANONICAL_COLUMN_SET",
+          "VALUE": null,
+          "PROVENANCE": null,
+          "RULE": "RULE_4_INCONSISTENT_CURRENT_DECLARATION_SHAPES",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/automation-rules-schema.ts",
+              "DIGEST": "2040335880bf5bbc0ccdf2987daa801ce6f3ede3fcb4829b4b5f6d5e51e1080f",
+              "RANGE": [46, 105]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/infrastructure/automation.ts",
+              "DIGEST": "2040335880bf5bbc0ccdf2987daa801ce6f3ede3fcb4829b4b5f6d5e51e1080f",
+              "RANGE": [46, 105]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
+              "DIGEST": "b5ba5e0ac52c52bfa361c27ff416fe2702cf2c5ad660339fc5b2abc4c31a324f",
+              "RANGE": [390, 429]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/recognition-rewards-schema.ts",
+              "DIGEST": "b5ba5e0ac52c52bfa361c27ff416fe2702cf2c5ad660339fc5b2abc4c31a324f",
+              "RANGE": [390, 429]
+            }
+          ],
+          "STATUS": "RESIDUAL_HUMAN_DECISION_REQUIRED",
+          "RATIONALE": "Current declarations describe different column sets for the same physical relation:[\"actions\",\"active_from\",\"active_until\",\"conditions\",\"created_at\",\"created_by\",\"description\",\"executions_count\",\"id\",\"last_executed_at\",\"max_executions\",\"name\",\"organization_id\",\"priority\",\"status\",\"target_entity\",\"target_filter\",\"timezone\",\"trigger_config\",\"trigger_type\",\"updated_at\"] versus [\"award_type_id\",\"conditions\",\"created_at\",\"created_by\",\"credit_amount\",\"description\",\"id\",\"is_active\",\"last_triggered_at\",\"name\",\"organization_id\",\"schedule\",\"trigger_count\",\"trigger_type\",\"updated_at\"]. Combining them creates a hybrid product schema not authorized by minimum commitment."
+        }
+      ],
+      "WHY_W4H_DOCTRINE_CANNOT_SELECT_IT": "The current referenced declarations describe different physical column sets for the same relation. Permissive null/default/constraint rules cannot choose which product blueprint is intended or authorize their union. Exact alternatives and evidence references are enumerated below.",
+      "VALID_OPTIONS": [
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-58c31d877505428b",
+          "RELATION_NAME": "automation_rules",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/automation-rules-schema.ts",
+            "DIGEST": "2040335880bf5bbc0ccdf2987daa801ce6f3ede3fcb4829b4b5f6d5e51e1080f",
+            "RANGE": [46, 105]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "name",
+            "description",
+            "status",
+            "priority",
+            "target_entity",
+            "target_filter",
+            "trigger_type",
+            "trigger_config",
+            "conditions",
+            "actions",
+            "max_executions",
+            "executions_count",
+            "last_executed_at",
+            "active_from",
+            "active_until",
+            "timezone",
+            "organization_id",
+            "created_at",
+            "updated_at",
+            "created_by"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => [\n  index(\"idx_automation_rules_status\").on(table.status),\n  index(\"idx_automation_rules_target\").on(table.targetEntity),\n  index(\"idx_automation_rules_org\").on(table.organizationId),\n  index(\"idx_automation_rules_priority\").on(table.priority),\n]"
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-58c31d877505428b",
+          "RELATION_NAME": "automation_rules",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/domains/infrastructure/automation.ts",
+            "DIGEST": "2040335880bf5bbc0ccdf2987daa801ce6f3ede3fcb4829b4b5f6d5e51e1080f",
+            "RANGE": [46, 105]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "name",
+            "description",
+            "status",
+            "priority",
+            "target_entity",
+            "target_filter",
+            "trigger_type",
+            "trigger_config",
+            "conditions",
+            "actions",
+            "max_executions",
+            "executions_count",
+            "last_executed_at",
+            "active_from",
+            "active_until",
+            "timezone",
+            "organization_id",
+            "created_at",
+            "updated_at",
+            "created_by"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => [\n  index(\"idx_automation_rules_status\").on(table.status),\n  index(\"idx_automation_rules_target\").on(table.targetEntity),\n  index(\"idx_automation_rules_org\").on(table.organizationId),\n  index(\"idx_automation_rules_priority\").on(table.priority),\n]"
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-58c31d877505428b",
+          "RELATION_NAME": "automation_rules",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
+            "DIGEST": "b5ba5e0ac52c52bfa361c27ff416fe2702cf2c5ad660339fc5b2abc4c31a324f",
+            "RANGE": [390, 429]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "name",
+            "description",
+            "trigger_type",
+            "conditions",
+            "award_type_id",
+            "credit_amount",
+            "schedule",
+            "is_active",
+            "last_triggered_at",
+            "trigger_count",
+            "created_at",
+            "updated_at",
+            "created_by"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(t) => ({\n    orgIdx: index('idx_automation_rules_org').on(t.orgId),\n    triggerIdx: index('automation_rules_trigger_idx').on(t.triggerType),\n    activeIdx: index('automation_rules_active_idx').on(t.isActive),\n    awardTypeIdx: index('automation_rules_award_type_idx').on(t.awardTypeId),\n  })"
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-58c31d877505428b",
+          "RELATION_NAME": "automation_rules",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/recognition-rewards-schema.ts",
+            "DIGEST": "b5ba5e0ac52c52bfa361c27ff416fe2702cf2c5ad660339fc5b2abc4c31a324f",
+            "RANGE": [390, 429]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "name",
+            "description",
+            "trigger_type",
+            "conditions",
+            "award_type_id",
+            "credit_amount",
+            "schedule",
+            "is_active",
+            "last_triggered_at",
+            "trigger_count",
+            "created_at",
+            "updated_at",
+            "created_by"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(t) => ({\n    orgIdx: index('idx_automation_rules_org').on(t.orgId),\n    triggerIdx: index('automation_rules_trigger_idx').on(t.triggerType),\n    activeIdx: index('automation_rules_active_idx').on(t.isActive),\n    awardTypeIdx: index('automation_rules_award_type_idx').on(t.awardTypeId),\n  })"
+        }
+      ],
+      "PRODUCT_OR_BUSINESS_SEMANTIC_IMPACT": "Competing column sets and constraint/index blueprints describe different feature/storage structures. Combining them adds product schema; selecting one affects compatibility with the other. No automatic hybrid or platform-preference choice.",
+      "MINIMUM_HUMAN_DECISION_REQUIRED": "Approve exact values for the enumerated residual properties only; already approved governance properties and ownership remain settled"
+    },
+    {
+      "DESIGN_CHOICE_ID": "UE-W4F-DESIGN-cd213b3d31bb4db9",
+      "AFFECTED_OBLIGATIONS": ["UE-W4G-DEFINITION-b7a4ae2719f7ac99"],
+      "AFFECTED_PHYSICAL_IDENTITIES": [
+        "union-eyes::COLUMN::public.insight_recommendations.organization_id"
+      ],
+      "EXACT_UNRESOLVED_PROPERTY": [
+        {
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b7a4ae2719f7ac99",
+          "PROPERTY": "CANONICAL_COLUMN_SET",
+          "VALUE": null,
+          "PROVENANCE": null,
+          "RULE": "RULE_4_INCONSISTENT_CURRENT_DECLARATION_SHAPES",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/analytics.ts",
+              "DIGEST": "48eb8be945af951a7529ffaf21330d2d09c2652c660eacbb99596519d1f001f4",
+              "RANGE": [120, 154]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/analytics/analytics.ts",
+              "DIGEST": "22526dd513bdd7363d629b5b23c7b04bc0dc0c1ebe3b33436ad7818bc1fd73af",
+              "RANGE": [120, 153]
+            }
+          ],
+          "STATUS": "RESIDUAL_HUMAN_DECISION_REQUIRED",
+          "RATIONALE": "Current declarations describe different column sets for the same physical relation:[\"acknowledged_at\",\"acknowledged_by\",\"action_deadline\",\"action_required\",\"ai_reference_id\",\"category\",\"completed_at\",\"confidence_score\",\"created_at\",\"data_source\",\"description\",\"dismissal_reason\",\"dismissed_at\",\"dismissed_by\",\"estimated_benefit\",\"id\",\"impact\",\"insight_type\",\"metrics\",\"notes\",\"organization_id\",\"priority\",\"recommendations\",\"related_entities\",\"status\",\"title\",\"trend\",\"updated_at\"] versus [\"acknowledged_at\",\"acknowledged_by\",\"action_deadline\",\"action_required\",\"category\",\"completed_at\",\"confidence_score\",\"created_at\",\"data_source\",\"description\",\"dismissal_reason\",\"dismissed_at\",\"dismissed_by\",\"estimated_benefit\",\"id\",\"impact\",\"insight_type\",\"metrics\",\"notes\",\"organization_id\",\"priority\",\"recommendations\",\"related_entities\",\"status\",\"title\",\"trend\",\"updated_at\"]. Combining them creates a hybrid product schema not authorized by minimum commitment."
+        }
+      ],
+      "WHY_W4H_DOCTRINE_CANNOT_SELECT_IT": "The current referenced declarations describe different physical column sets for the same relation. Permissive null/default/constraint rules cannot choose which product blueprint is intended or authorize their union. Exact alternatives and evidence references are enumerated below.",
+      "VALID_OPTIONS": [
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b7a4ae2719f7ac99",
+          "RELATION_NAME": "insight_recommendations",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/analytics.ts",
+            "DIGEST": "48eb8be945af951a7529ffaf21330d2d09c2652c660eacbb99596519d1f001f4",
+            "RANGE": [120, 154]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "insight_type",
+            "category",
+            "priority",
+            "title",
+            "description",
+            "data_source",
+            "metrics",
+            "trend",
+            "impact",
+            "recommendations",
+            "action_required",
+            "action_deadline",
+            "estimated_benefit",
+            "confidence_score",
+            "ai_reference_id",
+            "related_entities",
+            "status",
+            "acknowledged_by",
+            "acknowledged_at",
+            "dismissed_by",
+            "dismissed_at",
+            "dismissal_reason",
+            "completed_at",
+            "notes",
+            "created_at",
+            "updated_at"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => ({\n  orgIdx: index('insight_recommendations_org_idx').on(table.organizationId),\n  statusIdx: index('insight_recommendations_status_idx').on(table.status),\n  priorityIdx: index('insight_recommendations_priority_idx').on(table.priority),\n  createdIdx: index('insight_recommendations_created_idx').on(table.createdAt),\n})"
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b7a4ae2719f7ac99",
+          "RELATION_NAME": "insight_recommendations",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/domains/analytics/analytics.ts",
+            "DIGEST": "22526dd513bdd7363d629b5b23c7b04bc0dc0c1ebe3b33436ad7818bc1fd73af",
+            "RANGE": [120, 153]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "insight_type",
+            "category",
+            "priority",
+            "title",
+            "description",
+            "data_source",
+            "metrics",
+            "trend",
+            "impact",
+            "recommendations",
+            "action_required",
+            "action_deadline",
+            "estimated_benefit",
+            "confidence_score",
+            "related_entities",
+            "status",
+            "acknowledged_by",
+            "acknowledged_at",
+            "dismissed_by",
+            "dismissed_at",
+            "dismissal_reason",
+            "completed_at",
+            "notes",
+            "created_at",
+            "updated_at"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => ({\n  orgIdx: index('insight_recommendations_org_idx').on(table.organizationId),\n  statusIdx: index('insight_recommendations_status_idx').on(table.status),\n  priorityIdx: index('insight_recommendations_priority_idx').on(table.priority),\n  createdIdx: index('insight_recommendations_created_idx').on(table.createdAt),\n})"
+        }
+      ],
+      "PRODUCT_OR_BUSINESS_SEMANTIC_IMPACT": "Competing column sets and constraint/index blueprints describe different feature/storage structures. Combining them adds product schema; selecting one affects compatibility with the other. No automatic hybrid or platform-preference choice.",
+      "MINIMUM_HUMAN_DECISION_REQUIRED": "Approve exact values for the enumerated residual properties only; already approved governance properties and ownership remain settled"
+    },
+    {
+      "DESIGN_CHOICE_ID": "UE-W4F-DESIGN-da0568d4d7d7857e",
+      "AFFECTED_OBLIGATIONS": ["UE-W4G-DEFINITION-d15dd05e27f5495e"],
+      "AFFECTED_PHYSICAL_IDENTITIES": ["union-eyes::COLUMN::public.clc_sync_log.organization_id"],
+      "EXACT_UNRESOLVED_PROPERTY": [
+        {
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d15dd05e27f5495e",
+          "PROPERTY": "CANONICAL_COLUMN_SET",
+          "VALUE": null,
+          "PROVENANCE": null,
+          "RULE": "RULE_4_INCONSISTENT_CURRENT_DECLARATION_SHAPES",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/clc-per-capita-schema.ts",
+              "DIGEST": "f5d9d9877b7160a1c930666c4aec8cfc63999cbc5039c0ebba68c1f5bb282df5",
+              "RANGE": [188, 211]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/clc-sync-schema.ts",
+              "DIGEST": "8c93e4be71895aea8343f704ff1613d3427a5de0df85c9329686d881e2852c1d",
+              "RANGE": [61, 110]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/infrastructure/clc-per-capita.ts",
+              "DIGEST": "f5d9d9877b7160a1c930666c4aec8cfc63999cbc5039c0ebba68c1f5bb282df5",
+              "RANGE": [188, 211]
+            },
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/infrastructure/clc-sync.ts",
+              "DIGEST": "8c93e4be71895aea8343f704ff1613d3427a5de0df85c9329686d881e2852c1d",
+              "RANGE": [61, 110]
+            }
+          ],
+          "STATUS": "RESIDUAL_HUMAN_DECISION_REQUIRED",
+          "RATIONALE": "Current declarations describe different column sets for the same physical relation:[\"action\",\"affiliate_code\",\"changes\",\"conflicts\",\"duration\",\"error\",\"id\",\"organization_id\",\"synced_at\"] versus [\"created_at\",\"data_hash\",\"direction\",\"error_details\",\"error_message\",\"id\",\"initiated_by\",\"is_verified\",\"organization_id\",\"records_failed\",\"records_processed\",\"records_skipped\",\"records_succeeded\",\"status\",\"sync_data\",\"sync_end_date\",\"sync_start_date\",\"sync_type\",\"updated_at\",\"verification_notes\",\"verification_status\",\"verified_at\",\"verified_by\"]. Combining them creates a hybrid product schema not authorized by minimum commitment."
+        }
+      ],
+      "WHY_W4H_DOCTRINE_CANNOT_SELECT_IT": "The current referenced declarations describe different physical column sets for the same relation. Permissive null/default/constraint rules cannot choose which product blueprint is intended or authorize their union. Exact alternatives and evidence references are enumerated below.",
+      "VALID_OPTIONS": [
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d15dd05e27f5495e",
+          "RELATION_NAME": "clc_sync_log",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/clc-per-capita-schema.ts",
+            "DIGEST": "f5d9d9877b7160a1c930666c4aec8cfc63999cbc5039c0ebba68c1f5bb282df5",
+            "RANGE": [188, 211]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "affiliate_code",
+            "action",
+            "changes",
+            "conflicts",
+            "duration",
+            "error",
+            "synced_at"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => ({\n    idxSyncLogOrg: index('idx_sync_log_org').on(table.organizationId),\n    idxSyncLogAffiliate: index('idx_sync_log_affiliate').on(table.affiliateCode),\n    idxSyncLogSyncedAt: index('idx_sync_log_synced_at').on(table.syncedAt),\n    clcSyncLogOrganizationIdFkey: foreignKey({\n      columns: [table.organizationId],\n      foreignColumns: [organizations.id],\n      name: 'clc_sync_log_organization_id_fkey',\n    }),\n  })"
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d15dd05e27f5495e",
+          "RELATION_NAME": "clc_sync_log",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/clc-sync-schema.ts",
+            "DIGEST": "8c93e4be71895aea8343f704ff1613d3427a5de0df85c9329686d881e2852c1d",
+            "RANGE": [61, 110]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "sync_type",
+            "status",
+            "direction",
+            "sync_start_date",
+            "sync_end_date",
+            "records_processed",
+            "records_succeeded",
+            "records_failed",
+            "records_skipped",
+            "error_message",
+            "error_details",
+            "data_hash",
+            "sync_data",
+            "verification_status",
+            "verification_notes",
+            "is_verified",
+            "verified_at",
+            "verified_by",
+            "created_at",
+            "updated_at",
+            "initiated_by"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(t) => ({\n    orgIdx: index(\"clc_sync_log_org_idx\").on(t.organizationId),\n    statusIdx: index(\"clc_sync_log_status_idx\").on(t.status),\n    typeIdx: index(\"clc_sync_log_type_idx\").on(t.syncType),\n    dateIdx: index(\"clc_sync_log_date_idx\").on(t.createdAt),\n  })"
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d15dd05e27f5495e",
+          "RELATION_NAME": "clc_sync_log",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/domains/infrastructure/clc-per-capita.ts",
+            "DIGEST": "f5d9d9877b7160a1c930666c4aec8cfc63999cbc5039c0ebba68c1f5bb282df5",
+            "RANGE": [188, 211]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "affiliate_code",
+            "action",
+            "changes",
+            "conflicts",
+            "duration",
+            "error",
+            "synced_at"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(table) => ({\n    idxSyncLogOrg: index('idx_sync_log_org').on(table.organizationId),\n    idxSyncLogAffiliate: index('idx_sync_log_affiliate').on(table.affiliateCode),\n    idxSyncLogSyncedAt: index('idx_sync_log_synced_at').on(table.syncedAt),\n    clcSyncLogOrganizationIdFkey: foreignKey({\n      columns: [table.organizationId],\n      foreignColumns: [organizations.id],\n      name: 'clc_sync_log_organization_id_fkey',\n    }),\n  })"
+        },
+        {
+          "OPTION": "Explicitly select this current referenced physical blueprint and reconcile the competing variant",
+          "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d15dd05e27f5495e",
+          "RELATION_NAME": "clc_sync_log",
+          "EVIDENCE_REFERENCE": {
+            "FILE": "apps/union-eyes/db/schema/domains/infrastructure/clc-sync.ts",
+            "DIGEST": "8c93e4be71895aea8343f704ff1613d3427a5de0df85c9329686d881e2852c1d",
+            "RANGE": [61, 110]
+          },
+          "COLUMN_NAMES": [
+            "id",
+            "organization_id",
+            "sync_type",
+            "status",
+            "direction",
+            "sync_start_date",
+            "sync_end_date",
+            "records_processed",
+            "records_succeeded",
+            "records_failed",
+            "records_skipped",
+            "error_message",
+            "error_details",
+            "data_hash",
+            "sync_data",
+            "verification_status",
+            "verification_notes",
+            "is_verified",
+            "verified_at",
+            "verified_by",
+            "created_at",
+            "updated_at",
+            "initiated_by"
+          ],
+          "CONSTRAINT_DESIGN_EVIDENCE": "(t) => ({\n    orgIdx: index(\"clc_sync_log_org_idx\").on(t.organizationId),\n    statusIdx: index(\"clc_sync_log_status_idx\").on(t.status),\n    typeIdx: index(\"clc_sync_log_type_idx\").on(t.syncType),\n    dateIdx: index(\"clc_sync_log_date_idx\").on(t.createdAt),\n  })"
+        }
+      ],
+      "PRODUCT_OR_BUSINESS_SEMANTIC_IMPACT": "Competing column sets and constraint/index blueprints describe different feature/storage structures. Combining them adds product schema; selecting one affects compatibility with the other. No automatic hybrid or platform-preference choice.",
+      "MINIMUM_HUMAN_DECISION_REQUIRED": "Approve exact values for the enumerated residual properties only; already approved governance properties and ownership remain settled"
+    }
+  ],
+  "summary": {
+    "DESIGN_GROUPS_INPUT": 126,
+    "APPROVED": 121,
+    "RESIDUAL_HUMAN_DECISION_REQUIRED": 5,
+    "CONFLICT": 0,
+    "SUM": 126,
+    "UNACCOUNTED": 0,
+    "DEFINITION_OBLIGATIONS": 183,
+    "ALL_PROPERTIES_GOVERNED": 178,
+    "RESIDUAL_DECISION_REQUIRED": 5,
+    "CONFLICTED": 0,
+    "OBLIGATION_SUM": 183,
+    "DISTINCT_RELATIONS": 125,
+    "CANONICAL_SQL_AUTHORED": 0,
+    "INACTIVE_SQL_PAYLOADS_CREATED": 0,
+    "PRODUCERS_ACTIVATED": 0
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W4H_GATE": "BLOCKED",
+    "PHASE_1B_3C_A1I_W4H": "BLOCKED",
+    "CANONICAL_DEFINITION_GOVERNANCE": "PARTIAL_RESIDUAL_DECISIONS_REQUIRED",
+    "CANONICAL_CONTRACT_VERSION": "1.3.1",
+    "W4F_REGENERATION": "NOT_AUTHORIZED",
+    "W4F_REGENERATION_STARTED": "NO",
+    "W4": "BLOCKED_DEFINITION_DECISIONS_PENDING",
+    "W4P": "NOT_AUTHORIZED",
+    "W5": "NOT_AUTHORIZED",
+    "NO_FURTHER_W4H_DOCTRINE_PASS": "YES",
+    "CANONICAL_SQL_AUTHORED": 0,
+    "PRODUCERS_ACTIVATED": 0,
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "SQLSTATE 42501 duplicate_groups": ["admin/duplicates/route.ts#GET"],
+  "OTHER": [
+    "cases/[caseId]/export/route.ts#GET",
+    "cbas/[id]/route.ts#GET",
+    "clauses/[id]/route.ts#GET",
+    "signatures/documents/[id]/route.ts#GET",
+    "users/me/profile/route.ts#GET",
+    "admin/pki/workflows/[id]/route.ts#PUT",
+    "admin/pki/signatures/[id]/verify/route.ts#POST",
+    "admin/seed-cupe-pilot/route.ts#POST",
+    "cases/[caseId]/evidence/route.ts#POST",
+    "clauses/[id]/route.ts#DELETE",
+    "clauses/[id]/route.ts#PATCH",
+    "gdpr/data-export/route.ts#POST",
+    "location/consent/route.ts#DELETE",
+    "notifications/[id]/route.ts#PATCH",
+    "pension/benefits/route.ts#POST",
+    "pilot/apply/[id]/reference-profile/route.ts#POST",
+    "signatures/documents/[id]/route.ts#PATCH",
+    "signatures/documents/route.ts#POST",
+    "admin/pki/workflows/[id]/route.ts#GET",
+    "cases/[caseId]/audit/route.ts#GET",
+    "cases/[caseId]/next-actions/route.ts#GET",
+    "cases/[caseId]/notes/route.ts#GET",
+    "chatbot/sessions/[sessionId]/messages/route.ts#GET",
+    "claims/[id]/evidence/route.ts#GET",
+    "organizations/[id]/members/route.ts#GET",
+    "signatures/audit/[documentId]/route.ts#GET",
+    "workflow/overdue/route.ts#GET"
+  ],
+  "SQLSTATE 42501 grievances": ["cron/deadline-overdue/route.ts#GET"],
+  "SQLSTATE 42P01 deadline_reassignment_convergence": ["cron/deadline-reminders/route.ts#GET"],
+  "EXTERNAL_INTEGRATION_SECRET": [
+    "communications/webhooks/resend/route.ts#POST",
+    "payments/webhooks/paypal/route.ts#POST",
+    "payments/webhooks/stripe/route.ts#POST",
+    "calendar-sync/microsoft/auth/route.ts#GET"
+  ],
+  "SQLSTATE 42P01 org_subscriptions": ["cron/billing-lifecycle/route.ts#POST"],
+  "SQLSTATE 42501 ml_predictions": ["cron/observability-alerts/route.ts#POST"],
+  "SQLSTATE 42P01 claims": ["cron/sla-watchdog/route.ts#POST"],
+  "SQLSTATE 42P01 audit_security.audit_logs": [
+    "activities/route.ts#GET",
+    "admin/ai-usage/route.ts#GET"
+  ],
+  "SQLSTATE 42883 ": ["admin/dues/overview/route.ts#GET"],
+  "SQLSTATE 42501 ingestion_batches": [
+    "admin/ingest/batches/[id]/route.ts#GET",
+    "admin/ingest/batches/route.ts#GET"
+  ],
+  "SQLSTATE 42P01 case_studies": ["case-studies/route.ts#GET"],
+  "SQLSTATE 42P01 ": ["cbas/route.ts#GET"],
+  "SQLSTATE 22P02 ": [
+    "dues/balance/route.ts#GET",
+    "dues/payment-history/route.ts#GET",
+    "dues/receipt/[id]/route.ts#GET"
+  ]
+}

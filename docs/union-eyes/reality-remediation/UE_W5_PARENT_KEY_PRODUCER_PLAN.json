@@ -1,0 +1,507 @@
+{
+  "PHASE": "PHASE_1B_3C_A1I_W5B_PK",
+  "SPECIFICATION": {
+    "supplementId": "UE_PRE_W5_PARENT_KEYS_V1",
+    "graphDigest": "b700d55469c27bed84d98aa4281fb800486a4f776e4d88d753031d28446b21b2",
+    "parentW4pDigest": "b213e1b6e5773d2f513ef2a0b55e199d0055ea7f3fb8202c96e761e75d04346a",
+    "definitions": [
+      {
+        "relation": "allocation_rules",
+        "authorityDigest": "bb1c8026618337f8eecfad9dc54da0c8b37b1aae5d261e252e5c966c751b9533",
+        "sql": "ALTER TABLE \"public\".\"allocation_rules\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+        "sqlDigest": "0c5ba8801be9910878550c8c1a1c8e97ff12fad77795bd3d2160b2fa8b08fc7d",
+        "expectedBaselineDigest": "ee6425d1d073f1f42593362508530adac3a0f57f42a95cfe9ce1ee12f9670e39",
+        "expectedBaselineColumns": ["organization_id"]
+      },
+      {
+        "relation": "allocation_runs",
+        "authorityDigest": "7b1c14914c32a5f72acca8f6c8e65b1293ee6fb0d308393e14d09f87c1bd8eed",
+        "sql": "ALTER TABLE \"public\".\"allocation_runs\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+        "sqlDigest": "8e143f747047521d4e0ea9f0375dfd7cfa6469e3ed14713d5dfb8d0528b487da",
+        "expectedBaselineDigest": "ee6425d1d073f1f42593362508530adac3a0f57f42a95cfe9ce1ee12f9670e39",
+        "expectedBaselineColumns": ["organization_id"]
+      },
+      {
+        "relation": "commercial_contracts",
+        "authorityDigest": "573d5abadf83b6967165525d676743511fe6e6a1403d5f20fece339a9593a15a",
+        "sql": "ALTER TABLE \"public\".\"commercial_contracts\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+        "sqlDigest": "7e3f0abea74189ade6a85a4db22b1b6bf8d0b8754710e4f7488ceee01d70028a",
+        "expectedBaselineDigest": "ee6425d1d073f1f42593362508530adac3a0f57f42a95cfe9ce1ee12f9670e39",
+        "expectedBaselineColumns": ["organization_id"]
+      },
+      {
+        "relation": "committee_meetings",
+        "authorityDigest": "7ebb3fe8e8132c9ef20c6d892548b396808319d1327caacad653ac56e0f2bb3d",
+        "sql": "ALTER TABLE \"public\".\"committee_meetings\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+        "sqlDigest": "64c630fbbf954e59d1078b02ede073659a127dffea717c20c501690d90c60d2b",
+        "expectedBaselineDigest": "ee6425d1d073f1f42593362508530adac3a0f57f42a95cfe9ce1ee12f9670e39",
+        "expectedBaselineColumns": ["organization_id"]
+      },
+      {
+        "relation": "correspondence",
+        "authorityDigest": "98f94a42633d73628c1996ee7034271575218b63662e28d092ae7d1537998700",
+        "sql": "ALTER TABLE \"public\".\"correspondence\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+        "sqlDigest": "cf85a976dcf56b8764a57a13fa4352c1ffc0bc3f04e6c67c8a02ba23c81fc91d",
+        "expectedBaselineDigest": "ee6425d1d073f1f42593362508530adac3a0f57f42a95cfe9ce1ee12f9670e39",
+        "expectedBaselineColumns": ["organization_id"]
+      },
+      {
+        "relation": "duplicate_groups",
+        "authorityDigest": "4bc61fba6cf1b0d097b24a4824ed33cdeab737fadc97cb6f4339b930ef2448d7",
+        "sql": "ALTER TABLE \"public\".\"duplicate_groups\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+        "sqlDigest": "8bec1bbf48b404f5c01957aca6c0c1da2a2076392691c6a861a1487f44b6cb4c",
+        "expectedBaselineDigest": "ee6425d1d073f1f42593362508530adac3a0f57f42a95cfe9ce1ee12f9670e39",
+        "expectedBaselineColumns": ["organization_id"]
+      },
+      {
+        "relation": "ingestion_batches",
+        "authorityDigest": "50a0b67f3bcbf7365529697357faf1ac714be0b94c142bfb1fd2f4fe56c79b98",
+        "sql": "ALTER TABLE \"public\".\"ingestion_batches\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+        "sqlDigest": "88a98e88edb6fe29999a0c828d67bdfb5211db3764964d4f54b6627934e87459",
+        "expectedBaselineDigest": "ee6425d1d073f1f42593362508530adac3a0f57f42a95cfe9ce1ee12f9670e39",
+        "expectedBaselineColumns": ["organization_id"]
+      },
+      {
+        "relation": "platform_invoices",
+        "authorityDigest": "47860618ef0667cf2b421200e82ebdd0d10bc60c97f7928360909d72fef3cd11",
+        "sql": "ALTER TABLE \"public\".\"platform_invoices\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+        "sqlDigest": "dcadc5b87dc078fff16964d7a43c06ae38ef19745e403edbfe46530db481ddbd",
+        "expectedBaselineDigest": "ee6425d1d073f1f42593362508530adac3a0f57f42a95cfe9ce1ee12f9670e39",
+        "expectedBaselineColumns": ["organization_id"]
+      },
+      {
+        "relation": "platform_payments",
+        "authorityDigest": "82bb10152a155766530a6142360f6dce0a0ab1e734dda8832691b7f5512603dc",
+        "sql": "ALTER TABLE \"public\".\"platform_payments\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+        "sqlDigest": "8b7ce91302763943987dcdbfc5ddaa21262dbea38678cc903c729eb3fc33c3e8",
+        "expectedBaselineDigest": "ee6425d1d073f1f42593362508530adac3a0f57f42a95cfe9ce1ee12f9670e39",
+        "expectedBaselineColumns": ["organization_id"]
+      },
+      {
+        "relation": "reconciliation_runs",
+        "authorityDigest": "49a35fc826727af41445e47f795f403b01e957d8273266af1019a8dc2d332078",
+        "sql": "ALTER TABLE \"public\".\"reconciliation_runs\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+        "sqlDigest": "cc0564c302faf5493bbb92923a6236576a1c6245d6dd01c9e48fe9543f42187f",
+        "expectedBaselineDigest": "6af2f15fcffeaf41d3f6ed753721ebfc2737ba3f29c3248728509d4c28f90b66",
+        "expectedBaselineColumns": ["organization_id"]
+      }
+    ]
+  },
+  "PLAN_DIGEST": "6f9eb1190670f1d010c6d44ce6598b4924e806eae3a22d337ca79b5522cd0e90",
+  "AUTHORITY_DIGEST": "69b70908dc1e6fd9fc76a60a4ed29b24849bac5dd0a089ca77041862ae7b379d",
+  "PRODUCER_COUNT": 10,
+  "INSPECTOR_COUNT": 10,
+  "VERIFIER_COUNT": 10,
+  "PRODUCERS": [
+    {
+      "PRODUCER_ID": "PRE_W5_PK:allocation_rules",
+      "PHYSICAL_IDENTITY": "public.allocation_rules.id",
+      "RELATION": "allocation_rules",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"allocation_rules\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+          "SOURCE_SHA256": "abbf89017e4dbf394bb075ffbca2ae317c305be1bd59d3f2dfb77bf573f6be20",
+          "SOURCE_LINES": [51, 51],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+          "SOURCE_SHA256": "b33d837b48798f1237423516f5d7e402becac4b0d48cdffc3d2201e184bc111b",
+          "SOURCE_LINES": [343, 343],
+          "EXACT_DEFINITION": "id                UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "cc156b6b4d4a02ac9c564849c54a8b2f0ed4894647b103a18c62bc408f5d2c5e",
+          "RANK": 1
+        }
+      ],
+      "SOURCE_AUTHORITY_DIGEST": "bb1c8026618337f8eecfad9dc54da0c8b37b1aae5d261e252e5c966c751b9533",
+      "PRECONDITIONS": [
+        "Authenticated migration-admin pinned UE_OPERATIONAL target with verified exact W4P receipt/plan",
+        "Existing ordinary relation with exact W4P baseline column shape;all10keys inspected before any send",
+        "Empty relation on missing-key path;populated missing-key relation denies identity regeneration",
+        "No conflicting column,PK,unique constraint;gen_random_uuid resolution attested as PostgreSQL builtin or pgcrypto extension member",
+        "Explicit human authorization binds supplement plan,authority,graph,target,actor and W4P verification",
+        "Concrete exclusive rollback-on-rejection adapter required;absent current adapter=DENY"
+      ],
+      "INSPECTOR": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#inspectParentKey",
+      "CATALOG_READER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#readParentKeyCatalog",
+      "VERIFIER": "inspectParentKey==KEY_PRESENT_EXACT;immediate reread plus all10final rereads",
+      "HANDLER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#applyParentKeySupplement",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "TRANSACTION_CLASS": "TRANSACTION_COMPATIBLE",
+      "STATUS": "IMPLEMENTED_NOT_EXECUTED",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PRODUCER_ID": "PRE_W5_PK:allocation_runs",
+      "PHYSICAL_IDENTITY": "public.allocation_runs.id",
+      "RELATION": "allocation_runs",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"allocation_runs\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+          "SOURCE_SHA256": "abbf89017e4dbf394bb075ffbca2ae317c305be1bd59d3f2dfb77bf573f6be20",
+          "SOURCE_LINES": [98, 98],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+          "SOURCE_SHA256": "b33d837b48798f1237423516f5d7e402becac4b0d48cdffc3d2201e184bc111b",
+          "SOURCE_LINES": [376, 376],
+          "EXACT_DEFINITION": "id                UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "cc156b6b4d4a02ac9c564849c54a8b2f0ed4894647b103a18c62bc408f5d2c5e",
+          "RANK": 1
+        }
+      ],
+      "SOURCE_AUTHORITY_DIGEST": "7b1c14914c32a5f72acca8f6c8e65b1293ee6fb0d308393e14d09f87c1bd8eed",
+      "PRECONDITIONS": [
+        "Authenticated migration-admin pinned UE_OPERATIONAL target with verified exact W4P receipt/plan",
+        "Existing ordinary relation with exact W4P baseline column shape;all10keys inspected before any send",
+        "Empty relation on missing-key path;populated missing-key relation denies identity regeneration",
+        "No conflicting column,PK,unique constraint;gen_random_uuid resolution attested as PostgreSQL builtin or pgcrypto extension member",
+        "Explicit human authorization binds supplement plan,authority,graph,target,actor and W4P verification",
+        "Concrete exclusive rollback-on-rejection adapter required;absent current adapter=DENY"
+      ],
+      "INSPECTOR": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#inspectParentKey",
+      "CATALOG_READER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#readParentKeyCatalog",
+      "VERIFIER": "inspectParentKey==KEY_PRESENT_EXACT;immediate reread plus all10final rereads",
+      "HANDLER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#applyParentKeySupplement",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "TRANSACTION_CLASS": "TRANSACTION_COMPATIBLE",
+      "STATUS": "IMPLEMENTED_NOT_EXECUTED",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PRODUCER_ID": "PRE_W5_PK:commercial_contracts",
+      "PHYSICAL_IDENTITY": "public.commercial_contracts.id",
+      "RELATION": "commercial_contracts",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"commercial_contracts\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+          "SOURCE_SHA256": "f1b988aade5a9e6af88ef00bf6d4b9f539dc97a36b11525092302ef93e09e666",
+          "SOURCE_LINES": [60, 60],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+          "SOURCE_SHA256": "b0f4f4f5ead9b294f543523966a39473170b2a1f5324a2b51a5f565879654796",
+          "SOURCE_LINES": [67, 67],
+          "EXACT_DEFINITION": "id              UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "3e69827c2cd320ec185fa9c0759a01d8990d551a900e7a8883598f69003364b6",
+          "RANK": 1
+        }
+      ],
+      "SOURCE_AUTHORITY_DIGEST": "573d5abadf83b6967165525d676743511fe6e6a1403d5f20fece339a9593a15a",
+      "PRECONDITIONS": [
+        "Authenticated migration-admin pinned UE_OPERATIONAL target with verified exact W4P receipt/plan",
+        "Existing ordinary relation with exact W4P baseline column shape;all10keys inspected before any send",
+        "Empty relation on missing-key path;populated missing-key relation denies identity regeneration",
+        "No conflicting column,PK,unique constraint;gen_random_uuid resolution attested as PostgreSQL builtin or pgcrypto extension member",
+        "Explicit human authorization binds supplement plan,authority,graph,target,actor and W4P verification",
+        "Concrete exclusive rollback-on-rejection adapter required;absent current adapter=DENY"
+      ],
+      "INSPECTOR": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#inspectParentKey",
+      "CATALOG_READER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#readParentKeyCatalog",
+      "VERIFIER": "inspectParentKey==KEY_PRESENT_EXACT;immediate reread plus all10final rereads",
+      "HANDLER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#applyParentKeySupplement",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "TRANSACTION_CLASS": "TRANSACTION_COMPATIBLE",
+      "STATUS": "IMPLEMENTED_NOT_EXECUTED",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PRODUCER_ID": "PRE_W5_PK:committee_meetings",
+      "PHYSICAL_IDENTITY": "public.committee_meetings.id",
+      "RELATION": "committee_meetings",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"committee_meetings\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY": [
+        {
+          "FILE": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+          "SOURCE_SHA256": "fa8e61191e864250bcf1a2087f056be02dfd59eedd66a930d3f93c5e00b2cddd",
+          "SOURCE_LINES": [68, 68],
+          "EXACT_DEFINITION": "uuid('id').defaultRandom().primaryKey()",
+          "DEFINITION_SHA256": "14eacac7e08acc0f7679095a20d5583adcc7a4203b6acfc8fffb894b2dd82730",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+          "SOURCE_SHA256": "4a64cd997f035b7edc9f1c1f28a72fedd60aad8da875be20398e62e79fa958b2",
+          "SOURCE_LINES": [41, 41],
+          "EXACT_DEFINITION": "id uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "ad2f0c53f72a796884dcf7e4617fb8284a3048d353707c4a576904b6bf6c0c2b",
+          "RANK": 1
+        }
+      ],
+      "SOURCE_AUTHORITY_DIGEST": "7ebb3fe8e8132c9ef20c6d892548b396808319d1327caacad653ac56e0f2bb3d",
+      "PRECONDITIONS": [
+        "Authenticated migration-admin pinned UE_OPERATIONAL target with verified exact W4P receipt/plan",
+        "Existing ordinary relation with exact W4P baseline column shape;all10keys inspected before any send",
+        "Empty relation on missing-key path;populated missing-key relation denies identity regeneration",
+        "No conflicting column,PK,unique constraint;gen_random_uuid resolution attested as PostgreSQL builtin or pgcrypto extension member",
+        "Explicit human authorization binds supplement plan,authority,graph,target,actor and W4P verification",
+        "Concrete exclusive rollback-on-rejection adapter required;absent current adapter=DENY"
+      ],
+      "INSPECTOR": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#inspectParentKey",
+      "CATALOG_READER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#readParentKeyCatalog",
+      "VERIFIER": "inspectParentKey==KEY_PRESENT_EXACT;immediate reread plus all10final rereads",
+      "HANDLER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#applyParentKeySupplement",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "TRANSACTION_CLASS": "TRANSACTION_COMPATIBLE",
+      "STATUS": "IMPLEMENTED_NOT_EXECUTED",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PRODUCER_ID": "PRE_W5_PK:correspondence",
+      "PHYSICAL_IDENTITY": "public.correspondence.id",
+      "RELATION": "correspondence",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"correspondence\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+          "SOURCE_SHA256": "6eeb70a895e9b7bf1dc08bd938b90d8bf78a417bb16f71506017a4afdec60b5a",
+          "SOURCE_LINES": [147, 147],
+          "EXACT_DEFINITION": "uuid(\"id\").primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "2de1cb3515a56e709ab5c7b16cd0d9eae9b16178cad4fcb1fd7528476cd37d80",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+          "SOURCE_SHA256": "7855d4083ddf0e9ec66c9f96f39707d52b9901252df100520629cc9c10ef63cf",
+          "SOURCE_LINES": [73, 73],
+          "EXACT_DEFINITION": "id                  UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "51154f8c1f4b53ed60939fa12d2aeb4e25ae51ebb29eb05190853475ae191f66",
+          "RANK": 1
+        }
+      ],
+      "SOURCE_AUTHORITY_DIGEST": "98f94a42633d73628c1996ee7034271575218b63662e28d092ae7d1537998700",
+      "PRECONDITIONS": [
+        "Authenticated migration-admin pinned UE_OPERATIONAL target with verified exact W4P receipt/plan",
+        "Existing ordinary relation with exact W4P baseline column shape;all10keys inspected before any send",
+        "Empty relation on missing-key path;populated missing-key relation denies identity regeneration",
+        "No conflicting column,PK,unique constraint;gen_random_uuid resolution attested as PostgreSQL builtin or pgcrypto extension member",
+        "Explicit human authorization binds supplement plan,authority,graph,target,actor and W4P verification",
+        "Concrete exclusive rollback-on-rejection adapter required;absent current adapter=DENY"
+      ],
+      "INSPECTOR": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#inspectParentKey",
+      "CATALOG_READER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#readParentKeyCatalog",
+      "VERIFIER": "inspectParentKey==KEY_PRESENT_EXACT;immediate reread plus all10final rereads",
+      "HANDLER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#applyParentKeySupplement",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "TRANSACTION_CLASS": "TRANSACTION_COMPATIBLE",
+      "STATUS": "IMPLEMENTED_NOT_EXECUTED",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PRODUCER_ID": "PRE_W5_PK:duplicate_groups",
+      "PHYSICAL_IDENTITY": "public.duplicate_groups.id",
+      "RELATION": "duplicate_groups",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"duplicate_groups\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY": [
+        {
+          "FILE": "apps/union-eyes/db/schema/ingestion-schema.ts",
+          "SOURCE_SHA256": "15560275d6b52ec818be5038d20c22dc75a7b471a530feef129b9b32a486f15e",
+          "SOURCE_LINES": [111, 111],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0104_dedup_and_quality_warnings.sql",
+          "SOURCE_SHA256": "c7726d78685661033d4167073247a2ed343e9c0aa7d0f20ac4f44c16a827fe93",
+          "SOURCE_LINES": [10, 10],
+          "EXACT_DEFINITION": "id            UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "c4df5b0136b2de48c4ecee8a5514b5a37847c3a3d8459fcea1ec52a6a5a2f54d",
+          "RANK": 1
+        }
+      ],
+      "SOURCE_AUTHORITY_DIGEST": "4bc61fba6cf1b0d097b24a4824ed33cdeab737fadc97cb6f4339b930ef2448d7",
+      "PRECONDITIONS": [
+        "Authenticated migration-admin pinned UE_OPERATIONAL target with verified exact W4P receipt/plan",
+        "Existing ordinary relation with exact W4P baseline column shape;all10keys inspected before any send",
+        "Empty relation on missing-key path;populated missing-key relation denies identity regeneration",
+        "No conflicting column,PK,unique constraint;gen_random_uuid resolution attested as PostgreSQL builtin or pgcrypto extension member",
+        "Explicit human authorization binds supplement plan,authority,graph,target,actor and W4P verification",
+        "Concrete exclusive rollback-on-rejection adapter required;absent current adapter=DENY"
+      ],
+      "INSPECTOR": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#inspectParentKey",
+      "CATALOG_READER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#readParentKeyCatalog",
+      "VERIFIER": "inspectParentKey==KEY_PRESENT_EXACT;immediate reread plus all10final rereads",
+      "HANDLER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#applyParentKeySupplement",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "TRANSACTION_CLASS": "TRANSACTION_COMPATIBLE",
+      "STATUS": "IMPLEMENTED_NOT_EXECUTED",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PRODUCER_ID": "PRE_W5_PK:ingestion_batches",
+      "PHYSICAL_IDENTITY": "public.ingestion_batches.id",
+      "RELATION": "ingestion_batches",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"ingestion_batches\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY": [
+        {
+          "FILE": "apps/union-eyes/db/schema/ingestion-schema.ts",
+          "SOURCE_SHA256": "15560275d6b52ec818be5038d20c22dc75a7b471a530feef129b9b32a486f15e",
+          "SOURCE_LINES": [31, 31],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0089_ingestion_hardening.sql",
+          "SOURCE_SHA256": "86981811ca5a3126fdcef29da9e28fbbc1fc058122b889decec88261a2d9573d",
+          "SOURCE_LINES": [61, 61],
+          "EXACT_DEFINITION": "id            UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "c4df5b0136b2de48c4ecee8a5514b5a37847c3a3d8459fcea1ec52a6a5a2f54d",
+          "RANK": 1
+        }
+      ],
+      "SOURCE_AUTHORITY_DIGEST": "50a0b67f3bcbf7365529697357faf1ac714be0b94c142bfb1fd2f4fe56c79b98",
+      "PRECONDITIONS": [
+        "Authenticated migration-admin pinned UE_OPERATIONAL target with verified exact W4P receipt/plan",
+        "Existing ordinary relation with exact W4P baseline column shape;all10keys inspected before any send",
+        "Empty relation on missing-key path;populated missing-key relation denies identity regeneration",
+        "No conflicting column,PK,unique constraint;gen_random_uuid resolution attested as PostgreSQL builtin or pgcrypto extension member",
+        "Explicit human authorization binds supplement plan,authority,graph,target,actor and W4P verification",
+        "Concrete exclusive rollback-on-rejection adapter required;absent current adapter=DENY"
+      ],
+      "INSPECTOR": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#inspectParentKey",
+      "CATALOG_READER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#readParentKeyCatalog",
+      "VERIFIER": "inspectParentKey==KEY_PRESENT_EXACT;immediate reread plus all10final rereads",
+      "HANDLER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#applyParentKeySupplement",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "TRANSACTION_CLASS": "TRANSACTION_COMPATIBLE",
+      "STATUS": "IMPLEMENTED_NOT_EXECUTED",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PRODUCER_ID": "PRE_W5_PK:platform_invoices",
+      "PHYSICAL_IDENTITY": "public.platform_invoices.id",
+      "RELATION": "platform_invoices",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"platform_invoices\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+          "SOURCE_SHA256": "729311b4e5be5afcf25f9e17b1dcd23ae1abb06c4fcf74071064f6ac4c6aacd8",
+          "SOURCE_LINES": [173, 173],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+          "SOURCE_SHA256": "b33d837b48798f1237423516f5d7e402becac4b0d48cdffc3d2201e184bc111b",
+          "SOURCE_LINES": [175, 175],
+          "EXACT_DEFINITION": "id                  UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "51154f8c1f4b53ed60939fa12d2aeb4e25ae51ebb29eb05190853475ae191f66",
+          "RANK": 1
+        }
+      ],
+      "SOURCE_AUTHORITY_DIGEST": "47860618ef0667cf2b421200e82ebdd0d10bc60c97f7928360909d72fef3cd11",
+      "PRECONDITIONS": [
+        "Authenticated migration-admin pinned UE_OPERATIONAL target with verified exact W4P receipt/plan",
+        "Existing ordinary relation with exact W4P baseline column shape;all10keys inspected before any send",
+        "Empty relation on missing-key path;populated missing-key relation denies identity regeneration",
+        "No conflicting column,PK,unique constraint;gen_random_uuid resolution attested as PostgreSQL builtin or pgcrypto extension member",
+        "Explicit human authorization binds supplement plan,authority,graph,target,actor and W4P verification",
+        "Concrete exclusive rollback-on-rejection adapter required;absent current adapter=DENY"
+      ],
+      "INSPECTOR": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#inspectParentKey",
+      "CATALOG_READER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#readParentKeyCatalog",
+      "VERIFIER": "inspectParentKey==KEY_PRESENT_EXACT;immediate reread plus all10final rereads",
+      "HANDLER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#applyParentKeySupplement",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "TRANSACTION_CLASS": "TRANSACTION_COMPATIBLE",
+      "STATUS": "IMPLEMENTED_NOT_EXECUTED",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PRODUCER_ID": "PRE_W5_PK:platform_payments",
+      "PHYSICAL_IDENTITY": "public.platform_payments.id",
+      "RELATION": "platform_payments",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"platform_payments\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+          "SOURCE_SHA256": "729311b4e5be5afcf25f9e17b1dcd23ae1abb06c4fcf74071064f6ac4c6aacd8",
+          "SOURCE_LINES": [230, 230],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+          "SOURCE_SHA256": "b33d837b48798f1237423516f5d7e402becac4b0d48cdffc3d2201e184bc111b",
+          "SOURCE_LINES": [219, 219],
+          "EXACT_DEFINITION": "id                  UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "51154f8c1f4b53ed60939fa12d2aeb4e25ae51ebb29eb05190853475ae191f66",
+          "RANK": 1
+        }
+      ],
+      "SOURCE_AUTHORITY_DIGEST": "82bb10152a155766530a6142360f6dce0a0ab1e734dda8832691b7f5512603dc",
+      "PRECONDITIONS": [
+        "Authenticated migration-admin pinned UE_OPERATIONAL target with verified exact W4P receipt/plan",
+        "Existing ordinary relation with exact W4P baseline column shape;all10keys inspected before any send",
+        "Empty relation on missing-key path;populated missing-key relation denies identity regeneration",
+        "No conflicting column,PK,unique constraint;gen_random_uuid resolution attested as PostgreSQL builtin or pgcrypto extension member",
+        "Explicit human authorization binds supplement plan,authority,graph,target,actor and W4P verification",
+        "Concrete exclusive rollback-on-rejection adapter required;absent current adapter=DENY"
+      ],
+      "INSPECTOR": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#inspectParentKey",
+      "CATALOG_READER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#readParentKeyCatalog",
+      "VERIFIER": "inspectParentKey==KEY_PRESENT_EXACT;immediate reread plus all10final rereads",
+      "HANDLER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#applyParentKeySupplement",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "TRANSACTION_CLASS": "TRANSACTION_COMPATIBLE",
+      "STATUS": "IMPLEMENTED_NOT_EXECUTED",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PRODUCER_ID": "PRE_W5_PK:reconciliation_runs",
+      "PHYSICAL_IDENTITY": "public.reconciliation_runs.id",
+      "RELATION": "reconciliation_runs",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"reconciliation_runs\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+          "SOURCE_SHA256": "19c1827fdaa0da3821b5610906bb95b317103f7a75da778f3b088d2422850ba6",
+          "SOURCE_LINES": [60, 60],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+          "SOURCE_SHA256": "2fad4d827cd20b6faaf38631eed2e3d113fc9cb2027f2548bd99eb6d431a7f47",
+          "SOURCE_LINES": [275, 275],
+          "EXACT_DEFINITION": "id            UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "c4df5b0136b2de48c4ecee8a5514b5a37847c3a3d8459fcea1ec52a6a5a2f54d",
+          "RANK": 1
+        }
+      ],
+      "SOURCE_AUTHORITY_DIGEST": "49a35fc826727af41445e47f795f403b01e957d8273266af1019a8dc2d332078",
+      "PRECONDITIONS": [
+        "Authenticated migration-admin pinned UE_OPERATIONAL target with verified exact W4P receipt/plan",
+        "Existing ordinary relation with exact W4P baseline column shape;all10keys inspected before any send",
+        "Empty relation on missing-key path;populated missing-key relation denies identity regeneration",
+        "No conflicting column,PK,unique constraint;gen_random_uuid resolution attested as PostgreSQL builtin or pgcrypto extension member",
+        "Explicit human authorization binds supplement plan,authority,graph,target,actor and W4P verification",
+        "Concrete exclusive rollback-on-rejection adapter required;absent current adapter=DENY"
+      ],
+      "INSPECTOR": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#inspectParentKey",
+      "CATALOG_READER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#readParentKeyCatalog",
+      "VERIFIER": "inspectParentKey==KEY_PRESENT_EXACT;immediate reread plus all10final rereads",
+      "HANDLER": "apps/union-eyes/scripts/provisioning/parent-key-supplement.ts#applyParentKeySupplement",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "TRANSACTION_CLASS": "TRANSACTION_COMPATIBLE",
+      "STATUS": "IMPLEMENTED_NOT_EXECUTED",
+      "EXECUTION_ALLOWED": "NO"
+    }
+  ]
+}

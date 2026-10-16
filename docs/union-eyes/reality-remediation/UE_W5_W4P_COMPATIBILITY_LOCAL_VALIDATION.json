@@ -1,0 +1,118 @@
+{
+  "LINEAGE": "PROSPECTIVE_W5_COMPAT_V1",
+  "W5_FINAL_GATE": "BLOCKED_TERMINAL_STATIC",
+  "CANONICAL_CONTRACT_VERSION": "1.3.3",
+  "W6": "NOT_AUTHORIZED",
+  "FULL_QUALIFICATION_PASS": false,
+  "DATABASE_CONNECTIONS": 0,
+  "SQL_EXECUTED_AGAINST_DATABASE": 0,
+  "G3_REOPENED": "NO",
+  "WHEELHOUSE_ENVIRONMENT": "UE_FAKE_DJANGO_WHEELHOUSE points to the existing hash-locked offline wheelhouse; no package download",
+  "RESULTS": [
+    {
+      "COMMAND": "pnpm exec vitest run apps\\union-eyes\\scripts\\provisioning\\replay apps\\union-eyes\\scripts\\provisioning\\parent-key-supplement.test.ts apps\\union-eyes\\scripts\\provisioning\\post-w4p-execution.test.ts apps\\union-eyes\\scripts\\provisioning\\platform-baseline-promotion.test.ts scripts\\ue\\implement-w5-compatibility.test.ts scripts\\ue\\implement-w5b-post-w4p-replay.test.ts scripts\\ue\\w5bpk-parent-key-authority.test.ts scripts\\ue\\implement-w4p-platform-promotion.test.ts scripts\\ue\\author-w4fr4-final-baseline.test.ts scripts\\ue\\classify-w4lc-compatibility.test.ts scripts\\ue\\bind-w4lb-supplemental-operands.test.ts scripts\\ue\\normalize-w4pg-promotion-gate.test.ts",
+      "RESULT": "FAILED",
+      "PASSED": 7277,
+      "FAILED": 1,
+      "SKIPPED": 0,
+      "SUITES": 47,
+      "DURATION_SECONDS": 233.41,
+      "EXACT_FAILURE": "FAKE_BACKFILL_NATIVE_ASSIGNMENT_TYPE_MISMATCH:pg_catalog.text->pg_catalog.uuid",
+      "FAILING_TEST": "qualifies all106/762 conditional on the canonical W4P input, not Django reachability",
+      "INTERPRETATION": "The historical canonical-text full acceptance remains active and failing; it was not disabled or converted into an expected success. The prospective Django-first W4P path independently denies earlier on unrelated source/W4P preconditions. Root projects do not discover scripts/ue suites; those were actually executed separately below."
+    },
+    {
+      "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts --maxWorkers 2 scripts\\ue\\implement-w5-compatibility.test.ts scripts\\ue\\implement-w5b-post-w4p-replay.test.ts scripts\\ue\\w5bpk-parent-key-authority.test.ts",
+      "RESULT": "PASSED",
+      "PASSED": 211,
+      "FAILED": 0,
+      "SKIPPED": 0,
+      "SUITES": 3,
+      "DURATION_SECONDS": 134.94
+    },
+    {
+      "COMMAND": "pnpm exec vitest run --config scripts\\ue\\w4p-predecessor.vitest.config.ts --maxWorkers 2 scripts\\ue\\implement-w4p-platform-promotion.test.ts scripts\\ue\\classify-w4lc-compatibility.test.ts scripts\\ue\\bind-w4lb-supplemental-operands.test.ts scripts\\ue\\normalize-w4pg-promotion-gate.test.ts",
+      "RESULT": "PASSED",
+      "PASSED": 1104,
+      "FAILED": 0,
+      "SKIPPED": 0,
+      "SUITES": 4,
+      "DURATION_SECONDS": 158.32,
+      "BOUNDARY": "Existing authenticated predecessor restoration setup, read-only source interception; not live W4P execution."
+    },
+    {
+      "COMMAND": "pnpm exec vitest run --config scripts\\ue\\w4fr4-predecessor.vitest.config.ts --maxWorkers 2 scripts\\ue\\author-w4fr4-final-baseline.test.ts",
+      "RESULT": "PASSED",
+      "PASSED": 237,
+      "FAILED": 0,
+      "SKIPPED": 0,
+      "SUITES": 1,
+      "DURATION_SECONDS": 200.36
+    },
+    {
+      "COMMAND": "node --test infrastructure\\landing-zone\\g3-terminal-closure.test.mjs",
+      "RESULT": "PASSED",
+      "PASSED": 116,
+      "FAILED": 0
+    },
+    {
+      "COMMAND": "node infrastructure\\landing-zone\\g3-terminal-closure.mjs --check",
+      "RESULT": "PASSED",
+      "BOUNDARY": "Local preservation check only; G3 remains closed."
+    },
+    {
+      "COMMAND": "pnpm exec tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution Bundler --types node --esModuleInterop --strict apps\\union-eyes\\scripts\\provisioning\\replay-fake-w5-compatibility.ts apps\\union-eyes\\scripts\\provisioning\\replay-fake-w5-compatibility.test.ts apps\\union-eyes\\scripts\\provisioning\\replay-fake-django-baseline.ts scripts\\ue\\implement-w5-compatibility.ts scripts\\ue\\implement-w5-compatibility.test.ts",
+      "RESULT": "PASSED"
+    },
+    {
+      "COMMAND": "pnpm exec eslint --config apps\\union-eyes\\eslint.config.mjs apps\\union-eyes\\scripts\\provisioning\\replay-fake-w5-compatibility.ts apps\\union-eyes\\scripts\\provisioning\\replay-fake-w5-compatibility.test.ts apps\\union-eyes\\scripts\\provisioning\\replay-fake-django-baseline.ts scripts\\ue\\implement-w5-compatibility.ts scripts\\ue\\implement-w5-compatibility.test.ts --max-warnings 0 --rule '@next/next/no-html-link-for-pages: off'",
+      "RESULT": "PASSED",
+      "WARNINGS": 0,
+      "CONFIGURATION_NOTE": "Use the existing UE configuration from repository root to cover both provisioning and root CLI files. Disable only the irrelevant Next pages-directory rule for this non-UI selection; all remaining configured rules apply."
+    },
+    {
+      "COMMAND": "pnpm exec tsx scripts\\ue\\implement-w5-compatibility.ts --plan --self-test",
+      "RESULT": "PASSED",
+      "GATE_PRINTED": "W5=BLOCKED_TERMINAL_STATIC; 162payloads accounted; offline only; no1.3.4; W6=NOT_AUTHORIZED"
+    },
+    {
+      "COMMAND": "pnpm exec tsx scripts\\ue\\implement-w5-compatibility.ts --check --self-test",
+      "RESULT": "PASSED"
+    },
+    {
+      "COMMAND": "pnpm exec prettier --check apps\\union-eyes\\scripts\\provisioning\\replay-fake-w5-compatibility.ts apps\\union-eyes\\scripts\\provisioning\\replay-fake-w5-compatibility.test.ts apps\\union-eyes\\scripts\\provisioning\\replay-fake-django-baseline.ts scripts\\ue\\implement-w5-compatibility.ts scripts\\ue\\implement-w5-compatibility.test.ts docs\\union-eyes\\PHASE_1_AUTHORITATIVE_INDEXES.md 'docs\\union-eyes\\reality-remediation\\UE_W5_W4P_COMPATIBILITY_*.{json,md}' 'docs\\union-eyes\\reality-remediation\\w5-compat\\*.{json,md}'",
+      "RESULT": "PASSED"
+    },
+    {
+      "COMMAND": "pnpm validate:docs",
+      "RESULT": "PASSED",
+      "FILES_SCANNED": 2648,
+      "ERRORS": 0,
+      "WARNINGS": 1215,
+      "INFO": 1700
+    }
+  ],
+  "VALIDATED_SOURCE_SHA256": {
+    "apps/union-eyes/scripts/provisioning/replay-fake-w5-compatibility.ts": "04a0af3186a6d0fee3a57a5f369b3ce0419a37ea252adb11235773c69735aa93",
+    "apps/union-eyes/scripts/provisioning/replay-fake-w5-compatibility.test.ts": "6405f9a696fb962f43e49c2975398afd7b9673a7125cff9aacc100e149a97840",
+    "apps/union-eyes/scripts/provisioning/replay-fake-django-baseline.ts": "61994135dd7af5f91cd5fb89dada38ce3129d7bc0bb5c3469f6ac8ffd4971bc4",
+    "apps/union-eyes/scripts/provisioning/compile-fake-django-baseline.py": "e3dd626f32934eef052f353561e10548f7461d4fbde97999b0f5723c1bcb3337",
+    "scripts/ue/implement-w5-compatibility.ts": "d31deca91144b3ea8b346dc19b5a3cb4f21a7baf5533658e2e37456b36a6e906",
+    "scripts/ue/implement-w5-compatibility.test.ts": "32e478f42d75247051cac87cedfff5db2ab2e1ef4448c7cb8ca594ae585fb788"
+  },
+  "SOURCE_COMPILER_BOUNDARY": "The Python AST-only compiler is unchanged. The TypeScript loader only gained a CJS/ESM directory-resolution guard needed by the new CLI generator; its emitted source baseline and source authority remain independent of the prospective overlay.",
+  "COMPONENT_PROOFS": {
+    "MEMBERSHIP_OVERLAY_TESTS_PASSED": 11,
+    "NULL_OR_INVALID_UUID": "DENIED",
+    "ORPHAN_ORGANIZATION_UUID": "DENIED",
+    "DUPLICATE_ORGANIZATION_USER_PAIR": "DENIED",
+    "DISTINCT_ORGANIZATION_USER_PAIRS": "ALLOWED",
+    "UNIQUE_NOOP": "PHYSICAL_STATE_REVERIFIED",
+    "OVERLAY_COMMIT_POSTCONDITION_RECEIPT_FAILURE": "PHYSICAL_STATE_RESTORED",
+    "E048_EXACT_UUID_ASSIGNMENT": "ISOLATED_NATIVE_COMPONENT_PASSED",
+    "E048_FORCED_POSTCONDITION_FAILURE": "PHYSICAL_STATE_RESTORED",
+    "PARTIAL_W4P_PROMOTION": "DENIED_AND_RESTORED",
+    "FULL_107_FRESH_NOOP_ROLLBACK": "NOT_PROVEN"
+  },
+  "TERMINAL_REASON": "After the sole authorized membership supersession, claims, grievances and security_events retain nullable UUID organization_id source columns against unchanged NOT NULL W4P contracts; seven independently missing unique-constraint operand sets have no W4P or ten-key producer. Neither is a necessary consequence of the UUID/membership decision. No further static charter is requested."
+}

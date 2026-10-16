@@ -1,0 +1,145 @@
+{
+  "metadata": {
+    "PHASE": "PHASE_1B_3C_A1I_W4PG",
+    "INPUTS": {
+      "w4fr4": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING.json",
+      "definitions": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4.json",
+      "payloads": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR4.json",
+      "w4lc": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LC_COMPATIBILITY_GATE_NORMALIZATION.json",
+      "late": "docs/union-eyes/reality-remediation/UE_W4_LATE_PRODUCER_COMPATIBILITY_CLASSIFICATION.json",
+      "w4lb": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LB_SUPPLEMENTAL_OPERAND_BINDING.json",
+      "operands": "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_OPERAND_PRODUCER_BINDINGS.json",
+      "bindings": "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_CONSTRAINT_BINDINGS.json",
+      "deferred": "docs/union-eyes/reality-remediation/UE_W4_DEFERRED_MIXED_AUTHORITY_CONSTRAINTS.json",
+      "producer": "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json",
+      "canonical": "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json"
+    },
+    "EXECUTION_ALLOWED": "NO",
+    "GENERAL_DISCOVERY": "NO"
+  },
+  "summary": {
+    "W4FR4_DEFINITIONS": 183,
+    "W4FR4_PAYLOADS": 162,
+    "TYPE_PAYLOADS": 36,
+    "CREATE_RELATION_PAYLOADS": 57,
+    "ADD_COLUMN_PAYLOADS": 69,
+    "PRODUCER_DEFINITION_RECORDS": 183,
+    "ACCEPTED_PARENT_PRECONDITIONS": 69,
+    "MATERIALIZED_UNIQUE_OPERAND_PRECONDITIONS": 12,
+    "SET_A_TOTAL": 127,
+    "SET_A_PRE_W4P_REQUIRED": 0,
+    "SET_A_POST_W4P_REPLAY": 127,
+    "SET_A_UNRELATED_TO_W4P": 0,
+    "SET_B_TOTAL": 86,
+    "SET_B_PRE_W4P_ORDERING_REQUIRED": 0,
+    "SET_B_POST_W4P_ORDERING": 86,
+    "SET_C_TOTAL": 7,
+    "SET_C_PRE_W4P_REQUIRED": 0,
+    "SET_C_POST_W4P_DEFERRED_CONSTRAINT": 7,
+    "SET_C_UNRELATED_TO_W4P": 0,
+    "DISTINCT_UNBOUND_OPERAND_IDENTITIES": 9,
+    "OPERANDS_REQUIRED_BY_W4P": 0,
+    "SYNTHETIC_TENTH_OPERAND": "NONE",
+    "PRE_W4P_W5_COMPATIBILITY_SLICE_COUNT": 0,
+    "PRE_W4P_COMPATIBILITY_BLOCKERS": 0,
+    "RECORDED_DEPENDENCY_EDGES": 781,
+    "INBOUND_PATHS_FROM_UNRESOLVED_SETS": 0,
+    "INVENTED_DEPENDENCY_EDGES": 0,
+    "DEFINITION_CHANGES": 0,
+    "COMPATIBILITY_MECHANIC_CHANGES": 0,
+    "SQL_AUTHORED": 0,
+    "SQL_EXECUTED": 0,
+    "PRODUCERS_ACTIVATED": 0
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W4PG_GATE": "PASS",
+    "PHASE_1B_3C_A1I_W4PG": "PASS",
+    "W4P_DEPENDENCY_CUT_COMPLETE": "YES",
+    "ALL_INBOUND_W4P_DEPENDENCIES_ACCOUNTED": "YES",
+    "PRE_W4P_COMPATIBILITY_BLOCKERS": 0,
+    "PRE_W4P_W5_COMPATIBILITY_SLICE_COUNT": 0,
+    "W4P": "AUTHORIZED_NOT_STARTED",
+    "W5_COMPATIBILITY_SLICE": "NOT_REQUIRED_BEFORE_W4P",
+    "W5": "NOT_AUTHORIZED",
+    "W4": "BLOCKED_ORDERING_COMPATIBILITY_PENDING",
+    "CANONICAL_CONTRACT_VERSION": "1.3.2"
+  },
+  "DEPENDENCY_CUT_SHA256": "5c46b455408385fc7f199f7a81ea1402e065d92ccd3c9ff0ebc5882988ca8c05",
+  "DOWNSTREAM_REGISTER_SHA256": "d102e7b60b37b884345bb568c1458f47d5946708e84ba6b0f8a750d2601ce001",
+  "preservation": {
+    "BYTE_COMMITMENTS": {
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING.json": "feca82ce999454257dfd3157011684a829731bedab070d07890bc2f39d00f1c6",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4.json": "b84d75a98fec07e86ad68689a93ceebbdb262eee143de2a8f8eee6ba8562784d",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR4.json": "6f81fde1377714e0fb63177cd976a010ec6db197bb8365ad340b8b40d4629e2b",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LC_COMPATIBILITY_GATE_NORMALIZATION.json": "fef8528dda5467bb742cd4987b449809f3143099648ec42381b665ecb7cc3ab8",
+      "docs/union-eyes/reality-remediation/UE_W4_LATE_PRODUCER_COMPATIBILITY_CLASSIFICATION.json": "fc98ce059a4e4d26caadecb7ed9a686db81d324e8e597477f55064d74b76ed98",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LB_SUPPLEMENTAL_OPERAND_BINDING.json": "40ab8780f42b87389345cd3c5191f525ad5470e173f02d9eb946835bfbc3b1e0",
+      "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_OPERAND_PRODUCER_BINDINGS.json": "8ed7eb94b12d2d4b172e5a608d972ce93cbd4334e3cd4a4dfc31cfbffab15fb6",
+      "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_CONSTRAINT_BINDINGS.json": "2bfbbf5b3762d7bc4604b5e403210fb4162f0af8a667436454e3053b45bc8f6b",
+      "docs/union-eyes/reality-remediation/UE_W4_DEFERRED_MIXED_AUTHORITY_CONSTRAINTS.json": "ce57db581afbee96a9a9017b76cebf309b5741216a7df32d4b80d8f216c9c367",
+      "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json": "ba88ee29a58c55c6b50930ff75089a59c00c68526f2e2e12547e801cca6c9673",
+      "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": "89dda28394c53c1c9ed9222982c6fff4b0840186831129f32206ba451cc3b1fd"
+    },
+    "W4FR4_DEFINITIONS_SHA256": "d9f911db4107a06f4725aa69c17128dbaa8a4e63d227507f0b9d0ee56907355d",
+    "W4FR4_PAYLOADS_SHA256": "140b65cb599222e582d2d1f7cad2c0e5a9f5152c97a989c8a11561bf95e24320",
+    "PRODUCER_DEFINITION_METADATA_SHA256": "1e6fd247b77193bc538d7a67eba5b9febbe7e92278805d973211cccc2a8b1dbb",
+    "SET_A_RECORDS_SHA256": "132c65e94637a9c7415385928a59b976349e479e58d565dbe53b4235117aedeb",
+    "SET_B_HANDOFFS_SHA256": "bf0723dbc866f6346bb163a051e0b4397eedab11e027949ca4072f68354274b0",
+    "SET_C_HANDOFFS_SHA256": "1078a586c27d8930eb843cf7b093e7cfd33fde8d54e2ef50e59aac177bc8f51d",
+    "W4LB_RESIDUALS_SHA256": "2f602ec2c2c67d297f5b759c77aa276d6e4b50decda4be0c64e1fb89340660d0",
+    "W4LB_BINDING_RESULTS_SHA256": "cb7b8c4154fafb45edef95c4b12deabf98d6525ab5f19ef27e6d8339b6ea422f",
+    "CANONICAL_CONTRACT_VERSION": "1.3.2",
+    "UPSTREAM_BYTES_CHANGED": 0
+  },
+  "validation": {
+    "FIXED_INPUT_HASHES": "PASS",
+    "DEFINITION183_COVERAGE": "PASS",
+    "PAYLOAD162_COVERAGE": "PASS",
+    "SET_A127_COVERAGE": "PASS",
+    "SET_B86_COVERAGE": "PASS",
+    "SET_C7_COVERAGE": "PASS",
+    "OPERAND9_COVERAGE": "PASS",
+    "COMPLETED_CHECKS": [
+      {
+        "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts scripts\\ue\\normalize-w4pg-promotion-gate.test.ts",
+        "RESULT": "PASS",
+        "TESTS": 610
+      },
+      {
+        "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts scripts\\ue\\bind-w4lb-supplemental-operands.test.ts scripts\\ue\\classify-w4lc-compatibility.test.ts scripts\\ue\\author-w4fr4-final-baseline.test.ts",
+        "RESULT": "PASS",
+        "TESTS": 544
+      },
+      {
+        "COMMAND": "pnpm exec tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --skipLibCheck --esModuleInterop --types node scripts\\ue\\normalize-w4pg-promotion-gate.ts scripts\\ue\\normalize-w4pg-promotion-gate.test.ts",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm exec eslint --config apps\\union-eyes\\eslint.config.mjs --max-warnings 0 scripts\\ue\\normalize-w4pg-promotion-gate.ts scripts\\ue\\normalize-w4pg-promotion-gate.test.ts",
+        "RESULT": "PASS_EXIT0_EXISTING_NEXT_PAGES_DIRECTORY_DIAGNOSTIC"
+      },
+      {
+        "COMMAND": "pnpm exec prettier --check scripts\\ue\\normalize-w4pg-promotion-gate.ts scripts\\ue\\normalize-w4pg-promotion-gate.test.ts \"docs\\union-eyes\\reality-remediation\\*W4PG*\" \"docs\\union-eyes\\reality-remediation\\UE_W4P_PROMOTION_DEPENDENCY_CUT.*\" \"docs\\union-eyes\\reality-remediation\\UE_POST_W4P_COMPATIBILITY_OBLIGATIONS.*\"",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm exec tsx scripts\\ue\\normalize-w4pg-promotion-gate.ts --self-test --check",
+        "RESULT": "PASS_TWO_GENERATION_EXACT_BYTES_AND_PERSISTED_OUTPUT_EQUALITY"
+      },
+      { "COMMAND": "pnpm validate:docs", "RESULT": "PASS_0_ERRORS_1215_EXISTING_WARNINGS" }
+    ]
+  },
+  "proofBoundaries": {
+    "SQL_AUTHORED": 0,
+    "SQL_EXECUTED": 0,
+    "W4P_EXECUTED": "NO",
+    "COMPATIBILITY_MECHANICS_EXECUTED": "NO",
+    "W5_EXECUTED": "NO",
+    "DEFERRED_CONSTRAINTS_MATERIALIZED": "NO",
+    "DEFERRED_CONSTRAINTS_RUNTIME_PROVEN": "NO",
+    "PRODUCERS_ACTIVATED": 0,
+    "BOOTSTRAP_IMPLEMENTATION_COMPLETE": "NO",
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO"
+  }
+}

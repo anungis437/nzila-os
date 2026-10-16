@@ -1,0 +1,2599 @@
+{
+  "metadata": {
+    "PHASE": "PHASE_1B_3C_A1I_W5A",
+    "INPUTS": {
+      "w4p": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4P_PLATFORM_BASELINE_PROMOTION.json",
+      "promotionPlan": "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_PLAN.json",
+      "promotionImplementation": "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION.json",
+      "downstream": "docs/union-eyes/reality-remediation/UE_POST_W4P_COMPATIBILITY_OBLIGATIONS.json",
+      "w4lc": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LC_COMPATIBILITY_GATE_NORMALIZATION.json",
+      "late": "docs/union-eyes/reality-remediation/UE_W4_LATE_PRODUCER_COMPATIBILITY_CLASSIFICATION.json",
+      "deferredClassification": "docs/union-eyes/reality-remediation/UE_W4_DEFERRED_CONSTRAINT_COMPATIBILITY_CLASSIFICATION.json",
+      "w4lb": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LB_SUPPLEMENTAL_OPERAND_BINDING.json",
+      "operands": "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_OPERAND_PRODUCER_BINDINGS.json",
+      "bindings": "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_CONSTRAINT_BINDINGS.json",
+      "producer": "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json",
+      "canonical": "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json"
+    },
+    "EXECUTION_ALLOWED": "NO",
+    "GENERAL_DISCOVERY": "NO"
+  },
+  "TIE_RULE": "Existing frozen position,then exact source statement ordinal,then stable replay-unit ID;not semantic priority.",
+  "EXECUTION_ALLOWED": "NO",
+  "BOUND_REPLAY_ORDERING_GRAPH_COMPLETE": "YES",
+  "ORDER": [
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-ee280c1a6c173124",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0000_outstanding_viper.sql",
+      "SOURCE_SHA256": "55341b8ef332ee26d226bdda7b044664a3b1c570582e1d61015f7538030862e8",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-027175495062988b",
+      "HISTORICAL_POSITION": 0,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "55341b8ef332ee26d226bdda7b044664a3b1c570582e1d61015f7538030862e8",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 1
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-19f809ceb23d4459",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "SOURCE_SHA256": "9ca1fdeb3c5517124c65ff18bc52e753844d9d98533b09d4048571f2d65edda6",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-65e1e373a95475d0",
+      "HISTORICAL_POSITION": 1,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "9ca1fdeb3c5517124c65ff18bc52e753844d9d98533b09d4048571f2d65edda6",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 2
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-b297d9e886d9a202",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0002_certain_juggernaut.sql",
+      "SOURCE_SHA256": "c8c905a98b6ce238036328d708a119223b3544bf698b423f4f4a905a8c9d1bc8",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-9f7a80fbdbf98f2d",
+      "HISTORICAL_POSITION": 2,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "c8c905a98b6ce238036328d708a119223b3544bf698b423f4f4a905a8c9d1bc8",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 3
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-13554c6eb3f1c0eb",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0003_dizzy_alex_wilder.sql",
+      "SOURCE_SHA256": "105ea4b4710bf406f1f3a32a2704c724f39af152fdcf83701f19ad2b3de850ab",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-4085bb83be3f1670",
+      "HISTORICAL_POSITION": 3,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "105ea4b4710bf406f1f3a32a2704c724f39af152fdcf83701f19ad2b3de850ab",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 4
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-3fb61b10edb24c27",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0004_hesitant_chameleon.sql",
+      "SOURCE_SHA256": "9777c9417af6755c30ab896273222d7e68b4e4af3032110c21dbcf572d281df0",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-21cbfd9a1b94aaf8",
+      "HISTORICAL_POSITION": 4,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "9777c9417af6755c30ab896273222d7e68b4e4af3032110c21dbcf572d281df0",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 5
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-ca1bae17a0893cc8",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0005_add_icra_assessment_capability_token.sql",
+      "SOURCE_SHA256": "9a280d5e9ccdcdcb350673b40294b5a08d401b9f53dcc950b02868298494293a",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-bbf0e158383b8913",
+      "HISTORICAL_POSITION": 5,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "9a280d5e9ccdcdcb350673b40294b5a08d401b9f53dcc950b02868298494293a",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 6
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-13310055eee591d4",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0006_external_specialist_runtime_privilege_closure.sql",
+      "SOURCE_SHA256": "aa9a3314fc70de80e3064e8dedbc31b12a09caa3d99632ac75ae0c0a19731003",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-1e87bfdb9dff6e0f",
+      "HISTORICAL_POSITION": 6,
+      "INTRA_MIGRATION_POSITION": 15,
+      "EXACT_UNIT_SHA256": "d9e2836e5a60d1e0de351d70b902ee4f7f362f3741494f889f48358ae8f4ef35",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-4daad5d506e0f007"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 7
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-072f8d6b78f62da2",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0006_external_specialist_runtime_privilege_closure.sql",
+      "SOURCE_SHA256": "aa9a3314fc70de80e3064e8dedbc31b12a09caa3d99632ac75ae0c0a19731003",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-1e87bfdb9dff6e0f",
+      "HISTORICAL_POSITION": 6,
+      "INTRA_MIGRATION_POSITION": 16,
+      "EXACT_UNIT_SHA256": "126f7b777db0c23e5f496db5126d39a0e2d8daf9214b6494c413447220ae4bc6",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-c8d876875402e713"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 8
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-6b7fa7c3bb3a9d39",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0006_external_specialist_runtime_privilege_closure.sql",
+      "SOURCE_SHA256": "aa9a3314fc70de80e3064e8dedbc31b12a09caa3d99632ac75ae0c0a19731003",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-1e87bfdb9dff6e0f",
+      "HISTORICAL_POSITION": 6,
+      "INTRA_MIGRATION_POSITION": 17,
+      "EXACT_UNIT_SHA256": "9228f18ba854b6582c1eae87822275f50477b16c8c678492fc086fd0efe3e26d",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-724804cd28a46064"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 9
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-9e08c215ed632188",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0006_external_specialist_runtime_privilege_closure.sql",
+      "SOURCE_SHA256": "aa9a3314fc70de80e3064e8dedbc31b12a09caa3d99632ac75ae0c0a19731003",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-1e87bfdb9dff6e0f",
+      "HISTORICAL_POSITION": 6,
+      "INTRA_MIGRATION_POSITION": 18,
+      "EXACT_UNIT_SHA256": "d6136681c58c306ea18eda5a19de1eac413baa773d6332750fdd652fbd745278",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-70c79a2602591928"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 10
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-3fd6ebc950606f50",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0006_external_specialist_runtime_privilege_closure.sql",
+      "SOURCE_SHA256": "aa9a3314fc70de80e3064e8dedbc31b12a09caa3d99632ac75ae0c0a19731003",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-1e87bfdb9dff6e0f",
+      "HISTORICAL_POSITION": 6,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "aa9a3314fc70de80e3064e8dedbc31b12a09caa3d99632ac75ae0c0a19731003",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 11
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-c4e71d012b4f89f9",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0007_auth_bootstrap_runtime_remediation.sql",
+      "SOURCE_SHA256": "4b742c7a3a1a70532c9f3dc1133f3020b58246ff3663c036e92da09143751a45",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-c5846ed2d67f2a62",
+      "HISTORICAL_POSITION": 7,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "4b742c7a3a1a70532c9f3dc1133f3020b58246ff3663c036e92da09143751a45",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 12
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-06dc7290d04d2e91",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0008_runtime_acceptance_closure.sql",
+      "SOURCE_SHA256": "821563dc03232c3530b441c8372d82642e8762e5814f733e760c33d6005b29d0",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-b7ce906c401b96a1",
+      "HISTORICAL_POSITION": 8,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "821563dc03232c3530b441c8372d82642e8762e5814f733e760c33d6005b29d0",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 13
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-9931366ae1d06998",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+      "SOURCE_SHA256": "dfb79693e7ce06ef4d078fb0eed8cd8bcde60a54bd3b29ec09e766ac49fcb53d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-510940f2f0ef9913",
+      "HISTORICAL_POSITION": 9,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "dfb79693e7ce06ef4d078fb0eed8cd8bcde60a54bd3b29ec09e766ac49fcb53d",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 14
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-d264f77905daf432",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0010_tenant_isolation_rls_foundation.sql",
+      "SOURCE_SHA256": "9bfd46947d9d25539b32e72edccea1c1862c6c4f2c46bac2ae10a0a228ee75f5",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-41bd18f787e58ad3",
+      "HISTORICAL_POSITION": 10,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "9bfd46947d9d25539b32e72edccea1c1862c6c4f2c46bac2ae10a0a228ee75f5",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 15
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-ba9c377aa3ffde74",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0011_storage_authority_rls_completion.sql",
+      "SOURCE_SHA256": "fbf17ed35fb5c5efbb1c415f66ae2bb1fdf79e7ba1b8cfd8c711f40c6ea53c37",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-f907fbb59e68c927",
+      "HISTORICAL_POSITION": 11,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "fbf17ed35fb5c5efbb1c415f66ae2bb1fdf79e7ba1b8cfd8c711f40c6ea53c37",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 16
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-910f017958a83d90",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0012_storage_authority_rls_final_closure.sql",
+      "SOURCE_SHA256": "3891b11704a9934b0e408b6d1b0b38c9b1dd90bfcbaa71aa16e92b6e0f17c312",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-3de5469edc1f29ed",
+      "HISTORICAL_POSITION": 12,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "3891b11704a9934b0e408b6d1b0b38c9b1dd90bfcbaa71aa16e92b6e0f17c312",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 17
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-3680cb6035d8ae31",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0013_workbook_credential_payment_authority.sql",
+      "SOURCE_SHA256": "7b0dcc672d3380fdcb8abb2bc3885882a9e55fea28364cb3e8855b32e58ef0d0",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-5d9ad08c0b5ecc9c",
+      "HISTORICAL_POSITION": 13,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "7b0dcc672d3380fdcb8abb2bc3885882a9e55fea28364cb3e8855b32e58ef0d0",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 18
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-dba29b588058e693",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql",
+      "SOURCE_SHA256": "309b04cb85673fdffaa6751804cc74edb4d98bef06975c085388a51e93ab7208",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-af92c5998d24d676",
+      "HISTORICAL_POSITION": 15,
+      "INTRA_MIGRATION_POSITION": 0,
+      "EXACT_UNIT_SHA256": "b9e882039b2e7d44321baa831c2efd966bdfa898fe5929bedbcd3d3a09ac3e4f",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-06d7901ee922c700",
+        "UE-W4G-COMPATIBILITY-a928864a58f85736"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 19
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-9836d89dd87adc6b",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 0,
+      "EXACT_UNIT_SHA256": "f50bc32a694f54b504203c0cbd04503b4b0afacfe55ee6aa14ccc4a9ecc33c8c",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-e79772a3da75ad9a"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 20
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-f474bf717882a3bf",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 1,
+      "EXACT_UNIT_SHA256": "9a522126fe0b293ecaf83d5111820fdcf36106626ad10b2f87c1ff781ba44389",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-cb487179ca437d44"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 21
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-1744394e8bce863a",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 2,
+      "EXACT_UNIT_SHA256": "39f866177c02a965f74c9d2965d91d03eb2117684c395d01c77c32d404e1c807",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-0f355e3df086a2a0"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 22
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-0942d4ca182fafc1",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 3,
+      "EXACT_UNIT_SHA256": "017636cfc91a46d00af7365b47b80ba1c17d60a71368b09be8f9b8eaf8b516b5",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-e2a5f08b3ff2ac1a"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 23
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-67d23150240b8a73",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 4,
+      "EXACT_UNIT_SHA256": "8d8c7d6e51f6edfadf87331c0260aee960719d2d621a3d52702eff75bf880dcd",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-69550109d53bd177"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 24
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-cc3295246ba4cd03",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 5,
+      "EXACT_UNIT_SHA256": "8a40471aa8b02142c99ea95c0246aece2cc79e099cc016cf005b6905200bc1fe",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-3761da35850761b0"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 25
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-ce71ae6d9c3e7b7e",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 6,
+      "EXACT_UNIT_SHA256": "18534e418d91e9a49e66227bf4530d404803da9d895ad86024523dc1225cb71f",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-4b3872c568daabd6"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 26
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-e2e26f29d1a9203e",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 7,
+      "EXACT_UNIT_SHA256": "759b798887f54e8294f831d11391e2b654b321697f4950afc775c1df29b831c0",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-30e84cd2bd2cd83e"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 27
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-44d17f5222eb788c",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 8,
+      "EXACT_UNIT_SHA256": "4bb95da177704bb69e765c32ab41c016f11a047a82a9cf0a6ab148062ddf5433",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-1121ef13c5569ae8"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 28
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-8b749f997f7a70a1",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 9,
+      "EXACT_UNIT_SHA256": "2fce1efde9187bcfa93e639fddcbaca23d29442a422667db3a1361a382f248ed",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-49d73e6fd5079140"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 29
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-3abbc1556e6c978d",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 10,
+      "EXACT_UNIT_SHA256": "df90a288c878ca87b1993ebb2b780b201ba5182020f385c779e0d998662dda57",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-c2149289335776fb"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 30
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-d6f4fa42c353735b",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 11,
+      "EXACT_UNIT_SHA256": "5ccd9730231b7f4e05256283c7e0478b4c623c788912e8c6a4c35ab24299c663",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-d7ae11750b75a337"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 31
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-45dc2e4afdfa8caa",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 12,
+      "EXACT_UNIT_SHA256": "06c2c3b0a7a9c5f86d6ff15328be742df64415fb3ad858a7943c022cf54441d5",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-60f2e01c545ffc23"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 32
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-c04ea4ce6d59711a",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 13,
+      "EXACT_UNIT_SHA256": "fdf0f64f886bc70ef3700feafa68672ec8b7074ceefe9bbba532e750d8aa3fb8",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-ef53ebf8854f867e"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 33
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-8796ec08748f60be",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 14,
+      "EXACT_UNIT_SHA256": "9ab5696ef6fda66a108c89bb3a4a5c6f4ba9f4f7563eb8805dd27f87c2f07a81",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-63e4555c283a0922"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 34
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-029e5593f1d44ea5",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 15,
+      "EXACT_UNIT_SHA256": "53022e7797ed0fa54851ed8b5b860e39d791ecce5461192984f1fce138f4a9e2",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-9e1ea67cc8e59408"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 35
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-27b7ed57bb1d1a19",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 16,
+      "EXACT_UNIT_SHA256": "d75a53e0a180edde9eed645ec3b8f1a1388b412620258b64624fb549c4fd0e62",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-775b746a47059495"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 36
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-fe0a6794a15e309b",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 17,
+      "EXACT_UNIT_SHA256": "e5381ed28084f8039c6d65306e2434c92ccc6e213f001ee14742e1c45698e28b",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-dbb63ea4009c5bb7",
+        "UE-W4G-COMPATIBILITY-8181542ff1dc3539"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 37
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-97c7d3c2e5dfa56f",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 20,
+      "EXACT_UNIT_SHA256": "c272e4a202de44b9776158028c2e241da91c5c7daae3a8d4600d6558d0213d41",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-7ccc3f38bec8bac5",
+        "UE-W4G-COMPATIBILITY-91b3fabd5d8c211c"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 38
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-87551a13ff91159c",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 23,
+      "EXACT_UNIT_SHA256": "6f8a1469c7802d818f987e3551952f58194d9e4b664e505bf54610561aa434d6",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-9c0ceda5ba4fd4b7",
+        "UE-W4G-COMPATIBILITY-852c815ad716aa40"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 39
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-8706411d3a69dca5",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 26,
+      "EXACT_UNIT_SHA256": "2702d4c86b8ec0923fd7cfd9c99cc4ab80731f563fda5fe1db45092e0f73e89e",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-7a7c3171cd86c0f5",
+        "UE-W4G-COMPATIBILITY-1d7ef92acc31767d"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 40
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-a24d4c974c5bbd0b",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 28,
+      "EXACT_UNIT_SHA256": "3cfa7f4bb13ccf13115dc49df77833164734bb1d1c927a3a0ee7b26f502e04de",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-1fcd4e211cb30a20",
+        "UE-W4G-COMPATIBILITY-c4b0a290a57e8faf"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 41
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-4187996b94a24360",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 31,
+      "EXACT_UNIT_SHA256": "6d7e68b6a6efd207211635507da0ab59081c39d8b970a138971e216573146940",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-f6a588739edadf8d",
+        "UE-W4G-COMPATIBILITY-acbae9e0de5f3d34"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 42
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-cd135365e1d54ff5",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 33,
+      "EXACT_UNIT_SHA256": "19883a0a7e51f765ef6d28370350ef7bbe5df71bb6a089ab42776aa890c44fac",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-6405727cff6a7cfa",
+        "UE-W4G-COMPATIBILITY-a6ea832bf14f70d8"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 43
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-2f3b80d97427c106",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 36,
+      "EXACT_UNIT_SHA256": "6fff3058e4fd645e4d80637825398b9045072ca06bb7edb748e1c703278406f7",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-d88290a8c07a463b",
+        "UE-W4G-COMPATIBILITY-6261866451b4ca7b"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 44
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-a4eb3adae5e1c328",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 38,
+      "EXACT_UNIT_SHA256": "edb73f52a5ab6f54847398a34a594abdc20e519f6ca6e5a0acaadb2306207d43",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-39c45f5de19b34ed",
+        "UE-W4G-COMPATIBILITY-ee26fd1844e7581f"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 45
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-c500f96a2ad9ac55",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 40,
+      "EXACT_UNIT_SHA256": "b6883465415fa1eb230862afe0262c6658b27fb5feeab752db977d2ea437187e",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-8d1919e4f9a8f54e",
+        "UE-W4G-COMPATIBILITY-8bb8e7260614b626"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 46
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-a48fb327bdea0dac",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 42,
+      "EXACT_UNIT_SHA256": "c7deb46f1853392d0e3a4ad2c0b412ec47ad769bdd3a35e7df172bc092004c9e",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-5490c3676f8dbf20",
+        "UE-W4G-COMPATIBILITY-7f965317233201b6"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 47
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-82739eb740717c09",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 44,
+      "EXACT_UNIT_SHA256": "72aa9d14dbf0029197088be0cf1f15ed89bf581bdc8a32d135da84a37698ad5c",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-e7690b896b3668d0",
+        "UE-W4G-COMPATIBILITY-93b95e6f85408bc5"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 48
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-420ea4d347b89b83",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 46,
+      "EXACT_UNIT_SHA256": "98a9afaf584f2e27b8c8e9a574d32e4089d3d5447de69b2ad5eab3db6123ab91",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-bae47341eda11b14",
+        "UE-W4G-COMPATIBILITY-823442683fd1ebd2"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 49
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-2ae1edfd782e2d56",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 48,
+      "EXACT_UNIT_SHA256": "c4d02a38864f1f0a2992a45be7e1c5d2451fac855087d1265bb75fde5d12da77",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-6341ea640f926a96",
+        "UE-W4G-COMPATIBILITY-9e6f50c40f09b83d"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 50
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-69d5719573b34e07",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 50,
+      "EXACT_UNIT_SHA256": "6eae3608701be3b4c10e5dc6fcb18eb04fcb64e6c3bd9dee57b0f5a0b2bd5474",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-30a5af45ee9d036b",
+        "UE-W4G-COMPATIBILITY-84f3a7c8db5d91b1"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 51
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-9376a21a5a05bcd3",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 52,
+      "EXACT_UNIT_SHA256": "a2766dfac833c785f50f026753081df93c72baa54dfe5464030a9236616b14a6",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-8d662b8e811b8d7c",
+        "UE-W4G-COMPATIBILITY-d1db1f9648429c48"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 52
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-d3417886e6f09bdd",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql",
+      "SOURCE_SHA256": "83d9d41344e8f327752e4cc1a9fbb23d894f49b42e7f6282beadbe793c5ac1a0",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-b4ed69c2ce5aca49",
+      "HISTORICAL_POSITION": 17,
+      "INTRA_MIGRATION_POSITION": 0,
+      "EXACT_UNIT_SHA256": "f6e0b55653024d50debd2f3d6d932ca3e6108181c39197793eedf77e34fecbbc",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-039c2ca3750b2751",
+        "UE-W4G-COMPATIBILITY-37c6ab3bf15be5f4"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 53
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-724e1646eef925e6",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql",
+      "SOURCE_SHA256": "83d9d41344e8f327752e4cc1a9fbb23d894f49b42e7f6282beadbe793c5ac1a0",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-b4ed69c2ce5aca49",
+      "HISTORICAL_POSITION": 17,
+      "INTRA_MIGRATION_POSITION": 3,
+      "EXACT_UNIT_SHA256": "3aeb165c792a662c45613a38f14f1129ab9f986ebb1e623b68b44160df5f2941",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-6cd5218a21e86cda",
+        "UE-W4G-COMPATIBILITY-85ad4c3cc791cbf9"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 54
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-44336ecc70fc3415",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 0,
+      "EXACT_UNIT_SHA256": "58abb12a1fb3bdd183a4b79fe923b6bf5ccedb08b9ce566ee5c1ea2ba1e6d7c8",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-073e8aab1d91b7a2"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 55
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-c48d283372591a30",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 1,
+      "EXACT_UNIT_SHA256": "e6b293287305ca55680a7da23aa0afa767a1f310100dcea8d0fc710595713f06",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-68ff05f0569a8d6d"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 56
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-c780e4aee4e65401",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 2,
+      "EXACT_UNIT_SHA256": "7be72836bf11f7e58783e4642d4dfbe7a86a12a0918f73e55a82567b7a1222b5",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-c983c8702d05fff3"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 57
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-c8578f4ca15cde85",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 3,
+      "EXACT_UNIT_SHA256": "ffd52599adacc104e308c276bc3ec943fd479562a723453d59c934b8e8b9597c",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-725a84a67dacf344"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 58
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-0eaa3eae565a837d",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 4,
+      "EXACT_UNIT_SHA256": "63dab3aaa17f4c4804832e74f132c14ab5b3fc8ce86a9ce2951e4648becafad5",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-c21c522c20f0b1f7"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 59
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-2aff627a01aff9ca",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 5,
+      "EXACT_UNIT_SHA256": "82398acc5de3b2708a1cd1a2985d699132cd323f14944703f64c067e03553e3f",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-753016f85d5d75ee"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 60
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-64c589577b45587f",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 6,
+      "EXACT_UNIT_SHA256": "203e2ded46de3504e44f8e3049375de8441ee80437c798c91996ee6fb64dac37",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-89195e05edc0eb91"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 61
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-ae84b7ed89d56a40",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 7,
+      "EXACT_UNIT_SHA256": "d265acfaad6edc9f51874fe4aaccb72ab1053130e48f1839e4cef5ca3035befa",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-4a38bb56ce38e9fd"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 62
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-19dd5595300bd2d5",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 8,
+      "EXACT_UNIT_SHA256": "ea3eb9940b80a72b39606bb1b48622ae91353b89bd9da25059ade3c928668b49",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-19ccfd40e8ed25a0"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 63
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-7795f522fea7eb43",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 9,
+      "EXACT_UNIT_SHA256": "3b9c21de33d6bcc61952b7b78861aff4d01cbe2ec9f7fae3d34e1aca2e559be2",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-71cf8c8283fcf684"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 64
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-df884d8c591ed17f",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 10,
+      "EXACT_UNIT_SHA256": "b3bc85d707d23f18d12a5f6e6ecdfcd532e227e847297c18b9b2c27cbdb56645",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-ebf25894ccf7f12c"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 65
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-a1afaab31f0efbfe",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 11,
+      "EXACT_UNIT_SHA256": "6a93a20ffba06817777779672f67c102dcef6d12a5fb88919ba3edd6f5ba2a86",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-ffcb0dab9fa0dc65"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 66
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-4ca7e7d6246a03a7",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 12,
+      "EXACT_UNIT_SHA256": "c014a185eca30298202d24ffda6785ba114deaa6ffaaeda2421667119b437d4a",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-4b6806396937faff"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 67
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-d376506d10d2aae9",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 13,
+      "EXACT_UNIT_SHA256": "f8adcd1338b91865393140896ffd5343fe1e910a6d9c70d5d787f5f13dde0919",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-079fc377274badef"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 68
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-3e7e36a49da7d959",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 14,
+      "EXACT_UNIT_SHA256": "1ea29bc5eb3500c5c7f7076d90fc337e5c9fe90eadb99b2554db6885d06d8dc7",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-7d1d1d8d8b28e42c"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 69
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-0c77d8a1f13a8e65",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 15,
+      "EXACT_UNIT_SHA256": "011c54f95c05af7769ea1fe44655605059cf5b0389982e3e8e8b17ef0339781b",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-4f09decd29b449af"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 70
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-b7d6c09eee1adcdc",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 16,
+      "EXACT_UNIT_SHA256": "011e9c6ecd5280706f98eeea1cebef576c4eea7472daf71c86692de73d6185b5",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-c690127ab2817eea"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 71
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-47a85ebc512be639",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 17,
+      "EXACT_UNIT_SHA256": "c99a09eb9f8ec168f75ddd4ba9d0458ed11e84d38e5ecfaa15e0e405b92d2f92",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-677221e132ca3cb3"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 72
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-dab392692d89ad77",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 18,
+      "EXACT_UNIT_SHA256": "551f780b1d9c1604e8b7e0369350689080b2ef1e7035dd74d3d271830ac58764",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-d1edf8530d082555"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 73
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-92537bccc8321684",
+      "REPLAY_UNIT_CLASS": "FROZEN_WRAPPER_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 19,
+      "EXACT_UNIT_SHA256": "6beb7dc810780f05b15ca5b288868308396adfb5e3b664c5c872aa9aaa1cd63a",
+      "COMPATIBILITY_OBLIGATION_IDS": ["UE-W4G-COMPATIBILITY-7a7a506da0e111f2"],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 74
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-174fc34875314095",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 20,
+      "EXACT_UNIT_SHA256": "c342c420c4cbe61b542b3f87848e77fc0bda4ee93ac692318dac14096f022a42",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-e769c52e9f3f0ab7",
+        "UE-W4G-COMPATIBILITY-60ff9ee1068fa55d"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 75
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-12f9ac3a54194825",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 21,
+      "EXACT_UNIT_SHA256": "80410afdb3464b6479c682ad82621f9feea1af6f7b5956dc1a3b191c1b511b0e",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-af3167ad2c819722",
+        "UE-W4G-COMPATIBILITY-805d954c4663ace8"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 76
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-65749f8875f9316b",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 22,
+      "EXACT_UNIT_SHA256": "45235c393ced4db51d72ef39276126753df6d3d19dcba345e6eaeba0e52baa45",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-b4631140cb8692c8",
+        "UE-W4G-COMPATIBILITY-cb3c9d2cc9d15c0a"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 77
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-391cb4cfa9598e6c",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 23,
+      "EXACT_UNIT_SHA256": "7f619be1fdae88d36a4306e09aa920e40724844049addf0a82c6d28c8c5b7b7e",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-c02638c752afe820",
+        "UE-W4G-COMPATIBILITY-10cb2c8ec94c0520"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 78
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-21f2b23e12dea4f0",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 24,
+      "EXACT_UNIT_SHA256": "5089e53ec27fac39c88d810cc4e57a8b96c719d265a7d974338066641acb8515",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-71deb7ed768bd0e2",
+        "UE-W4G-COMPATIBILITY-2c78c9336db1ab36"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 79
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-aff16f2eefb2ebb2",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 25,
+      "EXACT_UNIT_SHA256": "dfea3158a4e765df0579f3dad19287d2b65c6f220aa7da2aef976c62911d901c",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-b014f0ff28ef932e",
+        "UE-W4G-COMPATIBILITY-0267051ea34a6f17"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 80
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-53398c582f5bd362",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 26,
+      "EXACT_UNIT_SHA256": "043f01bf89823b0446f36cce975b963b6ce4b478f96b22805b4dbae0ea8c4936",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-7a370dc84c8f3fa9",
+        "UE-W4G-COMPATIBILITY-2c2e9241bce19726"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 81
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-d3f3fdac0e364a32",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 27,
+      "EXACT_UNIT_SHA256": "28e2bf58ec78948abf4a40727af182c4b73e764915a03a4aec7908a7f871ab49",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-ce1562d988dbf7be",
+        "UE-W4G-COMPATIBILITY-9e3151150ab472b2"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 82
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-f21a1be9ee58212f",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 28,
+      "EXACT_UNIT_SHA256": "47c4fabf6591f67db4dbb5c760bc9e838649d816b207a5b10ef983b12600afdc",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-8cdb9b8de7d6b3b2",
+        "UE-W4G-COMPATIBILITY-babe744d3d30c21d"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 83
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-a252a18612d88e4d",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 29,
+      "EXACT_UNIT_SHA256": "92f26cd116af836e0184f257dfe8af4a18d4a0814f3b567d0ae0fbade7dd7be1",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-1dfd6d9b30dd2df8",
+        "UE-W4G-COMPATIBILITY-29945e8654e166b6"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 84
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-28bbad5e26b418e6",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 30,
+      "EXACT_UNIT_SHA256": "bf88374d4478327fc553c74b653682e4024e90832f341e375bb45ff294a75a6c",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-91f3b935d4d8f067",
+        "UE-W4G-COMPATIBILITY-3c2aa7241d164b82"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 85
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-85f36882224629d2",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 31,
+      "EXACT_UNIT_SHA256": "1ad59756630d561cc3481f9186f56209375698092c4cce8c031e0fd014b8b59f",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-1a3c221ccbf2c2da",
+        "UE-W4G-COMPATIBILITY-4aed58f41ff33c33"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 86
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-f7a539954b1f976f",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 32,
+      "EXACT_UNIT_SHA256": "fd289d622482979f8e695dca6664c779e9ceb45c0f631b0ed11bc13b25a746fe",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-a96c8c7a92db7cf2",
+        "UE-W4G-COMPATIBILITY-63289147884b53e7"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 87
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-40e0ad2409d69da3",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 33,
+      "EXACT_UNIT_SHA256": "a575657bc5dca9b2de3354a55cc77c78d6275eb14eb8a5cddb403f391c4422b4",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-ae1d74638c26d300",
+        "UE-W4G-COMPATIBILITY-7beafcfb93d9d738"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 88
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-0acdedbf984426e5",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 34,
+      "EXACT_UNIT_SHA256": "eab3130aa077e614afd8a3caa6b05af92c40b1c725d4ffe0a196187abc661f83",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-e3195fbd250217ab",
+        "UE-W4G-COMPATIBILITY-c3999da65da11125"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 89
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-e11d202ed0634dc3",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 35,
+      "EXACT_UNIT_SHA256": "24e76d31f3025888c825dc7bf8a171200e367d5257fb0012155607d18482e9f4",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-f423d67422fd62b4",
+        "UE-W4G-COMPATIBILITY-2ac3b8c52ccd6d37"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 90
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-a98b690f278e1151",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 36,
+      "EXACT_UNIT_SHA256": "0641249afef843bad538c429bb5aec7105186d273211e7505972bada74df51a8",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-9bc15440ee449502",
+        "UE-W4G-COMPATIBILITY-0167d469c06bf8e0"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 91
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-4586ea279a921eb5",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 37,
+      "EXACT_UNIT_SHA256": "062a2af105e932c3fae447793d25fcb6e82f9f35d13b3903019181aa5d237b02",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-283484cf393095a6",
+        "UE-W4G-COMPATIBILITY-294ea086ea087eb8"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 92
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-e1bccaef050717c7",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 38,
+      "EXACT_UNIT_SHA256": "fee518292eeecc66cd9d20907ccd51eea35a445388c94d572392438d65c94883",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-c5eb3f6b978c3ddd",
+        "UE-W4G-COMPATIBILITY-abfd6dfb3bd01b24"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 93
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-75b71b4744a6eed7",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 39,
+      "EXACT_UNIT_SHA256": "20c7b2928c862bbe60f9e2b5d56b7f8771c017b83b8d8bde0320b46c9353c4a9",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-5b8bd80f36c63734",
+        "UE-W4G-COMPATIBILITY-cd438b9cc5957086"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 94
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-7fd5f02b757e0f80",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 40,
+      "EXACT_UNIT_SHA256": "480b240ad115ec7c11c4a7cfb05e2d72e20c9fcf7323f9f8b3e051887e5ecae7",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-6ed9f5dbb7d4c7cd",
+        "UE-W4G-COMPATIBILITY-844a56d3066454a4"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 95
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-b185dd5888ecbd54",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 41,
+      "EXACT_UNIT_SHA256": "f328d9802bbbf795775c70747ac711913a4a63ea681dbc3647702ab82fa8bbfe",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-e325230a9c2473dc",
+        "UE-W4G-COMPATIBILITY-3c68d4782567c065"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 96
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-160faa299cd8561f",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 42,
+      "EXACT_UNIT_SHA256": "0383c515e42702888a78bbb29a16b6f8550992345242b7dc2b1e23f757a9b5b7",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-1202362c399c144e",
+        "UE-W4G-COMPATIBILITY-2b55f2d796db17fb"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 97
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-UNIT-b04871966ce9bb4b",
+      "REPLAY_UNIT_CLASS": "FROZEN_STATEMENT_UNIT",
+      "PHASE": "LATE_DEFINITION_STATE_BOUNDARY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 43,
+      "EXACT_UNIT_SHA256": "faff60ff2709539ccb44f7dbee047a4055b5da91828ab790964b0b59c3b249d3",
+      "COMPATIBILITY_OBLIGATION_IDS": [
+        "UE-W4G-COMPATIBILITY-e48f07f598c81af8",
+        "UE-W4G-COMPATIBILITY-1295095e5d3f72c5"
+      ],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation.",
+        "Verified frozen bytes and exact operation digest;all recorded creation dependencies/target/actor and required ordering boundaries proven before implementation activation."
+      ],
+      "POSTCONDITIONS": [
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact.",
+        "Exact accepted late object/required column exists before its consumer;original later evolution/security behavior remains intact."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 98
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-c1a4ed09468e3478",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0014_lineage_restoration_rls_closure.sql",
+      "SOURCE_SHA256": "cd8a2814a0e101dd56b0a94449eda3dce6e99860b368690a5fad3b97791a64a5",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-04ce25437b3debb8",
+      "HISTORICAL_POSITION": 14,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "cd8a2814a0e101dd56b0a94449eda3dce6e99860b368690a5fad3b97791a64a5",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 99
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-269370fc6e40197b",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql",
+      "SOURCE_SHA256": "309b04cb85673fdffaa6751804cc74edb4d98bef06975c085388a51e93ab7208",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-af92c5998d24d676",
+      "HISTORICAL_POSITION": 15,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "309b04cb85673fdffaa6751804cc74edb4d98bef06975c085388a51e93ab7208",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 100
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-ad77f2aaa115ec76",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "SOURCE_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "HISTORICAL_POSITION": 16,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 101
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-436a3708fd852cf7",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql",
+      "SOURCE_SHA256": "83d9d41344e8f327752e4cc1a9fbb23d894f49b42e7f6282beadbe793c5ac1a0",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-b4ed69c2ce5aca49",
+      "HISTORICAL_POSITION": 17,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "83d9d41344e8f327752e4cc1a9fbb23d894f49b42e7f6282beadbe793c5ac1a0",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 102
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-5e8d0306013d0588",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "SOURCE_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "HISTORICAL_POSITION": 18,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 103
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-196a6372198ad802",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0005_organization_members_deleted_at.sql",
+      "SOURCE_SHA256": "0580d447b4d8dcc129958bffa2eaa7a2c24120f3ff2ebdc51343e88b9d2ac554",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-76c2e1354d92cb2b",
+      "HISTORICAL_POSITION": 19,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "0580d447b4d8dcc129958bffa2eaa7a2c24120f3ff2ebdc51343e88b9d2ac554",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 104
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-f11597561b43e5dc",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0006_documents_runtime_columns.sql",
+      "SOURCE_SHA256": "661f14e708303514b5a9b4b430dc8d05dfc214852f54d262d9aa0057a9d3408e",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-695361fbcf4c5242",
+      "HISTORICAL_POSITION": 20,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "661f14e708303514b5a9b4b430dc8d05dfc214852f54d262d9aa0057a9d3408e",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 105
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-0851864ba4642ccc",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "UE_OPERATIONAL",
+      "SOURCE_FILE": "apps/union-eyes/db/migrations-platform/0007_claim_updates_runtime_columns.sql",
+      "SOURCE_SHA256": "bf015e6edf82c50e01f1bf64141d64e00f58b9da2100c4640d5e0e689beaf020",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-e19ff6f9225f74c6",
+      "HISTORICAL_POSITION": 21,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "bf015e6edf82c50e01f1bf64141d64e00f58b9da2100c4640d5e0e689beaf020",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 106
+    },
+    {
+      "REPLAY_UNIT_ID": "UE-W5A-MIGRATION-7e83ad2274abe3a6",
+      "REPLAY_UNIT_CLASS": "FROZEN_MIGRATION_UNIT",
+      "PHASE": "ORIGINAL_FROZEN_REPLAY",
+      "DATABASE_SCOPE": "FINANCIAL_SERVICE",
+      "SOURCE_FILE": "apps/union-eyes/services/financial-service/drizzle/0000_lucky_mole_man.sql",
+      "SOURCE_SHA256": "c57e929249d3fb610543c7b078d169e38b4d14975db1d59fb07433a665b469db",
+      "FROZEN_MIGRATION_ID": "UE-1B3CA1-MIGRATION-f871986b5844554e",
+      "HISTORICAL_POSITION": 22,
+      "INTRA_MIGRATION_POSITION": 9007199254740991,
+      "EXACT_UNIT_SHA256": "c57e929249d3fb610543c7b078d169e38b4d14975db1d59fb07433a665b469db",
+      "COMPATIBILITY_OBLIGATION_IDS": [],
+      "WRAPPER_BEHAVIOR_PRESERVED": "YES",
+      "PRECONDITIONS": [
+        "Count 23 preserves the accepted composite manifest: UE scoped/platform files execute on the operational scope in original relative order; the financial file remains in the distinct financial sequence, unchanged and non-materializing. Do not execute all 23 on a merged database."
+      ],
+      "POSTCONDITIONS": [
+        "Every original non-CREATE/postcreate statement and enclosing wrapper remains in original scope/relative order;only accepted exact state-aware CREATE recheck may avoid redundant creation."
+      ],
+      "EXECUTION_ALLOWED": "NO",
+      "REQUIRED_REPLAY_POSITION": 107
+    }
+  ],
+  "UNRESOLVED_ORDERING_ENDPOINT_IDS": [],
+  "CYCLE_OR_CYCLE_DEPENDENT_UNIT_IDS": [],
+  "ATOMICITY_CONFLICT_OBLIGATION_IDS": [],
+  "SCOPE_ISOLATION": "FINANCIAL_SERVICE node is its own sequence;linearized output is metadata only,never a merged-database execution plan."
+}

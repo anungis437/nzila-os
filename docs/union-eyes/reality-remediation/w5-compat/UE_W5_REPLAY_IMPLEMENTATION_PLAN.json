@@ -1,0 +1,3033 @@
+{
+  "PHASE": "PHASE_1B_3C_A1I_W5B_COMPAT",
+  "LINEAGE": "PROSPECTIVE_W5_COMPAT_V1",
+  "PHASE_1B_3C_A1I_W5B": "BLOCKED_TERMINAL_STATIC",
+  "W5": "BLOCKED_TERMINAL_STATIC",
+  "W6": "NOT_AUTHORIZED",
+  "CANONICAL_CONTRACT_VERSION": "1.3.3",
+  "AUTHORIZED_SUPERSESSIONS": 1,
+  "UUID_MEMBERSHIP_OVERLAY": "OFFLINE_COMPONENT_VERIFIED_NOT_EXECUTED_LIVE",
+  "MEMBERSHIP_UNIQUENESS": "OFFLINE_COMPONENT_VERIFIED_NOT_EXECUTED_LIVE",
+  "W4P_COMPLETION": "DENIED_INDEPENDENT_RESIDUALS",
+  "W4P_ATOMIC_DENIAL": "W5_COMPAT_W4P_INDEPENDENT_DENIAL:UE-W4FR4-PAYLOAD-116714fb92f94f71:MATERIALIZED_CONSTRAINT_OPERAND_MISSING:slug",
+  "W4P_PARTIAL_PROMOTION_ROLLED_BACK": true,
+  "SOURCE_BASELINE_DIGEST": "054d107d20563dabbdea951b18dc4b56e0e81aaedd1f5ffef16f15beda9016cc",
+  "SOURCE_BASELINE_UNCHANGED": true,
+  "SOURCE_BASELINE_CEILINGS": [
+    {
+      "migration": "contenttypes::0002_remove_content_type_name",
+      "file": "django/contrib/contenttypes/migrations/0002_remove_content_type_name.py",
+      "line": 33,
+      "operation": "migrations.RunPython",
+      "reason": "POSITIONAL_OPERATION_UNSUPPORTED",
+      "tables": []
+    },
+    {
+      "migration": "django_celery_results::0006_taskresult_date_created",
+      "file": "django_celery_results/migrations/0006_taskresult_date_created.py",
+      "line": 44,
+      "operation": "migrations.RunPython",
+      "reason": "POSITIONAL_OPERATION_UNSUPPORTED",
+      "tables": []
+    },
+    {
+      "migration": "django_celery_results::0009_groupresult",
+      "file": "django_celery_results/migrations/0009_groupresult.py",
+      "line": 162,
+      "operation": "FakeAddIndex",
+      "reason": "OPERATION_UNSUPPORTED:FakeAddIndex",
+      "tables": ["django_celery_results_chordcounter"]
+    },
+    {
+      "migration": "django_celery_results::0009_groupresult",
+      "file": "django_celery_results/migrations/0009_groupresult.py",
+      "line": 168,
+      "operation": "FakeAddIndex",
+      "reason": "OPERATION_UNSUPPORTED:FakeAddIndex",
+      "tables": ["django_celery_results_taskresult"]
+    },
+    {
+      "migration": "django_celery_results::0009_groupresult",
+      "file": "django_celery_results/migrations/0009_groupresult.py",
+      "line": 204,
+      "operation": "FakeAddIndex",
+      "reason": "OPERATION_UNSUPPORTED:FakeAddIndex",
+      "tables": ["django_celery_results_groupresult"]
+    },
+    {
+      "migration": "django_celery_results::0010_remove_duplicate_indices",
+      "file": "django_celery_results/migrations/0010_remove_duplicate_indices.py",
+      "line": 41,
+      "operation": "TryRemoveIndex",
+      "reason": "OPERATION_UNSUPPORTED:TryRemoveIndex",
+      "tables": ["django_celery_results_chordcounter"]
+    },
+    {
+      "migration": "django_celery_results::0010_remove_duplicate_indices",
+      "file": "django_celery_results/migrations/0010_remove_duplicate_indices.py",
+      "line": 45,
+      "operation": "TryRemoveIndex",
+      "reason": "OPERATION_UNSUPPORTED:TryRemoveIndex",
+      "tables": ["django_celery_results_groupresult"]
+    },
+    {
+      "migration": "django_celery_results::0010_remove_duplicate_indices",
+      "file": "django_celery_results/migrations/0010_remove_duplicate_indices.py",
+      "line": 49,
+      "operation": "TryRemoveIndex",
+      "reason": "OPERATION_UNSUPPORTED:TryRemoveIndex",
+      "tables": ["django_celery_results_taskresult"]
+    },
+    {
+      "migration": "auth::0011_update_proxy_permissions",
+      "file": "django/contrib/auth/migrations/0011_update_proxy_permissions.py",
+      "line": 73,
+      "operation": "migrations.RunPython",
+      "reason": "POSITIONAL_OPERATION_UNSUPPORTED",
+      "tables": []
+    },
+    {
+      "migration": "django_celery_beat::0001_initial",
+      "file": "django_celery_beat/migrations/0001_initial.py",
+      "line": 14,
+      "operation": "field:timezone",
+      "reason": "CUSTOM_FIELD_UNSUPPORTED:timezone_field.fields.TimeZoneField",
+      "tables": ["django_celery_beat_crontabschedule"]
+    },
+    {
+      "migration": "django_celery_results::0001_initial",
+      "file": "django_celery_results/migrations/0001_initial.py",
+      "line": 13,
+      "operation": "field:task_id",
+      "reason": "VARCHAR_LENGTH_UNSUPPORTED",
+      "tables": ["django_celery_results_taskresult"]
+    },
+    {
+      "migration": "django_celery_results::0001_initial",
+      "file": "django_celery_results/migrations/0001_initial.py",
+      "line": 13,
+      "operation": "field:task_name",
+      "reason": "VARCHAR_LENGTH_UNSUPPORTED",
+      "tables": ["django_celery_results_taskresult"]
+    },
+    {
+      "migration": "django_celery_results::0001_initial",
+      "file": "django_celery_results/migrations/0001_initial.py",
+      "line": 13,
+      "operation": "index",
+      "reason": "INDEX_COLUMN_REQUIRED",
+      "tables": ["django_celery_results_taskresult"]
+    },
+    {
+      "migration": "auth::0001_initial",
+      "file": "django/contrib/auth/migrations/0001_initial.py",
+      "line": 50,
+      "operation": "field:permissions",
+      "reason": "MANY_TO_MANY_THROUGH_TABLE_UNSUPPORTED",
+      "tables": ["auth_group_permissions"]
+    },
+    {
+      "migration": "auth::0001_initial",
+      "file": "django/contrib/auth/migrations/0001_initial.py",
+      "line": 81,
+      "operation": "field:groups",
+      "reason": "MANY_TO_MANY_THROUGH_TABLE_UNSUPPORTED",
+      "tables": ["auth_user_groups"]
+    },
+    {
+      "migration": "auth::0001_initial",
+      "file": "django/contrib/auth/migrations/0001_initial.py",
+      "line": 81,
+      "operation": "field:user_permissions",
+      "reason": "MANY_TO_MANY_THROUGH_TABLE_UNSUPPORTED",
+      "tables": ["auth_user_user_permissions"]
+    },
+    {
+      "migration": "django_celery_results::0008_chordcounter",
+      "file": "django_celery_results/migrations/0008_chordcounter.py",
+      "line": 14,
+      "operation": "field:group_id",
+      "reason": "VARCHAR_LENGTH_UNSUPPORTED",
+      "tables": ["django_celery_results_chordcounter"]
+    },
+    {
+      "migration": "django_celery_results::0009_groupresult",
+      "file": "django_celery_results/migrations/0009_groupresult.py",
+      "line": 28,
+      "operation": "field:group_id",
+      "reason": "VARCHAR_LENGTH_UNSUPPORTED",
+      "tables": ["django_celery_results_groupresult"]
+    }
+  ],
+  "SOURCE_BASELINE_IS_FULL_DJANGO_GRAPH_PROOF": false,
+  "CENSUS_BEFORE_OVERLAY": {
+    "ABSENT": 114,
+    "PRESENT_MATCHING": 37,
+    "PRECONDITION_MISSING": 7,
+    "PRESENT_DRIFTED": 4
+  },
+  "CENSUS_AFTER_MEMBERSHIP_OVERLAY_BEFORE_REMAINING_W4P": {
+    "ABSENT": 114,
+    "PRESENT_MATCHING": 38,
+    "PRECONDITION_MISSING": 7,
+    "PRESENT_DRIFTED": 3
+  },
+  "PAYLOADS_ACCOUNTED": 162,
+  "EXECUTION_AFFECTING_DRIFT": 3,
+  "UNRESOLVED_PRECONDITIONS": 7,
+  "E048": {
+    "EFFECT_ID": "UE-W5A-MIGRATION-d264f77905daf432:E048",
+    "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0010_tenant_isolation_rls_foundation.sql",
+    "SOURCE_SHA256": "32f8b632fb11db40437bd9d9f063e30a7ff54fe7ecdeb938736697e685d6775b",
+    "SOURCE_BYTES_CHANGED": false,
+    "ASSIGNMENT_TYPES_AFTER_MEMBERSHIP_OVERLAY": "pg_catalog.uuid -> pg_catalog.uuid",
+    "ISOLATED_NATIVE_ASSIGNMENT": "TYPE_COMPATIBLE_NOT_FULL_BOUNDARY_PROOF",
+    "CANONICAL_W4P_GUARDED_FK": "NOT_PROVEN; existing UUID member_documents column causes guarded ADD COLUMN to skip its inline FK",
+    "FULL_BOUNDARY_POSTCONDITION": "NOT_PROVEN"
+  },
+  "QUALIFICATION": {
+    "OPERATIONAL_VERIFIED": 0,
+    "OPERATIONAL_REQUIRED": 106,
+    "TOTAL_VERIFIED_IN_THIS_CHARTER": 0,
+    "TOTAL_REQUIRED": 107,
+    "FINANCIAL_PREDECESSOR_PROOF": "PRESERVED_NO_EFFECT_COMPONENT; not a full107certificate",
+    "ORIGINAL_BOUNDARIES_VERIFIED": 0,
+    "ORIGINAL_BOUNDARIES_REQUIRED": 23,
+    "EFFECTS_VERIFIED_IN_FULL_GRAPH": 0,
+    "EFFECTS_REQUIRED": 762,
+    "HANDLERS_QUALIFIED": 0,
+    "INSPECTORS_QUALIFIED": 0,
+    "VERIFIERS_QUALIFIED": 0,
+    "COMPONENT_CONTRACTS_COMPILED": 107,
+    "FRESH_REPLAY": "NOT_RUN_W4P_PRECONDITION_DENIED",
+    "REPLAY_NOOP": "NOT_PROVEN",
+    "FULL_GRAPH_ROLLBACK": "NOT_PROVEN",
+    "SUCCESSOR_EXECUTED": false,
+    "REPLAY_RECEIPT_PUBLISHED": false
+  },
+  "FROZEN_DENOMINATORS": {
+    "NODES": 107,
+    "EDGES": 231,
+    "COMPATIBILITY_RECORDS": 127,
+    "HANDOFF_RECORDS": 86,
+    "DEFERRED_CONSTRAINTS": 7,
+    "UNRESOLVED_DOWNSTREAM_OPERANDS": 9
+  },
+  "RESIDUALS": [
+    {
+      "payloadId": "UE-W4FR4-PAYLOAD-910e4de8658e1ac1",
+      "payloadKind": "ADD_COLUMN",
+      "sqlHash": "7e33ade46ecda05c7bd0bcabffaf9711f3aefdbf482a611a76362e66d4ecda1e",
+      "schema": "public",
+      "name": "integration_configs",
+      "expectedColumns": [
+        {
+          "name": "organization_id",
+          "postgresType": "uuid",
+          "notNull": true,
+          "defaultExpression": null,
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "expectedUniqueConstraints": [
+        {
+          "name": null,
+          "columns": ["organization_id", "provider"],
+          "deferrable": false,
+          "initiallyDeferred": false
+        }
+      ],
+      "actualRelation": {
+        "schema": "public",
+        "name": "integration_configs",
+        "kind": "r",
+        "columns": [
+          {
+            "name": "id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "updated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "organization_id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          }
+        ],
+        "uniqueConstraints": []
+      },
+      "sourceOrigins": [
+        {
+          "migration": "core::0001_initial",
+          "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+          "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+          "line": 1086,
+          "table": "integration_configs",
+          "column": "id",
+          "supported": true
+        },
+        {
+          "migration": "core::0001_initial",
+          "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+          "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+          "line": 1086,
+          "table": "integration_configs",
+          "column": "created_at",
+          "supported": true
+        },
+        {
+          "migration": "core::0001_initial",
+          "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+          "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+          "line": 1086,
+          "table": "integration_configs",
+          "column": "updated_at",
+          "supported": true
+        },
+        {
+          "migration": "core::0001_initial",
+          "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+          "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+          "line": 1086,
+          "table": "integration_configs",
+          "column": "organization_id",
+          "supported": true
+        }
+      ],
+      "inspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-910e4de8658e1ac1",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:provider"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "historicalSql": "ALTER TABLE \"public\".\"integration_configs\"\n  ADD COLUMN \"organization_id\" uuid NOT NULL,\n  ADD UNIQUE (\"organization_id\", \"provider\");",
+      "requiredExistingColumns": ["provider"],
+      "beforeOverlayInspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-910e4de8658e1ac1",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:provider"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "superseded": false,
+      "classification": "REAL_UNRESOLVED_PRECONDITION",
+      "prerequisiteProducers": [
+        {
+          "column": "provider",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        }
+      ],
+      "reason": "An existing source-produced parent lacks required unique-constraint operands. No unchanged W4P payload or ten-key definition produces all missing operands. The historical declaration used by the assumed canonical fixture is not a Django-first producer."
+    },
+    {
+      "payloadId": "UE-W4FR4-PAYLOAD-81d9d4ff553f38f1",
+      "payloadKind": "ADD_COLUMN",
+      "sqlHash": "156e7c5923a450a64e4f5925f6a12343cc47b98dbd8cef5b7ddc747053418535",
+      "schema": "public",
+      "name": "social_accounts",
+      "expectedColumns": [
+        {
+          "name": "organization_id",
+          "postgresType": "uuid",
+          "notNull": true,
+          "defaultExpression": null,
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "expectedUniqueConstraints": [
+        {
+          "name": null,
+          "columns": ["organization_id", "platform", "platform_user_id"],
+          "deferrable": false,
+          "initiallyDeferred": false
+        }
+      ],
+      "actualRelation": {
+        "schema": "public",
+        "name": "social_accounts",
+        "kind": "r",
+        "columns": [
+          {
+            "name": "id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "updated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "organization_id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          }
+        ],
+        "uniqueConstraints": []
+      },
+      "sourceOrigins": [
+        {
+          "migration": "content::0001_initial",
+          "file": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+          "sha256": "7b3da1a994257cdaaac04565bd71bb348b8f31372ea2365f71ff16b9533e3f2e",
+          "line": 983,
+          "table": "social_accounts",
+          "column": "id",
+          "supported": true
+        },
+        {
+          "migration": "content::0001_initial",
+          "file": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+          "sha256": "7b3da1a994257cdaaac04565bd71bb348b8f31372ea2365f71ff16b9533e3f2e",
+          "line": 983,
+          "table": "social_accounts",
+          "column": "created_at",
+          "supported": true
+        },
+        {
+          "migration": "content::0001_initial",
+          "file": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+          "sha256": "7b3da1a994257cdaaac04565bd71bb348b8f31372ea2365f71ff16b9533e3f2e",
+          "line": 983,
+          "table": "social_accounts",
+          "column": "updated_at",
+          "supported": true
+        },
+        {
+          "migration": "content::0001_initial",
+          "file": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+          "sha256": "7b3da1a994257cdaaac04565bd71bb348b8f31372ea2365f71ff16b9533e3f2e",
+          "line": 983,
+          "table": "social_accounts",
+          "column": "organization_id",
+          "supported": true
+        }
+      ],
+      "inspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-81d9d4ff553f38f1",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": [
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:platform",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:platform_user_id"
+        ],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "historicalSql": "ALTER TABLE \"public\".\"social_accounts\"\n  ADD COLUMN \"organization_id\" uuid NOT NULL,\n  ADD UNIQUE (\"organization_id\", \"platform\", \"platform_user_id\");",
+      "requiredExistingColumns": ["platform", "platform_user_id"],
+      "beforeOverlayInspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-81d9d4ff553f38f1",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": [
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:platform",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:platform_user_id"
+        ],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "superseded": false,
+      "classification": "REAL_UNRESOLVED_PRECONDITION",
+      "prerequisiteProducers": [
+        {
+          "column": "platform",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        },
+        {
+          "column": "platform_user_id",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        }
+      ],
+      "reason": "An existing source-produced parent lacks required unique-constraint operands. No unchanged W4P payload or ten-key definition produces all missing operands. The historical declaration used by the assumed canonical fixture is not a Django-first producer."
+    },
+    {
+      "payloadId": "UE-W4FR4-PAYLOAD-77c77645b1c15c95",
+      "payloadKind": "ADD_COLUMN",
+      "sqlHash": "5efe7da8f093bc64c7faff5c64e5606942113de73a9e6cc6aaef74d6fa579919",
+      "schema": "public",
+      "name": "claims",
+      "expectedColumns": [
+        {
+          "name": "organization_id",
+          "postgresType": "uuid",
+          "notNull": true,
+          "defaultExpression": null,
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "expectedUniqueConstraints": [],
+      "actualRelation": {
+        "schema": "public",
+        "name": "claims",
+        "kind": "r",
+        "columns": [
+          {
+            "name": "id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "updated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "claim_id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "claim_number",
+            "postgresType": "character varying(50)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "ai_analysis",
+            "postgresType": "jsonb",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "ai_score",
+            "postgresType": "integer",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "assigned_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "assigned_to",
+            "postgresType": "character varying(255)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "attachments",
+            "postgresType": "jsonb",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "claim_amount",
+            "postgresType": "character varying(20)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "claim_type",
+            "postgresType": "character varying(50)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "closed_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "complexity_score",
+            "postgresType": "integer",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "court_costs",
+            "postgresType": "character varying(20)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "description",
+            "postgresType": "text",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "desired_outcome",
+            "postgresType": "text",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "filed_date",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "incident_date",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "is_anonymous",
+            "postgresType": "boolean",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "legal_costs",
+            "postgresType": "character varying(20)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "location",
+            "postgresType": "text",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "member_id",
+            "postgresType": "text",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "merit_confidence",
+            "postgresType": "integer",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "metadata",
+            "postgresType": "jsonb",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "organization_id",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "precedent_match",
+            "postgresType": "integer",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "previous_report_details",
+            "postgresType": "text",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "previously_reported",
+            "postgresType": "boolean",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "priority",
+            "postgresType": "character varying(10)",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "progress",
+            "postgresType": "integer",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "resolution_outcome",
+            "postgresType": "character varying(100)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "resolved_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "settlement_amount",
+            "postgresType": "character varying(20)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "status",
+            "postgresType": "character varying(30)",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "voice_transcriptions",
+            "postgresType": "jsonb",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "witness_details",
+            "postgresType": "text",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "witnesses_present",
+            "postgresType": "boolean",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "idempotency_hash",
+            "postgresType": "character varying(64)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          }
+        ],
+        "uniqueConstraints": [
+          {
+            "name": "claims_claim_id_key",
+            "columns": ["claim_id"],
+            "deferrable": false,
+            "initiallyDeferred": false,
+            "validated": true,
+            "indexValid": true,
+            "indexReady": true,
+            "indexLive": true,
+            "nullsNotDistinct": false
+          },
+          {
+            "name": "claims_claim_number_key",
+            "columns": ["claim_number"],
+            "deferrable": false,
+            "initiallyDeferred": false,
+            "validated": true,
+            "indexValid": true,
+            "indexReady": true,
+            "indexLive": true,
+            "nullsNotDistinct": false
+          },
+          {
+            "name": "claims_idempotency_hash_key",
+            "columns": ["idempotency_hash"],
+            "deferrable": false,
+            "initiallyDeferred": false,
+            "validated": true,
+            "indexValid": true,
+            "indexReady": true,
+            "indexLive": true,
+            "nullsNotDistinct": false
+          }
+        ]
+      },
+      "sourceOrigins": [
+        {
+          "migration": "grievances::0001_initial",
+          "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+          "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+          "line": 68,
+          "table": "claims",
+          "column": "id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0001_initial",
+          "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+          "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+          "line": 68,
+          "table": "claims",
+          "column": "created_at",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0001_initial",
+          "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+          "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+          "line": 68,
+          "table": "claims",
+          "column": "updated_at",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0001_initial",
+          "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+          "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+          "line": 68,
+          "table": "claims",
+          "column": "claim_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 182,
+          "table": "claims",
+          "column": "claim_number",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 17,
+          "table": "claims",
+          "column": "ai_analysis",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 22,
+          "table": "claims",
+          "column": "ai_score",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 27,
+          "table": "claims",
+          "column": "assigned_at",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 32,
+          "table": "claims",
+          "column": "assigned_to",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 37,
+          "table": "claims",
+          "column": "attachments",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 42,
+          "table": "claims",
+          "column": "claim_amount",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 47,
+          "table": "claims",
+          "column": "claim_type",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 52,
+          "table": "claims",
+          "column": "closed_at",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 57,
+          "table": "claims",
+          "column": "complexity_score",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 62,
+          "table": "claims",
+          "column": "court_costs",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 67,
+          "table": "claims",
+          "column": "description",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 72,
+          "table": "claims",
+          "column": "desired_outcome",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 77,
+          "table": "claims",
+          "column": "filed_date",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 82,
+          "table": "claims",
+          "column": "incident_date",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 87,
+          "table": "claims",
+          "column": "is_anonymous",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 92,
+          "table": "claims",
+          "column": "legal_costs",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 97,
+          "table": "claims",
+          "column": "location",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 102,
+          "table": "claims",
+          "column": "member_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 107,
+          "table": "claims",
+          "column": "merit_confidence",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 112,
+          "table": "claims",
+          "column": "metadata",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 117,
+          "table": "claims",
+          "column": "organization_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 122,
+          "table": "claims",
+          "column": "precedent_match",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 127,
+          "table": "claims",
+          "column": "previous_report_details",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 132,
+          "table": "claims",
+          "column": "previously_reported",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 137,
+          "table": "claims",
+          "column": "priority",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 142,
+          "table": "claims",
+          "column": "progress",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 147,
+          "table": "claims",
+          "column": "resolution_outcome",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 152,
+          "table": "claims",
+          "column": "resolved_at",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 157,
+          "table": "claims",
+          "column": "settlement_amount",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 162,
+          "table": "claims",
+          "column": "status",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 167,
+          "table": "claims",
+          "column": "voice_transcriptions",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 172,
+          "table": "claims",
+          "column": "witness_details",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0002_expand_claims_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+          "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+          "line": 177,
+          "table": "claims",
+          "column": "witnesses_present",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0005_claims_idempotency_hash",
+          "file": "apps/union-eyes/backend/grievances/migrations/0005_claims_idempotency_hash.py",
+          "sha256": "4f5a7dd80664b4f8d77a067fcff3cbc4308df14e69e474540bc0a944cc609de9",
+          "line": 16,
+          "table": "claims",
+          "column": "idempotency_hash",
+          "supported": true
+        }
+      ],
+      "inspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-77c77645b1c15c95",
+        "STATE": "PRESENT_DRIFTED",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["organization_id:NULLABILITY_DRIFT"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "historicalSql": "ALTER TABLE \"public\".\"claims\"\n  ADD COLUMN \"organization_id\" uuid NOT NULL;",
+      "requiredExistingColumns": [],
+      "beforeOverlayInspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-77c77645b1c15c95",
+        "STATE": "PRESENT_DRIFTED",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["organization_id:NULLABILITY_DRIFT"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "superseded": false,
+      "classification": "INDEPENDENT_TRUE_CONTRADICTION",
+      "prerequisiteProducers": [],
+      "reason": "Existing source-produced organization_id is nullable but the unchanged W4P payload requires NOT NULL. ADD COLUMN cannot reconcile an existing column. Tightening this unrelated table nullability is not a necessary consequence of UUID membership type or membership uniqueness; this charter does not authorize it."
+    },
+    {
+      "payloadId": "UE-W4FR4-PAYLOAD-a3706a0a965fa035",
+      "payloadKind": "ADD_COLUMN",
+      "sqlHash": "6c5f2c7fb377d75b02e24d4fae22326673e170c9654a5948c6798b9c1585c0a6",
+      "schema": "public",
+      "name": "security_events",
+      "expectedColumns": [
+        {
+          "name": "organization_id",
+          "postgresType": "uuid",
+          "notNull": true,
+          "defaultExpression": null,
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "expectedUniqueConstraints": [],
+      "actualRelation": {
+        "schema": "public",
+        "name": "security_events",
+        "kind": "r",
+        "columns": [
+          {
+            "name": "id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "updated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "event_id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "user_id",
+            "postgresType": "character varying(255)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "organization_id",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          }
+        ],
+        "uniqueConstraints": [
+          {
+            "name": "security_events_event_id_key",
+            "columns": ["event_id"],
+            "deferrable": false,
+            "initiallyDeferred": false,
+            "validated": true,
+            "indexValid": true,
+            "indexReady": true,
+            "indexLive": true,
+            "nullsNotDistinct": false
+          }
+        ]
+      },
+      "sourceOrigins": [
+        {
+          "migration": "core::0001_initial",
+          "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+          "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+          "line": 1228,
+          "table": "security_events",
+          "column": "id",
+          "supported": true
+        },
+        {
+          "migration": "core::0001_initial",
+          "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+          "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+          "line": 1228,
+          "table": "security_events",
+          "column": "created_at",
+          "supported": true
+        },
+        {
+          "migration": "core::0001_initial",
+          "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+          "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+          "line": 1228,
+          "table": "security_events",
+          "column": "updated_at",
+          "supported": true
+        },
+        {
+          "migration": "core::0001_initial",
+          "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+          "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+          "line": 1228,
+          "table": "security_events",
+          "column": "event_id",
+          "supported": true
+        },
+        {
+          "migration": "core::0001_initial",
+          "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+          "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+          "line": 1228,
+          "table": "security_events",
+          "column": "user_id",
+          "supported": true
+        },
+        {
+          "migration": "core::0001_initial",
+          "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+          "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+          "line": 1228,
+          "table": "security_events",
+          "column": "organization_id",
+          "supported": true
+        }
+      ],
+      "inspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-a3706a0a965fa035",
+        "STATE": "PRESENT_DRIFTED",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["organization_id:NULLABILITY_DRIFT"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "historicalSql": "ALTER TABLE \"public\".\"security_events\"\n  ADD COLUMN \"organization_id\" uuid NOT NULL;",
+      "requiredExistingColumns": [],
+      "beforeOverlayInspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-a3706a0a965fa035",
+        "STATE": "PRESENT_DRIFTED",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["organization_id:NULLABILITY_DRIFT"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "superseded": false,
+      "classification": "INDEPENDENT_TRUE_CONTRADICTION",
+      "prerequisiteProducers": [],
+      "reason": "Existing source-produced organization_id is nullable but the unchanged W4P payload requires NOT NULL. ADD COLUMN cannot reconcile an existing column. Tightening this unrelated table nullability is not a necessary consequence of UUID membership type or membership uniqueness; this charter does not authorize it."
+    },
+    {
+      "payloadId": "UE-W4FR4-PAYLOAD-6b31483bbf5fbc3a",
+      "payloadKind": "ADD_COLUMN",
+      "sqlHash": "6206d88a106355162cff9e4b40e9cf2e1702073b59c3d4dd0ccf1d7db40233c7",
+      "schema": "public",
+      "name": "votes",
+      "expectedColumns": [
+        {
+          "name": "session_id",
+          "postgresType": "uuid",
+          "notNull": true,
+          "defaultExpression": null,
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "expectedUniqueConstraints": [
+        {
+          "name": "votes_session_voter_unique",
+          "columns": ["session_id", "voter_id"],
+          "deferrable": false,
+          "initiallyDeferred": false
+        }
+      ],
+      "actualRelation": {
+        "schema": "public",
+        "name": "votes",
+        "kind": "r",
+        "columns": [
+          {
+            "name": "id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "updated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "session_id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          }
+        ],
+        "uniqueConstraints": []
+      },
+      "sourceOrigins": [
+        {
+          "migration": "unions::0001_initial",
+          "file": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+          "sha256": "ecb9a54e3e72347f8cee67974518eae5da20a644e170e59868238ab9ad97245d",
+          "line": 1996,
+          "table": "votes",
+          "column": "id",
+          "supported": true
+        },
+        {
+          "migration": "unions::0001_initial",
+          "file": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+          "sha256": "ecb9a54e3e72347f8cee67974518eae5da20a644e170e59868238ab9ad97245d",
+          "line": 1996,
+          "table": "votes",
+          "column": "created_at",
+          "supported": true
+        },
+        {
+          "migration": "unions::0001_initial",
+          "file": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+          "sha256": "ecb9a54e3e72347f8cee67974518eae5da20a644e170e59868238ab9ad97245d",
+          "line": 1996,
+          "table": "votes",
+          "column": "updated_at",
+          "supported": true
+        },
+        {
+          "migration": "unions::0001_initial",
+          "file": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+          "sha256": "ecb9a54e3e72347f8cee67974518eae5da20a644e170e59868238ab9ad97245d",
+          "line": 1996,
+          "table": "votes",
+          "column": "session_id",
+          "supported": true
+        }
+      ],
+      "inspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-6b31483bbf5fbc3a",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:voter_id"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "historicalSql": "ALTER TABLE \"public\".\"votes\"\n  ADD COLUMN \"session_id\" uuid NOT NULL,\n  ADD CONSTRAINT \"votes_session_voter_unique\" UNIQUE (\"session_id\", \"voter_id\");",
+      "requiredExistingColumns": ["voter_id"],
+      "beforeOverlayInspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-6b31483bbf5fbc3a",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:voter_id"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "superseded": false,
+      "classification": "REAL_UNRESOLVED_PRECONDITION",
+      "prerequisiteProducers": [
+        {
+          "column": "voter_id",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        }
+      ],
+      "reason": "An existing source-produced parent lacks required unique-constraint operands. No unchanged W4P payload or ten-key definition produces all missing operands. The historical declaration used by the assumed canonical fixture is not a Django-first producer."
+    },
+    {
+      "payloadId": "UE-W4FR4-PAYLOAD-31142c169a9dd3d9",
+      "payloadKind": "ADD_COLUMN",
+      "sqlHash": "712b48ef6e93afe0364ff5f971b819daede7b0fd0d861f023cc5b80ccdcc9a5c",
+      "schema": "public",
+      "name": "ml_predictions",
+      "expectedColumns": [
+        {
+          "name": "organization_id",
+          "postgresType": "uuid",
+          "notNull": true,
+          "defaultExpression": null,
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "expectedUniqueConstraints": [
+        {
+          "name": "unique_prediction",
+          "columns": ["organization_id", "prediction_type", "prediction_date", "horizon"],
+          "deferrable": false,
+          "initiallyDeferred": false
+        }
+      ],
+      "actualRelation": {
+        "schema": "public",
+        "name": "ml_predictions",
+        "kind": "r",
+        "columns": [
+          {
+            "name": "id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "updated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "organization_id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          }
+        ],
+        "uniqueConstraints": []
+      },
+      "sourceOrigins": [
+        {
+          "migration": "ai_core::0001_initial",
+          "file": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+          "sha256": "ea1f9b284e468bbdd19bc8f98f2343d9f73775a8fb34ca8b4deffc6cd5d8e0cc",
+          "line": 469,
+          "table": "ml_predictions",
+          "column": "id",
+          "supported": true
+        },
+        {
+          "migration": "ai_core::0001_initial",
+          "file": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+          "sha256": "ea1f9b284e468bbdd19bc8f98f2343d9f73775a8fb34ca8b4deffc6cd5d8e0cc",
+          "line": 469,
+          "table": "ml_predictions",
+          "column": "created_at",
+          "supported": true
+        },
+        {
+          "migration": "ai_core::0001_initial",
+          "file": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+          "sha256": "ea1f9b284e468bbdd19bc8f98f2343d9f73775a8fb34ca8b4deffc6cd5d8e0cc",
+          "line": 469,
+          "table": "ml_predictions",
+          "column": "updated_at",
+          "supported": true
+        },
+        {
+          "migration": "ai_core::0001_initial",
+          "file": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+          "sha256": "ea1f9b284e468bbdd19bc8f98f2343d9f73775a8fb34ca8b4deffc6cd5d8e0cc",
+          "line": 469,
+          "table": "ml_predictions",
+          "column": "organization_id",
+          "supported": true
+        }
+      ],
+      "inspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-31142c169a9dd3d9",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": [
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:prediction_type",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:prediction_date",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:horizon"
+        ],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "historicalSql": "ALTER TABLE \"public\".\"ml_predictions\"\n  ADD COLUMN \"organization_id\" uuid NOT NULL,\n  ADD CONSTRAINT \"unique_prediction\" UNIQUE (\"organization_id\", \"prediction_type\", \"prediction_date\", \"horizon\");",
+      "requiredExistingColumns": ["prediction_type", "prediction_date", "horizon"],
+      "beforeOverlayInspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-31142c169a9dd3d9",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": [
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:prediction_type",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:prediction_date",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:horizon"
+        ],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "superseded": false,
+      "classification": "REAL_UNRESOLVED_PRECONDITION",
+      "prerequisiteProducers": [
+        {
+          "column": "prediction_type",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        },
+        {
+          "column": "prediction_date",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        },
+        {
+          "column": "horizon",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        }
+      ],
+      "reason": "An existing source-produced parent lacks required unique-constraint operands. No unchanged W4P payload or ten-key definition produces all missing operands. The historical declaration used by the assumed canonical fixture is not a Django-first producer."
+    },
+    {
+      "payloadId": "UE-W4FR4-PAYLOAD-116714fb92f94f71",
+      "payloadKind": "ADD_COLUMN",
+      "sqlHash": "cfb98915e8119adee4dde4173caf00527d9c7bddbccd718337e0ddded9ff4ee2",
+      "schema": "public",
+      "name": "cms_pages",
+      "expectedColumns": [
+        {
+          "name": "organization_id",
+          "postgresType": "uuid",
+          "notNull": true,
+          "defaultExpression": null,
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "expectedUniqueConstraints": [
+        {
+          "name": "cms_pages_organization_slug_unique",
+          "columns": ["organization_id", "slug"],
+          "deferrable": false,
+          "initiallyDeferred": false
+        }
+      ],
+      "actualRelation": {
+        "schema": "public",
+        "name": "cms_pages",
+        "kind": "r",
+        "columns": [
+          {
+            "name": "id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "updated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "organization_id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          }
+        ],
+        "uniqueConstraints": []
+      },
+      "sourceOrigins": [
+        {
+          "migration": "content::0001_initial",
+          "file": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+          "sha256": "7b3da1a994257cdaaac04565bd71bb348b8f31372ea2365f71ff16b9533e3f2e",
+          "line": 697,
+          "table": "cms_pages",
+          "column": "id",
+          "supported": true
+        },
+        {
+          "migration": "content::0001_initial",
+          "file": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+          "sha256": "7b3da1a994257cdaaac04565bd71bb348b8f31372ea2365f71ff16b9533e3f2e",
+          "line": 697,
+          "table": "cms_pages",
+          "column": "created_at",
+          "supported": true
+        },
+        {
+          "migration": "content::0001_initial",
+          "file": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+          "sha256": "7b3da1a994257cdaaac04565bd71bb348b8f31372ea2365f71ff16b9533e3f2e",
+          "line": 697,
+          "table": "cms_pages",
+          "column": "updated_at",
+          "supported": true
+        },
+        {
+          "migration": "content::0001_initial",
+          "file": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+          "sha256": "7b3da1a994257cdaaac04565bd71bb348b8f31372ea2365f71ff16b9533e3f2e",
+          "line": 697,
+          "table": "cms_pages",
+          "column": "organization_id",
+          "supported": true
+        }
+      ],
+      "inspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-116714fb92f94f71",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:slug"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "historicalSql": "ALTER TABLE \"public\".\"cms_pages\"\n  ADD COLUMN \"organization_id\" uuid NOT NULL,\n  ADD CONSTRAINT \"cms_pages_organization_slug_unique\" UNIQUE (\"organization_id\", \"slug\");",
+      "requiredExistingColumns": ["slug"],
+      "beforeOverlayInspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-116714fb92f94f71",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:slug"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "superseded": false,
+      "classification": "REAL_UNRESOLVED_PRECONDITION",
+      "prerequisiteProducers": [
+        {
+          "column": "slug",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        }
+      ],
+      "reason": "An existing source-produced parent lacks required unique-constraint operands. No unchanged W4P payload or ten-key definition produces all missing operands. The historical declaration used by the assumed canonical fixture is not a Django-first producer."
+    },
+    {
+      "payloadId": "UE-W4FR4-PAYLOAD-c60ebc8408c112e2",
+      "payloadKind": "ADD_COLUMN",
+      "sqlHash": "74d802ef7a733103d1b39444ce1aa5f8e6f7dd158d7bcac3912235afdca67291",
+      "schema": "public",
+      "name": "grievances",
+      "expectedColumns": [
+        {
+          "name": "organization_id",
+          "postgresType": "uuid",
+          "notNull": true,
+          "defaultExpression": null,
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "expectedUniqueConstraints": [],
+      "actualRelation": {
+        "schema": "public",
+        "name": "grievances",
+        "kind": "r",
+        "columns": [
+          {
+            "name": "id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "updated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "grievance_number",
+            "postgresType": "character varying(50)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "attachments",
+            "postgresType": "jsonb",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "background",
+            "postgresType": "text",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "cba_article",
+            "postgresType": "character varying(100)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "cba_id",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "cba_section",
+            "postgresType": "character varying(100)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "closed_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_by",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "description",
+            "postgresType": "text",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "desired_outcome",
+            "postgresType": "text",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "employer_id",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "employer_name",
+            "postgresType": "character varying(255)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "employer_rep_id",
+            "postgresType": "character varying(255)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "escalated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "filed_date",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "grievant_email",
+            "postgresType": "character varying(255)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "grievant_id",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "grievant_name",
+            "postgresType": "character varying(255)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "group_grievance_id",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "has_legal_implications",
+            "postgresType": "boolean",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "incident_date",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "is_arbitration_eligible",
+            "postgresType": "boolean",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "is_confidential",
+            "postgresType": "boolean",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "is_group_grievance",
+            "postgresType": "boolean",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "last_updated_by",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "meeting_date",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "organization_id",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "priority",
+            "postgresType": "character varying(10)",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "related_grievance_ids",
+            "postgresType": "jsonb",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "resolved_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "response_deadline",
+            "postgresType": "timestamp with time zone",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "status",
+            "postgresType": "character varying(20)",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "step",
+            "postgresType": "character varying(15)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "timeline",
+            "postgresType": "jsonb",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "title",
+            "postgresType": "character varying(500)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "type",
+            "postgresType": "character varying(20)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "union_rep_id",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "workplace_id",
+            "postgresType": "uuid",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "workplace_name",
+            "postgresType": "character varying(255)",
+            "notNull": false,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          }
+        ],
+        "uniqueConstraints": [
+          {
+            "name": "grievances_grievance_number_key",
+            "columns": ["grievance_number"],
+            "deferrable": false,
+            "initiallyDeferred": false,
+            "validated": true,
+            "indexValid": true,
+            "indexReady": true,
+            "indexLive": true,
+            "nullsNotDistinct": false
+          }
+        ]
+      },
+      "sourceOrigins": [
+        {
+          "migration": "grievances::0001_initial",
+          "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+          "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+          "line": 184,
+          "table": "grievances",
+          "column": "id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0001_initial",
+          "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+          "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+          "line": 184,
+          "table": "grievances",
+          "column": "created_at",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0001_initial",
+          "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+          "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+          "line": 184,
+          "table": "grievances",
+          "column": "updated_at",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 207,
+          "table": "grievances",
+          "column": "grievance_number",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 17,
+          "table": "grievances",
+          "column": "attachments",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 22,
+          "table": "grievances",
+          "column": "background",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 27,
+          "table": "grievances",
+          "column": "cba_article",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 32,
+          "table": "grievances",
+          "column": "cba_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 37,
+          "table": "grievances",
+          "column": "cba_section",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 42,
+          "table": "grievances",
+          "column": "closed_at",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 47,
+          "table": "grievances",
+          "column": "created_by",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 52,
+          "table": "grievances",
+          "column": "description",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 57,
+          "table": "grievances",
+          "column": "desired_outcome",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 62,
+          "table": "grievances",
+          "column": "employer_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 67,
+          "table": "grievances",
+          "column": "employer_name",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 72,
+          "table": "grievances",
+          "column": "employer_rep_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 77,
+          "table": "grievances",
+          "column": "escalated_at",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 82,
+          "table": "grievances",
+          "column": "filed_date",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 87,
+          "table": "grievances",
+          "column": "grievant_email",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 92,
+          "table": "grievances",
+          "column": "grievant_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 97,
+          "table": "grievances",
+          "column": "grievant_name",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 102,
+          "table": "grievances",
+          "column": "group_grievance_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 107,
+          "table": "grievances",
+          "column": "has_legal_implications",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 112,
+          "table": "grievances",
+          "column": "incident_date",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 117,
+          "table": "grievances",
+          "column": "is_arbitration_eligible",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 122,
+          "table": "grievances",
+          "column": "is_confidential",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 127,
+          "table": "grievances",
+          "column": "is_group_grievance",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 132,
+          "table": "grievances",
+          "column": "last_updated_by",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 137,
+          "table": "grievances",
+          "column": "meeting_date",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 142,
+          "table": "grievances",
+          "column": "organization_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 147,
+          "table": "grievances",
+          "column": "priority",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 152,
+          "table": "grievances",
+          "column": "related_grievance_ids",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 157,
+          "table": "grievances",
+          "column": "resolved_at",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 162,
+          "table": "grievances",
+          "column": "response_deadline",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 167,
+          "table": "grievances",
+          "column": "status",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 172,
+          "table": "grievances",
+          "column": "step",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 177,
+          "table": "grievances",
+          "column": "timeline",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 182,
+          "table": "grievances",
+          "column": "title",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 187,
+          "table": "grievances",
+          "column": "type",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 192,
+          "table": "grievances",
+          "column": "union_rep_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 197,
+          "table": "grievances",
+          "column": "workplace_id",
+          "supported": true
+        },
+        {
+          "migration": "grievances::0003_expand_grievances_model",
+          "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+          "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+          "line": 202,
+          "table": "grievances",
+          "column": "workplace_name",
+          "supported": true
+        }
+      ],
+      "inspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-c60ebc8408c112e2",
+        "STATE": "PRESENT_DRIFTED",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["organization_id:NULLABILITY_DRIFT"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "historicalSql": "ALTER TABLE \"public\".\"grievances\"\n  ADD COLUMN \"organization_id\" uuid NOT NULL;",
+      "requiredExistingColumns": [],
+      "beforeOverlayInspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-c60ebc8408c112e2",
+        "STATE": "PRESENT_DRIFTED",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["organization_id:NULLABILITY_DRIFT"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "superseded": false,
+      "classification": "INDEPENDENT_TRUE_CONTRADICTION",
+      "prerequisiteProducers": [],
+      "reason": "Existing source-produced organization_id is nullable but the unchanged W4P payload requires NOT NULL. ADD COLUMN cannot reconcile an existing column. Tightening this unrelated table nullability is not a necessary consequence of UUID membership type or membership uniqueness; this charter does not authorize it."
+    },
+    {
+      "payloadId": "UE-W4FR4-PAYLOAD-ac42c3588bfcf034",
+      "payloadKind": "ADD_COLUMN",
+      "sqlHash": "04f8bd19e036f91079156ab1f8b7b8d02dfe892505632ab91d7d226b5d960007",
+      "schema": "public",
+      "name": "model_metadata",
+      "expectedColumns": [
+        {
+          "name": "organization_id",
+          "postgresType": "uuid",
+          "notNull": true,
+          "defaultExpression": null,
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "expectedUniqueConstraints": [
+        {
+          "name": "unique_model",
+          "columns": ["organization_id", "model_type", "version"],
+          "deferrable": false,
+          "initiallyDeferred": false
+        }
+      ],
+      "actualRelation": {
+        "schema": "public",
+        "name": "model_metadata",
+        "kind": "r",
+        "columns": [
+          {
+            "name": "id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "updated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "organization_id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          }
+        ],
+        "uniqueConstraints": []
+      },
+      "sourceOrigins": [
+        {
+          "migration": "ai_core::0001_initial",
+          "file": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+          "sha256": "ea1f9b284e468bbdd19bc8f98f2343d9f73775a8fb34ca8b4deffc6cd5d8e0cc",
+          "line": 497,
+          "table": "model_metadata",
+          "column": "id",
+          "supported": true
+        },
+        {
+          "migration": "ai_core::0001_initial",
+          "file": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+          "sha256": "ea1f9b284e468bbdd19bc8f98f2343d9f73775a8fb34ca8b4deffc6cd5d8e0cc",
+          "line": 497,
+          "table": "model_metadata",
+          "column": "created_at",
+          "supported": true
+        },
+        {
+          "migration": "ai_core::0001_initial",
+          "file": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+          "sha256": "ea1f9b284e468bbdd19bc8f98f2343d9f73775a8fb34ca8b4deffc6cd5d8e0cc",
+          "line": 497,
+          "table": "model_metadata",
+          "column": "updated_at",
+          "supported": true
+        },
+        {
+          "migration": "ai_core::0001_initial",
+          "file": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+          "sha256": "ea1f9b284e468bbdd19bc8f98f2343d9f73775a8fb34ca8b4deffc6cd5d8e0cc",
+          "line": 497,
+          "table": "model_metadata",
+          "column": "organization_id",
+          "supported": true
+        }
+      ],
+      "inspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-ac42c3588bfcf034",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": [
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:model_type",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:version"
+        ],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "historicalSql": "ALTER TABLE \"public\".\"model_metadata\"\n  ADD COLUMN \"organization_id\" uuid NOT NULL,\n  ADD CONSTRAINT \"unique_model\" UNIQUE (\"organization_id\", \"model_type\", \"version\");",
+      "requiredExistingColumns": ["model_type", "version"],
+      "beforeOverlayInspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-ac42c3588bfcf034",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": [
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:model_type",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:version"
+        ],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "superseded": false,
+      "classification": "REAL_UNRESOLVED_PRECONDITION",
+      "prerequisiteProducers": [
+        {
+          "column": "model_type",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        },
+        {
+          "column": "version",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        }
+      ],
+      "reason": "An existing source-produced parent lacks required unique-constraint operands. No unchanged W4P payload or ten-key definition produces all missing operands. The historical declaration used by the assumed canonical fixture is not a Django-first producer."
+    },
+    {
+      "payloadId": "UE-W4FR4-PAYLOAD-6d3e5e5b1404436e",
+      "payloadKind": "ADD_COLUMN",
+      "sqlHash": "847e9f7b058aeeeafaed8c3b8980f7fd7d383c099696074fe041bc41ad2658b2",
+      "schema": "public",
+      "name": "donation_campaigns",
+      "expectedColumns": [
+        {
+          "name": "organization_id",
+          "postgresType": "uuid",
+          "notNull": true,
+          "defaultExpression": null,
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "expectedUniqueConstraints": [
+        {
+          "name": "donation_campaigns_organization_slug_unique",
+          "columns": ["organization_id", "slug"],
+          "deferrable": false,
+          "initiallyDeferred": false
+        }
+      ],
+      "actualRelation": {
+        "schema": "public",
+        "name": "donation_campaigns",
+        "kind": "r",
+        "columns": [
+          {
+            "name": "id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "created_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "updated_at",
+            "postgresType": "timestamp with time zone",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          },
+          {
+            "name": "organization_id",
+            "postgresType": "uuid",
+            "notNull": true,
+            "defaultExpression": null,
+            "identity": "",
+            "generated": "",
+            "dropped": false
+          }
+        ],
+        "uniqueConstraints": []
+      },
+      "sourceOrigins": [
+        {
+          "migration": "billing::0001_initial",
+          "file": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+          "sha256": "a63ed6c47e6604d64241a81187880f7c886062340d4ff49e57ec32c7ec1cf038",
+          "line": 1813,
+          "table": "donation_campaigns",
+          "column": "id",
+          "supported": true
+        },
+        {
+          "migration": "billing::0001_initial",
+          "file": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+          "sha256": "a63ed6c47e6604d64241a81187880f7c886062340d4ff49e57ec32c7ec1cf038",
+          "line": 1813,
+          "table": "donation_campaigns",
+          "column": "created_at",
+          "supported": true
+        },
+        {
+          "migration": "billing::0001_initial",
+          "file": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+          "sha256": "a63ed6c47e6604d64241a81187880f7c886062340d4ff49e57ec32c7ec1cf038",
+          "line": 1813,
+          "table": "donation_campaigns",
+          "column": "updated_at",
+          "supported": true
+        },
+        {
+          "migration": "billing::0001_initial",
+          "file": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+          "sha256": "a63ed6c47e6604d64241a81187880f7c886062340d4ff49e57ec32c7ec1cf038",
+          "line": 1813,
+          "table": "donation_campaigns",
+          "column": "organization_id",
+          "supported": true
+        }
+      ],
+      "inspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-6d3e5e5b1404436e",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:slug"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "historicalSql": "ALTER TABLE \"public\".\"donation_campaigns\"\n  ADD COLUMN \"organization_id\" uuid NOT NULL,\n  ADD CONSTRAINT \"donation_campaigns_organization_slug_unique\" UNIQUE (\"organization_id\", \"slug\");",
+      "requiredExistingColumns": ["slug"],
+      "beforeOverlayInspection": {
+        "PAYLOAD_ID": "UE-W4FR4-PAYLOAD-6d3e5e5b1404436e",
+        "STATE": "PRECONDITION_MISSING",
+        "PLANNED_ACTION": "FAIL_CLOSED",
+        "REASONS": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:slug"],
+        "EXTRA_CONTEXTUAL_STATE": "OBSERVED_NOT_REAUTHORED"
+      },
+      "superseded": false,
+      "classification": "REAL_UNRESOLVED_PRECONDITION",
+      "prerequisiteProducers": [
+        {
+          "column": "slug",
+          "w4pPayloadIds": [],
+          "supplementProducer": false
+        }
+      ],
+      "reason": "An existing source-produced parent lacks required unique-constraint operands. No unchanged W4P payload or ten-key definition produces all missing operands. The historical declaration used by the assumed canonical fixture is not a Django-first producer."
+    }
+  ],
+  "PRESERVATION_SHA256": {
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W5A_REPLAY_ORDERING_GRAPH.json": "5682f325a266b2f3fcccd1f735198bd06e6e623c96b8ea263d42122d339cc585",
+    "docs/union-eyes/reality-remediation/UE_W5_POST_W4P_REPLAY_GRAPH.json": "0e26428a255d91c8aeb8d8ae1e5cd95683ef437730908f35e7af911d4cb3bd30",
+    "docs/union-eyes/reality-remediation/UE_W5_REPLAY_TOPOLOGICAL_PLAN.json": "b896029e9f2eba4665956dbb3e36e1633183581f2e82f075eb424ac3305afcce",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4P_PLATFORM_BASELINE_PROMOTION.json": "9405b0b03e3966816605199a04244e7ffe41af6c2d03af31f25e7c2836d9bbfb",
+    "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_PLAN.json": "f58319b792dc62cf6ac06bcf8be070ca6020084f41e468add7d64217aba0b4d5",
+    "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION.json": "6f651aaa3f76a82192c5050e2400498d4f66a58c0aa0af2639770ccf52183c49",
+    "docs/union-eyes/reality-remediation/UE_W4_LATE_PRODUCER_COMPATIBILITY_CLASSIFICATION.json": "fc98ce059a4e4d26caadecb7ed9a686db81d324e8e597477f55064d74b76ed98",
+    "docs/union-eyes/reality-remediation/UE_POST_W4P_COMPATIBILITY_OBLIGATIONS.json": "2e10f3e40761c6b93bca473b263c262c2222f7b3a875e41ab268fa1b4448e043",
+    "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json": "b2db0a4924188facc243965b0de11cd921200ce8dda811c543263abdd84dc3aa",
+    "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": "5e105985d6b99fbdb118b87454543f92e0053ae1b574c3dfe6417f9bbbc81e2d",
+    "apps/union-eyes/db/migrations-cache/0000_outstanding_viper.sql": "55341b8ef332ee26d226bdda7b044664a3b1c570582e1d61015f7538030862e8",
+    "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql": "9ca1fdeb3c5517124c65ff18bc52e753844d9d98533b09d4048571f2d65edda6",
+    "apps/union-eyes/db/migrations-cache/0002_certain_juggernaut.sql": "c8c905a98b6ce238036328d708a119223b3544bf698b423f4f4a905a8c9d1bc8",
+    "apps/union-eyes/db/migrations-cache/0003_dizzy_alex_wilder.sql": "105ea4b4710bf406f1f3a32a2704c724f39af152fdcf83701f19ad2b3de850ab",
+    "apps/union-eyes/db/migrations-cache/0004_hesitant_chameleon.sql": "9777c9417af6755c30ab896273222d7e68b4e4af3032110c21dbcf572d281df0",
+    "apps/union-eyes/db/migrations-cache/0005_add_icra_assessment_capability_token.sql": "9a280d5e9ccdcdcb350673b40294b5a08d401b9f53dcc950b02868298494293a",
+    "apps/union-eyes/db/migrations-cache/0006_external_specialist_runtime_privilege_closure.sql": "aa9a3314fc70de80e3064e8dedbc31b12a09caa3d99632ac75ae0c0a19731003",
+    "apps/union-eyes/db/migrations-cache/0007_auth_bootstrap_runtime_remediation.sql": "4b742c7a3a1a70532c9f3dc1133f3020b58246ff3663c036e92da09143751a45",
+    "apps/union-eyes/db/migrations-cache/0008_runtime_acceptance_closure.sql": "821563dc03232c3530b441c8372d82642e8762e5814f733e760c33d6005b29d0",
+    "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql": "dfb79693e7ce06ef4d078fb0eed8cd8bcde60a54bd3b29ec09e766ac49fcb53d",
+    "apps/union-eyes/db/migrations-cache/0010_tenant_isolation_rls_foundation.sql": "9bfd46947d9d25539b32e72edccea1c1862c6c4f2c46bac2ae10a0a228ee75f5",
+    "apps/union-eyes/db/migrations-cache/0011_storage_authority_rls_completion.sql": "fbf17ed35fb5c5efbb1c415f66ae2bb1fdf79e7ba1b8cfd8c711f40c6ea53c37",
+    "apps/union-eyes/db/migrations-cache/0012_storage_authority_rls_final_closure.sql": "3891b11704a9934b0e408b6d1b0b38c9b1dd90bfcbaa71aa16e92b6e0f17c312",
+    "apps/union-eyes/db/migrations-cache/0013_workbook_credential_payment_authority.sql": "7b0dcc672d3380fdcb8abb2bc3885882a9e55fea28364cb3e8855b32e58ef0d0",
+    "apps/union-eyes/db/migrations-cache/0014_lineage_restoration_rls_closure.sql": "cd8a2814a0e101dd56b0a94449eda3dce6e99860b368690a5fad3b97791a64a5",
+    "apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql": "309b04cb85673fdffaa6751804cc74edb4d98bef06975c085388a51e93ab7208",
+    "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+    "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql": "83d9d41344e8f327752e4cc1a9fbb23d894f49b42e7f6282beadbe793c5ac1a0",
+    "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+    "apps/union-eyes/db/migrations-platform/0005_organization_members_deleted_at.sql": "0580d447b4d8dcc129958bffa2eaa7a2c24120f3ff2ebdc51343e88b9d2ac554",
+    "apps/union-eyes/db/migrations-platform/0006_documents_runtime_columns.sql": "661f14e708303514b5a9b4b430dc8d05dfc214852f54d262d9aa0057a9d3408e",
+    "apps/union-eyes/db/migrations-platform/0007_claim_updates_runtime_columns.sql": "bf015e6edf82c50e01f1bf64141d64e00f58b9da2100c4640d5e0e689beaf020",
+    "apps/union-eyes/services/financial-service/drizzle/0000_lucky_mole_man.sql": "c57e929249d3fb610543c7b078d169e38b4d14975db1d59fb07433a665b469db",
+    "docs/union-eyes/reality-remediation/UE_W5_ORIGINAL_BOUNDARY_EFFECT_LEDGER.json": "41ff4487e83c831dd94c6dbc50a2fe48de3f26af6b3c31453a188e975e423787",
+    "docs/union-eyes/reality-remediation/UE_W5_ORIGINAL_BOUNDARY_EFFECT_LEDGER.md": "d2dac8451116da8cff9510e8d81cfe334d9e943e9f9f6b690bcbc644b009127e",
+    "docs/union-eyes/reality-remediation/UE_W5_ORIGINAL_BOUNDARY_CLOSURE.json": "004edf398e489beaa864f44db7edd45f6570ee401a4cceb2aab1be676db07b2e",
+    "docs/union-eyes/reality-remediation/UE_W5_ORIGINAL_BOUNDARY_CLOSURE.md": "182974c4bfcb06f114048dad431771bbb0319f05957a9480d8bf872f2e6c6e76",
+    "docs/union-eyes/reality-remediation/UE_W5_REPLAY_IMPLEMENTATION_PLAN.json": "6f923d5e76a3c9f69aad058557d349919dff6ce5a2f7403cf6355fd7f2954e46",
+    "docs/union-eyes/reality-remediation/UE_W5_REPLAY_IMPLEMENTATION_PLAN.md": "182974c4bfcb06f114048dad431771bbb0319f05957a9480d8bf872f2e6c6e76",
+    "docs/union-eyes/reality-remediation/UE_W5_REPLAY_IMPLEMENTATION_REGISTRY.json": "c7dfc76b04099201f40d8183db45d5b6b9987073c36cd10d81ef4a20a44a2af8",
+    "docs/union-eyes/reality-remediation/UE_W5_REPLAY_IMPLEMENTATION_REGISTRY.md": "1479e5c2296b7a6683d92f508d55bfde4d8126d99d883deb0036e07c5b870163",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W5B_REPLAY_IMPLEMENTATION.json": "6d3224f61762e77d2345042c0e9d6efaafdc27d74027b0176d55292f96b6b243",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W5B_REPLAY_IMPLEMENTATION.md": "182974c4bfcb06f114048dad431771bbb0319f05957a9480d8bf872f2e6c6e76",
+    "docs/union-eyes/reality-remediation/UE_W5_PARENT_KEY_AUTHORITY.json": "11c1f0b988f5cb8d345149be3363c51695037ceab1286ccbef55781e7a9bf679",
+    "docs/union-eyes/reality-remediation/UE_W5_PARENT_KEY_AUTHORITY.md": "ba0d3f2d06acca40c872a9cded450c604a83f4425ddffe5ebca5f44850b38aa3",
+    "docs/union-eyes/reality-remediation/UE_W5_PARENT_KEY_PRODUCER_PLAN.json": "cf49770b8ba3bcd2c7d95e4b2b91966a446437085c80292dbaa1e17665c731af",
+    "docs/union-eyes/reality-remediation/UE_W5_PARENT_KEY_PRODUCER_PLAN.md": "ba0d3f2d06acca40c872a9cded450c604a83f4425ddffe5ebca5f44850b38aa3",
+    "docs/union-eyes/reality-remediation/UE_W5_PRE_REPLAY_PARENT_KEY_SUPPLEMENT.json": "f22afcae11edfb3cdd202696337e6650cd8ebaa5a9e7b597a7c8f439872c4eb2",
+    "docs/union-eyes/reality-remediation/UE_W5_PRE_REPLAY_PARENT_KEY_SUPPLEMENT.md": "ba0d3f2d06acca40c872a9cded450c604a83f4425ddffe5ebca5f44850b38aa3",
+    "infrastructure/landing-zone/g3-readiness-evidence/G3_TERMINAL_DISPOSITION.json": "813e0a147ea2efe711e0ff4dfdc83394885f7cd43e013efe25f2e6c0f3968d5f"
+  },
+  "PROOF_BOUNDARIES": {
+    "DATABASE_CONNECTIONS": 0,
+    "SQL_EXECUTED_AGAINST_DATABASE": 0,
+    "LIVE_EXECUTION": 0,
+    "W4P_EXECUTED_LIVE": "NO",
+    "COMPATIBILITY_OVERLAY_EXECUTED_LIVE": "NO",
+    "PARENT_KEY_SUPPLEMENT_EXECUTED_LIVE": "NO",
+    "W5_EXECUTED_LIVE": "NO",
+    "PRODUCTION_MUTATIONS": 0,
+    "G3_REOPENED": "NO",
+    "MERGE": "NO",
+    "PR": "NO",
+    "DEPLOY": "NO",
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO"
+  },
+  "HISTORICAL_PACKETS": "PRESERVED_AT_ORIGINAL_PATHS; prospective successor packets live in w5-compat",
+  "FURTHER_STATIC_REMEDIATION": "EXHAUSTED; no new charter requested or invented",
+  "ORDER": [
+    "SOURCE_BASELINE",
+    "AUTHORIZED_MEMBERSHIP_OVERLAY",
+    "W4P_COMPLETION_DENIED",
+    "STOP_NO_SUPPLEMENT_OR_W5_EXECUTION"
+  ]
+}

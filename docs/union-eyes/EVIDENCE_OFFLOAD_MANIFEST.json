@@ -1,0 +1,151 @@
+{
+    "schema":  "ue-evidence-offload/v1",
+    "reason":  "Generated evidence retained outside git. Oversized diffs break CI tooling (Playwright git metadata overflows on a ~550 MB diff) and GitHub rejects files over 100 MB. None is read by a CI-executed test; identity is pinned by sha256 and byte size.",
+    "files":  [
+                  {
+                      "path":  "docs/union-eyes/bootstrap-v2/UE_BOOTSTRAP_V2_RUNTIME_EVIDENCE.json",
+                      "bytes":  15662733,
+                      "sha256":  "fe07399eb4aa470c70693cf45018f30a024686f58be36f5f54dc92f6176c2555"
+                  },
+                  {
+                      "path":  "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.json",
+                      "bytes":  129809822,
+                      "sha256":  "d8113c2906e646568cddb9ee20df72ca7c57016f1d6da64ada7d3b9bec04c332"
+                  },
+                  {
+                      "path":  "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md",
+                      "bytes":  39313506,
+                      "sha256":  "0865ebdd8b8853a578a3e53c94e0c9b71124b1824cd03bce3c2c6922d2c12c0f"
+                  },
+                  {
+                      "path":  "docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json",
+                      "bytes":  33247580,
+                      "sha256":  "723a144ba3ffb5e97b50ff5a85f6a39b5d7507e0dcf1d8ea1258e58334783dce"
+                  },
+                  {
+                      "path":  "docs/union-eyes/bootstrap-v2/UE_V2_FINANCIAL_SCOPE_AUTHORITY.json",
+                      "bytes":  12344920,
+                      "sha256":  "047e33af6565932ad154ea7f3fd3800cfe262dacd797616b0550c25faf751497"
+                  },
+                  {
+                      "path":  "docs/union-eyes/bootstrap-v2/UE_V2_MUTATING_CALLER_INVENTORY.json",
+                      "bytes":  23407704,
+                      "sha256":  "0c1f01131e01f1cb3fa393b42d6e6edb49f183d3d629a4febf5672e637f6c9fd"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1A_2_FINAL_SOURCE_CLOSEOUT.json",
+                      "bytes":  5618000,
+                      "sha256":  "ee1320ef74ebd28676711be839073123d39fb55cfe92115c27bb2f530160f00a"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_1_CANONICAL_DATA_AUTHORITY_CENSUS.json",
+                      "bytes":  14075714,
+                      "sha256":  "8a0ab63ebfcba1590a64668d86200b696447892d7e400f82551ed8364800d5ef"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_1_R2N_DENOMINATOR_AND_CEILING_AUDIT.json",
+                      "bytes":  5604626,
+                      "sha256":  "f7d8b705f630ba100f9e4aac8b98dbfa79fe17bf36ebfb9e04853e1bf7a8e022"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_1_R2N_DENOMINATOR_AND_CEILING_AUDIT.md",
+                      "bytes":  10210757,
+                      "sha256":  "365743bff4e8c5376c97ef7f5424a54269509dc43ed918bffea637b28b8dfa3e"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_2B2A_ENTRY_ENFORCEMENT_PARTITION.json",
+                      "bytes":  5894494,
+                      "sha256":  "af1420262a73e9dd4a678aa8efa773a284be465d8bd362eccc9fd70b9c8adcee"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_2B2B1_SHARED_COHORT_ENFORCEMENT_ADJUDICATION.json",
+                      "bytes":  30434640,
+                      "sha256":  "1837ceac544b0bddc4eaf0a2c4a5be55f93e755f12aebc0ed23e87f1c656a024"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_2B2B2A_ENTRY_LOCAL_ENFORCEMENT_EVIDENCE.json",
+                      "bytes":  7603222,
+                      "sha256":  "f6f5f8836b4656f20feff68941733509a23af91d114b4c56f38cec3ae0f079c7"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_2B2B2B_ENTRY_LOCAL_ENFORCEMENT_ADJUDICATION.json",
+                      "bytes":  44369621,
+                      "sha256":  "6199022b0cb3732b7a573b74613e8b6d0527862d8909fd23b084124d4fce7712"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3A_RLS_TENANT_ISOLATION_SURFACE_CENSUS.json",
+                      "bytes":  74446160,
+                      "sha256":  "5755b17e89fbb81b3afb1b6fda4e18ba107153cd52680bad21041e466c13a883"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3B_STATIC_RLS_POLICY_CORRECTNESS_RECONCILIATION.json",
+                      "bytes":  85129966,
+                      "sha256":  "d65dea976c169acb795c71e5c3491d6478d4dbe0859e9b3b17c6be4691c7f84b"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3C_A_RUNTIME_PROOF_PREFLIGHT.json",
+                      "bytes":  20102474,
+                      "sha256":  "bf6a6e2c1f73f3d56b035b3b1705f298d34d7ff738095eefff8249c6bd6144d0"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1_CANONICAL_SCHEMA_BOOTSTRAP_LINEAGE.json",
+                      "bytes":  19132416,
+                      "sha256":  "1174c864e09fc68f42dca882bb26b6e82cdf4cd3dc58411bd8136e32e317d28d"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4_PRECONSUMER_PHYSICAL_PRODUCERS.json",
+                      "bytes":  5362105,
+                      "sha256":  "28eb0d823d81c05992cf7f4b19e92f6c2120883b884d97ac69bcce279e147bf4"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4D_PHYSICAL_OWNERSHIP_ADJUDICATION.json",
+                      "bytes":  8010712,
+                      "sha256":  "532ad46329ee72edb98d95814d5692b5530682454c6529d0920a12c0a1bb05cc"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4F_CANONICAL_DEFINITION_AUTHORING.json",
+                      "bytes":  25795961,
+                      "sha256":  "70a7c068648437aca9d04be3b784af16e29c084064e8fccdb06f815c9268fcc9"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.json",
+                      "bytes":  8595991,
+                      "sha256":  "50bc30927199ff75307eb8b27d5c9bb4a8faa3e7fb5b600a132fe22e9cd53328"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE.json",
+                      "bytes":  31489306,
+                      "sha256":  "58df0c17be136de8ecb2e42590c637530db9bf6d4c1423c03ddb40f80c28d63a"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS.json",
+                      "bytes":  24601049,
+                      "sha256":  "4404f6b17c63af569852d71c180923fa07a186ba7b42cdc62806e2d7c7b35a76"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_FINAL.json",
+                      "bytes":  58618562,
+                      "sha256":  "8f9dd85f0bcf11604c4f0261cd71a9ec62dd12c3ba003559901c69c70c3b92ed"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_RESOLVED.json",
+                      "bytes":  43916241,
+                      "sha256":  "b3b2427ec07afad6e28448910c8f4f50423182a0f36e03f3b1940ddce0c3016a"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR3.json",
+                      "bytes":  61388689,
+                      "sha256":  "bfb77a69904c6f0cbb6ffad5c103676bacf22cf2287b8dcfb23c05893ac90c5d"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4.json",
+                      "bytes":  15530469,
+                      "sha256":  "b84d75a98fec07e86ad68689a93ceebbdb262eee143de2a8f8eee6ba8562784d"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/UE_W4P_PROMOTION_DEPENDENCY_CUT.json",
+                      "bytes":  6817358,
+                      "sha256":  "57a593f2a1a617d7a26bb54d7eca673094d02d639bc1028140e88d59de55127b"
+                  }
+              ]
+}

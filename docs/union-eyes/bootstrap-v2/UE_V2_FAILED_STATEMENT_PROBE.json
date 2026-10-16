@@ -1,0 +1,313 @@
+[
+  {
+    "statement": "select count(*) from \"duplicate_groups\" where \"duplicate_groups\".\"organization_id\" = $1",
+    "routes": [
+      "apps/union-eyes/app/api/admin/duplicates/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42P01 relation \"duplicate_groups\" does not exist",
+      "union_eyes_system": "42P01 relation \"duplicate_groups\" does not exist",
+      "bare_login": "42P01 relation \"duplicate_groups\" does not exist"
+    }
+  },
+  {
+    "statement": "\n      select\n        gd.id                            as id,\n        gd.grievance_id                  as grievance_id,\n        g.organization_id                as organization_id,\n        gd.due_date                      as due_date\n      from grievance_deadlines gd\n      join grievances g on g.id = gd.grievance_id\n      where gd.due_date < now()\n        and gd.status not in ('completed', 'cancel",
+    "routes": [
+      "apps/union-eyes/app/api/cron/deadline-overdue/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "OK",
+      "union_eyes_system": "42P01 relation \"grievance_deadlines\" does not exist",
+      "bare_login": "42P01 relation \"grievance_deadlines\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\" from \"deadline_reassignment_convergence\" where \"deadline_reassignment_convergence\".\"status\" = $1 limit $2",
+    "routes": [
+      "apps/union-eyes/app/api/cron/deadline-reminders/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42P01 relation \"deadline_reassignment_convergence\" does not exist",
+      "union_eyes_system": "42P01 relation \"deadline_reassignment_convergence\" does not exist",
+      "bare_login": "42P01 relation \"deadline_reassignment_convergence\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"organization_id\", \"name\", \"provider_type\", \"saml_entity_id\", \"saml_sso_url\", \"saml_slo_url\", \"saml_certificate\", \"saml_signing_algorithm\", \"saml_name_id_format\", \"oidc_issuer\", \"oidc_client_id\", \"oidc_client_secret\", \"oidc_authorization_endpoint\", \"oidc_token_endpoint\", \"oidc_userinfo_endpoint\", \"oidc_jwks_uri\", \"oidc_scopes\", \"attribute_mapping\", \"role_mapping\", \"auto_provision\", \"j",
+    "routes": [
+      "apps/union-eyes/app/api/enterprise/sso/providers/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42703 column \"name\" does not exist",
+      "union_eyes_system": "42P01 relation \"sso_providers\" does not exist",
+      "bare_login": "42P01 relation \"sso_providers\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"organization_id\", \"name\", \"integration_type\", \"provider\", \"connection_type\", \"api_endpoint\", \"api_version\", \"auth_type\", \"credentials\", \"sftp_host\", \"sftp_port\", \"sftp_path\", \"file_format\", \"field_mapping\", \"sync_direction\", \"sync_frequency\", \"sync_schedule\", \"enabled\", \"connection_status\", \"last_sync_at\", \"last_sync_status\", \"records_synced_total\", \"last_sync_record_count\", \"error_c",
+    "routes": [
+      "apps/union-eyes/app/api/extensions/[id]/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42703 column \"name\" does not exist",
+      "union_eyes_system": "42P01 relation \"api_integrations\" does not exist",
+      "bare_login": "42P01 relation \"api_integrations\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"user_id\", \"email\", \"membership\", \"payment_provider\", \"stripe_customer_id\", \"stripe_subscription_id\", \"whop_user_id\", \"whop_membership_id\", \"plan_duration\", \"billing_cycle_start\", \"billing_cycle_end\", \"next_credit_renewal\", \"usage_credits\", \"used_credits\", \"status\", \"created_at\", \"updated_at\" from \"profiles\" where \"profiles\".\"user_id\" = $1 limit $2",
+    "routes": [
+      "apps/union-eyes/app/api/users/me/profile/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "OK",
+      "union_eyes_system": "42P01 relation \"profiles\" does not exist",
+      "bare_login": "42P01 relation \"profiles\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"organization_id\", \"status\", \"question_bank_version\", \"doctrine_version\", \"consent\", \"organization_context\", \"locale\", \"created_at\", \"submitted_at\", \"report_tier_id\", \"stripe_payment_ref\", \"claim_email\", \"claim_token\", \"claim_token_expires_at\", \"claimed_by_user_id\", \"claimed_org_id\", \"claimed_at\", \"utm_source\", \"utm_medium\", \"utm_campaign\", \"capability_token_hash\", \"capability_token_e",
+    "routes": [
+      "apps/union-eyes/app/api/icra/[assessmentId]/submit/route.ts#POST",
+      "apps/union-eyes/app/api/ocra/[assessmentId]/submit/route.ts#POST"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42501 permission denied for table icra_assessments",
+      "union_eyes_system": "42P01 relation \"icra_assessments\" does not exist",
+      "bare_login": "42P01 relation \"icra_assessments\" does not exist"
+    }
+  },
+  {
+    "statement": "insert into \"icra_assessments\" (\"id\", \"organization_id\", \"status\", \"question_bank_version\", \"doctrine_version\", \"consent\", \"organization_context\", \"locale\", \"created_at\", \"submitted_at\", \"report_tier_id\", \"stripe_payment_ref\", \"claim_email\", \"claim_token\", \"claim_token_expires_at\", \"claimed_by_user_id\", \"claimed_org_id\", \"claimed_at\", \"utm_source\", \"utm_medium\", \"utm_campaign\", \"capability_token_h",
+    "routes": [
+      "apps/union-eyes/app/api/icra/start/route.ts#POST",
+      "apps/union-eyes/app/api/oci/intake/route.ts#POST",
+      "apps/union-eyes/app/api/ocra/start/route.ts#POST"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42501 permission denied for table icra_assessments",
+      "union_eyes_system": "42P01 relation \"icra_assessments\" does not exist",
+      "bare_login": "42P01 relation \"icra_assessments\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"organization_id\" from \"org_subscriptions\" where \"org_subscriptions\".\"status\" = $1",
+    "routes": [
+      "apps/union-eyes/app/api/cron/billing-lifecycle/route.ts#POST"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "OK",
+      "union_eyes_system": "42P01 relation \"org_subscriptions\" does not exist",
+      "bare_login": "42P01 relation \"org_subscriptions\" does not exist"
+    }
+  },
+  {
+    "statement": "\n    SELECT organization_id::text, COUNT(*)::int AS count\n    FROM ml_predictions\n    WHERE prediction_type = 'sla_breach_risk'\n      AND created_at >= NOW() - INTERVAL '60 minutes'\n      AND predicted_value::numeric >= 0.80\n    GROUP BY organization_id\n  ",
+    "routes": [
+      "apps/union-eyes/app/api/cron/observability-alerts/route.ts#POST"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "OK",
+      "union_eyes_system": "42P01 relation \"ml_predictions\" does not exist",
+      "bare_login": "42P01 relation \"ml_predictions\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"claim_id\", \"claim_number\", \"status\", \"priority\", \"organization_id\", \"assigned_to\", \"updated_at\", \"created_at\" from \"claims\" where \"claims\".\"status\" NOT IN ('closed', 'resolved', 'rejected')",
+    "routes": [
+      "apps/union-eyes/app/api/cron/sla-watchdog/route.ts#POST"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "OK",
+      "union_eyes_system": "42P01 relation \"claims\" does not exist",
+      "bare_login": "42P01 relation \"claims\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"pilot_id\", \"organization_id\", \"enrollment_date\", \"days_active\", \"organizer_adoption_rate\", \"member_engagement_rate\", \"cases_managed\", \"avg_time_to_resolution\", \"health_score\", \"milestones\", \"last_calculated\" from \"pilot_metrics\" where \"pilot_metrics\".\"pilot_id\" = $1 order by \"pilot_metrics\".\"last_calculated\" desc limit $2",
+    "routes": [
+      "apps/union-eyes/app/api/pilot/apply/[id]/reference-profile/route.ts#POST"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "OK",
+      "union_eyes_system": "42P01 relation \"pilot_metrics\" does not exist",
+      "bare_login": "42P01 relation \"pilot_metrics\" does not exist"
+    }
+  },
+  {
+    "statement": "\n        SELECT audit_id AS id, user_id, organization_id, action,\n               resource_type, resource_id, metadata AS details, created_at\n        FROM audit_security.audit_logs\n        WHERE organization_id = $1\n        ORDER BY created_at DESC\n        LIMIT $2 OFFSET $3\n      ",
+    "routes": [
+      "apps/union-eyes/app/api/activities/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42P01 relation \"audit_security.audit_logs\" does not exist",
+      "union_eyes_system": "42P01 relation \"audit_security.audit_logs\" does not exist",
+      "bare_login": "42P01 relation \"audit_security.audit_logs\" does not exist"
+    }
+  },
+  {
+    "statement": "\n        SELECT\n          audit_id   AS id,\n          user_id    AS \"userId\",\n          organization_id AS \"organizationId\",\n          resource_id     AS \"origin\",\n          created_at      AS \"timestamp\",\n          metadata->>'model'       AS model,\n          metadata->>'dataClass'   AS \"dataClass\",\n          metadata->>'auditRefId'  AS \"auditRefId\"\n        FROM audit_security.audit_logs\n        ",
+    "routes": [
+      "apps/union-eyes/app/api/admin/ai-usage/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42P01 relation \"audit_security.audit_logs\" does not exist",
+      "union_eyes_system": "42P01 relation \"audit_security.audit_logs\" does not exist",
+      "bare_login": "42P01 relation \"audit_security.audit_logs\" does not exist"
+    }
+  },
+  {
+    "statement": "\n    SELECT\n      mdl.id,\n      mdl.amount,\n      mdl.status,\n      mdl.transaction_date AS \"transactionDate\",\n      mdl.period_start     AS \"periodStart\",\n      mdl.description,\n      mdl.user_id          AS \"userId\",\n      om.name              AS \"memberName\"\n    FROM member_dues_ledger mdl\n    LEFT JOIN organization_members om\n      ON om.user_id = mdl.user_id\n     AND om.organization_id = mdl.",
+    "routes": [
+      "apps/union-eyes/app/api/admin/dues/overview/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42883 operator does not exist: text = uuid",
+      "union_eyes_system": "42P01 relation \"member_dues_ledger\" does not exist",
+      "bare_login": "42P01 relation \"member_dues_ledger\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"organization_id\", \"source_system\", \"status\", \"total_records\", \"processed\", \"succeeded\", \"failed\", \"skipped\", \"error_summary\", \"started_at\", \"completed_at\", \"created_by\", \"created_at\", \"metadata\" from \"ingestion_batches\" where (\"ingestion_batches\".\"id\" = $1 and \"ingestion_batches\".\"organization_id\" = $2)",
+    "routes": [
+      "apps/union-eyes/app/api/admin/ingest/batches/[id]/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42P01 relation \"ingestion_batches\" does not exist",
+      "union_eyes_system": "42P01 relation \"ingestion_batches\" does not exist",
+      "bare_login": "42P01 relation \"ingestion_batches\" does not exist"
+    }
+  },
+  {
+    "statement": "select count(*) from \"ingestion_batches\" where \"ingestion_batches\".\"organization_id\" = $1",
+    "routes": [
+      "apps/union-eyes/app/api/admin/ingest/batches/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42P01 relation \"ingestion_batches\" does not exist",
+      "union_eyes_system": "42P01 relation \"ingestion_batches\" does not exist",
+      "bare_login": "42P01 relation \"ingestion_batches\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"organization_members\".\"id\", \"organization_members\".\"name\", \"organization_members\".\"email\", \"organization_members\".\"role\", \"organization_members\".\"organization_id\", \"organizations\".\"name\", \"organization_members\".\"created_at\" from \"organization_members\" left join \"organizations\" on \"organizations\".\"id\"::text = \"organization_members\".\"organization_id\" order by \"organization_members\".\"created_",
+    "routes": [
+      "apps/union-eyes/app/api/admin/stats/activity/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42883 operator does not exist: text = uuid",
+      "union_eyes_system": "42P01 relation \"organization_members\" does not exist",
+      "bare_login": "42P01 relation \"organization_members\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"organization_members\".\"id\", \"organization_members\".\"name\", \"organization_members\".\"email\", \"organization_members\".\"role\", \"organization_members\".\"organization_id\", \"organizations\".\"name\", \"organization_members\".\"status\", \"organization_members\".\"joined_at\", \"organization_members\".\"created_at\" from \"organization_members\" left join \"organizations\" on \"organizations\".\"id\"::text = \"organization",
+    "routes": [
+      "apps/union-eyes/app/api/admin/users/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42883 operator does not exist: text = uuid",
+      "union_eyes_system": "42P01 relation \"organization_members\" does not exist",
+      "bare_login": "42P01 relation \"organization_members\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"slug\", \"title\", \"organization_id\", \"organization_type\", \"category\", \"summary\", \"challenge\", \"solution\", \"outcome\", \"metrics\", \"testimonial\", \"visibility\", \"featured\", \"published_at\", \"created_at\", \"updated_at\" from \"case_studies\" order by \"case_studies\".\"created_at\" desc limit $1",
+    "routes": [
+      "apps/union-eyes/app/api/case-studies/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "OK",
+      "union_eyes_system": "42P01 relation \"case_studies\" does not exist",
+      "bare_login": "42P01 relation \"case_studies\" does not exist"
+    }
+  },
+  {
+    "statement": "\n        SELECT\n          count(*) FILTER (WHERE content_type = 'template') AS total_templates,\n          count(*) FILTER (WHERE content_type = 'template' AND status = 'published') AS published_templates,\n          count(*) FILTER (WHERE content_type = 'template' AND status = 'draft') AS draft_templates,\n          count(*) FILTER (WHERE content_type = 'template' AND status = 'review') AS review_te",
+    "routes": [
+      "apps/union-eyes/app/api/content/stats/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42703 column \"content_type\" does not exist",
+      "union_eyes_system": "42P01 relation \"cms_pages\" does not exist",
+      "bare_login": "42P01 relation \"cms_pages\" does not exist"
+    }
+  },
+  {
+    "statement": "\n      SELECT id, title, slug, meta_description, status, category,\n             content_type, file_url, file_size_mb, download_count,\n             view_count, published_at, created_by, updated_at\n      FROM cms_pages\n      WHERE organization_id = $1::uuid\n     ORDER BY updated_at DESC LIMIT $2",
+    "routes": [
+      "apps/union-eyes/app/api/content/templates/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42703 column \"category\" does not exist",
+      "union_eyes_system": "42P01 relation \"cms_pages\" does not exist",
+      "bare_login": "42P01 relation \"cms_pages\" does not exist"
+    }
+  },
+  {
+    "statement": "\n      SELECT id, course_code, course_name, course_description,\n             course_category, delivery_method, duration_hours,\n             duration_label, completion_count, is_active, is_mandatory,\n             materials_url, created_at, updated_at\n      FROM training_courses\n      WHERE organization_id = $1::uuid\n     AND is_active = true ORDER BY is_mandatory DESC, completion_count DESC",
+    "routes": [
+      "apps/union-eyes/app/api/content/training/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42703 column \"duration_label\" does not exist",
+      "union_eyes_system": "42P01 relation \"training_courses\" does not exist",
+      "bare_login": "42P01 relation \"training_courses\" does not exist"
+    }
+  },
+  {
+    "statement": "select COUNT(*), COALESCE(SUM(CASE WHEN \"transaction_type\" = 'charge' THEN \"amount\" ELSE 0 END), 0), COALESCE(SUM(CASE WHEN \"transaction_type\" = 'payment' THEN \"amount\" ELSE 0 END), 0), COALESCE(SUM(CASE WHEN \"transaction_type\" = 'credit' THEN \"amount\" ELSE 0 END), 0), COALESCE(SUM(CASE WHEN \"transaction_type\" = 'adjustment' THEN \"amount\" ELSE 0 END), 0), COALESCE(SUM(CASE WHEN \"transaction_type\" ",
+    "routes": [
+      "apps/union-eyes/app/api/dues/balance/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "OK",
+      "union_eyes_system": "42P01 relation \"member_dues_ledger\" does not exist",
+      "bare_login": "42P01 relation \"member_dues_ledger\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"user_id\", \"organization_id\", \"transaction_type\", \"transaction_date\", \"effective_date\", \"amount\", \"balance_before\", \"balance_after\", \"period_start\", \"period_end\", \"fiscal_year\", \"fiscal_month\", \"reference_type\", \"reference_id\", \"invoice_number\", \"receipt_number\", \"payment_method\", \"payment_reference\", \"description\", \"notes\", \"is_reversed\", \"reversal_id\", \"reversed_transaction_id\", \"st",
+    "routes": [
+      "apps/union-eyes/app/api/dues/payment-history/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "OK",
+      "union_eyes_system": "42P01 relation \"member_dues_ledger\" does not exist",
+      "bare_login": "42P01 relation \"member_dues_ledger\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"user_id\", \"organization_id\", \"transaction_type\", \"transaction_date\", \"effective_date\", \"amount\", \"balance_before\", \"balance_after\", \"period_start\", \"period_end\", \"fiscal_year\", \"fiscal_month\", \"reference_type\", \"reference_id\", \"invoice_number\", \"receipt_number\", \"payment_method\", \"payment_reference\", \"description\", \"notes\", \"is_reversed\", \"reversal_id\", \"reversed_transaction_id\", \"st",
+    "routes": [
+      "apps/union-eyes/app/api/dues/receipt/[id]/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "OK",
+      "union_eyes_system": "42P01 relation \"member_dues_ledger\" does not exist",
+      "bare_login": "42P01 relation \"member_dues_ledger\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"user_id\", \"organization_id\", \"tenant_id\", \"name\", \"email\", \"phone\", \"role\", \"status\", \"is_primary\", \"department\", \"location\", \"position\", \"hire_date\", \"membership_number\", \"seniority\", \"union_join_date\", \"preferred_contact_method\", \"metadata\", \"member_category\", \"exempt_from_per_capita\", \"exemption_reason\", \"exemption_approved_by\", \"exemption_approved_at\", \"search_vector\", \"created_a",
+    "routes": [
+      "apps/union-eyes/app/api/members/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42703 column \"tenant_id\" does not exist",
+      "union_eyes_system": "42P01 relation \"organization_members\" does not exist",
+      "bare_login": "42P01 relation \"organization_members\" does not exist"
+    }
+  },
+  {
+    "statement": "select \"id\", \"user_id\", \"organization_id\", \"tenant_id\", \"name\", \"email\", \"phone\", \"role\", \"status\", \"is_primary\", \"department\", \"location\", \"position\", \"hire_date\", \"membership_number\", \"seniority\", \"union_join_date\", \"preferred_contact_method\", \"metadata\", \"member_category\", \"exempt_from_per_capita\", \"exemption_reason\", \"exemption_approved_by\", \"exemption_approved_at\", \"search_vector\", \"created_a",
+    "routes": [
+      "apps/union-eyes/app/api/organizations/[id]/members/route.ts#GET"
+    ],
+    "outcome": {
+      "union_eyes_runtime": "42703 column \"tenant_id\" does not exist",
+      "union_eyes_system": "42P01 relation \"organization_members\" does not exist",
+      "bare_login": "42P01 relation \"organization_members\" does not exist"
+    }
+  }
+]

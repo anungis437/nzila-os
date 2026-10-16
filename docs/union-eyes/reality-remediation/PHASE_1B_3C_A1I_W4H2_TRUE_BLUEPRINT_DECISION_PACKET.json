@@ -1,0 +1,144 @@
+{
+  "PHASE": "PHASE_1B_3C_A1I_W4H2",
+  "summary": {
+    "TRUE_TIES_INPUT": 3,
+    "DECISION_CARDS": 3,
+    "DISTINCT_TIED_VARIANTS": 6,
+    "CURRENT_SOURCE_ALIASES": 10,
+    "UNACCOUNTED": 0,
+    "BLUEPRINTS_SELECTED": 0,
+    "HYBRID_OPTIONS": 0,
+    "PREFERENCES_INVENTED": 0,
+    "DESIGN_GROUPS_CLOSED": 123,
+    "DEFINITION_OBLIGATIONS_GOVERNED": 180
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W4H2_GATE": "PASS",
+    "PHASE_1B_3C_A1I_W4H": "BLOCKED_HUMAN_BLUEPRINT_SELECTION",
+    "W4H1": "BLOCKED_TRUE_BLUEPRINT_TIE",
+    "TRUE_BLUEPRINT_DECISIONS_PENDING": 3,
+    "CANONICAL_CONTRACT_VERSION": "1.3.1",
+    "W4F_REGENERATION": "NOT_AUTHORIZED",
+    "W4F_REGENERATION_STARTED": "NO",
+    "W4": "BLOCKED_DEFINITION_DECISIONS_PENDING",
+    "W4P": "NOT_AUTHORIZED",
+    "W5": "NOT_AUTHORIZED"
+  },
+  "PACKET": "docs/union-eyes/reality-remediation/UE_W4H2_TRUE_BLUEPRINT_HUMAN_DECISION_PACKET.json",
+  "PACKET_SHA256": "b41e782d02dfb3e8d8cb9660082ff0dd9ecd0e287f7ec2f54dc37b96452f8354",
+  "ACCOUNTED_DECISIONS": [
+    {
+      "RELATION": "public.consent_records",
+      "DESIGN_CHOICE_ID": "UE-W4F-DESIGN-71fba14faea517bb",
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-44595805fe306f09",
+      "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.consent_records.organization_id",
+      "VARIANT_IDS": ["VARIANT_A", "VARIANT_B"]
+    },
+    {
+      "RELATION": "public.automation_rules",
+      "DESIGN_CHOICE_ID": "UE-W4F-DESIGN-3fa69b01260f33dc",
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-58c31d877505428b",
+      "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.automation_rules.organization_id",
+      "VARIANT_IDS": ["VARIANT_A", "VARIANT_B"]
+    },
+    {
+      "RELATION": "public.clc_sync_log",
+      "DESIGN_CHOICE_ID": "UE-W4F-DESIGN-da0568d4d7d7857e",
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d15dd05e27f5495e",
+      "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.clc_sync_log.organization_id",
+      "VARIANT_IDS": ["VARIANT_A", "VARIANT_B"]
+    }
+  ],
+  "preservation": {
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H1_RESIDUAL_BLUEPRINT_CLOSURE.json": "20b9cbe13d06465472c389e328d8f455ad9a17ff3bff9c0e07a5a067d97c63b6",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE.json": "58df0c17be136de8ecb2e42590c637530db9bf6d4c1423c03ddb40f80c28d63a",
+    "docs/union-eyes/reality-remediation/UE_W4H_RESIDUAL_DEFINITION_DECISION_PACKET.json": "1f9af5a083dc824c2e3cfe9439487850e92c4c558e9b7451a351e8e34fa3e9b1",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4F_CANONICAL_DEFINITION_AUTHORING.json": "70a7c068648437aca9d04be3b784af16e29c084064e8fccdb06f815c9268fcc9",
+    "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS.json": "4404f6b17c63af569852d71c180923fa07a186ba7b42cdc62806e2d7c7b35a76"
+  },
+  "preservedSections": {
+    "W4H1_TWO_APPROVED_DECISIONS": "30f714f294d05c7b7693f748f5a4c61dad1388d5681988b36f5f87b28710c575",
+    "W4H_121_APPROVALS": "0b73f67269e599c71f730f9945f23f7a453a23320dfeb46fb6706c3ec3acfc4a",
+    "W4H_178_GOVERNED_OBLIGATIONS": "d8efabd5acf16e9033dd79344a08323359380575ca9c37774548d01ac836bf67",
+    "CASE_DOCUMENTS": "7202233de492c75bcc8f3693fb8b0b861d31f5e7ac580a908fffcf3afbfb4395",
+    "ALL_APPROVED_W4H_PROPERTIES": "8e7824bd58fbca883d98a8168e97c12abec98e8ec88eb50247ff07e201f59ada",
+    "ACCEPTED_UPSTREAM_COMMITMENTS": {
+      "OWNERSHIP_310": "2817037bde5da31bc9060439f3c7a40bf25c693e3bbdb6f30b83b347c17c0210",
+      "LATE_DEFINITIONS_127": "e9579bc94f23a209e7b29df01800800ae7dc5afb68e34ff1f858639a4b12b636",
+      "COMPATIBILITY_127": "d74066a581d7fde91e4f0f7d78ea8c1f1093fdda04d0ce97a3bc320f19d7e5fb",
+      "DJANGO_372": "8d105d3d8c15127f3efd465e702f50b8037502a9adfbe1a26f86372e07d1aa9c",
+      "PLAN_82": "acc8e9e24cd3aff81ee5f505464eb00bc3003290b4443c54d77c23f4b9a553af",
+      "RAW_WRAPPERS": "f3d037b202441b89585f66194c9bd99eea01123fc5b4b58ecec98062a9369d9f",
+      "W3": "483ac36f3e863f12fb7aedeff1c3ea5b5ba089158b5f55ae672d6d2faa789d36",
+      "W5_86": "bf0723dbc866f6346bb163a051e0b4397eedab11e027949ca4072f68354274b0",
+      "W6_118": "1537751d17f7be2ddb4a3528e56a5ecddc3afeafbd8c33b3029be96874a4ccf5",
+      "CANONICAL_803": "ffa17080b00c752182e6278b5b39214c3cedc22d0ee08ed0e8c0bcb0a3a70040",
+      "FROZEN_23": "5ebd2ab883f7523a36eefb0417d89a1f53d69b11ad5dc5cfe01658f4df75fab7",
+      "EXTENSIONS_AND_VECTOR": "4724ab96af71dee3ad754faf650f4ca5f281c75b5ec650cb158c3c1e573857a7"
+    }
+  },
+  "upstreamByteCommitments": {
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.json": "50bc30927199ff75307eb8b27d5c9bb4a8faa3e7fb5b600a132fe22e9cd53328",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4D_PHYSICAL_OWNERSHIP_ADJUDICATION.json": "532ad46329ee72edb98d95814d5692b5530682454c6529d0920a12c0a1bb05cc",
+    "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json": "83da528b5d3dc31cba20ca5ff66172c259582c1070c52335d94850f944506853",
+    "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": "6b4c81a8ceded4f70ae59e313656149e9c3246aa0feeee1973062d63ea8c114e",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4_PRECONSUMER_PHYSICAL_PRODUCERS.json": "28eb0d823d81c05992cf7f4b19e92f6c2120883b884d97ac69bcce279e147bf4",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE.json": "58df0c17be136de8ecb2e42590c637530db9bf6d4c1423c03ddb40f80c28d63a",
+    "docs/union-eyes/reality-remediation/UE_W4H_RESIDUAL_DEFINITION_DECISION_PACKET.json": "1f9af5a083dc824c2e3cfe9439487850e92c4c558e9b7451a351e8e34fa3e9b1",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4F_CANONICAL_DEFINITION_AUTHORING.json": "70a7c068648437aca9d04be3b784af16e29c084064e8fccdb06f815c9268fcc9",
+    "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS.json": "4404f6b17c63af569852d71c180923fa07a186ba7b42cdc62806e2d7c7b35a76"
+  },
+  "proofBoundaries": {
+    "CANONICAL_SQL_AUTHORED": 0,
+    "INACTIVE_SQL_PAYLOADS_CREATED": 0,
+    "PRODUCERS_ACTIVATED": 0,
+    "DATABASE_ROLES_PROVISIONED": "NO",
+    "ROLE_MEMBERSHIPS_APPLIED": "NO",
+    "DJANGO_SCHEMA_MATERIALIZED": "NO",
+    "PRECONSUMER_BASELINE_MATERIALIZED": "NO",
+    "PHYSICAL_PRODUCERS_EXECUTED": "NO",
+    "FAITHFUL_SCHEMA_REPLAY_PROVEN": "NO",
+    "RLS_POLICY_CORRECTNESS_RUNTIME_PROVEN": "NO",
+    "TENANT_ISOLATION_RUNTIME_PROVEN": "NO",
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO"
+  },
+  "validation": {
+    "FIXED_INPUTS_ONLY": "YES",
+    "COLUMN_DIFFS": "EXACT_NAMES;COMPARISON_ONLY",
+    "SHARED_PROPERTY_DIFFS": "ALL_COMMON_COLUMNS;EXACT_STATES_AND_VALUES",
+    "CONSTRAINT_DIFFS": "COLUMN_FACTS,LOGICAL_REFERENCES,EXACT_CALLBACK_EXPRESSIONS_AND_SOURCE",
+    "REQUIREMENTS": "FROZEN_W4H1_COVERAGE;NO_REEVALUATION_OF_CLOSED_DECISIONS",
+    "SELECTION_AND_PREFERENCE": "NONE",
+    "closeoutChecks": [
+      {
+        "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts scripts\\ue\\extract-w4h2-blueprint-packet.test.ts",
+        "RESULT": "PASS;33 tests:exact three cards/six variants/ten aliases,digests,column/shared-property/constraint diffs,accepted requirements,preservation,no preference/hybrid,determinism and unauthorized flags"
+      },
+      {
+        "COMMAND": "pnpm exec tsc --noEmit --target es2022 --module esnext --moduleResolution bundler --skipLibCheck --esModuleInterop --types node scripts\\ue\\extract-w4h2-blueprint-packet.ts scripts\\ue\\extract-w4h2-blueprint-packet.test.ts",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm exec eslint --config apps\\union-eyes\\eslint.config.mjs --max-warnings 0 scripts\\ue\\extract-w4h2-blueprint-packet.ts scripts\\ue\\extract-w4h2-blueprint-packet.test.ts",
+        "RESULT": "PASS;exit0;existing Next pages-directory diagnostic"
+      },
+      {
+        "COMMAND": "pnpm exec tsx scripts\\ue\\extract-w4h2-blueprint-packet.ts --self-test --check",
+        "RESULT": "PASS;two identical generations,four persistent output bytes,five immutable input hashes"
+      },
+      {
+        "COMMAND": "pnpm exec prettier --check scripts\\ue\\extract-w4h2-blueprint-packet.ts scripts\\ue\\extract-w4h2-blueprint-packet.test.ts docs\\union-eyes\\reality-remediation\\UE_W4H2_TRUE_BLUEPRINT_HUMAN_DECISION_PACKET.json docs\\union-eyes\\reality-remediation\\UE_W4H2_TRUE_BLUEPRINT_HUMAN_DECISION_PACKET.md docs\\union-eyes\\reality-remediation\\PHASE_1B_3C_A1I_W4H2_TRUE_BLUEPRINT_DECISION_PACKET.json docs\\union-eyes\\reality-remediation\\PHASE_1B_3C_A1I_W4H2_TRUE_BLUEPRINT_DECISION_PACKET.md",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm validate:docs",
+        "RESULT": "PASS;0 errors,1215 existing warnings,2601 files scanned"
+      },
+      {
+        "METHOD": "Independent read-only Node assertions;no import of W4H2 selection/comparison logic",
+        "RESULT": "PASS;exact three identities/decision IDs,six variants/ten aliases,source/declaration digests and column definitions,complete column/shared-property diffs,accepted coverage,2 W4H1 approvals/121 W4H groups/178 obligations/case_documents/all approved provenance section hashes,310/127/127/372/82/raw/W3/86/118/803/23 section commitments,canonical1.3.1 bytes,all fixed/transitive upstream byte commitments,packet digest,no selection/hybrid"
+      }
+    ]
+  }
+}

@@ -1,0 +1,977 @@
+{
+  "SCHEMA_VERSION": "1.0",
+  "UNION_EYES_W5_STATIC_REMEDIATION": "CLOSED_BLOCKED_TERMINAL_STATIC",
+  "PHASE_1B_3C_A1I_W5B": "BLOCKED_TERMINAL_STATIC",
+  "W5": "BLOCKED_TERMINAL_STATIC",
+  "W5_RUNTIME_EXECUTION": "NOT_AUTHORIZED",
+  "W6": "NOT_AUTHORIZED",
+  "CANONICAL_CONTRACT_VERSION": "1.3.3",
+  "STATIC_W5_REMEDIATION": "EXHAUSTED",
+  "W5_REOPEN_REQUIRES": "NEW_HUMAN_ARCHITECTURE_CHARTER",
+  "COMMAND": "RELEASED_TO_NORMAL_NZILA_OS_DELIVERY_OPERATIONS",
+  "DISPOSITION_KIND": "SUCCESSFUL_GOVERNANCE_CLOSURE_OF_UNSUCCESSFUL_W5_QUALIFICATION",
+  "ACCEPTED_BY_HUMAN": true,
+  "ACCEPTANCE_DATE": "2026-10-13",
+  "SCOPE": "W5_STATIC_BOOTSTRAP_REPLAY_QUALIFICATION_ONLY",
+  "PRODUCT_APPLICATION_ASSURANCE_FAILED": false,
+  "MEMBERSHIP_DECISION": {
+    "PROSPECTIVE_W4P_W5_MEMBERSHIP_COMPATIBILITY": "COMPLETE_NOT_EXECUTED",
+    "ORGANIZATION_IDENTIFIER_TYPE": "UUID",
+    "organization_members.organization_id": "UUID NOT NULL",
+    "member_documents.organization_id": "UUID",
+    "unique_org_membership": "UNIQUE (organization_id, user_id)",
+    "E048_BYTES_CHANGED": "NO",
+    "E048_UUID_TO_UUID_STATIC_COMPATIBILITY": "PASS"
+  },
+  "BLOCKERS": {
+    "THESE_BLOCKERS": "OUTSIDE_AUTHORIZED_MEMBERSHIP_COMPATIBILITY_CHARTER",
+    "INDEPENDENT_CONTRADICTIONS": [
+      {
+        "relation": "claims",
+        "source": "nullable UUID",
+        "W4P": "UUID NOT NULL",
+        "payloadSuffix": "77c77645b1c15c95",
+        "payloadId": "UE-W4FR4-PAYLOAD-77c77645b1c15c95",
+        "payloadSha256": "5efe7da8f093bc64c7faff5c64e5606942113de73a9e6cc6aaef74d6fa579919",
+        "sourceOrigins": [
+          {
+            "migration": "grievances::0001_initial",
+            "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+            "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+            "line": 68,
+            "table": "claims",
+            "column": "id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0001_initial",
+            "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+            "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+            "line": 68,
+            "table": "claims",
+            "column": "created_at",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0001_initial",
+            "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+            "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+            "line": 68,
+            "table": "claims",
+            "column": "updated_at",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0001_initial",
+            "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+            "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+            "line": 68,
+            "table": "claims",
+            "column": "claim_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 182,
+            "table": "claims",
+            "column": "claim_number",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 17,
+            "table": "claims",
+            "column": "ai_analysis",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 22,
+            "table": "claims",
+            "column": "ai_score",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 27,
+            "table": "claims",
+            "column": "assigned_at",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 32,
+            "table": "claims",
+            "column": "assigned_to",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 37,
+            "table": "claims",
+            "column": "attachments",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 42,
+            "table": "claims",
+            "column": "claim_amount",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 47,
+            "table": "claims",
+            "column": "claim_type",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 52,
+            "table": "claims",
+            "column": "closed_at",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 57,
+            "table": "claims",
+            "column": "complexity_score",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 62,
+            "table": "claims",
+            "column": "court_costs",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 67,
+            "table": "claims",
+            "column": "description",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 72,
+            "table": "claims",
+            "column": "desired_outcome",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 77,
+            "table": "claims",
+            "column": "filed_date",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 82,
+            "table": "claims",
+            "column": "incident_date",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 87,
+            "table": "claims",
+            "column": "is_anonymous",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 92,
+            "table": "claims",
+            "column": "legal_costs",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 97,
+            "table": "claims",
+            "column": "location",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 102,
+            "table": "claims",
+            "column": "member_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 107,
+            "table": "claims",
+            "column": "merit_confidence",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 112,
+            "table": "claims",
+            "column": "metadata",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 117,
+            "table": "claims",
+            "column": "organization_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 122,
+            "table": "claims",
+            "column": "precedent_match",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 127,
+            "table": "claims",
+            "column": "previous_report_details",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 132,
+            "table": "claims",
+            "column": "previously_reported",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 137,
+            "table": "claims",
+            "column": "priority",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 142,
+            "table": "claims",
+            "column": "progress",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 147,
+            "table": "claims",
+            "column": "resolution_outcome",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 152,
+            "table": "claims",
+            "column": "resolved_at",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 157,
+            "table": "claims",
+            "column": "settlement_amount",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 162,
+            "table": "claims",
+            "column": "status",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 167,
+            "table": "claims",
+            "column": "voice_transcriptions",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 172,
+            "table": "claims",
+            "column": "witness_details",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0002_expand_claims_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0002_expand_claims_model.py",
+            "sha256": "332cad748dabb0210376105639a277c03b0fe71a74ddc9b2685e755ff1c154ab",
+            "line": 177,
+            "table": "claims",
+            "column": "witnesses_present",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0005_claims_idempotency_hash",
+            "file": "apps/union-eyes/backend/grievances/migrations/0005_claims_idempotency_hash.py",
+            "sha256": "4f5a7dd80664b4f8d77a067fcff3cbc4308df14e69e474540bc0a944cc609de9",
+            "line": 16,
+            "table": "claims",
+            "column": "idempotency_hash",
+            "supported": true
+          }
+        ]
+      },
+      {
+        "relation": "grievances",
+        "source": "nullable UUID",
+        "W4P": "UUID NOT NULL",
+        "payloadSuffix": "c60ebc8408c112e2",
+        "payloadId": "UE-W4FR4-PAYLOAD-c60ebc8408c112e2",
+        "payloadSha256": "74d802ef7a733103d1b39444ce1aa5f8e6f7dd158d7bcac3912235afdca67291",
+        "sourceOrigins": [
+          {
+            "migration": "grievances::0001_initial",
+            "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+            "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+            "line": 184,
+            "table": "grievances",
+            "column": "id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0001_initial",
+            "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+            "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+            "line": 184,
+            "table": "grievances",
+            "column": "created_at",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0001_initial",
+            "file": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+            "sha256": "c7092f7acf52838711858bdd7b6555661a85b41f4583965b9a688f33e30fd074",
+            "line": 184,
+            "table": "grievances",
+            "column": "updated_at",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 207,
+            "table": "grievances",
+            "column": "grievance_number",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 17,
+            "table": "grievances",
+            "column": "attachments",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 22,
+            "table": "grievances",
+            "column": "background",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 27,
+            "table": "grievances",
+            "column": "cba_article",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 32,
+            "table": "grievances",
+            "column": "cba_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 37,
+            "table": "grievances",
+            "column": "cba_section",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 42,
+            "table": "grievances",
+            "column": "closed_at",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 47,
+            "table": "grievances",
+            "column": "created_by",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 52,
+            "table": "grievances",
+            "column": "description",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 57,
+            "table": "grievances",
+            "column": "desired_outcome",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 62,
+            "table": "grievances",
+            "column": "employer_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 67,
+            "table": "grievances",
+            "column": "employer_name",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 72,
+            "table": "grievances",
+            "column": "employer_rep_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 77,
+            "table": "grievances",
+            "column": "escalated_at",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 82,
+            "table": "grievances",
+            "column": "filed_date",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 87,
+            "table": "grievances",
+            "column": "grievant_email",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 92,
+            "table": "grievances",
+            "column": "grievant_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 97,
+            "table": "grievances",
+            "column": "grievant_name",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 102,
+            "table": "grievances",
+            "column": "group_grievance_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 107,
+            "table": "grievances",
+            "column": "has_legal_implications",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 112,
+            "table": "grievances",
+            "column": "incident_date",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 117,
+            "table": "grievances",
+            "column": "is_arbitration_eligible",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 122,
+            "table": "grievances",
+            "column": "is_confidential",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 127,
+            "table": "grievances",
+            "column": "is_group_grievance",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 132,
+            "table": "grievances",
+            "column": "last_updated_by",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 137,
+            "table": "grievances",
+            "column": "meeting_date",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 142,
+            "table": "grievances",
+            "column": "organization_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 147,
+            "table": "grievances",
+            "column": "priority",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 152,
+            "table": "grievances",
+            "column": "related_grievance_ids",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 157,
+            "table": "grievances",
+            "column": "resolved_at",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 162,
+            "table": "grievances",
+            "column": "response_deadline",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 167,
+            "table": "grievances",
+            "column": "status",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 172,
+            "table": "grievances",
+            "column": "step",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 177,
+            "table": "grievances",
+            "column": "timeline",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 182,
+            "table": "grievances",
+            "column": "title",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 187,
+            "table": "grievances",
+            "column": "type",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 192,
+            "table": "grievances",
+            "column": "union_rep_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 197,
+            "table": "grievances",
+            "column": "workplace_id",
+            "supported": true
+          },
+          {
+            "migration": "grievances::0003_expand_grievances_model",
+            "file": "apps/union-eyes/backend/grievances/migrations/0003_expand_grievances_model.py",
+            "sha256": "93d8b9c4caeac84e735bb4acab9060d61995bcb0249ddb1b15456897f970655b",
+            "line": 202,
+            "table": "grievances",
+            "column": "workplace_name",
+            "supported": true
+          }
+        ]
+      },
+      {
+        "relation": "security_events",
+        "source": "nullable UUID",
+        "W4P": "UUID NOT NULL",
+        "payloadSuffix": "a3706a0a965fa035",
+        "payloadId": "UE-W4FR4-PAYLOAD-a3706a0a965fa035",
+        "payloadSha256": "6c5f2c7fb377d75b02e24d4fae22326673e170c9654a5948c6798b9c1585c0a6",
+        "sourceOrigins": [
+          {
+            "migration": "core::0001_initial",
+            "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+            "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+            "line": 1228,
+            "table": "security_events",
+            "column": "id",
+            "supported": true
+          },
+          {
+            "migration": "core::0001_initial",
+            "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+            "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+            "line": 1228,
+            "table": "security_events",
+            "column": "created_at",
+            "supported": true
+          },
+          {
+            "migration": "core::0001_initial",
+            "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+            "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+            "line": 1228,
+            "table": "security_events",
+            "column": "updated_at",
+            "supported": true
+          },
+          {
+            "migration": "core::0001_initial",
+            "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+            "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+            "line": 1228,
+            "table": "security_events",
+            "column": "event_id",
+            "supported": true
+          },
+          {
+            "migration": "core::0001_initial",
+            "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+            "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+            "line": 1228,
+            "table": "security_events",
+            "column": "user_id",
+            "supported": true
+          },
+          {
+            "migration": "core::0001_initial",
+            "file": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+            "sha256": "bc373d4282c024b503bd370d79b731149c2964f5dca76db646a5fbf0b854b41a",
+            "line": 1228,
+            "table": "security_events",
+            "column": "organization_id",
+            "supported": true
+          }
+        ]
+      }
+    ],
+    "UNRESOLVED_OPERAND_SETS": [
+      {
+        "relation": "integration_configs",
+        "payloadId": "UE-W4FR4-PAYLOAD-910e4de8658e1ac1",
+        "payloadSha256": "7e33ade46ecda05c7bd0bcabffaf9711f3aefdbf482a611a76362e66d4ecda1e",
+        "reasons": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:provider"]
+      },
+      {
+        "relation": "social_accounts",
+        "payloadId": "UE-W4FR4-PAYLOAD-81d9d4ff553f38f1",
+        "payloadSha256": "156e7c5923a450a64e4f5925f6a12343cc47b98dbd8cef5b7ddc747053418535",
+        "reasons": [
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:platform",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:platform_user_id"
+        ]
+      },
+      {
+        "relation": "votes",
+        "payloadId": "UE-W4FR4-PAYLOAD-6b31483bbf5fbc3a",
+        "payloadSha256": "6206d88a106355162cff9e4b40e9cf2e1702073b59c3d4dd0ccf1d7db40233c7",
+        "reasons": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:voter_id"]
+      },
+      {
+        "relation": "ml_predictions",
+        "payloadId": "UE-W4FR4-PAYLOAD-31142c169a9dd3d9",
+        "payloadSha256": "712b48ef6e93afe0364ff5f971b819daede7b0fd0d861f023cc5b80ccdcc9a5c",
+        "reasons": [
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:prediction_type",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:prediction_date",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:horizon"
+        ]
+      },
+      {
+        "relation": "cms_pages",
+        "payloadId": "UE-W4FR4-PAYLOAD-116714fb92f94f71",
+        "payloadSha256": "cfb98915e8119adee4dde4173caf00527d9c7bddbccd718337e0ddded9ff4ee2",
+        "reasons": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:slug"]
+      },
+      {
+        "relation": "model_metadata",
+        "payloadId": "UE-W4FR4-PAYLOAD-ac42c3588bfcf034",
+        "payloadSha256": "04f8bd19e036f91079156ab1f8b7b8d02dfe892505632ab91d7d226b5d960007",
+        "reasons": [
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:model_type",
+          "MATERIALIZED_CONSTRAINT_OPERAND_MISSING:version"
+        ]
+      },
+      {
+        "relation": "donation_campaigns",
+        "payloadId": "UE-W4FR4-PAYLOAD-6d3e5e5b1404436e",
+        "payloadSha256": "847e9f7b058aeeeafaed8c3b8980f7fd7d383c099696074fe041bc41ad2658b2",
+        "reasons": ["MATERIALIZED_CONSTRAINT_OPERAND_MISSING:slug"]
+      }
+    ]
+  },
+  "W4P_CENSUS": {
+    "TOTAL_W4P_PAYLOADS": 162,
+    "ABSENT": 114,
+    "MATCHING": 38,
+    "DRIFTED": 3,
+    "MISSING_PRECONDITIONS": 7,
+    "THIS_IS_NOT_A_VERIFIED_W4P_CATALOG": true
+  },
+  "FIRST_PROSPECTIVE_PROMOTION_DENIAL": {
+    "payload": "116714fb92f94f71",
+    "missingPrerequisite": "cms_pages.slug",
+    "rollback": "PASS"
+  },
+  "QUALIFICATION_CEILING": {
+    "FULL_W4P_COMPATIBILITY": "NOT_PROVEN",
+    "OPERATIONAL_W5_NODES": "0 / 106",
+    "TOTAL_W5_NODES": "0 / 107",
+    "ORIGINAL_BOUNDARIES": "0 / 23",
+    "BOUNDARY_EFFECTS": "0 / 762",
+    "FRESH_REPLAY": "NOT_RUN",
+    "REPLAY_NOOP": "NOT_PROVEN",
+    "WHOLE_GRAPH_ROLLBACK": "NOT_PROVEN"
+  },
+  "RECORDED_VALIDATION": {
+    "REPLAY_TESTS_PASS": 7277,
+    "HISTORICAL_CANONICAL_TEXT_ACCEPTANCE": "FAIL_EXPECTED_PRESERVED_CONTRADICTION",
+    "W5_GOVERNANCE_TESTS_PASS": 211,
+    "W4_PREDECESSOR_TESTS_PASS": 1104,
+    "W4FR4_TESTS_PASS": 237,
+    "G3_TERMINAL_TESTS_PASS": 116,
+    "SKIPPED_TESTS_IN_FINAL_RECORDED_RUNS": 0,
+    "STRICT_TYPES": "PASS",
+    "ZERO_WARNING_LINT": "PASS",
+    "FORMATTING": "PASS",
+    "DETERMINISTIC_GENERATION": "PASS",
+    "DOCUMENTATION_VALIDATION": "PASS",
+    "BASIS": "PRESERVED_RECORDED_RUNS_NOT_NEW_FULL_QUALIFICATION"
+  },
+  "PROOF_BOUNDARIES": {
+    "DATABASE_CONNECTIONS": 0,
+    "DATABASE_SQL_EXECUTED": 0,
+    "LIVE_W4P_EXECUTION": "NO",
+    "LIVE_COMPATIBILITY_OVERLAY_EXECUTION": "NO",
+    "LIVE_PARENT_KEY_SUPPLEMENT_EXECUTION": "NO",
+    "LIVE_W5_EXECUTION": "NO",
+    "PRODUCTION_MUTATIONS": 0,
+    "PR_CREATED": "NO",
+    "MERGED": "NO",
+    "DEPLOYED": "NO",
+    "W6_STARTED": "NO",
+    "G3_REOPENED": "NO"
+  },
+  "FROZEN_DENOMINATORS": {
+    "NODES": 107,
+    "EDGES": 231,
+    "COMPATIBILITY_RECORDS": 127,
+    "HANDOFF_RECORDS": 86,
+    "DEFERRED_CONSTRAINTS": 7,
+    "UNRESOLVED_DOWNSTREAM_OPERANDS": 9
+  },
+  "E048": {
+    "EFFECT_ID": "UE-W5A-MIGRATION-d264f77905daf432:E048",
+    "SOURCE_FILE": "apps/union-eyes/db/migrations-cache/0010_tenant_isolation_rls_foundation.sql",
+    "SOURCE_SHA256": "32f8b632fb11db40437bd9d9f063e30a7ff54fe7ecdeb938736697e685d6775b",
+    "SOURCE_BYTES_CHANGED": false,
+    "ASSIGNMENT_TYPES_AFTER_MEMBERSHIP_OVERLAY": "pg_catalog.uuid -> pg_catalog.uuid",
+    "ISOLATED_NATIVE_ASSIGNMENT": "TYPE_COMPATIBLE_NOT_FULL_BOUNDARY_PROOF",
+    "CANONICAL_W4P_GUARDED_FK": "NOT_PROVEN; existing UUID member_documents column causes guarded ADD COLUMN to skip its inline FK",
+    "FULL_BOUNDARY_POSTCONDITION": "NOT_PROVEN",
+    "FULL_FROZEN_SOURCE_SHA256": "9bfd46947d9d25539b32e72edccea1c1862c6c4f2c46bac2ae10a0a228ee75f5",
+    "LEDGER_EFFECT_PRESENT": true,
+    "EXACT_SOURCE_BYTE_RANGE": [10097, 11905]
+  },
+  "GRAPH_DIGEST": "efce59eaa5d82056dfcc66f11b89d5f1a30b8c642fc5d11ab29d3f67e2905a07",
+  "EDGES_DIGEST": "e91e37e280840bf35ed03014feb25ccfa915bc6b9a3e124169a1192ef51a9f89",
+  "PRESERVATION_MANIFEST": "docs/union-eyes/reality-remediation/UE_W5_TERMINAL_STATIC_PRESERVATION.json",
+  "PRESERVATION_DIGEST": "d33ed962a3abc85fe0ca45e6c2a1343c870d2748e9d69ed563ed618f5dad7f43",
+  "REOPENING_RULE": "New human architecture mission must address broader nullable-ID semantics and missing producer ownership; not a continuation of W5B or another compatibility iteration.",
+  "GOVERNANCE_INDEX": "docs/union-eyes/PHASE_1_AUTHORITATIVE_INDEXES.md"
+}

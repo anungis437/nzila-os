@@ -1,0 +1,131 @@
+{
+  "contractVersion": "2.0",
+  "acceptanceVerdict": "FAIL",
+  "finalCoherentCandidate": "NOT_QUALIFIED",
+  "blockers": [],
+  "supersession": {
+    "disposition": "PRIOR_IRREDUCIBLE_AUTHORITY_CLAIM_DISPROVEN",
+    "evidence": "artifacts/ue-v2-durable-custody-tests.json",
+    "observed": "39/39 tests passed across four files, zero failures/skips: real Azure SDK against owned TLS vault/identity protocol fixture, durable wrapped data keys, process-restart and pre/post-rotation decryption, re-encryption decisions after restart, tamper, legacy-envelope, foreign-vault, revoked-identity and untrusted-TLS denial",
+    "sourceDigest": "0e7d048a2c0ccbe801210531a126e0913a5f368d93a8c23179f71715440c4847",
+    "custodyObservations": {
+      "acceptedIdentities": 2,
+      "wrappedDataKeys": 2,
+      "unwrappedDataKeys": 6,
+      "keyRotations": 1,
+      "ownedIdentityExited": true,
+      "ownedVaultExited": true,
+      "ownedStateRemoved": true
+    },
+    "productionCustody": "Production provisioning remains an external gate; no Azure or external secret store was accessed",
+    "wholeAcceptance": "Not qualified: full caller, financial scope, authenticated HTTP smoke and coherent regression remain internal work"
+  },
+  "historicalRejectedBlockers": [
+    {
+      "id": "UE_V2_PRODUCTION_CREDENTIAL_KEY_AUTHORITY",
+      "kind": "PRODUCT_OWNER_AUTHORITY_CONTRADICTION",
+      "sourcePath": "apps/union-eyes/lib/encryption.ts",
+      "sourceDigest": "dce36b1ec4db0d0d4bfd860920272abb914acfd5c0744fb16a8ff77bfa4486a2",
+      "sourceLines": [120, 251],
+      "caller": {
+        "path": "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
+        "sourceDigest": "378d9419d5b23e7b84bfea01b06e7f43ba656bff88ff00e8840f594dee31ae6c",
+        "entrypoint": "POST /api/enterprise/sso/providers",
+        "branch": "Non-empty oidcClientSecret invokes encryptSecret before db.insert(ssoProviders)",
+        "encryptionCallLine": 93,
+        "mutationLine": 97,
+        "httpExecution": "NOT_EXECUTED"
+      },
+      "actor": {
+        "requiredRole": "Organization admin or higher",
+        "requiredContext": "Authenticated canonical user and live authorized organization context",
+        "attribution": "organizationId and createdBy are taken from authenticated handler context",
+        "qualification": "Source-derived required actor, not an executed production HTTP actor proof"
+      },
+      "databaseScope": {
+        "scope": "Operational Union Eyes database, not the standalone financial database",
+        "table": "public.sso_providers",
+        "operation": "INSERT",
+        "protectedField": "oidc_client_secret"
+      },
+      "expectedAuthority": {
+        "keyAuthority": "Production EncryptionService requires Azure Key Vault and DefaultAzureCredential; environment/test fallback keys are forbidden",
+        "writeAuthority": "Authorized organization admin; ciphertext must be produced before an attributed operational INSERT",
+        "immutableHarnessRestrictions": [
+          "No Azure access",
+          "NO_EXTERNAL_SECRET_STORE",
+          "EXTERNAL_CONNECTION_TARGETS = 0",
+          "Do not disable a mandatory security control merely to start"
+        ]
+      },
+      "observedBehavior": {
+        "actualSourceFunction": "encryptSecret",
+        "nodeEnvironment": "production",
+        "withoutVault": "REFUSED",
+        "withSyntheticEnvironmentFallback": "REFUSED",
+        "observedError": "Azure Key Vault initialization failed in production environment. Please verify AZURE_KEY_VAULT_URL and Azure credentials are configured correctly.",
+        "encryptionRuntimeEvidence": [
+          "artifacts/ue-v2-production-key-authority-absent.json",
+          "artifacts/ue-v2-production-key-authority-fallback-refused.json"
+        ],
+        "callerUnitBehavior": "Encryption rejection prevents db.insert; this assertion uses isolated route unit dependencies and is not native HTTP qualification",
+        "sourceTest": "apps/union-eyes/scripts/bootstrap-v2/production-key-authority.test.ts",
+        "sourceTestDigest": "4bdbeee54522cffcbdf72387f66c89b59003fa25a188a8941b80418a3ddcbd34",
+        "testReport": "artifacts/ue-v2-production-key-authority-and-caller-tests.json",
+        "testReportDigest": "411956245367d1ed91b3092584e790f543194b997fe977c72f2b58ec48ba8930",
+        "tests": {
+          "passed": 18,
+          "failed": 0,
+          "skipped": 0,
+          "files": 3,
+          "scope": "Production encryption refusal, source caller regression and Node transport boundary only"
+        }
+      },
+      "whyLocalImplementationCannotSafelyFix": "The current authoritative production implementation provides only an Azure key authority. Enabling its development fallback, changing NODE_ENV, mocking its SDK, or disabling credential encryption would change a mandatory control and cannot qualify this encrypted mutation. A local service claiming Azure authority without an approved key-custody/identity contract cannot establish the expected production authority. Selecting and adding a different production key authority requires policy and custody semantics that cannot be inferred from the existing implementation.",
+      "requiredProductOwnerDecision": "Approve a specifically defined non-Azure production-grade key-authority backend and its local qualification contract, including authenticated key access, durable custody, key-version persistence/decryption, rotation, audit, and scope separation. Preserve the existing production no-fallback rule; do not authorize a harness-only bypass or exclude the active encrypted caller.",
+      "localEngineeringClosure": {
+        "fixed": "The SSO POST handler now uses withApi's already-parsed body instead of consuming the request body a second time",
+        "validation": [
+          {
+            "command": "pnpm --dir apps\\union-eyes exec vitest run scripts\\bootstrap-v2\\next-acceptance.test.ts scripts\\bootstrap-v2\\production-key-authority.test.ts app\\api\\enterprise\\sso\\providers\\__tests__\\route.test.ts --reporter=default --reporter=json --outputFile=..\\..\\artifacts\\ue-v2-production-key-authority-and-caller-tests.json",
+            "result": "PASS: 18/18 tests, 3 files, 0 skips"
+          },
+          {
+            "command": "pnpm --dir apps\\union-eyes typecheck",
+            "result": "PASS"
+          },
+          {
+            "command": "pnpm --dir apps\\union-eyes exec tsc --project scripts\\bootstrap-v2\\application-typecheck.json --incremental false",
+            "result": "PASS"
+          },
+          {
+            "command": "pnpm --dir apps\\union-eyes exec eslint scripts\\bootstrap-v2\\next-acceptance.ts scripts\\bootstrap-v2\\next-acceptance.test.ts scripts\\bootstrap-v2\\next-network-boundary.cjs scripts\\bootstrap-v2\\production-key-authority.test.ts app\\api\\enterprise\\sso\\providers\\route.ts app\\api\\enterprise\\sso\\providers\\__tests__\\route.test.ts --max-warnings 0",
+            "result": "PASS: zero warnings"
+          },
+          {
+            "command": "pnpm validate:docs",
+            "result": "PASS: 2657 files, 0 errors, 1218 warnings, 1704 informational findings"
+          }
+        ]
+      }
+    }
+  ],
+  "historicalProductionAttempt": {
+    "receipt": "artifacts/ue-v2-next-receipt-692b860b-c466-427a-a137-3f5d4d80fd19.json",
+    "sourceSnapshotDigest": "4194f878c31acde62fbb54f8903cad09f150ad068578bb32f9ac4a9f1519950c",
+    "buildArtifactDigest": "d299b9ef4464d1c433e93890bbb3a333a3835beda23ca2be82ef58dab8fedcd9",
+    "buildExitCode": 0,
+    "nextReadyLogObserved": true,
+    "httpProbe": "Timed out at 10 seconds; no successful HTTP response was qualified",
+    "acceptanceVerdict": "FAIL",
+    "warningQualification": "Incomplete",
+    "observedExternalTargetCount": "NOT_MEASURED_BY_THIS_ATTEMPT",
+    "transferToCurrentSourcePermitted": false
+  },
+  "limitations": [
+    "This is a specific authority blocker report, not the complete mutating caller inventory, actor map, financial scope authority or final acceptance receipt.",
+    "No completed full caller, financial, HTTP smoke, full-regression or final coherent source-digest qualification is claimed.",
+    "The saved 6a3117864a1f5cccdc5aaff05ad7ad087e98ab2de3bbd65eabd445de291ea823 plan and prior native proofs are historical; modified acceptance configuration/source require regeneration and rerunning.",
+    "Node transport observations are not OS-level confinement of native binaries or arbitrary child executables."
+  ]
+}

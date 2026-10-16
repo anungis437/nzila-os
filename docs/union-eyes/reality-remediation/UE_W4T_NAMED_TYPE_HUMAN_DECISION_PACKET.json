@@ -1,0 +1,467 @@
+{
+  "PHASE": "PHASE_1B_3C_A1I_W4T",
+  "HELD_TYPE_IDENTITIES": 4,
+  "residual": [
+    {
+      "CANONICAL_TYPE_IDENTITY": "public.fee_adjustment_type",
+      "TYPE_REFERENCE_EVIDENCE": [
+        {
+          "PROPERTY": "POSTGRES_TYPE",
+          "VALUE": "fee_adjustment_type",
+          "PROVENANCE": "EXACT_DECLARATION",
+          "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+              "DIGEST": "5867dc989fbb04bd71315cb4c70ca9859f75145ace86f353443ab291eb413594",
+              "RANGE": [190, 210],
+              "COLUMN_EXPRESSION_DIGEST": "9830836ecaf5611df7f94443a3cf08719549bbd066b6e5bf160517a314780327"
+            },
+            {
+              "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+              "DIGEST": "4f08ae3eca1249f8a50d64b535b6a1205bb31ec5724685153b4819a24805d9eb",
+              "RANGE": [154, 166],
+              "COLUMN_EXPRESSION_DIGEST": "b5fa67d6906e24997496105a052925fc94bca09dfb0f00f7fb594c6d8e17ad10"
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+          "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+        }
+      ],
+      "WHY_DEFINITION_IS_INCOMPLETE_OR_CONFLICTING": "HOLD_DEFINITION_CONFLICT",
+      "AVAILABLE_DEFINITION_CANDIDATES": [
+        {
+          "SCHEMA_NAME": "public",
+          "TYPE_NAME": "fee_adjustment_type",
+          "TYPE_KIND": "ENUM",
+          "ORDERED_ENUM_MEMBERS": ["reversal", "waiver", "correction", "dispute_credit"],
+          "DEFINITION_COMPLETE": true,
+          "MISSING_PHYSICAL_FACTS": [],
+          "SOURCE_FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+          "SOURCE_SHA256": "2fad4d827cd20b6faaf38631eed2e3d113fc9cb2027f2548bd99eb6d431a7f47",
+          "SOURCE_RANGE": [34, 34],
+          "DEFINITION_DIGEST": "ae8565585299ce6500ca416e4f609112f0c821b27e408181b66d6432d3dbb90e",
+          "EXACT_DEFINITION_TEXT": "CREATE TYPE fee_adjustment_type AS ENUM ('reversal','waiver','correction','dispute_credit');",
+          "SYMBOL": null,
+          "EVIDENCE_CLASS": "HISTORICAL"
+        },
+        {
+          "SCHEMA_NAME": "public",
+          "TYPE_NAME": "fee_adjustment_type",
+          "TYPE_KIND": "ENUM",
+          "ORDERED_ENUM_MEMBERS": [
+            "reversal",
+            "partial_reversal",
+            "waiver",
+            "correction",
+            "dispute_credit"
+          ],
+          "DEFINITION_COMPLETE": true,
+          "MISSING_PHYSICAL_FACTS": [],
+          "SOURCE_FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+          "SOURCE_SHA256": "e2f48c802f99e2b946610cbcc565b7049b66869a11a25b1985905d68f93102db",
+          "SOURCE_RANGE": [58, 64],
+          "DEFINITION_DIGEST": "a337b4b00db92bdf1e9b21b12164bd8b8aff9625ecf59c723aede9ba24854c91",
+          "EXACT_DEFINITION_TEXT": "feeAdjustmentTypeEnum = pgEnum('fee_adjustment_type', [\n  'reversal',\n  'partial_reversal',\n  'waiver',\n  'correction',\n  'dispute_credit',\n])",
+          "SYMBOL": "feeAdjustmentTypeEnum",
+          "EVIDENCE_CLASS": "CURRENT"
+        }
+      ],
+      "MISSING_PHYSICAL_FACTS": [
+        "Human selection of one exact ordered enum definition;current and historical members differ"
+      ],
+      "CONSUMER_RELATIONS": ["public.fee_adjustments"],
+      "CONSUMER_COLUMNS": [
+        {
+          "RELATION": "public.fee_adjustments",
+          "COLUMN": "adjustment_type",
+          "REFERENCE_ID": "UE-W4T-REFERENCE-1cc366e76fb3e62b"
+        }
+      ],
+      "OWNERSHIP_STATUS": "PLATFORM_BASELINE_GOVERNANCE_ADOPTED",
+      "OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "MINIMUM_HUMAN_DECISION_REQUIRED": "Select the canonical exact ordered member list from the enumerated candidates;do not revisit settled prospective ownership"
+    },
+    {
+      "CANONICAL_TYPE_IDENTITY": "public.ledger_event_type",
+      "TYPE_REFERENCE_EVIDENCE": [
+        {
+          "PROPERTY": "POSTGRES_TYPE",
+          "VALUE": "ledger_event_type",
+          "PROVENANCE": "EXACT_DECLARATION",
+          "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+              "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+              "RANGE": [89, 141],
+              "COLUMN_EXPRESSION_DIGEST": "1f41bc8f42218c3887ff75aa706f5a19e1543fa09d2563d17f2461088e193db9"
+            },
+            {
+              "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+              "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+              "RANGE": [3229, 3253],
+              "COLUMN_EXPRESSION_DIGEST": "40a42dbd6ccd7385448a22ac4cbf188ad21bfe14ac95ca71f58a92018a6fd5e2"
+            },
+            {
+              "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+              "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+              "RANGE": [258, 282],
+              "COLUMN_EXPRESSION_DIGEST": "40a42dbd6ccd7385448a22ac4cbf188ad21bfe14ac95ca71f58a92018a6fd5e2"
+            },
+            {
+              "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+              "DIGEST": "7b82e0771dd6c738f1806b367de8aecd48dbab6d9aa270865738c6c934f0a7cc",
+              "RANGE": [276, 314],
+              "COLUMN_EXPRESSION_DIGEST": "f5b6cc62d1a32fec14a08a42c3d967f6c3a396e82e1ee4af053dc547c0e99b88"
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+          "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+        }
+      ],
+      "WHY_DEFINITION_IS_INCOMPLETE_OR_CONFLICTING": "HOLD_DEFINITION_CONFLICT",
+      "AVAILABLE_DEFINITION_CANDIDATES": [
+        {
+          "SCHEMA_NAME": "public",
+          "TYPE_NAME": "ledger_event_type",
+          "TYPE_KIND": "ENUM",
+          "ORDERED_ENUM_MEMBERS": [
+            "invoice_generated",
+            "payment_received",
+            "allocation_run",
+            "adjustment_posted",
+            "credit_applied",
+            "subsidy_applied",
+            "writeoff_posted",
+            "period_closed",
+            "reversal"
+          ],
+          "DEFINITION_COMPLETE": true,
+          "MISSING_PHYSICAL_FACTS": [],
+          "SOURCE_FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+          "SOURCE_SHA256": "bd0e7ce522c7e0d9706b6d10d3e27bf5b93e874024c13eadb5e03c93efce5faa",
+          "SOURCE_RANGE": [98, 98],
+          "DEFINITION_DIGEST": "4139f1de83d4f10edfd4d28513427a655791768f761ebc4d042aaa031a9d5f37",
+          "EXACT_DEFINITION_TEXT": "CREATE TYPE \"public\".\"ledger_event_type\" AS ENUM('invoice_generated', 'payment_received', 'allocation_run', 'adjustment_posted', 'credit_applied', 'subsidy_applied', 'writeoff_posted', 'period_closed', 'reversal');",
+          "SYMBOL": null,
+          "EVIDENCE_CLASS": "HISTORICAL"
+        },
+        {
+          "SCHEMA_NAME": "public",
+          "TYPE_NAME": "ledger_event_type",
+          "TYPE_KIND": "ENUM",
+          "ORDERED_ENUM_MEMBERS": [
+            "invoice_generated",
+            "payment_received",
+            "allocation_run",
+            "adjustment_posted",
+            "credit_applied",
+            "subsidy_applied",
+            "writeoff_posted",
+            "period_closed",
+            "reversal"
+          ],
+          "DEFINITION_COMPLETE": true,
+          "MISSING_PHYSICAL_FACTS": [],
+          "SOURCE_FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+          "SOURCE_SHA256": "b33d837b48798f1237423516f5d7e402becac4b0d48cdffc3d2201e184bc111b",
+          "SOURCE_RANGE": [48, 48],
+          "DEFINITION_DIGEST": "d7e0352e30dc79bdf0f26aa1158b7284e1e01febdf6e368562ce0fee66b0f8f4",
+          "EXACT_DEFINITION_TEXT": "CREATE TYPE ledger_event_type AS ENUM ('invoice_generated','payment_received','allocation_run','adjustment_posted','credit_applied','subsidy_applied','writeoff_posted','period_closed','reversal');",
+          "SYMBOL": null,
+          "EVIDENCE_CLASS": "HISTORICAL"
+        },
+        {
+          "SCHEMA_NAME": "public",
+          "TYPE_NAME": "ledger_event_type",
+          "TYPE_KIND": "ENUM",
+          "ORDERED_ENUM_MEMBERS": [
+            "invoice_generated",
+            "payment_received",
+            "allocation_run",
+            "adjustment_posted",
+            "credit_applied",
+            "subsidy_applied",
+            "writeoff_posted",
+            "period_closed",
+            "reversal",
+            "fee_captured",
+            "settlement_closed"
+          ],
+          "DEFINITION_COMPLETE": true,
+          "MISSING_PHYSICAL_FACTS": [],
+          "SOURCE_FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+          "SOURCE_SHA256": "b12c79c10cf7461b52d3ccace7869e455b0b42574119ef30a30c5bc952f247ac",
+          "SOURCE_RANGE": [41, 53],
+          "DEFINITION_DIGEST": "b98fa32da24b6057c6f3e53a1534cea530b36ae242cff3ea6dc9af954c2a18b2",
+          "EXACT_DEFINITION_TEXT": "ledgerEventTypeEnum = pgEnum('ledger_event_type', [\n  'invoice_generated',\n  'payment_received',\n  'allocation_run',\n  'adjustment_posted',\n  'credit_applied',\n  'subsidy_applied',\n  'writeoff_posted',\n  'period_closed',\n  'reversal',\n  'fee_captured',\n  'settlement_closed',\n])",
+          "SYMBOL": "ledgerEventTypeEnum",
+          "EVIDENCE_CLASS": "CURRENT"
+        }
+      ],
+      "MISSING_PHYSICAL_FACTS": [
+        "Human selection of one exact ordered enum definition;current and historical members differ"
+      ],
+      "CONSUMER_RELATIONS": ["public.platform_cost_ledger_entries"],
+      "CONSUMER_COLUMNS": [
+        {
+          "RELATION": "public.platform_cost_ledger_entries",
+          "COLUMN": "event_type",
+          "REFERENCE_ID": "UE-W4T-REFERENCE-4f3121ed14775bcd"
+        }
+      ],
+      "OWNERSHIP_STATUS": "PLATFORM_BASELINE_GOVERNANCE_ADOPTED",
+      "OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "MINIMUM_HUMAN_DECISION_REQUIRED": "Select the canonical exact ordered member list from the enumerated candidates;do not revisit settled prospective ownership"
+    },
+    {
+      "CANONICAL_TYPE_IDENTITY": "public.ledger_source_type",
+      "TYPE_REFERENCE_EVIDENCE": [
+        {
+          "PROPERTY": "POSTGRES_TYPE",
+          "VALUE": "ledger_source_type",
+          "PROVENANCE": "EXACT_DECLARATION",
+          "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+              "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+              "RANGE": [89, 141],
+              "COLUMN_EXPRESSION_DIGEST": "f6afd1cb291c050fbe943cabf3a65e616656a87eb947997c03128b1cf53935a5"
+            },
+            {
+              "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+              "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+              "RANGE": [3229, 3253],
+              "COLUMN_EXPRESSION_DIGEST": "372df8bb6e2fb410d0c0f448f6c52839c8b89c7d3ae6d7402ebdf56fe5f976b1"
+            },
+            {
+              "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+              "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+              "RANGE": [258, 282],
+              "COLUMN_EXPRESSION_DIGEST": "372df8bb6e2fb410d0c0f448f6c52839c8b89c7d3ae6d7402ebdf56fe5f976b1"
+            },
+            {
+              "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+              "DIGEST": "7b82e0771dd6c738f1806b367de8aecd48dbab6d9aa270865738c6c934f0a7cc",
+              "RANGE": [276, 314],
+              "COLUMN_EXPRESSION_DIGEST": "ccd8bcecc45b5e6860e5fd3b0d68accf6b6045bcf162b374aaae8f16a94153d2"
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+          "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+        }
+      ],
+      "WHY_DEFINITION_IS_INCOMPLETE_OR_CONFLICTING": "HOLD_DEFINITION_CONFLICT",
+      "AVAILABLE_DEFINITION_CANDIDATES": [
+        {
+          "SCHEMA_NAME": "public",
+          "TYPE_NAME": "ledger_source_type",
+          "TYPE_KIND": "ENUM",
+          "ORDERED_ENUM_MEMBERS": [
+            "subscription",
+            "invoice",
+            "payment",
+            "adjustment",
+            "allocation",
+            "manual",
+            "system"
+          ],
+          "DEFINITION_COMPLETE": true,
+          "MISSING_PHYSICAL_FACTS": [],
+          "SOURCE_FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+          "SOURCE_SHA256": "bd0e7ce522c7e0d9706b6d10d3e27bf5b93e874024c13eadb5e03c93efce5faa",
+          "SOURCE_RANGE": [99, 99],
+          "DEFINITION_DIGEST": "10d88a66ae766dfb7a120fdf93629215dead0f22f6c8f53c04eb0db8a72fe636",
+          "EXACT_DEFINITION_TEXT": "CREATE TYPE \"public\".\"ledger_source_type\" AS ENUM('subscription', 'invoice', 'payment', 'adjustment', 'allocation', 'manual', 'system');",
+          "SYMBOL": null,
+          "EVIDENCE_CLASS": "HISTORICAL"
+        },
+        {
+          "SCHEMA_NAME": "public",
+          "TYPE_NAME": "ledger_source_type",
+          "TYPE_KIND": "ENUM",
+          "ORDERED_ENUM_MEMBERS": [
+            "subscription",
+            "invoice",
+            "payment",
+            "adjustment",
+            "allocation",
+            "manual",
+            "system"
+          ],
+          "DEFINITION_COMPLETE": true,
+          "MISSING_PHYSICAL_FACTS": [],
+          "SOURCE_FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+          "SOURCE_SHA256": "b33d837b48798f1237423516f5d7e402becac4b0d48cdffc3d2201e184bc111b",
+          "SOURCE_RANGE": [52, 52],
+          "DEFINITION_DIGEST": "2c1c6c924de54a82e999367a111a40590137e3e7a68bdffe76b0890927226e9a",
+          "EXACT_DEFINITION_TEXT": "CREATE TYPE ledger_source_type AS ENUM ('subscription','invoice','payment','adjustment','allocation','manual','system');",
+          "SYMBOL": null,
+          "EVIDENCE_CLASS": "HISTORICAL"
+        },
+        {
+          "SCHEMA_NAME": "public",
+          "TYPE_NAME": "ledger_source_type",
+          "TYPE_KIND": "ENUM",
+          "ORDERED_ENUM_MEMBERS": [
+            "subscription",
+            "invoice",
+            "payment",
+            "adjustment",
+            "allocation",
+            "manual",
+            "system",
+            "transaction_fee",
+            "settlement_batch"
+          ],
+          "DEFINITION_COMPLETE": true,
+          "MISSING_PHYSICAL_FACTS": [],
+          "SOURCE_FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+          "SOURCE_SHA256": "b12c79c10cf7461b52d3ccace7869e455b0b42574119ef30a30c5bc952f247ac",
+          "SOURCE_RANGE": [55, 65],
+          "DEFINITION_DIGEST": "d8d6be25d6aa292745e5a08c7276554f6e92551d4f21956d0002db3b22e6d66b",
+          "EXACT_DEFINITION_TEXT": "ledgerSourceTypeEnum = pgEnum('ledger_source_type', [\n  'subscription',\n  'invoice',\n  'payment',\n  'adjustment',\n  'allocation',\n  'manual',\n  'system',\n  'transaction_fee',\n  'settlement_batch',\n])",
+          "SYMBOL": "ledgerSourceTypeEnum",
+          "EVIDENCE_CLASS": "CURRENT"
+        }
+      ],
+      "MISSING_PHYSICAL_FACTS": [
+        "Human selection of one exact ordered enum definition;current and historical members differ"
+      ],
+      "CONSUMER_RELATIONS": ["public.platform_cost_ledger_entries"],
+      "CONSUMER_COLUMNS": [
+        {
+          "RELATION": "public.platform_cost_ledger_entries",
+          "COLUMN": "source_type",
+          "REFERENCE_ID": "UE-W4T-REFERENCE-a74e0d81bd09fa2e"
+        }
+      ],
+      "OWNERSHIP_STATUS": "PLATFORM_BASELINE_GOVERNANCE_ADOPTED",
+      "OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "MINIMUM_HUMAN_DECISION_REQUIRED": "Select the canonical exact ordered member list from the enumerated candidates;do not revisit settled prospective ownership"
+    },
+    {
+      "CANONICAL_TYPE_IDENTITY": "public.platform_cost_type",
+      "TYPE_REFERENCE_EVIDENCE": [
+        {
+          "PROPERTY": "POSTGRES_TYPE",
+          "VALUE": "platform_cost_type",
+          "PROVENANCE": "EXACT_DECLARATION",
+          "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+              "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+              "RANGE": [89, 141],
+              "COLUMN_EXPRESSION_DIGEST": "731286bd0624a2b46ad26f5b0a7289e93ee48a9264463bfd85c6850ffeca7d43"
+            },
+            {
+              "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+              "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+              "RANGE": [3229, 3253],
+              "COLUMN_EXPRESSION_DIGEST": "db1d3de1cb508c01f91bf34d5d569cb15d5f1e85b8d98f3fc32ab7179ea21b72"
+            },
+            {
+              "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+              "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+              "RANGE": [258, 282],
+              "COLUMN_EXPRESSION_DIGEST": "db1d3de1cb508c01f91bf34d5d569cb15d5f1e85b8d98f3fc32ab7179ea21b72"
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+          "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+        }
+      ],
+      "WHY_DEFINITION_IS_INCOMPLETE_OR_CONFLICTING": "HOLD_DEFINITION_CONFLICT",
+      "AVAILABLE_DEFINITION_CANDIDATES": [
+        {
+          "SCHEMA_NAME": "public",
+          "TYPE_NAME": "platform_cost_type",
+          "TYPE_KIND": "ENUM",
+          "ORDERED_ENUM_MEMBERS": [
+            "base_subscription",
+            "local_fee",
+            "seat_fee",
+            "module_fee",
+            "usage_fee",
+            "onboarding_fee",
+            "support_fee",
+            "adjustment",
+            "credit",
+            "subsidy",
+            "writeoff"
+          ],
+          "DEFINITION_COMPLETE": true,
+          "MISSING_PHYSICAL_FACTS": [],
+          "SOURCE_FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+          "SOURCE_SHA256": "bd0e7ce522c7e0d9706b6d10d3e27bf5b93e874024c13eadb5e03c93efce5faa",
+          "SOURCE_RANGE": [97, 97],
+          "DEFINITION_DIGEST": "3c60478f96d652a49b3bbd8e7b585f831d07e253fdf07239022d35c206db909a",
+          "EXACT_DEFINITION_TEXT": "CREATE TYPE \"public\".\"platform_cost_type\" AS ENUM('base_subscription', 'local_fee', 'seat_fee', 'module_fee', 'usage_fee', 'onboarding_fee', 'support_fee', 'adjustment', 'credit', 'subsidy', 'writeoff');",
+          "SYMBOL": null,
+          "EVIDENCE_CLASS": "HISTORICAL"
+        },
+        {
+          "SCHEMA_NAME": "public",
+          "TYPE_NAME": "platform_cost_type",
+          "TYPE_KIND": "ENUM",
+          "ORDERED_ENUM_MEMBERS": [
+            "base_subscription",
+            "local_fee",
+            "seat_fee",
+            "module_fee",
+            "usage_fee",
+            "onboarding_fee",
+            "support_fee",
+            "transaction_fee",
+            "settlement",
+            "adjustment",
+            "credit",
+            "subsidy",
+            "writeoff"
+          ],
+          "DEFINITION_COMPLETE": true,
+          "MISSING_PHYSICAL_FACTS": [],
+          "SOURCE_FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+          "SOURCE_SHA256": "b12c79c10cf7461b52d3ccace7869e455b0b42574119ef30a30c5bc952f247ac",
+          "SOURCE_RANGE": [25, 39],
+          "DEFINITION_DIGEST": "7f81f7eb340f05b9c7ca7f4461d6a40395e042553f5a8c91850264c980f545fb",
+          "EXACT_DEFINITION_TEXT": "costTypeEnum = pgEnum('platform_cost_type', [\n  'base_subscription',\n  'local_fee',\n  'seat_fee',\n  'module_fee',\n  'usage_fee',\n  'onboarding_fee',\n  'support_fee',\n  'transaction_fee',\n  'settlement',\n  'adjustment',\n  'credit',\n  'subsidy',\n  'writeoff',\n])",
+          "SYMBOL": "costTypeEnum",
+          "EVIDENCE_CLASS": "CURRENT"
+        }
+      ],
+      "MISSING_PHYSICAL_FACTS": [
+        "Human selection of one exact ordered enum definition;current and historical members differ"
+      ],
+      "CONSUMER_RELATIONS": ["public.platform_cost_ledger_entries"],
+      "CONSUMER_COLUMNS": [
+        {
+          "RELATION": "public.platform_cost_ledger_entries",
+          "COLUMN": "cost_type",
+          "REFERENCE_ID": "UE-W4T-REFERENCE-e163cee2741f9a26"
+        }
+      ],
+      "OWNERSHIP_STATUS": "PLATFORM_BASELINE_GOVERNANCE_ADOPTED",
+      "OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "MINIMUM_HUMAN_DECISION_REQUIRED": "Select the canonical exact ordered member list from the enumerated candidates;do not revisit settled prospective ownership"
+    }
+  ],
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W4T_GATE": "BLOCKED",
+    "PHASE_1B_3C_A1I_W4T": "BLOCKED",
+    "NAMED_TYPE_PRODUCTION_MODEL": "PARTIAL_HELD_DEFINITIONS",
+    "NO_FURTHER_W4T_GENERIC_DISCOVERY": "YES",
+    "W4FR_RETRY": "NOT_AUTHORIZED",
+    "CANONICAL_CONTRACT_VERSION": "1.3.1",
+    "W4": "BLOCKED_DEFINITION_IMPLEMENTATION_PENDING",
+    "W4P": "NOT_AUTHORIZED",
+    "W5": "NOT_AUTHORIZED"
+  }
+}

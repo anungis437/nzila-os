@@ -1,0 +1,2594 @@
+{
+  "candidateDigest": "76635d4db284f4a7c0ec934572cfcaa2b7e972e1ca9e62622ef1ab22c95a5f2f",
+  "sourcePlanDigest": "2cd70d70bd1f94cc6a8f7f37f32a94ae17a9ea1c441d8a12aaf1538d74601847",
+  "bucket": {
+    "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+    "count": 86,
+    "reason": "HTTP mutating route is not yet covered by the shared-guard generic bucket and needs route-specific fixture/body generation."
+  },
+  "executedRoutes": 86,
+  "passCount": 67,
+  "failCount": 19,
+  "receipts": [
+    {
+      "id": "apps/union-eyes/app/api/admin/database/optimize/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/admin/database/optimize/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 200,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/admin/feature-flags/route.ts#PATCH",
+      "sourcePath": "apps/union-eyes/app/api/admin/feature-flags/route.ts",
+      "method": "PATCH",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/admin/jobs/[action]/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/admin/jobs/[action]/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/admin/jobs/retry/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/admin/jobs/retry/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts#DELETE",
+      "sourcePath": "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts",
+      "method": "DELETE",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts#PUT",
+      "sourcePath": "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts",
+      "method": "PUT",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/admin/representation-protocol/route.ts#PUT",
+      "sourcePath": "apps/union-eyes/app/api/admin/representation-protocol/route.ts",
+      "method": "PUT",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/admin/system/cache/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/admin/system/cache/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 200,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/admin/users/[userId]/route.ts#DELETE",
+      "sourcePath": "apps/union-eyes/app/api/admin/users/[userId]/route.ts",
+      "method": "DELETE",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 404,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/admin/users/[userId]/route.ts#PUT",
+      "sourcePath": "apps/union-eyes/app/api/admin/users/[userId]/route.ts",
+      "method": "PUT",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 404,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/ai/cache-stats/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/ai/cache-stats/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/auth/forgot-password/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/auth/forgot-password/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 200,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 200,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/auth/invite/accept/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/auth/invite/accept/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/auth/logout/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/auth/logout/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 200,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 200,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/auth/magic-link/request/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/auth/magic-link/request/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 200,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 200,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/auth/magic-link/verify/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/auth/magic-link/verify/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/auth/mfa/disable/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/auth/mfa/disable/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/auth/mfa/enroll/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/auth/mfa/enroll/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/auth/mfa/verify-enroll/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/auth/mfa/verify-enroll/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/auth/reset-password/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/auth/reset-password/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/auth/signup/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/auth/signup/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cases/[caseId]/assign/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/assign/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cases/[caseId]/transition/route.ts#PATCH",
+      "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/transition/route.ts",
+      "method": "PATCH",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cases/bulk-import/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/cases/bulk-import/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cases/intake/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/cases/intake/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cbas/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/cbas/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/communications/webhooks/resend/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/continuity/archives/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/continuity/archives/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/continuity/docs/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/continuity/docs/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/finance/allocation/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/finance/allocation/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/finance/allocation/run/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/finance/allocation/run/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/finance/billing/route.ts#PATCH",
+      "sourcePath": "apps/union-eyes/app/api/finance/billing/route.ts",
+      "method": "PATCH",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/finance/billing/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/finance/billing/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/finance/invoices/[id]/payments/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/finance/invoices/[id]/payments/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/finance/invoices/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/finance/invoices/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/finance/pricing/compare/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/finance/pricing/compare/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/finance/pricing/quote/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/finance/pricing/quote/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/finance/simulation/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/finance/simulation/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/gdpr/cookie-consent/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/gdpr/cookie-consent/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/icra/[assessmentId]/answer/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/icra/[assessmentId]/answer/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/icra/[assessmentId]/claim/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/icra/[assessmentId]/claim/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/icra/[assessmentId]/submit/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/icra/[assessmentId]/submit/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/icra/email-results/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/icra/email-results/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/icra/report/[assessmentId]/review/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/icra/report/[assessmentId]/review/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/icra/start/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/icra/start/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/icra/submit/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/icra/submit/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/icra/telemetry/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/icra/telemetry/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 204,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 204,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/investigations/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/investigations/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/oci/assessment/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/oci/assessment/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/oci/intake/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/oci/intake/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/ocra/[assessmentId]/answer/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/ocra/[assessmentId]/answer/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 400,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/ocra/[assessmentId]/claim/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/ocra/[assessmentId]/claim/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/ocra/[assessmentId]/submit/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/ocra/[assessmentId]/submit/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/ocra/email-results/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/ocra/email-results/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/ocra/start/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/ocra/start/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/ocra/submit/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/ocra/submit/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/ocra/telemetry/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/ocra/telemetry/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 204,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 204,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/onboarding/transfers/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/onboarding/transfers/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts#DELETE",
+      "sourcePath": "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+      "method": "DELETE",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts#PATCH",
+      "sourcePath": "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+      "method": "PATCH",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/organizations/[id]/members/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/organizations/[id]/members/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/organizations/[id]/route.ts#DELETE",
+      "sourcePath": "apps/union-eyes/app/api/organizations/[id]/route.ts",
+      "method": "DELETE",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/organizations/[id]/route.ts#PATCH",
+      "sourcePath": "apps/union-eyes/app/api/organizations/[id]/route.ts",
+      "method": "PATCH",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts#DELETE",
+      "sourcePath": "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts",
+      "method": "DELETE",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts#PATCH",
+      "sourcePath": "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts",
+      "method": "PATCH",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/payments/checkout/create/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/payments/checkout/create/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/payments/webhooks/paypal/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/payments/webhooks/paypal/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/pilot/apply/[id]/route.ts#PATCH",
+      "sourcePath": "apps/union-eyes/app/api/pilot/apply/[id]/route.ts",
+      "method": "PATCH",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/pilot/apply/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/pilot/apply/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 429,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/portal/dues/pay/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/portal/dues/pay/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/privacy/consent/route.ts#DELETE",
+      "sourcePath": "apps/union-eyes/app/api/privacy/consent/route.ts",
+      "method": "DELETE",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/privacy/consent/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/privacy/consent/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/rewards/cron/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/rewards/cron/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/signatures/sign/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/signatures/sign/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/staging-proof/deadline-engine/scenario/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/staging-proof/deadline-engine/scenario/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 404,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 404,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/whop/create-checkout/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/whop/create-checkout/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/workbook/[id]/claim/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/workbook/[id]/claim/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts#DELETE",
+      "sourcePath": "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+      "method": "DELETE",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 503,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 503,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts#PATCH",
+      "sourcePath": "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+      "method": "PATCH",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 503,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 503,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/workbook/[id]/memory-holders/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/workbook/[id]/memory-holders/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 422,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 422,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/workbook/start/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/workbook/start/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 503,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "authenticated",
+          "status": 503,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/workflow/transition/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/workflow/transition/route.ts",
+      "method": "POST",
+      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
+      "cases": [
+        {
+          "name": "unauthenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "PASS"
+        },
+        {
+          "name": "forged-org-or-user",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
+        },
+        {
+          "name": "persisted-canonical-actor-org",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
+        }
+      ]
+    }
+  ]
+}
