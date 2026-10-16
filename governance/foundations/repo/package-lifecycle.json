@@ -163,6 +163,7 @@
     "mobility-family":                      { "tier": "INCUBATING", "product": "mobility" },
     "mobility-programs":                    { "tier": "INCUBATING", "product": "mobility" },
     "nacp-core":                            { "tier": "INCUBATING", "product": "nacp-exams" },
+    "civitas":                              { "tier": "INCUBATING", "notes": "Phase 0-1 advisory specialist. No execution authority." },
 
     "cli":                                  { "tier": "INFRASTRUCTURE" },
     "scripts-book":                         { "tier": "INFRASTRUCTURE" },
@@ -188,7 +189,7 @@
     "ACTIVE_FLAGSHIP": 25,
     "ACTIVE_SHARED_CORE": 87,
     "ACTIVE_PRODUCT": 5,
-    "INCUBATING": 36,
+    "INCUBATING": 37,
     "INFRASTRUCTURE": 19,
     "FROZEN": 0
   }

@@ -158,6 +158,7 @@ export default defineConfig({
       'packages/decision-intelligence',
       'packages/decision-intelligence-engine',
       'packages/decision-evidence',
+      'packages/civitas',
       'packages/governance-rationale',
       'packages/continuity-analysis',
       'packages/institutional-intelligence',

@@ -942,6 +942,12 @@
       "category": "APP_SUPPORT",
       "owner": "platform",
       "stability": "EVOLVING"
+    },
+    {
+      "name": "civitas",
+      "category": "DOMAIN_SHARED",
+      "owner": "platform",
+      "stability": "EXPERIMENTAL"
     }
   ],
   "governance_surfaces": [
