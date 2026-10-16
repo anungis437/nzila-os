@@ -58,7 +58,7 @@ type StripeFacade = {
 export async function initiateDuesPayment(input: {
   organizationId: string
   userId: string
-  stripe: StripeFacade
+  gateway: StripeFacade
   providerConfigured: boolean
 }): Promise<DuesPaymentInitiation> {
   if (!input.providerConfigured)
@@ -91,7 +91,7 @@ export async function initiateDuesPayment(input: {
   })
 
   try {
-    const intent = await input.stripe.paymentIntents.create(
+    const intent = await input.gateway.paymentIntents.create(
       {
         amount: toCents(pending.amount),
         currency: DUES_CURRENCY,

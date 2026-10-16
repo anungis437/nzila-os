@@ -94,7 +94,7 @@ export const POST = withApi(
       return await initiateDuesPayment({
         organizationId,
         userId,
-        stripe: stripe as unknown as Parameters<typeof initiateDuesPayment>[0]['stripe'],
+        gateway: stripe as unknown as Parameters<typeof initiateDuesPayment>[0]['gateway'],
         providerConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
       })
     } catch (error) {

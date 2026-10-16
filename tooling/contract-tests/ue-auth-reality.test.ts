@@ -67,6 +67,8 @@ const ALLOWED_PATTERNS = [
   'apps/union-eyes/lib/auth/roles.ts',
   // rbac-server.ts: 'clerk': UserRole.CLERK is the union officer role mapping, not auth vendor
   'apps/union-eyes/lib/auth/rbac-server.ts',
+  // platform-org-role.ts: 'clerk' is the union recording-clerk role key from the platform org-role claim, not the auth vendor
+  'apps/union-eyes/lib/auth/platform-org-role.ts',
   // role-access-flows tests: UserRole.CLERK domain role tests
   'apps/union-eyes/lib/auth/__tests__/role-access-flows.test.ts',
   // Committee and correspondence UI: "clerk" is the union officer role used in role-based UI gating

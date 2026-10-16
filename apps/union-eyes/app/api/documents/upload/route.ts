@@ -14,6 +14,7 @@ import { db } from "@/db/db";
 import { documents } from "@/db/schema";
 import { appendMandatoryAudit } from "@/lib/audit/mandatory-audit";
 import type { RLSTx } from "@/lib/db/with-rls-context";
+import { withOrgOwnedContext } from "@/lib/db/org-owned-context";
 import { logger } from "@/lib/logger";
 import { isMalwareScanError } from "@/lib/security/clamav";
 
@@ -265,7 +266,7 @@ export const POST = withRoleAuth('member', async (request, context) => {
     let document: typeof documents.$inferSelect;
     try {
       // The document row and its mandatory canonical audit record commit together.
-      document = await db.transaction(async (tx) => {
+      document = await withOrgOwnedContext(() => db.transaction(async (tx) => {
         const [created] = await tx.insert(documents).values({
           organizationId,
           folderId: folderId || null,
@@ -305,7 +306,7 @@ export const POST = withRoleAuth('member', async (request, context) => {
           },
         });
         return created;
-      });
+      }));
     } catch (persistError) {
       // Do not leave an orphaned Blob when the database or mandatory audit step fails.
       await deleteBlob(blob.url).catch((cleanupError) =>

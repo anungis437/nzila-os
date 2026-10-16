@@ -33,7 +33,7 @@ describe('initiateDuesPayment', () => {
     const create = vi.fn(async () => ({ id: 'pi_1', client_secret: 'secret_1' }))
     const result = await initiateDuesPayment({
       ...base,
-      stripe: { paymentIntents: { create } },
+      gateway: { paymentIntents: { create } },
       providerConfigured: true,
     })
     expect(result).toMatchObject({
@@ -64,7 +64,7 @@ describe('initiateDuesPayment', () => {
     await expect(
       initiateDuesPayment({
         ...base,
-        stripe: { paymentIntents: { create } },
+        gateway: { paymentIntents: { create } },
         providerConfigured: true,
       }),
     ).rejects.toMatchObject({ code: 'NOTHING_DUE' })
@@ -76,7 +76,7 @@ describe('initiateDuesPayment', () => {
     await expect(
       initiateDuesPayment({
         ...base,
-        stripe: { paymentIntents: { create } },
+        gateway: { paymentIntents: { create } },
         providerConfigured: false,
       }),
     ).rejects.toBeInstanceOf(DuesInitiationError)
@@ -90,7 +90,7 @@ describe('initiateDuesPayment', () => {
     await expect(
       initiateDuesPayment({
         ...base,
-        stripe: { paymentIntents: { create } },
+        gateway: { paymentIntents: { create } },
         providerConfigured: true,
       }),
     ).rejects.toThrow('stripe_down')

@@ -66,6 +66,7 @@ const AUTH_PATTERNS = [
 /** Paths explicitly allowed to have no auth (e.g. health/status endpoints, DAL layers) */
 const ALLOWLISTED_PATHS = [
   'lib/monitoring/status-actions.ts', // Read-only system status
+  'apps/union-eyes/scripts/bootstrap-v2/caller-graph.ts', // static analyser that names the directive; not a server action
   'lib/monitoring/status-page',       // Status page helpers
   'db/queries/',                      // DAL layer — auth enforced by calling server actions
 ]

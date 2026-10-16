@@ -50,6 +50,8 @@ export const SAFE_MUTATION_CONTEXTS = [
   'withSystemRLSContext',
   'withPlatformAdminRLSContext',
   'withExplicitUserContext',
+  // UE: runs the callback inside the caller's tenant RLS transaction (canonical) or delegates to withSystemContext (legacy)
+  'withOrgOwnedContext',
   'createAuditedScopedDb',
   'createScopedDb',
 ] as const
