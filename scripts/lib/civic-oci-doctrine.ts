@@ -18,10 +18,12 @@ export const CIVIC_HUMAN_ROUND1_AUTHORIZATION =
 export const CIVIC_HUMAN_ROUND1_MATERIALS =
   'docs/public-service/operations/CIVIC_HUMAN_VALIDATION_ROUND_1_MATERIALS.md'
 const ROUND1_DOCUMENT_FINGERPRINTS = {
-  [CIVIC_HUMAN_ROUND1_AUTHORIZATION]:
-    '370b4d25f067889ad77d88f88e75077f8ec489e8cf22c68eadfe2142f428140c',
-  [CIVIC_HUMAN_ROUND1_MATERIALS]:
-    '35cfab75645624659f6eb18d2696743a4883a6f344f4888dd4b39882758129d0',
+  [CIVIC_HUMAN_ROUND1_AUTHORIZATION]: {
+    sha256: '370b4d25f067889ad77d88f88e75077f8ec489e8cf22c68eadfe2142f428140c',
+  },
+  [CIVIC_HUMAN_ROUND1_MATERIALS]: {
+    sha256: '35cfab75645624659f6eb18d2696743a4883a6f344f4888dd4b39882758129d0',
+  },
 } as const
 const ROUND1_AMENDMENT_HEADING = '## Round 1 evidence governance and plan reconciliation\n'
 export const CIVIC_HUMAN_ROUND1_APPROVAL = {
@@ -1939,7 +1941,7 @@ function round1DocumentationReviewAllowed(
       const text = readRegularArchivalArtifact(root, artifact)
         .toString('utf8')
         .replace(/\r\n/g, '\n')
-      if (createHash('sha256').update(text).digest('hex') !== expected)
+      if (createHash('sha256').update(text).digest('hex') !== expected.sha256)
         return deny(
           'reviewed Round 1 authority/materials changed; no permission or findings conversion',
         )
