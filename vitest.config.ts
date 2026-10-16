@@ -51,6 +51,7 @@ export default defineConfig({
       'packages/platform-metrics',
       'packages/platform-performance',
       'packages/platform-isolation',
+      'packages/platform-restricted-data',
       'packages/platform-proof',
       'packages/platform-ops',
       'packages/data-lifecycle',

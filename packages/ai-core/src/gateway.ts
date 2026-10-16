@@ -12,6 +12,7 @@ import { createAzureOpenAIProvider } from './providers/azure-openai'
 import { createOpenAIProvider } from './providers/openai'
 import { createAnthropicProvider } from './providers/anthropic'
 import { redactText } from './redact'
+import { guardRestrictedGatewayRequest } from './restricted-guard'
 import { checkBudget, recordSpend, estimateCo2Grams } from './budgets'
 import { logAiRequest, sha256, appendAiAuditEvent, emitAiMetric } from './logging'
 import { resolvePrompt } from './prompts'
@@ -254,7 +255,21 @@ function getFeatureMaxTokens(profile: ResolvedCapabilityProfile, feature: AiFeat
 
 // ── Generate (non-stream) ───────────────────────────────────────────────────
 
+function requestText(input: AiGenerateRequest['input'] | AiEmbedRequest['input']): string | undefined {
+  if (typeof input === 'string') return input
+  if (input.every((item) => typeof item === 'string')) {
+    return input.join('\n')
+  }
+  return input.map((message) => message.content).join('\n')
+}
+
 export async function generate(req: AiGenerateRequest): Promise<AiGenerateResponse> {
+  guardRestrictedGatewayRequest({
+    classification: req.classification,
+    dataClass: req.dataClass,
+    modelPathId: req.modelPathId,
+    text: requestText(req.input),
+  })
   const env = getAiEnv()
   const profile = await resolveProfile(req)
 
@@ -292,6 +307,14 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
       messages = req.input
     }
   }
+
+  guardRestrictedGatewayRequest({
+    classification: req.classification,
+    dataClass: req.dataClass,
+    redactionMode: profile.redactionMode,
+    modelPathId: req.modelPathId,
+    text: requestText(req.input),
+  })
 
   // 4. Redaction
   let inputRedacted = false
@@ -386,6 +409,7 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
       status: 'failed',
       createdBy: null,
       dataClass: req.dataClass,
+      classification: req.classification,
       trace: req.trace,
     })
     throw err
@@ -415,6 +439,7 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
     status: 'success',
     createdBy: null, // set by API route
     dataClass: req.dataClass,
+    classification: req.classification,
     trace: req.trace,
     fallbackAttempts,
   })
@@ -461,6 +486,12 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
 // ── Chat (non-stream) ───────────────────────────────────────────────────────
 
 export async function chat(req: AiGenerateRequest): Promise<AiGenerateResponse> {
+  guardRestrictedGatewayRequest({
+    classification: req.classification,
+    dataClass: req.dataClass,
+    modelPathId: req.modelPathId,
+    text: requestText(req.input),
+  })
   // Same as generate but enforces 'chat' feature
   const profile = await resolveProfile(req)
   enforcePolicy(profile, 'chat', req.dataClass, { requiredModality: 'text' })
@@ -474,6 +505,12 @@ export async function chat(req: AiGenerateRequest): Promise<AiGenerateResponse> 
 export async function* chatStream(
   req: AiGenerateRequest,
 ): AsyncIterable<AiStreamChunk> {
+  guardRestrictedGatewayRequest({
+    classification: req.classification,
+    dataClass: req.dataClass,
+    modelPathId: req.modelPathId,
+    text: requestText(req.input),
+  })
   const env = getAiEnv()
   const profile = await resolveProfile(req)
 
@@ -503,6 +540,14 @@ export async function* chatStream(
       messages = req.input
     }
   }
+
+  guardRestrictedGatewayRequest({
+    classification: req.classification,
+    dataClass: req.dataClass,
+    redactionMode: profile.redactionMode,
+    modelPathId: req.modelPathId,
+    text: requestText(req.input),
+  })
 
   // Redaction
   let inputRedacted = false
@@ -572,6 +617,7 @@ export async function* chatStream(
       status: 'failed',
       createdBy: null,
       dataClass: req.dataClass,
+      classification: req.classification,
       trace: req.trace,
     })
     throw err
@@ -604,6 +650,7 @@ export async function* chatStream(
     status: 'success',
     createdBy: null,
     dataClass: req.dataClass,
+    classification: req.classification,
     trace: req.trace,
   })
 
@@ -621,6 +668,12 @@ export async function* chatStream(
 // ── Embed ───────────────────────────────────────────────────────────────────
 
 export async function embed(req: AiEmbedRequest): Promise<AiEmbedResponse> {
+  guardRestrictedGatewayRequest({
+    classification: req.classification,
+    dataClass: req.dataClass,
+    modelPathId: req.modelPathId,
+    text: requestText(req.input),
+  })
   const env = getAiEnv()
   const profile = await resolveProfile({
     orgId: req.orgId,
@@ -671,6 +724,7 @@ export async function embed(req: AiEmbedRequest): Promise<AiEmbedResponse> {
     status: 'success',
     createdBy: null,
     dataClass: req.dataClass,
+    classification: req.classification,
   })
 
   if (costUsd) {

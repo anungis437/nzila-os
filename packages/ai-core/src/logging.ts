@@ -5,6 +5,7 @@
  * Handles hashing, encryption, and payload storage.
  */
 import { createHash, createCipheriv, randomBytes } from 'node:crypto'
+import { bodiesSafeForPersistence } from '@nzila/platform-restricted-data'
 import { db } from '@nzila/db'
 import { aiRequests, aiRequestPayloads, auditEvents } from '@nzila/db/schema'
 import { computeEntryHash } from '@nzila/os-core/hash'
@@ -58,6 +59,7 @@ export interface LogAiRequestInput {
   errorCode?: string
   createdBy: string | null
   dataClass: DataClass
+  classification?: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED'
   trace?: AiTrace
   fallbackAttempts?: number
 }
@@ -105,8 +107,13 @@ export async function logAiRequest(
 ): Promise<{ requestId: string; requestHash: string; responseHash: string }> {
   const env = getAiEnv()
 
-  const requestStr = JSON.stringify(input.requestBody ?? '')
-  const responseStr = JSON.stringify(input.responseBody ?? '')
+  const safeBodies = bodiesSafeForPersistence({
+    classification: input.classification,
+    requestBody: input.requestBody,
+    responseBody: input.responseBody,
+  })
+  const requestStr = JSON.stringify(safeBodies.requestBody ?? '')
+  const responseStr = JSON.stringify(safeBodies.responseBody ?? '')
 
   const requestHash = sha256(requestStr)
   const responseHash = sha256(responseStr)
@@ -141,8 +148,8 @@ export async function logAiRequest(
       (input.dataClass === 'sensitive' || input.dataClass === 'regulated') &&
       !!env.AI_ENCRYPTION_KEY
 
-    let reqJson: unknown = input.requestBody
-    let resJson: unknown = input.responseBody
+    let reqJson: unknown = safeBodies.requestBody
+    let resJson: unknown = safeBodies.responseBody
     let encrypted = false
 
     if (needsEncrypt) {

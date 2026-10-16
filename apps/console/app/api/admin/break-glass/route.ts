@@ -11,13 +11,22 @@ import { authenticateUser } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
 import { enforcePolicies } from '@/lib/policy-enforcement'
 import { createLogger } from '@nzila/os-core'
+import { activateBreakGlass, PlaneError } from '@nzila/platform-restricted-data'
 
 const logger = createLogger('api:admin:break-glass')
 
 const BreakGlassSchema = z.object({
   reason: z.string().min(10, 'Reason must be at least 10 characters'),
-  scope: z.enum(['read', 'write', 'full']).default('read'),
   durationMinutes: z.number().int().min(5).max(240).default(60),
+  scope: z.union([
+    z.string(),
+    z.object({
+      appDomain: z.string().min(1),
+      resource: z.string().min(1),
+      action: z.enum(['read', 'write']),
+      principalId: z.string().min(1).optional(),
+    }),
+  ]),
 })
 
 export async function POST(req: NextRequest) {
@@ -80,15 +89,23 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Break-glass activation ───────────────────────────────────────────
+    let scoped
+    try {
+      scoped = activateBreakGlass({
+        actorId: auth.userId,
+        reason: parsed.data.reason,
+        durationMinutes: parsed.data.durationMinutes,
+        scope: parsed.data.scope,
+      })
+    } catch (error) {
+      if (error instanceof PlaneError) {
+        return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })
+      }
+      throw error
+    }
     const activation = {
-      id: crypto.randomUUID(),
-      activatedBy: auth.userId,
-      activatedAt: new Date().toISOString(),
-      scope: parsed.data.scope,
-      reason: parsed.data.reason,
-      expiresAt: new Date(
-        Date.now() + parsed.data.durationMinutes * 60_000,
-      ).toISOString(),
+      ...scoped,
+      activatedBy: scoped.actorId,
       policyEnforced: true,
     }
 

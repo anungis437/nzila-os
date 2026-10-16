@@ -131,6 +131,12 @@ packages:
     tier: foundational
     description: "Tenant isolation enforcement"
 
+  platform-restricted-data:
+    owner: "@nzila/governance"
+    steward: null
+    tier: foundational
+    description: "Restricted data classification, principal isolation, safe logging, and lifecycle controls"
+
   platform-procurement-proof:
     owner: "@nzila/governance"
     steward: null

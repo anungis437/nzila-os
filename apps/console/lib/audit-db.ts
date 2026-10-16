@@ -25,6 +25,7 @@ import { auditEvents } from '@nzila/db/schema'
 import { computeEntryHash } from '@nzila/os-core/hash'
 import { eq, desc, and, gte, lte, SQL } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
+import { buildRestrictedAuditEvent } from '@nzila/platform-restricted-data'
 
 const logger = createLogger('audit-db')
 
@@ -39,6 +40,16 @@ export interface RecordAuditEventInput {
   targetId?: string
   beforeJson?: Record<string, unknown>
   afterJson?: Record<string, unknown>
+  /** When RESTRICTED, payload snapshots are dropped and purpose metadata is required. */
+  classification?: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED'
+  purpose?: string
+  dataCategory?: string
+  authorizationBasis?: string
+  principalId?: string
+  serviceOrAgent?: string
+  correlationId?: string
+  missionId?: string
+  breakGlassReason?: string
 }
 
 export interface AuditEventRow {
@@ -132,6 +143,46 @@ export async function recordAuditEvent(
 
   const previousHash = latest?.hash ?? null
 
+  let beforeJson = input.beforeJson
+  let afterJson = input.afterJson
+  if (input.classification === 'RESTRICTED') {
+    const metadata = buildRestrictedAuditEvent({
+      actorId: input.actorClerkUserId,
+      serviceOrAgent: input.serviceOrAgent ?? input.actorRole ?? 'unspecified',
+      action: input.action,
+      resourceId: input.targetId ?? input.targetType,
+      category: input.dataCategory ?? '',
+      orgId: input.orgId,
+      principalId: input.principalId ?? '',
+      purpose: input.purpose ?? '',
+      authorizationBasis: input.authorizationBasis ?? '',
+      correlationId: input.correlationId,
+      missionId: input.missionId,
+      breakGlassReason: input.breakGlassReason,
+      outcome: 'allow',
+      beforeJson: input.beforeJson,
+      afterJson: input.afterJson,
+    })
+    beforeJson = undefined
+    afterJson = {
+      auditId: metadata.id,
+      at: metadata.at,
+      actorId: metadata.actorId,
+      serviceOrAgent: metadata.serviceOrAgent,
+      action: metadata.action,
+      resourceId: metadata.resourceId,
+      category: metadata.category,
+      principalId: metadata.principalId,
+      purpose: metadata.purpose,
+      authorizationBasis: metadata.authorizationBasis,
+      correlationId: metadata.correlationId,
+      missionId: metadata.missionId,
+      breakGlassReason: metadata.breakGlassReason,
+      outcome: metadata.outcome,
+      payloadStored: metadata.payloadStored,
+    }
+  }
+
   // 2. Build the hashable payload (deterministic subset)
   const payload = {
     orgId: input.orgId,
@@ -139,7 +190,7 @@ export async function recordAuditEvent(
     action: input.action,
     targetType: input.targetType,
     targetId: input.targetId ?? null,
-    afterJson: input.afterJson ?? null,
+    afterJson: afterJson ?? null,
     timestamp: new Date().toISOString(),
   }
 
@@ -155,8 +206,8 @@ export async function recordAuditEvent(
       action: input.action,
       targetType: input.targetType,
       targetId: input.targetId ?? undefined,
-      beforeJson: input.beforeJson ?? undefined,
-      afterJson: input.afterJson ?? undefined,
+      beforeJson: beforeJson ?? undefined,
+      afterJson: afterJson ?? undefined,
       hash,
       previousHash,
     })

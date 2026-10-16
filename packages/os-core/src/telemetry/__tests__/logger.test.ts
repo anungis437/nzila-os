@@ -76,6 +76,31 @@ describe('logger', () => {
       expect(parsed.count).toBe(5)
     })
 
+    it('redacts Restricted fields by default and keeps stack frames', () => {
+      const log = createLogger()
+      log.info('contact synthetic@example.invalid', {
+        classification: 'RESTRICTED',
+        bankAccount: 'synthetic-account-a',
+        requestBody: { prompt: 'synthetic-account-a' },
+      })
+      const parsed = JSON.parse(stdoutSpy.mock.calls[0]![0] as string)
+      const serialized = JSON.stringify(parsed)
+      expect(serialized).not.toContain('synthetic-account-a')
+      expect(serialized).not.toContain('synthetic@example.invalid')
+      expect(parsed.bankAccount).toBe('[REDACTED]')
+      expect(parsed.requestBody).toBe('[REDACTED]')
+    })
+
+    it('scrubs secret values on an error and leaves the stack frame', () => {
+      const log = createLogger()
+      const err = new Error('boom sk-abcdefghijklmnopqrstuvwxyz123456')
+      log.error('failed', err)
+      const parsed = JSON.parse(stderrSpy.mock.calls[0]![0] as string)
+      expect(parsed.errorMessage).not.toContain('sk-abcdefghijklmnopqrstuvwxyz123456')
+      expect(parsed.errorStack).toContain('at ')
+      expect(parsed.errorStack).not.toContain('sk-abcdefghijklmnopqrstuvwxyz123456')
+    })
+
     it('formats Error objects into error fields', () => {
       const log = createLogger()
       const err = new Error('boom')

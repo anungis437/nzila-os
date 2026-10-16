@@ -34,6 +34,7 @@
     "@nzila/ai-control": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
+    "@nzila/platform-restricted-data": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/pilot-mode": "workspace:*",
     "@nzila/tools-runtime": "workspace:*",

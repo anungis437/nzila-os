@@ -37,6 +37,10 @@ export interface AiGenerateRequest {
   input: string | ChatMessage[]
   variables?: Record<string, string>
   dataClass: DataClass
+  /** Governance tier. Restricted is denied unless a platform path is approved. */
+  classification?: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED'
+  /** Platform model-path id. Callers cannot mark a path approved. */
+  modelPathId?: string
   trace?: AiTrace
   params?: AiModelParams
 }
@@ -75,6 +79,8 @@ export interface AiEmbedRequest {
   profileKey: string
   input: string | string[]
   dataClass: DataClass
+  classification?: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED'
+  modelPathId?: string
 }
 
 export interface AiEmbedResponse {

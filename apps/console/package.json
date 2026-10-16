@@ -46,6 +46,7 @@
     "@nzila/platform-events": "workspace:*",
     "@nzila/platform-evidence-pack": "workspace:*",
     "@nzila/platform-export": "workspace:*",
+    "@nzila/platform-restricted-data": "workspace:*",
     "@nzila/platform-growth-os": "workspace:*",
     "@nzila/platform-integrations-control-plane": "workspace:*",
     "@nzila/platform-intelligence-home": "workspace:*",
