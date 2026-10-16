@@ -245,14 +245,7 @@ export async function resolveAuthorizationContextWithStore(
       identityBindingId: binding.id,
     })
   } else {
-    const [onlyMembership] = activeMemberships
-    if (!onlyMembership) {
-      fail(input, 'MEMBERSHIP_REQUIRED', undefined, {
-        platformUserId: binding.platformUserId,
-        identityBindingId: binding.id,
-      })
-    }
-    membership = onlyMembership
+    membership = activeMemberships[0]
   }
 
   const grants = await store.listPermissionGrants(

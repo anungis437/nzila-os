@@ -52,6 +52,7 @@ paths = [
   '''docs/union-eyes/.*\.json$''',   # UE machine-generated evidence ledgers: SHA-256 digests and identifiers, no credentials
   '''infrastructure/bicep/ue-v2/.*\.bicep$''',  # UE Bicep: Azure built-in role-definition GUIDs
   '''apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture\.ts$''',  # UE clean-room fixture: synthetic per-run role passwords
+  '''scripts/ue/build-django-migration-plan\.py$''',  # UE evidence generator: DECISION_ID dict key, not a credential
 ]
 
 commits = [
