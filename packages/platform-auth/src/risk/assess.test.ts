@@ -17,6 +17,12 @@ vi.mock('@nzila/db/client', () => ({
     select: mockSelect,
   },
 }))
+vi.mock('../auth-db', () => ({
+  authDb: {
+    select: mockSelect,
+    execute: (...args: unknown[]) => mockSelect(...args).from().where(),
+  },
+}))
 
 // Drizzle's relations helper is imported at module load by schema.
 vi.mock('drizzle-orm', async () => {

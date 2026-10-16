@@ -20,7 +20,7 @@ import {
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
 
 const accessInputSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.string().min(1).max(255),
   accessRole: z.enum(['secondary_lro', 'reviewer', 'read_only']),
   expiresAt: z.string().datetime({ offset: true }).optional().nullable(),
   canComment: z.boolean().optional(),

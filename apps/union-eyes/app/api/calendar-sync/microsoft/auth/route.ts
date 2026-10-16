@@ -28,6 +28,10 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
     // Redirect to Microsoft authorization page
     return NextResponse.redirect(authUrl);
   } catch (error) {
+    // Missing OAuth client configuration is an unavailable integration, not an internal fault.
+    if (error instanceof Error && /^Missing required Microsoft calendar OAuth environment variables/.test(error.message)) {
+      return NextResponse.json({ error: 'Microsoft calendar integration is not configured' }, { status: 503 });
+    }
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Failed to initiate Microsoft Calendar authorization',

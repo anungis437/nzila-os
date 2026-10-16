@@ -569,11 +569,11 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'components/dues/dues-payment-portal.tsx — "Manual Payment" tab removed; DuesPaymentForm and PaymentMethodManager are no longer imported or rendered',
       'app/api/dues/autopay/route.ts — confirmed does not exist (404)',
       'app/api/dues/payment-methods/[id]/route.ts (DELETE) and .../set-default/route.ts (POST) — confirmed do not exist (404)',
-      'git grep -rln "union-eyes-dues" — no webhook handler anywhere reconciles a completed create-payment-intent charge back into member_dues_ledger',
+      'Settlement now exists and is proven (lib/dues/dues-settlement.ts, verified Stripe webhook, idempotent, audited) but member dues collection is NOT initial launch scope: the initiation routes answer 501 unless UE_MEMBER_DUES_PAYMENTS=1 (lib/dues/member-dues-flag.ts)',
     ],
     targetWave: 0,
     notes:
-      'DISABLED rather than removed: create-payment-intent and the GET payment-methods list are genuinely wired to Stripe and were left in place, but hidden from the portal because a real charge can succeed while the member\'s own ledger balance never reflects it (missing webhook reconciliation), and 3 of the 4 payment-method management endpoints do not exist. Re-enabling requires: a Stripe webhook that inserts a member_dues_ledger payment row on payment_intent.succeeded, plus the missing autopay/delete/set-default routes.',
+      'DISABLED, DORMANT OPTIONAL CAPABILITY. Member dues collection is out of initial launch scope and no member payment UI is built; the payment form and payment-method manager are not rendered. The server-owned initiation (create-payment-intent, portal/dues/pay) and the verified-webhook settlement into member_dues_ledger are implemented and proven, and stay off by default. Re-enabling requires an explicit owner decision, UE_MEMBER_DUES_PAYMENTS=1, a mounted payment UI, and the still-missing autopay/delete/set-default routes.',
   },
 
   // ------------------------------------------------------------------------

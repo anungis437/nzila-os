@@ -140,7 +140,7 @@ export async function getInstitutionalGraph(): Promise<InstitutionalTimelineGrap
     const nodes: InstitutionalTimelineGraph['nodes'] = orgRows.map((org) => ({
       entityType: 'Organization',
       entityId: org.id,
-      tenantId: org.appId ?? org.id,
+      tenantId: org.id,
       canonicalName: org.displayName ?? org.name,
       status: normalizeStatus(org.status),
       metadata: {

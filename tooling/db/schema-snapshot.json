@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-09-26T14:59:36.018Z",
+  "capturedAt": "2026-10-16T11:36:39.440Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -143,8 +143,8 @@
       "size": 5342
     },
     "packages/db/src/schema/index.ts": {
-      "hash": "a1d4c5a73c1de06262364ddab467ec79501232897bbbd35a8a60085d81bbb9db",
-      "size": 2108
+      "hash": "bd8beadc0cbda8d3bbcf5abb437bd9067fedb674759a05685dc80bb5b589ab66",
+      "size": 2149
     },
     "packages/db/src/schema/integrations.ts": {
       "hash": "eb14da7e696b470fcc94eff69b3e3630820ca584acc5d5a0f216fe0f43e85d65",
@@ -194,6 +194,10 @@
       "hash": "7bb7e50b20ba0c81e928203ad3174805817058054d557e254c1296f94ffb5b23",
       "size": 1370
     },
+    "packages/db/src/schema/platform-authorization.ts": {
+      "hash": "a0767c3ad85c33c5a1273cefba6b14e8e89f44206ce6bde755cde96dcf95060c",
+      "size": 7227
+    },
     "packages/db/src/schema/platform-entity-graph.ts": {
       "hash": "af04157e5557c3d565b663ce59a7bcccee7c74716f1eb8af6800f1ccbe5aa217",
       "size": 2744
@@ -239,5 +243,5 @@
       "size": 38020
     }
   },
-  "compositeHash": "ac08dcf3163353c5f38e6299ac433415a16a537d5289acd2dfc5c581f7099412"
+  "compositeHash": "54db4efa2a3bf087093730d527e2a14dabe81e4aa39b5829074a59dc56c9a735"
 }

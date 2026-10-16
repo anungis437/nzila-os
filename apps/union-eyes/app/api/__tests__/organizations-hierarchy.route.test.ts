@@ -8,6 +8,9 @@ const m = vi.hoisted(() => ({
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db/db', () => ({ db: m.db }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: async (fn: () => Promise<unknown>) => fn(),
+}));
 vi.mock('@/db/schema-organizations', () => ({ organizations: { organizationType: 'organizationType', hierarchyLevel: 'hierarchyLevel', name: 'name' } }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();

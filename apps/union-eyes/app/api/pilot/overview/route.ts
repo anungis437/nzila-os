@@ -6,7 +6,8 @@
  */
 
 import { NextResponse } from "next/server";
-import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
+import { requireUser, hasMinRole, isPlatformAdminUser } from "@/lib/api-auth-guard";
+import { currentStateContextEnabled } from "@/lib/auth/canonical-bootstrap";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -35,10 +36,10 @@ export async function GET() {
     }
 
     // Only NZILA Ventures (platform owner) or platform admins can see the overview
-    const userOrgId = await getOrganizationIdForUser(user.userId);
-    const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
-      .split(',').map(id => id.trim()).filter(Boolean);
-    if (userOrgId !== DEFAULT_ORGANIZATION_ID && !platformAdminIds.includes(user.userId)) {
+    const platformAdmin = await isPlatformAdminUser(user.userId);
+    const platformOrganization = !currentStateContextEnabled() &&
+      (await getOrganizationIdForUser(user.userId)) === DEFAULT_ORGANIZATION_ID;
+    if (!platformAdmin && !platformOrganization) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
         "Only the platform organization can view the pilot overview"

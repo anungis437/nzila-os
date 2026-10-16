@@ -17,7 +17,8 @@
  *     by tampering with form data — the role comes from the row, not the body.
  */
 import { randomBytes, createHash } from 'crypto'
-import { db } from '@nzila/db/client'
+import { authDb as db, withAuthContext, withAuthSavepoint, withTenantAuthContext, insertAuthRow } from '../auth-db'
+import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority'
 import {
   authInvites,
   authUsers,
@@ -25,7 +26,7 @@ import {
   authAuditLog,
 } from '@nzila/db/schema'
 import { eq, and, sql, gt, isNull } from 'drizzle-orm'
-import { createSession, setSessionCookie } from '../password/session'
+import { completeAuthFirstFactor } from '../complete-auth'
 
 const INVITE_TOKEN_BYTES = 32
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
@@ -45,12 +46,7 @@ const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
  * If a tenant-scoped "chief operating officer" concept is ever needed,
  * create a distinct tenant-scoped role; never reuse the platform 'coo'.
  */
-export const TENANT_SELF_SERVICE_ASSIGNABLE_ROLES = new Set([
-  'member',
-  'steward',
-  'chief_steward',
-  'admin',
-])
+export const TENANT_SELF_SERVICE_ASSIGNABLE_ROLES: ReadonlySet<string> = new Set(AUTH_TENANT_ASSIGNABLE_ROLES)
 const ALLOWED_ROLES = TENANT_SELF_SERVICE_ASSIGNABLE_ROLES
 
 export interface CreateInviteInput {
@@ -80,6 +76,8 @@ export interface AcceptInviteInput {
 
 export interface AcceptInviteResult {
   success: boolean
+  requiresMfa?: true
+  challengeToken?: string
   user?: {
     id: string
     email: string
@@ -107,13 +105,13 @@ async function logEvent(
   },
 ): Promise<void> {
   try {
-    await db.insert(authAuditLog).values({
+    await withAuthSavepoint(async () => db.insert(authAuditLog).values({
       userId: opts.userId ?? null,
       eventType,
       ipAddress: opts.ipAddress ?? null,
       userAgent: opts.userAgent ?? null,
       metadata: opts.metadata ?? {},
-    })
+    }))
   } catch {
     // best-effort
   }
@@ -130,14 +128,15 @@ export async function createInvite(
   if (!ALLOWED_ROLES.has(role)) {
     return { success: false, error: `Invalid role: ${role}` }
   }
+  return withTenantAuthContext(input.invitedBy, input.organizationId, () => createInviteWithContext(input, email, role))
+}
 
+async function createInviteWithContext(input: CreateInviteInput, email: string, role: string): Promise<CreateInviteResult> {
   const token = generateToken()
   const tokenHash = hashToken(token)
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS)
 
-  const [row] = await db
-    .insert(authInvites)
-    .values({
+  const [row] = await insertAuthRow(authInvites, {
       email,
       organizationId: input.organizationId,
       role,
@@ -145,7 +144,6 @@ export async function createInvite(
       invitedBy: input.invitedBy,
       expiresAt,
     })
-    .returning({ id: authInvites.id })
 
   await logEvent('invite_created', {
     userId: input.invitedBy,
@@ -169,7 +167,11 @@ export async function acceptInvite(
     return { success: false, error: 'Invalid or expired invite' }
   }
   const tokenHash = hashToken(input.token)
+  return withAuthContext({ phase: 'redemption', selector: { kind: 'invite', tokenHash } },
+    () => acceptInviteWithContext(input, tokenHash))
+}
 
+async function acceptInviteWithContext(input: AcceptInviteInput, tokenHash: string): Promise<AcceptInviteResult> {
   const [invite] = await db
     .select()
     .from(authInvites)
@@ -182,6 +184,7 @@ export async function acceptInvite(
       ),
     )
     .limit(1)
+    .for('update')
 
   if (!invite) {
     await logEvent('invite_accept_failed', {
@@ -191,6 +194,7 @@ export async function acceptInvite(
     })
     return { success: false, error: 'Invalid or expired invite' }
   }
+  if (!ALLOWED_ROLES.has(invite.role)) return { success: false, error: 'Invalid invite role' }
 
   // Find or create the underlying user.
   const [existing] = await db
@@ -204,7 +208,7 @@ export async function acceptInvite(
     userId = existing.userId
   } else {
     userId = crypto.randomUUID()
-    await db.insert(authUsers).values({
+    await insertAuthRow(authUsers, {
       userId,
       email: invite.email,
       passwordHash: null,
@@ -241,7 +245,7 @@ export async function acceptInvite(
       })
       .where(eq(authOrganizationUsers.organizationUserId, existingMembership.id))
   } else {
-    await db.insert(authOrganizationUsers).values({
+    await insertAuthRow(authOrganizationUsers, {
       organizationId: invite.organizationId,
       userId,
       role: invite.role,
@@ -251,20 +255,13 @@ export async function acceptInvite(
     })
   }
 
-  // Mark invite consumed
-  await db
-    .update(authInvites)
-    .set({ acceptedAt: new Date(), acceptedUserId: userId })
-    .where(eq(authInvites.id, invite.id))
-
   // Mint session
-  const { token: sessionToken, session } = await createSession({
+  const completion = await completeAuthFirstFactor({
     userId,
     organizationId: invite.organizationId,
     ipAddress: input.ipAddress,
     userAgent: input.userAgent,
   })
-  await setSessionCookie(sessionToken, session.expiresAt)
 
   await logEvent('invite_accepted', {
     userId,
@@ -276,9 +273,12 @@ export async function acceptInvite(
       role: invite.role,
     },
   })
+  await db.update(authInvites).set({ acceptedAt: new Date(), acceptedUserId: userId })
+    .where(eq(authInvites.id, invite.id))
 
   return {
     success: true,
+    ...completion,
     user: {
       id: userId,
       email: invite.email,

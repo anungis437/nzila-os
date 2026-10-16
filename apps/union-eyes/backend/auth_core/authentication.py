@@ -160,7 +160,9 @@ class OIDCAuthentication(authentication.BaseAuthentication):
             # for a real bearer-authenticated request. Raises
             # AuthenticationFailed (fail closed) if org_id is present but
             # unresolvable.
-            request.organization, request.organization_id = resolve_organization_context(org_id)
+            request.organization, request.organization_id = (
+                resolve_organization_context(org_id)
+            )
 
             return (user, payload)
 
@@ -222,11 +224,24 @@ class OIDCAuthentication(authentication.BaseAuthentication):
         signing_key = jwks_client.get_signing_key_from_jwt(token)
 
         # Decode and verify token
+        canonical = getattr(settings, "UE_CANONICAL_BOOTSTRAP_V2", False)
+        if canonical and (not settings.AUTH_ISSUER or not settings.AUTH_AUDIENCE):
+            raise exceptions.AuthenticationFailed(
+                "Canonical OIDC issuer and audience required"
+            )
         payload = jwt.decode(
             token,
             signing_key.key,
             algorithms=["RS256"],
-            options={"verify_aud": False},  # OIDC aud claim not enforced
+            options={
+                "verify_aud": canonical,
+                **({"require": ["exp", "iss", "aud", "sub"]} if canonical else {}),
+            },
+            **(
+                {"issuer": settings.AUTH_ISSUER, "audience": settings.AUTH_AUDIENCE}
+                if canonical
+                else {}
+            ),
         )
 
         return payload

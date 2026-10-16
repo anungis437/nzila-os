@@ -73,7 +73,7 @@ export const aiClauseReasonings = pgTable('ai_clause_reasonings', {
 
   // Human review
   status: clauseReasoningStatusEnum('status').notNull().default('suggested'),
-  reviewedBy: uuid('reviewed_by'),
+  reviewedBy: text('reviewed_by'),
   reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
   humanApproved: boolean('human_approved').default(false),
 

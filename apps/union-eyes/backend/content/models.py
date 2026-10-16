@@ -347,6 +347,7 @@ class PublicContent(BaseModel):
 class MemberDocuments(BaseModel):
     """Migrated from drizzle: member-documents.ts"""
 
+    organization_id = models.UUIDField(null=True, blank=True)
     user_id = models.TextField()
     file_name = models.TextField()
     file_url = models.TextField()

@@ -21,8 +21,12 @@ const h = vi.hoisted(() => {
 });
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: vi.fn(async (fn: (tx?: unknown) => unknown) => fn(h.db as never)),
-  withRLSContext: vi.fn(async (fn: (tx?: unknown) => unknown) => fn(h.db as never)),
+  withSystemContext: vi.fn(async (a: unknown, b?: unknown) =>
+    (typeof a === 'function' ? a : (b as (tx?: unknown) => unknown))(h.db as never),
+  ),
+  withRLSContext: vi.fn(async (a: unknown, b?: unknown) =>
+    (typeof a === 'function' ? a : (b as (tx?: unknown) => unknown))(h.db as never),
+  ),
 }));
 
 vi.mock('@/db', () => ({ db: h.db }));

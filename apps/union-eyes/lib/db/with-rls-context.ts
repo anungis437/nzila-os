@@ -29,6 +29,13 @@ import { systemContextStorage } from '@/db/system-context-storage'
 import { tenantContextStorage } from '@/db/tenant-context-storage'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
+import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context'
+import { withCanonicalOrganizationBinding } from '@/lib/auth/canonical-organization-selection'
+import {
+  AuthOrgBindingError,
+  authenticatedOrgBindingSql,
+} from '@nzila/platform-auth/org-binding'
 
 /** Convenience alias for the typed transaction/db handle passed to withRLSContext callbacks */
 export type RLSTx = typeof db
@@ -64,9 +71,7 @@ export type RLSTx = typeof db
  */
 const SYSTEM_ORG_CONTEXT = 'system'
 
-export async function withRLSContext<T>(
-  operation: (tx: RLSTx) => Promise<T>,
-): Promise<T>
+export async function withRLSContext<T>(operation: (tx: RLSTx) => Promise<T>): Promise<T>
 export async function withRLSContext<T>(operation: () => Promise<T>): Promise<T>
 export async function withRLSContext<T>(
   context: Record<string, unknown>,
@@ -77,21 +82,12 @@ export async function withRLSContext<T>(
   operation: () => Promise<T>,
 ): Promise<T>
 export async function withRLSContext<T>(
-  contextOrOperation:
-    | Record<string, unknown>
-    | ((tx: RLSTx) => Promise<T>)
-    | (() => Promise<T>),
-  maybeOperation?:
-    | ((tx: RLSTx) => Promise<T>)
-    | (() => Promise<T>),
+  contextOrOperation: Record<string, unknown> | ((tx: RLSTx) => Promise<T>) | (() => Promise<T>),
+  maybeOperation?: ((tx: RLSTx) => Promise<T>) | (() => Promise<T>),
 ): Promise<T> {
   const hasContext = typeof contextOrOperation !== 'function'
-  const context = hasContext
-    ? (contextOrOperation as Record<string, unknown>)
-    : undefined
-  const operation = (hasContext ? maybeOperation! : contextOrOperation) as (
-    tx: RLSTx,
-  ) => Promise<T>
+  const context = hasContext ? (contextOrOperation as Record<string, unknown>) : undefined
+  const operation = (hasContext ? maybeOperation! : contextOrOperation) as (tx: RLSTx) => Promise<T>
 
   // Binary contract: when a context map is supplied it MUST carry an explicit,
   // non-empty string `organizationId`. The previous implementation silently
@@ -119,6 +115,22 @@ export async function withRLSContext<T>(
   if (!userId) {
     throw new Error(
       'Unauthorized: No authenticated user found. User must be logged in via platform auth.',
+    )
+  }
+
+  if (currentStateContextEnabled()) {
+    if (explicitOrgId === SYSTEM_ORG_CONTEXT)
+      throw new Error(
+        'V2 ordinary context cannot request an unscoped system lookup. Resolve canonical auth membership or use an explicitly authorized system context.',
+      )
+    return withCanonicalOrganizationBinding(
+      { organizationId: explicitOrgId, expectedActorUserId: userId },
+      (binding) =>
+        db.transaction(async (tx) => {
+          await tx.execute(sql`SET LOCAL ROLE union_eyes_runtime`)
+          await tx.execute(authenticatedOrgBindingSql(binding))
+          return tenantContextStorage.run(tx, () => operation(tx))
+        }),
     )
   }
 
@@ -193,9 +205,7 @@ export async function withRLSContext<T>(
     // that queries through `db` directly instead of the supplied `tx` would
     // otherwise silently run on the ordinary pooled connection, never on
     // the transaction set_config() was just applied to.
-    const result = await tenantContextStorage.run(tx as any, () =>
-      operation(tx as any as RLSTx),
-    )
+    const result = await tenantContextStorage.run(tx, () => operation(tx))
 
     // Transaction commit automatically clears local config variables
     return result
@@ -237,6 +247,12 @@ export async function withExplicitUserContext<T>(
   if (!userId) {
     throw new Error('Invalid user ID: Cannot set RLS context with empty user ID')
   }
+  if (currentStateContextEnabled()) {
+    const actor = await auth()
+    if (actor.userId !== userId)
+      throw new Error('V2 ordinary context cannot impersonate another authenticated actor')
+    return orgId ? withRLSContext({ organizationId: orgId }, operation) : withRLSContext(operation)
+  }
 
   return await db.transaction(async (tx) => {
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`)
@@ -246,7 +262,7 @@ export async function withExplicitUserContext<T>(
     }
     // Scope the module-level `db` import to this transaction — see
     // db/tenant-context-storage.ts.
-    const result = await tenantContextStorage.run(tx as any, () => operation())
+    const result = await tenantContextStorage.run(tx, () => operation())
     return result
   })
 }
@@ -277,9 +293,7 @@ export async function withExplicitUserContext<T>(
  *   });
  * }
  */
-export async function withSystemContext<T>(
-  operation: (tx: RLSTx) => Promise<T>,
-): Promise<T>
+export async function withSystemContext<T>(operation: (tx: RLSTx) => Promise<T>): Promise<T>
 export async function withSystemContext<T>(operation: () => Promise<T>): Promise<T>
 export async function withSystemContext<T>(
   operation: (() => Promise<T>) | ((tx: RLSTx) => Promise<T>),
@@ -290,6 +304,7 @@ export async function withSystemContext<T>(
   // variables on the tenant runtime connection. See
   // db/migrations/0108_rls_tenant_isolation_foundation.sql.
   return await systemDb.transaction(async (tx) => {
+    if (currentStateContextEnabled()) await tx.execute(sql`SET LOCAL ROLE union_eyes_system`)
     // Context vars are still cleared for audit/logging consistency, but no
     // policy on this connection depends on them being empty.
     await tx.execute(sql`SELECT set_config('app.current_user_id', '', true)`)
@@ -300,9 +315,7 @@ export async function withSystemContext<T>(
     // supplied `tx` — without this, those queries would silently run on the
     // tenant connection (union_eyes_runtime) despite appearing
     // system-authorized. See db/system-context-storage.ts.
-    const result = await systemContextStorage.run(tx as any, () =>
-      (operation as (tx: RLSTx) => Promise<T>)(tx as any as RLSTx),
-    )
+    const result = await systemContextStorage.run(tx, () => operation(tx))
     return result
   })
 }
@@ -468,7 +481,7 @@ export type RLSAwareQuery<T> = () => Promise<T>
  *
  * export const GET = withRLS(handleGET);
  */
-export function withRLS<TArgs extends any[], TReturn>(
+export function withRLS<TArgs extends unknown[], TReturn>(
   handler: (...args: TArgs) => Promise<TReturn>,
 ): (...args: TArgs) => Promise<TReturn> {
   return async (...args: TArgs): Promise<TReturn> => {
@@ -516,6 +529,10 @@ export async function withPlatformAdminRLSContext<T>(
   if (!adminId) {
     throw new Error('Platform admin ID is required for withPlatformAdminRLSContext')
   }
+  if (currentStateContextEnabled()) {
+    const context = await getCanonicalOrganizationContext({ expectedActorUserId: adminId })
+    if (!context.isSystemAdmin) throw new AuthOrgBindingError('ROLE_REQUIRED')
+  }
   logger.info('[withPlatformAdminRLSContext] Platform admin operation executing', {
     adminId,
     operation,
@@ -524,10 +541,11 @@ export async function withPlatformAdminRLSContext<T>(
   // rationale as withSystemContext above). app.current_user_id is set to
   // adminId for audit/logging only; it is not what grants access.
   return await systemDb.transaction(async (tx) => {
+    if (currentStateContextEnabled()) await tx.execute(sql`SET LOCAL ROLE union_eyes_system`)
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${adminId}, true)`)
     await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
     // Same ALS scoping as withSystemContext — fn() may query through the
     // module-level `db` import rather than an explicit tx.
-    return await systemContextStorage.run(tx as any, fn)
+    return await systemContextStorage.run(tx, fn)
   })
 }

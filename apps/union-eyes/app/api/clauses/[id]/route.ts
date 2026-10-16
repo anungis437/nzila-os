@@ -18,7 +18,9 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-export const GET = async (request: NextRequest, { params }: { params: { id: string } }) => {
+export const GET = async (request: NextRequest, { params: pendingParams }: { params: Promise<{ id: string }> }) => {
+  // Next 16 supplies route params as a Promise.
+  const params = await pendingParams;
   return withRoleAuth('member', async (request, context) => {
     const _user = { id: context.userId, organizationId: context.organizationId };
 
@@ -62,7 +64,9 @@ return standardErrorResponse(
     })(request, { params });
 };
 
-export const PATCH = async (request: NextRequest, { params }: { params: { id: string } }) => {
+export const PATCH = async (request: NextRequest, { params: pendingParams }: { params: Promise<{ id: string }> }) => {
+  // Next 16 supplies route params as a Promise.
+  const params = await pendingParams;
   return withRoleAuth('member', async (request, context) => {
     const _user = { id: context.userId, organizationId: context.organizationId };
 
@@ -91,7 +95,9 @@ return standardErrorResponse(
     })(request, { params });
 };
 
-export const DELETE = async (request: NextRequest, { params }: { params: { id: string } }) => {
+export const DELETE = async (request: NextRequest, { params: pendingParams }: { params: Promise<{ id: string }> }) => {
+  // Next 16 supplies route params as a Promise.
+  const params = await pendingParams;
   return withRoleAuth('member', async (request, context) => {
     const _user = { id: context.userId, organizationId: context.organizationId };
 

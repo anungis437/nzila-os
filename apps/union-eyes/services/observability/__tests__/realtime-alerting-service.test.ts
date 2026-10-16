@@ -2,11 +2,15 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 const h = vi.hoisted(() => {
   const queue: unknown[] = [];
+  const values = vi.fn();
+  const returning = vi.fn();
   const makeChain = () => {
     const chain: Record<string, unknown> = {};
     for (const m of ['select', 'from', 'where', 'limit', 'orderBy', 'innerJoin', 'leftJoin', 'insert', 'update', 'set', 'values', 'returning', 'delete']) {
       chain[m] = () => chain;
     }
+    chain.values = (input: unknown) => { values(input); return chain; };
+    chain.returning = () => { returning(); return chain; };
     chain.then = (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => {
       const v = queue.length ? queue.shift() : [];
       return (v instanceof Error ? Promise.reject(v) : Promise.resolve(v)).then(res, rej);
@@ -21,7 +25,7 @@ const h = vi.hoisted(() => {
     delete: () => makeChain(),
     execute,
   };
-  return { queue, db, execute };
+  return { queue, db, execute, values, returning };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
@@ -46,6 +50,8 @@ const pushSel = (...items: unknown[]) => h.queue.push(...items);
 beforeEach(() => {
   h.queue.length = 0;
   h.execute.mockReset();
+  h.values.mockClear();
+  h.returning.mockClear();
 });
 
 describe('observability/realtime-alerting-service', () => {
@@ -62,18 +68,18 @@ describe('observability/realtime-alerting-service', () => {
       // signal 1: no existing rule
       pushSel([]); // select existing -> none
       pushSel([{ id: 'rule-1' }]); // insert rule returning
-      pushSel([{ id: 'exec-1' }]); // insert execution returning
+      pushSel([]); // insert execution without reading the insert-only table
       pushSel([]); // insert notificationTracking
       pushSel([]); // insert inAppNotifications
       // signal 2: existing rule found
       pushSel([{ id: 'rule-2' }]); // select existing -> found (skips insert)
-      pushSel([{ id: 'exec-2' }]); // insert execution returning
+      pushSel([]); // insert execution
       pushSel([]); // notificationTracking
       pushSel([]); // inAppNotifications
       // signal 3: no existing rule
       pushSel([]); // select existing
       pushSel([{ id: 'rule-3' }]); // insert rule returning
-      pushSel([{ id: 'exec-3' }]); // insert execution returning
+      pushSel([]); // insert execution
       pushSel([]); // notificationTracking
       pushSel([]); // inAppNotifications
 
@@ -82,6 +88,16 @@ describe('observability/realtime-alerting-service', () => {
       expect(result.byKind.sla_breach_imminent).toBe(1);
       expect(result.byKind.ingestion_failures).toBe(1);
       expect(result.byKind.payment_reconciliation_failures).toBe(1);
+      expect(h.returning).toHaveBeenCalledTimes(2); // newly created rules only
+      for (const offset of [1, 4, 8]) {
+        const execution = h.values.mock.calls[offset][0];
+        expect(execution.id).toMatch(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
+        const tracking = h.values.mock.calls[offset + 1][0];
+        const notification = h.values.mock.calls[offset + 2][0];
+        expect(tracking.templateData.executionId).toBe(execution.id);
+        expect(tracking.metadata.executionId).toBe(execution.id);
+        expect(notification.data.executionId).toBe(execution.id);
+      }
     });
 
     it('returns zero when there are no breaches', async () => {
@@ -93,6 +109,17 @@ describe('observability/realtime-alerting-service', () => {
       const result = await runRealtimeObservabilitySweep();
       expect(result.emitted).toBe(0);
       expect(result.byKind.sla_breach_imminent).toBe(0);
+    });
+
+    it('surfaces execution insertion failure before publishing notification metadata', async () => {
+      h.execute
+        .mockResolvedValueOnce([{ organization_id: 'org-1', count: 1 }])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([]);
+      pushSel([{ id: 'rule-1' }], new Error('synthetic insert permission denied'));
+      await expect(runRealtimeObservabilitySweep()).rejects.toThrow('synthetic insert permission denied');
+      expect(h.values).toHaveBeenCalledTimes(1);
+      expect(h.returning).not.toHaveBeenCalled();
     });
   });
 

@@ -93,3 +93,13 @@ export {
   type AcceptanceAuthUser,
   type AcceptanceDb,
 } from './acceptance-auth'
+
+// ── Application-scoped local/test acceptance identity ────────────────────
+export {
+  mintAcceptanceIdentityToken,
+  verifyAcceptanceIdentityToken,
+  type AcceptanceTrustProfile,
+  type AcceptanceIdentityClaims,
+  type AcceptanceIdentityVerification,
+} from './acceptance-trust'
+

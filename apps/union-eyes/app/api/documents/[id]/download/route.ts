@@ -20,6 +20,7 @@ import {
   toGovernanceLabel,
 } from '@/lib/services/document-governance-service';
 import { generateSasUrl } from '@/lib/blob-client';
+import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
 
 const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
 
@@ -143,6 +144,16 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
   const downloadUrl = latestVersion?.storageKey
     ? await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey)
     : row.fileUrl;
+
+  // Access evidence is mandatory: no download URL is issued without its canonical audit record.
+  await appendMandatoryAudit(db, {
+    organizationId,
+    action: 'document.download',
+    resourceType: 'documents',
+    resourceId: row.id,
+    userId,
+    details: { route: '/api/documents/[id]/download', privacyLabel: row.privacyLabel ?? null },
+  });
 
   return standardSuccessResponse({
     id: row.id,

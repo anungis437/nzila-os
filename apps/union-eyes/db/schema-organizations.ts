@@ -5,7 +5,6 @@
 
 import { pgTable, uuid, text, timestamp, integer, jsonb, boolean, date, pgEnum, index, uniqueIndex, type AnyPgColumn, varchar, numeric } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { applications } from './schema-applications';
 
 // =====================================================
 // ENUMS
@@ -136,10 +135,7 @@ export const organizations = pgTable(
     status: text('status').default('active'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-    createdBy: uuid('created_by'),
-
-    // Application Registry
-    appId: uuid('app_id').references(() => applications.id),
+    createdBy: text('created_by'),
 
     // Legacy & Migration
     legacyOrgId: uuid('legacy_tenant_id'),
@@ -159,7 +155,6 @@ export const organizations = pgTable(
     statusIdx: index('idx_organizations_status').on(table.status),
     clcAffiliatedIdx: index('idx_organizations_clc_affiliated').on(table.clcAffiliated),
     // jurisdictionIdx: index('idx_organizations_jurisdiction').on(table.jurisdiction), // Commented out - column does not exist
-    appIdx: index('idx_organizations_app_id').on(table.appId),
     legacyOrgIdx: index('idx_organizations_legacy_tenant').on(table.legacyOrgId),
   })
 );
@@ -206,7 +201,7 @@ export const organizationRelationships = pgTable(
 
     // Audit
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    createdBy: uuid('created_by'),
+    createdBy: text('created_by'),
   },
   (table) => ({
     parentIdx: index('idx_org_relationships_parent').on(table.parentOrgId),
@@ -236,12 +231,6 @@ export const organizationsRelations = relations(organizations, ({ one, many }) =
   // Child organizations
   children: many(organizations, {
     relationName: 'organization_hierarchy',
-  }),
-
-  // Application this org belongs to
-  application: one(applications, {
-    fields: [organizations.appId],
-    references: [applications.id],
   }),
 
   // Relationships as parent
@@ -274,10 +263,6 @@ export const organizationRelationshipsRelations = relations(
   })
 );
 
-export const applicationsRelations = relations(applications, ({ many }) => ({
-  organizations: many(organizations),
-}));
-
 // =====================================================
 // ORGANIZATION MEMBERS (UPDATED)
 // =====================================================
@@ -291,10 +276,7 @@ export const organizationMembers = pgTable(
     // organization_id stores the slug (TEXT), not UUID
     // This allows flexible reference without strict foreign key constraint
     organizationId: text('organization_id').notNull(),
-    
-    // LEGACY: Keep for backward compatibility during migration
-    legacyOrgId: uuid('tenant_id'),
-    
+
     // Required fields in actual database
     name: text('name').notNull(),
     email: text('email').notNull(),
@@ -312,20 +294,16 @@ export const organizationMembers = pgTable(
     membershipNumber: text('membership_number'),
     seniority: integer('seniority'),
     unionJoinDate: timestamp('union_join_date', { withTimezone: true }),
-    preferredContactMethod: text('preferred_contact_method'),
     metadata: jsonb('metadata').$type<Record<string, unknown> | null>(),
 
     // Member category & per-capita exemptions (mirrors QA baseline + Phase 5A
     // production schema). The `member_category` enum is created in
     // tooling/sql/union-eyes-qa-baseline.sql.
     memberCategory: text('member_category'),
-    exemptFromPerCapita: boolean('exempt_from_per_capita'),
+    // The canonical column is NOT NULL without a database default; the ORM supplies the value.
+    exemptFromPerCapita: boolean('exempt_from_per_capita').$defaultFn(() => false),
     exemptionReason: text('exemption_reason'),
     exemptionApprovedBy: varchar('exemption_approved_by', { length: 255 }),
-    exemptionApprovedAt: timestamp('exemption_approved_at', { withTimezone: true }),
-
-    // Full-text search vector (populated by trigger / migration)
-    searchVector: text('search_vector'),
 
     // Timestamps
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -411,7 +389,7 @@ export const orgConfigurations = pgTable(
     description: text('description'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-    updatedBy: uuid('updated_by'),
+    updatedBy: text('updated_by'),
   },
   (table) => ({
     orgCategoryKeyIdx: uniqueIndex('idx_org_configurations_org_cat_key').on(
@@ -501,4 +479,3 @@ export function isLocalUnion(org: Organization): boolean {
 export function isFederation(org: Organization): boolean {
   return org.organizationType === 'federation';
 }
-

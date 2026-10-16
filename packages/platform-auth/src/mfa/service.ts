@@ -23,7 +23,7 @@
  * `two_factor_enabled` flag on authUsers.
  */
 import { randomBytes, createHash } from 'crypto'
-import { db } from '@nzila/db/client'
+import { authDb as db, withAuthContext, withAuthenticatedAuthContext } from '../auth-db'
 import {
   authMfaTotp,
   authMfaChallenges,
@@ -39,6 +39,7 @@ import {
 } from './totp'
 import { encryptSecret, decryptSecret } from './encryption'
 import { createSession, setSessionCookie } from '../password/session'
+import { authDb, withAuthSavepoint } from '../auth-db'
 
 const CHALLENGE_TOKEN_BYTES = 32
 const CHALLENGE_TTL_MS = 5 * 60 * 1000 // 5 minutes
@@ -108,15 +109,18 @@ async function logEvent(
     userAgent?: string | null
     metadata?: Record<string, unknown>
   },
+  executor: typeof db = db,
 ): Promise<void> {
   try {
-    await db.insert(authAuditLog).values({
+    const write = async () => executor.insert(authAuditLog).values({
       userId: opts.userId ?? null,
       eventType,
       ipAddress: opts.ipAddress ?? null,
       userAgent: opts.userAgent ?? null,
       metadata: opts.metadata ?? {},
     })
+    if (executor === authDb) await withAuthSavepoint(write)
+    else await write()
   } catch {
     // best-effort
   }
@@ -130,6 +134,10 @@ export async function getMfaStatus(userId: string): Promise<{
   enabledAt: Date | null
   recoveryCodeCount: number
 }> {
+  return withAuthenticatedAuthContext(userId, () => getMfaStatusWithContext(userId))
+}
+
+async function getMfaStatusWithContext(userId: string) {
   const [row] = await db
     .select()
     .from(authMfaTotp)
@@ -150,6 +158,10 @@ export async function getMfaStatus(userId: string): Promise<{
 // ─── Enroll ─────────────────────────────────────────────────────────────────
 
 export async function enrollMfa(input: EnrollInput): Promise<EnrollResult> {
+  return withAuthenticatedAuthContext(input.userId, () => enrollMfaWithContext(input))
+}
+
+async function enrollMfaWithContext(input: EnrollInput): Promise<EnrollResult> {
   // If already fully enabled, refuse re-enroll without explicit disable first.
   const existing = await getMfaStatus(input.userId)
   if (existing.enabled) {
@@ -195,6 +207,10 @@ export async function enrollMfa(input: EnrollInput): Promise<EnrollResult> {
 export async function verifyEnrollment(
   input: VerifyEnrollInput,
 ): Promise<{ success: boolean; error?: string }> {
+  return withAuthenticatedAuthContext(input.userId, () => verifyEnrollmentWithContext(input))
+}
+
+async function verifyEnrollmentWithContext(input: VerifyEnrollInput): Promise<{ success: boolean; error?: string }> {
   const [row] = await db
     .select()
     .from(authMfaTotp)
@@ -235,14 +251,25 @@ export async function disableMfa(
   actorUserId: string,
   reason?: string,
 ): Promise<{ success: boolean }> {
+  if (userId === actorUserId)
+    return withAuthenticatedAuthContext(userId, () => disableMfaWithContext(userId, actorUserId, reason))
+  const { auth } = await import('../entra/server')
+  if ((await auth()).userId !== actorUserId) throw new Error('Authenticated MFA administrator required')
+  return withAuthContext({ phase: 'mfa-admin', actorUserId, targetUserId: userId, reason: reason ?? 'Explicit administrator MFA disable' },
+    () => disableMfaWithContext(userId, actorUserId, reason))
+}
+
+async function disableMfaWithContext(userId: string, actorUserId: string, reason?: string): Promise<{ success: boolean }> {
   await db
     .update(authMfaTotp)
     .set({ disabledAt: new Date(), updatedAt: new Date() })
     .where(eq(authMfaTotp.userId, userId))
-  await db
+  const changed = await db
     .update(authUsers)
     .set({ twoFactorEnabled: false })
     .where(eq(authUsers.userId, userId))
+    .returning({ userId: authUsers.userId })
+  if (!changed.length) return { success: false }
   await logEvent('mfa_disabled', {
     userId,
     metadata: { actorUserId, reason: reason ?? null },
@@ -258,7 +285,7 @@ export async function issueMfaChallenge(
   const raw = randomBytes(CHALLENGE_TOKEN_BYTES).toString('base64url')
   const tokenHash = hashToken(raw)
   const expiresAt = new Date(Date.now() + CHALLENGE_TTL_MS)
-  await db.insert(authMfaChallenges).values({
+  await authDb.insert(authMfaChallenges).values({
     userId: input.userId,
     tokenHash,
     method: 'totp',
@@ -270,7 +297,7 @@ export async function issueMfaChallenge(
     userId: input.userId,
     ipAddress: input.ipAddress,
     userAgent: input.userAgent,
-  })
+  }, authDb)
   return { challengeToken: raw, expiresAt }
 }
 
@@ -287,6 +314,11 @@ export async function consumeMfaChallenge(
   }
 
   const tokenHash = hashToken(input.challengeToken)
+  return withAuthContext({ phase: 'redemption', selector: { kind: 'mfa', tokenHash } },
+    () => consumeMfaChallengeWithContext(input, tokenHash))
+}
+
+async function consumeMfaChallengeWithContext(input: ConsumeChallengeInput, tokenHash: string): Promise<ConsumeChallengeResult> {
   const [challenge] = await db
     .select()
     .from(authMfaChallenges)
@@ -298,6 +330,7 @@ export async function consumeMfaChallenge(
       ),
     )
     .limit(1)
+    .for('update')
 
   if (!challenge) {
     await logEvent('mfa_challenge_failed', {
@@ -316,6 +349,7 @@ export async function consumeMfaChallenge(
     .from(authMfaTotp)
     .where(eq(authMfaTotp.userId, challenge.userId))
     .limit(1)
+    .for('update')
 
   if (!totpRow || !totpRow.enabledAt || totpRow.disabledAt) {
     return { success: false, error: 'MFA not enabled for this account' }
@@ -354,12 +388,6 @@ export async function consumeMfaChallenge(
     return { success: false, error: 'Invalid code' }
   }
 
-  // Mark challenge consumed
-  await db
-    .update(authMfaChallenges)
-    .set({ consumedAt: new Date(), ipAddress: input.ipAddress ?? null, userAgent: input.userAgent ?? null })
-    .where(eq(authMfaChallenges.id, challenge.id))
-
   await db
     .update(authMfaTotp)
     .set({ lastUsedAt: new Date(), updatedAt: new Date() })
@@ -379,6 +407,9 @@ export async function consumeMfaChallenge(
     userAgent: input.userAgent,
     metadata: { usedRecoveryCode },
   })
+  await db.update(authMfaChallenges)
+    .set({ consumedAt: new Date(), ipAddress: input.ipAddress ?? null, userAgent: input.userAgent ?? null })
+    .where(eq(authMfaChallenges.id, challenge.id))
 
   return { success: true, userId: challenge.userId }
 }

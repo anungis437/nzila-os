@@ -39,6 +39,14 @@ describe('db/schema-organizations schema', () => {
     }
   });
 
+  it('does not project the rejected application discriminator', () => {
+    const config = getTableConfig(orgSchema.organizations);
+    expect(config.columns.map((column) => column.name)).not.toContain('app_id');
+    expect(config.indexes.map((entry) => entry.config.name)).not.toContain('idx_organizations_app_id');
+    const relations = orgSchema.organizationsRelations.config({ one, many } as never);
+    expect(relations).not.toHaveProperty('application');
+  });
+
   it('resolves the standalone organization-migration column references', () => {
     const migrationFragments = [
       orgSchema.claimsOrganizationMigration,

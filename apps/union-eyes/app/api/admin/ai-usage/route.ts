@@ -5,7 +5,8 @@
  */
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withOrgOwnedContext } from '@/lib/db/org-owned-context';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { sql } from 'drizzle-orm';
 import { standardSuccessResponse } from '@/lib/api/standardized-responses';
 
@@ -25,8 +26,27 @@ export const GET = withApi(
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50')));
     const offset = (page - 1) * limit;
 
-    return withSystemContext(async () => {
-      const rows = await db.execute(sql`
+    const v2 = currentStateContextEnabled();
+    return withOrgOwnedContext(async () => {
+      // V2: canonical tenant-scoped public.audit_logs (RLS limits rows to the caller's
+      // organization; event payload lives in details); legacy: audit_security, all organizations.
+      const rows = v2
+        ? await db.execute(sql`
+        SELECT
+          audit_id   AS id,
+          user_id    AS "userId",
+          organization_id AS "organizationId",
+          resource_id     AS "origin",
+          created_at      AS "timestamp",
+          details->'metadata'->>'model'       AS model,
+          details->'metadata'->>'dataClass'   AS "dataClass",
+          details->'metadata'->>'auditRefId'  AS "auditRefId"
+        FROM public.audit_logs
+        WHERE details->>'eventType' = 'ai.invocation'
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `)
+        : await db.execute(sql`
         SELECT
           audit_id   AS id,
           user_id    AS "userId",
@@ -42,7 +62,13 @@ export const GET = withApi(
         LIMIT ${limit} OFFSET ${offset}
       `);
 
-      const countResult = await db.execute(sql`
+      const countResult = v2
+        ? await db.execute(sql`
+        SELECT COUNT(*)::int AS total
+        FROM public.audit_logs
+        WHERE details->>'eventType' = 'ai.invocation'
+      `)
+        : await db.execute(sql`
         SELECT COUNT(*)::int AS total
         FROM audit_security.audit_logs
         WHERE metadata->>'eventType' = 'ai.invocation'
