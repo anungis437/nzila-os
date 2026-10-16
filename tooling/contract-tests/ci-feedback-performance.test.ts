@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import { describe, expect, it } from 'vitest'
 import { parse } from 'yaml'
 import { partitionTypecheckPlan } from '../ci/run-typecheck-shard.mjs'
@@ -26,9 +27,7 @@ describe('CI feedback caching', () => {
     )
     expect(setupStep.with['turbo-cache-key']).toBe('preview-build')
     const ci = parse(read('.github/workflows/ci.yml'))
-    expect(
-      ci.jobs.lint.steps.some((step: { run?: string }) => step.run === 'pnpm lint'),
-    ).toBe(true)
+    expect(ci.jobs.lint.steps.some((step: { run?: string }) => step.run === 'pnpm lint')).toBe(true)
     expect(ci.jobs.typecheck).toBeDefined()
     expect(ci.jobs.test).toBeDefined()
   })
@@ -125,7 +124,11 @@ describe('owner-declared routine build scope', () => {
     expect(new Set(all).size).toBe(plan.TASK_COUNT)
     expect(all.sort()).toEqual(plan.AFFECTED_PACKAGES)
     const e2e = parse(read('.github/workflows/e2e.yml'))
-    const e2eApps = e2e.jobs.e2e.strategy.matrix.include.map((entry: { app: string }) => entry.app)
+    const e2eApps = [
+      ...new Set<string>(
+        e2e.jobs.e2e.strategy.matrix.include.map((entry: { app: string }) => entry.app),
+      ),
+    ]
     expect(e2eApps).toEqual(['web', 'console', 'union-eyes', 'control-plane'])
     expect(e2eApps.every((app: string) => plan.ACTIVE_APPS.includes(app))).toBe(true)
   })
@@ -165,6 +168,122 @@ describe('owner-declared routine build scope', () => {
         catalog,
       ),
     ).toThrow('workspace is missing')
+  })
+})
+
+describe('Union Eyes E2E shard authority', () => {
+  const workflow = parse(read('.github/workflows/e2e.yml'))
+  const worker = workflow.jobs.e2e
+  const gate = workflow.jobs['union-eyes-result']
+  const code = gate.steps[0].run.match(/node --input-type=module <<'NODE'\n([\s\S]*?)\nNODE/)[1]
+  const head = 'a'.repeat(40)
+  const jobs = [1, 2, 3, 4].map((index) => ({
+    id: index,
+    name: `UE E2E worker (${index}/4)`,
+    run_id: 123,
+    run_attempt: 2,
+    head_sha: head,
+    status: 'completed',
+    conclusion: 'success',
+  }))
+
+  it('runs all four shards in separate runner-local databases with one browser worker', () => {
+    const entries = worker.strategy.matrix.include.filter(
+      (entry: { app: string }) => entry.app === 'union-eyes',
+    )
+    expect(entries.map((entry: { shard: number }) => entry.shard)).toEqual([1, 2, 3, 4])
+    expect(entries.every((entry: { shards: number }) => entry.shards === 4)).toBe(true)
+    expect(worker.strategy['fail-fast']).toBe(false)
+    const bootstrap = worker.steps.find((step: { name?: string }) =>
+      step.name?.startsWith('Bootstrap Union Eyes'),
+    )
+    expect(bootstrap.env.DATABASE_URL).toBe('postgresql://ci:ci@localhost:5432/ci_e2e')
+    expect(bootstrap.run).toContain('docker run --name ci-e2e-postgres')
+    expect(read('apps/union-eyes/playwright.config.ts')).toContain('workers: 1')
+    expect(read('apps/union-eyes/playwright.config.ts')).toContain('fullyParallel: false')
+    const command = worker.steps.find(
+      (step: { name?: string }) => step.name === 'Run Playwright tests',
+    ).run
+    expect(command).toContain('--shard=${{ matrix.shard }}/${{ matrix.shards }}')
+    expect(command).not.toContain('--no-deps')
+    expect(command).not.toContain('--grep')
+    expect(gate.name).toBe('E2E · union-eyes')
+    expect(gate.needs).toEqual(['e2e'])
+    expect(gate.if).toBe('always()')
+    expect(gate.permissions).toEqual({ contents: 'read', actions: 'read' })
+    expect(gate.steps[0].run).toContain('/attempts/${EXPECTED_ATTEMPT}/jobs')
+    for (const step of worker.steps.filter(
+      (step: { uses?: string }) => step.uses === 'actions/upload-artifact@v4',
+    )) {
+      expect(step.with.name).toContain('matrix.shard')
+      expect(step.with.overwrite).toBe(true)
+    }
+  })
+
+  const cases = [
+    {
+      name: 'all UE workers pass despite an unrelated app failure',
+      jobs: [...jobs, { name: 'E2E · web', conclusion: 'failure' }],
+      pass: true,
+    },
+    { name: 'missing worker', jobs: jobs.slice(1), pass: false },
+    { name: 'duplicate worker identity', jobs: [jobs[0], jobs[0], ...jobs.slice(2)], pass: false },
+    {
+      name: 'unexpected fifth worker',
+      jobs: [...jobs, { ...jobs[0], id: 5, name: 'UE E2E worker (5/4)' }],
+      pass: false,
+    },
+    ...['failure', 'cancelled', 'skipped', 'timed_out', 'neutral', null].map((conclusion) => ({
+      name: `worker conclusion ${conclusion}`,
+      jobs: [{ ...jobs[0], conclusion }, ...jobs.slice(1)],
+      pass: false,
+    })),
+    {
+      name: 'foreign head',
+      jobs: [{ ...jobs[0], head_sha: 'b'.repeat(40) }, ...jobs.slice(1)],
+      pass: false,
+    },
+    {
+      name: 'earlier attempt',
+      jobs: [{ ...jobs[0], run_attempt: 1 }, ...jobs.slice(1)],
+      pass: false,
+    },
+    { name: 'foreign run', jobs: [{ ...jobs[0], run_id: 122 }, ...jobs.slice(1)], pass: false },
+    {
+      name: 'unfinished worker',
+      jobs: [{ ...jobs[0], status: 'in_progress' }, ...jobs.slice(1)],
+      pass: false,
+    },
+  ]
+
+  it.each(cases)('executes the real aggregate validator: $name', ({ jobs: scenario, pass }) => {
+    const directory = mkdtempSync(join(tmpdir(), 'nzila-ue-e2e-gate-'))
+    try {
+      const file = join(directory, 'jobs.json')
+      const receipt = join(directory, 'receipt.json')
+      writeFileSync(
+        file,
+        JSON.stringify([{ jobs: scenario.slice(0, 2) }, { jobs: scenario.slice(2) }]),
+      )
+      const result = spawnSync(process.execPath, ['--input-type=module', '-e', code], {
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          EXPECTED_HEAD: head,
+          EXPECTED_RUN: '123',
+          EXPECTED_ATTEMPT: '2',
+          SHARD_JOBS_FILE: file,
+          SHARD_RECEIPT_FILE: receipt,
+        },
+      })
+      expect(result.error).toBeUndefined()
+      expect(result.status, result.stderr).toBe(pass ? 0 : 1)
+      if (pass) expect(JSON.parse(readFileSync(receipt, 'utf8')).workers).toHaveLength(4)
+    } finally {
+      for (const name of ['jobs.json', 'receipt.json'])
+        rmSync(join(directory, name), { force: true })
+      rmdirSync(directory)
+    }
   })
 })
 
