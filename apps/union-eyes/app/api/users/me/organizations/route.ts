@@ -4,8 +4,8 @@
  * Returns the authenticated user's organizations and memberships.
  * Queries Drizzle/PostgreSQL directly (replaces Django proxy).
  *
- * Platform admins (PLATFORM_ADMIN_USER_IDS) see ALL organizations
- * so they can switch into any org context for support / administration.
+ * V2 uses active private memberships, including for platform administrators.
+ * Legacy PLATFORM_ADMIN_USER_IDS can still enumerate all organizations when V2 is off.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser } from '@nzila/platform-auth/entra/server';
@@ -14,22 +14,24 @@ import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { profiles } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { createLogger } from '@nzila/os-core'
+import { isPlatformAdminUser } from '@/lib/api-auth-guard';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 
 const logger = createLogger('users:me:organizations')
 
 export const dynamic = 'force-dynamic';
 
-/** Check if the given userId is in the PLATFORM_ADMIN_USER_IDS env var. */
-function isPlatformAdmin(userId: string): boolean {
-  const ids = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
-    .split(',')
-    .map(s => s.trim())
-    .filter(Boolean);
-  return ids.includes(userId);
-}
-
 export async function GET(_req: NextRequest) {
   try {
+    if (currentStateContextEnabled()) {
+      const { getCanonicalOrganizationChoices, canonicalOrganizationError } =
+        await import('@/lib/auth/canonical-organization-selection')
+      try {
+        return NextResponse.json(await getCanonicalOrganizationChoices())
+      } catch (error) {
+        return canonicalOrganizationError(error, 'load')
+      }
+    }
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -37,7 +39,7 @@ export async function GET(_req: NextRequest) {
 
     logger.info('[/api/users/me/organizations] Request started', { userId });
 
-    const isAdmin = isPlatformAdmin(userId);
+    const isAdmin = await isPlatformAdminUser(userId);
 
     // Fetch memberships by current auth user ID.
     let memberships = await db
@@ -188,4 +190,3 @@ export async function GET(_req: NextRequest) {
     );
   }
 }
-

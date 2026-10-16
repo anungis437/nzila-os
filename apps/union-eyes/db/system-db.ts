@@ -63,8 +63,16 @@ function getSystemDb() {
   return _systemDb
 }
 
+export async function closeSystemClient(): Promise<void> {
+  if (_systemClient) {
+    await _systemClient.end({ timeout: 5 })
+    _systemDb = undefined
+    _systemClient = undefined
+  }
+}
+
 export const systemDb = new Proxy({} as PostgresJsDatabase<typeof schema>, {
   get(_target, prop) {
-    return (getSystemDb() as any as Record<string | symbol, unknown>)[prop]
+    return Reflect.get(getSystemDb(), prop)
   },
 })

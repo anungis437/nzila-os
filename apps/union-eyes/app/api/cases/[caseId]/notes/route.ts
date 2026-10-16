@@ -6,44 +6,45 @@
  * PR-023: Case Detail / History / Notes UX Hardening
  */
 
-import { NextResponse } from 'next/server';
-import { auth } from '@nzila/platform-auth/entra/server';
-import { z } from 'zod';
-import { eq, desc } from 'drizzle-orm';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { claimUpdates, claims } from '@/db/schema/claims-schema';
-import { auditDataMutation } from '@/lib/audit-logger';
-import { logger } from '@/lib/logger';
-import { buildUnionEvidencePack } from '@/lib/evidence';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { NextResponse } from 'next/server'
+import { auth } from '@nzila/platform-auth/entra/server'
+import { z } from 'zod'
+import { eq, desc } from 'drizzle-orm'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { claimUpdates, claims } from '@/db/schema/claims-schema'
+import { auditDataMutation } from '@/lib/audit-logger'
+import { logger } from '@/lib/logger'
+import { buildUnionEvidencePack } from '@/lib/evidence'
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
+import { authorizationDenialResponse } from '@/lib/api/authorization-denial'
+import { getOrganizationIdForUser } from '@/lib/organization-utils'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 const AddNoteSchema = z.object({
-  text: z.string().min(1, 'Note text is required').max(10000, 'Note must be at most 10,000 characters'),
+  text: z
+    .string()
+    .min(1, 'Note text is required')
+    .max(10000, 'Note must be at most 10,000 characters'),
   isInternal: z.boolean().optional().default(false),
-});
+})
 
 /**
  * GET /api/cases/[caseId]/notes — List notes for a case
  */
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ caseId: string }> },
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ caseId: string }> }) {
   try {
-    const { caseId } = await params;
+    const { caseId } = await params
 
-    const { userId } = await auth();
+    const { userId } = await auth()
     if (!userId) {
       return NextResponse.json(
         { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
         { status: 401 },
-      );
+      )
     }
-    const orgId = await getOrganizationIdForUser(userId);
-    await requireEntitlement(orgId, 'grievance_case_suite');
+    const orgId = await getOrganizationIdForUser(userId)
+    await requireEntitlement(orgId, 'grievance_case_suite')
 
     const notes = await withRLSContext(async (tx) => {
       // Verify the case exists (RLS enforces org isolation)
@@ -51,66 +52,65 @@ export async function GET(
         .select({ claimId: claims.claimId })
         .from(claims)
         .where(eq(claims.claimId, caseId))
-        .limit(1);
+        .limit(1)
 
-      if (!claim) return null;
+      if (!claim) return null
 
       return tx
         .select()
         .from(claimUpdates)
         .where(eq(claimUpdates.claimId, caseId))
-        .orderBy(desc(claimUpdates.createdAt));
-    });
+        .orderBy(desc(claimUpdates.createdAt))
+    })
 
     if (notes === null) {
       return NextResponse.json(
         { error: 'NOT_FOUND', message: `Case '${caseId}' not found.` },
         { status: 404 },
-      );
+      )
     }
 
-    return NextResponse.json({ caseId, notes });
+    return NextResponse.json({ caseId, notes })
   } catch (error) {
-    logger.error('Failed to get case notes', error as Error);
+    const denied = authorizationDenialResponse(error)
+    if (denied) return denied
+    logger.error('Failed to get case notes', error as Error)
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' },
       { status: 500 },
-    );
+    )
   }
 }
 
 /**
  * POST /api/cases/[caseId]/notes — Add a note to a case
  */
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ caseId: string }> },
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ caseId: string }> }) {
   try {
-    const { caseId } = await params;
+    const { caseId } = await params
 
-    const { userId } = await auth();
+    const { userId } = await auth()
     if (!userId) {
       return NextResponse.json(
         { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
         { status: 401 },
-      );
+      )
     }
-    const orgId = await getOrganizationIdForUser(userId);
-    await requireEntitlement(orgId, 'grievance_case_suite');
+    const orgId = await getOrganizationIdForUser(userId)
+    await requireEntitlement(orgId, 'grievance_case_suite')
 
     // Parse body
-    let body: any;
+    let body: any
     try {
-      body = await request.json();
+      body = await request.json()
     } catch {
       return NextResponse.json(
         { error: 'INVALID_INPUT', message: 'Request body must be valid JSON.' },
         { status: 400 },
-      );
+      )
     }
 
-    const parsed = AddNoteSchema.safeParse(body);
+    const parsed = AddNoteSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
         {
@@ -122,10 +122,10 @@ export async function POST(
           })),
         },
         { status: 400 },
-      );
+      )
     }
 
-    const { text, isInternal } = parsed.data;
+    const { text, isInternal } = parsed.data
 
     const note = await withRLSContext(async (tx) => {
       // Verify case exists (RLS enforces org isolation)
@@ -133,9 +133,9 @@ export async function POST(
         .select({ claimId: claims.claimId })
         .from(claims)
         .where(eq(claims.claimId, caseId))
-        .limit(1);
+        .limit(1)
 
-      if (!claim) return null;
+      if (!claim) return null
 
       const [newNote] = await tx
         .insert(claimUpdates)
@@ -147,16 +147,16 @@ export async function POST(
           isInternal,
           visibilityScope: isInternal ? 'staff' : 'member',
         })
-        .returning();
+        .returning()
 
-      return newNote;
-    });
+      return newNote
+    })
 
     if (!note) {
       return NextResponse.json(
         { error: 'NOT_FOUND', message: `Case '${caseId}' not found.` },
         { status: 404 },
-      );
+      )
     }
 
     // Audit trail — log note ID + content hash (not full text for privacy)
@@ -172,30 +172,31 @@ export async function POST(
         isInternal,
         contentLength: text.length,
       },
-    });
+    })
 
     logger.info('Case note added', {
       caseId,
       noteId: note.updateId,
       isInternal,
-    });
+    })
 
     buildUnionEvidencePack({
       actionType: 'CASE_NOTE_ADDED',
       orgId: orgId,
       actorId: userId,
       artifacts: [{ type: 'case_note', data: { caseId, noteId: note.updateId, isInternal } }],
-    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_NOTE_ADDED' }));
+    }).catch((err) =>
+      logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_NOTE_ADDED' }),
+    )
 
-    return NextResponse.json(
-      { success: true, noteId: note.updateId },
-      { status: 201 },
-    );
+    return NextResponse.json({ success: true, noteId: note.updateId }, { status: 201 })
   } catch (error) {
-    logger.error('Failed to add case note', error as Error);
+    const denied = authorizationDenialResponse(error)
+    if (denied) return denied
+    logger.error('Failed to add case note', error as Error)
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' },
       { status: 500 },
-    );
+    )
   }
 }

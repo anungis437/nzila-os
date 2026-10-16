@@ -26,9 +26,55 @@ from __future__ import annotations
 
 import logging
 
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
+
+
+class CanonicalTenantMetadataMixin:
+    """Opt-in current metadata CRUD; legacy view behavior remains unchanged."""
+
+    def _canonical_organization(self):
+        actor = getattr(self.request, "_ue_canonical_actor", None)
+        if actor is None or actor.organization_id is None:
+            raise PermissionDenied("Active canonical organization membership required.")
+        return actor.organization_id
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if not settings.UE_CANONICAL_BOOTSTRAP_V2:
+            return queryset
+        return queryset.filter(organization_id=self._canonical_organization())
+
+    def _canonical_write_organization(self, serializer):
+        organization_id = self._canonical_organization()
+        organization = serializer.validated_data.get("organization")
+        if organization is not None and str(organization.pk) != organization_id:
+            raise PermissionDenied("Foreign organization assignment denied.")
+        if (
+            serializer.instance is not None
+            and str(serializer.instance.organization_id) != organization_id
+        ):
+            raise NotFound()
+        return organization_id
+
+    def perform_create(self, serializer):
+        if not settings.UE_CANONICAL_BOOTSTRAP_V2:
+            return super().perform_create(serializer)
+        serializer.save(organization_id=self._canonical_write_organization(serializer))
+
+    def perform_update(self, serializer):
+        if not settings.UE_CANONICAL_BOOTSTRAP_V2:
+            return super().perform_update(serializer)
+        serializer.save(organization_id=self._canonical_write_organization(serializer))
+
+    def perform_destroy(self, instance):
+        if not settings.UE_CANONICAL_BOOTSTRAP_V2:
+            return super().perform_destroy(instance)
+        if str(instance.organization_id) != self._canonical_organization():
+            raise NotFound()
+        instance.delete()
 
 
 def _resolve_local_org_id(auth_org_id: str | None) -> str | None:
@@ -86,7 +132,11 @@ class OrgScopedMixin:
                 )
             return qs
 
-        local_org_id = _resolve_local_org_id(auth_org_id)
+        local_org_id = (
+            self.request.organization_id
+            if getattr(settings, "UE_CANONICAL_BOOTSTRAP_V2", False)
+            else _resolve_local_org_id(auth_org_id)
+        )
         if not local_org_id:
             # Org hasn't been created locally yet (no webhook fired).
             # Fail closed — return empty queryset rather than leaking data.
@@ -109,7 +159,11 @@ class OrgScopedMixin:
         auth_org_id: str | None = self.request.META.get(  # type: ignore[attr-defined]
             "HTTP_X_ORGANIZATION_ID"
         )
-        local_org_id = _resolve_local_org_id(auth_org_id)
+        local_org_id = (
+            self.request.organization_id
+            if getattr(settings, "UE_CANONICAL_BOOTSTRAP_V2", False)
+            else _resolve_local_org_id(auth_org_id)
+        )
 
         model = serializer.Meta.model
         field_names = {f.name for f in model._meta.get_fields()}
@@ -138,8 +192,10 @@ class UserScopedMixin:
             return qs.none()
 
         auth_user_id: str = (
-            user.username
-        )  # OIDCAuthentication sets username = auth user ID
+            self.request.user_id
+            if getattr(settings, "UE_CANONICAL_BOOTSTRAP_V2", False)
+            else user.username
+        )
 
         model = qs.model
         field_names = {f.name for f in model._meta.get_fields()}

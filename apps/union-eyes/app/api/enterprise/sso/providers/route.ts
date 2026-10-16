@@ -45,10 +45,12 @@ export const POST = withApi(
       description: 'Creates a new SSO provider configuration.',
     },
   },
-  async ({ request, organizationId, userId }) => {
+  async ({ body, organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
     if (!userId) throw ApiError.badRequest('User context required');
-    const body = await request.json();
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      throw ApiError.badRequest('Request body must be a JSON object');
+    }
     const {
       name,
       providerType,

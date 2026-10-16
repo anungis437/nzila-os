@@ -106,7 +106,7 @@ export const wcbClaims = pgTable('wcb_claims', {
   // Audit
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-  createdBy: uuid('created_by'),
+  createdBy: text('created_by'),
 }, (table) => ({
   orgIdx: index('idx_wcb_claims_org').on(table.organizationId),
   workerIdx: index('idx_wcb_claims_worker').on(table.workerId),
@@ -142,7 +142,7 @@ export const wcbEmployerAssessments = pgTable('wcb_employer_assessments', {
 
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-  createdBy: uuid('created_by'),
+  createdBy: text('created_by'),
 }, (table) => ({
   orgIdx: index('idx_wcb_assessments_org').on(table.organizationId),
   jurisdictionIdx: index('idx_wcb_assessments_jurisdiction').on(table.jurisdiction),

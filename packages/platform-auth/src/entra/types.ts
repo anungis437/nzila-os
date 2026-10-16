@@ -17,6 +17,8 @@ export interface EntraSession extends DefaultSession {
   idToken?: string
   roles: string[]
   activeOrgId?: string
+  /** Compatibility-only origin for the current group-derived org selection. */
+  activeOrgSource?: 'entra-group-legacy'
   orgRole?: string
   entraObjectId?: string
   /** Entra tenant ID the user authenticated from. */

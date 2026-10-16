@@ -79,6 +79,17 @@ describe('grievances/[id]/access route', () => {
     expect([200, 400, 403, 404, 500]).toContain(response.status);
   });
 
+  it('POST accepts a non-UUID application user id', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/grievances/g1/access', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ userId: 'ue-v2-http-admin-7c1f', accessRole: 'reviewer' }),
+    }));
+    expect(response.status).toBe(200);
+    expect(m.grantCaseAccess).toHaveBeenCalledWith(expect.objectContaining({ userId: 'ue-v2-http-admin-7c1f' }));
+  });
+
   it('PATCH updates assignment status', async () => {
     const { PATCH } = await loadRoute();
     const response = await PATCH(new Request('http://localhost/api/grievances/g1/access', {

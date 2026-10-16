@@ -285,6 +285,13 @@ class NotificationBounces(BaseModel):
 class PushDevices(BaseModel):
     """Migrated from drizzle: push-notifications.ts"""
     organization_id = models.UUIDField(null=True, blank=True)
+    profile = models.ForeignKey(
+        'auth_core.Profiles',
+        to_field='user_id',
+        db_column='profile_id',
+        on_delete=models.CASCADE,
+        related_name='push_devices',
+    )
 
     class Meta:
         db_table = 'push_devices'
@@ -370,9 +377,44 @@ class SmsRateLimits(BaseModel):
         db_table = 'sms_rate_limits'
         verbose_name = 'SmsRateLimits'
 
+def mobile_device_capabilities_default():
+    return {'camera': True, 'gps': True, 'biometric': True, 'push': True}
+
+
 class MobileDevices(BaseModel):
-    """Migrated from drizzle: mobile-devices-schema.ts"""
-    device_token = models.CharField(max_length=255, null=True, blank=True)
+    """Canonical device registration used by the current mobile sync route."""
+    device_token = models.CharField(max_length=512, unique=True)
+    device_id = models.CharField(max_length=255, unique=True)
+    user_id = models.CharField(max_length=255)
+    organization = models.ForeignKey(
+        'auth_core.Organizations',
+        on_delete=models.CASCADE,
+        related_name='mobile_devices',
+        null=True,
+        blank=True,
+    )
+    platform = models.CharField(max_length=20)
+    device_name = models.CharField(max_length=255, null=True, blank=True)
+    device_model = models.CharField(max_length=100, null=True, blank=True)
+    os_version = models.CharField(max_length=50, null=True, blank=True)
+    app_version = models.CharField(max_length=20, null=True, blank=True)
+    push_enabled = models.BooleanField(default=True, null=True)
+    notification_sound = models.BooleanField(default=True, null=True)
+    notification_vibration = models.BooleanField(default=True, null=True)
+    timezone = models.CharField(max_length=50, default='UTC', null=True)
+    locale = models.CharField(max_length=10, default='en-US', null=True)
+    capabilities = models.JSONField(default=mobile_device_capabilities_default, null=True)
+    is_compliant = models.BooleanField(default=True, null=True)
+    compliance_issues = models.JSONField(default=list, null=True)
+    last_compliance_check = models.DateTimeField(null=True, blank=True)
+    is_jailbroken = models.BooleanField(default=False, null=True)
+    last_secure_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True)
+    is_archived = models.BooleanField(default=False, null=True)
+    registered_at = models.DateTimeField(auto_now_add=True)
+    last_active_at = models.DateTimeField(null=True, blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True)
 
     class Meta:
         db_table = 'mobile_devices'
@@ -381,6 +423,20 @@ class MobileDevices(BaseModel):
 class MobileNotifications(BaseModel):
     """Migrated from drizzle: mobile-devices-schema.ts"""
     device = models.ForeignKey('MobileDevices', on_delete=models.CASCADE, related_name='mobile_notifications_device_set', null=True, blank=True)
+    user_id = models.CharField(max_length=255)
+    organization_id = models.UUIDField(null=True, blank=True)
+    title = models.CharField(max_length=255)
+    body = models.TextField(null=True, blank=True)
+    data = models.JSONField(default=dict, null=True)
+    priority = models.CharField(max_length=20, default='normal', null=True)
+    badge = models.IntegerField(null=True, blank=True)
+    sound = models.CharField(max_length=100, null=True, blank=True)
+    status = models.CharField(max_length=20)
+    provider_response = models.JSONField(default=dict, null=True)
+    scheduled_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    failed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'mobile_notifications'
@@ -389,6 +445,18 @@ class MobileNotifications(BaseModel):
 class MobileSyncQueue(BaseModel):
     """Migrated from drizzle: mobile-devices-schema.ts"""
     device = models.ForeignKey('MobileDevices', on_delete=models.CASCADE, related_name='mobile_sync_queue_device_set', null=True, blank=True)
+    entity_type = models.CharField(max_length=100)
+    org_id = models.CharField(max_length=255)
+    operation = models.CharField(max_length=20)
+    payload = models.JSONField()
+    client_timestamp = models.DateTimeField()
+    status = models.CharField(max_length=20, default='pending', null=True)
+    error_message = models.TextField(null=True, blank=True)
+    conflict_type = models.CharField(max_length=50, null=True, blank=True)
+    resolution = models.CharField(max_length=20, null=True, blank=True)
+    retry_count = models.IntegerField(default=0, null=True)
+    max_retries = models.IntegerField(default=3, null=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'mobile_sync_queue'

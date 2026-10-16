@@ -18,6 +18,8 @@
  */
 import { auth as nextAuthBase } from './config'
 import { resolveIdentityFromEntra } from './adapter'
+import { resolveExternalAuthIdentity } from '../provider-identity'
+import { authDb, withAuthContext } from '../auth-db'
 import type { AuthResult, AuthenticatedIdentity } from '../identity'
 import type { EntraSession } from './types'
 import {
@@ -50,6 +52,12 @@ export interface AuthSessionResult {
   userId: string | null
   orgId: string | null
   orgRole: string | null
+  /** Authenticated provider namespace, not an application permission source. */
+  identityProvider?: string | null
+  /** Provider-owned subject; never interpreted as the platform user id. */
+  providerSubject?: string | null
+  /** Describes legacy org selectors so consumers do not trust them as authority. */
+  orgSelectionSource?: 'entra-group-legacy' | 'legacy-membership-default' | null
   sessionId: string | null
   sessionClaims: Record<string, unknown> | null
   getToken: (options?: Record<string, unknown>) => Promise<string | null>
@@ -64,8 +72,6 @@ export interface AuthSessionResult {
  *   1. PG session cookie (`nzila_session`) — email/password auth
  *   2. Entra / NextAuth JWT — SSO
  */
-const isE2ETestAuthEnabled = (): boolean =>
-  (process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true'
 
 export async function auth(): Promise<AuthSessionResult> {
   // ── 0. UnionEyes staging acceptance auth ────────────────────────────────
@@ -85,6 +91,9 @@ export async function auth(): Promise<AuthSessionResult> {
         userId: acceptanceUser.id,
         orgId: acceptanceUser.organizationId,
         orgRole: null,
+        identityProvider: 'union-eyes-acceptance',
+        providerSubject: null,
+        orgSelectionSource: null,
         sessionId: acceptanceUser.sessionId,
         sessionClaims: {
           email: acceptanceUser.email,
@@ -110,69 +119,25 @@ export async function auth(): Promise<AuthSessionResult> {
     const pgToken = cookieStore.get(PG_SESSION_COOKIE)?.value
     if (pgToken) {
       const { getAuthUser } = await import('../password/auth-service')
-      let pgUser = await getAuthUser()
-      // E2E test escape hatch: when PLAYWRIGHT_TEST_AUTH=true and the cookie
-      // value matches the deterministic seed token shape `ue-seed-session-<userId>`,
-      // accept it directly without depending on opaque DB session validation.
-      // Fail-closed: only active when PLAYWRIGHT_TEST_AUTH is explicitly set,
-      // which is never true in production runtimes.
-      if (!pgUser && isE2ETestAuthEnabled() && pgToken.startsWith('ue-seed-session-')) {
-        const userId = pgToken.slice('ue-seed-session-'.length)
-        if (userId) {
-          try {
-            const { db } = await import('@nzila/db/client')
-            const { authUsers, authOrganizationUsers } = await import('@nzila/db/schema')
-            const { eq, and } = await import('drizzle-orm')
-            const [authRow] = await db
-              .select({
-                id: authUsers.userId,
-                email: authUsers.email,
-                firstName: authUsers.firstName,
-                lastName: authUsers.lastName,
-              })
-              .from(authUsers)
-              .where(and(eq(authUsers.userId, userId), eq(authUsers.isActive, true)))
-              .limit(1)
-            if (authRow) {
-              const [membership] = await db
-                .select({ organizationId: authOrganizationUsers.organizationId })
-                .from(authOrganizationUsers)
-                .where(
-                  and(
-                    eq(authOrganizationUsers.userId, userId),
-                    eq(authOrganizationUsers.isActive, true),
-                  ),
-                )
-                .limit(1)
-              pgUser = {
-                ...authRow,
-                organizationId: membership?.organizationId ?? null,
-                sessionId: pgToken,
-              }
-            }
-          } catch {
-            // E2E auth bridge lookup failed; fall through to standard paths.
-          }
-        }
-      }
+      const pgUser = await getAuthUser()
       if (pgUser) {
         // Resolve org role from DB
         let orgRole: string | null = null
         try {
-          const { db } = await import('@nzila/db/client')
           const { authOrganizationUsers } = await import('@nzila/db/schema')
           const { eq, and } = await import('drizzle-orm')
           if (pgUser.organizationId) {
-            const [membership] = await db
+            const organizationId = pgUser.organizationId
+            const [membership] = await withAuthContext({ phase: 'identity', userId: pgUser.id }, () => authDb
               .select({ role: authOrganizationUsers.role })
               .from(authOrganizationUsers)
               .where(
                 and(
                   eq(authOrganizationUsers.userId, pgUser.id),
-                  eq(authOrganizationUsers.organizationId, pgUser.organizationId),
+                  eq(authOrganizationUsers.organizationId, organizationId),
                 ),
               )
-              .limit(1)
+              .limit(1))
             orgRole = membership?.role ?? null
           }
         } catch {
@@ -183,6 +148,9 @@ export async function auth(): Promise<AuthSessionResult> {
           userId: pgUser.id,
           orgId: pgUser.organizationId,
           orgRole,
+          identityProvider: 'nzila-password',
+          providerSubject: pgUser.id,
+          orgSelectionSource: pgUser.organizationId ? 'legacy-membership-default' : null,
           sessionId: pgUser.sessionId,
           sessionClaims: {
             email: pgUser.email,
@@ -213,11 +181,20 @@ export async function auth(): Promise<AuthSessionResult> {
   if (!session?.user) {
     return { userId: null, orgId: null, orgRole: null, sessionId: null, sessionClaims: null, getToken: async () => null, has: () => false }
   }
+  const mapped = entra?.entraObjectId && entra?.tenantId
+    ? await resolveExternalAuthIdentity('entra', `${entra.tenantId}:${entra.entraObjectId}`) : null
+  if (!mapped) return { userId: null, orgId: null, orgRole: null, sessionId: null, sessionClaims: null, getToken: async () => null, has: () => false }
 
   return {
-    userId: entra?.entraObjectId ?? session.user.id ?? null,
+    userId: mapped.platformUserId,
     orgId: entra?.activeOrgId ?? null,
     orgRole: entra?.orgRole ?? null,
+    identityProvider: entra?.entraObjectId && entra?.tenantId ? 'entra' : null,
+    providerSubject:
+      entra?.entraObjectId && entra?.tenantId
+        ? `${entra.tenantId}:${entra.entraObjectId}`
+        : null,
+    orgSelectionSource: entra?.activeOrgSource ?? null,
     sessionId: entra?.entraObjectId ?? session.user.id ?? null,
     sessionClaims: {
       roles: entra?.roles ?? [],
@@ -283,47 +260,7 @@ export async function currentUser() {
     const pgToken = cookieStore.get(PG_SESSION_COOKIE)?.value
     if (pgToken) {
       const { getAuthUser } = await import('../password/auth-service')
-      let pgUser = await getAuthUser()
-      // Same E2E test escape hatch as auth() above. See note there.
-      if (!pgUser && isE2ETestAuthEnabled() && pgToken.startsWith('ue-seed-session-')) {
-        const userId = pgToken.slice('ue-seed-session-'.length)
-        if (userId) {
-          try {
-            const { db } = await import('@nzila/db/client')
-            const { authUsers, authOrganizationUsers } = await import('@nzila/db/schema')
-            const { eq, and } = await import('drizzle-orm')
-            const [authRow] = await db
-              .select({
-                id: authUsers.userId,
-                email: authUsers.email,
-                firstName: authUsers.firstName,
-                lastName: authUsers.lastName,
-              })
-              .from(authUsers)
-              .where(and(eq(authUsers.userId, userId), eq(authUsers.isActive, true)))
-              .limit(1)
-            if (authRow) {
-              const [membership] = await db
-                .select({ organizationId: authOrganizationUsers.organizationId })
-                .from(authOrganizationUsers)
-                .where(
-                  and(
-                    eq(authOrganizationUsers.userId, userId),
-                    eq(authOrganizationUsers.isActive, true),
-                  ),
-                )
-                .limit(1)
-              pgUser = {
-                ...authRow,
-                organizationId: membership?.organizationId ?? null,
-                sessionId: pgToken,
-              }
-            }
-          } catch {
-            // E2E auth bridge lookup failed; fall through to standard paths.
-          }
-        }
-      }
+      const pgUser = await getAuthUser()
       if (pgUser) {
         return {
           id: pgUser.id,
@@ -360,9 +297,12 @@ export async function currentUser() {
   const entra = session as EntraSession | null
 
   if (!session?.user) return null
+  const mapped = entra?.entraObjectId && entra?.tenantId
+    ? await resolveExternalAuthIdentity('entra', `${entra.tenantId}:${entra.entraObjectId}`) : null
+  if (!mapped) return null
 
   return {
-    id: entra?.entraObjectId ?? session.user.id ?? '',
+    id: mapped.platformUserId,
     firstName: session.user.name?.split(' ')[0] ?? null,
     lastName: session.user.name?.split(' ').slice(1).join(' ') || null,
     fullName: session.user.name ?? null,
@@ -410,7 +350,12 @@ export async function getAuth(_req?: unknown): Promise<AuthSessionResult> {
  */
 export async function getAuthSession(): Promise<AuthResult> {
   const session = await getSession()
-  return resolveIdentityFromEntra(session)
+  const result = resolveIdentityFromEntra(session)
+  if (!result.ok) return result
+  const mapped = session?.entraObjectId && session?.tenantId
+    ? await resolveExternalAuthIdentity('entra', `${session.tenantId}:${session.entraObjectId}`) : null
+  if (!mapped) return { ok: false, code: 'AUTH_REQUIRED', message: 'Verified platform identity binding required', httpStatus: 401 }
+  return { ...result, identity: { ...result.identity, userId: mapped.platformUserId } }
 }
 
 /**

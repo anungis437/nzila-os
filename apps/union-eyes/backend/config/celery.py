@@ -5,6 +5,7 @@ Workers are started with:
 Beat scheduler:
     celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 """
+
 import os
 
 from celery import Celery
@@ -18,6 +19,14 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 
 # Auto-discover tasks.py in every INSTALLED_APP.
 app.autodiscover_tasks()
+app.autodiscover_tasks(
+    [
+        "services.compliance_snapshot",
+        "services.events",
+        "services.integration_control_plane",
+    ],
+    force=True,
+)
 
 
 @app.task(bind=True, ignore_result=True)

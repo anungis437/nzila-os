@@ -366,13 +366,13 @@ export const grievanceDeadlines = pgTable("grievance_deadlines", {
   calculatedDueDate: timestamp("calculated_due_date", { withTimezone: true }),
   calculationProvenance: jsonb("calculation_provenance").default({}),
   confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
-  confirmedBy: uuid("confirmed_by"),
+  confirmedBy: text("confirmed_by"),
   overrideDueDate: timestamp("override_due_date", { withTimezone: true }),
   overrideReason: text("override_reason"),
   overrideAt: timestamp("override_at", { withTimezone: true }),
-  overrideBy: uuid("override_by"),
+  overrideBy: text("override_by"),
   supersededAt: timestamp("superseded_at", { withTimezone: true }),
-  supersededBy: uuid("superseded_by"),
+  supersededBy: text("superseded_by"),
 
   // Reminders
   reminderDays: integer("reminder_days").array(), // days before deadline to send reminders

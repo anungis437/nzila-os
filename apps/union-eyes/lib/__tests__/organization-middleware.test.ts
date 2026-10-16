@@ -50,6 +50,15 @@ vi.mock('@nzila/os-core', () => ({
   })),
 }));
 
+const mockCanonicalEnabled = vi.hoisted(() => vi.fn(() => false));
+const mockCanonicalContext = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({
+  currentStateContextEnabled: mockCanonicalEnabled,
+}));
+vi.mock('@/lib/auth/canonical-context', () => ({
+  getCanonicalOrganizationContext: mockCanonicalContext,
+}));
+
 // ── Imports ──────────────────────────────────────────────────────────────────
 
 import {
@@ -235,5 +244,68 @@ describe('withOrganizationAuth', () => {
     expect(mockWithRLS).toHaveBeenNthCalledWith(1, { organizationId: 'system' }, expect.any(Function));
     // Then membership verification + handler run under the resolved org context.
     expect(mockWithRLS).toHaveBeenNthCalledWith(2, { organizationId: 'org-1' }, expect.any(Function));
+  });
+});
+
+describe('withOrganizationAuth canonical V2 execution', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCanonicalEnabled.mockReturnValue(true);
+    mockRequireUser.mockResolvedValue({ userId: 'user_1' } as unknown as Awaited<ReturnType<typeof mockRequireUser>>);
+    mockCanonicalContext.mockResolvedValue({ userId: 'user_1', organizationId: 'org-1' });
+  });
+
+  it('runs the handler inside the canonical organization RLS transaction and awaits its failures', async () => {
+    let insideTransaction = false;
+    mockWithRLS.mockImplementationOnce((async (_context: unknown, operation: () => Promise<unknown>) => {
+      insideTransaction = true;
+      try {
+        return await operation();
+      } finally {
+        insideTransaction = false;
+      }
+    }) as unknown as typeof withRLSContext);
+    const handler = vi.fn(async () => {
+      expect(insideTransaction).toBe(true);
+      return { body: 'ok', status: 200 } as unknown as NextResponse;
+    });
+
+    await withOrganizationAuth(handler)({} as NextRequest);
+
+    expect(mockWithRLS).toHaveBeenCalledTimes(1);
+    expect(mockWithRLS).toHaveBeenCalledWith({ organizationId: 'org-1' }, expect.any(Function));
+    expect(handler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ organizationId: 'org-1', userId: 'user_1' }),
+      undefined,
+    );
+    expect(mockRequireUserForOrg).not.toHaveBeenCalled();
+  });
+
+  it('maps an entitlement denial to 403 rather than a generic 500', async () => {
+    const denial = Object.assign(new Error('Module access denied'), { code: 'ENTITLEMENT_REQUIRED' });
+    await withOrganizationAuth(vi.fn().mockRejectedValue(denial))({} as NextRequest);
+
+    expect(NextResponse.json).toHaveBeenCalledWith(
+      { error: 'Module access denied', code: 'ENTITLEMENT_REQUIRED' },
+      { status: 403 },
+    );
+  });
+
+  it('still reports unexpected handler failures as 500 and never invokes the handler without canonical context', async () => {
+    mockCanonicalContext.mockRejectedValueOnce(new Error('Forbidden'));
+    const handler = vi.fn();
+    await withOrganizationAuth(handler)({} as NextRequest);
+    expect(handler).not.toHaveBeenCalled();
+    expect(NextResponse.json).toHaveBeenCalledWith(
+      { error: 'Forbidden - User is not a member of this organization' },
+      { status: 403 },
+    );
+
+    await withOrganizationAuth(vi.fn().mockRejectedValue(new Error('boom')))({} as NextRequest);
+    expect(NextResponse.json).toHaveBeenLastCalledWith(
+      { error: 'Internal server error' },
+      { status: 500 },
+    );
   });
 });

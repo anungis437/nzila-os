@@ -78,8 +78,8 @@ export const GET = withApi(
       om.name              AS "memberName"
     FROM member_dues_ledger mdl
     LEFT JOIN organization_members om
-      ON om.user_id = mdl.user_id
-     AND om.organization_id = mdl.organization_id::text
+      ON om.user_id = mdl.user_id::text
+     AND om.organization_id::text = mdl.organization_id::text
     WHERE mdl.organization_id = ${organizationId}::uuid
       AND mdl.transaction_type = 'payment'
     ORDER BY mdl.transaction_date DESC

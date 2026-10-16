@@ -176,7 +176,7 @@ class Organizations(BaseModel):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.UUIDField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
 
     # Legacy & Migration
     legacy_org_id = models.UUIDField(
@@ -298,7 +298,7 @@ class OrganizationRelationships(BaseModel):
 
     # Audit
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.UUIDField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "organization_relationships"
@@ -512,7 +512,7 @@ class Profiles(BaseModel):
     PAYMENT_PROVIDER_CHOICES = [("stripe", "Stripe"), ("whop", "Whop")]
     WHOP_MEMBERSHIP_ID_CHOICES = [("free", "Free"), ("pro", "Pro")]
 
-    user_id = models.TextField()
+    user_id = models.TextField(unique=True)
     email = models.TextField(null=True, blank=True)
     membership = models.CharField(
         choices=MEMBERSHIP_CHOICES, max_length=14, default="free"
@@ -768,6 +768,12 @@ class OrganizationMembers(BaseModel):
     class Meta:
         db_table = "organization_members"
         verbose_name = "OrganizationMembers"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "user_id"],
+                name="unique_org_membership",
+            )
+        ]
 
 
 class SsoProviders(BaseModel):

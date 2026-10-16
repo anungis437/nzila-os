@@ -18,15 +18,12 @@
  * @layer 7 — Contract-Aware Runtime Enforcement
  */
 
-import { db } from '@/db';
-import {
-  orgEntitlements,
-  contractCoveredOrgs,
-} from '@/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
-import { NextResponse } from 'next/server';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { db } from '@/db'
+import { orgEntitlements, contractCoveredOrgs } from '@/db/schema'
+import { eq, and, sql } from 'drizzle-orm'
+import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
+import { NextResponse } from 'next/server'
+import { withRLSContext } from '@/lib/db/with-rls-context'
 
 // ============================================================================
 // Module Keys (canonical feature identifiers)
@@ -51,9 +48,9 @@ export const PLATFORM_MODULES = {
   EMPLOYER_EXECUTION_REPLAY: 'employer_execution_replay',
   EMPLOYER_EXECUTION_COMPLIANCE: 'employer_execution_compliance',
   UNION_KNOWLEDGE_SUITE: 'union_knowledge_suite',
-} as const;
+} as const
 
-export type PlatformModuleKey = (typeof PLATFORM_MODULES)[keyof typeof PLATFORM_MODULES];
+export type PlatformModuleKey = (typeof PLATFORM_MODULES)[keyof typeof PLATFORM_MODULES]
 
 // ============================================================================
 // Module Display Layer (Workstream B5)
@@ -73,25 +70,25 @@ export type PlatformModuleKey = (typeof PLATFORM_MODULES)[keyof typeof PLATFORM_
 //
 
 export interface ModuleDisplay {
-  displayName: string;
-  narrativeTagline: string;
+  displayName: string
+  narrativeTagline: string
   /**
    * Institutional framing — what role this capability plays in the
    * institution's governance/continuity posture. Optional; consumers
    * fall back to `narrativeTagline` when absent.
    */
-  organizationalDescription?: string;
+  organizationalDescription?: string
   /**
    * Operational framing — what stewards/representatives actually do
    * with this capability day to day. Optional.
    */
-  operationalDescription?: string;
+  operationalDescription?: string
   /**
    * AI / decisioning framing — only populated for capabilities that
    * involve reasoning support. Always asserts reviewer-led, governed,
    * non-autonomous posture.
    */
-  aiSafetyDescription?: string;
+  aiSafetyDescription?: string
 }
 
 export const PLATFORM_MODULE_DISPLAY: Record<PlatformModuleKey, ModuleDisplay> = {
@@ -259,7 +256,7 @@ export const PLATFORM_MODULE_DISPLAY: Record<PlatformModuleKey, ModuleDisplay> =
     operationalDescription:
       'Stewards curate and retrieve institutional knowledge to support consistent, defensible representation decisions.',
   },
-};
+}
 
 /**
  * Resolve a feature-key to its institutional display surface.
@@ -267,16 +264,16 @@ export const PLATFORM_MODULE_DISPLAY: Record<PlatformModuleKey, ModuleDisplay> =
  * yet in the display registry, so new entitlements never break the UI.
  */
 export function getModuleDisplay(featureKey: string): ModuleDisplay {
-  const known = (PLATFORM_MODULE_DISPLAY as Record<string, ModuleDisplay | undefined>)[featureKey];
-  if (known) return known;
+  const known = (PLATFORM_MODULE_DISPLAY as Record<string, ModuleDisplay | undefined>)[featureKey]
+  if (known) return known
   const humanised = featureKey
     .split('_')
     .map((part) => (part.length === 0 ? part : part[0].toUpperCase() + part.slice(1)))
-    .join(' ');
+    .join(' ')
   return {
     displayName: humanised,
     narrativeTagline: `Platform module ${humanised} — institutional capability registered for this organisation.`,
-  };
+  }
 }
 
 // ============================================================================
@@ -284,14 +281,14 @@ export function getModuleDisplay(featureKey: string): ModuleDisplay {
 // ============================================================================
 
 export interface EntitlementCheckResult {
-  allowed: boolean;
-  featureKey: string;
-  reason: string;
-  entitlementId?: string;
-  currentUsage?: number;
-  usageLimit?: number;
-  contractId?: string;
-  expiresAt?: Date;
+  allowed: boolean
+  featureKey: string
+  reason: string
+  entitlementId?: string
+  currentUsage?: number
+  usageLimit?: number
+  contractId?: string
+  expiresAt?: Date
 }
 
 // ============================================================================
@@ -306,82 +303,83 @@ export async function checkModuleEntitlement(
   organizationId: string,
   featureKey: string,
 ): Promise<EntitlementCheckResult> {
-  // Entitlement rows are tenant-RLS org-scoped. Lookup under system authority
-  // with organizationId / featureKey still bound in the WHERE clause.
-  return withSystemContext(async () => {
-  // 1. Look up active entitlement
-  const [entitlement] = await db
-    .select()
-    .from(orgEntitlements)
-    .where(
-      and(
-        eq(orgEntitlements.organizationId, organizationId),
-        eq(orgEntitlements.featureKey, featureKey),
-        eq(orgEntitlements.status, 'active'),
-      ),
-    )
-    .limit(1);
+  // Entitlement rows are organization-scoped runtime records. Resolve them
+  // under the caller's explicit organization context so V2 tenant authority
+  // is preserved and the ordinary runtime principal only sees its own org.
+  return withRLSContext({ organizationId }, async () => {
+    // 1. Look up active entitlement
+    const [entitlement] = await db
+      .select()
+      .from(orgEntitlements)
+      .where(
+        and(
+          eq(orgEntitlements.organizationId, organizationId),
+          eq(orgEntitlements.featureKey, featureKey),
+          eq(orgEntitlements.status, 'active'),
+        ),
+      )
+      .limit(1)
 
-  if (!entitlement) {
-    return {
-      allowed: false,
-      featureKey,
-      reason: `No active entitlement for module '${featureKey}'`,
-    };
-  }
-
-  // 2. Check expiration
-  if (entitlement.expiresAt && entitlement.expiresAt < new Date()) {
-    return {
-      allowed: false,
-      featureKey,
-      reason: `Entitlement for '${featureKey}' expired at ${entitlement.expiresAt.toISOString()}`,
-      entitlementId: entitlement.id,
-      expiresAt: entitlement.expiresAt,
-    };
-  }
-
-  // 3. Check usage limit
-  if (
-    entitlement.usageLimit !== null &&
-    entitlement.usageLimit !== undefined &&
-    entitlement.currentUsage !== null &&
-    entitlement.currentUsage !== undefined &&
-    entitlement.currentUsage >= entitlement.usageLimit
-  ) {
-    return {
-      allowed: false,
-      featureKey,
-      reason: `Usage limit reached for '${featureKey}' (${entitlement.currentUsage}/${entitlement.usageLimit})`,
-      entitlementId: entitlement.id,
-      currentUsage: entitlement.currentUsage,
-      usageLimit: entitlement.usageLimit,
-    };
-  }
-
-  // 4. Verify backing contract is active (if linked)
-  if (entitlement.contractLineItemId) {
-    const contractCheck = await verifyBackingContract(entitlement.contractLineItemId);
-    if (!contractCheck.valid) {
+    if (!entitlement) {
       return {
         allowed: false,
         featureKey,
-        reason: contractCheck.reason,
-        entitlementId: entitlement.id,
-      };
+        reason: `No active entitlement for module '${featureKey}'`,
+      }
     }
-  }
 
-  return {
-    allowed: true,
-    featureKey,
-    reason: 'Entitlement active',
-    entitlementId: entitlement.id,
-    currentUsage: entitlement.currentUsage ?? undefined,
-    usageLimit: entitlement.usageLimit ?? undefined,
-    expiresAt: entitlement.expiresAt ?? undefined,
-  };
-  });
+    // 2. Check expiration
+    if (entitlement.expiresAt && entitlement.expiresAt < new Date()) {
+      return {
+        allowed: false,
+        featureKey,
+        reason: `Entitlement for '${featureKey}' expired at ${entitlement.expiresAt.toISOString()}`,
+        entitlementId: entitlement.id,
+        expiresAt: entitlement.expiresAt,
+      }
+    }
+
+    // 3. Check usage limit
+    if (
+      entitlement.usageLimit !== null &&
+      entitlement.usageLimit !== undefined &&
+      entitlement.currentUsage !== null &&
+      entitlement.currentUsage !== undefined &&
+      entitlement.currentUsage >= entitlement.usageLimit
+    ) {
+      return {
+        allowed: false,
+        featureKey,
+        reason: `Usage limit reached for '${featureKey}' (${entitlement.currentUsage}/${entitlement.usageLimit})`,
+        entitlementId: entitlement.id,
+        currentUsage: entitlement.currentUsage,
+        usageLimit: entitlement.usageLimit,
+      }
+    }
+
+    // 4. Verify backing contract is active (if linked)
+    if (entitlement.contractLineItemId) {
+      const contractCheck = await verifyBackingContract(entitlement.contractLineItemId)
+      if (!contractCheck.valid) {
+        return {
+          allowed: false,
+          featureKey,
+          reason: contractCheck.reason,
+          entitlementId: entitlement.id,
+        }
+      }
+    }
+
+    return {
+      allowed: true,
+      featureKey,
+      reason: 'Entitlement active',
+      entitlementId: entitlement.id,
+      currentUsage: entitlement.currentUsage ?? undefined,
+      usageLimit: entitlement.usageLimit ?? undefined,
+      expiresAt: entitlement.expiresAt ?? undefined,
+    }
+  })
 }
 
 /**
@@ -400,9 +398,9 @@ export async function checkCoveredOrg(
         eq(contractCoveredOrgs.organizationId, organizationId),
       ),
     )
-    .limit(1);
+    .limit(1)
 
-  return !!covered && !covered.deactivatedAt;
+  return !!covered && !covered.deactivatedAt
 }
 
 /**
@@ -415,11 +413,8 @@ export async function listOrgEntitlements(
     .select()
     .from(orgEntitlements)
     .where(
-      and(
-        eq(orgEntitlements.organizationId, organizationId),
-        eq(orgEntitlements.status, 'active'),
-      ),
-    );
+      and(eq(orgEntitlements.organizationId, organizationId), eq(orgEntitlements.status, 'active')),
+    )
 
   return entitlements.map((e) => ({
     allowed: !(e.expiresAt && e.expiresAt < new Date()),
@@ -429,7 +424,7 @@ export async function listOrgEntitlements(
     currentUsage: e.currentUsage ?? undefined,
     usageLimit: e.usageLimit ?? undefined,
     expiresAt: e.expiresAt ?? undefined,
-  }));
+  }))
 }
 
 // ============================================================================
@@ -445,7 +440,7 @@ export async function requireEntitlement(
   featureKey: string,
   userId?: string,
 ): Promise<EntitlementCheckResult> {
-  const result = await checkModuleEntitlement(organizationId, featureKey);
+  const result = await checkModuleEntitlement(organizationId, featureKey)
 
   if (!result.allowed) {
     await auditLog({
@@ -461,12 +456,12 @@ export async function requireEntitlement(
         featureKey,
         reason: result.reason,
       },
-    });
+    })
 
-    throw new EntitlementError(featureKey, result.reason);
+    throw new EntitlementError(featureKey, result.reason)
   }
 
-  return result;
+  return result
 }
 
 /**
@@ -481,19 +476,19 @@ export function withEntitlement(
     // Extract organizationId from headers or context
     const orgId =
       (context as { organizationId?: string }).organizationId ??
-      request.headers.get('x-organization-id');
+      request.headers.get('x-organization-id')
 
     if (!orgId) {
       return NextResponse.json(
         { error: 'Organization context required for module access' },
         { status: 400 },
-      );
+      )
     }
 
-    const result = await checkModuleEntitlement(orgId, featureKey);
+    const result = await checkModuleEntitlement(orgId, featureKey)
 
     if (!result.allowed) {
-      const userId = request.headers.get('x-user-id') ?? undefined;
+      const userId = request.headers.get('x-user-id') ?? undefined
       await auditLog({
         eventType: AuditEventType.SYSTEM_SECURITY_ALERT,
         severity: AuditSeverity.HIGH,
@@ -503,7 +498,7 @@ export function withEntitlement(
         action: 'module_access_denied',
         outcome: 'failure',
         metadata: { featureKey, reason: result.reason },
-      });
+      })
 
       return NextResponse.json(
         {
@@ -513,11 +508,11 @@ export function withEntitlement(
           reason: result.reason,
         },
         { status: 403 },
-      );
+      )
     }
 
-    return handler(request, context);
-  };
+    return handler(request, context)
+  }
 }
 
 // ============================================================================
@@ -525,8 +520,8 @@ export function withEntitlement(
 // ============================================================================
 
 async function verifyBackingContract(contractLineItemId: string): Promise<{
-  valid: boolean;
-  reason: string;
+  valid: boolean
+  reason: string
 }> {
   // Query contract through line item → commercial_contracts
   const result = await db.execute(
@@ -537,23 +532,23 @@ async function verifyBackingContract(contractLineItemId: string): Promise<{
     WHERE cli.id = ${contractLineItemId}
     LIMIT 1
   `,
-  );
+  )
 
-  const rows = Array.from(result);
+  const rows = Array.from(result)
   if (rows.length === 0) {
-    return { valid: false, reason: 'Backing contract not found' };
+    return { valid: false, reason: 'Backing contract not found' }
   }
 
-  const contract = rows[0] as { status: string; expiration_date: string };
+  const contract = rows[0] as { status: string; expiration_date: string }
   if (contract.status !== 'active') {
-    return { valid: false, reason: `Backing contract is ${contract.status}` };
+    return { valid: false, reason: `Backing contract is ${contract.status}` }
   }
 
   if (contract.expiration_date && new Date(contract.expiration_date) < new Date()) {
-    return { valid: false, reason: 'Backing contract has expired' };
+    return { valid: false, reason: 'Backing contract has expired' }
   }
 
-  return { valid: true, reason: 'Contract active' };
+  return { valid: true, reason: 'Contract active' }
 }
 
 // ============================================================================
@@ -561,12 +556,12 @@ async function verifyBackingContract(contractLineItemId: string): Promise<{
 // ============================================================================
 
 export class EntitlementError extends Error {
-  public readonly code = 'ENTITLEMENT_REQUIRED';
-  public readonly featureKey: string;
+  public readonly code = 'ENTITLEMENT_REQUIRED'
+  public readonly featureKey: string
 
   constructor(featureKey: string, reason: string) {
-    super(`Entitlement required: ${featureKey} — ${reason}`);
-    this.name = 'EntitlementError';
-    this.featureKey = featureKey;
+    super(`Entitlement required: ${featureKey} — ${reason}`)
+    this.name = 'EntitlementError'
+    this.featureKey = featureKey
   }
 }

@@ -58,7 +58,8 @@ export const visibilityScopeEnum = pgEnum("visibility_scope", [
 export const claims = pgTable("claims", {
   id: uuid("id").primaryKey().defaultRandom(),
   claimId: uuid("claim_id").notNull().unique().defaultRandom(),
-  claimNumber: varchar("claim_number", { length: 50 }).unique(),
+  // Organization-scoped numbering: uniqueness is the canonical (organization_id, claim_number) constraint.
+  claimNumber: varchar("claim_number", { length: 50 }),
   organizationId: uuid("organization_id").notNull().references(() => organizations.id),
   memberId: varchar("member_id", { length: 255 }),
   isAnonymous: boolean("is_anonymous").default(true),

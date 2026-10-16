@@ -143,7 +143,7 @@ export async function countGoodStandingMembers(
         WHEN dp.payment_date >= ${sixtyDaysAgo} THEN om.user_id 
       END) as good_standing_members
     FROM organization_members om
-    LEFT JOIN dues_transactions dp ON dp.member_id = om.user_id::uuid 
+    LEFT JOIN dues_transactions dp ON dp.member_id = om.user_id 
       AND dp.organization_id = om.organization_id::uuid
       AND dp.status = 'paid'
     WHERE om.organization_id = ${organizationId}

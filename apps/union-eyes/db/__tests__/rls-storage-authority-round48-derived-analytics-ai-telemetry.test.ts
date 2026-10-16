@@ -252,7 +252,7 @@ describe('round 48 cross-tenant IDOR ratchet: ai_usage_metrics feedback route', 
   });
 });
 
-/* ── Dual-schema (same database) documentation ratchet ─────────────────── */
+/* ── Dual-schema / dedicated financial connection documentation ratchet ── */
 
 describe('round 48 dual-schema (same-database) documentation ratchet', () => {
   const dualSchemaTables = [
@@ -267,9 +267,10 @@ describe('round 48 dual-schema (same-database) documentation ratchet', () => {
     }
   });
 
-  it('financial-service genuinely shares this app\'s runtime (not an isolated deployment)', () => {
+  it('financial-service uses a dedicated financial connection contract rather than the app runtime URL', () => {
     const src = source('services/financial-service/src/db/index.ts');
     expect(src).toContain("require('../../../../lib/logger')");
-    expect(src).toContain('process.env.DATABASE_URL');
+    expect(src).toContain('financialConnectionString(process.env)');
+    expect(src).not.toContain('process.env.DATABASE_URL');
   });
 });

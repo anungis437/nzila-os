@@ -22,7 +22,7 @@
  *   • Uniform "we sent it if the email exists" response shape — no enumeration
  */
 import { randomBytes, createHash } from 'crypto'
-import { db } from '@nzila/db/client'
+import { authDb as db, withAuthContext, withAuthSavepoint, checkAuthRequestRateLimit, insertAuthRow } from '../auth-db'
 import {
   authMagicLinks,
   authUsers,
@@ -30,13 +30,12 @@ import {
   authOrgPolicies,
 } from '@nzila/db/schema'
 import { eq, and, sql, gt, isNull } from 'drizzle-orm'
-import { createSession, setSessionCookie } from '../password/session'
+import { completeAuthFirstFactor } from '../complete-auth'
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const MAGIC_LINK_TOKEN_BYTES = 32
 const MAGIC_LINK_TTL_MS = 15 * 60 * 1000 // 15 minutes
-const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000
 const MAX_REQUESTS_PER_EMAIL = 3
 const MAX_VERIFY_ATTEMPTS = 5
 
@@ -65,6 +64,8 @@ export interface VerifyMagicLinkInput {
 
 export interface VerifyMagicLinkResult {
   success: boolean
+  requiresMfa?: true
+  challengeToken?: string
   user?: {
     id: string
     email: string
@@ -94,30 +95,21 @@ async function logEvent(
   },
 ): Promise<void> {
   try {
-    await db.insert(authAuditLog).values({
+    await withAuthSavepoint(async () => db.insert(authAuditLog).values({
       userId: opts.userId ?? null,
       eventType,
       ipAddress: opts.ipAddress ?? null,
       userAgent: opts.userAgent ?? null,
       metadata: opts.metadata ?? {},
-    })
+    }))
   } catch {
     // best-effort
   }
 }
 
 async function checkRequestRateLimit(email: string): Promise<boolean> {
-  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS)
-  const result = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(authMagicLinks)
-    .where(
-      and(
-        eq(authMagicLinks.email, email),
-        gt(authMagicLinks.createdAt, windowStart),
-      ),
-    )
-  return (result[0]?.count ?? 0) < MAX_REQUESTS_PER_EMAIL
+  void email
+  return checkAuthRequestRateLimit(MAX_REQUESTS_PER_EMAIL)
 }
 
 async function ensurePolicyAllows(
@@ -152,6 +144,13 @@ async function ensurePolicyAllows(
 export async function requestMagicLink(
   input: RequestMagicLinkInput,
 ): Promise<RequestMagicLinkResult> {
+  return withAuthContext({
+    phase: 'issuance', operation: 'magic-issue', email: input.email,
+    ipAddress: input.ipAddress ?? undefined, organizationId: input.organizationId,
+  }, () => requestMagicLinkWithContext(input))
+}
+
+async function requestMagicLinkWithContext(input: RequestMagicLinkInput): Promise<RequestMagicLinkResult> {
   const email = input.email.toLowerCase().trim()
   if (!email || !email.includes('@')) {
     return { success: false, error: 'Invalid email address' }
@@ -193,7 +192,7 @@ export async function requestMagicLink(
   const tokenHash = hashToken(token)
   const expiresAt = new Date(Date.now() + MAGIC_LINK_TTL_MS)
 
-  await db.insert(authMagicLinks).values({
+  await insertAuthRow(authMagicLinks, {
     email,
     userId: existingUser?.userId ?? null,
     organizationId: input.organizationId ?? null,
@@ -219,6 +218,12 @@ export async function requestMagicLink(
 export async function verifyMagicLink(
   input: VerifyMagicLinkInput,
 ): Promise<VerifyMagicLinkResult> {
+  if (!input.token || typeof input.token !== 'string') return { success: false, error: 'Invalid or expired link' }
+  return withAuthContext({ phase: 'redemption', selector: { kind: 'magic-link', tokenHash: hashToken(input.token) } },
+    () => verifyMagicLinkWithContext(input))
+}
+
+async function verifyMagicLinkWithContext(input: VerifyMagicLinkInput): Promise<VerifyMagicLinkResult> {
   if (!input.token || typeof input.token !== 'string') {
     return { success: false, error: 'Invalid or expired link' }
   }
@@ -235,6 +240,7 @@ export async function verifyMagicLink(
       ),
     )
     .limit(1)
+    .for('update')
 
   if (!row) {
     await logEvent('magic_link_verify_failed', {
@@ -259,6 +265,9 @@ export async function verifyMagicLink(
     lastName: string | null
   }
 
+  const [existing] = await db.select({ userId: authUsers.userId }).from(authUsers)
+    .where(sql`lower(${authUsers.email})=${row.email}`).limit(1)
+  userId = userId ?? existing?.userId
   if (userId) {
     const [u] = await db
       .select({
@@ -277,9 +286,7 @@ export async function verifyMagicLink(
   } else {
     // Create on first sign-in. emailVerified=true because they proved control.
     userId = crypto.randomUUID()
-    const [created] = (await db
-      .insert(authUsers)
-      .values({
+    const [created] = await insertAuthRow(authUsers, {
         userId,
         email: row.email,
         passwordHash: null, // passwordless account
@@ -289,38 +296,15 @@ export async function verifyMagicLink(
         emailVerified: true,
         isActive: true,
       })
-      .returning({
-        id: authUsers.userId,
-        email: authUsers.email,
-        firstName: authUsers.firstName,
-        lastName: authUsers.lastName,
-      })) as [
-      {
-        id: string
-        email: string
-        firstName: string | null
-        lastName: string | null
-      },
-    ]
-    user = created
+    user = { id: created!.userId, email: created!.email, firstName: created!.firstName, lastName: created!.lastName }
   }
 
-  // Mark token consumed (single-use)
-  await db
-    .update(authMagicLinks)
-    .set({
-      usedAt: new Date(),
-      consumedIp: input.ipAddress ?? null,
-    })
-    .where(eq(authMagicLinks.id, row.id))
-
   // Mint a normal session — same cookie/contract as password login
-  const { token: sessionToken, session } = await createSession({
+  const completion = await completeAuthFirstFactor({
     userId,
     ipAddress: input.ipAddress,
     userAgent: input.userAgent,
   })
-  await setSessionCookie(sessionToken, session.expiresAt)
 
   await logEvent('magic_link_consumed', {
     userId,
@@ -328,6 +312,8 @@ export async function verifyMagicLink(
     userAgent: input.userAgent,
     metadata: { magicLinkId: row.id },
   })
+  await db.update(authMagicLinks).set({ usedAt: new Date(), consumedIp: input.ipAddress ?? null })
+    .where(eq(authMagicLinks.id, row.id))
 
-  return { success: true, user }
+  return { success: true, user, ...completion }
 }

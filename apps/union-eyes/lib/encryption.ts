@@ -6,6 +6,7 @@
  * 
  * Features:
  * - AES-256-GCM encryption
+ * - Versioned RSA-OAEP-256 vault envelopes retain data-key custody across process restarts
  * - Azure Key Vault key management
  * - Automatic key rotation with configurable intervals (default: 90 days)
  * - Multi-version key support for backward compatibility
@@ -88,6 +89,9 @@ interface EncryptedData {
   iv: string;         // Base64 encoded initialization vector
   authTag: string;    // Base64 encoded authentication tag
   keyVersion?: string; // Key version for rotation support
+  keyId?: string;
+  wrappedKey?: string;
+  wrapAlgorithm?: 'RSA-OAEP-256';
 }
 
 /**
@@ -96,13 +100,17 @@ interface EncryptedData {
 class EncryptionService {
   private keyClient: KeyClient | null = null;
   private cryptoClient: CryptographyClient | null = null;
+  private vaultKeyId: string | null = null;
+  private credential: DefaultAzureCredential | null = null;
+  private initialization: Promise<void>;
   private keyCache: Map<number, KeyMetadata> = new Map(); // version -> metadata
   private currentKeyVersion: number = 1;
   private initialized = false;
   private lastRotationCheck: Date | null = null;
 
   constructor() {
-    this.initialize().catch(error => {
+    this.initialization = this.initialize();
+    this.initialization.catch(error => {
       logger.error('Failed to initialize encryption service', error as Error);
     });
   }
@@ -209,15 +217,19 @@ class EncryptionService {
 
       // Initialize Azure Key Vault clients
       const credential = new DefaultAzureCredential();
+      this.credential = credential;
       this.keyClient = new KeyClient(KEY_VAULT_URL, credential);
 
       // Get or create encryption key
       const key = await this.keyClient.getKey(ENCRYPTION_KEY_NAME);
-      this.cryptoClient = new CryptographyClient(key, credential);
+      if (!key.id) throw new Error('Vault key has no versioned identifier');
+      this.validateVaultKeyId(key.id);
+      this.vaultKeyId = key.id;
+      this.cryptoClient = new CryptographyClient(key.id, credential);
 
-      // Initialize with a new key
-      const initialKey = crypto.randomBytes(KEY_LENGTH);
-      this.initializeKey(initialKey, 1);
+      // Azure retains the wrapping key; data keys live only in versioned ciphertext envelopes.
+      this.initializeKey(Buffer.alloc(0), 1);
+      if (key.properties.createdOn) this.keyCache.get(1)!.createdAt = key.properties.createdOn;
 
       this.initialized = true;
       logger.info('Encryption service initialized with Azure Key Vault', {
@@ -292,7 +304,7 @@ class EncryptionService {
    */
   private async ensureInitialized(): Promise<void> {
     if (!this.initialized) {
-      await this.initialize();
+      await this.initialization;
     }
 
     if (!this.initialized) {
@@ -302,6 +314,17 @@ class EncryptionService {
     // Check if key rotation is needed (but not too frequently)
     if (KEY_ROTATION_ENABLED) {
       await this.checkAndRotateKey();
+    }
+  }
+
+  private validateVaultKeyId(id: string): void {
+    const vault = new URL(KEY_VAULT_URL!);
+    const key = new URL(id);
+    const prefix = `${vault.pathname.replace(/\/$/, '')}/keys/${encodeURIComponent(ENCRYPTION_KEY_NAME)}/`;
+    if (key.origin !== vault.origin || !key.pathname.startsWith(prefix) ||
+        !/^[A-Za-z0-9-]+$/.test(key.pathname.slice(prefix.length)) ||
+        key.search || key.hash || key.username || key.password) {
+      throw new Error('Untrusted vault key identifier');
     }
   }
 
@@ -387,8 +410,16 @@ class EncryptionService {
     });
 
     try {
-      // Generate new key
-      const newKey = crypto.randomBytes(KEY_LENGTH);
+      let newKey = Buffer.alloc(0);
+      if (this.keyClient && this.credential) {
+        const key = await this.keyClient.createRsaKey(ENCRYPTION_KEY_NAME, { keySize: 2048 });
+        if (!key.id) throw new Error('Rotated vault key has no versioned identifier');
+        this.validateVaultKeyId(key.id);
+        this.cryptoClient = new CryptographyClient(key.id, this.credential);
+        this.vaultKeyId = key.id;
+      } else {
+        newKey = crypto.randomBytes(KEY_LENGTH);
+      }
 
       // Mark old key as inactive
       const oldKeyMetadata = this.keyCache.get(oldVersion);
@@ -499,8 +530,18 @@ class EncryptionService {
     await this.ensureInitialized();
 
     try {
-      const key = await this.getEncryptionKey();
+      const vaultClient = this.cryptoClient;
+      const key = vaultClient ? crypto.randomBytes(KEY_LENGTH) : await this.getEncryptionKey();
       const iv = crypto.randomBytes(IV_LENGTH);
+      const envelope = vaultClient
+        ? await vaultClient.wrapKey('RSA-OAEP-256', key)
+        : null;
+      if (envelope) {
+        if (!envelope.keyID) {
+          throw new Error('Azure Key Vault wrap response missing versioned key identifier');
+        }
+        this.validateVaultKeyId(envelope.keyID);
+      }
 
       const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
       
@@ -514,6 +555,11 @@ class EncryptionService {
         iv: iv.toString('base64'),
         authTag: authTag.toString('base64'),
         keyVersion: `v${this.currentKeyVersion}`,
+        ...(envelope ? {
+          keyId: envelope.keyID,
+          wrappedKey: Buffer.from(envelope.result).toString('base64'),
+          wrapAlgorithm: 'RSA-OAEP-256' as const,
+        } : {}),
       };
 
     } catch (error) {
@@ -568,9 +614,24 @@ class EncryptionService {
       }
 
       // Get the appropriate key version
-      const key = this.getEncryptionKeyByVersion(keyVersion);
+      let key: Buffer | null;
+      if (encryptedData.keyId || encryptedData.wrappedKey || encryptedData.wrapAlgorithm) {
+        if (!this.credential || !encryptedData.keyId || !encryptedData.wrappedKey ||
+            encryptedData.wrapAlgorithm !== 'RSA-OAEP-256') {
+          throw new Error('Invalid vault ciphertext envelope');
+        }
+        this.validateVaultKeyId(encryptedData.keyId);
+        const client = new CryptographyClient(encryptedData.keyId, this.credential);
+        key = Buffer.from((await client.unwrapKey(
+          'RSA-OAEP-256', Buffer.from(encryptedData.wrappedKey, 'base64'),
+        )).result);
+      } else {
+        // Historical process-local ciphertext cannot be recovered using a different vault key.
+        if (this.cryptoClient) throw new Error('Legacy vault ciphertext has no durable data key');
+        key = this.getEncryptionKeyByVersion(keyVersion);
+      }
       
-      if (!key) {
+      if (!key || key.length !== KEY_LENGTH) {
         // Log but don&apos;t expose version details to avoid information leakage
         logger.error('Decryption failed - key version not available', {
           hasKeyVersion: !!encryptedData.keyVersion,
@@ -722,6 +783,10 @@ class EncryptionService {
       const encryptedData: EncryptedData = typeof encrypted === 'string'
         ? JSON.parse(Buffer.from(encrypted, 'base64').toString('utf8'))
         : encrypted;
+
+      if (this.cryptoClient) {
+        return encryptedData.keyId !== this.vaultKeyId || !encryptedData.wrappedKey;
+      }
 
       // No version means very old data
       if (!encryptedData.keyVersion) {
@@ -1033,4 +1098,3 @@ export function shouldReEncryptData(encryptedData: string): boolean {
 export async function batchReEncryptData(encryptedValues: string[]): Promise<string[]> {
   return encryptionService.batchReEncrypt(encryptedValues);
 }
-

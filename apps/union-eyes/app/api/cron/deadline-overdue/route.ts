@@ -7,27 +7,24 @@
  *
  * Capability: UE-DEADLINE-OVERDUE (state: PARTIALLY_IMPLEMENTED).
  */
-import { randomUUID } from 'node:crypto';
-import { NextResponse } from 'next/server';
-import { sql } from 'drizzle-orm';
-import { withApi } from '@/lib/api/framework';
-import { withSystemContext } from '@/lib/db/with-rls-context';
-import {
-  scheduleGrievanceDeadlineReminders,
-  writeDeadlineAuditEvent,
-} from '@/lib/deadline-engine';
-import { createLogger } from '@nzila/os-core/telemetry';
+import { randomUUID } from 'node:crypto'
+import { NextResponse } from 'next/server'
+import { sql } from 'drizzle-orm'
+import { withApi } from '@/lib/api/framework'
+import { withSystemContext } from '@/lib/db/with-rls-context'
+import { scheduleGrievanceDeadlineReminders, writeDeadlineAuditEvent } from '@/lib/deadline-engine'
+import { createLogger } from '@nzila/os-core/telemetry'
 
-const logger = createLogger('union-eyes.cron.deadline-overdue');
+const logger = createLogger('union-eyes.cron.deadline-overdue')
 
-export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 interface OverdueRow {
-  id: string;
-  grievance_id: string;
-  organization_id: string;
-  due_date: string;
+  id: string
+  grievance_id: string
+  organization_id: string
+  due_date: string
 }
 
 export const GET = withApi(
@@ -39,12 +36,13 @@ export const GET = withApi(
     },
   },
   async () => {
-    const runId = randomUUID();
-    const startedAt = new Date();
+    const runId = randomUUID()
+    const startedAt = new Date()
 
     // Find deadlines that are past due and don't yet have an overdue
     // reminder in flight (pending or sent within the last 24h).
-    const overdueRows = (await withSystemContext((tx) => tx.execute(sql`
+    const overdueRows = (await withSystemContext((tx) =>
+      tx.execute(sql`
       select
         gd.id                            as id,
         gd.grievance_id                  as grievance_id,
@@ -63,51 +61,59 @@ export const GET = withApi(
                   or (r.status = 'sent' and r.sent_at > now() - interval '24 hours'))
         )
       limit 200
-    `))) as unknown as OverdueRow[];
+    `),
+    )) as unknown as OverdueRow[]
 
-    let scheduled = 0;
-    let failed = 0;
-    const errors: Array<{ deadlineId: string; error: string }> = [];
+    let scheduled = 0
+    let failed = 0
+    const errors: Array<{ deadlineId: string; error: string }> = []
 
     for (const row of overdueRows) {
       try {
-        const result = await scheduleGrievanceDeadlineReminders({
-          sourceDeadlineId: row.id,
-          grievanceId: row.grievance_id,
-          dueDate: new Date(row.due_date),
-          reminderOffsetsInDays: [0],
-          reminderKind: 'overdue',
-          actor: { type: 'system', id: 'cron:deadline-overdue' },
-          correlationId: runId,
-        });
+        // Queue write and audit event share one SYSTEM transaction (scheduled-job work state only).
+        const result = await withSystemContext(async (tx) => {
+          const scheduledReminders = await scheduleGrievanceDeadlineReminders({
+            sourceDeadlineId: row.id,
+            grievanceId: row.grievance_id,
+            dueDate: new Date(row.due_date),
+            reminderOffsetsInDays: [0],
+            reminderKind: 'overdue',
+            actor: { type: 'system', id: 'cron:deadline-overdue' },
+            correlationId: runId,
+          })
 
-        await withSystemContext((tx) => writeDeadlineAuditEvent({
-          organizationId: row.organization_id,
-          sourceTable: 'grievance_deadlines',
-          sourceDeadlineId: row.id,
-          eventType: 'overdue.detected',
-          actorType: 'system',
-          actorId: 'cron:deadline-overdue',
-          correlationId: runId,
-          metadata: {
-            scheduled_count: result.scheduled.length,
-            due_date: row.due_date,
-          },
-        }, tx));
-        scheduled += result.scheduled.length;
+          await writeDeadlineAuditEvent(
+            {
+              organizationId: row.organization_id,
+              sourceTable: 'grievance_deadlines',
+              sourceDeadlineId: row.id,
+              eventType: 'overdue.detected',
+              actorType: 'system',
+              actorId: 'cron:deadline-overdue',
+              correlationId: runId,
+              metadata: {
+                scheduled_count: scheduledReminders.scheduled.length,
+                due_date: row.due_date,
+              },
+            },
+            tx,
+          )
+          return scheduledReminders
+        })
+        scheduled += result.scheduled.length
       } catch (error) {
-        failed++;
-        const message = error instanceof Error ? error.message : String(error);
-        errors.push({ deadlineId: row.id, error: message });
+        failed++
+        const message = error instanceof Error ? error.message : String(error)
+        errors.push({ deadlineId: row.id, error: message })
         logger.error('deadline-overdue: failed to schedule overdue reminder', {
           runId,
           deadlineId: row.id,
           error: message,
-        });
+        })
       }
     }
 
-    const finishedAt = new Date();
+    const finishedAt = new Date()
     const payload = {
       runId,
       startedAt: startedAt.toISOString(),
@@ -117,9 +123,9 @@ export const GET = withApi(
       remindersScheduled: scheduled,
       failed,
       errors: errors.slice(0, 25),
-    };
+    }
 
-    logger.info('deadline-overdue: run finished', payload);
-    return NextResponse.json(payload);
+    logger.info('deadline-overdue: run finished', payload)
+    return NextResponse.json(payload)
   },
-);
+)

@@ -18,7 +18,9 @@ const adminJobsSchema = z.object({
   olderThanMs: z.unknown().optional(),
 });
 
-export const POST = async (request: NextRequest, { params }: { params: { action: string } }) => {
+export const POST = async (request: NextRequest, { params: pendingParams }: { params: Promise<{ action: string }> }) => {
+  // Next 16 supplies route params as a Promise.
+  const params = await pendingParams;
   return withAdminAuth(async (request, _context) => {
   // Import job-queue functions (now delegates to Django Celery task API)
     const { pauseQueue, resumeQueue, cleanCompletedJobs } = await import('@/lib/job-queue');

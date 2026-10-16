@@ -8,6 +8,8 @@
 import { sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { logger } from '@/lib/logger';
+import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { AuditMetadataSchema, type AuditMetadata } from './types';
 import type { DeadlineAuditEventType } from '@/db/schema/deadline-engine-schema';
 
@@ -78,4 +80,23 @@ export async function writeDeadlineAuditEvent(
     });
     throw error;
   }
+
+  // Privileged SYSTEM/worker processing is also recorded in the canonical hash-chained sink.
+  // A failure here is deliberately not swallowed.
+  await appendMandatoryAudit(executor as unknown as RLSTx, {
+    organizationId: input.organizationId,
+    action: `deadline.${input.eventType}`,
+    resourceType: input.sourceTable,
+    resourceId: input.sourceDeadlineId,
+    userId:
+      input.actorType === 'user'
+        ? (input.actorId ?? null)
+        : `system:${input.actorId ?? 'deadline-engine'}`,
+    details: {
+      reminderId: input.reminderId ?? null,
+      actorType: input.actorType,
+      correlationId: input.correlationId,
+      metadata: parsed.data,
+    },
+  });
 }
