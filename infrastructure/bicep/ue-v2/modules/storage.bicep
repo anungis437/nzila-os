@@ -23,7 +23,8 @@ resource account 'Microsoft.Storage/storageAccounts@2023-05-01' = {
     allowBlobPublicAccess: false
     allowSharedKeyAccess: true
     publicNetworkAccess: 'Disabled'
-    networkAcls: { defaultAction: 'Deny', bypass: 'None' }
+    // Trusted Microsoft services (backup, monitoring) only; publicNetworkAccess is Disabled and defaultAction is Deny, so no public path is opened.
+    networkAcls: { defaultAction: 'Deny', bypass: 'AzureServices' }
     encryption: {
       requireInfrastructureEncryption: true
       services: { blob: { enabled: true } }
