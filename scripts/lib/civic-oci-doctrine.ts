@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { dirname, extname, join, relative, resolve } from 'node:path'
 import ts from 'typescript'
+import { readRegularArchivalArtifact, verifyCivicRetainedEvidence } from './civic-retained-evidence'
 
 export const CIVIC_OCI_CONTRACT_PATH = 'governance/foundations/civic-oci-doctrine.contract.json'
 export const CIVIC_SLICE1_REVIEW_PACKET =
@@ -1452,68 +1453,42 @@ function slice2DocumentationReviewAllowed(root: string, contract: DoctrineContra
   return archiveFindings.length === 0
 }
 
-function readRegularArchivalArtifact(root: string, artifact: string): Buffer {
-  const segments = artifact.replace(/\\/g, '/').split('/')
-  if (
-    segments.some(
-      (segment) => !segment || segment === '.' || segment === '..' || segment.includes(':'),
-    )
-  )
-    throw new Error(`Invalid archival path: ${artifact}`)
-  let path = root
-  if (!lstatSync(path).isDirectory() || lstatSync(path).isSymbolicLink())
-    throw new Error('Archival root must be a regular directory')
-  for (let index = 0; index < segments.length; index++) {
-    path = join(path, segments[index])
-    const stats = lstatSync(path)
-    if (
-      stats.isSymbolicLink() ||
-      (index < segments.length - 1 ? !stats.isDirectory() : !stats.isFile())
-    )
-      throw new Error(`Non-regular archival path: ${artifact}`)
-  }
-  return readFileSync(path)
+function verifyHumanValidationRetainedEvidence(root: string): void {
+  verifyCivicRetainedEvidence(root, RETAINED_EVIDENCE_INVENTORIES, SLICE2_ARCHIVED_FILES)
 }
 
-function verifyHumanValidationRetainedEvidence(root: string): void {
-  for (const [artifact, expected] of Object.entries(RETAINED_EVIDENCE_INVENTORIES)) {
-    const content = readRegularArchivalArtifact(root, artifact)
-    if (createHash('sha256').update(content).digest('hex') !== expected)
-      throw new Error(`Retained inventory changed: ${artifact}`)
-    const inventory: unknown = JSON.parse(content.toString('utf8'))
-    const slice1 = artifact.includes('/slice1/')
-    const sources = artifact.endsWith('final-source-inventory.json')
-    const entries = valueAt(inventory, slice1 ? 'files' : 'entries')
-    if (
-      valueAt(inventory, 'classification') !== 'LOCAL_SYNTHETIC_PROOF_ARTIFACT' ||
-      !Array.isArray(entries) ||
-      entries.length !== (slice1 ? 22 : sources ? 11 : 204)
+export function isCivicArchivedProofCli(root: string, artifact: string): boolean {
+  if (!['apps/civic/src/proof.ts', 'apps/civic/src/slice1/worker.ts'].includes(artifact))
+    return false
+  const findings: DoctrineFinding[] = []
+  const contract = loadContract(root, findings)
+  if (
+    !contract ||
+    contract.runtimeAuthorization.authorized !== false ||
+    stable(contract.runtimeAuthorization.slice0) !== stable(CIVIC_SLICE0_APPROVAL) ||
+    stable(contract.runtimeAuthorization.slice1) !== stable(CIVIC_SLICE1_APPROVAL) ||
+    stable(contract.runtimeAuthorization.slice2) !==
+      stable({ ...CIVIC_SLICE2_APPROVAL, revokedAt: CIVIC_SLICE2_TERMINATED_AT })
+  )
+    return false
+  for (const slice of [0, 1, 2]) {
+    const proof = readText(
+      root,
+      `docs/public-service/operations/CIVIC_RUNTIME_SLICE_${slice}_PROOF.md`,
     )
-      throw new Error(`Invalid retained inventory: ${artifact}`)
-    for (const entry of entries) {
-      const name = valueAt(entry, slice1 ? 'path' : 'file')
-      const digest = valueAt(entry, sources ? 'normalizedLfSha256' : 'sha256')
-      const bytes = valueAt(entry, 'bytes')
-      if (typeof name !== 'string' || typeof digest !== 'string')
-        throw new Error(`Invalid retained entry: ${artifact}`)
-      const path = (slice1 ? `.civic-runtime/slice1/${name}` : name).replace(/\\/g, '/')
-      if (
-        sources
-          ? !(path in SLICE2_ARCHIVED_FILES) || SLICE2_ARCHIVED_FILES[path] !== digest
-          : !['.civic-runtime/slice1/', '.civic-runtime/slice2/', '.civic-anchor/slice2/'].some(
-              (prefix) => path.startsWith(prefix),
-            )
-      )
-        throw new Error(`Unapproved retained payload path: ${path}`)
-      const payload = readRegularArchivalArtifact(root, path)
-      const input = sources ? payload.toString('utf8').replace(/\r\n/g, '\n') : payload
-      if (
-        createHash('sha256').update(input).digest('hex') !== digest ||
-        (!sources && (typeof bytes !== 'number' || payload.length !== bytes))
-      )
-        throw new Error(`Retained payload changed: ${path}`)
-    }
+    if (
+      proof
+        ?.replace(/\r/g, '')
+        .split('\n')
+        .filter((line) => line.startsWith('**Authorization terminated:**'))
+        .join('\n') !== '**Authorization terminated:** YES'
+    )
+      return false
   }
+  validateArchivedSlice0(root, findings, true, true)
+  if (findings.length) return false
+  readRegularArchivalArtifact(root, artifact)
+  return true
 }
 
 function humanValidationDocumentationReviewAllowed(

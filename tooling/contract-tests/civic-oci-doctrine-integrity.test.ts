@@ -3,14 +3,37 @@ import {
   mkdtempSync,
   mkdirSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
   lstatSync,
   symlinkSync,
 } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+const { syntheticInventoryDigests } = vi.hoisted(() => ({
+  syntheticInventoryDigests: new Map<string, Readonly<Record<string, string>>>(),
+}))
+
+vi.mock('../../scripts/lib/civic-retained-evidence', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../scripts/lib/civic-retained-evidence')>()
+  return {
+    ...actual,
+    verifyCivicRetainedEvidence(
+      ...[root, inventories, sources]: Parameters<typeof actual.verifyCivicRetainedEvidence>
+    ) {
+      // Only fixture trust roots change; real hashing, payload and path checks remain in use.
+      actual.verifyCivicRetainedEvidence(
+        root,
+        syntheticInventoryDigests.get(root) ?? inventories,
+        sources,
+      )
+    },
+  }
+})
 
 import {
   CIVIC_OCI_CONTRACT_PATH,
@@ -33,6 +56,7 @@ import {
   assertCivicSlice1Authorized,
   type CivicDoctrineValidationContext,
   validateCivicOciDoctrine,
+  isCivicArchivedProofCli,
 } from '../../scripts/lib/civic-oci-doctrine'
 
 const ROOT = join(__dirname, '..', '..')
@@ -229,7 +253,11 @@ function createSlice2ReviewFixture(): string {
 }
 
 afterEach(() => {
-  while (fixtures.length > 0) rmSync(fixtures.pop()!, { recursive: true, force: true })
+  while (fixtures.length > 0) {
+    const root = fixtures.pop()!
+    syntheticInventoryDigests.delete(root)
+    rmSync(root, { recursive: true, force: true })
+  }
 })
 
 function createActiveSlice2Fixture(): string {
@@ -262,14 +290,71 @@ function createHumanPlanFixture(): string {
   for (const artifact of [
     CIVIC_HUMAN_VALIDATION_PLAN,
     'docs/public-service/operations/CIVIC_RUNTIME_SLICE_2_PROOF.md',
-    '.civic-runtime/slice1',
-    '.civic-runtime/slice2',
-    '.civic-anchor/slice2',
   ]) {
     mkdirSync(dirname(join(root, artifact)), { recursive: true })
     cpSync(join(ROOT, artifact), join(root, artifact), { recursive: true })
   }
+  createSyntheticRetainedEvidence(root)
   return root
+}
+
+function createSyntheticRetainedEvidence(root: string): void {
+  const digest = (content: Buffer | string) => createHash('sha256').update(content).digest('hex')
+  const write = (artifact: string, content: string) => {
+    mkdirSync(dirname(join(root, artifact)), { recursive: true })
+    writeFileSync(join(root, artifact), content)
+    return { bytes: Buffer.byteLength(content), sha256: digest(content) }
+  }
+  const files = Array.from({ length: 22 }, (_, index) => {
+    const path =
+      index === 0 ? 'checkpoints/final-proof-summary.json' : `fixture/payload-${index}.json`
+    return {
+      path,
+      ...write(
+        `.civic-runtime/slice1/${path}`,
+        JSON.stringify({ syntheticContractFixture: true, slice: 1, index }),
+      ),
+    }
+  })
+  const entries = Array.from({ length: 204 }, (_, index) => {
+    const file =
+      index === 0
+        ? '.civic-runtime/slice2/final-performance-summary.json'
+        : index === 1
+          ? '.civic-anchor/slice2/fixture-anchor.json'
+          : `.civic-runtime/slice2/fixture/payload-${index}.json`
+    return {
+      file: file.replace(/\//g, '\\'),
+      ...write(file, JSON.stringify({ syntheticContractFixture: true, slice: 2, index })),
+    }
+  })
+  const sources = [
+    'apps/civic/slice2.tsconfig.json',
+    'apps/civic/slice2.vitest.config.ts',
+    ...['apps/civic/src/slice2', 'apps/civic/tests/slice2'].flatMap((directory) =>
+      readdirSync(join(root, directory)).map((name) => `${directory}/${name}`),
+    ),
+  ].map((file) => ({
+    file,
+    normalizedLfSha256: digest(readFileSync(join(root, file), 'utf8').replace(/\r\n/g, '\n')),
+  }))
+  const inventories = {
+    '.civic-runtime/slice1/checkpoints/retained-inventory.json': { files },
+    '.civic-runtime/slice2/final-retained-manifest.json': { entries },
+    '.civic-runtime/slice2/final-source-inventory.json': { entries: sources },
+  }
+  const pins: Record<string, string> = {}
+  for (const [artifact, inventory] of Object.entries(inventories)) {
+    pins[artifact] = write(
+      artifact,
+      JSON.stringify({
+        classification: 'LOCAL_SYNTHETIC_PROOF_ARTIFACT',
+        syntheticContractFixture: true,
+        ...inventory,
+      }),
+    ).sha256
+  }
+  syntheticInventoryDigests.set(root, pins)
 }
 
 const ROUND1_CONTEXT: CivicDoctrineValidationContext = {
@@ -290,6 +375,36 @@ function createRound1Fixture(): string {
     mkdirSync(join(root, '.civic-research/round1', directory), { recursive: true })
   return root
 }
+
+describe('archived CIVIC proof CLI classification', () => {
+  it.each(['apps/civic/src/proof.ts', 'apps/civic/src/slice1/worker.ts'])(
+    'recognizes only unchanged terminated proof CLI %s',
+    (artifact) => {
+      const root = createHumanPlanFixture()
+      expect(isCivicArchivedProofCli(root, artifact)).toBe(true)
+      mutateText(root, artifact, (text) => text + '\nconsole.log("unapproved")\n')
+      expect(isCivicArchivedProofCli(root, artifact)).toBe(false)
+    },
+  )
+
+  it.each(['general-runtime', 'slice-grant', 'termination', 'new-source'])(
+    'does not exempt %s changes from runtime logging policy',
+    (change) => {
+      const root = createHumanPlanFixture()
+      if (change === 'general-runtime')
+        mutateContract(root, (contract) => (contract.runtimeAuthorization.authorized = true))
+      else if (change === 'slice-grant')
+        mutateContract(root, (contract) => (contract.runtimeAuthorization.slice1.enabled = false))
+      else if (change === 'termination')
+        mutateText(root, 'docs/public-service/operations/CIVIC_RUNTIME_SLICE_1_PROOF.md', (text) =>
+          text.replace('**Authorization terminated:** YES', '**Authorization terminated:** NO'),
+        )
+      else writeFileSync(join(root, 'apps/civic/src/new-cli.ts'), 'console.log("new")\n')
+      expect(isCivicArchivedProofCli(root, 'apps/civic/src/proof.ts')).toBe(false)
+      expect(isCivicArchivedProofCli(root, 'apps/civic/src/new-cli.ts')).toBe(false)
+    },
+  )
+})
 
 function writeRound1Record(
   root: string,
@@ -780,6 +895,15 @@ describe('exact human-validation plan archival gate', () => {
     )
   })
 
+  it('does not admit the synthetic CI corpus under production inventory pins', () => {
+    const root = createHumanPlanFixture()
+    expect(validate(root, HUMAN_PLAN_CONTEXT)).toEqual([])
+    syntheticInventoryDigests.delete(root)
+    expect(validate(root, HUMAN_PLAN_CONTEXT).map((x) => x.id)).toContain(
+      'CIVIC_HUMAN_VALIDATION_DOC_GATE_BLOCKED',
+    )
+  })
+
   it('blocks independent-anchor alteration', () => {
     const root = createHumanPlanFixture()
     const manifest = JSON.parse(
@@ -789,7 +913,7 @@ describe('exact human-validation plan archival gate', () => {
       entry.file.startsWith('.civic-anchor\\slice2\\'),
     )
     expect(anchor).toBeDefined()
-    writeFileSync(join(root, anchor.file), 'Altered anchor')
+    writeFileSync(join(root, anchor.file.replace(/\\/g, '/')), 'Altered anchor')
     expect(validate(root, HUMAN_PLAN_CONTEXT).map((x) => x.id)).toContain(
       'CIVIC_HUMAN_VALIDATION_DOC_GATE_BLOCKED',
     )

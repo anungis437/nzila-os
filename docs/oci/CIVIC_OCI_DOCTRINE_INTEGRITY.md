@@ -76,6 +76,22 @@ The validator fails with invariant ID, artifact, authority, expected state, and 
 Run it locally with `pnpm exec tsx scripts/validate-civic-oci-doctrine.ts`. It is included in
 `validate:doctrine` and exercised by the normal contract-test CI gate.
 
+### Portable archival contract fixtures
+
+CI generates a small, deterministic synthetic corpus in disposable test directories;
+it never copies developer-local `.civic-runtime` or `.civic-anchor` evidence stores.
+Only the test module substitutes inventory pins for those fixture roots. The shared
+retained-evidence verifier still checks manifest hashes, classification, entry counts,
+payload paths, regular files, byte sizes, payload hashes and the unchanged archived
+source fingerprints. Production retains its original inventory pins; a regression
+test confirms that those pins reject the CI corpus. These fixtures are not historical
+proof artifacts, participant evidence or authorization to execute CIVIC.
+
+The no-console contract recognizes only the two exact archived proof CLI paths,
+after checking their source fingerprints, all three termination markers, exact
+retained grants and closed general runtime authorization. New or altered source
+remains subject to the runtime logging policy; no CIVIC-wide exclusion is granted.
+
 ## Legitimate change process
 
 A legitimate doctrine change updates the canonical doctrine first, then the contract and its
