@@ -49,6 +49,9 @@ paths = [
   '''.*DJANGO_.*\.md$''',              # Django settings guides
   '''content/internal/cupe3906-bylaws-raw\.html$''',  # Scraped HTML with third-party New Relic tracking keys
   '''lib/api-docs/openapi-config\.ts$''',             # API docs with placeholder curl Authorization examples
+  '''docs/union-eyes/.*\.json$''',   # UE machine-generated evidence ledgers: SHA-256 digests and identifiers, no credentials
+  '''infrastructure/bicep/ue-v2/.*\.bicep$''',  # UE Bicep: Azure built-in role-definition GUIDs
+  '''apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture\.ts$''',  # UE clean-room fixture: synthetic per-run role passwords
 ]
 
 commits = [
