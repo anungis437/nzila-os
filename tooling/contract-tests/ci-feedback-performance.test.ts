@@ -15,6 +15,24 @@ describe('CI feedback caching', () => {
   const turbo = JSON.parse(read('turbo.json'))
   const setup = parse(read('.github/actions/setup-monorepo/action.yml'))
 
+  it('keeps preview builds in the active scope without duplicating canonical quality checks', () => {
+    const preview = parse(read('.github/workflows/preview-deploy.yml'))
+    const steps = preview.jobs.preview.steps
+    const commands = steps.map((step: { run?: string }) => step.run ?? '').join('\n')
+    expect(commands).toContain('node tooling/ci/run-scoped-build-shard.mjs 1 1')
+    expect(commands).not.toMatch(/pnpm (?:lint|typecheck|test|build)\b/)
+    const setupStep = steps.find(
+      (step: { uses?: string }) => step.uses === './.github/actions/setup-monorepo',
+    )
+    expect(setupStep.with['turbo-cache-key']).toBe('preview-build')
+    const ci = parse(read('.github/workflows/ci.yml'))
+    expect(
+      ci.jobs.lint.steps.some((step: { run?: string }) => step.run === 'pnpm lint'),
+    ).toBe(true)
+    expect(ci.jobs.typecheck).toBeDefined()
+    expect(ci.jobs.test).toBeDefined()
+  })
+
   it('persists the directory Turbo actually writes, scoped by runtime and lockfile', () => {
     const cache = setup.runs.steps.find(
       (step: { name?: string }) => step.name === 'Restore turbo cache',
