@@ -1,0 +1,1180 @@
+{
+  "metadata": {
+    "title": "Phase 1A.2b1 R1 — callback provenance reconciliation",
+    "scope": "Source-only follow-up to the exact 109 UNKNOWN_EFFECT_BOUNDARY records in phase1a2b1Closeout.bindingOutcomes.",
+    "historicalBaselineRevision": "1c337567635bb86ea0df7831557d8d2d22df1e6f",
+    "generatedFrom": "Current source tree plus the bounded R1 callback/caller trace captured in session evidence."
+  },
+  "reconciliation": {
+    "denominator": 644,
+    "historicalB1UnknownEffectBoundary": 138,
+    "historicalCloseoutResolved": 29,
+    "historicalCloseoutUnknownResidual": 109,
+    "r1DispositionTotal": 109,
+    "r1DispositionCounts": {
+      "SOURCE_TRACE_CAPTURED_NOT_TERMINAL": 77,
+      "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED": 13,
+      "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND": 17,
+      "ACTIVE_VISIBLE_ACTION_CALLBACK_OMITTED": 2
+    },
+    "r1UnclassifiedBindings": 0,
+    "noInRepositoryCallerIsNotProofOfRuntimeUnreachability": true,
+    "historicalB1AndCloseoutFieldsMutated": false,
+    "outOfClosureCandidatesPromoted": 0,
+    "outOfClosureCandidateCount": 245,
+    "r1OriginalTraceCaptureCount": 77,
+    "r1TraceCaptureStillUnproven": 23,
+    "r1TrueNoCallerUnknowns": 17,
+    "r1TerminalEffectNotProven": 40,
+    "sourceEffectFollowupVerified": 54,
+    "sourceEffectFollowupUnprovenFromTraceCandidates": 23
+  },
+  "gate": {
+    "r1Status": "SOURCE_RECONCILIATION_COMPLETE_WITH_40_UNPROVEN_TERMINAL_EFFECTS",
+    "historicalCloseoutStatus": "FAIL / NOT PROVEN",
+    "runtimeProof": false,
+    "readiness": "NO_GO — RUNTIME_PROOF_REQUIRED",
+    "limitations": [
+      "No runtime journey, HTTP request, persistence behavior, authorization rule, organization scope, audit effect, or integration was tested.",
+      "The original R1 trace-candidate category contains 77 records; an additive source-effect follow-up verifies 54 source-level effects, while 23 remain unproven.",
+      "Seventeen bindings have no in-repository component caller in the bounded source census; caller reachability and terminal effect remain unknown.",
+      "Optional callbacks absent or gated in the inspected callers were not converted into feature-readiness claims.",
+      "The two active visible-action callback omissions are source-proven findings and remain unfixed by design in this evidence-only task.",
+      "The 245 historical candidates outside accepted closure remain untouched."
+    ],
+    "r1TerminalEffectStatus": "FAIL / NOT PROVEN — 40 bindings"
+  },
+  "sourceEffectFollowup": {
+    "status": "PARTIAL_SOURCE_TRACE",
+    "method": "Direct inspection of the binding handler, active in-repository caller where present, forwarding path, and source-level terminal operation. This is not runtime proof.",
+    "verifiedCount": 54,
+    "unprovenFromTraceCandidates": 23,
+    "unprovenNoCaller": 17,
+    "unprovenTotal": 40,
+    "verifiedBindings": [
+    {
+      "bindingId": "components/onboarding/onboarding-provider.tsx:46:5:onNext",
+      "sourceEffect": "The provider passes advanceStep to OnboardingOverlay.onNext; advanceStep increments the persisted step and writes the user-scoped onboarding state to localStorage."
+    },
+    {
+      "bindingId": "components/organization/organization-selector.tsx:144:7:onClick",
+      "sourceEffect": "The error-state retry button calls refreshOrganizations, which delegates to loadUserOrganizations; the authenticated path requests GET /api/users/me/organizations and updates organization context state."
+    },
+    {
+      "bindingId": "components/organization/organization-selector.tsx:170:7:onClick",
+      "sourceEffect": "The no-organization button calls refreshOrganizations, which delegates to loadUserOrganizations; the authenticated path requests GET /api/users/me/organizations and updates organization context state."
+    },
+    {
+      "bindingId": "components/targets/targets-console.tsx:346:9:onClick",
+      "sourceEffect": "The action column calls handleToggle; it sends PATCH /api/targets/{id} with isActive and reloads target summary data."
+    },
+    {
+      "bindingId": "components/union-structure/CommitteeManagement.tsx:537:13:onSubmit",
+      "sourceEffect": "The active dashboard form submits through form.handleSubmit(onSubmit); onSubmit sends POST /api/committees or PATCH /api/committees/{id}, then closes the dialog and refreshes committee data."
+    },
+    {
+      "bindingId": "components/union-structure/BargainingUnitManagement.tsx:491:13:onSubmit",
+      "sourceEffect": "The active dashboard form submits through form.handleSubmit(onSubmit); onSubmit sends POST /api/bargaining-units or PATCH /api/bargaining-units/{id}, then closes the dialog and refreshes unit data."
+    },
+    {
+      "bindingId": "components/union-structure/WorksiteManagement.tsx:393:13:onSubmit",
+      "sourceEffect": "The active dashboard form submits through form.handleSubmit(onSubmit); onSubmit sends POST /api/worksites or PATCH /api/worksites/{id}, then closes the dialog and refreshes worksite data."
+    },
+    {
+      "bindingId": "components/union-structure/EmployerManagement.tsx:476:13:onSubmit",
+      "sourceEffect": "The active dashboard form submits through form.handleSubmit(onSubmit); onSubmit sends POST /api/employers or PATCH /api/employers/{id}, then closes the dialog and refreshes employer data."
+    },
+    {
+      "bindingId": "components/precedents/PrecedentCompareView.tsx:302:15:onClick",
+      "sourceEffect": "The comparison view receives handleRemoveFromComparison; invocation filters the selected precedent ID from local React state."
+    },
+    {
+      "bindingId": "components/precedents/PrecedentViewer.tsx:538:19:onClick",
+      "sourceEffect": "The active viewer receives handleDownloadDocument; for the decision document it opens the selected precedent's decisionDocumentUrl in a new browser tab when the URL exists."
+    },
+    {
+      "bindingId": "components/precedents/PrecedentViewer.tsx:562:19:onClick",
+      "sourceEffect": "The active viewer receives handleDownloadDocument; for the redacted document it opens the selected precedent's redactedDocumentUrl in a new browser tab when the URL exists."
+    },
+    {
+      "bindingId": "app/[locale]/dashboard/pilot/pilot-dashboard.tsx:216:17:onClick",
+      "sourceEffect": "PlatformOverview receives setSelectedOrg as onSelectOrg; invocation stores the selected organization ID in local React state."
+    },
+    {
+      "bindingId": "components/knowledge-transfer/organizational-memory-explorer.tsx:175:5:onClick",
+      "sourceEffect": "TopicPill forwards its click callback to the active topic handler, which updates active-topic/query state and starts POST /api/exit-interviews/search for the selected domain."
+    },
+    {
+      "bindingId": "components/knowledge-transfer/organizational-memory-explorer.tsx:326:15:onClick",
+      "sourceEffect": "The topic handler updates active-topic/query state and starts POST /api/exit-interviews/search for the selected domain."
+    },
+    {
+      "bindingId": "components/health-safety/HazardsList.tsx:215:15:onClick",
+      "sourceEffect": "The routed HazardsList caller supplies handleViewHazard; invocation navigates to /dashboard/health-safety/hazards/{hazardId}."
+    },
+    {
+      "bindingId": "components/health-safety/HazardsList.tsx:256:21:onClick",
+      "sourceEffect": "The routed HazardsList caller supplies handleViewHazard; invocation navigates to /dashboard/health-safety/hazards/{hazardId}."
+    },
+    {
+      "bindingId": "components/health-safety/HazardReportForm.tsx:170:5:onSubmit",
+      "sourceEffect": "The active hazards page supplies handleReportSubmit; form submission sends POST /api/health-safety/hazards with the organization ID, then closes the form and reloads summary data on an OK response."
+    },
+    {
+      "bindingId": "components/health-safety/HazardReportForm.tsx:395:11:onClick",
+      "sourceEffect": "The active hazards page supplies an onCancel callback that sets showReportForm to false."
+    },
+    {
+      "bindingId": "components/health-safety/IncidentReportForm.tsx:249:5:onSubmit",
+      "sourceEffect": "The active new-incident page supplies handleSubmit; form submission sends POST /api/health-safety/incidents with the form data and then routes to the incidents list on an OK response."
+    },
+    {
+      "bindingId": "components/health-safety/IncidentReportForm.tsx:605:11:onClick",
+      "sourceEffect": "The active new-incident page supplies onCancel, which routes to /dashboard/health-safety/incidents."
+    },
+    {
+      "bindingId": "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+      "sourceEffect": "The status action calls advanceStatus, which sends PATCH /api/grievances/{id}/status and updates the grievance status in local state when response data is present."
+    },
+    {
+      "bindingId": "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+      "sourceEffect": "The collaborator revoke action calls revokeCollaborator, which sends PATCH /api/grievances/{id}/access with status revoked and then refetches grievance data."
+    },
+    {
+      "bindingId": "components/clause-suggestions.tsx:140:19:onClick",
+      "sourceEffect": "The action calls handleLink, which sends POST /api/grievances/{grievanceId}/suggest-clauses with the search text and selected clause ID; on an OK response it invokes the optional onLink callback."
+    },
+    {
+      "bindingId": "components/steward-recommendations.tsx:137:19:onClick",
+      "sourceEffect": "The action calls handleAssign, which sends POST /api/grievances/{grievanceId}/assign with the selected steward ID; on an OK response it invokes the supplied onAssign callback."
+    },
+    {
+      "bindingId": "components/policy-governance/GovernanceSnapshotViewer.tsx:116:5:onClick",
+      "sourceEffect": "SnapshotRow invokes the supplied callback, which sets the selected snapshot in local React state."
+    },
+    {
+      "bindingId": "components/policy-governance/GovernanceSnapshotViewer.tsx:136:9:onClick",
+      "sourceEffect": "The detail close action invokes onClose, which clears the selected snapshot in local React state."
+    },
+    {
+      "bindingId": "components/policy-governance/PolicyDetail.tsx:45:11:onClick",
+      "sourceEffect": "The active PolicyRegistry caller supplies onClose to clear the selected policy in local React state."
+    },
+    {
+      "bindingId": "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:294:15:onClick",
+      "sourceEffect": "The node click toggles the selected node in local React state and forwards the node to the active caller, which stores it in local React state."
+    },
+    {
+      "bindingId": "components/knowledge-transfer/expertise-map/expertise-map.tsx:89:5:onClick",
+      "sourceEffect": "The active ExpertiseMap caller supplies onToggle to set or clear the expanded domain ID in local React state."
+    },
+    {
+      "bindingId": "app/[locale]/dashboard/content/_components/content-workflow-actions.tsx:93:13:onClick",
+      "sourceEffect": "The action calls handleTransition, which sends PATCH /api/content/templates/{itemId}/status and refreshes the route on an OK response."
+    },
+    {
+      "bindingId": "components/communications/sms-campaign-builder.tsx:679:9:onClick",
+      "sourceEffect": "At step 1 the action invokes onCancel, supplied by SmsConsole to switch to its dashboard view; at later steps it decrements the current-step state."
+    },
+    {
+      "bindingId": "components/health-safety/InspectionScheduleCalendar.tsx:233:25:onClick",
+      "sourceEffect": "The calendar action invokes the supplied onViewInspection callback; the active inspections page sets the selected inspection ID in local React state."
+    },
+    {
+      "bindingId": "components/health-safety/IncidentListTable.tsx:263:25:onClick",
+      "sourceEffect": "The active incidents page supplies handleViewIncident, which routes to /dashboard/health-safety/incidents/{incidentId}."
+    },
+    {
+      "bindingId": "app/[locale]/dashboard/dues/pay/[transactionId]/page.tsx:205:9:onClick",
+      "sourceEffect": "The card option invokes handlePaymentMethodSelected('card'), which sends POST /api/payments/checkout/create and redirects to the validated checkout URL when present."
+    },
+    {
+      "bindingId": "components/dues/deduction-history.tsx:127:23:onClick",
+      "sourceEffect": "The active dues portal supplies onReportIssue to set the selected deduction ID in local React state for the report-issue view."
+    },
+    {
+      "bindingId": "components/knowledge-transfer/continuity-simulation-workspace.tsx:180:7:onClick",
+      "sourceEffect": "The active ErrorState caller supplies fetchPropagation; retry requests GET /api/exit-interviews/propagation, maps the response into graph data, and updates loading/error/data state."
+    },
+    {
+      "bindingId": "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:134:9:onClick",
+      "sourceEffect": "The playback control switches local playing state; playback advances the current week on an interval, while pause stops the interval."
+    },
+    {
+      "bindingId": "components/admin/JobClassificationManagement.tsx:352:11:onSubmit",
+      "sourceEffect": "The active classification dialog submits through createJobClassificationAction or updateJobClassificationAction; on success it calls onClose(true), which closes the dialog and reloads the classification list."
+    },
+    {
+      "bindingId": "components/admin/JobClassificationManagement.tsx:522:15:onClick",
+      "sourceEffect": "The dialog cancel control invokes handleDialogClose, which closes the dialog and clears the editing classification in local React state."
+    },
+    {
+      "bindingId": "components/icra/ICRAAssessmentFlow.tsx:681:25:onClick",
+      "sourceEffect": "The active OrgContextForm caller routes the selection to handleOptionSelect, which updates the current section answer map in local React state."
+    },
+    {
+      "bindingId": "components/icra/ICRAAssessmentFlow.tsx:727:23:onClick",
+      "sourceEffect": "The active OrgContextForm caller routes the selection to handleOptionSelect, which updates the current section answer map in local React state."
+    },
+    {
+      "bindingId": "components/icra/ICRAAssessmentFlow.tsx:882:7:onClick",
+      "sourceEffect": "The organization-context form submits values to handleOrgContext, which stores the context, computes adaptive question routing with a static-bank fallback, and advances the assessment to step 2."
+    },
+    {
+      "bindingId": "components/icra/ConsentGate.tsx:214:9:onClick",
+      "sourceEffect": "The active ICRA flow supplies handleConsent; the proceed action stores consent and the optional Turnstile token in local state, then advances to organization-context step 1."
+    },
+    {
+      "bindingId": "components/calendar/CalendarSyncManager.tsx:397:11:onClick",
+      "sourceEffect": "The active calendar page supplies setSyncManagerOpen as onOpenChange; the close button sets the sync-manager dialog open state to false."
+    },
+    {
+      "bindingId": "components/calendar/EventDialog.tsx:370:13:onClick",
+      "sourceEffect": "The active calendar page supplies setEventDialogOpen as onOpenChange; the close button sets the event-dialog open state to false."
+    },
+    {
+      "bindingId": "components/calendar/CalendarSidebar.tsx:99:15:onSelect",
+      "sourceEffect": "The sidebar selection callback is wired to setSelectedCalendarId on the active calendar page, which stores the selected calendar ID in local React state."
+    },
+    {
+      "bindingId": "components/calendar/CalendarSidebar.tsx:134:17:onSelect",
+      "sourceEffect": "The sidebar selection callback is wired to setSelectedCalendarId on the active calendar page, which stores the selected calendar ID in local React state."
+    },
+    {
+      "bindingId": "components/calendar/CalendarSidebar.tsx:201:5:onClick",
+      "sourceEffect": "The calendar row invokes onSelect(calendar.id); the active page wires onSelectCalendar to setSelectedCalendarId, updating local React state."
+    },
+    {
+      "bindingId": "components/calendar/CalendarSidebar.tsx:236:11:onClick",
+      "sourceEffect": "The row sync control invokes onSync(calendar.id); the active calendar page resolves the connection and requests POST /api/calendar-sync/connections/{connectionId}/sync with local and external calendar IDs."
+    },
+    {
+      "bindingId": "components/calendar/CalendarView.tsx:240:11:onClick",
+      "sourceEffect": "The active calendar page supplies a no-op onDateClick and handleCreateEvent as onCreateEvent; clicking an empty day therefore opens the event dialog with that date as its initial value."
+    },
+    {
+      "bindingId": "components/calendar/CalendarView.tsx:257:17:onClick",
+      "sourceEffect": "The month-view event control forwards the selected event to the active page's handleEditEvent, which stores the event in local state and opens the event dialog."
+    },
+    {
+      "bindingId": "components/calendar/CalendarView.tsx:339:19:onClick",
+      "sourceEffect": "The week-view event control forwards the selected event to the active page's handleEditEvent, which stores the event in local state and opens the event dialog."
+    },
+    {
+      "bindingId": "components/calendar/CalendarView.tsx:401:17:onClick",
+      "sourceEffect": "The day-view event control forwards the selected event to the active page's handleEditEvent, which stores the event in local state and opens the event dialog."
+    },
+    {
+      "bindingId": "components/calendar/CalendarView.tsx:463:17:onClick",
+      "sourceEffect": "The agenda-view event control forwards the selected event to the active page's handleEditEvent, which stores the event in local state and opens the event dialog."
+    }
+  ],
+  "limitations": [
+    "A verified source operation does not prove the request succeeds, data persists, a destination route resolves, or a browser integration works.",
+    "No source-effect conclusion is made for the remaining 23 trace-candidate records or the 17 no-caller records."
+  ]
+  },
+  "rootContractClusters": [
+    {
+      "id": "R1-ACTION-CALLBACK-UNBOUND-01",
+      "disposition": "ACTIVE_VISIBLE_ACTION_CALLBACK_OMITTED",
+      "bindingIds": [
+        "components/health-safety/CorrectiveActionTracker.tsx:367:27:onClick",
+        "components/health-safety/InspectionFindingsCard.tsx:135:9:onClick"
+      ],
+      "findings": [
+        {
+          "source": "apps/union-eyes/components/health-safety/CorrectiveActionTracker.tsx",
+          "sourceLine": 367,
+          "contract": "onViewAction is optional and the rendered View Details button invokes it with optional chaining.",
+          "caller": "apps/union-eyes/app/[locale]/dashboard/health-safety/hazards/page.tsx",
+          "callerLine": 408,
+          "callbackProp": "onViewAction"
+        },
+        {
+          "source": "apps/union-eyes/components/health-safety/InspectionFindingsCard.tsx",
+          "sourceLine": 135,
+          "contract": "onViewDetails is optional and the rendered View Full Report button invokes it with optional chaining.",
+          "caller": "apps/union-eyes/app/[locale]/dashboard/health-safety/inspections/page.tsx",
+          "callerLine": 396,
+          "callbackProp": "onViewDetails"
+        }
+      ],
+      "sourceConclusion": "At these routed callsites, the visible buttons have no handler to dispatch. This is a source-path conclusion only; no runtime click was executed."
+    }
+  ],
+  "bindingOutcomes": [
+    {
+      "bindingId": "app/[locale]/dashboard/error.tsx:63:13:onClick",
+      "sourceFile": "app/[locale]/dashboard/error.tsx",
+      "sourceLine": 63,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=reset | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/onboarding/onboarding-provider.tsx:46:5:onNext",
+      "sourceFile": "components/onboarding/onboarding-provider.tsx",
+      "sourceLine": 46,
+      "event": "onNext",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=advanceStep | targets=- | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/organization/organization-selector.tsx:144:7:onClick",
+      "sourceFile": "components/organization/organization-selector.tsx",
+      "sourceLine": 144,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@144:7 | targets=refreshOrganizations() | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/organization/organization-selector.tsx:170:7:onClick",
+      "sourceFile": "components/organization/organization-selector.tsx",
+      "sourceLine": 170,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@170:7 | targets=refreshOrganizations() | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/targets/targets-console.tsx:346:9:onClick",
+      "sourceFile": "components/targets/targets-console.tsx",
+      "sourceLine": 346,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@346:9 | targets=onToggle(row.original.id,!(row.original.isActive ?? true)) | components/targets/targets-console.tsx:439 <CreateTargetDialog> onCreated=loadData -> components/targets/targets-console.tsx:369 loadData = useCallback(async () => { setLoading(true); try { const res = await fetch('/api/targets/summary'); if (!res.ok) throw new Error('Failed to load …"
+    },
+    {
+      "bindingId": "components/ui/data-table-advanced.tsx:324:17:onClick",
+      "sourceFile": "components/ui/data-table-advanced.tsx",
+      "sourceLine": 324,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@324:17 | targets=onRowClick(row) | components/grievances/grievance-queue-table.tsx:301 <DataTableAdvanced> onRowClick=(row) => onView?.(row.original) ; onExport=onExport -> components/grievances/grievance-queue-table.tsx:162 onExport"
+    },
+    {
+      "bindingId": "components/union-structure/CommitteeManagement.tsx:537:13:onSubmit",
+      "sourceFile": "components/union-structure/CommitteeManagement.tsx",
+      "sourceLine": 537,
+      "event": "onSubmit",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@537:13 | targets=form.handleSubmit(onSubmit) | components/union-structure/UnionStructureDashboard.tsx:208 <CommitteeManagement> onUpdate=fetchStats -> components/union-structure/UnionStructureDashboard.tsx:58 fetchStats = async () => { try { setIsLoading(true); // Fetch counts from each entity endpoint const [employers, worksites, units, committe…"
+    },
+    {
+      "bindingId": "components/union-structure/BargainingUnitManagement.tsx:491:13:onSubmit",
+      "sourceFile": "components/union-structure/BargainingUnitManagement.tsx",
+      "sourceLine": 491,
+      "event": "onSubmit",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@491:13 | targets=form.handleSubmit(onSubmit) | components/union-structure/UnionStructureDashboard.tsx:204 <BargainingUnitManagement> onUpdate=fetchStats -> components/union-structure/UnionStructureDashboard.tsx:58 fetchStats = async () => { try { setIsLoading(true); // Fetch counts from each entity endpoint const [employers, worksites, units, committe…"
+    },
+    {
+      "bindingId": "components/union-structure/WorksiteManagement.tsx:393:13:onSubmit",
+      "sourceFile": "components/union-structure/WorksiteManagement.tsx",
+      "sourceLine": 393,
+      "event": "onSubmit",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@393:13 | targets=form.handleSubmit(onSubmit) | components/union-structure/UnionStructureDashboard.tsx:200 <WorksiteManagement> onUpdate=fetchStats -> components/union-structure/UnionStructureDashboard.tsx:58 fetchStats = async () => { try { setIsLoading(true); // Fetch counts from each entity endpoint const [employers, worksites, units, committe…"
+    },
+    {
+      "bindingId": "components/union-structure/EmployerManagement.tsx:476:13:onSubmit",
+      "sourceFile": "components/union-structure/EmployerManagement.tsx",
+      "sourceLine": 476,
+      "event": "onSubmit",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@476:13 | targets=form.handleSubmit(onSubmit) | components/union-structure/UnionStructureDashboard.tsx:196 <EmployerManagement> onUpdate=fetchStats -> components/union-structure/UnionStructureDashboard.tsx:58 fetchStats = async () => { try { setIsLoading(true); // Fetch counts from each entity endpoint const [employers, worksites, units, committe…"
+    },
+    {
+      "bindingId": "components/precedents/PrecedentCompareView.tsx:302:15:onClick",
+      "sourceFile": "components/precedents/PrecedentCompareView.tsx",
+      "sourceLine": 302,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@302:15 | targets=onRemovePrecedent(precedent.id) | components/precedents/precedents-console.tsx:844 <PrecedentCompareView> onRemovePrecedent=handleRemoveFromComparison -> components/precedents/precedents-console.tsx:422 handleRemoveFromComparison = (precedentId: string) => { setSelectedPrecedentIds((prev) => prev.filter((id) => id !== preced…"
+    },
+    {
+      "bindingId": "components/precedents/PrecedentViewer.tsx:538:19:onClick",
+      "sourceFile": "components/precedents/PrecedentViewer.tsx",
+      "sourceLine": 538,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@538:19 | targets=onDownloadDocument(\"decision\") | components/precedents/precedents-console.tsx:822 <PrecedentViewer> onEdit=() => { openEditDialog(); } ; onDelete=handleDeletePrecedent -> components/precedents/precedents-console.tsx:575 handleDeletePrecedent = async () => { if (!selectedPrecedent) return; try { const response = await f…"
+    },
+    {
+      "bindingId": "components/precedents/PrecedentViewer.tsx:562:19:onClick",
+      "sourceFile": "components/precedents/PrecedentViewer.tsx",
+      "sourceLine": 562,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@562:19 | targets=onDownloadDocument(\"redacted\") | components/precedents/precedents-console.tsx:822 <PrecedentViewer> onEdit=() => { openEditDialog(); } ; onDelete=handleDeletePrecedent -> components/precedents/precedents-console.tsx:575 handleDeletePrecedent = async () => { if (!selectedPrecedent) return; try { const response = await f…"
+    },
+    {
+      "bindingId": "app/[locale]/dashboard/pilot/pilot-dashboard.tsx:216:17:onClick",
+      "sourceFile": "app/[locale]/dashboard/pilot/pilot-dashboard.tsx",
+      "sourceLine": 216,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@216:17 | targets=onSelectOrg(org.organizationId) | app/[locale]/dashboard/pilot/pilot-dashboard.tsx:91 <PlatformOverview> onSelectOrg=setSelectedOrg -> app/[locale]/dashboard/pilot/pilot-dashboard.tsx:25 setSelectedOrg"
+    },
+    {
+      "bindingId": "components/pilot/pilot-readiness-checklist.tsx:305:17:onClick",
+      "sourceFile": "components/pilot/pilot-readiness-checklist.tsx",
+      "sourceLine": 305,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@305:17 | targets=item.onAction(),onItemComplete(item.id) | app/[locale]/dashboard/pilot/onboarding/onboarding-console.tsx:156 <PilotReadinessChecklist> onItemComplete=handleChecklistComplete -> app/[locale]/dashboard/pilot/onboarding/onboarding-console.tsx:109 handleChecklistComplete = async (itemId: string) => { try { await fetch('/api/pilot/onboarding', { method: 'PAT…"
+    },
+    {
+      "bindingId": "components/knowledge-transfer/organizational-memory-explorer.tsx:175:5:onClick",
+      "sourceFile": "components/knowledge-transfer/organizational-memory-explorer.tsx",
+      "sourceLine": 175,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onClick | targets=- | components/knowledge-transfer/organizational-memory-explorer.tsx:326 <TopicPill> onClick=() => handleTopicClick(domain)"
+    },
+    {
+      "bindingId": "components/knowledge-transfer/organizational-memory-explorer.tsx:326:15:onClick",
+      "sourceFile": "components/knowledge-transfer/organizational-memory-explorer.tsx",
+      "sourceLine": 326,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@326:15 | targets=handleTopicClick(domain) | components/knowledge-transfer/organizational-memory-explorer.tsx:326 <TopicPill> onClick=() => handleTopicClick(domain)"
+    },
+    {
+      "bindingId": "components/ui/empty-state.tsx:101:9:onClick",
+      "sourceFile": "components/ui/empty-state.tsx",
+      "sourceLine": 101,
+      "event": "onClick",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=action.onClick | targets=- | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/ai/steward-copilot-drawer.tsx:141:9:onClick",
+      "sourceFile": "components/ai/steward-copilot-drawer.tsx",
+      "sourceLine": 141,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=onClose | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/ai/grievance-triage-card.tsx:88:13:onClick",
+      "sourceFile": "components/ai/grievance-triage-card.tsx",
+      "sourceLine": 88,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=onRequestTriage | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/ai/grievance-triage-card.tsx:169:17:onClick",
+      "sourceFile": "components/ai/grievance-triage-card.tsx",
+      "sourceLine": 169,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=INLINE@169:17 | targets=onAccept(reviewNotes) | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/ai/grievance-triage-card.tsx:178:17:onClick",
+      "sourceFile": "components/ai/grievance-triage-card.tsx",
+      "sourceLine": 178,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=INLINE@178:17 | targets=onReject(reviewNotes) | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/ai/employer-risk-card.tsx:79:13:onClick",
+      "sourceFile": "components/ai/employer-risk-card.tsx",
+      "sourceLine": 79,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=onRecalculate | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/ai/employer-risk-card.tsx:95:13:onClick",
+      "sourceFile": "components/ai/employer-risk-card.tsx",
+      "sourceLine": 95,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=onRecalculate | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/ai/clause-reasoning-panel.tsx:78:13:onClick",
+      "sourceFile": "components/ai/clause-reasoning-panel.tsx",
+      "sourceLine": 78,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=onRequestAnalysis | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/CorrectiveActionTracker.tsx:367:27:onClick",
+      "sourceFile": "components/health-safety/CorrectiveActionTracker.tsx",
+      "sourceLine": 367,
+      "event": "onClick",
+      "disposition": "ACTIVE_VISIBLE_ACTION_CALLBACK_OMITTED",
+      "sourceTrace": "origin=INLINE@367:27 | targets=onViewAction(action.id) | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:201:15:onClick",
+      "sourceFile": "components/health-safety/SafetyCommitteeMeetingScheduler.tsx",
+      "sourceLine": 201,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=onScheduleMeeting | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:220:17:onClick",
+      "sourceFile": "components/health-safety/SafetyCommitteeMeetingScheduler.tsx",
+      "sourceLine": 220,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=onScheduleMeeting | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:288:25:onClick",
+      "sourceFile": "components/health-safety/SafetyCommitteeMeetingScheduler.tsx",
+      "sourceLine": 288,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=INLINE@288:25 | targets=onViewMeeting(meeting.id) | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:368:25:onClick",
+      "sourceFile": "components/health-safety/SafetyCommitteeMeetingScheduler.tsx",
+      "sourceLine": 368,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=INLINE@368:25 | targets=onViewMeeting(meeting.id) | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/PPEDistributionTracker.tsx:147:17:onClick",
+      "sourceFile": "components/health-safety/PPEDistributionTracker.tsx",
+      "sourceLine": 147,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=INLINE@147:17 | targets=onReorder(item.id) | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/PPEDistributionTracker.tsx:221:15:onClick",
+      "sourceFile": "components/health-safety/PPEDistributionTracker.tsx",
+      "sourceLine": 221,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=onDistribute | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/PPEDistributionTracker.tsx:305:29:onClick",
+      "sourceFile": "components/health-safety/PPEDistributionTracker.tsx",
+      "sourceLine": 305,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=INLINE@305:29 | targets=onReorder(item.id) | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/HazardsList.tsx:215:15:onClick",
+      "sourceFile": "components/health-safety/HazardsList.tsx",
+      "sourceLine": 215,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@215:15 | targets=handleViewDetails(hazard.id) | app/[locale]/dashboard/health-safety/hazards/page.tsx:391 <HazardsList> onViewDetails=handleViewHazard -> app/[locale]/dashboard/health-safety/hazards/page.tsx:108 handleViewHazard = (hazardId: string) => { router.push(`/dashboard/health-safety/hazards/${hazardId}`); }"
+    },
+    {
+      "bindingId": "components/health-safety/HazardsList.tsx:256:21:onClick",
+      "sourceFile": "components/health-safety/HazardsList.tsx",
+      "sourceLine": 256,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@256:21 | targets=e.stopPropagation(),handleViewDetails(hazard.id) | app/[locale]/dashboard/health-safety/hazards/page.tsx:391 <HazardsList> onViewDetails=handleViewHazard -> app/[locale]/dashboard/health-safety/hazards/page.tsx:108 handleViewHazard = (hazardId: string) => { router.push(`/dashboard/health-safety/hazards/${hazardId}`); }"
+    },
+    {
+      "bindingId": "components/health-safety/HazardReportForm.tsx:170:5:onSubmit",
+      "sourceFile": "components/health-safety/HazardReportForm.tsx",
+      "sourceLine": 170,
+      "event": "onSubmit",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@170:5 | targets=form.handleSubmit(handleSubmit) | app/[locale]/dashboard/health-safety/hazards/page.tsx:172 <HazardReportForm> onSubmit=handleReportSubmit -> app/[locale]/dashboard/health-safety/hazards/page.tsx:112 handleReportSubmit = async (data: Record<string, unknown>) => { try { const res = await fetch('/api/health-safety/hazards', { metho…"
+    },
+    {
+      "bindingId": "components/health-safety/HazardReportForm.tsx:395:11:onClick",
+      "sourceFile": "components/health-safety/HazardReportForm.tsx",
+      "sourceLine": 395,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onCancel | targets=- | app/[locale]/dashboard/health-safety/hazards/page.tsx:172 <HazardReportForm> onSubmit=handleReportSubmit -> app/[locale]/dashboard/health-safety/hazards/page.tsx:112 handleReportSubmit = async (data: Record<string, unknown>) => { try { const res = await fetch('/api/health-safety/hazards', { metho…"
+    },
+    {
+      "bindingId": "components/health-safety/InspectionFindingsCard.tsx:135:9:onClick",
+      "sourceFile": "components/health-safety/InspectionFindingsCard.tsx",
+      "sourceLine": 135,
+      "event": "onClick",
+      "disposition": "ACTIVE_VISIBLE_ACTION_CALLBACK_OMITTED",
+      "sourceTrace": "origin=INLINE@135:9 | targets=onViewDetails(finding.id) | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/health-safety/InspectionChecklist.tsx:323:21:onChange",
+      "sourceFile": "components/health-safety/InspectionChecklist.tsx",
+      "sourceLine": 323,
+      "event": "onChange",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=INLINE@323:21 | targets=handlePhotoUpload(item.id,e.target.files) | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/InspectionScheduleCalendar.tsx:186:15:onClick",
+      "sourceFile": "components/health-safety/InspectionScheduleCalendar.tsx",
+      "sourceLine": 186,
+      "event": "onClick",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=onScheduleInspection | targets=- | app/[locale]/dashboard/health-safety/inspections/page.tsx:354 <InspectionScheduleCalendar> onViewInspection=handleViewInspection -> app/[locale]/dashboard/health-safety/inspections/page.tsx:128 handleViewInspection = (inspectionId: string) => { setSelectedInspection(inspectionId); }"
+    },
+    {
+      "bindingId": "components/health-safety/InspectionScheduleCalendar.tsx:233:25:onClick",
+      "sourceFile": "components/health-safety/InspectionScheduleCalendar.tsx",
+      "sourceLine": 233,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@233:25 | targets=onViewInspection(inspection.id) | app/[locale]/dashboard/health-safety/inspections/page.tsx:354 <InspectionScheduleCalendar> onViewInspection=handleViewInspection -> app/[locale]/dashboard/health-safety/inspections/page.tsx:128 handleViewInspection = (inspectionId: string) => { setSelectedInspection(inspectionId); }"
+    },
+    {
+      "bindingId": "components/health-safety/IncidentDetailView.tsx:191:17:onClick",
+      "sourceFile": "components/health-safety/IncidentDetailView.tsx",
+      "sourceLine": 191,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=onEdit | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/IncidentDetailView.tsx:201:17:onClick",
+      "sourceFile": "components/health-safety/IncidentDetailView.tsx",
+      "sourceLine": 201,
+      "event": "onClick",
+      "disposition": "NO_IN_REPOSITORY_COMPONENT_CALLER_FOUND",
+      "sourceTrace": "origin=onClose | targets=- | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/health-safety/IncidentReportForm.tsx:249:5:onSubmit",
+      "sourceFile": "components/health-safety/IncidentReportForm.tsx",
+      "sourceLine": 249,
+      "event": "onSubmit",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@249:5 | targets=form.handleSubmit(handleSubmit) | app/[locale]/dashboard/health-safety/incidents/new/page.tsx:151 <IncidentReportForm> onSubmit=handleSubmit -> app/[locale]/dashboard/health-safety/incidents/new/page.tsx:31 handleSubmit = async (data: Record<string, unknown>) => { try { const res = await fetch('/api/health-safety/incidents', { method: 'P…"
+    },
+    {
+      "bindingId": "components/health-safety/IncidentReportForm.tsx:605:11:onClick",
+      "sourceFile": "components/health-safety/IncidentReportForm.tsx",
+      "sourceLine": 605,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onCancel | targets=- | app/[locale]/dashboard/health-safety/incidents/new/page.tsx:151 <IncidentReportForm> onSubmit=handleSubmit -> app/[locale]/dashboard/health-safety/incidents/new/page.tsx:31 handleSubmit = async (data: Record<string, unknown>) => { try { const res = await fetch('/api/health-safety/incidents', { method: 'P…"
+    },
+    {
+      "bindingId": "components/health-safety/IncidentListTable.tsx:263:25:onClick",
+      "sourceFile": "components/health-safety/IncidentListTable.tsx",
+      "sourceLine": 263,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@263:25 | targets=handleViewDetails(incident.id) | app/[locale]/dashboard/health-safety/incidents/page.tsx:326 <IncidentListTable> onViewDetails=handleViewIncident -> app/[locale]/dashboard/health-safety/incidents/page.tsx:104 handleViewIncident = (incidentId: string) => { router.push(`/dashboard/health-safety/incidents/${incidentId}`); }"
+    },
+    {
+      "bindingId": "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+      "sourceFile": "components/grievances/grievance-detail-console.tsx",
+      "sourceLine": 343,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@343:19 | targets=advanceStatus(next) | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+      "sourceFile": "components/grievances/grievance-detail-console.tsx",
+      "sourceLine": 543,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@543:21 | targets=revokeCollaborator(assignment.id) | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/clause-suggestions.tsx:140:19:onClick",
+      "sourceFile": "components/clause-suggestions.tsx",
+      "sourceLine": 140,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@140:19 | targets=handleLink(clause.id) | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/steward-recommendations.tsx:137:19:onClick",
+      "sourceFile": "components/steward-recommendations.tsx",
+      "sourceLine": 137,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@137:19 | targets=handleAssign(c.stewardId) | components/grievances/grievance-detail-console.tsx:596 <StewardRecommendations> onAssign=() => { // Refetch grievance to update assigned steward fetch(`/api/grievances/${id}`) .then((r) => r.json()) .then((j) => { if (j.data) setGrievance(j.data); }); }"
+    },
+    {
+      "bindingId": "components/policy-governance/GovernanceSnapshotViewer.tsx:116:5:onClick",
+      "sourceFile": "components/policy-governance/GovernanceSnapshotViewer.tsx",
+      "sourceLine": 116,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onClick | targets=- | components/policy-governance/GovernanceSnapshotViewer.tsx:89 <SnapshotRow> onClick=() => setSelected(queried) || components/policy-governance/GovernanceSnapshotViewer.tsx:102 <SnapshotRow> onClick=() => setSelected(selected?.id === s.id ? null : s) || components/policy-governance/GovernanceSnapshotViewer.tsx:108 <SnapshotDetail> onClose=() => setSelected(null)"
+    },
+    {
+      "bindingId": "components/policy-governance/GovernanceSnapshotViewer.tsx:136:9:onClick",
+      "sourceFile": "components/policy-governance/GovernanceSnapshotViewer.tsx",
+      "sourceLine": 136,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onClose | targets=- | components/policy-governance/GovernanceSnapshotViewer.tsx:89 <SnapshotRow> onClick=() => setSelected(queried) || components/policy-governance/GovernanceSnapshotViewer.tsx:102 <SnapshotRow> onClick=() => setSelected(selected?.id === s.id ? null : s) || components/policy-governance/GovernanceSnapshotViewer.tsx:108 <SnapshotDetail> onClose=() => setSelected(null)"
+    },
+    {
+      "bindingId": "components/policy-governance/PolicyDetail.tsx:45:11:onClick",
+      "sourceFile": "components/policy-governance/PolicyDetail.tsx",
+      "sourceLine": 45,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onClose | targets=- | components/policy-governance/PolicyRegistry.tsx:108 <PolicyDetail> onClose=() => setSelected(null)"
+    },
+    {
+      "bindingId": "app/[locale]/dashboard/dues/pay/[transactionId]/page.tsx:205:9:onClick",
+      "sourceFile": "app/[locale]/dashboard/dues/pay/[transactionId]/page.tsx",
+      "sourceLine": 205,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@205:9 | targets=onPaymentMethodSelected('card') | app/[locale]/dashboard/dues/pay/[transactionId]/page.tsx:457 <PaymentMethodSelector> onPaymentMethodSelected=handlePaymentMethodSelected -> app/[locale]/dashboard/dues/pay/[transactionId]/page.tsx:301 handlePaymentMethodSelected = async (method: string) => { if (!transaction) return; try { setProcessing(…"
+    },
+    {
+      "bindingId": "components/dues/deduction-history.tsx:127:23:onClick",
+      "sourceFile": "components/dues/deduction-history.tsx",
+      "sourceLine": 127,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@127:23 | targets=onReportIssue(deduction.id) | components/dues/dues-payment-portal.tsx:188 <DeductionHistory> onReportIssue=(deductionId) => { setSelectedDeductionId(deductionId); }"
+    },
+    {
+      "bindingId": "app/[locale]/dashboard/dispatch/page.tsx:349:21:onClick",
+      "sourceFile": "app/[locale]/dashboard/dispatch/page.tsx",
+      "sourceLine": 349,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@349:21 | targets=handleAssign(selectedRequest,[c.memberId]) | NO_COMPONENT_CALLER_FOUND"
+    },
+    {
+      "bindingId": "components/analytics/TopItemsList.tsx:114:19:onClick",
+      "sourceFile": "components/analytics/TopItemsList.tsx",
+      "sourceLine": 114,
+      "event": "onClick",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=INLINE@114:19 | targets=onViewItem(item.id) | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/knowledge-transfer/continuity-simulation-workspace.tsx:180:7:onClick",
+      "sourceFile": "components/knowledge-transfer/continuity-simulation-workspace.tsx",
+      "sourceLine": 180,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onRetry | targets=- | components/knowledge-transfer/continuity-simulation-workspace.tsx:446 <ErrorState> onRetry=fetchPropagation -> components/knowledge-transfer/continuity-simulation-workspace.tsx:206 fetchPropagation = async () => { try { setPropagationLoading(true); setPropagationError(null); const res = await fetch('/a…"
+    },
+    {
+      "bindingId": "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:134:9:onClick",
+      "sourceFile": "components/knowledge-transfer/propagation-playback/propagation-playback.tsx",
+      "sourceLine": 134,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@134:9 | targets=- | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:294:15:onClick",
+      "sourceFile": "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx",
+      "sourceLine": 294,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@294:15 | targets=handleNodeClick(node) | components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:553 <TopicGraphViz> onNodeClick=(node) => setSelectedNode(node)"
+    },
+    {
+      "bindingId": "components/knowledge-transfer/expertise-map/expertise-map.tsx:89:5:onClick",
+      "sourceFile": "components/knowledge-transfer/expertise-map/expertise-map.tsx",
+      "sourceLine": 89,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onToggle | targets=- | components/knowledge-transfer/expertise-map/expertise-map.tsx:275 <DomainCard> onToggle=() => setExpandedId(expandedId === domain.domain ? null : domain.domain)"
+    },
+    {
+      "bindingId": "app/[locale]/dashboard/content/_components/content-workflow-actions.tsx:93:13:onClick",
+      "sourceFile": "app/[locale]/dashboard/content/_components/content-workflow-actions.tsx",
+      "sourceLine": 93,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@93:13 | targets=handleTransition(action.target) | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/communications/sms-campaign-builder.tsx:679:9:onClick",
+      "sourceFile": "components/communications/sms-campaign-builder.tsx",
+      "sourceLine": 679,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@679:9 | targets=- | components/communications/sms-console.tsx:329 <SmsCampaignBuilder> onComplete=() => setActiveView('dashboard') ; onCancel=() => setActiveView('dashboard')"
+    },
+    {
+      "bindingId": "components/clause-library/ClauseSharingControls.tsx:255:11:onClick",
+      "sourceFile": "components/clause-library/ClauseSharingControls.tsx",
+      "sourceLine": 255,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@255:11 | targets=onOpenChange(false) | components/clause-library/clause-library-console.tsx:573 <ClauseSharingControls> onOpenChange=setSharingDialogOpen -> components/clause-library/clause-library-console.tsx:82 setSharingDialogOpen ; onSave=async (settings) => { try { const response = await fetch(`/api/clause-library/${selectedClause.id…"
+    },
+    {
+      "bindingId": "components/clause-library/ClauseCompareView.tsx:253:15:onClick",
+      "sourceFile": "components/clause-library/ClauseCompareView.tsx",
+      "sourceLine": 253,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@253:15 | targets=onRemoveClause(clause.id) | components/clause-library/clause-library-console.tsx:628 <ClauseCompareView> onRemoveClause=handleRemoveFromComparison -> components/clause-library/clause-library-console.tsx:294 handleRemoveFromComparison = (clauseId: string) => { setSelectedClauseIds((prev) => { const newIds = prev.filter((id) …"
+    },
+    {
+      "bindingId": "components/claims/claim-list-table.tsx:243:17:onClick",
+      "sourceFile": "components/claims/claim-list-table.tsx",
+      "sourceLine": 243,
+      "event": "onClick",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=INLINE@243:17 | targets=onEdit(claim) | components/claims/claims-console.tsx:116 <ClaimListTable> onView=(c) => router.push(`/${locale}/dashboard/claims/${c.claimId}`)"
+    },
+    {
+      "bindingId": "components/claims/claim-list-table.tsx:251:19:onClick",
+      "sourceFile": "components/claims/claim-list-table.tsx",
+      "sourceLine": 251,
+      "event": "onClick",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=INLINE@251:19 | targets=onStatusChange(claim.claimId,\"in-review\") | components/claims/claims-console.tsx:116 <ClaimListTable> onView=(c) => router.push(`/${locale}/dashboard/claims/${c.claimId}`)"
+    },
+    {
+      "bindingId": "components/claims/claim-list-table.tsx:257:19:onClick",
+      "sourceFile": "components/claims/claim-list-table.tsx",
+      "sourceLine": 257,
+      "event": "onClick",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=INLINE@257:19 | targets=onStatusChange(claim.claimId,\"resolved\") | components/claims/claims-console.tsx:116 <ClaimListTable> onView=(c) => router.push(`/${locale}/dashboard/claims/${c.claimId}`)"
+    },
+    {
+      "bindingId": "components/claims/claim-list-table.tsx:268:19:onClick",
+      "sourceFile": "components/claims/claim-list-table.tsx",
+      "sourceLine": 268,
+      "event": "onClick",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=INLINE@268:19 | targets=onDelete(claim) | components/claims/claims-console.tsx:116 <ClaimListTable> onView=(c) => router.push(`/${locale}/dashboard/claims/${c.claimId}`)"
+    },
+    {
+      "bindingId": "components/cba-intelligence/benchmark-view.tsx:232:11:onClick",
+      "sourceFile": "components/cba-intelligence/benchmark-view.tsx",
+      "sourceLine": 232,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@232:11 | targets=refetch() | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/cba-intelligence/benchmark-view.tsx:345:15:onClick",
+      "sourceFile": "components/cba-intelligence/benchmark-view.tsx",
+      "sourceLine": 345,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@345:15 | targets=handleSaveSnapshot() | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/cba-intelligence/review-queue.tsx:328:35:onClick",
+      "sourceFile": "components/cba-intelligence/review-queue.tsx",
+      "sourceLine": 328,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@328:35 | targets=handleSubmit(item.id) | NO_CALLER_VALUE_CAPTURED"
+    },
+    {
+      "bindingId": "components/cba-intelligence/agreement-explorer.tsx:191:11:onClick",
+      "sourceFile": "components/cba-intelligence/agreement-explorer.tsx",
+      "sourceLine": 191,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onClose | targets=- | components/cba-intelligence/agreement-explorer.tsx:348 <AgreementDetailPanel> onClose=() => setSelectedId(null)"
+    },
+    {
+      "bindingId": "components/admin/bulk-import-organizations.tsx:487:11:onClick",
+      "sourceFile": "components/admin/bulk-import-organizations.tsx",
+      "sourceLine": 487,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@487:11 | targets=onOpenChange(false) | app/[locale]/dashboard/admin/organizations/page.tsx:485 <BulkImportOrganizations> onOpenChange=setBulkImportOpen -> app/[locale]/dashboard/admin/organizations/page.tsx:111 setBulkImportOpen ; onSuccess=() => { mutate(); setBulkImportOpen(false); }"
+    },
+    {
+      "bindingId": "components/organization/organization-tree.tsx:224:11:onSelect",
+      "sourceFile": "components/organization/organization-tree.tsx",
+      "sourceLine": 224,
+      "event": "onSelect",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@224:11 | targets=- | app/[locale]/dashboard/admin/organizations/page.tsx:466 <OrganizationTree> onSelect=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/organization/organization-tree.tsx:224 <TreeNode> onToggle=toggleNode -> components/organization/organization-tree.tsx:162 toggleNode = (node: OrganizationTreeNode, path: number[]) => { if (!node.isExpanded && (!node.children || node.children.length === 0)) { loadChildren(node, path); } else { // Just toggle expanded state const updateTree = (tree: OrganizationTreeNode, … ; onSelect=onSelect || onSelectOrganization || components/organization/organization-tree.tsx:322 <TreeNode> onToggle=onToggle -> components/organization/organization-tree.tsx:251 onToggle ; onSelect=onSelect -> components/organization/organization-tree.tsx:251 onSelect"
+    },
+    {
+      "bindingId": "components/organization/organization-tree.tsx:261:7:onClick",
+      "sourceFile": "components/organization/organization-tree.tsx",
+      "sourceLine": 261,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@261:7 | targets=onSelect(node) | app/[locale]/dashboard/admin/organizations/page.tsx:466 <OrganizationTree> onSelect=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/organization/organization-tree.tsx:224 <TreeNode> onToggle=toggleNode -> components/organization/organization-tree.tsx:162 toggleNode = (node: OrganizationTreeNode, path: number[]) => { if (!node.isExpanded && (!node.children || node.children.length === 0)) { loadChildren(node, path); } else { // Just toggle expanded state const updateTree = (tree: OrganizationTreeNode, … ; onSelect=onSelect || onSelectOrganization || components/organization/organization-tree.tsx:322 <TreeNode> onToggle=onToggle -> components/organization/organization-tree.tsx:251 onToggle ; onSelect=onSelect -> components/organization/organization-tree.tsx:251 onSelect"
+    },
+    {
+      "bindingId": "components/organization/organization-tree.tsx:270:11:onClick",
+      "sourceFile": "components/organization/organization-tree.tsx",
+      "sourceLine": 270,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@270:11 | targets=e.stopPropagation(),onToggle(node,path) | app/[locale]/dashboard/admin/organizations/page.tsx:466 <OrganizationTree> onSelect=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/organization/organization-tree.tsx:224 <TreeNode> onToggle=toggleNode -> components/organization/organization-tree.tsx:162 toggleNode = (node: OrganizationTreeNode, path: number[]) => { if (!node.isExpanded && (!node.children || node.children.length === 0)) { loadChildren(node, path); } else { // Just toggle expanded state const updateTree = (tree: OrganizationTreeNode, … ; onSelect=onSelect || onSelectOrganization || components/organization/organization-tree.tsx:322 <TreeNode> onToggle=onToggle -> components/organization/organization-tree.tsx:251 onToggle ; onSelect=onSelect -> components/organization/organization-tree.tsx:251 onSelect"
+    },
+    {
+      "bindingId": "components/organization/organization-tree.tsx:322:13:onSelect",
+      "sourceFile": "components/organization/organization-tree.tsx",
+      "sourceLine": 322,
+      "event": "onSelect",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onSelect | targets=- | app/[locale]/dashboard/admin/organizations/page.tsx:466 <OrganizationTree> onSelect=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/organization/organization-tree.tsx:224 <TreeNode> onToggle=toggleNode -> components/organization/organization-tree.tsx:162 toggleNode = (node: OrganizationTreeNode, path: number[]) => { if (!node.isExpanded && (!node.children || node.children.length === 0)) { loadChildren(node, path); } else { // Just toggle expanded state const updateTree = (tree: OrganizationTreeNode, … ; onSelect=onSelect || onSelectOrganization || components/organization/organization-tree.tsx:322 <TreeNode> onToggle=onToggle -> components/organization/organization-tree.tsx:251 onToggle ; onSelect=onSelect -> components/organization/organization-tree.tsx:251 onSelect"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:253:9:onClick",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 253,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@253:9 | targets=onToggle(node.id) | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:274:9:onClick",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 274,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@274:9 | targets=onSelect(node) | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:299:15:onClick",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 299,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@299:15 | targets=e.stopPropagation(),onAddChild(node) | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:313:15:onClick",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 313,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@313:15 | targets=e.stopPropagation(),onEdit(node) | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:327:15:onClick",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 327,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@327:15 | targets=e.stopPropagation(),onDelete(node) | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:348:13:onSelect",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 348,
+      "event": "onSelect",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onSelect | targets=- | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:348:13:onEdit",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 348,
+      "event": "onEdit",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=onEdit | targets=- | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:348:13:onAddChild",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 348,
+      "event": "onAddChild",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=onAddChild | targets=- | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:348:13:onDelete",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 348,
+      "event": "onDelete",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=onDelete | targets=- | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:568:15:onEdit",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 568,
+      "event": "onEdit",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=onEditOrganization | targets=- | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:568:15:onAddChild",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 568,
+      "event": "onAddChild",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=onAddChild | targets=- | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/organization-tree.tsx:568:15:onDelete",
+      "sourceFile": "components/admin/organization-tree.tsx",
+      "sourceLine": 568,
+      "event": "onDelete",
+      "disposition": "OPTIONAL_CALLBACK_ABSENT_OR_ACTION_GATED",
+      "sourceTrace": "origin=onDeleteOrganization | targets=- | app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555 <OrganizationTree> onSelectOrganization=(org) => router.push(`/dashboard/admin/organizations/${org.id}`) || components/admin/organization-tree.tsx:348 <TreeNodeComponent> onToggle=onToggle -> components/admin/organization-tree.tsx:228 onToggle ; onSelect=onSelect -> components/admin/organization-tree.tsx:229 onSelect ; onEdit=onEdit -> components/admin/organization-tree.tsx:230 onEdit ; o… || components/admin/organization-tree.tsx:568 <TreeNodeComponent> onToggle=handleToggle -> components/admin/organization-tree.tsx:425 handleToggle = useCallback((nodeId: string) => { setTreeData((prevTree) => { const toggleNode = (nodes: TreeNode[]): TreeNode[] => { return nodes.map((n…"
+    },
+    {
+      "bindingId": "components/admin/JobClassificationManagement.tsx:352:11:onSubmit",
+      "sourceFile": "components/admin/JobClassificationManagement.tsx",
+      "sourceLine": 352,
+      "event": "onSubmit",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@352:11 | targets=form.handleSubmit(onSubmit) | components/admin/JobClassificationManagement.tsx:242 <ClassificationFormDialog> onClose=handleDialogClose -> components/admin/JobClassificationManagement.tsx:138 handleDialogClose = (refresh?: boolean) => { setIsDialogOpen(false); setEditingClassification(null); if (refresh) { loadClassifications();…"
+    },
+    {
+      "bindingId": "components/admin/JobClassificationManagement.tsx:522:15:onClick",
+      "sourceFile": "components/admin/JobClassificationManagement.tsx",
+      "sourceLine": 522,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@522:15 | targets=onClose() | components/admin/JobClassificationManagement.tsx:242 <ClassificationFormDialog> onClose=handleDialogClose -> components/admin/JobClassificationManagement.tsx:138 handleDialogClose = (refresh?: boolean) => { setIsDialogOpen(false); setEditingClassification(null); if (refresh) { loadClassifications();…"
+    },
+    {
+      "bindingId": "components/icra/ICRAAssessmentFlow.tsx:681:25:onClick",
+      "sourceFile": "components/icra/ICRAAssessmentFlow.tsx",
+      "sourceLine": 681,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@681:25 | targets=handleOptionSelect(q.id,String(v)),String(v) | components/icra/ICRAAssessmentFlow.tsx:572 <OrgContextForm> onSubmit=handleOrgContext -> components/icra/ICRAAssessmentFlow.tsx:290 function handleOrgContext(ctx: OrgContextAnswers) { setOrgContext(ctx); // ── OCRA Dynamic Questionnaire Adaptation (doctrine 1.0.0) ───────────────… || components/icra/ICRAAssessmentFlow.tsx:585 <AdaptiveExplanationCard> onAcknowledge=() => setExplanationAcknowledged(true)"
+    },
+    {
+      "bindingId": "components/icra/ICRAAssessmentFlow.tsx:727:23:onClick",
+      "sourceFile": "components/icra/ICRAAssessmentFlow.tsx",
+      "sourceLine": 727,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@727:23 | targets=handleOptionSelect(q.id,opt.value) | components/icra/ICRAAssessmentFlow.tsx:572 <OrgContextForm> onSubmit=handleOrgContext -> components/icra/ICRAAssessmentFlow.tsx:290 function handleOrgContext(ctx: OrgContextAnswers) { setOrgContext(ctx); // ── OCRA Dynamic Questionnaire Adaptation (doctrine 1.0.0) ───────────────… || components/icra/ICRAAssessmentFlow.tsx:585 <AdaptiveExplanationCard> onAcknowledge=() => setExplanationAcknowledged(true)"
+    },
+    {
+      "bindingId": "components/icra/ICRAAssessmentFlow.tsx:882:7:onClick",
+      "sourceFile": "components/icra/ICRAAssessmentFlow.tsx",
+      "sourceLine": 882,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@882:7 | targets=onSubmit(values) | components/icra/ICRAAssessmentFlow.tsx:572 <OrgContextForm> onSubmit=handleOrgContext -> components/icra/ICRAAssessmentFlow.tsx:290 function handleOrgContext(ctx: OrgContextAnswers) { setOrgContext(ctx); // ── OCRA Dynamic Questionnaire Adaptation (doctrine 1.0.0) ───────────────… || components/icra/ICRAAssessmentFlow.tsx:585 <AdaptiveExplanationCard> onAcknowledge=() => setExplanationAcknowledged(true)"
+    },
+    {
+      "bindingId": "components/icra/ConsentGate.tsx:214:9:onClick",
+      "sourceFile": "components/icra/ConsentGate.tsx",
+      "sourceLine": 214,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=handleProceed | targets=- | components/icra/ICRAAssessmentFlow.tsx:562 <ConsentGate> onConsent=handleConsent -> components/icra/ICRAAssessmentFlow.tsx:283 function handleConsent(record: ConsentRecord, token: string | null) { setConsent(record); setTurnstileToken(token); setStep(1); }"
+    },
+    {
+      "bindingId": "components/calendar/CalendarSyncManager.tsx:397:11:onClick",
+      "sourceFile": "components/calendar/CalendarSyncManager.tsx",
+      "sourceLine": 397,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@397:11 | targets=onOpenChange(false) | app/[locale]/calendar/page.tsx:314 <CalendarSyncManager> onOpenChange=setSyncManagerOpen -> app/[locale]/calendar/page.tsx:67 setSyncManagerOpen"
+    },
+    {
+      "bindingId": "components/calendar/EventDialog.tsx:370:13:onClick",
+      "sourceFile": "components/calendar/EventDialog.tsx",
+      "sourceLine": 370,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@370:13 | targets=onOpenChange(false) | app/[locale]/calendar/page.tsx:304 <EventDialog> onOpenChange=setEventDialogOpen -> app/[locale]/calendar/page.tsx:66 setEventDialogOpen ; onSave=handleSaveEvent -> app/[locale]/calendar/page.tsx:128 handleSaveEvent = async (eventData: unknown) => { try { if (selectedE…"
+    },
+    {
+      "bindingId": "components/calendar/CalendarSidebar.tsx:99:15:onSelect",
+      "sourceFile": "components/calendar/CalendarSidebar.tsx",
+      "sourceLine": 99,
+      "event": "onSelect",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onSelectCalendar | targets=- | app/[locale]/calendar/page.tsx:255 <CalendarSidebar> onSelectCalendar=setSelectedCalendarId -> app/[locale]/calendar/page.tsx:61 setSelectedCalendarId ; onToggleVisibility=handleToggleCalendarVisibility -> app/[locale]/calendar/page.tsx:166 handleToggleCalendarVisibility =… || components/calendar/CalendarSidebar.tsx:99 <CalendarItem> onSelect=onSelectCalendar -> components/calendar/CalendarSidebar.tsx:51 onSelectCalendar ; onToggleVisibility=onToggleVisibility -> components/calendar/CalendarSidebar.tsx:52 onToggleVisibility || components/calendar/CalendarSidebar.tsx:134 <CalendarItem> onSelect=onSelectCalendar -> components/calendar/CalendarSidebar.tsx:51 onSelectCalendar ; onToggleVisibility=onToggleVisibility -> components/calendar/CalendarSidebar.tsx:52 onToggleVisibility ; onSync=onSyncCalendar ->…"
+    },
+    {
+      "bindingId": "components/calendar/CalendarSidebar.tsx:134:17:onSelect",
+      "sourceFile": "components/calendar/CalendarSidebar.tsx",
+      "sourceLine": 134,
+      "event": "onSelect",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onSelectCalendar | targets=- | app/[locale]/calendar/page.tsx:255 <CalendarSidebar> onSelectCalendar=setSelectedCalendarId -> app/[locale]/calendar/page.tsx:61 setSelectedCalendarId ; onToggleVisibility=handleToggleCalendarVisibility -> app/[locale]/calendar/page.tsx:166 handleToggleCalendarVisibility =… || components/calendar/CalendarSidebar.tsx:99 <CalendarItem> onSelect=onSelectCalendar -> components/calendar/CalendarSidebar.tsx:51 onSelectCalendar ; onToggleVisibility=onToggleVisibility -> components/calendar/CalendarSidebar.tsx:52 onToggleVisibility || components/calendar/CalendarSidebar.tsx:134 <CalendarItem> onSelect=onSelectCalendar -> components/calendar/CalendarSidebar.tsx:51 onSelectCalendar ; onToggleVisibility=onToggleVisibility -> components/calendar/CalendarSidebar.tsx:52 onToggleVisibility ; onSync=onSyncCalendar ->…"
+    },
+    {
+      "bindingId": "components/calendar/CalendarSidebar.tsx:201:5:onClick",
+      "sourceFile": "components/calendar/CalendarSidebar.tsx",
+      "sourceLine": 201,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@201:5 | targets=onSelect(calendar.id) | app/[locale]/calendar/page.tsx:255 <CalendarSidebar> onSelectCalendar=setSelectedCalendarId -> app/[locale]/calendar/page.tsx:61 setSelectedCalendarId ; onToggleVisibility=handleToggleCalendarVisibility -> app/[locale]/calendar/page.tsx:166 handleToggleCalendarVisibility =… || components/calendar/CalendarSidebar.tsx:99 <CalendarItem> onSelect=onSelectCalendar -> components/calendar/CalendarSidebar.tsx:51 onSelectCalendar ; onToggleVisibility=onToggleVisibility -> components/calendar/CalendarSidebar.tsx:52 onToggleVisibility || components/calendar/CalendarSidebar.tsx:134 <CalendarItem> onSelect=onSelectCalendar -> components/calendar/CalendarSidebar.tsx:51 onSelectCalendar ; onToggleVisibility=onToggleVisibility -> components/calendar/CalendarSidebar.tsx:52 onToggleVisibility ; onSync=onSyncCalendar ->…"
+    },
+    {
+      "bindingId": "components/calendar/CalendarSidebar.tsx:236:11:onClick",
+      "sourceFile": "components/calendar/CalendarSidebar.tsx",
+      "sourceLine": 236,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@236:11 | targets=e.stopPropagation(),onSync(calendar.id) | app/[locale]/calendar/page.tsx:255 <CalendarSidebar> onSelectCalendar=setSelectedCalendarId -> app/[locale]/calendar/page.tsx:61 setSelectedCalendarId ; onToggleVisibility=handleToggleCalendarVisibility -> app/[locale]/calendar/page.tsx:166 handleToggleCalendarVisibility =… || components/calendar/CalendarSidebar.tsx:99 <CalendarItem> onSelect=onSelectCalendar -> components/calendar/CalendarSidebar.tsx:51 onSelectCalendar ; onToggleVisibility=onToggleVisibility -> components/calendar/CalendarSidebar.tsx:52 onToggleVisibility || components/calendar/CalendarSidebar.tsx:134 <CalendarItem> onSelect=onSelectCalendar -> components/calendar/CalendarSidebar.tsx:51 onSelectCalendar ; onToggleVisibility=onToggleVisibility -> components/calendar/CalendarSidebar.tsx:52 onToggleVisibility ; onSync=onSyncCalendar ->…"
+    },
+    {
+      "bindingId": "components/calendar/CalendarView.tsx:240:11:onClick",
+      "sourceFile": "components/calendar/CalendarView.tsx",
+      "sourceLine": 240,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@240:11 | targets=onDateClick(day),onCreateEvent(day) | app/[locale]/calendar/page.tsx:284 <CalendarView> onEventClick=handleEditEvent -> app/[locale]/calendar/page.tsx:122 handleEditEvent = (event: CalendarEventRecord) => { setSelectedEvent(event); setInitialDate(undefined); setEventDialogOpen(true); } ; onDateClick=(_date)… || components/calendar/CalendarView.tsx:154 <MonthView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onDateClick=onDateClick -> components/calendar/CalendarView.tsx:45 onDateClick ; onCreateEvent=onCreateEvent -> components/calendar/Cale… || components/calendar/CalendarView.tsx:163 <WeekView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onCreateEvent=onCreateEvent -> components/calendar/CalendarView.tsx:46 onCreateEvent || components/calendar/CalendarView.tsx:171 <DayView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onCreateEvent=onCreateEvent -> components/calendar/CalendarView.tsx:46 onCreateEvent || components/calendar/CalendarView.tsx:179 <AgendaView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick"
+    },
+    {
+      "bindingId": "components/calendar/CalendarView.tsx:257:17:onClick",
+      "sourceFile": "components/calendar/CalendarView.tsx",
+      "sourceLine": 257,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@257:17 | targets=e.stopPropagation(),onEventClick(event) | app/[locale]/calendar/page.tsx:284 <CalendarView> onEventClick=handleEditEvent -> app/[locale]/calendar/page.tsx:122 handleEditEvent = (event: CalendarEventRecord) => { setSelectedEvent(event); setInitialDate(undefined); setEventDialogOpen(true); } ; onDateClick=(_date)… || components/calendar/CalendarView.tsx:154 <MonthView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onDateClick=onDateClick -> components/calendar/CalendarView.tsx:45 onDateClick ; onCreateEvent=onCreateEvent -> components/calendar/Cale… || components/calendar/CalendarView.tsx:163 <WeekView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onCreateEvent=onCreateEvent -> components/calendar/CalendarView.tsx:46 onCreateEvent || components/calendar/CalendarView.tsx:171 <DayView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onCreateEvent=onCreateEvent -> components/calendar/CalendarView.tsx:46 onCreateEvent || components/calendar/CalendarView.tsx:179 <AgendaView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick"
+    },
+    {
+      "bindingId": "components/calendar/CalendarView.tsx:339:19:onClick",
+      "sourceFile": "components/calendar/CalendarView.tsx",
+      "sourceLine": 339,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@339:19 | targets=e.stopPropagation(),onEventClick(event) | app/[locale]/calendar/page.tsx:284 <CalendarView> onEventClick=handleEditEvent -> app/[locale]/calendar/page.tsx:122 handleEditEvent = (event: CalendarEventRecord) => { setSelectedEvent(event); setInitialDate(undefined); setEventDialogOpen(true); } ; onDateClick=(_date)… || components/calendar/CalendarView.tsx:154 <MonthView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onDateClick=onDateClick -> components/calendar/CalendarView.tsx:45 onDateClick ; onCreateEvent=onCreateEvent -> components/calendar/Cale… || components/calendar/CalendarView.tsx:163 <WeekView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onCreateEvent=onCreateEvent -> components/calendar/CalendarView.tsx:46 onCreateEvent || components/calendar/CalendarView.tsx:171 <DayView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onCreateEvent=onCreateEvent -> components/calendar/CalendarView.tsx:46 onCreateEvent || components/calendar/CalendarView.tsx:179 <AgendaView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick"
+    },
+    {
+      "bindingId": "components/calendar/CalendarView.tsx:401:17:onClick",
+      "sourceFile": "components/calendar/CalendarView.tsx",
+      "sourceLine": 401,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@401:17 | targets=e.stopPropagation(),onEventClick(event) | app/[locale]/calendar/page.tsx:284 <CalendarView> onEventClick=handleEditEvent -> app/[locale]/calendar/page.tsx:122 handleEditEvent = (event: CalendarEventRecord) => { setSelectedEvent(event); setInitialDate(undefined); setEventDialogOpen(true); } ; onDateClick=(_date)… || components/calendar/CalendarView.tsx:154 <MonthView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onDateClick=onDateClick -> components/calendar/CalendarView.tsx:45 onDateClick ; onCreateEvent=onCreateEvent -> components/calendar/Cale… || components/calendar/CalendarView.tsx:163 <WeekView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onCreateEvent=onCreateEvent -> components/calendar/CalendarView.tsx:46 onCreateEvent || components/calendar/CalendarView.tsx:171 <DayView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onCreateEvent=onCreateEvent -> components/calendar/CalendarView.tsx:46 onCreateEvent || components/calendar/CalendarView.tsx:179 <AgendaView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick"
+    },
+    {
+      "bindingId": "components/calendar/CalendarView.tsx:463:17:onClick",
+      "sourceFile": "components/calendar/CalendarView.tsx",
+      "sourceLine": 463,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=INLINE@463:17 | targets=onEventClick(event) | app/[locale]/calendar/page.tsx:284 <CalendarView> onEventClick=handleEditEvent -> app/[locale]/calendar/page.tsx:122 handleEditEvent = (event: CalendarEventRecord) => { setSelectedEvent(event); setInitialDate(undefined); setEventDialogOpen(true); } ; onDateClick=(_date)… || components/calendar/CalendarView.tsx:154 <MonthView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onDateClick=onDateClick -> components/calendar/CalendarView.tsx:45 onDateClick ; onCreateEvent=onCreateEvent -> components/calendar/Cale… || components/calendar/CalendarView.tsx:163 <WeekView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onCreateEvent=onCreateEvent -> components/calendar/CalendarView.tsx:46 onCreateEvent || components/calendar/CalendarView.tsx:171 <DayView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick ; onCreateEvent=onCreateEvent -> components/calendar/CalendarView.tsx:46 onCreateEvent || components/calendar/CalendarView.tsx:179 <AgendaView> onEventClick=onEventClick -> components/calendar/CalendarView.tsx:44 onEventClick"
+    },
+    {
+      "bindingId": "app/[locale]/(marketing)/pilot-request/page.tsx:842:5:onClick",
+      "sourceFile": "app/[locale]/(marketing)/pilot-request/page.tsx",
+      "sourceLine": 842,
+      "event": "onClick",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=onClick | targets=- | app/[locale]/(marketing)/pilot-request/page.tsx:380 <Btn> onClick=() => setStep(2) || app/[locale]/(marketing)/pilot-request/page.tsx:443 <Btn> onClick=() => setStep(1) || app/[locale]/(marketing)/pilot-request/page.tsx:444 <Btn> onClick=() => setStep(3) || app/[locale]/(marketing)/pilot-request/page.tsx:496 <Btn> onClick=() => setStep(2) || app/[locale]/(marketing)/pilot-request/page.tsx:497 <Btn> onClick=() => setStep(4) || app/[locale]/(marketing)/pilot-request/page.tsx:548 <Btn> onClick=() => setStep(3) || app/[locale]/(marketing)/pilot-request/page.tsx:549 <Btn> onClick=handleAssessReadiness -> app/[locale]/(marketing)/pilot-request/page.tsx:229 handleAssessReadiness = () => { if (isFormValid) { const result = calculateReadinessScore(formData as PilotApplicationInput); setAssess… || app/[locale]/(marketing)/pilot-request/page.tsx:791 <Btn> onClick=() => setStep(4) || app/[locale]/(marketing)/pilot-request/page.tsx:792 <Btn> onClick=handleSubmit -> app/[locale]/(marketing)/pilot-request/page.tsx:237 handleSubmit = async () => { setSubmitting(true); try { const response = await fetch('/api/pilot/apply', { method: 'POST', headers: { 'Content-T…"
+    },
+    {
+      "bindingId": "components/analytics/kpi-builder-dialog.tsx:146:11:onSubmit",
+      "sourceFile": "components/analytics/kpi-builder-dialog.tsx",
+      "sourceLine": 146,
+      "event": "onSubmit",
+      "disposition": "SOURCE_TRACE_CAPTURED_NOT_TERMINAL",
+      "sourceTrace": "origin=EXPRESSION@146:11 | targets=form.handleSubmit(onSubmit) | NO_CALLER_VALUE_CAPTURED"
+    }
+  ]
+}

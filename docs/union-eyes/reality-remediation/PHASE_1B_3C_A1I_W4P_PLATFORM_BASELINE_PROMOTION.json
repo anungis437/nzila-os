@@ -1,0 +1,2085 @@
+{
+  "metadata": {
+    "PHASE": "PHASE_1B_3C_A1I_W4P",
+    "INPUTS": {
+      "w4fr4": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING.json",
+      "definitions": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4.json",
+      "payloads": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR4.json",
+      "w4pg": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4PG_PROMOTION_GATE_NORMALIZATION.json",
+      "cut": "docs/union-eyes/reality-remediation/UE_W4P_PROMOTION_DEPENDENCY_CUT.json",
+      "downstream": "docs/union-eyes/reality-remediation/UE_POST_W4P_COMPATIBILITY_OBLIGATIONS.json",
+      "producer": "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json",
+      "canonical": "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json"
+    },
+    "ENTRYPOINT": "apps/union-eyes/scripts/provisioning/platform-baseline-promotion.ts",
+    "ENTRYPOINT_SHA256": "67d54fe1c1dcdc4685d006e0b24a7d35fe7eee070c77cc1d8116705114c32fd2",
+    "AUTHORITATIVE_NORMALIZED_PAYLOAD_COMMITMENT": "6005cf57ee40d59a811947c61fa78652a89e6b66ca6222e8eddda92a430d80d5"
+  },
+  "summary": {
+    "PAYLOADS": 162,
+    "DEFINITIONS": 183,
+    "TYPE_PAYLOADS": 36,
+    "RELATION_CREATE_PAYLOADS": 57,
+    "ADD_COLUMN_PAYLOADS": 69,
+    "UNLINKED_W4_OBLIGATIONS": 0,
+    "MULTI_LINKED_W4_OBLIGATIONS": 0,
+    "CYCLE_COUNT": 0,
+    "UNRESOLVED_DEPENDENCY_EDGES": 0,
+    "POST_W4P_ITEMS_IN_PROMOTION_PRECONDITION_GRAPH": 0,
+    "DEFERRED_CONSTRAINTS": 7,
+    "DEFERRED_CONSTRAINTS_MATERIALIZED_BY_W4P": 0,
+    "POST_W4P_REPLAY_RECORDS": 127,
+    "POST_W4P_ORDERING_HANDOFFS": 86,
+    "POST_W4P_DEFERRED_CONSTRAINTS": 7,
+    "UNRESOLVED_DOWNSTREAM_OPERAND_BINDINGS": 9,
+    "CANONICAL_DDL_REGENERATED": "NO",
+    "CANONICAL_DDL_REWRITTEN": "NO",
+    "SQL_AUTHORED": 0,
+    "SQL_EXECUTED": 0,
+    "PRODUCERS_ACTIVATED": 0
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W4P_GATE": "PASS",
+    "PHASE_1B_3C_A1I_W4P": "PASS",
+    "PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION": "COMPLETE_NOT_EXECUTED",
+    "W4": "PASS",
+    "W4P_RUNTIME_EXECUTION": "NOT_AUTHORIZED",
+    "W5": "AUTHORIZED_NOT_STARTED",
+    "CANONICAL_CONTRACT_VERSION": "1.3.3"
+  },
+  "CONCURRENCY_GUARD": "EXPLICIT_IMPLEMENTATION_RESIDUAL",
+  "CONCURRENCY_RESIDUAL": "No canonical lock helper exists in bounded provisioning. No DB lock protocol invented. Future apply is denied without a W8-authenticated adapter implementing withExclusiveTransaction,including exclusive concurrency and rollback-on-rejection. This phase supplies and tests the mechanism/interface,not the concrete DB connector or runtime guard.",
+  "PLAN_DIGEST": "b213e1b6e5773d2f513ef2a0b55e199d0055ea7f3fb8202c96e761e75d04346a",
+  "IMPLEMENTATION_DIGEST": "aade7ea4f8b32ed2c1fef227cbaa02b6de20392fe4043d523c628c84d0547fee",
+  "preservation": {
+    "FIXED_INPUT_HASHES": {
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING.json": "feca82ce999454257dfd3157011684a829731bedab070d07890bc2f39d00f1c6",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4.json": "b84d75a98fec07e86ad68689a93ceebbdb262eee143de2a8f8eee6ba8562784d",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR4.json": "6f81fde1377714e0fb63177cd976a010ec6db197bb8365ad340b8b40d4629e2b",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4PG_PROMOTION_GATE_NORMALIZATION.json": "e391b68a8e387180ac32d2e1f1d2353f4b155858e4b833f95a3105b2e87a3feb",
+      "docs/union-eyes/reality-remediation/UE_W4P_PROMOTION_DEPENDENCY_CUT.json": "57a593f2a1a617d7a26bb54d7eca673094d02d639bc1028140e88d59de55127b",
+      "docs/union-eyes/reality-remediation/UE_POST_W4P_COMPATIBILITY_OBLIGATIONS.json": "2e10f3e40761c6b93bca473b263c262c2222f7b3a875e41ab268fa1b4448e043",
+      "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json": "ba88ee29a58c55c6b50930ff75089a59c00c68526f2e2e12547e801cca6c9673",
+      "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": "89dda28394c53c1c9ed9222982c6fff4b0840186831129f32206ba451cc3b1fd"
+    },
+    "CANONICAL_DDL_SHA256": "3937936a8d2aaddf7ec1e771fa33b57af9554d18652e4b79096bf87dab4000cb",
+    "W4PG_CUT_SHA256": "57a593f2a1a617d7a26bb54d7eca673094d02d639bc1028140e88d59de55127b",
+    "DOWNSTREAM_REGISTER_SHA256": "2e10f3e40761c6b93bca473b263c262c2222f7b3a875e41ab268fa1b4448e043",
+    "PAYLOAD_BYTES_CHANGED": 0,
+    "DOWNSTREAM_BYTES_CHANGED": 0
+  },
+  "versionAmendment": {
+    "VERSION_1_3_2_SHA256": "89dda28394c53c1c9ed9222982c6fff4b0840186831129f32206ba451cc3b1fd",
+    "VERSION_1_3_3_SHA256": "5e105985d6b99fbdb118b87454543f92e0053ae1b574c3dfe6417f9bbbc81e2d",
+    "PRIOR_PRODUCER_SHA256": "ba88ee29a58c55c6b50930ff75089a59c00c68526f2e2e12547e801cca6c9673",
+    "AMENDED_PRODUCER_SHA256": "b2db0a4924188facc243965b0de11cd921200ce8dda811c543263abdd84dc3aa",
+    "PRIOR_JSON_INVERSE_PATCHES": {
+      "canonical": [
+        { "PATH": ["CONTRACT_VERSION"], "EXISTED": true, "VALUE": "1.3.2" },
+        {
+          "PATH": ["phaseStatus", "W4"],
+          "EXISTED": true,
+          "VALUE": "BLOCKED_ORDERING_COMPATIBILITY_PENDING"
+        },
+        {
+          "PATH": ["phaseStatus", "CANONICAL_CONTRACT_VERSION"],
+          "EXISTED": true,
+          "VALUE": "1.3.2"
+        },
+        { "PATH": ["phaseStatus", "W5"], "EXISTED": true, "VALUE": "NOT_AUTHORIZED" },
+        { "PATH": ["phaseStatus", "PHASE_1B_3C_A1I_W4P_GATE"], "EXISTED": false },
+        { "PATH": ["phaseStatus", "PHASE_1B_3C_A1I_W4P"], "EXISTED": false },
+        { "PATH": ["phaseStatus", "PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION"], "EXISTED": false },
+        { "PATH": ["phaseStatus", "W4P_RUNTIME_EXECUTION"], "EXISTED": false },
+        {
+          "PATH": ["versionChain"],
+          "EXISTED": true,
+          "VALUE": [
+            {
+              "VERSION": 1,
+              "SHA256": "0fed10ff33f8ac7ee4886d89e50143097f9e42928ee1efc77ec1fedce5eb3983",
+              "RECONSTRUCTION_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION.json#PRIOR_GOVERNANCE_PATCHES.CONTRACT"
+            },
+            {
+              "VERSION": "1.1",
+              "SHA256": "ec0ac218281bf03a30e6449d87f133b16b8a6bb222bcdcacd186b4048b11c39d",
+              "RECONSTRUCTION_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W2_DATABASE_TARGET_SEARCH_PATH.json#PRIOR_CANONICAL_INVERSE_PATCHES"
+            },
+            {
+              "VERSION": "1.2",
+              "SHA256": "fe5bc24c5f1cc91af7e225e45887bb870a62e5811a2162fb74302af1e8df5cd2",
+              "RECONSTRUCTION_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT.json#PRIOR_JSON_INVERSE_PATCHES.canonical"
+            },
+            {
+              "VERSION": "1.3",
+              "SHA256": "5d61007a66a462484b226b9accbfd6cba8b04bb3af86d9c1e0b4e6e9339ff4f8",
+              "RECONSTRUCTION_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.json#PRIOR_JSON_INVERSE_PATCHES.canonical"
+            },
+            {
+              "VERSION": "1.3.2",
+              "PRIOR_VERSION": "1.3.1",
+              "PRIOR_SHA256": "6b4c81a8ceded4f70ae59e313656149e9c3246aa0feeee1973062d63ea8c114e",
+              "RECONSTRUCTION_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING.json#versionAmendment.PRIOR_JSON_INVERSE_PATCHES.canonical"
+            }
+          ]
+        },
+        { "PATH": ["platformBaselinePromotionImplementation"], "EXISTED": false }
+      ],
+      "producer": [
+        {
+          "PATH": ["platformProducerRegistry", "0", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "0", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "0", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "0", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "1", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "1", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "1", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "1", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "4", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "4", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "4", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "4", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "5", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "5", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "5", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "5", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "7", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "7", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "7", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "7", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "8", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "8", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "8", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "8", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "10", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "10", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "10", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "10", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "11", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "11", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "11", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "11", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "12", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "12", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "12", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "12", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "13", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "13", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "13", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "13", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "14", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "14", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "14", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "14", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "15", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "15", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "15", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "15", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "19", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "19", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "19", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "19", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "20", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "20", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "20", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "20", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "21", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "21", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "21", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "21", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "22", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "22", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "22", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "22", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "23", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "23", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "23", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "23", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "24", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "24", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "24", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "24", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "27", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "27", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "27", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "27", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "29", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "29", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "29", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "29", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "30", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "30", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "30", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "30", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "31", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "31", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "31", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "31", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "33", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "33", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "33", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "33", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "34", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "34", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "34", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "34", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "35", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "35", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "35", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "35", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "39", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "39", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "39", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "39", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "40", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "40", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "40", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "40", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "41", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "41", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "41", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "41", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "43", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "43", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "43", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "43", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "45", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "45", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "45", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "45", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "46", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "46", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "46", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "46", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "48", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "48", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "48", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "48", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "50", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "50", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "50", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "50", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "51", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "51", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "51", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "51", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "53", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "53", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "53", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "53", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "54", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "54", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "54", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "54", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "55", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "55", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "55", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "55", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "57", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "57", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "57", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "57", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "58", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "58", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "58", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "58", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "59", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "59", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "59", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "59", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "63", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "63", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "63", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "63", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "64", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "64", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "64", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "64", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "65", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "65", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "65", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "65", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "66", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "66", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "66", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "66", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "67", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "67", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "67", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "67", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "68", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "68", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "68", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "68", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "69", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "69", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "69", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "69", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "73", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "73", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "73", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "73", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "75", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "75", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "75", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "75", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "76", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "76", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "76", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "76", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "77", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "77", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "77", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "77", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "78", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "78", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "78", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "78", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "79", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "79", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "79", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "79", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "82", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "82", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "82", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "82", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "83", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "83", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "83", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "83", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "84", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "84", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "84", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "84", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "85", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "85", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "85", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "85", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "86", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "86", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "86", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "86", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "88", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "88", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "88", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "88", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "89", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "89", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "89", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "89", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "90", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "90", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "90", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "90", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "94", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "94", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "94", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "94", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "95", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "95", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "95", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "95", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "96", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "96", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "96", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "96", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "97", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "97", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "97", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "97", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "98", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "98", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "98", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "98", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "100", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "100", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "100", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "100", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "101", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "101", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "101", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "101", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "104", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "104", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "104", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "104", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "107", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "107", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "107", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "107", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "109", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "109", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "109", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "109", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "110", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "110", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "110", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "110", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "112", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "112", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "112", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "112", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "113", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "113", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "113", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "113", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "115", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "115", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "115", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "115", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "116", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "116", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "116", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "116", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "119", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "119", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "119", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "119", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "121", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "121", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "121", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "121", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "122", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "122", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "122", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "122", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "125", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "125", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "125", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "125", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "126", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "126", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "126", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "126", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "127", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "127", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "127", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "127", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "128", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "128", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "128", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "128", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "129", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "129", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "129", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "129", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "130", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "130", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "130", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "130", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "131", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "131", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "131", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "131", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "132", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "132", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "132", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "132", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "133", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "133", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "133", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "133", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "134", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "134", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "134", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "134", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "136", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "136", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "136", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "136", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "137", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "137", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "137", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "137", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "139", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "139", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "139", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "139", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "140", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "140", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "140", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "140", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "143", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "143", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "143", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "143", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "145", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "145", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "145", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "145", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "147", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "147", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "147", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "147", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "148", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "148", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "148", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "148", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "153", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "153", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "153", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "153", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "155", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "155", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "155", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "155", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "157", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "157", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "157", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "157", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "159", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "159", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "159", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "159", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "161", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "161", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "161", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "161", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "165", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "165", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "165", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "165", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "166", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "166", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "166", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "166", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "168", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "168", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "168", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "168", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "170", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "170", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "170", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "170", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "171", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "171", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "171", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "171", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "172", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "172", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "172", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "172", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "174", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "174", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "174", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "174", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "175", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "175", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "175", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "175", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "177", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "177", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "177", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "177", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "181", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "181", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "181", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "181", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "184", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "184", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "184", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "184", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "185", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "185", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "185", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "185", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "186", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "186", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "186", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "186", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "188", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "188", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "188", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "188", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "189", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "189", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "189", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "189", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "191", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "191", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "191", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "191", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "192", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "192", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "192", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "192", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "194", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "194", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "194", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "194", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "196", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "196", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "196", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "196", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "198", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "198", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "198", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "198", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "199", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "199", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "199", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "199", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "200", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "200", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "200", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "200", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "201", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "201", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "201", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "201", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "202", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "202", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "202", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "202", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "205", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "205", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "205", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "205", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "206", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "206", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "206", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "206", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "209", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "209", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "209", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "209", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "210", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "210", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "210", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "210", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "211", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "211", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "211", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "211", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "216", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "216", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "216", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "216", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "217", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "217", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "217", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "217", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "218", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "218", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "218", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "218", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "220", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "220", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "220", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "220", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "221", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "221", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "221", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "221", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "222", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "222", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "222", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "222", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "223", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "223", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "223", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "223", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "224", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "224", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "224", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "224", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "225", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "225", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "225", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "225", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "226", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "226", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "226", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "226", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "227", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "227", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "227", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "227", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "229", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "229", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "229", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "229", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "230", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "230", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "230", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "230", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "232", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "232", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "232", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "232", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "236", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "236", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "236", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "236", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "238", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "238", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "238", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "238", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "239", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "239", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "239", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "239", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "240", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "240", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "240", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "240", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "242", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "242", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "242", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "242", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "243", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "243", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "243", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "243", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "244", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "244", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "244", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "244", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "246", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "246", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "246", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "246", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "247", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "247", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "247", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "247", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "249", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "249", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "249", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "249", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "251", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "251", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "251", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "251", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "252", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "252", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "252", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "252", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "255", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "255", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "255", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "255", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "256", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "256", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "256", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "256", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "257", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "257", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "257", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "257", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "263", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "263", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "263", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "263", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "265", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "265", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "265", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "265", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "267", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "267", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "267", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "267", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "269", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "269", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "269", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "269", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "271", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "271", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "271", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "271", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "272", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "272", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "272", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "272", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "273", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "273", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "273", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "273", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "274", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "274", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "274", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "274", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "277", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "277", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "277", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "277", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "280", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "280", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "280", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "280", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "281", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "281", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "281", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "281", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "290", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "290", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "290", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "290", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "291", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "291", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "291", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "291", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "293", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "293", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "293", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "293", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "296", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "296", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "296", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "296", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "297", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "297", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "297", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "297", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "299", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "299", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "299", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "299", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "300", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "300", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "300", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "300", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "301", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "301", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "301", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "301", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "304", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "304", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "304", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "304", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "305", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "305", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "305", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "305", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "307", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "307", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "307", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "307", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        {
+          "PATH": ["platformProducerRegistry", "308", "W4P_IMPLEMENTATION_STATUS"],
+          "EXISTED": false
+        },
+        {
+          "PATH": ["platformProducerRegistry", "308", "W4P_IMPLEMENTATION_ENTRYPOINT"],
+          "EXISTED": false
+        },
+        { "PATH": ["platformProducerRegistry", "308", "W4P_PLAN_DIGEST"], "EXISTED": false },
+        { "PATH": ["platformProducerRegistry", "308", "W4P_PAYLOAD_COUNT"], "EXISTED": false },
+        { "PATH": ["phaseStatus", "W5"], "EXISTED": true, "VALUE": "NOT_AUTHORIZED" },
+        {
+          "PATH": ["phaseStatus", "W4"],
+          "EXISTED": true,
+          "VALUE": "BLOCKED_ORDERING_COMPATIBILITY_PENDING"
+        },
+        {
+          "PATH": ["phaseStatus", "CANONICAL_CONTRACT_VERSION"],
+          "EXISTED": true,
+          "VALUE": "1.3.2"
+        },
+        { "PATH": ["phaseStatus", "PHASE_1B_3C_A1I_W4P_GATE"], "EXISTED": false },
+        { "PATH": ["phaseStatus", "PHASE_1B_3C_A1I_W4P"], "EXISTED": false },
+        { "PATH": ["phaseStatus", "PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION"], "EXISTED": false },
+        { "PATH": ["phaseStatus", "W4P_RUNTIME_EXECUTION"], "EXISTED": false },
+        { "PATH": ["platformBaselinePromotionImplementation"], "EXISTED": false }
+      ]
+    },
+    "VERSION_CHAIN_RECONSTRUCTION": [
+      {
+        "VERSION": "1.3.3",
+        "SHA256": "5e105985d6b99fbdb118b87454543f92e0053ae1b574c3dfe6417f9bbbc81e2d"
+      },
+      {
+        "VERSION": "1.3.2",
+        "SHA256": "89dda28394c53c1c9ed9222982c6fff4b0840186831129f32206ba451cc3b1fd"
+      },
+      {
+        "VERSION": "1.3.1",
+        "SHA256": "6b4c81a8ceded4f70ae59e313656149e9c3246aa0feeee1973062d63ea8c114e"
+      },
+      {
+        "VERSION": "1.3",
+        "SHA256": "5d61007a66a462484b226b9accbfd6cba8b04bb3af86d9c1e0b4e6e9339ff4f8"
+      },
+      {
+        "VERSION": "1.2",
+        "SHA256": "fe5bc24c5f1cc91af7e225e45887bb870a62e5811a2162fb74302af1e8df5cd2"
+      },
+      {
+        "VERSION": "1.1",
+        "SHA256": "ec0ac218281bf03a30e6449d87f133b16b8a6bb222bcdcacd186b4048b11c39d"
+      },
+      {
+        "VERSION": "1.0",
+        "SHA256": "0fed10ff33f8ac7ee4886d89e50143097f9e42928ee1efc77ec1fedce5eb3983"
+      }
+    ]
+  },
+  "priorMarkdown": {
+    "canonical": "# W4G - prospective preconsumer ownership adoption\n\n**W4G PASS** is governance-only: exact310 ownership decisions approved,127 exact late definitions preserved,183 definitions still NOT_AUTHORED. Canonical **1.3.1**; W4 **BLOCKED_IMPLEMENTATION_PENDING**. W4F **AUTHORIZED_NOT_STARTED**; W4P and W5 **NOT_AUTHORIZED**. No producer activation or runtime proof.\n\n[W4G evidence](PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.json) contains exact ownership, definition, handoff and inverse reconstruction records. This is a new human governance rule, not historical repository authority. Version1.4 remains reserved for completed physical producer implementation.\n\n## Preserved historical pre-W4G documentation\n\nThe following body is retained verbatim as historical evidence. Its earlier ownership/gate/version statements are superseded by W4G above.\n\n# Canonical bootstrap contract — version 1.3 amendment\n\nCurrent [machine-readable contract](UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json): version **1.3**. [W3E closure](PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT.md) establishes exact external LOGIN-to-NOLOGIN delegation and guarded vector non-requirement. W1/W2/W3 offline gates PASS; W4 AUTHORIZED_NOT_STARTED. Runtime proof remains NO, READY_FOR_RUNTIME_PROOF = 0.\n\nAmendment: ROLE_EXTENSION_PROVISIONING_GOVERNANCE_CLOSURE. Exact 1.2 reconstruction/hash and prior W1/W2 chain are preserved in [W3E evidence](PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT.json). Authorization roles never authenticate or rotate secrets. Missing external LOGIN binding blocks future apply; only one expected edge is allowed; all extras/admin/nesting/cross-scope/runtime-to-migration edges fail drift.\n\n## Preserved historical version 1.2 documentation\n\nThe following body is historical evidence; its earlier W3 authorization/decision state is superseded by the 1.3 amendment above.\n\n# Union Eyes canonical runtime schema bootstrap contract\n\n## Status and governance authority\n\n**CONTRACT_VERSION = 1**  \n**CONTRACT_STATUS = GOVERNANCE_ADOPTED_IMPLEMENTATION_PENDING**  \n**PHASE_1B_3C_A1G_GATE = PASS**\n\nThis is the maintainer-authorized **prospective** architecture and remediation contract. It creates authority that frozen evidence did not establish. It does not declare implementation, schema materialization, faithful replay, staging/production identity, RLS correctness or product readiness proven. A1E remains SOURCE_CEILING_ACCEPTED with 803/118/86 evidence ceilings; its bytes and conclusions are unchanged.\n\n**Doctrine:** `DJANGO_FIRST_THEN_GOVERNED_PLATFORM_BASELINE_THEN_SCOPED_SECURITY_MIGRATIONS`.\n\nDjango owns operational domain materialization, including **auth_core -> Organizations model -> physical organizations relation**. Historical/audit SQL, fixtures, Drizzle declarations alone and cleanroom shims cannot compete for that authority. Django and scoped security share the **same intended operational database scope**. Financial service is a **distinct governed scope** requiring its own canonical materializer; no merge is authorized.\n\n## Exact canonical layers\n\n| Layer   | Name                                      | Required completion boundary                                                                                                                    |\n| ------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |\n| LAYER_0 | POSTGRES_PLATFORM_PREREQUISITES           | Every platform prerequisite has an approved creation authority/execution step/scope/failure behavior/verification; no undocumented manual state |\n| LAYER_1 | DJANGO_OPERATIONAL_SCHEMA_MATERIALIZATION | Complete graph/digests and actual expected schema assertions satisfied; no synthetic domain DDL                                                 |\n| LAYER_2 | UE_PRECONSUMER_PLATFORM_BASELINE          | All exact prerequisite and preconsumer binding assertions pass; later frozen provider compatibility established                                 |\n| LAYER_3 | UE_FROZEN_SCOPED_SECURITY_MIGRATIONS      | All governed scope-specific frozen files executed unchanged without tolerated errors; distinct financial scope handled separately               |\n| LAYER_4 | POST_BOOTSTRAP_VERIFICATION               | Expected output shapes and digests satisfied, no mutation; proof scope remains disposable until separately authorized wider evidence            |\n\nLayer 2 contains only explicitly platform-owned prerequisite producers and must not recreate Django-owned domain relations. Missing owner authority is an explicit human-decision obligation, not permission to fabricate a baseline table.\n\n## Database, roles and search paths\n\nThe same-target A1E deployment wiring supports intended scope architecture only. Exact non-secret target identities, per-process mappings and owner contracts require decision **UE-1B3CA1G-DECISION-b3a80b236c6a489d**. Production database equality and deployed identity runtime proof remain **NO**.\n\nRequired role classes: MIGRATION_ADMIN, APPLICATION_RUNTIME, SYSTEM_OR_INTERNAL_RUNTIME, FINANCIAL_MIGRATION and FINANCIAL_RUNTIME. Each must have explicit login/non-login expectation, bypass/ownership/grant boundary, creation and rotation authority. Runtime roles must be non-superuser/non-bypass and must not own RLS-protected domain objects. Exact names and migration ownership/delegation remain blocked on decision **UE-1B3CA1G-DECISION-4e0fdb9b7d80bdb5**; no values are invented and no roles are created.\n\nSchema names, ordered default/migration/runtime search paths and function-specific paths require decision **UE-1B3CA1G-DECISION-70fd4794fc24b96e**. Frozen qualified public identities constrain compatibility but do not establish every runtime path. Ambient defaults are not a contract; execution is blocked until exact values and trusted lookup/security-definer boundaries are approved.\n\n## Django and extension execution requirements\n\nFuture Django entrypoint: locked Python invokes backend/manage.py with config.settings, explicit operational target, `migrate --noinput` then `migrate --check`. Pin Python, Django, every migration-contributing package, settings module bytes, installed apps, migration modules and swappable-model resolution. Package lock, full plan and expected-schema digests must be produced; range-only declarations do not suffice. All 29 local migration IDs, 26 literal edge IDs and 25 configured app IDs are linked in the JSON.\n\nMandatory extensions are uuid-ossp, pgcrypto, pg_trgm and btree_gin. Installation is an **explicit fail-fast Layer 0 step**. A1E's four installer resolutions are not runtime presence evidence. Vector is outside the mandatory set unless independently required; decision **UE-1B3CA1G-DECISION-7e108c57ea428e21** must close its exact retained prerequisite without silent optional continuation or waiver.\n\n## Frozen manifest and compatibility\n\n**23 accepted composite files**, original order, bytes and hashes preserved. Scope partition: **22 UE scoped/platform files and 1 financial file**. UE files execute in their original relative order after real prerequisites; financial retains its distinct corresponding sequence. The comment-only financial file remains unchanged and non-materializing; do not execute all 23 on a merged database or call them the full fresh-schema materializer.\n\nAll 86 later-provider records require real preconsumer state **and compatibility with the unchanged later provider**. If a preconsumer producer collides with later CREATE/ALTER semantics, halt for a separate architecture/manifest decision. This contract does not authorize frozen rewrites, reordering, skips or baselined hashes as file execution.\n\n## Exact pending obligations\n\n| Primary prerequisite disposition         |   Count |\n| ---------------------------------------- | ------: |\n| DJANGO_BOOTSTRAP_OBLIGATION              |     372 |\n| EXTERNAL_DJANGO_PACKAGE_OBLIGATION       |       0 |\n| PLATFORM_BASELINE_OBLIGATION             |       0 |\n| ROLE_PROVISIONING_OBLIGATION             |       2 |\n| EXTENSION_PROVISIONING_OBLIGATION        |       1 |\n| TYPE_FUNCTION_BASELINE_OBLIGATION        |      41 |\n| FINANCIAL_MATERIALIZATION_OBLIGATION     |       1 |\n| RUNTIME_BINDING_OBLIGATION               |     117 |\n| SEARCH_PATH_OR_SCHEMA_BINDING_OBLIGATION |       0 |\n| EXPLICIT_GOVERNANCE_DECISION_REQUIRED    |     269 |\n| **SUM**                                  | **803** |\n\nAll 803 IDs receive exactly one primary disposition, explicit creation/owner requirement, execution layer, scope, failure behavior and verification; secondary decisions/dependencies are linked separately. **None is resolved by this conversion.**\n\nThe complete 945-prerequisite governance model also retains all 142 previously classified core/prior-frozen/installer-authority identities with explicit execution and verification requirements. Those are not recounted among the 803 and are not promoted to runtime proof.\n\nAll **118 opaque IDs** retain consumers, contract class, owner surface and both implementation/runtime evidence requirements; zero waived. Contract-class counts: PHYSICAL_TARGET_BINDING=91; RUNTIME_DATABASE_BINDING=0; SCHEMA_BINDING=0; ROLE_BINDING=4; SEARCH_PATH_BINDING=0; PACKAGE_OR_MIGRATION_BINDING=22; OTHER_EXPLICIT=1.\n\nAll **86 ordering IDs** retain consumer/prerequisite/later provider and one prospective owner disposition. Current owner decisions: DJANGO=0; PLATFORM_BASELINE=0; FINANCIAL_MATERIALIZER=0; GOVERNANCE_DECISION_REQUIRED=86. Ownership cannot be inferred merely from a later declaration.\n\nThe exact ledgers and per-workstream authorization packet are in [the JSON contract](UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json). External package/graph, installer verification and global target/path obligations are separately identified and explicitly **not counted in the 803**.\n\n## Financial materializer specification\n\nFinancial scope is distinct. An explicit decision must approve the authoritative full schema source. Future implementation must produce a complete executable byte-digested ordered migration manifest; guarded fresh-database entrypoint; fail-fast missing-input/prerequisite/DDL/digest behavior; disposable-only reset/teardown tests; expected and observed schema/migration digests; and a read-only verification command.\n\nFinancial sequence: platform prerequisites -> real financial materializer -> non-domain baseline -> unchanged financial frozen input (not materializer) -> read-only verification. Comment-only frozen SQL, partial repairs and missing-file-tolerant runners are non-authoritative. Nothing is implemented or executed here.\n\n## Failure, snapshot and cleanroom doctrines\n\nFail fast on missing prerequisites or migration errors. No missing-object tolerance, SQL rewrites, test-only schema shims, unpinned snapshots or comment-only materializers.\n\nSnapshot role is **OPTIONAL_RECOVERY_OR_ACCELERATION_MECHANISM**, not primary architecture. Future use requires identity, SHA256, schema version, migration level, provenance, expected schema/policy digests and forward compatibility. It never replaces schema authority.\n\nExisting tolerant cleanroom is a **NON_CANONICAL_DIAGNOSTIC_TOOL** and may never supply faithful-bootstrap evidence.\n\n## W1-W10 remediation and authorization\n\n| Workstream | Objective                                               | Depends on                 | State                                   |\n| ---------- | ------------------------------------------------------- | -------------------------- | --------------------------------------- |\n| W1         | Exact Django/package/migration lock                     | None                       | A1I_AUTHORIZED_NOT_STARTED              |\n| W2         | Database target + schema/search-path contract           | None                       | A1I_AUTHORIZED_NOT_STARTED              |\n| W3         | Role and extension provisioning contract implementation | W1, W2                     | A1I_AUTHORIZED_NOT_STARTED              |\n| W4         | Preconsumer platform baseline implementation            | W1, W2, W3                 | A1I_AUTHORIZED_NOT_STARTED              |\n| W5         | 86 ordering-obligation closure                          | W4                         | A1I_AUTHORIZED_NOT_STARTED              |\n| W6         | 118 opaque-binding implementation                       | W1, W2, W3, W4             | A1I_AUTHORIZED_NOT_STARTED              |\n| W7         | Financial materializer implementation                   | W2, W3                     | A1I_AUTHORIZED_NOT_STARTED              |\n| W8         | Disposable faithful bootstrap orchestrator              | W1, W2, W3, W4, W5, W6, W7 | A1I_AUTHORIZED_NOT_STARTED              |\n| W9         | Deterministic two-run faithful replay                   | W8                         | SEPARATE_RUNTIME_AUTHORIZATION_REQUIRED |\n| W10        | B3C-A full preflight rerun                              | W9                         | SEPARATE_RUNTIME_AUTHORIZATION_REQUIRED |\n\nSee [the implementation specification](PHASE_1B_3C_A1G_BOOTSTRAP_REMEDIATION_SPECIFICATION.md) and machine-readable per-workstream change/forbidden surfaces, input obligation IDs, outputs, validation, completion gates and next workstreams in the JSON.\n\n**A1I = AUTHORIZED_NOT_STARTED**. No workstream starts in A1G. W9 faithful execution and W10 full preflight rerun require separate authorization; A1R/A2/B3C-B remain NOT_AUTHORIZED. Implementation unit checks are not replay/runtime proof.\n\n## Verification and preserved proof boundaries\n\nFuture Layer 4 is verification only: expected objects/policies/RLS/roles/extensions/functions/types, lineage digest, no shims and no tolerated missing prerequisites; no mutation to make assertions pass.\n\nBOOTSTRAP_IMPLEMENTATION_COMPLETE, FAITHFUL_SCHEMA_REPLAY_PROVEN, PRODUCTION_SCHEMA_PROVEN, PRODUCTION_DATABASE_BINDING_RUNTIME_PROVEN, FAITHFUL_DISPOSABLE_SCHEMA_PROVEN, RLS_POLICY_CORRECTNESS_RUNTIME_PROVEN, TENANT_ISOLATION_RUNTIME_PROVEN and PRODUCT_READY all remain **NO**. Runtime readiness remains **0**, B3C packet **3,124**, and partial C-A catalog evidence stays quarantined.\n\n**NO_FURTHER_BOOTSTRAP_STATIC_SOURCE_PASS = YES.**\n\n## Validation\n\nGeneration asserts exact 803/118/86 input IDs, consumer/provider linkage, unique primary dispositions, closed workstream dependencies and frozen predecessor/23-file byte hashes. Syntax, scoped formatting and docs checks are external validations, not assumed from generation:\n\n```powershell\nnode --check scripts\\ue\\adopt-bootstrap-governance-contract.mjs\nnode scripts\\ue\\adopt-bootstrap-governance-contract.mjs --self-test\nnode scripts\\ue\\adopt-bootstrap-governance-contract.mjs\nnode scripts\\ue\\adopt-bootstrap-governance-contract.mjs --check\npnpm exec prettier --check scripts\\ue\\adopt-bootstrap-governance-contract.mjs docs\\union-eyes\\reality-remediation\\UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json docs\\union-eyes\\reality-remediation\\UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.md docs\\union-eyes\\reality-remediation\\PHASE_1B_3C_A1G_BOOTSTRAP_REMEDIATION_SPECIFICATION.md docs\\union-eyes\\PHASE_1_AUTHORITATIVE_INDEXES.md\npnpm validate:docs\n```\n\nNo source rescan, database, migration, dependency/configuration/schema/RLS modification, production/staging/shared-system access or PR. Only governance artifacts and their deterministic emitter/index are changed.\n\n## Current W4FR4 definition-authoring amendment - canonical 1.3.2\n\nThe preceding phase descriptions are historical. The current authoritative amendment is PLATFORM_BASELINE_CANONICAL_DEFINITION_AUTHORING:183 governed W4 prerequisite definitions,36 exact types,38 canonical type references and7 preserved deferred compound UNIQUE invariants. Scope remains the W4-owned minimum preconsumer baseline,not full application tables.\n\nDEFINITION_COMPLETE=YES;MATERIALIZATION_EXECUTED=NO;DEFERRED_CONSTRAINTS_MATERIALIZED=NO;EXECUTION_ALLOWED=NO. W4=BLOCKED_ORDERING_COMPATIBILITY_PENDING. Compatibility inputs remain127 existing records plus7 separate supplemental handoffs,with0 proven correspondence. Compatibility normalization AUTHORIZED_NOT_STARTED;W4P/W5 NOT_AUTHORIZED. READY_FOR_RUNTIME_PROOF=0;PRODUCT_READY=NO.\n\nSee [W4FR4 final authoring report](./PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING.md) and [inactive definition registry](./UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4.json). Exact inverse patches reconstruct canonical1.3.1 and the prior producer contract;no SQL execution is authorized.\n",
+    "producer": "# W4G - prospective preconsumer ownership adoption\n\n**W4G PASS** is governance-only: exact310 ownership decisions approved,127 exact late definitions preserved,183 definitions still NOT_AUTHORED. Canonical **1.3.1**; W4 **BLOCKED_IMPLEMENTATION_PENDING**. W4F **AUTHORIZED_NOT_STARTED**; W4P and W5 **NOT_AUTHORIZED**. No producer activation or runtime proof.\n\n[W4G evidence](PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.json) contains exact ownership, definition, handoff and inverse reconstruction records. This is a new human governance rule, not historical repository authority. Version1.4 remains reserved for completed physical producer implementation.\n\n## Preserved historical pre-W4G documentation\n\nThe following body is retained verbatim as historical evidence. Its earlier ownership/gate/version statements are superseded by W4G above.\n\n# W4 — preconsumer physical producer implementation\n\n## Gate: BLOCKED — exact ownership/definition decisions remain\n\nCanonical **1.3** is unchanged. W1/W2/W3/W3E remain accepted PASS. **No 1.4 amendment and no W5 authorization.** [Producer contract](UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json) and [W4 evidence](PHASE_1B_3C_A1I_W4_PRECONSUMER_PHYSICAL_PRODUCERS.json) consume exactly **768 W4 obligation IDs** and **310 decision IDs** from the fixed contract, not a replacement denominator.\n\n## Producer authorities and 372 Django mappings\n\nAll **372** W1N Django physical obligations have exactly one linked creation producer: **372 local Django**, **0 external Django**, **0 raw-produced**, **0 ownership-blocked within that 372**, sum **372**. Each uses the exact frozen lineage candidate identity, source file/hash, required column membership (where applicable), matching W1 operation line/class, migration ID and topological plan position. No broad source discovery or model-to-DDL regeneration.\n\nThe full **82-node graph** retains **29 local and 53 external migrations**, including locked external package/version/archive/file digests. Django-owned tables/columns stay Django-owned. Organizations remains Django. No substitute Django DDL is emitted.\n\nThe operational producer descriptor binds W2 Django actor/target/path (`public, pg_catalog`), W3 migration role/delegation/extension/privilege preconditions and W1 lock/graph/plan/settings/configured-app/package/swappable identity. The callable [prepareDjangoExecution](../../../scripts/ue/w4-physical-producers.ts) validates explicit inputs and returns a **nonexecuted** descriptor. W8 must later supply authenticated target and measured package/settings/source-byte evidence. There is no subprocess/database adapter, ambient fallback or Django import. All82 plan rows are parts of **one full Django invocation**, not82 separate migrate calls.\n\n## Platform registry:310 exact governance blockers\n\n**269 relation/column owner decisions** and **41 type/function owner/definition decisions** remain HUMAN_DECISION_REQUIRED in contract1.3. Every blocked physical identity links to its exact existing decision ID and source candidates. Conditional `PLATFORM_BASELINE_SUBJECT_TO_EXPLICIT_OWNERSHIP` is not ownership approval. W4's blanket workstream authorization cannot resolve those exact approvals.\n\nTherefore the platform registry is a **blocked-definition packet**, not310 implemented producers. It emits **zero mutating SQL**: no guessed function bodies, enum labels, security mode, SECURITY DEFINER search paths or ownership; no domain substitutes, financial materializer, roles or extensions. Exact approval and complete definition/security/ACL/dependency evidence are needed before those producers can be implemented.\n\n## Raw wrappers, graph and creation authority\n\nAll **16** W1 raw operation records are retained; exactly **four W1N W4 state/physical wrapper duties** are explicit. Original RunSQL/RunPython/generated/SeparateDatabaseAndState execution remains in its original migration. W6 semantics are not reinterpreted or implemented.\n\nKnown Django graph: duplicate producer IDs **0**, unresolved references **0**, cycles **0**; W1 order preserved. Full W4 graph is explicitly **not complete** because310 approved definitions/dependencies are missing. One known creation authority per physical identity; pending-owner records are not creation approval. No per-object alteration authority is inferred from a raw operation merely sharing a migration graph.\n\nMacro order stays W3 → full Django graph → approved platform baseline → frozen security migrations. No frozen consumer file/order/hash changed; W5 must adjudicate compatibility rather than W4 assuming later frozen CREATE/ALTER statements are safe.\n\n## Postconditions and handoffs\n\n372 read-only schema-qualified/parameterized relation/column descriptors require exactly one result and governed owner. Column queries expose type/nullability/default; W9 compares them with the exact locked Django state, **not an invented type inferred from existence**. Platform postconditions remain explicit blocked-definition records. These are EXPECTED_RUNTIME_PROOF, never observed catalogs.\n\nAll **86 W5 ordering IDs** receive a producer/blocked-producer handoff with prerequisite and unchanged consumer/later-provider references; ordering closure remains NO. All **118 opaque bindings** receive an intersection census (**0 intersect W4**); exact intersections name the physical producer, no-intersection rows explicitly say NO. W6 semantic binding remains required, no silent resolution.\n\n## Determinism, preservation and validation\n\nTwo generations match registry/plan/postcondition digests. Whole-file before/after hashes preserve all eight fixed artifacts, including canonical1.3 and accepted W1/W1N/W2/W3E. The exact predecessor reconstruction remains under its existing inverse-patch authorities. 803/118/86 IDs,23 frozen migration records,87 packages, Django5.2.18,25 apps,82 nodes, four mandatory extensions and22 vector consumers remain unchanged.\n\n```powershell\npnpm exec tsx scripts\\ue\\implement-w4-physical-producers.ts --plan\npnpm exec tsx scripts\\ue\\implement-w4-physical-producers.ts --self-test --check\n```\n\nStandalone --apply and unknown flags fail. Closeout: **38 W4 tests plus59 preserved W3E tests (97 total) PASS**; scoped TypeScript, actual root-scoped ESLint, formatting and generator self-tests/check/determinism PASS. Docs audit PASS (**0 errors,1,215 warnings**). Independent exact denominator/linkage/handoff/frozen-file/version/hash assertions PASS. Commands/results and implementation hashes are recorded in JSON. Offline tests do not prove any producer executed.\n\n## Proof and authorization boundary\n\nW4 = **BLOCKED**, W5 = **NOT_AUTHORIZED_BY_W4**, W5/W6–W10 not started. Roles/extensions/memberships/Django schema/platform baseline/physical producer execution/runtime configuration/replay/production schema/RLS/tenant isolation remain **NO**. No secrets, deployment changes or PR. READY_FOR_RUNTIME_PROOF = **0**, PRODUCT_READY = **NO**.\n\n## Current W4FR4 definition-authoring amendment - canonical 1.3.2\n\nThe preceding phase descriptions are historical. The current authoritative amendment is PLATFORM_BASELINE_CANONICAL_DEFINITION_AUTHORING:183 governed W4 prerequisite definitions,36 exact types,38 canonical type references and7 preserved deferred compound UNIQUE invariants. Scope remains the W4-owned minimum preconsumer baseline,not full application tables.\n\nDEFINITION_COMPLETE=YES;MATERIALIZATION_EXECUTED=NO;DEFERRED_CONSTRAINTS_MATERIALIZED=NO;EXECUTION_ALLOWED=NO. W4=BLOCKED_ORDERING_COMPATIBILITY_PENDING. Compatibility inputs remain127 existing records plus7 separate supplemental handoffs,with0 proven correspondence. Compatibility normalization AUTHORIZED_NOT_STARTED;W4P/W5 NOT_AUTHORIZED. READY_FOR_RUNTIME_PROOF=0;PRODUCT_READY=NO.\n\nSee [W4FR4 final authoring report](./PHASE_1B_3C_A1I_W4FR4_FINAL_BASELINE_AUTHORING.md) and [inactive definition registry](./UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4.json). Exact inverse patches reconstruct canonical1.3.1 and the prior producer contract;no SQL execution is authorized.\n"
+  },
+  "amendedMarkdownSha": {
+    "canonical": "7cf91cfe5495357c86078c46e3f8a122950c6d33bbc6067bec9025d39acc2ccd",
+    "producer": "fea77a8baf0f72ab8cbbbf80a69665d4d6e7a69c13a1abae9c21cb47d10922e0"
+  },
+  "validation": {
+    "EXACT162_ACCOUNTING": "PASS",
+    "EXACT183_LINKAGE": "PASS",
+    "TOPOLOGICAL_ORDER": "PASS",
+    "SQL_HASH_VALIDATION": "PASS",
+    "INVERSE_1_3_3_TO_1_3_2": "PASS",
+    "COMPLETED_CHECKS": [
+      {
+        "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts apps\\union-eyes\\scripts\\provisioning\\platform-baseline-promotion.test.ts scripts\\ue\\implement-w4p-platform-promotion.test.ts",
+        "RESULT": "PASS",
+        "TESTS": 895
+      },
+      {
+        "COMMAND": "pnpm exec vitest run --config scripts\\ue\\w4p-predecessor.vitest.config.ts scripts\\ue\\normalize-w4pg-promotion-gate.test.ts scripts\\ue\\bind-w4lb-supplemental-operands.test.ts scripts\\ue\\classify-w4lc-compatibility.test.ts scripts\\ue\\author-w4fr4-final-baseline.test.ts",
+        "RESULT": "PASS_EXACT_RECONSTRUCTED_1_3_2_INPUTS",
+        "TESTS": 1154
+      },
+      {
+        "COMMAND": "pnpm exec vitest run --config scripts\\ue\\w4fr4-predecessor.vitest.config.ts scripts\\ue\\close-w4c-constraint-timing.test.ts scripts\\ue\\normalize-w4s-authoring-scope.test.ts apps\\union-eyes\\scripts\\provisioning\\governed-provisioning.test.ts scripts\\ue\\verify-frozen-w4.test.ts",
+        "RESULT": "PASS_EXACT_HISTORICAL_INPUTS",
+        "TESTS": 141
+      },
+      {
+        "COMMAND": "pnpm exec tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --skipLibCheck --esModuleInterop --types node apps\\union-eyes\\scripts\\provisioning\\platform-baseline-promotion.ts apps\\union-eyes\\scripts\\provisioning\\platform-baseline-promotion.test.ts scripts\\ue\\implement-w4p-platform-promotion.ts scripts\\ue\\implement-w4p-platform-promotion.test.ts scripts\\ue\\w4p-historical-inputs.ts scripts\\ue\\w4p-historical-test-setup.ts scripts\\ue\\w4p-predecessor.vitest.config.ts scripts\\ue\\w4fr4-historical-test-setup.ts scripts\\ue\\verify-frozen-w4.test.ts",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm exec eslint --config apps\\union-eyes\\eslint.config.mjs --max-warnings 0 apps\\union-eyes\\scripts\\provisioning\\platform-baseline-promotion.ts apps\\union-eyes\\scripts\\provisioning\\platform-baseline-promotion.test.ts scripts\\ue\\implement-w4p-platform-promotion.ts scripts\\ue\\implement-w4p-platform-promotion.test.ts scripts\\ue\\w4p-historical-inputs.ts scripts\\ue\\w4p-historical-test-setup.ts scripts\\ue\\w4p-predecessor.vitest.config.ts scripts\\ue\\w4fr4-historical-test-setup.ts scripts\\ue\\verify-frozen-w4.test.ts",
+        "RESULT": "PASS_EXIT0_EXISTING_NEXT_PAGES_DIRECTORY_DIAGNOSTIC"
+      },
+      {
+        "COMMAND": "pnpm exec prettier --check apps\\union-eyes\\scripts\\provisioning\\platform-baseline-promotion.ts apps\\union-eyes\\scripts\\provisioning\\platform-baseline-promotion.test.ts scripts\\ue\\implement-w4p-platform-promotion.ts scripts\\ue\\implement-w4p-platform-promotion.test.ts scripts\\ue\\w4p-historical-inputs.ts scripts\\ue\\w4p-historical-test-setup.ts scripts\\ue\\w4p-predecessor.vitest.config.ts scripts\\ue\\w4fr4-historical-test-setup.ts scripts\\ue\\verify-frozen-w4.test.ts \"docs\\union-eyes\\reality-remediation\\*W4P_PLATFORM*\" \"docs\\union-eyes\\reality-remediation\\UE_W4_PLATFORM_BASELINE_PROMOTION*\" docs\\union-eyes\\reality-remediation\\UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json docs\\union-eyes\\reality-remediation\\UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm exec tsx scripts\\ue\\implement-w4p-platform-promotion.ts --self-test --check",
+        "RESULT": "PASS_TWO_GENERATION_EXACT_BYTES_AND_PERSISTED_OUTPUT_EQUALITY"
+      },
+      { "COMMAND": "pnpm validate:docs", "RESULT": "PASS_0_ERRORS_1215_EXISTING_WARNINGS" }
+    ],
+    "INDEPENDENT_FULL_CHAIN_RECONSTRUCTION": "PASS_1_3_3_TO_1_3_2_TO_1_3_1_TO_1_3_TO_1_2_TO_1_1_TO_1_0",
+    "FIXED_INPUT_COMMITMENTS": "PASS_8_WITH_EXACT_PRIOR_CONTRACT_RECONSTRUCTION",
+    "INHERITED_FROZEN_COMMITMENTS": "PASS_94_ORIGINAL_COMMITMENTS_WITH_ONLY_METADATA_AMENDED_CONTRACT_PAIRS_RECONSTRUCTED",
+    "REAL_DATABASE_CONNECTIONS": 0,
+    "REAL_SQL_EXECUTIONS": 0
+  },
+  "proofBoundaries": {
+    "DATABASE_ROLES_PROVISIONED": "NO",
+    "ROLE_MEMBERSHIPS_APPLIED": "NO",
+    "NAMED_TYPES_MATERIALIZED": "NO",
+    "DJANGO_SCHEMA_MATERIALIZED": "NO",
+    "PRECONSUMER_BASELINE_MATERIALIZED": "NO",
+    "DEFERRED_CONSTRAINTS_MATERIALIZED": "NO",
+    "PHYSICAL_PRODUCERS_EXECUTED": "NO",
+    "W4P_EXECUTED": "NO",
+    "CANONICAL_DEFINITION_SQL_EXECUTED": "NO",
+    "COMPATIBILITY_MECHANICS_EXECUTED": "NO",
+    "W5_EXECUTED": "NO",
+    "DATABASE_RUNTIME_CONFIGURATION_APPLIED": "NO",
+    "BOOTSTRAP_IMPLEMENTATION_COMPLETE": "NO",
+    "FAITHFUL_SCHEMA_REPLAY_PROVEN": "NO",
+    "PRODUCTION_SCHEMA_PROVEN": "NO",
+    "RLS_POLICY_CORRECTNESS_RUNTIME_PROVEN": "NO",
+    "TENANT_ISOLATION_RUNTIME_PROVEN": "NO",
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO",
+    "SQL_EXECUTED": 0,
+    "PRODUCERS_ACTIVATED": 0
+  }
+}

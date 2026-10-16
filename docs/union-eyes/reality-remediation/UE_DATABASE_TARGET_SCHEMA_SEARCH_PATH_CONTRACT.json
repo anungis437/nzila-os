@@ -1,0 +1,1951 @@
+{
+  "metadata": {
+    "PHASE": "PHASE_1B_3C_A1I_W2",
+    "METHOD": "Artifact-only authorized governance adjudication; no source rescan/environment/secret/SQL/runtime IO",
+    "FROZEN_INPUT_SHA256": {
+      "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": "ec0ac218281bf03a30e6449d87f133b16b8a6bb222bcdcacd186b4048b11c39d",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION.json": "9e5572df4ddfa735de29df42639a45117ce4c377a5ffcd6e9776d7c667cf1a51",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1_DJANGO_DEPENDENCY_MIGRATION_LOCK.json": "1e74413a98722c042888a5cd0e135f34719778e78407129a4c6821f2f7fc3b52",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1E_OPERATIONAL_BOOTSTRAP_BINDING_CLOSURE.json": "8a8aed72458720fe6ebaff1eec1227ec3c816d4f44747bc7b509c4736401e8f5"
+    },
+    "W2_INPUT_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+    "W2_INPUT_DECISION_IDS": [
+      "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+      "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+    ],
+    "SOURCE_CONFIGURATION_OBSERVATIONS": "Only frozen A1E; ceilings are alignment gaps, not current source exploitability or live target attestations"
+  },
+  "CONTRACT_VERSION": 1,
+  "CANONICAL_BOOTSTRAP_CONTRACT_VERSION": "1.2",
+  "CONTRACT_STATUS": "GOVERNANCE_ADOPTED_IMPLEMENTATION_PENDING",
+  "databaseScopes": [
+    {
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "LEGACY_DATABASE_SCOPE": "union-eyes",
+      "PURPOSE": "Django-owned operational domain plus governed platform/security consumers",
+      "PHYSICAL_TARGET_CLASS": "POSTGRESQL_EXPLICIT_ENVIRONMENT_SELECTED_DATABASE",
+      "TARGET_CONFIGURATION_CONTRACT": {
+        "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+        "ENVIRONMENT_ID_SOURCE": "UE_DATABASE_TARGET_ENVIRONMENT",
+        "HOST_SOURCE": "UE_OPERATIONAL_PGHOST",
+        "PORT_SOURCE": "UE_OPERATIONAL_PGPORT",
+        "DATABASE_NAME_SOURCE": "UE_OPERATIONAL_PGDATABASE",
+        "BINDING_MODE": "REQUIRED_SCOPE_SPECIFIC_NON_SECRET_DESCRIPTOR_PLUS_SEPARATE_CREDENTIAL_REFERENCE",
+        "MATERIALIZED_DESCRIPTOR_REQUIRED_BEFORE_CONNECTION": "YES",
+        "DESCRIPTOR_FIELDS": ["ENVIRONMENT_ID", "HOST", "PORT", "DATABASE_NAME"],
+        "MISSING_EMPTY_OR_AMBIENT_DEFAULT": "FAIL_FAST",
+        "URL_AND_DISCRETE_COMPONENTS_DISAGREE": "FAIL_FAST",
+        "CREDENTIAL_TARGET_MUST_MATCH_DESCRIPTOR": "YES",
+        "HOST_EQUIVALENCE": "Lowercase DNS name with one terminal dot removed; no DNS lookup, alias inference or IP equivalence",
+        "DATABASE_NAME_EQUIVALENCE": "Exact case-sensitive decoded database name; no default database",
+        "PORT_EQUIVALENCE": "Explicit integer 1..65535; no default port",
+        "ENVIRONMENT_EQUIVALENCE": "Exact environment ID selected once and propagated to every actor; no cross-environment fallback",
+        "SAME_PHYSICAL_DATABASE_KEY": ["NORMALIZED_HOST", "PORT", "DATABASE_NAME"],
+        "SSL_CONFIGURATION_REQUIRED": "Explicit verified transport configuration per selected environment; W8 applies; no URL override can change target/path",
+        "CONNECTION_STRING_SERIALIZATION": "FORBIDDEN",
+        "KNOWN_PHYSICAL_ENDPOINT_LITERAL": "NOT_READ_OR_CLAIMED; this is an exact mandatory reference/binding contract, not a live endpoint attestation",
+        "DEPLOYMENT_SELECTOR_REFERENCE": "needs.plan.outputs.key_vault_name",
+        "DEPLOYED_TARGET_RUNTIME_PROVEN": "NO"
+      },
+      "DATABASE_NAME_SOURCE": "UE_OPERATIONAL_PGDATABASE",
+      "HOST_SOURCE": "UE_OPERATIONAL_PGHOST",
+      "PORT_SOURCE": "UE_OPERATIONAL_PGPORT",
+      "ADMIN_CREDENTIAL_REFERENCE_CLASS": "UE_OPERATIONAL_MIGRATION_ADMIN_REFERENCE",
+      "RUNTIME_CREDENTIAL_REFERENCE_CLASS": "UE_OPERATIONAL_APPLICATION_OR_SYSTEM_REFERENCE",
+      "SCHEMA_CONTRACT": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE",
+        "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+        "UE-W2-PATH-UE_SYSTEM_RUNTIME"
+      ],
+      "SOURCE_CONFIGURATION_ALIGNED": "PARTIAL",
+      "CONTRACT_DEFINED": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "DISTINCT_FROM_SCOPE_ID": "FINANCIAL_SERVICE",
+      "SAME_DATABASE_DIFFERENT_SCHEMA_COUNTS_AS_DISTINCT_SCOPE": "NO",
+      "SAME_SERVER_DIFFERENT_DATABASE_ALLOWED": "YES; exact database key must differ",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 1374,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        },
+        {
+          "FILE": "apps/union-eyes/backend/manage.py",
+          "LINE": 17,
+          "SHA256": "e93e58f25eea9ec8130b7139b968611d34ef41d48cf9c7b7aa605e817705cb2a"
+        },
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 930,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        },
+        {
+          "FILE": "tooling/scripts/apply-icra-capability-rollout.mjs",
+          "LINE": 113,
+          "SHA256": "c36b39e6664cd4ca4ea2558bd0c77d41fd675e30d380ad6756af4a9f7b8bfcf6"
+        },
+        {
+          "FILE": "apps/union-eyes/scripts/schema-authority/fresh-build.ts",
+          "LINE": 100,
+          "SHA256": "33e496239610b2f731bcddd81260c7183e5c148814af9f5094c4ed8e68003cdf"
+        },
+        {
+          "FILE": "apps/union-eyes/scripts/schema-authority/fresh-build.ts",
+          "LINE": 121,
+          "SHA256": "33e496239610b2f731bcddd81260c7183e5c148814af9f5094c4ed8e68003cdf"
+        }
+      ]
+    },
+    {
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "LEGACY_DATABASE_SCOPE": "financial-service",
+      "PURPOSE": "Distinct financial-service database; never operational domain fallback",
+      "PHYSICAL_TARGET_CLASS": "POSTGRESQL_EXPLICIT_ENVIRONMENT_SELECTED_DATABASE",
+      "TARGET_CONFIGURATION_CONTRACT": {
+        "TARGET_ID": "UE-W2-TARGET-FINANCIAL_SERVICE",
+        "ENVIRONMENT_ID_SOURCE": "UE_DATABASE_TARGET_ENVIRONMENT",
+        "HOST_SOURCE": "FINANCIAL_SERVICE_PGHOST",
+        "PORT_SOURCE": "FINANCIAL_SERVICE_PGPORT",
+        "DATABASE_NAME_SOURCE": "FINANCIAL_SERVICE_PGDATABASE",
+        "BINDING_MODE": "REQUIRED_SCOPE_SPECIFIC_NON_SECRET_DESCRIPTOR_PLUS_SEPARATE_CREDENTIAL_REFERENCE",
+        "MATERIALIZED_DESCRIPTOR_REQUIRED_BEFORE_CONNECTION": "YES",
+        "DESCRIPTOR_FIELDS": ["ENVIRONMENT_ID", "HOST", "PORT", "DATABASE_NAME"],
+        "MISSING_EMPTY_OR_AMBIENT_DEFAULT": "FAIL_FAST",
+        "URL_AND_DISCRETE_COMPONENTS_DISAGREE": "FAIL_FAST",
+        "CREDENTIAL_TARGET_MUST_MATCH_DESCRIPTOR": "YES",
+        "HOST_EQUIVALENCE": "Lowercase DNS name with one terminal dot removed; no DNS lookup, alias inference or IP equivalence",
+        "DATABASE_NAME_EQUIVALENCE": "Exact case-sensitive decoded database name; no default database",
+        "PORT_EQUIVALENCE": "Explicit integer 1..65535; no default port",
+        "ENVIRONMENT_EQUIVALENCE": "Exact environment ID selected once and propagated to every actor; no cross-environment fallback",
+        "SAME_PHYSICAL_DATABASE_KEY": ["NORMALIZED_HOST", "PORT", "DATABASE_NAME"],
+        "SSL_CONFIGURATION_REQUIRED": "Explicit verified transport configuration per selected environment; W8 applies; no URL override can change target/path",
+        "CONNECTION_STRING_SERIALIZATION": "FORBIDDEN",
+        "KNOWN_PHYSICAL_ENDPOINT_LITERAL": "NOT_READ_OR_CLAIMED; this is an exact mandatory reference/binding contract, not a live endpoint attestation",
+        "DEPLOYMENT_SELECTOR_REFERENCE": "FINANCIAL_SERVICE_CREDENTIAL_REFERENCE_SET (prospective scope-specific selector)",
+        "DEPLOYED_TARGET_RUNTIME_PROVEN": "NO"
+      },
+      "DATABASE_NAME_SOURCE": "FINANCIAL_SERVICE_PGDATABASE",
+      "HOST_SOURCE": "FINANCIAL_SERVICE_PGHOST",
+      "PORT_SOURCE": "FINANCIAL_SERVICE_PGPORT",
+      "ADMIN_CREDENTIAL_REFERENCE_CLASS": "FINANCIAL_SERVICE_MIGRATION_REFERENCE",
+      "RUNTIME_CREDENTIAL_REFERENCE_CLASS": "FINANCIAL_SERVICE_RUNTIME_REFERENCE",
+      "SCHEMA_CONTRACT": ["FINANCIAL_SERVICE_PUBLIC", "FINANCIAL_SERVICE_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT": [
+        "UE-W2-PATH-FINANCIAL_PROVISIONING",
+        "UE-W2-PATH-FINANCIAL_MIGRATION",
+        "UE-W2-PATH-FINANCIAL_RUNTIME"
+      ],
+      "SOURCE_CONFIGURATION_ALIGNED": "PARTIAL",
+      "CONTRACT_DEFINED": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "DISTINCT_FROM_SCOPE_ID": "UE_OPERATIONAL",
+      "SAME_DATABASE_DIFFERENT_SCHEMA_COUNTS_AS_DISTINCT_SCOPE": "NO",
+      "SAME_SERVER_DIFFERENT_DATABASE_ALLOWED": "YES; exact database key must differ",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": "apps/union-eyes/services/financial-service/src/db/index.ts",
+          "LINE": 32,
+          "SHA256": "0d56f14d3094a457cdcb032d93bb6392871d0b13859358cfd24abc75bd670fab"
+        }
+      ]
+    }
+  ],
+  "databaseActors": [
+    {
+      "DATABASE_ACTOR_ID": "UE-W2-ACTOR-DJANGO_MIGRATION",
+      "ACTOR_CLASS": "DJANGO_MIGRATION",
+      "ACTOR_PURPOSE": "DJANGO_MIGRATION",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+      "TARGET_ENVIRONMENT_VARIABLES": [
+        "UE_DATABASE_TARGET_ENVIRONMENT",
+        "UE_OPERATIONAL_PGHOST",
+        "UE_OPERATIONAL_PGPORT",
+        "UE_OPERATIONAL_PGDATABASE"
+      ],
+      "TARGET_ENVIRONMENT_VARIABLE_STATUS": "PROSPECTIVE_REQUIRED_NAMES; no environment read or changed in W2",
+      "EXISTING_ENVIRONMENT_VARIABLE_NAMES": [
+        "MIGRATION_ADMIN_URL",
+        "ADMIN_PGHOST",
+        "ADMIN_PGPORT",
+        "ADMIN_PGDATABASE",
+        "PGHOST",
+        "PGPORT",
+        "PGDATABASE"
+      ],
+      "SECRET_REFERENCE_NAMES": [
+        "deploy-union-eyes.plan.key_vault_name::union-eyes-migration-admin-database-url"
+      ],
+      "SECRET_REFERENCE_STATUS": "EXISTING_STATIC_REFERENCE_RETAINED",
+      "DATABASE_NAME_BINDING": "UE_OPERATIONAL_PGDATABASE",
+      "HOST_BINDING": "UE_OPERATIONAL_PGHOST",
+      "PORT_BINDING": "UE_OPERATIONAL_PGPORT",
+      "ENVIRONMENT_BINDING": "UE_DATABASE_TARGET_ENVIRONMENT",
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-DJANGO_MIGRATION",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "ROLE_CLASS": "MIGRATION_ADMIN",
+      "PRINCIPAL_OR_GRANTS_ASSIGNED": "NO; W3",
+      "IMPLEMENTATION_EXISTS": "YES",
+      "IMPLEMENTATION_COVERAGE": "Existing runner/runtime surface evidenced; canonical binding not yet applied",
+      "BINDING_IMPLEMENTED": "NO",
+      "CONTRACT_DEFINED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "PARTIAL",
+      "RUNTIME_PROVEN": "NO",
+      "IMPLEMENTATION_OWNER": "W8",
+      "CREDENTIAL_ALIAS_RULE": "Existing URL/PG* names may be adapters only; decoded target and all connection options must be validated against this scope descriptor. No last-one-wins, ambient fallback, runtime admin reuse or financial/operational alias.",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 1374,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        },
+        {
+          "FILE": "apps/union-eyes/backend/manage.py",
+          "LINE": 17,
+          "SHA256": "e93e58f25eea9ec8130b7139b968611d34ef41d48cf9c7b7aa605e817705cb2a"
+        }
+      ],
+      "FROZEN_BINDING_IDS": ["UE-1B3CA1E-BINDING-7b4af79324c9215d"],
+      "CURRENT_SOURCE_SEARCH_PATH": "SOURCE_CEILING: server/default role search_path not pinned"
+    },
+    {
+      "DATABASE_ACTOR_ID": "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+      "ACTOR_CLASS": "UE_SCOPED_MIGRATION",
+      "ACTOR_PURPOSE": "SCOPED_SECURITY_MIGRATION",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+      "TARGET_ENVIRONMENT_VARIABLES": [
+        "UE_DATABASE_TARGET_ENVIRONMENT",
+        "UE_OPERATIONAL_PGHOST",
+        "UE_OPERATIONAL_PGPORT",
+        "UE_OPERATIONAL_PGDATABASE"
+      ],
+      "TARGET_ENVIRONMENT_VARIABLE_STATUS": "PROSPECTIVE_REQUIRED_NAMES; no environment read or changed in W2",
+      "EXISTING_ENVIRONMENT_VARIABLE_NAMES": [
+        "RLS_MIGRATION_ADMIN_DATABASE_URL",
+        "ADMIN_DATABASE_URL"
+      ],
+      "SECRET_REFERENCE_NAMES": [
+        "deploy-union-eyes.plan.key_vault_name::union-eyes-migration-admin-database-url"
+      ],
+      "SECRET_REFERENCE_STATUS": "EXISTING_STATIC_REFERENCE_RETAINED",
+      "DATABASE_NAME_BINDING": "UE_OPERATIONAL_PGDATABASE",
+      "HOST_BINDING": "UE_OPERATIONAL_PGHOST",
+      "PORT_BINDING": "UE_OPERATIONAL_PGPORT",
+      "ENVIRONMENT_BINDING": "UE_DATABASE_TARGET_ENVIRONMENT",
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "ROLE_CLASS": "MIGRATION_ADMIN",
+      "PRINCIPAL_OR_GRANTS_ASSIGNED": "NO; W3",
+      "IMPLEMENTATION_EXISTS": "YES",
+      "IMPLEMENTATION_COVERAGE": "Only targeted existing runner evidenced, not full frozen-manifest executor",
+      "BINDING_IMPLEMENTED": "NO",
+      "CONTRACT_DEFINED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "PARTIAL",
+      "RUNTIME_PROVEN": "NO",
+      "IMPLEMENTATION_OWNER": "W8",
+      "CREDENTIAL_ALIAS_RULE": "Existing URL/PG* names may be adapters only; decoded target and all connection options must be validated against this scope descriptor. No last-one-wins, ambient fallback, runtime admin reuse or financial/operational alias.",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 930,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        },
+        {
+          "FILE": "tooling/scripts/apply-icra-capability-rollout.mjs",
+          "LINE": 113,
+          "SHA256": "c36b39e6664cd4ca4ea2558bd0c77d41fd675e30d380ad6756af4a9f7b8bfcf6"
+        }
+      ],
+      "FROZEN_BINDING_IDS": ["UE-1B3CA1E-BINDING-c5b794f4c0208b5d"],
+      "CURRENT_SOURCE_SEARCH_PATH": "SOURCE_CEILING: URL/session search_path not pinned"
+    },
+    {
+      "DATABASE_ACTOR_ID": "UE-W2-ACTOR-PROVISIONING",
+      "ACTOR_CLASS": "UE_PLATFORM_BASELINE",
+      "ACTOR_PURPOSE": "PROVISIONING",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+      "TARGET_ENVIRONMENT_VARIABLES": [
+        "UE_DATABASE_TARGET_ENVIRONMENT",
+        "UE_OPERATIONAL_PGHOST",
+        "UE_OPERATIONAL_PGPORT",
+        "UE_OPERATIONAL_PGDATABASE"
+      ],
+      "TARGET_ENVIRONMENT_VARIABLE_STATUS": "PROSPECTIVE_REQUIRED_NAMES; no environment read or changed in W2",
+      "EXISTING_ENVIRONMENT_VARIABLE_NAMES": [
+        "PROVISION_ADMIN_DATABASE_URL",
+        "PROVISION_KEY_VAULT_NAME"
+      ],
+      "SECRET_REFERENCE_NAMES": [
+        "UE_OPERATIONAL_PROVISION_ADMIN_CREDENTIAL_REFERENCE (prospective)"
+      ],
+      "SECRET_REFERENCE_STATUS": "PROSPECTIVE_NORMALIZED_REFERENCE_CLASS; physical secret resource mapping required by W3/W7/W8",
+      "DATABASE_NAME_BINDING": "UE_OPERATIONAL_PGDATABASE",
+      "HOST_BINDING": "UE_OPERATIONAL_PGHOST",
+      "PORT_BINDING": "UE_OPERATIONAL_PGPORT",
+      "ENVIRONMENT_BINDING": "UE_DATABASE_TARGET_ENVIRONMENT",
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_PROVISIONING",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "ROLE_CLASS": "MIGRATION_ADMIN",
+      "PRINCIPAL_OR_GRANTS_ASSIGNED": "NO; W3",
+      "IMPLEMENTATION_EXISTS": "YES",
+      "IMPLEMENTATION_COVERAGE": "Existing role creator only; complete governed role/extension provisioner pending W3",
+      "BINDING_IMPLEMENTED": "NO",
+      "CONTRACT_DEFINED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "PARTIAL",
+      "RUNTIME_PROVEN": "NO",
+      "IMPLEMENTATION_OWNER": "W3",
+      "CREDENTIAL_ALIAS_RULE": "Existing URL/PG* names may be adapters only; decoded target and all connection options must be validated against this scope descriptor. No last-one-wins, ambient fallback, runtime admin reuse or financial/operational alias.",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+          "LINE": 135,
+          "SHA256": "bda57a01ea1feac0f6f9e59a97555fd175b00208c6093895611f15dafab35ec4"
+        },
+        {
+          "FILE": "apps/union-eyes/scripts/schema-authority/fresh-build.ts",
+          "LINE": 136,
+          "SHA256": "33e496239610b2f731bcddd81260c7183e5c148814af9f5094c4ed8e68003cdf"
+        },
+        {
+          "FILE": "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+          "LINE": 135,
+          "SHA256": "bda57a01ea1feac0f6f9e59a97555fd175b00208c6093895611f15dafab35ec4"
+        },
+        {
+          "FILE": "apps/union-eyes/scripts/schema-authority/fresh-build.ts",
+          "LINE": 136,
+          "SHA256": "33e496239610b2f731bcddd81260c7183e5c148814af9f5094c4ed8e68003cdf"
+        }
+      ],
+      "FROZEN_BINDING_IDS": [],
+      "CURRENT_SOURCE_SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E"
+    },
+    {
+      "DATABASE_ACTOR_ID": "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+      "ACTOR_CLASS": "UE_PLATFORM_BASELINE",
+      "ACTOR_PURPOSE": "PRECONSUMER_BASELINE",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+      "TARGET_ENVIRONMENT_VARIABLES": [
+        "UE_DATABASE_TARGET_ENVIRONMENT",
+        "UE_OPERATIONAL_PGHOST",
+        "UE_OPERATIONAL_PGPORT",
+        "UE_OPERATIONAL_PGDATABASE"
+      ],
+      "TARGET_ENVIRONMENT_VARIABLE_STATUS": "PROSPECTIVE_REQUIRED_NAMES; no environment read or changed in W2",
+      "EXISTING_ENVIRONMENT_VARIABLE_NAMES": ["UE_PLATFORM_BASELINE_ADMIN_DATABASE_URL"],
+      "SECRET_REFERENCE_NAMES": [
+        "deploy-union-eyes.plan.key_vault_name::union-eyes-migration-admin-database-url"
+      ],
+      "SECRET_REFERENCE_STATUS": "PROSPECTIVE_NORMALIZED_REFERENCE_CLASS; physical secret resource mapping required by W3/W7/W8",
+      "DATABASE_NAME_BINDING": "UE_OPERATIONAL_PGDATABASE",
+      "HOST_BINDING": "UE_OPERATIONAL_PGHOST",
+      "PORT_BINDING": "UE_OPERATIONAL_PGPORT",
+      "ENVIRONMENT_BINDING": "UE_DATABASE_TARGET_ENVIRONMENT",
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_PLATFORM_BASELINE",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "ROLE_CLASS": "MIGRATION_ADMIN",
+      "PRINCIPAL_OR_GRANTS_ASSIGNED": "NO; W3",
+      "IMPLEMENTATION_EXISTS": "NO",
+      "IMPLEMENTATION_COVERAGE": "Governed baseline executor not implemented",
+      "BINDING_IMPLEMENTED": "NO",
+      "CONTRACT_DEFINED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "IMPLEMENTATION_OWNER": "W4",
+      "CREDENTIAL_ALIAS_RULE": "Existing URL/PG* names may be adapters only; decoded target and all connection options must be validated against this scope descriptor. No last-one-wins, ambient fallback, runtime admin reuse or financial/operational alias.",
+      "EVIDENCE_REFERENCES": [],
+      "FROZEN_BINDING_IDS": [],
+      "CURRENT_SOURCE_SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E"
+    },
+    {
+      "DATABASE_ACTOR_ID": "UE-W2-ACTOR-APPLICATION_RUNTIME",
+      "ACTOR_CLASS": "UE_RUNTIME",
+      "ACTOR_PURPOSE": "APPLICATION_RUNTIME",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+      "TARGET_ENVIRONMENT_VARIABLES": [
+        "UE_DATABASE_TARGET_ENVIRONMENT",
+        "UE_OPERATIONAL_PGHOST",
+        "UE_OPERATIONAL_PGPORT",
+        "UE_OPERATIONAL_PGDATABASE"
+      ],
+      "TARGET_ENVIRONMENT_VARIABLE_STATUS": "PROSPECTIVE_REQUIRED_NAMES; no environment read or changed in W2",
+      "EXISTING_ENVIRONMENT_VARIABLE_NAMES": [
+        "DATABASE_URL",
+        "RUNTIME_URL",
+        "PGHOST",
+        "PGPORT",
+        "PGDATABASE"
+      ],
+      "SECRET_REFERENCE_NAMES": [
+        "UE_OPERATIONAL_APPLICATION_CREDENTIAL_REFERENCE (prospective normalized selector)"
+      ],
+      "SECRET_REFERENCE_STATUS": "PROSPECTIVE_NORMALIZED_REFERENCE_CLASS; physical secret resource mapping required by W3/W7/W8",
+      "DATABASE_NAME_BINDING": "UE_OPERATIONAL_PGDATABASE",
+      "HOST_BINDING": "UE_OPERATIONAL_PGHOST",
+      "PORT_BINDING": "UE_OPERATIONAL_PGPORT",
+      "ENVIRONMENT_BINDING": "UE_DATABASE_TARGET_ENVIRONMENT",
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "ROLE_CLASS": "APPLICATION_RUNTIME",
+      "PRINCIPAL_OR_GRANTS_ASSIGNED": "NO; W3",
+      "IMPLEMENTATION_EXISTS": "YES",
+      "IMPLEMENTATION_COVERAGE": "Next runtime and Django sidecar share one governed application target; existing runtime translation is not migration/runtime equality proof",
+      "BINDING_IMPLEMENTED": "NO",
+      "CONTRACT_DEFINED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "PARTIAL",
+      "RUNTIME_PROVEN": "NO",
+      "IMPLEMENTATION_OWNER": "W8",
+      "CREDENTIAL_ALIAS_RULE": "Existing URL/PG* names may be adapters only; decoded target and all connection options must be validated against this scope descriptor. No last-one-wins, ambient fallback, runtime admin reuse or financial/operational alias.",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 1844,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        }
+      ],
+      "FROZEN_BINDING_IDS": [],
+      "CURRENT_SOURCE_SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E"
+    },
+    {
+      "DATABASE_ACTOR_ID": "UE-W2-ACTOR-SYSTEM_RUNTIME",
+      "ACTOR_CLASS": "UE_SYSTEM_RUNTIME",
+      "ACTOR_PURPOSE": "SYSTEM_RUNTIME",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+      "TARGET_ENVIRONMENT_VARIABLES": [
+        "UE_DATABASE_TARGET_ENVIRONMENT",
+        "UE_OPERATIONAL_PGHOST",
+        "UE_OPERATIONAL_PGPORT",
+        "UE_OPERATIONAL_PGDATABASE"
+      ],
+      "TARGET_ENVIRONMENT_VARIABLE_STATUS": "PROSPECTIVE_REQUIRED_NAMES; no environment read or changed in W2",
+      "EXISTING_ENVIRONMENT_VARIABLE_NAMES": ["SYSTEM_URL"],
+      "SECRET_REFERENCE_NAMES": [
+        "UE_OPERATIONAL_SYSTEM_CREDENTIAL_REFERENCE (prospective normalized selector)"
+      ],
+      "SECRET_REFERENCE_STATUS": "PROSPECTIVE_NORMALIZED_REFERENCE_CLASS; physical secret resource mapping required by W3/W7/W8",
+      "DATABASE_NAME_BINDING": "UE_OPERATIONAL_PGDATABASE",
+      "HOST_BINDING": "UE_OPERATIONAL_PGHOST",
+      "PORT_BINDING": "UE_OPERATIONAL_PGPORT",
+      "ENVIRONMENT_BINDING": "UE_DATABASE_TARGET_ENVIRONMENT",
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_SYSTEM_RUNTIME",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+      "PRINCIPAL_OR_GRANTS_ASSIGNED": "NO; W3",
+      "IMPLEMENTATION_EXISTS": "NO",
+      "IMPLEMENTATION_COVERAGE": "System URL name recorded in accepted workflow inventory, but that is not proof of a separately implemented system actor; exact system process/pool application remains W8 duty",
+      "BINDING_IMPLEMENTED": "NO",
+      "CONTRACT_DEFINED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "IMPLEMENTATION_OWNER": "W8",
+      "CREDENTIAL_ALIAS_RULE": "Existing URL/PG* names may be adapters only; decoded target and all connection options must be validated against this scope descriptor. No last-one-wins, ambient fallback, runtime admin reuse or financial/operational alias.",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 1844,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        }
+      ],
+      "FROZEN_BINDING_IDS": [],
+      "CURRENT_SOURCE_SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E"
+    },
+    {
+      "DATABASE_ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+      "ACTOR_CLASS": "FINANCIAL_MIGRATION",
+      "ACTOR_PURPOSE": "FINANCIAL_PROVISIONING",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "TARGET_ID": "UE-W2-TARGET-FINANCIAL_SERVICE",
+      "TARGET_ENVIRONMENT_VARIABLES": [
+        "UE_DATABASE_TARGET_ENVIRONMENT",
+        "FINANCIAL_SERVICE_PGHOST",
+        "FINANCIAL_SERVICE_PGPORT",
+        "FINANCIAL_SERVICE_PGDATABASE"
+      ],
+      "TARGET_ENVIRONMENT_VARIABLE_STATUS": "PROSPECTIVE_REQUIRED_NAMES; no environment read or changed in W2",
+      "EXISTING_ENVIRONMENT_VARIABLE_NAMES": ["FINANCIAL_PROVISION_ADMIN_DATABASE_URL"],
+      "SECRET_REFERENCE_NAMES": ["FINANCIAL_SERVICE_PROVISION_CREDENTIAL_REFERENCE (prospective)"],
+      "SECRET_REFERENCE_STATUS": "PROSPECTIVE_NORMALIZED_REFERENCE_CLASS; physical secret resource mapping required by W3/W7/W8",
+      "DATABASE_NAME_BINDING": "FINANCIAL_SERVICE_PGDATABASE",
+      "HOST_BINDING": "FINANCIAL_SERVICE_PGHOST",
+      "PORT_BINDING": "FINANCIAL_SERVICE_PGPORT",
+      "ENVIRONMENT_BINDING": "UE_DATABASE_TARGET_ENVIRONMENT",
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-FINANCIAL_PROVISIONING",
+      "SCHEMA_IDS": ["FINANCIAL_SERVICE_PUBLIC", "FINANCIAL_SERVICE_PG_CATALOG"],
+      "ROLE_CLASS": "FINANCIAL_MIGRATION",
+      "PRINCIPAL_OR_GRANTS_ASSIGNED": "NO; W3",
+      "IMPLEMENTATION_EXISTS": "NO",
+      "IMPLEMENTATION_COVERAGE": "Separate financial provisioning target; no operational fallback",
+      "BINDING_IMPLEMENTED": "NO",
+      "CONTRACT_DEFINED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "IMPLEMENTATION_OWNER": "W3",
+      "CREDENTIAL_ALIAS_RULE": "Existing URL/PG* names may be adapters only; decoded target and all connection options must be validated against this scope descriptor. No last-one-wins, ambient fallback, runtime admin reuse or financial/operational alias.",
+      "EVIDENCE_REFERENCES": [],
+      "FROZEN_BINDING_IDS": [],
+      "CURRENT_SOURCE_SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E"
+    },
+    {
+      "DATABASE_ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+      "ACTOR_CLASS": "FINANCIAL_MIGRATION",
+      "ACTOR_PURPOSE": "FINANCIAL_MIGRATION",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "TARGET_ID": "UE-W2-TARGET-FINANCIAL_SERVICE",
+      "TARGET_ENVIRONMENT_VARIABLES": [
+        "UE_DATABASE_TARGET_ENVIRONMENT",
+        "FINANCIAL_SERVICE_PGHOST",
+        "FINANCIAL_SERVICE_PGPORT",
+        "FINANCIAL_SERVICE_PGDATABASE"
+      ],
+      "TARGET_ENVIRONMENT_VARIABLE_STATUS": "PROSPECTIVE_REQUIRED_NAMES; no environment read or changed in W2",
+      "EXISTING_ENVIRONMENT_VARIABLE_NAMES": ["DATABASE_URL", "FINANCIAL_MIGRATION_DATABASE_URL"],
+      "SECRET_REFERENCE_NAMES": ["FINANCIAL_SERVICE_MIGRATION_CREDENTIAL_REFERENCE (prospective)"],
+      "SECRET_REFERENCE_STATUS": "PROSPECTIVE_NORMALIZED_REFERENCE_CLASS; physical secret resource mapping required by W3/W7/W8",
+      "DATABASE_NAME_BINDING": "FINANCIAL_SERVICE_PGDATABASE",
+      "HOST_BINDING": "FINANCIAL_SERVICE_PGHOST",
+      "PORT_BINDING": "FINANCIAL_SERVICE_PGPORT",
+      "ENVIRONMENT_BINDING": "UE_DATABASE_TARGET_ENVIRONMENT",
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-FINANCIAL_MIGRATION",
+      "SCHEMA_IDS": ["FINANCIAL_SERVICE_PUBLIC", "FINANCIAL_SERVICE_PG_CATALOG"],
+      "ROLE_CLASS": "FINANCIAL_MIGRATION",
+      "PRINCIPAL_OR_GRANTS_ASSIGNED": "NO; W3",
+      "IMPLEMENTATION_EXISTS": "YES",
+      "IMPLEMENTATION_COVERAGE": "Existing manual partial runner only; full canonical materializer not implemented",
+      "BINDING_IMPLEMENTED": "NO",
+      "CONTRACT_DEFINED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "PARTIAL",
+      "RUNTIME_PROVEN": "NO",
+      "IMPLEMENTATION_OWNER": "W7",
+      "CREDENTIAL_ALIAS_RULE": "Existing URL/PG* names may be adapters only; decoded target and all connection options must be validated against this scope descriptor. No last-one-wins, ambient fallback, runtime admin reuse or financial/operational alias.",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": "apps/union-eyes/services/financial-service/run-migrations.ts",
+          "LINE": 35,
+          "SHA256": "e17e49c577e0d589d933b33b126c9899de2fb84e3db755669bace03acc1cca81"
+        },
+        {
+          "FILE": "apps/union-eyes/services/financial-service/package.json",
+          "LINE": 11,
+          "SHA256": "bb1fd50f2585e68f11fc5fe08c8239c11dbd02d49515ce2ae1b364bd1c26a0a4"
+        }
+      ],
+      "FROZEN_BINDING_IDS": [],
+      "CURRENT_SOURCE_SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E"
+    },
+    {
+      "DATABASE_ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_RUNTIME",
+      "ACTOR_CLASS": "FINANCIAL_RUNTIME",
+      "ACTOR_PURPOSE": "FINANCIAL_RUNTIME",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "TARGET_ID": "UE-W2-TARGET-FINANCIAL_SERVICE",
+      "TARGET_ENVIRONMENT_VARIABLES": [
+        "UE_DATABASE_TARGET_ENVIRONMENT",
+        "FINANCIAL_SERVICE_PGHOST",
+        "FINANCIAL_SERVICE_PGPORT",
+        "FINANCIAL_SERVICE_PGDATABASE"
+      ],
+      "TARGET_ENVIRONMENT_VARIABLE_STATUS": "PROSPECTIVE_REQUIRED_NAMES; no environment read or changed in W2",
+      "EXISTING_ENVIRONMENT_VARIABLE_NAMES": ["DATABASE_URL", "FINANCIAL_RUNTIME_DATABASE_URL"],
+      "SECRET_REFERENCE_NAMES": ["FINANCIAL_SERVICE_RUNTIME_CREDENTIAL_REFERENCE (prospective)"],
+      "SECRET_REFERENCE_STATUS": "PROSPECTIVE_NORMALIZED_REFERENCE_CLASS; physical secret resource mapping required by W3/W7/W8",
+      "DATABASE_NAME_BINDING": "FINANCIAL_SERVICE_PGDATABASE",
+      "HOST_BINDING": "FINANCIAL_SERVICE_PGHOST",
+      "PORT_BINDING": "FINANCIAL_SERVICE_PGPORT",
+      "ENVIRONMENT_BINDING": "UE_DATABASE_TARGET_ENVIRONMENT",
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-FINANCIAL_RUNTIME",
+      "SCHEMA_IDS": ["FINANCIAL_SERVICE_PUBLIC", "FINANCIAL_SERVICE_PG_CATALOG"],
+      "ROLE_CLASS": "FINANCIAL_RUNTIME",
+      "PRINCIPAL_OR_GRANTS_ASSIGNED": "NO; W3",
+      "IMPLEMENTATION_EXISTS": "YES",
+      "IMPLEMENTATION_COVERAGE": "Existing runner/runtime surface evidenced; canonical binding not yet applied",
+      "BINDING_IMPLEMENTED": "NO",
+      "CONTRACT_DEFINED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "PARTIAL",
+      "RUNTIME_PROVEN": "NO",
+      "IMPLEMENTATION_OWNER": "W7",
+      "CREDENTIAL_ALIAS_RULE": "Existing URL/PG* names may be adapters only; decoded target and all connection options must be validated against this scope descriptor. No last-one-wins, ambient fallback, runtime admin reuse or financial/operational alias.",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": "apps/union-eyes/services/financial-service/src/db/index.ts",
+          "LINE": 32,
+          "SHA256": "0d56f14d3094a457cdcb032d93bb6392871d0b13859358cfd24abc75bd670fab"
+        }
+      ],
+      "FROZEN_BINDING_IDS": ["UE-1B3CA1E-BINDING-fed0e4820af42571"],
+      "CURRENT_SOURCE_SEARCH_PATH": "SOURCE_CEILING"
+    }
+  ],
+  "schemas": [
+    {
+      "SCHEMA_ID": "UE_OPERATIONAL_PUBLIC",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "SCHEMA_NAME": "public",
+      "OWNER_CLASS": "GOVERNED_DDL_OWNER_FOR_DJANGO_AND_APPROVED_PLATFORM_OBJECTS",
+      "OWNER_PRINCIPAL_ASSIGNED_BY": "W3",
+      "PURPOSE": "Canonical existing operational namespace, compatible with frozen public/unqualified identities",
+      "PUBLIC_SCHEMA_ROLE": "CANONICAL_OPERATIONAL_SCHEMA",
+      "DOMAIN_OBJECTS_ALLOWED": "YES",
+      "PLATFORM_OBJECTS_ALLOWED": "YES",
+      "SECURITY_HELPERS_ALLOWED": "YES",
+      "FINANCIAL_OBJECTS_ALLOWED": "NO",
+      "PUBLIC_OR_RUNTIME_CREATE_ALLOWED": "NO",
+      "TRUST_PRECONDITION": "W3 must enforce no PUBLIC/application/system CREATE and no untrusted/transitively writable schema; W4/W7 inventory producer collisions before privileged lookup",
+      "DJANGO_DOMAIN_CREATION_AUTHORITY": "DJANGO; organizations stays Django-owned; no platform DDL surrogate",
+      "PHYSICALLY_CREATED_OR_OWNERSHIP_APPLIED": "NO"
+    },
+    {
+      "SCHEMA_ID": "UE_OPERATIONAL_PG_CATALOG",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "SCHEMA_NAME": "pg_catalog",
+      "OWNER_CLASS": "POSTGRESQL_SYSTEM",
+      "PURPOSE": "Built-in lookup only; never application/financial/bootstrap object creation",
+      "DOMAIN_OBJECTS_ALLOWED": "NO",
+      "PLATFORM_OBJECTS_ALLOWED": "NO",
+      "SECURITY_HELPERS_ALLOWED": "NO",
+      "FINANCIAL_OBJECTS_ALLOWED": "NO",
+      "BOOTSTRAP_WRITES_ALLOWED": "NO"
+    },
+    {
+      "SCHEMA_ID": "FINANCIAL_SERVICE_PUBLIC",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "SCHEMA_NAME": "public",
+      "OWNER_CLASS": "GOVERNED_FINANCIAL_DDL_OWNER",
+      "OWNER_PRINCIPAL_ASSIGNED_BY": "W3",
+      "PURPOSE": "Prospectively approved financial namespace within its own distinct physical database; not inherited from UE defaults",
+      "PUBLIC_SCHEMA_ROLE": "CANONICAL_FINANCIAL_SCHEMA",
+      "DOMAIN_OBJECTS_ALLOWED": "NO",
+      "PLATFORM_OBJECTS_ALLOWED": "NO",
+      "SECURITY_HELPERS_ALLOWED": "YES",
+      "FINANCIAL_OBJECTS_ALLOWED": "YES",
+      "PUBLIC_OR_RUNTIME_CREATE_ALLOWED": "NO",
+      "TRUST_PRECONDITION": "W3 must enforce no PUBLIC/application/system CREATE and no untrusted/transitively writable schema; W4/W7 inventory producer collisions before privileged lookup",
+      "DJANGO_DOMAIN_CREATION_AUTHORITY": "NOT_APPLICABLE",
+      "PHYSICALLY_CREATED_OR_OWNERSHIP_APPLIED": "NO"
+    },
+    {
+      "SCHEMA_ID": "FINANCIAL_SERVICE_PG_CATALOG",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "SCHEMA_NAME": "pg_catalog",
+      "OWNER_CLASS": "POSTGRESQL_SYSTEM",
+      "PURPOSE": "Built-in lookup only; never application/financial/bootstrap object creation",
+      "DOMAIN_OBJECTS_ALLOWED": "NO",
+      "PLATFORM_OBJECTS_ALLOWED": "NO",
+      "SECURITY_HELPERS_ALLOWED": "NO",
+      "FINANCIAL_OBJECTS_ALLOWED": "NO",
+      "BOOTSTRAP_WRITES_ALLOWED": "NO"
+    }
+  ],
+  "searchPathContracts": [
+    {
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-DJANGO_MIGRATION",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ACTOR_ID": "UE-W2-ACTOR-DJANGO_MIGRATION",
+      "ROLE_CLASS": "MIGRATION_ADMIN",
+      "SEARCH_PATH": ["public", "pg_catalog"],
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "APPLICATION_REQUIREMENT": "EXPLICIT_CONNECTION_CONFIGURATION; fixed on every new/reused pool connection before any SQL; wrong/ambient/URL-overridden path fails fast",
+      "ROLE_AND_DATABASE_DEFAULTS_SUFFICIENT": "NO",
+      "PG_CATALOG_HANDLING": "EXPLICIT_IN_SEARCH_PATH",
+      "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+      "TEMP_PRIVILEGE_ALLOWED": "NO",
+      "TEMP_IMPLICIT_LOOKUP_CAVEAT": "Omitting pg_temp does not suppress PostgreSQL implicit temporary relation/type lookup; W3 must deny effective TEMP including PUBLIC/inherited privileges; W8 rejects unexpected temporary namespace. Qualify privileged references regardless.",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "CREATION_NAMESPACE": "public",
+      "REASON": "Django/frozen unqualified CREATE must target public, not pg_catalog; public is governed trusted-only. New privileged SQL remains qualified and built-in collision checks are required before legacy execution.",
+      "PATH_DIFFERENCE_IS_PRIVILEGE_BROADENING": "NO",
+      "APPLIED_OR_RUNTIME_PROVEN": "NO"
+    },
+    {
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ACTOR_ID": "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+      "ROLE_CLASS": "MIGRATION_ADMIN",
+      "SEARCH_PATH": ["public", "pg_catalog"],
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "APPLICATION_REQUIREMENT": "EXPLICIT_CONNECTION_CONFIGURATION; fixed on every new/reused pool connection before any SQL; wrong/ambient/URL-overridden path fails fast",
+      "ROLE_AND_DATABASE_DEFAULTS_SUFFICIENT": "NO",
+      "PG_CATALOG_HANDLING": "EXPLICIT_IN_SEARCH_PATH",
+      "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+      "TEMP_PRIVILEGE_ALLOWED": "NO",
+      "TEMP_IMPLICIT_LOOKUP_CAVEAT": "Omitting pg_temp does not suppress PostgreSQL implicit temporary relation/type lookup; W3 must deny effective TEMP including PUBLIC/inherited privileges; W8 rejects unexpected temporary namespace. Qualify privileged references regardless.",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "CREATION_NAMESPACE": "public",
+      "REASON": "Django/frozen unqualified CREATE must target public, not pg_catalog; public is governed trusted-only. New privileged SQL remains qualified and built-in collision checks are required before legacy execution.",
+      "PATH_DIFFERENCE_IS_PRIVILEGE_BROADENING": "NO",
+      "APPLIED_OR_RUNTIME_PROVEN": "NO"
+    },
+    {
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_PROVISIONING",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ACTOR_ID": "UE-W2-ACTOR-PROVISIONING",
+      "ROLE_CLASS": "MIGRATION_ADMIN",
+      "SEARCH_PATH": ["pg_catalog"],
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "APPLICATION_REQUIREMENT": "EXPLICIT_CONNECTION_CONFIGURATION; fixed on every new/reused pool connection before any SQL; wrong/ambient/URL-overridden path fails fast",
+      "ROLE_AND_DATABASE_DEFAULTS_SUFFICIENT": "NO",
+      "PG_CATALOG_HANDLING": "EXPLICIT_IN_SEARCH_PATH",
+      "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+      "TEMP_PRIVILEGE_ALLOWED": "NO",
+      "TEMP_IMPLICIT_LOOKUP_CAVEAT": "Omitting pg_temp does not suppress PostgreSQL implicit temporary relation/type lookup; W3 must deny effective TEMP including PUBLIC/inherited privileges; W8 rejects unexpected temporary namespace. Qualify privileged references regardless.",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PG_CATALOG"],
+      "CREATION_NAMESPACE": "NO_UNQUALIFIED_DDL_ALLOWED",
+      "REASON": "Provisioning uses schema-qualified DDL only, with built-in lookup first and no domain search schema",
+      "PATH_DIFFERENCE_IS_PRIVILEGE_BROADENING": "NO",
+      "APPLIED_OR_RUNTIME_PROVEN": "NO"
+    },
+    {
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_PLATFORM_BASELINE",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ACTOR_ID": "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+      "ROLE_CLASS": "MIGRATION_ADMIN",
+      "SEARCH_PATH": ["public", "pg_catalog"],
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "APPLICATION_REQUIREMENT": "EXPLICIT_CONNECTION_CONFIGURATION; fixed on every new/reused pool connection before any SQL; wrong/ambient/URL-overridden path fails fast",
+      "ROLE_AND_DATABASE_DEFAULTS_SUFFICIENT": "NO",
+      "PG_CATALOG_HANDLING": "EXPLICIT_IN_SEARCH_PATH",
+      "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+      "TEMP_PRIVILEGE_ALLOWED": "NO",
+      "TEMP_IMPLICIT_LOOKUP_CAVEAT": "Omitting pg_temp does not suppress PostgreSQL implicit temporary relation/type lookup; W3 must deny effective TEMP including PUBLIC/inherited privileges; W8 rejects unexpected temporary namespace. Qualify privileged references regardless.",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "CREATION_NAMESPACE": "public",
+      "REASON": "Django/frozen unqualified CREATE must target public, not pg_catalog; public is governed trusted-only. New privileged SQL remains qualified and built-in collision checks are required before legacy execution.",
+      "PATH_DIFFERENCE_IS_PRIVILEGE_BROADENING": "NO",
+      "APPLIED_OR_RUNTIME_PROVEN": "NO"
+    },
+    {
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ACTOR_ID": "UE-W2-ACTOR-APPLICATION_RUNTIME",
+      "ROLE_CLASS": "APPLICATION_RUNTIME",
+      "SEARCH_PATH": ["pg_catalog", "public"],
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "APPLICATION_REQUIREMENT": "EXPLICIT_CONNECTION_CONFIGURATION; fixed on every new/reused pool connection before any SQL; wrong/ambient/URL-overridden path fails fast",
+      "ROLE_AND_DATABASE_DEFAULTS_SUFFICIENT": "NO",
+      "PG_CATALOG_HANDLING": "EXPLICIT_IN_SEARCH_PATH",
+      "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+      "TEMP_PRIVILEGE_ALLOWED": "NO",
+      "TEMP_IMPLICIT_LOOKUP_CAVEAT": "Omitting pg_temp does not suppress PostgreSQL implicit temporary relation/type lookup; W3 must deny effective TEMP including PUBLIC/inherited privileges; W8 rejects unexpected temporary namespace. Qualify privileged references regardless.",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PG_CATALOG", "UE_OPERATIONAL_PUBLIC"],
+      "CREATION_NAMESPACE": "NO_UNQUALIFIED_DDL_ALLOWED",
+      "REASON": "Runtime places pg_catalog before governed public to prioritize built-ins; it cannot create objects. System privilege does not broaden search path.",
+      "PATH_DIFFERENCE_IS_PRIVILEGE_BROADENING": "NO",
+      "APPLIED_OR_RUNTIME_PROVEN": "NO"
+    },
+    {
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_SYSTEM_RUNTIME",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ACTOR_ID": "UE-W2-ACTOR-SYSTEM_RUNTIME",
+      "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+      "SEARCH_PATH": ["pg_catalog", "public"],
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "APPLICATION_REQUIREMENT": "EXPLICIT_CONNECTION_CONFIGURATION; fixed on every new/reused pool connection before any SQL; wrong/ambient/URL-overridden path fails fast",
+      "ROLE_AND_DATABASE_DEFAULTS_SUFFICIENT": "NO",
+      "PG_CATALOG_HANDLING": "EXPLICIT_IN_SEARCH_PATH",
+      "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+      "TEMP_PRIVILEGE_ALLOWED": "NO",
+      "TEMP_IMPLICIT_LOOKUP_CAVEAT": "Omitting pg_temp does not suppress PostgreSQL implicit temporary relation/type lookup; W3 must deny effective TEMP including PUBLIC/inherited privileges; W8 rejects unexpected temporary namespace. Qualify privileged references regardless.",
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PG_CATALOG", "UE_OPERATIONAL_PUBLIC"],
+      "CREATION_NAMESPACE": "NO_UNQUALIFIED_DDL_ALLOWED",
+      "REASON": "Runtime places pg_catalog before governed public to prioritize built-ins; it cannot create objects. System privilege does not broaden search path.",
+      "PATH_DIFFERENCE_IS_PRIVILEGE_BROADENING": "NO",
+      "APPLIED_OR_RUNTIME_PROVEN": "NO"
+    },
+    {
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-FINANCIAL_PROVISIONING",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+      "ROLE_CLASS": "FINANCIAL_MIGRATION",
+      "SEARCH_PATH": ["pg_catalog"],
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "APPLICATION_REQUIREMENT": "EXPLICIT_CONNECTION_CONFIGURATION; fixed on every new/reused pool connection before any SQL; wrong/ambient/URL-overridden path fails fast",
+      "ROLE_AND_DATABASE_DEFAULTS_SUFFICIENT": "NO",
+      "PG_CATALOG_HANDLING": "EXPLICIT_IN_SEARCH_PATH",
+      "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+      "TEMP_PRIVILEGE_ALLOWED": "NO",
+      "TEMP_IMPLICIT_LOOKUP_CAVEAT": "Omitting pg_temp does not suppress PostgreSQL implicit temporary relation/type lookup; W3 must deny effective TEMP including PUBLIC/inherited privileges; W8 rejects unexpected temporary namespace. Qualify privileged references regardless.",
+      "SCHEMA_IDS": ["FINANCIAL_SERVICE_PG_CATALOG"],
+      "CREATION_NAMESPACE": "NO_UNQUALIFIED_DDL_ALLOWED",
+      "REASON": "Provisioning uses schema-qualified DDL only, with built-in lookup first and no domain search schema",
+      "PATH_DIFFERENCE_IS_PRIVILEGE_BROADENING": "NO",
+      "APPLIED_OR_RUNTIME_PROVEN": "NO"
+    },
+    {
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-FINANCIAL_MIGRATION",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+      "ROLE_CLASS": "FINANCIAL_MIGRATION",
+      "SEARCH_PATH": ["public", "pg_catalog"],
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "APPLICATION_REQUIREMENT": "EXPLICIT_CONNECTION_CONFIGURATION; fixed on every new/reused pool connection before any SQL; wrong/ambient/URL-overridden path fails fast",
+      "ROLE_AND_DATABASE_DEFAULTS_SUFFICIENT": "NO",
+      "PG_CATALOG_HANDLING": "EXPLICIT_IN_SEARCH_PATH",
+      "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+      "TEMP_PRIVILEGE_ALLOWED": "NO",
+      "TEMP_IMPLICIT_LOOKUP_CAVEAT": "Omitting pg_temp does not suppress PostgreSQL implicit temporary relation/type lookup; W3 must deny effective TEMP including PUBLIC/inherited privileges; W8 rejects unexpected temporary namespace. Qualify privileged references regardless.",
+      "SCHEMA_IDS": ["FINANCIAL_SERVICE_PUBLIC", "FINANCIAL_SERVICE_PG_CATALOG"],
+      "CREATION_NAMESPACE": "public",
+      "REASON": "Django/frozen unqualified CREATE must target public, not pg_catalog; public is governed trusted-only. New privileged SQL remains qualified and built-in collision checks are required before legacy execution.",
+      "PATH_DIFFERENCE_IS_PRIVILEGE_BROADENING": "NO",
+      "APPLIED_OR_RUNTIME_PROVEN": "NO"
+    },
+    {
+      "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-FINANCIAL_RUNTIME",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_RUNTIME",
+      "ROLE_CLASS": "FINANCIAL_RUNTIME",
+      "SEARCH_PATH": ["pg_catalog", "public"],
+      "SEARCH_PATH_SOURCE": "GOVERNED_PROSPECTIVE_CONTRACT",
+      "APPLICATION_REQUIREMENT": "EXPLICIT_CONNECTION_CONFIGURATION; fixed on every new/reused pool connection before any SQL; wrong/ambient/URL-overridden path fails fast",
+      "ROLE_AND_DATABASE_DEFAULTS_SUFFICIENT": "NO",
+      "PG_CATALOG_HANDLING": "EXPLICIT_IN_SEARCH_PATH",
+      "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+      "TEMP_PRIVILEGE_ALLOWED": "NO",
+      "TEMP_IMPLICIT_LOOKUP_CAVEAT": "Omitting pg_temp does not suppress PostgreSQL implicit temporary relation/type lookup; W3 must deny effective TEMP including PUBLIC/inherited privileges; W8 rejects unexpected temporary namespace. Qualify privileged references regardless.",
+      "SCHEMA_IDS": ["FINANCIAL_SERVICE_PG_CATALOG", "FINANCIAL_SERVICE_PUBLIC"],
+      "CREATION_NAMESPACE": "NO_UNQUALIFIED_DDL_ALLOWED",
+      "REASON": "Runtime places pg_catalog before governed public to prioritize built-ins; it cannot create objects. System privilege does not broaden search path.",
+      "PATH_DIFFERENCE_IS_PRIVILEGE_BROADENING": "NO",
+      "APPLIED_OR_RUNTIME_PROVEN": "NO"
+    }
+  ],
+  "namedSearchPaths": {
+    "UE_DEFAULT_SEARCH_PATH": ["pg_catalog", "public"],
+    "DJANGO_MIGRATION_SEARCH_PATH": ["public", "pg_catalog"],
+    "UE_PLATFORM_BASELINE_SEARCH_PATH": ["public", "pg_catalog"],
+    "UE_SCOPED_SECURITY_MIGRATION_SEARCH_PATH": ["public", "pg_catalog"],
+    "UE_APPLICATION_RUNTIME_SEARCH_PATH": ["pg_catalog", "public"],
+    "UE_SYSTEM_RUNTIME_SEARCH_PATH": ["pg_catalog", "public"],
+    "FINANCIAL_MIGRATION_SEARCH_PATH": ["public", "pg_catalog"],
+    "FINANCIAL_RUNTIME_SEARCH_PATH": ["pg_catalog", "public"],
+    "UE_PROVISIONING_SEARCH_PATH": ["pg_catalog"],
+    "FINANCIAL_PROVISIONING_SEARCH_PATH": ["pg_catalog"]
+  },
+  "sameTargetAndScopeDoctrine": {
+    "UE_DJANGO_TARGET_SCOPE": "UE_OPERATIONAL",
+    "UE_SCOPED_SECURITY_TARGET_SCOPE": "UE_OPERATIONAL",
+    "DJANGO_AND_SCOPED_SECURITY_SAME_TARGET": "YES",
+    "FINANCIAL_SERVICE_TARGET_SCOPE": "FINANCIAL_SERVICE",
+    "FINANCIAL_SERVICE_IS_DISTINCT_FROM_UE_OPERATIONAL": "YES",
+    "STATIC_REFERENCE_EQUALITY_EVIDENCE": {
+      "DJANGO_SCOPED_PHYSICAL_DB_BINDING": "ESTABLISHED_SAME_TARGET",
+      "ESTABLISHED_SCOPE": "Existing deployment Django and targeted scoped job share the same plan-selected vault and fixed secret reference; fresh-build composes one conn/dbName",
+      "SECRET_VALUES_COMPARED_OR_ACCESSED": "NO",
+      "PROVES_FULL_FROZEN_REPLAY_BINDING": "NO",
+      "PROVES_RUNTIME_DEPLOYED_TARGET": "NO",
+      "ALL_ENVIRONMENTS_OR_SERVICES_MERGED": "NO",
+      "FULL_CANONICAL_SCOPE_ROLE_SEARCH_PATH_BINDING": "SOURCE_CEILING",
+      "EVIDENCE": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 1374,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        },
+        {
+          "FILE": "apps/union-eyes/backend/manage.py",
+          "LINE": 17,
+          "SHA256": "e93e58f25eea9ec8130b7139b968611d34ef41d48cf9c7b7aa605e817705cb2a"
+        },
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 930,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        },
+        {
+          "FILE": "tooling/scripts/apply-icra-capability-rollout.mjs",
+          "LINE": 113,
+          "SHA256": "c36b39e6664cd4ca4ea2558bd0c77d41fd675e30d380ad6756af4a9f7b8bfcf6"
+        },
+        {
+          "FILE": "apps/union-eyes/scripts/schema-authority/fresh-build.ts",
+          "LINE": 100,
+          "SHA256": "33e496239610b2f731bcddd81260c7183e5c148814af9f5094c4ed8e68003cdf"
+        },
+        {
+          "FILE": "apps/union-eyes/scripts/schema-authority/fresh-build.ts",
+          "LINE": 121,
+          "SHA256": "33e496239610b2f731bcddd81260c7183e5c148814af9f5094c4ed8e68003cdf"
+        }
+      ],
+      "DEPLOYMENT_RUNTIME_TRANSLATION": {
+        "EVIDENCE": {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 1844,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        },
+        "BINDING": "Frontend DATABASE_URL secret reference is translated to Django runtime PG*; discrete PG* fallback exists",
+        "MIGRATION_ADMIN_VERSUS_RUNTIME_SECRET_TARGET_EQUALITY": "SOURCE_CEILING: separate secret references, no value comparison"
+      }
+    },
+    "DEPLOYED_RUNTIME_TARGET_EQUALITY_PROVEN": "NO"
+  },
+  "frozenBindingDisposition": [
+    {
+      "BINDING_ID": "UE-1B3CA1E-BINDING-7b4af79324c9215d",
+      "PROCESS_OR_SERVICE": "apply-django-migrations",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ENVIRONMENT_CLASS": "ENVIRONMENT_SELECTED",
+      "CANONICAL_USE": "ADAPTER_ONLY; must obey exact governed descriptor/path before later replay",
+      "CURRENT_SCHEMA_SEARCH_PATH": "SOURCE_CEILING: server/default role search_path not pinned",
+      "NEW_BINDING_APPLIED": "NO"
+    },
+    {
+      "BINDING_ID": "UE-1B3CA1E-BINDING-c5b794f4c0208b5d",
+      "PROCESS_OR_SERVICE": "apply-icra-capability-migration",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ENVIRONMENT_CLASS": "ENVIRONMENT_SELECTED",
+      "CANONICAL_USE": "ADAPTER_ONLY; must obey exact governed descriptor/path before later replay",
+      "CURRENT_SCHEMA_SEARCH_PATH": "SOURCE_CEILING: URL/session search_path not pinned",
+      "NEW_BINDING_APPLIED": "NO"
+    },
+    {
+      "BINDING_ID": "UE-1B3CA1E-BINDING-2df7ee35519b21d8",
+      "PROCESS_OR_SERVICE": "fresh-build:django",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ENVIRONMENT_CLASS": "DISPOSABLE_INSTANCE_OF_OPERATIONAL_SCOPE",
+      "CANONICAL_USE": "ADAPTER_ONLY; must obey exact governed descriptor/path before later replay",
+      "CURRENT_SCHEMA_SEARCH_PATH": "SOURCE_CEILING: role/default search_path not pinned",
+      "NEW_BINDING_APPLIED": "NO"
+    },
+    {
+      "BINDING_ID": "UE-1B3CA1E-BINDING-ed1248df5e3302dc",
+      "PROCESS_OR_SERVICE": "fresh-build:scoped",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ENVIRONMENT_CLASS": "DISPOSABLE_INSTANCE_OF_OPERATIONAL_SCOPE",
+      "CANONICAL_USE": "ADAPTER_ONLY; must obey exact governed descriptor/path before later replay",
+      "CURRENT_SCHEMA_SEARCH_PATH": "SOURCE_CEILING: role/default search_path not pinned",
+      "NEW_BINDING_APPLIED": "NO"
+    },
+    {
+      "BINDING_ID": "UE-1B3CA1E-BINDING-333c04dd151a2a68",
+      "PROCESS_OR_SERVICE": "db:bootstrap",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "ENVIRONMENT_CLASS": "ENVIRONMENT_SELECTED",
+      "CANONICAL_USE": "NOT_ADOPTED; lacks full Django target composition",
+      "CURRENT_SCHEMA_SEARCH_PATH": "SOURCE_CEILING: ambient role/session",
+      "NEW_BINDING_APPLIED": "NO"
+    },
+    {
+      "BINDING_ID": "UE-1B3CA1E-BINDING-fed0e4820af42571",
+      "PROCESS_OR_SERVICE": "financial-service",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "ENVIRONMENT_CLASS": "ENVIRONMENT_SELECTED",
+      "CANONICAL_USE": "ADAPTER_ONLY; must obey exact governed descriptor/path before later replay",
+      "CURRENT_SCHEMA_SEARCH_PATH": "SOURCE_CEILING",
+      "NEW_BINDING_APPLIED": "NO"
+    }
+  ],
+  "qualificationDoctrine": {
+    "DDL_OBJECT_REFERENCES": "MIXED_EXPLICIT_RULE",
+    "EXISTING_FROZEN_MIGRATIONS": "ALLOWED_UNDER_FIXED_GOVERNED_SEARCH_PATH",
+    "DJANGO_UNQUALIFIED_DB_TABLES": "ALLOWED_UNDER_FIXED_GOVERNED_SEARCH_PATH",
+    "NEW_PRIVILEGED_BOOTSTRAP_SQL": "REQUIRE_SCHEMA_QUALIFICATION",
+    "NEW_HELPER_TABLE_TYPE_FUNCTION_REFERENCES": "REQUIRE_SCHEMA_QUALIFICATION",
+    "NEW_BUILTIN_PRIVILEGED_REFERENCES": "REQUIRE_PG_CATALOG_QUALIFICATION",
+    "DJANGO_DEFAULT_DB_TABLE_SCHEMA": "public in UE_OPERATIONAL only",
+    "FROZEN_SQL_REWRITTEN": "NO",
+    "CROSS_SCOPE_RULES": {
+      "UE_OPERATIONAL_CODE_MAY_TARGET_FINANCIAL_SCOPE": "NO",
+      "FINANCIAL_RUNTIME_MAY_TARGET_UE_OPERATIONAL_SCOPE": "NO",
+      "BUSINESS_INTEGRATION": "OUTSIDE_W2; requires separately approved later integration contract"
+    }
+  },
+  "functionSearchPathDoctrine": {
+    "FUNCTION_SEARCH_PATH_MUST_BE_EXPLICIT": "YES",
+    "APPLIES_TO": ["SECURITY_DEFINER", "policy helper", "trigger helper", "privileged helper"],
+    "UE_FUNCTION_SEARCH_PATH": ["pg_catalog", "public"],
+    "FINANCIAL_FUNCTION_SEARCH_PATH": ["pg_catalog", "public"],
+    "SCOPE_ISOLATION": "Each function path refers to public in its own database only",
+    "CALLER_AMBIENT_PATH_ALLOWED": "NO",
+    "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+    "PRIVILEGED_RELATION_TYPE_HELPER_REFERENCES": "REQUIRE_SCHEMA_QUALIFICATION",
+    "TRUST_PRECONDITIONS": [
+      "No untrusted schema CREATE",
+      "No effective TEMP via PUBLIC/inherited privileges",
+      "Privileged references qualified; function owner/ACL decisions W3/W6"
+    ],
+    "EXISTING_FROZEN_FUNCTION_DRIFT": "Do not rewrite frozen SQL. W6 must adjudicate actual fixed function paths/qualified dependencies; incompatibility fails before replay.",
+    "CREATED_OR_ALTERED": "NO"
+  },
+  "roleClassTargetMatrix": [
+    {
+      "ROLE_CLASS": "MIGRATION_ADMIN",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-DJANGO_MIGRATION",
+        "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+        "UE-W2-ACTOR-PROVISIONING",
+        "UE-W2-ACTOR-PRECONSUMER_BASELINE"
+      ],
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE"
+      ],
+      "PRINCIPAL_NAME_OR_GRANTS_ASSIGNED": "NO; W3 only",
+      "ROLE_RUNTIME_OWNERSHIP_PROVEN": "NO"
+    },
+    {
+      "ROLE_CLASS": "APPLICATION_RUNTIME",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+      "ACTOR_IDS": ["UE-W2-ACTOR-APPLICATION_RUNTIME"],
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": ["UE-W2-PATH-UE_APPLICATION_RUNTIME"],
+      "PRINCIPAL_NAME_OR_GRANTS_ASSIGNED": "NO; W3 only",
+      "ROLE_RUNTIME_OWNERSHIP_PROVEN": "NO"
+    },
+    {
+      "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+      "ACTOR_IDS": ["UE-W2-ACTOR-SYSTEM_RUNTIME"],
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": ["UE-W2-PATH-UE_SYSTEM_RUNTIME"],
+      "PRINCIPAL_NAME_OR_GRANTS_ASSIGNED": "NO; W3 only",
+      "ROLE_RUNTIME_OWNERSHIP_PROVEN": "NO"
+    },
+    {
+      "ROLE_CLASS": "FINANCIAL_MIGRATION",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "TARGET_ID": "UE-W2-TARGET-FINANCIAL_SERVICE",
+      "ACTOR_IDS": ["UE-W2-ACTOR-FINANCIAL_PROVISIONING", "UE-W2-ACTOR-FINANCIAL_MIGRATION"],
+      "SCHEMA_IDS": ["FINANCIAL_SERVICE_PUBLIC", "FINANCIAL_SERVICE_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-FINANCIAL_PROVISIONING",
+        "UE-W2-PATH-FINANCIAL_MIGRATION"
+      ],
+      "PRINCIPAL_NAME_OR_GRANTS_ASSIGNED": "NO; W3 only",
+      "ROLE_RUNTIME_OWNERSHIP_PROVEN": "NO"
+    },
+    {
+      "ROLE_CLASS": "FINANCIAL_RUNTIME",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "TARGET_ID": "UE-W2-TARGET-FINANCIAL_SERVICE",
+      "ACTOR_IDS": ["UE-W2-ACTOR-FINANCIAL_RUNTIME"],
+      "SCHEMA_IDS": ["FINANCIAL_SERVICE_PUBLIC", "FINANCIAL_SERVICE_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": ["UE-W2-PATH-FINANCIAL_RUNTIME"],
+      "PRINCIPAL_NAME_OR_GRANTS_ASSIGNED": "NO; W3 only",
+      "ROLE_RUNTIME_OWNERSHIP_PROVEN": "NO"
+    }
+  ],
+  "governanceDecisions": [
+    {
+      "DECISION_ID": "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+      "SUBJECT": "Exact operational and distinct financial target contract",
+      "DECISION": {
+        "SCOPE_IDS": ["UE_OPERATIONAL", "FINANCIAL_SERVICE"],
+        "TARGET_DESCRIPTORS": [
+          {
+            "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+            "ENVIRONMENT_ID_SOURCE": "UE_DATABASE_TARGET_ENVIRONMENT",
+            "HOST_SOURCE": "UE_OPERATIONAL_PGHOST",
+            "PORT_SOURCE": "UE_OPERATIONAL_PGPORT",
+            "DATABASE_NAME_SOURCE": "UE_OPERATIONAL_PGDATABASE",
+            "BINDING_MODE": "REQUIRED_SCOPE_SPECIFIC_NON_SECRET_DESCRIPTOR_PLUS_SEPARATE_CREDENTIAL_REFERENCE",
+            "MATERIALIZED_DESCRIPTOR_REQUIRED_BEFORE_CONNECTION": "YES",
+            "DESCRIPTOR_FIELDS": ["ENVIRONMENT_ID", "HOST", "PORT", "DATABASE_NAME"],
+            "MISSING_EMPTY_OR_AMBIENT_DEFAULT": "FAIL_FAST",
+            "URL_AND_DISCRETE_COMPONENTS_DISAGREE": "FAIL_FAST",
+            "CREDENTIAL_TARGET_MUST_MATCH_DESCRIPTOR": "YES",
+            "HOST_EQUIVALENCE": "Lowercase DNS name with one terminal dot removed; no DNS lookup, alias inference or IP equivalence",
+            "DATABASE_NAME_EQUIVALENCE": "Exact case-sensitive decoded database name; no default database",
+            "PORT_EQUIVALENCE": "Explicit integer 1..65535; no default port",
+            "ENVIRONMENT_EQUIVALENCE": "Exact environment ID selected once and propagated to every actor; no cross-environment fallback",
+            "SAME_PHYSICAL_DATABASE_KEY": ["NORMALIZED_HOST", "PORT", "DATABASE_NAME"],
+            "SSL_CONFIGURATION_REQUIRED": "Explicit verified transport configuration per selected environment; W8 applies; no URL override can change target/path",
+            "CONNECTION_STRING_SERIALIZATION": "FORBIDDEN",
+            "KNOWN_PHYSICAL_ENDPOINT_LITERAL": "NOT_READ_OR_CLAIMED; this is an exact mandatory reference/binding contract, not a live endpoint attestation",
+            "DEPLOYMENT_SELECTOR_REFERENCE": "needs.plan.outputs.key_vault_name",
+            "DEPLOYED_TARGET_RUNTIME_PROVEN": "NO"
+          },
+          {
+            "TARGET_ID": "UE-W2-TARGET-FINANCIAL_SERVICE",
+            "ENVIRONMENT_ID_SOURCE": "UE_DATABASE_TARGET_ENVIRONMENT",
+            "HOST_SOURCE": "FINANCIAL_SERVICE_PGHOST",
+            "PORT_SOURCE": "FINANCIAL_SERVICE_PGPORT",
+            "DATABASE_NAME_SOURCE": "FINANCIAL_SERVICE_PGDATABASE",
+            "BINDING_MODE": "REQUIRED_SCOPE_SPECIFIC_NON_SECRET_DESCRIPTOR_PLUS_SEPARATE_CREDENTIAL_REFERENCE",
+            "MATERIALIZED_DESCRIPTOR_REQUIRED_BEFORE_CONNECTION": "YES",
+            "DESCRIPTOR_FIELDS": ["ENVIRONMENT_ID", "HOST", "PORT", "DATABASE_NAME"],
+            "MISSING_EMPTY_OR_AMBIENT_DEFAULT": "FAIL_FAST",
+            "URL_AND_DISCRETE_COMPONENTS_DISAGREE": "FAIL_FAST",
+            "CREDENTIAL_TARGET_MUST_MATCH_DESCRIPTOR": "YES",
+            "HOST_EQUIVALENCE": "Lowercase DNS name with one terminal dot removed; no DNS lookup, alias inference or IP equivalence",
+            "DATABASE_NAME_EQUIVALENCE": "Exact case-sensitive decoded database name; no default database",
+            "PORT_EQUIVALENCE": "Explicit integer 1..65535; no default port",
+            "ENVIRONMENT_EQUIVALENCE": "Exact environment ID selected once and propagated to every actor; no cross-environment fallback",
+            "SAME_PHYSICAL_DATABASE_KEY": ["NORMALIZED_HOST", "PORT", "DATABASE_NAME"],
+            "SSL_CONFIGURATION_REQUIRED": "Explicit verified transport configuration per selected environment; W8 applies; no URL override can change target/path",
+            "CONNECTION_STRING_SERIALIZATION": "FORBIDDEN",
+            "KNOWN_PHYSICAL_ENDPOINT_LITERAL": "NOT_READ_OR_CLAIMED; this is an exact mandatory reference/binding contract, not a live endpoint attestation",
+            "DEPLOYMENT_SELECTOR_REFERENCE": "FINANCIAL_SERVICE_CREDENTIAL_REFERENCE_SET (prospective scope-specific selector)",
+            "DEPLOYED_TARGET_RUNTIME_PROVEN": "NO"
+          }
+        ],
+        "SAME_OPERATIONAL_TARGET": "YES",
+        "DISTINCT_FINANCIAL_TARGET": "YES",
+        "CREDENTIAL_ROLES_DISTINCT": "YES"
+      },
+      "RATIONALE": "Accepted A1E establishes shared Django/scoped reference only; mandate one scope-specific descriptor for all operational actors and a physically different financial descriptor. No live hostname or credential equality is inferred.",
+      "EVIDENCE_REFERENCES": [
+        "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json",
+        "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1E_OPERATIONAL_BOOTSTRAP_BINDING_CLOSURE.json",
+        "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1_DJANGO_DEPENDENCY_MIGRATION_LOCK.json",
+        "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION.json"
+      ],
+      "APPROVED": "YES",
+      "APPROVAL_AUTHORITY": "Explicit W2 maintainer mission authorizes target/schema/search-path adjudication",
+      "IMPLEMENTATION_REQUIRED_BY": ["W3", "W4", "W6", "W7", "W8"],
+      "RUNTIME_CONFIGURATION_APPLIED": "NO"
+    },
+    {
+      "DECISION_ID": "UE-1B3CA1G-DECISION-70fd4794fc24b96e",
+      "SUBJECT": "Exact schema names and search paths",
+      "DECISION": {
+        "SCHEMAS": [
+          {
+            "SCHEMA_ID": "UE_OPERATIONAL_PUBLIC",
+            "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+            "SCHEMA_NAME": "public",
+            "OWNER_CLASS": "GOVERNED_DDL_OWNER_FOR_DJANGO_AND_APPROVED_PLATFORM_OBJECTS",
+            "OWNER_PRINCIPAL_ASSIGNED_BY": "W3",
+            "PURPOSE": "Canonical existing operational namespace, compatible with frozen public/unqualified identities",
+            "PUBLIC_SCHEMA_ROLE": "CANONICAL_OPERATIONAL_SCHEMA",
+            "DOMAIN_OBJECTS_ALLOWED": "YES",
+            "PLATFORM_OBJECTS_ALLOWED": "YES",
+            "SECURITY_HELPERS_ALLOWED": "YES",
+            "FINANCIAL_OBJECTS_ALLOWED": "NO",
+            "PUBLIC_OR_RUNTIME_CREATE_ALLOWED": "NO",
+            "TRUST_PRECONDITION": "W3 must enforce no PUBLIC/application/system CREATE and no untrusted/transitively writable schema; W4/W7 inventory producer collisions before privileged lookup",
+            "DJANGO_DOMAIN_CREATION_AUTHORITY": "DJANGO; organizations stays Django-owned; no platform DDL surrogate",
+            "PHYSICALLY_CREATED_OR_OWNERSHIP_APPLIED": "NO"
+          },
+          {
+            "SCHEMA_ID": "UE_OPERATIONAL_PG_CATALOG",
+            "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+            "SCHEMA_NAME": "pg_catalog",
+            "OWNER_CLASS": "POSTGRESQL_SYSTEM",
+            "PURPOSE": "Built-in lookup only; never application/financial/bootstrap object creation",
+            "DOMAIN_OBJECTS_ALLOWED": "NO",
+            "PLATFORM_OBJECTS_ALLOWED": "NO",
+            "SECURITY_HELPERS_ALLOWED": "NO",
+            "FINANCIAL_OBJECTS_ALLOWED": "NO",
+            "BOOTSTRAP_WRITES_ALLOWED": "NO"
+          },
+          {
+            "SCHEMA_ID": "FINANCIAL_SERVICE_PUBLIC",
+            "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+            "SCHEMA_NAME": "public",
+            "OWNER_CLASS": "GOVERNED_FINANCIAL_DDL_OWNER",
+            "OWNER_PRINCIPAL_ASSIGNED_BY": "W3",
+            "PURPOSE": "Prospectively approved financial namespace within its own distinct physical database; not inherited from UE defaults",
+            "PUBLIC_SCHEMA_ROLE": "CANONICAL_FINANCIAL_SCHEMA",
+            "DOMAIN_OBJECTS_ALLOWED": "NO",
+            "PLATFORM_OBJECTS_ALLOWED": "NO",
+            "SECURITY_HELPERS_ALLOWED": "YES",
+            "FINANCIAL_OBJECTS_ALLOWED": "YES",
+            "PUBLIC_OR_RUNTIME_CREATE_ALLOWED": "NO",
+            "TRUST_PRECONDITION": "W3 must enforce no PUBLIC/application/system CREATE and no untrusted/transitively writable schema; W4/W7 inventory producer collisions before privileged lookup",
+            "DJANGO_DOMAIN_CREATION_AUTHORITY": "NOT_APPLICABLE",
+            "PHYSICALLY_CREATED_OR_OWNERSHIP_APPLIED": "NO"
+          },
+          {
+            "SCHEMA_ID": "FINANCIAL_SERVICE_PG_CATALOG",
+            "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+            "SCHEMA_NAME": "pg_catalog",
+            "OWNER_CLASS": "POSTGRESQL_SYSTEM",
+            "PURPOSE": "Built-in lookup only; never application/financial/bootstrap object creation",
+            "DOMAIN_OBJECTS_ALLOWED": "NO",
+            "PLATFORM_OBJECTS_ALLOWED": "NO",
+            "SECURITY_HELPERS_ALLOWED": "NO",
+            "FINANCIAL_OBJECTS_ALLOWED": "NO",
+            "BOOTSTRAP_WRITES_ALLOWED": "NO"
+          }
+        ],
+        "SEARCH_PATHS": [
+          {
+            "ID": "UE-W2-PATH-DJANGO_MIGRATION",
+            "SCOPE": "UE_OPERATIONAL",
+            "PATH": ["public", "pg_catalog"]
+          },
+          {
+            "ID": "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+            "SCOPE": "UE_OPERATIONAL",
+            "PATH": ["public", "pg_catalog"]
+          },
+          { "ID": "UE-W2-PATH-UE_PROVISIONING", "SCOPE": "UE_OPERATIONAL", "PATH": ["pg_catalog"] },
+          {
+            "ID": "UE-W2-PATH-UE_PLATFORM_BASELINE",
+            "SCOPE": "UE_OPERATIONAL",
+            "PATH": ["public", "pg_catalog"]
+          },
+          {
+            "ID": "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+            "SCOPE": "UE_OPERATIONAL",
+            "PATH": ["pg_catalog", "public"]
+          },
+          {
+            "ID": "UE-W2-PATH-UE_SYSTEM_RUNTIME",
+            "SCOPE": "UE_OPERATIONAL",
+            "PATH": ["pg_catalog", "public"]
+          },
+          {
+            "ID": "UE-W2-PATH-FINANCIAL_PROVISIONING",
+            "SCOPE": "FINANCIAL_SERVICE",
+            "PATH": ["pg_catalog"]
+          },
+          {
+            "ID": "UE-W2-PATH-FINANCIAL_MIGRATION",
+            "SCOPE": "FINANCIAL_SERVICE",
+            "PATH": ["public", "pg_catalog"]
+          },
+          {
+            "ID": "UE-W2-PATH-FINANCIAL_RUNTIME",
+            "SCOPE": "FINANCIAL_SERVICE",
+            "PATH": ["pg_catalog", "public"]
+          }
+        ],
+        "QUALIFICATION": {
+          "DDL_OBJECT_REFERENCES": "MIXED_EXPLICIT_RULE",
+          "EXISTING_FROZEN_MIGRATIONS": "ALLOWED_UNDER_FIXED_GOVERNED_SEARCH_PATH",
+          "DJANGO_UNQUALIFIED_DB_TABLES": "ALLOWED_UNDER_FIXED_GOVERNED_SEARCH_PATH",
+          "NEW_PRIVILEGED_BOOTSTRAP_SQL": "REQUIRE_SCHEMA_QUALIFICATION",
+          "NEW_HELPER_TABLE_TYPE_FUNCTION_REFERENCES": "REQUIRE_SCHEMA_QUALIFICATION",
+          "NEW_BUILTIN_PRIVILEGED_REFERENCES": "REQUIRE_PG_CATALOG_QUALIFICATION",
+          "DJANGO_DEFAULT_DB_TABLE_SCHEMA": "public in UE_OPERATIONAL only",
+          "FROZEN_SQL_REWRITTEN": "NO",
+          "CROSS_SCOPE_RULES": {
+            "UE_OPERATIONAL_CODE_MAY_TARGET_FINANCIAL_SCOPE": "NO",
+            "FINANCIAL_RUNTIME_MAY_TARGET_UE_OPERATIONAL_SCOPE": "NO",
+            "BUSINESS_INTEGRATION": "OUTSIDE_W2; requires separately approved later integration contract"
+          }
+        },
+        "FUNCTION_PATHS": {
+          "FUNCTION_SEARCH_PATH_MUST_BE_EXPLICIT": "YES",
+          "APPLIES_TO": [
+            "SECURITY_DEFINER",
+            "policy helper",
+            "trigger helper",
+            "privileged helper"
+          ],
+          "UE_FUNCTION_SEARCH_PATH": ["pg_catalog", "public"],
+          "FINANCIAL_FUNCTION_SEARCH_PATH": ["pg_catalog", "public"],
+          "SCOPE_ISOLATION": "Each function path refers to public in its own database only",
+          "CALLER_AMBIENT_PATH_ALLOWED": "NO",
+          "PG_TEMP_HANDLING": "NOT_EXPLICITLY_ALLOWED",
+          "PRIVILEGED_RELATION_TYPE_HELPER_REFERENCES": "REQUIRE_SCHEMA_QUALIFICATION",
+          "TRUST_PRECONDITIONS": [
+            "No untrusted schema CREATE",
+            "No effective TEMP via PUBLIC/inherited privileges",
+            "Privileged references qualified; function owner/ACL decisions W3/W6"
+          ],
+          "EXISTING_FROZEN_FUNCTION_DRIFT": "Do not rewrite frozen SQL. W6 must adjudicate actual fixed function paths/qualified dependencies; incompatibility fails before replay.",
+          "CREATED_OR_ALTERED": "NO"
+        }
+      },
+      "RATIONALE": "Retain frozen public/unqualified operational lineage; select financial public independently within a distinct database. Migration public-first is necessary for Django CREATE; runtime catalog-first limits lookup ambiguity. No cosmetic new schema.",
+      "EVIDENCE_REFERENCES": [
+        "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json",
+        "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1E_OPERATIONAL_BOOTSTRAP_BINDING_CLOSURE.json",
+        "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1_DJANGO_DEPENDENCY_MIGRATION_LOCK.json",
+        "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION.json"
+      ],
+      "APPROVED": "YES",
+      "APPROVAL_AUTHORITY": "Explicit W2 maintainer mission authorizes target/schema/search-path adjudication",
+      "IMPLEMENTATION_REQUIRED_BY": ["W3", "W4", "W6", "W7", "W8"],
+      "RUNTIME_CONFIGURATION_APPLIED": "NO"
+    }
+  ],
+  "obligationLinkage": [
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21",
+      "W2_REQUIREMENT": "Approve non-secret target identifiers, endpoint/database equivalence rules, secret-reference mapping, scope isolation, ownership and allowed migration/runtime identity classes; preserve UE same-scope and financial distinct-scope doctrines.",
+      "CONTRACT_VALUE": {
+        "SCOPE_IDS": ["UE_OPERATIONAL", "FINANCIAL_SERVICE"],
+        "ACTOR_IDS": [
+          "UE-W2-ACTOR-DJANGO_MIGRATION",
+          "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+          "UE-W2-ACTOR-PROVISIONING",
+          "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+          "UE-W2-ACTOR-APPLICATION_RUNTIME",
+          "UE-W2-ACTOR-SYSTEM_RUNTIME",
+          "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+          "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+          "UE-W2-ACTOR-FINANCIAL_RUNTIME"
+        ],
+        "SCHEMA_IDS": [
+          "UE_OPERATIONAL_PUBLIC",
+          "UE_OPERATIONAL_PG_CATALOG",
+          "FINANCIAL_SERVICE_PUBLIC",
+          "FINANCIAL_SERVICE_PG_CATALOG"
+        ],
+        "SEARCH_PATH_CONTRACT_IDS": [
+          "UE-W2-PATH-DJANGO_MIGRATION",
+          "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+          "UE-W2-PATH-UE_PROVISIONING",
+          "UE-W2-PATH-UE_PLATFORM_BASELINE",
+          "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+          "UE-W2-PATH-UE_SYSTEM_RUNTIME",
+          "UE-W2-PATH-FINANCIAL_PROVISIONING",
+          "UE-W2-PATH-FINANCIAL_MIGRATION",
+          "UE-W2-PATH-FINANCIAL_RUNTIME"
+        ],
+        "ROLE_CLASSES": [
+          "MIGRATION_ADMIN",
+          "APPLICATION_RUNTIME",
+          "SYSTEM_OR_INTERNAL_RUNTIME",
+          "FINANCIAL_MIGRATION",
+          "FINANCIAL_RUNTIME"
+        ],
+        "TARGET_MATCHING": "Exact environment/host/port/database descriptor; same UE scope, distinct financial physical database; no ambient fallback",
+        "SECRET_REFERENCE_MODEL": "Existing static migration-admin reference retained; runtime/financial/provisioning reference classes prospective, no values read"
+      },
+      "IMPLEMENTED_BY_W2": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "docs/union-eyes/reality-remediation/UE_DATABASE_TARGET_SCHEMA_SEARCH_PATH_CONTRACT.json",
+        "databaseScopes",
+        "databaseActors",
+        "schemas",
+        "searchPathContracts",
+        "qualificationDoctrine",
+        "roleClassTargetMatrix",
+        "governanceDecisions",
+        "offline fail-fast descriptor tests"
+      ],
+      "PHYSICAL_CHANGE_REQUIRED_LATER": "YES",
+      "DOWNSTREAM_OWNER": ["W3", "W4", "W6", "W7", "W8"],
+      "CONTRACT_DEFINED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "PARTIAL",
+      "RUNTIME_PROVEN": "NO"
+    }
+  ],
+  "configurationDrift": [
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-DJANGO_MIGRATION-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-DJANGO_MIGRATION",
+      "GOVERNED_VALUE": {
+        "SEARCH_PATH": ["public", "pg_catalog"],
+        "TARGET_DESCRIPTOR_REQUIRED": true,
+        "TEMP_PRIVILEGE": "DENIED"
+      },
+      "CURRENT_SOURCE_VALUE": {
+        "SEARCH_PATH": "SOURCE_CEILING: server/default role search_path not pinned",
+        "IMPLEMENTATION_COVERAGE": "Existing runner/runtime surface evidenced; canonical binding not yet applied",
+        "SCOPE_DESCRIPTOR": "No complete canonical descriptor binding established in frozen A1E"
+      },
+      "DRIFT_CLASS": "SOURCE_ALIGNMENT_CEILING",
+      "REMEDIATION_OWNER": "W8",
+      "ADDITIONAL_OWNER": "W3 effective CREATE/TEMP boundaries",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 1374,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        },
+        {
+          "FILE": "apps/union-eyes/backend/manage.py",
+          "LINE": 17,
+          "SHA256": "e93e58f25eea9ec8130b7139b968611d34ef41d48cf9c7b7aa605e817705cb2a"
+        }
+      ]
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-SCOPED_SECURITY_MIGRATION-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+      "GOVERNED_VALUE": {
+        "SEARCH_PATH": ["public", "pg_catalog"],
+        "TARGET_DESCRIPTOR_REQUIRED": true,
+        "TEMP_PRIVILEGE": "DENIED"
+      },
+      "CURRENT_SOURCE_VALUE": {
+        "SEARCH_PATH": "SOURCE_CEILING: URL/session search_path not pinned",
+        "IMPLEMENTATION_COVERAGE": "Only targeted existing runner evidenced, not full frozen-manifest executor",
+        "SCOPE_DESCRIPTOR": "No complete canonical descriptor binding established in frozen A1E"
+      },
+      "DRIFT_CLASS": "SOURCE_ALIGNMENT_CEILING",
+      "REMEDIATION_OWNER": "W8",
+      "ADDITIONAL_OWNER": "W3 effective CREATE/TEMP boundaries",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 930,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        },
+        {
+          "FILE": "tooling/scripts/apply-icra-capability-rollout.mjs",
+          "LINE": 113,
+          "SHA256": "c36b39e6664cd4ca4ea2558bd0c77d41fd675e30d380ad6756af4a9f7b8bfcf6"
+        }
+      ]
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-PROVISIONING-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-PROVISIONING",
+      "GOVERNED_VALUE": {
+        "SEARCH_PATH": ["pg_catalog"],
+        "TARGET_DESCRIPTOR_REQUIRED": true,
+        "TEMP_PRIVILEGE": "DENIED"
+      },
+      "CURRENT_SOURCE_VALUE": {
+        "SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E",
+        "IMPLEMENTATION_COVERAGE": "Existing role creator only; complete governed role/extension provisioner pending W3",
+        "SCOPE_DESCRIPTOR": "No complete canonical descriptor binding established in frozen A1E"
+      },
+      "DRIFT_CLASS": "SOURCE_ALIGNMENT_CEILING",
+      "REMEDIATION_OWNER": "W3",
+      "ADDITIONAL_OWNER": "W3 effective CREATE/TEMP boundaries",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+          "LINE": 135,
+          "SHA256": "bda57a01ea1feac0f6f9e59a97555fd175b00208c6093895611f15dafab35ec4"
+        },
+        {
+          "FILE": "apps/union-eyes/scripts/schema-authority/fresh-build.ts",
+          "LINE": 136,
+          "SHA256": "33e496239610b2f731bcddd81260c7183e5c148814af9f5094c4ed8e68003cdf"
+        },
+        {
+          "FILE": "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+          "LINE": 135,
+          "SHA256": "bda57a01ea1feac0f6f9e59a97555fd175b00208c6093895611f15dafab35ec4"
+        },
+        {
+          "FILE": "apps/union-eyes/scripts/schema-authority/fresh-build.ts",
+          "LINE": 136,
+          "SHA256": "33e496239610b2f731bcddd81260c7183e5c148814af9f5094c4ed8e68003cdf"
+        }
+      ]
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-PRECONSUMER_BASELINE-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+      "GOVERNED_VALUE": {
+        "SEARCH_PATH": ["public", "pg_catalog"],
+        "TARGET_DESCRIPTOR_REQUIRED": true,
+        "TEMP_PRIVILEGE": "DENIED"
+      },
+      "CURRENT_SOURCE_VALUE": {
+        "SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E",
+        "IMPLEMENTATION_COVERAGE": "Governed baseline executor not implemented",
+        "SCOPE_DESCRIPTOR": "No complete canonical descriptor binding established in frozen A1E"
+      },
+      "DRIFT_CLASS": "PROSPECTIVE_IMPLEMENTATION_GAP",
+      "REMEDIATION_OWNER": "W4",
+      "ADDITIONAL_OWNER": "W3 effective CREATE/TEMP boundaries",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": []
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-APPLICATION_RUNTIME-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-APPLICATION_RUNTIME",
+      "GOVERNED_VALUE": {
+        "SEARCH_PATH": ["pg_catalog", "public"],
+        "TARGET_DESCRIPTOR_REQUIRED": true,
+        "TEMP_PRIVILEGE": "DENIED"
+      },
+      "CURRENT_SOURCE_VALUE": {
+        "SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E",
+        "IMPLEMENTATION_COVERAGE": "Next runtime and Django sidecar share one governed application target; existing runtime translation is not migration/runtime equality proof",
+        "SCOPE_DESCRIPTOR": "No complete canonical descriptor binding established in frozen A1E"
+      },
+      "DRIFT_CLASS": "SOURCE_ALIGNMENT_CEILING",
+      "REMEDIATION_OWNER": "W8",
+      "ADDITIONAL_OWNER": "W3 effective CREATE/TEMP boundaries",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 1844,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        }
+      ]
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-SYSTEM_RUNTIME-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-SYSTEM_RUNTIME",
+      "GOVERNED_VALUE": {
+        "SEARCH_PATH": ["pg_catalog", "public"],
+        "TARGET_DESCRIPTOR_REQUIRED": true,
+        "TEMP_PRIVILEGE": "DENIED"
+      },
+      "CURRENT_SOURCE_VALUE": {
+        "SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E",
+        "IMPLEMENTATION_COVERAGE": "System URL name recorded in accepted workflow inventory, but that is not proof of a separately implemented system actor; exact system process/pool application remains W8 duty",
+        "SCOPE_DESCRIPTOR": "No complete canonical descriptor binding established in frozen A1E"
+      },
+      "DRIFT_CLASS": "PROSPECTIVE_IMPLEMENTATION_GAP",
+      "REMEDIATION_OWNER": "W8",
+      "ADDITIONAL_OWNER": "W3 effective CREATE/TEMP boundaries",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 1844,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        }
+      ]
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-FINANCIAL_PROVISIONING-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+      "GOVERNED_VALUE": {
+        "SEARCH_PATH": ["pg_catalog"],
+        "TARGET_DESCRIPTOR_REQUIRED": true,
+        "TEMP_PRIVILEGE": "DENIED"
+      },
+      "CURRENT_SOURCE_VALUE": {
+        "SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E",
+        "IMPLEMENTATION_COVERAGE": "Separate financial provisioning target; no operational fallback",
+        "SCOPE_DESCRIPTOR": "No complete canonical descriptor binding established in frozen A1E"
+      },
+      "DRIFT_CLASS": "PROSPECTIVE_IMPLEMENTATION_GAP",
+      "REMEDIATION_OWNER": "W3",
+      "ADDITIONAL_OWNER": "W3 effective CREATE/TEMP boundaries",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": []
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-FINANCIAL_MIGRATION-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+      "GOVERNED_VALUE": {
+        "SEARCH_PATH": ["public", "pg_catalog"],
+        "TARGET_DESCRIPTOR_REQUIRED": true,
+        "TEMP_PRIVILEGE": "DENIED"
+      },
+      "CURRENT_SOURCE_VALUE": {
+        "SEARCH_PATH": "No actor-specific fixed path evidenced in frozen A1E",
+        "IMPLEMENTATION_COVERAGE": "Existing manual partial runner only; full canonical materializer not implemented",
+        "SCOPE_DESCRIPTOR": "No complete canonical descriptor binding established in frozen A1E"
+      },
+      "DRIFT_CLASS": "SOURCE_ALIGNMENT_CEILING",
+      "REMEDIATION_OWNER": "W7",
+      "ADDITIONAL_OWNER": "W3 effective CREATE/TEMP boundaries",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": "apps/union-eyes/services/financial-service/run-migrations.ts",
+          "LINE": 35,
+          "SHA256": "e17e49c577e0d589d933b33b126c9899de2fb84e3db755669bace03acc1cca81"
+        },
+        {
+          "FILE": "apps/union-eyes/services/financial-service/package.json",
+          "LINE": 11,
+          "SHA256": "bb1fd50f2585e68f11fc5fe08c8239c11dbd02d49515ce2ae1b364bd1c26a0a4"
+        }
+      ]
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-FINANCIAL_RUNTIME-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_RUNTIME",
+      "GOVERNED_VALUE": {
+        "SEARCH_PATH": ["pg_catalog", "public"],
+        "TARGET_DESCRIPTOR_REQUIRED": true,
+        "TEMP_PRIVILEGE": "DENIED"
+      },
+      "CURRENT_SOURCE_VALUE": {
+        "SEARCH_PATH": "SOURCE_CEILING",
+        "IMPLEMENTATION_COVERAGE": "Existing runner/runtime surface evidenced; canonical binding not yet applied",
+        "SCOPE_DESCRIPTOR": "No complete canonical descriptor binding established in frozen A1E"
+      },
+      "DRIFT_CLASS": "SOURCE_ALIGNMENT_CEILING",
+      "REMEDIATION_OWNER": "W7",
+      "ADDITIONAL_OWNER": "W3 effective CREATE/TEMP boundaries",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": "apps/union-eyes/services/financial-service/src/db/index.ts",
+          "LINE": 32,
+          "SHA256": "0d56f14d3094a457cdcb032d93bb6392871d0b13859358cfd24abc75bd670fab"
+        }
+      ]
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-MIGRATION-RUNTIME-TARGET-EQUALITY",
+      "ACTOR_ID": "UE-W2-ACTOR-APPLICATION_RUNTIME",
+      "GOVERNED_VALUE": "Admin, application and system credential targets equal the single explicit UE_OPERATIONAL descriptor, credentials/roles remain distinct",
+      "CURRENT_SOURCE_VALUE": "SOURCE_CEILING: separate secret references, no value comparison",
+      "DRIFT_CLASS": "SOURCE_ALIGNMENT_CEILING",
+      "REMEDIATION_OWNER": "W8",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": ".github/workflows/deploy-union-eyes.yml",
+          "LINE": 1844,
+          "SHA256": "e63944925ca5fbf647213e5790d932263a585c3fe0af487811a2ba120afb61c5"
+        }
+      ]
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-LEGACY-BOOTSTRAP-TARGET",
+      "ACTOR_ID": "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+      "GOVERNED_VALUE": "Only governed Django-first composition with explicit UE_OPERATIONAL descriptor and fixed path may be canonical",
+      "CURRENT_SOURCE_VALUE": {
+        "LEGACY_BINDING_ID": "UE-1B3CA1E-BINDING-333c04dd151a2a68",
+        "DATABASE_URL_VARIABLE": "DATABASE_URL",
+        "SCHEMA_SEARCH_PATH": "SOURCE_CEILING: ambient role/session",
+        "FULL_DJANGO_TARGET_COMPOSITION": "NO: orchestrator does not execute Django"
+      },
+      "DRIFT_CLASS": "NON_CANONICAL_EXISTING_CANDIDATE",
+      "REMEDIATION_OWNER": "W8",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
+          "LINE": 65,
+          "SHA256": "ad9dc5ab1dda313fb12b67a9ea5294bb7ba7d5ac731d6a7ade3e0941914b3b14"
+        }
+      ]
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-FINANCIAL-GENERIC-URL",
+      "ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_RUNTIME",
+      "GOVERNED_VALUE": "Financial runtime and migrator use separate role/credential references matching FINANCIAL_SERVICE descriptor; never UE_DATABASE_URL fallback",
+      "CURRENT_SOURCE_VALUE": "Accepted financial runtime and manual migration surfaces both consume generic DATABASE_URL; no separate canonical financial target/reference set or search path established",
+      "DRIFT_CLASS": "SOURCE_ALIGNMENT_CEILING",
+      "REMEDIATION_OWNER": "W7",
+      "ADDITIONAL_OWNER": "W8",
+      "BLOCKS_W2": "NO",
+      "BLOCKS_FAITHFUL_REPLAY_UNTIL_ALIGNED": "YES",
+      "EVIDENCE_REFERENCES": [
+        {
+          "FILE": "apps/union-eyes/services/financial-service/src/db/index.ts",
+          "LINE": 32,
+          "SHA256": "0d56f14d3094a457cdcb032d93bb6392871d0b13859358cfd24abc75bd670fab"
+        }
+      ]
+    }
+  ],
+  "structuralRiskFindings": [
+    {
+      "STRUCTURAL_RISK_ID": "UE-W2-RISK-UNTRUSTED_PRECEDENCE",
+      "STRUCTURAL_RISK": "An untrusted/writable public schema before trusted built-ins could alter lookup in legacy migrations",
+      "REQUIRED_MITIGATION": "No PUBLIC/runtime/system CREATE, including inherited paths; W4 validates governed producer inventory. Runtime uses pg_catalog first.",
+      "IMPLEMENTATION_OWNER": "W3",
+      "RESIDUAL_STATE": "REQUIRES_DOWNSTREAM_IMPLEMENTATION_AND_VERIFICATION",
+      "EXPLOITABILITY_ASSESSED_OR_CLAIMED": "NO",
+      "BLOCKS_W2_CONTRACT": "NO; concrete downstream controls specified, not claimed applied"
+    },
+    {
+      "STRUCTURAL_RISK_ID": "UE-W2-RISK-PUBLIC_BEFORE_CATALOG_DDL",
+      "STRUCTURAL_RISK": "Django/frozen unqualified CREATE requires public first; that ordering cannot alone prove built-in helper lookup integrity",
+      "REQUIRED_MITIGATION": "New privileged references are schema-qualified; legacy producers require known public helper inventory/collision checks before execution, otherwise fail.",
+      "IMPLEMENTATION_OWNER": "W4",
+      "RESIDUAL_STATE": "REQUIRES_DOWNSTREAM_IMPLEMENTATION_AND_VERIFICATION",
+      "EXPLOITABILITY_ASSESSED_OR_CLAIMED": "NO",
+      "BLOCKS_W2_CONTRACT": "NO; concrete downstream controls specified, not claimed applied"
+    },
+    {
+      "STRUCTURAL_RISK_ID": "UE-W2-RISK-UNQUALIFIED_PRIVILEGED_HELPERS",
+      "STRUCTURAL_RISK": "Caller/search-path inheritance or overloaded helper names could make privileged resolution ambiguous",
+      "REQUIRED_MITIGATION": "Explicit function-specific trusted path and schema-qualified helper/table/type references; no caller ambient path.",
+      "IMPLEMENTATION_OWNER": "W6",
+      "RESIDUAL_STATE": "REQUIRES_DOWNSTREAM_IMPLEMENTATION_AND_VERIFICATION",
+      "EXPLOITABILITY_ASSESSED_OR_CLAIMED": "NO",
+      "BLOCKS_W2_CONTRACT": "NO; concrete downstream controls specified, not claimed applied"
+    },
+    {
+      "STRUCTURAL_RISK_ID": "UE-W2-RISK-MIGRATION_TARGET_AMBIGUITY",
+      "STRUCTURAL_RISK": "Separate URL/PG* adapters or role/database defaults can target a different endpoint/path despite a successful command",
+      "REQUIRED_MITIGATION": "Compare exact non-secret descriptor tuple and actual connection identity/path under later authorized validation; mismatch fails before consumer.",
+      "IMPLEMENTATION_OWNER": "W8",
+      "RESIDUAL_STATE": "REQUIRES_DOWNSTREAM_IMPLEMENTATION_AND_VERIFICATION",
+      "EXPLOITABILITY_ASSESSED_OR_CLAIMED": "NO",
+      "BLOCKS_W2_CONTRACT": "NO; concrete downstream controls specified, not claimed applied"
+    },
+    {
+      "STRUCTURAL_RISK_ID": "UE-W2-RISK-RUNTIME_TARGET_AMBIGUITY",
+      "STRUCTURAL_RISK": "Admin/runtime secret references need not resolve to equal targets; generic financial URL can accidentally select operational database",
+      "REQUIRED_MITIGATION": "Separate credential classes; require same operational tuple, distinct financial tuple and fixed pool paths. No fallback.",
+      "IMPLEMENTATION_OWNER": "W8",
+      "RESIDUAL_STATE": "REQUIRES_DOWNSTREAM_IMPLEMENTATION_AND_VERIFICATION",
+      "EXPLOITABILITY_ASSESSED_OR_CLAIMED": "NO",
+      "BLOCKS_W2_CONTRACT": "NO; concrete downstream controls specified, not claimed applied"
+    },
+    {
+      "STRUCTURAL_RISK_ID": "UE-W2-RISK-IMPLICIT_TEMP_LOOKUP",
+      "STRUCTURAL_RISK": "Omitted pg_temp can still precede explicit schemas for relation/type lookup when a temporary namespace exists",
+      "REQUIRED_MITIGATION": "Deny effective TEMP via PUBLIC and inherited roles; qualify privileged references; W8 checks no unexpected temp namespace before privileged execution. No automatic assumption from path omission.",
+      "IMPLEMENTATION_OWNER": "W3",
+      "RESIDUAL_STATE": "REQUIRES_DOWNSTREAM_IMPLEMENTATION_AND_VERIFICATION",
+      "EXPLOITABILITY_ASSESSED_OR_CLAIMED": "NO",
+      "BLOCKS_W2_CONTRACT": "NO; concrete downstream controls specified, not claimed applied"
+    }
+  ],
+  "downstreamImplementationPacket": [
+    {
+      "DOWNSTREAM_TASK_ID": "UE-W2-DOWNSTREAM-W3",
+      "OWNER_WORKSTREAM": "W3",
+      "REQUIREMENT": "Map separate role/credential classes to exact scope targets; provision governed schema ownership/CREATE/TEMP boundaries and mandatory extensions under fixed qualified provisioning paths. No principal/grant/extension is created by W2.",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-DJANGO_MIGRATION",
+        "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+        "UE-W2-ACTOR-PROVISIONING",
+        "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+        "UE-W2-ACTOR-APPLICATION_RUNTIME",
+        "UE-W2-ACTOR-SYSTEM_RUNTIME",
+        "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+        "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+        "UE-W2-ACTOR-FINANCIAL_RUNTIME"
+      ],
+      "SCOPE_IDS": ["UE_OPERATIONAL", "FINANCIAL_SERVICE"],
+      "SCHEMA_IDS": [
+        "UE_OPERATIONAL_PUBLIC",
+        "UE_OPERATIONAL_PG_CATALOG",
+        "FINANCIAL_SERVICE_PUBLIC",
+        "FINANCIAL_SERVICE_PG_CATALOG"
+      ],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE",
+        "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+        "UE-W2-PATH-UE_SYSTEM_RUNTIME",
+        "UE-W2-PATH-FINANCIAL_PROVISIONING",
+        "UE-W2-PATH-FINANCIAL_MIGRATION",
+        "UE-W2-PATH-FINANCIAL_RUNTIME"
+      ],
+      "W2_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+      "W2_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+        "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+      ],
+      "IMPLEMENTED_OR_STARTED_BY_W2": "NO",
+      "FAILURE_BEHAVIOR": "FAIL_FAST_BEFORE_FIRST_BOOTSTRAP_CONSUMER",
+      "VERIFICATION_OWNER": "W8 preflight; W9 separately authorized runtime proof"
+    },
+    {
+      "DOWNSTREAM_TASK_ID": "UE-W2-DOWNSTREAM-W4",
+      "OWNER_WORKSTREAM": "W4",
+      "REQUIREMENT": "Implement real Django-owned and approved preconsumer producers in operational public; preserve domain authority and frozen SQL. Validate collision-free trusted schema before legacy public-first DDL.",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-DJANGO_MIGRATION",
+        "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+        "UE-W2-ACTOR-PROVISIONING",
+        "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+        "UE-W2-ACTOR-APPLICATION_RUNTIME",
+        "UE-W2-ACTOR-SYSTEM_RUNTIME"
+      ],
+      "SCOPE_IDS": ["UE_OPERATIONAL"],
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE",
+        "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+        "UE-W2-PATH-UE_SYSTEM_RUNTIME"
+      ],
+      "W2_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+      "W2_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+        "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+      ],
+      "IMPLEMENTED_OR_STARTED_BY_W2": "NO",
+      "FAILURE_BEHAVIOR": "FAIL_FAST_BEFORE_FIRST_BOOTSTRAP_CONSUMER",
+      "VERIFICATION_OWNER": "W8 preflight; W9 separately authorized runtime proof"
+    },
+    {
+      "DOWNSTREAM_TASK_ID": "UE-W2-DOWNSTREAM-W6",
+      "OWNER_WORKSTREAM": "W6",
+      "REQUIREMENT": "Bind raw/opaque helper, policy and privileged semantic targets to exact scope/schema/function path; prohibit ambient and cross-scope resolution.",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-DJANGO_MIGRATION",
+        "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+        "UE-W2-ACTOR-PROVISIONING",
+        "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+        "UE-W2-ACTOR-APPLICATION_RUNTIME",
+        "UE-W2-ACTOR-SYSTEM_RUNTIME"
+      ],
+      "SCOPE_IDS": ["UE_OPERATIONAL"],
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE",
+        "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+        "UE-W2-PATH-UE_SYSTEM_RUNTIME"
+      ],
+      "W2_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+      "W2_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+        "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+      ],
+      "IMPLEMENTED_OR_STARTED_BY_W2": "NO",
+      "FAILURE_BEHAVIOR": "FAIL_FAST_BEFORE_FIRST_BOOTSTRAP_CONSUMER",
+      "VERIFICATION_OWNER": "W8 preflight; W9 separately authorized runtime proof"
+    },
+    {
+      "DOWNSTREAM_TASK_ID": "UE-W2-DOWNSTREAM-W7",
+      "OWNER_WORKSTREAM": "W7",
+      "REQUIREMENT": "Implement fail-fast full financial materializer and isolated migration/runtime credential adapters; financial public belongs to a distinct physical database.",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+        "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+        "UE-W2-ACTOR-FINANCIAL_RUNTIME"
+      ],
+      "SCOPE_IDS": ["FINANCIAL_SERVICE"],
+      "SCHEMA_IDS": ["FINANCIAL_SERVICE_PUBLIC", "FINANCIAL_SERVICE_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-FINANCIAL_PROVISIONING",
+        "UE-W2-PATH-FINANCIAL_MIGRATION",
+        "UE-W2-PATH-FINANCIAL_RUNTIME"
+      ],
+      "W2_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+      "W2_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+        "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+      ],
+      "IMPLEMENTED_OR_STARTED_BY_W2": "NO",
+      "FAILURE_BEHAVIOR": "FAIL_FAST_BEFORE_FIRST_BOOTSTRAP_CONSUMER",
+      "VERIFICATION_OWNER": "W8 preflight; W9 separately authorized runtime proof"
+    },
+    {
+      "DOWNSTREAM_TASK_ID": "UE-W2-DOWNSTREAM-W8",
+      "OWNER_WORKSTREAM": "W8",
+      "REQUIREMENT": "Compose descriptors into every connection/pool, reject ambient/conflicting URL/PG* options, verify same-operational/distinct-financial targets and effective paths/CREATE/TEMP boundaries before any replay. Apply runtime/secret/configuration alignment only in its authorized lane.",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-DJANGO_MIGRATION",
+        "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+        "UE-W2-ACTOR-PROVISIONING",
+        "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+        "UE-W2-ACTOR-APPLICATION_RUNTIME",
+        "UE-W2-ACTOR-SYSTEM_RUNTIME",
+        "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+        "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+        "UE-W2-ACTOR-FINANCIAL_RUNTIME"
+      ],
+      "SCOPE_IDS": ["UE_OPERATIONAL", "FINANCIAL_SERVICE"],
+      "SCHEMA_IDS": [
+        "UE_OPERATIONAL_PUBLIC",
+        "UE_OPERATIONAL_PG_CATALOG",
+        "FINANCIAL_SERVICE_PUBLIC",
+        "FINANCIAL_SERVICE_PG_CATALOG"
+      ],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE",
+        "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+        "UE-W2-PATH-UE_SYSTEM_RUNTIME",
+        "UE-W2-PATH-FINANCIAL_PROVISIONING",
+        "UE-W2-PATH-FINANCIAL_MIGRATION",
+        "UE-W2-PATH-FINANCIAL_RUNTIME"
+      ],
+      "W2_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+      "W2_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+        "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+      ],
+      "IMPLEMENTED_OR_STARTED_BY_W2": "NO",
+      "FAILURE_BEHAVIOR": "FAIL_FAST_BEFORE_FIRST_BOOTSTRAP_CONSUMER",
+      "VERIFICATION_OWNER": "W8 preflight; W9 separately authorized runtime proof"
+    }
+  ],
+  "validation": {
+    "EXACT_W2_INPUT_OBLIGATIONS": 1,
+    "W2_OBLIGATIONS_IMPLEMENTED_AS_CONTRACT": 1,
+    "EXACT_W2_INPUT_DECISIONS": 2,
+    "W2_DECISIONS_APPROVED": 2,
+    "OBLIGATION_IDS_LOST": 0,
+    "OBLIGATION_IDS_DUPLICATED": 0,
+    "DECISION_IDS_LOST": 0,
+    "DECISION_IDS_DUPLICATED": 0,
+    "ACTORS": 9,
+    "SCOPES": 2,
+    "SCHEMAS": 4,
+    "SEARCH_PATH_CONTRACTS": 9,
+    "ROLE_CLASSES": 5,
+    "DOWNSTREAM_REFERENCE_INTEGRITY": "PASS",
+    "OFFLINE_DESCRIPTOR_TESTS": {
+      "POSITIVE": 2,
+      "NEGATIVE": 16,
+      "MODE": "SYNTHETIC_NON_SECRET_DESCRIPTORS_ONLY; no environment, SQL or database IO"
+    },
+    "SOURCE_CONFIGURATION_APPLIED": "NO",
+    "PHYSICAL_TARGET_VALUES_ACCESSED": "NO",
+    "NO_DATABASE_ACCESS": true,
+    "NO_MIGRATION_EXECUTION": true,
+    "NO_ROLE_CREATION": true,
+    "NO_EXTENSION_INSTALLATION": true,
+    "NO_SCHEMA_CREATION": true,
+    "NO_SECRET_VALUE_ACCESS": true,
+    "NO_DEPLOYMENT_CONFIGURATION_MUTATION": true,
+    "NO_RLS_CHANGE": true,
+    "W1_REOPENED": "NO"
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W2_GATE": "PASS",
+    "PHASE_1B_3C_A1I_W2": "PASS",
+    "PHASE_1B_3C_A1I_W2_DATABASE_TARGET_SEARCH_PATH_CONTRACT": "PASS",
+    "DATABASE_TARGET_CONTRACT": "ESTABLISHED",
+    "DATABASE_SCOPE_CONTRACT": "ESTABLISHED",
+    "SCHEMA_AUTHORITY_CONTRACT": "ESTABLISHED",
+    "SEARCH_PATH_CONTRACT": "ESTABLISHED",
+    "QUALIFICATION_DOCTRINE": "ESTABLISHED",
+    "W2_IMPLEMENTATION_COMPLETE": "YES",
+    "BOOTSTRAP_CONTRACT_VERSION": "1.2",
+    "W1": "PASS",
+    "W1N": "PASS",
+    "W2": "PASS",
+    "W2_STARTED": "YES",
+    "W3": "AUTHORIZED_NOT_STARTED",
+    "PHASE_1B_3C_A1I_W3_ROLE_EXTENSION_PROVISIONING": "AUTHORIZED_NOT_STARTED",
+    "W3_STARTED": "NO",
+    "W4_W10_STARTED": "NO",
+    "A1R_STARTED": "NO",
+    "A2_STARTED": "NO",
+    "B3C_B_STARTED": "NO",
+    "DATABASE_RUNTIME_CONFIGURATION_APPLIED": "NO",
+    "DATABASE_RUNTIME_CONFIGURATION_PROVEN": "NO",
+    "DATABASE_ROLES_PROVISIONED": "NO",
+    "EXTENSIONS_RUNTIME_PROVEN": "NO",
+    "DJANGO_SCHEMA_MATERIALIZED": "NO",
+    "BOOTSTRAP_IMPLEMENTATION_COMPLETE": "NO",
+    "FAITHFUL_SCHEMA_REPLAY_PROVEN": "NO",
+    "PRODUCTION_SCHEMA_PROVEN": "NO",
+    "RLS_POLICY_CORRECTNESS_RUNTIME_PROVEN": "NO",
+    "TENANT_ISOLATION_RUNTIME_PROVEN": "NO",
+    "DEPLOYED_RUNTIME_TARGET_EQUALITY_PROVEN": "NO",
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO"
+  }
+}

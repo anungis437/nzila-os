@@ -1,0 +1,3157 @@
+{
+  "metadata": {
+    "PHASE": "PHASE_1B_3C_A1I_W4FR2",
+    "STATUS": "BLOCKED_TYPE_ONLY_PARTIAL_PAYLOAD_MODEL",
+    "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+    "EXECUTION_ALLOWED": "NO"
+  },
+  "TYPE_PAYLOADS": [
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-b879eb0a1f95f2a0",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.allocation_method"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"allocation_method\" AS ENUM ('per_member_count', 'per_active_user', 'per_case_volume', 'per_local_flat', 'weighted_hybrid', 'manual_override', 'subsidized');",
+      "SQL_SHA256": "41eafcd5512490129559aad2199939b44500580c9e84bbb49c22dc4084022020",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-8eae0e5be812828d",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.allocation_run_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"allocation_run_status\" AS ENUM ('draft', 'simulated', 'pending_approval', 'approved', 'posted', 'reversed', 'failed');",
+      "SQL_SHA256": "b7855ba6c487ff8df3c195f41e39474777ff3853e870eb9dcd2c1d9fbd4f2c44",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-1bc153f2d11cf193",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.allocation_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"allocation_status\" AS ENUM ('unallocated', 'pending', 'allocated', 'partially_allocated', 'reversed');",
+      "SQL_SHA256": "3e9d79b2b2bcaaa64ba544f29b7630a453a8c66db51b83b1a816cf302166aaf6",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-bbb2b5cd6799c5b0",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.billing_account_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"billing_account_status\" AS ENUM ('active', 'suspended', 'closed', 'pending');",
+      "SQL_SHA256": "b1ce0370392c19be1f0b4635ec0552b1583b847b7553ae091c6454da6402b7f8",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-2e9e9fd2175b8368",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.case_access_role"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"case_access_role\" AS ENUM ('secondary_lro', 'reviewer', 'read_only');",
+      "SQL_SHA256": "e2b581631c71be146f7fb05cf77e30caf9ecb95c28584d9527cb0fc5fece0db5",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-5641863c826a9bc6",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.case_access_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"case_access_status\" AS ENUM ('active', 'revoked', 'expired');",
+      "SQL_SHA256": "5343062d0a93d9ae3b67a926559689a82d8f749a21391af5d6e3a22a6d5f5070",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-70d8653e889e60cc",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.chargeback_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"chargeback_status\" AS ENUM ('draft', 'issued', 'acknowledged', 'disputed', 'resolved');",
+      "SQL_SHA256": "020a82357cb7bde591bf0a781cfce8055410803bf7b107245091db8709fb1b6f",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-478fa4d88bd91e6f",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.commercial_contract_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"commercial_contract_status\" AS ENUM ('draft', 'pending_approval', 'active', 'expired', 'terminated', 'superseded');",
+      "SQL_SHA256": "a828eee141c4edf0f1def2c06136eeb76aaa48ac3db5f7894617c93c07b307ae",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-8d62adf637d300fe",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.committee_action_item_priority"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"committee_action_item_priority\" AS ENUM ('low', 'medium', 'high', 'urgent');",
+      "SQL_SHA256": "74f9bc758645bc7aedbae97032445ee8788cbc94a8cffb162b2e7146e3f71588",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-2aa2c76339f847ed",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.committee_action_item_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"committee_action_item_status\" AS ENUM ('pending', 'in_progress', 'completed', 'deferred', 'cancelled');",
+      "SQL_SHA256": "3ad967da97660d4f35e532bf28976daf48f5bdcd06f4956ded2aea30e086c061",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-9f3b5d7d204d1842",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.committee_meeting_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"committee_meeting_status\" AS ENUM ('scheduled', 'in_progress', 'completed', 'cancelled', 'postponed');",
+      "SQL_SHA256": "1978629cb40e7b2f002a45a4858e03dd990d2409e87b0ccd8fd51c0ed57de6ce",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-5b2560b976efd6e8",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.contract_line_type"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"contract_line_type\" AS ENUM ('module_license', 'feature_access', 'usage_quota', 'seat_allocation', 'support_level', 'sla_commitment', 'custom');",
+      "SQL_SHA256": "4878a524ec27bab7444cc30a5cd2657fcb247002762185cee068d7a00a577a75",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-29b0e7f7fbc39db0",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.correspondence_audit_event"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"correspondence_audit_event\" AS ENUM ('created', 'edited', 'submitted_for_review', 'review_requested', 'approved', 'revision_requested', 'signed', 'signature_affixed', 'dispatched', 'delivered', 'returned', 'cancelled', 'recipient_added', 'recipient_removed', 'attachment_added', 'attachment_removed', 'template_applied', 'reassigned', 'viewed');",
+      "SQL_SHA256": "fde776563b09f5fc8c53dd85cc2475448288ef18d02735560a8f43be16a6c914",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-7b9508d7d7a9fb30",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.correspondence_priority"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"correspondence_priority\" AS ENUM ('low', 'normal', 'high', 'urgent');",
+      "SQL_SHA256": "ea587141be6d2407a69fbbe90f41b5d102209f131bd2a77b1c8b526e26f736d5",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-f3c17a785e890a58",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.correspondence_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"correspondence_status\" AS ENUM ('draft', 'pending_review', 'approved', 'signed', 'dispatched', 'delivered', 'returned', 'cancelled');",
+      "SQL_SHA256": "f929b2be05149868cf5dab6d7a052b890448355785bfb09ad55d586e712e5f92",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-d4f3f1205f3c4e4f",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.correspondence_type"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"correspondence_type\" AS ENUM ('letter', 'notice', 'memo', 'demand', 'response', 'proposal', 'agreement', 'report', 'other');",
+      "SQL_SHA256": "574b91dd812335181372738fcff09c04f07844a97709067bd8aa249f20eba059",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-739370d3793f9efd",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.covered_org_role"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"covered_org_role\" AS ENUM ('local', 'division', 'region', 'employer');",
+      "SQL_SHA256": "98b9c6cdb7dc4b389529e7f32968d12c748102af2fd52c938b6975813fc9f71e",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-21328c36c9e16513",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.document_grant_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"document_grant_status\" AS ENUM ('active', 'revoked', 'expired');",
+      "SQL_SHA256": "0d2cb9e423b95a1538c6d39bea3bc6ebad430d19f2ffca8cb410405d766c5964",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-632014dc36554f28",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.document_linked_entity_type"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"document_linked_entity_type\" AS ENUM ('case', 'grievance', 'member', 'policy_library', 'template_library', 'collective_agreement', 'other');",
+      "SQL_SHA256": "0356ec53f25afbd15245edc55e1428ee780d2fb720872e4f54ab25efd122d9bb",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-5c49dfdfffc81cb1",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.fee_adjustment_type"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"fee_adjustment_type\" AS ENUM ('reversal', 'partial_reversal', 'waiver', 'correction', 'dispute_credit');",
+      "SQL_SHA256": "72d375af2127b43de4379dfe9be7186c82f1f800d0c52591a2e2d6adb88fda96",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-e956ada47b2027ee",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.fee_event_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"fee_event_status\" AS ENUM ('captured', 'reversed', 'settled', 'disputed', 'waived');",
+      "SQL_SHA256": "fb591fd9ee4e84cd745e6c6b74def26fcb10d820ff8cd01a9a01548bfd613d7f",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-daa867a7d0b4b385",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.fee_model"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"fee_model\" AS ENUM ('percentage', 'flat', 'hybrid', 'waived', 'subsidized');",
+      "SQL_SHA256": "b2d68e2253b821ee2f2adf57e63ea37a0e7da5cdb45e8edff9c846e68769bfdc",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-70970724169a1a4e",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.fee_rule_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"fee_rule_status\" AS ENUM ('active', 'inactive', 'expired');",
+      "SQL_SHA256": "2e60d2c6daa214f4c1aa478251debcb54a7d8556bbcff78d215ee00c221bbdaa",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-d4e5fc824bb8dcaa",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.ledger_event_type"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"ledger_event_type\" AS ENUM ('invoice_generated', 'payment_received', 'allocation_run', 'adjustment_posted', 'credit_applied', 'subsidy_applied', 'writeoff_posted', 'period_closed', 'reversal', 'fee_captured', 'settlement_closed');",
+      "SQL_SHA256": "9192eb860dcf9cbd218237c97056519ab1f57e9f2970e89b45661736c7f44356",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-77b43048821a55fc",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.ledger_source_type"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"ledger_source_type\" AS ENUM ('subscription', 'invoice', 'payment', 'adjustment', 'allocation', 'manual', 'system', 'transaction_fee', 'settlement_batch');",
+      "SQL_SHA256": "94e79204d9f2689bf228829309b40b6ab65b275e0f3a699909268524d0214447",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-e33b3dea11feae2a",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.org_entitlement_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"org_entitlement_status\" AS ENUM ('active', 'suspended', 'expired', 'revoked');",
+      "SQL_SHA256": "11bd9fa8b5d8a91b960215bc6518a705931f019ec223f68bc7dde4de9054c2ad",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-fd05e4ccdf4d45ad",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.platform_cost_type"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"platform_cost_type\" AS ENUM ('base_subscription', 'local_fee', 'seat_fee', 'module_fee', 'usage_fee', 'onboarding_fee', 'support_fee', 'transaction_fee', 'settlement', 'adjustment', 'credit', 'subsidy', 'writeoff');",
+      "SQL_SHA256": "7b5662399d4be7145adf386e5471458e891ddef80b9fc5ca413300ce82eb9916",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-1feacb00f48c684c",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.platform_invoice_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"platform_invoice_status\" AS ENUM ('draft', 'issued', 'paid', 'partially_paid', 'overdue', 'void', 'written_off');",
+      "SQL_SHA256": "4d8dc50b8468cffcf0435686ef0c80c2f3ab1a574a1357efc342f521a4e7370b",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-f78bbaa15d3fcb1a",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.platform_payment_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"platform_payment_status\" AS ENUM ('pending', 'processing', 'completed', 'failed', 'refunded');",
+      "SQL_SHA256": "37970c97f14e89edc829f61be0a77125d4517196f1b1d88574ef0f79c21d3aea",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-4fcb349f9dfe5ff1",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.reconciliation_exception_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"reconciliation_exception_status\" AS ENUM ('open', 'under_review', 'resolved', 'written_off');",
+      "SQL_SHA256": "07c9c795280d565823c090516959ffa11ed6871f9b326627b8bab8515b3801e3",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-edfecf2978239869",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.reconciliation_exception_type"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"reconciliation_exception_type\" AS ENUM ('unmatched_payment', 'unmatched_invoice', 'amount_discrepancy', 'duplicate_payment', 'missing_fee_event', 'orphaned_refund');",
+      "SQL_SHA256": "0b7fc76a6d16045552870188815a69f5516e012cd75f2e2379860d2773a5801d",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-20086ba4e2604386",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.reconciliation_match_type"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"reconciliation_match_type\" AS ENUM ('invoice_payment', 'fee_settlement', 'refund_reversal', 'adjustment_credit');",
+      "SQL_SHA256": "51f3358108dccd4fbf7709089ef34f0a132bce947e21a2aa88334f1f71fa55b4",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-bc9628439000ab1a",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.reconciliation_run_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"reconciliation_run_status\" AS ENUM ('running', 'completed', 'failed');",
+      "SQL_SHA256": "fd154a0ef7309aaa9a007a747992ae89993fcacce76dd4795f0a3e3753fe15e9",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-3860ea681ecd9efa",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.signature_source"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"signature_source\" AS ENUM ('drawn', 'uploaded', 'typed');",
+      "SQL_SHA256": "f741da0e7413786972c9af18a1a3c2e222d692c81f86b74539e5f7b184fd7f46",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-670f4d546e6eca23",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.subscription_lifecycle_event"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"subscription_lifecycle_event\" AS ENUM ('created', 'activated', 'trial_started', 'trial_ending_soon', 'trial_expired', 'trial_converted', 'upgraded', 'downgraded', 'paused', 'resumed', 'payment_failed', 'payment_retried', 'payment_recovered', 'dunning_started', 'dunning_escalated', 'dunning_resolved', 'cancelled', 'expired', 'reactivated', 'renewed');",
+      "SQL_SHA256": "b340d4b00ac502d81c0405b25ea43f3254690a5b1f4a40ee411c228a8030adba",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "PAYLOAD_ID": "UE-W4FR2-TYPE-289d62d6d6a1e625",
+      "PAYLOAD_KIND": "TYPE_DEFINITION",
+      "PHYSICAL_IDENTITIES_PRODUCED": ["union-eyes::TYPE::public.subscription_status"],
+      "DEPENDENCY_PAYLOAD_IDS": [],
+      "DEFINITION_OBLIGATION_IDS": [],
+      "SQL": "CREATE TYPE \"public\".\"subscription_status\" AS ENUM ('active', 'trialing', 'past_due', 'cancelled', 'paused');",
+      "SQL_SHA256": "44406211be4e71ed2a2b22aba2bde2d6f41ee6b92f7ab03a4b56ed746e9e3b5a",
+      "SQL_STATUS": "DEFINITION_ONLY_NOT_EXECUTABLE",
+      "EXECUTION_ALLOWED": "NO"
+    }
+  ],
+  "RELATION_CREATE_PAYLOADS": [],
+  "COLUMN_ADD_PAYLOADS": [],
+  "typeBeforeConsumerRequirements": [
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-78d7fe174305e827",
+      "CANONICAL_TYPE_IDENTITY": "public.committee_meeting_status",
+      "GOVERNED_TYPE_NAME": "committee_meeting_status",
+      "CONSUMER_RELATION": "public.committee_meetings",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-e2e3390b43bbbd14"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "committee_meeting_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+            "DIGEST": "6930521355d59e71f2466d499d697c5bfb1e2bfacd1ce1180aa6c6ca1a57ac31",
+            "RANGE": [65, 138],
+            "COLUMN_EXPRESSION_DIGEST": "9a0006421c80d645caafd736c2a26b676a73250f056c46d47a038fea2fdd1f23"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+            "DIGEST": "4b348c1aee141a5d4d5e0c7a886899c9251cb3e53e1ddffbc5d687e4ad1bce0e",
+            "RANGE": [40, 65],
+            "COLUMN_EXPRESSION_DIGEST": "9391fbeee16c1b39aaee4bbdccab33a97daad2a0e1607cf1c8d03214dfda9f45"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "3873e73c24ef4e83687319f0260a8640e3ae17c1280f9555b6c0f00d06f94c29",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-9f3b5d7d204d1842"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-9f3b5d7d204d1842",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-42750e078e068c7a",
+      "CANONICAL_TYPE_IDENTITY": "public.document_grant_status",
+      "GOVERNED_TYPE_NAME": "document_grant_status",
+      "CONSUMER_RELATION": "public.document_access_grants",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-5ff5a7531c756fba"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "document_grant_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/documents-schema.ts",
+            "DIGEST": "9afa28d67ed43cc419825b90891aa22827bcbe5c2c3d644edb6c4611afbb3aa1",
+            "RANGE": [154, 172],
+            "COLUMN_EXPRESSION_DIGEST": "a0e0ed5874dfb0afd19733d9e542b58c07aebb4d7165f13a6a2c72cf28cca902"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+            "DIGEST": "aca805396f4ac310eae17482ac65ceda42ed73b979a646664819c1bf490caf18",
+            "RANGE": [141, 154],
+            "COLUMN_EXPRESSION_DIGEST": "cd76baddb82b784760bac3880009efa9f60e86eaf8bc9213a635114aea9b66a2"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "009ef219e7771d88eeadfba985708e0cf5b665966eb7cb843011e3215a81fd8c",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-21328c36c9e16513"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-21328c36c9e16513",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-de245690696f8210",
+      "CANONICAL_TYPE_IDENTITY": "public.platform_payment_status",
+      "GOVERNED_TYPE_NAME": "platform_payment_status",
+      "CONSUMER_RELATION": "public.platform_payments",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-d6b71ca5f85600e8"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "platform_payment_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+            "DIGEST": "4e06f25f80d3e5f77928685714b703b5d66980ab6e9d4a1e73a444c704e8bcf6",
+            "RANGE": [229, 251],
+            "COLUMN_EXPRESSION_DIGEST": "2e70c7d63666c9343a36f5cc1351fffbc5bc83d9e4da252eb26c71de400c7381"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "9afb03a655b83d7ec7926ca2a1bfe0a4a840aa2fe1c3917131fddb730fbbd6bc",
+            "RANGE": [3190, 3204],
+            "COLUMN_EXPRESSION_DIGEST": "8bb70152f80e434dd17795273045d986199136cac60ae55b05c781517ad5686f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "9afb03a655b83d7ec7926ca2a1bfe0a4a840aa2fe1c3917131fddb730fbbd6bc",
+            "RANGE": [59, 73],
+            "COLUMN_EXPRESSION_DIGEST": "8bb70152f80e434dd17795273045d986199136cac60ae55b05c781517ad5686f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "54f1a596bae0f0b962e31408c492a1b2f429786f2a3f1f6b7cbf2eb5820e28ce",
+            "RANGE": [218, 232],
+            "COLUMN_EXPRESSION_DIGEST": "7c273ef8eb2d56b4824ba9adf28f84badc505f0e8b2384f0dd6e0de73ce68756"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "9219aeab3369aede91cb891bc3ac21683b2b4f264b0c799f2edd39034f83baa1",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-f78bbaa15d3fcb1a"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-f78bbaa15d3fcb1a",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-2e92f87521a9dfb7",
+      "CANONICAL_TYPE_IDENTITY": "public.correspondence_audit_event",
+      "GOVERNED_TYPE_NAME": "correspondence_audit_event",
+      "CONSUMER_RELATION": "public.correspondence_audit_trail",
+      "CONSUMER_COLUMN": "event_type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-45b134f39d0e55ec"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "correspondence_audit_event",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+            "DIGEST": "147e514a893b0c8ae2060380dd23c3391a1a4d6f5d8eb78ddb83b12ecb628b5f",
+            "RANGE": [286, 317],
+            "COLUMN_EXPRESSION_DIGEST": "271e4252dcdc27b8fbe25d485227677b95f993a2af208807a666fce8e73178ac"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+            "DIGEST": "ffce0716c3456bbb6c88da022472ba75de4034d0ced190bcb90ddaf8a797fc4a",
+            "RANGE": [129, 142],
+            "COLUMN_EXPRESSION_DIGEST": "2797ee4ec717aff1116558a56040ef73748e0becc79e302a3fcfeb8653b01788"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "8edd3ed4722c54d68108f00dcbd98ca2ac1a8b00dd3e920380131364b36b0d37",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-29b0e7f7fbc39db0"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-29b0e7f7fbc39db0",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-8d7af53cb329ac76",
+      "CANONICAL_TYPE_IDENTITY": "public.reconciliation_run_status",
+      "GOVERNED_TYPE_NAME": "reconciliation_run_status",
+      "CONSUMER_RELATION": "public.reconciliation_runs",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-c502a3e035469ff4"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "reconciliation_run_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+            "DIGEST": "83f17ae57d7684628b42ea868cd3c343389c18eef80bdee0a9c2d8f239c1f922",
+            "RANGE": [59, 83],
+            "COLUMN_EXPRESSION_DIGEST": "1f918ad65101bedd722a29bbf6da97dc2cdf7221866fcbe2477624084ae00d07"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "96521e1457aa1fb79aac733473538ceba06ad43995611bfcd5e91e550d881137",
+            "RANGE": [274, 293],
+            "COLUMN_EXPRESSION_DIGEST": "e8d12735503ca708fdbd25f39e3e19c8e55b3bbe713373002e61badd92be490c"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "70f9bfd4f38515b3a3fc98019ca67486b8acfc0e35eea151e27df251cea5a725",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-bc9628439000ab1a"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-bc9628439000ab1a",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-b8e51c0948935d34",
+      "CANONICAL_TYPE_IDENTITY": "public.reconciliation_match_type",
+      "GOVERNED_TYPE_NAME": "reconciliation_match_type",
+      "CONSUMER_RELATION": "public.reconciliation_matches",
+      "CONSUMER_COLUMN": "match_type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-9fcf052b2479db7d"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "reconciliation_match_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+            "DIGEST": "7f59fa9878c4b5487b897aaa1b392620004d9eba49dc565cd490794dd9a5be40",
+            "RANGE": [89, 108],
+            "COLUMN_EXPRESSION_DIGEST": "0017b32a02579a6d802f4a380886913340a52d1a7a8d1409bda6fc00e417f5b6"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "47389773d317999b63a07c0af5d46bef08ddba0aef033a4abdc30550e97646fc",
+            "RANGE": [295, 308],
+            "COLUMN_EXPRESSION_DIGEST": "365d4034ee92bdd70f50551d00b515b8ac10be269f9534653a87b9e2f0b3b6d9"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "d74d7c560a8e3712e3ef98c8a9b2d1cb5abfbac35243c246a0cf94b2463d05d1",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-20086ba4e2604386"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-20086ba4e2604386",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-87496be2a8ff7b98",
+      "CANONICAL_TYPE_IDENTITY": "public.chargeback_status",
+      "GOVERNED_TYPE_NAME": "chargeback_status",
+      "CONSUMER_RELATION": "public.chargeback_statements",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-4e7904c2d7460d66"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "chargeback_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+            "DIGEST": "de0c631687c990136fad71a3b6ae66859477978a1aea6226d7100959db861294",
+            "RANGE": [175, 201],
+            "COLUMN_EXPRESSION_DIGEST": "7e7ca676e7d981f10ac185c94f2ca23ed8cac83410eb957a4c368514285ca843"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "6e8fbcbdef4a1c01588317105aa065df76fd5f8c39e454f2c84662ad2b1a0561",
+            "RANGE": [3327, 3343],
+            "COLUMN_EXPRESSION_DIGEST": "3d766b2bec423e0cb0a8f31b9287287af33c0e66358d157f457f660c4f494f6e"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "6e8fbcbdef4a1c01588317105aa065df76fd5f8c39e454f2c84662ad2b1a0561",
+            "RANGE": [239, 255],
+            "COLUMN_EXPRESSION_DIGEST": "3d766b2bec423e0cb0a8f31b9287287af33c0e66358d157f457f660c4f494f6e"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "4d64e48f00a46b67e3f1b8f072311ecac79b454778c800814fe1cc9e6d621541",
+            "RANGE": [439, 455],
+            "COLUMN_EXPRESSION_DIGEST": "5bae69f3b93a146a575461fc495547b7c3d61021857be32f6f89fff6b1f9a42f"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "a35c83904b429cf3c8f24bdde831ecd2ff1c0b79c7506aa8c9219608854fbd03",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-70d8653e889e60cc"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-70d8653e889e60cc",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-2f853bcd66c7f5e0",
+      "CANONICAL_TYPE_IDENTITY": "public.allocation_method",
+      "GOVERNED_TYPE_NAME": "allocation_method",
+      "CONSUMER_RELATION": "public.allocation_run_lines",
+      "CONSUMER_COLUMN": "method",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-e3dcd5840085f80a"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "allocation_method",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+            "DIGEST": "3946549a762cbf0780ac5379a14d5cab06c84ade1d22fc0e5b568f3703d94b3d",
+            "RANGE": [130, 148],
+            "COLUMN_EXPRESSION_DIGEST": "c180bf5ea62fa7fd2d798beae81d60ba4abd658752952159c33d3adac12554a1"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "780710d6ef0d514dbf297188de4b71c693b4230d0222b5073ae063a8a59c667a",
+            "RANGE": [3293, 3306],
+            "COLUMN_EXPRESSION_DIGEST": "e81d750b4e4a1cb461ee3e945b9a05196c781f9f8344ca1bc3d041df8fc5fba5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "780710d6ef0d514dbf297188de4b71c693b4230d0222b5073ae063a8a59c667a",
+            "RANGE": [210, 223],
+            "COLUMN_EXPRESSION_DIGEST": "e81d750b4e4a1cb461ee3e945b9a05196c781f9f8344ca1bc3d041df8fc5fba5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "3d5956b45bbb52c23a02c4211c7432539fdd467ffeefedac055bc6ebfbaf4dba",
+            "RANGE": [404, 417],
+            "COLUMN_EXPRESSION_DIGEST": "bbfeeeeb6ea5a2d1548fc56589956ff08d684d2c1c91b304f1ee91cb5a9c678f"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "ba27adb880e93372a743f0be0b6a58b33750ddfc92a261af5a1848d0a3b63437",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-b879eb0a1f95f2a0"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-b879eb0a1f95f2a0",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-80452f4bcf6328f3",
+      "CANONICAL_TYPE_IDENTITY": "public.committee_action_item_status",
+      "GOVERNED_TYPE_NAME": "committee_action_item_status",
+      "CONSUMER_RELATION": "public.committee_action_items",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-51b50e5aa03cc6e4"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "committee_action_item_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+            "DIGEST": "d433631c21c208e217f2b34c416bb9eeb404020dc7b64e6bed4b94ca49cfb906",
+            "RANGE": [174, 221],
+            "COLUMN_EXPRESSION_DIGEST": "e9777037a92dff3f8945e5f81ce133d1bf430d3d2ca19677da99a2a4026abc6b"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+            "DIGEST": "f969a332601c3edbb8ac791c2b30c9588f3eceacbc322a38b8586ac5443989db",
+            "RANGE": [93, 113],
+            "COLUMN_EXPRESSION_DIGEST": "7148e656da391746c60ab0558cf54cba3d22a9a4dbc8f3aeb9ddd1e42501da68"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "cc4d12c5c6d0e73624c28082c711a30d1434a3666c836b27df95dd677fc8b3a0",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-2aa2c76339f847ed"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-2aa2c76339f847ed",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-5506948cf07468ae",
+      "CANONICAL_TYPE_IDENTITY": "public.committee_action_item_priority",
+      "GOVERNED_TYPE_NAME": "committee_action_item_priority",
+      "CONSUMER_RELATION": "public.committee_action_items",
+      "CONSUMER_COLUMN": "priority",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-51b50e5aa03cc6e4"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "committee_action_item_priority",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+            "DIGEST": "d433631c21c208e217f2b34c416bb9eeb404020dc7b64e6bed4b94ca49cfb906",
+            "RANGE": [174, 221],
+            "COLUMN_EXPRESSION_DIGEST": "217de169907d5a51b33fccb796b956136f141fca07a94e06992e77b408d19c5f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+            "DIGEST": "f969a332601c3edbb8ac791c2b30c9588f3eceacbc322a38b8586ac5443989db",
+            "RANGE": [93, 113],
+            "COLUMN_EXPRESSION_DIGEST": "f0786e8db140223701046b29c2029b13d076fe01870d786e9109f7dca158137a"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "87d8a1e4d972e8109e0b67406945dee3a8c45c6c1a62bb241564963586010aeb",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-8d62adf637d300fe"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-8d62adf637d300fe",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-b74a3025983e93d9",
+      "CANONICAL_TYPE_IDENTITY": "public.correspondence_type",
+      "GOVERNED_TYPE_NAME": "correspondence_type",
+      "CONSUMER_RELATION": "public.correspondence",
+      "CONSUMER_COLUMN": "type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b24a0a0dd53e2fa2"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "correspondence_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+            "DIGEST": "75571384fa9fa71517ea2c4da5f56b77d810acc5238402f0b6e7251031b515aa",
+            "RANGE": [144, 239],
+            "COLUMN_EXPRESSION_DIGEST": "49c9311194867f565628c7f8de3b4ac92c18dbd0bd2a95caac7d66f6abb46fd5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+            "DIGEST": "0ff80ddb222e110fdb363dafc3c54335b7b606573845afc3d5f3a09fe64a33fd",
+            "RANGE": [72, 100],
+            "COLUMN_EXPRESSION_DIGEST": "0ea3810bf7f844afbc5fc63eb591cc12d89d19e51c029e05601bd3787c73662f"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "26528307103754f9accc2fbe319ed916eb085f05be147e5d45aae716a6c572ca",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-d4f3f1205f3c4e4f"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-d4f3f1205f3c4e4f",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-901dafbb6005df47",
+      "CANONICAL_TYPE_IDENTITY": "public.correspondence_priority",
+      "GOVERNED_TYPE_NAME": "correspondence_priority",
+      "CONSUMER_RELATION": "public.correspondence",
+      "CONSUMER_COLUMN": "priority",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b24a0a0dd53e2fa2"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "correspondence_priority",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+            "DIGEST": "75571384fa9fa71517ea2c4da5f56b77d810acc5238402f0b6e7251031b515aa",
+            "RANGE": [144, 239],
+            "COLUMN_EXPRESSION_DIGEST": "f61a43840542329293642f1b20c40c175c40e761b266716288f8f7b2849b5a1e"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+            "DIGEST": "0ff80ddb222e110fdb363dafc3c54335b7b606573845afc3d5f3a09fe64a33fd",
+            "RANGE": [72, 100],
+            "COLUMN_EXPRESSION_DIGEST": "fee9120c219c62afe98713847be534dc1aa25bdcc88f782fd5485d0080d19fe1"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "6c19f4f32d1ed5c5e383b1c4849bf87f3bca19eb276a60103935de54aea12fc5",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-7b9508d7d7a9fb30"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-7b9508d7d7a9fb30",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-9500a1350162660d",
+      "CANONICAL_TYPE_IDENTITY": "public.correspondence_status",
+      "GOVERNED_TYPE_NAME": "correspondence_status",
+      "CONSUMER_RELATION": "public.correspondence",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b24a0a0dd53e2fa2"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "correspondence_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+            "DIGEST": "75571384fa9fa71517ea2c4da5f56b77d810acc5238402f0b6e7251031b515aa",
+            "RANGE": [144, 239],
+            "COLUMN_EXPRESSION_DIGEST": "f738365377501ee193bcb3431b4c6a772d227477f71abb5c084a5da956faa01a"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+            "DIGEST": "0ff80ddb222e110fdb363dafc3c54335b7b606573845afc3d5f3a09fe64a33fd",
+            "RANGE": [72, 100],
+            "COLUMN_EXPRESSION_DIGEST": "31ba9979c49d5fe39f528fa6881c261dee7f0e2db075dfbca80f294edd5111e1"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "0d3bae552ba27ac88eb1081d514c33071b4690718e40fde9070c76c6efd31b1f",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-f3c17a785e890a58"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-f3c17a785e890a58",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-1cc366e76fb3e62b",
+      "CANONICAL_TYPE_IDENTITY": "public.fee_adjustment_type",
+      "GOVERNED_TYPE_NAME": "fee_adjustment_type",
+      "CONSUMER_RELATION": "public.fee_adjustments",
+      "CONSUMER_COLUMN": "adjustment_type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-46eee32aeeba7016"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "fee_adjustment_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+            "DIGEST": "5867dc989fbb04bd71315cb4c70ca9859f75145ace86f353443ab291eb413594",
+            "RANGE": [190, 210],
+            "COLUMN_EXPRESSION_DIGEST": "9830836ecaf5611df7f94443a3cf08719549bbd066b6e5bf160517a314780327"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "4f08ae3eca1249f8a50d64b535b6a1205bb31ec5724685153b4819a24805d9eb",
+            "RANGE": [154, 166],
+            "COLUMN_EXPRESSION_DIGEST": "b5fa67d6906e24997496105a052925fc94bca09dfb0f00f7fb594c6d8e17ad10"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "a337b4b00db92bdf1e9b21b12164bd8b8aff9625ecf59c723aede9ba24854c91",
+      "TYPE_DEFINITION_AUTHORITY": "HUMAN_ARCHITECTURE_W4T1",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-5c49dfdfffc81cb1"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-5c49dfdfffc81cb1",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-4def2d59f140f766",
+      "CANONICAL_TYPE_IDENTITY": "public.case_access_role",
+      "GOVERNED_TYPE_NAME": "case_access_role",
+      "CONSUMER_RELATION": "public.grievance_case_access_assignments",
+      "CONSUMER_COLUMN": "access_role",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-90830dcafd151747"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "case_access_role",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts",
+            "DIGEST": "9ac4dd47821512bb283a756573ca4f5fd62afe18f83499fcc9c555a8f60e0fb4",
+            "RANGE": [97, 125],
+            "COLUMN_EXPRESSION_DIGEST": "d46b7ee5b639dfe91708625535c8842f4badbaddccc8a3ba3588638a1abf4d34"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+            "DIGEST": "b860ff1c367b7507f3cabb728f7eb5c4dbc6fe4cbe4d6efd0b3337057decceab",
+            "RANGE": [185, 201],
+            "COLUMN_EXPRESSION_DIGEST": "63cb822e4e3dd4ebc912411dcad06ceda39d3893f53135270ea87c1b20584384"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "d344fb363a9dc69a5968790d89e57fe6ceff5d2142c062ccec7ecbcf7f5b5096",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-2e9e9fd2175b8368"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-2e9e9fd2175b8368",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-d9a75f3c1993b928",
+      "CANONICAL_TYPE_IDENTITY": "public.case_access_status",
+      "GOVERNED_TYPE_NAME": "case_access_status",
+      "CONSUMER_RELATION": "public.grievance_case_access_assignments",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-90830dcafd151747"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "case_access_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts",
+            "DIGEST": "9ac4dd47821512bb283a756573ca4f5fd62afe18f83499fcc9c555a8f60e0fb4",
+            "RANGE": [97, 125],
+            "COLUMN_EXPRESSION_DIGEST": "7587ad45d45e7cfbd09848414a7ef19840bdc73dabbf4f863462b04e83eaef21"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+            "DIGEST": "b860ff1c367b7507f3cabb728f7eb5c4dbc6fe4cbe4d6efd0b3337057decceab",
+            "RANGE": [185, 201],
+            "COLUMN_EXPRESSION_DIGEST": "86a3e64bd9c849e940bc64779d8b2a37152c2166269064f2169c5b7dd203769a"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "578bca8771a642637275063b23e466ebc0bf201033cf6393578f5085709835ab",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-5641863c826a9bc6"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-5641863c826a9bc6",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-408fe655ec13182a",
+      "CANONICAL_TYPE_IDENTITY": "public.commercial_contract_status",
+      "GOVERNED_TYPE_NAME": "commercial_contract_status",
+      "CONSUMER_RELATION": "public.commercial_contracts",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-aac864940adbbd32"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "commercial_contract_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+            "DIGEST": "222f9d60466f0a2e01d8ab5a485e3970f645383164160debe2d4424f79bc56c6",
+            "RANGE": [59, 94],
+            "COLUMN_EXPRESSION_DIGEST": "f5da73f4dc5063fe1646ad3de531bd72f45be936a132e14f1fc62aebbbadab67"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+            "DIGEST": "2713d4d488a332b524069ff7803af9942b7a25e087be34314b4de5bbeb6de223",
+            "RANGE": [66, 91],
+            "COLUMN_EXPRESSION_DIGEST": "340c093e084390bc9d51218e1b5c9570631f61e62268943ba852e5c94eb2614c"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "e2eb847e09291fd276e8311ee40208ef6367c7c168c5ed78a18f3fdb61403153",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-478fa4d88bd91e6f"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-478fa4d88bd91e6f",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-7753b255680e3a47",
+      "CANONICAL_TYPE_IDENTITY": "public.fee_model",
+      "GOVERNED_TYPE_NAME": "fee_model",
+      "CONSUMER_RELATION": "public.transaction_fee_events",
+      "CONSUMER_COLUMN": "fee_model_applied",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-89f18d78b9a89abd"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "fee_model",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+            "DIGEST": "a11e34c80ab5f43b87d9b826104abf7ef5b1faadf9093e6257f684302b893b4a",
+            "RANGE": [104, 137],
+            "COLUMN_EXPRESSION_DIGEST": "b3d5e66befffe94e0ef6c4edcdaba446b7c43fffc9605f65fc720deb5c86c30b"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "862897de9827f936b764d5b80ca1a0446a706cf1c0446840203bf55acacfb430",
+            "RANGE": [121, 141],
+            "COLUMN_EXPRESSION_DIGEST": "047444200ff0d0861cbb4fba3ebd67f01ec87e3a5631661f761a12379a1ab6eb"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "d4848ce8802f221a1e15596efa27c244480da9b74c0a584f8fcf53153f00a8d8",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-daa867a7d0b4b385"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-daa867a7d0b4b385",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-1d813473acbfa1df",
+      "CANONICAL_TYPE_IDENTITY": "public.fee_event_status",
+      "GOVERNED_TYPE_NAME": "fee_event_status",
+      "CONSUMER_RELATION": "public.transaction_fee_events",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-89f18d78b9a89abd"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "fee_event_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+            "DIGEST": "a11e34c80ab5f43b87d9b826104abf7ef5b1faadf9093e6257f684302b893b4a",
+            "RANGE": [104, 137],
+            "COLUMN_EXPRESSION_DIGEST": "5c18c490cd290d740e832c823420b0c26fe7e8b253c806cd32af8cb08527f00f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "862897de9827f936b764d5b80ca1a0446a706cf1c0446840203bf55acacfb430",
+            "RANGE": [121, 141],
+            "COLUMN_EXPRESSION_DIGEST": "fa0830297ce3821ea08389fa2fc1343f62c044c475977ec601a548aac6b29c93"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "725ca29d0089687a129820b14430926c3fa51fa1d8c5307917adcdede4af7b4c",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-e956ada47b2027ee"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-e956ada47b2027ee",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-6d14e3978d291f8a",
+      "CANONICAL_TYPE_IDENTITY": "public.contract_line_type",
+      "GOVERNED_TYPE_NAME": "contract_line_type",
+      "CONSUMER_RELATION": "public.contract_line_items",
+      "CONSUMER_COLUMN": "line_type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-8770bf08b157fd55"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "contract_line_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+            "DIGEST": "1ebd4ac373adbf479ff43957be9419a086c1f67f7e7a780a679fd64269798356",
+            "RANGE": [100, 121],
+            "COLUMN_EXPRESSION_DIGEST": "6bf0a394210b8061f2a4c9c98baf181309c082b7641cf1760e0d8a5ddeea9664"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+            "DIGEST": "9d0915df09e15738092d2da9fca278460db1ae8bcf6b2286ca3b3327b4b0fd4f",
+            "RANGE": [98, 114],
+            "COLUMN_EXPRESSION_DIGEST": "7937bb7b7998557a42727ced72671a5c21482fd3b2c12b5f22c9f5ba8b682718"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "2ad7bcc56b34faee41e55079ea052d6b116c203d1f561493875f54de04ecfd0c",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-5b2560b976efd6e8"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-5b2560b976efd6e8",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-de2239aa53b197d6",
+      "CANONICAL_TYPE_IDENTITY": "public.billing_account_status",
+      "GOVERNED_TYPE_NAME": "billing_account_status",
+      "CONSUMER_RELATION": "public.billing_accounts",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-3792d9e3137b1653"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "billing_account_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+            "DIGEST": "dbcf1796cc47e4e0709b9e5278a7d630afa8b330ea5094ef77649ae4e9b249a5",
+            "RANGE": [61, 86],
+            "COLUMN_EXPRESSION_DIGEST": "e57441fb6681bcbfca017a79cc08286d4a7b177a3348482593f4fa986d42d5db"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "7f64dd2e6815c0ec02e3ff9b61a8a4cdfe1f2a319f78a16bc851f392ef5f2bf8",
+            "RANGE": [3064, 3081],
+            "COLUMN_EXPRESSION_DIGEST": "f32326ade0ce688b4e541e09dfbd3b2cd51ab9ef4bd8ff2e9808bbd0d59757b2"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "7f64dd2e6815c0ec02e3ff9b61a8a4cdfe1f2a319f78a16bc851f392ef5f2bf8",
+            "RANGE": [1, 18],
+            "COLUMN_EXPRESSION_DIGEST": "f32326ade0ce688b4e541e09dfbd3b2cd51ab9ef4bd8ff2e9808bbd0d59757b2"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "5fa93eb2670d4ea6a1538cff6d6e8b9078f66776090869eaeb662a0a04c23bbc",
+            "RANGE": [89, 105],
+            "COLUMN_EXPRESSION_DIGEST": "ed6b5b583f5fbe47550e555d7d838d444b7c99e8086d61c70c18af4ef33938bc"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "4dbf48cb17ffa1c8cba68ac29bdd5506538e39e8078c645ef67c54243d4a127b",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-bbb2b5cd6799c5b0"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-bbb2b5cd6799c5b0",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-0db5a1b736eb76cc",
+      "CANONICAL_TYPE_IDENTITY": "public.org_entitlement_status",
+      "GOVERNED_TYPE_NAME": "org_entitlement_status",
+      "CONSUMER_RELATION": "public.org_entitlements",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-91539638ae3d477c"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "org_entitlement_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+            "DIGEST": "787b806da768a9e1f34cf70e6d4d02483cfc3803e0ac8995d4e229bc3faea9d0",
+            "RANGE": [127, 154],
+            "COLUMN_EXPRESSION_DIGEST": "129f251d5f589c83cee9e893fd88095e54634877da78658831c230ae270f83e3"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+            "DIGEST": "b334373a80945b0dfc73afda450b719825457889df80a122b949bb689f0c76cb",
+            "RANGE": [119, 139],
+            "COLUMN_EXPRESSION_DIGEST": "1c1aa531f50157bcda34bf2a32fc51776077bcb4a7fb0d693b1f4b896dc0719c"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "fd9850a314a069c647c324b78195e135478bfebdaa1d58ded8979d64af32ed2c",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-e33b3dea11feae2a"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-e33b3dea11feae2a",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-6f00c890ec419df4",
+      "CANONICAL_TYPE_IDENTITY": "public.allocation_run_status",
+      "GOVERNED_TYPE_NAME": "allocation_run_status",
+      "CONSUMER_RELATION": "public.allocation_runs",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b83cc475c4e82867"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "allocation_run_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+            "DIGEST": "493116055073f182606cebb17a6035b804468ca4334da412088a23cc7e8046eb",
+            "RANGE": [97, 124],
+            "COLUMN_EXPRESSION_DIGEST": "6374fb78708ff688ba936f896b27be97a36cfa98623925d74fb01af7668940be"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "7dd97fa766fe7009d8e91d8c78b4d8a856c997a3e591c2961f666480bddeb817",
+            "RANGE": [3308, 3325],
+            "COLUMN_EXPRESSION_DIGEST": "8eb6dbb054357ba416f9005118de62f106aff7a79ead504b4a32087c4f6338f3"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "7dd97fa766fe7009d8e91d8c78b4d8a856c997a3e591c2961f666480bddeb817",
+            "RANGE": [190, 207],
+            "COLUMN_EXPRESSION_DIGEST": "8eb6dbb054357ba416f9005118de62f106aff7a79ead504b4a32087c4f6338f3"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "6565ee7822038198464a6d4721a4a0de8b4ed91261781d3c95d1bd2b5a64b4fd",
+            "RANGE": [375, 392],
+            "COLUMN_EXPRESSION_DIGEST": "ae5f150d318b8780a83c00a03af0f0d1bad4ccd8bbd4975077795f4b6d76769d"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "6568740eb595f8094b7137d0cfc2988fa886112ce517414c7cc252bc51c6a9f8",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-8eae0e5be812828d"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-8eae0e5be812828d",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-fff761a5f2edd556",
+      "CANONICAL_TYPE_IDENTITY": "public.fee_model",
+      "GOVERNED_TYPE_NAME": "fee_model",
+      "CONSUMER_RELATION": "public.transaction_fee_rules",
+      "CONSUMER_COLUMN": "fee_model",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-12776be5e6d9813e"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "fee_model",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+            "DIGEST": "65471be97f8d2b54b42c80138e395d7788c173064385c4524fa4dcc04b59e6dd",
+            "RANGE": [70, 98],
+            "COLUMN_EXPRESSION_DIGEST": "3b8104cff22971949f806a141f9e21f58431803d67ce1952eed24e9b22a55857"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "bd5aa3d871ada7abd5ff63b22b42e316ee621c44063c84eedcfce8cb9befbe7e",
+            "RANGE": [80, 101],
+            "COLUMN_EXPRESSION_DIGEST": "8f299c87565eb29d084352c78a59540fc1ae6849b2eedb4d6e5d4f3d188cfc17"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "d4848ce8802f221a1e15596efa27c244480da9b74c0a584f8fcf53153f00a8d8",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-daa867a7d0b4b385"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-daa867a7d0b4b385",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-6370a15dbc87aa91",
+      "CANONICAL_TYPE_IDENTITY": "public.fee_rule_status",
+      "GOVERNED_TYPE_NAME": "fee_rule_status",
+      "CONSUMER_RELATION": "public.transaction_fee_rules",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-12776be5e6d9813e"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "fee_rule_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+            "DIGEST": "65471be97f8d2b54b42c80138e395d7788c173064385c4524fa4dcc04b59e6dd",
+            "RANGE": [70, 98],
+            "COLUMN_EXPRESSION_DIGEST": "4a589187fa7e3232411931f1d0ee2481f9621dd16a73ddb78a44cc86774dd9dc"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "bd5aa3d871ada7abd5ff63b22b42e316ee621c44063c84eedcfce8cb9befbe7e",
+            "RANGE": [80, 101],
+            "COLUMN_EXPRESSION_DIGEST": "90c6d6377e2a1f8839c617332defad6462dc8506a789ac4a286e9c42cfc27730"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "25513be64808581cde3046cbd20191e19f564d14a6ec4437b1976a19bf88e153",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-70970724169a1a4e"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-70970724169a1a4e",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-2f4ad5e23c9c2fe5",
+      "CANONICAL_TYPE_IDENTITY": "public.signature_source",
+      "GOVERNED_TYPE_NAME": "signature_source",
+      "CONSUMER_RELATION": "public.user_signatures",
+      "CONSUMER_COLUMN": "source",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-9d2cf676ad999891"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "signature_source",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+            "DIGEST": "cd55c2296f8a8c1329594404bc39bf5111e61ca60e0ef09924287a5d4afb3cc1",
+            "RANGE": [100, 134],
+            "COLUMN_EXPRESSION_DIGEST": "9fe2f2473edf200f2f82c759d7198746554b05c2433a4052684cfb09358db2af"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+            "DIGEST": "c175845d635bc5220f18d34545715056ed46003c63eb05317805952242381c03",
+            "RANGE": [52, 65],
+            "COLUMN_EXPRESSION_DIGEST": "8ba144ddb404ccaf45be48931b5ba6fdffeccebd5adb975d143ea089a496ca2f"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "53b2e73c016aed5b9832313c9cbba8703718a0a53cbd9dcf594d563e8321a880",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-3860ea681ecd9efa"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-3860ea681ecd9efa",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-9fe0e1ba571dde04",
+      "CANONICAL_TYPE_IDENTITY": "public.subscription_lifecycle_event",
+      "GOVERNED_TYPE_NAME": "subscription_lifecycle_event",
+      "CONSUMER_RELATION": "public.subscription_events_log",
+      "CONSUMER_COLUMN": "event_type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b445c889d1db562d"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "subscription_lifecycle_event",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/dunning.ts",
+            "DIGEST": "315dbce2374d8a9d01452f656c4d227fab57a91f37f59de22871a24b4a6edfe8",
+            "RANGE": [145, 165],
+            "COLUMN_EXPRESSION_DIGEST": "a341b189e4f21a5661b9cf0ddd42e9dceb5c1d88c521d35946a0edb6bd50f29f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+            "DIGEST": "61b6ac7185d7c5812a9ef8f33ccf54e1f716747931c16ff4476cdbe0436eb72b",
+            "RANGE": [268, 279],
+            "COLUMN_EXPRESSION_DIGEST": "ebdc25915c0bbeafaf8cd9a5d611c56ba3b0ce63380cfae1a6b4c8ee2c1a6ec7"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "c8eaacdaed4184519c8a37eb63ba0566ac25043f96d11cb8da0688dc197d30b8",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-670f4d546e6eca23"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-670f4d546e6eca23",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-384933cf7165cedf",
+      "CANONICAL_TYPE_IDENTITY": "public.subscription_status",
+      "GOVERNED_TYPE_NAME": "subscription_status",
+      "CONSUMER_RELATION": "public.org_subscriptions",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-6ecf8031c8972266"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "subscription_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+            "DIGEST": "19406235a2b7461c51b5601595307940842e6c5ece0c9d3c4a75958cbad28056",
+            "RANGE": [118, 146],
+            "COLUMN_EXPRESSION_DIGEST": "732170962cdfa288a0415ccd9d7998f2d0de8894a99352f376f726107875744f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "fe3c75adffbe58a9d040f1626ce3ab696ed3cc0a56ef2907fbd1af007d5ecb6d",
+            "RANGE": [3125, 3143],
+            "COLUMN_EXPRESSION_DIGEST": "ebd988b93680b272009608178e96f75b8d3fae5a9b774302c66efc5592914710"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "fe3c75adffbe58a9d040f1626ce3ab696ed3cc0a56ef2907fbd1af007d5ecb6d",
+            "RANGE": [86, 104],
+            "COLUMN_EXPRESSION_DIGEST": "ebd988b93680b272009608178e96f75b8d3fae5a9b774302c66efc5592914710"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "19a3fc1cf339d2aba5f9d10f7ad867663736ec66d1c02fbb15cc13090abb0d26",
+            "RANGE": [134, 152],
+            "COLUMN_EXPRESSION_DIGEST": "ea10898079bd799c9ffa4fa902e50533fbe3792a1a04dc5f0658e28a5d55ac3c"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "919555ada00dcb25f3e85e35ef7ffa7c02cd0ef19157bf767ca807851d330001",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-289d62d6d6a1e625"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-289d62d6d6a1e625",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-50eaf9d0c5a78d0e",
+      "CANONICAL_TYPE_IDENTITY": "public.reconciliation_exception_type",
+      "GOVERNED_TYPE_NAME": "reconciliation_exception_type",
+      "CONSUMER_RELATION": "public.reconciliation_exceptions",
+      "CONSUMER_COLUMN": "exception_type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-5b7ff3fe06372a75"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "reconciliation_exception_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+            "DIGEST": "2498be279ebd7537887a14f1e3e3375ce4d516992eb4e1dc9350d7394da82aa6",
+            "RANGE": [114, 140],
+            "COLUMN_EXPRESSION_DIGEST": "7687af43158d791fee75cc58f953362eeed5c837cfe7f4249de5d60f46725b58"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "0dbfd97f80f7802f5e60fbeb16f6d9bc16ce06e12a648087e0f4dafafc5236fe",
+            "RANGE": [310, 328],
+            "COLUMN_EXPRESSION_DIGEST": "42fc67b296bb9de1cca90ad01382c988e73a6f438cfaa0ad98fca38dd9ecd8fa"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "cd508d7c88894ded78e78dfbc12e85aff59ef8ae5e9eda802a1b0e82f78ccc46",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-edfecf2978239869"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-edfecf2978239869",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-c15bcf7c7c602b61",
+      "CANONICAL_TYPE_IDENTITY": "public.reconciliation_exception_status",
+      "GOVERNED_TYPE_NAME": "reconciliation_exception_status",
+      "CONSUMER_RELATION": "public.reconciliation_exceptions",
+      "CONSUMER_COLUMN": "exception_status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-5b7ff3fe06372a75"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "reconciliation_exception_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+            "DIGEST": "2498be279ebd7537887a14f1e3e3375ce4d516992eb4e1dc9350d7394da82aa6",
+            "RANGE": [114, 140],
+            "COLUMN_EXPRESSION_DIGEST": "e46986b3069cc6c205947475078afb82625552a9499064fe69a750482cf54ad8"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "0dbfd97f80f7802f5e60fbeb16f6d9bc16ce06e12a648087e0f4dafafc5236fe",
+            "RANGE": [310, 328],
+            "COLUMN_EXPRESSION_DIGEST": "153d8c8f8ab22afcda1c8656e423f2b1eb27ad11b6c92280c64e40a07be5065e"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "e06beb5e91f03a580f013b944761bf5b9dba51a96456b794ce0736f28eb21105",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-4fcb349f9dfe5ff1"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-4fcb349f9dfe5ff1",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-e34d2f276cb3cec0",
+      "CANONICAL_TYPE_IDENTITY": "public.platform_invoice_status",
+      "GOVERNED_TYPE_NAME": "platform_invoice_status",
+      "CONSUMER_RELATION": "public.platform_invoices",
+      "CONSUMER_COLUMN": "status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-f9d77efe7e881f7c"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "platform_invoice_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+            "DIGEST": "b2d906fb2419611726015be4714ab59c2eb9ca1c15c4df81dfc3433c82d464f0",
+            "RANGE": [172, 201],
+            "COLUMN_EXPRESSION_DIGEST": "590b3cd2c4054beadc1165d739bd11feb3ec831eff3f6f5d48dd04e97c496672"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "cc9141c7c9d0b2789cc4a4ae3d8edea550a1a1e5d86a11a28e73269c00014a63",
+            "RANGE": [3168, 3188],
+            "COLUMN_EXPRESSION_DIGEST": "e582fcb6ec91506d5d923947f0be333de7a378fc66496b24773a1385908d3a82"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "cc9141c7c9d0b2789cc4a4ae3d8edea550a1a1e5d86a11a28e73269c00014a63",
+            "RANGE": [21, 41],
+            "COLUMN_EXPRESSION_DIGEST": "e582fcb6ec91506d5d923947f0be333de7a378fc66496b24773a1385908d3a82"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "db1ed6982a348ba6c4707af7e9fa5e0d53b297c4cf9b7afbe76add673e6b1c83",
+            "RANGE": [174, 193],
+            "COLUMN_EXPRESSION_DIGEST": "0e69d4ddd423a6fc30225c935cd7a31a8142cacf77091847ae32a07f1459e3de"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "f3783d8143cd2e5be3c5a671f464958db1329e11f170636438abb21c936c4e7f",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-1feacb00f48c684c"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-1feacb00f48c684c",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-be4a015ecc8bd898",
+      "CANONICAL_TYPE_IDENTITY": "public.document_linked_entity_type",
+      "GOVERNED_TYPE_NAME": "document_linked_entity_type",
+      "CONSUMER_RELATION": "public.document_links",
+      "CONSUMER_COLUMN": "linked_entity_type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-2896d62bb60bda9f"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "document_linked_entity_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/documents-schema.ts",
+            "DIGEST": "a05453f9cebf181329bffe01430755eb63e7a230a37774b07b6d10fa0ffcb8c2",
+            "RANGE": [139, 152],
+            "COLUMN_EXPRESSION_DIGEST": "112786619cc178fbc093190770b1fdabbad0f16acca39f6d090ed45bcd9af90d"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+            "DIGEST": "6893cd4912da2854b45f7f3033c26505912629efe91990fc6d9980ae91a2e5d3",
+            "RANGE": [120, 129],
+            "COLUMN_EXPRESSION_DIGEST": "860904b7d21ef89b429a63a5c8467804f6432b59da713f01559e763cb079de97"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "48b4710e20ae715dc710e78f4f492b6a097b9889bbc33afbdbccf500b75b3a52",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-632014dc36554f28"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-632014dc36554f28",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-8d0fd309141f1770",
+      "CANONICAL_TYPE_IDENTITY": "public.allocation_method",
+      "GOVERNED_TYPE_NAME": "allocation_method",
+      "CONSUMER_RELATION": "public.allocation_rule_versions",
+      "CONSUMER_COLUMN": "method",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-ebd5a33d867b1069"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "allocation_method",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+            "DIGEST": "ce278a07f5d40fde74223c0a9b4857c1fb5f05f0e5b50577a7c22937bcb72ea5",
+            "RANGE": [69, 91],
+            "COLUMN_EXPRESSION_DIGEST": "c180bf5ea62fa7fd2d798beae81d60ba4abd658752952159c33d3adac12554a1"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "f268e331e240769a5b7e9a54ac62dd52826fc0f3bb4795ecc239d14faac0fa42",
+            "RANGE": [3267, 3280],
+            "COLUMN_EXPRESSION_DIGEST": "e81d750b4e4a1cb461ee3e945b9a05196c781f9f8344ca1bc3d041df8fc5fba5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "f268e331e240769a5b7e9a54ac62dd52826fc0f3bb4795ecc239d14faac0fa42",
+            "RANGE": [174, 187],
+            "COLUMN_EXPRESSION_DIGEST": "e81d750b4e4a1cb461ee3e945b9a05196c781f9f8344ca1bc3d041df8fc5fba5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "72e5d5b8957c55790d916545279896689c1a1b3e0adff7b153be152cbd10487d",
+            "RANGE": [356, 369],
+            "COLUMN_EXPRESSION_DIGEST": "be27e0628444b6f973f5e8270e1e9c8b3ab5e6e4d546e16a76c30a0a0b766468"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "ba27adb880e93372a743f0be0b6a58b33750ddfc92a261af5a1848d0a3b63437",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-b879eb0a1f95f2a0"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-b879eb0a1f95f2a0",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-e163cee2741f9a26",
+      "CANONICAL_TYPE_IDENTITY": "public.platform_cost_type",
+      "GOVERNED_TYPE_NAME": "platform_cost_type",
+      "CONSUMER_RELATION": "public.platform_cost_ledger_entries",
+      "CONSUMER_COLUMN": "cost_type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-09701481b7a73806"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "platform_cost_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+            "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+            "RANGE": [89, 141],
+            "COLUMN_EXPRESSION_DIGEST": "731286bd0624a2b46ad26f5b0a7289e93ee48a9264463bfd85c6850ffeca7d43"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [3229, 3253],
+            "COLUMN_EXPRESSION_DIGEST": "db1d3de1cb508c01f91bf34d5d569cb15d5f1e85b8d98f3fc32ab7179ea21b72"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [258, 282],
+            "COLUMN_EXPRESSION_DIGEST": "db1d3de1cb508c01f91bf34d5d569cb15d5f1e85b8d98f3fc32ab7179ea21b72"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "7f81f7eb340f05b9c7ca7f4461d6a40395e042553f5a8c91850264c980f545fb",
+      "TYPE_DEFINITION_AUTHORITY": "HUMAN_ARCHITECTURE_W4T1",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-fd05e4ccdf4d45ad"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-fd05e4ccdf4d45ad",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-4f3121ed14775bcd",
+      "CANONICAL_TYPE_IDENTITY": "public.ledger_event_type",
+      "GOVERNED_TYPE_NAME": "ledger_event_type",
+      "CONSUMER_RELATION": "public.platform_cost_ledger_entries",
+      "CONSUMER_COLUMN": "event_type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-09701481b7a73806"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "ledger_event_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+            "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+            "RANGE": [89, 141],
+            "COLUMN_EXPRESSION_DIGEST": "1f41bc8f42218c3887ff75aa706f5a19e1543fa09d2563d17f2461088e193db9"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [3229, 3253],
+            "COLUMN_EXPRESSION_DIGEST": "40a42dbd6ccd7385448a22ac4cbf188ad21bfe14ac95ca71f58a92018a6fd5e2"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [258, 282],
+            "COLUMN_EXPRESSION_DIGEST": "40a42dbd6ccd7385448a22ac4cbf188ad21bfe14ac95ca71f58a92018a6fd5e2"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "7b82e0771dd6c738f1806b367de8aecd48dbab6d9aa270865738c6c934f0a7cc",
+            "RANGE": [276, 314],
+            "COLUMN_EXPRESSION_DIGEST": "f5b6cc62d1a32fec14a08a42c3d967f6c3a396e82e1ee4af053dc547c0e99b88"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "b98fa32da24b6057c6f3e53a1534cea530b36ae242cff3ea6dc9af954c2a18b2",
+      "TYPE_DEFINITION_AUTHORITY": "HUMAN_ARCHITECTURE_W4T1",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-d4e5fc824bb8dcaa"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-d4e5fc824bb8dcaa",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-a74e0d81bd09fa2e",
+      "CANONICAL_TYPE_IDENTITY": "public.ledger_source_type",
+      "GOVERNED_TYPE_NAME": "ledger_source_type",
+      "CONSUMER_RELATION": "public.platform_cost_ledger_entries",
+      "CONSUMER_COLUMN": "source_type",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-09701481b7a73806"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "ledger_source_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+            "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+            "RANGE": [89, 141],
+            "COLUMN_EXPRESSION_DIGEST": "f6afd1cb291c050fbe943cabf3a65e616656a87eb947997c03128b1cf53935a5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [3229, 3253],
+            "COLUMN_EXPRESSION_DIGEST": "372df8bb6e2fb410d0c0f448f6c52839c8b89c7d3ae6d7402ebdf56fe5f976b1"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [258, 282],
+            "COLUMN_EXPRESSION_DIGEST": "372df8bb6e2fb410d0c0f448f6c52839c8b89c7d3ae6d7402ebdf56fe5f976b1"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "7b82e0771dd6c738f1806b367de8aecd48dbab6d9aa270865738c6c934f0a7cc",
+            "RANGE": [276, 314],
+            "COLUMN_EXPRESSION_DIGEST": "ccd8bcecc45b5e6860e5fd3b0d68accf6b6045bcf162b374aaae8f16a94153d2"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "d8d6be25d6aa292745e5a08c7276554f6e92551d4f21956d0002db3b22e6d66b",
+      "TYPE_DEFINITION_AUTHORITY": "HUMAN_ARCHITECTURE_W4T1",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-77b43048821a55fc"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-77b43048821a55fc",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-1592e82b34df6c92",
+      "CANONICAL_TYPE_IDENTITY": "public.allocation_status",
+      "GOVERNED_TYPE_NAME": "allocation_status",
+      "CONSUMER_RELATION": "public.platform_cost_ledger_entries",
+      "CONSUMER_COLUMN": "allocation_status",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-09701481b7a73806"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "allocation_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+            "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+            "RANGE": [89, 141],
+            "COLUMN_EXPRESSION_DIGEST": "be0ea5072eff15588dd468d2d50dce24249cd45930d51acd2530ee651b183b45"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [3229, 3253],
+            "COLUMN_EXPRESSION_DIGEST": "d8c583ed7f179ebe74fe83d8683b23efdae22af0f9566a4306e48159d21af688"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [258, 282],
+            "COLUMN_EXPRESSION_DIGEST": "d8c583ed7f179ebe74fe83d8683b23efdae22af0f9566a4306e48159d21af688"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "7b82e0771dd6c738f1806b367de8aecd48dbab6d9aa270865738c6c934f0a7cc",
+            "RANGE": [276, 314],
+            "COLUMN_EXPRESSION_DIGEST": "d9884c70b3a0fd56cd1d897be1eee04f9830375a9e1254fcd0b7f9ca532282df"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "4e052c28c04239aa24c83a073473e762233870fd86e561e1185540288b23f741",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-1bc153f2d11cf193"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-1bc153f2d11cf193",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    },
+    {
+      "REFERENCE_ID": "UE-W4T-REFERENCE-c8afaa47de1f68ed",
+      "CANONICAL_TYPE_IDENTITY": "public.covered_org_role",
+      "GOVERNED_TYPE_NAME": "covered_org_role",
+      "CONSUMER_RELATION": "public.contract_covered_orgs",
+      "CONSUMER_COLUMN": "role",
+      "SOURCE_W4_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b5be0303e59d6043"],
+      "TYPE_REFERENCE_EVIDENCE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "covered_org_role",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/contract-amendments.ts",
+            "DIGEST": "f2af68f94f9cbff80bb5fec989f72647d647c258be618f8faab44804f325ac3a",
+            "RANGE": [103, 121],
+            "COLUMN_EXPRESSION_DIGEST": "4e7118e6252caeda1eacefbc96949c020b64044fd8ffc8016e55f4edd8ddd64d"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "527a6562e556ef8add167c2ffd660f5012fa849480bdb08a3287e44731ae45c6",
+            "RANGE": [259, 268],
+            "COLUMN_EXPRESSION_DIGEST": "19f6ffffcab55adfd088910f51c256468944219d0c99362ef52b87b098e84a63"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "TYPE_KIND": "ENUM",
+      "TYPE_DEFINITION_DIGEST": "d1ba544929e0f146f8d427e39ffdfb58dbf175a7d10a3cdae9a3deacb279ecc5",
+      "TYPE_DEFINITION_AUTHORITY": "EXACT_FROZEN_DECLARATION",
+      "TYPE_OWNERSHIP_AUTHORITY": "HUMAN_GOVERNANCE_W4T",
+      "TYPE_REGISTRY_REFERENCE": {
+        "FILE": "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json",
+        "TYPE_DEPENDENCY_ID": "UE-W4T-TYPE-739370d3793f9efd"
+      },
+      "DEPENDENCY_TYPE_PAYLOAD_ID": "UE-W4FR2-TYPE-739370d3793f9efd",
+      "CONSUMER_PAYLOAD_ID": null,
+      "DEPENDENCY_STATUS": "TYPE_RESOLVED_CONSUMER_PAYLOAD_WITHHELD_GLOBAL_COMPLETENESS_BLOCKED",
+      "W5_EXECUTION_ORDER_AUTHORIZATION": "NO"
+    }
+  ],
+  "obligationPayloadLinkage": [],
+  "withheldObligations": [
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-e2e3390b43bbbd14",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-5ff5a7531c756fba",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d6b71ca5f85600e8",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-0d247a5cba6a9d61",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-bdb609cc7baa01c2",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d89f0987950bab57",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-aaf3aabccb495e7f",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-c8e51be7d0357305",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-5c7e78723dd8b80c",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-f2f28be3b2e68cea",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-84f415bde3d5c6f3",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-be9a6a857141eb81",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-9fcf052b2479db7d",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-c42b44506e916c09",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-52b2c28739bcece0",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-79e40d9187cb6a7c",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-cab23c6b12d57a4f",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-1e595830a62237bf",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-51b50e5aa03cc6e4",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-bc9f436943fed1fb",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-e4f0447bb4ca17d5",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-9e4ed03af8265305",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-8da69050bb970606",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-793e6a3c3afb6c0d",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-1cd715d5e4e34aab",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-4385ef0bae72d906",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-cbe8ca30d102c85c",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-faaedf071e9474d9",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-eee41efd9b277000",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-dfc328a8124c57b8",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-52236976259977d8",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-5dd450d5a9bfbd3d",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-21caf7d5c281dc05",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-46eee32aeeba7016",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-2d963f0d561a17e8",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-56fe645bf9e73b00",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-756e3e7b8e548b6f",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-87a3b2852823e548",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-60fb717281799128",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-fd42e5b91097211c",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-0d9e1e9c958bef73",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-10596d92de2d3392",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-89f18d78b9a89abd",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-8beced6d1e218aae",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-809288112f671447",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-8770bf08b157fd55",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-c201bd9a9075a9fc",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-44595805fe306f09",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-1a482361bcea822b",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-f493f5f557ea0e20",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-afd71c91f22e709b",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-5e186d38272d19e9",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b5777037fa7076c9",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-1616d255367c341d",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b83cc475c4e82867",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-77aa06833477f7cb",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d77d0e3c52106009",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-0da917bb97bd47c5",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-80dcddbe88876e34",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-91539638ae3d477c",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-f55495cc409fdfd2",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-7fb439ddf62630e3",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-62b0bd9d44912725",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-179c6b9ad97d6f79",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-a88dde536cbede42",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b502a1ccdc7cdafa",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-2e1394a7f6a4e434",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-e123fe64090b7971",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-c058ea21e68785aa",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-9d2cf676ad999891",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-4a20f6599c8d58bd",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d58923e2dd1fa638",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-5280bd5a0dac1976",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-55b4f73e9c33e4a9",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-998bbdad46844766",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b445c889d1db562d",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-5e8cae1d4bd50d81",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-4648ff217ac6cc45",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ab2e5559d33568a9",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-41c38d35cdae147e",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-cfe9d739faf2339f",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ec225314c0c4682a",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-34cb89029be25de1",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b5d27044822acab6",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-dd48e7592a26e32b",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-58c31d877505428b",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-a4c6bdc1b34b9fc9",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-6ecf8031c8972266",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-5b7ff3fe06372a75",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-12776be5e6d9813e",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-01039dfaf1aef9e9",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-991a59fe214af62f",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b4dd280d315f7967",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-06a95e0530bf5222",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-f9d77efe7e881f7c",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ef7f6f6d7fd6fcba",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-9f87b8aceb37a5e9",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-2408ee92a2ea2a17",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-a599883fcf88fcfd",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b24a0a0dd53e2fa2",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d2984bad8a44340c",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-4cccc858adfe40c8",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-789de61afb7f456e",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-61566bbd5596697a",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-36555f8ef9439626",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-158f528b63067fc0",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-93aa2e53f25b0ceb",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-7bd95bddf5e5e088",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-36cc29238e7b1c5f",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-712a6126f7094619",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-0b58437ab5c5177b",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-c0f7a7d75fd6b1e0",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-2896d62bb60bda9f",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-945d34aed13d2fcd",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ca0dacd63bac180a",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-5ab4212aea6fd54f",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-faffbddb0b4f4c07",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-c68c2a04fb984b1c",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-2d5d398452327f5a",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-aac864940adbbd32",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-f66d7a338e0aaf98",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-dce12b5912d8ee64",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-a2857a83bff244c1",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-59598e4fae4f7b0d",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-037238384978cae6",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-108a7c1bd83321e3",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b7a4ae2719f7ac99",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ae2197bfd5221519",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-34201d2f0362a5ea",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-cfc81ee3cb2e56d7",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-09701481b7a73806",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d15dd05e27f5495e",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-f88e536dfe7c9fb6",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-fdc28e7164e40223",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-9c8d97de51e0ff43",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-3e160456784daa37",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-5c716b624f8b24cf",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-bef3dcb8fb277e26",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-1e7ec67ee69ef7b6",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-9ef8045d75910d91",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-7fb2822005b07979",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-4e7904c2d7460d66",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-cc4bc7b06e15bf5b",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-3394a97bfe7271a8",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-3a0ff2be30ed8847",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-ebd5a33d867b1069",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-3f48cbde40a5e3a3",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-592065aac991737c",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-9a5862b480351712",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-913c7ab8451a2b83",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-be408cb4cf02966c",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-90830dcafd151747",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-9b8e6b266d5cb735",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-45b134f39d0e55ec",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-69f1a58054842fc0",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-e3dcd5840085f80a",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-cabeda5f38f282e3",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-c39975a3310b6357",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-10388110c50e6fc9",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-cb2f7c896e6a7401",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d9ebb9a8d43d80f5",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-f74c9382861e94cf",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-bac3a50d170191c0",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-5d310f41a9648a79",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-f401ed92c8a34660",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-731915f26f297332",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-3792d9e3137b1653",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-2f46bc9a15b4fe78",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-c432eb8ba3ac2f1a",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-850ac49223670dce",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-826d70dcec1f59f0",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-bc69d1985ac36405",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-f61df29292bbff2d",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-e0c651018aa523e3",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-94f5cd8d9af96333",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-e024821c0da00c3a",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b5be0303e59d6043",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-469f0baa0fa99ef9",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-674e6fcd96fbace1",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-4ab47f6e1669c96b",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d5306055f65a8621",
+      "RESPONSIBILITY": "ADD_COLUMN_TO_EXISTING_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-d1ca2f19242e9564",
+      "RESPONSIBILITY": "RELATION_CREATE_INCLUDES_COLUMN",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-c502a3e035469ff4",
+      "RESPONSIBILITY": "CREATE_RELATION",
+      "REASON": "GLOBAL125_SELECTED_SHAPE_PHYSICAL_COMPLETENESS_PREFLIGHT_BLOCKED"
+    }
+  ],
+  "summary": {
+    "DEFINITION_OBLIGATIONS_INPUT": 183,
+    "RELATION_OBLIGATIONS": 57,
+    "COLUMN_OBLIGATIONS": 126,
+    "CANONICAL_DEFINITION_AUTHORED": 0,
+    "DESIGN_DECISION_REQUIRED": 0,
+    "DEFINITION_CONFLICT": 0,
+    "PHYSICAL_COMPLETENESS_SCOPE_BLOCKERS": 108,
+    "DISTINCT_RELATION_GROUPS": 125,
+    "RELATIONS_FULLY_DEFINED": 0,
+    "RELATIONS_WITH_RECORDED_REPRESENTATION_GAP": 26,
+    "OTHER_RELATIONS_NOT_FULLY_LOWERED_OR_CLAIMED": 99,
+    "GOVERNED_COLUMNS_RETAINED": 822,
+    "EXISTING_AUTHORITY_COLUMNS_NOT_REAUTHORED": 1299,
+    "DISTINCT_NAMED_TYPES": 36,
+    "TYPE_DEFINITIONS_AUTHORED": 36,
+    "TYPE_REFERENCES": 38,
+    "TYPE_REFERENCES_RESOLVED": 38,
+    "TYPE_HOLDS": 0,
+    "CREATE_RELATION_RESPONSIBILITIES": 57,
+    "RELATION_CREATE_INCLUDES_COLUMN": 57,
+    "FUTURE_ADD_COLUMN_RESPONSIBILITIES": 69,
+    "TYPE_SQL_PAYLOADS": 36,
+    "RELATION_CREATE_PAYLOADS": 0,
+    "COLUMN_ADD_PAYLOADS": 0,
+    "SQL_PAYLOADS": 36,
+    "OBLIGATION_PAYLOAD_LINKS": 0,
+    "UNLINKED_OBLIGATIONS": 183,
+    "MULTI_LINKED_OBLIGATIONS": 0,
+    "ACCOUNTED_WITHHELD_OBLIGATIONS": 183,
+    "UNACCOUNTED": 0,
+    "TYPE_BEFORE_CONSUMER_RULES_RESOLVED": 38,
+    "COMPLETE_CONSUMER_PAYLOAD_DEPENDENCY_EDGES": 0,
+    "PRODUCER_METADATA_UPDATES": 0,
+    "MULTIPLE_CREATION_AUTHORITIES": 0,
+    "DUPLICATE_COLUMN_CREATION": 0,
+    "HYBRID_SCHEMAS_AUTHORED": 0,
+    "SQL_EXECUTED": 0
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W4FR2_GATE": "BLOCKED",
+    "PHASE_1B_3C_A1I_W4FR2": "BLOCKED",
+    "BLOCKER_CLASS": "SELECTED_FULL_SHAPE_COMPLETENESS_VS_EXISTING_PARENT_AUTHORITY_BOUNDARY",
+    "DO_NOT_PERFORM_NEW_DISCOVERY": "YES",
+    "CANONICAL_DEFINITION_AUTHORING": "NOT_COMPLETE_PHYSICAL_COMPLETENESS_SCOPE_CONTRADICTION",
+    "W4T": "PASS",
+    "W4T1": "PASS",
+    "NAMED_TYPE_PRODUCTION_MODEL": "COMPLETE_NOT_EXECUTED",
+    "CANONICAL_CONTRACT_VERSION": "1.3.1",
+    "VERSION_1_3_2_PUBLISHED": "NO",
+    "W4": "BLOCKED_DEFINITION_IMPLEMENTATION_PENDING",
+    "W4P": "NOT_AUTHORIZED",
+    "W5": "NOT_AUTHORIZED",
+    "W4_COMPATIBILITY_GATE_NORMALIZATION": "NOT_AUTHORIZED",
+    "W4_REMAINING_COMPATIBILITY_RECORDS": 127,
+    "W4_REMAINING_BLOCKER": "PHYSICAL_COMPLETENESS_SCOPE_CONTRADICTION;127_COMPATIBILITY_RECORDS_STILL_REMAIN_NOT_SOLE_BLOCKER"
+  }
+}

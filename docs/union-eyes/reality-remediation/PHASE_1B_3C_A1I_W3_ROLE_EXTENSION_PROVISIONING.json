@@ -1,0 +1,2448 @@
+{
+  "metadata": {
+    "PHASE": "PHASE_1B_3C_A1I_W3",
+    "METHOD": "Frozen artifact plus selected provisioning-source implementation; offline descriptors/tests only",
+    "FROZEN_INPUT_SHA256": {
+      "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": "fe5bc24c5f1cc91af7e225e45887bb870a62e5811a2162fb74302af1e8df5cd2",
+      "docs/union-eyes/reality-remediation/UE_DATABASE_TARGET_SCHEMA_SEARCH_PATH_CONTRACT.json": "7d45cfc927ec6e8b1909098785d2e7dd0fc58fc195890ad81b9c00a61a455610",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W2_DATABASE_TARGET_SEARCH_PATH.json": "b7a2b94be4f6a819baa801683d2d89bf5da2d0f8a8ca432a2d71021c1b33948b",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1_DJANGO_DEPENDENCY_MIGRATION_LOCK.json": "1e74413a98722c042888a5cd0e135f34719778e78407129a4c6821f2f7fc3b52",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION.json": "9e5572df4ddfa735de29df42639a45117ce4c377a5ffcd6e9776d7c667cf1a51",
+      "apps/union-eyes/backend/requirements.lock": "310eb938f4f7c25b6f93323031981ede60a0d2ef2d68e017a5c9ced33e326fe6",
+      "apps/union-eyes/backend/requirements.lock.metadata.json": "5a4f876e20fc71a615c3249a1f3cce2d7015e10957fbd8a6505c331283c82a0d"
+    },
+    "W3_INPUT_OBLIGATION_IDS": [
+      "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "UE-1B3CA1G-PREREQUISITE-OBLIGATION-41ce41c4d5eb013f",
+      "UE-1B3CA1G-PREREQUISITE-OBLIGATION-2c54c7df423d7946",
+      "UE-1B3CA1G-OPAQUE-OBLIGATION-54d46dbb3790f7b7",
+      "UE-1B3CA1G-OPAQUE-OBLIGATION-1d96c03855120f6c",
+      "UE-1B3CA1G-OPAQUE-OBLIGATION-95475ff37e61236f",
+      "UE-1B3CA1G-OPAQUE-OBLIGATION-e7352bddb4afd294",
+      "UE-1B3CA1G-INSTALLER-VERIFICATION-2e7c5b5727cee606",
+      "UE-1B3CA1G-INSTALLER-VERIFICATION-38ee26a47d8c334e",
+      "UE-1B3CA1G-INSTALLER-VERIFICATION-e756e0bb06d855ca",
+      "UE-1B3CA1G-INSTALLER-VERIFICATION-301cf3eb2ebebd20"
+    ],
+    "W3_INPUT_DECISION_IDS": [
+      "UE-1B3CA1G-DECISION-4e0fdb9b7d80bdb5",
+      "UE-1B3CA1G-DECISION-7e108c57ea428e21"
+    ]
+  },
+  "CONTRACT_STATUS": "CONTRACT_IMPLEMENTED_COMPLETE_OFFLINE_NOT_APPLIED",
+  "authority": {
+    "EXISTING_PROVISIONING_AUTHORITIES": ["apps/union-eyes/scripts/provision-runtime-db-roles.ts"],
+    "SELECTED_CANONICAL_IMPLEMENTATION_SURFACE": "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+    "SUPPORT_MODULE": "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+    "PACKAGE_ENTRYPOINTS": ["db:provision-roles", "rls:provision-roles"],
+    "PRIOR_BEHAVIOR": "Two hardcoded LOGIN runtime roles, auto-normalized existing attrs, automatic password rotation/Key Vault publishing and CONNECT grants",
+    "INTENTIONAL_BEHAVIOR_CHANGE": "No-argument invocations explicitly fail rather than suggesting provisioning success. --plan never connects. Existing role mismatch fails; no secret/vault access. --apply refuses pending approval/W8 runtime adapter. This replaces the unsafe governance-coupled behavior, not a competing authority.",
+    "LIVE_ADAPTER_IMPLEMENTED": "NO; explicit W8 downstream integration requirement. This lane implements structured SQL and injected single-client transaction apply/verify, not a network connection.",
+    "IMPLEMENTATION_SHA256": {
+      "apps/union-eyes/scripts/provision-runtime-db-roles.ts": "63eb62e38f11801a518c3c367b582849ff1c55c1a03015b8ed70692a21b29098",
+      "apps/union-eyes/scripts/provisioning/governed-provisioning.ts": "866cb29a794bb0086b6f25b4408dbd0a97ebadb8aaf60ee3cac76598f9149990",
+      "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts": "1d80bae7b14f8f07be52b363338ec16fce6cdf55a1e5df835970dad282b77031"
+    },
+    "W3E_AUTHORIZED_ALIGNMENT": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT.json"
+  },
+  "roleSpecifications": [
+    {
+      "ROLE_CLASS": "MIGRATION_ADMIN",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "PRINCIPAL_BINDING": "MIGRATION_ADMIN_PRINCIPAL",
+      "FROZEN_REQUIRED_NAME": null,
+      "LOGIN_EXPECTATION": "NOLOGIN",
+      "LOGIN_PRINCIPAL_BINDING": "MIGRATION_ADMIN_LOGIN_PRINCIPAL",
+      "AUTHENTICATION_AND_ROTATION_AUTHORITY": "EXTERNAL_SECRET_DEPLOYMENT_AUTHORITY_NOT_W3",
+      "BYPASSRLS_EXPECTATION": "NO",
+      "SUPERUSER_EXPECTATION": "NO",
+      "CREATEDB_EXPECTATION": "NO",
+      "CREATEROLE_EXPECTATION": "NO",
+      "REPLICATION_EXPECTATION": "NO",
+      "INHERIT_EXPECTATION": "NO",
+      "OWNERSHIP_EXPECTATION": "Governed producer only, never runtime; exact delegation/owner approval required before apply",
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE"
+      ],
+      "TEMP_EXPECTATION": "DENIED",
+      "DATABASE_CONNECT_EXPECTATION": "GRANT_NAMED_ONLY",
+      "SCHEMA_USAGE_EXPECTATION": "public USAGE",
+      "SCHEMA_CREATE_EXPECTATION": "public CREATE",
+      "MAY_OWN_DOMAIN_TABLES": true,
+      "MAY_OWN_PLATFORM_HELPERS": true,
+      "MAY_OWN_FINANCIAL_TABLES": false,
+      "ROTATION_AUTHORITY": "NOT_APPLICABLE_TO_NOLOGIN_AUTHORIZATION_ROLE",
+      "CREATION_AUTHORITY": "Governed Layer 0 provisioning implementation, platform operator approved; no undocumented manual preexistence",
+      "ROLE_MEMBERSHIP_EXPECTATION": "EXACT_EXTERNAL_LOGIN_TO_AUTHORIZATION_ROLE_ONLY",
+      "POST_BOOTSTRAP_USAGE_EXPECTATION": "No permanent application/runtime use; separately approved delegation/credential activation only"
+    },
+    {
+      "ROLE_CLASS": "APPLICATION_RUNTIME",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "PRINCIPAL_BINDING": "APPLICATION_RUNTIME_PRINCIPAL",
+      "FROZEN_REQUIRED_NAME": "union_eyes_runtime",
+      "LOGIN_EXPECTATION": "NOLOGIN",
+      "LOGIN_PRINCIPAL_BINDING": "APPLICATION_RUNTIME_LOGIN_PRINCIPAL",
+      "AUTHENTICATION_AND_ROTATION_AUTHORITY": "EXTERNAL_SECRET_DEPLOYMENT_AUTHORITY_NOT_W3",
+      "BYPASSRLS_EXPECTATION": "NO",
+      "SUPERUSER_EXPECTATION": "NO",
+      "CREATEDB_EXPECTATION": "NO",
+      "CREATEROLE_EXPECTATION": "NO",
+      "REPLICATION_EXPECTATION": "NO",
+      "INHERIT_EXPECTATION": "NO",
+      "OWNERSHIP_EXPECTATION": "No database/schema/domain/platform/financial ownership",
+      "SEARCH_PATH_CONTRACT_IDS": ["UE-W2-PATH-UE_APPLICATION_RUNTIME"],
+      "TEMP_EXPECTATION": "DENIED",
+      "DATABASE_CONNECT_EXPECTATION": "GRANT_NAMED_ONLY",
+      "SCHEMA_USAGE_EXPECTATION": "public USAGE",
+      "SCHEMA_CREATE_EXPECTATION": "DENIED",
+      "MAY_OWN_DOMAIN_TABLES": false,
+      "MAY_OWN_PLATFORM_HELPERS": false,
+      "MAY_OWN_FINANCIAL_TABLES": false,
+      "ROTATION_AUTHORITY": "NOT_APPLICABLE_TO_NOLOGIN_AUTHORIZATION_ROLE",
+      "CREATION_AUTHORITY": "Governed Layer 0 provisioning implementation, platform operator approved; no undocumented manual preexistence",
+      "ROLE_MEMBERSHIP_EXPECTATION": "EXACT_EXTERNAL_LOGIN_TO_AUTHORIZATION_ROLE_ONLY",
+      "POST_BOOTSTRAP_USAGE_EXPECTATION": "Bounded object grants only after W4/W6/W7 materialization; no ALL PRIVILEGES"
+    },
+    {
+      "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "PRINCIPAL_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_PRINCIPAL",
+      "FROZEN_REQUIRED_NAME": "union_eyes_system",
+      "LOGIN_EXPECTATION": "NOLOGIN",
+      "LOGIN_PRINCIPAL_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_LOGIN_PRINCIPAL",
+      "AUTHENTICATION_AND_ROTATION_AUTHORITY": "EXTERNAL_SECRET_DEPLOYMENT_AUTHORITY_NOT_W3",
+      "BYPASSRLS_EXPECTATION": "NO",
+      "SUPERUSER_EXPECTATION": "NO",
+      "CREATEDB_EXPECTATION": "NO",
+      "CREATEROLE_EXPECTATION": "NO",
+      "REPLICATION_EXPECTATION": "NO",
+      "INHERIT_EXPECTATION": "NO",
+      "OWNERSHIP_EXPECTATION": "No database/schema/domain/platform/financial ownership",
+      "SEARCH_PATH_CONTRACT_IDS": ["UE-W2-PATH-UE_SYSTEM_RUNTIME"],
+      "TEMP_EXPECTATION": "DENIED",
+      "DATABASE_CONNECT_EXPECTATION": "GRANT_NAMED_ONLY",
+      "SCHEMA_USAGE_EXPECTATION": "public USAGE",
+      "SCHEMA_CREATE_EXPECTATION": "DENIED",
+      "MAY_OWN_DOMAIN_TABLES": false,
+      "MAY_OWN_PLATFORM_HELPERS": false,
+      "MAY_OWN_FINANCIAL_TABLES": false,
+      "ROTATION_AUTHORITY": "NOT_APPLICABLE_TO_NOLOGIN_AUTHORIZATION_ROLE",
+      "CREATION_AUTHORITY": "Governed Layer 0 provisioning implementation, platform operator approved; no undocumented manual preexistence",
+      "ROLE_MEMBERSHIP_EXPECTATION": "EXACT_EXTERNAL_LOGIN_TO_AUTHORIZATION_ROLE_ONLY",
+      "POST_BOOTSTRAP_USAGE_EXPECTATION": "Bounded object grants only after W4/W6/W7 materialization; no ALL PRIVILEGES"
+    },
+    {
+      "ROLE_CLASS": "FINANCIAL_MIGRATION",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "PRINCIPAL_BINDING": "FINANCIAL_MIGRATION_PRINCIPAL",
+      "FROZEN_REQUIRED_NAME": null,
+      "LOGIN_EXPECTATION": "NOLOGIN",
+      "LOGIN_PRINCIPAL_BINDING": "FINANCIAL_MIGRATION_LOGIN_PRINCIPAL",
+      "AUTHENTICATION_AND_ROTATION_AUTHORITY": "EXTERNAL_SECRET_DEPLOYMENT_AUTHORITY_NOT_W3",
+      "BYPASSRLS_EXPECTATION": "NO",
+      "SUPERUSER_EXPECTATION": "NO",
+      "CREATEDB_EXPECTATION": "NO",
+      "CREATEROLE_EXPECTATION": "NO",
+      "REPLICATION_EXPECTATION": "NO",
+      "INHERIT_EXPECTATION": "NO",
+      "OWNERSHIP_EXPECTATION": "Governed producer only, never runtime; exact delegation/owner approval required before apply",
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-FINANCIAL_PROVISIONING",
+        "UE-W2-PATH-FINANCIAL_MIGRATION"
+      ],
+      "TEMP_EXPECTATION": "DENIED",
+      "DATABASE_CONNECT_EXPECTATION": "GRANT_NAMED_ONLY",
+      "SCHEMA_USAGE_EXPECTATION": "public USAGE",
+      "SCHEMA_CREATE_EXPECTATION": "public CREATE",
+      "MAY_OWN_DOMAIN_TABLES": false,
+      "MAY_OWN_PLATFORM_HELPERS": false,
+      "MAY_OWN_FINANCIAL_TABLES": true,
+      "ROTATION_AUTHORITY": "NOT_APPLICABLE_TO_NOLOGIN_AUTHORIZATION_ROLE",
+      "CREATION_AUTHORITY": "Governed Layer 0 provisioning implementation, platform operator approved; no undocumented manual preexistence",
+      "ROLE_MEMBERSHIP_EXPECTATION": "EXACT_EXTERNAL_LOGIN_TO_AUTHORIZATION_ROLE_ONLY",
+      "POST_BOOTSTRAP_USAGE_EXPECTATION": "No permanent application/runtime use; separately approved delegation/credential activation only"
+    },
+    {
+      "ROLE_CLASS": "FINANCIAL_RUNTIME",
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "PRINCIPAL_BINDING": "FINANCIAL_RUNTIME_PRINCIPAL",
+      "FROZEN_REQUIRED_NAME": null,
+      "LOGIN_EXPECTATION": "NOLOGIN",
+      "LOGIN_PRINCIPAL_BINDING": "FINANCIAL_RUNTIME_LOGIN_PRINCIPAL",
+      "AUTHENTICATION_AND_ROTATION_AUTHORITY": "EXTERNAL_SECRET_DEPLOYMENT_AUTHORITY_NOT_W3",
+      "BYPASSRLS_EXPECTATION": "NO",
+      "SUPERUSER_EXPECTATION": "NO",
+      "CREATEDB_EXPECTATION": "NO",
+      "CREATEROLE_EXPECTATION": "NO",
+      "REPLICATION_EXPECTATION": "NO",
+      "INHERIT_EXPECTATION": "NO",
+      "OWNERSHIP_EXPECTATION": "No database/schema/domain/platform/financial ownership",
+      "SEARCH_PATH_CONTRACT_IDS": ["UE-W2-PATH-FINANCIAL_RUNTIME"],
+      "TEMP_EXPECTATION": "DENIED",
+      "DATABASE_CONNECT_EXPECTATION": "GRANT_NAMED_ONLY",
+      "SCHEMA_USAGE_EXPECTATION": "public USAGE",
+      "SCHEMA_CREATE_EXPECTATION": "DENIED",
+      "MAY_OWN_DOMAIN_TABLES": false,
+      "MAY_OWN_PLATFORM_HELPERS": false,
+      "MAY_OWN_FINANCIAL_TABLES": false,
+      "ROTATION_AUTHORITY": "NOT_APPLICABLE_TO_NOLOGIN_AUTHORIZATION_ROLE",
+      "CREATION_AUTHORITY": "Governed Layer 0 provisioning implementation, platform operator approved; no undocumented manual preexistence",
+      "ROLE_MEMBERSHIP_EXPECTATION": "EXACT_EXTERNAL_LOGIN_TO_AUTHORIZATION_ROLE_ONLY",
+      "POST_BOOTSTRAP_USAGE_EXPECTATION": "Bounded object grants only after W4/W6/W7 materialization; no ALL PRIVILEGES"
+    }
+  ],
+  "extensionSpecifications": [
+    {
+      "EXTENSION": "uuid-ossp",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "INSTALL_SCHEMA": "public",
+      "REQUIRED_BEFORE": "DEPENDENT_OPERATIONAL_MIGRATIONS",
+      "INSTALL_AUTHORITY": "Separately approved provisioning operator on same target/client; install privilege prerequisite, never runtime role escalation",
+      "MANDATORY": true,
+      "FAILURE_POLICY": "FAIL_FAST",
+      "VERSION_POLICY": "PLATFORM_PROVIDED_VERSION",
+      "RELOCATION_POLICY": "NEVER_MOVE_EXISTING; explicit SCHEMA on install; availability/control metadata must support public placement"
+    },
+    {
+      "EXTENSION": "pgcrypto",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "INSTALL_SCHEMA": "public",
+      "REQUIRED_BEFORE": "DEPENDENT_OPERATIONAL_MIGRATIONS",
+      "INSTALL_AUTHORITY": "Separately approved provisioning operator on same target/client; install privilege prerequisite, never runtime role escalation",
+      "MANDATORY": true,
+      "FAILURE_POLICY": "FAIL_FAST",
+      "VERSION_POLICY": "PLATFORM_PROVIDED_VERSION",
+      "RELOCATION_POLICY": "NEVER_MOVE_EXISTING; explicit SCHEMA on install; availability/control metadata must support public placement"
+    },
+    {
+      "EXTENSION": "pg_trgm",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "INSTALL_SCHEMA": "public",
+      "REQUIRED_BEFORE": "DEPENDENT_OPERATIONAL_MIGRATIONS",
+      "INSTALL_AUTHORITY": "Separately approved provisioning operator on same target/client; install privilege prerequisite, never runtime role escalation",
+      "MANDATORY": true,
+      "FAILURE_POLICY": "FAIL_FAST",
+      "VERSION_POLICY": "PLATFORM_PROVIDED_VERSION",
+      "RELOCATION_POLICY": "NEVER_MOVE_EXISTING; explicit SCHEMA on install; availability/control metadata must support public placement"
+    },
+    {
+      "EXTENSION": "btree_gin",
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "INSTALL_SCHEMA": "public",
+      "REQUIRED_BEFORE": "DEPENDENT_OPERATIONAL_MIGRATIONS",
+      "INSTALL_AUTHORITY": "Separately approved provisioning operator on same target/client; install privilege prerequisite, never runtime role escalation",
+      "MANDATORY": true,
+      "FAILURE_POLICY": "FAIL_FAST",
+      "VERSION_POLICY": "PLATFORM_PROVIDED_VERSION",
+      "RELOCATION_POLICY": "NEVER_MOVE_EXISTING; explicit SCHEMA on install; availability/control metadata must support public placement"
+    }
+  ],
+  "VECTOR_EXTENSION_DISPOSITION": "OPTIONAL_GUARDED_NOT_BASELINE_REQUIRED",
+  "targetValidation": {
+    "SOURCE": "docs/union-eyes/reality-remediation/UE_DATABASE_TARGET_SCHEMA_SEARCH_PATH_CONTRACT.json",
+    "REQUIRED_SCOPES": ["UE_OPERATIONAL", "FINANCIAL_SERVICE"],
+    "REQUIRED_FIELDS": [
+      "TARGET_ID",
+      "DATABASE_SCOPE_ID",
+      "DATABASE_ACTOR_ID",
+      "HOST_BINDING",
+      "PORT_BINDING",
+      "DATABASE_NAME_BINDING",
+      "ROLE_CLASS",
+      "SEARCH_PATH_CONTRACT_ID",
+      "ENVIRONMENT_ID",
+      "HOST",
+      "PORT",
+      "DATABASE_NAME",
+      "SEARCH_PATH"
+    ],
+    "REJECTIONS": [
+      "Missing/duplicate scope",
+      "Wrong actor/target/binding/path/role",
+      "Ambient/default target",
+      "Unknown URL/PG* overrides",
+      "Cross-scope physical target collision",
+      "Cross-environment",
+      "Missing/injected/reserved principal",
+      "Principal alias/cross-scope collision",
+      "Credential/secret-bearing descriptor"
+    ],
+    "PRE_SQL_IDENTITY_CHECK": "Exact target descriptor plus current_database/current_user/current_role/fixed path/no temp namespace; one injected transaction client; W8 must supply authenticated descriptor/catalog adapter"
+  },
+  "privilegeContract": {
+    "TEMP_ALLOWED": "NO for all five role classes",
+    "PUBLIC_DATABASE_PRIVILEGES": {
+      "CONNECT": "REVOKE; grant scoped named roles only",
+      "TEMP": "REVOKE",
+      "CREATE": "REVOKE"
+    },
+    "PUBLIC_SCHEMA_PRIVILEGES": {
+      "USAGE": "REVOKE PUBLIC; grant scoped named roles only",
+      "CREATE": "REVOKE PUBLIC; grant only governed producer class after approval"
+    },
+    "NAMED_RUNTIME_SCHEMA_CREATE": "DENIED",
+    "ROLE_MEMBERSHIPS": "EXACT_EXTERNAL_LOGIN_TO_AUTHORIZATION_ROLE_ONLY; ADMIN_OPTION NO; complete graph rejects all extras/reverse/nested/cross-scope/runtime-to-migration edges",
+    "PUBLIC_FUNCTION_EXECUTE": "Revoke global AND public-schema default EXECUTE for future approved producers; no hypothetical object grants",
+    "DEFAULT_PRIVILEGES": "W3 manages default PUBLIC EXECUTE restriction only; W4/W6/W7 materialize exact object grants after creation",
+    "EXISTING_OBJECT_FUNCTION_ACLS": "Inventory/closure remains W4/W6/W7; no ALL FUNCTIONS or ALL TABLES broad grant/revoke in W3",
+    "OWNERSHIP": "Runtime authorization roles own no domain/helper/financial objects. Migration authorization owns only legitimate scope-local producer objects; no database/schema/table ownership transfers.",
+    "NOLOGIN_STAGING": "Authorization roles remain permanently NOLOGIN; distinct external LOGIN authentication and secret rotation are not W3",
+    "PASSWORDS": "No password generation/read/log/SQL/persistence in W3; future credential adapter consumes values at execution only, not artifacts",
+    "OPERATOR": "Separate external operator prerequisite with install/role/default-privilege authority; no implicit role escalation or runtime reuse",
+    "SCHEMA_PREEXISTENCE": "public must exist with approved nonruntime owner; this provisioner creates no schema",
+    "IDENTITY_VS_PATH": "No ALTER ROLE default search_path: migration/provisioning share a role class but different W2 paths. W8 sets/validates per actor connection."
+  },
+  "planTemplates": [
+    {
+      "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+      "TARGET_CONTRACT": {
+        "TARGET_ID": "UE-W2-TARGET-UE_OPERATIONAL",
+        "DATABASE_ACTOR_ID": "UE-W2-ACTOR-PROVISIONING",
+        "ROLE_CLASS": "MIGRATION_ADMIN",
+        "HOST_BINDING": "UE_OPERATIONAL_PGHOST",
+        "PORT_BINDING": "UE_OPERATIONAL_PGPORT",
+        "DATABASE_NAME_BINDING": "UE_OPERATIONAL_PGDATABASE",
+        "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-UE_PROVISIONING"
+      },
+      "PRINCIPAL_PLACEHOLDERS": {
+        "MIGRATION_ADMIN": "REQUIRED_MIGRATION_ADMIN_PRINCIPAL",
+        "APPLICATION_RUNTIME": "union_eyes_runtime",
+        "SYSTEM_OR_INTERNAL_RUNTIME": "union_eyes_system"
+      },
+      "DELEGATION_BINDINGS": [
+        {
+          "ROLE_CLASS": "MIGRATION_ADMIN",
+          "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+          "AUTHORIZATION_ROLE": "REQUIRED_MIGRATION_ADMIN_PRINCIPAL",
+          "LOGIN_PRINCIPAL": "REQUIRED_MIGRATION_ADMIN_LOGIN"
+        },
+        {
+          "ROLE_CLASS": "APPLICATION_RUNTIME",
+          "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+          "AUTHORIZATION_ROLE": "union_eyes_runtime",
+          "LOGIN_PRINCIPAL": "REQUIRED_APPLICATION_RUNTIME_LOGIN"
+        },
+        {
+          "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+          "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+          "AUTHORIZATION_ROLE": "union_eyes_system",
+          "LOGIN_PRINCIPAL": "REQUIRED_SYSTEM_RUNTIME_LOGIN"
+        },
+        {
+          "ROLE_CLASS": "FINANCIAL_MIGRATION",
+          "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+          "AUTHORIZATION_ROLE": "REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL",
+          "LOGIN_PRINCIPAL": "REQUIRED_FINANCIAL_MIGRATION_LOGIN"
+        },
+        {
+          "ROLE_CLASS": "FINANCIAL_RUNTIME",
+          "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+          "AUTHORIZATION_ROLE": "REQUIRED_FINANCIAL_RUNTIME_PRINCIPAL",
+          "LOGIN_PRINCIPAL": "REQUIRED_FINANCIAL_RUNTIME_LOGIN"
+        }
+      ],
+      "DELEGATION_BINDING_STATE": "NOT_RUNTIME_BOUND",
+      "OPERATIONS": [
+        {
+          "ID": "CREATE-MIGRATION_ADMIN",
+          "KIND": "CREATE_ROLE_IF_ABSENT",
+          "ROLE_CLASS": "MIGRATION_ADMIN",
+          "SQL": "CREATE ROLE \"REQUIRED_MIGRATION_ADMIN_PRINCIPAL\" NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT;"
+        },
+        {
+          "ID": "CREATE-APPLICATION_RUNTIME",
+          "KIND": "CREATE_ROLE_IF_ABSENT",
+          "ROLE_CLASS": "APPLICATION_RUNTIME",
+          "SQL": "CREATE ROLE \"union_eyes_runtime\" NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT;"
+        },
+        {
+          "ID": "CREATE-SYSTEM_OR_INTERNAL_RUNTIME",
+          "KIND": "CREATE_ROLE_IF_ABSENT",
+          "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+          "SQL": "CREATE ROLE \"union_eyes_system\" NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT;"
+        },
+        {
+          "ID": "EXTENSION-uuid-ossp",
+          "KIND": "INSTALL_EXTENSION_IF_ABSENT",
+          "EXTENSION": "uuid-ossp",
+          "SQL": "CREATE EXTENSION \"uuid-ossp\" WITH SCHEMA \"public\";"
+        },
+        {
+          "ID": "EXTENSION-pgcrypto",
+          "KIND": "INSTALL_EXTENSION_IF_ABSENT",
+          "EXTENSION": "pgcrypto",
+          "SQL": "CREATE EXTENSION \"pgcrypto\" WITH SCHEMA \"public\";"
+        },
+        {
+          "ID": "EXTENSION-pg_trgm",
+          "KIND": "INSTALL_EXTENSION_IF_ABSENT",
+          "EXTENSION": "pg_trgm",
+          "SQL": "CREATE EXTENSION \"pg_trgm\" WITH SCHEMA \"public\";"
+        },
+        {
+          "ID": "EXTENSION-btree_gin",
+          "KIND": "INSTALL_EXTENSION_IF_ABSENT",
+          "EXTENSION": "btree_gin",
+          "SQL": "CREATE EXTENSION \"btree_gin\" WITH SCHEMA \"public\";"
+        },
+        {
+          "ID": "PUBLIC-DATABASE-BOUNDARY",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE CONNECT, TEMPORARY, CREATE ON DATABASE \"REQUIRED_UE_OPERATIONAL_DATABASE\" FROM PUBLIC;"
+        },
+        {
+          "ID": "PUBLIC-SCHEMA-BOUNDARY",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE USAGE, CREATE ON SCHEMA \"public\" FROM PUBLIC;"
+        },
+        {
+          "ID": "BOUNDARY-MIGRATION_ADMIN-1",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE TEMPORARY, CREATE ON DATABASE \"REQUIRED_UE_OPERATIONAL_DATABASE\" FROM \"REQUIRED_MIGRATION_ADMIN_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-MIGRATION_ADMIN-2",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT CONNECT ON DATABASE \"REQUIRED_UE_OPERATIONAL_DATABASE\" TO \"REQUIRED_MIGRATION_ADMIN_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-MIGRATION_ADMIN-3",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT USAGE ON SCHEMA \"public\" TO \"REQUIRED_MIGRATION_ADMIN_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-MIGRATION_ADMIN-4",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT CREATE ON SCHEMA \"public\" TO \"REQUIRED_MIGRATION_ADMIN_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-MIGRATION_ADMIN-5",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "ALTER DEFAULT PRIVILEGES FOR ROLE \"REQUIRED_MIGRATION_ADMIN_PRINCIPAL\" REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;"
+        },
+        {
+          "ID": "BOUNDARY-MIGRATION_ADMIN-6",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "ALTER DEFAULT PRIVILEGES FOR ROLE \"REQUIRED_MIGRATION_ADMIN_PRINCIPAL\" IN SCHEMA \"public\" REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;"
+        },
+        {
+          "ID": "BOUNDARY-APPLICATION_RUNTIME-1",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE TEMPORARY, CREATE ON DATABASE \"REQUIRED_UE_OPERATIONAL_DATABASE\" FROM \"union_eyes_runtime\";"
+        },
+        {
+          "ID": "BOUNDARY-APPLICATION_RUNTIME-2",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT CONNECT ON DATABASE \"REQUIRED_UE_OPERATIONAL_DATABASE\" TO \"union_eyes_runtime\";"
+        },
+        {
+          "ID": "BOUNDARY-APPLICATION_RUNTIME-3",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT USAGE ON SCHEMA \"public\" TO \"union_eyes_runtime\";"
+        },
+        {
+          "ID": "BOUNDARY-APPLICATION_RUNTIME-4",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE CREATE ON SCHEMA \"public\" FROM \"union_eyes_runtime\";"
+        },
+        {
+          "ID": "BOUNDARY-SYSTEM_OR_INTERNAL_RUNTIME-1",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE TEMPORARY, CREATE ON DATABASE \"REQUIRED_UE_OPERATIONAL_DATABASE\" FROM \"union_eyes_system\";"
+        },
+        {
+          "ID": "BOUNDARY-SYSTEM_OR_INTERNAL_RUNTIME-2",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT CONNECT ON DATABASE \"REQUIRED_UE_OPERATIONAL_DATABASE\" TO \"union_eyes_system\";"
+        },
+        {
+          "ID": "BOUNDARY-SYSTEM_OR_INTERNAL_RUNTIME-3",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT USAGE ON SCHEMA \"public\" TO \"union_eyes_system\";"
+        },
+        {
+          "ID": "BOUNDARY-SYSTEM_OR_INTERNAL_RUNTIME-4",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE CREATE ON SCHEMA \"public\" FROM \"union_eyes_system\";"
+        },
+        {
+          "ID": "DELEGATE-MIGRATION_ADMIN",
+          "KIND": "GRANT_MEMBERSHIP_IF_ABSENT",
+          "ROLE_CLASS": "MIGRATION_ADMIN",
+          "SQL": "GRANT \"REQUIRED_MIGRATION_ADMIN_PRINCIPAL\" TO \"REQUIRED_MIGRATION_ADMIN_LOGIN\";"
+        },
+        {
+          "ID": "DELEGATE-APPLICATION_RUNTIME",
+          "KIND": "GRANT_MEMBERSHIP_IF_ABSENT",
+          "ROLE_CLASS": "APPLICATION_RUNTIME",
+          "SQL": "GRANT \"union_eyes_runtime\" TO \"REQUIRED_APPLICATION_RUNTIME_LOGIN\";"
+        },
+        {
+          "ID": "DELEGATE-SYSTEM_OR_INTERNAL_RUNTIME",
+          "KIND": "GRANT_MEMBERSHIP_IF_ABSENT",
+          "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+          "SQL": "GRANT \"union_eyes_system\" TO \"REQUIRED_SYSTEM_RUNTIME_LOGIN\";"
+        }
+      ],
+      "VERIFY_SQL": [
+        {
+          "ID": "TARGET",
+          "SQL": "SELECT pg_catalog.current_database() AS database_name, CURRENT_USER AS current_user, CURRENT_ROLE AS current_role, pg_catalog.current_setting('search_path') AS search_path, pg_catalog.pg_my_temp_schema() <> 0 AS temporary_namespace_present;",
+          "PARAMETER_BINDINGS": []
+        },
+        {
+          "ID": "ROLE-ATTRIBUTES",
+          "SQL": "SELECT rolname, rolcanlogin, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole, rolreplication, rolinherit FROM pg_catalog.pg_roles WHERE rolname = ANY($1::text[]) ORDER BY rolname;",
+          "PARAMETER_BINDINGS": ["scope authorization and external login principal names"]
+        },
+        {
+          "ID": "ROLE-MEMBERSHIPS",
+          "SQL": "SELECT granted.rolname AS granted_role, member.rolname AS member_role, m.admin_option, COALESCE((pg_catalog.to_jsonb(m)->>'set_option')::boolean, true) AS set_option FROM pg_catalog.pg_auth_members m JOIN pg_catalog.pg_roles granted ON granted.oid = m.roleid JOIN pg_catalog.pg_roles member ON member.oid = m.member ORDER BY granted_role, member_role, m.grantor;",
+          "PARAMETER_BINDINGS": [
+            "Complete cluster membership graph, including every edge touching either authorization roles or bound login principals; never filter away extra/nested/cross-scope edges"
+          ]
+        },
+        {
+          "ID": "OWNERSHIP",
+          "SQL": "SELECT r.rolname, d.dbid, d.classid, d.objid FROM pg_catalog.pg_shdepend d JOIN pg_catalog.pg_roles r ON r.oid = d.refobjid WHERE d.deptype = $1 AND r.rolname = ANY($2::text[]) ORDER BY r.rolname, d.dbid, d.classid, d.objid;",
+          "PARAMETER_BINDINGS": [
+            "o",
+            "scope principal names; includes shared/cross-database ownership"
+          ]
+        },
+        {
+          "ID": "EFFECTIVE-PRIVILEGES",
+          "SQL": "SELECT r.rolname, pg_catalog.has_database_privilege(r.oid, pg_catalog.current_database(), 'CONNECT') AS connect, pg_catalog.has_database_privilege(r.oid, pg_catalog.current_database(), 'TEMP') AS temp, pg_catalog.has_database_privilege(r.oid, pg_catalog.current_database(), 'CREATE') AS database_create, pg_catalog.has_schema_privilege(r.oid, 'public', 'USAGE') AS schema_usage, pg_catalog.has_schema_privilege(r.oid, 'public', 'CREATE') AS schema_create FROM pg_catalog.pg_roles r WHERE r.rolname = ANY($1::text[]) ORDER BY r.rolname;",
+          "PARAMETER_BINDINGS": ["scope principal names"]
+        },
+        {
+          "ID": "DATABASE-PUBLIC-ACL",
+          "SQL": "SELECT a.* FROM pg_catalog.pg_database d CROSS JOIN LATERAL pg_catalog.aclexplode(COALESCE(d.datacl, pg_catalog.acldefault('d', d.datdba))) a WHERE d.datname = pg_catalog.current_database();",
+          "PARAMETER_BINDINGS": []
+        },
+        {
+          "ID": "SCHEMA-PUBLIC-ACL",
+          "SQL": "SELECT a.* FROM pg_catalog.pg_namespace n CROSS JOIN LATERAL pg_catalog.aclexplode(COALESCE(n.nspacl, pg_catalog.acldefault('n', n.nspowner))) a WHERE n.nspname = 'public';",
+          "PARAMETER_BINDINGS": []
+        },
+        {
+          "ID": "EXTENSIONS",
+          "SQL": "SELECT e.extname, e.extversion, n.nspname FROM pg_catalog.pg_extension e JOIN pg_catalog.pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = ANY($1::text[]) ORDER BY e.extname;",
+          "PARAMETER_BINDINGS": ["mandatory scope extension names"]
+        },
+        {
+          "ID": "EXTENSION-AVAILABILITY",
+          "SQL": "SELECT name, version, installed, superuser, trusted, relocatable, schema FROM pg_catalog.pg_available_extension_versions WHERE name = ANY($1::text[]) ORDER BY name, version;",
+          "PARAMETER_BINDINGS": [
+            "mandatory scope extension names; resolve platform default/version and public compatibility"
+          ]
+        },
+        {
+          "ID": "EXTENSION-DEFAULT-VERSION",
+          "SQL": "SELECT name, default_version FROM pg_catalog.pg_available_extensions WHERE name = ANY($1::text[]) ORDER BY name;",
+          "PARAMETER_BINDINGS": ["mandatory scope extension names"]
+        },
+        {
+          "ID": "DEFAULT-PRIVILEGES",
+          "SQL": "SELECT r.rolname AS creator, d.defaclnamespace, d.defaclobjtype, a.* FROM pg_catalog.pg_default_acl d JOIN pg_catalog.pg_roles r ON r.oid = d.defaclrole CROSS JOIN LATERAL pg_catalog.aclexplode(d.defaclacl) a WHERE r.rolname = ANY($1::text[]) ORDER BY creator, d.defaclnamespace, d.defaclobjtype, a.grantee, a.privilege_type;",
+          "PARAMETER_BINDINGS": [
+            "all scoped creator principals; absent global function row implies PostgreSQL PUBLIC EXECUTE default"
+          ]
+        }
+      ],
+      "SQL_SHA256": "2ba5dfc893f950dcc747aa56361207d06a0be16e30b092c436f5e436e7a2bc18",
+      "TEMPLATE_SHA256": "9339f8d166e2ff7f43ce360c4d1b2e0d907290358a1570d25a1eace551d27022",
+      "EXECUTABLE": "NO; placeholders are not principal approvals or endpoint bindings",
+      "GOVERNANCE_BLOCKERS": []
+    },
+    {
+      "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+      "TARGET_CONTRACT": {
+        "TARGET_ID": "UE-W2-TARGET-FINANCIAL_SERVICE",
+        "DATABASE_ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+        "ROLE_CLASS": "FINANCIAL_MIGRATION",
+        "HOST_BINDING": "FINANCIAL_SERVICE_PGHOST",
+        "PORT_BINDING": "FINANCIAL_SERVICE_PGPORT",
+        "DATABASE_NAME_BINDING": "FINANCIAL_SERVICE_PGDATABASE",
+        "SEARCH_PATH_CONTRACT_ID": "UE-W2-PATH-FINANCIAL_PROVISIONING"
+      },
+      "PRINCIPAL_PLACEHOLDERS": {
+        "FINANCIAL_MIGRATION": "REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL",
+        "FINANCIAL_RUNTIME": "REQUIRED_FINANCIAL_RUNTIME_PRINCIPAL"
+      },
+      "DELEGATION_BINDINGS": [
+        {
+          "ROLE_CLASS": "MIGRATION_ADMIN",
+          "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+          "AUTHORIZATION_ROLE": "REQUIRED_MIGRATION_ADMIN_PRINCIPAL",
+          "LOGIN_PRINCIPAL": "REQUIRED_MIGRATION_ADMIN_LOGIN"
+        },
+        {
+          "ROLE_CLASS": "APPLICATION_RUNTIME",
+          "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+          "AUTHORIZATION_ROLE": "union_eyes_runtime",
+          "LOGIN_PRINCIPAL": "REQUIRED_APPLICATION_RUNTIME_LOGIN"
+        },
+        {
+          "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+          "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+          "AUTHORIZATION_ROLE": "union_eyes_system",
+          "LOGIN_PRINCIPAL": "REQUIRED_SYSTEM_RUNTIME_LOGIN"
+        },
+        {
+          "ROLE_CLASS": "FINANCIAL_MIGRATION",
+          "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+          "AUTHORIZATION_ROLE": "REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL",
+          "LOGIN_PRINCIPAL": "REQUIRED_FINANCIAL_MIGRATION_LOGIN"
+        },
+        {
+          "ROLE_CLASS": "FINANCIAL_RUNTIME",
+          "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+          "AUTHORIZATION_ROLE": "REQUIRED_FINANCIAL_RUNTIME_PRINCIPAL",
+          "LOGIN_PRINCIPAL": "REQUIRED_FINANCIAL_RUNTIME_LOGIN"
+        }
+      ],
+      "DELEGATION_BINDING_STATE": "NOT_RUNTIME_BOUND",
+      "OPERATIONS": [
+        {
+          "ID": "CREATE-FINANCIAL_MIGRATION",
+          "KIND": "CREATE_ROLE_IF_ABSENT",
+          "ROLE_CLASS": "FINANCIAL_MIGRATION",
+          "SQL": "CREATE ROLE \"REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL\" NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT;"
+        },
+        {
+          "ID": "CREATE-FINANCIAL_RUNTIME",
+          "KIND": "CREATE_ROLE_IF_ABSENT",
+          "ROLE_CLASS": "FINANCIAL_RUNTIME",
+          "SQL": "CREATE ROLE \"REQUIRED_FINANCIAL_RUNTIME_PRINCIPAL\" NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT;"
+        },
+        {
+          "ID": "PUBLIC-DATABASE-BOUNDARY",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE CONNECT, TEMPORARY, CREATE ON DATABASE \"REQUIRED_FINANCIAL_SERVICE_DATABASE\" FROM PUBLIC;"
+        },
+        {
+          "ID": "PUBLIC-SCHEMA-BOUNDARY",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE USAGE, CREATE ON SCHEMA \"public\" FROM PUBLIC;"
+        },
+        {
+          "ID": "BOUNDARY-FINANCIAL_MIGRATION-1",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE TEMPORARY, CREATE ON DATABASE \"REQUIRED_FINANCIAL_SERVICE_DATABASE\" FROM \"REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-FINANCIAL_MIGRATION-2",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT CONNECT ON DATABASE \"REQUIRED_FINANCIAL_SERVICE_DATABASE\" TO \"REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-FINANCIAL_MIGRATION-3",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT USAGE ON SCHEMA \"public\" TO \"REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-FINANCIAL_MIGRATION-4",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT CREATE ON SCHEMA \"public\" TO \"REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-FINANCIAL_MIGRATION-5",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "ALTER DEFAULT PRIVILEGES FOR ROLE \"REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL\" REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;"
+        },
+        {
+          "ID": "BOUNDARY-FINANCIAL_MIGRATION-6",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "ALTER DEFAULT PRIVILEGES FOR ROLE \"REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL\" IN SCHEMA \"public\" REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;"
+        },
+        {
+          "ID": "BOUNDARY-FINANCIAL_RUNTIME-1",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE TEMPORARY, CREATE ON DATABASE \"REQUIRED_FINANCIAL_SERVICE_DATABASE\" FROM \"REQUIRED_FINANCIAL_RUNTIME_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-FINANCIAL_RUNTIME-2",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT CONNECT ON DATABASE \"REQUIRED_FINANCIAL_SERVICE_DATABASE\" TO \"REQUIRED_FINANCIAL_RUNTIME_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-FINANCIAL_RUNTIME-3",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "GRANT USAGE ON SCHEMA \"public\" TO \"REQUIRED_FINANCIAL_RUNTIME_PRINCIPAL\";"
+        },
+        {
+          "ID": "BOUNDARY-FINANCIAL_RUNTIME-4",
+          "KIND": "PRIVILEGE_BOUNDARY",
+          "SQL": "REVOKE CREATE ON SCHEMA \"public\" FROM \"REQUIRED_FINANCIAL_RUNTIME_PRINCIPAL\";"
+        },
+        {
+          "ID": "DELEGATE-FINANCIAL_MIGRATION",
+          "KIND": "GRANT_MEMBERSHIP_IF_ABSENT",
+          "ROLE_CLASS": "FINANCIAL_MIGRATION",
+          "SQL": "GRANT \"REQUIRED_FINANCIAL_MIGRATION_PRINCIPAL\" TO \"REQUIRED_FINANCIAL_MIGRATION_LOGIN\";"
+        },
+        {
+          "ID": "DELEGATE-FINANCIAL_RUNTIME",
+          "KIND": "GRANT_MEMBERSHIP_IF_ABSENT",
+          "ROLE_CLASS": "FINANCIAL_RUNTIME",
+          "SQL": "GRANT \"REQUIRED_FINANCIAL_RUNTIME_PRINCIPAL\" TO \"REQUIRED_FINANCIAL_RUNTIME_LOGIN\";"
+        }
+      ],
+      "VERIFY_SQL": [
+        {
+          "ID": "TARGET",
+          "SQL": "SELECT pg_catalog.current_database() AS database_name, CURRENT_USER AS current_user, CURRENT_ROLE AS current_role, pg_catalog.current_setting('search_path') AS search_path, pg_catalog.pg_my_temp_schema() <> 0 AS temporary_namespace_present;",
+          "PARAMETER_BINDINGS": []
+        },
+        {
+          "ID": "ROLE-ATTRIBUTES",
+          "SQL": "SELECT rolname, rolcanlogin, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole, rolreplication, rolinherit FROM pg_catalog.pg_roles WHERE rolname = ANY($1::text[]) ORDER BY rolname;",
+          "PARAMETER_BINDINGS": ["scope authorization and external login principal names"]
+        },
+        {
+          "ID": "ROLE-MEMBERSHIPS",
+          "SQL": "SELECT granted.rolname AS granted_role, member.rolname AS member_role, m.admin_option, COALESCE((pg_catalog.to_jsonb(m)->>'set_option')::boolean, true) AS set_option FROM pg_catalog.pg_auth_members m JOIN pg_catalog.pg_roles granted ON granted.oid = m.roleid JOIN pg_catalog.pg_roles member ON member.oid = m.member ORDER BY granted_role, member_role, m.grantor;",
+          "PARAMETER_BINDINGS": [
+            "Complete cluster membership graph, including every edge touching either authorization roles or bound login principals; never filter away extra/nested/cross-scope edges"
+          ]
+        },
+        {
+          "ID": "OWNERSHIP",
+          "SQL": "SELECT r.rolname, d.dbid, d.classid, d.objid FROM pg_catalog.pg_shdepend d JOIN pg_catalog.pg_roles r ON r.oid = d.refobjid WHERE d.deptype = $1 AND r.rolname = ANY($2::text[]) ORDER BY r.rolname, d.dbid, d.classid, d.objid;",
+          "PARAMETER_BINDINGS": [
+            "o",
+            "scope principal names; includes shared/cross-database ownership"
+          ]
+        },
+        {
+          "ID": "EFFECTIVE-PRIVILEGES",
+          "SQL": "SELECT r.rolname, pg_catalog.has_database_privilege(r.oid, pg_catalog.current_database(), 'CONNECT') AS connect, pg_catalog.has_database_privilege(r.oid, pg_catalog.current_database(), 'TEMP') AS temp, pg_catalog.has_database_privilege(r.oid, pg_catalog.current_database(), 'CREATE') AS database_create, pg_catalog.has_schema_privilege(r.oid, 'public', 'USAGE') AS schema_usage, pg_catalog.has_schema_privilege(r.oid, 'public', 'CREATE') AS schema_create FROM pg_catalog.pg_roles r WHERE r.rolname = ANY($1::text[]) ORDER BY r.rolname;",
+          "PARAMETER_BINDINGS": ["scope principal names"]
+        },
+        {
+          "ID": "DATABASE-PUBLIC-ACL",
+          "SQL": "SELECT a.* FROM pg_catalog.pg_database d CROSS JOIN LATERAL pg_catalog.aclexplode(COALESCE(d.datacl, pg_catalog.acldefault('d', d.datdba))) a WHERE d.datname = pg_catalog.current_database();",
+          "PARAMETER_BINDINGS": []
+        },
+        {
+          "ID": "SCHEMA-PUBLIC-ACL",
+          "SQL": "SELECT a.* FROM pg_catalog.pg_namespace n CROSS JOIN LATERAL pg_catalog.aclexplode(COALESCE(n.nspacl, pg_catalog.acldefault('n', n.nspowner))) a WHERE n.nspname = 'public';",
+          "PARAMETER_BINDINGS": []
+        },
+        {
+          "ID": "EXTENSIONS",
+          "SQL": "SELECT e.extname, e.extversion, n.nspname FROM pg_catalog.pg_extension e JOIN pg_catalog.pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = ANY($1::text[]) ORDER BY e.extname;",
+          "PARAMETER_BINDINGS": ["mandatory scope extension names"]
+        },
+        {
+          "ID": "EXTENSION-AVAILABILITY",
+          "SQL": "SELECT name, version, installed, superuser, trusted, relocatable, schema FROM pg_catalog.pg_available_extension_versions WHERE name = ANY($1::text[]) ORDER BY name, version;",
+          "PARAMETER_BINDINGS": [
+            "mandatory scope extension names; resolve platform default/version and public compatibility"
+          ]
+        },
+        {
+          "ID": "EXTENSION-DEFAULT-VERSION",
+          "SQL": "SELECT name, default_version FROM pg_catalog.pg_available_extensions WHERE name = ANY($1::text[]) ORDER BY name;",
+          "PARAMETER_BINDINGS": ["mandatory scope extension names"]
+        },
+        {
+          "ID": "DEFAULT-PRIVILEGES",
+          "SQL": "SELECT r.rolname AS creator, d.defaclnamespace, d.defaclobjtype, a.* FROM pg_catalog.pg_default_acl d JOIN pg_catalog.pg_roles r ON r.oid = d.defaclrole CROSS JOIN LATERAL pg_catalog.aclexplode(d.defaclacl) a WHERE r.rolname = ANY($1::text[]) ORDER BY creator, d.defaclnamespace, d.defaclobjtype, a.grantee, a.privilege_type;",
+          "PARAMETER_BINDINGS": [
+            "all scoped creator principals; absent global function row implies PostgreSQL PUBLIC EXECUTE default"
+          ]
+        }
+      ],
+      "SQL_SHA256": "fbadab0f0762a21e4c55e58dad424ae0d1e401a7d4463a80946fd061f078f3a3",
+      "TEMPLATE_SHA256": "f5392c219887d28c9417f8df7073afcb47c6c0830b94b29637b1efffdcf115a6",
+      "EXECUTABLE": "NO; placeholders are not principal approvals or endpoint bindings",
+      "GOVERNANCE_BLOCKERS": []
+    }
+  ],
+  "modes": {
+    "PLAN": "Offline unbound specifications or bound deterministic SQL plan; no client/environment/secret access",
+    "APPLY": "CLI standalone blocked. Future injected W8 adapter requires approved decisions, all exact external bindings, authenticated target, complete catalog preflight before first SQL; missing edge GRANT only, drift FAIL without automatic REVOKE; exact postflight.",
+    "VERIFY": "CLI --verify --bindings FILE --scope SCOPE --snapshot FILE is offline. Exported verify path uses same snapshot/catalog contract and issues no mutation; live adapter belongs to W8.",
+    "PASSWORD_ACTIVATION": "OUTSIDE_W3; external secret/deployment authority activates/rotates LOGIN principals through separately authorized W8 integration"
+  },
+  "opaqueRoleBindingPacket": [
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-54d46dbb3790f7b7",
+      "W3_ROLE_CLASS_BINDINGS": [
+        {
+          "ROLE_CLASS": "MIGRATION_ADMIN",
+          "EXTERNAL_PRINCIPAL_BINDING": "MIGRATION_ADMIN_PRINCIPAL"
+        },
+        {
+          "ROLE_CLASS": "APPLICATION_RUNTIME",
+          "EXTERNAL_PRINCIPAL_BINDING": "APPLICATION_RUNTIME_PRINCIPAL"
+        },
+        {
+          "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+          "EXTERNAL_PRINCIPAL_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_PRINCIPAL"
+        }
+      ],
+      "W2_TARGET_SCOPE": "UE_OPERATIONAL",
+      "W2_SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "INPUT_CONSUMER_REFERENCES": [
+        {
+          "MIGRATION_NODE_ID": "UE-1B3CA1-MIGRATION-510940f2f0ef9913",
+          "MIGRATION_FILE": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+          "SOURCE_EVIDENCE": {
+            "FILE": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+            "LINE": 29,
+            "FILE_SHA256": "dfb79693e7ce06ef4d078fb0eed8cd8bcde60a54bd3b29ec09e766ac49fcb53d"
+          },
+          "CONSUMPTION_REASON": "ALL_OBJECTS_IN_SCHEMA_EXECUTION_SET_REQUIRES_CANONICAL_CATALOG"
+        }
+      ],
+      "PERMITTED_TARGET_SET": "Only later exact W4/W6 materialized object/ACL inventory in UE_OPERATIONAL.public; no wildcard object grants or empty-list success",
+      "DEFAULT_PRIVILEGE_OWNER": "W3 no PUBLIC future function EXECUTE; W4/W6 realize exact grants after materialization",
+      "EXPECTED_OBJECT_TARGETS_REQUIRED_BEFORE_CONSUMER": "YES; W4/W6 must supply exact nonempty object identities, owners, ACLs/default ACLs and positive/negative assertions",
+      "OBJECT_SET_IMPLEMENTED_IN_W3": "NO",
+      "W3_ROLE_INPUT_MECHANISM_IMPLEMENTED": "YES",
+      "ROLE_APPROVAL_PENDING": "NO",
+      "DOWNSTREAM_OWNER": "W6",
+      "RUNTIME_PROVEN": "NO",
+      "ROLE_DECISION_STATUS": "APPROVED_AND_IMPLEMENTED_IN_W3_CONTRACT",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-1d96c03855120f6c",
+      "W3_ROLE_CLASS_BINDINGS": [
+        {
+          "ROLE_CLASS": "MIGRATION_ADMIN",
+          "EXTERNAL_PRINCIPAL_BINDING": "MIGRATION_ADMIN_PRINCIPAL"
+        },
+        {
+          "ROLE_CLASS": "APPLICATION_RUNTIME",
+          "EXTERNAL_PRINCIPAL_BINDING": "APPLICATION_RUNTIME_PRINCIPAL"
+        },
+        {
+          "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+          "EXTERNAL_PRINCIPAL_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_PRINCIPAL"
+        }
+      ],
+      "W2_TARGET_SCOPE": "UE_OPERATIONAL",
+      "W2_SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "INPUT_CONSUMER_REFERENCES": [
+        {
+          "MIGRATION_NODE_ID": "UE-1B3CA1-MIGRATION-510940f2f0ef9913",
+          "MIGRATION_FILE": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+          "SOURCE_EVIDENCE": {
+            "FILE": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+            "LINE": 28,
+            "FILE_SHA256": "dfb79693e7ce06ef4d078fb0eed8cd8bcde60a54bd3b29ec09e766ac49fcb53d"
+          },
+          "CONSUMPTION_REASON": "ALL_OBJECTS_IN_SCHEMA_EXECUTION_SET_REQUIRES_CANONICAL_CATALOG"
+        }
+      ],
+      "PERMITTED_TARGET_SET": "Only later exact W4/W6 materialized object/ACL inventory in UE_OPERATIONAL.public; no wildcard object grants or empty-list success",
+      "DEFAULT_PRIVILEGE_OWNER": "W3 no PUBLIC future function EXECUTE; W4/W6 realize exact grants after materialization",
+      "EXPECTED_OBJECT_TARGETS_REQUIRED_BEFORE_CONSUMER": "YES; W4/W6 must supply exact nonempty object identities, owners, ACLs/default ACLs and positive/negative assertions",
+      "OBJECT_SET_IMPLEMENTED_IN_W3": "NO",
+      "W3_ROLE_INPUT_MECHANISM_IMPLEMENTED": "YES",
+      "ROLE_APPROVAL_PENDING": "NO",
+      "DOWNSTREAM_OWNER": "W6",
+      "RUNTIME_PROVEN": "NO",
+      "ROLE_DECISION_STATUS": "APPROVED_AND_IMPLEMENTED_IN_W3_CONTRACT",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-95475ff37e61236f",
+      "W3_ROLE_CLASS_BINDINGS": [
+        {
+          "ROLE_CLASS": "MIGRATION_ADMIN",
+          "EXTERNAL_PRINCIPAL_BINDING": "MIGRATION_ADMIN_PRINCIPAL"
+        },
+        {
+          "ROLE_CLASS": "APPLICATION_RUNTIME",
+          "EXTERNAL_PRINCIPAL_BINDING": "APPLICATION_RUNTIME_PRINCIPAL"
+        },
+        {
+          "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+          "EXTERNAL_PRINCIPAL_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_PRINCIPAL"
+        }
+      ],
+      "W2_TARGET_SCOPE": "UE_OPERATIONAL",
+      "W2_SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "INPUT_CONSUMER_REFERENCES": [
+        {
+          "MIGRATION_NODE_ID": "UE-1B3CA1-MIGRATION-510940f2f0ef9913",
+          "MIGRATION_FILE": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+          "SOURCE_EVIDENCE": {
+            "FILE": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+            "LINE": 22,
+            "FILE_SHA256": "dfb79693e7ce06ef4d078fb0eed8cd8bcde60a54bd3b29ec09e766ac49fcb53d"
+          },
+          "CONSUMPTION_REASON": "ALL_OBJECTS_IN_SCHEMA_EXECUTION_SET_REQUIRES_CANONICAL_CATALOG"
+        }
+      ],
+      "PERMITTED_TARGET_SET": "Only later exact W4/W6 materialized object/ACL inventory in UE_OPERATIONAL.public; no wildcard object grants or empty-list success",
+      "DEFAULT_PRIVILEGE_OWNER": "W3 no PUBLIC future function EXECUTE; W4/W6 realize exact grants after materialization",
+      "EXPECTED_OBJECT_TARGETS_REQUIRED_BEFORE_CONSUMER": "YES; W4/W6 must supply exact nonempty object identities, owners, ACLs/default ACLs and positive/negative assertions",
+      "OBJECT_SET_IMPLEMENTED_IN_W3": "NO",
+      "W3_ROLE_INPUT_MECHANISM_IMPLEMENTED": "YES",
+      "ROLE_APPROVAL_PENDING": "NO",
+      "DOWNSTREAM_OWNER": "W6",
+      "RUNTIME_PROVEN": "NO",
+      "ROLE_DECISION_STATUS": "APPROVED_AND_IMPLEMENTED_IN_W3_CONTRACT",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-e7352bddb4afd294",
+      "W3_ROLE_CLASS_BINDINGS": [
+        {
+          "ROLE_CLASS": "MIGRATION_ADMIN",
+          "EXTERNAL_PRINCIPAL_BINDING": "MIGRATION_ADMIN_PRINCIPAL"
+        },
+        {
+          "ROLE_CLASS": "APPLICATION_RUNTIME",
+          "EXTERNAL_PRINCIPAL_BINDING": "APPLICATION_RUNTIME_PRINCIPAL"
+        },
+        {
+          "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+          "EXTERNAL_PRINCIPAL_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_PRINCIPAL"
+        }
+      ],
+      "W2_TARGET_SCOPE": "UE_OPERATIONAL",
+      "W2_SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "INPUT_CONSUMER_REFERENCES": [
+        {
+          "MIGRATION_NODE_ID": "UE-1B3CA1-MIGRATION-510940f2f0ef9913",
+          "MIGRATION_FILE": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+          "SOURCE_EVIDENCE": {
+            "FILE": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+            "LINE": 23,
+            "FILE_SHA256": "dfb79693e7ce06ef4d078fb0eed8cd8bcde60a54bd3b29ec09e766ac49fcb53d"
+          },
+          "CONSUMPTION_REASON": "ALL_OBJECTS_IN_SCHEMA_EXECUTION_SET_REQUIRES_CANONICAL_CATALOG"
+        }
+      ],
+      "PERMITTED_TARGET_SET": "Only later exact W4/W6 materialized object/ACL inventory in UE_OPERATIONAL.public; no wildcard object grants or empty-list success",
+      "DEFAULT_PRIVILEGE_OWNER": "W3 no PUBLIC future function EXECUTE; W4/W6 realize exact grants after materialization",
+      "EXPECTED_OBJECT_TARGETS_REQUIRED_BEFORE_CONSUMER": "YES; W4/W6 must supply exact nonempty object identities, owners, ACLs/default ACLs and positive/negative assertions",
+      "OBJECT_SET_IMPLEMENTED_IN_W3": "NO",
+      "W3_ROLE_INPUT_MECHANISM_IMPLEMENTED": "YES",
+      "ROLE_APPROVAL_PENDING": "NO",
+      "DOWNSTREAM_OWNER": "W6",
+      "RUNTIME_PROVEN": "NO",
+      "ROLE_DECISION_STATUS": "APPROVED_AND_IMPLEMENTED_IN_W3_CONTRACT",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES"
+    }
+  ],
+  "governanceDecisions": [
+    {
+      "DECISION_ID": "UE-1B3CA1G-DECISION-4e0fdb9b7d80bdb5",
+      "SUBJECT": "Role identity, ownership and rotation authority",
+      "STATUS": "APPROVED_AND_IMPLEMENTED_IN_W3_CONTRACT",
+      "OWNER_CLASS": "HUMAN_ARCHITECTURE_OR_PLATFORM_MAINTAINER",
+      "REQUIRED_DECISION_RECORD": "Approve exact migration-admin, application/system runtime and distinct financial migration/runtime principal names; login/non-login provisioning, ownership, least-privilege grants and rotation authorities. Runtime roles must not own protected objects or bypass RLS.",
+      "WORKSTREAM_ID": "W3",
+      "AFFECTED_PREREQUISITE_IDS": [],
+      "AFFECTED_OPAQUE_BINDING_IDS": [],
+      "AFFECTED_ORDERING_RECORD_IDS": [],
+      "EXECUTION_BLOCKED_UNTIL_RECORDED": "NO; decision recorded, runtime binding/adapter authorization still required",
+      "DECISION_ASSUMED": "NO; explicit W3D intent plus W3E alignment instruction",
+      "APPROVED": "YES",
+      "APPROVAL_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3D_GOVERNANCE_DECISION_COMPATIBILITY.json",
+      "IMPLEMENTATION_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT.json",
+      "CONTRACT_VALUE": {
+        "ROLE_IDENTITY_MODEL": "EXTERNAL_LOGIN_PRINCIPAL_BOUND_TO_CANONICAL_NOLOGIN_AUTHORIZATION_ROLE",
+        "EXTERNAL_PRINCIPAL_BINDINGS": [
+          {
+            "ROLE_CLASS": "MIGRATION_ADMIN",
+            "AUTHORIZATION_ROLE_BINDING": "MIGRATION_ADMIN_PRINCIPAL",
+            "EXTERNAL_LOGIN_PRINCIPAL_BINDING": "MIGRATION_ADMIN_LOGIN_PRINCIPAL",
+            "CARDINALITY": "EXACTLY_ONE_DISTINCT_EXTERNAL_LOGIN_PRINCIPAL"
+          },
+          {
+            "ROLE_CLASS": "APPLICATION_RUNTIME",
+            "AUTHORIZATION_ROLE_BINDING": "APPLICATION_RUNTIME_PRINCIPAL",
+            "EXTERNAL_LOGIN_PRINCIPAL_BINDING": "APPLICATION_RUNTIME_LOGIN_PRINCIPAL",
+            "CARDINALITY": "EXACTLY_ONE_DISTINCT_EXTERNAL_LOGIN_PRINCIPAL"
+          },
+          {
+            "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+            "AUTHORIZATION_ROLE_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_PRINCIPAL",
+            "EXTERNAL_LOGIN_PRINCIPAL_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_LOGIN_PRINCIPAL",
+            "CARDINALITY": "EXACTLY_ONE_DISTINCT_EXTERNAL_LOGIN_PRINCIPAL"
+          },
+          {
+            "ROLE_CLASS": "FINANCIAL_MIGRATION",
+            "AUTHORIZATION_ROLE_BINDING": "FINANCIAL_MIGRATION_PRINCIPAL",
+            "EXTERNAL_LOGIN_PRINCIPAL_BINDING": "FINANCIAL_MIGRATION_LOGIN_PRINCIPAL",
+            "CARDINALITY": "EXACTLY_ONE_DISTINCT_EXTERNAL_LOGIN_PRINCIPAL"
+          },
+          {
+            "ROLE_CLASS": "FINANCIAL_RUNTIME",
+            "AUTHORIZATION_ROLE_BINDING": "FINANCIAL_RUNTIME_PRINCIPAL",
+            "EXTERNAL_LOGIN_PRINCIPAL_BINDING": "FINANCIAL_RUNTIME_LOGIN_PRINCIPAL",
+            "CARDINALITY": "EXACTLY_ONE_DISTINCT_EXTERNAL_LOGIN_PRINCIPAL"
+          }
+        ],
+        "EXTERNAL_PRINCIPAL_BINDING_REQUIRED": "YES",
+        "HARDCODED_DEFAULT_PRINCIPAL": "NO",
+        "AMBIENT_CURRENT_USER_FALLBACK": "NO",
+        "INFERRED_PRINCIPAL_NAME": "NO",
+        "CANONICAL_AUTHORIZATION_ROLES_LOGIN": "NOLOGIN",
+        "CANONICAL_AUTHORIZATION_ROLE_PASSWORD": "NONE",
+        "CANONICAL_AUTHORIZATION_ROLE_SECRET_ROTATION": "NOT_APPLICABLE",
+        "LOGIN_PRINCIPAL_CREATION": "OUTSIDE_W3",
+        "LOGIN_PRINCIPAL_BINDING": "REQUIRED_BEFORE_RUNTIME_EXECUTION",
+        "LOGIN_PRINCIPAL_SECRET_STORAGE": "EXTERNAL_SECRET_AUTHORITY",
+        "LOGIN_PRINCIPAL_SECRET_ROTATION": "EXTERNAL_SECRET_DEPLOYMENT_AUTHORITY",
+        "LOGIN_PRINCIPAL_MAY_ASSUME_ITS_AUTHORIZATION_ROLE": "YES",
+        "CROSS_SCOPE_ROLE_MEMBERSHIP": "PROHIBITED",
+        "RUNTIME_TO_MIGRATION_ROLE_MEMBERSHIP": "PROHIBITED",
+        "ADMIN_OPTION": "NO",
+        "ROLE_ADMINISTRATION": "NO",
+        "NESTED_DELEGATION": "NO",
+        "ROTATION_AUTHORITY": "GOVERNED_SECRET_MANAGEMENT_AND_DEPLOYMENT_AUTHORITY",
+        "REPOSITORY_SECRET_ROTATION_AUTHORITY": "NO",
+        "DATABASE_AUTHORIZATION_ROLE_ROTATION_AUTHORITY": "NO",
+        "LOGIN_BINDING_IMPLEMENTATION_OWNER": "W8",
+        "ROLE_OWNERSHIP": [
+          {
+            "ROLE_CLASS": "MIGRATION_ADMIN",
+            "MAY_OWN_DOMAIN_TABLES": true,
+            "MAY_OWN_PLATFORM_HELPERS": true,
+            "MAY_OWN_FINANCIAL_TABLES": false,
+            "ACTIVATION": "BOUNDED_BOOTSTRAP_OR_MIGRATION_EXECUTION_ONLY",
+            "OWNERSHIP_RUNTIME_PROVEN": "NO"
+          },
+          {
+            "ROLE_CLASS": "APPLICATION_RUNTIME",
+            "MAY_OWN_DOMAIN_TABLES": false,
+            "MAY_OWN_PLATFORM_HELPERS": false,
+            "MAY_OWN_FINANCIAL_TABLES": false,
+            "ACTIVATION": "CORRESPONDING_RUNTIME_CLASS_ONLY",
+            "OWNERSHIP_RUNTIME_PROVEN": "NO"
+          },
+          {
+            "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+            "MAY_OWN_DOMAIN_TABLES": false,
+            "MAY_OWN_PLATFORM_HELPERS": false,
+            "MAY_OWN_FINANCIAL_TABLES": false,
+            "ACTIVATION": "CORRESPONDING_RUNTIME_CLASS_ONLY",
+            "OWNERSHIP_RUNTIME_PROVEN": "NO"
+          },
+          {
+            "ROLE_CLASS": "FINANCIAL_MIGRATION",
+            "MAY_OWN_DOMAIN_TABLES": false,
+            "MAY_OWN_PLATFORM_HELPERS": false,
+            "MAY_OWN_FINANCIAL_TABLES": true,
+            "ACTIVATION": "BOUNDED_BOOTSTRAP_OR_MIGRATION_EXECUTION_ONLY",
+            "OWNERSHIP_RUNTIME_PROVEN": "NO"
+          },
+          {
+            "ROLE_CLASS": "FINANCIAL_RUNTIME",
+            "MAY_OWN_DOMAIN_TABLES": false,
+            "MAY_OWN_PLATFORM_HELPERS": false,
+            "MAY_OWN_FINANCIAL_TABLES": false,
+            "ACTIVATION": "CORRESPONDING_RUNTIME_CLASS_ONLY",
+            "OWNERSHIP_RUNTIME_PROVEN": "NO"
+          }
+        ],
+        "PRIVILEGED_ATTRIBUTES": {
+          "SUPERUSER": "NO",
+          "BYPASSRLS": "NO",
+          "CREATEDB": "NO",
+          "CREATEROLE": "NO",
+          "REPLICATION": "NO"
+        },
+        "ROLE_MEMBERSHIP_MODEL": "EXACT_EXTERNAL_LOGIN_TO_AUTHORIZATION_ROLE_ONLY",
+        "DELEGATION_BINDING_STATE": "NOT_RUNTIME_BOUND",
+        "DIRECTION": "GRANT authorization_role TO external_login_principal",
+        "SET_ROLE_CAPABILITY_REQUIRED": "YES",
+        "AUTHORIZATION_ROLE_MEMBER_OF_LOGIN_PRINCIPAL": "NO",
+        "MISSING_BINDING": "FAIL_MISSING_PRINCIPAL_BINDING",
+        "EXPECTED_MEMBERSHIP_ABSENT": "GRANT_EXACT_EXPECTED_EDGE_DURING_FUTURE_GOVERNED_APPLY",
+        "UNEXPECTED_MEMBERSHIP": "FAIL_DRIFT_WITHOUT_AUTOMATIC_REVOKE",
+        "POST_BINDING_VERIFICATION": "Only exact expected edge present, no admin option, SET capability present, no extra/reverse/nested/cross-scope/runtime-to-migration edge",
+        "CATALOG_COMPLETENESS": "Full pg_auth_members graph; descriptor incoming/outgoing lists must reconcile to graph, not filtered success",
+        "LOGIN_PRINCIPAL_ATTRIBUTES": "Must already exist, LOGIN, non-superuser/non-bypass/non-CREATEDB/non-CREATEROLE/non-replication; W3 never creates/rotates it",
+        "POSTGRESQL_MEMBERSHIP_OPTIONS": "admin_option measured on all supported versions; set_option measured via to_jsonb for PostgreSQL 16+ and implicit SET capability on earlier versions"
+      },
+      "RUNTIME_PROVEN": "NO"
+    },
+    {
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "SUBJECT": "Vector requirement and guarded-use decision",
+      "STATUS": "APPROVED_AND_IMPLEMENTED_IN_W3_CONTRACT",
+      "OWNER_CLASS": "HUMAN_ARCHITECTURE_OR_PLATFORM_MAINTAINER",
+      "REQUIRED_DECISION_RECORD": "Vector is excluded from the canonical mandatory extension set unless independently required. Decide each accepted consumer obligation explicitly: prove guarded non-requirement or add a governed mandatory fail-fast install step. Exclusion alone does not waive the frozen prerequisite.",
+      "WORKSTREAM_ID": "W3",
+      "AFFECTED_PREREQUISITE_IDS": ["UE-1B3CA1-PREREQUISITE-2c5cb7df8aa992e3"],
+      "AFFECTED_OPAQUE_BINDING_IDS": [],
+      "AFFECTED_ORDERING_RECORD_IDS": [],
+      "EXECUTION_BLOCKED_UNTIL_RECORDED": "NO; decision recorded, runtime binding/adapter authorization still required",
+      "DECISION_ASSUMED": "NO; explicit W3D intent plus W3E alignment instruction",
+      "APPROVED": "YES",
+      "APPROVAL_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3D_GOVERNANCE_DECISION_COMPATIBILITY.json",
+      "IMPLEMENTATION_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT.json",
+      "CONTRACT_VALUE": {
+        "VECTOR_EXTENSION_DISPOSITION": "OPTIONAL_GUARDED_NOT_BASELINE_REQUIRED",
+        "VECTOR_IN_MANDATORY_EXTENSION_SET": "NO",
+        "CONSUMER_RECONCILIATION": [
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-027175495062988b",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-04ce25437b3debb8",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-1e87bfdb9dff6e0f",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-21cbfd9a1b94aaf8",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-3de5469edc1f29ed",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-4085bb83be3f1670",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-41bd18f787e58ad3",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-510940f2f0ef9913",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-5d9ad08c0b5ecc9c",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-65e1e373a95475d0",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-695361fbcf4c5242",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-76c2e1354d92cb2b",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-9f7a80fbdbf98f2d",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-af92c5998d24d676",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-b4ed69c2ce5aca49",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-b7ce906c401b96a1",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-bbf0e158383b8913",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-c5846ed2d67f2a62",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-e19ff6f9225f74c6",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          },
+          {
+            "CONSUMER_ID": "UE-1B3CA1-MIGRATION-f907fbb59e68c927",
+            "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+            "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+            "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+            "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+            "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+            "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+            "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+          }
+        ],
+        "FUTURE_DEPENDENCY": "FAIL_CONTRACT_DRIFT until explicitly amended before dependent execution"
+      },
+      "RUNTIME_PROVEN": "NO"
+    }
+  ],
+  "obligationLinkage": [
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "IMPLEMENTED_BY_W3": "YES",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json",
+        "UE-1B3CA1G-DECISION-7e108c57ea428e21"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "Approved guarded non-requirement for all 22 current consumers; future dependency requires explicit amendment",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W3_CONTRACT_IMPLEMENTED_DOWNSTREAM_RUNTIME_PENDING",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-41ce41c4d5eb013f",
+      "IMPLEMENTED_BY_W3": "YES",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "W3 mechanism and contract complete offline; external bindings/application/runtime evidence remain W8/W9",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W8_RUNTIME_BINDING_PENDING",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-2c54c7df423d7946",
+      "IMPLEMENTED_BY_W3": "YES",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "W3 mechanism and contract complete offline; external bindings/application/runtime evidence remain W8/W9",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W8_RUNTIME_BINDING_PENDING",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-54d46dbb3790f7b7",
+      "IMPLEMENTED_BY_W3": "W3_INPUT_COMPONENT_ONLY",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "W3 role/delegation inputs complete; W6 owns exact object-set/ACL/default-ACL materialization",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W6",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W6_OBJECT_ACL_IMPLEMENTATION_PENDING",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-1d96c03855120f6c",
+      "IMPLEMENTED_BY_W3": "W3_INPUT_COMPONENT_ONLY",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "W3 role/delegation inputs complete; W6 owns exact object-set/ACL/default-ACL materialization",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W6",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W6_OBJECT_ACL_IMPLEMENTATION_PENDING",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-95475ff37e61236f",
+      "IMPLEMENTED_BY_W3": "W3_INPUT_COMPONENT_ONLY",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "W3 role/delegation inputs complete; W6 owns exact object-set/ACL/default-ACL materialization",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W6",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W6_OBJECT_ACL_IMPLEMENTATION_PENDING",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-e7352bddb4afd294",
+      "IMPLEMENTED_BY_W3": "W3_INPUT_COMPONENT_ONLY",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "W3 role/delegation inputs complete; W6 owns exact object-set/ACL/default-ACL materialization",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W6",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W6_OBJECT_ACL_IMPLEMENTATION_PENDING",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-INSTALLER-VERIFICATION-2e7c5b5727cee606",
+      "IMPLEMENTED_BY_W3": "YES",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "W3 mechanism and contract complete offline; external bindings/application/runtime evidence remain W8/W9",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W3_MECHANISM_IMPLEMENTED",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-INSTALLER-VERIFICATION-38ee26a47d8c334e",
+      "IMPLEMENTED_BY_W3": "YES",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "W3 mechanism and contract complete offline; external bindings/application/runtime evidence remain W8/W9",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W3_MECHANISM_IMPLEMENTED",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-INSTALLER-VERIFICATION-e756e0bb06d855ca",
+      "IMPLEMENTED_BY_W3": "YES",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "W3 mechanism and contract complete offline; external bindings/application/runtime evidence remain W8/W9",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W3_MECHANISM_IMPLEMENTED",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-INSTALLER-VERIFICATION-301cf3eb2ebebd20",
+      "IMPLEMENTED_BY_W3": "YES",
+      "MECHANISM_IMPLEMENTED": "YES",
+      "IMPLEMENTATION_EVIDENCE": [
+        "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.ts",
+        "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+        "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json"
+      ],
+      "PHYSICAL_RUNTIME_APPLIED": "NO",
+      "RUNTIME_PROVEN": "NO",
+      "COMPLETION_BOUNDARY": "W3 mechanism and contract complete offline; external bindings/application/runtime evidence remain W8/W9",
+      "BLOCKING_DECISION_IDS": [],
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "COMPLETION_CLASS": "W3_MECHANISM_IMPLEMENTED",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES"
+    }
+  ],
+  "w2DriftReconciliation": [
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-DJANGO_MIGRATION-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-DJANGO_MIGRATION",
+      "W3_IMPLEMENTATION_STATUS": "VALIDATION_IMPLEMENTED_DOWNSTREAM_APPLICATION_PENDING",
+      "REMEDIATION_IMPLEMENTED_IN_CODE": "YES",
+      "SOURCE_CONFIGURATION_CHANGED": "NO",
+      "RUNTIME_ALIGNED": "NO",
+      "FUTURE_RUNTIME_VERIFICATION": "W8 snapshot/catalog adapter must measure fixed path, effective TEMP/CREATE/ownership/memberships/PUBLIC/default ACLs. W9 proves authorized replay; no runtime success inferred.",
+      "REMAINING_PRIMARY_OWNER": "W8",
+      "VALIDATION_IMPLEMENTED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO"
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-SCOPED_SECURITY_MIGRATION-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+      "W3_IMPLEMENTATION_STATUS": "VALIDATION_IMPLEMENTED_DOWNSTREAM_APPLICATION_PENDING",
+      "REMEDIATION_IMPLEMENTED_IN_CODE": "YES",
+      "SOURCE_CONFIGURATION_CHANGED": "NO",
+      "RUNTIME_ALIGNED": "NO",
+      "FUTURE_RUNTIME_VERIFICATION": "W8 snapshot/catalog adapter must measure fixed path, effective TEMP/CREATE/ownership/memberships/PUBLIC/default ACLs. W9 proves authorized replay; no runtime success inferred.",
+      "REMAINING_PRIMARY_OWNER": "W8",
+      "VALIDATION_IMPLEMENTED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO"
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-PROVISIONING-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-PROVISIONING",
+      "W3_IMPLEMENTATION_STATUS": "VALIDATION_IMPLEMENTED_DOWNSTREAM_APPLICATION_PENDING",
+      "REMEDIATION_IMPLEMENTED_IN_CODE": "YES",
+      "SOURCE_CONFIGURATION_CHANGED": "NO",
+      "RUNTIME_ALIGNED": "NO",
+      "FUTURE_RUNTIME_VERIFICATION": "W8 snapshot/catalog adapter must measure fixed path, effective TEMP/CREATE/ownership/memberships/PUBLIC/default ACLs. W9 proves authorized replay; no runtime success inferred.",
+      "REMAINING_PRIMARY_OWNER": "W3",
+      "VALIDATION_IMPLEMENTED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO"
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-PRECONSUMER_BASELINE-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+      "W3_IMPLEMENTATION_STATUS": "VALIDATION_IMPLEMENTED_DOWNSTREAM_APPLICATION_PENDING",
+      "REMEDIATION_IMPLEMENTED_IN_CODE": "YES",
+      "SOURCE_CONFIGURATION_CHANGED": "NO",
+      "RUNTIME_ALIGNED": "NO",
+      "FUTURE_RUNTIME_VERIFICATION": "W8 snapshot/catalog adapter must measure fixed path, effective TEMP/CREATE/ownership/memberships/PUBLIC/default ACLs. W9 proves authorized replay; no runtime success inferred.",
+      "REMAINING_PRIMARY_OWNER": "W4",
+      "VALIDATION_IMPLEMENTED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO"
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-APPLICATION_RUNTIME-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-APPLICATION_RUNTIME",
+      "W3_IMPLEMENTATION_STATUS": "VALIDATION_IMPLEMENTED_DOWNSTREAM_APPLICATION_PENDING",
+      "REMEDIATION_IMPLEMENTED_IN_CODE": "YES",
+      "SOURCE_CONFIGURATION_CHANGED": "NO",
+      "RUNTIME_ALIGNED": "NO",
+      "FUTURE_RUNTIME_VERIFICATION": "W8 snapshot/catalog adapter must measure fixed path, effective TEMP/CREATE/ownership/memberships/PUBLIC/default ACLs. W9 proves authorized replay; no runtime success inferred.",
+      "REMAINING_PRIMARY_OWNER": "W8",
+      "VALIDATION_IMPLEMENTED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO"
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-SYSTEM_RUNTIME-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-SYSTEM_RUNTIME",
+      "W3_IMPLEMENTATION_STATUS": "VALIDATION_IMPLEMENTED_DOWNSTREAM_APPLICATION_PENDING",
+      "REMEDIATION_IMPLEMENTED_IN_CODE": "YES",
+      "SOURCE_CONFIGURATION_CHANGED": "NO",
+      "RUNTIME_ALIGNED": "NO",
+      "FUTURE_RUNTIME_VERIFICATION": "W8 snapshot/catalog adapter must measure fixed path, effective TEMP/CREATE/ownership/memberships/PUBLIC/default ACLs. W9 proves authorized replay; no runtime success inferred.",
+      "REMAINING_PRIMARY_OWNER": "W8",
+      "VALIDATION_IMPLEMENTED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO"
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-FINANCIAL_PROVISIONING-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+      "W3_IMPLEMENTATION_STATUS": "VALIDATION_IMPLEMENTED_DOWNSTREAM_APPLICATION_PENDING",
+      "REMEDIATION_IMPLEMENTED_IN_CODE": "YES",
+      "SOURCE_CONFIGURATION_CHANGED": "NO",
+      "RUNTIME_ALIGNED": "NO",
+      "FUTURE_RUNTIME_VERIFICATION": "W8 snapshot/catalog adapter must measure fixed path, effective TEMP/CREATE/ownership/memberships/PUBLIC/default ACLs. W9 proves authorized replay; no runtime success inferred.",
+      "REMAINING_PRIMARY_OWNER": "W3",
+      "VALIDATION_IMPLEMENTED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO"
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-FINANCIAL_MIGRATION-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+      "W3_IMPLEMENTATION_STATUS": "VALIDATION_IMPLEMENTED_DOWNSTREAM_APPLICATION_PENDING",
+      "REMEDIATION_IMPLEMENTED_IN_CODE": "YES",
+      "SOURCE_CONFIGURATION_CHANGED": "NO",
+      "RUNTIME_ALIGNED": "NO",
+      "FUTURE_RUNTIME_VERIFICATION": "W8 snapshot/catalog adapter must measure fixed path, effective TEMP/CREATE/ownership/memberships/PUBLIC/default ACLs. W9 proves authorized replay; no runtime success inferred.",
+      "REMAINING_PRIMARY_OWNER": "W7",
+      "VALIDATION_IMPLEMENTED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO"
+    },
+    {
+      "W2_CONFIGURATION_DRIFT_ID": "UE-W2-DRIFT-FINANCIAL_RUNTIME-PATH",
+      "ACTOR_ID": "UE-W2-ACTOR-FINANCIAL_RUNTIME",
+      "W3_IMPLEMENTATION_STATUS": "VALIDATION_IMPLEMENTED_DOWNSTREAM_APPLICATION_PENDING",
+      "REMEDIATION_IMPLEMENTED_IN_CODE": "YES",
+      "SOURCE_CONFIGURATION_CHANGED": "NO",
+      "RUNTIME_ALIGNED": "NO",
+      "FUTURE_RUNTIME_VERIFICATION": "W8 snapshot/catalog adapter must measure fixed path, effective TEMP/CREATE/ownership/memberships/PUBLIC/default ACLs. W9 proves authorized replay; no runtime success inferred.",
+      "REMAINING_PRIMARY_OWNER": "W7",
+      "VALIDATION_IMPLEMENTED": "YES",
+      "SOURCE_CONFIGURATION_ALIGNED": "NO"
+    }
+  ],
+  "downstreamImplementationPacket": [
+    {
+      "DOWNSTREAM_TASK_ID": "UE-W2-DOWNSTREAM-W3",
+      "OWNER_WORKSTREAM": "W3",
+      "REQUIREMENT": "Map separate role/credential classes to exact scope targets; provision governed schema ownership/CREATE/TEMP boundaries and mandatory extensions under fixed qualified provisioning paths. No principal/grant/extension is created by W2.",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-DJANGO_MIGRATION",
+        "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+        "UE-W2-ACTOR-PROVISIONING",
+        "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+        "UE-W2-ACTOR-APPLICATION_RUNTIME",
+        "UE-W2-ACTOR-SYSTEM_RUNTIME",
+        "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+        "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+        "UE-W2-ACTOR-FINANCIAL_RUNTIME"
+      ],
+      "SCOPE_IDS": ["UE_OPERATIONAL", "FINANCIAL_SERVICE"],
+      "SCHEMA_IDS": [
+        "UE_OPERATIONAL_PUBLIC",
+        "UE_OPERATIONAL_PG_CATALOG",
+        "FINANCIAL_SERVICE_PUBLIC",
+        "FINANCIAL_SERVICE_PG_CATALOG"
+      ],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE",
+        "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+        "UE-W2-PATH-UE_SYSTEM_RUNTIME",
+        "UE-W2-PATH-FINANCIAL_PROVISIONING",
+        "UE-W2-PATH-FINANCIAL_MIGRATION",
+        "UE-W2-PATH-FINANCIAL_RUNTIME"
+      ],
+      "W2_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+      "W2_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+        "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+      ],
+      "IMPLEMENTED_OR_STARTED_BY_W2": "NO",
+      "FAILURE_BEHAVIOR": "FAIL_FAST_BEFORE_FIRST_BOOTSTRAP_CONSUMER",
+      "VERIFICATION_OWNER": "W8 preflight; W9 separately authorized runtime proof",
+      "W3_OBLIGATION_IDS": [
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-41ce41c4d5eb013f",
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-2c54c7df423d7946",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-54d46dbb3790f7b7",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-1d96c03855120f6c",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-95475ff37e61236f",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-e7352bddb4afd294",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-2e7c5b5727cee606",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-38ee26a47d8c334e",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-e756e0bb06d855ca",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-301cf3eb2ebebd20"
+      ],
+      "W3_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-4e0fdb9b7d80bdb5",
+        "UE-1B3CA1G-DECISION-7e108c57ea428e21"
+      ],
+      "W3_MECHANISM": "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+      "STARTED_BY_THIS_PACKET": "NO",
+      "REQUIRED": "Consume scoped role/extension/privilege inputs only after approvals; exact object grants/ACL inventory remains owned by physical/binding/materializer lanes"
+    },
+    {
+      "DOWNSTREAM_TASK_ID": "UE-W2-DOWNSTREAM-W4",
+      "OWNER_WORKSTREAM": "W4",
+      "REQUIREMENT": "Implement real Django-owned and approved preconsumer producers in operational public; preserve domain authority and frozen SQL. Validate collision-free trusted schema before legacy public-first DDL.",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-DJANGO_MIGRATION",
+        "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+        "UE-W2-ACTOR-PROVISIONING",
+        "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+        "UE-W2-ACTOR-APPLICATION_RUNTIME",
+        "UE-W2-ACTOR-SYSTEM_RUNTIME"
+      ],
+      "SCOPE_IDS": ["UE_OPERATIONAL"],
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE",
+        "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+        "UE-W2-PATH-UE_SYSTEM_RUNTIME"
+      ],
+      "W2_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+      "W2_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+        "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+      ],
+      "IMPLEMENTED_OR_STARTED_BY_W2": "NO",
+      "FAILURE_BEHAVIOR": "FAIL_FAST_BEFORE_FIRST_BOOTSTRAP_CONSUMER",
+      "VERIFICATION_OWNER": "W8 preflight; W9 separately authorized runtime proof",
+      "W3_OBLIGATION_IDS": [
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-41ce41c4d5eb013f",
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-2c54c7df423d7946",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-54d46dbb3790f7b7",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-1d96c03855120f6c",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-95475ff37e61236f",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-e7352bddb4afd294",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-2e7c5b5727cee606",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-38ee26a47d8c334e",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-e756e0bb06d855ca",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-301cf3eb2ebebd20"
+      ],
+      "W3_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-4e0fdb9b7d80bdb5",
+        "UE-1B3CA1G-DECISION-7e108c57ea428e21"
+      ],
+      "W3_MECHANISM": "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+      "STARTED_BY_THIS_PACKET": "NO",
+      "REQUIRED": "Consume scoped role/extension/privilege inputs only after approvals; exact object grants/ACL inventory remains owned by physical/binding/materializer lanes"
+    },
+    {
+      "DOWNSTREAM_TASK_ID": "UE-W2-DOWNSTREAM-W6",
+      "OWNER_WORKSTREAM": "W6",
+      "REQUIREMENT": "Bind raw/opaque helper, policy and privileged semantic targets to exact scope/schema/function path; prohibit ambient and cross-scope resolution.",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-DJANGO_MIGRATION",
+        "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+        "UE-W2-ACTOR-PROVISIONING",
+        "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+        "UE-W2-ACTOR-APPLICATION_RUNTIME",
+        "UE-W2-ACTOR-SYSTEM_RUNTIME"
+      ],
+      "SCOPE_IDS": ["UE_OPERATIONAL"],
+      "SCHEMA_IDS": ["UE_OPERATIONAL_PUBLIC", "UE_OPERATIONAL_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE",
+        "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+        "UE-W2-PATH-UE_SYSTEM_RUNTIME"
+      ],
+      "W2_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+      "W2_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+        "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+      ],
+      "IMPLEMENTED_OR_STARTED_BY_W2": "NO",
+      "FAILURE_BEHAVIOR": "FAIL_FAST_BEFORE_FIRST_BOOTSTRAP_CONSUMER",
+      "VERIFICATION_OWNER": "W8 preflight; W9 separately authorized runtime proof",
+      "W3_OBLIGATION_IDS": [
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-41ce41c4d5eb013f",
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-2c54c7df423d7946",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-54d46dbb3790f7b7",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-1d96c03855120f6c",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-95475ff37e61236f",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-e7352bddb4afd294",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-2e7c5b5727cee606",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-38ee26a47d8c334e",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-e756e0bb06d855ca",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-301cf3eb2ebebd20"
+      ],
+      "W3_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-4e0fdb9b7d80bdb5",
+        "UE-1B3CA1G-DECISION-7e108c57ea428e21"
+      ],
+      "W3_MECHANISM": "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+      "STARTED_BY_THIS_PACKET": "NO",
+      "REQUIRED": "Consume scoped role/extension/privilege inputs only after approvals; exact object grants/ACL inventory remains owned by physical/binding/materializer lanes"
+    },
+    {
+      "DOWNSTREAM_TASK_ID": "UE-W2-DOWNSTREAM-W7",
+      "OWNER_WORKSTREAM": "W7",
+      "REQUIREMENT": "Implement fail-fast full financial materializer and isolated migration/runtime credential adapters; financial public belongs to a distinct physical database.",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+        "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+        "UE-W2-ACTOR-FINANCIAL_RUNTIME"
+      ],
+      "SCOPE_IDS": ["FINANCIAL_SERVICE"],
+      "SCHEMA_IDS": ["FINANCIAL_SERVICE_PUBLIC", "FINANCIAL_SERVICE_PG_CATALOG"],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-FINANCIAL_PROVISIONING",
+        "UE-W2-PATH-FINANCIAL_MIGRATION",
+        "UE-W2-PATH-FINANCIAL_RUNTIME"
+      ],
+      "W2_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+      "W2_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+        "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+      ],
+      "IMPLEMENTED_OR_STARTED_BY_W2": "NO",
+      "FAILURE_BEHAVIOR": "FAIL_FAST_BEFORE_FIRST_BOOTSTRAP_CONSUMER",
+      "VERIFICATION_OWNER": "W8 preflight; W9 separately authorized runtime proof",
+      "W3_OBLIGATION_IDS": [
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-41ce41c4d5eb013f",
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-2c54c7df423d7946",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-54d46dbb3790f7b7",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-1d96c03855120f6c",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-95475ff37e61236f",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-e7352bddb4afd294",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-2e7c5b5727cee606",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-38ee26a47d8c334e",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-e756e0bb06d855ca",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-301cf3eb2ebebd20"
+      ],
+      "W3_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-4e0fdb9b7d80bdb5",
+        "UE-1B3CA1G-DECISION-7e108c57ea428e21"
+      ],
+      "W3_MECHANISM": "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+      "STARTED_BY_THIS_PACKET": "NO",
+      "REQUIRED": "Consume scoped role/extension/privilege inputs only after approvals; exact object grants/ACL inventory remains owned by physical/binding/materializer lanes"
+    },
+    {
+      "DOWNSTREAM_TASK_ID": "UE-W2-DOWNSTREAM-W8",
+      "OWNER_WORKSTREAM": "W8",
+      "REQUIREMENT": "Compose descriptors into every connection/pool, reject ambient/conflicting URL/PG* options, verify same-operational/distinct-financial targets and effective paths/CREATE/TEMP boundaries before any replay. Apply runtime/secret/configuration alignment only in its authorized lane.",
+      "ACTOR_IDS": [
+        "UE-W2-ACTOR-DJANGO_MIGRATION",
+        "UE-W2-ACTOR-SCOPED_SECURITY_MIGRATION",
+        "UE-W2-ACTOR-PROVISIONING",
+        "UE-W2-ACTOR-PRECONSUMER_BASELINE",
+        "UE-W2-ACTOR-APPLICATION_RUNTIME",
+        "UE-W2-ACTOR-SYSTEM_RUNTIME",
+        "UE-W2-ACTOR-FINANCIAL_PROVISIONING",
+        "UE-W2-ACTOR-FINANCIAL_MIGRATION",
+        "UE-W2-ACTOR-FINANCIAL_RUNTIME"
+      ],
+      "SCOPE_IDS": ["UE_OPERATIONAL", "FINANCIAL_SERVICE"],
+      "SCHEMA_IDS": [
+        "UE_OPERATIONAL_PUBLIC",
+        "UE_OPERATIONAL_PG_CATALOG",
+        "FINANCIAL_SERVICE_PUBLIC",
+        "FINANCIAL_SERVICE_PG_CATALOG"
+      ],
+      "SEARCH_PATH_CONTRACT_IDS": [
+        "UE-W2-PATH-DJANGO_MIGRATION",
+        "UE-W2-PATH-UE_SCOPED_SECURITY_MIGRATION",
+        "UE-W2-PATH-UE_PROVISIONING",
+        "UE-W2-PATH-UE_PLATFORM_BASELINE",
+        "UE-W2-PATH-UE_APPLICATION_RUNTIME",
+        "UE-W2-PATH-UE_SYSTEM_RUNTIME",
+        "UE-W2-PATH-FINANCIAL_PROVISIONING",
+        "UE-W2-PATH-FINANCIAL_MIGRATION",
+        "UE-W2-PATH-FINANCIAL_RUNTIME"
+      ],
+      "W2_OBLIGATION_IDS": ["UE-1B3CA1G-REQUIREMENT-cfda13aaa220ee21"],
+      "W2_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-b3a80b236c6a489d",
+        "UE-1B3CA1G-DECISION-70fd4794fc24b96e"
+      ],
+      "IMPLEMENTED_OR_STARTED_BY_W2": "NO",
+      "FAILURE_BEHAVIOR": "FAIL_FAST_BEFORE_FIRST_BOOTSTRAP_CONSUMER",
+      "VERIFICATION_OWNER": "W8 preflight; W9 separately authorized runtime proof",
+      "W3_OBLIGATION_IDS": [
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-41ce41c4d5eb013f",
+        "UE-1B3CA1G-PREREQUISITE-OBLIGATION-2c54c7df423d7946",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-54d46dbb3790f7b7",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-1d96c03855120f6c",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-95475ff37e61236f",
+        "UE-1B3CA1G-OPAQUE-OBLIGATION-e7352bddb4afd294",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-2e7c5b5727cee606",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-38ee26a47d8c334e",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-e756e0bb06d855ca",
+        "UE-1B3CA1G-INSTALLER-VERIFICATION-301cf3eb2ebebd20"
+      ],
+      "W3_DECISION_IDS": [
+        "UE-1B3CA1G-DECISION-4e0fdb9b7d80bdb5",
+        "UE-1B3CA1G-DECISION-7e108c57ea428e21"
+      ],
+      "W3_MECHANISM": "apps/union-eyes/scripts/provision-runtime-db-roles.ts",
+      "STARTED_BY_THIS_PACKET": "NO",
+      "REQUIRED": "After separate W8 authorization supply all exact LOGIN/auth-role bindings, authenticated target and complete membership/role/privilege catalog adapter on one transaction client; secret creation/storage/rotation remain external; migration activation bounded."
+    }
+  ],
+  "preservation": {
+    "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": {
+      "BEFORE_SHA256": "fe5bc24c5f1cc91af7e225e45887bb870a62e5811a2162fb74302af1e8df5cd2",
+      "AFTER_SHA256": "fe5bc24c5f1cc91af7e225e45887bb870a62e5811a2162fb74302af1e8df5cd2",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/UE_DATABASE_TARGET_SCHEMA_SEARCH_PATH_CONTRACT.json": {
+      "BEFORE_SHA256": "7d45cfc927ec6e8b1909098785d2e7dd0fc58fc195890ad81b9c00a61a455610",
+      "AFTER_SHA256": "7d45cfc927ec6e8b1909098785d2e7dd0fc58fc195890ad81b9c00a61a455610",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W2_DATABASE_TARGET_SEARCH_PATH.json": {
+      "BEFORE_SHA256": "b7a2b94be4f6a819baa801683d2d89bf5da2d0f8a8ca432a2d71021c1b33948b",
+      "AFTER_SHA256": "b7a2b94be4f6a819baa801683d2d89bf5da2d0f8a8ca432a2d71021c1b33948b",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1_DJANGO_DEPENDENCY_MIGRATION_LOCK.json": {
+      "BEFORE_SHA256": "1e74413a98722c042888a5cd0e135f34719778e78407129a4c6821f2f7fc3b52",
+      "AFTER_SHA256": "1e74413a98722c042888a5cd0e135f34719778e78407129a4c6821f2f7fc3b52",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION.json": {
+      "BEFORE_SHA256": "9e5572df4ddfa735de29df42639a45117ce4c377a5ffcd6e9776d7c667cf1a51",
+      "AFTER_SHA256": "9e5572df4ddfa735de29df42639a45117ce4c377a5ffcd6e9776d7c667cf1a51",
+      "CHANGED": "NO"
+    },
+    "apps/union-eyes/backend/requirements.lock": {
+      "BEFORE_SHA256": "310eb938f4f7c25b6f93323031981ede60a0d2ef2d68e017a5c9ced33e326fe6",
+      "AFTER_SHA256": "310eb938f4f7c25b6f93323031981ede60a0d2ef2d68e017a5c9ced33e326fe6",
+      "CHANGED": "NO"
+    },
+    "apps/union-eyes/backend/requirements.lock.metadata.json": {
+      "BEFORE_SHA256": "5a4f876e20fc71a615c3249a1f3cce2d7015e10957fbd8a6505c331283c82a0d",
+      "AFTER_SHA256": "5a4f876e20fc71a615c3249a1f3cce2d7015e10957fbd8a6505c331283c82a0d",
+      "CHANGED": "NO"
+    }
+  },
+  "validation": {
+    "W3_INPUT_OBLIGATIONS": 11,
+    "W3_INPUT_DECISIONS": 2,
+    "IMPLEMENTED_OBLIGATIONS": 4,
+    "GOVERNANCE_OR_SHARED_DEPENDENT_OBLIGATIONS": 0,
+    "OBLIGATION_IDS_LOST": 0,
+    "OBLIGATION_IDS_DUPLICATED": 0,
+    "DECISIONS_APPROVED": 2,
+    "DECISIONS_PENDING": 0,
+    "ROLE_CLASSES": 5,
+    "MANDATORY_EXTENSIONS": 4,
+    "VECTOR_EXTENSION_DISPOSITION": "OPTIONAL_GUARDED_NOT_BASELINE_REQUIRED",
+    "TWO_SCOPE_PLAN_TEMPLATES": 2,
+    "W3_W2_DRIFT_LINKS": 9,
+    "DETERMINISTIC_SQL_TEMPLATES_SHA256": "6c5608d0bfe7127bad0f44ab935ef4e13b198a61dd239fe02d985a8624d0ed5d",
+    "TEST_AUTHORITY": "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+    "NO_DATABASE_CONNECTION": true,
+    "NO_SQL_EXECUTION": true,
+    "NO_SECRET_ACCESS": true,
+    "NO_DEPLOYMENT_CONFIGURATION_MUTATION": true,
+    "NO_ROLE_EXTENSION_SCHEMA_GRANT_OR_RLS_RUNTIME_MUTATION": true,
+    "W3_CONTRACT_COMPONENTS_COMPLETE": 11,
+    "DOWNSTREAM_W6_OBJECT_ACL_OBLIGATIONS": 4,
+    "VECTOR_CURRENT_CONSUMERS": 22,
+    "MEMBER_GRAPH_FILTERED": "NO"
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W3_GATE": "PASS",
+    "PHASE_1B_3C_A1I_W3": "PASS",
+    "ROLE_PROVISIONING_IMPLEMENTATION": "COMPLETE_NOT_APPLIED",
+    "EXTENSION_PROVISIONING_IMPLEMENTATION": "COMPLETE_NOT_APPLIED",
+    "PROVISIONING_VERIFY_IMPLEMENTATION": "OFFLINE_DESCRIPTOR_AND_QUERY_IMPLEMENTED_W8_CATALOG_ADAPTER_REQUIRED_NOT_EXECUTED",
+    "TEMP_PRIVILEGE_CONTRACT": "PROPOSED_IMPLEMENTED_NOT_APPLIED",
+    "PUBLIC_SCHEMA_PRIVILEGE_CONTRACT": "PROPOSED_IMPLEMENTED_NOT_APPLIED",
+    "CANONICAL_BOOTSTRAP_CONTRACT_VERSION": "1.2",
+    "VERSION_1_3_CREATED": "NO; full W3 gate did not pass",
+    "W1": "PASS",
+    "W2": "PASS",
+    "W3_STARTED": "YES; offline implementation only",
+    "W4": "AUTHORIZED_NOT_STARTED",
+    "W4_STARTED": "NO",
+    "W5_W10_STARTED": "NO",
+    "A1R_STARTED": "NO",
+    "A2_STARTED": "NO",
+    "B3C_B_STARTED": "NO",
+    "DATABASE_ROLES_PROVISIONED": "NO",
+    "EXTENSIONS_RUNTIME_PROVEN": "NO",
+    "DATABASE_RUNTIME_CONFIGURATION_APPLIED": "NO",
+    "DATABASE_RUNTIME_CONFIGURATION_PROVEN": "NO",
+    "DJANGO_SCHEMA_MATERIALIZED": "NO",
+    "PRECONSUMER_BASELINE_MATERIALIZED": "NO",
+    "BOOTSTRAP_IMPLEMENTATION_COMPLETE": "NO",
+    "FAITHFUL_SCHEMA_REPLAY_PROVEN": "NO",
+    "PRODUCTION_SCHEMA_PROVEN": "NO",
+    "RLS_POLICY_CORRECTNESS_RUNTIME_PROVEN": "NO",
+    "TENANT_ISOLATION_RUNTIME_PROVEN": "NO",
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO",
+    "LOGIN_PRINCIPALS_BOUND": "NO",
+    "ROLE_MEMBERSHIPS_APPLIED": "NO",
+    "SECRETS_ACCESSED": "NO",
+    "PHASE_1B_3C_A1I_W3E_GATE": "PASS",
+    "PHASE_1B_3C_A1I_W3D_GATE": "PASS",
+    "PHASE_1B_3C_A1I_W3D": "PASS",
+    "W3": "PASS",
+    "CANONICAL_CONTRACT_VERSION": "1.3",
+    "DELEGATION_MEMBERSHIP_CONTRACT": "ESTABLISHED",
+    "MEMBERSHIP_VERIFY_IMPLEMENTATION": "COMPLETE_NOT_EXECUTED",
+    "VECTOR_EXTENSION_DISPOSITION": "OPTIONAL_GUARDED_NOT_BASELINE_REQUIRED",
+    "PHASE_1B_3C_A1I_W4_PRECONSUMER_PHYSICAL_PRODUCERS": "AUTHORIZED_NOT_STARTED"
+  },
+  "VERSION_1_SHA256": "0fed10ff33f8ac7ee4886d89e50143097f9e42928ee1efc77ec1fedce5eb3983",
+  "VERSION_1_1_SHA256": "ec0ac218281bf03a30e6449d87f133b16b8a6bb222bcdcacd186b4048b11c39d",
+  "VERSION_1_2_SHA256": "fe5bc24c5f1cc91af7e225e45887bb870a62e5811a2162fb74302af1e8df5cd2",
+  "PRIOR_VERSION_CHAIN": [
+    {
+      "VERSION": 1,
+      "SHA256": "0fed10ff33f8ac7ee4886d89e50143097f9e42928ee1efc77ec1fedce5eb3983",
+      "RECONSTRUCTION_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION.json#PRIOR_GOVERNANCE_PATCHES.CONTRACT"
+    },
+    {
+      "VERSION": "1.1",
+      "SHA256": "ec0ac218281bf03a30e6449d87f133b16b8a6bb222bcdcacd186b4048b11c39d",
+      "RECONSTRUCTION_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W2_DATABASE_TARGET_SEARCH_PATH.json#PRIOR_CANONICAL_INVERSE_PATCHES"
+    }
+  ],
+  "CANONICAL_CONTRACT_AMENDED": "YES; explicit W3E delegation alignment plus approved W3D intents",
+  "frozenUniverses": {
+    "PREREQUISITES": {
+      "COUNT": 803,
+      "SHA256": "72248f8e1295d855c7cdc25abce02989a573f27b945877ff3dcdad33cda08419"
+    },
+    "OPAQUE": {
+      "COUNT": 118,
+      "SHA256": "6c128973f81f179bbb04423a9346e87aeba017dbf5ba6dfe5bf0ceb4b9121384"
+    },
+    "ORDERING": {
+      "COUNT": 86,
+      "SHA256": "3d475d1a4b27f9e42c5d65c705b1dd914c25501626c25f4e771846055f209192"
+    },
+    "FROZEN_SECURITY_MANIFEST": {
+      "COUNT": 23,
+      "SHA256": "5ebd2ab883f7523a36eefb0417d89a1f53d69b11ad5dc5cfe01658f4df75fab7"
+    },
+    "W2_ACTOR_SCHEMA_SCOPE_PATH_SHA256": "9a9abcf3d5a4f9aa9fb76682083091e4f91309eeec32cd0a3eda702a088a6742"
+  },
+  "delegationContract": {
+    "ROLE_IDENTITY_MODEL": "EXTERNAL_LOGIN_PRINCIPAL_BOUND_TO_CANONICAL_NOLOGIN_AUTHORIZATION_ROLE",
+    "EXTERNAL_PRINCIPAL_BINDINGS": [
+      {
+        "ROLE_CLASS": "MIGRATION_ADMIN",
+        "AUTHORIZATION_ROLE_BINDING": "MIGRATION_ADMIN_PRINCIPAL",
+        "EXTERNAL_LOGIN_PRINCIPAL_BINDING": "MIGRATION_ADMIN_LOGIN_PRINCIPAL",
+        "CARDINALITY": "EXACTLY_ONE_DISTINCT_EXTERNAL_LOGIN_PRINCIPAL"
+      },
+      {
+        "ROLE_CLASS": "APPLICATION_RUNTIME",
+        "AUTHORIZATION_ROLE_BINDING": "APPLICATION_RUNTIME_PRINCIPAL",
+        "EXTERNAL_LOGIN_PRINCIPAL_BINDING": "APPLICATION_RUNTIME_LOGIN_PRINCIPAL",
+        "CARDINALITY": "EXACTLY_ONE_DISTINCT_EXTERNAL_LOGIN_PRINCIPAL"
+      },
+      {
+        "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+        "AUTHORIZATION_ROLE_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_PRINCIPAL",
+        "EXTERNAL_LOGIN_PRINCIPAL_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_LOGIN_PRINCIPAL",
+        "CARDINALITY": "EXACTLY_ONE_DISTINCT_EXTERNAL_LOGIN_PRINCIPAL"
+      },
+      {
+        "ROLE_CLASS": "FINANCIAL_MIGRATION",
+        "AUTHORIZATION_ROLE_BINDING": "FINANCIAL_MIGRATION_PRINCIPAL",
+        "EXTERNAL_LOGIN_PRINCIPAL_BINDING": "FINANCIAL_MIGRATION_LOGIN_PRINCIPAL",
+        "CARDINALITY": "EXACTLY_ONE_DISTINCT_EXTERNAL_LOGIN_PRINCIPAL"
+      },
+      {
+        "ROLE_CLASS": "FINANCIAL_RUNTIME",
+        "AUTHORIZATION_ROLE_BINDING": "FINANCIAL_RUNTIME_PRINCIPAL",
+        "EXTERNAL_LOGIN_PRINCIPAL_BINDING": "FINANCIAL_RUNTIME_LOGIN_PRINCIPAL",
+        "CARDINALITY": "EXACTLY_ONE_DISTINCT_EXTERNAL_LOGIN_PRINCIPAL"
+      }
+    ],
+    "EXTERNAL_PRINCIPAL_BINDING_REQUIRED": "YES",
+    "HARDCODED_DEFAULT_PRINCIPAL": "NO",
+    "AMBIENT_CURRENT_USER_FALLBACK": "NO",
+    "INFERRED_PRINCIPAL_NAME": "NO",
+    "CANONICAL_AUTHORIZATION_ROLES_LOGIN": "NOLOGIN",
+    "CANONICAL_AUTHORIZATION_ROLE_PASSWORD": "NONE",
+    "CANONICAL_AUTHORIZATION_ROLE_SECRET_ROTATION": "NOT_APPLICABLE",
+    "LOGIN_PRINCIPAL_CREATION": "OUTSIDE_W3",
+    "LOGIN_PRINCIPAL_BINDING": "REQUIRED_BEFORE_RUNTIME_EXECUTION",
+    "LOGIN_PRINCIPAL_SECRET_STORAGE": "EXTERNAL_SECRET_AUTHORITY",
+    "LOGIN_PRINCIPAL_SECRET_ROTATION": "EXTERNAL_SECRET_DEPLOYMENT_AUTHORITY",
+    "LOGIN_PRINCIPAL_MAY_ASSUME_ITS_AUTHORIZATION_ROLE": "YES",
+    "CROSS_SCOPE_ROLE_MEMBERSHIP": "PROHIBITED",
+    "RUNTIME_TO_MIGRATION_ROLE_MEMBERSHIP": "PROHIBITED",
+    "ADMIN_OPTION": "NO",
+    "ROLE_ADMINISTRATION": "NO",
+    "NESTED_DELEGATION": "NO",
+    "ROTATION_AUTHORITY": "GOVERNED_SECRET_MANAGEMENT_AND_DEPLOYMENT_AUTHORITY",
+    "REPOSITORY_SECRET_ROTATION_AUTHORITY": "NO",
+    "DATABASE_AUTHORIZATION_ROLE_ROTATION_AUTHORITY": "NO",
+    "LOGIN_BINDING_IMPLEMENTATION_OWNER": "W8",
+    "ROLE_OWNERSHIP": [
+      {
+        "ROLE_CLASS": "MIGRATION_ADMIN",
+        "MAY_OWN_DOMAIN_TABLES": true,
+        "MAY_OWN_PLATFORM_HELPERS": true,
+        "MAY_OWN_FINANCIAL_TABLES": false,
+        "ACTIVATION": "BOUNDED_BOOTSTRAP_OR_MIGRATION_EXECUTION_ONLY",
+        "OWNERSHIP_RUNTIME_PROVEN": "NO"
+      },
+      {
+        "ROLE_CLASS": "APPLICATION_RUNTIME",
+        "MAY_OWN_DOMAIN_TABLES": false,
+        "MAY_OWN_PLATFORM_HELPERS": false,
+        "MAY_OWN_FINANCIAL_TABLES": false,
+        "ACTIVATION": "CORRESPONDING_RUNTIME_CLASS_ONLY",
+        "OWNERSHIP_RUNTIME_PROVEN": "NO"
+      },
+      {
+        "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+        "MAY_OWN_DOMAIN_TABLES": false,
+        "MAY_OWN_PLATFORM_HELPERS": false,
+        "MAY_OWN_FINANCIAL_TABLES": false,
+        "ACTIVATION": "CORRESPONDING_RUNTIME_CLASS_ONLY",
+        "OWNERSHIP_RUNTIME_PROVEN": "NO"
+      },
+      {
+        "ROLE_CLASS": "FINANCIAL_MIGRATION",
+        "MAY_OWN_DOMAIN_TABLES": false,
+        "MAY_OWN_PLATFORM_HELPERS": false,
+        "MAY_OWN_FINANCIAL_TABLES": true,
+        "ACTIVATION": "BOUNDED_BOOTSTRAP_OR_MIGRATION_EXECUTION_ONLY",
+        "OWNERSHIP_RUNTIME_PROVEN": "NO"
+      },
+      {
+        "ROLE_CLASS": "FINANCIAL_RUNTIME",
+        "MAY_OWN_DOMAIN_TABLES": false,
+        "MAY_OWN_PLATFORM_HELPERS": false,
+        "MAY_OWN_FINANCIAL_TABLES": false,
+        "ACTIVATION": "CORRESPONDING_RUNTIME_CLASS_ONLY",
+        "OWNERSHIP_RUNTIME_PROVEN": "NO"
+      }
+    ],
+    "PRIVILEGED_ATTRIBUTES": {
+      "SUPERUSER": "NO",
+      "BYPASSRLS": "NO",
+      "CREATEDB": "NO",
+      "CREATEROLE": "NO",
+      "REPLICATION": "NO"
+    },
+    "ROLE_MEMBERSHIP_MODEL": "EXACT_EXTERNAL_LOGIN_TO_AUTHORIZATION_ROLE_ONLY",
+    "DELEGATION_BINDING_STATE": "NOT_RUNTIME_BOUND",
+    "DIRECTION": "GRANT authorization_role TO external_login_principal",
+    "SET_ROLE_CAPABILITY_REQUIRED": "YES",
+    "AUTHORIZATION_ROLE_MEMBER_OF_LOGIN_PRINCIPAL": "NO",
+    "MISSING_BINDING": "FAIL_MISSING_PRINCIPAL_BINDING",
+    "EXPECTED_MEMBERSHIP_ABSENT": "GRANT_EXACT_EXPECTED_EDGE_DURING_FUTURE_GOVERNED_APPLY",
+    "UNEXPECTED_MEMBERSHIP": "FAIL_DRIFT_WITHOUT_AUTOMATIC_REVOKE",
+    "POST_BINDING_VERIFICATION": "Only exact expected edge present, no admin option, SET capability present, no extra/reverse/nested/cross-scope/runtime-to-migration edge",
+    "CATALOG_COMPLETENESS": "Full pg_auth_members graph; descriptor incoming/outgoing lists must reconcile to graph, not filtered success",
+    "LOGIN_PRINCIPAL_ATTRIBUTES": "Must already exist, LOGIN, non-superuser/non-bypass/non-CREATEDB/non-CREATEROLE/non-replication; W3 never creates/rotates it",
+    "POSTGRESQL_MEMBERSHIP_OPTIONS": "admin_option measured on all supported versions; set_option measured via to_jsonb for PostgreSQL 16+ and implicit SET capability on earlier versions"
+  },
+  "vectorConsumerReconciliation": [
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-027175495062988b",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-04ce25437b3debb8",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-1e87bfdb9dff6e0f",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-21cbfd9a1b94aaf8",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-3de5469edc1f29ed",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-4085bb83be3f1670",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-41bd18f787e58ad3",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-510940f2f0ef9913",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-5d9ad08c0b5ecc9c",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-65e1e373a95475d0",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-695361fbcf4c5242",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-76c2e1354d92cb2b",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-9f7a80fbdbf98f2d",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-af92c5998d24d676",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-b4ed69c2ce5aca49",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-b7ce906c401b96a1",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-bbf0e158383b8913",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-c5846ed2d67f2a62",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-e19ff6f9225f74c6",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-f907fbb59e68c927",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    }
+  ],
+  "digests": {
+    "ROLE_SPECIFICATIONS": "6063b45dacfd0c0b34bc07077133736c5e9aa23b5cfc480b2ccc618017139184",
+    "MEMBERSHIP_PLAN": "be0882c015e836d6a3f4acc623031d5f8b1be18a66fac35ee8dc7021e7a307d6",
+    "MEMBERSHIP_VERIFY_QUERIES": "7b21b01088d49d59ed9e837b7199f3481a687dc437ec97fb5f612e3b410c0026",
+    "FULL_W3_PLAN": "6c5608d0bfe7127bad0f44ab935ef4e13b198a61dd239fe02d985a8624d0ed5d",
+    "VECTOR_DECISION_MODEL": "54cec933bb57b1c1696bd5858cf3dd9cd91323c3885a2aff9db5190cae41b5fb",
+    "NON_DELEGATION_PLAN": "31361334ee171c180195375f5c377990859eff18cd15f7cf03bde859a9cc667f"
+  },
+  "historicalValidation": {
+    "W3_INPUT_OBLIGATIONS": 11,
+    "W3_INPUT_DECISIONS": 2,
+    "IMPLEMENTED_OBLIGATIONS": 4,
+    "GOVERNANCE_OR_SHARED_DEPENDENT_OBLIGATIONS": 7,
+    "OBLIGATION_IDS_LOST": 0,
+    "OBLIGATION_IDS_DUPLICATED": 0,
+    "DECISIONS_APPROVED": 0,
+    "DECISIONS_PENDING": 2,
+    "ROLE_CLASSES": 5,
+    "MANDATORY_EXTENSIONS": 4,
+    "VECTOR_EXTENSION_DISPOSITION": "GOVERNANCE_DECISION_REQUIRED",
+    "TWO_SCOPE_PLAN_TEMPLATES": 2,
+    "W3_W2_DRIFT_LINKS": 9,
+    "DETERMINISTIC_SQL_TEMPLATES_SHA256": "9e205582c02fbb8cbd9ba95541f93353872b63e050a79787541aed1b7cb5f0dd",
+    "TEST_AUTHORITY": "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+    "NO_DATABASE_CONNECTION": true,
+    "NO_SQL_EXECUTION": true,
+    "NO_SECRET_ACCESS": true,
+    "NO_DEPLOYMENT_CONFIGURATION_MUTATION": true,
+    "NO_ROLE_EXTENSION_SCHEMA_GRANT_OR_RLS_RUNTIME_MUTATION": true
+  },
+  "VERSION_1_3_SHA256": "5d61007a66a462484b226b9accbfd6cba8b04bb3af86d9c1e0b4e6e9339ff4f8",
+  "W3E_CLOSURE_REFERENCE": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3E_DELEGATION_MEMBERSHIP_ALIGNMENT.json",
+  "historicalW3Validation": {
+    "W3_INPUT_OBLIGATIONS": 11,
+    "W3_INPUT_DECISIONS": 2,
+    "IMPLEMENTED_OBLIGATIONS": 4,
+    "GOVERNANCE_OR_SHARED_DEPENDENT_OBLIGATIONS": 7,
+    "OBLIGATION_IDS_LOST": 0,
+    "OBLIGATION_IDS_DUPLICATED": 0,
+    "DECISIONS_APPROVED": 0,
+    "DECISIONS_PENDING": 2,
+    "ROLE_CLASSES": 5,
+    "MANDATORY_EXTENSIONS": 4,
+    "VECTOR_EXTENSION_DISPOSITION": "GOVERNANCE_DECISION_REQUIRED",
+    "TWO_SCOPE_PLAN_TEMPLATES": 2,
+    "W3_W2_DRIFT_LINKS": 9,
+    "DETERMINISTIC_SQL_TEMPLATES_SHA256": "9e205582c02fbb8cbd9ba95541f93353872b63e050a79787541aed1b7cb5f0dd",
+    "TEST_AUTHORITY": "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts",
+    "NO_DATABASE_CONNECTION": true,
+    "NO_SQL_EXECUTION": true,
+    "NO_SECRET_ACCESS": true,
+    "NO_DEPLOYMENT_CONFIGURATION_MUTATION": true,
+    "NO_ROLE_EXTENSION_SCHEMA_GRANT_OR_RLS_RUNTIME_MUTATION": true
+  }
+}

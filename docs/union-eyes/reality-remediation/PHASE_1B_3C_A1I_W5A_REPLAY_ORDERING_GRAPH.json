@@ -1,0 +1,204 @@
+{
+  "metadata": {
+    "PHASE": "PHASE_1B_3C_A1I_W5A",
+    "INPUTS": {
+      "w4p": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4P_PLATFORM_BASELINE_PROMOTION.json",
+      "promotionPlan": "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_PLAN.json",
+      "promotionImplementation": "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION.json",
+      "downstream": "docs/union-eyes/reality-remediation/UE_POST_W4P_COMPATIBILITY_OBLIGATIONS.json",
+      "w4lc": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LC_COMPATIBILITY_GATE_NORMALIZATION.json",
+      "late": "docs/union-eyes/reality-remediation/UE_W4_LATE_PRODUCER_COMPATIBILITY_CLASSIFICATION.json",
+      "deferredClassification": "docs/union-eyes/reality-remediation/UE_W4_DEFERRED_CONSTRAINT_COMPATIBILITY_CLASSIFICATION.json",
+      "w4lb": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LB_SUPPLEMENTAL_OPERAND_BINDING.json",
+      "operands": "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_OPERAND_PRODUCER_BINDINGS.json",
+      "bindings": "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_CONSTRAINT_BINDINGS.json",
+      "producer": "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json",
+      "canonical": "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json"
+    },
+    "EXECUTION_ALLOWED": "NO",
+    "GENERAL_DISCOVERY": "NO"
+  },
+  "summary": {
+    "REPLAY_RECORD_COUNT": 127,
+    "REPLAY_RECORDS_ACCOUNTED": 127,
+    "UNACCOUNTED_REPLAY_RECORDS": 0,
+    "ORDERING_HANDOFFS": 86,
+    "HANDOFFS_WITH_GRAPH_EDGES": 86,
+    "UNACCOUNTED_HANDOFFS": 0,
+    "ACCEPTED_HANDOFF_EDGE_RECORDS": 86,
+    "UNIQUE_ACCEPTED_HANDOFF_ENDPOINT_EDGES": 43,
+    "REPLAY_UNIT_COUNT": 107,
+    "DISTINCT_COMPATIBILITY_REPLAY_UNITS": 84,
+    "FROZEN_STATEMENT_UNITS": 43,
+    "FROZEN_WRAPPER_UNITS": 41,
+    "ORIGINAL_FROZEN_MIGRATION_REPLAY_UNITS": 23,
+    "GRAPH_EDGE_COUNT": 231,
+    "REPLAY_GRAPH_CYCLES": 0,
+    "UNRESOLVED_ORDERING_ENDPOINTS": 0,
+    "UNPROVEN_ORDERING_EDGES": 0,
+    "ATOMICITY_CONFLICT_RECORDS": 0,
+    "DEFERRED_CONSTRAINT_HANDOFFS": 7,
+    "DEFERRED_CONSTRAINT_LOCATIONS_COMPLETE": "NO",
+    "UNRESOLVED_OPERAND_BINDINGS": 9,
+    "FROZEN_MIGRATIONS_HASH_VERIFIED": 23,
+    "FROZEN_MIGRATION_HASH_DRIFT": 0,
+    "FROZEN_MIGRATIONS_REWRITTEN": 0,
+    "W4P_PRECONDITION_GRAPH_CHANGED": "NO",
+    "POST_W4P_ITEMS_MOVED_BACK_BEFORE_W4P": 0,
+    "COMPATIBILITY_MECHANICS_CHANGED": 0,
+    "ORDERING_HANDOFFS_CHANGED": 0,
+    "SQL_AUTHORED": 0,
+    "SQL_EXECUTED": 0,
+    "PRODUCERS_ACTIVATED": 0
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W5A_GATE": "PASS",
+    "PHASE_1B_3C_A1I_W5A": "PASS",
+    "BOUND_REPLAY_ORDERING_GRAPH": "COMPLETE_NOT_EXECUTED",
+    "W5": "IN_PROGRESS",
+    "W5B_REPLAY_IMPLEMENTATION": "AUTHORIZED_NOT_STARTED",
+    "W4": "PASS",
+    "W4P": "PASS",
+    "W4P_RUNTIME_EXECUTION": "NOT_AUTHORIZED",
+    "CANONICAL_CONTRACT_VERSION": "1.3.3"
+  },
+  "blockers": {
+    "ATOMICITY_CONFLICT_OBLIGATION_IDS": [],
+    "ATOMICITY_CONFLICT_UNIT_IDS": [],
+    "CYCLE_OR_CYCLE_DEPENDENT_UNIT_IDS": [],
+    "UNRESOLVED_ORDERING_ENDPOINT_IDS": []
+  },
+  "determinismDigests": {
+    "REPLAY_GRAPH_SHA256": "b700d55469c27bed84d98aa4281fb800486a4f776e4d88d753031d28446b21b2",
+    "TOPOLOGICAL_PLAN_SHA256": "e5c5a60e8f37ee6c43617d44ca73d2f541d28777f3d0609863e0aad6dd87a989",
+    "REPLAY_UNIT_REGISTRY_SHA256": "efce59eaa5d82056dfcc66f11b89d5f1a30b8c642fc5d11ab29d3f67e2905a07",
+    "ORDERING_EDGE_REGISTRY_SHA256": "05c02be14e2d3a0dad5505a1f09d8f45636f9aff2005f645feb8d18b58c964a1",
+    "DOWNSTREAM_RESIDUAL_REGISTER_SHA256": "86a966657d4e0473fe10d05d4705efb1112f9ec61759c89b0f202b5a03db08dd"
+  },
+  "preservation": {
+    "BYTE_COMMITMENTS": {
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4P_PLATFORM_BASELINE_PROMOTION.json": "9405b0b03e3966816605199a04244e7ffe41af6c2d03af31f25e7c2836d9bbfb",
+      "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_PLAN.json": "f58319b792dc62cf6ac06bcf8be070ca6020084f41e468add7d64217aba0b4d5",
+      "docs/union-eyes/reality-remediation/UE_W4_PLATFORM_BASELINE_PROMOTION_IMPLEMENTATION.json": "6f651aaa3f76a82192c5050e2400498d4f66a58c0aa0af2639770ccf52183c49",
+      "docs/union-eyes/reality-remediation/UE_POST_W4P_COMPATIBILITY_OBLIGATIONS.json": "2e10f3e40761c6b93bca473b263c262c2222f7b3a875e41ab268fa1b4448e043",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LC_COMPATIBILITY_GATE_NORMALIZATION.json": "fef8528dda5467bb742cd4987b449809f3143099648ec42381b665ecb7cc3ab8",
+      "docs/union-eyes/reality-remediation/UE_W4_LATE_PRODUCER_COMPATIBILITY_CLASSIFICATION.json": "fc98ce059a4e4d26caadecb7ed9a686db81d324e8e597477f55064d74b76ed98",
+      "docs/union-eyes/reality-remediation/UE_W4_DEFERRED_CONSTRAINT_COMPATIBILITY_CLASSIFICATION.json": "51700b9b0d5860ee9218fabc43ba1aeeb09b96cd6d0b908998e046d724ee05ec",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4LB_SUPPLEMENTAL_OPERAND_BINDING.json": "40ab8780f42b87389345cd3c5191f525ad5470e173f02d9eb946835bfbc3b1e0",
+      "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_OPERAND_PRODUCER_BINDINGS.json": "8ed7eb94b12d2d4b172e5a608d972ce93cbd4334e3cd4a4dfc31cfbffab15fb6",
+      "docs/union-eyes/reality-remediation/UE_W4_SUPPLEMENTAL_CONSTRAINT_BINDINGS.json": "2bfbbf5b3762d7bc4604b5e403210fb4162f0af8a667436454e3053b45bc8f6b",
+      "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json": "b2db0a4924188facc243965b0de11cd921200ce8dda811c543263abdd84dc3aa",
+      "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": "5e105985d6b99fbdb118b87454543f92e0053ae1b574c3dfe6417f9bbbc81e2d",
+      "apps/union-eyes/scripts/provisioning/platform-baseline-promotion.ts": "67d54fe1c1dcdc4685d006e0b24a7d35fe7eee070c77cc1d8116705114c32fd2",
+      "apps/union-eyes/db/migrations-cache/0000_outstanding_viper.sql": "55341b8ef332ee26d226bdda7b044664a3b1c570582e1d61015f7538030862e8",
+      "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql": "9ca1fdeb3c5517124c65ff18bc52e753844d9d98533b09d4048571f2d65edda6",
+      "apps/union-eyes/db/migrations-cache/0002_certain_juggernaut.sql": "c8c905a98b6ce238036328d708a119223b3544bf698b423f4f4a905a8c9d1bc8",
+      "apps/union-eyes/db/migrations-cache/0003_dizzy_alex_wilder.sql": "105ea4b4710bf406f1f3a32a2704c724f39af152fdcf83701f19ad2b3de850ab",
+      "apps/union-eyes/db/migrations-cache/0004_hesitant_chameleon.sql": "9777c9417af6755c30ab896273222d7e68b4e4af3032110c21dbcf572d281df0",
+      "apps/union-eyes/db/migrations-cache/0005_add_icra_assessment_capability_token.sql": "9a280d5e9ccdcdcb350673b40294b5a08d401b9f53dcc950b02868298494293a",
+      "apps/union-eyes/db/migrations-cache/0006_external_specialist_runtime_privilege_closure.sql": "aa9a3314fc70de80e3064e8dedbc31b12a09caa3d99632ac75ae0c0a19731003",
+      "apps/union-eyes/db/migrations-cache/0007_auth_bootstrap_runtime_remediation.sql": "4b742c7a3a1a70532c9f3dc1133f3020b58246ff3663c036e92da09143751a45",
+      "apps/union-eyes/db/migrations-cache/0008_runtime_acceptance_closure.sql": "821563dc03232c3530b441c8372d82642e8762e5814f733e760c33d6005b29d0",
+      "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql": "dfb79693e7ce06ef4d078fb0eed8cd8bcde60a54bd3b29ec09e766ac49fcb53d",
+      "apps/union-eyes/db/migrations-cache/0010_tenant_isolation_rls_foundation.sql": "9bfd46947d9d25539b32e72edccea1c1862c6c4f2c46bac2ae10a0a228ee75f5",
+      "apps/union-eyes/db/migrations-cache/0011_storage_authority_rls_completion.sql": "fbf17ed35fb5c5efbb1c415f66ae2bb1fdf79e7ba1b8cfd8c711f40c6ea53c37",
+      "apps/union-eyes/db/migrations-cache/0012_storage_authority_rls_final_closure.sql": "3891b11704a9934b0e408b6d1b0b38c9b1dd90bfcbaa71aa16e92b6e0f17c312",
+      "apps/union-eyes/db/migrations-cache/0013_workbook_credential_payment_authority.sql": "7b0dcc672d3380fdcb8abb2bc3885882a9e55fea28364cb3e8855b32e58ef0d0",
+      "apps/union-eyes/db/migrations-cache/0014_lineage_restoration_rls_closure.sql": "cd8a2814a0e101dd56b0a94449eda3dce6e99860b368690a5fad3b97791a64a5",
+      "apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql": "309b04cb85673fdffaa6751804cc74edb4d98bef06975c085388a51e93ab7208",
+      "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d",
+      "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql": "83d9d41344e8f327752e4cc1a9fbb23d894f49b42e7f6282beadbe793c5ac1a0",
+      "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de",
+      "apps/union-eyes/db/migrations-platform/0005_organization_members_deleted_at.sql": "0580d447b4d8dcc129958bffa2eaa7a2c24120f3ff2ebdc51343e88b9d2ac554",
+      "apps/union-eyes/db/migrations-platform/0006_documents_runtime_columns.sql": "661f14e708303514b5a9b4b430dc8d05dfc214852f54d262d9aa0057a9d3408e",
+      "apps/union-eyes/db/migrations-platform/0007_claim_updates_runtime_columns.sql": "bf015e6edf82c50e01f1bf64141d64e00f58b9da2100c4640d5e0e689beaf020",
+      "apps/union-eyes/services/financial-service/drizzle/0000_lucky_mole_man.sql": "c57e929249d3fb610543c7b078d169e38b4d14975db1d59fb07433a665b469db"
+    },
+    "W4P_PLAN_DIGEST": "b213e1b6e5773d2f513ef2a0b55e199d0055ea7f3fb8202c96e761e75d04346a",
+    "W4_DEFINITIONS": 183,
+    "W4_PAYLOADS": 162,
+    "NAMED_TYPES": 36,
+    "CONTEXTUAL_TYPE_REFERENCES": 38,
+    "COMPATIBILITY_RECORDS_SHA256": "132c65e94637a9c7415385928a59b976349e479e58d565dbe53b4235117aedeb",
+    "ORDERING_HANDOFFS_SHA256": "bf0723dbc866f6346bb163a051e0b4397eedab11e027949ca4072f68354274b0",
+    "DEFERRED_HANDOFF_BINDINGS_SHA256": "cb7b8c4154fafb45edef95c4b12deabf98d6525ab5f19ef27e6d8339b6ea422f",
+    "OPERAND_RESIDUALS_SHA256": "2f602ec2c2c67d297f5b759c77aa276d6e4b50decda4be0c64e1fb89340660d0",
+    "UPSTREAM_BYTES_CHANGED": 0,
+    "CANONICAL_CONTRACT_VERSION": "1.3.3"
+  },
+  "validation": {
+    "EXACT127_ACCOUNTING": "PASS",
+    "EXACT86_ACCOUNTING": "PASS",
+    "EXACT7_ACCOUNTING": "PASS",
+    "EXACT9_ACCOUNTING": "PASS",
+    "FROZEN23_HASHES": "PASS",
+    "EXACT_OPERATION_BINDING": "PASS",
+    "COMPATIBILITY_MECHANICS_PRESERVED": "PASS",
+    "EDGE_PROVENANCE": "PASS",
+    "DAG_CLOSURE": "PASS",
+    "COMPLETED_LOCAL_VALIDATION": [
+      {
+        "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts scripts\\ue\\close-w5a-replay-graph.test.ts",
+        "RESULT": "PASS",
+        "TESTS_PASSED": 531
+      },
+      {
+        "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts apps\\union-eyes\\scripts\\provisioning\\platform-baseline-promotion.test.ts scripts\\ue\\implement-w4p-platform-promotion.test.ts",
+        "RESULT": "PASS",
+        "TESTS_PASSED": 895
+      },
+      {
+        "COMMAND": "pnpm exec vitest run --config scripts\\ue\\w4p-predecessor.vitest.config.ts scripts\\ue\\normalize-w4pg-promotion-gate.test.ts scripts\\ue\\bind-w4lb-supplemental-operands.test.ts scripts\\ue\\classify-w4lc-compatibility.test.ts scripts\\ue\\author-w4fr4-final-baseline.test.ts",
+        "RESULT": "PASS",
+        "TESTS_PASSED": 1154
+      },
+      {
+        "COMMAND": "pnpm exec tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --skipLibCheck --esModuleInterop --types node scripts\\ue\\close-w5a-replay-graph.ts scripts\\ue\\close-w5a-replay-graph.test.ts",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm exec eslint --config apps\\union-eyes\\eslint.config.mjs --max-warnings 0 scripts\\ue\\close-w5a-replay-graph.ts scripts\\ue\\close-w5a-replay-graph.test.ts",
+        "RESULT": "PASS_EXIT_0",
+        "NOTE": "Existing Next pages-directory diagnostic printed;no lint errors."
+      },
+      {
+        "COMMAND": "pnpm exec tsx scripts\\ue\\close-w5a-replay-graph.ts --plan --self-test",
+        "RESULT": "PASS_TWO_GENERATIONS_IDENTICAL"
+      },
+      {
+        "COMMAND": "pnpm exec tsx scripts\\ue\\close-w5a-replay-graph.ts --check --self-test",
+        "RESULT": "PASS_PERSISTED_BYTES_FIXED_INPUTS_TWO_GENERATIONS"
+      },
+      {
+        "COMMAND": "pnpm exec prettier --check scripts\\ue\\close-w5a-replay-graph.ts scripts\\ue\\close-w5a-replay-graph.test.ts docs\\union-eyes\\reality-remediation\\UE_W5_POST_W4P_REPLAY_GRAPH.json docs\\union-eyes\\reality-remediation\\UE_W5_POST_W4P_REPLAY_GRAPH.md docs\\union-eyes\\reality-remediation\\UE_W5_REPLAY_TOPOLOGICAL_PLAN.json docs\\union-eyes\\reality-remediation\\UE_W5_REPLAY_TOPOLOGICAL_PLAN.md docs\\union-eyes\\reality-remediation\\PHASE_1B_3C_A1I_W5A_REPLAY_ORDERING_GRAPH.json docs\\union-eyes\\reality-remediation\\PHASE_1B_3C_A1I_W5A_REPLAY_ORDERING_GRAPH.md",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm validate:docs",
+        "RESULT": "PASS",
+        "FILES_SCANNED": 2635,
+        "ERRORS": 0,
+        "EXISTING_WARNINGS": 1215
+      }
+    ],
+    "DISTINCT_TESTS_PASSED": 2580,
+    "INDEPENDENT_PERSISTED_JSON_VERIFICATION": "PASS;node fs/crypto/assert verification without generator imports:107 nodes,231 ordered/provenance edges,36 byte commitments,exact127/86/7/9,no cross-scope edge,no activation",
+    "EVIDENCE_CEILING": "Completed local static/fake-only validation;never a runtime execution receipt."
+  },
+  "proofBoundaries": {
+    "DATABASE_CONNECTIONS": 0,
+    "SQL_EXECUTED": 0,
+    "W4P_EXECUTED": "NO",
+    "FROZEN_MIGRATIONS_EXECUTED": 0,
+    "COMPATIBILITY_MECHANICS_EXECUTED": 0,
+    "DEFERRED_CONSTRAINTS_MATERIALIZED": "NO",
+    "W5_EXECUTED": "NO",
+    "PRODUCERS_ACTIVATED": 0,
+    "BOOTSTRAP_IMPLEMENTATION_COMPLETE": "NO",
+    "FAITHFUL_SCHEMA_REPLAY_PROVEN": "NO",
+    "RLS_POLICY_CORRECTNESS_RUNTIME_PROVEN": "NO",
+    "TENANT_ISOLATION_RUNTIME_PROVEN": "NO",
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO"
+  }
+}

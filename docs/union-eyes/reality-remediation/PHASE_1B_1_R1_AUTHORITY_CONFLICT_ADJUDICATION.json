@@ -1,0 +1,404 @@
+{
+  "title": "Phase 1B.1-R1 — Exact-Five Authority Conflict Adjudication",
+  "status": "PASS",
+  "sourceOnly": true,
+  "scope": {
+    "censusInput": "docs/union-eyes/reality-remediation/PHASE_1B_1_CANONICAL_DATA_AUTHORITY_CENSUS.json",
+    "predicate": "persistenceUniverse rows matching productionAccessObserved=true, declarationConflict=true, and canonicalSchemaModule=null",
+    "inputCount": 5,
+    "objectIds": [
+      "financial-service::public.arrears",
+      "financial-service::public.dues_rules",
+      "financial-service::public.dues_transactions",
+      "financial-service::public.stipend_disbursements",
+      "union-eyes::public.dues_transactions"
+    ],
+    "databaseIdentity": "Source scope and PostgreSQL schema are recorded separately. No database URL value, server/catalog, deployed schema, or physical database identity was inspected."
+  },
+  "methodology": {
+    "declarationShape": "For these exact declarations only, database column names are extracted from the root Drizzle builder call, not from a chained default() call. Other persistence-universe records retain their previous dispositions and extracted fields.",
+    "accessEvidence": "Counts are static operation-pattern candidates in directly recorded importing files. They do not establish route reachability, runtime execution, query success, or writes.",
+    "migrationEvidence": "References identify checked-in DDL and model/migration source only. No migration was executed and no migration ledger was queried.",
+    "ownerEvidence": "A configured Drizzle schema input identifies the source used by that configuration; it does not prove deployed physical schema. Django canonical-owner doctrine applies only where a matching Django model exists."
+  },
+  "dispositions": [
+    {
+      "objectId": "financial-service::public.arrears",
+      "schema": "public",
+      "finalDisposition": "KNOWN_DUPLICATE_AUTHORITY_CONFLICTS",
+      "authorityQuestion": "DISPOSED_AS_REGISTERED_SOURCE_CONFLICT",
+      "unknownAuthority": false,
+      "physicalIdentityVerified": false,
+      "sourceAuthority": {
+        "configuredSchemaInput": "apps/union-eyes/services/financial-service/src/db/schema.ts",
+        "configuredOutputDirectory": "apps/union-eyes/services/financial-service/drizzle",
+        "outputSideDeclaration": "apps/union-eyes/services/financial-service/drizzle/schema.ts",
+        "interpretation": "The configured input and the output-side/introspection DDL disagree on source shape. Configuration selects the current input for Drizzle generation but does not establish the currently deployed table shape or an explicit ownership registry."
+      },
+      "declarations": [
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/schema.ts",
+          "exportName": "arrears",
+          "line": 1572,
+          "importingFiles": [],
+          "candidateOperations": { "read": 0, "insert": 0, "update": 0, "delete": 0, "join": 0 }
+        },
+        {
+          "file": "apps/union-eyes/services/financial-service/src/db/schema.ts",
+          "exportName": "arrears",
+          "line": 1588,
+          "importingFiles": [
+            "apps/union-eyes/services/financial-service/src/jobs/arrears-management-workflow.ts",
+            "apps/union-eyes/services/financial-service/src/jobs/payment-collection-workflow.ts"
+          ],
+          "candidateOperations": { "read": 2, "insert": 1, "update": 2, "delete": 0, "join": 0 }
+        }
+      ],
+      "schemaDifferences": [
+        "The configured src/db/schema.ts declaration adds notification_stage as nullable text defaulting to 'none'; the output-side declaration and 0000 introspection DDL omit it.",
+        "The 0000 DDL and output-side declaration include tenant_id; the configured source keeps tenant_id."
+      ],
+      "migrationEvidence": [
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/0000_lucky_mole_man.sql",
+          "line": 1521,
+          "event": "CREATE TABLE IF NOT EXISTS public.arrears",
+          "lineage": "financial-service",
+          "journalTag": "0000_lucky_mole_man",
+          "note": "The file header says it was generated after database introspection and leaves execution commented out; this does not prove application."
+        }
+      ],
+      "defectIds": ["UE-1B1-R1-001"],
+      "confidence": "high"
+    },
+    {
+      "objectId": "financial-service::public.dues_rules",
+      "schema": "public",
+      "finalDisposition": "KNOWN_DUPLICATE_AUTHORITY_CONFLICTS",
+      "authorityQuestion": "DISPOSED_AS_REGISTERED_SOURCE_CONFLICT",
+      "unknownAuthority": false,
+      "physicalIdentityVerified": false,
+      "sourceAuthority": {
+        "configuredSchemaInput": "apps/union-eyes/services/financial-service/src/db/schema.ts",
+        "configuredOutputDirectory": "apps/union-eyes/services/financial-service/drizzle",
+        "outputSideDeclaration": "apps/union-eyes/services/financial-service/drizzle/schema.ts",
+        "interpretation": "The configured input and the output-side/introspection DDL disagree on organization scope and its dependent constraints. No explicit object-level authority record or verified physical winner was found."
+      },
+      "declarations": [
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/schema.ts",
+          "exportName": "duesRules",
+          "line": 1064,
+          "importingFiles": ["apps/union-eyes/services/financial-service/drizzle/relations.ts"],
+          "candidateOperations": { "read": 0, "insert": 0, "update": 0, "delete": 0, "join": 0 }
+        },
+        {
+          "file": "apps/union-eyes/services/financial-service/src/db/schema.ts",
+          "exportName": "duesRules",
+          "line": 1055,
+          "importingFiles": [
+            "apps/union-eyes/services/financial-service/src/jobs/dues-calculation-workflow.ts",
+            "apps/union-eyes/services/financial-service/src/routes/dues-rules-backup.ts"
+          ],
+          "candidateOperations": { "read": 4, "insert": 2, "update": 2, "delete": 0, "join": 0 }
+        }
+      ],
+      "schemaDifferences": [
+        "The output-side declaration and 0000 DDL use tenant_id; the configured source uses organization_id.",
+        "The tenant_id variant references tenant_management.tenants(tenant_id), indexes tenant_id, and scopes unique_rule_code by tenant_id; the organization_id variant references public.organizations(id), indexes organization_id, and scopes uniqueness by organization_id.",
+        "The remaining declared columns have matching names and Drizzle types/defaults in the paired declarations."
+      ],
+      "migrationEvidence": [
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/0000_lucky_mole_man.sql",
+          "line": 1198,
+          "event": "CREATE TABLE IF NOT EXISTS public.dues_rules",
+          "lineage": "financial-service",
+          "journalTag": "0000_lucky_mole_man"
+        },
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/0000_lucky_mole_man.sql",
+          "line": 4840,
+          "event": "ALTER TABLE dues_rules ADD tenant_id foreign key",
+          "lineage": "financial-service"
+        }
+      ],
+      "defectIds": ["UE-1B1-R1-002"],
+      "confidence": "high"
+    },
+    {
+      "objectId": "financial-service::public.dues_transactions",
+      "schema": "public",
+      "finalDisposition": "KNOWN_DUPLICATE_AUTHORITY_CONFLICTS",
+      "authorityQuestion": "DISPOSED_AS_REGISTERED_SOURCE_CONFLICT",
+      "unknownAuthority": false,
+      "physicalIdentityVerified": false,
+      "sourceAuthority": {
+        "configuredSchemaInput": "apps/union-eyes/services/financial-service/src/db/schema.ts",
+        "configuredOutputDirectory": "apps/union-eyes/services/financial-service/drizzle",
+        "outputSideDeclaration": "apps/union-eyes/services/financial-service/drizzle/schema.ts",
+        "interpretation": "The configured input and the output-side/introspection DDL disagree on organization scope and dependent constraints. The configured path is source-selection evidence, not physical-schema verification."
+      },
+      "declarations": [
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/schema.ts",
+          "exportName": "duesTransactions",
+          "line": 5923,
+          "importingFiles": ["apps/union-eyes/services/financial-service/drizzle/relations.ts"],
+          "candidateOperations": { "read": 0, "insert": 0, "update": 0, "delete": 0, "join": 0 }
+        },
+        {
+          "file": "apps/union-eyes/services/financial-service/src/db/schema.ts",
+          "exportName": "duesTransactions",
+          "line": 5980,
+          "importingFiles": [
+            "apps/union-eyes/services/financial-service/src/jobs/arrears-management-workflow.ts",
+            "apps/union-eyes/services/financial-service/src/jobs/dues-calculation-workflow.ts",
+            "apps/union-eyes/services/financial-service/src/jobs/payment-collection-workflow.ts",
+            "apps/union-eyes/services/financial-service/src/routes/analytics.ts"
+          ],
+          "candidateOperations": { "read": 4, "insert": 1, "update": 2, "delete": 0, "join": 0 }
+        }
+      ],
+      "schemaDifferences": [
+        "The output-side declaration and 0000 DDL use tenant_id; the configured source uses organization_id.",
+        "The organization-scoped foreign key and status/amount indexes in the configured source differ from the tenant-scoped foreign key and indexes in the output-side shape.",
+        "Other declared business columns match by name across these two declarations."
+      ],
+      "migrationEvidence": [
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/0000_lucky_mole_man.sql",
+          "line": 4532,
+          "event": "CREATE TABLE IF NOT EXISTS public.dues_transactions",
+          "lineage": "financial-service",
+          "journalTag": "0000_lucky_mole_man"
+        },
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/0000_lucky_mole_man.sql",
+          "line": 5626,
+          "event": "ALTER TABLE dues_transactions ADD tenant_id foreign key",
+          "lineage": "financial-service"
+        }
+      ],
+      "defectIds": ["UE-1B1-R1-003"],
+      "confidence": "high"
+    },
+    {
+      "objectId": "financial-service::public.stipend_disbursements",
+      "schema": "public",
+      "finalDisposition": "KNOWN_DUPLICATE_AUTHORITY_CONFLICTS",
+      "authorityQuestion": "DISPOSED_AS_REGISTERED_SOURCE_CONFLICT",
+      "unknownAuthority": false,
+      "physicalIdentityVerified": false,
+      "sourceAuthority": {
+        "configuredSchemaInput": "apps/union-eyes/services/financial-service/src/db/schema.ts",
+        "configuredOutputDirectory": "apps/union-eyes/services/financial-service/drizzle",
+        "outputSideDeclaration": "apps/union-eyes/services/financial-service/drizzle/schema.ts",
+        "interpretation": "The configured source contains additional fields absent from the output-side/introspection DDL. The source config does not prove whether those fields are deployed."
+      },
+      "declarations": [
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/schema.ts",
+          "exportName": "stipendDisbursements",
+          "line": 1231,
+          "importingFiles": ["apps/union-eyes/services/financial-service/drizzle/relations.ts"],
+          "candidateOperations": { "read": 0, "insert": 0, "update": 0, "delete": 0, "join": 0 }
+        },
+        {
+          "file": "apps/union-eyes/services/financial-service/src/db/schema.ts",
+          "exportName": "stipendDisbursements",
+          "line": 1222,
+          "importingFiles": [
+            "apps/union-eyes/services/financial-service/src/jobs/stipend-processing-workflow.ts",
+            "apps/union-eyes/services/financial-service/src/routes/analytics.ts",
+            "apps/union-eyes/services/financial-service/src/services/burn-rate-predictor.ts"
+          ],
+          "candidateOperations": { "read": 6, "insert": 1, "update": 2, "delete": 0, "join": 3 }
+        }
+      ],
+      "schemaDifferences": [
+        "The configured source adds days_worked integer default 0 and calculated_amount numeric nullable; both are absent from the output-side declaration and 0000 DDL.",
+        "The remaining declared columns, nullability, defaults, and unique member/week constraint match in the paired declarations."
+      ],
+      "migrationEvidence": [
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/0000_lucky_mole_man.sql",
+          "line": 1300,
+          "event": "CREATE TABLE IF NOT EXISTS public.stipend_disbursements",
+          "lineage": "financial-service",
+          "journalTag": "0000_lucky_mole_man"
+        },
+        {
+          "file": "apps/union-eyes/services/financial-service/drizzle/0000_lucky_mole_man.sql",
+          "line": 4882,
+          "event": "ALTER TABLE stipend_disbursements ADD strike_fund_id foreign key",
+          "lineage": "financial-service"
+        }
+      ],
+      "defectIds": ["UE-1B1-R1-004"],
+      "confidence": "high"
+    },
+    {
+      "objectId": "union-eyes::public.dues_transactions",
+      "schema": "public",
+      "finalDisposition": "ACTIVE_CANONICAL_WITH_LEGACY_MIRROR",
+      "authorityQuestion": "DISPOSED_BY_DJANGO_CANONICAL_OWNER_DOCTRINE",
+      "unknownAuthority": false,
+      "physicalIdentityVerified": false,
+      "sourceAuthority": {
+        "owner": "DJANGO_CANONICAL",
+        "doctrineFile": "apps/union-eyes/db/schema-authority/registry.json",
+        "modelFile": "apps/union-eyes/backend/billing/models.py",
+        "model": "DuesTransactions",
+        "modelLine": 415,
+        "tableEvidence": "Meta.db_table='dues_transactions' at line 426",
+        "canonicalSchemaMapEntry": false,
+        "interpretation": "The repository doctrine and matching concrete Django model establish source-level canonical ownership. They do not prove current deployed physical columns or migration application."
+      },
+      "declarations": [
+        {
+          "file": "apps/union-eyes/db/schema/dues-transactions-schema.ts",
+          "exportName": "duesTransactions",
+          "line": 10,
+          "importingFiles": ["apps/union-eyes/db/queries/dues-queries.ts"],
+          "candidateOperations": { "read": 4, "insert": 1, "update": 2, "delete": 0, "join": 0 },
+          "authorityRole": "NONCANONICAL_DRIZZLE_MIRROR"
+        },
+        {
+          "file": "apps/union-eyes/db/schema/domains/finance/dues.ts",
+          "exportName": "duesTransactions",
+          "line": 11,
+          "importingFiles": [],
+          "candidateOperations": { "read": 0, "insert": 0, "update": 0, "delete": 0, "join": 0 },
+          "authorityRole": "NONCANONICAL_DRIZZLE_MIRROR_EXPORTED_BY_FINANCE_DOMAIN"
+        }
+      ],
+      "schemaDifferences": [
+        "The domain declaration adds nullable processor_type, processor_payment_id, and processor_customer_id fields and defines payment_processor values; the directly imported standalone declaration omits those fields.",
+        "The Django DuesTransactions model and its initial migration establish a model/table mapping but expose a narrower field set than either Drizzle declaration.",
+        "The direct importer uses full-shape .select().from(duesTransactions) candidates and insert/update .returning() candidates; this conflicts with the authority doctrine requiring governed Drizzle read projections and no Drizzle-owned DDL/writes for canonical entities."
+      ],
+      "migrationEvidence": [
+        {
+          "file": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+          "line": 616,
+          "event": "Django CreateModel DuesTransactions",
+          "lineage": "django",
+          "tableLine": 653
+        },
+        {
+          "file": "apps/union-eyes/db/migrations/0008_lean_mother_askani.sql",
+          "line": 278,
+          "event": "CREATE TABLE IF NOT EXISTS public.dues_transactions",
+          "occurrencesInSameFile": 28,
+          "lineage": "frozen-historical",
+          "note": "Repeated source statements in one file are not a chronological or applied-migration signal."
+        },
+        {
+          "file": "apps/union-eyes/db/migrations/0019_lonely_stephen_strange.sql",
+          "line": 262,
+          "event": "DROP TABLE dues_transactions CASCADE",
+          "lineage": "frozen-historical"
+        },
+        {
+          "file": "apps/union-eyes/db/migrations/0078_force_dues_transactions_rls.sql",
+          "line": 5,
+          "event": "ALTER TABLE dues_transactions ENABLE ROW LEVEL SECURITY",
+          "lineage": "frozen-historical"
+        },
+        {
+          "file": "apps/union-eyes/db/migrations/0078_force_dues_transactions_rls.sql",
+          "line": 6,
+          "event": "ALTER TABLE dues_transactions FORCE ROW LEVEL SECURITY",
+          "lineage": "frozen-historical"
+        },
+        {
+          "file": "apps/union-eyes/db/migrations/20260910_rls_enforcement_expansion_round58.sql",
+          "line": 1207,
+          "event": "Conditional existence check for dues_transactions before organization RLS policy creation",
+          "lineage": "frozen-historical"
+        }
+      ],
+      "defectIds": ["UE-1B1-R1-005"],
+      "confidence": "high"
+    }
+  ],
+  "defectRegister": [
+    {
+      "defectId": "UE-1B1-R1-001",
+      "objectId": "financial-service::public.arrears",
+      "classification": "KNOWN_DUPLICATE_AUTHORITY_CONFLICT",
+      "description": "The configured source adds notification_stage while the introspection-derived DDL and output-side schema omit it; physical winner is unverified.",
+      "repairPerformed": false
+    },
+    {
+      "defectId": "UE-1B1-R1-002",
+      "objectId": "financial-service::public.dues_rules",
+      "classification": "KNOWN_DUPLICATE_AUTHORITY_CONFLICT",
+      "description": "tenant_id versus organization_id changes the indexed, unique, and foreign-key scope.",
+      "repairPerformed": false
+    },
+    {
+      "defectId": "UE-1B1-R1-003",
+      "objectId": "financial-service::public.dues_transactions",
+      "classification": "KNOWN_DUPLICATE_AUTHORITY_CONFLICT",
+      "description": "tenant_id versus organization_id changes the foreign-key and index scope.",
+      "repairPerformed": false
+    },
+    {
+      "defectId": "UE-1B1-R1-004",
+      "objectId": "financial-service::public.stipend_disbursements",
+      "classification": "KNOWN_DUPLICATE_AUTHORITY_CONFLICT",
+      "description": "Configured source-only days_worked and calculated_amount fields are absent from the output-side/introspection shape.",
+      "repairPerformed": false
+    },
+    {
+      "defectId": "UE-1B1-R1-005",
+      "objectId": "union-eyes::public.dues_transactions",
+      "classification": "CANONICAL_MIRROR_SHAPE_AND_ACCESS_DEFECT",
+      "description": "A direct full-shape Drizzle importer uses a noncanonical mirror and performs candidate inserts/updates; the exported domain mirror has three processor fields absent from the directly imported declaration.",
+      "repairPerformed": false
+    }
+  ],
+  "principalAuthorityCounts": {
+    "scope": "The five fixed R1 object groups; each group has one exclusive final disposition. Representation counts are reported separately and may overlap.",
+    "ACTIVE_CANONICAL_TABLES": 0,
+    "ACTIVE_CANONICAL_WITH_LEGACY_MIRROR": 1,
+    "LEGACY_NON_AUTHORITATIVE_TABLES": 0,
+    "MIGRATION_ONLY_HISTORICAL_TABLES": 0,
+    "GENERATED_OR_DERIVED_TABLE_REPRESENTATIONS": 0,
+    "TEST_OR_FIXTURE_ONLY_TABLES": 0,
+    "KNOWN_DUPLICATE_AUTHORITY_CONFLICTS": 4,
+    "UNKNOWN_AUTHORITY_TABLES": 0,
+    "nonAuthoritativeDrizzleMirrorDeclarations": 2,
+    "declaredColumnShapeConflicts": 5,
+    "dispositionTotal": 5,
+    "countingNote": "The legacy-nonauthoritative and generated/derived table categories are zero as exclusive table-object dispositions in this fixed set. The Union Eyes object is counted as canonical-with-mirror, with its two noncanonical Drizzle declarations counted separately; the four financial-service conflicts remain explicit and are not folded into an authority category."
+  },
+  "censusWideResiduals": {
+    "persistenceUniverseObjectCount": 1593,
+    "authorityClassCountsBeforeR1Overlay": {
+      "ACTIVE_CANONICAL_AUTHORITY": 13,
+      "ACTIVE_CANONICAL_AUTHORITY_WITH_LEGACY_MIRROR": 511,
+      "CONFLICTING_OR_UNRESOLVED_AUTHORITY": 163,
+      "GENERATED_OR_DERIVED_REPRESENTATION": 34,
+      "MIGRATION_ONLY_HISTORICAL": 609,
+      "PROVIDER_OR_EXTERNALLY_MANAGED": 3,
+      "UNKNOWN_SOURCE_CEILING": 260
+    },
+    "activeProductionAccessUnknownAuthorityObjectsOutsideFixedR1Input": 7,
+    "outsideFixedInputDispositionChanges": 0
+  },
+  "gate": {
+    "fixedFiveAdjudication": "PASS",
+    "phase1b1Census": "SOURCE_CEILING",
+    "globalGateRationale": "All five fixed records have explicit, registered dispositions and UNKNOWN_AUTHORITY_TABLES is zero within this fixed set. The existing census still contains 260 UNKNOWN_SOURCE_CEILING objects, including seven with indexed production access outside the fixed input, and Phase 1A source-ceiling records remain carried forward. Those objects were not investigated or reclassified by R1."
+  },
+  "boundaries": [
+    "No runtime database, connection string value, database catalog, migration ledger, or deployed schema was inspected.",
+    "No migration was executed; no database was written; no application repair was performed.",
+    "No unrelated persistence object was reviewed or dispositioned.",
+    "No RLS effectiveness, tenant isolation, query reachability, or successful-write claim is made.",
+    "Phase 1B.2 and later phases were not started."
+  ]
+}

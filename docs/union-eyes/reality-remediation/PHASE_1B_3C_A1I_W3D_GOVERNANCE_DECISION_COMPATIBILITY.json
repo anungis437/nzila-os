@@ -1,0 +1,897 @@
+{
+  "metadata": {
+    "PHASE": "PHASE_1B_3C_A1I_W3D",
+    "METHOD": "Fixed artifact-only decision compatibility adjudication; no source rescan or provisioning edits"
+  },
+  "governanceDecisions": [
+    {
+      "DECISION_ID": "UE-1B3CA1G-DECISION-4e0fdb9b7d80bdb5",
+      "DECISION_STATUS": "APPROVED_BY_W3D_MAINTAINER_INSTRUCTION",
+      "APPROVED": "YES",
+      "CONTRACT_VALUE": {
+        "ROLE_IDENTITY_MODEL": "EXTERNAL_LOGIN_PRINCIPAL_BOUND_TO_CANONICAL_NOLOGIN_AUTHORIZATION_ROLE",
+        "EXTERNAL_PRINCIPAL_BINDINGS": [
+          {
+            "ROLE_CLASS": "MIGRATION_ADMIN",
+            "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+            "EXTERNAL_PRINCIPAL_BINDING": "MIGRATION_ADMIN_PRINCIPAL",
+            "EXISTING_FROZEN_AUTHORIZATION_NAME_CONSTRAINT": null
+          },
+          {
+            "ROLE_CLASS": "APPLICATION_RUNTIME",
+            "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+            "EXTERNAL_PRINCIPAL_BINDING": "APPLICATION_RUNTIME_PRINCIPAL",
+            "EXISTING_FROZEN_AUTHORIZATION_NAME_CONSTRAINT": "union_eyes_runtime"
+          },
+          {
+            "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+            "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+            "EXTERNAL_PRINCIPAL_BINDING": "SYSTEM_OR_INTERNAL_RUNTIME_PRINCIPAL",
+            "EXISTING_FROZEN_AUTHORIZATION_NAME_CONSTRAINT": "union_eyes_system"
+          },
+          {
+            "ROLE_CLASS": "FINANCIAL_MIGRATION",
+            "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+            "EXTERNAL_PRINCIPAL_BINDING": "FINANCIAL_MIGRATION_PRINCIPAL",
+            "EXISTING_FROZEN_AUTHORIZATION_NAME_CONSTRAINT": null
+          },
+          {
+            "ROLE_CLASS": "FINANCIAL_RUNTIME",
+            "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+            "EXTERNAL_PRINCIPAL_BINDING": "FINANCIAL_RUNTIME_PRINCIPAL",
+            "EXISTING_FROZEN_AUTHORIZATION_NAME_CONSTRAINT": null
+          }
+        ],
+        "EXTERNAL_PRINCIPAL_BINDING_REQUIRED": "YES",
+        "HARDCODED_DEFAULT_PRINCIPAL": "NO",
+        "AMBIENT_CURRENT_USER_FALLBACK": "NO",
+        "INFERRED_PRINCIPAL_NAME": "NO",
+        "CANONICAL_AUTHORIZATION_ROLES_LOGIN": "NOLOGIN",
+        "CANONICAL_AUTHORIZATION_ROLE_PASSWORD": "NONE",
+        "CANONICAL_AUTHORIZATION_ROLE_SECRET_ROTATION": "NOT_APPLICABLE",
+        "LOGIN_PRINCIPAL_CREATION": "OUTSIDE_W3",
+        "LOGIN_PRINCIPAL_BINDING": "REQUIRED_BEFORE_RUNTIME_EXECUTION",
+        "LOGIN_PRINCIPAL_SECRET_STORAGE": "EXTERNAL_SECRET_AUTHORITY",
+        "LOGIN_PRINCIPAL_SECRET_ROTATION": "EXTERNAL_SECRET_DEPLOYMENT_AUTHORITY",
+        "LOGIN_PRINCIPAL_MAY_ASSUME_ITS_AUTHORIZATION_ROLE": "YES",
+        "CROSS_SCOPE_ROLE_MEMBERSHIP": "PROHIBITED",
+        "RUNTIME_TO_MIGRATION_ROLE_MEMBERSHIP": "PROHIBITED",
+        "ADMIN_OPTION": "NO",
+        "ROLE_ADMINISTRATION": "NO",
+        "NESTED_DELEGATION": "NO",
+        "ROTATION_AUTHORITY": "GOVERNED_SECRET_MANAGEMENT_AND_DEPLOYMENT_AUTHORITY",
+        "REPOSITORY_SECRET_ROTATION_AUTHORITY": "NO",
+        "DATABASE_AUTHORIZATION_ROLE_ROTATION_AUTHORITY": "NO",
+        "LOGIN_BINDING_IMPLEMENTATION_OWNER": "W8",
+        "ROLE_OWNERSHIP": [
+          {
+            "ROLE_CLASS": "MIGRATION_ADMIN",
+            "MAY_OWN_DOMAIN_TABLES": true,
+            "MAY_OWN_PLATFORM_HELPERS": true,
+            "MAY_OWN_FINANCIAL_TABLES": false,
+            "ACTIVATION": "BOUNDED_BOOTSTRAP_OR_MIGRATION_EXECUTION_ONLY",
+            "OWNERSHIP_RUNTIME_PROVEN": "NO"
+          },
+          {
+            "ROLE_CLASS": "APPLICATION_RUNTIME",
+            "MAY_OWN_DOMAIN_TABLES": false,
+            "MAY_OWN_PLATFORM_HELPERS": false,
+            "MAY_OWN_FINANCIAL_TABLES": false,
+            "ACTIVATION": "CORRESPONDING_RUNTIME_CLASS_ONLY",
+            "OWNERSHIP_RUNTIME_PROVEN": "NO"
+          },
+          {
+            "ROLE_CLASS": "SYSTEM_OR_INTERNAL_RUNTIME",
+            "MAY_OWN_DOMAIN_TABLES": false,
+            "MAY_OWN_PLATFORM_HELPERS": false,
+            "MAY_OWN_FINANCIAL_TABLES": false,
+            "ACTIVATION": "CORRESPONDING_RUNTIME_CLASS_ONLY",
+            "OWNERSHIP_RUNTIME_PROVEN": "NO"
+          },
+          {
+            "ROLE_CLASS": "FINANCIAL_MIGRATION",
+            "MAY_OWN_DOMAIN_TABLES": false,
+            "MAY_OWN_PLATFORM_HELPERS": false,
+            "MAY_OWN_FINANCIAL_TABLES": true,
+            "ACTIVATION": "BOUNDED_BOOTSTRAP_OR_MIGRATION_EXECUTION_ONLY",
+            "OWNERSHIP_RUNTIME_PROVEN": "NO"
+          },
+          {
+            "ROLE_CLASS": "FINANCIAL_RUNTIME",
+            "MAY_OWN_DOMAIN_TABLES": false,
+            "MAY_OWN_PLATFORM_HELPERS": false,
+            "MAY_OWN_FINANCIAL_TABLES": false,
+            "ACTIVATION": "CORRESPONDING_RUNTIME_CLASS_ONLY",
+            "OWNERSHIP_RUNTIME_PROVEN": "NO"
+          }
+        ],
+        "PRIVILEGED_ATTRIBUTES": {
+          "SUPERUSER": "NO",
+          "BYPASSRLS": "NO",
+          "CREATEDB": "NO",
+          "CREATEROLE": "NO",
+          "REPLICATION": "NO"
+        }
+      },
+      "IMPLEMENTATION_COMPATIBILITY": "NO; existing zero-membership verifier conflicts with authorized login delegation",
+      "INTEGRATED_IN_CANONICAL_CONTRACT": "NO; compatibility STOP, no silent version 1.2 mutation"
+    },
+    {
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DECISION_STATUS": "APPROVED_BY_W3D_MAINTAINER_INSTRUCTION",
+      "APPROVED": "YES",
+      "VECTOR_EXTENSION_DISPOSITION": "OPTIONAL_GUARDED_NOT_BASELINE_REQUIRED",
+      "VECTOR_IN_CANONICAL_BASELINE": "NO",
+      "VECTOR_MANDATORY_INSTALLATION": "NO",
+      "VECTOR_AUTOMATIC_INSTALLATION": "NO",
+      "VECTOR_SILENT_AVAILABILITY_ASSUMPTION": "NO",
+      "CONSUMER_RECONCILIATION": [
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-027175495062988b",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-04ce25437b3debb8",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-1e87bfdb9dff6e0f",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-21cbfd9a1b94aaf8",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-3de5469edc1f29ed",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-4085bb83be3f1670",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-41bd18f787e58ad3",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-510940f2f0ef9913",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-5d9ad08c0b5ecc9c",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-65e1e373a95475d0",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-695361fbcf4c5242",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-76c2e1354d92cb2b",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-9f7a80fbdbf98f2d",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-af92c5998d24d676",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-b4ed69c2ce5aca49",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-b7ce906c401b96a1",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-bbf0e158383b8913",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-c5846ed2d67f2a62",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-e19ff6f9225f74c6",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        },
+        {
+          "CONSUMER_ID": "UE-1B3CA1-MIGRATION-f907fbb59e68c927",
+          "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+          "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+          "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+          "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+          "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+          "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+          "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+        }
+      ],
+      "INTEGRATED_IN_CANONICAL_CONTRACT": "NO; compatibility STOP prevents full 1.3 publication"
+    }
+  ],
+  "compatibilityConflicts": [
+    {
+      "CONFLICT_ID": "UE-W3D-CONFLICT-AUTHORIZED-DELEGATION-VS-ZERO-MEMBERSHIPS",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-4e0fdb9b7d80bdb5",
+      "ROLE_CLASSES": [
+        "MIGRATION_ADMIN",
+        "APPLICATION_RUNTIME",
+        "SYSTEM_OR_INTERNAL_RUNTIME",
+        "FINANCIAL_MIGRATION",
+        "FINANCIAL_RUNTIME"
+      ],
+      "ACCEPTED_IMPLEMENTATION_EXPECTATION": "NO_MEMBERSHIPS_IN_EITHER_DIRECTION",
+      "APPROVED_GOVERNANCE_EXPECTATION": "Separate external login principal may assume exactly its governed NOLOGIN authorization role",
+      "VERIFICATION_EVIDENCE": [
+        {
+          "DATABASE_SCOPE_ID": "UE_OPERATIONAL",
+          "ROLE_MEMBERSHIP_QUERY": {
+            "ID": "ROLE-MEMBERSHIPS",
+            "SQL": "SELECT granted.rolname AS granted_role, member.rolname AS member_role FROM pg_catalog.pg_auth_members m JOIN pg_catalog.pg_roles granted ON granted.oid = m.roleid JOIN pg_catalog.pg_roles member ON member.oid = m.member WHERE granted.rolname = ANY($1::text[]) OR member.rolname = ANY($1::text[]) ORDER BY granted_role, member_role;",
+            "PARAMETER_BINDINGS": ["scope principal names"]
+          }
+        },
+        {
+          "DATABASE_SCOPE_ID": "FINANCIAL_SERVICE",
+          "ROLE_MEMBERSHIP_QUERY": {
+            "ID": "ROLE-MEMBERSHIPS",
+            "SQL": "SELECT granted.rolname AS granted_role, member.rolname AS member_role FROM pg_catalog.pg_auth_members m JOIN pg_catalog.pg_roles granted ON granted.oid = m.roleid JOIN pg_catalog.pg_roles member ON member.oid = m.member WHERE granted.rolname = ANY($1::text[]) OR member.rolname = ANY($1::text[]) ORDER BY granted_role, member_role;",
+            "PARAMETER_BINDINGS": ["scope principal names"]
+          }
+        }
+      ],
+      "WHY_METADATA_ONLY_IS_INSUFFICIENT": "A login principal delegated to an authorization role is a member of that role. The accepted descriptor contract rejects memberRoles in addition to memberships; its recorded query includes either direction. Passing an empty memberRoles projection would hide actual catalog state and is not an honest alignment.",
+      "PROVISIONING_PHASE_SEPARATION": "Zero memberships can be valid before W8 login delegation. It is not a post-delegation verification contract. Existing artifacts do not explicitly establish a distinct pre-delegation verifier boundary plus governed post-delegation verifier.",
+      "REQUIRED_BOUNDED_AUTHORIZATION": [
+        "Permit an explicit lifecycle boundary: W3 verifier is pre-delegation only and W8 must implement a separate exact post-delegation verifier before runtime acceptance",
+        "Or permit a scoped verifier/spec/test change allowing only the explicitly bound direct login-to-authorization membership, with no admin option, cross-scope/runtime-to-migration/nested delegation"
+      ],
+      "IMPLEMENTATION_CHANGED_BY_W3D": "NO"
+    }
+  ],
+  "vectorConsumerReconciliation": [
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-027175495062988b",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-04ce25437b3debb8",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-1e87bfdb9dff6e0f",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-21cbfd9a1b94aaf8",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-3de5469edc1f29ed",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-4085bb83be3f1670",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-41bd18f787e58ad3",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-510940f2f0ef9913",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-5d9ad08c0b5ecc9c",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-65e1e373a95475d0",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-695361fbcf4c5242",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-76c2e1354d92cb2b",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-819bed4bd7277b71",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-9f7a80fbdbf98f2d",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-af92c5998d24d676",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-b4ed69c2ce5aca49",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-b7ce906c401b96a1",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-bbf0e158383b8913",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-c5846ed2d67f2a62",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-cc154f343a13d947",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-e19ff6f9225f74c6",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    },
+    {
+      "CONSUMER_ID": "UE-1B3CA1-MIGRATION-f907fbb59e68c927",
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "DECISION_ID": "UE-1B3CA1G-DECISION-7e108c57ea428e21",
+      "DISPOSITION": "CURRENTLY_NOT_AUTHORIZED_TO_REQUIRE_VECTOR",
+      "GOVERNANCE_GUARDED_NON_REQUIREMENT_ACCEPTED": "YES",
+      "SOURCE_SEMANTICS_OR_REPLAY_PROVEN": "NO",
+      "FUTURE_VECTOR_DEPENDENCY": "FAIL_CONTRACT_DRIFT unless explicit consumer/prerequisite/amendment/provisioning/availability sequence approved",
+      "EVIDENCE": "Version 1.2 vector prerequisite permits approved guarded non-requirement OR mandatory fail-fast installation; vector excluded from exact four mandatory extensions. No source rescan."
+    }
+  ],
+  "normalizedObligationProposal": [
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-e3c89f30d0c2714d",
+      "PRIOR_IMPLEMENTED_BY_W3": "NO",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "CLASSIFICATION": "RUNTIME_PROOF_LATER",
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-41ce41c4d5eb013f",
+      "PRIOR_IMPLEMENTED_BY_W3": "NO",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "NO; role/delegation verification compatibility pending",
+      "CLASSIFICATION": "RUNTIME_BINDING_W8",
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-PREREQUISITE-OBLIGATION-2c54c7df423d7946",
+      "PRIOR_IMPLEMENTED_BY_W3": "NO",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "NO; role/delegation verification compatibility pending",
+      "CLASSIFICATION": "RUNTIME_BINDING_W8",
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-54d46dbb3790f7b7",
+      "PRIOR_IMPLEMENTED_BY_W3": "NO",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "NO; role/delegation verification compatibility pending",
+      "CLASSIFICATION": "DOWNSTREAM_OBJECT_ACL_IMPLEMENTATION_W6",
+      "DOWNSTREAM_OWNER": "W6",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-1d96c03855120f6c",
+      "PRIOR_IMPLEMENTED_BY_W3": "NO",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "NO; role/delegation verification compatibility pending",
+      "CLASSIFICATION": "DOWNSTREAM_OBJECT_ACL_IMPLEMENTATION_W6",
+      "DOWNSTREAM_OWNER": "W6",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-95475ff37e61236f",
+      "PRIOR_IMPLEMENTED_BY_W3": "NO",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "NO; role/delegation verification compatibility pending",
+      "CLASSIFICATION": "DOWNSTREAM_OBJECT_ACL_IMPLEMENTATION_W6",
+      "DOWNSTREAM_OWNER": "W6",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-OPAQUE-OBLIGATION-e7352bddb4afd294",
+      "PRIOR_IMPLEMENTED_BY_W3": "NO",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "NO; role/delegation verification compatibility pending",
+      "CLASSIFICATION": "DOWNSTREAM_OBJECT_ACL_IMPLEMENTATION_W6",
+      "DOWNSTREAM_OWNER": "W6",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-INSTALLER-VERIFICATION-2e7c5b5727cee606",
+      "PRIOR_IMPLEMENTED_BY_W3": "YES",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "CLASSIFICATION": "IMPLEMENTED_BY_W3",
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-INSTALLER-VERIFICATION-38ee26a47d8c334e",
+      "PRIOR_IMPLEMENTED_BY_W3": "YES",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "CLASSIFICATION": "IMPLEMENTED_BY_W3",
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-INSTALLER-VERIFICATION-e756e0bb06d855ca",
+      "PRIOR_IMPLEMENTED_BY_W3": "YES",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "CLASSIFICATION": "IMPLEMENTED_BY_W3",
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    },
+    {
+      "OBLIGATION_ID": "UE-1B3CA1G-INSTALLER-VERIFICATION-301cf3eb2ebebd20",
+      "PRIOR_IMPLEMENTED_BY_W3": "YES",
+      "W3_CONTRACT_COMPONENT_COMPLETE": "YES",
+      "CLASSIFICATION": "IMPLEMENTED_BY_W3",
+      "DOWNSTREAM_OWNER": "W8/W9",
+      "DOWNSTREAM_IMPLEMENTATION_PENDING": "YES",
+      "RUNTIME_PROVEN": "NO",
+      "NORMALIZATION_APPLIED": "NO; compatibility STOP, prior linkage preserved"
+    }
+  ],
+  "preservation": {
+    "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": {
+      "BEFORE_SHA256": "fe5bc24c5f1cc91af7e225e45887bb870a62e5811a2162fb74302af1e8df5cd2",
+      "AFTER_SHA256": "fe5bc24c5f1cc91af7e225e45887bb870a62e5811a2162fb74302af1e8df5cd2",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/UE_DATABASE_TARGET_SCHEMA_SEARCH_PATH_CONTRACT.json": {
+      "BEFORE_SHA256": "7d45cfc927ec6e8b1909098785d2e7dd0fc58fc195890ad81b9c00a61a455610",
+      "AFTER_SHA256": "7d45cfc927ec6e8b1909098785d2e7dd0fc58fc195890ad81b9c00a61a455610",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/UE_ROLE_EXTENSION_PROVISIONING_CONTRACT.json": {
+      "BEFORE_SHA256": "b6e09442ccf0d2fcf107cdedffa6d1f88212f5511882f6802a58bdda5e78506d",
+      "AFTER_SHA256": "b6e09442ccf0d2fcf107cdedffa6d1f88212f5511882f6802a58bdda5e78506d",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3_ROLE_EXTENSION_PROVISIONING.json": {
+      "BEFORE_SHA256": "1f475922fa25e9942535ca9b497a1e672e4675747882a938cb8683df02105422",
+      "AFTER_SHA256": "1f475922fa25e9942535ca9b497a1e672e4675747882a938cb8683df02105422",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W3_ROLE_EXTENSION_PROVISIONING.md": {
+      "BEFORE_SHA256": "3519b1901b3cfc0cba46fd9f05b298dfeae389dd8c8c3387c137384dd77e0750",
+      "AFTER_SHA256": "3519b1901b3cfc0cba46fd9f05b298dfeae389dd8c8c3387c137384dd77e0750",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1_DJANGO_DEPENDENCY_MIGRATION_LOCK.json": {
+      "BEFORE_SHA256": "1e74413a98722c042888a5cd0e135f34719778e78407129a4c6821f2f7fc3b52",
+      "AFTER_SHA256": "1e74413a98722c042888a5cd0e135f34719778e78407129a4c6821f2f7fc3b52",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W1N_GOVERNANCE_BOUNDARY_NORMALIZATION.json": {
+      "BEFORE_SHA256": "9e5572df4ddfa735de29df42639a45117ce4c377a5ffcd6e9776d7c667cf1a51",
+      "AFTER_SHA256": "9e5572df4ddfa735de29df42639a45117ce4c377a5ffcd6e9776d7c667cf1a51",
+      "CHANGED": "NO"
+    },
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W2_DATABASE_TARGET_SEARCH_PATH.json": {
+      "BEFORE_SHA256": "b7a2b94be4f6a819baa801683d2d89bf5da2d0f8a8ca432a2d71021c1b33948b",
+      "AFTER_SHA256": "b7a2b94be4f6a819baa801683d2d89bf5da2d0f8a8ca432a2d71021c1b33948b",
+      "CHANGED": "NO"
+    }
+  },
+  "w3SectionPreservation": {
+    "authority": {
+      "BEFORE_SHA256": "144b18c9c23dce30b7ea09c908f68644546c8537108b457c5ece450e17bc8226",
+      "AFTER_SHA256": "144b18c9c23dce30b7ea09c908f68644546c8537108b457c5ece450e17bc8226",
+      "CHANGED": "NO"
+    },
+    "roleSpecifications": {
+      "BEFORE_SHA256": "6f339c9dbe422af87ea08214e2669e7eeac1566f84e9cc59ebe8a80bc6b3ecfc",
+      "AFTER_SHA256": "6f339c9dbe422af87ea08214e2669e7eeac1566f84e9cc59ebe8a80bc6b3ecfc",
+      "CHANGED": "NO"
+    },
+    "extensionSpecifications": {
+      "BEFORE_SHA256": "6e9a59adccfb9044d48d527de0fb902a2888e9f35ad80430d786d9423bf352e2",
+      "AFTER_SHA256": "6e9a59adccfb9044d48d527de0fb902a2888e9f35ad80430d786d9423bf352e2",
+      "CHANGED": "NO"
+    },
+    "targetValidation": {
+      "BEFORE_SHA256": "9b1ebf863a786356b3d0ce09f8b6b954e53c612ef7ad544c840b770d589950fe",
+      "AFTER_SHA256": "9b1ebf863a786356b3d0ce09f8b6b954e53c612ef7ad544c840b770d589950fe",
+      "CHANGED": "NO"
+    },
+    "privilegeContract": {
+      "BEFORE_SHA256": "0df2778f70eb1979fde1e2258490f11f3c48290a6c93596ab7df2268b5196b93",
+      "AFTER_SHA256": "0df2778f70eb1979fde1e2258490f11f3c48290a6c93596ab7df2268b5196b93",
+      "CHANGED": "NO"
+    },
+    "planTemplates": {
+      "BEFORE_SHA256": "9e205582c02fbb8cbd9ba95541f93353872b63e050a79787541aed1b7cb5f0dd",
+      "AFTER_SHA256": "9e205582c02fbb8cbd9ba95541f93353872b63e050a79787541aed1b7cb5f0dd",
+      "CHANGED": "NO"
+    },
+    "modes": {
+      "BEFORE_SHA256": "c113cb2b50473c1a0c1f82882408d828cdb9b44514c1800dc58185543fde1db6",
+      "AFTER_SHA256": "c113cb2b50473c1a0c1f82882408d828cdb9b44514c1800dc58185543fde1db6",
+      "CHANGED": "NO"
+    },
+    "opaqueRoleBindingPacket": {
+      "BEFORE_SHA256": "47b8389a5fdfc1b0cac9b7957526a283873c4eb5e61b3693a5b3c587e49fc153",
+      "AFTER_SHA256": "47b8389a5fdfc1b0cac9b7957526a283873c4eb5e61b3693a5b3c587e49fc153",
+      "CHANGED": "NO"
+    },
+    "w2DriftReconciliation": {
+      "BEFORE_SHA256": "c5ab4668edc127107020e10dd87ad414e0883641eca9b1fca25ebf80de3e091b",
+      "AFTER_SHA256": "c5ab4668edc127107020e10dd87ad414e0883641eca9b1fca25ebf80de3e091b",
+      "CHANGED": "NO"
+    },
+    "downstreamImplementationPacket": {
+      "BEFORE_SHA256": "c3805fd9290f62f04d84d2cb2d4f3076666fe70cb2d993d800871957d179168c",
+      "AFTER_SHA256": "c3805fd9290f62f04d84d2cb2d4f3076666fe70cb2d993d800871957d179168c",
+      "CHANGED": "NO"
+    },
+    "validation": {
+      "BEFORE_SHA256": "4128eb8b2fa020be1b00a1ee79098e8291ce729328ecf113d23d262cefba6866",
+      "AFTER_SHA256": "4128eb8b2fa020be1b00a1ee79098e8291ce729328ecf113d23d262cefba6866",
+      "CHANGED": "NO"
+    }
+  },
+  "implementationCodeHashReferences": {
+    "apps/union-eyes/scripts/provision-runtime-db-roles.ts": "63eb62e38f11801a518c3c367b582849ff1c55c1a03015b8ed70692a21b29098",
+    "apps/union-eyes/scripts/provisioning/governed-provisioning.ts": "f2c3a7621943f041e1283998dabe5e95c3b7bcdb67d24e5224a32574d7e3ccfc",
+    "apps/union-eyes/scripts/provisioning/governed-provisioning.test.ts": "3168acfa79a492a934dc931c823a0676b84888508988a29e9bf53bb492709e55"
+  },
+  "IMPLEMENTATION_CODE_READ_OR_EDITED": "NO; existing hash references preserved; only existing tests/type/lint may read source during validation",
+  "CHANGE_FLAGS": {
+    "PROVISIONER_CODE_CHANGED": "NO",
+    "ROLE_SQL_CHANGED": "NO",
+    "EXTENSION_SQL_CHANGED": "NO",
+    "VERIFY_SQL_CHANGED": "NO",
+    "TARGET_VALIDATION_CHANGED": "NO",
+    "PRIVILEGE_BOUNDARY_CHANGED": "NO",
+    "W3_IMPLEMENTATION_DIGEST_CHANGED": "NO"
+  },
+  "priorVersionChain": {
+    "VERSION_1_SHA256": "0fed10ff33f8ac7ee4886d89e50143097f9e42928ee1efc77ec1fedce5eb3983",
+    "VERSION_1_1_SHA256": "ec0ac218281bf03a30e6449d87f133b16b8a6bb222bcdcacd186b4048b11c39d",
+    "VERSION_1_2_SHA256": "fe5bc24c5f1cc91af7e225e45887bb870a62e5811a2162fb74302af1e8df5cd2",
+    "VERSION_1_3_CREATED": "NO"
+  },
+  "validation": {
+    "OBLIGATIONS": 11,
+    "DECISIONS": 2,
+    "DECISIONS_APPROVED_AS_INTENT": 2,
+    "INSTALLER_MECHANISMS_PRESERVED": 4,
+    "OPAQUE_ROLE_BINDINGS_PRESERVED": 4,
+    "W2_DRIFT_RECORDS_PRESERVED": 9,
+    "PLAN_TEMPLATES_PRESERVED": 2,
+    "VECTOR_CONSUMERS": 22,
+    "VECTOR_EXPLICIT_MANDATORY_CONTRADICTION": "NO",
+    "IMPLEMENTATION_GOVERNANCE_COMPATIBILITY": "FAIL; authorized role membership contradicts accepted no-memberships descriptor contract",
+    "W1_DISTRIBUTIONS": 87,
+    "W1_DJANGO": "5.2.18",
+    "W2_ACTORS": 9,
+    "W2_SCOPES": 2,
+    "W2_PATHS": 9,
+    "PREREQUISITES": 803,
+    "OPAQUE": 118,
+    "ORDERING": 86,
+    "FROZEN_MANIFEST": 23,
+    "NO_RUNTIME_OR_CONFIGURATION_ACTION": true
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W3D_GATE": "BLOCKED_IMPLEMENTATION_GOVERNANCE_CONFLICT",
+    "PHASE_1B_3C_A1I_W3_GATE": "BLOCKED",
+    "CANONICAL_CONTRACT_VERSION": "1.2",
+    "W1": "PASS",
+    "W2": "PASS",
+    "W4": "NOT_AUTHORIZED_BY_W3D",
+    "W4_STARTED": "NO",
+    "W5_W10_STARTED": "NO",
+    "A1R_STARTED": "NO",
+    "A2_STARTED": "NO",
+    "B3C_B_STARTED": "NO",
+    "DATABASE_ROLES_PROVISIONED": "NO",
+    "LOGIN_PRINCIPALS_BOUND": "NO",
+    "SECRETS_ACCESSED": "NO",
+    "EXTENSIONS_RUNTIME_PROVEN": "NO",
+    "DATABASE_RUNTIME_CONFIGURATION_APPLIED": "NO",
+    "DATABASE_RUNTIME_CONFIGURATION_PROVEN": "NO",
+    "DJANGO_SCHEMA_MATERIALIZED": "NO",
+    "PRECONSUMER_BASELINE_MATERIALIZED": "NO",
+    "BOOTSTRAP_IMPLEMENTATION_COMPLETE": "NO",
+    "FAITHFUL_SCHEMA_REPLAY_PROVEN": "NO",
+    "PRODUCTION_SCHEMA_PROVEN": "NO",
+    "RLS_POLICY_CORRECTNESS_RUNTIME_PROVEN": "NO",
+    "TENANT_ISOLATION_RUNTIME_PROVEN": "NO",
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO"
+  }
+}

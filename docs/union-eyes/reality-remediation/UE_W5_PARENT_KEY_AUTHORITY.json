@@ -1,0 +1,485 @@
+{
+  "PHASE": "PHASE_1B_3C_A1I_W5B_PK",
+  "NEW_PROSPECTIVE_AUTHORITY": "PRE_W5_PARENT_KEY_PRODUCTION_SUPPLEMENT",
+  "AUTHORIZED_PARENT_KEY_IDENTITIES": 10,
+  "EXACT": 10,
+  "CONFLICTING_AUTHORITY": 0,
+  "RECORDS": [
+    {
+      "PARENT_KEY_ID": "PRE_W5_PK:allocation_rules",
+      "RELATION": "allocation_rules",
+      "COLUMN": "id",
+      "PHYSICAL_IDENTITY": "public.allocation_rules.id",
+      "EVIDENCE_SOURCES": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+          "SOURCE_SHA256": "abbf89017e4dbf394bb075ffbca2ae317c305be1bd59d3f2dfb77bf573f6be20",
+          "SOURCE_LINES": [51, 51],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+          "SOURCE_SHA256": "b33d837b48798f1237423516f5d7e402becac4b0d48cdffc3d2201e184bc111b",
+          "SOURCE_LINES": [343, 343],
+          "EXACT_DEFINITION": "id                UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "cc156b6b4d4a02ac9c564849c54a8b2f0ed4894647b103a18c62bc408f5d2c5e",
+          "RANK": 1
+        }
+      ],
+      "EVIDENCE_DIGESTS": [
+        "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+        "cc156b6b4d4a02ac9c564849c54a8b2f0ed4894647b103a18c62bc408f5d2c5e"
+      ],
+      "DATA_TYPE": "uuid",
+      "TYPE_MODIFIERS": "NONE",
+      "NULLABILITY": "NOT_NULL_IMPLICIT_PRIMARY_KEY",
+      "DEFAULT": "gen_random_uuid()",
+      "IDENTITY_BEHAVIOR": "NONE",
+      "SEQUENCE_BEHAVIOR": "NONE",
+      "PRIMARY_KEY_STATUS": "SINGLE_COLUMN_ID",
+      "UNIQUE_STATUS": "IMPLICIT_PRIMARY_KEY_UNIQUE",
+      "FOREIGN_KEY_STATUS": "NONE",
+      "COLLATION": "NONE",
+      "GENERATED_STATUS": "NONE",
+      "OWNERSHIP_PRIVILEGE_IMPLICATIONS": "Existing relation owner retained;no role/grant/owner mutation. New column inherits table-level privileges;no explicit column ACL. Referenced schema/default function must be qualified and verified by future adapter.",
+      "AUXILIARY_KEY_SEMANTICS": { "SCHEMA": [], "HISTORICAL": [] },
+      "OTHER_CONSTRAINTS": "NONE_ON_ID_BEYOND_PRIMARY_KEY",
+      "DEFINITION_STATUS": "EXACT",
+      "EMPTY_RELATION_CREATE_PATH": "EXACT_W4P_PARENT_SHAPE_PLUS_ROW_COUNT_ZERO;add canonical UUID default and primary key",
+      "EXISTING_RELATION_MISSING_KEY_PATH": "POPULATED_DENY_KEY_ABSENT_AMBIGUOUS_DATA_STATE;no regeneration of historical identity",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"allocation_rules\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY_DIGEST": "bb1c8026618337f8eecfad9dc54da0c8b37b1aae5d261e252e5c966c751b9533"
+    },
+    {
+      "PARENT_KEY_ID": "PRE_W5_PK:allocation_runs",
+      "RELATION": "allocation_runs",
+      "COLUMN": "id",
+      "PHYSICAL_IDENTITY": "public.allocation_runs.id",
+      "EVIDENCE_SOURCES": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+          "SOURCE_SHA256": "abbf89017e4dbf394bb075ffbca2ae317c305be1bd59d3f2dfb77bf573f6be20",
+          "SOURCE_LINES": [98, 98],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+          "SOURCE_SHA256": "b33d837b48798f1237423516f5d7e402becac4b0d48cdffc3d2201e184bc111b",
+          "SOURCE_LINES": [376, 376],
+          "EXACT_DEFINITION": "id                UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "cc156b6b4d4a02ac9c564849c54a8b2f0ed4894647b103a18c62bc408f5d2c5e",
+          "RANK": 1
+        }
+      ],
+      "EVIDENCE_DIGESTS": [
+        "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+        "cc156b6b4d4a02ac9c564849c54a8b2f0ed4894647b103a18c62bc408f5d2c5e"
+      ],
+      "DATA_TYPE": "uuid",
+      "TYPE_MODIFIERS": "NONE",
+      "NULLABILITY": "NOT_NULL_IMPLICIT_PRIMARY_KEY",
+      "DEFAULT": "gen_random_uuid()",
+      "IDENTITY_BEHAVIOR": "NONE",
+      "SEQUENCE_BEHAVIOR": "NONE",
+      "PRIMARY_KEY_STATUS": "SINGLE_COLUMN_ID",
+      "UNIQUE_STATUS": "IMPLICIT_PRIMARY_KEY_UNIQUE",
+      "FOREIGN_KEY_STATUS": "NONE",
+      "COLLATION": "NONE",
+      "GENERATED_STATUS": "NONE",
+      "OWNERSHIP_PRIVILEGE_IMPLICATIONS": "Existing relation owner retained;no role/grant/owner mutation. New column inherits table-level privileges;no explicit column ACL. Referenced schema/default function must be qualified and verified by future adapter.",
+      "AUXILIARY_KEY_SEMANTICS": { "SCHEMA": [], "HISTORICAL": [] },
+      "OTHER_CONSTRAINTS": "NONE_ON_ID_BEYOND_PRIMARY_KEY",
+      "DEFINITION_STATUS": "EXACT",
+      "EMPTY_RELATION_CREATE_PATH": "EXACT_W4P_PARENT_SHAPE_PLUS_ROW_COUNT_ZERO;add canonical UUID default and primary key",
+      "EXISTING_RELATION_MISSING_KEY_PATH": "POPULATED_DENY_KEY_ABSENT_AMBIGUOUS_DATA_STATE;no regeneration of historical identity",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"allocation_runs\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY_DIGEST": "7b1c14914c32a5f72acca8f6c8e65b1293ee6fb0d308393e14d09f87c1bd8eed"
+    },
+    {
+      "PARENT_KEY_ID": "PRE_W5_PK:commercial_contracts",
+      "RELATION": "commercial_contracts",
+      "COLUMN": "id",
+      "PHYSICAL_IDENTITY": "public.commercial_contracts.id",
+      "EVIDENCE_SOURCES": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+          "SOURCE_SHA256": "f1b988aade5a9e6af88ef00bf6d4b9f539dc97a36b11525092302ef93e09e666",
+          "SOURCE_LINES": [60, 60],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+          "SOURCE_SHA256": "b0f4f4f5ead9b294f543523966a39473170b2a1f5324a2b51a5f565879654796",
+          "SOURCE_LINES": [67, 67],
+          "EXACT_DEFINITION": "id              UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "3e69827c2cd320ec185fa9c0759a01d8990d551a900e7a8883598f69003364b6",
+          "RANK": 1
+        }
+      ],
+      "EVIDENCE_DIGESTS": [
+        "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+        "3e69827c2cd320ec185fa9c0759a01d8990d551a900e7a8883598f69003364b6"
+      ],
+      "DATA_TYPE": "uuid",
+      "TYPE_MODIFIERS": "NONE",
+      "NULLABILITY": "NOT_NULL_IMPLICIT_PRIMARY_KEY",
+      "DEFAULT": "gen_random_uuid()",
+      "IDENTITY_BEHAVIOR": "NONE",
+      "SEQUENCE_BEHAVIOR": "NONE",
+      "PRIMARY_KEY_STATUS": "SINGLE_COLUMN_ID",
+      "UNIQUE_STATUS": "IMPLICIT_PRIMARY_KEY_UNIQUE",
+      "FOREIGN_KEY_STATUS": "NONE",
+      "COLLATION": "NONE",
+      "GENERATED_STATUS": "NONE",
+      "OWNERSHIP_PRIVILEGE_IMPLICATIONS": "Existing relation owner retained;no role/grant/owner mutation. New column inherits table-level privileges;no explicit column ACL. Referenced schema/default function must be qualified and verified by future adapter.",
+      "AUXILIARY_KEY_SEMANTICS": { "SCHEMA": [], "HISTORICAL": [] },
+      "OTHER_CONSTRAINTS": "NONE_ON_ID_BEYOND_PRIMARY_KEY",
+      "DEFINITION_STATUS": "EXACT",
+      "EMPTY_RELATION_CREATE_PATH": "EXACT_W4P_PARENT_SHAPE_PLUS_ROW_COUNT_ZERO;add canonical UUID default and primary key",
+      "EXISTING_RELATION_MISSING_KEY_PATH": "POPULATED_DENY_KEY_ABSENT_AMBIGUOUS_DATA_STATE;no regeneration of historical identity",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"commercial_contracts\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY_DIGEST": "573d5abadf83b6967165525d676743511fe6e6a1403d5f20fece339a9593a15a"
+    },
+    {
+      "PARENT_KEY_ID": "PRE_W5_PK:committee_meetings",
+      "RELATION": "committee_meetings",
+      "COLUMN": "id",
+      "PHYSICAL_IDENTITY": "public.committee_meetings.id",
+      "EVIDENCE_SOURCES": [
+        {
+          "FILE": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+          "SOURCE_SHA256": "fa8e61191e864250bcf1a2087f056be02dfd59eedd66a930d3f93c5e00b2cddd",
+          "SOURCE_LINES": [68, 68],
+          "EXACT_DEFINITION": "uuid('id').defaultRandom().primaryKey()",
+          "DEFINITION_SHA256": "14eacac7e08acc0f7679095a20d5583adcc7a4203b6acfc8fffb894b2dd82730",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+          "SOURCE_SHA256": "4a64cd997f035b7edc9f1c1f28a72fedd60aad8da875be20398e62e79fa958b2",
+          "SOURCE_LINES": [41, 41],
+          "EXACT_DEFINITION": "id uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "ad2f0c53f72a796884dcf7e4617fb8284a3048d353707c4a576904b6bf6c0c2b",
+          "RANK": 1
+        }
+      ],
+      "EVIDENCE_DIGESTS": [
+        "14eacac7e08acc0f7679095a20d5583adcc7a4203b6acfc8fffb894b2dd82730",
+        "ad2f0c53f72a796884dcf7e4617fb8284a3048d353707c4a576904b6bf6c0c2b"
+      ],
+      "DATA_TYPE": "uuid",
+      "TYPE_MODIFIERS": "NONE",
+      "NULLABILITY": "NOT_NULL_IMPLICIT_PRIMARY_KEY",
+      "DEFAULT": "gen_random_uuid()",
+      "IDENTITY_BEHAVIOR": "NONE",
+      "SEQUENCE_BEHAVIOR": "NONE",
+      "PRIMARY_KEY_STATUS": "SINGLE_COLUMN_ID",
+      "UNIQUE_STATUS": "IMPLICIT_PRIMARY_KEY_UNIQUE",
+      "FOREIGN_KEY_STATUS": "NONE",
+      "COLLATION": "NONE",
+      "GENERATED_STATUS": "NONE",
+      "OWNERSHIP_PRIVILEGE_IMPLICATIONS": "Existing relation owner retained;no role/grant/owner mutation. New column inherits table-level privileges;no explicit column ACL. Referenced schema/default function must be qualified and verified by future adapter.",
+      "AUXILIARY_KEY_SEMANTICS": { "SCHEMA": [], "HISTORICAL": [] },
+      "OTHER_CONSTRAINTS": "NONE_ON_ID_BEYOND_PRIMARY_KEY",
+      "DEFINITION_STATUS": "EXACT",
+      "EMPTY_RELATION_CREATE_PATH": "EXACT_W4P_PARENT_SHAPE_PLUS_ROW_COUNT_ZERO;add canonical UUID default and primary key",
+      "EXISTING_RELATION_MISSING_KEY_PATH": "POPULATED_DENY_KEY_ABSENT_AMBIGUOUS_DATA_STATE;no regeneration of historical identity",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"committee_meetings\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY_DIGEST": "7ebb3fe8e8132c9ef20c6d892548b396808319d1327caacad653ac56e0f2bb3d"
+    },
+    {
+      "PARENT_KEY_ID": "PRE_W5_PK:correspondence",
+      "RELATION": "correspondence",
+      "COLUMN": "id",
+      "PHYSICAL_IDENTITY": "public.correspondence.id",
+      "EVIDENCE_SOURCES": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+          "SOURCE_SHA256": "6eeb70a895e9b7bf1dc08bd938b90d8bf78a417bb16f71506017a4afdec60b5a",
+          "SOURCE_LINES": [147, 147],
+          "EXACT_DEFINITION": "uuid(\"id\").primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "2de1cb3515a56e709ab5c7b16cd0d9eae9b16178cad4fcb1fd7528476cd37d80",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+          "SOURCE_SHA256": "7855d4083ddf0e9ec66c9f96f39707d52b9901252df100520629cc9c10ef63cf",
+          "SOURCE_LINES": [73, 73],
+          "EXACT_DEFINITION": "id                  UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "51154f8c1f4b53ed60939fa12d2aeb4e25ae51ebb29eb05190853475ae191f66",
+          "RANK": 1
+        }
+      ],
+      "EVIDENCE_DIGESTS": [
+        "2de1cb3515a56e709ab5c7b16cd0d9eae9b16178cad4fcb1fd7528476cd37d80",
+        "51154f8c1f4b53ed60939fa12d2aeb4e25ae51ebb29eb05190853475ae191f66"
+      ],
+      "DATA_TYPE": "uuid",
+      "TYPE_MODIFIERS": "NONE",
+      "NULLABILITY": "NOT_NULL_IMPLICIT_PRIMARY_KEY",
+      "DEFAULT": "gen_random_uuid()",
+      "IDENTITY_BEHAVIOR": "NONE",
+      "SEQUENCE_BEHAVIOR": "NONE",
+      "PRIMARY_KEY_STATUS": "SINGLE_COLUMN_ID",
+      "UNIQUE_STATUS": "IMPLICIT_PRIMARY_KEY_UNIQUE",
+      "FOREIGN_KEY_STATUS": "NONE",
+      "COLLATION": "NONE",
+      "GENERATED_STATUS": "NONE",
+      "OWNERSHIP_PRIVILEGE_IMPLICATIONS": "Existing relation owner retained;no role/grant/owner mutation. New column inherits table-level privileges;no explicit column ACL. Referenced schema/default function must be qualified and verified by future adapter.",
+      "AUXILIARY_KEY_SEMANTICS": { "SCHEMA": [], "HISTORICAL": [] },
+      "OTHER_CONSTRAINTS": "NONE_ON_ID_BEYOND_PRIMARY_KEY",
+      "DEFINITION_STATUS": "EXACT",
+      "EMPTY_RELATION_CREATE_PATH": "EXACT_W4P_PARENT_SHAPE_PLUS_ROW_COUNT_ZERO;add canonical UUID default and primary key",
+      "EXISTING_RELATION_MISSING_KEY_PATH": "POPULATED_DENY_KEY_ABSENT_AMBIGUOUS_DATA_STATE;no regeneration of historical identity",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"correspondence\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY_DIGEST": "98f94a42633d73628c1996ee7034271575218b63662e28d092ae7d1537998700"
+    },
+    {
+      "PARENT_KEY_ID": "PRE_W5_PK:duplicate_groups",
+      "RELATION": "duplicate_groups",
+      "COLUMN": "id",
+      "PHYSICAL_IDENTITY": "public.duplicate_groups.id",
+      "EVIDENCE_SOURCES": [
+        {
+          "FILE": "apps/union-eyes/db/schema/ingestion-schema.ts",
+          "SOURCE_SHA256": "15560275d6b52ec818be5038d20c22dc75a7b471a530feef129b9b32a486f15e",
+          "SOURCE_LINES": [111, 111],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0104_dedup_and_quality_warnings.sql",
+          "SOURCE_SHA256": "c7726d78685661033d4167073247a2ed343e9c0aa7d0f20ac4f44c16a827fe93",
+          "SOURCE_LINES": [10, 10],
+          "EXACT_DEFINITION": "id            UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "c4df5b0136b2de48c4ecee8a5514b5a37847c3a3d8459fcea1ec52a6a5a2f54d",
+          "RANK": 1
+        }
+      ],
+      "EVIDENCE_DIGESTS": [
+        "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+        "c4df5b0136b2de48c4ecee8a5514b5a37847c3a3d8459fcea1ec52a6a5a2f54d"
+      ],
+      "DATA_TYPE": "uuid",
+      "TYPE_MODIFIERS": "NONE",
+      "NULLABILITY": "NOT_NULL_IMPLICIT_PRIMARY_KEY",
+      "DEFAULT": "gen_random_uuid()",
+      "IDENTITY_BEHAVIOR": "NONE",
+      "SEQUENCE_BEHAVIOR": "NONE",
+      "PRIMARY_KEY_STATUS": "SINGLE_COLUMN_ID",
+      "UNIQUE_STATUS": "IMPLICIT_PRIMARY_KEY_UNIQUE",
+      "FOREIGN_KEY_STATUS": "NONE",
+      "COLLATION": "NONE",
+      "GENERATED_STATUS": "NONE",
+      "OWNERSHIP_PRIVILEGE_IMPLICATIONS": "Existing relation owner retained;no role/grant/owner mutation. New column inherits table-level privileges;no explicit column ACL. Referenced schema/default function must be qualified and verified by future adapter.",
+      "AUXILIARY_KEY_SEMANTICS": { "SCHEMA": [], "HISTORICAL": [] },
+      "OTHER_CONSTRAINTS": "NONE_ON_ID_BEYOND_PRIMARY_KEY",
+      "DEFINITION_STATUS": "EXACT",
+      "EMPTY_RELATION_CREATE_PATH": "EXACT_W4P_PARENT_SHAPE_PLUS_ROW_COUNT_ZERO;add canonical UUID default and primary key",
+      "EXISTING_RELATION_MISSING_KEY_PATH": "POPULATED_DENY_KEY_ABSENT_AMBIGUOUS_DATA_STATE;no regeneration of historical identity",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"duplicate_groups\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY_DIGEST": "4bc61fba6cf1b0d097b24a4824ed33cdeab737fadc97cb6f4339b930ef2448d7"
+    },
+    {
+      "PARENT_KEY_ID": "PRE_W5_PK:ingestion_batches",
+      "RELATION": "ingestion_batches",
+      "COLUMN": "id",
+      "PHYSICAL_IDENTITY": "public.ingestion_batches.id",
+      "EVIDENCE_SOURCES": [
+        {
+          "FILE": "apps/union-eyes/db/schema/ingestion-schema.ts",
+          "SOURCE_SHA256": "15560275d6b52ec818be5038d20c22dc75a7b471a530feef129b9b32a486f15e",
+          "SOURCE_LINES": [31, 31],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0089_ingestion_hardening.sql",
+          "SOURCE_SHA256": "86981811ca5a3126fdcef29da9e28fbbc1fc058122b889decec88261a2d9573d",
+          "SOURCE_LINES": [61, 61],
+          "EXACT_DEFINITION": "id            UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "c4df5b0136b2de48c4ecee8a5514b5a37847c3a3d8459fcea1ec52a6a5a2f54d",
+          "RANK": 1
+        }
+      ],
+      "EVIDENCE_DIGESTS": [
+        "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+        "c4df5b0136b2de48c4ecee8a5514b5a37847c3a3d8459fcea1ec52a6a5a2f54d"
+      ],
+      "DATA_TYPE": "uuid",
+      "TYPE_MODIFIERS": "NONE",
+      "NULLABILITY": "NOT_NULL_IMPLICIT_PRIMARY_KEY",
+      "DEFAULT": "gen_random_uuid()",
+      "IDENTITY_BEHAVIOR": "NONE",
+      "SEQUENCE_BEHAVIOR": "NONE",
+      "PRIMARY_KEY_STATUS": "SINGLE_COLUMN_ID",
+      "UNIQUE_STATUS": "IMPLICIT_PRIMARY_KEY_UNIQUE",
+      "FOREIGN_KEY_STATUS": "NONE",
+      "COLLATION": "NONE",
+      "GENERATED_STATUS": "NONE",
+      "OWNERSHIP_PRIVILEGE_IMPLICATIONS": "Existing relation owner retained;no role/grant/owner mutation. New column inherits table-level privileges;no explicit column ACL. Referenced schema/default function must be qualified and verified by future adapter.",
+      "AUXILIARY_KEY_SEMANTICS": { "SCHEMA": [], "HISTORICAL": [] },
+      "OTHER_CONSTRAINTS": "NONE_ON_ID_BEYOND_PRIMARY_KEY",
+      "DEFINITION_STATUS": "EXACT",
+      "EMPTY_RELATION_CREATE_PATH": "EXACT_W4P_PARENT_SHAPE_PLUS_ROW_COUNT_ZERO;add canonical UUID default and primary key",
+      "EXISTING_RELATION_MISSING_KEY_PATH": "POPULATED_DENY_KEY_ABSENT_AMBIGUOUS_DATA_STATE;no regeneration of historical identity",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"ingestion_batches\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY_DIGEST": "50a0b67f3bcbf7365529697357faf1ac714be0b94c142bfb1fd2f4fe56c79b98"
+    },
+    {
+      "PARENT_KEY_ID": "PRE_W5_PK:platform_invoices",
+      "RELATION": "platform_invoices",
+      "COLUMN": "id",
+      "PHYSICAL_IDENTITY": "public.platform_invoices.id",
+      "EVIDENCE_SOURCES": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+          "SOURCE_SHA256": "729311b4e5be5afcf25f9e17b1dcd23ae1abb06c4fcf74071064f6ac4c6aacd8",
+          "SOURCE_LINES": [173, 173],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+          "SOURCE_SHA256": "b33d837b48798f1237423516f5d7e402becac4b0d48cdffc3d2201e184bc111b",
+          "SOURCE_LINES": [175, 175],
+          "EXACT_DEFINITION": "id                  UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "51154f8c1f4b53ed60939fa12d2aeb4e25ae51ebb29eb05190853475ae191f66",
+          "RANK": 1
+        }
+      ],
+      "EVIDENCE_DIGESTS": [
+        "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+        "51154f8c1f4b53ed60939fa12d2aeb4e25ae51ebb29eb05190853475ae191f66"
+      ],
+      "DATA_TYPE": "uuid",
+      "TYPE_MODIFIERS": "NONE",
+      "NULLABILITY": "NOT_NULL_IMPLICIT_PRIMARY_KEY",
+      "DEFAULT": "gen_random_uuid()",
+      "IDENTITY_BEHAVIOR": "NONE",
+      "SEQUENCE_BEHAVIOR": "NONE",
+      "PRIMARY_KEY_STATUS": "SINGLE_COLUMN_ID",
+      "UNIQUE_STATUS": "IMPLICIT_PRIMARY_KEY_UNIQUE",
+      "FOREIGN_KEY_STATUS": "NONE",
+      "COLLATION": "NONE",
+      "GENERATED_STATUS": "NONE",
+      "OWNERSHIP_PRIVILEGE_IMPLICATIONS": "Existing relation owner retained;no role/grant/owner mutation. New column inherits table-level privileges;no explicit column ACL. Referenced schema/default function must be qualified and verified by future adapter.",
+      "AUXILIARY_KEY_SEMANTICS": { "SCHEMA": [], "HISTORICAL": [] },
+      "OTHER_CONSTRAINTS": "NONE_ON_ID_BEYOND_PRIMARY_KEY",
+      "DEFINITION_STATUS": "EXACT",
+      "EMPTY_RELATION_CREATE_PATH": "EXACT_W4P_PARENT_SHAPE_PLUS_ROW_COUNT_ZERO;add canonical UUID default and primary key",
+      "EXISTING_RELATION_MISSING_KEY_PATH": "POPULATED_DENY_KEY_ABSENT_AMBIGUOUS_DATA_STATE;no regeneration of historical identity",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"platform_invoices\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY_DIGEST": "47860618ef0667cf2b421200e82ebdd0d10bc60c97f7928360909d72fef3cd11"
+    },
+    {
+      "PARENT_KEY_ID": "PRE_W5_PK:platform_payments",
+      "RELATION": "platform_payments",
+      "COLUMN": "id",
+      "PHYSICAL_IDENTITY": "public.platform_payments.id",
+      "EVIDENCE_SOURCES": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+          "SOURCE_SHA256": "729311b4e5be5afcf25f9e17b1dcd23ae1abb06c4fcf74071064f6ac4c6aacd8",
+          "SOURCE_LINES": [230, 230],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+          "SOURCE_SHA256": "b33d837b48798f1237423516f5d7e402becac4b0d48cdffc3d2201e184bc111b",
+          "SOURCE_LINES": [219, 219],
+          "EXACT_DEFINITION": "id                  UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "51154f8c1f4b53ed60939fa12d2aeb4e25ae51ebb29eb05190853475ae191f66",
+          "RANK": 1
+        }
+      ],
+      "EVIDENCE_DIGESTS": [
+        "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+        "51154f8c1f4b53ed60939fa12d2aeb4e25ae51ebb29eb05190853475ae191f66"
+      ],
+      "DATA_TYPE": "uuid",
+      "TYPE_MODIFIERS": "NONE",
+      "NULLABILITY": "NOT_NULL_IMPLICIT_PRIMARY_KEY",
+      "DEFAULT": "gen_random_uuid()",
+      "IDENTITY_BEHAVIOR": "NONE",
+      "SEQUENCE_BEHAVIOR": "NONE",
+      "PRIMARY_KEY_STATUS": "SINGLE_COLUMN_ID",
+      "UNIQUE_STATUS": "IMPLICIT_PRIMARY_KEY_UNIQUE",
+      "FOREIGN_KEY_STATUS": "NONE",
+      "COLLATION": "NONE",
+      "GENERATED_STATUS": "NONE",
+      "OWNERSHIP_PRIVILEGE_IMPLICATIONS": "Existing relation owner retained;no role/grant/owner mutation. New column inherits table-level privileges;no explicit column ACL. Referenced schema/default function must be qualified and verified by future adapter.",
+      "AUXILIARY_KEY_SEMANTICS": { "SCHEMA": [], "HISTORICAL": [] },
+      "OTHER_CONSTRAINTS": "NONE_ON_ID_BEYOND_PRIMARY_KEY",
+      "DEFINITION_STATUS": "EXACT",
+      "EMPTY_RELATION_CREATE_PATH": "EXACT_W4P_PARENT_SHAPE_PLUS_ROW_COUNT_ZERO;add canonical UUID default and primary key",
+      "EXISTING_RELATION_MISSING_KEY_PATH": "POPULATED_DENY_KEY_ABSENT_AMBIGUOUS_DATA_STATE;no regeneration of historical identity",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"platform_payments\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY_DIGEST": "82bb10152a155766530a6142360f6dce0a0ab1e734dda8832691b7f5512603dc"
+    },
+    {
+      "PARENT_KEY_ID": "PRE_W5_PK:reconciliation_runs",
+      "RELATION": "reconciliation_runs",
+      "COLUMN": "id",
+      "PHYSICAL_IDENTITY": "public.reconciliation_runs.id",
+      "EVIDENCE_SOURCES": [
+        {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+          "SOURCE_SHA256": "19c1827fdaa0da3821b5610906bb95b317103f7a75da778f3b088d2422850ba6",
+          "SOURCE_LINES": [60, 60],
+          "EXACT_DEFINITION": "uuid('id').primaryKey().defaultRandom()",
+          "DEFINITION_SHA256": "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+          "RANK": 1
+        },
+        {
+          "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+          "SOURCE_SHA256": "2fad4d827cd20b6faaf38631eed2e3d113fc9cb2027f2548bd99eb6d431a7f47",
+          "SOURCE_LINES": [275, 275],
+          "EXACT_DEFINITION": "id            UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+          "DEFINITION_SHA256": "c4df5b0136b2de48c4ecee8a5514b5a37847c3a3d8459fcea1ec52a6a5a2f54d",
+          "RANK": 1
+        }
+      ],
+      "EVIDENCE_DIGESTS": [
+        "be933ae16c31a9d884a92c3b1b99c3be976757fe303d3856a8c0dc112967dd98",
+        "c4df5b0136b2de48c4ecee8a5514b5a37847c3a3d8459fcea1ec52a6a5a2f54d"
+      ],
+      "DATA_TYPE": "uuid",
+      "TYPE_MODIFIERS": "NONE",
+      "NULLABILITY": "NOT_NULL_IMPLICIT_PRIMARY_KEY",
+      "DEFAULT": "gen_random_uuid()",
+      "IDENTITY_BEHAVIOR": "NONE",
+      "SEQUENCE_BEHAVIOR": "NONE",
+      "PRIMARY_KEY_STATUS": "SINGLE_COLUMN_ID",
+      "UNIQUE_STATUS": "IMPLICIT_PRIMARY_KEY_UNIQUE",
+      "FOREIGN_KEY_STATUS": "NONE",
+      "COLLATION": "NONE",
+      "GENERATED_STATUS": "NONE",
+      "OWNERSHIP_PRIVILEGE_IMPLICATIONS": "Existing relation owner retained;no role/grant/owner mutation. New column inherits table-level privileges;no explicit column ACL. Referenced schema/default function must be qualified and verified by future adapter.",
+      "AUXILIARY_KEY_SEMANTICS": { "SCHEMA": [], "HISTORICAL": [] },
+      "OTHER_CONSTRAINTS": "NONE_ON_ID_BEYOND_PRIMARY_KEY",
+      "DEFINITION_STATUS": "EXACT",
+      "EMPTY_RELATION_CREATE_PATH": "EXACT_W4P_PARENT_SHAPE_PLUS_ROW_COUNT_ZERO;add canonical UUID default and primary key",
+      "EXISTING_RELATION_MISSING_KEY_PATH": "POPULATED_DENY_KEY_ABSENT_AMBIGUOUS_DATA_STATE;no regeneration of historical identity",
+      "EXACT_CANONICAL_DDL": "ALTER TABLE \"public\".\"reconciliation_runs\" ADD COLUMN \"id\" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY;",
+      "SOURCE_AUTHORITY_DIGEST": "49a35fc826727af41445e47f795f403b01e957d8273266af1019a8dc2d332078"
+    }
+  ],
+  "AUTHORITY_DIGEST": "e746fc68c8fb1f91387669da7721a56239b7404dd1016a1f27883febf730f972",
+  "SEARCH_CEILING": "Exact10relation/id declarations in canonical Drizzle,historical matching CREATEs,accepted W4/W4P definition context and bound23sources. No downstream operand/producer search. Backend exact-name search found no corresponding db_table/model declaration.",
+  "HISTORICAL_W4P_CHANGED": "NO",
+  "W5A_TOPOLOGY_CHANGED": "NO",
+  "FROZEN_MIGRATIONS_CHANGED": "NO",
+  "RETROACTIVE_HISTORICAL_CLAIM": "NO"
+}

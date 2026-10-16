@@ -1,0 +1,2128 @@
+{
+  "PHASE": "PHASE_1B_3C_A1I_W4FR",
+  "summary": {
+    "DEFINITION_OBLIGATIONS_INPUT": 183,
+    "RELATION_OBLIGATIONS": 57,
+    "COLUMN_OBLIGATIONS": 126,
+    "SUM": 183,
+    "GOVERNED_DEFINITION_RECORDS_NORMALIZED": 183,
+    "CANONICAL_DEFINITION_AUTHORED": 0,
+    "DESIGN_DECISION_REQUIRED": 0,
+    "DEFINITION_CONFLICT": 0,
+    "UNACCOUNTED": 0,
+    "DISTINCT_RELATION_GROUPS": 125,
+    "DISTINCT_RELATIONS": 125,
+    "RELATIONS_FULLY_DEFINED": 0,
+    "RELATIONS_PHYSICAL_LOWERING_NOT_PERFORMED": 125,
+    "GOVERNED_PROPERTY_UNRESOLVED_COUNT": 0,
+    "NAMED_TYPE_REFERENCES_WITHOUT_PRODUCER": 38,
+    "DISTINCT_NAMED_TYPES_WITHOUT_PRODUCER": 36,
+    "AFFECTED_RELATIONS": 28,
+    "AFFECTED_OBLIGATIONS": 28,
+    "CREATE_RELATION": 57,
+    "RELATION_CREATE_INCLUDES_COLUMN": 57,
+    "ADD_COLUMN_TO_EXISTING_RELATION": 69,
+    "INACTIVE_SQL_PAYLOADS": 0,
+    "OBLIGATION_PAYLOAD_LINKS": 0,
+    "UNLINKED_OBLIGATIONS": 183,
+    "MULTIPLE_CREATION_AUTHORITIES": 0,
+    "DUPLICATE_COLUMN_CREATION": 0,
+    "HYBRID_BLUEPRINTS_CREATED": 0,
+    "PRODUCER_METADATA_UPDATES": 0,
+    "CANONICAL_CONTRACT_MUTATED": "NO",
+    "HISTORICAL_W4F_BYTES_CHANGED": "NO"
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W4FR_GATE": "BLOCKED",
+    "PHASE_1B_3C_A1I_W4FR": "BLOCKED",
+    "BLOCKER_CLASS": "NAMED_TYPE_PRODUCTION_AUTHORITY_NOT_ESTABLISHED_IN_FIXED_INPUTS",
+    "CANONICAL_DEFINITION_AUTHORING": "NOT_COMPLETE_PHYSICAL_DEPENDENCY_AUTHORITY_REQUIRED",
+    "W4H": "PASS",
+    "CANONICAL_DEFINITION_GOVERNANCE": "COMPLETE",
+    "CANONICAL_CONTRACT_VERSION": "1.3.1",
+    "VERSION_1_3_2_PUBLISHED": "NO",
+    "W4F_REGENERATION": "ATTEMPTED_BLOCKED_PREFLIGHT",
+    "W4": "BLOCKED_DEFINITION_IMPLEMENTATION_PENDING",
+    "W4P": "NOT_AUTHORIZED",
+    "W5": "NOT_AUTHORIZED",
+    "W4_COMPATIBILITY_GATE_NORMALIZATION": "NOT_AUTHORIZED",
+    "W4_REMAINING_COMPATIBILITY_RECORDS": 127
+  },
+  "governanceAccounting": {
+    "DESIGN_GROUPS_TOTAL": 126,
+    "DESIGN_GROUPS_CLOSED": 126,
+    "DEFINITION_OBLIGATIONS_GOVERNED": 183,
+    "RESIDUAL_HUMAN_DECISIONS": 0
+  },
+  "dependencyBlockers": [
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-f07d101db545dbc3",
+      "RELATION": "public.committee_meetings",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "committee_meeting_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.committee_meeting_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "committee_meeting_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+            "DIGEST": "6930521355d59e71f2466d499d697c5bfb1e2bfacd1ce1180aa6c6ca1a57ac31",
+            "RANGE": [65, 138],
+            "COLUMN_EXPRESSION_DIGEST": "9a0006421c80d645caafd736c2a26b676a73250f056c46d47a038fea2fdd1f23"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+            "DIGEST": "4b348c1aee141a5d4d5e0c7a886899c9251cb3e53e1ddffbc5d687e4ad1bce0e",
+            "RANGE": [40, 65],
+            "COLUMN_EXPRESSION_DIGEST": "9391fbeee16c1b39aaee4bbdccab33a97daad2a0e1607cf1c8d03214dfda9f45"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-e2e3390b43bbbd14"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-83257e9662924d35",
+      "RELATION": "public.document_access_grants",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "document_grant_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.document_grant_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "document_grant_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/documents-schema.ts",
+            "DIGEST": "9afa28d67ed43cc419825b90891aa22827bcbe5c2c3d644edb6c4611afbb3aa1",
+            "RANGE": [154, 172],
+            "COLUMN_EXPRESSION_DIGEST": "a0e0ed5874dfb0afd19733d9e542b58c07aebb4d7165f13a6a2c72cf28cca902"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+            "DIGEST": "aca805396f4ac310eae17482ac65ceda42ed73b979a646664819c1bf490caf18",
+            "RANGE": [141, 154],
+            "COLUMN_EXPRESSION_DIGEST": "cd76baddb82b784760bac3880009efa9f60e86eaf8bc9213a635114aea9b66a2"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-5ff5a7531c756fba"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-5985cd6e696ad40e",
+      "RELATION": "public.platform_payments",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "platform_payment_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.platform_payment_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "platform_payment_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+            "DIGEST": "4e06f25f80d3e5f77928685714b703b5d66980ab6e9d4a1e73a444c704e8bcf6",
+            "RANGE": [229, 251],
+            "COLUMN_EXPRESSION_DIGEST": "2e70c7d63666c9343a36f5cc1351fffbc5bc83d9e4da252eb26c71de400c7381"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "9afb03a655b83d7ec7926ca2a1bfe0a4a840aa2fe1c3917131fddb730fbbd6bc",
+            "RANGE": [3190, 3204],
+            "COLUMN_EXPRESSION_DIGEST": "8bb70152f80e434dd17795273045d986199136cac60ae55b05c781517ad5686f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "9afb03a655b83d7ec7926ca2a1bfe0a4a840aa2fe1c3917131fddb730fbbd6bc",
+            "RANGE": [59, 73],
+            "COLUMN_EXPRESSION_DIGEST": "8bb70152f80e434dd17795273045d986199136cac60ae55b05c781517ad5686f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "54f1a596bae0f0b962e31408c492a1b2f429786f2a3f1f6b7cbf2eb5820e28ce",
+            "RANGE": [218, 232],
+            "COLUMN_EXPRESSION_DIGEST": "7c273ef8eb2d56b4824ba9adf28f84badc505f0e8b2384f0dd6e0de73ce68756"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-d6b71ca5f85600e8"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-8ebd38f9b6a924e8",
+      "RELATION": "public.correspondence_audit_trail",
+      "COLUMN": "event_type",
+      "GOVERNED_TYPE_NAME": "correspondence_audit_event",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.correspondence_audit_event",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "correspondence_audit_event",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+            "DIGEST": "147e514a893b0c8ae2060380dd23c3391a1a4d6f5d8eb78ddb83b12ecb628b5f",
+            "RANGE": [286, 317],
+            "COLUMN_EXPRESSION_DIGEST": "271e4252dcdc27b8fbe25d485227677b95f993a2af208807a666fce8e73178ac"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+            "DIGEST": "ffce0716c3456bbb6c88da022472ba75de4034d0ced190bcb90ddaf8a797fc4a",
+            "RANGE": [129, 142],
+            "COLUMN_EXPRESSION_DIGEST": "2797ee4ec717aff1116558a56040ef73748e0becc79e302a3fcfeb8653b01788"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-45b134f39d0e55ec"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-ce1ee2d1a00a5f68",
+      "RELATION": "public.reconciliation_runs",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "reconciliation_run_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.reconciliation_run_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "reconciliation_run_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+            "DIGEST": "83f17ae57d7684628b42ea868cd3c343389c18eef80bdee0a9c2d8f239c1f922",
+            "RANGE": [59, 83],
+            "COLUMN_EXPRESSION_DIGEST": "1f918ad65101bedd722a29bbf6da97dc2cdf7221866fcbe2477624084ae00d07"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "96521e1457aa1fb79aac733473538ceba06ad43995611bfcd5e91e550d881137",
+            "RANGE": [274, 293],
+            "COLUMN_EXPRESSION_DIGEST": "e8d12735503ca708fdbd25f39e3e19c8e55b3bbe713373002e61badd92be490c"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-c502a3e035469ff4"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-38ec20a8652cf16d",
+      "RELATION": "public.reconciliation_matches",
+      "COLUMN": "match_type",
+      "GOVERNED_TYPE_NAME": "reconciliation_match_type",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.reconciliation_match_type",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "reconciliation_match_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+            "DIGEST": "7f59fa9878c4b5487b897aaa1b392620004d9eba49dc565cd490794dd9a5be40",
+            "RANGE": [89, 108],
+            "COLUMN_EXPRESSION_DIGEST": "0017b32a02579a6d802f4a380886913340a52d1a7a8d1409bda6fc00e417f5b6"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "47389773d317999b63a07c0af5d46bef08ddba0aef033a4abdc30550e97646fc",
+            "RANGE": [295, 308],
+            "COLUMN_EXPRESSION_DIGEST": "365d4034ee92bdd70f50551d00b515b8ac10be269f9534653a87b9e2f0b3b6d9"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-9fcf052b2479db7d"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-fc6b7cc18095333c",
+      "RELATION": "public.chargeback_statements",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "chargeback_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.chargeback_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "chargeback_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+            "DIGEST": "de0c631687c990136fad71a3b6ae66859477978a1aea6226d7100959db861294",
+            "RANGE": [175, 201],
+            "COLUMN_EXPRESSION_DIGEST": "7e7ca676e7d981f10ac185c94f2ca23ed8cac83410eb957a4c368514285ca843"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "6e8fbcbdef4a1c01588317105aa065df76fd5f8c39e454f2c84662ad2b1a0561",
+            "RANGE": [3327, 3343],
+            "COLUMN_EXPRESSION_DIGEST": "3d766b2bec423e0cb0a8f31b9287287af33c0e66358d157f457f660c4f494f6e"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "6e8fbcbdef4a1c01588317105aa065df76fd5f8c39e454f2c84662ad2b1a0561",
+            "RANGE": [239, 255],
+            "COLUMN_EXPRESSION_DIGEST": "3d766b2bec423e0cb0a8f31b9287287af33c0e66358d157f457f660c4f494f6e"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "4d64e48f00a46b67e3f1b8f072311ecac79b454778c800814fe1cc9e6d621541",
+            "RANGE": [439, 455],
+            "COLUMN_EXPRESSION_DIGEST": "5bae69f3b93a146a575461fc495547b7c3d61021857be32f6f89fff6b1f9a42f"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-4e7904c2d7460d66"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-7556f1aad6e16cff",
+      "RELATION": "public.allocation_run_lines",
+      "COLUMN": "method",
+      "GOVERNED_TYPE_NAME": "allocation_method",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.allocation_method",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "allocation_method",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+            "DIGEST": "3946549a762cbf0780ac5379a14d5cab06c84ade1d22fc0e5b568f3703d94b3d",
+            "RANGE": [130, 148],
+            "COLUMN_EXPRESSION_DIGEST": "c180bf5ea62fa7fd2d798beae81d60ba4abd658752952159c33d3adac12554a1"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "780710d6ef0d514dbf297188de4b71c693b4230d0222b5073ae063a8a59c667a",
+            "RANGE": [3293, 3306],
+            "COLUMN_EXPRESSION_DIGEST": "e81d750b4e4a1cb461ee3e945b9a05196c781f9f8344ca1bc3d041df8fc5fba5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "780710d6ef0d514dbf297188de4b71c693b4230d0222b5073ae063a8a59c667a",
+            "RANGE": [210, 223],
+            "COLUMN_EXPRESSION_DIGEST": "e81d750b4e4a1cb461ee3e945b9a05196c781f9f8344ca1bc3d041df8fc5fba5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "3d5956b45bbb52c23a02c4211c7432539fdd467ffeefedac055bc6ebfbaf4dba",
+            "RANGE": [404, 417],
+            "COLUMN_EXPRESSION_DIGEST": "bbfeeeeb6ea5a2d1548fc56589956ff08d684d2c1c91b304f1ee91cb5a9c678f"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-e3dcd5840085f80a"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-d73c4aba281effaf",
+      "RELATION": "public.committee_action_items",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "committee_action_item_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.committee_action_item_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "committee_action_item_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+            "DIGEST": "d433631c21c208e217f2b34c416bb9eeb404020dc7b64e6bed4b94ca49cfb906",
+            "RANGE": [174, 221],
+            "COLUMN_EXPRESSION_DIGEST": "e9777037a92dff3f8945e5f81ce133d1bf430d3d2ca19677da99a2a4026abc6b"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+            "DIGEST": "f969a332601c3edbb8ac791c2b30c9588f3eceacbc322a38b8586ac5443989db",
+            "RANGE": [93, 113],
+            "COLUMN_EXPRESSION_DIGEST": "7148e656da391746c60ab0558cf54cba3d22a9a4dbc8f3aeb9ddd1e42501da68"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-51b50e5aa03cc6e4"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-d73c4aba281effaf",
+      "RELATION": "public.committee_action_items",
+      "COLUMN": "priority",
+      "GOVERNED_TYPE_NAME": "committee_action_item_priority",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.committee_action_item_priority",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "committee_action_item_priority",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+            "DIGEST": "d433631c21c208e217f2b34c416bb9eeb404020dc7b64e6bed4b94ca49cfb906",
+            "RANGE": [174, 221],
+            "COLUMN_EXPRESSION_DIGEST": "217de169907d5a51b33fccb796b956136f141fca07a94e06992e77b408d19c5f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+            "DIGEST": "f969a332601c3edbb8ac791c2b30c9588f3eceacbc322a38b8586ac5443989db",
+            "RANGE": [93, 113],
+            "COLUMN_EXPRESSION_DIGEST": "f0786e8db140223701046b29c2029b13d076fe01870d786e9109f7dca158137a"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-51b50e5aa03cc6e4"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-374e74fd6e2f6f18",
+      "RELATION": "public.correspondence",
+      "COLUMN": "type",
+      "GOVERNED_TYPE_NAME": "correspondence_type",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.correspondence_type",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "correspondence_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+            "DIGEST": "75571384fa9fa71517ea2c4da5f56b77d810acc5238402f0b6e7251031b515aa",
+            "RANGE": [144, 239],
+            "COLUMN_EXPRESSION_DIGEST": "49c9311194867f565628c7f8de3b4ac92c18dbd0bd2a95caac7d66f6abb46fd5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+            "DIGEST": "0ff80ddb222e110fdb363dafc3c54335b7b606573845afc3d5f3a09fe64a33fd",
+            "RANGE": [72, 100],
+            "COLUMN_EXPRESSION_DIGEST": "0ea3810bf7f844afbc5fc63eb591cc12d89d19e51c029e05601bd3787c73662f"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b24a0a0dd53e2fa2"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-374e74fd6e2f6f18",
+      "RELATION": "public.correspondence",
+      "COLUMN": "priority",
+      "GOVERNED_TYPE_NAME": "correspondence_priority",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.correspondence_priority",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "correspondence_priority",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+            "DIGEST": "75571384fa9fa71517ea2c4da5f56b77d810acc5238402f0b6e7251031b515aa",
+            "RANGE": [144, 239],
+            "COLUMN_EXPRESSION_DIGEST": "f61a43840542329293642f1b20c40c175c40e761b266716288f8f7b2849b5a1e"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+            "DIGEST": "0ff80ddb222e110fdb363dafc3c54335b7b606573845afc3d5f3a09fe64a33fd",
+            "RANGE": [72, 100],
+            "COLUMN_EXPRESSION_DIGEST": "fee9120c219c62afe98713847be534dc1aa25bdcc88f782fd5485d0080d19fe1"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b24a0a0dd53e2fa2"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-374e74fd6e2f6f18",
+      "RELATION": "public.correspondence",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "correspondence_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.correspondence_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "correspondence_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+            "DIGEST": "75571384fa9fa71517ea2c4da5f56b77d810acc5238402f0b6e7251031b515aa",
+            "RANGE": [144, 239],
+            "COLUMN_EXPRESSION_DIGEST": "f738365377501ee193bcb3431b4c6a772d227477f71abb5c084a5da956faa01a"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+            "DIGEST": "0ff80ddb222e110fdb363dafc3c54335b7b606573845afc3d5f3a09fe64a33fd",
+            "RANGE": [72, 100],
+            "COLUMN_EXPRESSION_DIGEST": "31ba9979c49d5fe39f528fa6881c261dee7f0e2db075dfbca80f294edd5111e1"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b24a0a0dd53e2fa2"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-9ceddc0fb023ae7f",
+      "RELATION": "public.fee_adjustments",
+      "COLUMN": "adjustment_type",
+      "GOVERNED_TYPE_NAME": "fee_adjustment_type",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.fee_adjustment_type",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "fee_adjustment_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+            "DIGEST": "5867dc989fbb04bd71315cb4c70ca9859f75145ace86f353443ab291eb413594",
+            "RANGE": [190, 210],
+            "COLUMN_EXPRESSION_DIGEST": "9830836ecaf5611df7f94443a3cf08719549bbd066b6e5bf160517a314780327"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "4f08ae3eca1249f8a50d64b535b6a1205bb31ec5724685153b4819a24805d9eb",
+            "RANGE": [154, 166],
+            "COLUMN_EXPRESSION_DIGEST": "b5fa67d6906e24997496105a052925fc94bca09dfb0f00f7fb594c6d8e17ad10"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-46eee32aeeba7016"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-a4fd64f94561706e",
+      "RELATION": "public.grievance_case_access_assignments",
+      "COLUMN": "access_role",
+      "GOVERNED_TYPE_NAME": "case_access_role",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.case_access_role",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "case_access_role",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts",
+            "DIGEST": "9ac4dd47821512bb283a756573ca4f5fd62afe18f83499fcc9c555a8f60e0fb4",
+            "RANGE": [97, 125],
+            "COLUMN_EXPRESSION_DIGEST": "d46b7ee5b639dfe91708625535c8842f4badbaddccc8a3ba3588638a1abf4d34"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+            "DIGEST": "b860ff1c367b7507f3cabb728f7eb5c4dbc6fe4cbe4d6efd0b3337057decceab",
+            "RANGE": [185, 201],
+            "COLUMN_EXPRESSION_DIGEST": "63cb822e4e3dd4ebc912411dcad06ceda39d3893f53135270ea87c1b20584384"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-90830dcafd151747"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-a4fd64f94561706e",
+      "RELATION": "public.grievance_case_access_assignments",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "case_access_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.case_access_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "case_access_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts",
+            "DIGEST": "9ac4dd47821512bb283a756573ca4f5fd62afe18f83499fcc9c555a8f60e0fb4",
+            "RANGE": [97, 125],
+            "COLUMN_EXPRESSION_DIGEST": "7587ad45d45e7cfbd09848414a7ef19840bdc73dabbf4f863462b04e83eaef21"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+            "DIGEST": "b860ff1c367b7507f3cabb728f7eb5c4dbc6fe4cbe4d6efd0b3337057decceab",
+            "RANGE": [185, 201],
+            "COLUMN_EXPRESSION_DIGEST": "86a3e64bd9c849e940bc64779d8b2a37152c2166269064f2169c5b7dd203769a"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-90830dcafd151747"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-354e8b1b7988ec0f",
+      "RELATION": "public.commercial_contracts",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "commercial_contract_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.commercial_contract_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "commercial_contract_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+            "DIGEST": "222f9d60466f0a2e01d8ab5a485e3970f645383164160debe2d4424f79bc56c6",
+            "RANGE": [59, 94],
+            "COLUMN_EXPRESSION_DIGEST": "f5da73f4dc5063fe1646ad3de531bd72f45be936a132e14f1fc62aebbbadab67"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+            "DIGEST": "2713d4d488a332b524069ff7803af9942b7a25e087be34314b4de5bbeb6de223",
+            "RANGE": [66, 91],
+            "COLUMN_EXPRESSION_DIGEST": "340c093e084390bc9d51218e1b5c9570631f61e62268943ba852e5c94eb2614c"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-aac864940adbbd32"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-955b3577ae9aa13d",
+      "RELATION": "public.transaction_fee_events",
+      "COLUMN": "fee_model_applied",
+      "GOVERNED_TYPE_NAME": "fee_model",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.fee_model",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "fee_model",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+            "DIGEST": "a11e34c80ab5f43b87d9b826104abf7ef5b1faadf9093e6257f684302b893b4a",
+            "RANGE": [104, 137],
+            "COLUMN_EXPRESSION_DIGEST": "b3d5e66befffe94e0ef6c4edcdaba446b7c43fffc9605f65fc720deb5c86c30b"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "862897de9827f936b764d5b80ca1a0446a706cf1c0446840203bf55acacfb430",
+            "RANGE": [121, 141],
+            "COLUMN_EXPRESSION_DIGEST": "047444200ff0d0861cbb4fba3ebd67f01ec87e3a5631661f761a12379a1ab6eb"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-89f18d78b9a89abd"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-955b3577ae9aa13d",
+      "RELATION": "public.transaction_fee_events",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "fee_event_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.fee_event_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "fee_event_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+            "DIGEST": "a11e34c80ab5f43b87d9b826104abf7ef5b1faadf9093e6257f684302b893b4a",
+            "RANGE": [104, 137],
+            "COLUMN_EXPRESSION_DIGEST": "5c18c490cd290d740e832c823420b0c26fe7e8b253c806cd32af8cb08527f00f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "862897de9827f936b764d5b80ca1a0446a706cf1c0446840203bf55acacfb430",
+            "RANGE": [121, 141],
+            "COLUMN_EXPRESSION_DIGEST": "fa0830297ce3821ea08389fa2fc1343f62c044c475977ec601a548aac6b29c93"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-89f18d78b9a89abd"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-c6e161597a2ee30f",
+      "RELATION": "public.contract_line_items",
+      "COLUMN": "line_type",
+      "GOVERNED_TYPE_NAME": "contract_line_type",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.contract_line_type",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "contract_line_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+            "DIGEST": "1ebd4ac373adbf479ff43957be9419a086c1f67f7e7a780a679fd64269798356",
+            "RANGE": [100, 121],
+            "COLUMN_EXPRESSION_DIGEST": "6bf0a394210b8061f2a4c9c98baf181309c082b7641cf1760e0d8a5ddeea9664"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+            "DIGEST": "9d0915df09e15738092d2da9fca278460db1ae8bcf6b2286ca3b3327b4b0fd4f",
+            "RANGE": [98, 114],
+            "COLUMN_EXPRESSION_DIGEST": "7937bb7b7998557a42727ced72671a5c21482fd3b2c12b5f22c9f5ba8b682718"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-8770bf08b157fd55"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-457f6c334f2c5d69",
+      "RELATION": "public.billing_accounts",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "billing_account_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.billing_account_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "billing_account_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+            "DIGEST": "dbcf1796cc47e4e0709b9e5278a7d630afa8b330ea5094ef77649ae4e9b249a5",
+            "RANGE": [61, 86],
+            "COLUMN_EXPRESSION_DIGEST": "e57441fb6681bcbfca017a79cc08286d4a7b177a3348482593f4fa986d42d5db"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "7f64dd2e6815c0ec02e3ff9b61a8a4cdfe1f2a319f78a16bc851f392ef5f2bf8",
+            "RANGE": [3064, 3081],
+            "COLUMN_EXPRESSION_DIGEST": "f32326ade0ce688b4e541e09dfbd3b2cd51ab9ef4bd8ff2e9808bbd0d59757b2"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "7f64dd2e6815c0ec02e3ff9b61a8a4cdfe1f2a319f78a16bc851f392ef5f2bf8",
+            "RANGE": [1, 18],
+            "COLUMN_EXPRESSION_DIGEST": "f32326ade0ce688b4e541e09dfbd3b2cd51ab9ef4bd8ff2e9808bbd0d59757b2"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "5fa93eb2670d4ea6a1538cff6d6e8b9078f66776090869eaeb662a0a04c23bbc",
+            "RANGE": [89, 105],
+            "COLUMN_EXPRESSION_DIGEST": "ed6b5b583f5fbe47550e555d7d838d444b7c99e8086d61c70c18af4ef33938bc"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-3792d9e3137b1653"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-52c4a67abecbdda0",
+      "RELATION": "public.org_entitlements",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "org_entitlement_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.org_entitlement_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "org_entitlement_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+            "DIGEST": "787b806da768a9e1f34cf70e6d4d02483cfc3803e0ac8995d4e229bc3faea9d0",
+            "RANGE": [127, 154],
+            "COLUMN_EXPRESSION_DIGEST": "129f251d5f589c83cee9e893fd88095e54634877da78658831c230ae270f83e3"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+            "DIGEST": "b334373a80945b0dfc73afda450b719825457889df80a122b949bb689f0c76cb",
+            "RANGE": [119, 139],
+            "COLUMN_EXPRESSION_DIGEST": "1c1aa531f50157bcda34bf2a32fc51776077bcb4a7fb0d693b1f4b896dc0719c"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-91539638ae3d477c"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-4b91f070ce6e513d",
+      "RELATION": "public.allocation_runs",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "allocation_run_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.allocation_run_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "allocation_run_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+            "DIGEST": "493116055073f182606cebb17a6035b804468ca4334da412088a23cc7e8046eb",
+            "RANGE": [97, 124],
+            "COLUMN_EXPRESSION_DIGEST": "6374fb78708ff688ba936f896b27be97a36cfa98623925d74fb01af7668940be"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "7dd97fa766fe7009d8e91d8c78b4d8a856c997a3e591c2961f666480bddeb817",
+            "RANGE": [3308, 3325],
+            "COLUMN_EXPRESSION_DIGEST": "8eb6dbb054357ba416f9005118de62f106aff7a79ead504b4a32087c4f6338f3"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "7dd97fa766fe7009d8e91d8c78b4d8a856c997a3e591c2961f666480bddeb817",
+            "RANGE": [190, 207],
+            "COLUMN_EXPRESSION_DIGEST": "8eb6dbb054357ba416f9005118de62f106aff7a79ead504b4a32087c4f6338f3"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "6565ee7822038198464a6d4721a4a0de8b4ed91261781d3c95d1bd2b5a64b4fd",
+            "RANGE": [375, 392],
+            "COLUMN_EXPRESSION_DIGEST": "ae5f150d318b8780a83c00a03af0f0d1bad4ccd8bbd4975077795f4b6d76769d"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b83cc475c4e82867"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-0de4d9b0bf311799",
+      "RELATION": "public.transaction_fee_rules",
+      "COLUMN": "fee_model",
+      "GOVERNED_TYPE_NAME": "fee_model",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.fee_model",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "fee_model",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+            "DIGEST": "65471be97f8d2b54b42c80138e395d7788c173064385c4524fa4dcc04b59e6dd",
+            "RANGE": [70, 98],
+            "COLUMN_EXPRESSION_DIGEST": "3b8104cff22971949f806a141f9e21f58431803d67ce1952eed24e9b22a55857"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "bd5aa3d871ada7abd5ff63b22b42e316ee621c44063c84eedcfce8cb9befbe7e",
+            "RANGE": [80, 101],
+            "COLUMN_EXPRESSION_DIGEST": "8f299c87565eb29d084352c78a59540fc1ae6849b2eedb4d6e5d4f3d188cfc17"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-12776be5e6d9813e"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-0de4d9b0bf311799",
+      "RELATION": "public.transaction_fee_rules",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "fee_rule_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.fee_rule_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "fee_rule_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+            "DIGEST": "65471be97f8d2b54b42c80138e395d7788c173064385c4524fa4dcc04b59e6dd",
+            "RANGE": [70, 98],
+            "COLUMN_EXPRESSION_DIGEST": "4a589187fa7e3232411931f1d0ee2481f9621dd16a73ddb78a44cc86774dd9dc"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "bd5aa3d871ada7abd5ff63b22b42e316ee621c44063c84eedcfce8cb9befbe7e",
+            "RANGE": [80, 101],
+            "COLUMN_EXPRESSION_DIGEST": "90c6d6377e2a1f8839c617332defad6462dc8506a789ac4a286e9c42cfc27730"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-12776be5e6d9813e"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-54f023929dec98b6",
+      "RELATION": "public.user_signatures",
+      "COLUMN": "source",
+      "GOVERNED_TYPE_NAME": "signature_source",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.signature_source",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "signature_source",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+            "DIGEST": "cd55c2296f8a8c1329594404bc39bf5111e61ca60e0ef09924287a5d4afb3cc1",
+            "RANGE": [100, 134],
+            "COLUMN_EXPRESSION_DIGEST": "9fe2f2473edf200f2f82c759d7198746554b05c2433a4052684cfb09358db2af"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+            "DIGEST": "c175845d635bc5220f18d34545715056ed46003c63eb05317805952242381c03",
+            "RANGE": [52, 65],
+            "COLUMN_EXPRESSION_DIGEST": "8ba144ddb404ccaf45be48931b5ba6fdffeccebd5adb975d143ea089a496ca2f"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-9d2cf676ad999891"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-be408a2fd8f62e9b",
+      "RELATION": "public.subscription_events_log",
+      "COLUMN": "event_type",
+      "GOVERNED_TYPE_NAME": "subscription_lifecycle_event",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.subscription_lifecycle_event",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "subscription_lifecycle_event",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/dunning.ts",
+            "DIGEST": "315dbce2374d8a9d01452f656c4d227fab57a91f37f59de22871a24b4a6edfe8",
+            "RANGE": [145, 165],
+            "COLUMN_EXPRESSION_DIGEST": "a341b189e4f21a5661b9cf0ddd42e9dceb5c1d88c521d35946a0edb6bd50f29f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+            "DIGEST": "61b6ac7185d7c5812a9ef8f33ccf54e1f716747931c16ff4476cdbe0436eb72b",
+            "RANGE": [268, 279],
+            "COLUMN_EXPRESSION_DIGEST": "ebdc25915c0bbeafaf8cd9a5d611c56ba3b0ce63380cfae1a6b4c8ee2c1a6ec7"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b445c889d1db562d"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-93b9276af8d38a8b",
+      "RELATION": "public.org_subscriptions",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "subscription_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.subscription_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "subscription_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+            "DIGEST": "19406235a2b7461c51b5601595307940842e6c5ece0c9d3c4a75958cbad28056",
+            "RANGE": [118, 146],
+            "COLUMN_EXPRESSION_DIGEST": "732170962cdfa288a0415ccd9d7998f2d0de8894a99352f376f726107875744f"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "fe3c75adffbe58a9d040f1626ce3ab696ed3cc0a56ef2907fbd1af007d5ecb6d",
+            "RANGE": [3125, 3143],
+            "COLUMN_EXPRESSION_DIGEST": "ebd988b93680b272009608178e96f75b8d3fae5a9b774302c66efc5592914710"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "fe3c75adffbe58a9d040f1626ce3ab696ed3cc0a56ef2907fbd1af007d5ecb6d",
+            "RANGE": [86, 104],
+            "COLUMN_EXPRESSION_DIGEST": "ebd988b93680b272009608178e96f75b8d3fae5a9b774302c66efc5592914710"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "19a3fc1cf339d2aba5f9d10f7ad867663736ec66d1c02fbb15cc13090abb0d26",
+            "RANGE": [134, 152],
+            "COLUMN_EXPRESSION_DIGEST": "ea10898079bd799c9ffa4fa902e50533fbe3792a1a04dc5f0658e28a5d55ac3c"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-6ecf8031c8972266"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-799cd5bb8ed5a326",
+      "RELATION": "public.reconciliation_exceptions",
+      "COLUMN": "exception_type",
+      "GOVERNED_TYPE_NAME": "reconciliation_exception_type",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.reconciliation_exception_type",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "reconciliation_exception_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+            "DIGEST": "2498be279ebd7537887a14f1e3e3375ce4d516992eb4e1dc9350d7394da82aa6",
+            "RANGE": [114, 140],
+            "COLUMN_EXPRESSION_DIGEST": "7687af43158d791fee75cc58f953362eeed5c837cfe7f4249de5d60f46725b58"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "0dbfd97f80f7802f5e60fbeb16f6d9bc16ce06e12a648087e0f4dafafc5236fe",
+            "RANGE": [310, 328],
+            "COLUMN_EXPRESSION_DIGEST": "42fc67b296bb9de1cca90ad01382c988e73a6f438cfaa0ad98fca38dd9ecd8fa"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-5b7ff3fe06372a75"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-799cd5bb8ed5a326",
+      "RELATION": "public.reconciliation_exceptions",
+      "COLUMN": "exception_status",
+      "GOVERNED_TYPE_NAME": "reconciliation_exception_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.reconciliation_exception_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "reconciliation_exception_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+            "DIGEST": "2498be279ebd7537887a14f1e3e3375ce4d516992eb4e1dc9350d7394da82aa6",
+            "RANGE": [114, 140],
+            "COLUMN_EXPRESSION_DIGEST": "e46986b3069cc6c205947475078afb82625552a9499064fe69a750482cf54ad8"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "0dbfd97f80f7802f5e60fbeb16f6d9bc16ce06e12a648087e0f4dafafc5236fe",
+            "RANGE": [310, 328],
+            "COLUMN_EXPRESSION_DIGEST": "153d8c8f8ab22afcda1c8656e423f2b1eb27ad11b6c92280c64e40a07be5065e"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-5b7ff3fe06372a75"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-665d085536ec6ced",
+      "RELATION": "public.platform_invoices",
+      "COLUMN": "status",
+      "GOVERNED_TYPE_NAME": "platform_invoice_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.platform_invoice_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "platform_invoice_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+            "DIGEST": "b2d906fb2419611726015be4714ab59c2eb9ca1c15c4df81dfc3433c82d464f0",
+            "RANGE": [172, 201],
+            "COLUMN_EXPRESSION_DIGEST": "590b3cd2c4054beadc1165d739bd11feb3ec831eff3f6f5d48dd04e97c496672"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "cc9141c7c9d0b2789cc4a4ae3d8edea550a1a1e5d86a11a28e73269c00014a63",
+            "RANGE": [3168, 3188],
+            "COLUMN_EXPRESSION_DIGEST": "e582fcb6ec91506d5d923947f0be333de7a378fc66496b24773a1385908d3a82"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "cc9141c7c9d0b2789cc4a4ae3d8edea550a1a1e5d86a11a28e73269c00014a63",
+            "RANGE": [21, 41],
+            "COLUMN_EXPRESSION_DIGEST": "e582fcb6ec91506d5d923947f0be333de7a378fc66496b24773a1385908d3a82"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "db1ed6982a348ba6c4707af7e9fa5e0d53b297c4cf9b7afbe76add673e6b1c83",
+            "RANGE": [174, 193],
+            "COLUMN_EXPRESSION_DIGEST": "0e69d4ddd423a6fc30225c935cd7a31a8142cacf77091847ae32a07f1459e3de"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-f9d77efe7e881f7c"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-fa19a76e9368a78a",
+      "RELATION": "public.document_links",
+      "COLUMN": "linked_entity_type",
+      "GOVERNED_TYPE_NAME": "document_linked_entity_type",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.document_linked_entity_type",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "document_linked_entity_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/documents-schema.ts",
+            "DIGEST": "a05453f9cebf181329bffe01430755eb63e7a230a37774b07b6d10fa0ffcb8c2",
+            "RANGE": [139, 152],
+            "COLUMN_EXPRESSION_DIGEST": "112786619cc178fbc093190770b1fdabbad0f16acca39f6d090ed45bcd9af90d"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+            "DIGEST": "6893cd4912da2854b45f7f3033c26505912629efe91990fc6d9980ae91a2e5d3",
+            "RANGE": [120, 129],
+            "COLUMN_EXPRESSION_DIGEST": "860904b7d21ef89b429a63a5c8467804f6432b59da713f01559e763cb079de97"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-2896d62bb60bda9f"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-82b62e88e72e2a44",
+      "RELATION": "public.allocation_rule_versions",
+      "COLUMN": "method",
+      "GOVERNED_TYPE_NAME": "allocation_method",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.allocation_method",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "allocation_method",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+            "DIGEST": "ce278a07f5d40fde74223c0a9b4857c1fb5f05f0e5b50577a7c22937bcb72ea5",
+            "RANGE": [69, 91],
+            "COLUMN_EXPRESSION_DIGEST": "c180bf5ea62fa7fd2d798beae81d60ba4abd658752952159c33d3adac12554a1"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "f268e331e240769a5b7e9a54ac62dd52826fc0f3bb4795ecc239d14faac0fa42",
+            "RANGE": [3267, 3280],
+            "COLUMN_EXPRESSION_DIGEST": "e81d750b4e4a1cb461ee3e945b9a05196c781f9f8344ca1bc3d041df8fc5fba5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "f268e331e240769a5b7e9a54ac62dd52826fc0f3bb4795ecc239d14faac0fa42",
+            "RANGE": [174, 187],
+            "COLUMN_EXPRESSION_DIGEST": "e81d750b4e4a1cb461ee3e945b9a05196c781f9f8344ca1bc3d041df8fc5fba5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "72e5d5b8957c55790d916545279896689c1a1b3e0adff7b153be152cbd10487d",
+            "RANGE": [356, 369],
+            "COLUMN_EXPRESSION_DIGEST": "be27e0628444b6f973f5e8270e1e9c8b3ab5e6e4d546e16a76c30a0a0b766468"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-ebd5a33d867b1069"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-f0f138af324c7794",
+      "RELATION": "public.platform_cost_ledger_entries",
+      "COLUMN": "cost_type",
+      "GOVERNED_TYPE_NAME": "platform_cost_type",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.platform_cost_type",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "platform_cost_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+            "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+            "RANGE": [89, 141],
+            "COLUMN_EXPRESSION_DIGEST": "731286bd0624a2b46ad26f5b0a7289e93ee48a9264463bfd85c6850ffeca7d43"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [3229, 3253],
+            "COLUMN_EXPRESSION_DIGEST": "db1d3de1cb508c01f91bf34d5d569cb15d5f1e85b8d98f3fc32ab7179ea21b72"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [258, 282],
+            "COLUMN_EXPRESSION_DIGEST": "db1d3de1cb508c01f91bf34d5d569cb15d5f1e85b8d98f3fc32ab7179ea21b72"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-09701481b7a73806"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-f0f138af324c7794",
+      "RELATION": "public.platform_cost_ledger_entries",
+      "COLUMN": "event_type",
+      "GOVERNED_TYPE_NAME": "ledger_event_type",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.ledger_event_type",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "ledger_event_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+            "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+            "RANGE": [89, 141],
+            "COLUMN_EXPRESSION_DIGEST": "1f41bc8f42218c3887ff75aa706f5a19e1543fa09d2563d17f2461088e193db9"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [3229, 3253],
+            "COLUMN_EXPRESSION_DIGEST": "40a42dbd6ccd7385448a22ac4cbf188ad21bfe14ac95ca71f58a92018a6fd5e2"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [258, 282],
+            "COLUMN_EXPRESSION_DIGEST": "40a42dbd6ccd7385448a22ac4cbf188ad21bfe14ac95ca71f58a92018a6fd5e2"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "7b82e0771dd6c738f1806b367de8aecd48dbab6d9aa270865738c6c934f0a7cc",
+            "RANGE": [276, 314],
+            "COLUMN_EXPRESSION_DIGEST": "f5b6cc62d1a32fec14a08a42c3d967f6c3a396e82e1ee4af053dc547c0e99b88"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-09701481b7a73806"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-f0f138af324c7794",
+      "RELATION": "public.platform_cost_ledger_entries",
+      "COLUMN": "source_type",
+      "GOVERNED_TYPE_NAME": "ledger_source_type",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.ledger_source_type",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "ledger_source_type",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+            "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+            "RANGE": [89, 141],
+            "COLUMN_EXPRESSION_DIGEST": "f6afd1cb291c050fbe943cabf3a65e616656a87eb947997c03128b1cf53935a5"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [3229, 3253],
+            "COLUMN_EXPRESSION_DIGEST": "372df8bb6e2fb410d0c0f448f6c52839c8b89c7d3ae6d7402ebdf56fe5f976b1"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [258, 282],
+            "COLUMN_EXPRESSION_DIGEST": "372df8bb6e2fb410d0c0f448f6c52839c8b89c7d3ae6d7402ebdf56fe5f976b1"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "7b82e0771dd6c738f1806b367de8aecd48dbab6d9aa270865738c6c934f0a7cc",
+            "RANGE": [276, 314],
+            "COLUMN_EXPRESSION_DIGEST": "ccd8bcecc45b5e6860e5fd3b0d68accf6b6045bcf162b374aaae8f16a94153d2"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-09701481b7a73806"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-f0f138af324c7794",
+      "RELATION": "public.platform_cost_ledger_entries",
+      "COLUMN": "allocation_status",
+      "GOVERNED_TYPE_NAME": "allocation_status",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.allocation_status",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "allocation_status",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+            "DIGEST": "d00d95ae2ef6c4983f0c7da90e28da36583076c43db11ac832d90a40c007acb3",
+            "RANGE": [89, 141],
+            "COLUMN_EXPRESSION_DIGEST": "be0ea5072eff15588dd468d2d50dce24249cd45930d51acd2530ee651b183b45"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [3229, 3253],
+            "COLUMN_EXPRESSION_DIGEST": "d8c583ed7f179ebe74fe83d8683b23efdae22af0f9566a4306e48159d21af688"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations-audit/finance-tables.sql",
+            "DIGEST": "1a07b5a61d1ed305beb87fa018c44bcfd4faf0dce2618b023fc53c88b5d4c0d3",
+            "RANGE": [258, 282],
+            "COLUMN_EXPRESSION_DIGEST": "d8c583ed7f179ebe74fe83d8683b23efdae22af0f9566a4306e48159d21af688"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+            "DIGEST": "7b82e0771dd6c738f1806b367de8aecd48dbab6d9aa270865738c6c934f0a7cc",
+            "RANGE": [276, 314],
+            "COLUMN_EXPRESSION_DIGEST": "d9884c70b3a0fd56cd1d897be1eee04f9830375a9e1254fcd0b7f9ca532282df"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-09701481b7a73806"]
+    },
+    {
+      "RELATION_DEFINITION_ID": "UE-W4F-RELATION-f434bbf0e0d72394",
+      "RELATION": "public.contract_covered_orgs",
+      "COLUMN": "role",
+      "GOVERNED_TYPE_NAME": "covered_org_role",
+      "PHYSICAL_IDENTITY": "union-eyes::TYPE::public.covered_org_role",
+      "RECORDED_PRODUCER_AUTHORITY": null,
+      "GOVERNED_LATE_TYPE_IDENTITY": null,
+      "RESULT": "NO_RECORDED_TYPE_PRODUCER_AUTHORITY",
+      "IDENTITY_POSTURE": "Expected qualified lookup identity only;not a newly assigned canonical type identity or creation authority",
+      "EXECUTION_ALLOWED": "NO",
+      "PROPERTY_PROVENANCE": "W4H_GOVERNANCE_DECISION",
+      "GOVERNED_VALUE_AND_POSTURE": {
+        "PROPERTY": "POSTGRES_TYPE",
+        "VALUE": "covered_org_role",
+        "PROVENANCE": "EXACT_DECLARATION",
+        "RULE": "RULE_5_EXACT_DECLARED_NAMED_TYPE",
+        "EVIDENCE_REFERENCES": [
+          {
+            "FILE": "apps/union-eyes/db/schema/domains/finance/contract-amendments.ts",
+            "DIGEST": "f2af68f94f9cbff80bb5fec989f72647d647c258be618f8faab44804f325ac3a",
+            "RANGE": [103, 121],
+            "COLUMN_EXPRESSION_DIGEST": "4e7118e6252caeda1eacefbc96949c020b64044fd8ffc8016e55f4edd8ddd64d"
+          },
+          {
+            "FILE": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+            "DIGEST": "527a6562e556ef8add167c2ffd660f5012fa849480bdb08a3287e44731ae45c6",
+            "RANGE": [259, 268],
+            "COLUMN_EXPRESSION_DIGEST": "19f6ffffcab55adfd088910f51c256468944219d0c99362ef52b87b098e84a63"
+          }
+        ],
+        "STATUS": "APPROVED",
+        "RATIONALE": "Current pgEnum name is exact definition-design evidence; do not substitute historical text or another type family",
+        "TYPE_DEPENDENCY_POSTURE": "Existing named declaration dependency only; W4H does not author enum members, grant type ownership, authorize new type creation, or prove type availability. Definition authoring and producer dependency verification remain separate."
+      },
+      "AFFECTED_DEFINITION_OBLIGATION_IDS": ["UE-W4G-DEFINITION-b5be0303e59d6043"]
+    }
+  ],
+  "governanceNotReopened": "Named type names remain authoritative. Establish exact canonical type identity and production/ordering authority within permitted governance;no text substitution or invented enum creation.",
+  "producerDefinitionMetadataIntegration": {
+    "STATUS": "NOT_PERFORMED_GATE_BLOCKED",
+    "UPDATES": [],
+    "EXECUTION_ALLOWED": "NO",
+    "MUTATING_OPERATIONS": []
+  },
+  "versionAmendment": {
+    "STATUS": "NOT_PERFORMED_GATE_BLOCKED",
+    "VERSION_1_3_1_SHA256": "6b4c81a8ceded4f70ae59e313656149e9c3246aa0feeee1973062d63ea8c114e",
+    "VERSION_1_3_2_SHA256": null,
+    "PRIOR_JSON_INVERSE_PATCHES": []
+  },
+  "preservation": {
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H3_FINAL_BLUEPRINT_SELECTION.json": "3baf30e0af81a84d42e428ddf4a2e0cda56b41029c4c5afe88f6b0770758e1d8",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE.json": "58df0c17be136de8ecb2e42590c637530db9bf6d4c1423c03ddb40f80c28d63a",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H1_RESIDUAL_BLUEPRINT_CLOSURE.json": "20b9cbe13d06465472c389e328d8f455ad9a17ff3bff9c0e07a5a067d97c63b6",
+    "docs/union-eyes/reality-remediation/UE_W4H2_TRUE_BLUEPRINT_HUMAN_DECISION_PACKET.json": "b41e782d02dfb3e8d8cb9660082ff0dd9ecd0e287f7ec2f54dc37b96452f8354",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4F_CANONICAL_DEFINITION_AUTHORING.json": "70a7c068648437aca9d04be3b784af16e29c084064e8fccdb06f815c9268fcc9",
+    "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS.json": "4404f6b17c63af569852d71c180923fa07a186ba7b42cdc62806e2d7c7b35a76",
+    "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.json": "50bc30927199ff75307eb8b27d5c9bb4a8faa3e7fb5b600a132fe22e9cd53328",
+    "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json": "83da528b5d3dc31cba20ca5ff66172c259582c1070c52335d94850f944506853",
+    "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": "6b4c81a8ceded4f70ae59e313656149e9c3246aa0feeee1973062d63ea8c114e"
+  },
+  "preservedSections": {
+    "OWNERSHIP_310": "2817037bde5da31bc9060439f3c7a40bf25c693e3bbdb6f30b83b347c17c0210",
+    "LATE_DEFINITIONS_127": "e9579bc94f23a209e7b29df01800800ae7dc5afb68e34ff1f858639a4b12b636",
+    "COMPATIBILITY_127": "d74066a581d7fde91e4f0f7d78ea8c1f1093fdda04d0ce97a3bc320f19d7e5fb",
+    "DJANGO_372": "8d105d3d8c15127f3efd465e702f50b8037502a9adfbe1a26f86372e07d1aa9c",
+    "PLAN_82": "acc8e9e24cd3aff81ee5f505464eb00bc3003290b4443c54d77c23f4b9a553af",
+    "RAW_WRAPPERS": "f3d037b202441b89585f66194c9bd99eea01123fc5b4b58ecec98062a9369d9f",
+    "W3": "483ac36f3e863f12fb7aedeff1c3ea5b5ba089158b5f55ae672d6d2faa789d36",
+    "W5_86": "bf0723dbc866f6346bb163a051e0b4397eedab11e027949ca4072f68354274b0",
+    "W6_118": "1537751d17f7be2ddb4a3528e56a5ecddc3afeafbd8c33b3029be96874a4ccf5",
+    "CANONICAL_803": "ffa17080b00c752182e6278b5b39214c3cedc22d0ee08ed0e8c0bcb0a3a70040",
+    "FROZEN_23": "5ebd2ab883f7523a36eefb0417d89a1f53d69b11ad5dc5cfe01658f4df75fab7",
+    "EXTENSIONS_AND_VECTOR": "4724ab96af71dee3ad754faf650f4ca5f281c75b5ec650cb158c3c1e573857a7"
+  },
+  "priorGovernancePreservation": {
+    "HISTORICAL_REPORTS_OVERWRITTEN": "NO",
+    "PREVIOUSLY_CLOSED_GROUPS": 123,
+    "PREVIOUSLY_GOVERNED_OBLIGATIONS": 180,
+    "PRESERVED_W4H_GROUPS": [
+      "UE-W4F-DESIGN-009775f7e36f9417",
+      "UE-W4F-DESIGN-2015a4d1c4e8c853",
+      "UE-W4F-DESIGN-71e652a803700bfe",
+      "UE-W4F-DESIGN-7981caff02645e37",
+      "UE-W4F-DESIGN-6866cd42d8b55b7d",
+      "UE-W4F-DESIGN-dba96afa816d1292",
+      "UE-W4F-DESIGN-095ce184bc385e9b",
+      "UE-W4F-DESIGN-68d060ff7af3b66b",
+      "UE-W4F-DESIGN-567af604f5ffa6b3",
+      "UE-W4F-DESIGN-35b82360b27d2f1c",
+      "UE-W4F-DESIGN-ad69e2c15c84e429",
+      "UE-W4F-DESIGN-a0a95e23a9e3f989",
+      "UE-W4F-DESIGN-3b4e3ca57716086e",
+      "UE-W4F-DESIGN-2218da9dbac065af",
+      "UE-W4F-DESIGN-e887f5d0b865aa85",
+      "UE-W4F-DESIGN-56535212b8f6e374",
+      "UE-W4F-DESIGN-5c77ea0d4a8c9e95",
+      "UE-W4F-DESIGN-2b7e82f322e8676c",
+      "UE-W4F-DESIGN-e9654e8159bc6a35",
+      "UE-W4F-DESIGN-fdaa1aa9d7012f65",
+      "UE-W4F-DESIGN-f27978017b66ec76",
+      "UE-W4F-DESIGN-931acb19a7a2f283",
+      "UE-W4F-DESIGN-db46ef6ab8dc1c75",
+      "UE-W4F-DESIGN-9234e7879e72452d",
+      "UE-W4F-DESIGN-ef19545a336161dd",
+      "UE-W4F-DESIGN-a24ded2bf357d1f4",
+      "UE-W4F-DESIGN-ae2e7d8bcb10f4ad",
+      "UE-W4F-DESIGN-7b097c5fa5d5b59d",
+      "UE-W4F-DESIGN-dcaf9214ba5cee49",
+      "UE-W4F-DESIGN-57c06e4999d3c37e",
+      "UE-W4F-DESIGN-b60c3a8b449885e3",
+      "UE-W4F-DESIGN-679c4da8facb5cf8",
+      "UE-W4F-DESIGN-13acb55970c55f99",
+      "UE-W4F-DESIGN-559a690dc3dd4d09",
+      "UE-W4F-DESIGN-3f18f66bd5607445",
+      "UE-W4F-DESIGN-0392dcda33d9ed1d",
+      "UE-W4F-DESIGN-b0110161ada18d5b",
+      "UE-W4F-DESIGN-6b640d8f6e32f5f7",
+      "UE-W4F-DESIGN-e848e96896ac7e29",
+      "UE-W4F-DESIGN-ed48bbfbd05e54e6",
+      "UE-W4F-DESIGN-cd470b63011077b6",
+      "UE-W4F-DESIGN-9752c266c7f8d31d",
+      "UE-W4F-DESIGN-528e99e049ccffe9",
+      "UE-W4F-DESIGN-fced696bd5d3029f",
+      "UE-W4F-DESIGN-e1bc15654f261e64",
+      "UE-W4F-DESIGN-ff194d4e7850205b",
+      "UE-W4F-DESIGN-eb1d3cf4c623c524",
+      "UE-W4F-DESIGN-71c6da3a862f6890",
+      "UE-W4F-DESIGN-0cd284007f37f49a",
+      "UE-W4F-DESIGN-781394812d13f203",
+      "UE-W4F-DESIGN-e9e3a2ea786c190a",
+      "UE-W4F-DESIGN-07e9f40cb9a2b725",
+      "UE-W4F-DESIGN-d5c562e922451a2d",
+      "UE-W4F-DESIGN-85539e90a31d848a",
+      "UE-W4F-DESIGN-2b5a5edb0e309a34",
+      "UE-W4F-DESIGN-f34da0f38581365e",
+      "UE-W4F-DESIGN-d3a5f820387fac63",
+      "UE-W4F-DESIGN-48a1ddb8482c3d90",
+      "UE-W4F-DESIGN-e97e9d8ee3e4cc0b",
+      "UE-W4F-DESIGN-2d52557d0b5ba884",
+      "UE-W4F-DESIGN-3cc6dd52f55e0a54",
+      "UE-W4F-DESIGN-d9414d7832991c9a",
+      "UE-W4F-DESIGN-cb429f5820da69e9",
+      "UE-W4F-DESIGN-b1e23f9ea51bc0af",
+      "UE-W4F-DESIGN-7f9d90d6e3359da1",
+      "UE-W4F-DESIGN-694fb7dd9f73e7f2",
+      "UE-W4F-DESIGN-bc2f203b4a1a5c1d",
+      "UE-W4F-DESIGN-0b4d396a1ce4e910",
+      "UE-W4F-DESIGN-8532ee535dba0dee",
+      "UE-W4F-DESIGN-03e792f49d562323",
+      "UE-W4F-DESIGN-9f77bd55b544e069",
+      "UE-W4F-DESIGN-9dc03900711cc99a",
+      "UE-W4F-DESIGN-ed1ee7b288f0fc5a",
+      "UE-W4F-DESIGN-4a8749efc7e789a7",
+      "UE-W4F-DESIGN-48f44ac4c80fefb4",
+      "UE-W4F-DESIGN-1193f7a25ccd1fae",
+      "UE-W4F-DESIGN-be74f11bb084f9ee",
+      "UE-W4F-DESIGN-eca7ebec43e0540f",
+      "UE-W4F-DESIGN-f8b686cff1b128ee",
+      "UE-W4F-DESIGN-1db34346695861b1",
+      "UE-W4F-DESIGN-fb070814882ed3e9",
+      "UE-W4F-DESIGN-5df012d304cba6d7",
+      "UE-W4F-DESIGN-bd0107438127b14e",
+      "UE-W4F-DESIGN-823b22d065ceda47",
+      "UE-W4F-DESIGN-54762bfdd63fc6c8",
+      "UE-W4F-DESIGN-89ba0aa3310702c7",
+      "UE-W4F-DESIGN-bd11494afca7a376",
+      "UE-W4F-DESIGN-841d79aa3ce124c4",
+      "UE-W4F-DESIGN-668d7667686dbe31",
+      "UE-W4F-DESIGN-ef6b13ee3ee3cb93",
+      "UE-W4F-DESIGN-30ee77e90b3e087a",
+      "UE-W4F-DESIGN-4d93fb5aa9f7c976",
+      "UE-W4F-DESIGN-e6b0769494e5986f",
+      "UE-W4F-DESIGN-df724e0f913e1f42",
+      "UE-W4F-DESIGN-e52bacc7a9fce0f3",
+      "UE-W4F-DESIGN-a90637f486ac835f",
+      "UE-W4F-DESIGN-591ea53696e00d78",
+      "UE-W4F-DESIGN-41ed5915c6af4942",
+      "UE-W4F-DESIGN-2378203cc5be10a5",
+      "UE-W4F-DESIGN-d86d3a7172321cc4",
+      "UE-W4F-DESIGN-b235e1114fc81ce0",
+      "UE-W4F-DESIGN-67df780ab8fce6a9",
+      "UE-W4F-DESIGN-1790e5b720a7c060",
+      "UE-W4F-DESIGN-29e3d0935bf6b887",
+      "UE-W4F-DESIGN-854441d771d35680",
+      "UE-W4F-DESIGN-1f9e97bfeece93ea",
+      "UE-W4F-DESIGN-a9bd0f118a32c8a5",
+      "UE-W4F-DESIGN-598bc5921a254d34",
+      "UE-W4F-DESIGN-bba471b785e6b410",
+      "UE-W4F-DESIGN-186ac0dc247b0d10",
+      "UE-W4F-DESIGN-d7b3026963699390",
+      "UE-W4F-DESIGN-58ca3cc04bd584ca",
+      "UE-W4F-DESIGN-675a6e6b4034928c",
+      "UE-W4F-DESIGN-3a4bd33e425062af",
+      "UE-W4F-DESIGN-e1d6f32e9a64b2cb",
+      "UE-W4F-DESIGN-6b2ce7c7f7368921",
+      "UE-W4F-DESIGN-19452e8ec8b9fa7d",
+      "UE-W4F-DESIGN-741a2d14f73bba5c",
+      "UE-W4F-DESIGN-aac063c9d7f40ade",
+      "UE-W4F-DESIGN-86ac72674c496722",
+      "UE-W4F-DESIGN-dca9a5e35f195125"
+    ],
+    "PRESERVED_W4H_OBLIGATIONS": [
+      "UE-W4G-DEFINITION-e2e3390b43bbbd14",
+      "UE-W4G-DEFINITION-5ff5a7531c756fba",
+      "UE-W4G-DEFINITION-d6b71ca5f85600e8",
+      "UE-W4G-DEFINITION-0d247a5cba6a9d61",
+      "UE-W4G-DEFINITION-bdb609cc7baa01c2",
+      "UE-W4G-DEFINITION-d89f0987950bab57",
+      "UE-W4G-DEFINITION-aaf3aabccb495e7f",
+      "UE-W4G-DEFINITION-c8e51be7d0357305",
+      "UE-W4G-DEFINITION-5c7e78723dd8b80c",
+      "UE-W4G-DEFINITION-f2f28be3b2e68cea",
+      "UE-W4G-DEFINITION-84f415bde3d5c6f3",
+      "UE-W4G-DEFINITION-be9a6a857141eb81",
+      "UE-W4G-DEFINITION-9fcf052b2479db7d",
+      "UE-W4G-DEFINITION-c42b44506e916c09",
+      "UE-W4G-DEFINITION-52b2c28739bcece0",
+      "UE-W4G-DEFINITION-79e40d9187cb6a7c",
+      "UE-W4G-DEFINITION-cab23c6b12d57a4f",
+      "UE-W4G-DEFINITION-1e595830a62237bf",
+      "UE-W4G-DEFINITION-51b50e5aa03cc6e4",
+      "UE-W4G-DEFINITION-bc9f436943fed1fb",
+      "UE-W4G-DEFINITION-e4f0447bb4ca17d5",
+      "UE-W4G-DEFINITION-9e4ed03af8265305",
+      "UE-W4G-DEFINITION-8da69050bb970606",
+      "UE-W4G-DEFINITION-793e6a3c3afb6c0d",
+      "UE-W4G-DEFINITION-1cd715d5e4e34aab",
+      "UE-W4G-DEFINITION-4385ef0bae72d906",
+      "UE-W4G-DEFINITION-cbe8ca30d102c85c",
+      "UE-W4G-DEFINITION-faaedf071e9474d9",
+      "UE-W4G-DEFINITION-eee41efd9b277000",
+      "UE-W4G-DEFINITION-dfc328a8124c57b8",
+      "UE-W4G-DEFINITION-52236976259977d8",
+      "UE-W4G-DEFINITION-5dd450d5a9bfbd3d",
+      "UE-W4G-DEFINITION-21caf7d5c281dc05",
+      "UE-W4G-DEFINITION-46eee32aeeba7016",
+      "UE-W4G-DEFINITION-2d963f0d561a17e8",
+      "UE-W4G-DEFINITION-56fe645bf9e73b00",
+      "UE-W4G-DEFINITION-756e3e7b8e548b6f",
+      "UE-W4G-DEFINITION-87a3b2852823e548",
+      "UE-W4G-DEFINITION-60fb717281799128",
+      "UE-W4G-DEFINITION-fd42e5b91097211c",
+      "UE-W4G-DEFINITION-0d9e1e9c958bef73",
+      "UE-W4G-DEFINITION-10596d92de2d3392",
+      "UE-W4G-DEFINITION-89f18d78b9a89abd",
+      "UE-W4G-DEFINITION-8beced6d1e218aae",
+      "UE-W4G-DEFINITION-809288112f671447",
+      "UE-W4G-DEFINITION-8770bf08b157fd55",
+      "UE-W4G-DEFINITION-c201bd9a9075a9fc",
+      "UE-W4G-DEFINITION-1a482361bcea822b",
+      "UE-W4G-DEFINITION-f493f5f557ea0e20",
+      "UE-W4G-DEFINITION-afd71c91f22e709b",
+      "UE-W4G-DEFINITION-5e186d38272d19e9",
+      "UE-W4G-DEFINITION-b5777037fa7076c9",
+      "UE-W4G-DEFINITION-1616d255367c341d",
+      "UE-W4G-DEFINITION-b83cc475c4e82867",
+      "UE-W4G-DEFINITION-77aa06833477f7cb",
+      "UE-W4G-DEFINITION-d77d0e3c52106009",
+      "UE-W4G-DEFINITION-0da917bb97bd47c5",
+      "UE-W4G-DEFINITION-80dcddbe88876e34",
+      "UE-W4G-DEFINITION-91539638ae3d477c",
+      "UE-W4G-DEFINITION-f55495cc409fdfd2",
+      "UE-W4G-DEFINITION-7fb439ddf62630e3",
+      "UE-W4G-DEFINITION-62b0bd9d44912725",
+      "UE-W4G-DEFINITION-179c6b9ad97d6f79",
+      "UE-W4G-DEFINITION-a88dde536cbede42",
+      "UE-W4G-DEFINITION-b502a1ccdc7cdafa",
+      "UE-W4G-DEFINITION-2e1394a7f6a4e434",
+      "UE-W4G-DEFINITION-e123fe64090b7971",
+      "UE-W4G-DEFINITION-c058ea21e68785aa",
+      "UE-W4G-DEFINITION-9d2cf676ad999891",
+      "UE-W4G-DEFINITION-4a20f6599c8d58bd",
+      "UE-W4G-DEFINITION-d58923e2dd1fa638",
+      "UE-W4G-DEFINITION-5280bd5a0dac1976",
+      "UE-W4G-DEFINITION-55b4f73e9c33e4a9",
+      "UE-W4G-DEFINITION-998bbdad46844766",
+      "UE-W4G-DEFINITION-b445c889d1db562d",
+      "UE-W4G-DEFINITION-5e8cae1d4bd50d81",
+      "UE-W4G-DEFINITION-4648ff217ac6cc45",
+      "UE-W4G-DEFINITION-41c38d35cdae147e",
+      "UE-W4G-DEFINITION-cfe9d739faf2339f",
+      "UE-W4G-DEFINITION-ec225314c0c4682a",
+      "UE-W4G-DEFINITION-34cb89029be25de1",
+      "UE-W4G-DEFINITION-b5d27044822acab6",
+      "UE-W4G-DEFINITION-dd48e7592a26e32b",
+      "UE-W4G-DEFINITION-a4c6bdc1b34b9fc9",
+      "UE-W4G-DEFINITION-6ecf8031c8972266",
+      "UE-W4G-DEFINITION-5b7ff3fe06372a75",
+      "UE-W4G-DEFINITION-12776be5e6d9813e",
+      "UE-W4G-DEFINITION-01039dfaf1aef9e9",
+      "UE-W4G-DEFINITION-991a59fe214af62f",
+      "UE-W4G-DEFINITION-b4dd280d315f7967",
+      "UE-W4G-DEFINITION-06a95e0530bf5222",
+      "UE-W4G-DEFINITION-f9d77efe7e881f7c",
+      "UE-W4G-DEFINITION-ef7f6f6d7fd6fcba",
+      "UE-W4G-DEFINITION-9f87b8aceb37a5e9",
+      "UE-W4G-DEFINITION-2408ee92a2ea2a17",
+      "UE-W4G-DEFINITION-a599883fcf88fcfd",
+      "UE-W4G-DEFINITION-b24a0a0dd53e2fa2",
+      "UE-W4G-DEFINITION-d2984bad8a44340c",
+      "UE-W4G-DEFINITION-4cccc858adfe40c8",
+      "UE-W4G-DEFINITION-789de61afb7f456e",
+      "UE-W4G-DEFINITION-61566bbd5596697a",
+      "UE-W4G-DEFINITION-36555f8ef9439626",
+      "UE-W4G-DEFINITION-158f528b63067fc0",
+      "UE-W4G-DEFINITION-93aa2e53f25b0ceb",
+      "UE-W4G-DEFINITION-7bd95bddf5e5e088",
+      "UE-W4G-DEFINITION-36cc29238e7b1c5f",
+      "UE-W4G-DEFINITION-712a6126f7094619",
+      "UE-W4G-DEFINITION-0b58437ab5c5177b",
+      "UE-W4G-DEFINITION-c0f7a7d75fd6b1e0",
+      "UE-W4G-DEFINITION-2896d62bb60bda9f",
+      "UE-W4G-DEFINITION-945d34aed13d2fcd",
+      "UE-W4G-DEFINITION-ca0dacd63bac180a",
+      "UE-W4G-DEFINITION-5ab4212aea6fd54f",
+      "UE-W4G-DEFINITION-faffbddb0b4f4c07",
+      "UE-W4G-DEFINITION-c68c2a04fb984b1c",
+      "UE-W4G-DEFINITION-2d5d398452327f5a",
+      "UE-W4G-DEFINITION-aac864940adbbd32",
+      "UE-W4G-DEFINITION-f66d7a338e0aaf98",
+      "UE-W4G-DEFINITION-dce12b5912d8ee64",
+      "UE-W4G-DEFINITION-a2857a83bff244c1",
+      "UE-W4G-DEFINITION-59598e4fae4f7b0d",
+      "UE-W4G-DEFINITION-037238384978cae6",
+      "UE-W4G-DEFINITION-108a7c1bd83321e3",
+      "UE-W4G-DEFINITION-ae2197bfd5221519",
+      "UE-W4G-DEFINITION-34201d2f0362a5ea",
+      "UE-W4G-DEFINITION-cfc81ee3cb2e56d7",
+      "UE-W4G-DEFINITION-09701481b7a73806",
+      "UE-W4G-DEFINITION-f88e536dfe7c9fb6",
+      "UE-W4G-DEFINITION-fdc28e7164e40223",
+      "UE-W4G-DEFINITION-9c8d97de51e0ff43",
+      "UE-W4G-DEFINITION-3e160456784daa37",
+      "UE-W4G-DEFINITION-5c716b624f8b24cf",
+      "UE-W4G-DEFINITION-bef3dcb8fb277e26",
+      "UE-W4G-DEFINITION-1e7ec67ee69ef7b6",
+      "UE-W4G-DEFINITION-9ef8045d75910d91",
+      "UE-W4G-DEFINITION-7fb2822005b07979",
+      "UE-W4G-DEFINITION-4e7904c2d7460d66",
+      "UE-W4G-DEFINITION-cc4bc7b06e15bf5b",
+      "UE-W4G-DEFINITION-3394a97bfe7271a8",
+      "UE-W4G-DEFINITION-3a0ff2be30ed8847",
+      "UE-W4G-DEFINITION-ebd5a33d867b1069",
+      "UE-W4G-DEFINITION-3f48cbde40a5e3a3",
+      "UE-W4G-DEFINITION-592065aac991737c",
+      "UE-W4G-DEFINITION-9a5862b480351712",
+      "UE-W4G-DEFINITION-913c7ab8451a2b83",
+      "UE-W4G-DEFINITION-be408cb4cf02966c",
+      "UE-W4G-DEFINITION-90830dcafd151747",
+      "UE-W4G-DEFINITION-9b8e6b266d5cb735",
+      "UE-W4G-DEFINITION-45b134f39d0e55ec",
+      "UE-W4G-DEFINITION-69f1a58054842fc0",
+      "UE-W4G-DEFINITION-e3dcd5840085f80a",
+      "UE-W4G-DEFINITION-cabeda5f38f282e3",
+      "UE-W4G-DEFINITION-c39975a3310b6357",
+      "UE-W4G-DEFINITION-10388110c50e6fc9",
+      "UE-W4G-DEFINITION-cb2f7c896e6a7401",
+      "UE-W4G-DEFINITION-d9ebb9a8d43d80f5",
+      "UE-W4G-DEFINITION-f74c9382861e94cf",
+      "UE-W4G-DEFINITION-bac3a50d170191c0",
+      "UE-W4G-DEFINITION-5d310f41a9648a79",
+      "UE-W4G-DEFINITION-f401ed92c8a34660",
+      "UE-W4G-DEFINITION-731915f26f297332",
+      "UE-W4G-DEFINITION-3792d9e3137b1653",
+      "UE-W4G-DEFINITION-2f46bc9a15b4fe78",
+      "UE-W4G-DEFINITION-c432eb8ba3ac2f1a",
+      "UE-W4G-DEFINITION-850ac49223670dce",
+      "UE-W4G-DEFINITION-826d70dcec1f59f0",
+      "UE-W4G-DEFINITION-bc69d1985ac36405",
+      "UE-W4G-DEFINITION-f61df29292bbff2d",
+      "UE-W4G-DEFINITION-e0c651018aa523e3",
+      "UE-W4G-DEFINITION-94f5cd8d9af96333",
+      "UE-W4G-DEFINITION-e024821c0da00c3a",
+      "UE-W4G-DEFINITION-b5be0303e59d6043",
+      "UE-W4G-DEFINITION-469f0baa0fa99ef9",
+      "UE-W4G-DEFINITION-674e6fcd96fbace1",
+      "UE-W4G-DEFINITION-4ab47f6e1669c96b",
+      "UE-W4G-DEFINITION-d5306055f65a8621",
+      "UE-W4G-DEFINITION-d1ca2f19242e9564",
+      "UE-W4G-DEFINITION-c502a3e035469ff4"
+    ],
+    "W4H1_APPROVED_DECISION_IDS": [
+      "UE-W4F-DESIGN-23354a99ca9a879a",
+      "UE-W4F-DESIGN-cd213b3d31bb4db9"
+    ],
+    "SECTION_DIGESTS": {
+      "W4H1_TWO_APPROVED_DECISIONS": "30f714f294d05c7b7693f748f5a4c61dad1388d5681988b36f5f87b28710c575",
+      "W4H_121_APPROVALS": "0b73f67269e599c71f730f9945f23f7a453a23320dfeb46fb6706c3ec3acfc4a",
+      "W4H_178_GOVERNED_OBLIGATIONS": "d8efabd5acf16e9033dd79344a08323359380575ca9c37774548d01ac836bf67",
+      "CASE_DOCUMENTS": "7202233de492c75bcc8f3693fb8b0b861d31f5e7ac580a908fffcf3afbfb4395",
+      "ALL_APPROVED_W4H_PROPERTIES": "8e7824bd58fbca883d98a8168e97c12abec98e8ec88eb50247ff07e201f59ada",
+      "ACCEPTED_UPSTREAM_COMMITMENTS": {
+        "OWNERSHIP_310": "2817037bde5da31bc9060439f3c7a40bf25c693e3bbdb6f30b83b347c17c0210",
+        "LATE_DEFINITIONS_127": "e9579bc94f23a209e7b29df01800800ae7dc5afb68e34ff1f858639a4b12b636",
+        "COMPATIBILITY_127": "d74066a581d7fde91e4f0f7d78ea8c1f1093fdda04d0ce97a3bc320f19d7e5fb",
+        "DJANGO_372": "8d105d3d8c15127f3efd465e702f50b8037502a9adfbe1a26f86372e07d1aa9c",
+        "PLAN_82": "acc8e9e24cd3aff81ee5f505464eb00bc3003290b4443c54d77c23f4b9a553af",
+        "RAW_WRAPPERS": "f3d037b202441b89585f66194c9bd99eea01123fc5b4b58ecec98062a9369d9f",
+        "W3": "483ac36f3e863f12fb7aedeff1c3ea5b5ba089158b5f55ae672d6d2faa789d36",
+        "W5_86": "bf0723dbc866f6346bb163a051e0b4397eedab11e027949ca4072f68354274b0",
+        "W6_118": "1537751d17f7be2ddb4a3528e56a5ecddc3afeafbd8c33b3029be96874a4ccf5",
+        "CANONICAL_803": "ffa17080b00c752182e6278b5b39214c3cedc22d0ee08ed0e8c0bcb0a3a70040",
+        "FROZEN_23": "5ebd2ab883f7523a36eefb0417d89a1f53d69b11ad5dc5cfe01658f4df75fab7",
+        "EXTENSIONS_AND_VECTOR": "4724ab96af71dee3ad754faf650f4ca5f281c75b5ec650cb158c3c1e573857a7"
+      }
+    },
+    "PRIOR_W4H_PROPERTIES_AUTHORITATIVE": "YES",
+    "UPSTREAM_BYTE_COMMITMENTS": {
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H1_RESIDUAL_BLUEPRINT_CLOSURE.json": "20b9cbe13d06465472c389e328d8f455ad9a17ff3bff9c0e07a5a067d97c63b6",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE.json": "58df0c17be136de8ecb2e42590c637530db9bf6d4c1423c03ddb40f80c28d63a",
+      "docs/union-eyes/reality-remediation/UE_W4H_RESIDUAL_DEFINITION_DECISION_PACKET.json": "1f9af5a083dc824c2e3cfe9439487850e92c4c558e9b7451a351e8e34fa3e9b1",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4F_CANONICAL_DEFINITION_AUTHORING.json": "70a7c068648437aca9d04be3b784af16e29c084064e8fccdb06f815c9268fcc9",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS.json": "4404f6b17c63af569852d71c180923fa07a186ba7b42cdc62806e2d7c7b35a76",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.json": "50bc30927199ff75307eb8b27d5c9bb4a8faa3e7fb5b600a132fe22e9cd53328",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4D_PHYSICAL_OWNERSHIP_ADJUDICATION.json": "532ad46329ee72edb98d95814d5692b5530682454c6529d0920a12c0a1bb05cc",
+      "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json": "83da528b5d3dc31cba20ca5ff66172c259582c1070c52335d94850f944506853",
+      "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": "6b4c81a8ceded4f70ae59e313656149e9c3246aa0feeee1973062d63ea8c114e",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4_PRECONSUMER_PHYSICAL_PRODUCERS.json": "28eb0d823d81c05992cf7f4b19e92f6c2120883b884d97ac69bcce279e147bf4"
+    }
+  },
+  "historicalEvidence": {
+    "W4F": {
+      "W1": "PASS",
+      "W2": "PASS",
+      "W3": "PASS",
+      "W4G": "PASS",
+      "PHASE_1B_3C_A1I_W4F_GATE": "BLOCKED",
+      "PHASE_1B_3C_A1I_W4F": "BLOCKED",
+      "CANONICAL_CONTRACT_VERSION": "1.3.1",
+      "CONTRACT_1_3_2_CREATED": "NO",
+      "W4": "BLOCKED_DEFINITION_DECISIONS_PENDING",
+      "W4P": "NOT_AUTHORIZED",
+      "W5": "NOT_AUTHORIZED",
+      "NO_FURTHER_W4F_GENERIC_DISCOVERY": "YES",
+      "DATABASE_ROLES_PROVISIONED": "NO",
+      "EXTENSIONS_RUNTIME_PROVEN": "NO",
+      "ROLE_MEMBERSHIPS_APPLIED": "NO",
+      "DJANGO_SCHEMA_MATERIALIZED": "NO",
+      "PRECONSUMER_BASELINE_MATERIALIZED": "NO",
+      "PHYSICAL_PRODUCERS_EXECUTED": "NO",
+      "CANONICAL_DEFINITION_SQL_EXECUTED": "NO",
+      "BOOTSTRAP_IMPLEMENTATION_COMPLETE": "NO",
+      "FAITHFUL_SCHEMA_REPLAY_PROVEN": "NO",
+      "RLS_POLICY_CORRECTNESS_RUNTIME_PROVEN": "NO",
+      "TENANT_ISOLATION_RUNTIME_PROVEN": "NO",
+      "READY_FOR_RUNTIME_PROOF": 0,
+      "PRODUCT_READY": "NO"
+    },
+    "W4H": {
+      "PHASE_1B_3C_A1I_W4H_GATE": "BLOCKED",
+      "PHASE_1B_3C_A1I_W4H": "BLOCKED",
+      "CANONICAL_DEFINITION_GOVERNANCE": "PARTIAL_RESIDUAL_DECISIONS_REQUIRED",
+      "CANONICAL_CONTRACT_VERSION": "1.3.1",
+      "W4F_REGENERATION": "NOT_AUTHORIZED",
+      "W4F_REGENERATION_STARTED": "NO",
+      "W4": "BLOCKED_DEFINITION_DECISIONS_PENDING",
+      "W4P": "NOT_AUTHORIZED",
+      "W5": "NOT_AUTHORIZED",
+      "NO_FURTHER_W4H_DOCTRINE_PASS": "YES",
+      "CANONICAL_SQL_AUTHORED": 0,
+      "PRODUCERS_ACTIVATED": 0,
+      "READY_FOR_RUNTIME_PROOF": 0,
+      "PRODUCT_READY": "NO"
+    },
+    "W4H1": {
+      "PHASE_1B_3C_A1I_W4H1_GATE": "BLOCKED_TRUE_BLUEPRINT_TIE",
+      "PHASE_1B_3C_A1I_W4H": "BLOCKED",
+      "CANONICAL_DEFINITION_GOVERNANCE": "PARTIAL_TRUE_BLUEPRINT_TIES",
+      "CANONICAL_CONTRACT_VERSION": "1.3.1",
+      "W4F_REGENERATION": "NOT_AUTHORIZED",
+      "W4F_REGENERATION_STARTED": "NO",
+      "W4": "BLOCKED_DEFINITION_DECISIONS_PENDING",
+      "W4P": "NOT_AUTHORIZED",
+      "W5": "NOT_AUTHORIZED",
+      "NO_FURTHER_W4H_DOCTRINE_PASS": "YES"
+    },
+    "W4H3": {
+      "PHASE_1B_3C_A1I_W4H3_GATE": "PASS",
+      "PHASE_1B_3C_A1I_W4H3": "PASS",
+      "PHASE_1B_3C_A1I_W4H": "PASS",
+      "CANONICAL_DEFINITION_GOVERNANCE": "COMPLETE",
+      "HISTORICAL_OPEN_DECISION_STATE": "SUPERSEDED_BY_W4H3",
+      "CANONICAL_CONTRACT_VERSION": "1.3.1",
+      "W4F_REGENERATION": "AUTHORIZED_NOT_STARTED",
+      "W4F_REGENERATION_STARTED": "NO",
+      "W4": "BLOCKED_DEFINITION_IMPLEMENTATION_PENDING",
+      "W4P": "NOT_AUTHORIZED",
+      "W5": "NOT_AUTHORIZED"
+    }
+  },
+  "proofBoundaries": {
+    "CANONICAL_SQL_AUTHORED": 0,
+    "INACTIVE_SQL_PAYLOADS_CREATED": 0,
+    "PRODUCERS_ACTIVATED": 0,
+    "DATABASE_ROLES_PROVISIONED": "NO",
+    "ROLE_MEMBERSHIPS_APPLIED": "NO",
+    "DJANGO_SCHEMA_MATERIALIZED": "NO",
+    "PRECONSUMER_BASELINE_MATERIALIZED": "NO",
+    "PHYSICAL_PRODUCERS_EXECUTED": "NO",
+    "FAITHFUL_SCHEMA_REPLAY_PROVEN": "NO",
+    "RLS_POLICY_CORRECTNESS_RUNTIME_PROVEN": "NO",
+    "TENANT_ISOLATION_RUNTIME_PROVEN": "NO",
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO",
+    "EXTENSIONS_RUNTIME_PROVEN": "NO",
+    "CANONICAL_DEFINITION_SQL_EXECUTED": "NO",
+    "DATABASE_RUNTIME_CONFIGURATION_APPLIED": "NO",
+    "BOOTSTRAP_IMPLEMENTATION_COMPLETE": "NO",
+    "PRODUCTION_SCHEMA_PROVEN": "NO"
+  },
+  "validation": {
+    "EXACT_183_IDS": "PASS",
+    "OBJECT_KIND_57_126": "PASS",
+    "EXACT_125_RELATIONS": "PASS",
+    "BLUEPRINT_PROPERTY_GOVERNANCE": "PASS",
+    "CREATION_VS_ALTERATION_LINEAGE": "PASS",
+    "NAMED_TYPE_PRODUCER_AUTHORITY": "BLOCKED;not present among accepted41 late type decisions or established physical producer identities",
+    "SQL_SAFETY_AND_QUALIFICATION": "NOT_RUN_NO_SQL_AUTHORED",
+    "PAYLOAD_AND_PRODUCER_METADATA_LINKAGE": "NOT_RUN_GATE_BLOCKED",
+    "CONTRACT_1_3_2_INVERSE_RECONSTRUCTION": "NOT_APPLICABLE_NO_AMENDMENT",
+    "RESOLVED_REGISTRY_COMPLETE": "NO",
+    "closeoutChecks": [
+      {
+        "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts scripts\\ue\\regenerate-w4fr-definitions.test.ts scripts\\ue\\author-w4-canonical-definitions.test.ts scripts\\ue\\verify-frozen-w4.test.ts apps\\union-eyes\\scripts\\provisioning\\governed-provisioning.test.ts",
+        "RESULT": "PASS;170 tests:29 W4FR,44 frozen W4F,38 frozen W4,59 W3E;predecessor contract reconstruction stays isolated in memory"
+      },
+      {
+        "COMMAND": "pnpm exec tsc --noEmit --target es2022 --module esnext --moduleResolution bundler --skipLibCheck --esModuleInterop --types node scripts\\ue\\regenerate-w4fr-definitions.ts scripts\\ue\\regenerate-w4fr-definitions.test.ts",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm exec eslint --config apps\\union-eyes\\eslint.config.mjs --max-warnings 0 scripts\\ue\\regenerate-w4fr-definitions.ts scripts\\ue\\regenerate-w4fr-definitions.test.ts",
+        "RESULT": "PASS;exit0;existing Next pages-directory diagnostic"
+      },
+      {
+        "COMMAND": "pnpm exec tsx scripts\\ue\\regenerate-w4fr-definitions.ts --self-test --check",
+        "RESULT": "PASS;two matching supplemental registry/payload/report generations and exact persistent bytes;physical authoring gate remains BLOCKED"
+      },
+      {
+        "COMMAND": "pnpm exec prettier --check scripts\\ue\\regenerate-w4fr-definitions.ts scripts\\ue\\regenerate-w4fr-definitions.test.ts docs\\union-eyes\\reality-remediation\\UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_RESOLVED.json docs\\union-eyes\\reality-remediation\\UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_RESOLVED.md docs\\union-eyes\\reality-remediation\\UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS.json docs\\union-eyes\\reality-remediation\\UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS.md docs\\union-eyes\\reality-remediation\\PHASE_1B_3C_A1I_W4FR_CANONICAL_DEFINITION_REGENERATION.json docs\\union-eyes\\reality-remediation\\PHASE_1B_3C_A1I_W4FR_CANONICAL_DEFINITION_REGENERATION.md",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm validate:docs",
+        "RESULT": "PASS;0 errors,1215 existing warnings,2605 files scanned"
+      },
+      {
+        "METHOD": "Independent read-only Node assertions;no import of normalization or type-authority implementation",
+        "RESULT": "PASS;exact183/57/126/125 IDs,A/A/B ordered columns and digests,all governed-property digests,38 references/36 missing type producers,all fixed/transitive upstream historical bytes and artifact digests,no SQL/producer metadata/contract mutation"
+      }
+    ]
+  },
+  "determinismDigests": {
+    "DEFINITION_REGISTRY_SHA256": "b3b2427ec07afad6e28448910c8f4f50423182a0f36e03f3b1940ddce0c3016a",
+    "RELATION_DEFINITIONS_SHA256": "7fc43553052339df2c100841bc8ccc602a88e17292954b3887ccff8b551cc21b",
+    "COLUMN_DEFINITIONS_SHA256": "1bf5595c4956bf878860e1d64e2569416bf571abc7c9daf08b4f042d1538c37c",
+    "OBLIGATION_LINKAGE_SHA256": "d4dbb72a47fc81e296eda8f918a3611e60d0b2a7a41c6dbdafff3afd47b123cd",
+    "SQL_PAYLOADS_SHA256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "PRODUCER_METADATA_SHA256": "83da528b5d3dc31cba20ca5ff66172c259582c1070c52335d94850f944506853",
+    "SQL_PAYLOAD_ARTIFACT_SHA256": "bfc352ea26a8fbe12219fa8b8bf4815b2f93f4381359629ad2cd91c7188dc3ce"
+  }
+}

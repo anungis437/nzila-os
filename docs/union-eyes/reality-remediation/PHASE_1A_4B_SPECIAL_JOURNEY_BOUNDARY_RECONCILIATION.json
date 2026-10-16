@@ -1,0 +1,3695 @@
+{
+  "metadata": {
+    "title": "Phase 1A.4b Special Journey and External-Specialist Boundary Reconciliation",
+    "generatedBy": "scripts/ue/reconcile-special-journeys.mjs",
+    "generatedAt": null,
+    "evidenceBoundary": "Accepted Phase 1A.4a, 1A.3b, 1A.2, 1A.1, and user-surface census artifacts plus existing UE readiness documentation; no application source or runtime evidence.",
+    "applicationSourceInspected": false,
+    "runtimeActionExecuted": false,
+    "productCodeChanged": false
+  },
+  "phaseStatus": {
+    "phase0": "PASS",
+    "phase1A1": "PASS",
+    "phase1A2": "SOURCE_CEILING_ACCEPTED",
+    "phase1A3": "PASS",
+    "phase1A4a": "PASS",
+    "phase1A4bGate": "PASS",
+    "phase1A4": "PASS",
+    "corePersonaJourneySourceModel": "CLOSED",
+    "specialJourneyBoundarySourceModel": "CLOSED",
+    "liunaRuntimeProven": "NO",
+    "workAidRuntimeProven": "NO",
+    "operationalReadiness": "NO_GO — RUNTIME_PROOF_REQUIRED",
+    "phase1AFinalSourceReconciliation": "AUTHORIZED",
+    "phase1AFinalSourceReconciliationStarted": "NO",
+    "phase1A": "NOT_YET_PROVEN",
+    "phase1B": "NOT_AUTHORIZED",
+    "phase2": "NOT_AUTHORIZED",
+    "productReady": "NO"
+  },
+  "summary": {
+    "liunaRequiredDimensions": 11,
+    "liunaStatusCounts": {
+      "NOT_SOURCE_SUPPORTED": 1,
+      "PARTIALLY_SOURCE_SUPPORTED": 4,
+      "SOURCE_CEILING": 4,
+      "SOURCE_SUPPORTED_WITH_DEFECT_AND_CEILING": 2
+    },
+    "liunaDimensionCountSum": 11,
+    "liunaSourceTransitionsEstablished": 0,
+    "liunaStaticRelationsOnly": 0,
+    "liunaCapabilityRelationsOnly": 6,
+    "liunaNoSourceTransitions": 1,
+    "liunaTransitionCountSum": 7,
+    "liunaDirectRouteOnlySteps": 3,
+    "liunaNoSourceTransitionSteps": 6,
+    "externalSpecialistDimensions": 13,
+    "externalSpecialistStatusCounts": {
+      "SOURCE_SUPPORTED": 0,
+      "PARTIALLY_SOURCE_SUPPORTED": 0,
+      "NOT_SOURCE_SUPPORTED": 0,
+      "OUTSIDE_CURRENT_SOURCE_MODEL": 13
+    },
+    "externalSpecialistDimensionCountSum": 13,
+    "blockingGaps": [
+      "SPECIALIST_IDENTITY",
+      "SPECIALIST_ASSIGNMENT",
+      "BOUNDED_EXTERNAL_ACCESS",
+      "CASE_HANDOFF",
+      "DOCUMENT_INTAKE",
+      "EVIDENCE_HANDOFF",
+      "RESTRICTED_EVIDENCE_ACCESS",
+      "ACCESS_EXPIRY",
+      "ACCESS_REVOCATION",
+      "AUDIT_OF_SPECIALIST_ACTIVITY"
+    ],
+    "materialGaps": [
+      "CASE_STATUS_EXCHANGE",
+      "COMMUNICATION_EXCHANGE",
+      "SPECIALIST_DISENGAGEMENT"
+    ],
+    "supportingGaps": [],
+    "futureDesignObligationCount": 13,
+    "liunaSourceComplete": false,
+    "workAidEnablementReady": false
+  },
+  "liunaContinuityJourney": {
+    "journeyId": "LIUNA_LEADERSHIP_CONTINUITY",
+    "businessOutcome": "Preserve institutionally relevant context, active-matter responsibility, commitments, and evidence through a leadership transition without overstating source or runtime proof.",
+    "entryCondition": "A leadership/context-owner transition is proposed; no source evidence establishes an actual LIUNA workflow entry condition.",
+    "expectedEndState": "A successor has appropriately scoped context and responsibility, with deadlines, evidence, provenance, and institutional knowledge retained; this end state is not source-complete.",
+    "stepIds": [
+      "LIUNA_CONTINUITY_STEP_01",
+      "LIUNA_CONTINUITY_STEP_02",
+      "LIUNA_CONTINUITY_STEP_03",
+      "LIUNA_CONTINUITY_STEP_04",
+      "LIUNA_CONTINUITY_STEP_05",
+      "LIUNA_CONTINUITY_STEP_06",
+      "LIUNA_CONTINUITY_STEP_07",
+      "LIUNA_CONTINUITY_STEP_08",
+      "LIUNA_CONTINUITY_STEP_09",
+      "LIUNA_CONTINUITY_STEP_10",
+      "LIUNA_CONTINUITY_STEP_11"
+    ],
+    "capabilityIds": [
+      "CALENDAR_MEETINGS",
+      "CASE_DEADLINES",
+      "CASE_EVIDENCE",
+      "CASE_RECORDS",
+      "CASE_RESPONSIBILITY",
+      "GOVERNANCE_ADMINISTRATION",
+      "KNOWLEDGE_HANDOFF"
+    ],
+    "bindingIds": [
+      "app/[locale]/calendar/page.tsx:255:7:onCreateCalendar",
+      "app/[locale]/calendar/page.tsx:255:7:onManageSync",
+      "app/[locale]/calendar/page.tsx:255:7:onSelectCalendar",
+      "app/[locale]/calendar/page.tsx:255:7:onSyncCalendar",
+      "app/[locale]/calendar/page.tsx:271:13:onClick",
+      "app/[locale]/calendar/page.tsx:284:11:onCreateEvent",
+      "app/[locale]/calendar/page.tsx:304:7:onDelete",
+      "app/[locale]/calendar/page.tsx:304:7:onSave",
+      "app/[locale]/calendar/page.tsx:381:13:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:401:13:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:498:21:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:592:17:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:654:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:698:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:788:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:884:15:onClick",
+      "app/[locale]/dashboard/claims/[id]/page.tsx:272:19:onUploadComplete",
+      "app/[locale]/dashboard/claims/new/page.tsx:576:21:onChange",
+      "app/[locale]/dashboard/claims/new/page.tsx:600:27:onClick",
+      "app/[locale]/dashboard/committees/[id]/committee-workspace.tsx:175:13:onClick",
+      "app/[locale]/dashboard/dispatch/page.tsx:139:11:onClick",
+      "app/[locale]/dashboard/dispatch/page.tsx:201:13:onSubmit",
+      "app/[locale]/dashboard/dispatch/page.tsx:349:21:onClick",
+      "app/[locale]/dashboard/finance/allocation/page.tsx:169:21:onClick",
+      "app/[locale]/dashboard/leadership/page.tsx:154:13:onClick",
+      "app/[locale]/dashboard/leadership/page.tsx:186:11:onClick",
+      "app/[locale]/dashboard/voting/page.tsx:281:29:onClick",
+      "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:104:11:onClick",
+      "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:79:11:onClick",
+      "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:329:23:onClick",
+      "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:342:13:onClick",
+      "app/[locale]/workbook/claim/ClaimWorkbookClient.tsx:64:7:onClick",
+      "components/admin/clc-analytics-dashboard.tsx:319:11:onClick",
+      "components/ai/grievance-triage-card.tsx:169:17:onClick",
+      "components/ai/grievance-triage-card.tsx:178:17:onClick",
+      "components/ai/grievance-triage-card.tsx:88:13:onClick",
+      "components/analytics/analytics-overview-console.tsx:186:19:onClick",
+      "components/auth/forgot-password-form.tsx:68:7:onSubmit",
+      "components/calendar/CalendarSidebar.tsx:134:17:onSelect",
+      "components/calendar/CalendarSidebar.tsx:134:17:onSync",
+      "components/calendar/CalendarSidebar.tsx:151:11:onClick",
+      "components/calendar/CalendarSidebar.tsx:201:5:onClick",
+      "components/calendar/CalendarSidebar.tsx:208:7:onClick",
+      "components/calendar/CalendarSidebar.tsx:236:11:onClick",
+      "components/calendar/CalendarSidebar.tsx:75:7:onClick",
+      "components/calendar/CalendarSidebar.tsx:99:15:onSelect",
+      "components/calendar/CalendarSyncManager.tsx:214:15:onClick",
+      "components/calendar/CalendarSyncManager.tsx:227:15:onClick",
+      "components/calendar/CalendarSyncManager.tsx:351:25:onClick",
+      "components/calendar/CalendarSyncManager.tsx:369:25:onClick",
+      "components/calendar/CalendarSyncManager.tsx:397:11:onClick",
+      "components/calendar/CalendarView.tsx:103:13:onClick",
+      "components/calendar/CalendarView.tsx:106:13:onClick",
+      "components/calendar/CalendarView.tsx:109:13:onClick",
+      "components/calendar/CalendarView.tsx:154:11:onCreateEvent",
+      "components/calendar/CalendarView.tsx:163:11:onCreateEvent",
+      "components/calendar/CalendarView.tsx:171:11:onCreateEvent",
+      "components/calendar/CalendarView.tsx:240:11:onClick",
+      "components/calendar/CalendarView.tsx:257:17:onClick",
+      "components/calendar/CalendarView.tsx:329:15:onClick",
+      "components/calendar/CalendarView.tsx:339:19:onClick",
+      "components/calendar/CalendarView.tsx:392:13:onClick",
+      "components/calendar/CalendarView.tsx:401:17:onClick",
+      "components/calendar/CalendarView.tsx:463:17:onClick",
+      "components/calendar/EventDialog.tsx:183:9:onSubmit",
+      "components/calendar/EventDialog.tsx:312:15:onClick",
+      "components/calendar/EventDialog.tsx:324:21:onClick",
+      "components/calendar/EventDialog.tsx:361:15:onClick",
+      "components/calendar/EventDialog.tsx:370:13:onClick",
+      "components/claims/claim-list-table.tsx:237:17:onClick",
+      "components/claims/claim-list-table.tsx:243:17:onClick",
+      "components/claims/claim-list-table.tsx:251:19:onClick",
+      "components/claims/claim-list-table.tsx:257:19:onClick",
+      "components/claims/claim-list-table.tsx:268:19:onClick",
+      "components/claims/claims-console.tsx:77:9:onClick",
+      "components/clause-library/clause-library-console.tsx:361:15:onClick",
+      "components/clause-library/clause-library-console.tsx:409:25:onClick",
+      "components/clause-library/clause-library-console.tsx:416:21:onClick",
+      "components/clause-library/clause-library-console.tsx:435:19:onClick",
+      "components/clause-library/clause-library-console.tsx:464:15:onCompare",
+      "components/clause-library/clause-library-console.tsx:464:15:onDelete",
+      "components/clause-library/clause-library-console.tsx:464:15:onEdit",
+      "components/clause-library/clause-library-console.tsx:464:15:onShare",
+      "components/clause-library/clause-library-console.tsx:508:17:onAddTag",
+      "components/clause-library/clause-library-console.tsx:508:17:onRemoveTag",
+      "components/clause-library/clause-library-console.tsx:573:15:onSave",
+      "components/clause-library/clause-library-console.tsx:628:13:onExport",
+      "components/clause-library/clause-library-console.tsx:628:13:onRemoveClause",
+      "components/clause-library/ClauseCompareView.tsx:112:11:onClick",
+      "components/clause-library/ClauseCompareView.tsx:224:13:onClick",
+      "components/clause-library/ClauseCompareView.tsx:237:13:onClick",
+      "components/clause-library/ClauseCompareView.tsx:253:15:onClick",
+      "components/clause-library/ClauseLibrarySearch.tsx:304:17:onClick",
+      "components/clause-library/ClauseLibrarySearch.tsx:323:11:onClick",
+      "components/clause-library/ClauseSharingControls.tsx:255:11:onClick",
+      "components/clause-library/ClauseSharingControls.tsx:258:11:onClick",
+      "components/clause-library/ClauseTagManager.tsx:121:15:onClick",
+      "components/clause-library/ClauseTagManager.tsx:151:19:onClick",
+      "components/clause-library/ClauseViewer.tsx:120:13:onClick",
+      "components/clause-library/ClauseViewer.tsx:128:17:onClick",
+      "components/clause-library/ClauseViewer.tsx:134:17:onClick",
+      "components/clause-library/ClauseViewer.tsx:157:23:onClick",
+      "components/file-upload.tsx:184:7:onDrop",
+      "components/file-upload.tsx:196:9:onChange",
+      "components/file-upload.tsx:277:25:onClick",
+      "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+      "components/grievances/grievance-detail-console.tsx:459:11:onSubmit",
+      "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+      "components/grievances/grievance-detail-console.tsx:582:15:onClick",
+      "components/grievances/grievance-detail-console.tsx:596:7:onAssign",
+      "components/grievances/grievances-console.tsx:355:19:onSubmit",
+      "components/grievances/grievances-console.tsx:848:31:onClick",
+      "components/grievances/grievances-console.tsx:860:31:onClick",
+      "components/health-safety/InspectionScheduleCalendar.tsx:164:13:onClick",
+      "components/health-safety/InspectionScheduleCalendar.tsx:178:13:onClick",
+      "components/health-safety/InspectionScheduleCalendar.tsx:186:15:onClick",
+      "components/health-safety/InspectionScheduleCalendar.tsx:233:25:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:201:15:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:220:17:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:288:25:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:296:27:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:368:25:onClick",
+      "components/icra/ICRAAssessmentFlow.tsx:585:7:onAcknowledge",
+      "components/icra/ICRAAssessmentFlow.tsx:988:7:onClick",
+      "components/jurisdiction/deadline-calculator.tsx:133:15:onSelect",
+      "components/jurisdiction/deadline-calculator.tsx:143:9:onClick",
+      "components/knowledge-transfer/cognition-graph/cognition-graph-viz.tsx:294:17:onClick",
+      "components/knowledge-transfer/continuity-planning-workspace.tsx:545:25:onClick",
+      "components/knowledge-transfer/continuity-simulation-workspace.tsx:180:7:onClick",
+      "components/knowledge-transfer/continuity-simulation-workspace.tsx:446:13:onRetry",
+      "components/knowledge-transfer/continuity-simulation-workspace.tsx:460:17:onClick",
+      "components/knowledge-transfer/exit-interview-create-form.tsx:81:5:onSubmit",
+      "components/knowledge-transfer/expertise-map/expertise-map.tsx:89:5:onClick",
+      "components/knowledge-transfer/organizational-memory-explorer.tsx:175:5:onClick",
+      "components/knowledge-transfer/organizational-memory-explorer.tsx:279:7:onSubmit",
+      "components/knowledge-transfer/organizational-memory-explorer.tsx:326:15:onClick",
+      "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:128:9:onClick",
+      "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:134:9:onClick",
+      "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:294:15:onClick",
+      "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:353:9:onClick",
+      "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:361:9:onClick",
+      "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:369:9:onClick",
+      "components/policy-governance/ApprovalQueue.tsx:104:13:onClick",
+      "components/policy-governance/ApprovalQueue.tsx:113:13:onClick",
+      "components/policy-governance/ConflictAnalysis.tsx:104:15:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:116:5:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:136:9:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:67:9:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:70:9:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:80:11:onClick",
+      "components/policy-governance/PolicyCard.tsx:35:5:onClick",
+      "components/policy-governance/PolicyDetail.tsx:45:11:onClick",
+      "components/policy-governance/PolicyLineage.tsx:90:9:onClick",
+      "components/policy-governance/ReplayCenter.tsx:103:21:onClick",
+      "components/policy-governance/ReplayCenter.tsx:71:9:onClick",
+      "components/steward-recommendations.tsx:137:19:onClick",
+      "components/steward-recommendations.tsx:81:9:onClick",
+      "components/workbench/workbench-console.tsx:917:35:onClick"
+    ],
+    "knownDefectIds": [
+      "ACTION-API-METHOD-01",
+      "ACTION-API-ROUTE-01",
+      "UE-R1-ROOT-001",
+      "UE-R1-ROOT-003",
+      "UE-R1-ROOT-004",
+      "UE-R1-ROOT-031",
+      "UE-R1-ROOT-067"
+    ],
+    "sourceCeilingObligationIds": [
+      "BINDING-011d933df1b5",
+      "BINDING-0929516c95e4",
+      "BINDING-116f55d1f95d",
+      "BINDING-1a56c96637ba",
+      "BINDING-209f2ec4c3be",
+      "BINDING-25074af3471d",
+      "BINDING-3055fe84dda0",
+      "BINDING-3709b9400fc3",
+      "BINDING-3d7720dd7ee1",
+      "BINDING-3f9bfc5b443f",
+      "BINDING-3ff2004de4e1",
+      "BINDING-4256ecebd732",
+      "BINDING-44a2030d2577",
+      "BINDING-46b703fe0580",
+      "BINDING-46d2e7c75807",
+      "BINDING-46d919076131",
+      "BINDING-4ba04fb5ccf5",
+      "BINDING-4c02ab6c24fa",
+      "BINDING-4de75f902351",
+      "BINDING-596d1f9287df",
+      "BINDING-5c2c348e3c43",
+      "BINDING-5d837a805683",
+      "BINDING-5da3b588a6df",
+      "BINDING-65c61233bdc3",
+      "BINDING-69bfc5dbbb09",
+      "BINDING-6fad83f3bfa5",
+      "BINDING-780177a62d1d",
+      "BINDING-782eaf20a15c",
+      "BINDING-78e9d1775b9c",
+      "BINDING-795985f7d91f",
+      "BINDING-7d9eb397c3da",
+      "BINDING-9488ce91def1",
+      "BINDING-a5b294a7f7d1",
+      "BINDING-b15b7db11d7c",
+      "BINDING-b93c0f2467b5",
+      "BINDING-b9ddddb81a60",
+      "BINDING-bd03beb308a5",
+      "BINDING-c20fc2dbd038",
+      "BINDING-c34c563dff3e",
+      "BINDING-c457def02d40",
+      "BINDING-d1513a7f89a0",
+      "BINDING-d6ea031f3a70",
+      "BINDING-dd82dfa5ea2e",
+      "BINDING-e0f83819600a",
+      "BINDING-e3396056384d",
+      "BINDING-eb9e086f063f",
+      "BINDING-ebd2cf731f6d",
+      "BINDING-ed87372c2603",
+      "BINDING-f1e66974b258",
+      "BINDING-f2fd54fd1bfd",
+      "BINDING-f33ec1024a96",
+      "BINDING-f4e3772a3738",
+      "BINDING-f5a7a6761f7f",
+      "BINDING-fb55993af6ac"
+    ],
+    "residualEffectChainIds": [
+      "UE-B2-CHAIN-0014",
+      "UE-B2-CHAIN-0015",
+      "UE-B2-CHAIN-0016",
+      "UE-B2-CHAIN-0027",
+      "UE-B2-CHAIN-0028",
+      "UE-B2-CHAIN-0030",
+      "UE-B2-CHAIN-0100",
+      "UE-B2-CHAIN-0110",
+      "UE-B2-CHAIN-0111",
+      "UE-B2-CHAIN-0113",
+      "UE-B2-CHAIN-0114",
+      "UE-B2-CHAIN-0115",
+      "UE-B2-CHAIN-0116",
+      "UE-B2-CHAIN-0117",
+      "UE-B2-CHAIN-0118",
+      "UE-B2-CHAIN-0119",
+      "UE-B2-CHAIN-0120",
+      "UE-B2-CHAIN-0123",
+      "UE-B2-CHAIN-0124",
+      "UE-B2-CHAIN-0125",
+      "UE-B2-CHAIN-0126",
+      "UE-B2-CHAIN-0128",
+      "UE-B2-CHAIN-0129",
+      "UE-B2-CHAIN-0130",
+      "UE-B2-CHAIN-0131",
+      "UE-B2-CHAIN-0133",
+      "UE-B2-CHAIN-0134",
+      "UE-B2-CHAIN-0135",
+      "UE-B2-CHAIN-0136",
+      "UE-B2-CHAIN-0137",
+      "UE-B2-CHAIN-0138",
+      "UE-B2-CHAIN-0139",
+      "UE-B2-CHAIN-0140",
+      "UE-B2-CHAIN-0227",
+      "UE-B2-CHAIN-0228",
+      "UE-B2-CHAIN-0229",
+      "UE-B2-CHAIN-0230",
+      "UE-B2-CHAIN-0231",
+      "UE-B2-CHAIN-0232",
+      "UE-B2-CHAIN-0233",
+      "UE-B2-CHAIN-0234",
+      "UE-B2-CHAIN-0235",
+      "UE-B2-CHAIN-0236",
+      "UE-B2-CHAIN-0299",
+      "UE-B2-CHAIN-0300",
+      "UE-B2-CHAIN-0301",
+      "UE-B2-CHAIN-0302",
+      "UE-B2-CHAIN-0303",
+      "UE-B2-CHAIN-0304",
+      "UE-B2-CHAIN-0305",
+      "UE-B2-CHAIN-0306",
+      "UE-B2-CHAIN-0307",
+      "UE-B2-CHAIN-0308",
+      "UE-B2-CHAIN-0309",
+      "UE-B2-CHAIN-0310",
+      "UE-B2-CHAIN-0311",
+      "UE-B2-CHAIN-0331",
+      "UE-B2-CHAIN-0332",
+      "UE-B2-CHAIN-0335",
+      "UE-B2-CHAIN-0337",
+      "UE-B2-CHAIN-0338",
+      "UE-B2-CHAIN-0339",
+      "UE-B2-CHAIN-0340",
+      "UE-B2-CHAIN-0341",
+      "UE-B2-CHAIN-0374",
+      "UE-B2-CHAIN-0375",
+      "UE-B2-CHAIN-0381"
+    ],
+    "residualEffectChainObligationIds": [
+      "CHAIN-UE-B2-CHAIN-0014",
+      "CHAIN-UE-B2-CHAIN-0015",
+      "CHAIN-UE-B2-CHAIN-0016",
+      "CHAIN-UE-B2-CHAIN-0027",
+      "CHAIN-UE-B2-CHAIN-0028",
+      "CHAIN-UE-B2-CHAIN-0030",
+      "CHAIN-UE-B2-CHAIN-0100",
+      "CHAIN-UE-B2-CHAIN-0110",
+      "CHAIN-UE-B2-CHAIN-0111",
+      "CHAIN-UE-B2-CHAIN-0113",
+      "CHAIN-UE-B2-CHAIN-0114",
+      "CHAIN-UE-B2-CHAIN-0115",
+      "CHAIN-UE-B2-CHAIN-0116",
+      "CHAIN-UE-B2-CHAIN-0117",
+      "CHAIN-UE-B2-CHAIN-0118",
+      "CHAIN-UE-B2-CHAIN-0119",
+      "CHAIN-UE-B2-CHAIN-0120",
+      "CHAIN-UE-B2-CHAIN-0123",
+      "CHAIN-UE-B2-CHAIN-0124",
+      "CHAIN-UE-B2-CHAIN-0125",
+      "CHAIN-UE-B2-CHAIN-0126",
+      "CHAIN-UE-B2-CHAIN-0128",
+      "CHAIN-UE-B2-CHAIN-0129",
+      "CHAIN-UE-B2-CHAIN-0130",
+      "CHAIN-UE-B2-CHAIN-0131",
+      "CHAIN-UE-B2-CHAIN-0133",
+      "CHAIN-UE-B2-CHAIN-0134",
+      "CHAIN-UE-B2-CHAIN-0135",
+      "CHAIN-UE-B2-CHAIN-0136",
+      "CHAIN-UE-B2-CHAIN-0137",
+      "CHAIN-UE-B2-CHAIN-0138",
+      "CHAIN-UE-B2-CHAIN-0139",
+      "CHAIN-UE-B2-CHAIN-0140",
+      "CHAIN-UE-B2-CHAIN-0227",
+      "CHAIN-UE-B2-CHAIN-0228",
+      "CHAIN-UE-B2-CHAIN-0229",
+      "CHAIN-UE-B2-CHAIN-0230",
+      "CHAIN-UE-B2-CHAIN-0231",
+      "CHAIN-UE-B2-CHAIN-0232",
+      "CHAIN-UE-B2-CHAIN-0233",
+      "CHAIN-UE-B2-CHAIN-0234",
+      "CHAIN-UE-B2-CHAIN-0235",
+      "CHAIN-UE-B2-CHAIN-0236",
+      "CHAIN-UE-B2-CHAIN-0299",
+      "CHAIN-UE-B2-CHAIN-0300",
+      "CHAIN-UE-B2-CHAIN-0301",
+      "CHAIN-UE-B2-CHAIN-0302",
+      "CHAIN-UE-B2-CHAIN-0303",
+      "CHAIN-UE-B2-CHAIN-0304",
+      "CHAIN-UE-B2-CHAIN-0305",
+      "CHAIN-UE-B2-CHAIN-0306",
+      "CHAIN-UE-B2-CHAIN-0307",
+      "CHAIN-UE-B2-CHAIN-0308",
+      "CHAIN-UE-B2-CHAIN-0309",
+      "CHAIN-UE-B2-CHAIN-0310",
+      "CHAIN-UE-B2-CHAIN-0311",
+      "CHAIN-UE-B2-CHAIN-0331",
+      "CHAIN-UE-B2-CHAIN-0332",
+      "CHAIN-UE-B2-CHAIN-0335",
+      "CHAIN-UE-B2-CHAIN-0337",
+      "CHAIN-UE-B2-CHAIN-0338",
+      "CHAIN-UE-B2-CHAIN-0339",
+      "CHAIN-UE-B2-CHAIN-0340",
+      "CHAIN-UE-B2-CHAIN-0341",
+      "CHAIN-UE-B2-CHAIN-0374",
+      "CHAIN-UE-B2-CHAIN-0375",
+      "CHAIN-UE-B2-CHAIN-0381"
+    ],
+    "sourceStatus": "PARTIAL_SOURCE_SUPPORT",
+    "runtimeProven": "NO",
+    "authorizationProven": "NO",
+    "persistenceProven": "NO",
+    "humanUsabilityProven": "NO",
+    "executionStatus": "NOT_EXECUTED"
+  },
+  "liunaDimensions": [
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_01",
+      "continuityDimension": "CONTEXT_CAPTURE",
+      "businessIntent": "Capture and expose institutional context held by the outgoing leader.",
+      "sourceSupport": "SOURCE_CEILING",
+      "sourceCapabilityIds": [
+        "KNOWLEDGE_HANDOFF"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "KNOWLEDGE_HANDOFF",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS"
+        }
+      ],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "knowledge/context preservation",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "COLLECTIVE_BARGAINING",
+            "ARBITRATION_PRECEDENT_KNOWLEDGE",
+            "LEARNING_TRAINING",
+            "KNOWLEDGE_HANDOFF"
+          ]
+        },
+        {
+          "dimension": "successor handoff",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "KNOWLEDGE_HANDOFF"
+          ]
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:104:11:onClick",
+        "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:79:11:onClick",
+        "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:329:23:onClick",
+        "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:342:13:onClick",
+        "components/icra/ICRAAssessmentFlow.tsx:585:7:onAcknowledge",
+        "components/icra/ICRAAssessmentFlow.tsx:988:7:onClick",
+        "components/knowledge-transfer/cognition-graph/cognition-graph-viz.tsx:294:17:onClick",
+        "components/knowledge-transfer/continuity-planning-workspace.tsx:545:25:onClick",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:460:17:onClick",
+        "components/knowledge-transfer/exit-interview-create-form.tsx:81:5:onSubmit",
+        "components/knowledge-transfer/expertise-map/expertise-map.tsx:89:5:onClick",
+        "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:128:9:onClick",
+        "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:134:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:294:15:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:353:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:361:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:369:9:onClick"
+      ],
+      "routesOrSurfaces": [],
+      "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+      "knownDefectIds": [],
+      "sourceCeilingObligationIds": [
+        "BINDING-69bfc5dbbb09",
+        "BINDING-780177a62d1d",
+        "BINDING-dd82dfa5ea2e"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0015",
+        "UE-B2-CHAIN-0016",
+        "UE-B2-CHAIN-0100"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0015",
+        "CHAIN-UE-B2-CHAIN-0016",
+        "CHAIN-UE-B2-CHAIN-0100"
+      ],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "The accepted model contains a knowledge-transfer signal, but does not establish an outgoing-owner context-capture action or its ordered entry path."
+    },
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_02",
+      "continuityDimension": "ACTIVE_MATTER_VISIBILITY",
+      "businessIntent": "Identify active matters relevant to the institutional transition.",
+      "sourceSupport": "SOURCE_SUPPORTED_WITH_DEFECT_AND_CEILING",
+      "sourceCapabilityIds": [
+        "CASE_RECORDS"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "CASE_RECORDS",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_DEFECTS_AND_CEILING_OBLIGATIONS"
+        }
+      ],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "institutional record retention",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "MEMBER_RECORDS",
+            "ORGANIZATION_STRUCTURE",
+            "CASE_RECORDS",
+            "CASE_EVIDENCE",
+            "COLLECTIVE_BARGAINING",
+            "GOVERNANCE_ADMINISTRATION",
+            "ELECTIONS",
+            "HEALTH_SAFETY_CASES",
+            "MEMBER_DUES_SELF_SERVICE",
+            "DUES_REMITTANCE_ADMIN",
+            "FINANCIAL_PLANNING",
+            "GENERAL_COMMUNICATIONS",
+            "ARBITRATION_PRECEDENT_KNOWLEDGE",
+            "DOCUMENT_LIBRARY",
+            "KNOWLEDGE_HANDOFF",
+            "INSTITUTIONAL_REPORTING"
+          ]
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/claims/[id]/page.tsx:272:19:onUploadComplete",
+        "app/[locale]/dashboard/claims/new/page.tsx:576:21:onChange",
+        "app/[locale]/dashboard/claims/new/page.tsx:600:27:onClick",
+        "app/[locale]/workbook/claim/ClaimWorkbookClient.tsx:64:7:onClick",
+        "components/claims/claim-list-table.tsx:237:17:onClick",
+        "components/claims/claim-list-table.tsx:243:17:onClick",
+        "components/claims/claim-list-table.tsx:251:19:onClick",
+        "components/claims/claim-list-table.tsx:257:19:onClick",
+        "components/claims/claim-list-table.tsx:268:19:onClick",
+        "components/claims/claims-console.tsx:77:9:onClick",
+        "components/file-upload.tsx:184:7:onDrop",
+        "components/file-upload.tsx:196:9:onChange",
+        "components/file-upload.tsx:277:25:onClick",
+        "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+        "components/grievances/grievance-detail-console.tsx:459:11:onSubmit",
+        "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+        "components/grievances/grievance-detail-console.tsx:582:15:onClick",
+        "components/grievances/grievance-detail-console.tsx:596:7:onAssign",
+        "components/grievances/grievances-console.tsx:355:19:onSubmit",
+        "components/grievances/grievances-console.tsx:848:31:onClick",
+        "components/grievances/grievances-console.tsx:860:31:onClick",
+        "components/steward-recommendations.tsx:81:9:onClick",
+        "components/workbench/workbench-console.tsx:917:35:onClick"
+      ],
+      "routesOrSurfaces": [
+        {
+          "route": "/[locale]/dashboard/claims/[id]",
+          "staticEvidence": {
+            "normalizedRoute": "/dashboard/claims/[param]",
+            "pageRecordFound": true,
+            "pageEntryMechanism": "CONTEXTUAL_PAGE_LINK",
+            "pageDisposition": "CONTEXTUAL_WORKFLOW",
+            "primaryNavigationRecords": [],
+            "contextualInboundLinkCount": 4,
+            "contextualInboundLinks": [
+              {
+                "linkMechanism": "ROUTER_PUSH",
+                "sourceRoute": "/dashboard/members/[id]",
+                "targetRoute": "/dashboard/claims/[param]"
+              },
+              {
+                "linkMechanism": "ROUTER_PUSH",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/[param]"
+              },
+              {
+                "linkMechanism": "JSX_LINK_HREF",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/[param]"
+              },
+              {
+                "linkMechanism": "ROUTER_PUSH",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/[param]"
+              }
+            ]
+          }
+        },
+        {
+          "route": "/[locale]/dashboard/claims/new",
+          "staticEvidence": {
+            "normalizedRoute": "/dashboard/claims/new",
+            "pageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "primaryNavigationRecords": [
+              {
+                "experience": "member",
+                "label": "Open Representation Case",
+                "pathname": "/dashboard/claims/new"
+              },
+              {
+                "experience": "member",
+                "label": "Open Representation Case",
+                "pathname": "/dashboard/claims/new"
+              }
+            ],
+            "contextualInboundLinkCount": 8,
+            "contextualInboundLinks": [
+              {
+                "linkMechanism": "ROUTER_PUSH",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/new"
+              },
+              {
+                "linkMechanism": "ROUTER_PUSH",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/new"
+              },
+              {
+                "linkMechanism": "ROUTER_PUSH",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/new"
+              },
+              {
+                "linkMechanism": "ROUTER_PUSH",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/new"
+              },
+              {
+                "linkMechanism": "JSX_LINK_HREF",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/new"
+              },
+              {
+                "linkMechanism": "JSX_LINK_HREF",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/new"
+              },
+              {
+                "linkMechanism": "JSX_LINK_HREF",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/new"
+              },
+              {
+                "linkMechanism": "ROUTER_PUSH",
+                "sourceRoute": null,
+                "targetRoute": "/dashboard/claims/new"
+              }
+            ]
+          }
+        }
+      ],
+      "discoverabilityStatus": "SOURCE_LINK",
+      "knownDefectIds": [
+        "ACTION-API-METHOD-01",
+        "UE-R1-ROOT-067"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-011d933df1b5",
+        "BINDING-25074af3471d",
+        "BINDING-4256ecebd732",
+        "BINDING-46d2e7c75807",
+        "BINDING-46d919076131",
+        "BINDING-4de75f902351",
+        "BINDING-6fad83f3bfa5",
+        "BINDING-9488ce91def1",
+        "BINDING-b93c0f2467b5",
+        "BINDING-d1513a7f89a0"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0014",
+        "UE-B2-CHAIN-0027",
+        "UE-B2-CHAIN-0028",
+        "UE-B2-CHAIN-0110",
+        "UE-B2-CHAIN-0111",
+        "UE-B2-CHAIN-0113",
+        "UE-B2-CHAIN-0114",
+        "UE-B2-CHAIN-0115",
+        "UE-B2-CHAIN-0116",
+        "UE-B2-CHAIN-0117",
+        "UE-B2-CHAIN-0118",
+        "UE-B2-CHAIN-0119",
+        "UE-B2-CHAIN-0120",
+        "UE-B2-CHAIN-0374",
+        "UE-B2-CHAIN-0375"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0014",
+        "CHAIN-UE-B2-CHAIN-0027",
+        "CHAIN-UE-B2-CHAIN-0028",
+        "CHAIN-UE-B2-CHAIN-0110",
+        "CHAIN-UE-B2-CHAIN-0111",
+        "CHAIN-UE-B2-CHAIN-0113",
+        "CHAIN-UE-B2-CHAIN-0114",
+        "CHAIN-UE-B2-CHAIN-0115",
+        "CHAIN-UE-B2-CHAIN-0116",
+        "CHAIN-UE-B2-CHAIN-0117",
+        "CHAIN-UE-B2-CHAIN-0118",
+        "CHAIN-UE-B2-CHAIN-0119",
+        "CHAIN-UE-B2-CHAIN-0120",
+        "CHAIN-UE-B2-CHAIN-0374",
+        "CHAIN-UE-B2-CHAIN-0375"
+      ],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "Matter-record source signals exist, but the static links are not a LIUNA continuity sequence and do not establish that all active matters are visible to a successor."
+    },
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_03",
+      "continuityDimension": "RESPONSIBILITY_ASSIGNMENT",
+      "businessIntent": "Identify the current owner of each relevant matter or commitment.",
+      "sourceSupport": "SOURCE_SUPPORTED_WITH_DEFECT_AND_CEILING",
+      "sourceCapabilityIds": [
+        "CASE_RESPONSIBILITY"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "CASE_RESPONSIBILITY",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_DEFECTS_AND_CEILING_OBLIGATIONS"
+        }
+      ],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "ownership/assignment",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "CASE_RESPONSIBILITY",
+            "HEALTH_SAFETY_CASES",
+            "ORGANIZING_CAMPAIGNS"
+          ]
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/dispatch/page.tsx:139:11:onClick",
+        "app/[locale]/dashboard/dispatch/page.tsx:201:13:onSubmit",
+        "app/[locale]/dashboard/dispatch/page.tsx:349:21:onClick",
+        "components/ai/grievance-triage-card.tsx:169:17:onClick",
+        "components/ai/grievance-triage-card.tsx:178:17:onClick",
+        "components/ai/grievance-triage-card.tsx:88:13:onClick",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:180:7:onClick",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:446:13:onRetry",
+        "components/knowledge-transfer/organizational-memory-explorer.tsx:175:5:onClick",
+        "components/knowledge-transfer/organizational-memory-explorer.tsx:279:7:onSubmit",
+        "components/knowledge-transfer/organizational-memory-explorer.tsx:326:15:onClick",
+        "components/steward-recommendations.tsx:137:19:onClick"
+      ],
+      "routesOrSurfaces": [
+        {
+          "route": "/[locale]/dashboard/dispatch",
+          "staticEvidence": {
+            "normalizedRoute": "/dashboard/dispatch",
+            "pageRecordFound": true,
+            "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+            "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+            "primaryNavigationRecords": [],
+            "contextualInboundLinkCount": 0,
+            "contextualInboundLinks": []
+          }
+        }
+      ],
+      "discoverabilityStatus": "DIRECT_ROUTE_ONLY",
+      "knownDefectIds": [
+        "ACTION-API-METHOD-01",
+        "UE-R1-ROOT-067"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-4ba04fb5ccf5",
+        "BINDING-65c61233bdc3",
+        "BINDING-78e9d1775b9c",
+        "BINDING-b15b7db11d7c"
+      ],
+      "residualEffectChainIds": [],
+      "residualEffectChainObligationIds": [],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "The accepted assignment concept is source-bounded and has inherited defects and ceilings; the dispatch surface has no static inbound navigation edge."
+    },
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_04",
+      "continuityDimension": "RESPONSIBILITY_REASSIGNMENT",
+      "businessIntent": "Transfer responsibility from the outgoing owner to an identified successor.",
+      "sourceSupport": "PARTIALLY_SOURCE_SUPPORTED",
+      "sourceCapabilityIds": [
+        "CASE_RESPONSIBILITY",
+        "KNOWLEDGE_HANDOFF"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "CASE_RESPONSIBILITY",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_DEFECTS_AND_CEILING_OBLIGATIONS"
+        },
+        {
+          "capabilityId": "KNOWLEDGE_HANDOFF",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS"
+        }
+      ],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "ownership/assignment",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "CASE_RESPONSIBILITY",
+            "HEALTH_SAFETY_CASES",
+            "ORGANIZING_CAMPAIGNS"
+          ]
+        },
+        {
+          "dimension": "successor handoff",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "KNOWLEDGE_HANDOFF"
+          ]
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/dispatch/page.tsx:139:11:onClick",
+        "app/[locale]/dashboard/dispatch/page.tsx:201:13:onSubmit",
+        "app/[locale]/dashboard/dispatch/page.tsx:349:21:onClick",
+        "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:104:11:onClick",
+        "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:79:11:onClick",
+        "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:329:23:onClick",
+        "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:342:13:onClick",
+        "components/ai/grievance-triage-card.tsx:169:17:onClick",
+        "components/ai/grievance-triage-card.tsx:178:17:onClick",
+        "components/ai/grievance-triage-card.tsx:88:13:onClick",
+        "components/icra/ICRAAssessmentFlow.tsx:585:7:onAcknowledge",
+        "components/icra/ICRAAssessmentFlow.tsx:988:7:onClick",
+        "components/knowledge-transfer/cognition-graph/cognition-graph-viz.tsx:294:17:onClick",
+        "components/knowledge-transfer/continuity-planning-workspace.tsx:545:25:onClick",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:180:7:onClick",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:446:13:onRetry",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:460:17:onClick",
+        "components/knowledge-transfer/exit-interview-create-form.tsx:81:5:onSubmit",
+        "components/knowledge-transfer/expertise-map/expertise-map.tsx:89:5:onClick",
+        "components/knowledge-transfer/organizational-memory-explorer.tsx:175:5:onClick",
+        "components/knowledge-transfer/organizational-memory-explorer.tsx:279:7:onSubmit",
+        "components/knowledge-transfer/organizational-memory-explorer.tsx:326:15:onClick",
+        "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:128:9:onClick",
+        "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:134:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:294:15:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:353:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:361:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:369:9:onClick",
+        "components/steward-recommendations.tsx:137:19:onClick"
+      ],
+      "routesOrSurfaces": [
+        {
+          "route": "/[locale]/dashboard/dispatch",
+          "staticEvidence": {
+            "normalizedRoute": "/dashboard/dispatch",
+            "pageRecordFound": true,
+            "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+            "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+            "primaryNavigationRecords": [],
+            "contextualInboundLinkCount": 0,
+            "contextualInboundLinks": []
+          }
+        }
+      ],
+      "discoverabilityStatus": "DIRECT_ROUTE_ONLY",
+      "knownDefectIds": [
+        "ACTION-API-METHOD-01",
+        "UE-R1-ROOT-067"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-4ba04fb5ccf5",
+        "BINDING-65c61233bdc3",
+        "BINDING-69bfc5dbbb09",
+        "BINDING-780177a62d1d",
+        "BINDING-78e9d1775b9c",
+        "BINDING-b15b7db11d7c",
+        "BINDING-dd82dfa5ea2e"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0015",
+        "UE-B2-CHAIN-0016",
+        "UE-B2-CHAIN-0100"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0015",
+        "CHAIN-UE-B2-CHAIN-0016",
+        "CHAIN-UE-B2-CHAIN-0100"
+      ],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "Assignment and successor-handoff concepts exist separately; the accepted model does not establish a predecessor-to-successor reassignment transition."
+    },
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_05",
+      "continuityDimension": "DEADLINE_CONTINUITY",
+      "businessIntent": "Carry deadlines and open commitments forward through reassignment.",
+      "sourceSupport": "PARTIALLY_SOURCE_SUPPORTED",
+      "sourceCapabilityIds": [
+        "CALENDAR_MEETINGS",
+        "CASE_DEADLINES"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "CALENDAR_MEETINGS",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_DEFECTS_AND_CEILING_OBLIGATIONS"
+        },
+        {
+          "capabilityId": "CASE_DEADLINES",
+          "capabilitySourceStatus": "SOURCE_MODEL_BOUNDED_WITH_DEFECTS"
+        }
+      ],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "deadline continuity",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "CASE_DEADLINES",
+            "CALENDAR_MEETINGS"
+          ]
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/calendar/page.tsx:255:7:onCreateCalendar",
+        "app/[locale]/calendar/page.tsx:255:7:onManageSync",
+        "app/[locale]/calendar/page.tsx:255:7:onSelectCalendar",
+        "app/[locale]/calendar/page.tsx:255:7:onSyncCalendar",
+        "app/[locale]/calendar/page.tsx:271:13:onClick",
+        "app/[locale]/calendar/page.tsx:284:11:onCreateEvent",
+        "app/[locale]/calendar/page.tsx:304:7:onDelete",
+        "app/[locale]/calendar/page.tsx:304:7:onSave",
+        "app/[locale]/calendar/page.tsx:381:13:onClick",
+        "components/calendar/CalendarSidebar.tsx:134:17:onSelect",
+        "components/calendar/CalendarSidebar.tsx:134:17:onSync",
+        "components/calendar/CalendarSidebar.tsx:151:11:onClick",
+        "components/calendar/CalendarSidebar.tsx:201:5:onClick",
+        "components/calendar/CalendarSidebar.tsx:208:7:onClick",
+        "components/calendar/CalendarSidebar.tsx:236:11:onClick",
+        "components/calendar/CalendarSidebar.tsx:75:7:onClick",
+        "components/calendar/CalendarSidebar.tsx:99:15:onSelect",
+        "components/calendar/CalendarSyncManager.tsx:214:15:onClick",
+        "components/calendar/CalendarSyncManager.tsx:227:15:onClick",
+        "components/calendar/CalendarSyncManager.tsx:351:25:onClick",
+        "components/calendar/CalendarSyncManager.tsx:369:25:onClick",
+        "components/calendar/CalendarSyncManager.tsx:397:11:onClick",
+        "components/calendar/CalendarView.tsx:103:13:onClick",
+        "components/calendar/CalendarView.tsx:106:13:onClick",
+        "components/calendar/CalendarView.tsx:109:13:onClick",
+        "components/calendar/CalendarView.tsx:154:11:onCreateEvent",
+        "components/calendar/CalendarView.tsx:163:11:onCreateEvent",
+        "components/calendar/CalendarView.tsx:171:11:onCreateEvent",
+        "components/calendar/CalendarView.tsx:240:11:onClick",
+        "components/calendar/CalendarView.tsx:257:17:onClick",
+        "components/calendar/CalendarView.tsx:329:15:onClick",
+        "components/calendar/CalendarView.tsx:339:19:onClick",
+        "components/calendar/CalendarView.tsx:392:13:onClick",
+        "components/calendar/CalendarView.tsx:401:17:onClick",
+        "components/calendar/CalendarView.tsx:463:17:onClick",
+        "components/calendar/EventDialog.tsx:183:9:onSubmit",
+        "components/calendar/EventDialog.tsx:312:15:onClick",
+        "components/calendar/EventDialog.tsx:324:21:onClick",
+        "components/calendar/EventDialog.tsx:361:15:onClick",
+        "components/calendar/EventDialog.tsx:370:13:onClick",
+        "components/health-safety/InspectionScheduleCalendar.tsx:164:13:onClick",
+        "components/health-safety/InspectionScheduleCalendar.tsx:178:13:onClick",
+        "components/health-safety/InspectionScheduleCalendar.tsx:186:15:onClick",
+        "components/health-safety/InspectionScheduleCalendar.tsx:233:25:onClick",
+        "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:201:15:onClick",
+        "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:220:17:onClick",
+        "components/jurisdiction/deadline-calculator.tsx:133:15:onSelect",
+        "components/jurisdiction/deadline-calculator.tsx:143:9:onClick"
+      ],
+      "routesOrSurfaces": [],
+      "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+      "knownDefectIds": [
+        "ACTION-API-METHOD-01",
+        "ACTION-API-ROUTE-01",
+        "UE-R1-ROOT-001",
+        "UE-R1-ROOT-003",
+        "UE-R1-ROOT-004",
+        "UE-R1-ROOT-031"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-116f55d1f95d",
+        "BINDING-1a56c96637ba",
+        "BINDING-7d9eb397c3da",
+        "BINDING-bd03beb308a5",
+        "BINDING-c34c563dff3e",
+        "BINDING-c457def02d40",
+        "BINDING-e0f83819600a",
+        "BINDING-e3396056384d",
+        "BINDING-f5a7a6761f7f"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0331",
+        "UE-B2-CHAIN-0332",
+        "UE-B2-CHAIN-0335",
+        "UE-B2-CHAIN-0337",
+        "UE-B2-CHAIN-0338",
+        "UE-B2-CHAIN-0339",
+        "UE-B2-CHAIN-0340",
+        "UE-B2-CHAIN-0341",
+        "UE-B2-CHAIN-0381"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0331",
+        "CHAIN-UE-B2-CHAIN-0332",
+        "CHAIN-UE-B2-CHAIN-0335",
+        "CHAIN-UE-B2-CHAIN-0337",
+        "CHAIN-UE-B2-CHAIN-0338",
+        "CHAIN-UE-B2-CHAIN-0339",
+        "CHAIN-UE-B2-CHAIN-0340",
+        "CHAIN-UE-B2-CHAIN-0341",
+        "CHAIN-UE-B2-CHAIN-0381"
+      ],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "A deadline-continuity source signal exists, but the accepted CASE_DEADLINES definition explicitly does not infer reminder-engine behavior or survival across reassignment."
+    },
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_06",
+      "continuityDimension": "EVIDENCE_CONTINUITY",
+      "businessIntent": "Keep relevant matter evidence institutionally available across the transition.",
+      "sourceSupport": "SOURCE_CEILING",
+      "sourceCapabilityIds": [
+        "CASE_EVIDENCE"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "CASE_EVIDENCE",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS"
+        }
+      ],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "restricted evidence continuity",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "CASE_EVIDENCE"
+          ]
+        },
+        {
+          "dimension": "institutional record retention",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "MEMBER_RECORDS",
+            "ORGANIZATION_STRUCTURE",
+            "CASE_RECORDS",
+            "CASE_EVIDENCE",
+            "COLLECTIVE_BARGAINING",
+            "GOVERNANCE_ADMINISTRATION",
+            "ELECTIONS",
+            "HEALTH_SAFETY_CASES",
+            "MEMBER_DUES_SELF_SERVICE",
+            "DUES_REMITTANCE_ADMIN",
+            "FINANCIAL_PLANNING",
+            "GENERAL_COMMUNICATIONS",
+            "ARBITRATION_PRECEDENT_KNOWLEDGE",
+            "DOCUMENT_LIBRARY",
+            "KNOWLEDGE_HANDOFF",
+            "INSTITUTIONAL_REPORTING"
+          ]
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/voting/page.tsx:281:29:onClick",
+        "components/analytics/analytics-overview-console.tsx:186:19:onClick",
+        "components/clause-library/clause-library-console.tsx:361:15:onClick",
+        "components/clause-library/clause-library-console.tsx:409:25:onClick",
+        "components/clause-library/clause-library-console.tsx:416:21:onClick",
+        "components/clause-library/clause-library-console.tsx:435:19:onClick",
+        "components/clause-library/clause-library-console.tsx:464:15:onCompare",
+        "components/clause-library/clause-library-console.tsx:464:15:onDelete",
+        "components/clause-library/clause-library-console.tsx:464:15:onEdit",
+        "components/clause-library/clause-library-console.tsx:464:15:onShare",
+        "components/clause-library/clause-library-console.tsx:508:17:onAddTag",
+        "components/clause-library/clause-library-console.tsx:508:17:onRemoveTag",
+        "components/clause-library/clause-library-console.tsx:573:15:onSave",
+        "components/clause-library/clause-library-console.tsx:628:13:onExport",
+        "components/clause-library/clause-library-console.tsx:628:13:onRemoveClause",
+        "components/clause-library/ClauseCompareView.tsx:112:11:onClick",
+        "components/clause-library/ClauseCompareView.tsx:224:13:onClick",
+        "components/clause-library/ClauseCompareView.tsx:237:13:onClick",
+        "components/clause-library/ClauseCompareView.tsx:253:15:onClick",
+        "components/clause-library/ClauseLibrarySearch.tsx:304:17:onClick",
+        "components/clause-library/ClauseLibrarySearch.tsx:323:11:onClick",
+        "components/clause-library/ClauseSharingControls.tsx:255:11:onClick",
+        "components/clause-library/ClauseSharingControls.tsx:258:11:onClick",
+        "components/clause-library/ClauseTagManager.tsx:121:15:onClick",
+        "components/clause-library/ClauseTagManager.tsx:151:19:onClick",
+        "components/clause-library/ClauseViewer.tsx:120:13:onClick",
+        "components/clause-library/ClauseViewer.tsx:128:17:onClick",
+        "components/clause-library/ClauseViewer.tsx:134:17:onClick",
+        "components/clause-library/ClauseViewer.tsx:157:23:onClick",
+        "components/policy-governance/ReplayCenter.tsx:103:21:onClick"
+      ],
+      "routesOrSurfaces": [
+        {
+          "route": "/[locale]/dashboard/voting",
+          "staticEvidence": {
+            "normalizedRoute": "/dashboard/voting",
+            "pageRecordFound": true,
+            "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+            "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+            "primaryNavigationRecords": [],
+            "contextualInboundLinkCount": 0,
+            "contextualInboundLinks": []
+          }
+        }
+      ],
+      "discoverabilityStatus": "DIRECT_ROUTE_ONLY",
+      "knownDefectIds": [],
+      "sourceCeilingObligationIds": [
+        "BINDING-0929516c95e4",
+        "BINDING-3055fe84dda0",
+        "BINDING-3709b9400fc3",
+        "BINDING-4c02ab6c24fa",
+        "BINDING-5c2c348e3c43",
+        "BINDING-782eaf20a15c",
+        "BINDING-c20fc2dbd038",
+        "BINDING-ebd2cf731f6d",
+        "BINDING-f1e66974b258",
+        "BINDING-f33ec1024a96",
+        "BINDING-fb55993af6ac"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0030",
+        "UE-B2-CHAIN-0130",
+        "UE-B2-CHAIN-0227",
+        "UE-B2-CHAIN-0228",
+        "UE-B2-CHAIN-0229",
+        "UE-B2-CHAIN-0230",
+        "UE-B2-CHAIN-0231",
+        "UE-B2-CHAIN-0232",
+        "UE-B2-CHAIN-0233",
+        "UE-B2-CHAIN-0234",
+        "UE-B2-CHAIN-0235",
+        "UE-B2-CHAIN-0236"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0030",
+        "CHAIN-UE-B2-CHAIN-0130",
+        "CHAIN-UE-B2-CHAIN-0227",
+        "CHAIN-UE-B2-CHAIN-0228",
+        "CHAIN-UE-B2-CHAIN-0229",
+        "CHAIN-UE-B2-CHAIN-0230",
+        "CHAIN-UE-B2-CHAIN-0231",
+        "CHAIN-UE-B2-CHAIN-0232",
+        "CHAIN-UE-B2-CHAIN-0233",
+        "CHAIN-UE-B2-CHAIN-0234",
+        "CHAIN-UE-B2-CHAIN-0235",
+        "CHAIN-UE-B2-CHAIN-0236"
+      ],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "The accepted model contains a case-evidence signal with open ceilings; the route candidate has no static inbound entry and does not prove continuity across actors."
+    },
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_07",
+      "continuityDimension": "RESTRICTED_EVIDENCE_BOUNDARY",
+      "businessIntent": "Keep restricted evidence bounded to only appropriately authorized successors.",
+      "sourceSupport": "NOT_SOURCE_SUPPORTED",
+      "sourceCapabilityIds": [],
+      "capabilitySourceStatus": [],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "restricted evidence continuity",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "CASE_EVIDENCE"
+          ]
+        }
+      ],
+      "bindingIds": [],
+      "routesOrSurfaces": [],
+      "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+      "knownDefectIds": [],
+      "sourceCeilingObligationIds": [],
+      "residualEffectChainIds": [],
+      "residualEffectChainObligationIds": [],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "CASE_EVIDENCE does not establish classification, least-privilege scope, successor eligibility, authorization, or access revocation for restricted evidence."
+    },
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_08",
+      "continuityDimension": "SUCCESSOR_HANDOFF",
+      "businessIntent": "Hand off matter context and responsibility to a successor.",
+      "sourceSupport": "SOURCE_CEILING",
+      "sourceCapabilityIds": [
+        "CASE_RESPONSIBILITY",
+        "KNOWLEDGE_HANDOFF"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "CASE_RESPONSIBILITY",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_DEFECTS_AND_CEILING_OBLIGATIONS"
+        },
+        {
+          "capabilityId": "KNOWLEDGE_HANDOFF",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS"
+        }
+      ],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "successor handoff",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "KNOWLEDGE_HANDOFF"
+          ]
+        },
+        {
+          "dimension": "ownership/assignment",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "CASE_RESPONSIBILITY",
+            "HEALTH_SAFETY_CASES",
+            "ORGANIZING_CAMPAIGNS"
+          ]
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/dispatch/page.tsx:139:11:onClick",
+        "app/[locale]/dashboard/dispatch/page.tsx:201:13:onSubmit",
+        "app/[locale]/dashboard/dispatch/page.tsx:349:21:onClick",
+        "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:104:11:onClick",
+        "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:79:11:onClick",
+        "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:329:23:onClick",
+        "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:342:13:onClick",
+        "components/ai/grievance-triage-card.tsx:169:17:onClick",
+        "components/ai/grievance-triage-card.tsx:178:17:onClick",
+        "components/ai/grievance-triage-card.tsx:88:13:onClick",
+        "components/icra/ICRAAssessmentFlow.tsx:585:7:onAcknowledge",
+        "components/icra/ICRAAssessmentFlow.tsx:988:7:onClick",
+        "components/knowledge-transfer/cognition-graph/cognition-graph-viz.tsx:294:17:onClick",
+        "components/knowledge-transfer/continuity-planning-workspace.tsx:545:25:onClick",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:180:7:onClick",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:446:13:onRetry",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:460:17:onClick",
+        "components/knowledge-transfer/exit-interview-create-form.tsx:81:5:onSubmit",
+        "components/knowledge-transfer/expertise-map/expertise-map.tsx:89:5:onClick",
+        "components/knowledge-transfer/organizational-memory-explorer.tsx:175:5:onClick",
+        "components/knowledge-transfer/organizational-memory-explorer.tsx:279:7:onSubmit",
+        "components/knowledge-transfer/organizational-memory-explorer.tsx:326:15:onClick",
+        "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:128:9:onClick",
+        "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:134:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:294:15:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:353:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:361:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:369:9:onClick",
+        "components/steward-recommendations.tsx:137:19:onClick"
+      ],
+      "routesOrSurfaces": [],
+      "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+      "knownDefectIds": [
+        "ACTION-API-METHOD-01",
+        "UE-R1-ROOT-067"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-4ba04fb5ccf5",
+        "BINDING-65c61233bdc3",
+        "BINDING-69bfc5dbbb09",
+        "BINDING-780177a62d1d",
+        "BINDING-78e9d1775b9c",
+        "BINDING-b15b7db11d7c",
+        "BINDING-dd82dfa5ea2e"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0015",
+        "UE-B2-CHAIN-0016",
+        "UE-B2-CHAIN-0100"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0015",
+        "CHAIN-UE-B2-CHAIN-0016",
+        "CHAIN-UE-B2-CHAIN-0100"
+      ],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "The accepted model has a successor-handoff signal, but no ordered or discoverable LIUNA handoff flow is established."
+    },
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_09",
+      "continuityDimension": "KNOWLEDGE_PRESERVATION",
+      "businessIntent": "Preserve institutional knowledge beyond the outgoing actor's tenure.",
+      "sourceSupport": "SOURCE_CEILING",
+      "sourceCapabilityIds": [
+        "KNOWLEDGE_HANDOFF"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "KNOWLEDGE_HANDOFF",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS"
+        }
+      ],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "knowledge/context preservation",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "COLLECTIVE_BARGAINING",
+            "ARBITRATION_PRECEDENT_KNOWLEDGE",
+            "LEARNING_TRAINING",
+            "KNOWLEDGE_HANDOFF"
+          ]
+        },
+        {
+          "dimension": "institutional record retention",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "MEMBER_RECORDS",
+            "ORGANIZATION_STRUCTURE",
+            "CASE_RECORDS",
+            "CASE_EVIDENCE",
+            "COLLECTIVE_BARGAINING",
+            "GOVERNANCE_ADMINISTRATION",
+            "ELECTIONS",
+            "HEALTH_SAFETY_CASES",
+            "MEMBER_DUES_SELF_SERVICE",
+            "DUES_REMITTANCE_ADMIN",
+            "FINANCIAL_PLANNING",
+            "GENERAL_COMMUNICATIONS",
+            "ARBITRATION_PRECEDENT_KNOWLEDGE",
+            "DOCUMENT_LIBRARY",
+            "KNOWLEDGE_HANDOFF",
+            "INSTITUTIONAL_REPORTING"
+          ]
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:104:11:onClick",
+        "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:79:11:onClick",
+        "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:329:23:onClick",
+        "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:342:13:onClick",
+        "components/icra/ICRAAssessmentFlow.tsx:585:7:onAcknowledge",
+        "components/icra/ICRAAssessmentFlow.tsx:988:7:onClick",
+        "components/knowledge-transfer/cognition-graph/cognition-graph-viz.tsx:294:17:onClick",
+        "components/knowledge-transfer/continuity-planning-workspace.tsx:545:25:onClick",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:460:17:onClick",
+        "components/knowledge-transfer/exit-interview-create-form.tsx:81:5:onSubmit",
+        "components/knowledge-transfer/expertise-map/expertise-map.tsx:89:5:onClick",
+        "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:128:9:onClick",
+        "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:134:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:294:15:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:353:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:361:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:369:9:onClick"
+      ],
+      "routesOrSurfaces": [],
+      "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+      "knownDefectIds": [],
+      "sourceCeilingObligationIds": [
+        "BINDING-69bfc5dbbb09",
+        "BINDING-780177a62d1d",
+        "BINDING-dd82dfa5ea2e"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0015",
+        "UE-B2-CHAIN-0016",
+        "UE-B2-CHAIN-0100"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0015",
+        "CHAIN-UE-B2-CHAIN-0016",
+        "CHAIN-UE-B2-CHAIN-0100"
+      ],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "The knowledge-preservation capability is a source-model signal with open obligations; durable post-transition retention is not proven."
+    },
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_10",
+      "continuityDimension": "AUDIT_PROVENANCE",
+      "businessIntent": "Establish provenance for the handoff and resulting responsibility changes.",
+      "sourceSupport": "PARTIALLY_SOURCE_SUPPORTED",
+      "sourceCapabilityIds": [
+        "GOVERNANCE_ADMINISTRATION"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "GOVERNANCE_ADMINISTRATION",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS"
+        }
+      ],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "auditability",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "GOVERNANCE_ADMINISTRATION",
+            "DUES_REMITTANCE_ADMIN",
+            "FINANCIAL_PLANNING"
+          ]
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:401:13:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:498:21:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:592:17:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:654:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:698:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:788:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:884:15:onClick",
+        "app/[locale]/dashboard/committees/[id]/committee-workspace.tsx:175:13:onClick",
+        "app/[locale]/dashboard/finance/allocation/page.tsx:169:21:onClick",
+        "app/[locale]/dashboard/leadership/page.tsx:154:13:onClick",
+        "app/[locale]/dashboard/leadership/page.tsx:186:11:onClick",
+        "components/admin/clc-analytics-dashboard.tsx:319:11:onClick",
+        "components/auth/forgot-password-form.tsx:68:7:onSubmit",
+        "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:288:25:onClick",
+        "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:296:27:onClick",
+        "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:368:25:onClick",
+        "components/policy-governance/ApprovalQueue.tsx:104:13:onClick",
+        "components/policy-governance/ApprovalQueue.tsx:113:13:onClick",
+        "components/policy-governance/ConflictAnalysis.tsx:104:15:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:116:5:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:136:9:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:67:9:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:70:9:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:80:11:onClick",
+        "components/policy-governance/PolicyCard.tsx:35:5:onClick",
+        "components/policy-governance/PolicyDetail.tsx:45:11:onClick",
+        "components/policy-governance/PolicyLineage.tsx:90:9:onClick",
+        "components/policy-governance/ReplayCenter.tsx:71:9:onClick"
+      ],
+      "routesOrSurfaces": [
+        {
+          "route": "/[locale]/dashboard/leadership",
+          "staticEvidence": {
+            "normalizedRoute": "/dashboard/leadership",
+            "pageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "primaryNavigationRecords": [
+              {
+                "experience": "executive",
+                "label": "Onboarding Survivability (Leadership Continuity)",
+                "pathname": "/dashboard/leadership"
+              }
+            ],
+            "contextualInboundLinkCount": 0,
+            "contextualInboundLinks": []
+          }
+        },
+        {
+          "route": "/[locale]/dashboard/finance/allocation",
+          "staticEvidence": {
+            "normalizedRoute": "/dashboard/finance/allocation",
+            "pageRecordFound": true,
+            "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+            "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+            "primaryNavigationRecords": [],
+            "contextualInboundLinkCount": 0,
+            "contextualInboundLinks": []
+          }
+        }
+      ],
+      "discoverabilityStatus": "PRIMARY_NAV",
+      "knownDefectIds": [],
+      "sourceCeilingObligationIds": [
+        "BINDING-209f2ec4c3be",
+        "BINDING-3d7720dd7ee1",
+        "BINDING-3f9bfc5b443f",
+        "BINDING-3ff2004de4e1",
+        "BINDING-44a2030d2577",
+        "BINDING-46b703fe0580",
+        "BINDING-596d1f9287df",
+        "BINDING-5d837a805683",
+        "BINDING-5da3b588a6df",
+        "BINDING-795985f7d91f",
+        "BINDING-a5b294a7f7d1",
+        "BINDING-b9ddddb81a60",
+        "BINDING-d6ea031f3a70",
+        "BINDING-eb9e086f063f",
+        "BINDING-ed87372c2603",
+        "BINDING-f2fd54fd1bfd",
+        "BINDING-f4e3772a3738"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0123",
+        "UE-B2-CHAIN-0124",
+        "UE-B2-CHAIN-0125",
+        "UE-B2-CHAIN-0126",
+        "UE-B2-CHAIN-0128",
+        "UE-B2-CHAIN-0129",
+        "UE-B2-CHAIN-0131",
+        "UE-B2-CHAIN-0133",
+        "UE-B2-CHAIN-0134",
+        "UE-B2-CHAIN-0135",
+        "UE-B2-CHAIN-0136",
+        "UE-B2-CHAIN-0137",
+        "UE-B2-CHAIN-0138",
+        "UE-B2-CHAIN-0139",
+        "UE-B2-CHAIN-0140",
+        "UE-B2-CHAIN-0299",
+        "UE-B2-CHAIN-0300",
+        "UE-B2-CHAIN-0301",
+        "UE-B2-CHAIN-0302",
+        "UE-B2-CHAIN-0303",
+        "UE-B2-CHAIN-0304",
+        "UE-B2-CHAIN-0305",
+        "UE-B2-CHAIN-0306",
+        "UE-B2-CHAIN-0307",
+        "UE-B2-CHAIN-0308",
+        "UE-B2-CHAIN-0309",
+        "UE-B2-CHAIN-0310",
+        "UE-B2-CHAIN-0311"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0123",
+        "CHAIN-UE-B2-CHAIN-0124",
+        "CHAIN-UE-B2-CHAIN-0125",
+        "CHAIN-UE-B2-CHAIN-0126",
+        "CHAIN-UE-B2-CHAIN-0128",
+        "CHAIN-UE-B2-CHAIN-0129",
+        "CHAIN-UE-B2-CHAIN-0131",
+        "CHAIN-UE-B2-CHAIN-0133",
+        "CHAIN-UE-B2-CHAIN-0134",
+        "CHAIN-UE-B2-CHAIN-0135",
+        "CHAIN-UE-B2-CHAIN-0136",
+        "CHAIN-UE-B2-CHAIN-0137",
+        "CHAIN-UE-B2-CHAIN-0138",
+        "CHAIN-UE-B2-CHAIN-0139",
+        "CHAIN-UE-B2-CHAIN-0140",
+        "CHAIN-UE-B2-CHAIN-0299",
+        "CHAIN-UE-B2-CHAIN-0300",
+        "CHAIN-UE-B2-CHAIN-0301",
+        "CHAIN-UE-B2-CHAIN-0302",
+        "CHAIN-UE-B2-CHAIN-0303",
+        "CHAIN-UE-B2-CHAIN-0304",
+        "CHAIN-UE-B2-CHAIN-0305",
+        "CHAIN-UE-B2-CHAIN-0306",
+        "CHAIN-UE-B2-CHAIN-0307",
+        "CHAIN-UE-B2-CHAIN-0308",
+        "CHAIN-UE-B2-CHAIN-0309",
+        "CHAIN-UE-B2-CHAIN-0310",
+        "CHAIN-UE-B2-CHAIN-0311"
+      ],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "The accepted model includes an auditability signal and a leadership navigation surface, but neither establishes transaction-level handoff provenance or a preserved audit trail."
+    },
+    {
+      "stepId": "LIUNA_CONTINUITY_STEP_11",
+      "continuityDimension": "POST_HANDOFF_CONTINUITY",
+      "businessIntent": "Keep matters, deadlines, evidence, and knowledge usable after handoff.",
+      "sourceSupport": "PARTIALLY_SOURCE_SUPPORTED",
+      "sourceCapabilityIds": [
+        "CASE_DEADLINES",
+        "CASE_EVIDENCE",
+        "CASE_RECORDS",
+        "KNOWLEDGE_HANDOFF"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "CASE_DEADLINES",
+          "capabilitySourceStatus": "SOURCE_MODEL_BOUNDED_WITH_DEFECTS"
+        },
+        {
+          "capabilityId": "CASE_EVIDENCE",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS"
+        },
+        {
+          "capabilityId": "CASE_RECORDS",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_DEFECTS_AND_CEILING_OBLIGATIONS"
+        },
+        {
+          "capabilityId": "KNOWLEDGE_HANDOFF",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS"
+        }
+      ],
+      "acceptedContinuitySignals": [
+        {
+          "dimension": "institutional record retention",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "MEMBER_RECORDS",
+            "ORGANIZATION_STRUCTURE",
+            "CASE_RECORDS",
+            "CASE_EVIDENCE",
+            "COLLECTIVE_BARGAINING",
+            "GOVERNANCE_ADMINISTRATION",
+            "ELECTIONS",
+            "HEALTH_SAFETY_CASES",
+            "MEMBER_DUES_SELF_SERVICE",
+            "DUES_REMITTANCE_ADMIN",
+            "FINANCIAL_PLANNING",
+            "GENERAL_COMMUNICATIONS",
+            "ARBITRATION_PRECEDENT_KNOWLEDGE",
+            "DOCUMENT_LIBRARY",
+            "KNOWLEDGE_HANDOFF",
+            "INSTITUTIONAL_REPORTING"
+          ]
+        },
+        {
+          "dimension": "deadline continuity",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "CASE_DEADLINES",
+            "CALENDAR_MEETINGS"
+          ]
+        },
+        {
+          "dimension": "restricted evidence continuity",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "CASE_EVIDENCE"
+          ]
+        },
+        {
+          "dimension": "successor handoff",
+          "sourceModelContainsSignal": true,
+          "runtimeOrOperationalProof": "NO",
+          "assessment": "SOURCE_MODEL_SIGNAL_ONLY; the evidence does not establish operational continuity, ownership, recovery, or service-level behavior.",
+          "referencedCapabilityIds": [
+            "KNOWLEDGE_HANDOFF"
+          ]
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/claims/[id]/page.tsx:272:19:onUploadComplete",
+        "app/[locale]/dashboard/claims/new/page.tsx:576:21:onChange",
+        "app/[locale]/dashboard/claims/new/page.tsx:600:27:onClick",
+        "app/[locale]/dashboard/voting/page.tsx:281:29:onClick",
+        "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:104:11:onClick",
+        "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:79:11:onClick",
+        "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:329:23:onClick",
+        "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:342:13:onClick",
+        "app/[locale]/workbook/claim/ClaimWorkbookClient.tsx:64:7:onClick",
+        "components/analytics/analytics-overview-console.tsx:186:19:onClick",
+        "components/claims/claim-list-table.tsx:237:17:onClick",
+        "components/claims/claim-list-table.tsx:243:17:onClick",
+        "components/claims/claim-list-table.tsx:251:19:onClick",
+        "components/claims/claim-list-table.tsx:257:19:onClick",
+        "components/claims/claim-list-table.tsx:268:19:onClick",
+        "components/claims/claims-console.tsx:77:9:onClick",
+        "components/clause-library/clause-library-console.tsx:361:15:onClick",
+        "components/clause-library/clause-library-console.tsx:409:25:onClick",
+        "components/clause-library/clause-library-console.tsx:416:21:onClick",
+        "components/clause-library/clause-library-console.tsx:435:19:onClick",
+        "components/clause-library/clause-library-console.tsx:464:15:onCompare",
+        "components/clause-library/clause-library-console.tsx:464:15:onDelete",
+        "components/clause-library/clause-library-console.tsx:464:15:onEdit",
+        "components/clause-library/clause-library-console.tsx:464:15:onShare",
+        "components/clause-library/clause-library-console.tsx:508:17:onAddTag",
+        "components/clause-library/clause-library-console.tsx:508:17:onRemoveTag",
+        "components/clause-library/clause-library-console.tsx:573:15:onSave",
+        "components/clause-library/clause-library-console.tsx:628:13:onExport",
+        "components/clause-library/clause-library-console.tsx:628:13:onRemoveClause",
+        "components/clause-library/ClauseCompareView.tsx:112:11:onClick",
+        "components/clause-library/ClauseCompareView.tsx:224:13:onClick",
+        "components/clause-library/ClauseCompareView.tsx:237:13:onClick",
+        "components/clause-library/ClauseCompareView.tsx:253:15:onClick",
+        "components/clause-library/ClauseLibrarySearch.tsx:304:17:onClick",
+        "components/clause-library/ClauseLibrarySearch.tsx:323:11:onClick",
+        "components/clause-library/ClauseSharingControls.tsx:255:11:onClick",
+        "components/clause-library/ClauseSharingControls.tsx:258:11:onClick",
+        "components/clause-library/ClauseTagManager.tsx:121:15:onClick",
+        "components/clause-library/ClauseTagManager.tsx:151:19:onClick",
+        "components/clause-library/ClauseViewer.tsx:120:13:onClick",
+        "components/clause-library/ClauseViewer.tsx:128:17:onClick",
+        "components/clause-library/ClauseViewer.tsx:134:17:onClick",
+        "components/clause-library/ClauseViewer.tsx:157:23:onClick",
+        "components/file-upload.tsx:184:7:onDrop",
+        "components/file-upload.tsx:196:9:onChange",
+        "components/file-upload.tsx:277:25:onClick",
+        "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+        "components/grievances/grievance-detail-console.tsx:459:11:onSubmit",
+        "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+        "components/grievances/grievance-detail-console.tsx:582:15:onClick",
+        "components/grievances/grievance-detail-console.tsx:596:7:onAssign",
+        "components/grievances/grievances-console.tsx:355:19:onSubmit",
+        "components/grievances/grievances-console.tsx:848:31:onClick",
+        "components/grievances/grievances-console.tsx:860:31:onClick",
+        "components/icra/ICRAAssessmentFlow.tsx:585:7:onAcknowledge",
+        "components/icra/ICRAAssessmentFlow.tsx:988:7:onClick",
+        "components/jurisdiction/deadline-calculator.tsx:133:15:onSelect",
+        "components/jurisdiction/deadline-calculator.tsx:143:9:onClick",
+        "components/knowledge-transfer/cognition-graph/cognition-graph-viz.tsx:294:17:onClick",
+        "components/knowledge-transfer/continuity-planning-workspace.tsx:545:25:onClick",
+        "components/knowledge-transfer/continuity-simulation-workspace.tsx:460:17:onClick",
+        "components/knowledge-transfer/exit-interview-create-form.tsx:81:5:onSubmit",
+        "components/knowledge-transfer/expertise-map/expertise-map.tsx:89:5:onClick",
+        "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:128:9:onClick",
+        "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:134:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:294:15:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:353:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:361:9:onClick",
+        "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:369:9:onClick",
+        "components/policy-governance/ReplayCenter.tsx:103:21:onClick",
+        "components/steward-recommendations.tsx:81:9:onClick",
+        "components/workbench/workbench-console.tsx:917:35:onClick"
+      ],
+      "routesOrSurfaces": [],
+      "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+      "knownDefectIds": [
+        "ACTION-API-METHOD-01",
+        "ACTION-API-ROUTE-01",
+        "UE-R1-ROOT-004",
+        "UE-R1-ROOT-067"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-011d933df1b5",
+        "BINDING-0929516c95e4",
+        "BINDING-25074af3471d",
+        "BINDING-3055fe84dda0",
+        "BINDING-3709b9400fc3",
+        "BINDING-4256ecebd732",
+        "BINDING-46d2e7c75807",
+        "BINDING-46d919076131",
+        "BINDING-4c02ab6c24fa",
+        "BINDING-4de75f902351",
+        "BINDING-5c2c348e3c43",
+        "BINDING-69bfc5dbbb09",
+        "BINDING-6fad83f3bfa5",
+        "BINDING-780177a62d1d",
+        "BINDING-782eaf20a15c",
+        "BINDING-9488ce91def1",
+        "BINDING-b93c0f2467b5",
+        "BINDING-c20fc2dbd038",
+        "BINDING-d1513a7f89a0",
+        "BINDING-dd82dfa5ea2e",
+        "BINDING-ebd2cf731f6d",
+        "BINDING-f1e66974b258",
+        "BINDING-f33ec1024a96",
+        "BINDING-fb55993af6ac"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0014",
+        "UE-B2-CHAIN-0015",
+        "UE-B2-CHAIN-0016",
+        "UE-B2-CHAIN-0027",
+        "UE-B2-CHAIN-0028",
+        "UE-B2-CHAIN-0030",
+        "UE-B2-CHAIN-0100",
+        "UE-B2-CHAIN-0110",
+        "UE-B2-CHAIN-0111",
+        "UE-B2-CHAIN-0113",
+        "UE-B2-CHAIN-0114",
+        "UE-B2-CHAIN-0115",
+        "UE-B2-CHAIN-0116",
+        "UE-B2-CHAIN-0117",
+        "UE-B2-CHAIN-0118",
+        "UE-B2-CHAIN-0119",
+        "UE-B2-CHAIN-0120",
+        "UE-B2-CHAIN-0130",
+        "UE-B2-CHAIN-0227",
+        "UE-B2-CHAIN-0228",
+        "UE-B2-CHAIN-0229",
+        "UE-B2-CHAIN-0230",
+        "UE-B2-CHAIN-0231",
+        "UE-B2-CHAIN-0232",
+        "UE-B2-CHAIN-0233",
+        "UE-B2-CHAIN-0234",
+        "UE-B2-CHAIN-0235",
+        "UE-B2-CHAIN-0236",
+        "UE-B2-CHAIN-0374",
+        "UE-B2-CHAIN-0375"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0014",
+        "CHAIN-UE-B2-CHAIN-0015",
+        "CHAIN-UE-B2-CHAIN-0016",
+        "CHAIN-UE-B2-CHAIN-0027",
+        "CHAIN-UE-B2-CHAIN-0028",
+        "CHAIN-UE-B2-CHAIN-0030",
+        "CHAIN-UE-B2-CHAIN-0100",
+        "CHAIN-UE-B2-CHAIN-0110",
+        "CHAIN-UE-B2-CHAIN-0111",
+        "CHAIN-UE-B2-CHAIN-0113",
+        "CHAIN-UE-B2-CHAIN-0114",
+        "CHAIN-UE-B2-CHAIN-0115",
+        "CHAIN-UE-B2-CHAIN-0116",
+        "CHAIN-UE-B2-CHAIN-0117",
+        "CHAIN-UE-B2-CHAIN-0118",
+        "CHAIN-UE-B2-CHAIN-0119",
+        "CHAIN-UE-B2-CHAIN-0120",
+        "CHAIN-UE-B2-CHAIN-0130",
+        "CHAIN-UE-B2-CHAIN-0227",
+        "CHAIN-UE-B2-CHAIN-0228",
+        "CHAIN-UE-B2-CHAIN-0229",
+        "CHAIN-UE-B2-CHAIN-0230",
+        "CHAIN-UE-B2-CHAIN-0231",
+        "CHAIN-UE-B2-CHAIN-0232",
+        "CHAIN-UE-B2-CHAIN-0233",
+        "CHAIN-UE-B2-CHAIN-0234",
+        "CHAIN-UE-B2-CHAIN-0235",
+        "CHAIN-UE-B2-CHAIN-0236",
+        "CHAIN-UE-B2-CHAIN-0374",
+        "CHAIN-UE-B2-CHAIN-0375"
+      ],
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "gapReason": "Separate continuity-related source signals exist, but the accepted corpus establishes no joined post-handoff state, access, or operational result."
+    }
+  ],
+  "liunaTransitions": [
+    {
+      "id": "CONTEXT_TO_MATTER",
+      "from": "INSTITUTIONAL_CONTEXT",
+      "to": "ACTIVE_MATTER",
+      "classification": "CAPABILITY_RELATION_ONLY",
+      "capabilityIds": [
+        "KNOWLEDGE_HANDOFF",
+        "CASE_RECORDS"
+      ],
+      "establishedSourceTransition": false,
+      "explanation": "The accepted model contains the named capability concepts, but no binding-level or workflow edge establishes this ordered transition."
+    },
+    {
+      "id": "MATTER_TO_RESPONSIBILITY",
+      "from": "ACTIVE_MATTER",
+      "to": "CURRENT_RESPONSIBILITY",
+      "classification": "CAPABILITY_RELATION_ONLY",
+      "capabilityIds": [
+        "CASE_RECORDS",
+        "CASE_RESPONSIBILITY"
+      ],
+      "establishedSourceTransition": false,
+      "explanation": "The accepted model contains the named capability concepts, but no binding-level or workflow edge establishes this ordered transition."
+    },
+    {
+      "id": "RESPONSIBILITY_TO_SUCCESSOR",
+      "from": "CURRENT_RESPONSIBILITY",
+      "to": "SUCCESSOR_ASSUMES_RESPONSIBILITY",
+      "classification": "CAPABILITY_RELATION_ONLY",
+      "capabilityIds": [
+        "CASE_RESPONSIBILITY",
+        "KNOWLEDGE_HANDOFF"
+      ],
+      "establishedSourceTransition": false,
+      "explanation": "The accepted model contains the named capability concepts, but no binding-level or workflow edge establishes this ordered transition."
+    },
+    {
+      "id": "MATTER_TO_DEADLINE",
+      "from": "ACTIVE_MATTER",
+      "to": "DEADLINE_OR_OPEN_COMMITMENT",
+      "classification": "CAPABILITY_RELATION_ONLY",
+      "capabilityIds": [
+        "CASE_RECORDS",
+        "CASE_DEADLINES",
+        "CALENDAR_MEETINGS"
+      ],
+      "establishedSourceTransition": false,
+      "explanation": "The accepted model contains the named capability concepts, but no binding-level or workflow edge establishes this ordered transition."
+    },
+    {
+      "id": "MATTER_TO_EVIDENCE",
+      "from": "ACTIVE_MATTER",
+      "to": "RESTRICTED_EVIDENCE",
+      "classification": "CAPABILITY_RELATION_ONLY",
+      "capabilityIds": [
+        "CASE_RECORDS",
+        "CASE_EVIDENCE"
+      ],
+      "establishedSourceTransition": false,
+      "explanation": "The accepted model contains the named capability concepts, but no binding-level or workflow edge establishes this ordered transition."
+    },
+    {
+      "id": "EVIDENCE_TO_SUCCESSOR_ACCESS",
+      "from": "RESTRICTED_EVIDENCE",
+      "to": "SUCCESSOR_ACCESS",
+      "classification": "NO_SOURCE_TRANSITION",
+      "capabilityIds": [],
+      "establishedSourceTransition": false,
+      "explanation": "The accepted source model establishes no bounded evidence-access transition for a successor."
+    },
+    {
+      "id": "HANDOFF_TO_RETAINED_CONTEXT",
+      "from": "SUCCESSOR_HANDOFF",
+      "to": "RETAINED_INSTITUTIONAL_CONTEXT",
+      "classification": "CAPABILITY_RELATION_ONLY",
+      "capabilityIds": [
+        "KNOWLEDGE_HANDOFF"
+      ],
+      "establishedSourceTransition": false,
+      "explanation": "The accepted model contains the named capability concepts, but no binding-level or workflow edge establishes this ordered transition."
+    }
+  ],
+  "liunaDiscoverability": {
+    "stepClassifications": [
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_01",
+        "dimension": "CONTEXT_CAPTURE",
+        "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+        "routes": []
+      },
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_02",
+        "dimension": "ACTIVE_MATTER_VISIBILITY",
+        "discoverabilityStatus": "SOURCE_LINK",
+        "routes": [
+          {
+            "route": "/[locale]/dashboard/claims/[id]",
+            "staticEvidence": {
+              "normalizedRoute": "/dashboard/claims/[param]",
+              "pageRecordFound": true,
+              "pageEntryMechanism": "CONTEXTUAL_PAGE_LINK",
+              "pageDisposition": "CONTEXTUAL_WORKFLOW",
+              "primaryNavigationRecords": [],
+              "contextualInboundLinkCount": 4,
+              "contextualInboundLinks": [
+                {
+                  "linkMechanism": "ROUTER_PUSH",
+                  "sourceRoute": "/dashboard/members/[id]",
+                  "targetRoute": "/dashboard/claims/[param]"
+                },
+                {
+                  "linkMechanism": "ROUTER_PUSH",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/[param]"
+                },
+                {
+                  "linkMechanism": "JSX_LINK_HREF",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/[param]"
+                },
+                {
+                  "linkMechanism": "ROUTER_PUSH",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/[param]"
+                }
+              ]
+            }
+          },
+          {
+            "route": "/[locale]/dashboard/claims/new",
+            "staticEvidence": {
+              "normalizedRoute": "/dashboard/claims/new",
+              "pageRecordFound": true,
+              "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+              "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+              "primaryNavigationRecords": [
+                {
+                  "experience": "member",
+                  "label": "Open Representation Case",
+                  "pathname": "/dashboard/claims/new"
+                },
+                {
+                  "experience": "member",
+                  "label": "Open Representation Case",
+                  "pathname": "/dashboard/claims/new"
+                }
+              ],
+              "contextualInboundLinkCount": 8,
+              "contextualInboundLinks": [
+                {
+                  "linkMechanism": "ROUTER_PUSH",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/new"
+                },
+                {
+                  "linkMechanism": "ROUTER_PUSH",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/new"
+                },
+                {
+                  "linkMechanism": "ROUTER_PUSH",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/new"
+                },
+                {
+                  "linkMechanism": "ROUTER_PUSH",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/new"
+                },
+                {
+                  "linkMechanism": "JSX_LINK_HREF",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/new"
+                },
+                {
+                  "linkMechanism": "JSX_LINK_HREF",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/new"
+                },
+                {
+                  "linkMechanism": "JSX_LINK_HREF",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/new"
+                },
+                {
+                  "linkMechanism": "ROUTER_PUSH",
+                  "sourceRoute": null,
+                  "targetRoute": "/dashboard/claims/new"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_03",
+        "dimension": "RESPONSIBILITY_ASSIGNMENT",
+        "discoverabilityStatus": "DIRECT_ROUTE_ONLY",
+        "routes": [
+          {
+            "route": "/[locale]/dashboard/dispatch",
+            "staticEvidence": {
+              "normalizedRoute": "/dashboard/dispatch",
+              "pageRecordFound": true,
+              "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+              "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+              "primaryNavigationRecords": [],
+              "contextualInboundLinkCount": 0,
+              "contextualInboundLinks": []
+            }
+          }
+        ]
+      },
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_04",
+        "dimension": "RESPONSIBILITY_REASSIGNMENT",
+        "discoverabilityStatus": "DIRECT_ROUTE_ONLY",
+        "routes": [
+          {
+            "route": "/[locale]/dashboard/dispatch",
+            "staticEvidence": {
+              "normalizedRoute": "/dashboard/dispatch",
+              "pageRecordFound": true,
+              "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+              "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+              "primaryNavigationRecords": [],
+              "contextualInboundLinkCount": 0,
+              "contextualInboundLinks": []
+            }
+          }
+        ]
+      },
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_05",
+        "dimension": "DEADLINE_CONTINUITY",
+        "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+        "routes": []
+      },
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_06",
+        "dimension": "EVIDENCE_CONTINUITY",
+        "discoverabilityStatus": "DIRECT_ROUTE_ONLY",
+        "routes": [
+          {
+            "route": "/[locale]/dashboard/voting",
+            "staticEvidence": {
+              "normalizedRoute": "/dashboard/voting",
+              "pageRecordFound": true,
+              "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+              "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+              "primaryNavigationRecords": [],
+              "contextualInboundLinkCount": 0,
+              "contextualInboundLinks": []
+            }
+          }
+        ]
+      },
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_07",
+        "dimension": "RESTRICTED_EVIDENCE_BOUNDARY",
+        "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+        "routes": []
+      },
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_08",
+        "dimension": "SUCCESSOR_HANDOFF",
+        "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+        "routes": []
+      },
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_09",
+        "dimension": "KNOWLEDGE_PRESERVATION",
+        "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+        "routes": []
+      },
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_10",
+        "dimension": "AUDIT_PROVENANCE",
+        "discoverabilityStatus": "PRIMARY_NAV",
+        "routes": [
+          {
+            "route": "/[locale]/dashboard/leadership",
+            "staticEvidence": {
+              "normalizedRoute": "/dashboard/leadership",
+              "pageRecordFound": true,
+              "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+              "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+              "primaryNavigationRecords": [
+                {
+                  "experience": "executive",
+                  "label": "Onboarding Survivability (Leadership Continuity)",
+                  "pathname": "/dashboard/leadership"
+                }
+              ],
+              "contextualInboundLinkCount": 0,
+              "contextualInboundLinks": []
+            }
+          },
+          {
+            "route": "/[locale]/dashboard/finance/allocation",
+            "staticEvidence": {
+              "normalizedRoute": "/dashboard/finance/allocation",
+              "pageRecordFound": true,
+              "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+              "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+              "primaryNavigationRecords": [],
+              "contextualInboundLinkCount": 0,
+              "contextualInboundLinks": []
+            }
+          }
+        ]
+      },
+      {
+        "stepId": "LIUNA_CONTINUITY_STEP_11",
+        "dimension": "POST_HANDOFF_CONTINUITY",
+        "discoverabilityStatus": "NO_SOURCE_TRANSITION",
+        "routes": []
+      }
+    ],
+    "directRouteOnlyStepIds": [
+      "LIUNA_CONTINUITY_STEP_03",
+      "LIUNA_CONTINUITY_STEP_04",
+      "LIUNA_CONTINUITY_STEP_06"
+    ],
+    "noSourceTransitionStepIds": [
+      "LIUNA_CONTINUITY_STEP_01",
+      "LIUNA_CONTINUITY_STEP_05",
+      "LIUNA_CONTINUITY_STEP_07",
+      "LIUNA_CONTINUITY_STEP_08",
+      "LIUNA_CONTINUITY_STEP_09",
+      "LIUNA_CONTINUITY_STEP_11"
+    ],
+    "limitation": "Static navigation or contextual-link evidence does not establish LIUNA-specific authorization, usability, action completion, or a complete sequence."
+  },
+  "liunaAdversarialAnswers": [
+    {
+      "question": "Can an outgoing leader expose the relevant institutional context?",
+      "answer": "PARTIAL_SOURCE_SIGNAL",
+      "evidence": [
+        "KNOWLEDGE_HANDOFF"
+      ],
+      "rationale": "A knowledge/context-preservation signal exists, but no outgoing-actor action or ordered path is established."
+    },
+    {
+      "question": "Can active matters be identified?",
+      "answer": "PARTIAL_SOURCE_SIGNAL",
+      "evidence": [
+        "CASE_RECORDS"
+      ],
+      "rationale": "Matter-record signals exist, but completeness and successor visibility are not established."
+    },
+    {
+      "question": "Can responsibility be reassigned?",
+      "answer": "PARTIAL_SOURCE_SIGNAL",
+      "evidence": [
+        "CASE_RESPONSIBILITY",
+        "KNOWLEDGE_HANDOFF"
+      ],
+      "rationale": "Assignment and handoff concepts exist, but the predecessor-to-successor transition is not established."
+    },
+    {
+      "question": "Can deadline state survive reassignment?",
+      "answer": "PARTIAL_SOURCE_SIGNAL",
+      "evidence": [
+        "CASE_DEADLINES",
+        "CALENDAR_MEETINGS"
+      ],
+      "rationale": "The review records a deadline-continuity signal; it explicitly does not prove reminder delivery or deadline survival after reassignment."
+    },
+    {
+      "question": "Can evidence remain institutionally available?",
+      "answer": "PARTIAL_SOURCE_SIGNAL",
+      "evidence": [
+        "CASE_EVIDENCE"
+      ],
+      "rationale": "Evidence-handling and retention signals exist, but cross-actor continuity remains unproven and obligations are open."
+    },
+    {
+      "question": "Can restricted evidence remain bounded?",
+      "answer": "NO_SOURCE_SIGNAL",
+      "evidence": [],
+      "rationale": "No accepted capability establishes a restricted-evidence access boundary or successor-specific authorization."
+    },
+    {
+      "question": "Can the successor inherit only appropriate context?",
+      "answer": "NO_SOURCE_SIGNAL",
+      "evidence": [],
+      "rationale": "No source establishes least-privilege context selection or successor access scope."
+    },
+    {
+      "question": "Can knowledge survive the actor transition?",
+      "answer": "PARTIAL_SOURCE_SIGNAL",
+      "evidence": [
+        "KNOWLEDGE_HANDOFF"
+      ],
+      "rationale": "Knowledge handoff is a source-model signal only; durable post-transition retention is not proven."
+    },
+    {
+      "question": "Can the transition be audited?",
+      "answer": "PARTIAL_SOURCE_SIGNAL",
+      "evidence": [
+        "GOVERNANCE_ADMINISTRATION"
+      ],
+      "rationale": "A general auditability signal exists, but handoff provenance and persisted audit history are not established."
+    },
+    {
+      "question": "Can the original actor lose access where required?",
+      "answer": "NO_SOURCE_SIGNAL",
+      "evidence": [],
+      "rationale": "The accepted model establishes neither transition-triggered revocation nor offboarding for this sequence."
+    }
+  ],
+  "liunaObligationExposure": {
+    "capabilityIds": [
+      "CALENDAR_MEETINGS",
+      "CASE_DEADLINES",
+      "CASE_EVIDENCE",
+      "CASE_RECORDS",
+      "CASE_RESPONSIBILITY",
+      "GOVERNANCE_ADMINISTRATION",
+      "KNOWLEDGE_HANDOFF"
+    ],
+    "bindingIds": [
+      "app/[locale]/calendar/page.tsx:255:7:onCreateCalendar",
+      "app/[locale]/calendar/page.tsx:255:7:onManageSync",
+      "app/[locale]/calendar/page.tsx:255:7:onSelectCalendar",
+      "app/[locale]/calendar/page.tsx:255:7:onSyncCalendar",
+      "app/[locale]/calendar/page.tsx:271:13:onClick",
+      "app/[locale]/calendar/page.tsx:284:11:onCreateEvent",
+      "app/[locale]/calendar/page.tsx:304:7:onDelete",
+      "app/[locale]/calendar/page.tsx:304:7:onSave",
+      "app/[locale]/calendar/page.tsx:381:13:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:401:13:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:498:21:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:592:17:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:654:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:698:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:788:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:884:15:onClick",
+      "app/[locale]/dashboard/claims/[id]/page.tsx:272:19:onUploadComplete",
+      "app/[locale]/dashboard/claims/new/page.tsx:576:21:onChange",
+      "app/[locale]/dashboard/claims/new/page.tsx:600:27:onClick",
+      "app/[locale]/dashboard/committees/[id]/committee-workspace.tsx:175:13:onClick",
+      "app/[locale]/dashboard/dispatch/page.tsx:139:11:onClick",
+      "app/[locale]/dashboard/dispatch/page.tsx:201:13:onSubmit",
+      "app/[locale]/dashboard/dispatch/page.tsx:349:21:onClick",
+      "app/[locale]/dashboard/finance/allocation/page.tsx:169:21:onClick",
+      "app/[locale]/dashboard/leadership/page.tsx:154:13:onClick",
+      "app/[locale]/dashboard/leadership/page.tsx:186:11:onClick",
+      "app/[locale]/dashboard/voting/page.tsx:281:29:onClick",
+      "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:104:11:onClick",
+      "app/[locale]/organizational-continuity-risk/_components/HumanScenesCarousel.tsx:79:11:onClick",
+      "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:329:23:onClick",
+      "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:342:13:onClick",
+      "app/[locale]/workbook/claim/ClaimWorkbookClient.tsx:64:7:onClick",
+      "components/admin/clc-analytics-dashboard.tsx:319:11:onClick",
+      "components/ai/grievance-triage-card.tsx:169:17:onClick",
+      "components/ai/grievance-triage-card.tsx:178:17:onClick",
+      "components/ai/grievance-triage-card.tsx:88:13:onClick",
+      "components/analytics/analytics-overview-console.tsx:186:19:onClick",
+      "components/auth/forgot-password-form.tsx:68:7:onSubmit",
+      "components/calendar/CalendarSidebar.tsx:134:17:onSelect",
+      "components/calendar/CalendarSidebar.tsx:134:17:onSync",
+      "components/calendar/CalendarSidebar.tsx:151:11:onClick",
+      "components/calendar/CalendarSidebar.tsx:201:5:onClick",
+      "components/calendar/CalendarSidebar.tsx:208:7:onClick",
+      "components/calendar/CalendarSidebar.tsx:236:11:onClick",
+      "components/calendar/CalendarSidebar.tsx:75:7:onClick",
+      "components/calendar/CalendarSidebar.tsx:99:15:onSelect",
+      "components/calendar/CalendarSyncManager.tsx:214:15:onClick",
+      "components/calendar/CalendarSyncManager.tsx:227:15:onClick",
+      "components/calendar/CalendarSyncManager.tsx:351:25:onClick",
+      "components/calendar/CalendarSyncManager.tsx:369:25:onClick",
+      "components/calendar/CalendarSyncManager.tsx:397:11:onClick",
+      "components/calendar/CalendarView.tsx:103:13:onClick",
+      "components/calendar/CalendarView.tsx:106:13:onClick",
+      "components/calendar/CalendarView.tsx:109:13:onClick",
+      "components/calendar/CalendarView.tsx:154:11:onCreateEvent",
+      "components/calendar/CalendarView.tsx:163:11:onCreateEvent",
+      "components/calendar/CalendarView.tsx:171:11:onCreateEvent",
+      "components/calendar/CalendarView.tsx:240:11:onClick",
+      "components/calendar/CalendarView.tsx:257:17:onClick",
+      "components/calendar/CalendarView.tsx:329:15:onClick",
+      "components/calendar/CalendarView.tsx:339:19:onClick",
+      "components/calendar/CalendarView.tsx:392:13:onClick",
+      "components/calendar/CalendarView.tsx:401:17:onClick",
+      "components/calendar/CalendarView.tsx:463:17:onClick",
+      "components/calendar/EventDialog.tsx:183:9:onSubmit",
+      "components/calendar/EventDialog.tsx:312:15:onClick",
+      "components/calendar/EventDialog.tsx:324:21:onClick",
+      "components/calendar/EventDialog.tsx:361:15:onClick",
+      "components/calendar/EventDialog.tsx:370:13:onClick",
+      "components/claims/claim-list-table.tsx:237:17:onClick",
+      "components/claims/claim-list-table.tsx:243:17:onClick",
+      "components/claims/claim-list-table.tsx:251:19:onClick",
+      "components/claims/claim-list-table.tsx:257:19:onClick",
+      "components/claims/claim-list-table.tsx:268:19:onClick",
+      "components/claims/claims-console.tsx:77:9:onClick",
+      "components/clause-library/clause-library-console.tsx:361:15:onClick",
+      "components/clause-library/clause-library-console.tsx:409:25:onClick",
+      "components/clause-library/clause-library-console.tsx:416:21:onClick",
+      "components/clause-library/clause-library-console.tsx:435:19:onClick",
+      "components/clause-library/clause-library-console.tsx:464:15:onCompare",
+      "components/clause-library/clause-library-console.tsx:464:15:onDelete",
+      "components/clause-library/clause-library-console.tsx:464:15:onEdit",
+      "components/clause-library/clause-library-console.tsx:464:15:onShare",
+      "components/clause-library/clause-library-console.tsx:508:17:onAddTag",
+      "components/clause-library/clause-library-console.tsx:508:17:onRemoveTag",
+      "components/clause-library/clause-library-console.tsx:573:15:onSave",
+      "components/clause-library/clause-library-console.tsx:628:13:onExport",
+      "components/clause-library/clause-library-console.tsx:628:13:onRemoveClause",
+      "components/clause-library/ClauseCompareView.tsx:112:11:onClick",
+      "components/clause-library/ClauseCompareView.tsx:224:13:onClick",
+      "components/clause-library/ClauseCompareView.tsx:237:13:onClick",
+      "components/clause-library/ClauseCompareView.tsx:253:15:onClick",
+      "components/clause-library/ClauseLibrarySearch.tsx:304:17:onClick",
+      "components/clause-library/ClauseLibrarySearch.tsx:323:11:onClick",
+      "components/clause-library/ClauseSharingControls.tsx:255:11:onClick",
+      "components/clause-library/ClauseSharingControls.tsx:258:11:onClick",
+      "components/clause-library/ClauseTagManager.tsx:121:15:onClick",
+      "components/clause-library/ClauseTagManager.tsx:151:19:onClick",
+      "components/clause-library/ClauseViewer.tsx:120:13:onClick",
+      "components/clause-library/ClauseViewer.tsx:128:17:onClick",
+      "components/clause-library/ClauseViewer.tsx:134:17:onClick",
+      "components/clause-library/ClauseViewer.tsx:157:23:onClick",
+      "components/file-upload.tsx:184:7:onDrop",
+      "components/file-upload.tsx:196:9:onChange",
+      "components/file-upload.tsx:277:25:onClick",
+      "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+      "components/grievances/grievance-detail-console.tsx:459:11:onSubmit",
+      "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+      "components/grievances/grievance-detail-console.tsx:582:15:onClick",
+      "components/grievances/grievance-detail-console.tsx:596:7:onAssign",
+      "components/grievances/grievances-console.tsx:355:19:onSubmit",
+      "components/grievances/grievances-console.tsx:848:31:onClick",
+      "components/grievances/grievances-console.tsx:860:31:onClick",
+      "components/health-safety/InspectionScheduleCalendar.tsx:164:13:onClick",
+      "components/health-safety/InspectionScheduleCalendar.tsx:178:13:onClick",
+      "components/health-safety/InspectionScheduleCalendar.tsx:186:15:onClick",
+      "components/health-safety/InspectionScheduleCalendar.tsx:233:25:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:201:15:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:220:17:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:288:25:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:296:27:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:368:25:onClick",
+      "components/icra/ICRAAssessmentFlow.tsx:585:7:onAcknowledge",
+      "components/icra/ICRAAssessmentFlow.tsx:988:7:onClick",
+      "components/jurisdiction/deadline-calculator.tsx:133:15:onSelect",
+      "components/jurisdiction/deadline-calculator.tsx:143:9:onClick",
+      "components/knowledge-transfer/cognition-graph/cognition-graph-viz.tsx:294:17:onClick",
+      "components/knowledge-transfer/continuity-planning-workspace.tsx:545:25:onClick",
+      "components/knowledge-transfer/continuity-simulation-workspace.tsx:180:7:onClick",
+      "components/knowledge-transfer/continuity-simulation-workspace.tsx:446:13:onRetry",
+      "components/knowledge-transfer/continuity-simulation-workspace.tsx:460:17:onClick",
+      "components/knowledge-transfer/exit-interview-create-form.tsx:81:5:onSubmit",
+      "components/knowledge-transfer/expertise-map/expertise-map.tsx:89:5:onClick",
+      "components/knowledge-transfer/organizational-memory-explorer.tsx:175:5:onClick",
+      "components/knowledge-transfer/organizational-memory-explorer.tsx:279:7:onSubmit",
+      "components/knowledge-transfer/organizational-memory-explorer.tsx:326:15:onClick",
+      "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:128:9:onClick",
+      "components/knowledge-transfer/propagation-playback/propagation-playback.tsx:134:9:onClick",
+      "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:294:15:onClick",
+      "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:353:9:onClick",
+      "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:361:9:onClick",
+      "components/knowledge-transfer/topic-graph/topic-graph-viz.tsx:369:9:onClick",
+      "components/policy-governance/ApprovalQueue.tsx:104:13:onClick",
+      "components/policy-governance/ApprovalQueue.tsx:113:13:onClick",
+      "components/policy-governance/ConflictAnalysis.tsx:104:15:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:116:5:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:136:9:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:67:9:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:70:9:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:80:11:onClick",
+      "components/policy-governance/PolicyCard.tsx:35:5:onClick",
+      "components/policy-governance/PolicyDetail.tsx:45:11:onClick",
+      "components/policy-governance/PolicyLineage.tsx:90:9:onClick",
+      "components/policy-governance/ReplayCenter.tsx:103:21:onClick",
+      "components/policy-governance/ReplayCenter.tsx:71:9:onClick",
+      "components/steward-recommendations.tsx:137:19:onClick",
+      "components/steward-recommendations.tsx:81:9:onClick",
+      "components/workbench/workbench-console.tsx:917:35:onClick"
+    ],
+    "knownDefectIds": [
+      "ACTION-API-METHOD-01",
+      "ACTION-API-ROUTE-01",
+      "UE-R1-ROOT-001",
+      "UE-R1-ROOT-003",
+      "UE-R1-ROOT-004",
+      "UE-R1-ROOT-031",
+      "UE-R1-ROOT-067"
+    ],
+    "sourceCeilingBindingIds": [
+      "app/[locale]/calendar/page.tsx:255:7:onSyncCalendar",
+      "app/[locale]/calendar/page.tsx:304:7:onDelete",
+      "app/[locale]/calendar/page.tsx:304:7:onSave",
+      "app/[locale]/calendar/page.tsx:381:13:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:401:13:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:498:21:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:592:17:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:654:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:698:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:788:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:884:15:onClick",
+      "app/[locale]/dashboard/dispatch/page.tsx:349:21:onClick",
+      "app/[locale]/dashboard/voting/page.tsx:281:29:onClick",
+      "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:329:23:onClick",
+      "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:342:13:onClick",
+      "app/[locale]/workbook/claim/ClaimWorkbookClient.tsx:64:7:onClick",
+      "components/ai/grievance-triage-card.tsx:169:17:onClick",
+      "components/ai/grievance-triage-card.tsx:178:17:onClick",
+      "components/ai/grievance-triage-card.tsx:88:13:onClick",
+      "components/calendar/CalendarSidebar.tsx:236:11:onClick",
+      "components/calendar/CalendarSyncManager.tsx:351:25:onClick",
+      "components/calendar/CalendarSyncManager.tsx:369:25:onClick",
+      "components/clause-library/clause-library-console.tsx:361:15:onClick",
+      "components/clause-library/clause-library-console.tsx:416:21:onClick",
+      "components/clause-library/clause-library-console.tsx:464:15:onCompare",
+      "components/clause-library/clause-library-console.tsx:464:15:onDelete",
+      "components/clause-library/clause-library-console.tsx:508:17:onAddTag",
+      "components/clause-library/clause-library-console.tsx:508:17:onRemoveTag",
+      "components/clause-library/clause-library-console.tsx:573:15:onSave",
+      "components/clause-library/ClauseCompareView.tsx:253:15:onClick",
+      "components/clause-library/ClauseSharingControls.tsx:255:11:onClick",
+      "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+      "components/grievances/grievance-detail-console.tsx:459:11:onSubmit",
+      "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+      "components/grievances/grievance-detail-console.tsx:582:15:onClick",
+      "components/grievances/grievance-detail-console.tsx:596:7:onAssign",
+      "components/grievances/grievances-console.tsx:355:19:onSubmit",
+      "components/grievances/grievances-console.tsx:848:31:onClick",
+      "components/grievances/grievances-console.tsx:860:31:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:201:15:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:220:17:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:288:25:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:368:25:onClick",
+      "components/knowledge-transfer/exit-interview-create-form.tsx:81:5:onSubmit",
+      "components/policy-governance/ApprovalQueue.tsx:104:13:onClick",
+      "components/policy-governance/ApprovalQueue.tsx:113:13:onClick",
+      "components/policy-governance/ConflictAnalysis.tsx:104:15:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:67:9:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:70:9:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:80:11:onClick",
+      "components/policy-governance/PolicyLineage.tsx:90:9:onClick",
+      "components/policy-governance/ReplayCenter.tsx:103:21:onClick",
+      "components/policy-governance/ReplayCenter.tsx:71:9:onClick",
+      "components/workbench/workbench-console.tsx:917:35:onClick"
+    ],
+    "sourceCeilingObligationIds": [
+      "BINDING-011d933df1b5",
+      "BINDING-0929516c95e4",
+      "BINDING-116f55d1f95d",
+      "BINDING-1a56c96637ba",
+      "BINDING-209f2ec4c3be",
+      "BINDING-25074af3471d",
+      "BINDING-3055fe84dda0",
+      "BINDING-3709b9400fc3",
+      "BINDING-3d7720dd7ee1",
+      "BINDING-3f9bfc5b443f",
+      "BINDING-3ff2004de4e1",
+      "BINDING-4256ecebd732",
+      "BINDING-44a2030d2577",
+      "BINDING-46b703fe0580",
+      "BINDING-46d2e7c75807",
+      "BINDING-46d919076131",
+      "BINDING-4ba04fb5ccf5",
+      "BINDING-4c02ab6c24fa",
+      "BINDING-4de75f902351",
+      "BINDING-596d1f9287df",
+      "BINDING-5c2c348e3c43",
+      "BINDING-5d837a805683",
+      "BINDING-5da3b588a6df",
+      "BINDING-65c61233bdc3",
+      "BINDING-69bfc5dbbb09",
+      "BINDING-6fad83f3bfa5",
+      "BINDING-780177a62d1d",
+      "BINDING-782eaf20a15c",
+      "BINDING-78e9d1775b9c",
+      "BINDING-795985f7d91f",
+      "BINDING-7d9eb397c3da",
+      "BINDING-9488ce91def1",
+      "BINDING-a5b294a7f7d1",
+      "BINDING-b15b7db11d7c",
+      "BINDING-b93c0f2467b5",
+      "BINDING-b9ddddb81a60",
+      "BINDING-bd03beb308a5",
+      "BINDING-c20fc2dbd038",
+      "BINDING-c34c563dff3e",
+      "BINDING-c457def02d40",
+      "BINDING-d1513a7f89a0",
+      "BINDING-d6ea031f3a70",
+      "BINDING-dd82dfa5ea2e",
+      "BINDING-e0f83819600a",
+      "BINDING-e3396056384d",
+      "BINDING-eb9e086f063f",
+      "BINDING-ebd2cf731f6d",
+      "BINDING-ed87372c2603",
+      "BINDING-f1e66974b258",
+      "BINDING-f2fd54fd1bfd",
+      "BINDING-f33ec1024a96",
+      "BINDING-f4e3772a3738",
+      "BINDING-f5a7a6761f7f",
+      "BINDING-fb55993af6ac"
+    ],
+    "residualEffectChainIds": [
+      "UE-B2-CHAIN-0014",
+      "UE-B2-CHAIN-0015",
+      "UE-B2-CHAIN-0016",
+      "UE-B2-CHAIN-0027",
+      "UE-B2-CHAIN-0028",
+      "UE-B2-CHAIN-0030",
+      "UE-B2-CHAIN-0100",
+      "UE-B2-CHAIN-0110",
+      "UE-B2-CHAIN-0111",
+      "UE-B2-CHAIN-0113",
+      "UE-B2-CHAIN-0114",
+      "UE-B2-CHAIN-0115",
+      "UE-B2-CHAIN-0116",
+      "UE-B2-CHAIN-0117",
+      "UE-B2-CHAIN-0118",
+      "UE-B2-CHAIN-0119",
+      "UE-B2-CHAIN-0120",
+      "UE-B2-CHAIN-0123",
+      "UE-B2-CHAIN-0124",
+      "UE-B2-CHAIN-0125",
+      "UE-B2-CHAIN-0126",
+      "UE-B2-CHAIN-0128",
+      "UE-B2-CHAIN-0129",
+      "UE-B2-CHAIN-0130",
+      "UE-B2-CHAIN-0131",
+      "UE-B2-CHAIN-0133",
+      "UE-B2-CHAIN-0134",
+      "UE-B2-CHAIN-0135",
+      "UE-B2-CHAIN-0136",
+      "UE-B2-CHAIN-0137",
+      "UE-B2-CHAIN-0138",
+      "UE-B2-CHAIN-0139",
+      "UE-B2-CHAIN-0140",
+      "UE-B2-CHAIN-0227",
+      "UE-B2-CHAIN-0228",
+      "UE-B2-CHAIN-0229",
+      "UE-B2-CHAIN-0230",
+      "UE-B2-CHAIN-0231",
+      "UE-B2-CHAIN-0232",
+      "UE-B2-CHAIN-0233",
+      "UE-B2-CHAIN-0234",
+      "UE-B2-CHAIN-0235",
+      "UE-B2-CHAIN-0236",
+      "UE-B2-CHAIN-0299",
+      "UE-B2-CHAIN-0300",
+      "UE-B2-CHAIN-0301",
+      "UE-B2-CHAIN-0302",
+      "UE-B2-CHAIN-0303",
+      "UE-B2-CHAIN-0304",
+      "UE-B2-CHAIN-0305",
+      "UE-B2-CHAIN-0306",
+      "UE-B2-CHAIN-0307",
+      "UE-B2-CHAIN-0308",
+      "UE-B2-CHAIN-0309",
+      "UE-B2-CHAIN-0310",
+      "UE-B2-CHAIN-0311",
+      "UE-B2-CHAIN-0331",
+      "UE-B2-CHAIN-0332",
+      "UE-B2-CHAIN-0335",
+      "UE-B2-CHAIN-0337",
+      "UE-B2-CHAIN-0338",
+      "UE-B2-CHAIN-0339",
+      "UE-B2-CHAIN-0340",
+      "UE-B2-CHAIN-0341",
+      "UE-B2-CHAIN-0374",
+      "UE-B2-CHAIN-0375",
+      "UE-B2-CHAIN-0381"
+    ],
+    "residualEffectChainObligationIds": [
+      "CHAIN-UE-B2-CHAIN-0014",
+      "CHAIN-UE-B2-CHAIN-0015",
+      "CHAIN-UE-B2-CHAIN-0016",
+      "CHAIN-UE-B2-CHAIN-0027",
+      "CHAIN-UE-B2-CHAIN-0028",
+      "CHAIN-UE-B2-CHAIN-0030",
+      "CHAIN-UE-B2-CHAIN-0100",
+      "CHAIN-UE-B2-CHAIN-0110",
+      "CHAIN-UE-B2-CHAIN-0111",
+      "CHAIN-UE-B2-CHAIN-0113",
+      "CHAIN-UE-B2-CHAIN-0114",
+      "CHAIN-UE-B2-CHAIN-0115",
+      "CHAIN-UE-B2-CHAIN-0116",
+      "CHAIN-UE-B2-CHAIN-0117",
+      "CHAIN-UE-B2-CHAIN-0118",
+      "CHAIN-UE-B2-CHAIN-0119",
+      "CHAIN-UE-B2-CHAIN-0120",
+      "CHAIN-UE-B2-CHAIN-0123",
+      "CHAIN-UE-B2-CHAIN-0124",
+      "CHAIN-UE-B2-CHAIN-0125",
+      "CHAIN-UE-B2-CHAIN-0126",
+      "CHAIN-UE-B2-CHAIN-0128",
+      "CHAIN-UE-B2-CHAIN-0129",
+      "CHAIN-UE-B2-CHAIN-0130",
+      "CHAIN-UE-B2-CHAIN-0131",
+      "CHAIN-UE-B2-CHAIN-0133",
+      "CHAIN-UE-B2-CHAIN-0134",
+      "CHAIN-UE-B2-CHAIN-0135",
+      "CHAIN-UE-B2-CHAIN-0136",
+      "CHAIN-UE-B2-CHAIN-0137",
+      "CHAIN-UE-B2-CHAIN-0138",
+      "CHAIN-UE-B2-CHAIN-0139",
+      "CHAIN-UE-B2-CHAIN-0140",
+      "CHAIN-UE-B2-CHAIN-0227",
+      "CHAIN-UE-B2-CHAIN-0228",
+      "CHAIN-UE-B2-CHAIN-0229",
+      "CHAIN-UE-B2-CHAIN-0230",
+      "CHAIN-UE-B2-CHAIN-0231",
+      "CHAIN-UE-B2-CHAIN-0232",
+      "CHAIN-UE-B2-CHAIN-0233",
+      "CHAIN-UE-B2-CHAIN-0234",
+      "CHAIN-UE-B2-CHAIN-0235",
+      "CHAIN-UE-B2-CHAIN-0236",
+      "CHAIN-UE-B2-CHAIN-0299",
+      "CHAIN-UE-B2-CHAIN-0300",
+      "CHAIN-UE-B2-CHAIN-0301",
+      "CHAIN-UE-B2-CHAIN-0302",
+      "CHAIN-UE-B2-CHAIN-0303",
+      "CHAIN-UE-B2-CHAIN-0304",
+      "CHAIN-UE-B2-CHAIN-0305",
+      "CHAIN-UE-B2-CHAIN-0306",
+      "CHAIN-UE-B2-CHAIN-0307",
+      "CHAIN-UE-B2-CHAIN-0308",
+      "CHAIN-UE-B2-CHAIN-0309",
+      "CHAIN-UE-B2-CHAIN-0310",
+      "CHAIN-UE-B2-CHAIN-0311",
+      "CHAIN-UE-B2-CHAIN-0331",
+      "CHAIN-UE-B2-CHAIN-0332",
+      "CHAIN-UE-B2-CHAIN-0335",
+      "CHAIN-UE-B2-CHAIN-0337",
+      "CHAIN-UE-B2-CHAIN-0338",
+      "CHAIN-UE-B2-CHAIN-0339",
+      "CHAIN-UE-B2-CHAIN-0340",
+      "CHAIN-UE-B2-CHAIN-0341",
+      "CHAIN-UE-B2-CHAIN-0374",
+      "CHAIN-UE-B2-CHAIN-0375",
+      "CHAIN-UE-B2-CHAIN-0381"
+    ],
+    "falseSuccessExposure": {
+      "sourceSupportedBindingIds": [],
+      "potentialOnlyBindingIds": [],
+      "dimensionsKeptSeparate": true
+    }
+  },
+  "externalSpecialistAssessment": {
+    "currentSourceSupport": "NONE",
+    "acceptedPriorSupportedDimensions": [],
+    "supportedDimensions": [],
+    "partialDimensions": [],
+    "unsupportedDimensions": [
+      "SPECIALIST_IDENTITY",
+      "SPECIALIST_ASSIGNMENT",
+      "BOUNDED_EXTERNAL_ACCESS",
+      "CASE_HANDOFF",
+      "DOCUMENT_INTAKE",
+      "EVIDENCE_HANDOFF",
+      "CASE_STATUS_EXCHANGE",
+      "COMMUNICATION_EXCHANGE",
+      "RESTRICTED_EVIDENCE_ACCESS",
+      "ACCESS_EXPIRY",
+      "ACCESS_REVOCATION",
+      "SPECIALIST_DISENGAGEMENT",
+      "AUDIT_OF_SPECIALIST_ACTIVITY"
+    ],
+    "relevantExistingCapabilityIds": [
+      "CASE_COMMUNICATIONS",
+      "CASE_EVIDENCE",
+      "CASE_RECORDS",
+      "CASE_RESPONSIBILITY",
+      "DOCUMENT_LIBRARY",
+      "GOVERNANCE_ADMINISTRATION",
+      "USER_ACCESS"
+    ],
+    "missingCapabilityClasses": [
+      "MISSING_ACCESS_BOUNDARY",
+      "MISSING_ACTOR_MODEL",
+      "MISSING_ASSIGNMENT_MODEL",
+      "MISSING_CASE_HANDOFF",
+      "MISSING_COMMUNICATION_EXCHANGE",
+      "MISSING_DOCUMENT_INTAKE",
+      "MISSING_EVIDENCE_HANDOFF",
+      "MISSING_EXPIRY_REVOCATION",
+      "MISSING_EXTERNAL_AUDIT_BOUNDARY",
+      "MISSING_EXTERNAL_IDENTITY_MODEL",
+      "MISSING_STATUS_EXCHANGE"
+    ],
+    "integrationInferred": "NO",
+    "productBuildAuthorized": "NO",
+    "authStartWorkAid": "NO",
+    "workAidContextFromRequester": [
+      "WorkAid uses Clio; this is requester-provided operating context, not evidence of a UE integration.",
+      "UE is intended to complement rather than replace Clio; this is a boundary for assessment, not a product claim.",
+      "The specialist use case includes scoped matters, denial letters or case documents, photo identification, authorization or file requests, case status, specialist work, and eventual access termination.",
+      "None of these external-specialist actions is established by the accepted UE source model."
+    ],
+    "absenceIsClassifiedAs": "GAP_NOT_DEFECT"
+  },
+  "externalSpecialistDimensions": [
+    {
+      "dimension": "SPECIALIST_IDENTITY",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "external_party_role",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "SPECIALIST_ASSIGNMENT",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "specialist_assignment",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "CASE_RESPONSIBILITY"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "BOUNDED_EXTERNAL_ACCESS",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "restricted_external_access",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "USER_ACCESS"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "CASE_HANDOFF",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "case_or_evidence_handoff",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "CASE_RECORDS",
+        "CASE_RESPONSIBILITY"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "DOCUMENT_INTAKE",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "document_intake",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "DOCUMENT_LIBRARY"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "EVIDENCE_HANDOFF",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "case_or_evidence_handoff",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "CASE_EVIDENCE"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "CASE_STATUS_EXCHANGE",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "status_or_communication_exchange",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "CASE_RECORDS"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "COMMUNICATION_EXCHANGE",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "status_or_communication_exchange",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "CASE_COMMUNICATIONS"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "RESTRICTED_EVIDENCE_ACCESS",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "restricted_external_access",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "CASE_EVIDENCE",
+        "USER_ACCESS"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "ACCESS_EXPIRY",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "specialist_assignment",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "USER_ACCESS"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "ACCESS_REVOCATION",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "restricted_external_access",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "USER_ACCESS"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "SPECIALIST_DISENGAGEMENT",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "specialist_assignment",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "CASE_RESPONSIBILITY",
+        "USER_ACCESS"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    },
+    {
+      "dimension": "AUDIT_OF_SPECIALIST_ACTIVITY",
+      "classification": "OUTSIDE_CURRENT_SOURCE_MODEL",
+      "acceptedPriorAssessment": {
+        "dimension": "external_party_role",
+        "sourceSupport": "NOT_ESTABLISHED"
+      },
+      "externalSpecialistCapabilityIds": [],
+      "reusableInternalCapabilityIds": [
+        "GOVERNANCE_ADMINISTRATION"
+      ],
+      "boundaryStatement": "Any listed reusable capability is internal-only source evidence; it is not external-specialist identity, access, handoff, or integration support."
+    }
+  ],
+  "externalSpecialistAdversarialAnswers": [
+    {
+      "question": "Can an external specialist exist as a bounded UE actor?",
+      "answer": "NO_SOURCE_SUPPORT",
+      "rationale": "The accepted Phase 1A.3b external-specialist review establishes no supported dimensions; internal capabilities are not treated as external actor or access support."
+    },
+    {
+      "question": "Can they be assigned only specific matters?",
+      "answer": "NO_SOURCE_SUPPORT",
+      "rationale": "The accepted Phase 1A.3b external-specialist review establishes no supported dimensions; internal capabilities are not treated as external actor or access support."
+    },
+    {
+      "question": "Can access exclude unrelated organizational data?",
+      "answer": "NO_SOURCE_SUPPORT",
+      "rationale": "The accepted Phase 1A.3b external-specialist review establishes no supported dimensions; internal capabilities are not treated as external actor or access support."
+    },
+    {
+      "question": "Can documents be exchanged safely?",
+      "answer": "NO_SOURCE_SUPPORT",
+      "rationale": "The accepted Phase 1A.3b external-specialist review establishes no supported dimensions; internal capabilities are not treated as external actor or access support."
+    },
+    {
+      "question": "Can evidence be restricted appropriately?",
+      "answer": "NO_SOURCE_SUPPORT",
+      "rationale": "The accepted Phase 1A.3b external-specialist review establishes no supported dimensions; internal capabilities are not treated as external actor or access support."
+    },
+    {
+      "question": "Can status and communications flow back?",
+      "answer": "NO_SOURCE_SUPPORT",
+      "rationale": "The accepted Phase 1A.3b external-specialist review establishes no supported dimensions; internal capabilities are not treated as external actor or access support."
+    },
+    {
+      "question": "Can access expire automatically?",
+      "answer": "NO_SOURCE_SUPPORT",
+      "rationale": "The accepted Phase 1A.3b external-specialist review establishes no supported dimensions; internal capabilities are not treated as external actor or access support."
+    },
+    {
+      "question": "Can access be revoked?",
+      "answer": "NO_SOURCE_SUPPORT",
+      "rationale": "The accepted Phase 1A.3b external-specialist review establishes no supported dimensions; internal capabilities are not treated as external actor or access support."
+    },
+    {
+      "question": "Can specialist activity be audited?",
+      "answer": "NO_SOURCE_SUPPORT",
+      "rationale": "The accepted Phase 1A.3b external-specialist review establishes no supported dimensions; internal capabilities are not treated as external actor or access support."
+    }
+  ],
+  "workAidSourceAssessment": {
+    "assessmentId": "WORKAID_OPERATING_MODEL_SOURCE_ASSESSMENT",
+    "currentSourceSupport": "NONE_FOR_EXTERNAL_SPECIALIST_OPERATIONS",
+    "supportedDimensions": [],
+    "partialDimensions": [],
+    "unsupportedDimensions": [
+      "SPECIALIST_IDENTITY",
+      "SPECIALIST_ASSIGNMENT",
+      "BOUNDED_EXTERNAL_ACCESS",
+      "CASE_HANDOFF",
+      "DOCUMENT_INTAKE",
+      "EVIDENCE_HANDOFF",
+      "CASE_STATUS_EXCHANGE",
+      "COMMUNICATION_EXCHANGE",
+      "RESTRICTED_EVIDENCE_ACCESS",
+      "ACCESS_EXPIRY",
+      "ACCESS_REVOCATION",
+      "SPECIALIST_DISENGAGEMENT",
+      "AUDIT_OF_SPECIALIST_ACTIVITY"
+    ],
+    "relevantExistingCapabilityIds": [
+      "CASE_COMMUNICATIONS",
+      "CASE_EVIDENCE",
+      "CASE_RECORDS",
+      "CASE_RESPONSIBILITY",
+      "DOCUMENT_LIBRARY",
+      "GOVERNANCE_ADMINISTRATION",
+      "USER_ACCESS"
+    ],
+    "capabilityReuseClassification": "CURRENT_REUSABLE_FOUNDATION_ONLY",
+    "missingCapabilityClasses": [
+      "MISSING_ACCESS_BOUNDARY",
+      "MISSING_ACTOR_MODEL",
+      "MISSING_ASSIGNMENT_MODEL",
+      "MISSING_CASE_HANDOFF",
+      "MISSING_COMMUNICATION_EXCHANGE",
+      "MISSING_DOCUMENT_INTAKE",
+      "MISSING_EVIDENCE_HANDOFF",
+      "MISSING_EXPIRY_REVOCATION",
+      "MISSING_EXTERNAL_AUDIT_BOUNDARY",
+      "MISSING_EXTERNAL_IDENTITY_MODEL",
+      "MISSING_STATUS_EXCHANGE"
+    ],
+    "integrationInferred": "NO",
+    "productBuildAuthorized": "NO",
+    "authStartWorkAid": "NO",
+    "documentationSourceCandidate": "YES",
+    "documentationCandidateRationale": "Documentation may describe only the accepted, source-bounded internal UE capabilities and their limitations; it must explicitly state that external-specialist access, document exchange, WorkAid enablement, and Clio integration are not established.",
+    "enablementReady": "NO",
+    "currentVersusFutureItems": [
+      {
+        "item": "Internal case and matter record concepts",
+        "classification": "CURRENT_SOURCE_CAPABILITY",
+        "capabilityIds": [
+          "CASE_RECORDS"
+        ]
+      },
+      {
+        "item": "Internal assignment, deadline, communication, evidence, governance, knowledge, and document concepts",
+        "classification": "CURRENT_SOURCE_CAPABILITY",
+        "capabilityIds": [
+          "CASE_RESPONSIBILITY",
+          "CASE_DEADLINES",
+          "CASE_COMMUNICATIONS",
+          "CASE_EVIDENCE",
+          "GOVERNANCE_ADMINISTRATION",
+          "KNOWLEDGE_HANDOFF",
+          "DOCUMENT_LIBRARY"
+        ]
+      },
+      {
+        "item": "Potential reuse of internal records and document/evidence foundations in a separately authorized future design",
+        "classification": "CURRENT_REUSABLE_FOUNDATION",
+        "capabilityIds": [
+          "CASE_RECORDS",
+          "CASE_EVIDENCE",
+          "DOCUMENT_LIBRARY"
+        ]
+      },
+      {
+        "item": "External actor/identity, scoped assignment/access, external document/evidence exchange, expiry/revocation, and external audit",
+        "classification": "FUTURE_REQUIRED_CAPABILITY",
+        "capabilityIds": []
+      },
+      {
+        "item": "Clio integration, synchronization, or any external-provider connection",
+        "classification": "NOT_SUPPORTED",
+        "capabilityIds": []
+      }
+    ]
+  },
+  "futureDesignObligations": [
+    {
+      "obligationId": "EXT-SPECIALIST-01",
+      "dimension": "SPECIALIST_IDENTITY",
+      "gapClasses": [
+        "MISSING_ACTOR_MODEL",
+        "MISSING_EXTERNAL_IDENTITY_MODEL"
+      ],
+      "severity": "BLOCKING",
+      "currentCapabilityReuse": [],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-02",
+      "dimension": "SPECIALIST_ASSIGNMENT",
+      "gapClasses": [
+        "MISSING_ASSIGNMENT_MODEL"
+      ],
+      "severity": "BLOCKING",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "CASE_RESPONSIBILITY",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-03",
+      "dimension": "BOUNDED_EXTERNAL_ACCESS",
+      "gapClasses": [
+        "MISSING_ACCESS_BOUNDARY"
+      ],
+      "severity": "BLOCKING",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "USER_ACCESS",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-04",
+      "dimension": "CASE_HANDOFF",
+      "gapClasses": [
+        "MISSING_CASE_HANDOFF"
+      ],
+      "severity": "BLOCKING",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "CASE_RECORDS",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        },
+        {
+          "capabilityId": "CASE_RESPONSIBILITY",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-05",
+      "dimension": "DOCUMENT_INTAKE",
+      "gapClasses": [
+        "MISSING_DOCUMENT_INTAKE"
+      ],
+      "severity": "BLOCKING",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "DOCUMENT_LIBRARY",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "UNDETERMINED",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-06",
+      "dimension": "EVIDENCE_HANDOFF",
+      "gapClasses": [
+        "MISSING_EVIDENCE_HANDOFF"
+      ],
+      "severity": "BLOCKING",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "CASE_EVIDENCE",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "UNDETERMINED",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-07",
+      "dimension": "CASE_STATUS_EXCHANGE",
+      "gapClasses": [
+        "MISSING_STATUS_EXCHANGE"
+      ],
+      "severity": "MATERIAL",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "CASE_RECORDS",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-08",
+      "dimension": "COMMUNICATION_EXCHANGE",
+      "gapClasses": [
+        "MISSING_COMMUNICATION_EXCHANGE"
+      ],
+      "severity": "MATERIAL",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "CASE_COMMUNICATIONS",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-09",
+      "dimension": "RESTRICTED_EVIDENCE_ACCESS",
+      "gapClasses": [
+        "MISSING_ACCESS_BOUNDARY"
+      ],
+      "severity": "BLOCKING",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "CASE_EVIDENCE",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        },
+        {
+          "capabilityId": "USER_ACCESS",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-10",
+      "dimension": "ACCESS_EXPIRY",
+      "gapClasses": [
+        "MISSING_EXPIRY_REVOCATION"
+      ],
+      "severity": "BLOCKING",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "USER_ACCESS",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-11",
+      "dimension": "ACCESS_REVOCATION",
+      "gapClasses": [
+        "MISSING_EXPIRY_REVOCATION"
+      ],
+      "severity": "BLOCKING",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "USER_ACCESS",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-12",
+      "dimension": "SPECIALIST_DISENGAGEMENT",
+      "gapClasses": [
+        "MISSING_EXPIRY_REVOCATION"
+      ],
+      "severity": "MATERIAL",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "CASE_RESPONSIBILITY",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        },
+        {
+          "capabilityId": "USER_ACCESS",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    },
+    {
+      "obligationId": "EXT-SPECIALIST-13",
+      "dimension": "AUDIT_OF_SPECIALIST_ACTIVITY",
+      "gapClasses": [
+        "MISSING_EXTERNAL_AUDIT_BOUNDARY"
+      ],
+      "severity": "BLOCKING",
+      "currentCapabilityReuse": [
+        {
+          "capabilityId": "GOVERNANCE_ADMINISTRATION",
+          "classification": "CURRENT_REUSABLE_FOUNDATION",
+          "externalSpecialistSupport": false
+        }
+      ],
+      "newCapabilityRequired": "YES",
+      "authorizationRequiredBeforeBuild": true
+    }
+  ],
+  "defectExposure": {
+    "classification": "LIUNA_ONLY_INHERITED_SOURCE_DEFECTS",
+    "knownDefectIds": [
+      "ACTION-API-METHOD-01",
+      "ACTION-API-ROUTE-01",
+      "UE-R1-ROOT-001",
+      "UE-R1-ROOT-003",
+      "UE-R1-ROOT-004",
+      "UE-R1-ROOT-031",
+      "UE-R1-ROOT-067"
+    ],
+    "externalSpecialistDefectsInvented": false,
+    "externalAbsenceDisposition": "GAP_NOT_DEFECT"
+  },
+  "sourceCeilingExposure": {
+    "obligationIds": [
+      "BINDING-011d933df1b5",
+      "BINDING-0929516c95e4",
+      "BINDING-116f55d1f95d",
+      "BINDING-1a56c96637ba",
+      "BINDING-209f2ec4c3be",
+      "BINDING-25074af3471d",
+      "BINDING-3055fe84dda0",
+      "BINDING-3709b9400fc3",
+      "BINDING-3d7720dd7ee1",
+      "BINDING-3f9bfc5b443f",
+      "BINDING-3ff2004de4e1",
+      "BINDING-4256ecebd732",
+      "BINDING-44a2030d2577",
+      "BINDING-46b703fe0580",
+      "BINDING-46d2e7c75807",
+      "BINDING-46d919076131",
+      "BINDING-4ba04fb5ccf5",
+      "BINDING-4c02ab6c24fa",
+      "BINDING-4de75f902351",
+      "BINDING-596d1f9287df",
+      "BINDING-5c2c348e3c43",
+      "BINDING-5d837a805683",
+      "BINDING-5da3b588a6df",
+      "BINDING-65c61233bdc3",
+      "BINDING-69bfc5dbbb09",
+      "BINDING-6fad83f3bfa5",
+      "BINDING-780177a62d1d",
+      "BINDING-782eaf20a15c",
+      "BINDING-78e9d1775b9c",
+      "BINDING-795985f7d91f",
+      "BINDING-7d9eb397c3da",
+      "BINDING-9488ce91def1",
+      "BINDING-a5b294a7f7d1",
+      "BINDING-b15b7db11d7c",
+      "BINDING-b93c0f2467b5",
+      "BINDING-b9ddddb81a60",
+      "BINDING-bd03beb308a5",
+      "BINDING-c20fc2dbd038",
+      "BINDING-c34c563dff3e",
+      "BINDING-c457def02d40",
+      "BINDING-d1513a7f89a0",
+      "BINDING-d6ea031f3a70",
+      "BINDING-dd82dfa5ea2e",
+      "BINDING-e0f83819600a",
+      "BINDING-e3396056384d",
+      "BINDING-eb9e086f063f",
+      "BINDING-ebd2cf731f6d",
+      "BINDING-ed87372c2603",
+      "BINDING-f1e66974b258",
+      "BINDING-f2fd54fd1bfd",
+      "BINDING-f33ec1024a96",
+      "BINDING-f4e3772a3738",
+      "BINDING-f5a7a6761f7f",
+      "BINDING-fb55993af6ac"
+    ],
+    "bindingIds": [
+      "app/[locale]/calendar/page.tsx:255:7:onSyncCalendar",
+      "app/[locale]/calendar/page.tsx:304:7:onDelete",
+      "app/[locale]/calendar/page.tsx:304:7:onSave",
+      "app/[locale]/calendar/page.tsx:381:13:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:401:13:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:498:21:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:592:17:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:654:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:698:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:788:15:onClick",
+      "app/[locale]/dashboard/admin/governance/governance-console.tsx:884:15:onClick",
+      "app/[locale]/dashboard/dispatch/page.tsx:349:21:onClick",
+      "app/[locale]/dashboard/voting/page.tsx:281:29:onClick",
+      "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:329:23:onClick",
+      "app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx:342:13:onClick",
+      "app/[locale]/workbook/claim/ClaimWorkbookClient.tsx:64:7:onClick",
+      "components/ai/grievance-triage-card.tsx:169:17:onClick",
+      "components/ai/grievance-triage-card.tsx:178:17:onClick",
+      "components/ai/grievance-triage-card.tsx:88:13:onClick",
+      "components/calendar/CalendarSidebar.tsx:236:11:onClick",
+      "components/calendar/CalendarSyncManager.tsx:351:25:onClick",
+      "components/calendar/CalendarSyncManager.tsx:369:25:onClick",
+      "components/clause-library/clause-library-console.tsx:361:15:onClick",
+      "components/clause-library/clause-library-console.tsx:416:21:onClick",
+      "components/clause-library/clause-library-console.tsx:464:15:onCompare",
+      "components/clause-library/clause-library-console.tsx:464:15:onDelete",
+      "components/clause-library/clause-library-console.tsx:508:17:onAddTag",
+      "components/clause-library/clause-library-console.tsx:508:17:onRemoveTag",
+      "components/clause-library/clause-library-console.tsx:573:15:onSave",
+      "components/clause-library/ClauseCompareView.tsx:253:15:onClick",
+      "components/clause-library/ClauseSharingControls.tsx:255:11:onClick",
+      "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+      "components/grievances/grievance-detail-console.tsx:459:11:onSubmit",
+      "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+      "components/grievances/grievance-detail-console.tsx:582:15:onClick",
+      "components/grievances/grievance-detail-console.tsx:596:7:onAssign",
+      "components/grievances/grievances-console.tsx:355:19:onSubmit",
+      "components/grievances/grievances-console.tsx:848:31:onClick",
+      "components/grievances/grievances-console.tsx:860:31:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:201:15:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:220:17:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:288:25:onClick",
+      "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:368:25:onClick",
+      "components/knowledge-transfer/exit-interview-create-form.tsx:81:5:onSubmit",
+      "components/policy-governance/ApprovalQueue.tsx:104:13:onClick",
+      "components/policy-governance/ApprovalQueue.tsx:113:13:onClick",
+      "components/policy-governance/ConflictAnalysis.tsx:104:15:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:67:9:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:70:9:onClick",
+      "components/policy-governance/GovernanceSnapshotViewer.tsx:80:11:onClick",
+      "components/policy-governance/PolicyLineage.tsx:90:9:onClick",
+      "components/policy-governance/ReplayCenter.tsx:103:21:onClick",
+      "components/policy-governance/ReplayCenter.tsx:71:9:onClick",
+      "components/workbench/workbench-console.tsx:917:35:onClick"
+    ],
+    "residualEffectChainIds": [
+      "UE-B2-CHAIN-0014",
+      "UE-B2-CHAIN-0015",
+      "UE-B2-CHAIN-0016",
+      "UE-B2-CHAIN-0027",
+      "UE-B2-CHAIN-0028",
+      "UE-B2-CHAIN-0030",
+      "UE-B2-CHAIN-0100",
+      "UE-B2-CHAIN-0110",
+      "UE-B2-CHAIN-0111",
+      "UE-B2-CHAIN-0113",
+      "UE-B2-CHAIN-0114",
+      "UE-B2-CHAIN-0115",
+      "UE-B2-CHAIN-0116",
+      "UE-B2-CHAIN-0117",
+      "UE-B2-CHAIN-0118",
+      "UE-B2-CHAIN-0119",
+      "UE-B2-CHAIN-0120",
+      "UE-B2-CHAIN-0123",
+      "UE-B2-CHAIN-0124",
+      "UE-B2-CHAIN-0125",
+      "UE-B2-CHAIN-0126",
+      "UE-B2-CHAIN-0128",
+      "UE-B2-CHAIN-0129",
+      "UE-B2-CHAIN-0130",
+      "UE-B2-CHAIN-0131",
+      "UE-B2-CHAIN-0133",
+      "UE-B2-CHAIN-0134",
+      "UE-B2-CHAIN-0135",
+      "UE-B2-CHAIN-0136",
+      "UE-B2-CHAIN-0137",
+      "UE-B2-CHAIN-0138",
+      "UE-B2-CHAIN-0139",
+      "UE-B2-CHAIN-0140",
+      "UE-B2-CHAIN-0227",
+      "UE-B2-CHAIN-0228",
+      "UE-B2-CHAIN-0229",
+      "UE-B2-CHAIN-0230",
+      "UE-B2-CHAIN-0231",
+      "UE-B2-CHAIN-0232",
+      "UE-B2-CHAIN-0233",
+      "UE-B2-CHAIN-0234",
+      "UE-B2-CHAIN-0235",
+      "UE-B2-CHAIN-0236",
+      "UE-B2-CHAIN-0299",
+      "UE-B2-CHAIN-0300",
+      "UE-B2-CHAIN-0301",
+      "UE-B2-CHAIN-0302",
+      "UE-B2-CHAIN-0303",
+      "UE-B2-CHAIN-0304",
+      "UE-B2-CHAIN-0305",
+      "UE-B2-CHAIN-0306",
+      "UE-B2-CHAIN-0307",
+      "UE-B2-CHAIN-0308",
+      "UE-B2-CHAIN-0309",
+      "UE-B2-CHAIN-0310",
+      "UE-B2-CHAIN-0311",
+      "UE-B2-CHAIN-0331",
+      "UE-B2-CHAIN-0332",
+      "UE-B2-CHAIN-0335",
+      "UE-B2-CHAIN-0337",
+      "UE-B2-CHAIN-0338",
+      "UE-B2-CHAIN-0339",
+      "UE-B2-CHAIN-0340",
+      "UE-B2-CHAIN-0341",
+      "UE-B2-CHAIN-0374",
+      "UE-B2-CHAIN-0375",
+      "UE-B2-CHAIN-0381"
+    ],
+    "residualEffectChainObligationIds": [
+      "CHAIN-UE-B2-CHAIN-0014",
+      "CHAIN-UE-B2-CHAIN-0015",
+      "CHAIN-UE-B2-CHAIN-0016",
+      "CHAIN-UE-B2-CHAIN-0027",
+      "CHAIN-UE-B2-CHAIN-0028",
+      "CHAIN-UE-B2-CHAIN-0030",
+      "CHAIN-UE-B2-CHAIN-0100",
+      "CHAIN-UE-B2-CHAIN-0110",
+      "CHAIN-UE-B2-CHAIN-0111",
+      "CHAIN-UE-B2-CHAIN-0113",
+      "CHAIN-UE-B2-CHAIN-0114",
+      "CHAIN-UE-B2-CHAIN-0115",
+      "CHAIN-UE-B2-CHAIN-0116",
+      "CHAIN-UE-B2-CHAIN-0117",
+      "CHAIN-UE-B2-CHAIN-0118",
+      "CHAIN-UE-B2-CHAIN-0119",
+      "CHAIN-UE-B2-CHAIN-0120",
+      "CHAIN-UE-B2-CHAIN-0123",
+      "CHAIN-UE-B2-CHAIN-0124",
+      "CHAIN-UE-B2-CHAIN-0125",
+      "CHAIN-UE-B2-CHAIN-0126",
+      "CHAIN-UE-B2-CHAIN-0128",
+      "CHAIN-UE-B2-CHAIN-0129",
+      "CHAIN-UE-B2-CHAIN-0130",
+      "CHAIN-UE-B2-CHAIN-0131",
+      "CHAIN-UE-B2-CHAIN-0133",
+      "CHAIN-UE-B2-CHAIN-0134",
+      "CHAIN-UE-B2-CHAIN-0135",
+      "CHAIN-UE-B2-CHAIN-0136",
+      "CHAIN-UE-B2-CHAIN-0137",
+      "CHAIN-UE-B2-CHAIN-0138",
+      "CHAIN-UE-B2-CHAIN-0139",
+      "CHAIN-UE-B2-CHAIN-0140",
+      "CHAIN-UE-B2-CHAIN-0227",
+      "CHAIN-UE-B2-CHAIN-0228",
+      "CHAIN-UE-B2-CHAIN-0229",
+      "CHAIN-UE-B2-CHAIN-0230",
+      "CHAIN-UE-B2-CHAIN-0231",
+      "CHAIN-UE-B2-CHAIN-0232",
+      "CHAIN-UE-B2-CHAIN-0233",
+      "CHAIN-UE-B2-CHAIN-0234",
+      "CHAIN-UE-B2-CHAIN-0235",
+      "CHAIN-UE-B2-CHAIN-0236",
+      "CHAIN-UE-B2-CHAIN-0299",
+      "CHAIN-UE-B2-CHAIN-0300",
+      "CHAIN-UE-B2-CHAIN-0301",
+      "CHAIN-UE-B2-CHAIN-0302",
+      "CHAIN-UE-B2-CHAIN-0303",
+      "CHAIN-UE-B2-CHAIN-0304",
+      "CHAIN-UE-B2-CHAIN-0305",
+      "CHAIN-UE-B2-CHAIN-0306",
+      "CHAIN-UE-B2-CHAIN-0307",
+      "CHAIN-UE-B2-CHAIN-0308",
+      "CHAIN-UE-B2-CHAIN-0309",
+      "CHAIN-UE-B2-CHAIN-0310",
+      "CHAIN-UE-B2-CHAIN-0311",
+      "CHAIN-UE-B2-CHAIN-0331",
+      "CHAIN-UE-B2-CHAIN-0332",
+      "CHAIN-UE-B2-CHAIN-0335",
+      "CHAIN-UE-B2-CHAIN-0337",
+      "CHAIN-UE-B2-CHAIN-0338",
+      "CHAIN-UE-B2-CHAIN-0339",
+      "CHAIN-UE-B2-CHAIN-0340",
+      "CHAIN-UE-B2-CHAIN-0341",
+      "CHAIN-UE-B2-CHAIN-0374",
+      "CHAIN-UE-B2-CHAIN-0375",
+      "CHAIN-UE-B2-CHAIN-0381"
+    ],
+    "externalSpecialistObligationsAttached": false
+  },
+  "falseSuccessExposure": {
+    "sourceSupportedBindingIds": [],
+    "potentialOnlyBindingIds": [],
+    "sourceModelSourceSupportedBindingIds": [
+      "app/[locale]/dashboard/admin/page.tsx:844:23:onClick",
+      "components/admin/clc-remittances-dashboard.tsx:500:13:onClick",
+      "components/admin/clc-remittances-dashboard.tsx:504:13:onClick",
+      "components/admin/clc-remittances-dashboard.tsx:508:13:onClick",
+      "components/admin/clc-remittances-dashboard.tsx:596:25:onClick"
+    ],
+    "sourceModelPotentialOnlyBindingIds": [
+      "app/[locale]/dashboard/elections/[id]/page.tsx:263:17:onClick",
+      "app/[locale]/dashboard/profile/page.tsx:1173:23:onClick",
+      "components/icra/ICRAAssessmentFlow.tsx:572:11:onSubmit",
+      "components/rewards/redemption-form.tsx:84:5:onSubmit"
+    ],
+    "evidenceOverlapBindingCount": 0,
+    "dimensionsKeptSeparate": true,
+    "externalSpecialistGapAddedAsFalseSuccess": false
+  },
+  "gate": {
+    "phase1A4bGate": "PASS",
+    "liunaContinuitySourceReconciliationComplete": "YES",
+    "externalSpecialistBoundaryReconciliationComplete": "YES",
+    "unclassifiedLiunaDimensions": 0,
+    "unclassifiedLiunaTransitions": 0,
+    "unclassifiedExternalSpecialistDimensions": 0,
+    "orphanCapabilityReferences": 0,
+    "orphanBindingReferences": 0,
+    "orphanObligationReferences": 0,
+    "orphanDefectReferences": 0,
+    "orphanResidualChainReferences": 0,
+    "unsupportedExternalCapabilitiesInvented": 0,
+    "phase1A4Closeout": "PASS",
+    "phase1AFinalSourceReconciliation": "AUTHORIZED",
+    "phase1AFinalSourceReconciliationStarted": "NO"
+  },
+  "validation": {
+    "all11LiunaDimensionsClassified": true,
+    "all7LiunaTransitionsClassified": true,
+    "allLiunaCapabilityReferencesInFinalModel": true,
+    "allTransitionCapabilityReferencesInFinalModel": true,
+    "allLiunaBindingReferencesInCloseout": true,
+    "allRelevantDefectsInherited": true,
+    "allRelevantSourceCeilingAndResidualObligationsInherited": true,
+    "all13ExternalSpecialistDimensionsClassified": true,
+    "noUnsupportedExternalSpecialistCapabilityInvented": true,
+    "workAidIntegrationNotInferred": true,
+    "allFutureExternalSpecialistGapsRegistered": true,
+    "gapClassesUseApprovedTaxonomy": true,
+    "liunaAndExternalBoundariesKeptDistinct": true,
+    "noRuntimeClaimIntroduced": true,
+    "noAuthorizationClaimIntroduced": true,
+    "noPersistenceClaimIntroduced": true,
+    "noApplicationSourceInspected": true,
+    "noRuntimeActionExecuted": true,
+    "sourceCorpusInputsAccepted": true
+  },
+  "limitations": [
+    "All evidence is accepted source-model or static index evidence; no application source was inspected and no runtime action was executed.",
+    "The eight accepted institutional-continuity signals explicitly disclaim runtime or operational proof.",
+    "A capability concept, binding, static route, or navigation record does not establish an ordered handoff, authorization, persistence, or usability.",
+    "The external-specialist review is separate from LIUNA internal continuity; generic internal assignment, evidence, document, knowledge, and access concepts are not treated as external-specialist support.",
+    "WorkAid and Clio are treated only as requester-provided operating context; no integration, contact, enablement, or product build is authorized.",
+    "Phase 1A final source reconciliation is authorized as a recommendation only and has not been started."
+  ]
+}

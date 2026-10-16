@@ -1,0 +1,1220 @@
+{
+  "metadata": {
+    "PHASE": "PHASE_1B_3C_A1I_W4C",
+    "INPUTS": {
+      "w4fr3": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR3_MINIMAL_BASELINE_AUTHORING.json",
+      "scope": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4S_PHYSICAL_AUTHORING_SCOPE_NORMALIZATION.json",
+      "resolved": "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_RESOLVED.json",
+      "w4h": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE.json",
+      "w4g": "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.json",
+      "producer": "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json"
+    },
+    "GENERAL_DISCOVERY": "NO"
+  },
+  "rules": {
+    "AUTHORITY": "HUMAN_ARCHITECTURE_W4C",
+    "SCOPE": "EXACT_SEVEN_CONSTRAINT_MATERIALIZATION_TIMING_ONLY",
+    "MIXED_AUTHORITY_CONSTRAINT_RULE": "MATERIALIZE_ONLY_AFTER_ALL_OPERAND_COLUMNS_EXIST",
+    "W4_CANONICAL_DEFINITION_COMPLETE": "W4_OWNED_OBJECT_DEFINITION_COMPLETE AND CROSS_AUTHORITY_CONSTRAINT_SEMANTICS_RECORDED",
+    "W4_BASELINE_CONSTRAINT_MATERIALIZATION": "DEFERRED_UNTIL_ALL_CONSTRAINT_OPERANDS_EXIST",
+    "PARTIAL_UNIQUE_SUBSTITUTE": "PROHIBITED",
+    "W4FR4_PASS_REQUIREMENTS": {
+      "W4_OBLIGATIONS_PHYSICALLY_DEFINED": 183,
+      "RELATION_PREREQUISITES_DEFINED": 57,
+      "COLUMN_PREREQUISITES_DEFINED": 126,
+      "NAMED_TYPES_DEFINED": 36,
+      "NAMED_TYPE_REFERENCES_RESOLVED": 38,
+      "MIXED_AUTHORITY_CONSTRAINTS_CANONICALLY_RECORDED": 7,
+      "CONSTRAINT_MATERIALIZATIONS_EXPLICITLY_DEFERRED": 7,
+      "ACCEPTED_CONSTRAINTS_DROPPED": 0,
+      "PARENT_OWNED_OPERANDS_REAUTHORED": 0,
+      "UNRESOLVED_W4_OWNED_PHYSICAL_PROPERTIES": 0
+    },
+    "FUTURE_CLAIM_CEILING": "W4_PRECONSUMER_BASELINE_DEFINITION_COMPLETE only after W4FR4 PASS;not ALL_APPLICATION_CONSTRAINTS_MATERIALIZED",
+    "AUTHORITY_CLASSIFICATION_NOTE": "NON_W4_OPERANDS means outside explicit W4 baseline materialization. Frozen W4S context-only W4_OWNED records are preserved;no new parent creation authority is inferred or assigned.",
+    "HISTORICAL_W4FR3": "Correctly BLOCKED under pre-W4C rule;only materialization-timing assumption superseded"
+  },
+  "summary": {
+    "CONSTRAINTS_INPUT": 7,
+    "CONSTRAINTS_ACCOUNTED": 7,
+    "BLOCKED_W4_OBLIGATION_IDS_INPUT": 14,
+    "BLOCKED_W4_OBLIGATION_IDS_ACCOUNTED": 14,
+    "UNACCOUNTED": 0,
+    "W4_DEFINITION_OBLIGATIONS": 183,
+    "RELATION_CREATE_RESPONSIBILITIES": 57,
+    "INCLUDED_COLUMN_RESPONSIBILITIES": 57,
+    "ADD_COLUMN_RESPONSIBILITIES": 69,
+    "DEFERRED_MIXED_AUTHORITY_CONSTRAINTS": 7,
+    "EXACT_LATER_PRODUCERS_IDENTIFIED": 0,
+    "COMPATIBILITY_PHASE_RESOLUTION_REQUIRED": 7,
+    "EXISTING_LATE_PRODUCER_COMPATIBILITY_RECORDS": 127,
+    "SUPPLEMENTAL_DEFERRED_CONSTRAINT_HANDOFFS": 7,
+    "PARTIAL_UNIQUE_SUBSTITUTIONS": 0,
+    "CONSTRAINTS_DROPPED": 0,
+    "CONSTRAINTS_REPLACED": 0,
+    "CONSTRAINTS_WEAKENED": 0,
+    "PARENT_OWNED_OPERAND_COLUMNS_CREATED_BY_W4": 0,
+    "PARENT_OWNED_OPERAND_COLUMNS_REAUTHORED_BY_W4": 0,
+    "SQL_AUTHORED": 0,
+    "SQL_EXECUTED": 0,
+    "PRODUCER_METADATA_UPDATES": 0
+  },
+  "constraintTimingDisposition": [
+    {
+      "DEFERRED_CONSTRAINT_ID": "UE-W4C-DEFERRED-CONSTRAINT-687b0013df9b8c8a",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-687b0013df9b8c8a",
+      "SOURCE_W4FR3_BLOCKER_ID": "UE-W4FR3-CONSTRAINT-e97ff3c36985ca7a",
+      "RELATION": "public.org_entitlements",
+      "CONSTRAINT_KIND": "UNIQUE",
+      "ORDERED_OPERAND_COLUMNS": ["organization_id", "feature_key"],
+      "W4_OWNED_OPERANDS": ["organization_id"],
+      "NON_W4_OPERANDS": ["feature_key"],
+      "OPERAND_AUTHORITY_EVIDENCE": [
+        {
+          "COLUMN": "organization_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_entitlements.organization_id",
+          "W4_BASELINE_OPERAND_CLASS": "W4_OWNED_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_entitlements.organization_id",
+            "COLUMN_NAME": "organization_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "AUTHORIZED_FUTURE_INACTIVE_DEFINITION_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "YES",
+            "W4_DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-1616d255367c341d",
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-91539638ae3d477c",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        },
+        {
+          "COLUMN": "feature_key",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_entitlements.feature_key",
+          "W4_BASELINE_OPERAND_CLASS": "NON_W4_BASELINE_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_entitlements.feature_key",
+            "COLUMN_NAME": "feature_key",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "NO_INDEPENDENT_COLUMN_OBLIGATION_CONTEXT_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "NO_INDEPENDENT_COLUMN_COMPLETENESS_DENOMINATOR",
+            "W4_DEFINITION_OBLIGATION_ID": null,
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-91539638ae3d477c",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        }
+      ],
+      "SOURCE_W4_OBLIGATION_IDS": [
+        "UE-W4G-DEFINITION-1616d255367c341d",
+        "UE-W4G-DEFINITION-91539638ae3d477c"
+      ],
+      "CANONICAL_CONSTRAINT_PROVENANCE": {
+        "GOVERNED_UNIQUE_PROPERTY": {
+          "PROPERTY": "UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex('org_entitlements_org_feature_idx').on(t.organizationId, t.featureKey)\"]",
+          "PROVENANCE": "EXACT_DECLARATION",
+          "RULE": "RULE_9_10_11_CURRENT_CALLBACK_FACT",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+              "DIGEST": "787b806da768a9e1f34cf70e6d4d02483cfc3803e0ac8995d4e229bc3faea9d0",
+              "RANGE": [127, 154]
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Explicit current callback participation; primary key establishes NOT_NULL. No inferred restriction."
+        },
+        "GOVERNED_OBLIGATION_PROPERTY": {
+          "PROPERTY": "organization_id.UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex('org_entitlements_org_feature_idx').on(t.organizationId, t.featureKey)\"]"
+        },
+        "FROZEN_DECLARATION_REFERENCE": {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+          "FILE_SHA256": "f1b988aade5a9e6af88ef00bf6d4b9f539dc97a36b11525092302ef93e09e666",
+          "RANGE": [127, 154],
+          "DIGEST": "787b806da768a9e1f34cf70e6d4d02483cfc3803e0ac8995d4e229bc3faea9d0",
+          "TEXT": "pgTable('org_entitlements', {\n  id: uuid('id').primaryKey().defaultRandom(),\n  organizationId: uuid('organization_id')\n    .notNull()\n    .references(() => organizations.id, { onDelete: 'restrict' }),\n  contractLineItemId: uuid('contract_line_item_id')\n    .references(() => contractLineItems.id, { onDelete: 'set null' }),\n  featureKey: varchar('feature_key', { length: 100 }).notNull(),\n  status: entitlementStatusEnum('status').notNull().default('active'),\n  grantedAt: timestamp('granted_at', { withTimezone: true }).defaultNow().notNull(),\n  expiresAt: timestamp('expires_at', { withTimezone: true }),\n  usageLimit: integer('usage_limit'),           // null = unlimited\n  usagePeriod: varchar('usage_period', { length: 20 }),\n  currentUsage: integer('current_usage').notNull().default(0),\n  usagePeriodStart: timestamp('usage_period_start', { withTimezone: true }),\n  lastResetAt: timestamp('last_reset_at', { withTimezone: true }),\n  grantedBy: varchar('granted_by', { length: 255 }),\n  revokedBy: varchar('revoked_by', { length: 255 }),\n  revokedAt: timestamp('revoked_at', { withTimezone: true }),\n  revokeReason: text('revoke_reason'),\n  metadata: jsonb('metadata').$type<Record<string, unknown>>(),\n  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),\n  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),\n}, (t) => ({\n  orgFeatureIdx: uniqueIndex('org_entitlements_org_feature_idx').on(t.organizationId, t.featureKey),\n  statusIdx: index('org_entitlements_status_idx').on(t.status),\n  expiresIdx: index('org_entitlements_expires_idx').on(t.expiresAt),\n}))",
+          "CLASS": "DECLARATION_DESIGN_EVIDENCE",
+          "CREATION_AUTHORITY": "NO",
+          "EXECUTION_AUTHORITY": "NO"
+        }
+      },
+      "CANONICAL_CONSTRAINT_DEFINITION": "COMPLETE",
+      "CONSTRAINT_SEMANTICS": "PRESERVED",
+      "CONSTRAINT_DROPPED": "NO",
+      "CONSTRAINT_REPLACED": "NO",
+      "CONSTRAINT_WEAKENED": "NO",
+      "PARTIAL_UNIQUE_SUBSTITUTION": "PROHIBITED",
+      "W4_BASELINE_MATERIALIZATION": "DEFERRED",
+      "BASELINE_EXECUTABLE_MATERIALIZATION": "DEFERRED",
+      "MATERIALIZATION_PRECONDITION": "ALL_OPERAND_COLUMNS_PHYSICALLY_EXIST",
+      "MATERIALIZATION_STATUS": "DEFERRED_NOT_EXECUTED",
+      "BASELINE_PAYLOAD_BEHAVIOR": {
+        "CREATE_RELATION": "YES",
+        "CREATE_W4_OWNED_COLUMNS": "YES",
+        "CREATE_PARENT_OWNED_OPERANDS": "NO",
+        "CREATE_COMPOUND_UNIQUE_CONSTRAINT": "NO",
+        "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-687b0013df9b8c8a",
+        "STATUS": "FUTURE_W4FR4_ONLY_NOT_AUTHORED"
+      },
+      "NON_W4_OPERAND_IDENTITIES": ["union-eyes::COLUMN::public.org_entitlements.feature_key"],
+      "STATUS": "COMPATIBILITY_PHASE_RESOLUTION_REQUIRED",
+      "DEFERRED_TO_PRODUCER_ID": null,
+      "DEPENDENCY_OPERAND_IDS": ["union-eyes::COLUMN::public.org_entitlements.feature_key"],
+      "CONSTRAINT_MATERIALIZATION_AFTER": "FINAL_OPERAND_PRODUCTION",
+      "MATERIALIZATION_OWNER": "LATE_PRODUCER_COMPATIBILITY_RESOLUTION",
+      "HUMAN_SCHEMA_DECISION_REQUIRED": "NO",
+      "LINKAGE_EVIDENCE": [
+        {
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_entitlements.feature_key",
+          "EXACT_LATE_DEFINITION_REFERENCES": [],
+          "EXACT_COMPATIBILITY_REFERENCES": [],
+          "EXACT_PLAN_REFERENCES": [],
+          "EXACT_REGISTRY_PRODUCER_IDS": []
+        }
+      ],
+      "LINKAGE_CEILING": "Exact operand identities only;declaration context is not a producer. Missing/ambiguous production evidence remains compatibility-resolution metadata.",
+      "COMPATIBILITY_INTEGRATION": "SUPPLEMENTAL_DEFERRED_CONSTRAINT_HANDOFF;existing127 records unchanged",
+      "EXISTING_COMPATIBILITY_OBLIGATION_IDS": [],
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "DEFERRED_CONSTRAINT_ID": "UE-W4C-DEFERRED-CONSTRAINT-ab480be7d3ecbe76",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-ab480be7d3ecbe76",
+      "SOURCE_W4FR3_BLOCKER_ID": "UE-W4FR3-CONSTRAINT-fa309c750769a117",
+      "RELATION": "public.billing_periods",
+      "CONSTRAINT_KIND": "UNIQUE",
+      "ORDERED_OPERAND_COLUMNS": ["organization_id", "label"],
+      "W4_OWNED_OPERANDS": ["organization_id"],
+      "NON_W4_OPERANDS": ["label"],
+      "OPERAND_AUTHORITY_EVIDENCE": [
+        {
+          "COLUMN": "organization_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.billing_periods.organization_id",
+          "W4_BASELINE_OPERAND_CLASS": "W4_OWNED_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.billing_periods.organization_id",
+            "COLUMN_NAME": "organization_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "AUTHORIZED_FUTURE_INACTIVE_DEFINITION_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "YES",
+            "W4_DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-77aa06833477f7cb",
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-2f46bc9a15b4fe78",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        },
+        {
+          "COLUMN": "label",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.billing_periods.label",
+          "W4_BASELINE_OPERAND_CLASS": "NON_W4_BASELINE_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.billing_periods.label",
+            "COLUMN_NAME": "label",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "NO_INDEPENDENT_COLUMN_OBLIGATION_CONTEXT_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "NO_INDEPENDENT_COLUMN_COMPLETENESS_DENOMINATOR",
+            "W4_DEFINITION_OBLIGATION_ID": null,
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-2f46bc9a15b4fe78",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        }
+      ],
+      "SOURCE_W4_OBLIGATION_IDS": [
+        "UE-W4G-DEFINITION-77aa06833477f7cb",
+        "UE-W4G-DEFINITION-2f46bc9a15b4fe78"
+      ],
+      "CANONICAL_CONSTRAINT_PROVENANCE": {
+        "GOVERNED_UNIQUE_PROPERTY": {
+          "PROPERTY": "UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex('billing_periods_org_label_idx').on(t.organizationId, t.label)\"]",
+          "PROVENANCE": "EXACT_DECLARATION",
+          "RULE": "RULE_9_10_11_CURRENT_CALLBACK_FACT",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+              "DIGEST": "f3b406c41ba92eaf9df5af08b13778fb0e880673b31647edfe937cd8c1037de7",
+              "RANGE": [152, 166]
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Explicit current callback participation; primary key establishes NOT_NULL. No inferred restriction."
+        },
+        "GOVERNED_OBLIGATION_PROPERTY": {
+          "PROPERTY": "organization_id.UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex('billing_periods_org_label_idx').on(t.organizationId, t.label)\"]"
+        },
+        "FROZEN_DECLARATION_REFERENCE": {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+          "FILE_SHA256": "729311b4e5be5afcf25f9e17b1dcd23ae1abb06c4fcf74071064f6ac4c6aacd8",
+          "RANGE": [152, 166],
+          "DIGEST": "f3b406c41ba92eaf9df5af08b13778fb0e880673b31647edfe937cd8c1037de7",
+          "TEXT": "pgTable('billing_periods', {\n  id: uuid('id').primaryKey().defaultRandom(),\n  organizationId: uuid('organization_id')\n    .notNull()\n    .references(() => organizations.id, { onDelete: 'restrict' }),\n  periodStart: timestamp('period_start', { withTimezone: true }).notNull(),\n  periodEnd: timestamp('period_end', { withTimezone: true }).notNull(),\n  label: varchar('label', { length: 50 }).notNull(), // e.g. \"2026-03\"\n  isClosed: boolean('is_closed').notNull().default(false),\n  closedAt: timestamp('closed_at', { withTimezone: true }),\n  closedBy: varchar('closed_by', { length: 255 }),\n  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),\n}, (t) => ({\n  orgPeriodIdx: uniqueIndex('billing_periods_org_label_idx').on(t.organizationId, t.label),\n}))",
+          "CLASS": "DECLARATION_DESIGN_EVIDENCE",
+          "CREATION_AUTHORITY": "NO",
+          "EXECUTION_AUTHORITY": "NO"
+        }
+      },
+      "CANONICAL_CONSTRAINT_DEFINITION": "COMPLETE",
+      "CONSTRAINT_SEMANTICS": "PRESERVED",
+      "CONSTRAINT_DROPPED": "NO",
+      "CONSTRAINT_REPLACED": "NO",
+      "CONSTRAINT_WEAKENED": "NO",
+      "PARTIAL_UNIQUE_SUBSTITUTION": "PROHIBITED",
+      "W4_BASELINE_MATERIALIZATION": "DEFERRED",
+      "BASELINE_EXECUTABLE_MATERIALIZATION": "DEFERRED",
+      "MATERIALIZATION_PRECONDITION": "ALL_OPERAND_COLUMNS_PHYSICALLY_EXIST",
+      "MATERIALIZATION_STATUS": "DEFERRED_NOT_EXECUTED",
+      "BASELINE_PAYLOAD_BEHAVIOR": {
+        "CREATE_RELATION": "YES",
+        "CREATE_W4_OWNED_COLUMNS": "YES",
+        "CREATE_PARENT_OWNED_OPERANDS": "NO",
+        "CREATE_COMPOUND_UNIQUE_CONSTRAINT": "NO",
+        "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-ab480be7d3ecbe76",
+        "STATUS": "FUTURE_W4FR4_ONLY_NOT_AUTHORED"
+      },
+      "NON_W4_OPERAND_IDENTITIES": ["union-eyes::COLUMN::public.billing_periods.label"],
+      "STATUS": "COMPATIBILITY_PHASE_RESOLUTION_REQUIRED",
+      "DEFERRED_TO_PRODUCER_ID": null,
+      "DEPENDENCY_OPERAND_IDS": ["union-eyes::COLUMN::public.billing_periods.label"],
+      "CONSTRAINT_MATERIALIZATION_AFTER": "FINAL_OPERAND_PRODUCTION",
+      "MATERIALIZATION_OWNER": "LATE_PRODUCER_COMPATIBILITY_RESOLUTION",
+      "HUMAN_SCHEMA_DECISION_REQUIRED": "NO",
+      "LINKAGE_EVIDENCE": [
+        {
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.billing_periods.label",
+          "EXACT_LATE_DEFINITION_REFERENCES": [],
+          "EXACT_COMPATIBILITY_REFERENCES": [],
+          "EXACT_PLAN_REFERENCES": [],
+          "EXACT_REGISTRY_PRODUCER_IDS": []
+        }
+      ],
+      "LINKAGE_CEILING": "Exact operand identities only;declaration context is not a producer. Missing/ambiguous production evidence remains compatibility-resolution metadata.",
+      "COMPATIBILITY_INTEGRATION": "SUPPLEMENTAL_DEFERRED_CONSTRAINT_HANDOFF;existing127 records unchanged",
+      "EXISTING_COMPATIBILITY_OBLIGATION_IDS": [],
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "DEFERRED_CONSTRAINT_ID": "UE-W4C-DEFERRED-CONSTRAINT-b54f294d75c25fb5",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-b54f294d75c25fb5",
+      "SOURCE_W4FR3_BLOCKER_ID": "UE-W4FR3-CONSTRAINT-b10f6cef88ab5fbf",
+      "RELATION": "public.org_configurations",
+      "CONSTRAINT_KIND": "UNIQUE",
+      "ORDERED_OPERAND_COLUMNS": ["organization_id", "category", "key"],
+      "W4_OWNED_OPERANDS": ["organization_id"],
+      "NON_W4_OPERANDS": ["category", "key"],
+      "OPERAND_AUTHORITY_EVIDENCE": [
+        {
+          "COLUMN": "organization_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_configurations.organization_id",
+          "W4_BASELINE_OPERAND_CLASS": "W4_OWNED_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_configurations.organization_id",
+            "COLUMN_NAME": "organization_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "AUTHORIZED_FUTURE_INACTIVE_DEFINITION_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "YES",
+            "W4_DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-55b4f73e9c33e4a9",
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-c42b44506e916c09",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        },
+        {
+          "COLUMN": "category",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_configurations.category",
+          "W4_BASELINE_OPERAND_CLASS": "NON_W4_BASELINE_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_configurations.category",
+            "COLUMN_NAME": "category",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "NO_INDEPENDENT_COLUMN_OBLIGATION_CONTEXT_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "NO_INDEPENDENT_COLUMN_COMPLETENESS_DENOMINATOR",
+            "W4_DEFINITION_OBLIGATION_ID": null,
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-c42b44506e916c09",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        },
+        {
+          "COLUMN": "key",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_configurations.key",
+          "W4_BASELINE_OPERAND_CLASS": "NON_W4_BASELINE_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_configurations.key",
+            "COLUMN_NAME": "key",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "NO_INDEPENDENT_COLUMN_OBLIGATION_CONTEXT_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "NO_INDEPENDENT_COLUMN_COMPLETENESS_DENOMINATOR",
+            "W4_DEFINITION_OBLIGATION_ID": null,
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-c42b44506e916c09",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        }
+      ],
+      "SOURCE_W4_OBLIGATION_IDS": [
+        "UE-W4G-DEFINITION-55b4f73e9c33e4a9",
+        "UE-W4G-DEFINITION-c42b44506e916c09"
+      ],
+      "CANONICAL_CONSTRAINT_PROVENANCE": {
+        "GOVERNED_UNIQUE_PROPERTY": {
+          "PROPERTY": "UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex('idx_org_configurations_org_cat_key').on(\\n      table.organizationId,\\n      table.category,\\n      table.key,\\n    )\"]",
+          "PROVENANCE": "EXACT_DECLARATION",
+          "RULE": "RULE_9_10_11_CURRENT_CALLBACK_FACT",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema-organizations.ts",
+              "DIGEST": "82042bf17360c04d57468b7eb7504c6c2e282abe761bd72ad158e8d6f5e486ef",
+              "RANGE": [401, 424]
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Explicit current callback participation; primary key establishes NOT_NULL. No inferred restriction."
+        },
+        "GOVERNED_OBLIGATION_PROPERTY": {
+          "PROPERTY": "organization_id.UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex('idx_org_configurations_org_cat_key').on(\\n      table.organizationId,\\n      table.category,\\n      table.key,\\n    )\"]"
+        },
+        "FROZEN_DECLARATION_REFERENCE": {
+          "FILE": "apps/union-eyes/db/schema-organizations.ts",
+          "FILE_SHA256": "72f938989c612b123a8eccb40952b66f46fba000b43a7c9d58f9480013d255d0",
+          "RANGE": [401, 424],
+          "DIGEST": "82042bf17360c04d57468b7eb7504c6c2e282abe761bd72ad158e8d6f5e486ef",
+          "TEXT": "pgTable(\n  'org_configurations',\n  {\n    id: uuid('id').defaultRandom().primaryKey(),\n    organizationId: uuid('organization_id')\n      .notNull()\n      .references(() => organizations.id, { onDelete: 'cascade' }),\n    category: text('category').notNull(),\n    key: text('key').notNull(),\n    value: jsonb('value'),\n    description: text('description'),\n    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),\n    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),\n    updatedBy: uuid('updated_by'),\n  },\n  (table) => ({\n    orgCategoryKeyIdx: uniqueIndex('idx_org_configurations_org_cat_key').on(\n      table.organizationId,\n      table.category,\n      table.key,\n    ),\n    orgIdx: index('idx_org_configurations_org').on(table.organizationId),\n  }),\n)",
+          "CLASS": "DECLARATION_DESIGN_EVIDENCE",
+          "CREATION_AUTHORITY": "NO",
+          "EXECUTION_AUTHORITY": "NO"
+        }
+      },
+      "CANONICAL_CONSTRAINT_DEFINITION": "COMPLETE",
+      "CONSTRAINT_SEMANTICS": "PRESERVED",
+      "CONSTRAINT_DROPPED": "NO",
+      "CONSTRAINT_REPLACED": "NO",
+      "CONSTRAINT_WEAKENED": "NO",
+      "PARTIAL_UNIQUE_SUBSTITUTION": "PROHIBITED",
+      "W4_BASELINE_MATERIALIZATION": "DEFERRED",
+      "BASELINE_EXECUTABLE_MATERIALIZATION": "DEFERRED",
+      "MATERIALIZATION_PRECONDITION": "ALL_OPERAND_COLUMNS_PHYSICALLY_EXIST",
+      "MATERIALIZATION_STATUS": "DEFERRED_NOT_EXECUTED",
+      "BASELINE_PAYLOAD_BEHAVIOR": {
+        "CREATE_RELATION": "YES",
+        "CREATE_W4_OWNED_COLUMNS": "YES",
+        "CREATE_PARENT_OWNED_OPERANDS": "NO",
+        "CREATE_COMPOUND_UNIQUE_CONSTRAINT": "NO",
+        "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-b54f294d75c25fb5",
+        "STATUS": "FUTURE_W4FR4_ONLY_NOT_AUTHORED"
+      },
+      "NON_W4_OPERAND_IDENTITIES": [
+        "union-eyes::COLUMN::public.org_configurations.category",
+        "union-eyes::COLUMN::public.org_configurations.key"
+      ],
+      "STATUS": "COMPATIBILITY_PHASE_RESOLUTION_REQUIRED",
+      "DEFERRED_TO_PRODUCER_ID": null,
+      "DEPENDENCY_OPERAND_IDS": [
+        "union-eyes::COLUMN::public.org_configurations.category",
+        "union-eyes::COLUMN::public.org_configurations.key"
+      ],
+      "CONSTRAINT_MATERIALIZATION_AFTER": "FINAL_OPERAND_PRODUCTION",
+      "MATERIALIZATION_OWNER": "LATE_PRODUCER_COMPATIBILITY_RESOLUTION",
+      "HUMAN_SCHEMA_DECISION_REQUIRED": "NO",
+      "LINKAGE_EVIDENCE": [
+        {
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_configurations.category",
+          "EXACT_LATE_DEFINITION_REFERENCES": [],
+          "EXACT_COMPATIBILITY_REFERENCES": [],
+          "EXACT_PLAN_REFERENCES": [],
+          "EXACT_REGISTRY_PRODUCER_IDS": []
+        },
+        {
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.org_configurations.key",
+          "EXACT_LATE_DEFINITION_REFERENCES": [],
+          "EXACT_COMPATIBILITY_REFERENCES": [],
+          "EXACT_PLAN_REFERENCES": [],
+          "EXACT_REGISTRY_PRODUCER_IDS": []
+        }
+      ],
+      "LINKAGE_CEILING": "Exact operand identities only;declaration context is not a producer. Missing/ambiguous production evidence remains compatibility-resolution metadata.",
+      "COMPATIBILITY_INTEGRATION": "SUPPLEMENTAL_DEFERRED_CONSTRAINT_HANDOFF;existing127 records unchanged",
+      "EXISTING_COMPATIBILITY_OBLIGATION_IDS": [],
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "DEFERRED_CONSTRAINT_ID": "UE-W4C-DEFERRED-CONSTRAINT-22e544681ea09ae3",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-22e544681ea09ae3",
+      "SOURCE_W4FR3_BLOCKER_ID": "UE-W4FR3-CONSTRAINT-bb3d790f6f641601",
+      "RELATION": "public.pilot_checklist_items",
+      "CONSTRAINT_KIND": "UNIQUE",
+      "ORDERED_OPERAND_COLUMNS": ["organization_id", "item_id"],
+      "W4_OWNED_OPERANDS": ["organization_id"],
+      "NON_W4_OPERANDS": ["item_id"],
+      "OPERAND_AUTHORITY_EVIDENCE": [
+        {
+          "COLUMN": "organization_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.pilot_checklist_items.organization_id",
+          "W4_BASELINE_OPERAND_CLASS": "W4_OWNED_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.pilot_checklist_items.organization_id",
+            "COLUMN_NAME": "organization_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "AUTHORIZED_FUTURE_INACTIVE_DEFINITION_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "YES",
+            "W4_DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-34cb89029be25de1",
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-789de61afb7f456e",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        },
+        {
+          "COLUMN": "item_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.pilot_checklist_items.item_id",
+          "W4_BASELINE_OPERAND_CLASS": "NON_W4_BASELINE_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.pilot_checklist_items.item_id",
+            "COLUMN_NAME": "item_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "NO_INDEPENDENT_COLUMN_OBLIGATION_CONTEXT_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "NO_INDEPENDENT_COLUMN_COMPLETENESS_DENOMINATOR",
+            "W4_DEFINITION_OBLIGATION_ID": null,
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-789de61afb7f456e",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        }
+      ],
+      "SOURCE_W4_OBLIGATION_IDS": [
+        "UE-W4G-DEFINITION-34cb89029be25de1",
+        "UE-W4G-DEFINITION-789de61afb7f456e"
+      ],
+      "CANONICAL_CONSTRAINT_PROVENANCE": {
+        "GOVERNED_UNIQUE_PROPERTY": {
+          "PROPERTY": "UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex(\\\"uq_pilot_checklist_org_item\\\").on(\\n      table.organizationId,\\n      table.itemId,\\n    )\"]",
+          "PROVENANCE": "EXACT_DECLARATION",
+          "RULE": "RULE_9_10_11_CURRENT_CALLBACK_FACT",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/pilot/pilot-onboarding.ts",
+              "DIGEST": "a27a17e77cc9dd91f504783470cdeeff18ba7186ecd6ec49584c454a2395a4a5",
+              "RANGE": [18, 41]
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Explicit current callback participation; primary key establishes NOT_NULL. No inferred restriction."
+        },
+        "GOVERNED_OBLIGATION_PROPERTY": {
+          "PROPERTY": "organization_id.UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex(\\\"uq_pilot_checklist_org_item\\\").on(\\n      table.organizationId,\\n      table.itemId,\\n    )\"]"
+        },
+        "FROZEN_DECLARATION_REFERENCE": {
+          "FILE": "apps/union-eyes/db/schema/domains/pilot/pilot-onboarding.ts",
+          "FILE_SHA256": "3eaab5abe41994846eafb0ab88ea61f87b10175b1ff0ef2fdf71edf0c56d0729",
+          "RANGE": [18, 41],
+          "DIGEST": "a27a17e77cc9dd91f504783470cdeeff18ba7186ecd6ec49584c454a2395a4a5",
+          "TEXT": "pgTable(\n  \"pilot_checklist_items\",\n  {\n    id: uuid(\"id\").primaryKey().defaultRandom(),\n    organizationId: uuid(\"organization_id\").notNull(),\n    itemId: varchar(\"item_id\", { length: 100 }).notNull(),\n    completed: boolean(\"completed\").notNull().default(false),\n    completedAt: timestamp(\"completed_at\", { withTimezone: true }),\n    completedBy: varchar(\"completed_by\", { length: 255 }),\n    createdAt: timestamp(\"created_at\", { withTimezone: true })\n      .notNull()\n      .defaultNow(),\n    updatedAt: timestamp(\"updated_at\", { withTimezone: true })\n      .notNull()\n      .defaultNow(),\n  },\n  (table) => [\n    uniqueIndex(\"uq_pilot_checklist_org_item\").on(\n      table.organizationId,\n      table.itemId,\n    ),\n    index(\"idx_pilot_checklist_org\").on(table.organizationId),\n  ],\n)",
+          "CLASS": "DECLARATION_DESIGN_EVIDENCE",
+          "CREATION_AUTHORITY": "NO",
+          "EXECUTION_AUTHORITY": "NO"
+        }
+      },
+      "CANONICAL_CONSTRAINT_DEFINITION": "COMPLETE",
+      "CONSTRAINT_SEMANTICS": "PRESERVED",
+      "CONSTRAINT_DROPPED": "NO",
+      "CONSTRAINT_REPLACED": "NO",
+      "CONSTRAINT_WEAKENED": "NO",
+      "PARTIAL_UNIQUE_SUBSTITUTION": "PROHIBITED",
+      "W4_BASELINE_MATERIALIZATION": "DEFERRED",
+      "BASELINE_EXECUTABLE_MATERIALIZATION": "DEFERRED",
+      "MATERIALIZATION_PRECONDITION": "ALL_OPERAND_COLUMNS_PHYSICALLY_EXIST",
+      "MATERIALIZATION_STATUS": "DEFERRED_NOT_EXECUTED",
+      "BASELINE_PAYLOAD_BEHAVIOR": {
+        "CREATE_RELATION": "YES",
+        "CREATE_W4_OWNED_COLUMNS": "YES",
+        "CREATE_PARENT_OWNED_OPERANDS": "NO",
+        "CREATE_COMPOUND_UNIQUE_CONSTRAINT": "NO",
+        "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-22e544681ea09ae3",
+        "STATUS": "FUTURE_W4FR4_ONLY_NOT_AUTHORED"
+      },
+      "NON_W4_OPERAND_IDENTITIES": ["union-eyes::COLUMN::public.pilot_checklist_items.item_id"],
+      "STATUS": "COMPATIBILITY_PHASE_RESOLUTION_REQUIRED",
+      "DEFERRED_TO_PRODUCER_ID": null,
+      "DEPENDENCY_OPERAND_IDS": ["union-eyes::COLUMN::public.pilot_checklist_items.item_id"],
+      "CONSTRAINT_MATERIALIZATION_AFTER": "FINAL_OPERAND_PRODUCTION",
+      "MATERIALIZATION_OWNER": "LATE_PRODUCER_COMPATIBILITY_RESOLUTION",
+      "HUMAN_SCHEMA_DECISION_REQUIRED": "NO",
+      "LINKAGE_EVIDENCE": [
+        {
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.pilot_checklist_items.item_id",
+          "EXACT_LATE_DEFINITION_REFERENCES": [],
+          "EXACT_COMPATIBILITY_REFERENCES": [],
+          "EXACT_PLAN_REFERENCES": [],
+          "EXACT_REGISTRY_PRODUCER_IDS": []
+        }
+      ],
+      "LINKAGE_CEILING": "Exact operand identities only;declaration context is not a producer. Missing/ambiguous production evidence remains compatibility-resolution metadata.",
+      "COMPATIBILITY_INTEGRATION": "SUPPLEMENTAL_DEFERRED_CONSTRAINT_HANDOFF;existing127 records unchanged",
+      "EXISTING_COMPATIBILITY_OBLIGATION_IDS": [],
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "DEFERRED_CONSTRAINT_ID": "UE-W4C-DEFERRED-CONSTRAINT-921db4f0bc63e01d",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-921db4f0bc63e01d",
+      "SOURCE_W4FR3_BLOCKER_ID": "UE-W4FR3-CONSTRAINT-1b81408f5fc4bb17",
+      "RELATION": "public.member_jurisdiction_preferences",
+      "CONSTRAINT_KIND": "UNIQUE",
+      "ORDERED_OPERAND_COLUMNS": ["user_id", "organization_id"],
+      "W4_OWNED_OPERANDS": ["organization_id"],
+      "NON_W4_OPERANDS": ["user_id"],
+      "OPERAND_AUTHORITY_EVIDENCE": [
+        {
+          "COLUMN": "user_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.member_jurisdiction_preferences.user_id",
+          "W4_BASELINE_OPERAND_CLASS": "NON_W4_BASELINE_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.member_jurisdiction_preferences.user_id",
+            "COLUMN_NAME": "user_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "NO_INDEPENDENT_COLUMN_OBLIGATION_CONTEXT_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "NO_INDEPENDENT_COLUMN_COMPLETENESS_DENOMINATOR",
+            "W4_DEFINITION_OBLIGATION_ID": null,
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-1a482361bcea822b",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        },
+        {
+          "COLUMN": "organization_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.member_jurisdiction_preferences.organization_id",
+          "W4_BASELINE_OPERAND_CLASS": "W4_OWNED_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.member_jurisdiction_preferences.organization_id",
+            "COLUMN_NAME": "organization_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "AUTHORIZED_FUTURE_INACTIVE_DEFINITION_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "YES",
+            "W4_DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-991a59fe214af62f",
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-1a482361bcea822b",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        }
+      ],
+      "SOURCE_W4_OBLIGATION_IDS": [
+        "UE-W4G-DEFINITION-991a59fe214af62f",
+        "UE-W4G-DEFINITION-1a482361bcea822b"
+      ],
+      "CANONICAL_CONSTRAINT_PROVENANCE": {
+        "GOVERNED_UNIQUE_PROPERTY": {
+          "PROPERTY": "UNIQUE_PARTICIPATION",
+          "VALUE": "[\"UNIQUE(user_id, organization_id)\"]",
+          "PROVENANCE": "EXACT_HISTORICAL_EVIDENCE",
+          "RULE": "RULE_9_10_11_EXACT_HISTORICAL_CONSTRAINT",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/migrations/20260328_jurisdiction_preferences.sql",
+              "DIGEST": "11a9a43a527938fc04cc71e02837a042c8dd17d63c1b6e86203e7549b17ab3b7",
+              "RANGE": [5, 16]
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Exact historical constraint design evidence names this physical column; not regenerated SQL"
+        },
+        "GOVERNED_OBLIGATION_PROPERTY": {
+          "PROPERTY": "organization_id.UNIQUE_PARTICIPATION",
+          "VALUE": "[\"UNIQUE(user_id, organization_id)\"]"
+        },
+        "FROZEN_DECLARATION_REFERENCE": {
+          "FILE": "apps/union-eyes/db/schema/domains/member/jurisdiction-preferences.ts",
+          "FILE_SHA256": "17d736eeaeb09a760635c060b9dc4a1cc051e4cfb1e5df65fb0a0684ea850fd7",
+          "RANGE": [16, 45],
+          "DIGEST": "9171f0720e3a7e25afd841c7e45ae5dfff9ef71959087307d185fe3ebd70a74d",
+          "TEXT": "pgTable('member_jurisdiction_preferences', {\n  id: uuid('id').primaryKey().defaultRandom(),\n  userId: text('user_id').notNull(),\n  organizationId: uuid('organization_id')\n    .notNull()\n    .references(() => organizations.id, { onDelete: 'cascade' }),\n\n  // Selected jurisdictions — subset of caJurisdictionEnum values\n  // e.g. ['ON', 'federal'] or ['QC', 'federal', 'BC']\n  preferredJurisdictions: jsonb('preferred_jurisdictions')\n    .notNull()\n    .$type<string[]>()\n    .default([]),\n\n  // Jurisdiction level filter — which level(s) of labour boards matter\n  // e.g. ['federal', 'provincial'] or ['municipal', 'provincial']\n  preferredLevels: jsonb('preferred_levels')\n    .notNull()\n    .$type<string[]>()\n    .default([]),\n\n  // Whether to always include national/federal precedents regardless of selection\n  includeNational: boolean('include_national').notNull().default(true),\n\n  // Whether to auto-apply preferences on the precedent search page\n  autoApply: boolean('auto_apply').notNull().default(true),\n\n  createdAt: timestamp('created_at').notNull().defaultNow(),\n  updatedAt: timestamp('updated_at').notNull().defaultNow(),\n})",
+          "CLASS": "DECLARATION_DESIGN_EVIDENCE",
+          "CREATION_AUTHORITY": "NO",
+          "EXECUTION_AUTHORITY": "NO"
+        }
+      },
+      "CANONICAL_CONSTRAINT_DEFINITION": "COMPLETE",
+      "CONSTRAINT_SEMANTICS": "PRESERVED",
+      "CONSTRAINT_DROPPED": "NO",
+      "CONSTRAINT_REPLACED": "NO",
+      "CONSTRAINT_WEAKENED": "NO",
+      "PARTIAL_UNIQUE_SUBSTITUTION": "PROHIBITED",
+      "W4_BASELINE_MATERIALIZATION": "DEFERRED",
+      "BASELINE_EXECUTABLE_MATERIALIZATION": "DEFERRED",
+      "MATERIALIZATION_PRECONDITION": "ALL_OPERAND_COLUMNS_PHYSICALLY_EXIST",
+      "MATERIALIZATION_STATUS": "DEFERRED_NOT_EXECUTED",
+      "BASELINE_PAYLOAD_BEHAVIOR": {
+        "CREATE_RELATION": "YES",
+        "CREATE_W4_OWNED_COLUMNS": "YES",
+        "CREATE_PARENT_OWNED_OPERANDS": "NO",
+        "CREATE_COMPOUND_UNIQUE_CONSTRAINT": "NO",
+        "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-921db4f0bc63e01d",
+        "STATUS": "FUTURE_W4FR4_ONLY_NOT_AUTHORED"
+      },
+      "NON_W4_OPERAND_IDENTITIES": [
+        "union-eyes::COLUMN::public.member_jurisdiction_preferences.user_id"
+      ],
+      "STATUS": "COMPATIBILITY_PHASE_RESOLUTION_REQUIRED",
+      "DEFERRED_TO_PRODUCER_ID": null,
+      "DEPENDENCY_OPERAND_IDS": [
+        "union-eyes::COLUMN::public.member_jurisdiction_preferences.user_id"
+      ],
+      "CONSTRAINT_MATERIALIZATION_AFTER": "FINAL_OPERAND_PRODUCTION",
+      "MATERIALIZATION_OWNER": "LATE_PRODUCER_COMPATIBILITY_RESOLUTION",
+      "HUMAN_SCHEMA_DECISION_REQUIRED": "NO",
+      "LINKAGE_EVIDENCE": [
+        {
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.member_jurisdiction_preferences.user_id",
+          "EXACT_LATE_DEFINITION_REFERENCES": [],
+          "EXACT_COMPATIBILITY_REFERENCES": [],
+          "EXACT_PLAN_REFERENCES": [],
+          "EXACT_REGISTRY_PRODUCER_IDS": []
+        }
+      ],
+      "LINKAGE_CEILING": "Exact operand identities only;declaration context is not a producer. Missing/ambiguous production evidence remains compatibility-resolution metadata.",
+      "COMPATIBILITY_INTEGRATION": "SUPPLEMENTAL_DEFERRED_CONSTRAINT_HANDOFF;existing127 records unchanged",
+      "EXISTING_COMPATIBILITY_OBLIGATION_IDS": [],
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "DEFERRED_CONSTRAINT_ID": "UE-W4C-DEFERRED-CONSTRAINT-097a8c58a7231680",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-097a8c58a7231680",
+      "SOURCE_W4FR3_BLOCKER_ID": "UE-W4FR3-CONSTRAINT-f69de66856cf9b13",
+      "RELATION": "public.contract_covered_orgs",
+      "CONSTRAINT_KIND": "UNIQUE",
+      "ORDERED_OPERAND_COLUMNS": ["contract_id", "organization_id"],
+      "W4_OWNED_OPERANDS": ["organization_id"],
+      "NON_W4_OPERANDS": ["contract_id"],
+      "OPERAND_AUTHORITY_EVIDENCE": [
+        {
+          "COLUMN": "contract_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.contract_covered_orgs.contract_id",
+          "W4_BASELINE_OPERAND_CLASS": "NON_W4_BASELINE_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.contract_covered_orgs.contract_id",
+            "COLUMN_NAME": "contract_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "NO_INDEPENDENT_COLUMN_OBLIGATION_CONTEXT_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "NO_INDEPENDENT_COLUMN_COMPLETENESS_DENOMINATOR",
+            "W4_DEFINITION_OBLIGATION_ID": null,
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-b5be0303e59d6043",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        },
+        {
+          "COLUMN": "organization_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.contract_covered_orgs.organization_id",
+          "W4_BASELINE_OPERAND_CLASS": "W4_OWNED_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.contract_covered_orgs.organization_id",
+            "COLUMN_NAME": "organization_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "AUTHORIZED_FUTURE_INACTIVE_DEFINITION_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "YES",
+            "W4_DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-7fb2822005b07979",
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-b5be0303e59d6043",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        }
+      ],
+      "SOURCE_W4_OBLIGATION_IDS": [
+        "UE-W4G-DEFINITION-7fb2822005b07979",
+        "UE-W4G-DEFINITION-b5be0303e59d6043"
+      ],
+      "CANONICAL_CONSTRAINT_PROVENANCE": {
+        "GOVERNED_UNIQUE_PROPERTY": {
+          "PROPERTY": "UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex('contract_covered_orgs_contract_org_idx')\\n    .on(t.contractId, t.organizationId)\"]",
+          "PROVENANCE": "EXACT_DECLARATION",
+          "RULE": "RULE_9_10_11_CURRENT_CALLBACK_FACT",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/domains/finance/contract-amendments.ts",
+              "DIGEST": "f2af68f94f9cbff80bb5fec989f72647d647c258be618f8faab44804f325ac3a",
+              "RANGE": [103, 121]
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Explicit current callback participation; primary key establishes NOT_NULL. No inferred restriction."
+        },
+        "GOVERNED_OBLIGATION_PROPERTY": {
+          "PROPERTY": "organization_id.UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex('contract_covered_orgs_contract_org_idx')\\n    .on(t.contractId, t.organizationId)\"]"
+        },
+        "FROZEN_DECLARATION_REFERENCE": {
+          "FILE": "apps/union-eyes/db/schema/domains/finance/contract-amendments.ts",
+          "FILE_SHA256": "168b7f87838a71c15a5d2553b9245001524cbcb276db5371950b9a9d61301efe",
+          "RANGE": [103, 121],
+          "DIGEST": "f2af68f94f9cbff80bb5fec989f72647d647c258be618f8faab44804f325ac3a",
+          "TEXT": "pgTable('contract_covered_orgs', {\n  id: uuid('id').primaryKey().defaultRandom(),\n  contractId: uuid('contract_id')\n    .notNull()\n    .references(() => commercialContracts.id, { onDelete: 'cascade' }),\n  organizationId: uuid('organization_id')\n    .notNull()\n    .references(() => organizations.id, { onDelete: 'restrict' }),\n  role: coveredOrgRoleEnum('role').notNull(),\n  activatedAt: timestamp('activated_at', { withTimezone: true }).defaultNow().notNull(),\n  deactivatedAt: timestamp('deactivated_at', { withTimezone: true }),\n  metadata: jsonb('metadata').$type<Record<string, unknown>>(),\n  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),\n}, (t) => ({\n  contractIdx: index('contract_covered_orgs_contract_idx').on(t.contractId),\n  orgIdx: index('contract_covered_orgs_org_idx').on(t.organizationId),\n  contractOrgIdx: uniqueIndex('contract_covered_orgs_contract_org_idx')\n    .on(t.contractId, t.organizationId),\n}))",
+          "CLASS": "DECLARATION_DESIGN_EVIDENCE",
+          "CREATION_AUTHORITY": "NO",
+          "EXECUTION_AUTHORITY": "NO"
+        }
+      },
+      "CANONICAL_CONSTRAINT_DEFINITION": "COMPLETE",
+      "CONSTRAINT_SEMANTICS": "PRESERVED",
+      "CONSTRAINT_DROPPED": "NO",
+      "CONSTRAINT_REPLACED": "NO",
+      "CONSTRAINT_WEAKENED": "NO",
+      "PARTIAL_UNIQUE_SUBSTITUTION": "PROHIBITED",
+      "W4_BASELINE_MATERIALIZATION": "DEFERRED",
+      "BASELINE_EXECUTABLE_MATERIALIZATION": "DEFERRED",
+      "MATERIALIZATION_PRECONDITION": "ALL_OPERAND_COLUMNS_PHYSICALLY_EXIST",
+      "MATERIALIZATION_STATUS": "DEFERRED_NOT_EXECUTED",
+      "BASELINE_PAYLOAD_BEHAVIOR": {
+        "CREATE_RELATION": "YES",
+        "CREATE_W4_OWNED_COLUMNS": "YES",
+        "CREATE_PARENT_OWNED_OPERANDS": "NO",
+        "CREATE_COMPOUND_UNIQUE_CONSTRAINT": "NO",
+        "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-097a8c58a7231680",
+        "STATUS": "FUTURE_W4FR4_ONLY_NOT_AUTHORED"
+      },
+      "NON_W4_OPERAND_IDENTITIES": ["union-eyes::COLUMN::public.contract_covered_orgs.contract_id"],
+      "STATUS": "COMPATIBILITY_PHASE_RESOLUTION_REQUIRED",
+      "DEFERRED_TO_PRODUCER_ID": null,
+      "DEPENDENCY_OPERAND_IDS": ["union-eyes::COLUMN::public.contract_covered_orgs.contract_id"],
+      "CONSTRAINT_MATERIALIZATION_AFTER": "FINAL_OPERAND_PRODUCTION",
+      "MATERIALIZATION_OWNER": "LATE_PRODUCER_COMPATIBILITY_RESOLUTION",
+      "HUMAN_SCHEMA_DECISION_REQUIRED": "NO",
+      "LINKAGE_EVIDENCE": [
+        {
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.contract_covered_orgs.contract_id",
+          "EXACT_LATE_DEFINITION_REFERENCES": [],
+          "EXACT_COMPATIBILITY_REFERENCES": [],
+          "EXACT_PLAN_REFERENCES": [],
+          "EXACT_REGISTRY_PRODUCER_IDS": []
+        }
+      ],
+      "LINKAGE_CEILING": "Exact operand identities only;declaration context is not a producer. Missing/ambiguous production evidence remains compatibility-resolution metadata.",
+      "COMPATIBILITY_INTEGRATION": "SUPPLEMENTAL_DEFERRED_CONSTRAINT_HANDOFF;existing127 records unchanged",
+      "EXISTING_COMPATIBILITY_OBLIGATION_IDS": [],
+      "EXECUTION_ALLOWED": "NO"
+    },
+    {
+      "DEFERRED_CONSTRAINT_ID": "UE-W4C-DEFERRED-CONSTRAINT-f6342ea2e97736f4",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-f6342ea2e97736f4",
+      "SOURCE_W4FR3_BLOCKER_ID": "UE-W4FR3-CONSTRAINT-5818d8e0edc6168b",
+      "RELATION": "public.duplicate_group_members",
+      "CONSTRAINT_KIND": "UNIQUE",
+      "ORDERED_OPERAND_COLUMNS": ["group_id", "record_type", "record_id"],
+      "W4_OWNED_OPERANDS": ["group_id"],
+      "NON_W4_OPERANDS": ["record_type", "record_id"],
+      "OPERAND_AUTHORITY_EVIDENCE": [
+        {
+          "COLUMN": "group_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.duplicate_group_members.group_id",
+          "W4_BASELINE_OPERAND_CLASS": "W4_OWNED_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.duplicate_group_members.group_id",
+            "COLUMN_NAME": "group_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "AUTHORIZED_FUTURE_INACTIVE_DEFINITION_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "YES",
+            "W4_DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-bac3a50d170191c0",
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-cc4bc7b06e15bf5b",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        },
+        {
+          "COLUMN": "record_type",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.duplicate_group_members.record_type",
+          "W4_BASELINE_OPERAND_CLASS": "NON_W4_BASELINE_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.duplicate_group_members.record_type",
+            "COLUMN_NAME": "record_type",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "NO_INDEPENDENT_COLUMN_OBLIGATION_CONTEXT_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "NO_INDEPENDENT_COLUMN_COMPLETENESS_DENOMINATOR",
+            "W4_DEFINITION_OBLIGATION_ID": null,
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-cc4bc7b06e15bf5b",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        },
+        {
+          "COLUMN": "record_id",
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.duplicate_group_members.record_id",
+          "W4_BASELINE_OPERAND_CLASS": "NON_W4_BASELINE_OPERAND",
+          "FROZEN_W4S_AUTHORITY_RECORD": {
+            "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.duplicate_group_members.record_id",
+            "COLUMN_NAME": "record_id",
+            "AUTHORITY_CLASS": "W4_OWNED",
+            "W4_REAUTHOR": "NO_INDEPENDENT_COLUMN_OBLIGATION_CONTEXT_ONLY",
+            "W4_PHYSICAL_COMPLETENESS_REQUIRED": "NO_INDEPENDENT_COLUMN_COMPLETENESS_DENOMINATOR",
+            "W4_DEFINITION_OBLIGATION_ID": null,
+            "RELATED_RELATION_OBLIGATION_ID": "UE-W4G-DEFINITION-cc4bc7b06e15bf5b",
+            "GOVERNED_APPLICATION_COLUMN_CONTEXT": true
+          }
+        }
+      ],
+      "SOURCE_W4_OBLIGATION_IDS": [
+        "UE-W4G-DEFINITION-bac3a50d170191c0",
+        "UE-W4G-DEFINITION-cc4bc7b06e15bf5b"
+      ],
+      "CANONICAL_CONSTRAINT_PROVENANCE": {
+        "GOVERNED_UNIQUE_PROPERTY": {
+          "PROPERTY": "UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex('idx_dup_members_unique').on(table.groupId, table.recordType, table.recordId)\"]",
+          "PROVENANCE": "EXACT_DECLARATION",
+          "RULE": "RULE_9_10_11_CURRENT_CALLBACK_FACT",
+          "EVIDENCE_REFERENCES": [
+            {
+              "FILE": "apps/union-eyes/db/schema/ingestion-schema.ts",
+              "DIGEST": "dcbf0a084699781754650458f9a99e1b65183f034dd967aee069fc3747b1be9b",
+              "RANGE": [131, 145]
+            }
+          ],
+          "STATUS": "APPROVED",
+          "RATIONALE": "Explicit current callback participation; primary key establishes NOT_NULL. No inferred restriction."
+        },
+        "GOVERNED_OBLIGATION_PROPERTY": {
+          "PROPERTY": "group_id.UNIQUE_PARTICIPATION",
+          "VALUE": "[\"uniqueIndex('idx_dup_members_unique').on(table.groupId, table.recordType, table.recordId)\"]"
+        },
+        "FROZEN_DECLARATION_REFERENCE": {
+          "FILE": "apps/union-eyes/db/schema/ingestion-schema.ts",
+          "FILE_SHA256": "15560275d6b52ec818be5038d20c22dc75a7b471a530feef129b9b32a486f15e",
+          "RANGE": [131, 145],
+          "DIGEST": "dcbf0a084699781754650458f9a99e1b65183f034dd967aee069fc3747b1be9b",
+          "TEXT": "pgTable('duplicate_group_members', {\n  id: uuid('id').primaryKey().defaultRandom(),\n  groupId: uuid('group_id')\n    .notNull()\n    .references(() => duplicateGroups.id, { onDelete: 'cascade' }),\n  recordType: varchar('record_type', { length: 30 }).notNull(), // 'grievance' | 'document' | 'timeline_event'\n  recordId: uuid('record_id').notNull(),\n  similarityScore: real('similarity_score'),\n  isAnchor: boolean('is_anchor').notNull().default(false),\n  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),\n}, (table) => [\n  index('idx_dup_members_group').on(table.groupId),\n  index('idx_dup_members_record').on(table.recordType, table.recordId),\n  uniqueIndex('idx_dup_members_unique').on(table.groupId, table.recordType, table.recordId),\n])",
+          "CLASS": "DECLARATION_DESIGN_EVIDENCE",
+          "CREATION_AUTHORITY": "NO",
+          "EXECUTION_AUTHORITY": "NO"
+        }
+      },
+      "CANONICAL_CONSTRAINT_DEFINITION": "COMPLETE",
+      "CONSTRAINT_SEMANTICS": "PRESERVED",
+      "CONSTRAINT_DROPPED": "NO",
+      "CONSTRAINT_REPLACED": "NO",
+      "CONSTRAINT_WEAKENED": "NO",
+      "PARTIAL_UNIQUE_SUBSTITUTION": "PROHIBITED",
+      "W4_BASELINE_MATERIALIZATION": "DEFERRED",
+      "BASELINE_EXECUTABLE_MATERIALIZATION": "DEFERRED",
+      "MATERIALIZATION_PRECONDITION": "ALL_OPERAND_COLUMNS_PHYSICALLY_EXIST",
+      "MATERIALIZATION_STATUS": "DEFERRED_NOT_EXECUTED",
+      "BASELINE_PAYLOAD_BEHAVIOR": {
+        "CREATE_RELATION": "YES",
+        "CREATE_W4_OWNED_COLUMNS": "YES",
+        "CREATE_PARENT_OWNED_OPERANDS": "NO",
+        "CREATE_COMPOUND_UNIQUE_CONSTRAINT": "NO",
+        "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-f6342ea2e97736f4",
+        "STATUS": "FUTURE_W4FR4_ONLY_NOT_AUTHORED"
+      },
+      "NON_W4_OPERAND_IDENTITIES": [
+        "union-eyes::COLUMN::public.duplicate_group_members.record_type",
+        "union-eyes::COLUMN::public.duplicate_group_members.record_id"
+      ],
+      "STATUS": "COMPATIBILITY_PHASE_RESOLUTION_REQUIRED",
+      "DEFERRED_TO_PRODUCER_ID": null,
+      "DEPENDENCY_OPERAND_IDS": [
+        "union-eyes::COLUMN::public.duplicate_group_members.record_type",
+        "union-eyes::COLUMN::public.duplicate_group_members.record_id"
+      ],
+      "CONSTRAINT_MATERIALIZATION_AFTER": "FINAL_OPERAND_PRODUCTION",
+      "MATERIALIZATION_OWNER": "LATE_PRODUCER_COMPATIBILITY_RESOLUTION",
+      "HUMAN_SCHEMA_DECISION_REQUIRED": "NO",
+      "LINKAGE_EVIDENCE": [
+        {
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.duplicate_group_members.record_type",
+          "EXACT_LATE_DEFINITION_REFERENCES": [],
+          "EXACT_COMPATIBILITY_REFERENCES": [],
+          "EXACT_PLAN_REFERENCES": [],
+          "EXACT_REGISTRY_PRODUCER_IDS": []
+        },
+        {
+          "PHYSICAL_IDENTITY": "union-eyes::COLUMN::public.duplicate_group_members.record_id",
+          "EXACT_LATE_DEFINITION_REFERENCES": [],
+          "EXACT_COMPATIBILITY_REFERENCES": [],
+          "EXACT_PLAN_REFERENCES": [],
+          "EXACT_REGISTRY_PRODUCER_IDS": []
+        }
+      ],
+      "LINKAGE_CEILING": "Exact operand identities only;declaration context is not a producer. Missing/ambiguous production evidence remains compatibility-resolution metadata.",
+      "COMPATIBILITY_INTEGRATION": "SUPPLEMENTAL_DEFERRED_CONSTRAINT_HANDOFF;existing127 records unchanged",
+      "EXISTING_COMPATIBILITY_OBLIGATION_IDS": [],
+      "EXECUTION_ALLOWED": "NO"
+    }
+  ],
+  "blockedIdDisposition": [
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-1616d255367c341d",
+      "RELATION": "public.org_entitlements",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-687b0013df9b8c8a",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-1a482361bcea822b",
+      "RELATION": "public.member_jurisdiction_preferences",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-921db4f0bc63e01d",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-2f46bc9a15b4fe78",
+      "RELATION": "public.billing_periods",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-ab480be7d3ecbe76",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-34cb89029be25de1",
+      "RELATION": "public.pilot_checklist_items",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-22e544681ea09ae3",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-55b4f73e9c33e4a9",
+      "RELATION": "public.org_configurations",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-b54f294d75c25fb5",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-77aa06833477f7cb",
+      "RELATION": "public.billing_periods",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-ab480be7d3ecbe76",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-789de61afb7f456e",
+      "RELATION": "public.pilot_checklist_items",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-22e544681ea09ae3",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-7fb2822005b07979",
+      "RELATION": "public.contract_covered_orgs",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-097a8c58a7231680",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-91539638ae3d477c",
+      "RELATION": "public.org_entitlements",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-687b0013df9b8c8a",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-991a59fe214af62f",
+      "RELATION": "public.member_jurisdiction_preferences",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-921db4f0bc63e01d",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-b5be0303e59d6043",
+      "RELATION": "public.contract_covered_orgs",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-097a8c58a7231680",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-bac3a50d170191c0",
+      "RELATION": "public.duplicate_group_members",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-f6342ea2e97736f4",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-c42b44506e916c09",
+      "RELATION": "public.org_configurations",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-b54f294d75c25fb5",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    },
+    {
+      "DEFINITION_OBLIGATION_ID": "UE-W4G-DEFINITION-cc4bc7b06e15bf5b",
+      "RELATION": "public.duplicate_group_members",
+      "DEFERRED_CONSTRAINT_HANDOFF_ID": "UE-W4C-DEFERRED-CONSTRAINT-f6342ea2e97736f4",
+      "W4FR3_BLOCKER_DISPOSITION": "CLOSED_BY_CONSTRAINT_TIMING_NORMALIZATION",
+      "PHYSICAL_DEFINITION_STATUS": "NOT_AUTHORED_W4FR4_NOT_STARTED"
+    }
+  ],
+  "preservation": {
+    "BYTE_COMMITMENTS": {
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4S_PHYSICAL_AUTHORING_SCOPE_NORMALIZATION.json": "7d3bc5413a3a177ad26c7f02aae7c93caba99549ee35e9d9db7b5c2ccb396efa",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H3_FINAL_BLUEPRINT_SELECTION.json": "3baf30e0af81a84d42e428ddf4a2e0cda56b41029c4c5afe88f6b0770758e1d8",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4T1_FINAL_TYPE_DEFINITION_SELECTION.json": "c3c3940c33e08b297068fdfe66a52e1b869d9fd91276b8f22ed9eeb5568e06a2",
+      "docs/union-eyes/reality-remediation/UE_W4_NAMED_TYPE_DEPENDENCY_REGISTRY.json": "31a8d6ea71de4ed896f8b465b5093dc67a4a53a72e326858ef01be6a4f791c73",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_RESOLVED.json": "b3b2427ec07afad6e28448910c8f4f50423182a0f36e03f3b1940ddce0c3016a",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4F_CANONICAL_DEFINITION_AUTHORING.json": "70a7c068648437aca9d04be3b784af16e29c084064e8fccdb06f815c9268fcc9",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4G_PRECONSUMER_OWNERSHIP_ADOPTION.json": "50bc30927199ff75307eb8b27d5c9bb4a8faa3e7fb5b600a132fe22e9cd53328",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H_CANONICAL_DEFINITION_GOVERNANCE.json": "58df0c17be136de8ecb2e42590c637530db9bf6d4c1423c03ddb40f80c28d63a",
+      "docs/union-eyes/reality-remediation/UE_PRECONSUMER_PHYSICAL_PRODUCER_CONTRACT.json": "83da528b5d3dc31cba20ca5ff66172c259582c1070c52335d94850f944506853",
+      "docs/union-eyes/reality-remediation/UE_CANONICAL_RUNTIME_SCHEMA_BOOTSTRAP_CONTRACT.json": "6b4c81a8ceded4f70ae59e313656149e9c3246aa0feeee1973062d63ea8c114e",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR2_CANONICAL_DEFINITION_REGENERATION.json": "d5dc722a6de31693ea08272fdd6487db700ea9d46a00eb033215d896a8e07e29",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4T_NAMED_TYPE_PRODUCTION_CLOSURE.json": "2e422dc1ae5aa221588e66dabc8fa9cbf5398f575b3fd9a70e2f51af03488721",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR_CANONICAL_DEFINITION_REGENERATION.json": "b8fef92a25d7c9c0bbc14c5770aca25c086405a85239508d309da69c00d8fe54",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4H1_RESIDUAL_BLUEPRINT_CLOSURE.json": "20b9cbe13d06465472c389e328d8f455ad9a17ff3bff9c0e07a5a067d97c63b6",
+      "docs/union-eyes/reality-remediation/UE_W4H2_TRUE_BLUEPRINT_HUMAN_DECISION_PACKET.json": "b41e782d02dfb3e8d8cb9660082ff0dd9ecd0e287f7ec2f54dc37b96452f8354",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS.json": "4404f6b17c63af569852d71c180923fa07a186ba7b42cdc62806e2d7c7b35a76",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR_CANONICAL_DEFINITION_REGENERATION.md": "e767f671f63faec327b423e71f14c79e9d4a33d05963dbd98bca451bdde86ed6",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4T_NAMED_TYPE_PRODUCTION_CLOSURE.md": "098cd0dad100e9785cc2f0ae7fcee8bb69e1bf5c107e98f05d5597768c886c22",
+      "docs/union-eyes/reality-remediation/UE_W4T_NAMED_TYPE_HUMAN_DECISION_PACKET.json": "5202d0fb78a1365ae84f70b309f1129962a2ada13dd3f06a70d79c454092f352",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4T1_FINAL_TYPE_DEFINITION_SELECTION.md": "ca80ac86792df195c0430a0030fd6f4d4eeef82d99fc3d0b7b273fae82773853",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR2_CANONICAL_DEFINITION_REGENERATION.md": "7c7825981d43df698a54c6f9854651fc3b19b155b67e49837f95ea3c4f0344c4",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_FINAL.json": "8f9dd85f0bcf11604c4f0261cd71a9ec62dd12c3ba003559901c69c70c3b92ed",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_FINAL.md": "0031e82107b00febb90403b028990d4e0408d76006268be377f3761f10a7a68d",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_FINAL.json": "68bee0ee40507e4dc13cb3acfc9bab3563bd61367959396ca9f74789d8ad1772",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_FINAL.md": "460ff4da7196a04bd6d89b385b5d4544bda61d7554208ec4188d402bfc755a60",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4S_PHYSICAL_AUTHORING_SCOPE_NORMALIZATION.md": "c39e3112fc1ec2cb608ad8b0e5cd3d7b00c17476a79c4eb2baecc56435d03ae4",
+      "apps/union-eyes/db/schema/domains/finance/contracts.ts": "f1b988aade5a9e6af88ef00bf6d4b9f539dc97a36b11525092302ef93e09e666",
+      "apps/union-eyes/db/schema/domains/finance/platform-billing.ts": "729311b4e5be5afcf25f9e17b1dcd23ae1abb06c4fcf74071064f6ac4c6aacd8",
+      "apps/union-eyes/db/schema-organizations.ts": "72f938989c612b123a8eccb40952b66f46fba000b43a7c9d58f9480013d255d0",
+      "apps/union-eyes/db/schema/domains/pilot/pilot-onboarding.ts": "3eaab5abe41994846eafb0ab88ea61f87b10175b1ff0ef2fdf71edf0c56d0729",
+      "apps/union-eyes/db/schema/domains/member/jurisdiction-preferences.ts": "17d736eeaeb09a760635c060b9dc4a1cc051e4cfb1e5df65fb0a0684ea850fd7",
+      "apps/union-eyes/db/schema/domains/finance/contract-amendments.ts": "168b7f87838a71c15a5d2553b9245001524cbcb276db5371950b9a9d61301efe",
+      "apps/union-eyes/db/schema/ingestion-schema.ts": "15560275d6b52ec818be5038d20c22dc75a7b471a530feef129b9b32a486f15e",
+      "apps/union-eyes/db/schema/domains/finance/allocation.ts": "abbf89017e4dbf394bb075ffbca2ae317c305be1bd59d3f2dfb77bf573f6be20",
+      "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts": "b12c79c10cf7461b52d3ccace7869e455b0b42574119ef30a30c5bc952f247ac",
+      "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts": "acd6d4a25319a948932f825ad13ec9bacf5a93e02edb9f2135c2bceea528adbb",
+      "apps/union-eyes/db/schema/committee-workspace-schema.ts": "fa8e61191e864250bcf1a2087f056be02dfd59eedd66a930d3f93c5e00b2cddd",
+      "apps/union-eyes/db/schema/domains/documents/correspondence.ts": "6eeb70a895e9b7bf1dc08bd938b90d8bf78a417bb16f71506017a4afdec60b5a",
+      "apps/union-eyes/db/schema/documents-schema.ts": "fe3ced83b7e55022973feea752c40de9aff3b81484d4eae01244f16e4373e0a2",
+      "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts": "e2f48c802f99e2b946610cbcc565b7049b66869a11a25b1985905d68f93102db",
+      "apps/union-eyes/db/schema/domains/finance/reconciliation.ts": "19c1827fdaa0da3821b5610906bb95b317103f7a75da778f3b088d2422850ba6",
+      "apps/union-eyes/db/schema/domains/finance/dunning.ts": "9d6dd9feaded4d7cd8c8ebc1d1379a6ef33d7e75d426df6edc67f7c0895d9d72",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR3_MINIMAL_BASELINE_AUTHORING.json": "4aa75ae8909552d68aee01d78bd09c3b55935554c97e3446b1319cdc6dc1d9dc",
+      "docs/union-eyes/reality-remediation/PHASE_1B_3C_A1I_W4FR3_MINIMAL_BASELINE_AUTHORING.md": "02f3effd15af1397c7e2cea4b6952be51961cee9c7d42d7cfd5f99379a6b01a5",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR3.json": "bfb77a69904c6f0cbb6ffad5c103676bacf22cf2287b8dcfb23c05893ac90c5d",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR3.md": "7dffa730ad031ae3102e504c9484c1b9f5f520759a8f17732e0bf5a6f85bcb05",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR3.json": "8101e9b2c4a5bcb1953fd11e7e3f223768b0ee9a8e54fec61fab4119d0c25ac1",
+      "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_INACTIVE_SQL_PAYLOADS_W4FR3.md": "00aa2a015b6a1f85886a39f032e3ec6b9b742782820589f59d645c4da67d83d9"
+    },
+    "PRESERVED_SECTIONS": {
+      "OWNERSHIP_310": "2817037bde5da31bc9060439f3c7a40bf25c693e3bbdb6f30b83b347c17c0210",
+      "LATE_DEFINITIONS_127": "e9579bc94f23a209e7b29df01800800ae7dc5afb68e34ff1f858639a4b12b636",
+      "COMPATIBILITY_127": "d74066a581d7fde91e4f0f7d78ea8c1f1093fdda04d0ce97a3bc320f19d7e5fb",
+      "DJANGO_372": "8d105d3d8c15127f3efd465e702f50b8037502a9adfbe1a26f86372e07d1aa9c",
+      "PLAN_82": "acc8e9e24cd3aff81ee5f505464eb00bc3003290b4443c54d77c23f4b9a553af",
+      "RAW_WRAPPERS": "f3d037b202441b89585f66194c9bd99eea01123fc5b4b58ecec98062a9369d9f",
+      "W3": "483ac36f3e863f12fb7aedeff1c3ea5b5ba089158b5f55ae672d6d2faa789d36",
+      "W5_86": "bf0723dbc866f6346bb163a051e0b4397eedab11e027949ca4072f68354274b0",
+      "W6_118": "1537751d17f7be2ddb4a3528e56a5ecddc3afeafbd8c33b3029be96874a4ccf5",
+      "CANONICAL_803": "ffa17080b00c752182e6278b5b39214c3cedc22d0ee08ed0e8c0bcb0a3a70040",
+      "FROZEN_23": "5ebd2ab883f7523a36eefb0417d89a1f53d69b11ad5dc5cfe01658f4df75fab7",
+      "EXTENSIONS_AND_VECTOR": "4724ab96af71dee3ad754faf650f4ca5f281c75b5ec650cb158c3c1e573857a7"
+    },
+    "SCOPE_SUMMARY": {
+      "DEFINITION_OBLIGATIONS": 183,
+      "RELATION_OBLIGATIONS": 57,
+      "COLUMN_OBLIGATIONS": 126,
+      "RELATION_CREATE_OBLIGATIONS": 57,
+      "INCLUDED_COLUMN_OBLIGATIONS": 57,
+      "ADD_COLUMN_OBLIGATIONS": 69,
+      "SUM": 183,
+      "UNACCOUNTED_OBLIGATIONS": 0,
+      "SELECTED_RELATION_CONTEXTS": 125,
+      "W4_RELATION_PREREQUISITES": 57,
+      "PARENT_AUTHORITY_RELATION_CONTEXTS": 68,
+      "SELECTED_COLUMNS_CLASSIFIED": 2121,
+      "UNCLASSIFIED_SELECTED_COLUMNS": 0,
+      "W4_GOVERNED_COLUMN_CONTEXTS": 822,
+      "EXPLICIT_W4_COLUMN_PREREQUISITES": 126,
+      "OTHER_GOVERNED_RELATION_COLUMN_CONTEXTS_NOT_INDEPENDENT_OBLIGATIONS": 696,
+      "PARENT_OWNED_COLUMNS_EXCLUDED_FROM_REAUTHORING": 1299,
+      "PARENT_OWNED_COLUMNS_WITH_UNRESOLVED_PHYSICAL_REPRESENTATION": 108,
+      "TIMESTAMP_REPRESENTATION_GAPS": 94,
+      "NUMERIC_PRECISION_SCALE_GAPS": 13,
+      "VARCHAR_LENGTH_OR_UNBOUNDED_GAPS": 1,
+      "W4_OWNED_GAPS_WITHIN_108": 0,
+      "PARENT_OWNED_COLUMNS_REAUTHORED": 0,
+      "HYBRID_APPLICATION_BLUEPRINTS_CREATED": 0,
+      "DISTINCT_NAMED_TYPES": 36,
+      "EXACT_TYPE_DEFINITIONS": 36,
+      "TYPE_REFERENCES_RESOLVED": 38,
+      "TYPE_HOLDS": 0,
+      "SQL_AUTHORED": 0,
+      "SQL_EXECUTED": 0
+    },
+    "TYPE_DEFINITIONS_SHA256": "e2dbff9c0aedeea22104eb901aac15ccd69f5029eae1852fef27c15dcc80ad75",
+    "TYPE_REFERENCES_SHA256": "16cf1f946306b2c68fa8fbba0ca673ffd4e39e9909769f274dedcd416aef40ef",
+    "CASE_DOCUMENTS_RESOLUTION_SHA256": "7202233de492c75bcc8f3693fb8b0b861d31f5e7ac580a908fffcf3afbfb4395",
+    "BLUEPRINT_SELECTIONS_SHA256": "aefa134aa3c26378ace30de76223f7cedd1fd1f7a145f3a984454fe8d99a9358",
+    "HISTORICAL_W4FR3_BYTES_CHANGED": "NO",
+    "EXISTING127_COMPATIBILITY_RECORDS_CHANGED": "NO",
+    "EXISTING127_COMPATIBILITY_RECORDS_CLASSIFIED": "NO",
+    "CANONICAL_CONTRACT_VERSION": "1.3.1",
+    "CANONICAL_CONTRACT_BYTES_CHANGED": "NO"
+  },
+  "validation": {
+    "EXACT7_CONSTRAINTS_EXACT14_IDS": "PASS",
+    "ORDERED_OPERANDS_AND_GOVERNED_PROVENANCE": "PASS",
+    "W4S_OPERAND_CLASSIFICATION": "PASS_FROZEN_AUTHORITY_PRESERVED",
+    "FIXED_UPSTREAM_BYTE_COMMITMENTS": 48,
+    "DETERMINISM": "MODEL_DIGEST_AND_TWO_GENERATION_EXACT_BYTES",
+    "DISTINCT_TESTS_PASSED": 338,
+    "INDEPENDENT_BYTE_COMMITMENTS_VERIFIED": 48,
+    "DOCUMENTATION_ERRORS": 0,
+    "DOCUMENTATION_EXISTING_WARNINGS": 1215,
+    "COMMAND_RESULTS": [
+      {
+        "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts scripts\\ue\\close-w4c-constraint-timing.test.ts scripts\\ue\\author-w4fr3-minimal-baseline.test.ts scripts\\ue\\normalize-w4s-authoring-scope.test.ts scripts\\ue\\record-w4t1-human-type-selections.test.ts scripts\\ue\\regenerate-w4fr2-definitions.test.ts scripts\\ue\\regenerate-w4fr-definitions.test.ts scripts\\ue\\close-w4t-named-types.test.ts scripts\\ue\\verify-frozen-w4.test.ts apps\\union-eyes\\scripts\\provisioning\\governed-provisioning.test.ts",
+        "RESULT": "PASS:294 tests;22 W4C and272 predecessor tests"
+      },
+      {
+        "COMMAND": "pnpm exec vitest run --config apps\\union-eyes\\vitest.config.ts scripts\\ue\\author-w4-canonical-definitions.test.ts",
+        "RESULT": "PASS:44 frozen W4F tests"
+      },
+      {
+        "COMMAND": "pnpm exec tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --skipLibCheck --esModuleInterop --types node scripts\\ue\\close-w4c-constraint-timing.ts scripts\\ue\\close-w4c-constraint-timing.test.ts",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm exec eslint --config apps\\union-eyes\\eslint.config.mjs --max-warnings 0 scripts\\ue\\close-w4c-constraint-timing.ts scripts\\ue\\close-w4c-constraint-timing.test.ts",
+        "RESULT": "PASS:existing Next pages-directory diagnostic;exit0"
+      },
+      {
+        "COMMAND": "pnpm exec prettier --check scripts\\ue\\close-w4c-constraint-timing.ts scripts\\ue\\close-w4c-constraint-timing.test.ts",
+        "RESULT": "PASS"
+      },
+      {
+        "COMMAND": "pnpm exec tsx scripts\\ue\\close-w4c-constraint-timing.ts --self-test --check",
+        "RESULT": "PASS:two-generation exact-byte equality;persisted outputs and fixed upstream hashes"
+      },
+      { "COMMAND": "pnpm validate:docs", "RESULT": "PASS:0 errors;1215 existing warnings" }
+    ]
+  },
+  "digests": {
+    "HANDOFFS": "1078a586c27d8930eb843cf7b093e7cfd33fde8d54e2ef50e59aac177bc8f51d",
+    "DISPOSITIONS": "b2900deb21d1f7b1a7260b6440a98eabab137734aeb35a0d2516816f93974632",
+    "RULES": "4de462860cd77d7ef2433a0a1a51d4c4eb9f89bd06de4841f9a4be605c32c6b0"
+  },
+  "proofBoundaries": {
+    "CANONICAL_SQL_AUTHORED": 0,
+    "INACTIVE_SQL_PAYLOADS_CREATED": 0,
+    "PRODUCERS_ACTIVATED": 0,
+    "DATABASE_ROLES_PROVISIONED": "NO",
+    "ROLE_MEMBERSHIPS_APPLIED": "NO",
+    "DJANGO_SCHEMA_MATERIALIZED": "NO",
+    "PRECONSUMER_BASELINE_MATERIALIZED": "NO",
+    "PHYSICAL_PRODUCERS_EXECUTED": "NO",
+    "FAITHFUL_SCHEMA_REPLAY_PROVEN": "NO",
+    "RLS_POLICY_CORRECTNESS_RUNTIME_PROVEN": "NO",
+    "TENANT_ISOLATION_RUNTIME_PROVEN": "NO",
+    "READY_FOR_RUNTIME_PROOF": 0,
+    "PRODUCT_READY": "NO",
+    "EXTENSIONS_RUNTIME_PROVEN": "NO",
+    "CANONICAL_DEFINITION_SQL_EXECUTED": "NO",
+    "DATABASE_RUNTIME_CONFIGURATION_APPLIED": "NO",
+    "BOOTSTRAP_IMPLEMENTATION_COMPLETE": "NO",
+    "PRODUCTION_SCHEMA_PROVEN": "NO",
+    "NAMED_TYPES_MATERIALIZED": "NO",
+    "TYPE_SQL_EXECUTED": "NO",
+    "PARENT_SCHEMA_RUNTIME_CORRECTNESS_PROVEN": "NO",
+    "DEFERRED_CONSTRAINTS_MATERIALIZED": "NO",
+    "DEFERRED_CONSTRAINTS_RUNTIME_PROVEN": "NO"
+  },
+  "phaseStatus": {
+    "PHASE_1B_3C_A1I_W4C_GATE": "PASS",
+    "PHASE_1B_3C_A1I_W4C": "PASS",
+    "MIXED_AUTHORITY_CONSTRAINT_MODEL": "COMPLETE_NOT_MATERIALIZED",
+    "DEFERRED_MIXED_AUTHORITY_CONSTRAINTS": 7,
+    "W4FR3_CONSTRAINT_BLOCKER": "CLOSED_BY_GOVERNANCE",
+    "HISTORICAL_W4FR3_GATE": "BLOCKED",
+    "W4FR4": "AUTHORIZED_NOT_STARTED",
+    "W4FR4_STARTED": "NO",
+    "W4": "BLOCKED_DEFINITION_IMPLEMENTATION_PENDING",
+    "W4P": "NOT_AUTHORIZED",
+    "W5": "NOT_AUTHORIZED",
+    "CANONICAL_CONTRACT_VERSION": "1.3.1",
+    "VERSION_1_3_2_PUBLISHED": "NO",
+    "W4_COMPATIBILITY_GATE_NORMALIZATION": "NOT_AUTHORIZED"
+  }
+}

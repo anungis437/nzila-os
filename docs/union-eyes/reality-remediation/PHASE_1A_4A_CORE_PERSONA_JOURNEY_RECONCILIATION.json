@@ -1,0 +1,2592 @@
+{
+  "metadata": {
+    "title": "Phase 1A.4a Core Persona Journey Reconciliation",
+    "evidenceBoundary": "Accepted Phase 1A.3b capability model as primary evidence; Phase 1A.2 closeout for inherited binding obligations and priority; Phase 1A.1 index and Phase 1A census for static surface/discoverability only; pilot and convergence documents as documented targets only.",
+    "generatedBy": "scripts/ue/reconcile-core-persona-journeys.mjs",
+    "generatedAt": null,
+    "applicationSourceInspected": false,
+    "runtimeActionExecuted": false,
+    "productCodeChanged": false
+  },
+  "phaseStatus": {
+    "phase1A3bGate": "PASS",
+    "phase1A": "NOT_YET_PROVEN",
+    "operationalReadiness": "NO_GO — RUNTIME_PROOF_REQUIRED",
+    "phase1A4b": "DEFERRED",
+    "phase1B": "NOT_AUTHORIZED",
+    "phase2": "NOT_AUTHORIZED",
+    "phase3B": "BLOCKED_UNTIL_OPERATIONAL_READINESS_PASS"
+  },
+  "summary": {
+    "requiredPersonas": 6,
+    "canonicalJourneyCandidates": 5,
+    "historicalJourneyRecords": 7,
+    "historicalStepRecords": 23,
+    "deferredPhase1A4bRecords": 2,
+    "sourceCompleteJourneyCount": 0,
+    "runtimeVerifiedJourneyCount": 0,
+    "documentedWalkthroughTargetsWithoutOrderedSteps": 2
+  },
+  "personaReconciliation": [
+    {
+      "persona": "MEMBER",
+      "primaryCapabilityIds": [
+        "CASE_DEADLINES",
+        "CASE_RECORDS",
+        "USER_ACCESS"
+      ],
+      "historicalStaticSequenceFound": true,
+      "canonicalJourneyIds": [
+        "MEMBER_CASE_REVIEW"
+      ],
+      "sourceCompleteJourneyCount": 0,
+      "disposition": "CANONICAL_CANDIDATE_SOURCE_DERIVED_UNVERIFIED"
+    },
+    {
+      "persona": "STAFF",
+      "primaryCapabilityIds": [
+        "CASE_COMMUNICATIONS",
+        "GENERAL_COMMUNICATIONS",
+        "MEMBER_RECORDS"
+      ],
+      "historicalStaticSequenceFound": true,
+      "canonicalJourneyIds": [
+        "STAFF_CASE_CORRESPONDENCE"
+      ],
+      "sourceCompleteJourneyCount": 0,
+      "disposition": "CANONICAL_CANDIDATE_SOURCE_DERIVED_UNVERIFIED"
+    },
+    {
+      "persona": "EXECUTIVE",
+      "primaryCapabilityIds": [
+        "GOVERNANCE_ADMINISTRATION",
+        "INSTITUTIONAL_REPORTING"
+      ],
+      "historicalStaticSequenceFound": true,
+      "canonicalJourneyIds": [
+        "EXECUTIVE_GOVERNANCE_REPORTING"
+      ],
+      "sourceCompleteJourneyCount": 0,
+      "disposition": "CANONICAL_CANDIDATE_SOURCE_DERIVED_UNVERIFIED"
+    },
+    {
+      "persona": "GOVERNANCE",
+      "primaryCapabilityIds": [],
+      "historicalStaticSequenceFound": true,
+      "canonicalJourneyIds": [],
+      "sourceCompleteJourneyCount": 0,
+      "disposition": "NO_PRIMARY_PERSONA_CAPABILITY_EVIDENCE"
+    },
+    {
+      "persona": "ADMIN",
+      "primaryCapabilityIds": [
+        "APPLICATION_ADMINISTRATION",
+        "DOCUMENT_LIBRARY",
+        "DUES_REMITTANCE_ADMIN",
+        "ELECTIONS",
+        "GENERAL_COMMUNICATIONS",
+        "GOVERNANCE_ADMINISTRATION",
+        "INSTITUTIONAL_REPORTING",
+        "MEMBER_RECOGNITION",
+        "MEMBER_RECORDS",
+        "ORGANIZATION_STRUCTURE",
+        "PILOT_ADMINISTRATION",
+        "USER_ACCESS"
+      ],
+      "historicalStaticSequenceFound": true,
+      "canonicalJourneyIds": [
+        "ADMIN_ORGANIZATION_ACCESS"
+      ],
+      "sourceCompleteJourneyCount": 0,
+      "disposition": "CANONICAL_CANDIDATE_SOURCE_DERIVED_UNVERIFIED"
+    },
+    {
+      "persona": "PUBLIC",
+      "primaryCapabilityIds": [
+        "PUBLIC_INQUIRIES",
+        "WORKPLACE_RISK_ASSESSMENT"
+      ],
+      "historicalStaticSequenceFound": false,
+      "canonicalJourneyIds": [
+        "PUBLIC_INQUIRY_SUBMISSION"
+      ],
+      "sourceCompleteJourneyCount": 0,
+      "disposition": "CANONICAL_CANDIDATE_SOURCE_DERIVED_UNVERIFIED"
+    }
+  ],
+  "canonicalJourneys": [
+    {
+      "journeyId": "MEMBER_CASE_REVIEW",
+      "persona": "MEMBER",
+      "title": "Access and follow a representation case",
+      "criticality": "CORE",
+      "evidenceDisposition": "SOURCE_DERIVED_UNVERIFIED",
+      "journeyOrderEvidence": "STATIC_STAKEHOLDER_SEQUENCE",
+      "sourceSequenceFile": "e2e/stakeholder-demo-journeys.spec.ts",
+      "capabilityIds": [
+        "CASE_RECORDS",
+        "CASE_DEADLINES"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "CASE_RECORDS",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_DEFECTS_AND_CEILING_OBLIGATIONS",
+          "primaryPersonas": [
+            "MEMBER"
+          ],
+          "criticality": "CORE"
+        },
+        {
+          "capabilityId": "CASE_DEADLINES",
+          "capabilitySourceStatus": "SOURCE_MODEL_BOUNDED_WITH_DEFECTS",
+          "primaryPersonas": [
+            "MEMBER"
+          ],
+          "criticality": "CORE"
+        }
+      ],
+      "candidateRouteEvidence": [
+        {
+          "capabilityId": "CASE_RECORDS",
+          "route": "/[locale]/dashboard/claims/[id]",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/claims/[id]",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "CONTEXTUAL_PAGE_LINK",
+            "pageDisposition": "CONTEXTUAL_WORKFLOW",
+            "pageCallerSourceCount": 4,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "CASE_RECORDS"
+            ]
+          }
+        },
+        {
+          "capabilityId": "CASE_RECORDS",
+          "route": "/[locale]/dashboard/claims/new",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/claims/new",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 10,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "member"
+            ],
+            "contextualInboundEdgeCount": 8,
+            "routeCandidateCapabilityIds": [
+              "CASE_RECORDS",
+              "USER_ACCESS"
+            ]
+          }
+        }
+      ],
+      "steps": [
+        {
+          "stepId": "MEMBER_CASE_REVIEW_STEP_01",
+          "sourceLabel": "My Cases",
+          "sourceHref": "/dashboard/inbox?type=intake",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/inbox",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 15,
+            "primaryNavigationEntryCountForPersona": 5,
+            "primaryNavigationExperiences": [
+              "member",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 8,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "MEMBER_CASE_REVIEW_STEP_02",
+          "sourceLabel": "Open Representation Case",
+          "sourceHref": "/dashboard/claims/new",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/claims/new",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 10,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "member"
+            ],
+            "contextualInboundEdgeCount": 8,
+            "routeCandidateCapabilityIds": [
+              "CASE_RECORDS",
+              "USER_ACCESS"
+            ]
+          },
+          "actionEvidenceClassification": "EXACT_ROUTE_CANDIDATE_MATCH_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "MEMBER_CASE_REVIEW_STEP_03",
+          "sourceLabel": "Messages",
+          "sourceHref": "/dashboard/inbox?type=message",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/inbox",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 15,
+            "primaryNavigationEntryCountForPersona": 5,
+            "primaryNavigationExperiences": [
+              "member",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 8,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "MEMBER_CASE_REVIEW_STEP_04",
+          "sourceLabel": "Documents",
+          "sourceHref": "/dashboard/documents",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/documents",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 5,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "member",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 3,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/claims/[id]/page.tsx:272:19:onUploadComplete",
+        "app/[locale]/dashboard/claims/new/page.tsx:576:21:onChange",
+        "app/[locale]/dashboard/claims/new/page.tsx:600:27:onClick",
+        "app/[locale]/workbook/claim/ClaimWorkbookClient.tsx:64:7:onClick",
+        "components/claims/claim-list-table.tsx:237:17:onClick",
+        "components/claims/claim-list-table.tsx:243:17:onClick",
+        "components/claims/claim-list-table.tsx:251:19:onClick",
+        "components/claims/claim-list-table.tsx:257:19:onClick",
+        "components/claims/claim-list-table.tsx:268:19:onClick",
+        "components/claims/claims-console.tsx:77:9:onClick",
+        "components/file-upload.tsx:184:7:onDrop",
+        "components/file-upload.tsx:196:9:onChange",
+        "components/file-upload.tsx:277:25:onClick",
+        "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+        "components/grievances/grievance-detail-console.tsx:459:11:onSubmit",
+        "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+        "components/grievances/grievance-detail-console.tsx:582:15:onClick",
+        "components/grievances/grievance-detail-console.tsx:596:7:onAssign",
+        "components/grievances/grievances-console.tsx:355:19:onSubmit",
+        "components/grievances/grievances-console.tsx:848:31:onClick",
+        "components/grievances/grievances-console.tsx:860:31:onClick",
+        "components/jurisdiction/deadline-calculator.tsx:133:15:onSelect",
+        "components/jurisdiction/deadline-calculator.tsx:143:9:onClick",
+        "components/steward-recommendations.tsx:81:9:onClick",
+        "components/workbench/workbench-console.tsx:917:35:onClick"
+      ],
+      "sourceCeilingBindingIds": [
+        "app/[locale]/workbook/claim/ClaimWorkbookClient.tsx:64:7:onClick",
+        "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+        "components/grievances/grievance-detail-console.tsx:459:11:onSubmit",
+        "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+        "components/grievances/grievance-detail-console.tsx:582:15:onClick",
+        "components/grievances/grievance-detail-console.tsx:596:7:onAssign",
+        "components/grievances/grievances-console.tsx:355:19:onSubmit",
+        "components/grievances/grievances-console.tsx:848:31:onClick",
+        "components/grievances/grievances-console.tsx:860:31:onClick",
+        "components/workbench/workbench-console.tsx:917:35:onClick"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-011d933df1b5",
+        "BINDING-25074af3471d",
+        "BINDING-4256ecebd732",
+        "BINDING-46d2e7c75807",
+        "BINDING-46d919076131",
+        "BINDING-4de75f902351",
+        "BINDING-6fad83f3bfa5",
+        "BINDING-9488ce91def1",
+        "BINDING-b93c0f2467b5",
+        "BINDING-d1513a7f89a0"
+      ],
+      "residualEffectChainBindingIds": [
+        "app/[locale]/workbook/claim/ClaimWorkbookClient.tsx:64:7:onClick",
+        "components/grievances/grievance-detail-console.tsx:343:19:onClick",
+        "components/grievances/grievance-detail-console.tsx:459:11:onSubmit",
+        "components/grievances/grievance-detail-console.tsx:543:21:onClick",
+        "components/grievances/grievance-detail-console.tsx:582:15:onClick",
+        "components/grievances/grievance-detail-console.tsx:596:7:onAssign",
+        "components/grievances/grievances-console.tsx:355:19:onSubmit",
+        "components/grievances/grievances-console.tsx:848:31:onClick",
+        "components/grievances/grievances-console.tsx:860:31:onClick",
+        "components/workbench/workbench-console.tsx:917:35:onClick"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0014",
+        "UE-B2-CHAIN-0027",
+        "UE-B2-CHAIN-0028",
+        "UE-B2-CHAIN-0110",
+        "UE-B2-CHAIN-0111",
+        "UE-B2-CHAIN-0113",
+        "UE-B2-CHAIN-0114",
+        "UE-B2-CHAIN-0115",
+        "UE-B2-CHAIN-0116",
+        "UE-B2-CHAIN-0117",
+        "UE-B2-CHAIN-0118",
+        "UE-B2-CHAIN-0119",
+        "UE-B2-CHAIN-0120",
+        "UE-B2-CHAIN-0374",
+        "UE-B2-CHAIN-0375"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0014",
+        "CHAIN-UE-B2-CHAIN-0027",
+        "CHAIN-UE-B2-CHAIN-0028",
+        "CHAIN-UE-B2-CHAIN-0110",
+        "CHAIN-UE-B2-CHAIN-0111",
+        "CHAIN-UE-B2-CHAIN-0113",
+        "CHAIN-UE-B2-CHAIN-0114",
+        "CHAIN-UE-B2-CHAIN-0115",
+        "CHAIN-UE-B2-CHAIN-0116",
+        "CHAIN-UE-B2-CHAIN-0117",
+        "CHAIN-UE-B2-CHAIN-0118",
+        "CHAIN-UE-B2-CHAIN-0119",
+        "CHAIN-UE-B2-CHAIN-0120",
+        "CHAIN-UE-B2-CHAIN-0374",
+        "CHAIN-UE-B2-CHAIN-0375"
+      ],
+      "knownDefectBindingIds": [
+        "components/grievances/grievances-console.tsx:848:31:onClick",
+        "components/jurisdiction/deadline-calculator.tsx:143:9:onClick"
+      ],
+      "knownDefectIds": [
+        "ACTION-API-METHOD-01",
+        "ACTION-API-ROUTE-01",
+        "UE-R1-ROOT-004",
+        "UE-R1-ROOT-067"
+      ],
+      "priority": {
+        "bindingCountsByClass": {
+          "P2_EVIDENCE_CLOSURE": 9,
+          "P2_SOURCE_DEFECT": 2,
+          "P3_SOURCE_CLASSIFIED": 14
+        },
+        "highestOpenPriority": "P2",
+        "source": "Phase 1A.2 binding priorityClass joined by retained bindingId"
+      },
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "claims": {
+        "sourceComplete": false,
+        "runtimeVerified": false,
+        "authorizationVerified": false,
+        "persistenceVerified": false,
+        "userActionExecuted": false,
+        "explanation": "Static page, navigation, capability, and action-binding evidence does not establish a completed user journey or successful business effect."
+      }
+    },
+    {
+      "journeyId": "STAFF_CASE_CORRESPONDENCE",
+      "persona": "STAFF",
+      "title": "Record case-related correspondence",
+      "criticality": "CORE",
+      "evidenceDisposition": "SOURCE_DERIVED_UNVERIFIED",
+      "journeyOrderEvidence": "STATIC_STAKEHOLDER_SEQUENCE",
+      "sourceSequenceFile": "e2e/stakeholder-demo-journeys.spec.ts",
+      "capabilityIds": [
+        "CASE_COMMUNICATIONS"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "CASE_COMMUNICATIONS",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS",
+          "primaryPersonas": [
+            "STAFF"
+          ],
+          "criticality": "CORE"
+        }
+      ],
+      "candidateRouteEvidence": [],
+      "steps": [
+        {
+          "stepId": "STAFF_CASE_CORRESPONDENCE_STEP_01",
+          "sourceLabel": "Casework Console",
+          "sourceHref": "/dashboard/work",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": false,
+          "censusCoverage": "SURFACE_ONLY",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/work",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "CONTEXTUAL_PAGE_LINK",
+            "pageDisposition": "CONTEXTUAL_WORKFLOW",
+            "pageCallerSourceCount": 1,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 1,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "STAFF_CASE_CORRESPONDENCE_STEP_02",
+          "sourceLabel": "Representation Cases",
+          "sourceHref": "/dashboard/inbox?type=intake",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/inbox",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 15,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "member",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 8,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "STAFF_CASE_CORRESPONDENCE_STEP_03",
+          "sourceLabel": "Communications",
+          "sourceHref": "/dashboard/correspondence",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/correspondence",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 1,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "STAFF_CASE_CORRESPONDENCE_STEP_04",
+          "sourceLabel": "Assignments",
+          "sourceHref": "/dashboard/priorities",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": false,
+          "censusCoverage": "SURFACE_ONLY",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/priorities",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "CONTEXTUAL_PAGE_LINK",
+            "pageDisposition": "CONTEXTUAL_WORKFLOW",
+            "pageCallerSourceCount": 4,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 4,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "STAFF_CASE_CORRESPONDENCE_STEP_05",
+          "sourceLabel": "Documents",
+          "sourceHref": "/dashboard/documents",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/documents",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 5,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "member",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 3,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/correspondence/correspondence-dashboard.tsx:253:11:onCancel",
+        "app/[locale]/dashboard/correspondence/correspondence-dashboard.tsx:253:11:onCreated",
+        "app/[locale]/dashboard/correspondence/new-letter-composer.tsx:403:13:onClick",
+        "app/[locale]/dashboard/correspondence/new-letter-composer.tsx:426:11:onClick",
+        "app/[locale]/dashboard/correspondence/new-letter-composer.tsx:448:11:onClick",
+        "app/[locale]/dashboard/correspondence/new-letter-composer.tsx:462:9:onClick",
+        "app/[locale]/dashboard/correspondence/new-letter-composer.tsx:530:11:onClick",
+        "app/[locale]/dashboard/correspondence/new-letter-composer.tsx:564:11:onClick",
+        "app/[locale]/dashboard/correspondence/new-letter-composer.tsx:567:11:onClick"
+      ],
+      "sourceCeilingBindingIds": [
+        "app/[locale]/dashboard/correspondence/new-letter-composer.tsx:530:11:onClick"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-c96c26ecc978"
+      ],
+      "residualEffectChainBindingIds": [
+        "app/[locale]/dashboard/correspondence/new-letter-composer.tsx:530:11:onClick"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0182"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0182"
+      ],
+      "knownDefectBindingIds": [],
+      "knownDefectIds": [],
+      "priority": {
+        "bindingCountsByClass": {
+          "P2_EVIDENCE_CLOSURE": 1,
+          "P3_SOURCE_CLASSIFIED": 8
+        },
+        "highestOpenPriority": "P2",
+        "source": "Phase 1A.2 binding priorityClass joined by retained bindingId"
+      },
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "claims": {
+        "sourceComplete": false,
+        "runtimeVerified": false,
+        "authorizationVerified": false,
+        "persistenceVerified": false,
+        "userActionExecuted": false,
+        "explanation": "Static page, navigation, capability, and action-binding evidence does not establish a completed user journey or successful business effect."
+      }
+    },
+    {
+      "journeyId": "EXECUTIVE_GOVERNANCE_REPORTING",
+      "persona": "EXECUTIVE",
+      "title": "Review institutional governance and reporting surfaces",
+      "criticality": "CORE",
+      "evidenceDisposition": "SOURCE_DERIVED_UNVERIFIED",
+      "journeyOrderEvidence": "STATIC_STAKEHOLDER_SEQUENCE",
+      "sourceSequenceFile": "e2e/stakeholder-demo-journeys.spec.ts",
+      "capabilityIds": [
+        "GOVERNANCE_ADMINISTRATION",
+        "INSTITUTIONAL_REPORTING"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "GOVERNANCE_ADMINISTRATION",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS",
+          "primaryPersonas": [
+            "EXECUTIVE",
+            "ADMIN"
+          ],
+          "criticality": "CORE"
+        },
+        {
+          "capabilityId": "INSTITUTIONAL_REPORTING",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_DEFECTS_AND_CEILING_OBLIGATIONS",
+          "primaryPersonas": [
+            "ADMIN",
+            "EXECUTIVE"
+          ],
+          "criticality": "MATERIAL"
+        }
+      ],
+      "candidateRouteEvidence": [
+        {
+          "capabilityId": "GOVERNANCE_ADMINISTRATION",
+          "route": "/[locale]/dashboard/finance/allocation",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/finance/allocation",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+            "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+            "pageCallerSourceCount": 0,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "GOVERNANCE_ADMINISTRATION"
+            ]
+          }
+        },
+        {
+          "capabilityId": "GOVERNANCE_ADMINISTRATION",
+          "route": "/[locale]/dashboard/leadership",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/leadership",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 1,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "executive"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "GOVERNANCE_ADMINISTRATION"
+            ]
+          }
+        },
+        {
+          "capabilityId": "INSTITUTIONAL_REPORTING",
+          "route": "/[locale]/dashboard/admin/ai-usage",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/admin/ai-usage",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+            "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+            "pageCallerSourceCount": 0,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "INSTITUTIONAL_REPORTING"
+            ]
+          }
+        },
+        {
+          "capabilityId": "INSTITUTIONAL_REPORTING",
+          "route": "/[locale]/dashboard/admin/scheduled-reports",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/admin/scheduled-reports",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+            "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+            "pageCallerSourceCount": 0,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "INSTITUTIONAL_REPORTING"
+            ]
+          }
+        }
+      ],
+      "steps": [
+        {
+          "stepId": "EXECUTIVE_GOVERNANCE_REPORTING_STEP_01",
+          "sourceLabel": "Executive Overview",
+          "sourceHref": "/dashboard/intelligence?scope=executive",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/intelligence",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 7,
+            "primaryNavigationEntryCountForPersona": 3,
+            "primaryNavigationExperiences": [
+              "executive",
+              "governance",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 2,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "EXECUTIVE_GOVERNANCE_REPORTING_STEP_02",
+          "sourceLabel": "Continuity Insights",
+          "sourceHref": "/dashboard/continuity-intelligence",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/continuity-intelligence",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 3,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "executive",
+              "governance"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "EXECUTIVE_GOVERNANCE_REPORTING_STEP_03",
+          "sourceLabel": "Leadership Continuity",
+          "sourceHref": "/dashboard/leadership",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/leadership",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 1,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "executive"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "GOVERNANCE_ADMINISTRATION"
+            ]
+          },
+          "actionEvidenceClassification": "EXACT_ROUTE_CANDIDATE_MATCH_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "EXECUTIVE_GOVERNANCE_REPORTING_STEP_04",
+          "sourceLabel": "Continuity Operations",
+          "sourceHref": "/dashboard/executive-operating-intelligence",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/executive-operating-intelligence",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 2,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "executive"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "EXECUTIVE_GOVERNANCE_REPORTING_STEP_05",
+          "sourceLabel": "Member Outcomes Ledger",
+          "sourceHref": "/dashboard/outcomes",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/outcomes",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 1,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "executive"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/admin/ai-usage/page.tsx:114:11:onClick",
+        "app/[locale]/dashboard/admin/ai-usage/page.tsx:127:11:onClick",
+        "app/[locale]/dashboard/admin/ai-usage/page.tsx:221:13:onClick",
+        "app/[locale]/dashboard/admin/ai-usage/page.tsx:230:13:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:401:13:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:498:21:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:592:17:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:654:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:698:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:788:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:884:15:onClick",
+        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx:157:7:onSubmit",
+        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx:346:21:onClick",
+        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx:375:21:onClick",
+        "app/[locale]/dashboard/committees/[id]/committee-workspace.tsx:175:13:onClick",
+        "app/[locale]/dashboard/finance/allocation/page.tsx:169:21:onClick",
+        "app/[locale]/dashboard/leadership/page.tsx:154:13:onClick",
+        "app/[locale]/dashboard/leadership/page.tsx:186:11:onClick",
+        "components/admin/clc-analytics-dashboard.tsx:319:11:onClick",
+        "components/admin/clc-analytics-dashboard.tsx:323:11:onClick",
+        "components/admin/ScheduledReportForm.tsx:139:9:onClick",
+        "components/admin/ScheduledReportForm.tsx:154:9:onSubmit",
+        "components/admin/ScheduledReportForm.tsx:352:13:onClick",
+        "components/analytics/analytics-dashboard.tsx:120:11:onClick",
+        "components/analytics/analytics-overview-console.tsx:178:19:onClick",
+        "components/analytics/comparative-analysis.tsx:138:9:onClick",
+        "components/analytics/insights-panel.tsx:228:19:onClick",
+        "components/analytics/insights-panel.tsx:235:19:onClick",
+        "components/analytics/insights-panel.tsx:250:19:onClick",
+        "components/analytics/insights-panel.tsx:256:19:onClick",
+        "components/analytics/insights-panel.tsx:267:17:onClick",
+        "components/analytics/kpi-builder-dialog.tsx:146:11:onSubmit",
+        "components/analytics/TopItemsList.tsx:114:19:onClick",
+        "components/auth/forgot-password-form.tsx:68:7:onSubmit",
+        "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:288:25:onClick",
+        "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:296:27:onClick",
+        "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:368:25:onClick",
+        "components/leadership/employer-hotspots-table.tsx:154:23:onClick",
+        "components/leadership/leadership-export.tsx:168:9:onClick",
+        "components/leadership/leadership-export.tsx:172:9:onClick",
+        "components/policy-governance/ApprovalQueue.tsx:104:13:onClick",
+        "components/policy-governance/ApprovalQueue.tsx:113:13:onClick",
+        "components/policy-governance/ConflictAnalysis.tsx:104:15:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:116:5:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:136:9:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:67:9:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:70:9:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:80:11:onClick",
+        "components/policy-governance/PolicyCard.tsx:35:5:onClick",
+        "components/policy-governance/PolicyDetail.tsx:45:11:onClick",
+        "components/policy-governance/PolicyLineage.tsx:90:9:onClick",
+        "components/policy-governance/ReplayCenter.tsx:71:9:onClick",
+        "components/ui/data-table-advanced.tsx:241:15:onClick",
+        "components/ui/data-table-advanced.tsx:244:15:onClick"
+      ],
+      "sourceCeilingBindingIds": [
+        "app/[locale]/dashboard/admin/ai-usage/page.tsx:114:11:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:401:13:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:498:21:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:592:17:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:654:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:698:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:788:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:884:15:onClick",
+        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx:157:7:onSubmit",
+        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx:346:21:onClick",
+        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx:375:21:onClick",
+        "components/admin/ScheduledReportForm.tsx:154:9:onSubmit",
+        "components/analytics/comparative-analysis.tsx:138:9:onClick",
+        "components/analytics/kpi-builder-dialog.tsx:146:11:onSubmit",
+        "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:288:25:onClick",
+        "components/health-safety/SafetyCommitteeMeetingScheduler.tsx:368:25:onClick",
+        "components/policy-governance/ApprovalQueue.tsx:104:13:onClick",
+        "components/policy-governance/ApprovalQueue.tsx:113:13:onClick",
+        "components/policy-governance/ConflictAnalysis.tsx:104:15:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:67:9:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:70:9:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:80:11:onClick",
+        "components/policy-governance/PolicyLineage.tsx:90:9:onClick",
+        "components/policy-governance/ReplayCenter.tsx:71:9:onClick"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-04eb26a69444",
+        "BINDING-209f2ec4c3be",
+        "BINDING-21112375f2e5",
+        "BINDING-3d7720dd7ee1",
+        "BINDING-3f9bfc5b443f",
+        "BINDING-3ff2004de4e1",
+        "BINDING-44a2030d2577",
+        "BINDING-46b703fe0580",
+        "BINDING-596d1f9287df",
+        "BINDING-5d837a805683",
+        "BINDING-5da3b588a6df",
+        "BINDING-6615d66eca03",
+        "BINDING-795985f7d91f",
+        "BINDING-7c1a068bed76",
+        "BINDING-7d1f656faf7c",
+        "BINDING-89a0f0ff2376",
+        "BINDING-89a540cae6ce",
+        "BINDING-a5b294a7f7d1",
+        "BINDING-b9ddddb81a60",
+        "BINDING-d6ea031f3a70",
+        "BINDING-eb9e086f063f",
+        "BINDING-ed87372c2603",
+        "BINDING-f2fd54fd1bfd",
+        "BINDING-f4e3772a3738"
+      ],
+      "residualEffectChainBindingIds": [
+        "app/[locale]/dashboard/admin/ai-usage/page.tsx:114:11:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:401:13:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:498:21:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:592:17:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:654:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:698:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:788:15:onClick",
+        "app/[locale]/dashboard/admin/governance/governance-console.tsx:884:15:onClick",
+        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx:157:7:onSubmit",
+        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx:346:21:onClick",
+        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx:375:21:onClick",
+        "components/admin/ScheduledReportForm.tsx:154:9:onSubmit",
+        "components/analytics/comparative-analysis.tsx:138:9:onClick",
+        "components/policy-governance/ApprovalQueue.tsx:104:13:onClick",
+        "components/policy-governance/ApprovalQueue.tsx:113:13:onClick",
+        "components/policy-governance/ConflictAnalysis.tsx:104:15:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:67:9:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:70:9:onClick",
+        "components/policy-governance/GovernanceSnapshotViewer.tsx:80:11:onClick",
+        "components/policy-governance/PolicyLineage.tsx:90:9:onClick",
+        "components/policy-governance/ReplayCenter.tsx:71:9:onClick"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0123",
+        "UE-B2-CHAIN-0124",
+        "UE-B2-CHAIN-0125",
+        "UE-B2-CHAIN-0126",
+        "UE-B2-CHAIN-0128",
+        "UE-B2-CHAIN-0129",
+        "UE-B2-CHAIN-0131",
+        "UE-B2-CHAIN-0133",
+        "UE-B2-CHAIN-0134",
+        "UE-B2-CHAIN-0135",
+        "UE-B2-CHAIN-0136",
+        "UE-B2-CHAIN-0137",
+        "UE-B2-CHAIN-0138",
+        "UE-B2-CHAIN-0139",
+        "UE-B2-CHAIN-0140",
+        "UE-B2-CHAIN-0259",
+        "UE-B2-CHAIN-0260",
+        "UE-B2-CHAIN-0261",
+        "UE-B2-CHAIN-0262",
+        "UE-B2-CHAIN-0263",
+        "UE-B2-CHAIN-0264",
+        "UE-B2-CHAIN-0299",
+        "UE-B2-CHAIN-0300",
+        "UE-B2-CHAIN-0301",
+        "UE-B2-CHAIN-0302",
+        "UE-B2-CHAIN-0303",
+        "UE-B2-CHAIN-0304",
+        "UE-B2-CHAIN-0305",
+        "UE-B2-CHAIN-0306",
+        "UE-B2-CHAIN-0307",
+        "UE-B2-CHAIN-0308",
+        "UE-B2-CHAIN-0309",
+        "UE-B2-CHAIN-0310",
+        "UE-B2-CHAIN-0311",
+        "UE-B2-CHAIN-0327",
+        "UE-B2-CHAIN-0346"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0123",
+        "CHAIN-UE-B2-CHAIN-0124",
+        "CHAIN-UE-B2-CHAIN-0125",
+        "CHAIN-UE-B2-CHAIN-0126",
+        "CHAIN-UE-B2-CHAIN-0128",
+        "CHAIN-UE-B2-CHAIN-0129",
+        "CHAIN-UE-B2-CHAIN-0131",
+        "CHAIN-UE-B2-CHAIN-0133",
+        "CHAIN-UE-B2-CHAIN-0134",
+        "CHAIN-UE-B2-CHAIN-0135",
+        "CHAIN-UE-B2-CHAIN-0136",
+        "CHAIN-UE-B2-CHAIN-0137",
+        "CHAIN-UE-B2-CHAIN-0138",
+        "CHAIN-UE-B2-CHAIN-0139",
+        "CHAIN-UE-B2-CHAIN-0140",
+        "CHAIN-UE-B2-CHAIN-0259",
+        "CHAIN-UE-B2-CHAIN-0260",
+        "CHAIN-UE-B2-CHAIN-0261",
+        "CHAIN-UE-B2-CHAIN-0262",
+        "CHAIN-UE-B2-CHAIN-0263",
+        "CHAIN-UE-B2-CHAIN-0264",
+        "CHAIN-UE-B2-CHAIN-0299",
+        "CHAIN-UE-B2-CHAIN-0300",
+        "CHAIN-UE-B2-CHAIN-0301",
+        "CHAIN-UE-B2-CHAIN-0302",
+        "CHAIN-UE-B2-CHAIN-0303",
+        "CHAIN-UE-B2-CHAIN-0304",
+        "CHAIN-UE-B2-CHAIN-0305",
+        "CHAIN-UE-B2-CHAIN-0306",
+        "CHAIN-UE-B2-CHAIN-0307",
+        "CHAIN-UE-B2-CHAIN-0308",
+        "CHAIN-UE-B2-CHAIN-0309",
+        "CHAIN-UE-B2-CHAIN-0310",
+        "CHAIN-UE-B2-CHAIN-0311",
+        "CHAIN-UE-B2-CHAIN-0327",
+        "CHAIN-UE-B2-CHAIN-0346"
+      ],
+      "knownDefectBindingIds": [
+        "components/admin/clc-analytics-dashboard.tsx:323:11:onClick",
+        "components/analytics/analytics-overview-console.tsx:178:19:onClick",
+        "components/analytics/insights-panel.tsx:228:19:onClick",
+        "components/analytics/insights-panel.tsx:235:19:onClick",
+        "components/analytics/insights-panel.tsx:250:19:onClick",
+        "components/analytics/insights-panel.tsx:256:19:onClick",
+        "components/analytics/insights-panel.tsx:267:17:onClick"
+      ],
+      "knownDefectIds": [
+        "ACTION-API-METHOD-01",
+        "ACTION-API-ROUTE-01",
+        "UE-R1-ROOT-002",
+        "UE-R1-ROOT-017"
+      ],
+      "priority": {
+        "bindingCountsByClass": {
+          "P2_EVIDENCE_CLOSURE": 24,
+          "P2_SOURCE_DEFECT": 7,
+          "P3_SOURCE_CLASSIFIED": 23
+        },
+        "highestOpenPriority": "P2",
+        "source": "Phase 1A.2 binding priorityClass joined by retained bindingId"
+      },
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "claims": {
+        "sourceComplete": false,
+        "runtimeVerified": false,
+        "authorizationVerified": false,
+        "persistenceVerified": false,
+        "userActionExecuted": false,
+        "explanation": "Static page, navigation, capability, and action-binding evidence does not establish a completed user journey or successful business effect."
+      }
+    },
+    {
+      "journeyId": "ADMIN_ORGANIZATION_ACCESS",
+      "persona": "ADMIN",
+      "title": "Administer organizational structure and user access",
+      "criticality": "CORE",
+      "evidenceDisposition": "SOURCE_DERIVED_UNVERIFIED",
+      "journeyOrderEvidence": "STATIC_STAKEHOLDER_SEQUENCE",
+      "sourceSequenceFile": "e2e/stakeholder-demo-journeys.spec.ts",
+      "capabilityIds": [
+        "ORGANIZATION_STRUCTURE",
+        "USER_ACCESS"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "ORGANIZATION_STRUCTURE",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_DEFECTS_AND_CEILING_OBLIGATIONS",
+          "primaryPersonas": [
+            "ADMIN"
+          ],
+          "criticality": "CORE"
+        },
+        {
+          "capabilityId": "USER_ACCESS",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_DEFECTS_AND_CEILING_OBLIGATIONS",
+          "primaryPersonas": [
+            "ADMIN",
+            "MEMBER"
+          ],
+          "criticality": "MATERIAL"
+        }
+      ],
+      "candidateRouteEvidence": [
+        {
+          "capabilityId": "ORGANIZATION_STRUCTURE",
+          "route": "/[locale]/dashboard/admin/organizations",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/admin/organizations",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 8,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "admin"
+            ],
+            "contextualInboundEdgeCount": 6,
+            "routeCandidateCapabilityIds": [
+              "ELECTIONS",
+              "ORGANIZATION_STRUCTURE"
+            ]
+          }
+        },
+        {
+          "capabilityId": "ORGANIZATION_STRUCTURE",
+          "route": "/[locale]/dashboard/admin/organizations/[id]",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/admin/organizations/[id]",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "CONTEXTUAL_PAGE_LINK",
+            "pageDisposition": "CONTEXTUAL_WORKFLOW",
+            "pageCallerSourceCount": 10,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "ORGANIZATION_STRUCTURE"
+            ]
+          }
+        },
+        {
+          "capabilityId": "ORGANIZATION_STRUCTURE",
+          "route": "/[locale]/dashboard/admin/organizations/[id]/edit",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/admin/organizations/[id]/edit",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "CONTEXTUAL_PAGE_LINK",
+            "pageDisposition": "CONTEXTUAL_WORKFLOW",
+            "pageCallerSourceCount": 2,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "ORGANIZATION_STRUCTURE"
+            ]
+          }
+        },
+        {
+          "capabilityId": "ORGANIZATION_STRUCTURE",
+          "route": "/[locale]/dashboard/admin/organizations/new",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/admin/organizations/new",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "CONTEXTUAL_PAGE_LINK",
+            "pageDisposition": "CONTEXTUAL_WORKFLOW",
+            "pageCallerSourceCount": 6,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 6,
+            "routeCandidateCapabilityIds": [
+              "ORGANIZATION_STRUCTURE"
+            ]
+          }
+        },
+        {
+          "capabilityId": "USER_ACCESS",
+          "route": "/[locale]/dashboard/claims/new",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/claims/new",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 10,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [
+              "member"
+            ],
+            "contextualInboundEdgeCount": 8,
+            "routeCandidateCapabilityIds": [
+              "CASE_RECORDS",
+              "USER_ACCESS"
+            ]
+          }
+        },
+        {
+          "capabilityId": "USER_ACCESS",
+          "route": "/[locale]/dashboard/pay",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/pay",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+            "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+            "pageCallerSourceCount": 0,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "USER_ACCESS"
+            ]
+          }
+        },
+        {
+          "capabilityId": "USER_ACCESS",
+          "route": "/[locale]/dashboard/profile",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/profile",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "SHARED_COMPONENT_OR_CODE_REFERENCE",
+            "pageDisposition": "SHARED_COMPONENT_OR_CODE_REFERENCE",
+            "pageCallerSourceCount": 1,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 1,
+            "routeCandidateCapabilityIds": [
+              "USER_ACCESS"
+            ]
+          }
+        },
+        {
+          "capabilityId": "USER_ACCESS",
+          "route": "/[locale]/dashboard/settings/sharing",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/settings/sharing",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "NO_STATIC_INBOUND_ENTRY_FOUND",
+            "pageDisposition": "CANONICAL_SOURCE_PAGE_NO_STATIC_INBOUND_CALLER",
+            "pageCallerSourceCount": 0,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "USER_ACCESS"
+            ]
+          }
+        },
+        {
+          "capabilityId": "USER_ACCESS",
+          "route": "/invite/accept",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/invite/accept",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "AUTH_FLOW_ENTRY",
+            "pageDisposition": "AUTH_FLOW",
+            "pageCallerSourceCount": 0,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "USER_ACCESS"
+            ]
+          }
+        }
+      ],
+      "steps": [
+        {
+          "stepId": "ADMIN_ORGANIZATION_ACCESS_STEP_01",
+          "sourceLabel": "Organization",
+          "sourceHref": "/dashboard/admin/organizations",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/admin/organizations",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 8,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "admin"
+            ],
+            "contextualInboundEdgeCount": 6,
+            "routeCandidateCapabilityIds": [
+              "ELECTIONS",
+              "ORGANIZATION_STRUCTURE"
+            ]
+          },
+          "actionEvidenceClassification": "EXACT_ROUTE_CANDIDATE_MATCH_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "ADMIN_ORGANIZATION_ACCESS_STEP_02",
+          "sourceLabel": "Users & Roles",
+          "sourceHref": "/dashboard/admin/members",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/admin/members",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 2,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "admin"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "ADMIN_ORGANIZATION_ACCESS_STEP_03",
+          "sourceLabel": "Policies",
+          "sourceHref": "/dashboard/governance",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/governance",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 7,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "admin",
+              "governance"
+            ],
+            "contextualInboundEdgeCount": 3,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "ADMIN_ORGANIZATION_ACCESS_STEP_04",
+          "sourceLabel": "Security",
+          "sourceHref": "/dashboard/security",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/security",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 18,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "admin"
+            ],
+            "contextualInboundEdgeCount": 17,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "ADMIN_ORGANIZATION_ACCESS_STEP_05",
+          "sourceLabel": "Audit",
+          "sourceHref": "/dashboard/audits",
+          "staticSurfaceExists": true,
+          "staticNavEntryExists": true,
+          "censusCoverage": "SURFACE_AND_NAV_PRESENT",
+          "navigationEvidence": {
+            "normalizedRoute": "/dashboard/audits",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 2,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "admin",
+              "governance"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "actionEvidenceClassification": "STATIC_SURFACE_AND_NAVIGATION_ONLY",
+          "executionStatus": "NOT_EXECUTED"
+        }
+      ],
+      "bindingIds": [
+        "app/[locale]/dashboard/admin/organizations/[id]/edit/page.tsx:271:7:onSubmit",
+        "app/[locale]/dashboard/admin/organizations/[id]/edit/page.tsx:493:15:onClick",
+        "app/[locale]/dashboard/admin/organizations/[id]/page.tsx:555:11:onSelectOrganization",
+        "app/[locale]/dashboard/admin/organizations/[id]/page.tsx:674:17:onClick",
+        "app/[locale]/dashboard/admin/organizations/new/page.tsx:198:7:onSubmit",
+        "app/[locale]/dashboard/admin/organizations/page.tsx:433:35:onClick",
+        "app/[locale]/dashboard/admin/organizations/page.tsx:437:35:onClick",
+        "app/[locale]/dashboard/admin/organizations/page.tsx:441:35:onClick",
+        "app/[locale]/dashboard/admin/organizations/page.tsx:445:35:onClick",
+        "app/[locale]/dashboard/admin/organizations/page.tsx:466:15:onSelect",
+        "app/[locale]/dashboard/admin/organizations/page.tsx:485:7:onOpenChange",
+        "app/[locale]/dashboard/claims/new/page.tsx:412:15:onSubmit",
+        "app/[locale]/dashboard/pay/page.tsx:249:13:onClick",
+        "app/[locale]/dashboard/profile/page.tsx:1173:23:onClick",
+        "app/[locale]/dashboard/profile/page.tsx:247:17:onClick",
+        "app/[locale]/dashboard/settings/_components/org-settings-content.tsx:821:27:onClick",
+        "app/[locale]/dashboard/settings/_components/org-settings-content.tsx:964:17:onClick",
+        "app/[locale]/dashboard/settings/_components/org-settings-content.tsx:970:17:onClick",
+        "app/[locale]/dashboard/settings/sharing/page.tsx:81:11:onSave",
+        "app/invite/accept/page.tsx:70:9:onSubmit",
+        "components/admin/bulk-import-organizations.tsx:287:13:onClick",
+        "components/admin/bulk-import-organizations.tsx:299:13:onDrop",
+        "components/admin/bulk-import-organizations.tsx:317:15:onClick",
+        "components/admin/bulk-import-organizations.tsx:349:15:onClick",
+        "components/admin/bulk-import-organizations.tsx:487:11:onClick",
+        "components/admin/bulk-import-organizations.tsx:491:13:onClick",
+        "components/admin/members-console.tsx:482:13:onClick",
+        "components/admin/organization-tree.tsx:253:9:onClick",
+        "components/admin/organization-tree.tsx:274:9:onClick",
+        "components/admin/organization-tree.tsx:299:15:onClick",
+        "components/admin/organization-tree.tsx:313:15:onClick",
+        "components/admin/organization-tree.tsx:327:15:onClick",
+        "components/admin/organization-tree.tsx:348:13:onAddChild",
+        "components/admin/organization-tree.tsx:348:13:onDelete",
+        "components/admin/organization-tree.tsx:348:13:onEdit",
+        "components/admin/organization-tree.tsx:348:13:onSelect",
+        "components/admin/organization-tree.tsx:505:13:onClick",
+        "components/admin/organization-tree.tsx:508:13:onClick",
+        "components/admin/organization-tree.tsx:568:15:onAddChild",
+        "components/admin/organization-tree.tsx:568:15:onDelete",
+        "components/admin/organization-tree.tsx:568:15:onEdit",
+        "components/admin/organization-tree.tsx:568:15:onSelect",
+        "components/ai/ai-chatbot.tsx:291:13:onClick",
+        "components/ai/ai-chatbot.tsx:299:15:onClick",
+        "components/ai/ai-chatbot.tsx:320:23:onClick",
+        "components/ai/ai-chatbot.tsx:324:23:onClick",
+        "components/ai/ai-chatbot.tsx:355:21:onClick",
+        "components/ai/ai-chatbot.tsx:467:15:onClick",
+        "components/ai/steward-copilot-drawer.tsx:243:17:onClick",
+        "components/ai/steward-copilot-drawer.tsx:246:17:onClick",
+        "components/ai/steward-copilot-drawer.tsx:249:17:onClick",
+        "components/auth/login-form.tsx:236:11:onClick",
+        "components/auth/login-form.tsx:245:9:onSubmit",
+        "components/auth/login-form.tsx:298:9:onSubmit",
+        "components/auth/login-form.tsx:339:9:onSubmit",
+        "components/auth/login-form.tsx:374:11:onClick",
+        "components/auth/mfa-settings.tsx:169:9:onSubmit",
+        "components/auth/mfa-settings.tsx:230:11:onClick",
+        "components/auth/mfa-settings.tsx:246:11:onClick",
+        "components/auth/reset-password-form.tsx:103:7:onSubmit",
+        "components/auth/signup-form.tsx:52:7:onSubmit",
+        "components/header-actions.tsx:27:7:onClick",
+        "components/organization/bulk-operations.tsx:223:13:onClick",
+        "components/organization/bulk-operations.tsx:233:13:onClick",
+        "components/organization/bulk-operations.tsx:243:13:onClick",
+        "components/organization/bulk-operations.tsx:253:13:onClick",
+        "components/organization/bulk-operations.tsx:304:13:onClick",
+        "components/organization/bulk-operations.tsx:353:13:onClick",
+        "components/organization/organization-selector.tsx:144:7:onClick",
+        "components/organization/organization-selector.tsx:170:7:onClick",
+        "components/organization/organization-selector.tsx:234:19:onSelect",
+        "components/organization/organization-tree.tsx:205:13:onClick",
+        "components/organization/organization-tree.tsx:224:11:onSelect",
+        "components/organization/organization-tree.tsx:261:7:onClick",
+        "components/organization/organization-tree.tsx:270:11:onClick",
+        "components/organization/organization-tree.tsx:322:13:onSelect",
+        "components/policy-governance/DriftDetection.tsx:55:9:onClick",
+        "components/policy-governance/ReplayCenter.tsx:64:9:onClick",
+        "components/sharing/SharingSettingsForm.tsx:355:9:onClick",
+        "components/ui/data-table-advanced.tsx:453:7:onClick",
+        "components/union-structure/BargainingUnitManagement.tsx:379:11:onClick",
+        "components/union-structure/BargainingUnitManagement.tsx:455:27:onClick",
+        "components/union-structure/BargainingUnitManagement.tsx:459:27:onClick",
+        "components/union-structure/BargainingUnitManagement.tsx:491:13:onSubmit",
+        "components/union-structure/CommitteeManagement.tsx:405:13:onClick",
+        "components/union-structure/CommitteeManagement.tsx:484:23:onClick",
+        "components/union-structure/CommitteeManagement.tsx:492:29:onClick",
+        "components/union-structure/CommitteeManagement.tsx:498:29:onClick",
+        "components/union-structure/CommitteeManagement.tsx:504:29:onClick",
+        "components/union-structure/CommitteeManagement.tsx:537:13:onSubmit",
+        "components/union-structure/EmployerManagement.tsx:328:15:onClick",
+        "components/union-structure/EmployerManagement.tsx:332:15:onClick",
+        "components/union-structure/EmployerManagement.tsx:437:29:onClick",
+        "components/union-structure/EmployerManagement.tsx:442:29:onClick",
+        "components/union-structure/EmployerManagement.tsx:476:13:onSubmit",
+        "components/union-structure/UnionStructureDashboard.tsx:196:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:200:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:204:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:208:11:onUpdate",
+        "components/union-structure/WorksiteManagement.tsx:265:15:onClick",
+        "components/union-structure/WorksiteManagement.tsx:269:15:onClick",
+        "components/union-structure/WorksiteManagement.tsx:354:29:onClick",
+        "components/union-structure/WorksiteManagement.tsx:359:29:onClick",
+        "components/union-structure/WorksiteManagement.tsx:393:13:onSubmit"
+      ],
+      "sourceCeilingBindingIds": [
+        "app/[locale]/dashboard/admin/organizations/[id]/edit/page.tsx:271:7:onSubmit",
+        "app/[locale]/dashboard/admin/organizations/[id]/edit/page.tsx:493:15:onClick",
+        "app/[locale]/dashboard/admin/organizations/[id]/page.tsx:674:17:onClick",
+        "app/[locale]/dashboard/admin/organizations/new/page.tsx:198:7:onSubmit",
+        "app/[locale]/dashboard/admin/organizations/page.tsx:445:35:onClick",
+        "app/[locale]/dashboard/claims/new/page.tsx:412:15:onSubmit",
+        "app/[locale]/dashboard/settings/_components/org-settings-content.tsx:964:17:onClick",
+        "app/[locale]/dashboard/settings/_components/org-settings-content.tsx:970:17:onClick",
+        "app/invite/accept/page.tsx:70:9:onSubmit",
+        "components/admin/bulk-import-organizations.tsx:299:13:onDrop",
+        "components/admin/bulk-import-organizations.tsx:317:15:onClick",
+        "components/admin/bulk-import-organizations.tsx:487:11:onClick",
+        "components/admin/bulk-import-organizations.tsx:491:13:onClick",
+        "components/admin/organization-tree.tsx:253:9:onClick",
+        "components/admin/organization-tree.tsx:274:9:onClick",
+        "components/admin/organization-tree.tsx:299:15:onClick",
+        "components/admin/organization-tree.tsx:313:15:onClick",
+        "components/admin/organization-tree.tsx:327:15:onClick",
+        "components/admin/organization-tree.tsx:348:13:onSelect",
+        "components/ai/ai-chatbot.tsx:355:21:onClick",
+        "components/ai/ai-chatbot.tsx:467:15:onClick",
+        "components/auth/login-form.tsx:245:9:onSubmit",
+        "components/auth/mfa-settings.tsx:246:11:onClick",
+        "components/organization/bulk-operations.tsx:223:13:onClick",
+        "components/organization/bulk-operations.tsx:233:13:onClick",
+        "components/organization/bulk-operations.tsx:243:13:onClick",
+        "components/organization/bulk-operations.tsx:304:13:onClick",
+        "components/organization/bulk-operations.tsx:353:13:onClick",
+        "components/organization/organization-selector.tsx:144:7:onClick",
+        "components/organization/organization-selector.tsx:170:7:onClick",
+        "components/organization/organization-tree.tsx:205:13:onClick",
+        "components/organization/organization-tree.tsx:224:11:onSelect",
+        "components/organization/organization-tree.tsx:261:7:onClick",
+        "components/organization/organization-tree.tsx:270:11:onClick",
+        "components/organization/organization-tree.tsx:322:13:onSelect",
+        "components/policy-governance/DriftDetection.tsx:55:9:onClick",
+        "components/policy-governance/ReplayCenter.tsx:64:9:onClick",
+        "components/union-structure/CommitteeManagement.tsx:504:29:onClick",
+        "components/union-structure/CommitteeManagement.tsx:537:13:onSubmit",
+        "components/union-structure/EmployerManagement.tsx:328:15:onClick",
+        "components/union-structure/EmployerManagement.tsx:442:29:onClick",
+        "components/union-structure/EmployerManagement.tsx:476:13:onSubmit",
+        "components/union-structure/UnionStructureDashboard.tsx:196:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:200:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:204:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:208:11:onUpdate",
+        "components/union-structure/WorksiteManagement.tsx:265:15:onClick",
+        "components/union-structure/WorksiteManagement.tsx:359:29:onClick",
+        "components/union-structure/WorksiteManagement.tsx:393:13:onSubmit"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-00c310c3bed0",
+        "BINDING-0c30630cd883",
+        "BINDING-13061bd62c25",
+        "BINDING-1781a3350423",
+        "BINDING-1813c77ca623",
+        "BINDING-1ae6af49925e",
+        "BINDING-1f9818cc2414",
+        "BINDING-24dad02d3569",
+        "BINDING-25fc5991c395",
+        "BINDING-27683eb7655b",
+        "BINDING-3a5a59264735",
+        "BINDING-3b7683532ac0",
+        "BINDING-3c6915f28395",
+        "BINDING-3eec7e3c9ecd",
+        "BINDING-3f7aad5884e5",
+        "BINDING-443535f5a2da",
+        "BINDING-460cf152c769",
+        "BINDING-481777ba68df",
+        "BINDING-4af04c5deaa8",
+        "BINDING-4bcf779b0b28",
+        "BINDING-4bead1663479",
+        "BINDING-5d5b5f5744ce",
+        "BINDING-66668c1f0f05",
+        "BINDING-6a36e790d528",
+        "BINDING-6e5412be98eb",
+        "BINDING-7098ff93b475",
+        "BINDING-7ac7e6c4f095",
+        "BINDING-7d3ebe098a5d",
+        "BINDING-820c7800e7da",
+        "BINDING-8415253f89e9",
+        "BINDING-8c3ffb66d0f5",
+        "BINDING-8cecb61449a6",
+        "BINDING-8da2e0c4bcf9",
+        "BINDING-8e5aeb6beb0d",
+        "BINDING-975bccc0d2ea",
+        "BINDING-9b355982ae45",
+        "BINDING-a0b3e6af4890",
+        "BINDING-acd37455a722",
+        "BINDING-afeb64e50543",
+        "BINDING-be85852dc78a",
+        "BINDING-cc627539dc6a",
+        "BINDING-d00abb1bcdeb",
+        "BINDING-d377d8f20ecc",
+        "BINDING-daac97d606f1",
+        "BINDING-e1379acad2c6",
+        "BINDING-ee0ba4f2d481",
+        "BINDING-ef0d0327e7ea",
+        "BINDING-f1be450e2a68",
+        "BINDING-f7256588a0da"
+      ],
+      "residualEffectChainBindingIds": [
+        "app/[locale]/dashboard/admin/organizations/[id]/edit/page.tsx:271:7:onSubmit",
+        "app/[locale]/dashboard/admin/organizations/[id]/edit/page.tsx:493:15:onClick",
+        "app/[locale]/dashboard/admin/organizations/[id]/page.tsx:674:17:onClick",
+        "app/[locale]/dashboard/admin/organizations/new/page.tsx:198:7:onSubmit",
+        "app/[locale]/dashboard/admin/organizations/page.tsx:445:35:onClick",
+        "app/[locale]/dashboard/claims/new/page.tsx:412:15:onSubmit",
+        "app/[locale]/dashboard/settings/_components/org-settings-content.tsx:964:17:onClick",
+        "app/[locale]/dashboard/settings/_components/org-settings-content.tsx:970:17:onClick",
+        "app/invite/accept/page.tsx:70:9:onSubmit",
+        "components/admin/bulk-import-organizations.tsx:299:13:onDrop",
+        "components/admin/bulk-import-organizations.tsx:317:15:onClick",
+        "components/admin/bulk-import-organizations.tsx:491:13:onClick",
+        "components/ai/ai-chatbot.tsx:355:21:onClick",
+        "components/ai/ai-chatbot.tsx:467:15:onClick",
+        "components/auth/login-form.tsx:245:9:onSubmit",
+        "components/auth/mfa-settings.tsx:246:11:onClick",
+        "components/organization/bulk-operations.tsx:223:13:onClick",
+        "components/organization/bulk-operations.tsx:233:13:onClick",
+        "components/organization/bulk-operations.tsx:243:13:onClick",
+        "components/organization/bulk-operations.tsx:304:13:onClick",
+        "components/organization/bulk-operations.tsx:353:13:onClick",
+        "components/organization/organization-selector.tsx:144:7:onClick",
+        "components/organization/organization-selector.tsx:170:7:onClick",
+        "components/organization/organization-tree.tsx:205:13:onClick",
+        "components/policy-governance/DriftDetection.tsx:55:9:onClick",
+        "components/policy-governance/ReplayCenter.tsx:64:9:onClick",
+        "components/union-structure/CommitteeManagement.tsx:504:29:onClick",
+        "components/union-structure/CommitteeManagement.tsx:537:13:onSubmit",
+        "components/union-structure/EmployerManagement.tsx:328:15:onClick",
+        "components/union-structure/EmployerManagement.tsx:442:29:onClick",
+        "components/union-structure/EmployerManagement.tsx:476:13:onSubmit",
+        "components/union-structure/UnionStructureDashboard.tsx:196:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:200:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:204:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:208:11:onUpdate",
+        "components/union-structure/WorksiteManagement.tsx:265:15:onClick",
+        "components/union-structure/WorksiteManagement.tsx:359:29:onClick",
+        "components/union-structure/WorksiteManagement.tsx:393:13:onSubmit"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0009",
+        "UE-B2-CHAIN-0012",
+        "UE-B2-CHAIN-0022",
+        "UE-B2-CHAIN-0033",
+        "UE-B2-CHAIN-0034",
+        "UE-B2-CHAIN-0035",
+        "UE-B2-CHAIN-0036",
+        "UE-B2-CHAIN-0039",
+        "UE-B2-CHAIN-0040",
+        "UE-B2-CHAIN-0041",
+        "UE-B2-CHAIN-0042",
+        "UE-B2-CHAIN-0045",
+        "UE-B2-CHAIN-0046",
+        "UE-B2-CHAIN-0047",
+        "UE-B2-CHAIN-0048",
+        "UE-B2-CHAIN-0051",
+        "UE-B2-CHAIN-0052",
+        "UE-B2-CHAIN-0053",
+        "UE-B2-CHAIN-0054",
+        "UE-B2-CHAIN-0057",
+        "UE-B2-CHAIN-0058",
+        "UE-B2-CHAIN-0061",
+        "UE-B2-CHAIN-0062",
+        "UE-B2-CHAIN-0063",
+        "UE-B2-CHAIN-0064",
+        "UE-B2-CHAIN-0065",
+        "UE-B2-CHAIN-0066",
+        "UE-B2-CHAIN-0069",
+        "UE-B2-CHAIN-0070",
+        "UE-B2-CHAIN-0127",
+        "UE-B2-CHAIN-0132",
+        "UE-B2-CHAIN-0239",
+        "UE-B2-CHAIN-0254",
+        "UE-B2-CHAIN-0258",
+        "UE-B2-CHAIN-0278",
+        "UE-B2-CHAIN-0279",
+        "UE-B2-CHAIN-0280",
+        "UE-B2-CHAIN-0281",
+        "UE-B2-CHAIN-0282",
+        "UE-B2-CHAIN-0283",
+        "UE-B2-CHAIN-0284",
+        "UE-B2-CHAIN-0285",
+        "UE-B2-CHAIN-0286",
+        "UE-B2-CHAIN-0287",
+        "UE-B2-CHAIN-0288",
+        "UE-B2-CHAIN-0289",
+        "UE-B2-CHAIN-0292",
+        "UE-B2-CHAIN-0293",
+        "UE-B2-CHAIN-0359",
+        "UE-B2-CHAIN-0360",
+        "UE-B2-CHAIN-0362",
+        "UE-B2-CHAIN-0363",
+        "UE-B2-CHAIN-0366",
+        "UE-B2-CHAIN-0367",
+        "UE-B2-CHAIN-0368",
+        "UE-B2-CHAIN-0369"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0009",
+        "CHAIN-UE-B2-CHAIN-0012",
+        "CHAIN-UE-B2-CHAIN-0022",
+        "CHAIN-UE-B2-CHAIN-0033",
+        "CHAIN-UE-B2-CHAIN-0034",
+        "CHAIN-UE-B2-CHAIN-0035",
+        "CHAIN-UE-B2-CHAIN-0036",
+        "CHAIN-UE-B2-CHAIN-0039",
+        "CHAIN-UE-B2-CHAIN-0040",
+        "CHAIN-UE-B2-CHAIN-0041",
+        "CHAIN-UE-B2-CHAIN-0042",
+        "CHAIN-UE-B2-CHAIN-0045",
+        "CHAIN-UE-B2-CHAIN-0046",
+        "CHAIN-UE-B2-CHAIN-0047",
+        "CHAIN-UE-B2-CHAIN-0048",
+        "CHAIN-UE-B2-CHAIN-0051",
+        "CHAIN-UE-B2-CHAIN-0052",
+        "CHAIN-UE-B2-CHAIN-0053",
+        "CHAIN-UE-B2-CHAIN-0054",
+        "CHAIN-UE-B2-CHAIN-0057",
+        "CHAIN-UE-B2-CHAIN-0058",
+        "CHAIN-UE-B2-CHAIN-0061",
+        "CHAIN-UE-B2-CHAIN-0062",
+        "CHAIN-UE-B2-CHAIN-0063",
+        "CHAIN-UE-B2-CHAIN-0064",
+        "CHAIN-UE-B2-CHAIN-0065",
+        "CHAIN-UE-B2-CHAIN-0066",
+        "CHAIN-UE-B2-CHAIN-0069",
+        "CHAIN-UE-B2-CHAIN-0070",
+        "CHAIN-UE-B2-CHAIN-0127",
+        "CHAIN-UE-B2-CHAIN-0132",
+        "CHAIN-UE-B2-CHAIN-0239",
+        "CHAIN-UE-B2-CHAIN-0254",
+        "CHAIN-UE-B2-CHAIN-0258",
+        "CHAIN-UE-B2-CHAIN-0278",
+        "CHAIN-UE-B2-CHAIN-0279",
+        "CHAIN-UE-B2-CHAIN-0280",
+        "CHAIN-UE-B2-CHAIN-0281",
+        "CHAIN-UE-B2-CHAIN-0282",
+        "CHAIN-UE-B2-CHAIN-0283",
+        "CHAIN-UE-B2-CHAIN-0284",
+        "CHAIN-UE-B2-CHAIN-0285",
+        "CHAIN-UE-B2-CHAIN-0286",
+        "CHAIN-UE-B2-CHAIN-0287",
+        "CHAIN-UE-B2-CHAIN-0288",
+        "CHAIN-UE-B2-CHAIN-0289",
+        "CHAIN-UE-B2-CHAIN-0292",
+        "CHAIN-UE-B2-CHAIN-0293",
+        "CHAIN-UE-B2-CHAIN-0359",
+        "CHAIN-UE-B2-CHAIN-0360",
+        "CHAIN-UE-B2-CHAIN-0362",
+        "CHAIN-UE-B2-CHAIN-0363",
+        "CHAIN-UE-B2-CHAIN-0366",
+        "CHAIN-UE-B2-CHAIN-0367",
+        "CHAIN-UE-B2-CHAIN-0368",
+        "CHAIN-UE-B2-CHAIN-0369"
+      ],
+      "knownDefectBindingIds": [
+        "components/ai/ai-chatbot.tsx:320:23:onClick",
+        "components/ai/ai-chatbot.tsx:324:23:onClick",
+        "components/sharing/SharingSettingsForm.tsx:355:9:onClick",
+        "components/union-structure/BargainingUnitManagement.tsx:459:27:onClick",
+        "components/union-structure/BargainingUnitManagement.tsx:491:13:onSubmit",
+        "components/union-structure/UnionStructureDashboard.tsx:196:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:200:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:204:11:onUpdate",
+        "components/union-structure/UnionStructureDashboard.tsx:208:11:onUpdate"
+      ],
+      "knownDefectIds": [
+        "ACTION-API-METHOD-01",
+        "ACTION-API-ROUTE-01",
+        "UE-R1-ROOT-001",
+        "UE-R1-ROOT-002",
+        "UE-R1-ROOT-003",
+        "UE-R1-ROOT-004",
+        "UE-R1-ROOT-072"
+      ],
+      "priority": {
+        "bindingCountsByClass": {
+          "P2_EVIDENCE_CLOSURE": 45,
+          "P2_SOURCE_DEFECT": 9,
+          "P3_SOURCE_CLASSIFIED": 50
+        },
+        "highestOpenPriority": "P2",
+        "source": "Phase 1A.2 binding priorityClass joined by retained bindingId"
+      },
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [
+          "app/[locale]/dashboard/profile/page.tsx:1173:23:onClick"
+        ],
+        "dimensionsKeptSeparate": true
+      },
+      "claims": {
+        "sourceComplete": false,
+        "runtimeVerified": false,
+        "authorizationVerified": false,
+        "persistenceVerified": false,
+        "userActionExecuted": false,
+        "explanation": "Static page, navigation, capability, and action-binding evidence does not establish a completed user journey or successful business effect."
+      }
+    },
+    {
+      "journeyId": "PUBLIC_INQUIRY_SUBMISSION",
+      "persona": "PUBLIC",
+      "title": "Submit a public inquiry or pilot request",
+      "criticality": "SUPPORTING",
+      "evidenceDisposition": "SOURCE_DERIVED_UNVERIFIED",
+      "journeyOrderEvidence": "NO_ORDERED_PUBLIC_SEQUENCE_FOUND",
+      "sourceSequenceFile": null,
+      "capabilityIds": [
+        "PUBLIC_INQUIRIES"
+      ],
+      "capabilitySourceStatus": [
+        {
+          "capabilityId": "PUBLIC_INQUIRIES",
+          "capabilitySourceStatus": "SOURCE_MODEL_HAS_CEILING_OBLIGATIONS",
+          "primaryPersonas": [
+            "PUBLIC"
+          ],
+          "criticality": "SUPPORTING"
+        }
+      ],
+      "candidateRouteEvidence": [
+        {
+          "capabilityId": "PUBLIC_INQUIRIES",
+          "route": "/[locale]/pilot-request",
+          "staticSurfaceExists": true,
+          "navigationEvidence": {
+            "normalizedRoute": "/pilot-request",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "SOURCE_REDIRECT",
+            "pageDisposition": "PAGE_ALIAS_REDIRECT",
+            "pageCallerSourceCount": 4,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 4,
+            "routeCandidateCapabilityIds": [
+              "PUBLIC_INQUIRIES"
+            ]
+          }
+        }
+      ],
+      "steps": [],
+      "bindingIds": [
+        "app/(marketing)/contact/contact-form.tsx:105:5:onSubmit",
+        "app/[locale]/(marketing)/pilot-request/page.tsx:549:17:onClick",
+        "app/[locale]/(marketing)/pilot-request/page.tsx:792:17:onClick",
+        "app/[locale]/(marketing)/pilot-request/page.tsx:842:5:onClick"
+      ],
+      "sourceCeilingBindingIds": [
+        "app/[locale]/(marketing)/pilot-request/page.tsx:792:17:onClick",
+        "app/[locale]/(marketing)/pilot-request/page.tsx:842:5:onClick"
+      ],
+      "sourceCeilingObligationIds": [
+        "BINDING-97c9ed90e726",
+        "BINDING-ebc51a906ae8"
+      ],
+      "residualEffectChainBindingIds": [
+        "app/[locale]/(marketing)/pilot-request/page.tsx:792:17:onClick"
+      ],
+      "residualEffectChainIds": [
+        "UE-B2-CHAIN-0344"
+      ],
+      "residualEffectChainObligationIds": [
+        "CHAIN-UE-B2-CHAIN-0344"
+      ],
+      "knownDefectBindingIds": [],
+      "knownDefectIds": [],
+      "priority": {
+        "bindingCountsByClass": {
+          "P2_EVIDENCE_CLOSURE": 2,
+          "P3_SOURCE_CLASSIFIED": 2
+        },
+        "highestOpenPriority": "P2",
+        "source": "Phase 1A.2 binding priorityClass joined by retained bindingId"
+      },
+      "falseSuccessExposure": {
+        "sourceSupportedBindingIds": [],
+        "potentialOnlyBindingIds": [],
+        "dimensionsKeptSeparate": true
+      },
+      "claims": {
+        "sourceComplete": false,
+        "runtimeVerified": false,
+        "authorizationVerified": false,
+        "persistenceVerified": false,
+        "userActionExecuted": false,
+        "explanation": "Static page, navigation, capability, and action-binding evidence does not establish a completed user journey or successful business effect."
+      }
+    }
+  ],
+  "historicalJourneyReconciliation": [
+    {
+      "sourceJourney": "MEMBER",
+      "sourceFile": "e2e/stakeholder-demo-journeys.spec.ts",
+      "sourceStepCount": 4,
+      "sourceCoverage": {
+        "SURFACE_AND_NAV_PRESENT": 4
+      },
+      "disposition": "RECONCILED_TO_SOURCE_DERIVED_UNVERIFIED_CANDIDATE",
+      "canonicalJourneyId": "MEMBER_CASE_REVIEW",
+      "stepEvidence": [
+        {
+          "stepId": "MEMBER_HISTORICAL_STEP_01",
+          "label": "My Cases",
+          "href": "/dashboard/inbox?type=intake",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/inbox",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 15,
+            "primaryNavigationEntryCountForPersona": 5,
+            "primaryNavigationExperiences": [
+              "member",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 8,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "MEMBER_HISTORICAL_STEP_02",
+          "label": "Open Representation Case",
+          "href": "/dashboard/claims/new",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/claims/new",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 10,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "member"
+            ],
+            "contextualInboundEdgeCount": 8,
+            "routeCandidateCapabilityIds": [
+              "CASE_RECORDS",
+              "USER_ACCESS"
+            ]
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "MEMBER_HISTORICAL_STEP_03",
+          "label": "Messages",
+          "href": "/dashboard/inbox?type=message",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/inbox",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 15,
+            "primaryNavigationEntryCountForPersona": 5,
+            "primaryNavigationExperiences": [
+              "member",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 8,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "MEMBER_HISTORICAL_STEP_04",
+          "label": "Documents",
+          "href": "/dashboard/documents",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/documents",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 5,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "member",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 3,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        }
+      ]
+    },
+    {
+      "sourceJourney": "STAFF",
+      "sourceFile": "e2e/stakeholder-demo-journeys.spec.ts",
+      "sourceStepCount": 5,
+      "sourceCoverage": {
+        "SURFACE_ONLY": 2,
+        "SURFACE_AND_NAV_PRESENT": 3
+      },
+      "disposition": "RECONCILED_TO_SOURCE_DERIVED_UNVERIFIED_CANDIDATE",
+      "canonicalJourneyId": "STAFF_CASE_CORRESPONDENCE",
+      "stepEvidence": [
+        {
+          "stepId": "STAFF_HISTORICAL_STEP_01",
+          "label": "Casework Console",
+          "href": "/dashboard/work",
+          "staticSurfaceExists": true,
+          "navEntryExists": false,
+          "coverage": "SURFACE_ONLY",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/work",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "CONTEXTUAL_PAGE_LINK",
+            "pageDisposition": "CONTEXTUAL_WORKFLOW",
+            "pageCallerSourceCount": 1,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 1,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "STAFF_HISTORICAL_STEP_02",
+          "label": "Representation Cases",
+          "href": "/dashboard/inbox?type=intake",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/inbox",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 15,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "member",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 8,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "STAFF_HISTORICAL_STEP_03",
+          "label": "Communications",
+          "href": "/dashboard/correspondence",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/correspondence",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 1,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "STAFF_HISTORICAL_STEP_04",
+          "label": "Assignments",
+          "href": "/dashboard/priorities",
+          "staticSurfaceExists": true,
+          "navEntryExists": false,
+          "coverage": "SURFACE_ONLY",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/priorities",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "CONTEXTUAL_PAGE_LINK",
+            "pageDisposition": "CONTEXTUAL_WORKFLOW",
+            "pageCallerSourceCount": 4,
+            "primaryNavigationEntryCountForPersona": 0,
+            "primaryNavigationExperiences": [],
+            "contextualInboundEdgeCount": 4,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "STAFF_HISTORICAL_STEP_05",
+          "label": "Documents",
+          "href": "/dashboard/documents",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/documents",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 5,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "member",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 3,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        }
+      ]
+    },
+    {
+      "sourceJourney": "EXECUTIVE",
+      "sourceFile": "e2e/stakeholder-demo-journeys.spec.ts",
+      "sourceStepCount": 5,
+      "sourceCoverage": {
+        "SURFACE_AND_NAV_PRESENT": 5
+      },
+      "disposition": "RECONCILED_TO_SOURCE_DERIVED_UNVERIFIED_CANDIDATE",
+      "canonicalJourneyId": "EXECUTIVE_GOVERNANCE_REPORTING",
+      "stepEvidence": [
+        {
+          "stepId": "EXECUTIVE_HISTORICAL_STEP_01",
+          "label": "Executive Overview",
+          "href": "/dashboard/intelligence?scope=executive",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/intelligence",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 7,
+            "primaryNavigationEntryCountForPersona": 3,
+            "primaryNavigationExperiences": [
+              "executive",
+              "governance",
+              "staff"
+            ],
+            "contextualInboundEdgeCount": 2,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "EXECUTIVE_HISTORICAL_STEP_02",
+          "label": "Continuity Insights",
+          "href": "/dashboard/continuity-intelligence",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/continuity-intelligence",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 3,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "executive",
+              "governance"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "EXECUTIVE_HISTORICAL_STEP_03",
+          "label": "Leadership Continuity",
+          "href": "/dashboard/leadership",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/leadership",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 1,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "executive"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": [
+              "GOVERNANCE_ADMINISTRATION"
+            ]
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "EXECUTIVE_HISTORICAL_STEP_04",
+          "label": "Continuity Operations",
+          "href": "/dashboard/executive-operating-intelligence",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/executive-operating-intelligence",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 2,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "executive"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "EXECUTIVE_HISTORICAL_STEP_05",
+          "label": "Member Outcomes Ledger",
+          "href": "/dashboard/outcomes",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/outcomes",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 1,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "executive"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        }
+      ]
+    },
+    {
+      "sourceJourney": "GOVERNANCE",
+      "sourceFile": "e2e/stakeholder-demo-journeys.spec.ts",
+      "sourceStepCount": 4,
+      "sourceCoverage": {
+        "SURFACE_AND_NAV_PRESENT": 4
+      },
+      "disposition": "NAVIGATION_SEQUENCE_ONLY_NO_PRIMARY_PERSONA_CAPABILITY",
+      "canonicalJourneyId": null,
+      "stepEvidence": [
+        {
+          "stepId": "GOVERNANCE_HISTORICAL_STEP_01",
+          "label": "Governance Overview",
+          "href": "/dashboard/governance",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/governance",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 7,
+            "primaryNavigationEntryCountForPersona": 3,
+            "primaryNavigationExperiences": [
+              "admin",
+              "governance"
+            ],
+            "contextualInboundEdgeCount": 3,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "GOVERNANCE_HISTORICAL_STEP_02",
+          "label": "Trust & Explainability",
+          "href": "/dashboard/trust",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/trust",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 6,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "executive",
+              "governance"
+            ],
+            "contextualInboundEdgeCount": 3,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "GOVERNANCE_HISTORICAL_STEP_03",
+          "label": "Audit & Evidence",
+          "href": "/dashboard/audits",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/audits",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 2,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "admin",
+              "governance"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "GOVERNANCE_HISTORICAL_STEP_04",
+          "label": "Continuity Signals",
+          "href": "/dashboard/continuity-intelligence",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/continuity-intelligence",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 3,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "executive",
+              "governance"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        }
+      ]
+    },
+    {
+      "sourceJourney": "ADMIN",
+      "sourceFile": "e2e/stakeholder-demo-journeys.spec.ts",
+      "sourceStepCount": 5,
+      "sourceCoverage": {
+        "SURFACE_AND_NAV_PRESENT": 5
+      },
+      "disposition": "RECONCILED_TO_SOURCE_DERIVED_UNVERIFIED_CANDIDATE",
+      "canonicalJourneyId": "ADMIN_ORGANIZATION_ACCESS",
+      "stepEvidence": [
+        {
+          "stepId": "ADMIN_HISTORICAL_STEP_01",
+          "label": "Organization",
+          "href": "/dashboard/admin/organizations",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/admin/organizations",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 8,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "admin"
+            ],
+            "contextualInboundEdgeCount": 6,
+            "routeCandidateCapabilityIds": [
+              "ELECTIONS",
+              "ORGANIZATION_STRUCTURE"
+            ]
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "ADMIN_HISTORICAL_STEP_02",
+          "label": "Users & Roles",
+          "href": "/dashboard/admin/members",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/admin/members",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 2,
+            "primaryNavigationEntryCountForPersona": 2,
+            "primaryNavigationExperiences": [
+              "admin"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "ADMIN_HISTORICAL_STEP_03",
+          "label": "Policies",
+          "href": "/dashboard/governance",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/governance",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 7,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "admin",
+              "governance"
+            ],
+            "contextualInboundEdgeCount": 3,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "ADMIN_HISTORICAL_STEP_04",
+          "label": "Security",
+          "href": "/dashboard/security",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/security",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 18,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "admin"
+            ],
+            "contextualInboundEdgeCount": 17,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        },
+        {
+          "stepId": "ADMIN_HISTORICAL_STEP_05",
+          "label": "Audit",
+          "href": "/dashboard/audits",
+          "staticSurfaceExists": true,
+          "navEntryExists": true,
+          "coverage": "SURFACE_AND_NAV_PRESENT",
+          "routeEvidence": {
+            "normalizedRoute": "/dashboard/audits",
+            "staticPageRecordFound": true,
+            "pageEntryMechanism": "PRIMARY_ROLE_NAVIGATION",
+            "pageDisposition": "PRIMARY_ROLE_NAVIGATION",
+            "pageCallerSourceCount": 2,
+            "primaryNavigationEntryCountForPersona": 1,
+            "primaryNavigationExperiences": [
+              "admin",
+              "governance"
+            ],
+            "contextualInboundEdgeCount": 0,
+            "routeCandidateCapabilityIds": []
+          },
+          "executionStatus": "NOT_EXECUTED"
+        }
+      ]
+    },
+    {
+      "sourceJourney": "LIUNA_CONTINUITY",
+      "sourceFile": null,
+      "sourceStepCount": 0,
+      "disposition": "DEFERRED_TO_PHASE_1A_4B",
+      "canonicalJourneyId": null,
+      "stepEvidence": []
+    },
+    {
+      "sourceJourney": "WORKAID_OPERATING_MODEL",
+      "sourceFile": null,
+      "sourceStepCount": 0,
+      "disposition": "DEFERRED_TO_PHASE_1A_4B",
+      "canonicalJourneyId": null,
+      "stepEvidence": []
+    }
+  ],
+  "documentedTargets": [
+    {
+      "targetId": "PILOT_CASE_LIFECYCLE",
+      "sourceFile": "docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md",
+      "recordType": "PILOT_SUCCESS_TARGET",
+      "target": "Intake → resolution or formal deferral",
+      "targetThreshold": "At least 20 cases processed end-to-end by pilot close",
+      "persona": null,
+      "capabilityIds": [
+        "CASE_RECORDS"
+      ],
+      "disposition": "DOCUMENTED_OUTCOME_TARGET_NOT_JOURNEY_EXECUTION_EVIDENCE"
+    },
+    {
+      "targetId": "EXECUTIVE_PROCUREMENT_WALKTHROUGHS",
+      "sourceFile": "docs/union-eyes/runtime-convergence/full-executive-procurement-experience-convergence.md",
+      "recordType": "DOCTRINAL_WALKTHROUGH_TARGETS",
+      "target": "Executive, governance, trust-center, procurement, pilot, onboarding, and operational-proof flows",
+      "persona": null,
+      "capabilityIds": [],
+      "disposition": "DOCTRINAL_TARGETS_WITHOUT_ORDERED_SOURCE_STEPS"
+    },
+    {
+      "targetId": "DEMO_PILOT_WALKTHROUGHS",
+      "sourceFile": "docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md",
+      "recordType": "DOCTRINAL_WALKTHROUGH_TARGETS",
+      "target": "Executive, procurement, steward, and member operational walkthroughs",
+      "persona": null,
+      "capabilityIds": [],
+      "disposition": "DOCTRINAL_TARGETS_WITHOUT_ORDERED_SOURCE_STEPS"
+    }
+  ],
+  "falseSuccessReconciliation": {
+    "sourceSupportedBindingIds": [
+      "app/[locale]/dashboard/admin/page.tsx:844:23:onClick",
+      "components/admin/clc-remittances-dashboard.tsx:500:13:onClick",
+      "components/admin/clc-remittances-dashboard.tsx:504:13:onClick",
+      "components/admin/clc-remittances-dashboard.tsx:508:13:onClick",
+      "components/admin/clc-remittances-dashboard.tsx:596:25:onClick"
+    ],
+    "sourceSupportedChainIds": [
+      "UE-B2-CHAIN-0223",
+      "UE-B2-CHAIN-0271",
+      "UE-B2-CHAIN-0351",
+      "UE-B2-CHAIN-0352",
+      "UE-B2-CHAIN-0353"
+    ],
+    "potentialOnlyBindingIds": [
+      "app/[locale]/dashboard/elections/[id]/page.tsx:263:17:onClick",
+      "app/[locale]/dashboard/profile/page.tsx:1173:23:onClick",
+      "components/icra/ICRAAssessmentFlow.tsx:572:11:onSubmit",
+      "components/rewards/redemption-form.tsx:84:5:onSubmit"
+    ],
+    "evidenceOverlapBindingCount": 0,
+    "interpretation": "Preserve both source-supported false-success records and the smaller effect-index potential flag as separate evidence dimensions."
+  },
+  "limitations": [
+    "Historical stakeholder-demo paths are static source inventories; no journey was executed.",
+    "Route and navigation presence do not establish action completion, authorization, persistence, successful external effects, or audit behavior.",
+    "Capability persona tags are analytical source labels, not role-access proof.",
+    "Per-step capability matches require exact normalized route-candidate equality; no semantic route-to-capability inference is made.",
+    "The pilot case lifecycle and executive/procurement/demo walkthroughs are documented targets, not evidence that the target flows occurred.",
+    "The five source-supported and four potential-only false-success binding sets are retained separately.",
+    "LIUNA continuity and WorkAid operating-model journeys remain deferred to Phase 1A.4b."
+  ],
+  "validation": {
+    "acceptedPhase1A3bInput": true,
+    "acceptedBindingDenominators": true,
+    "sourceCeilingObligationDenominatorRetained": true,
+    "residualEffectChainDenominatorRetained": true,
+    "knownDefectBindingDenominatorRetained": true,
+    "allRequiredPersonasRepresented": true,
+    "everyHistoricalJourneyRecordReconciled": true,
+    "allStaticJourneyStepsPreserved": true,
+    "externalSpecialistJourneysDeferred": true,
+    "canonicalCapabilitiesPrimaryForPersona": true,
+    "candidatesWithoutHistoricalSequenceHaveNoOrderedSteps": true,
+    "highestOpenPriorityMatchesRetainedPriorityClasses": true,
+    "inheritedBindingAndObligationIdsResolve": true,
+    "falseSuccessDimensionsRemainSeparate": true,
+    "noJourneyExecutionOrRuntimeClaims": true,
+    "noLaterPhaseStarted": true,
+    "applicationSourceInspected": false,
+    "runtimeActionExecuted": false,
+    "productCodeChanged": false
+  }
+}

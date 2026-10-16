@@ -85,6 +85,7 @@ are portfolio inventory, not part of the current two-lane commercial spine — s
 
 ## 6. Links
 
+- Phase 1 authoritative indexes: [`PHASE_1_AUTHORITATIVE_INDEXES.md`](PHASE_1_AUTHORITATIVE_INDEXES.md)
 - Programme charter: [`reality-remediation/00_PROGRAM_CHARTER.md`](reality-remediation/00_PROGRAM_CHARTER.md)
 - Current gate: [`reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md`](reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md)
   (supersedes [`24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md`](reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md),

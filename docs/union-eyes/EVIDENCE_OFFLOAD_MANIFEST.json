@@ -1,0 +1,32 @@
+{
+    "schema":  "ue-evidence-offload/v1",
+    "reason":  "Oversized generated evidence (\u003e50 MB; GitHub rejects \u003e100 MB). Not read by any CI-executed test. Retained outside git; identity pinned by sha256 and byte size.",
+    "threshold_bytes":  52428800,
+    "files":  [
+                  {
+                      "path":  "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.json",
+                      "bytes":  129809822,
+                      "sha256":  "d8113c2906e646568cddb9ee20df72ca7c57016f1d6da64ada7d3b9bec04c332"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3B_STATIC_RLS_POLICY_CORRECTNESS_RECONCILIATION.json",
+                      "bytes":  85129966,
+                      "sha256":  "d65dea976c169acb795c71e5c3491d6478d4dbe0859e9b3b17c6be4691c7f84b"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/PHASE_1B_3A_RLS_TENANT_ISOLATION_SURFACE_CENSUS.json",
+                      "bytes":  74446160,
+                      "sha256":  "5755b17e89fbb81b3afb1b6fda4e18ba107153cd52680bad21041e466c13a883"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR3.json",
+                      "bytes":  61388689,
+                      "sha256":  "bfb77a69904c6f0cbb6ffad5c103676bacf22cf2287b8dcfb23c05893ac90c5d"
+                  },
+                  {
+                      "path":  "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_FINAL.json",
+                      "bytes":  58618562,
+                      "sha256":  "8f9dd85f0bcf11604c4f0261cd71a9ec62dd12c3ba003559901c69c70c3b92ed"
+                  }
+              ]
+}
