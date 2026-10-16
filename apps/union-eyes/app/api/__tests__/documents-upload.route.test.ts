@@ -26,6 +26,7 @@ vi.mock('@/db/db', () => ({
   },
 }));
 vi.mock('@/db/schema', () => ({ documents: {} }));
+vi.mock('@/lib/db/org-owned-context', () => ({ withOrgOwnedContext: (operation: () => unknown) => operation() }));
 vi.mock('@/lib/audit/mandatory-audit', () => ({ appendMandatoryAudit: m.appendMandatoryAudit }));
 vi.mock('@/lib/blob-client', () => ({ putBlob: m.putBlob, deleteBlob: m.deleteBlob }));
 vi.mock('@/lib/security/clamav', () => ({ isMalwareScanError: m.isMalwareScanError }));

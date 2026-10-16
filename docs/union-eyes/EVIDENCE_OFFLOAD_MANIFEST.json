@@ -18,11 +18,6 @@
                       "sha256":  "0865ebdd8b8853a578a3e53c94e0c9b71124b1824cd03bce3c2c6922d2c12c0f"
                   },
                   {
-                      "path":  "docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json",
-                      "bytes":  33247580,
-                      "sha256":  "723a144ba3ffb5e97b50ff5a85f6a39b5d7507e0dcf1d8ea1258e58334783dce"
-                  },
-                  {
                       "path":  "docs/union-eyes/bootstrap-v2/UE_V2_FINANCIAL_SCOPE_AUTHORITY.json",
                       "bytes":  12344920,
                       "sha256":  "047e33af6565932ad154ea7f3fd3800cfe262dacd797616b0550c25faf751497"
@@ -136,16 +131,6 @@
                       "path":  "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR3.json",
                       "bytes":  61388689,
                       "sha256":  "bfb77a69904c6f0cbb6ffad5c103676bacf22cf2287b8dcfb23c05893ac90c5d"
-                  },
-                  {
-                      "path":  "docs/union-eyes/reality-remediation/UE_PLATFORM_BASELINE_CANONICAL_DEFINITIONS_W4FR4.json",
-                      "bytes":  15530469,
-                      "sha256":  "b84d75a98fec07e86ad68689a93ceebbdb262eee143de2a8f8eee6ba8562784d"
-                  },
-                  {
-                      "path":  "docs/union-eyes/reality-remediation/UE_W4P_PROMOTION_DEPENDENCY_CUT.json",
-                      "bytes":  6817358,
-                      "sha256":  "57a593f2a1a617d7a26bb54d7eca673094d02d639bc1028140e88d59de55127b"
                   }
               ]
 }

@@ -194,7 +194,7 @@ describe('independent Django AST source reader;not a full macro or runtime proof
       expect(source.SOURCE_SHA256).toBe(nodes[index].FILE_SHA256)
       expect(source.SOURCE_SHA256).toBe(
         replayHash(
-          readFileSync(resolve(process.cwd(), replayText(nodes[index].SOURCE_FILE))).toString(
+          readFileSync(resolve(import.meta.dirname, '../../../..', replayText(nodes[index].SOURCE_FILE))).toString(
             'utf8',
           ),
         ),
