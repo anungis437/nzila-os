@@ -73,7 +73,23 @@ jobs:
             shards: 4
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ matrix.app == 'union-eyes' && (github.event.pull_request.head.sha || github.sha) || '' }}
       - uses: ./.github/actions/setup-monorepo
+
+      - name: Verify Union Eyes source checkout
+        if: matrix.app == 'union-eyes'
+        env:
+          UE_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { execFileSync } from 'node:child_process'
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim()
+          const head = git('rev-parse', 'HEAD')
+          assert.equal(head, process.env.UE_EXPECTED_HEAD, 'UE E2E must execute the exact PR head')
+          console.log(JSON.stringify({ head, tree: git('rev-parse', 'HEAD^{tree}') }))
+          NODE
 
       - name: Install Playwright browsers
         run: pnpm -C apps/${{ matrix.app }} exec playwright install --with-deps chromium

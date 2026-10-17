@@ -5,7 +5,7 @@ application user identifier (the `user_management.users.user_id` value carried b
 Genuine entity UUID references stay UUID. Classification uses foreign keys, the current declarations
 and how live application code reads and writes each column; it is never decided by column name alone.
 
-- Source plan: `0a5ee060e7c3e3e373192ca8a4a1d58a47b44bfe490c6a7f8587f05127553ef4`
+- Source plan: `5ba116ec82c491577f4eee6ee7e19ef83472d62fd3d2b263b6e3212f9970597e`
 - Identity-looking UUID candidates classified: **77**
 - Unclassified current identity columns: **0**
 - Contract violations: **0**

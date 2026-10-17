@@ -4,7 +4,7 @@
 Proven on the Azure staging server with synthetic data. The V2 installer is local-only by design, so
 production is a verified restore of the qualified candidate.
 
-Frozen candidate: schema plan digest `0a5ee060e7c3e3e373192ca8a4a1d58a47b44bfe490c6a7f8587f05127553ef4` (re-frozen for the clean release from previous qualified digest `4f9732e25ce07fc953648d5275c1901d674c833c78631b814f389bb90cc4c748`; 694 tables and 8,420 statements are identical, see UE_RELEASE_PLAN_REFREEZE.md)
+Frozen candidate: schema plan digest `5ba116ec82c491577f4eee6ee7e19ef83472d62fd3d2b263b6e3212f9970597e` (re-frozen for bounded E2E compatibility from clean-release digest `0a5ee060e7c3e3e373192ca8a4a1d58a47b44bfe490c6a7f8587f05127553ef4`; original qualified digest `4f9732e25ce07fc953648d5275c1901d674c833c78631b814f389bb90cc4c748`; 694 tables and 8,420 statements are identical, see UE_RELEASE_PLAN_REFREEZE.md)
 (694 tables, 8,420 statements, 19,865 catalog objects, catalog digest
 `863de854d655321d3c639bd41dfbc0938cbe04d13bf0c91d1c8fa341e857cc2c`).
 

@@ -863,4 +863,4 @@ to 1.
 
 ## Release plan re-freeze
 
-The plan digest above was qualified on the staging candidate. The clean release reconstruction re-froze the plan once; the current digest is `0a5ee060e7c3e3e373192ca8a4a1d58a47b44bfe490c6a7f8587f05127553ef4`. Tables, statements and DDL are unchanged. See [UE_RELEASE_PLAN_REFREEZE.md](../production/UE_RELEASE_PLAN_REFREEZE.md).
+The plan digest above was qualified on the staging candidate. The clean release re-freeze produced `0a5ee060e7c3e3e373192ca8a4a1d58a47b44bfe490c6a7f8587f05127553ef4`; the final bounded E2E auth compatibility re-freeze produces `5ba116ec82c491577f4eee6ee7e19ef83472d62fd3d2b263b6e3212f9970597e`. Tables, statements and DDL are unchanged. The original qualified digest remains `4f9732e25ce07fc953648d5275c1901d674c833c78631b814f389bb90cc4c748`. See [UE_RELEASE_PLAN_REFREEZE.md](../production/UE_RELEASE_PLAN_REFREEZE.md). Historical runtime evidence retains its recorded source; final PR-head qualification and human security disposition are recorded on #923.

@@ -2,14 +2,14 @@
   "schema": "ue-release-manifest/v2",
   "base": "origin/main",
   "unclassified": 0,
-  "TOTAL_RELEASE_FILES": 425,
-  "TOTAL_SHARED_PACKAGE_FILES": 50,
+  "TOTAL_RELEASE_FILES": 427,
+  "TOTAL_SHARED_PACKAGE_FILES": 51,
   "TOTAL_DOC_FILES": 40,
   "TOTAL_EVIDENCE_FILES": 11,
   "categoryCounts": {
     "UE_SECURITY_REQUIRED": 37,
     "UE_RUNTIME_REQUIRED": 143,
-    "TEST_REQUIRED_FOR_ABOVE": 89,
+    "TEST_REQUIRED_FOR_ABOVE": 91,
     "UE_RELEASE_OPERATION_REQUIRED": 60,
     "UE_DOCUMENTATION_REQUIRED": 29,
     "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST": 11,
@@ -17,6 +17,14 @@
     "SHARED_PLATFORM_REQUIRED_BY_UE": 48
   },
   "files": [
+    {
+      "path": ".github/workflows/e2e.yml",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Preserves the accepted main E2E infrastructure and assertions; explicitly configures local non-canonical UE fixtures and verifies the exact UE PR source checkout.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
     {
       "path": ".gitleaksignore",
       "category": "UE_SECURITY_REQUIRED",
@@ -3170,9 +3178,17 @@
       "shared_dependency": true
     },
     {
+      "path": "packages/platform-auth/src/entra/server.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Tests the shared UE seed-session compatibility boundary, production/canonical denial, existing active membership reads, role preservation and absence of identity persistence.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": true
+    },
+    {
       "path": "packages/platform-auth/src/entra/server.ts",
       "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
-      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "reason": "Canonical UE provider/session identity resolution plus the bounded local non-canonical E2E seed-session compatibility repair; no production fallback or identity/membership/role persistence.",
       "runtime_required": false,
       "test_required": false,
       "shared_dependency": true
@@ -3417,5 +3433,9 @@
       "test_required": false,
       "shared_dependency": false
     }
-  ]
+  ],
+  "baseCommit": "bd45b3cbbc12805910a918d6e5f2495afee43245",
+  "CORA_FILES_IN_RELEASE": 0,
+  "FOREIGN_CI_INFRA_DUPLICATES": 0,
+  "FOREIGN_OPS_BASELINE_DUPLICATES": 0
 }

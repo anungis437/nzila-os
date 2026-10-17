@@ -1,5 +1,53 @@
 # Union Eyes release: plan re-freeze
 
+`PLAN_STATUS = REFROZEN_FOR_E2E_AUTH_COMPATIBILITY`
+
+| Field | Value |
+| --- | --- |
+| Original accepted / staging-qualified plan | `4f9732e25ce07fc953648d5275c1901d674c833c78631b814f389bb90cc4c748` |
+| Previous clean-release plan | `0a5ee060e7c3e3e373192ca8a4a1d58a47b44bfe490c6a7f8587f05127553ef4` |
+| Final auth-repaired plan | `5ba116ec82c491577f4eee6ee7e19ef83472d62fd3d2b263b6e3212f9970597e` |
+| Digest definition | sha256 of `JSON.stringify(plan)` for `UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json` |
+
+## Final E2E compatibility re-freeze
+
+`PLAN_CHANGE_REASON`:
+
+```text
+Restore non-production, non-canonical
+E2E seed-session compatibility removed
+during canonical auth rewrite.
+```
+
+Exactly one source commitment changed: `packages/platform-auth/src/entra/server.ts`.
+The full semantic plans compare equal after removing source-digest metadata.
+All 694 tables, 8,420 statement canonical IDs and SQL texts, 297 decisions,
+54 exclusions and zero security blockers are unchanged. No business schema or DDL changed.
+
+The fallback requires the explicit E2E flag, QA flag, `UE_ENVIRONMENT=local`,
+`UE_CANONICAL_BOOTSTRAP_V2=0`, no configured canonical auth database credentials,
+and a strictly validated existing `ue-seed-session-ue-qa-*` fixture cookie.
+Every configured production signal denies it. `NODE_ENV=production` describes the
+Next.js build used by the browser harness; the existing UE deployment identity is
+explicitly local. The fallback only reads existing active users and memberships.
+It writes no identity, membership or role state; application tenant and role checks remain in place.
+Ordinary opaque password sessions and canonical Entra binding resolution retain their existing paths.
+
+Before re-freeze: platform-auth tests 207/207, selected UE auth/tenant tests 1,257/1,257
+(15 files, exit 0; Windows worker-shutdown warning retained), platform-auth lint,
+platform-auth/Zonga-core/UE typechecks, and 57 existing E2E infrastructure contracts passed.
+The repair commit also passed the normal repository hook's 236 typecheck tasks.
+The browser workers explicitly check out and verify the final PR head.
+Exact-head release qualification and human security disposition are recorded on PR #923.
+
+Updated current digest-bound records include the identity contract (official census generator),
+release plan references, production hardening package, acceptance ledger and release manifest.
+The ledger and hardening package expose the current lineage in `releasePlanRefreeze`.
+Earlier acceptance/candidate objects and runtime evidence retain their original values;
+they do not qualify this later source. No staging capability claim or production authorization is added.
+
+## Prior clean-release re-freeze (historical)
+
 `PLAN_STATUS = REFROZEN_FOR_RELEASE`
 
 | Field | Value |
