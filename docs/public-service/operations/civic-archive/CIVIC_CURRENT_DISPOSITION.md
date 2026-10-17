@@ -31,3 +31,7 @@ The recorded Round 1 window ends on 2026-11-11 without automatic renewal. Named
 participant and individual approvals remain separate human decisions. This archive
 does not approve outreach, sessions, participants or real data. Historical claims
 describe their recorded time and scope, not current product readiness.
+
+The archive candidate uses the repository-compliant branch `fix/civic-archive-closure`.
+The original execution grant remains bound to its original branch and workstation;
+carrying the archive on a new branch does not transfer execution authority.
