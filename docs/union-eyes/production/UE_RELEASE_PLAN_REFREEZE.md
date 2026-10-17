@@ -46,6 +46,24 @@ The ledger and hardening package expose the current lineage in `releasePlanRefre
 Earlier acceptance/candidate objects and runtime evidence retain their original values;
 they do not qualify this later source. No staging capability claim or production authorization is added.
 
+## Qualification-discovered fixture corrections
+
+The first exact-head E2E attempt at `542af8b` passed three workers and exposed a
+legacy API-test helper calling the canonical password gateway without canonical
+credentials. The test-only helper now installs the existing seeded session into
+Playwright's real API cookie jar through a nonce-scoped loopback HTTP response.
+It rejects remote targets and unknown/inactive fixtures. Seven focused tests
+cover cookie delivery, identity switching, rejection and the unchanged ordinary
+password-login flow. Production login and E2E assertions remain unchanged.
+
+The same head's isolated fast suite returned exit 0 with 30,053 passing tests,
+zero failures and 518 skips in 13m11s, but its strict receipt rejected tracked
+report mutations. Three report-generator tests now restore original report bytes
+after validating fresh output. All three focused tests pass with no report diff;
+source-integrity qualification remains mandatory. Neither correction changes a
+plan-bound source commitment or the plan digest above. Later exact-head results
+and human security review must be recorded on PR #923 before a merge decision.
+
 ## Prior clean-release re-freeze (historical)
 
 `PLAN_STATUS = REFROZEN_FOR_RELEASE`

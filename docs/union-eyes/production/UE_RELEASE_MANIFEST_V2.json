@@ -2,14 +2,14 @@
   "schema": "ue-release-manifest/v2",
   "base": "origin/main",
   "unclassified": 0,
-  "TOTAL_RELEASE_FILES": 427,
+  "TOTAL_RELEASE_FILES": 432,
   "TOTAL_SHARED_PACKAGE_FILES": 51,
   "TOTAL_DOC_FILES": 40,
   "TOTAL_EVIDENCE_FILES": 11,
   "categoryCounts": {
     "UE_SECURITY_REQUIRED": 37,
     "UE_RUNTIME_REQUIRED": 143,
-    "TEST_REQUIRED_FOR_ABOVE": 91,
+    "TEST_REQUIRED_FOR_ABOVE": 96,
     "UE_RELEASE_OPERATION_REQUIRED": 60,
     "UE_DOCUMENTATION_REQUIRED": 29,
     "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST": 11,
@@ -1282,6 +1282,14 @@
       "shared_dependency": false
     },
     {
+      "path": "apps/union-eyes/lib/__tests__/e2e-api-session.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test-only API fixture seed-cookie compatibility using the real Playwright cookie jar; preserves production login and authorization assertions, rejects remote targets and validates identity switching.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
       "path": "apps/union-eyes/lib/__tests__/organization-middleware.test.ts",
       "category": "TEST_REQUIRED_FOR_ABOVE",
       "reason": "Test of included UE source or UE tooling.",
@@ -1735,6 +1743,30 @@
       "reason": "Self-hosted font so the production image build needs no network font fetch.",
       "runtime_required": true,
       "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/__tests__/generate-authority-convergence-report.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Preserves original tracked report bytes after assertions validate freshly generated output, keeping full-suite exact-source integrity without weakening report assertions.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/__tests__/generate-explicit-grant-dry-run.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Preserves original tracked report bytes after assertions validate freshly generated output, keeping full-suite exact-source integrity without weakening report assertions.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/__tests__/generate-public-schema-grant-census.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Preserves original tracked report bytes after assertions validate freshly generated output, keeping full-suite exact-source integrity without weakening report assertions.",
+      "runtime_required": false,
+      "test_required": true,
       "shared_dependency": false
     },
     {
@@ -2567,6 +2599,14 @@
       "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
       "runtime_required": true,
       "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/tests/e2e/_helpers.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test-only API fixture seed-cookie compatibility using the real Playwright cookie jar; preserves production login and authorization assertions, rejects remote targets and validates identity switching.",
+      "runtime_required": false,
+      "test_required": true,
       "shared_dependency": false
     },
     {
