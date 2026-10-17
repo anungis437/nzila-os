@@ -60,6 +60,7 @@ function entriesToCsv(entries: AuditEntry[]): string {
     'traceId',
     'spanId',
     'payload',
+    'hashVersion',
   ]
 
   const rows = entries.map((e) =>
@@ -76,6 +77,7 @@ function entriesToCsv(entries: AuditEntry[]): string {
       e.traceId ?? '',
       e.spanId ?? '',
       JSON.stringify(e.payload).replace(/"/g, '""'),
+      String(e.hashVersion ?? 1),
     ]
       .map((v) => `"${v}"`)
       .join(','),

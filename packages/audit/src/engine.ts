@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import {
   type AuditEntry,
   type AuditInput,
+  type AuditHashVersion,
   auditInputSchema,
   GENESIS_HASH,
 } from './schema.js'
@@ -9,8 +10,41 @@ import type { AuditStore } from './store.js'
 
 // ─── Hash Computation ───────────────────────────────────────────────────────
 
-export function computeAuditHash(prevHash: string, payload: Record<string, unknown>): string {
-  const data = prevHash + JSON.stringify(payload, Object.keys(payload).sort())
+type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue }
+
+function ordered(value: JsonValue): JsonValue {
+  if (Array.isArray(value)) return value.map(ordered)
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, ordered(value[key])]))
+  }
+  return value
+}
+
+/** Preserve JSON value semantics (including toJSON/optional fields), without mutating input. */
+function canonicalJson(payload: Record<string, unknown>): string {
+  // This first pass also rejects cycles/BigInt before recursive ordering.
+  const value = JSON.parse(JSON.stringify(payload)) as JsonValue
+  return JSON.stringify(ordered(value))
+}
+
+export function computeAuditHash(
+  prevHash: string,
+  payload: Record<string, unknown>,
+  version: AuditHashVersion = 2,
+): string {
+  let data: string
+  switch (version) {
+    case 1:
+      // Historical evidence only. Never use this lossy encoding for new records.
+      data = prevHash + JSON.stringify(payload, Object.keys(payload).sort())
+      break
+    case 2:
+      // Domain separation binds the version; removing/changing hashVersion cannot downgrade a v2 hash.
+      data = `nzila:audit:sha256:v2\0${prevHash}\0${canonicalJson(payload)}`
+      break
+    default:
+      throw new Error('Unsupported audit hash version')
+  }
   return createHash('sha256').update(data).digest('hex')
 }
 
@@ -56,6 +90,7 @@ export class AuditEngine {
       payload: validated.payload,
       prevHash,
       hash,
+      hashVersion: 2,
       traceId: validated.traceId,
       spanId: validated.spanId,
     }
