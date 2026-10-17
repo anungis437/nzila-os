@@ -46,6 +46,77 @@ function isPgFallbackEnabled(): boolean {
   return raw.toLowerCase() !== 'false'
 }
 
+function isE2ETestAuthEnabled(): boolean {
+  const normalized = (value: string | undefined) => (value ?? '').trim().toLowerCase()
+  // NODE_ENV describes the Next.js build. Deployment identity must explicitly
+  // say local; an unset environment, staging or a production signal fails closed.
+  const productionSignals = [
+    process.env.UE_ENVIRONMENT,
+    process.env.NEXT_PUBLIC_APP_ENV,
+    process.env.NZILA_MODE,
+    process.env.UE_DEPLOYMENT_TYPE,
+    process.env.NZILA_DEPLOYMENT_TYPE,
+    process.env.DEPLOYMENT_ENVIRONMENT,
+  ]
+  return (
+    normalized(process.env.PLAYWRIGHT_TEST_AUTH) === 'true' &&
+    normalized(process.env.QA_TEST_ENV) === 'true' &&
+    normalized(process.env.UE_ENVIRONMENT) === 'local' &&
+    process.env.UE_CANONICAL_BOOTSTRAP_V2 === '0' &&
+    !process.env.AUTH_DATABASE_URL &&
+    !process.env.AUTH_SYSTEM_DATABASE_URL &&
+    !productionSignals.some((value) => /^(prod|production)(?:\s|$)/.test(normalized(value)))
+  )
+}
+
+type ServerAuthUser = import('../password/auth-service').AuthUser & {
+  e2eSeedSession?: true
+  e2eOrgRole?: string | null
+}
+
+async function resolvePgSessionUser(token: string): Promise<ServerAuthUser | null> {
+  if (!token.startsWith('ue-seed-session-')) {
+    return (await import('../password/auth-service')).getAuthUser()
+  }
+  // Never let deterministic seed cookies enter ordinary credential validation.
+  if (!isE2ETestAuthEnabled() || token.length > 160) return null
+  const match = /^ue-seed-session-(ue-qa-[a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(token)
+  if (!match || match[0] !== token) return null
+  const userId = match[1]
+  if (!userId) return null
+  // Legacy fixture database only, behind the non-canonical local-test gate.
+  // Read existing identity/membership; never provision bindings, roles or users.
+  const { db } = await import('@nzila/db/client')
+  const { authUsers, authOrganizationUsers } = await import('@nzila/db/schema')
+  const { and, eq } = await import('drizzle-orm')
+  const [user] = await db
+    .select({
+      id: authUsers.userId,
+      email: authUsers.email,
+      firstName: authUsers.firstName,
+      lastName: authUsers.lastName,
+    })
+    .from(authUsers)
+    .where(and(eq(authUsers.userId, userId), eq(authUsers.isActive, true)))
+    .limit(1)
+  if (!user) return null
+  const [membership] = await db
+    .select({
+      organizationId: authOrganizationUsers.organizationId,
+      role: authOrganizationUsers.role,
+    })
+    .from(authOrganizationUsers)
+    .where(and(eq(authOrganizationUsers.userId, userId), eq(authOrganizationUsers.isActive, true)))
+    .limit(1)
+  return {
+    ...user,
+    organizationId: membership?.organizationId ?? null,
+    sessionId: token,
+    e2eSeedSession: true,
+    e2eOrgRole: membership?.role ?? null,
+  }
+}
+
 // ── Server Auth ─────────────────────────────────────────────────────────────
 
 export interface AuthSessionResult {
@@ -118,15 +189,14 @@ export async function auth(): Promise<AuthSessionResult> {
     const cookieStore = await cookies()
     const pgToken = cookieStore.get(PG_SESSION_COOKIE)?.value
     if (pgToken) {
-      const { getAuthUser } = await import('../password/auth-service')
-      const pgUser = await getAuthUser()
+      const pgUser = await resolvePgSessionUser(pgToken)
       if (pgUser) {
         // Resolve org role from DB
-        let orgRole: string | null = null
+        let orgRole: string | null = pgUser.e2eOrgRole ?? null
         try {
           const { authOrganizationUsers } = await import('@nzila/db/schema')
           const { eq, and } = await import('drizzle-orm')
-          if (pgUser.organizationId) {
+          if (!pgUser.e2eSeedSession && pgUser.organizationId) {
             const organizationId = pgUser.organizationId
             const [membership] = await withAuthContext({ phase: 'identity', userId: pgUser.id }, () => authDb
               .select({ role: authOrganizationUsers.role })
@@ -259,8 +329,7 @@ export async function currentUser() {
     const cookieStore = await cookies()
     const pgToken = cookieStore.get(PG_SESSION_COOKIE)?.value
     if (pgToken) {
-      const { getAuthUser } = await import('../password/auth-service')
-      const pgUser = await getAuthUser()
+      const pgUser = await resolvePgSessionUser(pgToken)
       if (pgUser) {
         return {
           id: pgUser.id,

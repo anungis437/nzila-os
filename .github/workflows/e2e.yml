@@ -227,6 +227,9 @@ jobs:
           QA_TEST_ENV: 'true'
           PLAYWRIGHT_TEST_AUTH: 'true'
           UE_E2E_RISK_BYPASS: 'true'
+          # Production Next.js build, explicitly local non-canonical UE fixtures.
+          UE_ENVIRONMENT: ${{ matrix.app == 'union-eyes' && 'local' || '' }}
+          UE_CANONICAL_BOOTSTRAP_V2: ${{ matrix.app == 'union-eyes' && '0' || '' }}
           # Surface API errors in /tmp/app-server.log (Next.js prod is otherwise silent)
           NEXT_LOG_LEVEL: debug
           DEBUG: 'next:*'
