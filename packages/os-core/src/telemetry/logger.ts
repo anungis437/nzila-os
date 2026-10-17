@@ -51,6 +51,10 @@ function buildEntry(
     errorFields.errorName = meta.name
     errorFields.errorMessage = meta.message
     errorFields.errorStack = meta.stack
+    // Preserve governance markers when normalizing an Error; dropping them
+    // would downgrade its message and stack before the redaction boundary.
+    if ('classification' in meta && typeof meta.classification === 'string') errorFields.classification = meta.classification
+    if ('dataClassification' in meta && typeof meta.dataClassification === 'string') errorFields.dataClassification = meta.dataClassification
     meta = undefined
   }
 

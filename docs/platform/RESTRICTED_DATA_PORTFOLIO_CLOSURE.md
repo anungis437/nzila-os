@@ -15,6 +15,8 @@ grant-bound export and minimum disclosure, principal-only deletion, detached
 state snapshots, nested classification, and AI schema/route propagation.
 Restricted knowledge ingestion is rejected before proposal or source storage.
 Console revokes an emergency activation when its durable audit write fails.
+Logger normalization retains governance markers attached to Error objects before
+redacting their message and stack; ordinary unmarked errors retain diagnostics.
 
 Administrative package interfaces require trusted server adapters using
 canonical authentication. This package does not implement authenticated durable

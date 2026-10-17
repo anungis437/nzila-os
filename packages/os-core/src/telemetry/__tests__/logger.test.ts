@@ -111,6 +111,19 @@ describe('logger', () => {
       expect(parsed.errorStack).toBeDefined()
     })
 
+    it.each(['classification', 'dataClassification'])('preserves %s on Error objects before redaction', (field) => {
+      const log = createLogger()
+      const err = Object.assign(new Error('private synthetic narrative'), { [field]: 'RESTRICTED' })
+      err.stack = 'Error: private synthetic narrative\n    at handler (synthetic.ts:1:1)'
+      log.error('restricted operation failed', err)
+      const serialized = stderrSpy.mock.calls[0]![0] as string
+      const parsed = JSON.parse(serialized)
+      expect(serialized).not.toContain('private synthetic narrative')
+      expect(parsed[field]).toBe('RESTRICTED')
+      expect(parsed.errorMessage).toBe('[REDACTED]')
+      expect(parsed.errorStack).toContain('at handler')
+    })
+
     it('injects request context when present', () => {
       vi.mocked(getRequestContext).mockReturnValue({
         requestId: 'req-x',

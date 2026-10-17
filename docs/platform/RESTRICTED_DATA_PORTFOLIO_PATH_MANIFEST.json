@@ -142,7 +142,7 @@
     {
       "path": "packages/os-core/src/telemetry/logger.ts",
       "category": "DEFAULT_OBSERVABILITY_REDACTION",
-      "reason": "Preserves original pre-write logging redaction while retaining normal logger behavior.",
+      "reason": "Preserves pre-write logging redaction and retains governance markers when normalizing Error objects, while keeping ordinary diagnostics.",
       "presentInOriginal925Delta": true
     },
     {
