@@ -8,6 +8,12 @@
   "unclassifiedPaths": 0,
   "paths": [
     {
+      "path": ".gitleaksignore",
+      "category": "EXACT_SYNTHETIC_FIXTURE_FINGERPRINT",
+      "reason": "Records the single Gitleaks 8.24.3 historical finding for the published alphabetical fake red-team key; no rule or path exclusion is added.",
+      "presentInOriginal925Delta": false
+    },
+    {
       "path": "apps/console/app/api/admin/break-glass/route.ts",
       "category": "CONSOLE_SECURITY_INTEGRATION",
       "reason": "Binds emergency access to authenticated actor/target scope and drops Restricted audit payloads before hashing and persistence.",

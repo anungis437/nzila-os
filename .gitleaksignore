@@ -205,3 +205,8 @@ scripts/cora-farmer360-acceptance.mjs:nzila-database-url-with-password:7
 
 # Cora disposable bootstrap guard: public database identifiers in a SQL allowlist, not credentials.
 packages/db/bootstrap/platform-authz-fixture.ts:generic-api-key:62
+
+# Restricted-data red-team fixture: published alphabetical fake key used only
+# to verify redaction. Exact historical finding from Gitleaks 8.24.3; no rule
+# or path is excluded, and the fixture is not a provider credential.
+7b12896b16ce281bc621b5c8c46e9b65c65e2f62:packages/platform-restricted-data/src/redteam.ts:generic-api-key:73

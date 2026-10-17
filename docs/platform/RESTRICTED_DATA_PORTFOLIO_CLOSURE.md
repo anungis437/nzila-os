@@ -32,8 +32,12 @@ type checking, documentation/governance checks, remote contracts and the full
 fast suite must qualify the final source commit. A successful earlier source or
 local focused test is not the final remote qualification receipt.
 
-Human security review remains pending for this candidate. No security approval
-is inferred from approvals of Union Eyes, Cora or CIVIC. Merge is not authorized.
+Human security review was explicitly approved on 2026-10-17 for source commit
+`0dffa483685234172cb838aafbd3211007db8936`; GitHub approval by `anungisa` is on
+that same commit. The maintainer requested the security-design-reviewed label.
+The subsequent correction records one exact historical scanner fingerprint for
+the published alphabetical fake red-team key; application/security source is
+unchanged. No approval is inferred from other products. Merge is not authorized.
 Final PR receipts must identify the tested source commit and tree separately
 from the qualification helper workflow revision.
 
