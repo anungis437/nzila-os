@@ -174,6 +174,7 @@ describe('wallet-service', () => {
       // Mock insert
       const newEntry = { id: 'le-1', balanceAfter: 150, amountCredits: 50 };
       mocks.mockReturning.mockResolvedValueOnce([newEntry]);
+      const expiresAt = new Date('2027-01-01T00:00:00Z');
 
       const result = await applyLedgerEntry(db, {
         orgId: 'org-1',
@@ -181,10 +182,25 @@ describe('wallet-service', () => {
         eventType: 'earn',
         amountCredits: 50,
         sourceType: 'award',
+        expiresAt,
       });
 
       expect(result).toEqual(newEntry);
       expect(mocks.mockInsert).toHaveBeenCalled();
+      expect(mocks.mockValues).toHaveBeenCalledWith(expect.objectContaining({
+        orgId: 'org-1', userId: 'user-1', eventType: 'earn',
+        amountCredits: 50, balanceAfter: 150, expiresAt,
+      }));
+    });
+
+    it('rejects expiration metadata on a debit before reading or writing the ledger', async () => {
+      const { db } = await import('@/db');
+      await expect(applyLedgerEntry(db, {
+        orgId: 'org-1', userId: 'u-1', eventType: 'spend',
+        amountCredits: -50, sourceType: 'redemption', expiresAt: new Date(),
+      })).rejects.toThrow('Expiration requires');
+      expect(db.select).not.toHaveBeenCalled();
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
     });
 
     it('throws when balance would go negative', async () => {
@@ -207,7 +223,7 @@ describe('wallet-service', () => {
       ).rejects.toThrow('Insufficient balance');
     });
 
-    it('allows negative balance when override is set', async () => {
+    it('does not claim an override can bypass the canonical non-negative constraint', async () => {
       const { db } = await import('@/db');
 
       const mockLimit = vi.fn().mockResolvedValue([{ balanceAfter: 10 }]);
@@ -216,10 +232,7 @@ describe('wallet-service', () => {
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
       vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
-      const newEntry = { id: 'le-1', balanceAfter: -40 };
-      mocks.mockReturning.mockResolvedValueOnce([newEntry]);
-
-      const result = await applyLedgerEntry(
+      await expect(applyLedgerEntry(
         db,
         {
           orgId: 'org-1',
@@ -229,9 +242,8 @@ describe('wallet-service', () => {
           sourceType: 'admin_adjustment',
         },
         true
-      );
-
-      expect(result.balanceAfter).toBe(-40);
+      )).rejects.toThrow('Negative balances are prohibited');
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
     });
 
     it('handles first-time user with no entries', async () => {

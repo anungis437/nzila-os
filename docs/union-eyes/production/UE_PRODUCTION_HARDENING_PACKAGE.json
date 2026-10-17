@@ -1,0 +1,513 @@
+{
+  "package": "UE_PRODUCTION_HARDENING_PACKAGE",
+  "date": "2026-10-15",
+  "sourceChanged": "YES. Hardening: lib/rate-limiter.ts. Scope correction: member dues initiation gated by lib/dues/member-dues-flag.ts (three routes), capability registry note. New operator tools in scripts/production/ (first-admin, restore preparation, go-live smoke). No schema authority change. Release compatibility: packages/platform-auth/src/entra/server.ts restores bounded local, non-canonical E2E seed-session resolution. Production identity authority and business schema are unchanged.",
+  "PRODUCTION_READY": "YES_WITH_OPERATIONAL_GATES",
+  "PRODUCTION_DEPLOY_AUTHORIZED": "NO",
+  "CUSTOMER_DATA_AUTHORIZED": "NO",
+  "MERGE_AUTHORIZED": "NO",
+  "disposition": "No unfinished application or security engineering remains for launch scope. Every remaining gate is a human decision, provider action or infrastructure operation. The infrastructure template is compiled and linted but has not been deployed.",
+  "digests": {
+    "PRODUCTION_PLAN_DIGEST": "5ba116ec82c491577f4eee6ee7e19ef83472d62fd3d2b263b6e3212f9970597e",
+    "PREVIOUS_QUALIFIED_PLAN_DIGEST": "4f9732e25ce07fc953648d5275c1901d674c833c78631b814f389bb90cc4c748",
+    "PLAN_STATUS": "REFROZEN_FOR_E2E_AUTH_COMPATIBILITY",
+    "PRODUCTION_IMAGE_DIGEST": "PENDING_CI_MERGED_SOURCE",
+    "PRODUCTION_IMAGE_STATUS": "NOT BUILT, deliberately. NEXT_PUBLIC_* values are baked at build time, so production needs its own image, and the release image must come from CI on the merged branch (R-7); a local build of an uncommitted tree would be a meaningless digest. The exact build inputs are in the README. The digest proven on staging is STAGING_PROOF_IMAGE.",
+    "STAGING_PROOF_IMAGE": "@sha256:c1a206c17450581a8c8b21685343f753ce7ade2c8cbf7ccf720b93cc3ce2a7ec",
+    "STAGING_PROOF_REVISION": "nzila-os-union-eyes-v2-staging--r13",
+    "PREVIOUS_RELEASE_PLAN_DIGEST": "0a5ee060e7c3e3e373192ca8a4a1d58a47b44bfe490c6a7f8587f05127553ef4"
+  },
+  "evidenceThisPass": {
+    "RESEND_ENVIRONMENT_ISOLATION": "PASS: staging-specific send-only key created through the Resend API (cannot manage keys); production key versions disabled in nzila-staging-kv and replaced in the staging app secret; fingerprints differ; delivery through the app recorded as sent.",
+    "RATE_LIMITER_FAIL_CLOSED": "PASS on staging: Redis down returned 409 (handler ran) before the fix and 429 after; control with Redis up returned 409.",
+    "RATE_LIMITER_RECOVERY": "PASS on staging (revision r13, no app restart): Redis down -> explicit limit 429, org-scoped read 200 in ~2s; Redis back -> limiter passed again 26s later. Go-live smoke 16/16 on the same image.",
+    "PITR_RESTORE_DRILL": "PASS: restored nzila-ue-v2-staging-db to a new server in 7m11s; 695 tables, 1,223 policies, 134 functions, 2,187 indexes and 694 RLS tables matched the source; restored data stopped exactly at the restore point (6 later organizations and 4 later users absent); scratch server deleted.",
+    "BICEP": "main.bicep compiles and lints with 0 warnings; no secret literals; not deployed and not what-if-validated (needs a target resource group).",
+    "ALERT_QUERIES": "Calibrated on the staging logs: 5xx (500 x2, 502 x6), Redis (7), Resend (2), database (9), Stripe webhook (5). No log signal exists for ClamAV outage or dead-lettering, so metric alerts and a DB check are used.",
+    "GO_LIVE_SMOKE": "scripts/production/go-live-smoke.ts: 16/16 on the final staging image (unauthenticated and authenticated modes).",
+    "REGRESSION": "FINAL pnpm test:fast on the exact frozen source: 38,285 tests passed, 0 failed, 114 skipped (2,283 files passed, 13 skipped); typecheck PASS; lint 0 errors; plan check PASS. The run exited 1 because vitest reported one unhandled error (a worker failed to start for lib/__tests__/api.test.ts: \"Timeout waiting for worker to respond\"). Classified INFRASTRUCTURE_FLAKE: that file passes in isolation (6/6). Earlier, a manifest-native failure under load was likewise classified a flake (passed in isolation). A clean exit-0 run in CI before merge is recommended.",
+    "IMAGE_SECRET_SCAN": "No credentials in the built image; the only prefix matches are Zod startsWith(\"whsec_\") validators.",
+    "LEGACY_CHECKOUT_ROUTE": "POST /api/payments/checkout/create returns 500 on staging, creates no Stripe session, leaves the dues row pending (fails closed).",
+    "SCOPE_CORRECTION": "Member dues removed from the launch contract; dues initiation routes gated (501 unless UE_MEMBER_DUES_PAYMENTS=1) with 22 tests including a negative control; Stripe secrets are optional in the manifest and the template (enableStripe=false by default).",
+    "FIRST_ADMIN_BOOTSTRAP": "PASS: 5 unit + 9 native tests on real PostgreSQL with the canonical schema; the race test fails without the advisory lock.",
+    "RESTORE_TOOL": "scripts/production/prepare-bootstrap-restore.ts reproduces the Azure-proven restore byte for byte (identical SHA-256 for schema and receipt) and is unit tested."
+  },
+  "secretManifest": [
+    {
+      "name": "database-url",
+      "envVar": "DATABASE_URL",
+      "owner": "Platform DBA",
+      "systemOfRecord": "Key Vault (value generated at role creation; role lives in PostgreSQL)",
+      "rotationOwner": "Platform DBA",
+      "rotation": "90 days; create the new password on the login role, set a new Key Vault version, restart the revision",
+      "consumer": "app",
+      "required": true,
+      "notes": "Non-superuser login role, no BYPASSRLS; tenant isolation depends on it."
+    },
+    {
+      "name": "system-database-url",
+      "envVar": "SYSTEM_DATABASE_URL",
+      "owner": "Platform DBA",
+      "systemOfRecord": "Key Vault",
+      "rotationOwner": "Platform DBA",
+      "rotation": "90 days, same procedure",
+      "consumer": "app",
+      "required": true,
+      "notes": "NOINHERIT login role that may only SET ROLE union_eyes_system."
+    },
+    {
+      "name": "auth-database-url",
+      "envVar": "AUTH_DATABASE_URL / AUTH_SYSTEM_DATABASE_URL",
+      "owner": "Platform DBA",
+      "systemOfRecord": "Key Vault",
+      "rotationOwner": "Platform DBA",
+      "rotation": "90 days, same procedure",
+      "consumer": "app",
+      "required": true,
+      "notes": "Auth gateway login role."
+    },
+    {
+      "name": "pg-admin-password",
+      "envVar": "(none; operators only)",
+      "owner": "Platform DBA",
+      "systemOfRecord": "Key Vault, break-glass",
+      "rotationOwner": "Platform DBA",
+      "rotation": "After every bootstrap/restore; 90 days",
+      "consumer": "operators (bootstrap, restore, catalog verification)",
+      "required": true,
+      "notes": "Never injected into the app. Operator access is through a temporary in-VNet host."
+    },
+    {
+      "name": "auth-secret",
+      "envVar": "AUTH_SECRET",
+      "owner": "Security owner",
+      "systemOfRecord": "Key Vault",
+      "rotationOwner": "Security owner",
+      "rotation": "Annually or on suspicion; rotation signs every user out",
+      "consumer": "app",
+      "required": true,
+      "notes": "48+ random bytes."
+    },
+    {
+      "name": "mfa-encryption-key",
+      "envVar": "AUTH_MFA_ENCRYPTION_KEY",
+      "owner": "Security owner",
+      "systemOfRecord": "Key Vault",
+      "rotationOwner": "Security owner",
+      "rotation": "NOT ROTATABLE with the current code: stored TOTP secrets are encrypted with it and there is no re-encryption path (risk R-11)",
+      "consumer": "app",
+      "required": true,
+      "notes": "32 random bytes. Back up the Key Vault version; losing it locks out all MFA users."
+    },
+    {
+      "name": "voting-secret",
+      "envVar": "VOTING_SECRET",
+      "owner": "Security owner",
+      "systemOfRecord": "Key Vault",
+      "rotationOwner": "Security owner",
+      "rotation": "Only between elections",
+      "consumer": "app",
+      "required": true,
+      "notes": ""
+    },
+    {
+      "name": "cron-secret",
+      "envVar": "CRON_SECRET_KEY",
+      "owner": "Platform engineer",
+      "systemOfRecord": "Key Vault",
+      "rotationOwner": "Platform engineer",
+      "rotation": "90 days; the app and the cron job read the same secret and restart together",
+      "consumer": "app, cron job",
+      "required": true,
+      "notes": "Compared in constant time."
+    },
+    {
+      "name": "redis-url",
+      "envVar": "REDIS_URL",
+      "owner": "Platform engineer",
+      "systemOfRecord": "Key Vault (rediss://:<access key>@<host>:10000); key from Azure Managed Redis",
+      "rotationOwner": "Platform engineer",
+      "rotation": "90 days; regenerate the secondary key, publish the URL, restart, then regenerate the primary",
+      "consumer": "app",
+      "required": true,
+      "notes": "Required runtime dependency; rate limits fail closed without it."
+    },
+    {
+      "name": "stripe-secret-key",
+      "envVar": "STRIPE_SECRET_KEY",
+      "owner": "Finance owner (Stripe account holder)",
+      "systemOfRecord": "Stripe Dashboard -> Key Vault",
+      "rotationOwner": "Finance owner + Platform engineer",
+      "rotation": "Use a restricted live key (rk_live) limited to PaymentIntents; roll every 90 days with Stripe rolling-key expiry (applies only if client-commercial billing is enabled)",
+      "consumer": "app",
+      "required": false,
+      "notes": "OPTIONAL at initial launch: Stripe is post-launch client-commercial enablement. No live key is provisioned and no live charge is authorized. Not referenced by the template unless enableStripe=true."
+    },
+    {
+      "name": "stripe-webhook-secret",
+      "envVar": "STRIPE_WEBHOOK_SECRET",
+      "owner": "Finance owner",
+      "systemOfRecord": "Stripe Dashboard (production endpoint) -> Key Vault",
+      "rotationOwner": "Finance owner + Platform engineer",
+      "rotation": "On endpoint secret roll; the route verifies one secret, so roll in a quiet window and restart immediately (risk R-12) (applies only if client-commercial billing is enabled)",
+      "consumer": "app",
+      "required": false,
+      "notes": "OPTIONAL at initial launch: Stripe is post-launch client-commercial enablement. No live key is provisioned and no live charge is authorized. Not referenced by the template unless enableStripe=true."
+    },
+    {
+      "name": "resend-api-key",
+      "envVar": "RESEND_API_KEY",
+      "owner": "Communications owner (Resend account holder)",
+      "systemOfRecord": "Resend Dashboard -> Key Vault",
+      "rotationOwner": "Communications owner + Platform engineer",
+      "rotation": "90 days; create the new send-only key, publish, restart, then revoke the old key",
+      "consumer": "app",
+      "required": true,
+      "notes": "Production-specific send-only key restricted to the verified sending domain."
+    },
+    {
+      "name": "storage-account-key",
+      "envVar": "AZURE_STORAGE_ACCOUNT_KEY",
+      "owner": "Platform engineer",
+      "systemOfRecord": "Azure Storage -> Key Vault",
+      "rotationOwner": "Platform engineer",
+      "rotation": "90 days; alternate key1/key2 so the old key stays valid until the restart completes",
+      "consumer": "app",
+      "required": true,
+      "notes": "@nzila/blob signs SAS URLs with the account key and has no managed-identity path (risk R-8)."
+    },
+    {
+      "name": "pii-encryption-key",
+      "envVar": "AZURE_KEY_VAULT_URL (key, not a secret value)",
+      "owner": "Security owner",
+      "systemOfRecord": "Key Vault RSA key; app identity holds Key Vault Crypto User",
+      "rotationOwner": "Security owner",
+      "rotation": "New key versions only after a re-wrap plan exists; never delete the old version",
+      "consumer": "app (managed identity)",
+      "required": true,
+      "notes": "Created by the runbook; not rotated without a re-encryption procedure."
+    },
+    {
+      "name": "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+      "envVar": "build argument (public value)",
+      "owner": "Finance owner",
+      "systemOfRecord": "Stripe Dashboard -> release pipeline variable",
+      "rotationOwner": "Release engineer",
+      "rotation": "Only when the Stripe account changes",
+      "consumer": "release image build (client bundle)",
+      "required": false,
+      "notes": "Not required: no member-facing payment page is mounted. Only needed if a client payment page is enabled."
+    }
+  ],
+  "riskMatrix": [
+    {
+      "id": "R-1",
+      "risk": "Rate limiter failed open when Redis was unreachable (ioredis pipeline errors were dropped)",
+      "control": "FIXED this pass: adapter propagates per-command errors; proven fail-closed on staging (409 before, 429 after)",
+      "residual": "Low",
+      "owner": "Engineering",
+      "blocker": false,
+      "kind": "ACCEPTED_RESIDUAL"
+    },
+    {
+      "id": "R-2",
+      "risk": "A stuck Redis command hung every org-scoped request until the app was restarted after an outage",
+      "control": "FIXED this pass: bounded store timeout (2s, RATE_LIMIT_STORE_TIMEOUT_MS), ioredis commandTimeout/connectTimeout, and the client is discarded and recreated after a timed-out command. Proven on staging with no app restart: recovered 26s after Redis returned (an earlier revision that only called disconnect() did not recover)",
+      "residual": "Low",
+      "owner": "Engineering",
+      "blocker": false,
+      "kind": "ACCEPTED_RESIDUAL"
+    },
+    {
+      "id": "R-3",
+      "risk": "Production credential copied into staging",
+      "control": "REMOVED this pass: staging-specific send-only key, old versions disabled, app secret replaced, key fingerprints differ",
+      "residual": "None",
+      "owner": "Platform engineer",
+      "blocker": false,
+      "kind": "ACCEPTED_RESIDUAL"
+    },
+    {
+      "id": "R-4",
+      "risk": "Production PostgreSQL private connectivity: legacy production is on a public endpoint with AllowAllAzureServices",
+      "control": "V2 template: VNet-injected server, private DNS, no public access, no firewall rules; the runbooks use an in-VNet operator host",
+      "residual": "Open until the V2 stack is deployed (template compiled and linted, not deployed)",
+      "owner": "Platform engineer",
+      "blocker": true,
+      "kind": "OPERATIONAL_GATE"
+    },
+    {
+      "id": "R-5",
+      "risk": "Front Door is Standard: no managed WAF rule sets and no Private Link; the legacy app FQDN is reachable directly (WAF bypass)",
+      "control": "V2 env is internal; required: upgrade the profile to Premium, add Private Link origin and the Microsoft default + bot rule sets in Prevention",
+      "residual": "WAF protection absent until upgraded",
+      "owner": "Platform engineer",
+      "blocker": true,
+      "kind": "OPERATIONAL_GATE"
+    },
+    {
+      "id": "R-6",
+      "risk": "Registry has admin credentials enabled, is Basic, public, and shared by staging and production",
+      "control": "V2 pulls by managed identity (AcrPull); required: disable admin after staging apps move to identity pull, import by digest, preferably a dedicated Premium registry",
+      "residual": "Supply-chain exposure while admin stays enabled",
+      "owner": "Platform engineer",
+      "blocker": true,
+      "kind": "OPERATIONAL_GATE"
+    },
+    {
+      "id": "R-7",
+      "risk": "Release source is an uncommitted working tree; no CI-built, signed artifact exists",
+      "control": "Release image is PENDING_CI_MERGED_SOURCE. Required: commit, PR with the repository checks, merge, CI build from the protected branch, promote by digest. The final source digest is recorded in the ledger.",
+      "residual": "Digest below is a candidate only",
+      "owner": "Release owner",
+      "blocker": true,
+      "kind": "OPERATIONAL_GATE"
+    },
+    {
+      "id": "R-8",
+      "risk": "Storage uses a shared account key; @nzila/blob has no managed-identity or user-delegation SAS path",
+      "control": "Private endpoint only, key only in Key Vault, rotation runbook, versioning and soft delete",
+      "residual": "Key compromise requires network access first; managed-identity support is backlog",
+      "owner": "Engineering (backlog)",
+      "blocker": false,
+      "kind": "ACCEPTED_RESIDUAL"
+    },
+    {
+      "id": "R-9",
+      "risk": "Production schema bootstrap execution (the V2 installer is local-only by design)",
+      "control": "PROCEDURE_APPROVED: CANONICAL_BOOTSTRAP_V2 as a verified restore of the qualified candidate. RUNBOOK_DATABASE_BOOTSTRAP.md has preconditions, exact commands, expected results, verification, rollback and stop conditions; the restore tool reproduces the Azure-proven restore byte for byte",
+      "residual": "EXECUTION_PENDING (human, in-VNet operator host)",
+      "owner": "Platform DBA + product owner",
+      "blocker": true,
+      "kind": "OPERATIONAL_GATE"
+    },
+    {
+      "id": "R-10",
+      "risk": "First administrator for the new production database",
+      "control": "ENGINEERING PASS: operator-only tool (no HTTP surface, no default identity or password), one transaction under an advisory lock, idempotent, canonical audit, enrolled MFA, refuses when any administrator exists. Proven on real PostgreSQL with the canonical schema (9 native tests, race test fails without the lock). RUNBOOK_FIRST_ADMIN_BOOTSTRAP.md",
+      "residual": "EXECUTION_PENDING (owner-supplied identity, production execution)",
+      "owner": "Product owner + Security owner",
+      "blocker": true,
+      "kind": "OPERATIONAL_GATE"
+    },
+    {
+      "id": "R-11",
+      "risk": "The MFA encryption key cannot be rotated (no re-encryption path)",
+      "control": "Key held only in Key Vault with purge protection; documented as non-rotatable",
+      "residual": "Compromise would force an MFA re-enrollment of all users",
+      "owner": "Engineering (backlog)",
+      "blocker": false,
+      "kind": "ACCEPTED_RESIDUAL"
+    },
+    {
+      "id": "R-12",
+      "risk": "Stripe webhook route verifies a single secret, so a secret roll briefly rejects events (relevant only if Stripe is enabled)",
+      "control": "Roll in a quiet window and restart; Stripe retries failed deliveries for up to three days",
+      "residual": "Low; N/A at initial launch",
+      "owner": "Finance owner",
+      "blocker": false,
+      "kind": "ACCEPTED_RESIDUAL"
+    },
+    {
+      "id": "R-13",
+      "risk": "CLIENT_COMMERCIAL_PAYMENT_STRATEGY: whether Stripe must be active at initial launch",
+      "control": "RECLASSIFIED. R-13 = POST_LAUNCH_COMMERCIAL_ENABLEMENT. Member dues collection is out of launch scope, the dues payment UI is not built, the dues Stripe flow is a dormant optional capability (501 unless UE_MEMBER_DUES_PAYMENTS=1), and no initial-launch journey depends on Stripe. See COMMERCIAL_STRIPE_BOUNDARY.md",
+      "residual": "None for launch; live Stripe configuration becomes a gate only if a client-commercial payment is selected for the initial rollout",
+      "owner": "Product owner",
+      "blocker": false,
+      "kind": "POST_LAUNCH"
+    },
+    {
+      "id": "R-14",
+      "risk": "Legacy POST /api/payments/checkout/create returned 500 under V2",
+      "control": "CLOSED: it now answers 501 NOT_IMPLEMENTED while member dues payment is not enabled (auth first, then 501; no database or provider access); covered by tests",
+      "residual": "None",
+      "owner": "Engineering (backlog)",
+      "blocker": false,
+      "kind": "CLOSED"
+    },
+    {
+      "id": "R-15",
+      "risk": "/api/health is shallow: it returned 200 while Redis was down",
+      "control": "Dependency alerts (Redis, ClamAV, database, Stripe, Resend) and the go-live smoke probe dependencies directly",
+      "residual": "Container probes do not detect dependency loss",
+      "owner": "Engineering (backlog)",
+      "blocker": false,
+      "kind": "ACCEPTED_RESIDUAL"
+    },
+    {
+      "id": "R-16",
+      "risk": "No log signal for ClamAV outage or cron dead-lettering",
+      "control": "ClamAV: replica-count metric alert; cron: job-failure alert (pattern unvalidated until first run) plus the Resend-failure alert and a daily dead-letter SQL check",
+      "residual": "Dead-letter visibility is partly manual",
+      "owner": "Platform engineer",
+      "blocker": false,
+      "kind": "ACCEPTED_RESIDUAL"
+    },
+    {
+      "id": "R-17",
+      "risk": "Nothing schedules the deadline-reminder cron in production",
+      "control": "Template defines a Container Apps job (5 minute schedule) with the secret from Key Vault; needs a curl image imported into the registry",
+      "residual": "Operational step",
+      "owner": "Platform engineer",
+      "blocker": false,
+      "kind": "ACCEPTED_RESIDUAL"
+    },
+    {
+      "id": "R-18",
+      "risk": "Cutover from the legacy production UE stack",
+      "control": "DECISION_CLOSED: INITIAL_CUTOVER = RUN_ALONGSIDE (no big-bang replacement; the legacy stack keeps serving its users). Cutover conditions: new stack healthy, authentication healthy, tenant isolation verified, first admin established, providers healthy where required, audit persistence healthy, synthetic production smoke clean, rollback available",
+      "residual": "EXECUTION_PENDING",
+      "owner": "Product owner",
+      "blocker": true,
+      "kind": "OPERATIONAL_GATE"
+    },
+    {
+      "id": "R-19",
+      "risk": "Server feature profile",
+      "control": "CLOSED_PRODUCT_DECISION: PRODUCTION_SERVER_PROFILE = internal (the qualified profile). executive is post-launch",
+      "residual": "None",
+      "owner": "Product owner",
+      "blocker": false,
+      "kind": "CLOSED"
+    },
+    {
+      "id": "R-20",
+      "risk": "Production restore time is unmeasured at production size (staging drill: 7 minutes for a B1ms server with synthetic data)",
+      "control": "PITR with 35 day retention and geo-redundant backup in the template; run the same drill after the first deployment",
+      "residual": "RTO unknown at scale",
+      "owner": "Platform DBA",
+      "blocker": false,
+      "kind": "ACCEPTED_RESIDUAL"
+    }
+  ],
+  "nonBlockingPostLaunch": [
+    "Client-commercial Stripe billing (COMMERCIAL_STRIPE_BOUNDARY.md)",
+    "Member dues collection (dormant)",
+    "PayPal",
+    "Microsoft Calendar",
+    "PKI",
+    "CUPE seed tooling",
+    "automated billing lifecycle (cron/billing-lifecycle stays 501)",
+    "executive server profile",
+    "managed-identity blob access",
+    "MFA key rotation path",
+    "dependency-aware health endpoint",
+    "dead-letter log signal"
+  ],
+  "scopeDecisions": {
+    "MEMBER_DUES_PAYMENT": "OUT_OF_INITIAL_LAUNCH_SCOPE",
+    "MEMBER_DUES_PAYMENT_UI": "NOT_REQUIRED (do not build)",
+    "MEMBER_DUES_STRIPE_FLOW": "DORMANT_OPTIONAL_CAPABILITY (off unless UE_MEMBER_DUES_PAYMENTS=1; routes answer 501)",
+    "STRIPE_PRIMARY_PURPOSE": "CLIENT_COMMERCIAL_MANAGEMENT",
+    "STRIPE_CLIENT_BILLING": "OPTIONAL / POST_LAUNCH",
+    "STRIPE_INITIAL_LAUNCH_REQUIREMENT": "NO",
+    "COMMERCIAL_STRIPE_CONTRACT": "docs/union-eyes/production/COMMERCIAL_STRIPE_BOUNDARY.md",
+    "PRODUCTION_SERVER_PROFILE": "internal",
+    "INITIAL_CUTOVER": "RUN_ALONGSIDE",
+    "DATABASE_BOOTSTRAP": "CANONICAL_BOOTSTRAP_V2 (procedure approved, execution pending)"
+  },
+  "internalReleaseBlockers": {
+    "count": 0,
+    "definition": "Real A/B defects or an unproven exact-source regression; operational and human gates are listed separately in goLiveOperationalGates"
+  },
+  "goLiveOperationalGates": [
+    {
+      "id": "R-4",
+      "gate": "Production PostgreSQL private connectivity: legacy production is on a public endpoint with AllowAllAzureServices",
+      "kind": "OPERATIONAL_GATE",
+      "owner": "Platform engineer"
+    },
+    {
+      "id": "R-5",
+      "gate": "Front Door is Standard: no managed WAF rule sets and no Private Link; the legacy app FQDN is reachable directly (WAF bypass)",
+      "kind": "OPERATIONAL_GATE",
+      "owner": "Platform engineer"
+    },
+    {
+      "id": "R-6",
+      "gate": "Registry has admin credentials enabled, is Basic, public, and shared by staging and production",
+      "kind": "OPERATIONAL_GATE",
+      "owner": "Platform engineer"
+    },
+    {
+      "id": "R-7",
+      "gate": "Release source is an uncommitted working tree; no CI-built, signed artifact exists",
+      "kind": "OPERATIONAL_GATE",
+      "owner": "Release owner"
+    },
+    {
+      "id": "R-9",
+      "gate": "Production schema bootstrap execution (the V2 installer is local-only by design)",
+      "kind": "OPERATIONAL_GATE",
+      "owner": "Platform DBA + product owner"
+    },
+    {
+      "id": "R-10",
+      "gate": "First administrator for the new production database",
+      "kind": "OPERATIONAL_GATE",
+      "owner": "Product owner + Security owner"
+    },
+    {
+      "id": "R-18",
+      "gate": "Cutover from the legacy production UE stack",
+      "kind": "OPERATIONAL_GATE",
+      "owner": "Product owner"
+    },
+    {
+      "id": "G-secrets",
+      "gate": "Production secret provisioning in the new Key Vault (the manifest lists what is required and what is optional)",
+      "kind": "OPERATIONAL_ACTION",
+      "owner": "Platform engineer"
+    },
+    {
+      "id": "G-dns",
+      "gate": "Production DNS, certificate and provider setup (Resend production key and sending domain; Stripe only if client billing is selected)",
+      "kind": "OPERATIONAL_ACTION",
+      "owner": "Platform engineer + Communications owner"
+    },
+    {
+      "id": "G-authorization",
+      "gate": "Merge, production deployment and customer-data authorizations",
+      "kind": "HUMAN_DECISION",
+      "owner": "Aubert"
+    }
+  ],
+  "finalReleaseCandidate": {
+    "FINAL_SOURCE_GIT_STATUS": "HEAD 1c337567635bb86ea0df7831557d8d2d22df1e6f on main; 230 modified and 1,142 untracked files (docs/ and reports/ excluded, generated artifacts/ excluded from the digest), nothing committed",
+    "FINAL_SOURCE_DIGEST": "c5f4510100e61443330a2cfd7728340d56e99d407480c5d51ce506c3a4b03e17",
+    "FINAL_SOURCE_DIGEST_DEFINITION": "sha256 over the HEAD commit and, for every modified or untracked file outside docs/, reports/ and artifacts/ (generated test evidence), its path and sha256, sorted; 1,328 files. Identical before and after the final regression.",
+    "FINAL_PLAN_DIGEST": "0a5ee060e7c3e3e373192ca8a4a1d58a47b44bfe490c6a7f8587f05127553ef4",
+    "PREVIOUS_QUALIFIED_PLAN_DIGEST": "4f9732e25ce07fc953648d5275c1901d674c833c78631b814f389bb90cc4c748",
+    "PLAN_UNCHANGED": "SUPERSEDED: the plan was re-frozen once for the clean release (tables, statements and DDL unchanged; only source commitments changed). See UE_RELEASE_PLAN_REFREEZE.md.",
+    "regression": {
+      "typecheck": "pnpm --filter @nzila/union-eyes typecheck: PASS",
+      "lint": "ESLint 0 errors on all changed files",
+      "targeted": "96 tests in 11 files: rate limiter, member dues gate, dues settlement, Stripe dues webhook, first-admin unit and native, restore tool, capability registry",
+      "FINAL_TEST_FAST_PASS": 38285,
+      "FINAL_TEST_FAST_FAIL": 0,
+      "FINAL_TEST_FAST_SKIP": 114,
+      "testFiles": "2,283 passed, 13 skipped (2,296)",
+      "conditions": "exact frozen source; native flags set; ran 27 minutes with no image build or other heavy job started by this lane",
+      "runExitCode": 1,
+      "runExitCodeReason": "Vitest reported 1 unhandled error, not a failed test: \"[vitest-pool]: Failed to start forks worker for test files lib/__tests__/api.test.ts ... Timeout waiting for worker to respond\". All 38,285 tests passed and 0 failed.",
+      "classification": "INFRASTRUCTURE_FLAKE",
+      "isolatedRerun": "lib/__tests__/api.test.ts rerun once in isolation: 6 of 6 passed (2.1 s). No product code was changed for it.",
+      "caveat": "The final run did not exit 0. Whether this one file executed inside that run is not separately evidenced; its tests are covered by the isolated pass. A clean exit-0 run in CI before merge is still recommended."
+    }
+  },
+  "releasePlanRefreeze": {
+    "PLAN_STATUS": "REFROZEN_FOR_E2E_AUTH_COMPATIBILITY",
+    "ORIGINAL_ACCEPTED_PLAN_DIGEST": "4f9732e25ce07fc953648d5275c1901d674c833c78631b814f389bb90cc4c748",
+    "PREVIOUS_RELEASE_PLAN_DIGEST": "0a5ee060e7c3e3e373192ca8a4a1d58a47b44bfe490c6a7f8587f05127553ef4",
+    "FINAL_PLAN_DIGEST": "5ba116ec82c491577f4eee6ee7e19ef83472d62fd3d2b263b6e3212f9970597e",
+    "PLAN_CHANGE_REASON": "Restore non-production, non-canonical\nE2E seed-session compatibility removed\nduring canonical auth rewrite.",
+    "TABLES_CHANGED": "NO",
+    "DDL_CHANGED": "NO",
+    "STATEMENTS_SEMANTICALLY_CHANGED": "NO",
+    "SOURCE_COMMITMENTS_CHANGED": [
+      "packages/platform-auth/src/entra/server.ts"
+    ],
+    "HISTORICAL_EVIDENCE": "Earlier acceptance and candidate records retain their recorded source/plan digests and test results. They do not qualify the final auth-repaired PR head. Exact-head qualification and human security disposition are recorded on PR #923."
+  }
+}

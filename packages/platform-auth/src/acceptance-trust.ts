@@ -98,16 +98,12 @@ export async function verifyAcceptanceIdentityToken(input: {
   if (!input.token || !profileIsValid(profile)) return { ok: false }
 
   try {
-    const { payload, protectedHeader } = await jwtVerify(
-      input.token,
-      new TextEncoder().encode(profile.signingSecret),
-      {
-        algorithms: ['HS256'],
-        issuer: profile.issuer,
-        audience: profile.audience,
-        currentDate: input.now,
-      },
-    )
+    const { payload, protectedHeader } = await jwtVerify(input.token, new TextEncoder().encode(profile.signingSecret), {
+      algorithms: ['HS256'],
+      issuer: profile.issuer,
+      audience: profile.audience,
+      currentDate: input.now,
+    })
     if (protectedHeader.typ !== 'JWT') return { ok: false }
     if (
       payload.iss !== profile.issuer ||

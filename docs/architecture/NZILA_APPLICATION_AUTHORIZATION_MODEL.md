@@ -256,7 +256,7 @@ paths are not all migrated:
 
 ## Phase 3A local runtime acceptance
 
-`pnpm authz:acceptance` starts only the dedicated
+`node scripts/platform-authz-acceptance.mjs run` starts only the dedicated
 `nzila-platform-authz-acceptance` Docker Compose project, bound to loopback
 port `55442`, and refuses to reuse pre-existing project resources. Its
 database-specific bootstrap mirrors the canonical predecessor tables needed
@@ -280,7 +280,7 @@ provider sign-in, or Farmer 360 runtime capability. Farmer 360 remains
 
 ## Phase 3B application-scoped acceptance identity
 
-The same `pnpm authz:acceptance` harness also exercises Cora's
+The same `node scripts/platform-authz-acceptance.mjs run` harness also exercises Cora's
 application-scoped acceptance token profile against that disposable database.
 The signing secret is generated in process memory for each run. The Cora
 acceptance provider is bound to a dedicated synthetic platform principal,
@@ -313,7 +313,7 @@ Focused validation passed:
   — 4 tests passed, including additive/forward-only migration assertions.
 - `pnpm --filter @nzila/cora exec vitest run lib/__tests__/resolve-org.test.ts 'app/api/farmer-360/[profileId]/route.test.ts'`
   — 13 tests passed.
-- `pnpm authz:acceptance` — passed: Cora database integration 2/2, platform
+- `node scripts/platform-authz-acceptance.mjs run` — passed: Cora database integration 2/2, platform
   authorization database acceptance 10/10, and Cora acceptance identity
   database proof 5/5; `0041` applied once, replay failed as expected without
   changing seeded rows, and the disposable Docker project, network, and volume

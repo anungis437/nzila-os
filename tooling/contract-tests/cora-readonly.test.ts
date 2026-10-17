@@ -223,7 +223,6 @@ describe('CORA_NO_SQL_MUTATIONS_003 — No operational SQL mutations in Cora', (
   // template literals, or raw SQL-like content.
   const SQL_MUTATION_PATTERN =
     /\b(INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|\.insert\s*\(|\.update\s*\(|\.delete\s*\()/i
-  const FARMER360_PERSISTENCE_PATH = '/apps/cora/lib/farmer-360/adapters.ts'
   const FARMER360_WRITE_TARGETS = new Set([
     'auditEvents',
     'coraEvidenceRecords',
@@ -250,7 +249,6 @@ describe('CORA_NO_SQL_MUTATIONS_003 — No operational SQL mutations in Cora', (
 
       const content = readContent(file)
       if (!content) continue
-      if (rel === FARMER360_PERSISTENCE_PATH) continue
 
       // Check line by line for better error messages
       const lines = content.split('\n')
@@ -276,8 +274,10 @@ describe('CORA_NO_SQL_MUTATIONS_003 — No operational SQL mutations in Cora', (
   })
 
   it('limits Farmer 360 persistence to Cora-owned records and canonical evidence/audit', () => {
-    const adapterPath = join(CORA_ROOT, 'lib', 'farmer-360', 'adapters.ts')
+    const adapterPath = join(ROOT, 'packages', 'db', 'src', 'cora-farmer360.ts')
     const content = readContent(adapterPath)
+    expect(readContent(join(CORA_ROOT, 'lib', 'farmer-360', 'adapters.ts')))
+      .toContain("from '@nzila/db/cora-farmer360'")
     const writes = [...content.matchAll(
       /\b(?:tx|db)\s*\.\s*(insert|update|delete)\s*\(\s*([A-Za-z_$][\w$]*)/g,
     )].map(([, operation, target]) => ({ operation, target }))

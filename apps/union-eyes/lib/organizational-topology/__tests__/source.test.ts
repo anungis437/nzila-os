@@ -131,6 +131,7 @@ describe('organizational-topology/source', () => {
 
     const graph = await getInstitutionalGraph()
     expect(graph.nodes).toHaveLength(2)
+    expect(graph.nodes.map((node) => node.tenantId)).toEqual(['org1', 'org2'])
     expect(graph.edges.length).toBeGreaterThanOrEqual(2)
     expect(graph.decisions).toHaveLength(1)
   })

@@ -207,7 +207,9 @@ export const recognitionAwards = pgTable(
 
 /**
  * Reward Wallet Ledger
- * Append-only ledger for all credit transactions
+ * Append-only credit ledger. Prospective entity fields are owned by
+ * backend/unions/models.py RewardWalletLedger; expiry belongs to the earning
+ * entry, not a second zero-credit "expiration_scheduled" transaction.
  */
 export const rewardWalletLedger = pgTable(
   'reward_wallet_ledger',
@@ -217,13 +219,21 @@ export const rewardWalletLedger = pgTable(
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
     userId: varchar('user_id', { length: 255 }).notNull(), // Clerk user ID
-    eventType: walletEventTypeEnum('event_type').notNull(),
+    eventType: varchar('event_type', { length: 16 })
+      .$type<'earn' | 'spend' | 'expire' | 'revoke' | 'adjust' | 'refund'>()
+      .notNull(),
     amountCredits: integer('amount_credits').notNull(),
     balanceAfter: integer('balance_after').notNull(),
-    sourceType: walletSourceTypeEnum('source_type').notNull(),
+    sourceType: varchar('source_type', { length: 32 })
+      .$type<'award' | 'redemption' | 'admin_adjustment' | 'system'>()
+      .notNull(),
     sourceId: uuid('source_id'), // FK to awards or redemptions
     memo: text('memo'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
@@ -239,6 +249,14 @@ export const rewardWalletLedger = pgTable(
     checkBalanceNonNegative: check(
       'wallet_balance_non_negative',
       sql`${table.balanceAfter} >= 0`
+    ),
+    checkEventType: check(
+      'wallet_event_type_valid',
+      sql`${table.eventType} IN ('earn', 'spend', 'expire', 'revoke', 'adjust', 'refund')`
+    ),
+    checkSourceType: check(
+      'wallet_source_type_valid',
+      sql`${table.sourceType} IN ('award', 'redemption', 'admin_adjustment', 'system')`
     ),
   })
 );
@@ -558,4 +576,3 @@ export type NewWebhookReceipt = typeof webhookReceipts.$inferInsert;
 
 export type AutomationRule = typeof automationRules.$inferSelect;
 export type NewAutomationRule = typeof automationRules.$inferInsert;
-

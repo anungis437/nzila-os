@@ -80,7 +80,7 @@ export const employerContacts = pgTable(
 
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-    createdBy: uuid("created_by"),
+    createdBy: text("created_by"),
   },
   (table) => [
     index("idx_employer_contacts_org").on(table.organizationId),
@@ -108,7 +108,7 @@ export const employerCommunications = pgTable(
 
     // Parties
     senderName: varchar("sender_name", { length: 255 }).notNull(),
-    senderUserId: uuid("sender_user_id"),
+    senderUserId: text("sender_user_id"),
     recipientName: varchar("recipient_name", { length: 255 }).notNull(),
     recipientContactId: uuid("recipient_contact_id").references(
       () => employerContacts.id
@@ -133,7 +133,7 @@ export const employerCommunications = pgTable(
 
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-    createdBy: uuid("created_by"),
+    createdBy: text("created_by"),
   },
   (table) => [
     index("idx_employer_comms_org").on(table.organizationId),

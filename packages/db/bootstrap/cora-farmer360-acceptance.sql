@@ -33,15 +33,6 @@ CREATE TABLE "orgs" (
   CONSTRAINT "orgs_clerk_org_id_unique" UNIQUE ("clerk_org_id")
 );
 
-CREATE SCHEMA "user_management";
-
-CREATE TABLE "user_management"."users" (
-  "user_id" varchar(255) PRIMARY KEY,
-  "email" varchar(255) NOT NULL UNIQUE,
-  "is_active" boolean NOT NULL DEFAULT true,
-  "lifecycle_state" varchar(20) NOT NULL DEFAULT 'active'
-);
-
 CREATE TYPE "agri_producer_status" AS ENUM ('active', 'inactive', 'suspended');
 
 CREATE TABLE "agri_producers" (

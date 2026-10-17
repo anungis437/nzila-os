@@ -88,13 +88,13 @@ describe('communications/webhooks/resend route', () => {
     });
   });
 
-  it('returns 500 when webhook configuration is missing', async () => {
+  it('returns 503 when webhook configuration is missing', async () => {
     delete process.env.RESEND_API_KEY;
     const { POST } = await loadRoute();
 
     const response = await POST(webhookRequest('{}'));
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(503);
   });
 
   it('returns 400 when svix headers are missing', async () => {

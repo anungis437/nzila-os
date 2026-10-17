@@ -70,7 +70,11 @@ const mocks = vi.hoisted(() => {
 
 vi.mock('@nzila/db/schema', () => mocks.tables)
 vi.mock('@nzila/db/client', () => ({ db: mocks.ordinaryDb }))
-vi.mock('../auth-db', () => ({ authDb: mocks.authDb }))
+vi.mock('../auth-db', () => ({
+  authDb: mocks.authDb,
+  withAuthContext: (_context: unknown, callback: () => Promise<unknown>) => callback(),
+  withAuthSavepoint: (callback: () => Promise<unknown>) => callback(),
+}))
 vi.mock('drizzle-orm', () => ({
   and: (...args: unknown[]) => ({ op: 'and', args }),
   eq: (...args: unknown[]) => ({ op: 'eq', args }),
@@ -159,4 +163,3 @@ describe('password login auth bootstrap', () => {
     expect(mocks.state.createSession).not.toHaveBeenCalled()
   })
 })
-

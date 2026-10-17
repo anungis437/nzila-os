@@ -42,6 +42,14 @@ if [[ "$STATUS" -ne 0 || "$MODE" == "ERROR" ]]; then
   exit 1
 fi
 
+# Partition the proven plan across CI runners. Unsharded local invocation
+# retains the original full/affected commands and fail-closed fallback.
+if [[ -n "${TYPECHECK_SHARD_TOTAL:-}" || -n "${TYPECHECK_SHARD_INDEX:-}" ]]; then
+  node "$ROOT/tooling/ci/run-typecheck-shard.mjs" "$PLAN_FILE" \
+    "${TYPECHECK_SHARD_INDEX:-}" "${TYPECHECK_SHARD_TOTAL:-}"
+  exit $?
+fi
+
 case "$MODE" in
   FULL)
     # Same portfolio command as an unresolved or global typecheck.

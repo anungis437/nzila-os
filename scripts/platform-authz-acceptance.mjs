@@ -19,6 +19,7 @@ function run(command, args, options = {}) {
   if (result.status !== 0) {
     throw new Error(`${command} exited with status ${result.status ?? 'unknown'}`)
   }
+  return result
 }
 
 function compose(args, options) {
@@ -73,6 +74,36 @@ function applySqlFile(path) {
     '-f',
     path,
   ])
+}
+
+function applyCanonicalAuthFixture(mode, password) {
+  const result = run(
+    'pnpm',
+    ['--filter', '@nzila/db', 'exec', 'tsx', 'bootstrap/platform-authz-fixture.ts', mode],
+    {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'inherit'],
+      env: { ...process.env, CORA_AUTHZ_FIXTURE_PASSWORD: password ?? '' },
+    },
+  )
+  compose(
+    [
+      'exec',
+      '-T',
+      'postgres',
+      'psql',
+      '-U',
+      'platform_authz_acceptance',
+      '-d',
+      'nzila_platform_authz_acceptance',
+      '-v',
+      'ON_ERROR_STOP=1',
+    ],
+    {
+      input: result.stdout,
+      stdio: ['pipe', 'inherit', 'inherit'],
+    },
+  )
 }
 
 function verifyForwardOnlyReplay() {
@@ -151,9 +182,15 @@ function test() {
   if (running.status !== 0 || !running.stdout.split(/\r?\n/).includes('postgres')) {
     throw new Error('The disposable authorization database is not running')
   }
+  const authPassword = randomBytes(32).toString('hex')
+  applyCanonicalAuthFixture('login', authPassword)
+  const authUrl = new URL(databaseUrl)
+  authUrl.username = 'cora_authz_fixture_gateway'
+  authUrl.password = authPassword
   const env = {
     ...process.env,
     DATABASE_URL: databaseUrl,
+    AUTH_DATABASE_URL: authUrl.toString(),
     DATABASE_POOL_SIZE: '3',
     CORA_ACCEPTANCE_AUTH_ENABLED: 'true',
     CORA_ACCEPTANCE_AUTH_SECRET: randomBytes(32).toString('base64url'),
@@ -167,7 +204,7 @@ function test() {
       'exec',
       'vitest',
       'run',
-      'lib/authorization-acceptance.integration.test.ts',
+      '../../tooling/cora-acceptance/authorization.integration.test.ts',
     ],
     { env },
   )
@@ -212,8 +249,10 @@ if (command === 'down') {
     started = true
     compose(['up', '--detach', '--wait'])
     applySqlFile('/acceptance/bootstrap.sql')
+    applyCanonicalAuthFixture('schema')
     applySqlFile('/acceptance/0041_platform_authorization_authority.sql')
     applySqlFile('/acceptance/fixtures.sql')
+    applyCanonicalAuthFixture('boundary')
     verifyForwardOnlyReplay()
     test()
   } finally {
@@ -224,8 +263,10 @@ if (command === 'down') {
   compose(['up', '--detach', '--wait'])
 } else if (command === 'bootstrap') {
   applySqlFile('/acceptance/bootstrap.sql')
+  applyCanonicalAuthFixture('schema')
   applySqlFile('/acceptance/0041_platform_authorization_authority.sql')
   applySqlFile('/acceptance/fixtures.sql')
+  applyCanonicalAuthFixture('boundary')
   verifyForwardOnlyReplay()
 } else {
   test()

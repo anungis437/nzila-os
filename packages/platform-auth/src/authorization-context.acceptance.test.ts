@@ -1,3 +1,4 @@
+import { closeAuthClients } from '@nzila/db/auth-client'
 import { randomUUID } from 'node:crypto'
 import { and, desc, eq, getTableColumns, sql } from 'drizzle-orm'
 import { afterAll, describe, expect, it } from 'vitest'
@@ -78,6 +79,7 @@ async function findAuditByCorrelation(correlationId: string) {
 
 describe.skipIf(!acceptanceDatabaseUrl)('platform authorization database acceptance', () => {
   afterAll(async () => {
+    await closeAuthClients()
     await db.$client.end({ timeout: 5 })
   })
 
@@ -238,10 +240,10 @@ describe.skipIf(!acceptanceDatabaseUrl)('platform authorization database accepta
       overrides?: Partial<AuthorizationResolutionInput>
     }> = [
       { subject: 'subject-missing', code: 'IDENTITY_NOT_BOUND' },
-      { subject: 'subject-disabled', code: 'IDENTITY_BINDING_INACTIVE' },
-      { subject: 'subject-revoked', code: 'IDENTITY_BINDING_INACTIVE' },
+      { subject: 'subject-disabled', code: 'IDENTITY_NOT_BOUND' },
+      { subject: 'subject-revoked', code: 'IDENTITY_NOT_BOUND' },
       { subject: 'subject-unverified', code: 'IDENTITY_BINDING_INACTIVE' },
-      { subject: 'subject-inactive', code: 'PLATFORM_USER_INACTIVE' },
+      { subject: 'subject-inactive', code: 'IDENTITY_NOT_BOUND' },
       { subject: 'subject-no-membership', code: 'MEMBERSHIP_REQUIRED' },
       { subject: 'subject-membership-states', code: 'MEMBERSHIP_REQUIRED' },
       { subject: 'subject-expired-membership', code: 'MEMBERSHIP_REQUIRED' },

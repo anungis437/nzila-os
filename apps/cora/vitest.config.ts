@@ -14,7 +14,7 @@ export default defineProject({
     hookTimeout: 30_000,
     name: 'cora',
     environment: 'node',
-    include: ['**/*.test.ts', '**/*.test.tsx'],
+    include: ['**/*.test.ts', '**/*.test.tsx', '../../tooling/cora-acceptance/*.test.ts'],
     coverage: {
       provider: 'v8',
       include: [

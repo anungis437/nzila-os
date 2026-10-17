@@ -9,14 +9,7 @@
  */
 
 // Auth service — core flows
-export {
-  signup,
-  login,
-  logout,
-  forgotPassword,
-  resetPassword,
-  getAuthUser,
-} from './auth-service'
+export { signup, login, logout, forgotPassword, resetPassword, getAuthUser } from './auth-service'
 export type {
   AuthResult,
   AuthUser,
@@ -27,12 +20,7 @@ export type {
 } from './auth-service'
 
 // Password utilities
-export {
-  hashPassword,
-  verifyPassword,
-  needsRehash,
-  validatePassword,
-} from './password'
+export { hashPassword, verifyPassword, needsRehash, validatePassword } from './password'
 export type { PasswordValidationResult } from './password'
 
 // Session management
@@ -43,6 +31,9 @@ export {
   revokeSession,
   revokeAllUserSessions,
   rotateSession,
+  rebindSessionOrganization,
+  SessionRebindDenied,
+  sessionCookieAttributes,
   setSessionCookie,
   clearSessionCookie,
   getSessionFromCookie,

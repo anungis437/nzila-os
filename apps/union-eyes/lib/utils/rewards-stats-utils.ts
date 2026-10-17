@@ -1,12 +1,9 @@
 /**
- * Rewards Statistics Utilities
- * Helper functions for calculating reward totals and stats
- * 
- * Part of Week 2 P1 Implementation - Dashboard Data Loading Fixes
+ * Tenant-scoped current credit ledger totals.
+ * Empty wallets are zero; database/schema failures propagate to the caller.
  */
-
 import { db } from '@/db/db';
-import { rewardWalletLedger } from '@/db/schema';
+import { rewardWalletLedger } from '@/db/schema/domains/infrastructure/rewards';
 import { eq, and, sql } from 'drizzle-orm';
 
 export interface RewardTotals {
@@ -16,118 +13,75 @@ export interface RewardTotals {
   currentBalance: number;
 }
 
-/**
- * Calculate reward totals for a user
- */
 export async function calculateRewardTotals(
   userId: string,
   organizationId: string
 ): Promise<RewardTotals> {
-  try {
-    // Aggregate ledger entries by type
-    const result = await db
-      .select({
-        eventType: rewardWalletLedger.transactionType,
-        total: sql<number>`CAST(SUM(${rewardWalletLedger.pointsChange}) AS INTEGER)`,
-      })
-      .from(rewardWalletLedger)
-      .where(
-        and(
-          eq(rewardWalletLedger.userId, userId),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq((rewardWalletLedger as any).orgId, organizationId)
-        )
-      )
-      .groupBy(rewardWalletLedger.transactionType);
+  const result = await db
+    .select({
+      eventType: rewardWalletLedger.eventType,
+      total: sql<number>`CAST(SUM(${rewardWalletLedger.amountCredits}) AS INTEGER)`,
+    })
+    .from(rewardWalletLedger)
+    .where(and(
+      eq(rewardWalletLedger.userId, userId),
+      eq(rewardWalletLedger.orgId, organizationId)
+    ))
+    .groupBy(rewardWalletLedger.eventType);
 
-    // Initialize totals
-    const totals: RewardTotals = {
-      totalEarned: 0,
-      totalRedeemed: 0,
-      totalExpired: 0,
-      currentBalance: 0,
-    };
-
-    // Sum up the totals by type
-    result.forEach(row => {
-      const amount = Math.abs(row.total || 0);
-      
-      switch (row.eventType) {
-        case 'earn':
-        case 'adjust':
-        case 'refund':
-          totals.totalEarned += amount;
-          totals.currentBalance += amount;
-          break;
-        case 'spend':
-          totals.totalRedeemed += amount;
-          totals.currentBalance -= amount;
-          break;
-        case 'expire':
-        case 'revoke':
-          totals.totalExpired += amount;
-          totals.currentBalance -= amount;
-          break;
-      }
-    });
-
-    return totals;
-  } catch (_error) {
-return {
-      totalEarned: 0,
-      totalRedeemed: 0,
-      totalExpired: 0,
-      currentBalance: 0,
-    };
+  const totals: RewardTotals = {
+    totalEarned: 0,
+    totalRedeemed: 0,
+    totalExpired: 0,
+    currentBalance: 0,
+  };
+  for (const row of result) {
+    const amount = Number(row.total ?? 0);
+    // Adjustments can be debits. Taking abs() here would inflate the balance.
+    totals.currentBalance += amount;
+    switch (row.eventType) {
+      case 'earn':
+      case 'adjust':
+      case 'refund':
+        totals.totalEarned += amount;
+        break;
+      case 'spend':
+        totals.totalRedeemed -= amount;
+        break;
+      case 'expire':
+      case 'revoke':
+        totals.totalExpired -= amount;
+        break;
+    }
   }
+  return totals;
 }
 
-/**
- * Get earned credits total (simpler version)
- */
 export async function getTotalEarned(userId: string, organizationId: string): Promise<number> {
-  try {
-    const result = await db
-      .select({
-        total: sql<number>`CAST(SUM(${rewardWalletLedger.pointsChange}) AS INTEGER)`,
-      })
-      .from(rewardWalletLedger)
-      .where(
-        and(
-          eq(rewardWalletLedger.userId, userId),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq((rewardWalletLedger as any).orgId, organizationId),
-          sql`${rewardWalletLedger.transactionType} IN ('earn', 'adjust', 'refund')`
-        )
-      );
-
-    return result[0]?.total || 0;
-  } catch (_error) {
-return 0;
-  }
+  const result = await db
+    .select({
+      total: sql<number>`CAST(SUM(${rewardWalletLedger.amountCredits}) AS INTEGER)`,
+    })
+    .from(rewardWalletLedger)
+    .where(and(
+      eq(rewardWalletLedger.userId, userId),
+      eq(rewardWalletLedger.orgId, organizationId),
+      sql`${rewardWalletLedger.eventType} IN ('earn', 'adjust', 'refund')`
+    ));
+  return Number(result[0]?.total ?? 0);
 }
 
-/**
- * Get redeemed credits total (simpler version)
- */
 export async function getTotalRedeemed(userId: string, organizationId: string): Promise<number> {
-  try {
-    const result = await db
-      .select({
-        total: sql<number>`CAST(SUM(${rewardWalletLedger.pointsChange}) AS INTEGER)`,
-      })
-      .from(rewardWalletLedger)
-      .where(
-        and(
-          eq(rewardWalletLedger.userId, userId),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq((rewardWalletLedger as any).orgId, organizationId),
-          eq(rewardWalletLedger.transactionType, 'spend')
-        )
-      );
-
-    return Math.abs(result[0]?.total || 0);
-  } catch (_error) {
-return 0;
-  }
+  const result = await db
+    .select({
+      total: sql<number>`CAST(SUM(${rewardWalletLedger.amountCredits}) AS INTEGER)`,
+    })
+    .from(rewardWalletLedger)
+    .where(and(
+      eq(rewardWalletLedger.userId, userId),
+      eq(rewardWalletLedger.orgId, organizationId),
+      eq(rewardWalletLedger.eventType, 'spend')
+    ));
+  const total = Number(result[0]?.total ?? 0);
+  return total === 0 ? 0 : -total;
 }

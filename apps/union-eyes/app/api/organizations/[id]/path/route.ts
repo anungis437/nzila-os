@@ -1,7 +1,8 @@
 /**
  * GET /api/organizations/[id]/path
  *
- * Returns the hierarchy path from root to the given organization (breadcrumb chain).
+ * V2 returns private-membership-scoped ancestry and explicitly reports omitted ancestors.
+ * Flag-off retains the legacy root-to-organization breadcrumb chain.
  * Replaces Django proxy with direct Drizzle/PostgreSQL query.
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,6 +10,7 @@ import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
 import { eq, inArray } from 'drizzle-orm';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +41,15 @@ function formatOrg(o: OrgRow) {
 }
 
 export async function GET(_req: NextRequest, { params }: Params) {
+  if (currentStateContextEnabled()) {
+    const { getCanonicalOrganizationPath, canonicalOrganizationError } =
+      await import('@/lib/auth/canonical-organization-selection')
+    try {
+      return NextResponse.json(await getCanonicalOrganizationPath((await params).id))
+    } catch (error) {
+      return canonicalOrganizationError(error, 'load hierarchy path for')
+    }
+  }
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -10,7 +10,8 @@ import {
   rewardWalletLedger,
   rewardBudgetEnvelopes,
   rewardRedemptions,
-} from '@/db/schema/recognition-rewards-schema';
+} from '@/db/schema/domains/infrastructure/rewards';
+import { organizationMembers, users } from '@/db/schema';
 import { logger } from '@/lib/logger';
 
 type CsvRow = Record<string, unknown>;
@@ -249,16 +250,17 @@ export async function exportLedgerToCSV(
         rwl.id,
         rwl.created_at,
         rwl.event_type,
-        rwl.amount,
+        rwl.amount_credits AS amount,
         rwl.balance_after,
-        om.user_name,
+        om.name AS user_name,
         u.email,
         rwl.source_type,
         rwl.source_id,
-        rwl.description
+        rwl.memo AS description
       FROM ${rewardWalletLedger} rwl
-      LEFT JOIN organization_members om ON om.user_id = rwl.user_id
-      LEFT JOIN auth_user u ON u.id::text = rwl.user_id
+      LEFT JOIN ${organizationMembers} om
+        ON om.user_id = rwl.user_id AND om.organization_id = rwl.org_id::text
+      LEFT JOIN ${users} u ON u.user_id = rwl.user_id
       WHERE ${sql.join(conditions, sql` AND `)}
       ORDER BY rwl.created_at DESC
     `;
@@ -501,4 +503,3 @@ export async function exportAnalyticsToCSV(
     throw error;
   }
 }
-

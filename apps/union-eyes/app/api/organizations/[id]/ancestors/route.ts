@@ -1,32 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@nzila/platform-auth/entra/server';
-import { db } from '@/db/db';
-import { organizations } from '@/db/schema-organizations';
-import { eq, inArray } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@nzila/platform-auth/entra/server'
+import { db } from '@/db/db'
+import { organizations } from '@/db/schema-organizations'
+import { eq, inArray } from 'drizzle-orm'
+import { withSystemContext } from '@/lib/db/with-rls-context'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: Promise<{ id: string }> }
 
 export async function GET(_req: NextRequest, { params }: Params) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { id } = await params;
+  const { id } = await params
   // Get the org to read its hierarchy_path
-  const [org] = await db.select({ hierarchyPath: organizations.hierarchyPath })
-    .from(organizations)
-    .where(eq(organizations.id, id));
+  const [org] = await withSystemContext(() =>
+    db
+      .select({ hierarchyPath: organizations.hierarchyPath })
+      .from(organizations)
+      .where(eq(organizations.id, id)),
+  )
 
-  if (!org) return NextResponse.json({ data: [] });
+  if (!org) return NextResponse.json({ data: [] })
 
   // hierarchy_path contains ancestor IDs; fetch them
-  const ancestorIds = (org.hierarchyPath ?? []).filter(aid => aid !== id);
-  if (ancestorIds.length === 0) return NextResponse.json({ data: [] });
+  const ancestorIds = (org.hierarchyPath ?? []).filter((aid) => aid !== id)
+  if (ancestorIds.length === 0) return NextResponse.json({ data: [] })
 
-  const rows = await db.select().from(organizations).where(inArray(organizations.id, ancestorIds));
+  const rows = await withSystemContext(() =>
+    db.select().from(organizations).where(inArray(organizations.id, ancestorIds)),
+  )
 
-  const mapped = rows.map(row => ({
+  const mapped = rows.map((row) => ({
     id: row.id,
     name: row.name,
     slug: row.slug,
@@ -34,10 +40,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
     organization_type: row.organizationType,
     hierarchy_level: row.hierarchyLevel,
     status: row.status,
-  }));
+  }))
 
   // Sort by hierarchy level (top-most first)
-  mapped.sort((a, b) => a.hierarchy_level - b.hierarchy_level);
+  mapped.sort((a, b) => a.hierarchy_level - b.hierarchy_level)
 
-  return NextResponse.json({ data: mapped });
+  return NextResponse.json({ data: mapped })
 }

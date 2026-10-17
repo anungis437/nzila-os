@@ -17,7 +17,7 @@
  * `accountSource` is an audit trail of where the user came from originally;
  * it never changes, even if the user later uses a different auth method.
  */
-import { db } from '@nzila/db/client'
+import { authDb as db, withAuthContext, withAuthenticatedAuthContext, withAuthSavepoint } from '../auth-db'
 import { authUsers, authAuditLog, authUserSessions } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 
@@ -32,11 +32,11 @@ async function logEvent(
   },
 ): Promise<void> {
   try {
-    await db.insert(authAuditLog).values({
+    await withAuthSavepoint(async () => db.insert(authAuditLog).values({
       userId: opts.userId ?? null,
       eventType,
       metadata: opts.metadata ?? {},
-    })
+    }))
   } catch {
     // best-effort
   }
@@ -47,7 +47,18 @@ export async function suspendUser(
   actorUserId: string,
   reason?: string,
 ): Promise<{ success: boolean }> {
-  await db
+  await validateActor(actorUserId)
+  return withAuthContext({ phase: 'lifecycle', operation: 'suspend', actorUserId, targetUserId: userId, reason: reason ?? 'Explicit user suspension' },
+    () => suspendWithContext(userId, actorUserId, reason))
+}
+
+async function validateActor(actorUserId: string): Promise<void> {
+  const { auth } = await import('../entra/server')
+  if ((await auth()).userId !== actorUserId) throw new Error('Authenticated lifecycle administrator required')
+}
+
+async function suspendWithContext(userId: string, actorUserId: string, reason?: string): Promise<{ success: boolean }> {
+  const changed = await db
     .update(authUsers)
     .set({
       lifecycleState: 'suspended',
@@ -57,7 +68,8 @@ export async function suspendUser(
       isActive: false,
       updatedAt: new Date(),
     })
-    .where(eq(authUsers.userId, userId))
+    .where(eq(authUsers.userId, userId)).returning({ userId: authUsers.userId })
+  if (!changed.length) return { success: false }
   await logEvent('user_suspended', {
     userId,
     metadata: { actorUserId, reason: reason ?? null },
@@ -69,7 +81,13 @@ export async function reactivateUser(
   userId: string,
   actorUserId: string,
 ): Promise<{ success: boolean }> {
-  await db
+  await validateActor(actorUserId)
+  return withAuthContext({ phase: 'lifecycle', operation: 'reactivate', actorUserId, targetUserId: userId, reason: 'Explicit user reactivation' },
+    () => reactivateWithContext(userId, actorUserId))
+}
+
+async function reactivateWithContext(userId: string, actorUserId: string): Promise<{ success: boolean }> {
+  const changed = await db
     .update(authUsers)
     .set({
       lifecycleState: 'active',
@@ -79,7 +97,8 @@ export async function reactivateUser(
       isActive: true,
       updatedAt: new Date(),
     })
-    .where(eq(authUsers.userId, userId))
+    .where(eq(authUsers.userId, userId)).returning({ userId: authUsers.userId })
+  if (!changed.length) return { success: false }
   await logEvent('user_reactivated', { userId, metadata: { actorUserId } })
   return { success: true }
 }
@@ -89,7 +108,13 @@ export async function deprovisionUser(
   actorUserId: string,
   reason?: string,
 ): Promise<{ success: boolean; sessionsRevoked: number }> {
-  await db
+  await validateActor(actorUserId)
+  return withAuthContext({ phase: 'lifecycle', operation: 'deprovision', actorUserId, targetUserId: userId, reason: reason ?? 'Explicit user deprovisioning' },
+    () => deprovisionWithContext(userId, actorUserId, reason))
+}
+
+async function deprovisionWithContext(userId: string, actorUserId: string, reason?: string): Promise<{ success: boolean; sessionsRevoked: number }> {
+  const changed = await db
     .update(authUsers)
     .set({
       lifecycleState: 'deprovisioned',
@@ -99,7 +124,8 @@ export async function deprovisionUser(
       isActive: false,
       updatedAt: new Date(),
     })
-    .where(eq(authUsers.userId, userId))
+    .where(eq(authUsers.userId, userId)).returning({ userId: authUsers.userId })
+  if (!changed.length) return { success: false, sessionsRevoked: 0 }
 
   // Revoke all active sessions
   const revoked = await db
@@ -130,6 +156,10 @@ export async function getUserLifecycle(userId: string): Promise<{
   lifecycleReason: string | null
   lifecycleChangedAt: Date | null
 } | null> {
+  return withAuthenticatedAuthContext(userId, () => getLifecycleWithContext(userId))
+}
+
+async function getLifecycleWithContext(userId: string) {
   const [row] = await db
     .select({
       lifecycleState: authUsers.lifecycleState,

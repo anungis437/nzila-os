@@ -1,0 +1,318 @@
+{
+  "candidateDigest": "a8b17a0d3d0a112d78c4959892079f582acb8173a00802e00cb2b40310a5435d",
+  "sourcePlanDigest": "2cd70d70bd1f94cc6a8f7f37f32a94ae17a9ea1c441d8a12aaf1538d74601847",
+  "bucket": {
+    "bucket": "NOT_IMPLEMENTED_501",
+    "count": 16,
+    "reason": "Route source explicitly returns a 501/NOT_IMPLEMENTED path and qualifies via actual 501 response."
+  },
+  "executedRoutes": 16,
+  "passCount": 0,
+  "failCount": 16,
+  "receipts": [
+    {
+      "id": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts",
+      "method": "POST",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 500,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts#GET",
+      "sourcePath": "apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts",
+      "method": "GET",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cron/monthly-dues/route.ts#GET",
+      "sourcePath": "apps/union-eyes/app/api/cron/monthly-dues/route.ts",
+      "method": "GET",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cron/overdue-notifications/route.ts#GET",
+      "sourcePath": "apps/union-eyes/app/api/cron/overdue-notifications/route.ts",
+      "method": "GET",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cron/process-messages/route.ts#GET",
+      "sourcePath": "apps/union-eyes/app/api/cron/process-messages/route.ts",
+      "method": "GET",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cron/process-notifications/route.ts#GET",
+      "sourcePath": "apps/union-eyes/app/api/cron/process-notifications/route.ts",
+      "method": "GET",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/cron/scheduled-reports/route.ts#GET",
+      "sourcePath": "apps/union-eyes/app/api/cron/scheduled-reports/route.ts",
+      "method": "GET",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 401,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/dashboard/export-csv/route.ts#GET",
+      "sourcePath": "apps/union-eyes/app/api/dashboard/export-csv/route.ts",
+      "method": "GET",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/documents/[id]/route.ts#DELETE",
+      "sourcePath": "apps/union-eyes/app/api/documents/[id]/route.ts",
+      "method": "DELETE",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/documents/[id]/route.ts#GET",
+      "sourcePath": "apps/union-eyes/app/api/documents/[id]/route.ts",
+      "method": "GET",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/documents/[id]/route.ts#PATCH",
+      "sourcePath": "apps/union-eyes/app/api/documents/[id]/route.ts",
+      "method": "PATCH",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/documents/bulk/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/documents/bulk/route.ts",
+      "method": "POST",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/documents/folders/route.ts#GET",
+      "sourcePath": "apps/union-eyes/app/api/documents/folders/route.ts",
+      "method": "GET",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/documents/folders/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/documents/folders/route.ts",
+      "method": "POST",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/documents/route.ts#GET",
+      "sourcePath": "apps/union-eyes/app/api/documents/route.ts",
+      "method": "GET",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    },
+    {
+      "id": "apps/union-eyes/app/api/documents/route.ts#POST",
+      "sourcePath": "apps/union-eyes/app/api/documents/route.ts",
+      "method": "POST",
+      "bucket": "NOT_IMPLEMENTED_501",
+      "cases": [
+        {
+          "name": "authenticated",
+          "status": 403,
+          "outcome": "FAIL"
+        },
+        {
+          "name": "unauthenticated",
+          "status": 0,
+          "outcome": "N/A",
+          "note": "501 qualification depends on the implemented route contract, not anonymous denial"
+        }
+      ]
+    }
+  ]
+}

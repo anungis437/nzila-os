@@ -1,4 +1,6 @@
 import { expect, type APIRequestContext } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
+import { createServer } from 'node:http'
 import { UE_TEST_USER_PASSWORD, UE_TEST_USERS } from '../fixtures/test-users'
 import { getE2EEnv } from './e2e-env'
 
@@ -41,6 +43,48 @@ export async function seedOrVerifyTestState(request: APIRequestContext): Promise
 }
 
 export async function loginAsTestUser(request: APIRequestContext, email: string): Promise<void> {
+  if ((process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true') {
+    const fixture = Object.values(UE_TEST_USERS).find(user => user.email === email)
+    if (!fixture || fixture.status !== 'active') {
+      throw new Error(`[ue:e2e] Unknown or inactive seeded fixture user: ${email}`)
+    }
+    const target = new URL(getBaseUrl())
+    if (target.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(target.hostname)
+      || target.username || target.password) {
+      throw new Error('[ue:e2e] Seed session setup requires a loopback HTTP target')
+    }
+    // APIRequestContext has no public cookie mutator. A temporary loopback
+    // response installs the same seed cookie as loginAsRole into its real jar.
+    // No application login endpoint, identity write or request-method patch is used.
+    const nonce = `/${randomUUID()}`
+    const issuer = createServer((incoming, response) => {
+      if (incoming.url !== nonce) {
+        response.writeHead(404).end()
+        return
+      }
+      response.setHeader('Set-Cookie',
+        `nzila_session=ue-seed-session-${fixture.userId}; Path=/; HttpOnly; SameSite=Lax`)
+      response.writeHead(204).end()
+    })
+    await new Promise<void>((resolve, reject) => {
+      issuer.once('error', reject)
+      issuer.listen(0, target.hostname, () => resolve())
+    })
+    try {
+      const address = issuer.address()
+      if (!address || typeof address === 'string') throw new Error('[ue:e2e] Cookie fixture failed to bind')
+      const url = new URL(target.origin)
+      url.port = String(address.port)
+      url.pathname = nonce
+      const response = await request.get(url.toString(), { maxRedirects: 0, timeout: 10_000 })
+      if (response.status() !== 204) throw new Error('[ue:e2e] Cookie fixture setup failed')
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        issuer.close(error => error ? reject(error) : resolve())
+      })
+    }
+    return
+  }
   // Reset any stale session between flows to keep auth deterministic across test cases.
   await request.post('/api/auth/logout').catch(() => undefined)
 

@@ -378,11 +378,12 @@ export async function searchMembers(
       isNull(organizationMembers.deletedAt),
     ];
 
-    // Add full-text search if query provided
+    // Full-text search is computed from canonical columns; no stored vector column exists.
+    const memberVector = sql`to_tsvector('english', coalesce(${organizationMembers.name}, '') || ' ' || coalesce(${organizationMembers.email}, '') || ' ' || coalesce(${organizationMembers.membershipNumber}, ''))`;
     if (searchQuery && searchQuery.trim()) {
       // Convert search query to tsquery format (handle multiple words)
       const tsQuery = searchQuery.trim().split(/\s+/).join(' & ');
-      conditions.push(sql`${organizationMembers.searchVector} @@ to_tsquery('english', ${tsQuery})`);
+      conditions.push(sql`${memberVector} @@ to_tsquery('english', ${tsQuery})`);
     }
 
     // Add filters
@@ -405,7 +406,7 @@ export async function searchMembers(
     if (searchQuery && searchQuery.trim()) {
       const tsQuery = searchQuery.trim().split(/\s+/).join(' & ');
       return await query.orderBy(
-        sql`ts_rank(${organizationMembers.searchVector}, to_tsquery('english', ${tsQuery})) DESC`
+        sql`ts_rank(${memberVector}, to_tsquery('english', ${tsQuery})) DESC`
       );
     }
 

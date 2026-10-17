@@ -193,7 +193,9 @@ export async function writeSourceDisclosureDecisionAudit(
     sourceSystem: event.sourceSystem,
     ...(event.sourceDomain ? { sourceDomain: event.sourceDomain } : {}),
     ...(event.sourceEntity ? { sourceEntity: event.sourceEntity } : {}),
-    ...(event.sourceOrganizationId ? { sourceOrganizationId: event.sourceOrganizationId } : {}),
+    ...(event.sourceOrganizationId
+      ? { sourceOrganizationId: event.sourceOrganizationId }
+      : {}),
     factClass: event.factClass,
     ...(event.policyId ? { policyId: event.policyId } : {}),
     ...(event.policyVersion ? { policyVersion: event.policyVersion } : {}),

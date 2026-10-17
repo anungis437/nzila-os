@@ -1,3 +1,4 @@
+import { closeAuthClients } from '@nzila/db/auth-client'
 import { randomUUID } from 'node:crypto'
 import { SignJWT } from 'jose'
 import { and, eq, sql } from 'drizzle-orm'
@@ -106,6 +107,7 @@ describe.skipIf(!acceptanceDatabaseUrl)(
   'Cora acceptance identity to canonical authorization acceptance',
   () => {
     afterAll(async () => {
+      await closeAuthClients()
       await db.$client.end({ timeout: 5 })
     })
 
@@ -187,7 +189,7 @@ describe.skipIf(!acceptanceDatabaseUrl)(
 
     it('denies missing or inactive canonical bindings and memberships', async () => {
       await expectDenied('actor-without-binding', 'IDENTITY_NOT_BOUND')
-      await expectDenied('actor-disabled', 'IDENTITY_BINDING_INACTIVE')
+      await expectDenied('actor-disabled', 'IDENTITY_NOT_BOUND')
       await expectDenied('actor-no-membership', 'MEMBERSHIP_REQUIRED')
       await expectDenied('actor-suspended', 'MEMBERSHIP_NOT_ACTIVE', { organizationId: orgB })
     })

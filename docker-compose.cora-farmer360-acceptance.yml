@@ -14,7 +14,7 @@ services:
       - ./packages/db/bootstrap:/acceptance/bootstrap:ro
       - ./packages/db/drizzle:/acceptance/migrations:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U cora_acceptance -d cora_farmer360_acceptance']
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U cora_acceptance -d cora_farmer360_acceptance']
       interval: 2s
       timeout: 3s
       retries: 30

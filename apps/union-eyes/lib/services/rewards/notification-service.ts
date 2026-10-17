@@ -6,21 +6,20 @@
 
 import { db } from '@/db';
 import { 
-  rewardWalletLedger, 
   recognitionAwards, 
   rewardRedemptions,
   organizations,
   users,
   organizationMembers 
 } from '@/db/schema';
+import { rewardWalletLedger } from '@/db/schema/domains/infrastructure/rewards';
 import { 
   sendAwardReceivedEmail, 
   sendApprovalRequestEmail, 
   sendCreditExpirationEmail, 
   sendRedemptionConfirmationEmail 
 } from './email-service';
-import { eq, and, lte, gte, desc, sql, gt } from 'drizzle-orm';
-import { v4 as uuidv4 } from 'uuid';
+import { eq, and, lte, gte, sql, gt } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 // Batch configuration
@@ -48,8 +47,6 @@ type ExpirationBatchCounter =
   | 'usersNotified7Days'
   | 'usersNotified14Days'
   | 'usersNotified30Days';
-
-type RewardWalletLedgerInsert = typeof rewardWalletLedger.$inferInsert;
 
 function asObject(value: any): Record<string, unknown> | null {
   return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null;
@@ -199,10 +196,13 @@ export async function notifyAwardPendingApproval(awardId: string) {
  * Get users with expiring credits within the specified timeframe
  * Uses batched queries for performance
  * 
- * NOTE: Credit expiration is not currently implemented in the schema.
- * This function returns an empty array until expiration tracking is added.
+ * Expiry metadata is captured atomically on positive earning entries.
+ * Cross-tenant scans are reserved for the existing system notification job;
+ * an organization filter restricts tenant monitoring callers.
+ * Amounts are dated earnings, not allocated remaining lots: the current ledger
+ * does not define a spend-to-earning allocation or an expiration debit worker.
  */
-export async function getExpiringCreditsUsers(daysBeforeExpiration: number, batchSize = BATCH_SIZE) {
+export async function getExpiringCreditsUsers(daysBeforeExpiration: number, batchSize = BATCH_SIZE, organizationId?: string) {
   const now = new Date();
   const expiresBefore = new Date();
   expiresBefore.setDate(expiresBefore.getDate() + daysBeforeExpiration);
@@ -212,20 +212,25 @@ export async function getExpiringCreditsUsers(daysBeforeExpiration: number, batc
       userId: rewardWalletLedger.userId,
       userEmail: users.email,
       userName: organizationMembers.name,
-      organizationId: organizationMembers.organizationId,
+      organizationId: rewardWalletLedger.orgId,
       organizationName: organizations.name,
-      expiringAmount: sql<number>`sum(${rewardWalletLedger.pointsChange})`,
+      expiringAmount: sql<number>`sum(${rewardWalletLedger.amountCredits})`,
       expirationDate: rewardWalletLedger.expiresAt,
     })
     .from(rewardWalletLedger)
     .leftJoin(users, eq(users.userId, rewardWalletLedger.userId))
-    .leftJoin(organizationMembers, eq(organizationMembers.userId, rewardWalletLedger.userId))
-    .leftJoin(organizations, eq(sql`${organizations.id}::text`, organizationMembers.organizationId))
+    .leftJoin(organizationMembers, and(
+      eq(organizationMembers.userId, rewardWalletLedger.userId),
+      eq(organizationMembers.organizationId, sql`${rewardWalletLedger.orgId}::text`)
+    ))
+    .leftJoin(organizations, eq(organizations.id, rewardWalletLedger.orgId))
     .where(
       and(
         gte(rewardWalletLedger.expiresAt, now),
         lte(rewardWalletLedger.expiresAt, expiresBefore),
-        gt(rewardWalletLedger.pointsChange, 0)
+        gt(rewardWalletLedger.amountCredits, 0),
+        eq(rewardWalletLedger.eventType, 'earn'),
+        organizationId ? eq(rewardWalletLedger.orgId, organizationId) : undefined
       )
     )
     .groupBy(
@@ -233,7 +238,7 @@ export async function getExpiringCreditsUsers(daysBeforeExpiration: number, batc
       rewardWalletLedger.expiresAt,
       users.email,
       organizationMembers.name,
-      organizationMembers.organizationId,
+      rewardWalletLedger.orgId,
       organizations.name
     )
     .limit(batchSize);
@@ -256,8 +261,6 @@ export async function getExpiringCreditsUsers(daysBeforeExpiration: number, batc
 /**
  * Send credit expiration notification to a single user
  * 
- * NOTE: Credit expiration is not currently implemented.
- * This function logs a warning and returns success without sending emails.
  */
 async function sendExpirationNotificationToUser(
   entry: ExpiringCreditsNotification
@@ -446,7 +449,7 @@ export async function sendBatchExpirationWarnings() {
     });
 
     return {
-      success: true,
+      success: results.errors.length === 0,
       ...results,
       duration: `${duration}ms`,
     };
@@ -461,23 +464,23 @@ export async function sendBatchExpirationWarnings() {
  */
 export async function getNotificationStats(organizationId?: string) {
   try {
-    // Get recent notification counts (simplified - would need notification log table)
+    // Sent-notification counts cannot be inferred from ledger eligibility.
     const stats = {
-      totalExpiringNotifications7Days: 0,
-      totalExpiringNotifications14Days: 0,
-      totalExpiringNotifications30Days: 0,
+      totalExpiringNotifications7Days: null,
+      totalExpiringNotifications14Days: null,
+      totalExpiringNotifications30Days: null,
       pendingAwards: 0,
       recentRedemptions: 0,
     };
-
-    // Credit expiration not yet implemented
-    stats.totalExpiringNotifications7Days = 0;
 
     // Count pending awards
     const [pendingResult] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(recognitionAwards)
-      .where(eq(recognitionAwards.status, 'pending'));
+      .where(and(
+        eq(recognitionAwards.status, 'pending'),
+        organizationId ? eq(recognitionAwards.orgId, organizationId) : undefined
+      ));
     
     stats.pendingAwards = pendingResult?.count || 0;
 
@@ -488,7 +491,10 @@ export async function getNotificationStats(organizationId?: string) {
     const [redemptionResult] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(rewardRedemptions)
-      .where(gte(rewardRedemptions.createdAt, oneDayAgo));
+      .where(and(
+        gte(rewardRedemptions.createdAt, oneDayAgo),
+        organizationId ? eq(rewardRedemptions.orgId, organizationId) : undefined
+      ));
     
     stats.recentRedemptions = redemptionResult?.count || 0;
 
@@ -500,46 +506,44 @@ export async function getNotificationStats(organizationId?: string) {
 }
 
 /**
- * Schedule future expiration notifications
- * This would be called after credits are earned
- * 
- * NOTE: Credit expiration is not currently implemented.
- * This function is a placeholder for future functionality.
+ * Confirm an earning entry is eligible for the expiration warning scan.
+ * Expiry must be persisted via applyLedgerEntry({ expiresAt }) at issuance.
+ * Append-only storage cannot annotate an existing entry after the fact, and a
+ * zero-credit scheduling row neither expires credits nor preserves their amount.
  */
 export async function scheduleExpirationNotifications(
   userId: string,
   creditsEarned: number,
-  expiresAt: Date
+  expiresAt: Date,
+  orgId: string,
+  ledgerEntryId: string
 ) {
   try {
-    const [latest] = await db
-      .select({ balanceAfter: rewardWalletLedger.balanceAfter })
+    if (!orgId || !ledgerEntryId || !Number.isFinite(expiresAt.getTime()) || creditsEarned <= 0) {
+      throw new Error('Expiration confirmation requires organization, earning entry, amount and date');
+    }
+    const [entry] = await db
+      .select()
       .from(rewardWalletLedger)
-      .where(eq(rewardWalletLedger.userId, userId))
-      .orderBy(desc(rewardWalletLedger.createdAt))
+      .where(and(
+        eq(rewardWalletLedger.id, ledgerEntryId),
+        eq(rewardWalletLedger.orgId, orgId),
+        eq(rewardWalletLedger.userId, userId),
+        eq(rewardWalletLedger.eventType, 'earn')
+      ))
       .limit(1);
 
-    const scheduledEntry: RewardWalletLedgerInsert = {
-      id: uuidv4(),
-      userId,
-      transactionType: 'expiration_scheduled',
-      pointsChange: 0,
-      balanceAfter: latest?.balanceAfter ?? 0,
-      expiresAt,
-      description: 'Credit expiration scheduled',
-      createdAt: new Date(),
-    };
-
-    await db.insert(rewardWalletLedger).values(scheduledEntry);
+    if (!entry || entry.amountCredits !== creditsEarned || entry.expiresAt?.getTime() !== expiresAt.getTime()) {
+      throw new Error('Expiry must already be recorded on the matching earning entry');
+    }
 
     return {
       success: true,
       scheduled: 1,
-      message: 'Credit expiration scheduled',
+      message: 'Recorded earning expiry is eligible for expiration warnings',
     };
   } catch (error) {
-    logger.error('[Notifications] Error in expiration scheduling placeholder', { error, userId });
+    logger.error('[Notifications] Error confirming recorded earning expiry', { error, userId, orgId });
     return { success: false, error };
   }
 }
-

@@ -1,0 +1,43 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "incremental": false
+  },
+  "include": [
+    "../../lib/db/with-rls-context.ts",
+    "../../lib/auth/canonical-organization-selection.ts",
+    "../../lib/auth/canonical-membership-role.ts",
+    "../../contexts/organization-context.tsx",
+    "../../lib/db/__tests__/with-rls-context.test.ts",
+    "../../lib/__tests__/api-auth-guard-canonical.test.ts",
+    "../../app/api/admin/system/cache/route.ts",
+    "../../app/api/admin/database/optimize/route.ts",
+    "../../app/api/admin/users/[userId]/route.ts",
+    "../../app/api/users/me/organizations/route.ts",
+    "../../app/api/organizations/switch/route.ts",
+    "../../app/api/organizations/[id]/path/route.ts",
+    "../../app/api/organizations/tree/route.ts",
+    "../../app/api/pilot/overview/route.ts",
+    "runtime-security-native.test.ts",
+    "system-component-integration.test.ts",
+    "organization-selection-native.test.ts",
+    "next-acceptance.ts",
+    "next-acceptance.test.ts",
+    "caller-*.ts",
+    "production-key-authority.test.ts",
+    "local-vault-fixture.test.ts",
+    "connection-environment-surface.test.ts",
+    "system-mutation*.ts",
+    "native-runtime-fixture.ts",
+    "fee-adjustment-native-proof.ts",
+    "../../services/platform-economics/fee-adjustment-insert.ts",
+    "../../services/platform-economics/transaction-fee-engine.ts",
+    "../../services/platform-economics/transaction-fee-engine.test.ts",
+    "../../lib/auth/__tests__/canonical-context.test.ts",
+    "../../lib/api/__tests__/with-api-canonical.test.ts"
+  ],
+  "files": [],
+  "exclude": []
+}

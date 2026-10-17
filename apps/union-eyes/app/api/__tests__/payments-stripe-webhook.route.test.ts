@@ -212,7 +212,7 @@ describe('payments/webhooks/stripe route', () => {
     const payload = JSON.stringify({ id: 'evt_1', type: 'payment_intent.succeeded', data: { object: {} } });
     const response = await POST(makeStripeRequest(payload, 'fallback-secret'));
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(503);
     await expect(response.json()).resolves.toMatchObject({ error: 'Webhook secret not configured' });
   });
 

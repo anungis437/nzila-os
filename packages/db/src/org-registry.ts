@@ -34,6 +34,13 @@
  *   - Partner-scoped (e.g., `partners`, `deals` — use `partner_id`, not `org_id`)
  */
 export const ORG_SCOPED_TABLES = [
+  // Cora-owned evidence and Farmer 360 records (never Agrimo writes).
+  'coraEvidenceRecords',
+  'coraEvidenceConclusions',
+  'coraConclusionEvidenceRefs',
+  'coraFarmer360Profiles',
+  'coraFarmer360ContextVersions',
+  'coraFarmer360Assertions',
   // ── orgs.ts ─────────────────────────────────────────
   'orgRoles',
   'orgMembers',
@@ -377,6 +384,7 @@ export type OrgScopedTableName = (typeof ORG_SCOPED_TABLES)[number]
  * Each exclusion must have a documented reason.
  */
 export const NON_ORG_SCOPED_TABLES = [
+  { table: 'platformMethodologyVersions', reason: 'Global versioned methodology reference registry; contains no organization-owned records' },
   // Root entity table — id IS the Org
   { table: 'orgs', reason: '`id` IS the Org identifier — root table' },
   // Global person registry — shared across Orgs
@@ -451,6 +459,10 @@ export const NON_ORG_SCOPED_TABLES = [
   { table: 'policyApprovalActions', reason: 'Scoped via chain_id FK → policyApprovalChains (FK chain to Org-scoped)' },
   { table: 'policyReplayResults', reason: 'Scoped via session_id FK → policyReplaySessions (Org-scoped)' },
   { table: 'policyConflicts', reason: 'Scoped via policy_id FK → governedPolicies (Org-scoped); cross-policy conflict ledger has no direct org_id column' },
+  // platform-authorization.ts (shared platform authorization authority)
+  { table: 'platformIdentityBindings', reason: 'Global provider-identity to platform-user binding; an identity is not owned by one Org' },
+  { table: 'platformOrganizationMemberships', reason: 'Scoped by its organization_id column (not org_id); read only through platform authorization-context, never via the org-scoped client' },
+  { table: 'platformApplicationPermissionGrants', reason: 'Scoped by its organization_id column (not org_id) and membership FK; read only through platform authorization-context' },
 ] as const
 
 /**

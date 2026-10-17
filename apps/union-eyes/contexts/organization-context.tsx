@@ -14,6 +14,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from '@nzila/platform-auth/entra/client';
+import { CANONICAL_ORGANIZATION_AUTHORITY } from '@/lib/auth/organization-authority';
 
 // Organization type definitions
 export interface Organization {
@@ -59,7 +60,7 @@ export interface OrganizationContextValue {
   loadOrganizationTree: () => Promise<void>;
 }
 
-function normalizeOrganization(raw: any): Organization | null {
+function normalizeOrganization(raw: unknown): Organization | null {
   if (!raw || typeof raw !== 'object') {
     return null;
   }
@@ -111,20 +112,29 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
   const [organizationPath, setOrganizationPath] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCanonicalAuthority, setIsCanonicalAuthority] = useState(false);
 
   /**
    * Load organization hierarchy path (ancestors)
    */
-  const loadOrganizationPath = useCallback(async (orgId: string) => {
+  const loadOrganizationPath = useCallback(async (orgId: string, canonical = false) => {
     try {
       const response = await fetch(`/api/organizations/${orgId}/path`, {
         credentials: 'include',
       });
+      if (canonical && !response.ok) {
+        throw new Error(`Failed to load canonical organization path: ${response.status}`);
+      }
       if (response.ok) {
         const result = await response.json();
+        if (canonical && (result.organizationAuthority !== CANONICAL_ORGANIZATION_AUTHORITY ||
+          !Array.isArray(result.data))) {
+          throw new Error('Organization hierarchy response lacks canonical authority');
+        }
         setOrganizationPath(result.data || []);
       }
     } catch (err) {
+      if (canonical) throw err;
       void err;
     }
   }, []);
@@ -178,9 +188,28 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
 
       const data = await response.json();
       let organizations = (data.organizations || [])
-        .map((org: any) => normalizeOrganization(org))
+        .map((org: unknown) => normalizeOrganization(org))
         .filter((org: Organization | null): org is Organization => org !== null);
       const memberships = data.memberships || [];
+      setIsCanonicalAuthority(data.organizationAuthority === CANONICAL_ORGANIZATION_AUTHORITY);
+
+      if (data.organizationAuthority === CANONICAL_ORGANIZATION_AUTHORITY) {
+        if (data.activeOrganizationId !== null && typeof data.activeOrganizationId !== 'string') {
+          throw new Error('Canonical organization response has no authoritative selection');
+        }
+        const active = organizations.find((org: Organization) => org.id === data.activeOrganizationId);
+        if (data.activeOrganizationId !== null && !active) {
+          throw new Error('Canonical organization selection is not in the authorized list');
+        }
+        setUserOrganizations(organizations);
+        setUserMemberships(memberships);
+        setOrganizationId(data.activeOrganizationId);
+        setOrganization(active ?? null);
+        setOrganizationPath([]);
+        setOrganizationTree([]);
+        if (active) await loadOrganizationPath(active.id, true);
+        return;
+      }
 
       // Fallback: if memberships exist but org objects are empty, resolve
       // organizations directly by membership IDs.
@@ -333,14 +362,25 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
       const response = await fetch('/api/organizations/tree', {
         credentials: 'include',
       });
+      if (isCanonicalAuthority && !response.ok) {
+        throw new Error(`Failed to load canonical organization tree: ${response.status}`);
+      }
       if (response.ok) {
         const result = await response.json();
+        if (isCanonicalAuthority && (result.organizationAuthority !== CANONICAL_ORGANIZATION_AUTHORITY ||
+          !Array.isArray(result.data))) {
+          throw new Error('Organization tree response lacks canonical authority');
+        }
         setOrganizationTree(result.data || []);
       }
     } catch (err) {
+      if (isCanonicalAuthority) {
+        setError(err instanceof Error ? err.message : 'Failed to load canonical organization tree');
+        return;
+      }
       void err;
     }
-  }, []);
+  }, [isCanonicalAuthority]);
 
   /**
    * Switch to a different organization
@@ -371,6 +411,20 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
       
       if (!data.success) {
         throw new Error('Organization switch validation failed');
+      }
+
+      if (data.organizationAuthority === CANONICAL_ORGANIZATION_AUTHORITY) {
+        const active = normalizeOrganization(data.organization);
+        if (data.activeOrganizationId !== newOrganizationId || active?.id !== newOrganizationId) {
+          throw new Error('Canonical organization switch returned a different selection');
+        }
+        setOrganizationId(data.activeOrganizationId);
+        setOrganization(active);
+        setOrganizationPath([]);
+        setOrganizationTree([]);
+        await loadOrganizationPath(data.activeOrganizationId, true);
+        window.location.reload();
+        return;
       }
 
       const secureAttr = window.location.protocol === 'https:' ? '; Secure' : '';
@@ -483,4 +537,3 @@ export function useSwitchOrganization(): (organizationId: string) => Promise<voi
   const { switchOrganization } = useOrganization();
   return switchOrganization;
 }
-

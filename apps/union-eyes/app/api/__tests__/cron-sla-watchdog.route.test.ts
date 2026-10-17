@@ -9,7 +9,6 @@ const m = vi.hoisted(() => ({
     error: vi.fn(),
     debug: vi.fn(),
   },
-  trackPilotEvent: vi.fn(),
   getSLADeadlineHours: vi.fn(),
   toLifecycleState: vi.fn(),
   recordUnionEyesSlaCompliance: vi.fn(),
@@ -22,6 +21,10 @@ vi.mock('@/db/db', () => ({
   },
 }));
 
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: vi.fn(async (operation: () => Promise<unknown>) => operation()),
+}));
+
 vi.mock('@/lib/events/event-bus', () => ({
   eventBus: {
     emit: m.eventEmit,
@@ -29,7 +32,6 @@ vi.mock('@/lib/events/event-bus', () => ({
 }));
 
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
-vi.mock('@/lib/services/pilot-tracking', () => ({ trackPilotEvent: m.trackPilotEvent }));
 vi.mock('@/lib/workflow/case-lifecycle', () => ({ getSLADeadlineHours: m.getSLADeadlineHours }));
 vi.mock('@/lib/workflow/state-bridge', () => ({ toLifecycleState: m.toLifecycleState }));
 vi.mock('@/lib/pilot-metrics', () => ({
@@ -55,7 +57,6 @@ async function loadRoute() {
 describe('cron/sla-watchdog route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.trackPilotEvent.mockResolvedValue(undefined);
     m.recordUnionEyesSlaCompliance.mockResolvedValue(undefined);
     m.recordUnionEyesSlaWatchdog.mockResolvedValue(undefined);
     m.toLifecycleState.mockReturnValue('submitted');
@@ -72,7 +73,7 @@ describe('cron/sla-watchdog route', () => {
     expect(m.eventEmit).not.toHaveBeenCalled();
   });
 
-  it('emits at-risk events and pilot tracking when claim is near SLA breach', async () => {
+  it('emits at-risk events when claim is near SLA breach', async () => {
     const now = new Date();
     const updatedAt = new Date(now.getTime() - 23 * 60 * 60 * 1000); // 1h remaining if SLA=24h
     m.dbSelect.mockReturnValueOnce(
@@ -95,10 +96,6 @@ describe('cron/sla-watchdog route', () => {
 
     expect(result).toMatchObject({ scanned: 1, at_risk: 1, breached: 0 });
     expect(m.eventEmit).toHaveBeenCalledTimes(2);
-    expect(m.trackPilotEvent).toHaveBeenCalledWith(expect.objectContaining({
-      organizationId: 'org_1',
-      eventType: 'sla_breach_risk',
-    }));
   });
 
   it('emits breached events and metrics when claim is overdue', async () => {
@@ -128,7 +125,6 @@ describe('cron/sla-watchdog route', () => {
       expect.objectContaining({ event_type: 'sla_breached' }),
       expect.objectContaining({ source: 'sla-watchdog' }),
     );
-    expect(m.trackPilotEvent).toHaveBeenCalledWith(expect.objectContaining({ eventType: 'sla_breached' }));
     expect(m.recordUnionEyesSlaWatchdog).toHaveBeenCalled();
     expect(m.recordUnionEyesSlaCompliance).toHaveBeenCalled();
   });

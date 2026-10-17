@@ -1,9 +1,21 @@
+import { logger } from '@nzila/os-core/telemetry'
 import { NextResponse } from 'next/server'
-import { OrgAccessDeniedError } from '@nzila/org/guards'
+import {
+  OrgAccessDeniedError,
+  OrgScopeRequiredError,
+  OrgScopeInvalidError,
+  requireOrgScope,
+} from '@nzila/org/guards'
 import { AuthorizationResolutionError } from '@nzila/platform-auth/authorization-context'
 import { resolveOrgContext } from '@/lib/resolve-org'
 import { createFarmer360Service } from '@/lib/farmer-360/service'
 import { createFarmer360RuntimePorts } from '@/lib/farmer-360/adapters'
+
+async function requireOrgAccess() {
+  const context = await resolveOrgContext({ requiredPermissions: ['cora:farmer360:read'] })
+  requireOrgScope(context)
+  return context
+}
 
 const farmer360 = createFarmer360Service(createFarmer360RuntimePorts())
 
@@ -25,22 +37,25 @@ export async function GET(
 ) {
   let context
   try {
-    context = await resolveOrgContext({ requiredPermissions: ['cora:farmer360:read'] })
+    context = await requireOrgAccess()
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unable to resolve request identity'
     if (message === 'Unauthorized') {
       return noStoreJson({ error: message }, { status: 401 })
     }
     if (error instanceof AuthorizationResolutionError) {
-      console.warn('[CORA:AUTHZ:DENY]', error.audit)
+      logger.warn('[CORA:AUTHZ:DENY]', { ...error.audit })
       return noStoreJson({ error: 'Organization access is not authorized' }, { status: 403 })
     }
-    console.error('[CORA:FARMER360:AUTH]', error)
+    if (error instanceof OrgScopeRequiredError || error instanceof OrgScopeInvalidError) {
+      return noStoreJson({ error: 'Organization access is not authorized' }, { status: 403 })
+    }
+    logger.error('[CORA:FARMER360:AUTH]', error instanceof Error ? error : { error: String(error) })
     return noStoreJson({ error: 'Unable to resolve request identity' }, { status: 500 })
   }
 
   if (!context.permissions.includes('cora:farmer360:read')) {
-    console.warn('[CORA:AUTHZ:DENY]', {
+    logger.warn('[CORA:AUTHZ:DENY]', {
       ...context.authorizationAudit,
       decision: 'DENY',
       reason: 'APPLICATION_PERMISSION_REQUIRED',
@@ -64,7 +79,7 @@ export async function GET(
     if (error instanceof Error && error.message.startsWith('Farmer 360 profile not found:')) {
       return noStoreJson({ error: 'Farmer 360 profile not found' }, { status: 404 })
     }
-    console.error('[CORA:FARMER360:READ]', error)
+    logger.error('[CORA:FARMER360:READ]', error instanceof Error ? error : { error: String(error) })
     return noStoreJson({ error: 'Unable to read Farmer 360 profile' }, { status: 500 })
   }
 }

@@ -5,15 +5,15 @@ inputs:
   node-version:
     description: Node.js version to install.
     required: false
-    default: "22"
+    default: '22'
   install:
     description: Whether to run pnpm install --frozen-lockfile.
     required: false
-    default: "true"
+    default: 'true'
   turbo-cache-key:
     description: Cache key prefix for the local turbo cache. Empty = skip cache restore.
     required: false
-    default: ""
+    default: ''
 
 runs:
   using: composite
@@ -21,6 +21,10 @@ runs:
     - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
     - uses: actions/setup-node@v6
+      # Cache transport is optional; a stalled segment must fall back to the
+      # frozen install rather than consume several minutes of feedback time.
+      env:
+        SEGMENT_DOWNLOAD_TIMEOUT_MINS: '1'
       with:
         node-version: ${{ inputs.node-version }}
         cache: pnpm
@@ -33,9 +37,10 @@ runs:
     - name: Restore turbo cache
       if: inputs.turbo-cache-key != ''
       uses: actions/cache@v5
+      env:
+        SEGMENT_DOWNLOAD_TIMEOUT_MINS: '1'
       with:
-        path: node_modules/.cache/turbo
-        key: turbo-${{ inputs.turbo-cache-key }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+        path: .turbo/cache
+        key: turbo-v2-${{ inputs.turbo-cache-key }}-${{ runner.os }}-node${{ inputs.node-version }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
         restore-keys: |
-          turbo-${{ inputs.turbo-cache-key }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-          turbo-${{ inputs.turbo-cache-key }}-${{ runner.os }}-
+          turbo-v2-${{ inputs.turbo-cache-key }}-${{ runner.os }}-node${{ inputs.node-version }}-${{ hashFiles('pnpm-lock.yaml') }}-

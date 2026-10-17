@@ -18,7 +18,7 @@
  * @layer 1.5 — Transaction Fees
  */
 
-import { db } from '@/db';
+import { db } from '@/db'
 import {
   transactionFeeRules,
   transactionFeeEvents,
@@ -27,82 +27,84 @@ import {
   feeAdjustments,
   type NewTransactionFeeRule,
   type TransactionFeeEvent,
-} from '@/db/schema';
-import { eq, and, lte, gte, isNull, or, desc, inArray } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
-import { appendLedgerEntry } from './ledger-service';
-import { v4 as uuidv4 } from 'uuid';
+} from '@/db/schema'
+import { eq, and, lte, gte, isNull, or, desc, inArray } from 'drizzle-orm'
+import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
+import { appendLedgerEntry } from './ledger-service'
+import { v4 as uuidv4 } from 'uuid'
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
+import { insertWriteOwnedFeeAdjustment, type FeeAdjustmentInsert } from './fee-adjustment-insert'
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface CreateFeeRuleInput {
-  organizationId?: string;
-  contractId?: string;
-  name: string;
-  description?: string;
-  feeModel: NewTransactionFeeRule['feeModel'];
-  percentageRate?: string;
-  flatFeeCad?: string;
-  minimumFeeCad?: string;
-  maximumFeeCad?: string;
-  flowType: string;
-  moduleKey?: string;
-  effectiveFrom: Date;
-  effectiveTo?: Date;
-  priority?: number;
-  createdBy?: string;
+  organizationId?: string
+  contractId?: string
+  name: string
+  description?: string
+  feeModel: NewTransactionFeeRule['feeModel']
+  percentageRate?: string
+  flatFeeCad?: string
+  minimumFeeCad?: string
+  maximumFeeCad?: string
+  flowType: string
+  moduleKey?: string
+  effectiveFrom: Date
+  effectiveTo?: Date
+  priority?: number
+  createdBy?: string
 }
 
 export interface FeeCalculationInput {
-  organizationId: string;
-  flowType: string;
-  moduleKey?: string;
-  grossAmountCad: string;
-  contractId?: string;
+  organizationId: string
+  flowType: string
+  moduleKey?: string
+  grossAmountCad: string
+  contractId?: string
 }
 
 export interface FeeCalculationResult {
-  grossAmountCad: string;
-  feeAmountCad: string;
-  netAmountCad: string;
-  feeModel: string;
-  percentageRateApplied?: string;
-  flatFeeApplied?: string;
-  ruleId: string;
-  ruleName: string;
+  grossAmountCad: string
+  feeAmountCad: string
+  netAmountCad: string
+  feeModel: string
+  percentageRateApplied?: string
+  flatFeeApplied?: string
+  ruleId: string
+  ruleName: string
 }
 
 export interface CaptureTransactionFeeInput {
-  organizationId: string;
-  ruleId: string;
-  contractId?: string;
-  idempotencyKey: string;
-  sourceTransactionId: string;
-  sourceTransactionType: string;
-  grossAmountCad: string;
-  feeAmountCad: string;
-  netAmountCad: string;
-  feeModel: TransactionFeeEvent['feeModel'];
-  percentageRateApplied?: string;
-  flatFeeApplied?: string;
-  billingPeriodId?: string;
-  metadata?: Record<string, unknown>;
+  organizationId: string
+  ruleId: string
+  contractId?: string
+  idempotencyKey: string
+  sourceTransactionId: string
+  sourceTransactionType: string
+  grossAmountCad: string
+  feeAmountCad: string
+  netAmountCad: string
+  feeModel: TransactionFeeEvent['feeModel']
+  percentageRateApplied?: string
+  flatFeeApplied?: string
+  billingPeriodId?: string
+  metadata?: Record<string, unknown>
 }
 
 export interface FeeReportSummary {
-  totalGrossCad: string;
-  totalFeesCad: string;
-  totalNetCad: string;
-  eventCount: number;
+  totalGrossCad: string
+  totalFeesCad: string
+  totalNetCad: string
+  eventCount: number
   byOrg: Array<{
-    organizationId: string;
-    grossCad: string;
-    feesCad: string;
-    netCad: string;
-    count: number;
-  }>;
+    organizationId: string
+    grossCad: string
+    feesCad: string
+    netCad: string
+    count: number
+  }>
 }
 
 // ============================================================================
@@ -132,7 +134,7 @@ export async function createFeeRule(input: CreateFeeRuleInput) {
       priority: input.priority ?? 0,
       createdBy: input.createdBy,
     })
-    .returning();
+    .returning()
 
   await auditLog({
     eventType: AuditEventType.DATA_CREATE,
@@ -143,9 +145,9 @@ export async function createFeeRule(input: CreateFeeRuleInput) {
     action: 'fee_rule_created',
     userId: input.createdBy,
     metadata: { flowType: input.flowType, feeModel: input.feeModel },
-  });
+  })
 
-  return rule;
+  return rule
 }
 
 /**
@@ -158,7 +160,7 @@ export async function findApplicableRule(
   moduleKey?: string,
   contractId?: string,
 ) {
-  const now = new Date();
+  const now = new Date()
 
   const rules = await db
     .select()
@@ -168,38 +170,35 @@ export async function findApplicableRule(
         eq(transactionFeeRules.flowType, flowType),
         eq(transactionFeeRules.status, 'active'),
         lte(transactionFeeRules.effectiveFrom, now),
-        or(
-          isNull(transactionFeeRules.effectiveTo),
-          gte(transactionFeeRules.effectiveTo, now),
-        ),
+        or(isNull(transactionFeeRules.effectiveTo), gte(transactionFeeRules.effectiveTo, now)),
         or(
           eq(transactionFeeRules.organizationId, organizationId),
           isNull(transactionFeeRules.organizationId),
         ),
       ),
     )
-    .orderBy(desc(transactionFeeRules.priority));
+    .orderBy(desc(transactionFeeRules.priority))
 
   // Best match: contract-specific + module-specific > contract-specific > org > global
-  let best: (typeof rules)[number] | null = null;
+  let best: (typeof rules)[number] | null = null
   for (const rule of rules) {
     if (contractId && rule.contractId === contractId && moduleKey && rule.moduleKey === moduleKey) {
-      return rule; // Most specific match
+      return rule // Most specific match
     }
     if (contractId && rule.contractId === contractId && !rule.moduleKey) {
-      best = best ?? rule;
-      continue;
+      best = best ?? rule
+      continue
     }
     if (rule.organizationId === organizationId && !rule.contractId) {
-      best = best ?? rule;
-      continue;
+      best = best ?? rule
+      continue
     }
     if (!rule.organizationId && !rule.contractId) {
-      best = best ?? rule;
+      best = best ?? rule
     }
   }
 
-  return best;
+  return best
 }
 
 // ============================================================================
@@ -218,51 +217,51 @@ export async function evaluateFee(
     input.flowType,
     input.moduleKey,
     input.contractId,
-  );
+  )
 
-  if (!rule) return null;
+  if (!rule) return null
 
-  const gross = parseDecimal(input.grossAmountCad);
-  let fee = '0.00';
-  let percentageApplied: string | undefined;
-  let flatApplied: string | undefined;
+  const gross = parseDecimal(input.grossAmountCad)
+  let fee = '0.00'
+  let percentageApplied: string | undefined
+  let flatApplied: string | undefined
 
   switch (rule.feeModel) {
     case 'percentage': {
-      const rate = parseDecimal(rule.percentageRate ?? '0');
-      fee = multiplyDecimal(gross, rate);
-      percentageApplied = rule.percentageRate ?? undefined;
-      break;
+      const rate = parseDecimal(rule.percentageRate ?? '0')
+      fee = multiplyDecimal(gross, rate)
+      percentageApplied = rule.percentageRate ?? undefined
+      break
     }
     case 'flat': {
-      fee = rule.flatFeeCad ?? '0.00';
-      flatApplied = fee;
-      break;
+      fee = rule.flatFeeCad ?? '0.00'
+      flatApplied = fee
+      break
     }
     case 'hybrid': {
-      const pctRate = parseDecimal(rule.percentageRate ?? '0');
-      const pctFee = multiplyDecimal(gross, pctRate);
-      const flatFee = parseDecimal(rule.flatFeeCad ?? '0');
-      fee = addDecimal(pctFee, flatFee);
-      percentageApplied = rule.percentageRate ?? undefined;
-      flatApplied = rule.flatFeeCad ?? undefined;
-      break;
+      const pctRate = parseDecimal(rule.percentageRate ?? '0')
+      const pctFee = multiplyDecimal(gross, pctRate)
+      const flatFee = parseDecimal(rule.flatFeeCad ?? '0')
+      fee = addDecimal(pctFee, flatFee)
+      percentageApplied = rule.percentageRate ?? undefined
+      flatApplied = rule.flatFeeCad ?? undefined
+      break
     }
     case 'waived':
     case 'subsidized':
-      fee = '0.00';
-      break;
+      fee = '0.00'
+      break
   }
 
   // Apply min/max caps
   if (rule.minimumFeeCad && compareDecimal(fee, rule.minimumFeeCad) < 0) {
-    fee = rule.minimumFeeCad;
+    fee = rule.minimumFeeCad
   }
   if (rule.maximumFeeCad && compareDecimal(fee, rule.maximumFeeCad) > 0) {
-    fee = rule.maximumFeeCad;
+    fee = rule.maximumFeeCad
   }
 
-  const net = subtractDecimal(gross, fee);
+  const net = subtractDecimal(gross, fee)
 
   return {
     grossAmountCad: gross,
@@ -273,7 +272,7 @@ export async function evaluateFee(
     flatFeeApplied: flatApplied,
     ruleId: rule.id,
     ruleName: rule.name,
-  };
+  }
 }
 
 // ============================================================================
@@ -292,9 +291,9 @@ export async function captureTransactionFee(
     .select()
     .from(transactionFeeEvents)
     .where(eq(transactionFeeEvents.idempotencyKey, input.idempotencyKey))
-    .limit(1);
+    .limit(1)
 
-  if (existing) return existing;
+  if (existing) return existing
 
   const [event] = await db
     .insert(transactionFeeEvents)
@@ -315,7 +314,7 @@ export async function captureTransactionFee(
       status: 'captured',
       metadata: input.metadata,
     })
-    .returning();
+    .returning()
 
   // Bridge fee capture into the canonical DAPL ledger
   await appendLedgerEntry({
@@ -334,7 +333,7 @@ export async function captureTransactionFee(
       feeModel: input.feeModel,
       ruleId: input.ruleId,
     },
-  });
+  })
 
   await auditLog({
     eventType: AuditEventType.DATA_CREATE,
@@ -349,9 +348,9 @@ export async function captureTransactionFee(
       feeAmountCad: input.feeAmountCad,
       netAmountCad: input.netAmountCad,
     },
-  });
+  })
 
-  return event;
+  return event
 }
 
 // ============================================================================
@@ -380,49 +379,46 @@ export async function reverseTransactionFee(
       .select()
       .from(transactionFeeEvents)
       .where(
-        and(
-          eq(transactionFeeEvents.id, feeEventId),
-          eq(transactionFeeEvents.status, 'captured'),
-        ),
+        and(eq(transactionFeeEvents.id, feeEventId), eq(transactionFeeEvents.status, 'captured')),
       )
-      .limit(1);
+      .limit(1)
 
     if (!event) {
-      throw new Error(`Fee event ${feeEventId} not found or already reversed`);
+      throw new Error(`Fee event ${feeEventId} not found or already reversed`)
     }
 
     // Calculate reversal amount: proportional if partial, full otherwise
-    let reversalAmount: string;
+    let reversalAmount: string
     if (partialRefundAmount) {
       // Proportional fee reversal: (refundAmount / grossAmount) × feeAmount
-      const ratio = divideDecimal(partialRefundAmount, event.grossAmountCad);
-      reversalAmount = multiplyDecimal(event.feeAmountCad, ratio);
+      const ratio = divideDecimal(partialRefundAmount, event.grossAmountCad)
+      reversalAmount = multiplyDecimal(event.feeAmountCad, ratio)
     } else {
-      reversalAmount = event.feeAmountCad;
+      reversalAmount = event.feeAmountCad
     }
 
     // Mark as reversed (full) or keep captured (partial — may have further refunds)
-    const newStatus = partialRefundAmount ? 'captured' : 'reversed';
+    const newStatus = partialRefundAmount ? 'captured' : 'reversed'
     const [updatedEvent] = await tx
       .update(transactionFeeEvents)
       .set({ status: newStatus })
       .where(eq(transactionFeeEvents.id, feeEventId))
-      .returning();
+      .returning()
 
     // Create reversal adjustment
-    const [adjustment] = await tx
-      .insert(feeAdjustments)
-      .values({
-        feeEventId,
-        organizationId: event.organizationId,
-        adjustmentType: partialRefundAmount ? 'partial_reversal' : 'reversal',
-        amountCad: `-${reversalAmount}`,
-        reason,
-        sourceRefundId,
-        approvedBy,
-        approvedAt: approvedBy ? new Date() : undefined,
-      })
-      .returning();
+    const adjustmentInput: FeeAdjustmentInsert = {
+      feeEventId,
+      organizationId: event.organizationId,
+      adjustmentType: partialRefundAmount ? 'partial_reversal' : 'reversal',
+      amountCad: `-${reversalAmount}`,
+      reason,
+      sourceRefundId,
+      approvedBy,
+      approvedAt: approvedBy ? new Date() : undefined,
+    }
+    const adjustment = currentStateContextEnabled()
+      ? await insertWriteOwnedFeeAdjustment(tx, adjustmentInput)
+      : (await tx.insert(feeAdjustments).values(adjustmentInput).returning())[0]
 
     // Bridge fee reversal into the canonical DAPL ledger as contra entry
     await appendLedgerEntry({
@@ -443,7 +439,7 @@ export async function reverseTransactionFee(
         isPartial: !!partialRefundAmount,
       },
       createdBy: approvedBy,
-    });
+    })
 
     await auditLog({
       eventType: AuditEventType.DATA_UPDATE,
@@ -460,10 +456,10 @@ export async function reverseTransactionFee(
         sourceRefundId,
         reason,
       },
-    });
+    })
 
-    return { event: updatedEvent, adjustment };
-  });
+    return { event: updatedEvent, adjustment }
+  })
 }
 
 // ============================================================================
@@ -478,7 +474,7 @@ export async function createSettlementBatch(
   periodEnd: Date,
   createdBy?: string,
 ): Promise<typeof feeSettlementBatches.$inferSelect> {
-  const batchNumber = `STL-${Date.now().toString(36).toUpperCase()}-${uuidv4().slice(0, 6).toUpperCase()}`;
+  const batchNumber = `STL-${Date.now().toString(36).toUpperCase()}-${uuidv4().slice(0, 6).toUpperCase()}`
 
   return await db.transaction(async (tx) => {
     // Get captured events not yet settled
@@ -492,20 +488,20 @@ export async function createSettlementBatch(
           lte(transactionFeeEvents.capturedAt, periodEnd),
           isNull(transactionFeeEvents.settlementBatchId),
         ),
-      );
+      )
 
     if (events.length === 0) {
-      throw new Error('No un-settled fee events found for this period');
+      throw new Error('No un-settled fee events found for this period')
     }
 
-    let totalGross = '0.00';
-    let totalFees = '0.00';
-    let totalNet = '0.00';
+    let totalGross = '0.00'
+    let totalFees = '0.00'
+    let totalNet = '0.00'
 
     for (const e of events) {
-      totalGross = addDecimal(totalGross, e.grossAmountCad);
-      totalFees = addDecimal(totalFees, e.feeAmountCad);
-      totalNet = addDecimal(totalNet, e.netAmountCad);
+      totalGross = addDecimal(totalGross, e.grossAmountCad)
+      totalFees = addDecimal(totalFees, e.feeAmountCad)
+      totalNet = addDecimal(totalNet, e.netAmountCad)
     }
 
     // Create batch
@@ -521,14 +517,14 @@ export async function createSettlementBatch(
         eventCount: events.length,
         status: 'open',
       })
-      .returning();
+      .returning()
 
     // Link events to batch and create settlement lines
-    const eventIds = events.map((e) => e.id);
+    const eventIds = events.map((e) => e.id)
     await tx
       .update(transactionFeeEvents)
       .set({ settlementBatchId: batch.id })
-      .where(inArray(transactionFeeEvents.id, eventIds));
+      .where(inArray(transactionFeeEvents.id, eventIds))
 
     for (const e of events) {
       await tx.insert(feeSettlementLines).values({
@@ -538,7 +534,7 @@ export async function createSettlementBatch(
         grossAmountCad: e.grossAmountCad,
         feeAmountCad: e.feeAmountCad,
         netAmountCad: e.netAmountCad,
-      });
+      })
     }
 
     await auditLog({
@@ -549,19 +545,16 @@ export async function createSettlementBatch(
       action: 'settlement_batch_created',
       userId: createdBy,
       metadata: { batchNumber, eventCount: events.length, totalFeesCad: totalFees },
-    });
+    })
 
-    return batch;
-  });
+    return batch
+  })
 }
 
 /**
  * Close a settlement batch (mark events as settled).
  */
-export async function closeSettlementBatch(
-  batchId: string,
-  closedBy: string,
-) {
+export async function closeSettlementBatch(batchId: string, closedBy: string) {
   const result = await db.transaction(async (tx) => {
     // Update batch status
     const [batch] = await tx
@@ -572,23 +565,18 @@ export async function closeSettlementBatch(
         closedBy,
         updatedAt: new Date(),
       })
-      .where(
-        and(
-          eq(feeSettlementBatches.id, batchId),
-          eq(feeSettlementBatches.status, 'open'),
-        ),
-      )
-      .returning();
+      .where(and(eq(feeSettlementBatches.id, batchId), eq(feeSettlementBatches.status, 'open')))
+      .returning()
 
     if (!batch) {
-      throw new Error(`Settlement batch ${batchId} not found or not open`);
+      throw new Error(`Settlement batch ${batchId} not found or not open`)
     }
 
     // Mark events as settled
     await tx
       .update(transactionFeeEvents)
       .set({ status: 'settled' })
-      .where(eq(transactionFeeEvents.settlementBatchId, batchId));
+      .where(eq(transactionFeeEvents.settlementBatchId, batchId))
 
     await auditLog({
       eventType: AuditEventType.DATA_UPDATE,
@@ -598,10 +586,10 @@ export async function closeSettlementBatch(
       action: 'settlement_batch_closed',
       userId: closedBy,
       metadata: { batchNumber: batch.batchNumber, eventCount: batch.eventCount },
-    });
+    })
 
-    return batch;
-  });
+    return batch
+  })
 
   // Bridge settlement into the canonical DAPL ledger
   await appendLedgerEntry({
@@ -619,9 +607,9 @@ export async function closeSettlementBatch(
       totalNetCad: result.totalNetCad,
     },
     createdBy: closedBy,
-  });
+  })
 
-  return result;
+  return result
 }
 
 // ============================================================================
@@ -640,34 +628,46 @@ export async function getFeeReport(
     gte(transactionFeeEvents.capturedAt, periodStart),
     lte(transactionFeeEvents.capturedAt, periodEnd),
     inArray(transactionFeeEvents.status, ['captured', 'settled']),
-  ];
+  ]
   if (organizationId) {
-    conditions.push(eq(transactionFeeEvents.organizationId, organizationId));
+    conditions.push(eq(transactionFeeEvents.organizationId, organizationId))
   }
 
   const events = await db
     .select()
     .from(transactionFeeEvents)
-    .where(and(...conditions));
+    .where(and(...conditions))
 
-  let totalGross = '0.00';
-  let totalFees = '0.00';
-  let totalNet = '0.00';
+  let totalGross = '0.00'
+  let totalFees = '0.00'
+  let totalNet = '0.00'
 
-  const byOrgMap: Record<string, { grossCad: string; feesCad: string; netCad: string; count: number }> = {};
+  const byOrgMap: Record<
+    string,
+    { grossCad: string; feesCad: string; netCad: string; count: number }
+  > = {}
 
   for (const e of events) {
-    totalGross = addDecimal(totalGross, e.grossAmountCad);
-    totalFees = addDecimal(totalFees, e.feeAmountCad);
-    totalNet = addDecimal(totalNet, e.netAmountCad);
+    totalGross = addDecimal(totalGross, e.grossAmountCad)
+    totalFees = addDecimal(totalFees, e.feeAmountCad)
+    totalNet = addDecimal(totalNet, e.netAmountCad)
 
     if (!byOrgMap[e.organizationId]) {
-      byOrgMap[e.organizationId] = { grossCad: '0.00', feesCad: '0.00', netCad: '0.00', count: 0 };
+      byOrgMap[e.organizationId] = { grossCad: '0.00', feesCad: '0.00', netCad: '0.00', count: 0 }
     }
-    byOrgMap[e.organizationId].grossCad = addDecimal(byOrgMap[e.organizationId].grossCad, e.grossAmountCad);
-    byOrgMap[e.organizationId].feesCad = addDecimal(byOrgMap[e.organizationId].feesCad, e.feeAmountCad);
-    byOrgMap[e.organizationId].netCad = addDecimal(byOrgMap[e.organizationId].netCad, e.netAmountCad);
-    byOrgMap[e.organizationId].count += 1;
+    byOrgMap[e.organizationId].grossCad = addDecimal(
+      byOrgMap[e.organizationId].grossCad,
+      e.grossAmountCad,
+    )
+    byOrgMap[e.organizationId].feesCad = addDecimal(
+      byOrgMap[e.organizationId].feesCad,
+      e.feeAmountCad,
+    )
+    byOrgMap[e.organizationId].netCad = addDecimal(
+      byOrgMap[e.organizationId].netCad,
+      e.netAmountCad,
+    )
+    byOrgMap[e.organizationId].count += 1
   }
 
   return {
@@ -679,7 +679,7 @@ export async function getFeeReport(
       organizationId: orgId,
       ...data,
     })),
-  };
+  }
 }
 
 // ============================================================================
@@ -687,37 +687,37 @@ export async function getFeeReport(
 // ============================================================================
 
 function parseDecimal(value: string | null | undefined): string {
-  if (!value) return '0.00';
-  const n = Number(value);
-  if (Number.isNaN(n)) return '0.00';
-  return n.toFixed(2);
+  if (!value) return '0.00'
+  const n = Number(value)
+  if (Number.isNaN(n)) return '0.00'
+  return n.toFixed(2)
 }
 
 function addDecimal(a: string, b: string): string {
-  const result = (Math.round(Number(a) * 100) + Math.round(Number(b) * 100)) / 100;
-  return result.toFixed(2);
+  const result = (Math.round(Number(a) * 100) + Math.round(Number(b) * 100)) / 100
+  return result.toFixed(2)
 }
 
 function subtractDecimal(a: string, b: string): string {
-  const result = (Math.round(Number(a) * 100) - Math.round(Number(b) * 100)) / 100;
-  return result.toFixed(2);
+  const result = (Math.round(Number(a) * 100) - Math.round(Number(b) * 100)) / 100
+  return result.toFixed(2)
 }
 
 function multiplyDecimal(amount: string, rate: string): string {
   // Banker's rounding: round half to even
-  const raw = Number(amount) * Number(rate);
-  const cents = Math.round(raw * 100);
-  return (cents / 100).toFixed(2);
+  const raw = Number(amount) * Number(rate)
+  const cents = Math.round(raw * 100)
+  return (cents / 100).toFixed(2)
 }
 
 function compareDecimal(a: string, b: string): number {
-  return Math.round(Number(a) * 100) - Math.round(Number(b) * 100);
+  return Math.round(Number(a) * 100) - Math.round(Number(b) * 100)
 }
 
 function divideDecimal(numerator: string, denominator: string): string {
-  const d = Number(denominator);
-  if (d === 0) return '0.00';
-  const result = Number(numerator) / d;
+  const d = Number(denominator)
+  if (d === 0) return '0.00'
+  const result = Number(numerator) / d
   // Return as ratio string with higher precision for intermediate calc
-  return result.toString();
+  return result.toString()
 }

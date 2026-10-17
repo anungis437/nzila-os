@@ -89,3 +89,116 @@ f7ceba2b811b5303a8d9fe01459402c6761bda1c:apps/union-eyes/scripts/schema-authorit
 # generic `scheme://user:token@host/db`). Covers only that historical commit
 # still inside the PR's scanned range.
 .gitleaksignore:nzila-database-url-with-password:75
+
+# Union Eyes V2 release: generated evidence maps source-file paths to SHA-256 digests. Keys such as "sentry.server.config.ts" or
+# "django.contrib.auth.models" next to a 64-hex digest trip generic-api-key/sentry/freshbooks. Exact lines only; nothing else in these
+# files or in the docs tree is ignored.
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:freshbooks-access-token:1765
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:freshbooks-access-token:1766
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:1211
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:1235
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:1284
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:130
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:1319
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:1415
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:1727
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:179
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:187
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:193
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:195
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:201
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2085
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2160
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2194
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2252
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2325
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2361
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2363
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2364
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2417
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2439
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2450
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2451
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2452
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2453
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2454
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2455
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2456
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2461
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2462
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2466
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2509
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2535
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2675
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2683
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2777
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:2833
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:3119
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:3205
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:349
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:3631
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:367
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:3698
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:3703
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:3984
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:4020
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:4057
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:4066
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:4166
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:451
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:452
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:461
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:473
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:474
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:533
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:534
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:633
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:634
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:660
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:661
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:879
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:883
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:949
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:962
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:996
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:generic-api-key:997
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:sentry-access-token:522
+docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json:sentry-access-token:523
+
+# Union Eyes V2 release: source-path -> SHA-256 source commitments in the frozen bootstrap plan (generic-api-key on key names).
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157199
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157235
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157372
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157507
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157534
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157552
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157554
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157560
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157589
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157592
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157601
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157602
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157603
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157604
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157605
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157654
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157682
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157690
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:157785
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:19
+
+# Union Eyes V2 release: Azure built-in role-definition GUID (public identifier) in the production Bicep.
+infrastructure/bicep/ue-v2/main.bicep:generic-api-key:274
+
+# Union Eyes V2 release: clean-room fixture builds a loopback URL with a per-run random role password (randomBytes) that is never persisted.
+apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture.ts:nzila-database-url-with-password:126
+
+# Cora acceptance harnesses: published, disposable Docker fixture credentials,
+# fixed loopback endpoints only. They are not production or provider secrets.
+# Review: matching dedicated compose fixture + loopback-only acceptance checks.
+# Exact historical findings only; no rule or path exclusion is introduced.
+fac513edd8009cfde75f3e5bba223ecc95e5a114:scripts/platform-authz-acceptance.mjs:nzila-database-url-with-password:7
+fac513edd8009cfde75f3e5bba223ecc95e5a114:scripts/cora-farmer360-acceptance.mjs:nzila-database-url-with-password:6
+# Current harness source locations for the same reviewed published fixtures.
+scripts/platform-authz-acceptance.mjs:nzila-database-url-with-password:7
+scripts/cora-farmer360-acceptance.mjs:nzila-database-url-with-password:7

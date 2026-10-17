@@ -1,7 +1,8 @@
 /**
  * GET /api/organizations/tree
  *
- * Returns all organizations in a flat list (client builds tree from parentId).
+ * V2 returns only active private-member organizations (client builds a scoped tree).
+ * Flag-off retains the legacy flat organization list.
  * Replaces Django proxy with direct Drizzle/PostgreSQL query.
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,10 +10,20 @@ import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
 import { asc } from 'drizzle-orm';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(_req: NextRequest) {
+  if (currentStateContextEnabled()) {
+    const { getCanonicalOrganizationTree, canonicalOrganizationError } =
+      await import('@/lib/auth/canonical-organization-selection')
+    try {
+      return NextResponse.json(await getCanonicalOrganizationTree())
+    } catch (error) {
+      return canonicalOrganizationError(error, 'load hierarchy for')
+    }
+  }
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

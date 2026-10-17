@@ -50,6 +50,9 @@ export const SAFE_MUTATION_CONTEXTS = [
   'withSystemRLSContext',
   'withPlatformAdminRLSContext',
   'withExplicitUserContext',
+  // UE helper: canonical mode requires the caller's tenant RLS transaction (fails closed otherwise), legacy mode delegates
+  // to withSystemContext. Behavior is proven by apps/union-eyes/lib/db/__tests__/org-owned-context.test.ts.
+  'withOrgOwnedContext',
   'createAuditedScopedDb',
   'createScopedDb',
 ] as const

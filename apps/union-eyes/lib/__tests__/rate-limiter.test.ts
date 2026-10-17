@@ -14,6 +14,9 @@ const mocks = vi.hoisted(() => {
   const mockCircuitExecute = vi.fn((fn: () => Promise<any>) => fn());
   return {
     mockPipeline,
+    mockDisconnect: vi.fn(),
+    mockDestroy: vi.fn(),
+    mockConstructed: vi.fn(),
     mockCircuitExecute,
     mockLoggerInfo: vi.fn(),
     mockLoggerError: vi.fn(),
@@ -40,7 +43,10 @@ vi.mock('@upstash/redis', () => ({
 
 vi.mock('ioredis', () => ({
   default: class MockIORedis {
+    constructor() { mocks.mockConstructed(); }
     on() { return this; }
+    stream = { destroyed: false, destroy: () => mocks.mockDestroy() };
+    disconnect(reconnect?: boolean) { mocks.mockDisconnect(reconnect); }
     pipeline() { return mocks.mockPipeline; }
   },
 }));
@@ -111,6 +117,101 @@ describe('rate-limiter', () => {
       expect(result.allowed).toBe(false);
       expect(result.current).toBe(11);
       expect(result.remaining).toBe(0);
+    });
+
+    describe('ioredis (REDIS_URL) pipeline adapter', () => {
+      beforeEach(() => {
+        delete process.env.UPSTASH_REDIS_REST_URL;
+        delete process.env.UPSTASH_REDIS_REST_TOKEN;
+        process.env.REDIS_URL = 'redis://redis.internal:6379';
+      });
+      const unreachable = [
+        [new Error('connect ECONNREFUSED'), undefined],
+        [new Error('connect ECONNREFUSED'), undefined],
+        [new Error('connect ECONNREFUSED'), undefined],
+        [new Error('connect ECONNREFUSED'), undefined],
+      ];
+
+      it('counts requests from successful [err, value] results', async () => {
+        mocks.mockPipeline.exec.mockResolvedValue([[null, 0], [null, 3], [null, 1], [null, 1]]);
+        const { checkRateLimit } = await import('../rate-limiter');
+        const result = await checkRateLimit('user-1', { limit: 10, window: 3600, identifier: 'test' });
+        expect(result.allowed).toBe(true);
+        expect(result.current).toBe(4);
+      });
+
+      it('fails closed when Redis is unreachable and the limit is explicit', async () => {
+        mocks.mockPipeline.exec.mockResolvedValue(unreachable);
+        const { checkRateLimit } = await import('../rate-limiter');
+        const result = await checkRateLimit('user-1', { limit: 10, window: 3600, identifier: 'financial-write' });
+        expect(result.allowed).toBe(false);
+        expect(result.error).toMatch(/unavailable/i);
+      });
+
+      it('fails closed when the pipeline returns no result', async () => {
+        mocks.mockPipeline.exec.mockResolvedValue(null);
+        const { checkRateLimit } = await import('../rate-limiter');
+        const result = await checkRateLimit('user-1', { limit: 10, window: 3600, identifier: 'test' });
+        expect(result.allowed).toBe(false);
+      });
+
+      it('still fails open for catch-all limits that opt in', async () => {
+        mocks.mockPipeline.exec.mockResolvedValue(unreachable);
+        const { checkRateLimit } = await import('../rate-limiter');
+        const result = await checkRateLimit('org-1', { limit: 10, window: 3600, identifier: 'default', failOpen: true });
+        expect(result.allowed).toBe(true);
+      });
+
+      it('forces a fresh connection after a timed-out command so the limiter can recover', async () => {
+        mocks.mockPipeline.exec.mockResolvedValue([
+          [new Error('Command timed out'), undefined],
+          [new Error('Command timed out'), undefined],
+          [new Error('Command timed out'), undefined],
+          [new Error('Command timed out'), undefined],
+        ]);
+        const { checkRateLimit } = await import('../rate-limiter');
+        const result = await checkRateLimit('user-1', { limit: 10, window: 3600, identifier: 'financial-write' });
+        expect(result.allowed).toBe(false);
+        expect(mocks.mockDisconnect).toHaveBeenCalledTimes(1);
+        // a half-open peer never answers a graceful close, so the socket itself must be destroyed
+        expect(mocks.mockDestroy).toHaveBeenCalledTimes(1);
+        // and the limiter must have opened a brand-new client for the next check
+        expect(mocks.mockConstructed).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not reconnect on ordinary failures or on success', async () => {
+        mocks.mockPipeline.exec.mockResolvedValue([[null, 0], [null, 1], [null, 1], [null, 1]]);
+        const { checkRateLimit } = await import('../rate-limiter');
+        await checkRateLimit('user-1', { limit: 10, window: 3600, identifier: 'test' });
+        mocks.mockPipeline.exec.mockResolvedValue([[new Error('ECONNREFUSED'), undefined]]);
+        await checkRateLimit('user-1', { limit: 10, window: 3600, identifier: 'test' });
+        expect(mocks.mockDisconnect).not.toHaveBeenCalled();
+        expect(mocks.mockDestroy).not.toHaveBeenCalled();
+        expect(mocks.mockConstructed).toHaveBeenCalledTimes(1);
+      });
+      describe('a Redis command that never settles', () => {
+        beforeEach(() => vi.useFakeTimers());
+        afterEach(() => vi.useRealTimers());
+
+        it('is bounded and fails closed for an explicit limit', async () => {
+          mocks.mockPipeline.exec.mockReturnValue(new Promise(() => {}));
+          const { checkRateLimit } = await import('../rate-limiter');
+          const pending = checkRateLimit('user-1', { limit: 10, window: 3600, identifier: 'financial-write' });
+          await vi.advanceTimersByTimeAsync(2600);
+          const result = await pending;
+          expect(result.allowed).toBe(false);
+          expect(result.error).toMatch(/unavailable/i);
+        });
+
+        it('is bounded and fails open for a catch-all limit that opts in', async () => {
+          mocks.mockPipeline.exec.mockReturnValue(new Promise(() => {}));
+          const { checkRateLimit } = await import('../rate-limiter');
+          const pending = checkRateLimit('org-1', { limit: 10, window: 3600, identifier: 'default', failOpen: true });
+          await vi.advanceTimersByTimeAsync(2600);
+          const result = await pending;
+          expect(result.allowed).toBe(true);
+        });
+      });
     });
 
     it('rejects when Redis is not configured', async () => {

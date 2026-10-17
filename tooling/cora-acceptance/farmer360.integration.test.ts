@@ -1,10 +1,14 @@
+import { closeAuthClients } from '../../packages/db/src/auth-client'
 import { createHash } from 'node:crypto'
 import { and, count, eq, sql } from 'drizzle-orm'
-import { createSourceDisclosureAuthority } from '@nzila/platform-auth/source-disclosure'
-import { writeSourceDisclosureDecisionAudit } from '@nzila/db/authorization-audit'
-import type { Farmer360RequestContext } from './service'
-import type { PolicyEvaluationInput, PolicyEvaluationOutput } from '@nzila/platform-policy-engine'
-import { db } from '@nzila/db/client'
+import { createSourceDisclosureAuthority } from '../../packages/platform-auth/src/source-disclosure.ts'
+import { writeSourceDisclosureDecisionAudit } from '../../packages/db/src/authorization-audit.ts'
+import type { Farmer360RequestContext } from '../../apps/cora/lib/farmer-360/service'
+import type {
+  PolicyEvaluationInput,
+  PolicyEvaluationOutput,
+} from '../../packages/platform-policy-engine/src/index.ts'
+import { db } from '../../packages/db/src/client.ts'
 import {
   agriProducers,
   auditEvents,
@@ -12,16 +16,19 @@ import {
   coraFarmer360Assertions,
   coraFarmer360ContextVersions,
   platformMethodologyVersions,
-} from '@nzila/db/schema'
+} from '../../packages/db/src/schema/index.ts'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
-import { getProducerById } from '@nzila/agri-db/readonly'
+import { getProducerById } from '../../packages/agri-db/src/readonly/index.ts'
 import {
   CORA_ENTERPRISE_CONTEXT_WRITE_PERMISSION,
   CORA_FARMER360_READ_PERMISSION,
   CORA_FARMER_ASSERTION_WRITE_PERMISSION,
   createFarmer360Service,
-} from './service'
-import { farmer360Persistence, getProducerFarmer360Snapshot } from './adapters'
+} from '../../apps/cora/lib/farmer-360/service'
+import {
+  farmer360Persistence,
+  getProducerFarmer360Snapshot,
+} from '../../apps/cora/lib/farmer-360/adapters'
 
 const FIXTURE_ORG_ID = '36000000-0000-4000-8000-000000000001'
 const OTHER_ORG_ID = '36000000-0000-4000-8000-000000000002'
@@ -39,15 +46,15 @@ const authMocks = vi.hoisted(() => ({
   currentUser: vi.fn(),
 }))
 
-vi.mock('@nzila/platform-auth/entra/server', () => ({
+vi.mock('../../packages/platform-auth/src/entra/server.ts', () => ({
   auth: authMocks.auth,
   currentUser: authMocks.currentUser,
 }))
-vi.mock('@nzila/os-core/config/super-admins', () => ({
+vi.mock('../../packages/os-core/src/config/super-admins.ts', () => ({
   isSuperAdmin: () => false,
 }))
 
-import { GET } from '../../app/api/farmer-360/[profileId]/route'
+import { GET } from '../../apps/cora/app/api/farmer-360/[profileId]/route'
 
 type ConsentMode = 'CONSENT_ALLOW' | 'CONSENT_DENY'
 type PolicyMode = 'POLICY_ALLOW' | 'POLICY_DENY'
@@ -194,7 +201,9 @@ describe.skipIf(!isAcceptanceDatabase)('Farmer 360 local DB acceptance', () => {
     expect(methodology?.createdBy).toBe('test-only:cora-farmer360-acceptance')
   })
 
-  afterAll(() => {
+  afterAll(async () => {
+    await closeAuthClients()
+    await db.$client.end({ timeout: 5 })
     authMocks.auth.mockReset()
     authMocks.currentUser.mockReset()
   })

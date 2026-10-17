@@ -8,23 +8,19 @@
  * Protected by withApi cron auth (Phase 7 — Workflow Realignment).
  */
 import { db } from '@/db/db'
+import { withSystemContext } from '@/lib/db/with-rls-context'
 import { claims } from '@/db/schema'
 import { sql } from 'drizzle-orm'
 import { eventBus } from '@/lib/events/event-bus'
 import { logger } from '@/lib/logger'
 import { withApi } from '@/lib/api/framework'
-import { trackPilotEvent } from '@/lib/services/pilot-tracking'
 import { getSLADeadlineHours, type CasePriority } from '@/lib/workflow/case-lifecycle'
 import { toLifecycleState } from '@/lib/workflow/state-bridge'
 import { recordUnionEyesSlaCompliance, recordUnionEyesSlaWatchdog } from '@/lib/pilot-metrics'
 
 export const dynamic = 'force-dynamic'
 
-function slaDeadline(
-  status: string,
-  priority: string,
-  statusChangedAt: Date,
-): Date {
+function slaDeadline(status: string, priority: string, statusChangedAt: Date): Date {
   const lifecycleState = toLifecycleState('claim', status) ?? 'submitted'
   const hours = getSLADeadlineHours(lifecycleState, (priority as CasePriority) || 'medium')
   const d = new Date(statusChangedAt)
@@ -38,20 +34,24 @@ export const POST = withApi(
     openapi: { tags: ['Cron'], summary: 'SLA watchdog — scan claims for SLA compliance' },
   },
   async () => {
-    // Fetch all active (non-terminal) claims
-    const activeClaims = await db
-      .select({
-        claimId: claims.claimId,
-        claimNumber: claims.claimNumber,
-        status: claims.status,
-        priority: claims.priority,
-        organizationId: claims.organizationId,
-        assignedTo: claims.assignedTo,
-        updatedAt: claims.updatedAt,
-        createdAt: claims.createdAt,
-      })
-      .from(claims)
-      .where(sql`${claims.status} NOT IN ('closed', 'resolved', 'rejected')`)
+    // Fetch all active (non-terminal) claims. This job is authorized only for a
+    // cross-organization SELECT on claims; it emits events and metrics but does not
+    // write tenant tables (pilot_events), which SYSTEM authority does not imply.
+    const activeClaims = await withSystemContext(async () =>
+      db
+        .select({
+          claimId: claims.claimId,
+          claimNumber: claims.claimNumber,
+          status: claims.status,
+          priority: claims.priority,
+          organizationId: claims.organizationId,
+          assignedTo: claims.assignedTo,
+          updatedAt: claims.updatedAt,
+          createdAt: claims.createdAt,
+        })
+        .from(claims)
+        .where(sql`${claims.status} NOT IN ('closed', 'resolved', 'rejected')`),
+    )
 
     const now = new Date()
     let atRiskCount = 0
@@ -65,7 +65,10 @@ export const POST = withApi(
       const deadline = slaDeadline(status, priority, changedAt)
       const msRemaining = deadline.getTime() - now.getTime()
       const hoursRemaining = msRemaining / (1000 * 60 * 60)
-      const totalHours = getSLADeadlineHours(toLifecycleState('claim', status) ?? 'submitted', priority)
+      const totalHours = getSLADeadlineHours(
+        toLifecycleState('claim', status) ?? 'submitted',
+        priority,
+      )
 
       // At-risk: less than 20% of SLA time remaining
       const atRisk = hoursRemaining > 0 && hoursRemaining < totalHours * 0.2
@@ -73,93 +76,75 @@ export const POST = withApi(
 
       if (breached) {
         breachedCount++
-        eventBus.emit('claim_events', {
-          claim_id: c.claimId,
-          event_type: 'sla_breached',
-          actor: 'system:sla-watchdog',
-          timestamp: now.toISOString(),
-          payload: {
-            claimNumber: c.claimNumber,
-            status,
-            priority,
-            deadline: deadline.toISOString(),
-            hoursOverdue: Math.abs(hoursRemaining).toFixed(1),
-            organizationId: c.organizationId,
-            assignedTo: c.assignedTo,
-          },
-        }, {
-          organizationId: c.organizationId ?? undefined,
-          source: 'sla-watchdog',
-        })
-
-        if (c.organizationId) {
-          await trackPilotEvent({
-            userId: 'system:sla-watchdog',
-            organizationId: c.organizationId,
-            sessionId: `system:${c.claimId}`,
-            eventType: 'sla_breached',
-            metadata: {
-              claimId: c.claimId,
+        eventBus.emit(
+          'claim_events',
+          {
+            claim_id: c.claimId,
+            event_type: 'sla_breached',
+            actor: 'system:sla-watchdog',
+            timestamp: now.toISOString(),
+            payload: {
               claimNumber: c.claimNumber,
               status,
               priority,
+              deadline: deadline.toISOString(),
+              hoursOverdue: Math.abs(hoursRemaining).toFixed(1),
+              organizationId: c.organizationId,
+              assignedTo: c.assignedTo,
             },
-          })
-        }
+          },
+          {
+            organizationId: c.organizationId ?? undefined,
+            source: 'sla-watchdog',
+          },
+        )
       } else if (atRisk) {
         atRiskCount++
-        eventBus.emit('claim_events', {
-          claim_id: c.claimId,
-          event_type: 'sla_at_risk',
-          actor: 'system:sla-watchdog',
-          timestamp: now.toISOString(),
-          payload: {
-            claimNumber: c.claimNumber,
-            status,
-            priority,
-            deadline: deadline.toISOString(),
-            hoursRemaining: hoursRemaining.toFixed(1),
-            organizationId: c.organizationId,
-            assignedTo: c.assignedTo,
-          },
-        }, {
-          organizationId: c.organizationId ?? undefined,
-          source: 'sla-watchdog',
-        })
-
-        eventBus.emit('claim_events', {
-          claim_id: c.claimId,
-          event_type: 'sla_breach_risk',
-          actor: 'system:sla-watchdog',
-          timestamp: now.toISOString(),
-          payload: {
-            claimNumber: c.claimNumber,
-            status,
-            priority,
-            deadline: deadline.toISOString(),
-            hoursRemaining: hoursRemaining.toFixed(1),
-            organizationId: c.organizationId,
-            assignedTo: c.assignedTo,
-          },
-        }, {
-          organizationId: c.organizationId ?? undefined,
-          source: 'sla-watchdog',
-        })
-
-        if (c.organizationId) {
-          await trackPilotEvent({
-            userId: 'system:sla-watchdog',
-            organizationId: c.organizationId,
-            sessionId: `system:${c.claimId}`,
-            eventType: 'sla_breach_risk',
-            metadata: {
-              claimId: c.claimId,
+        eventBus.emit(
+          'claim_events',
+          {
+            claim_id: c.claimId,
+            event_type: 'sla_at_risk',
+            actor: 'system:sla-watchdog',
+            timestamp: now.toISOString(),
+            payload: {
               claimNumber: c.claimNumber,
               status,
               priority,
+              deadline: deadline.toISOString(),
+              hoursRemaining: hoursRemaining.toFixed(1),
+              organizationId: c.organizationId,
+              assignedTo: c.assignedTo,
             },
-          })
-        }
+          },
+          {
+            organizationId: c.organizationId ?? undefined,
+            source: 'sla-watchdog',
+          },
+        )
+
+        eventBus.emit(
+          'claim_events',
+          {
+            claim_id: c.claimId,
+            event_type: 'sla_breach_risk',
+            actor: 'system:sla-watchdog',
+            timestamp: now.toISOString(),
+            payload: {
+              claimNumber: c.claimNumber,
+              status,
+              priority,
+              deadline: deadline.toISOString(),
+              hoursRemaining: hoursRemaining.toFixed(1),
+              organizationId: c.organizationId,
+              assignedTo: c.assignedTo,
+            },
+          },
+          {
+            organizationId: c.organizationId ?? undefined,
+            source: 'sla-watchdog',
+          },
+        )
       }
     }
 
@@ -170,16 +155,27 @@ export const POST = withApi(
     })
 
     const watchdogTraceId = `sla-watchdog:${now.toISOString()}`
-    const orgCounts = new Map<string, { breached: number; atRisk: number; compliant: number; scanned: number }>()
+    const orgCounts = new Map<
+      string,
+      { breached: number; atRisk: number; compliant: number; scanned: number }
+    >()
     for (const c of activeClaims) {
       if (!c.organizationId) continue
-      const current = orgCounts.get(c.organizationId) ?? { breached: 0, atRisk: 0, compliant: 0, scanned: 0 }
+      const current = orgCounts.get(c.organizationId) ?? {
+        breached: 0,
+        atRisk: 0,
+        compliant: 0,
+        scanned: 0,
+      }
       const status = c.status
       const priority = (c.priority as CasePriority) || 'medium'
       const changedAt = c.updatedAt ?? c.createdAt ?? now
       const deadline = slaDeadline(status, priority, changedAt)
       const hoursRemaining = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60)
-      const totalHours = getSLADeadlineHours(toLifecycleState('claim', status) ?? 'submitted', priority)
+      const totalHours = getSLADeadlineHours(
+        toLifecycleState('claim', status) ?? 'submitted',
+        priority,
+      )
       current.scanned += 1
       if (hoursRemaining <= 0) current.breached += 1
       else {
@@ -190,12 +186,22 @@ export const POST = withApi(
     }
 
     for (const [orgId, counts] of orgCounts.entries()) {
-      recordUnionEyesSlaWatchdog(orgId, counts.breached, counts.atRisk, watchdogTraceId).catch((err) =>
-        logger.warn('Pilot metric emit failed', { error: String(err), metric: 'sla_breach_count', orgId }),
+      recordUnionEyesSlaWatchdog(orgId, counts.breached, counts.atRisk, watchdogTraceId).catch(
+        (err) =>
+          logger.warn('Pilot metric emit failed', {
+            error: String(err),
+            metric: 'sla_breach_count',
+            orgId,
+          }),
       )
 
-      recordUnionEyesSlaCompliance(orgId, counts.compliant, counts.scanned, watchdogTraceId).catch((err) =>
-        logger.warn('Pilot metric emit failed', { error: String(err), metric: 'sla_compliance_rate', orgId }),
+      recordUnionEyesSlaCompliance(orgId, counts.compliant, counts.scanned, watchdogTraceId).catch(
+        (err) =>
+          logger.warn('Pilot metric emit failed', {
+            error: String(err),
+            metric: 'sla_compliance_rate',
+            orgId,
+          }),
       )
     }
 

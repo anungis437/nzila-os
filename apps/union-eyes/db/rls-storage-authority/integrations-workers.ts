@@ -451,7 +451,7 @@ export const integrationsWorkersEntries: StorageAuthorityEntry[] = [
     reason: "CLOSED round 41 (DIRECT_ORG_RUNTIME_BATCH): direct NOT NULL organization_id column (ingestion-schema.ts). app/api/admin/ingest/retry/route.ts (minRole admin) and app/api/grievances/import/route.ts (withOrganizationAuth — organizationId server-derived via getOrganizationIdForUser, never client-supplied) both filter eq(ingestionBatches.organizationId, organizationId) via lib/ingestion/batch-ingest.ts's runBatchImport(opts.organizationId). The retry route additionally verifies eq(ingestionBatches.id, body.batch_id) AND organizationId before touching any ingestionRecords. Some queries execute inside withSystemContext (a separate union_eyes_system DB connection) but every query still manually filters by the caller's own trusted organizationId first — consistent with the existing collective_agreements/deadline_reminders precedent in this manifest (claims-continuity.ts) of treating an app-level-filtered withSystemContext read as TENANT_RUNTIME, not a system/worker authority root. No Django model exists for this table.",
     supportingCapability: ["app/api/admin/ingest/retry/route.ts","app/api/grievances/import/route.ts","lib/ingestion/batch-ingest.ts","lib/ingestion/migration-metrics.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
-    requiredSystemPrivileges: [],
+    requiredSystemPrivileges: ["SELECT"],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",
     reviewPriority: "NONE",

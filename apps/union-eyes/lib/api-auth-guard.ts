@@ -43,6 +43,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { secretsEqual } from '@/lib/api/secret-compare';
 import { auth, currentUser as platformCurrentUser } from '@nzila/platform-auth/entra/server';
 import { cookies } from 'next/headers';
 import { eq, and, isNull } from 'drizzle-orm';
@@ -62,6 +63,9 @@ import { AuditEventType, AuditSeverity, auditLog } from '@/lib/audit-logger';
 import { ROLE_PERMISSIONS } from '@/lib/auth/roles';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { getCanonicalOrganizationContext, getCanonicalPasswordActor } from '@/lib/auth/canonical-context';
+import { AuthOrgBindingError } from '@nzila/platform-auth/org-binding';
 
 // =============================================================================
 // AUTH RE-EXPORTS
@@ -287,6 +291,7 @@ export const LEGACY_ROLE_MAP: Record<string, UserRole> = {
  * Full user profile from auth session
  */
 export interface AuthUser {
+  isSystemAdmin?: boolean;
   id: string;
   email: string | null;
   name: string | null;
@@ -383,6 +388,8 @@ export interface ApiGuardOptions {
   requireAuth?: boolean;
   /** For cron routes: validate cron secret header */
   cronAuth?: boolean;
+  /** V2 only: set false for authenticated profile/onboarding routes without an organization */
+  requireOrg?: boolean;
   /** Minimum permission level required */
   minPermission?: string;
 }
@@ -430,7 +437,7 @@ function verifyCronAuth(request: NextRequest): boolean {
     return false;
   }
   
-  return cronSecret === expectedSecret;
+  return secretsEqual(cronSecret ?? '', expectedSecret);
 }
 
 // =============================================================================
@@ -446,7 +453,45 @@ function verifyCronAuth(request: NextRequest): boolean {
  *
  * This allows both auth systems to coexist during migration.
  */
+function canonicalAuthUser(context: {
+  isSystemAdmin: boolean;
+  userId: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  organizationId: string | null;
+  role: string;
+}): AuthUser {
+  return {
+    isSystemAdmin: context.isSystemAdmin,
+    id: context.userId,
+    email: context.email,
+    name: [context.firstName, context.lastName].filter(Boolean).join(' ') || null,
+    firstName: context.firstName,
+    lastName: context.lastName,
+    imageUrl: null,
+    legacyTenantId: null,
+    role: context.role,
+    organizationId: context.organizationId,
+    metadata: {},
+  };
+}
+
 export async function getCurrentUser(): Promise<AuthUser | null> {
+  if (currentStateContextEnabled()) {
+    const passwordActor = await getCanonicalPasswordActor();
+    if (passwordActor && !passwordActor.organizationId)
+      return canonicalAuthUser({
+        ...passwordActor,
+        role: passwordActor.isSystemAdmin ? 'app_owner' : 'member',
+      });
+    const actor = await auth();
+    if (!actor.userId) return null;
+    return canonicalAuthUser(await getCanonicalOrganizationContext({
+      expectedActorUserId: actor.userId,
+      organizationId: passwordActor?.organizationId,
+    }));
+  }
   // ── 1. Try PG session-based auth first ──────────────────────────────────
   try {
     const { getAuthUser } = await import('@/lib/auth/auth-service');
@@ -676,6 +721,16 @@ function isUuid(value: unknown): value is string {
  * Get unified user context with organization membership from database
  */
 export async function getUserContext(): Promise<UnifiedUserContext | null> {
+  if (currentStateContextEnabled()) {
+    const context = await getCanonicalOrganizationContext();
+    return {
+      userId: context.userId,
+      organizationId: context.organizationId,
+      roles: [context.role],
+      permissions: getPermissionsForRole(context.role),
+      memberId: `auth-org:${context.organizationId}`,
+    };
+  }
   const authResult = await auth();
   const { userId } = authResult;
 
@@ -802,6 +857,19 @@ export async function getUserContextForOrganization(
   organizationId: string,
   userIdOverride?: string
 ): Promise<UnifiedUserContext | null> {
+  if (currentStateContextEnabled()) {
+    const context = await getCanonicalOrganizationContext({
+      organizationId,
+      expectedActorUserId: userIdOverride,
+    });
+    return {
+      userId: context.userId,
+      organizationId: context.organizationId,
+      roles: [context.role],
+      permissions: getPermissionsForRole(context.role),
+      memberId: `auth-org:${context.organizationId}`,
+    };
+  }
   const userId = userIdOverride || (await auth()).userId;
 
   if (!userId) {
@@ -960,6 +1028,11 @@ export async function requireRole(role: string): Promise<UnifiedUserContext> {
  * Get user role from database
  */
 async function getUserRoleFromDatabase(userId: string, organizationId?: string | null): Promise<string> {
+  if (currentStateContextEnabled())
+    return normalizeRole((await getCanonicalOrganizationContext({
+      organizationId,
+      expectedActorUserId: userId,
+    })).role);
   if (organizationId) {
     const [authMembershipByOrg] = await db
       .select({ role: authOrganizationUsers.role })
@@ -1014,6 +1087,8 @@ async function getUserRoleFromDatabase(userId: string, organizationId?: string |
  * Check if user is a system administrator
  */
 export async function isSystemAdmin(userIdOverride?: string): Promise<boolean> {
+  if (currentStateContextEnabled())
+    return (await getCanonicalOrganizationContext({ expectedActorUserId: userIdOverride })).isSystemAdmin;
   try {
     const userId = userIdOverride || (await auth()).userId;
     if (!userId) {
@@ -1048,6 +1123,44 @@ export async function requireSystemAdmin(): Promise<void> {
  * Require API authentication with options
  */
 export async function requireApiAuth(options: RequireApiAuthOptions = {}) {
+  if (currentStateContextEnabled()) {
+    let user: AuthUser | null;
+    try {
+      user = await getCurrentUser();
+    } catch (error) {
+      if (!(error instanceof AuthOrgBindingError)) throw error;
+      logger.warn('[Auth] Canonical API authority denied', { code: error.code });
+      const authenticationDenied = [
+        'UNAUTHENTICATED',
+        'ACTOR_MISMATCH',
+        'SESSION_AUTHORITY_REQUIRED',
+      ].includes(error.code);
+      throw new Error(
+        authenticationDenied
+          ? 'Unauthorized: Canonical authentication required'
+          : 'Forbidden: Canonical organization authority required',
+        { cause: error }
+      );
+    }
+    if (!user) {
+      if (options.allowPublic) return { userId: null, organizationId: null, role: null };
+      logger.warn('[Auth] Canonical API authentication required');
+      throw new Error('Unauthorized: Authentication required');
+    }
+    if ((options.orgScoped || options.roles?.length) && !user.organizationId) {
+      logger.warn('[Auth] Canonical API organization required', { userId: user.id });
+      throw new Error('Forbidden: Organization context unavailable');
+    }
+    if (options.roles?.length && (!user.role || !options.roles.includes(user.role))) {
+      logger.warn('[Auth] Canonical API role denied', { userId: user.id, role: user.role });
+      throw new Error(`Forbidden: Requires one of roles: ${options.roles.join(', ')}`);
+    }
+    return {
+      userId: user.id,
+      organizationId: options.orgScoped ? user.organizationId : null,
+      role: options.roles?.length ? user.role : null,
+    };
+  }
   const { userId } = await auth();
   
   if (!userId && !options.allowPublic) {
@@ -1091,6 +1204,21 @@ export async function requireApiAuth(options: RequireApiAuthOptions = {}) {
 // ROLE UTILITIES
 // =============================================================================
 
+export async function isPlatformAdminUser(userId: string): Promise<boolean> {
+  if (currentStateContextEnabled()) {
+    try {
+      const user = await getCurrentUser();
+      return user?.id === userId && user.isSystemAdmin === true;
+    } catch (error) {
+      if (!(error instanceof AuthOrgBindingError)) throw error;
+      logger.warn('[Auth] Canonical platform authority denied', { code: error.code });
+      return false;
+    }
+  }
+  return (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
+    .split(',').map(id => id.trim()).filter(Boolean).includes(userId);
+}
+
 /**
  * Normalize role string to aligned database enum value
  */
@@ -1124,7 +1252,7 @@ export async function hasRole(requiredRole: string): Promise<boolean> {
     .split(',')
     .map(id => id.trim())
     .filter(Boolean);
-  if (platformAdminIds.includes(user.id)) {
+  if (!currentStateContextEnabled() && platformAdminIds.includes(user.id)) {
     return true;
   }
   
@@ -1145,6 +1273,10 @@ export async function hasRoleInOrganization(
   requiredRole: string
 ): Promise<boolean> {
   try {
+    if (currentStateContextEnabled()) {
+      const context = await getCanonicalOrganizationContext({ organizationId });
+      return ROLE_HIERARCHY[normalizeRole(context.role)] >= ROLE_HIERARCHY[normalizeRole(requiredRole)];
+    }
     const user = await getCurrentUser();
     if (!user) return false;
     
@@ -1185,6 +1317,11 @@ export async function getUserRole(
   userId: string,
   organizationId: string
 ): Promise<UserRole | null> {
+  if (currentStateContextEnabled())
+    return normalizeRole((await getCanonicalOrganizationContext({
+      organizationId,
+      expectedActorUserId: userId,
+    })).role);
   // With the auth provider, org IDs are UUIDs directly — no legacy tenants table needed.
   // Delegate to hasRoleInOrganization which queries organizationMembers correctly.
   try {
@@ -1214,6 +1351,7 @@ export async function getUserRole(
  *   PLATFORM_ADMIN_USER_IDS → organization_users → organization_members → auth metadata
  */
 export async function hasMinRole(minRole: string): Promise<boolean> {
+  if (currentStateContextEnabled()) return hasRole(minRole);
   try {
     const { userId } = await auth();
     if (!userId) return false;
@@ -1280,6 +1418,7 @@ export function withRoleAuth<TContext extends Record<string, unknown> = BaseAuth
     try {
       user = await getCurrentUser();
     } catch (_error) {
+      if (currentStateContextEnabled()) throw _error;
       return NextResponse.json(
         { error: 'Unauthorized: Authentication required' },
         { status: 401 }
@@ -1301,7 +1440,8 @@ export function withRoleAuth<TContext extends Record<string, unknown> = BaseAuth
     try {
       const { getOrganizationIdForUser } = await import('./organization-utils');
       authCtx.organizationId = await getOrganizationIdForUser(user.id);
-    } catch {
+    } catch (error) {
+      if (currentStateContextEnabled()) throw error;
       authCtx.organizationId = user.organizationId ?? undefined;
     }
 
@@ -1315,11 +1455,12 @@ export function withRoleAuth<TContext extends Record<string, unknown> = BaseAuth
 
     const response = await handler(request, context);
 
-    // Fire-and-forget governance audit for admin/officer-tier deprecated routes.
-    // Failures are logged but never propagate to the caller.
+    // Governance audit for admin/officer-tier deprecated routes. Canonical V2 awaits it inside
+    // the active tenant transaction (a detached write would outlive that transaction and its
+    // failure must roll the protected operation back); legacy mode stays fire-and-forget.
     if (_deprecatedAutoAudit) {
       const _traceId = Math.random().toString(36).slice(2, 10);
-      void auditLog({
+      const _emission = auditLog({
         eventType: _deprecatedAuditEventType,
         severity: _deprecatedAuditSeverity,
         userId: (context as unknown as BaseAuthContext).userId ?? 'unknown',
@@ -1328,9 +1469,12 @@ export function withRoleAuth<TContext extends Record<string, unknown> = BaseAuth
         action: request.method.toLowerCase(),
         outcome: 'success',
         details: { traceId: _traceId, automated: true, source: 'deprecated-wrapper' },
-      }).catch((err: unknown) => {
-        logger.error('[deprecated-wrapper] Audit emission failed', { error: (err as Error).message });
       });
+      if (currentStateContextEnabled()) await _emission;
+      else
+        void _emission.catch((err: unknown) => {
+          logger.error('[deprecated-wrapper] Audit emission failed', { error: (err as Error).message });
+        });
     }
 
     return response;
@@ -1376,7 +1520,8 @@ export function withMinRole<TContext extends Record<string, unknown> = BaseAuthC
     try {
       const { getOrganizationIdForUser } = await import('./organization-utils');
       authCtx.organizationId = await getOrganizationIdForUser(user.id);
-    } catch {
+    } catch (error) {
+      if (currentStateContextEnabled()) throw error;
       authCtx.organizationId = user.organizationId ?? undefined;
     }
 
@@ -1390,10 +1535,11 @@ export function withMinRole<TContext extends Record<string, unknown> = BaseAuthC
 
     const response = await handler(request, context);
 
-    // Fire-and-forget governance audit for admin/officer-tier deprecated routes.
+    // Governance audit for admin/officer-tier deprecated routes (V2: awaited inside the tenant
+    // transaction; legacy: fire-and-forget).
     if (_deprecatedAutoAudit) {
       const _traceId = Math.random().toString(36).slice(2, 10);
-      void auditLog({
+      const _emission = auditLog({
         eventType: _deprecatedAuditEventType,
         severity: _deprecatedAuditSeverity,
         userId: authCtx.userId ?? 'unknown',
@@ -1402,9 +1548,12 @@ export function withMinRole<TContext extends Record<string, unknown> = BaseAuthC
         action: request.method.toLowerCase(),
         outcome: 'success',
         details: { traceId: _traceId, automated: true, source: 'deprecated-wrapper' },
-      }).catch((err: unknown) => {
-        logger.error('[deprecated-wrapper] Audit emission failed', { error: (err as Error).message });
       });
+      if (currentStateContextEnabled()) await _emission;
+      else
+        void _emission.catch((err: unknown) => {
+          logger.error('[deprecated-wrapper] Audit emission failed', { error: (err as Error).message });
+        });
     }
 
     return response;
@@ -1446,7 +1595,8 @@ export function withSystemAdminAuth<TContext extends Record<string, unknown> = B
     try {
       const { getOrganizationIdForUser } = await import('./organization-utils');
       authCtx.organizationId = await getOrganizationIdForUser(user.id);
-    } catch {
+    } catch (error) {
+      if (currentStateContextEnabled()) throw error;
       authCtx.organizationId = user.organizationId ?? undefined;
     }
 
@@ -1891,7 +2041,14 @@ export function withApiAuth<TContext extends Record<string, unknown> = BaseAuthC
   handler: ApiRouteHandler<TContext>,
   options: ApiGuardOptions = {}
 ): ApiRouteHandler<TContext> {
-  return async (request: NextRequest, context: TContext) => {
+  return async (request: NextRequest, routeContext: TContext) => {
+    let context = routeContext;
+    // Next 16 passes route params as a Promise; legacy handlers read them synchronously.
+    // Awaiting a plain object is a no-op, so handlers that already await params keep working.
+    const pendingParams = (context as { params?: PromiseLike<unknown> } | undefined)?.params;
+    if (pendingParams && typeof pendingParams.then === 'function') {
+      context = { ...context, params: await pendingParams } as TContext;
+    }
     const pathname = request.nextUrl.pathname;
     
     const isPublic = isPublicRoute(pathname);
@@ -1911,6 +2068,17 @@ export function withApiAuth<TContext extends Record<string, unknown> = BaseAuthC
       return handler(request, context);
     }
     
+    if (requireAuth && currentStateContextEnabled()) {
+      const { withApi } = await import('./api/with-api');
+      return withApi(
+        { requireOrg: options.requireOrg },
+        async ({ user, organizationId }) => handler(
+          request,
+          Object.assign({}, context, { userId: user?.id, organizationId })
+        )
+      )(request);
+    }
+
     // User authentication
     if (requireAuth) {
       try {

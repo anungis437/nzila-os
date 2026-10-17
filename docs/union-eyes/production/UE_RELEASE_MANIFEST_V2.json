@@ -1,0 +1,3481 @@
+{
+  "schema": "ue-release-manifest/v2",
+  "base": "origin/main",
+  "unclassified": 0,
+  "TOTAL_RELEASE_FILES": 432,
+  "TOTAL_SHARED_PACKAGE_FILES": 51,
+  "TOTAL_DOC_FILES": 40,
+  "TOTAL_EVIDENCE_FILES": 11,
+  "categoryCounts": {
+    "UE_SECURITY_REQUIRED": 37,
+    "UE_RUNTIME_REQUIRED": 143,
+    "TEST_REQUIRED_FOR_ABOVE": 96,
+    "UE_RELEASE_OPERATION_REQUIRED": 60,
+    "UE_DOCUMENTATION_REQUIRED": 29,
+    "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST": 11,
+    "UE_INFRA_REQUIRED": 8,
+    "SHARED_PLATFORM_REQUIRED_BY_UE": 48
+  },
+  "files": [
+    {
+      "path": ".github/workflows/e2e.yml",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Preserves the accepted main E2E infrastructure and assertions; explicitly configures local non-canonical UE fixtures and verifies the exact UE PR source checkout.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": ".gitleaksignore",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Exact-fingerprint ignores for known false positives in generated UE evidence; no path or directory is masked.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/actions/admin-actions.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/app/__tests__/route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/admin-database-optimize.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/communications-webhooks-resend.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cron-sla-watchdog.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/documents-upload.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/grievances-access.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/organizations-hierarchy.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/organizations-id-analytics.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/organizations-id-members.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/organizations-id.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/payments-paypal-webhook.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/payments-stripe-webhook-dues.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/payments-stripe-webhook.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/pilot-overview.route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/activities/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/ai-usage/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/database/optimize/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/dues/overview/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/duplicates/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/ingest/batches/[id]/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/ingest/batches/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/ingest/retry/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/ingest/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/jobs/[action]/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/pki/certificates/[id]/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/pki/certificates/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/pki/signatures/[id]/sign/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/pki/signatures/[id]/verify/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/pki/signatures/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/pki/workflows/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/seed-cupe-pilot/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/stats/activity/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/system/cache/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/users/[userId]/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/users/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/billing/batch-status/[jobId]/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/calendar-sync/microsoft/auth/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/case-studies/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/audit/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/export/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/next-actions/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/cbas/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/chatbot/sessions/[sessionId]/messages/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/claims/[id]/evidence/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/claims/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/clauses/[id]/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/content/stats/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/content/training/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/billing-lifecycle/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/deadline-overdue/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/deadline-reminders/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/sla-watchdog/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/upload/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/dues/arrears/route.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/dues/create-payment-intent/route.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/enterprise/sso/providers/__tests__/route.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/gdpr/data-export/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/grievances/[id]/access/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/notifications/[id]/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/[id]/ancestors/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/[id]/children/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/[id]/descendants/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/[id]/members/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/[id]/path/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/[id]/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/hierarchy/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/search/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/switch/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/organizations/tree/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/payments/checkout/create/route.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/payments/webhooks/paypal/route.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/pilot/overview/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/portal/dues/pay/route.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/signatures/documents/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/users/me/organizations/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/users/me/profile/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/api/workflow/overdue/route.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/app/layout.tsx",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/auth_core/authentication.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/auth_core/canonical_context.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/auth_core/migrations/0006_application_user_id_text.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/auth_core/mixins.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/auth_core/models.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/migrations/0002_member_dues_ledger_user_id_text.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/migrations/0003_application_user_id_text.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/models.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/views.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/compliance/models.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/config/celery.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/config/settings.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/content/models.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/core/views.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/grievances/migrations/0006_claim_number_org_scope_and_user_text.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/grievances/models.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/notifications/models.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/requirements.lock",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Frozen dependency lock the bootstrap plan is bound to.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/requirements.lock.metadata.json",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Frozen dependency lock the bootstrap plan is bound to.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/backend/unions/models.py",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Django models/migrations/auth context for the canonical text user identity and per-organization claim numbers.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/contexts/__tests__/organization-context.test.tsx",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/contexts/organization-context.tsx",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/organization-members-insert-defaults.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/rls-storage-authority-round41-direct-org-runtime-batch.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/rls-storage-authority-round48-derived-analytics-ai-telemetry.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/rls-storage-authority-round49-immutable-security-audit-evidence.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/schema-organizations.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/index.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/queries/organization-members-queries.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/analytics-ai.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/baseline-0108.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/claims-continuity.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/documents-evidence.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/finance.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/governance.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/integrations-workers.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/organizations-membership.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema-applications.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema-organizations.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/claims-schema.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/cms-website-schema.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/documents-schema.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/claims/grievances.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/claims/workflows.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/employer-communications.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/push-notifications.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/dues.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/health-safety/cnesst-schema.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/health-safety/provincial-wcb-schema.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/awards.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/cms.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/index.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/ai-clause-reasoning.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/ai-copilot-sessions.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/ai-grievance-triage.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/dues-transactions-schema.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/grievance-schema.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/grievance-workflow-schema.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/push-notifications.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/schema/representation-authority-schema.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/db/system-db.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/api-auth-guard-canonical.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/api-auth-guard-params.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/audit-logger-canonical.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/e2e-api-session.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test-only API fixture seed-cookie compatibility using the real Playwright cookie jar; preserves production login and authorization assertions, rejects remote targets and validates identity switching.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/organization-middleware.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/rate-limiter.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/rewards-stats-utils.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/api-auth-guard.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/api/__tests__/secret-compare.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/api/__tests__/with-api-canonical.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/api/__tests__/with-api.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/api/authorization-denial.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/api/secret-compare.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/api/with-api.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/audit-logger.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/audit/__tests__/canonical-audit-chain.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/audit/__tests__/mandatory-audit.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/audit/canonical-audit-chain.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/audit/mandatory-audit.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/__tests__/canonical-context.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/canonical-bootstrap.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/canonical-context.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/canonical-membership-role.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/canonical-organization-selection.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/organization-authority.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/platform-org-role.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/rbac-server.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/claims/__tests__/claim-number.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/claims/claim-number.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/db/__tests__/org-owned-context.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/db/__tests__/with-rls-context.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/db/org-owned-context.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/db/with-rls-context.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/deadline-engine/audit.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/dues/__tests__/dues-payment-service.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/dues/__tests__/dues-settlement.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/dues/__tests__/member-dues-flag.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/dues/dues-payment-service.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/dues/dues-settlement.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/dues/member-dues-flag.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/encryption.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/organization-middleware.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/organization-utils.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/organizational-topology/__tests__/source.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/organizational-topology/source.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/rate-limiter.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/reality/capability-registry.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/services/rewards/__tests__/export-service.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/services/rewards/__tests__/notification-service.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/services/rewards/__tests__/wallet-service.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/services/rewards/export-service.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/services/rewards/notification-service.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/services/rewards/wallet-service.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/lib/utils/rewards-stats-utils.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/public/fonts/poppins/OFL.txt",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Self-hosted font so the production image build needs no network font fetch.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/public/fonts/poppins/Poppins-Bold.ttf",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Self-hosted font so the production image build needs no network font fetch.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/public/fonts/poppins/Poppins-Light.ttf",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Self-hosted font so the production image build needs no network font fetch.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/public/fonts/poppins/Poppins-Medium.ttf",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Self-hosted font so the production image build needs no network font fetch.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/public/fonts/poppins/Poppins-Regular.ttf",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Self-hosted font so the production image build needs no network font fetch.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/public/fonts/poppins/Poppins-SemiBold.ttf",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Self-hosted font so the production image build needs no network font fetch.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/public/fonts/poppins/provenance.json",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Self-hosted font so the production image build needs no network font fetch.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/__tests__/generate-authority-convergence-report.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Preserves original tracked report bytes after assertions validate freshly generated output, keeping full-suite exact-source integrity without weakening report assertions.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/__tests__/generate-explicit-grant-dry-run.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Preserves original tracked report bytes after assertions validate freshly generated output, keeping full-suite exact-source integrity without weakening report assertions.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/__tests__/generate-public-schema-grant-census.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Preserves original tracked report bytes after assertions validate freshly generated output, keeping full-suite exact-source integrity without weakening report assertions.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/__tests__/runtime-schema-authority-oracle.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/acceptance/acceptance-ledger.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/acceptance/acceptance-ledger.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/acceptance/caller-control-graph.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/acceptance/identity-census.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/acceptance/identity-contract.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/app-schema-compat.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/application-typecheck.json",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/audit-chain-native.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-fixture.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-native.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-org-runtime.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-privileges.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-runtime.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-sql.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/backend-application.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/backend-application.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/bootstrap-v2.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/caller-buckets.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/caller-graph.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/caller-graph.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/caller-inventory.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/clean-room.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/connection-environment-surface.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/connection-environment-surface.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/constraint-source.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/current-authority.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/current-authority.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/current_application.py",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/current_models.py",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/defaults-native.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/execution-roles.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/failed-statement-probe.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/failing-route-diagnostics.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/fee-adjustment-native-proof.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/financial-http-boundary.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework-application.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework-contract.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework-native.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework-privileges.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework-runtime.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework-sql.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework_application.py",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/installer.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/launch-defects-native.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/live-declarations.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/local-vault-fixture.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/local-vault-fixture.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest-application.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest-application.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest-defaults.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest-defaults.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest-native.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest-security.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest-trace.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest-typecheck.json",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/minimum-installer.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/minimum-installer.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/next-acceptance.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/next-acceptance.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/next-http-smoke.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/next-network-boundary.cjs",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/organization-selection-native.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/plan.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/production-key-authority.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/reward-source.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/route-bucket-qualification.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/route-bucket-triage.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/runtime-security-native.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/runtime-security.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/security.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/service-column-contracts.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/source.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/system-component-integration.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/system-mutation-contracts.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/system-mutation-contracts.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/system-mutation-native.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/test_current_application_graph.py",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/generate-runtime-schema-authority-oracle.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Canonical bootstrap V2 plan/clean-room/installer/acceptance tooling or oracle generator the release is qualified with.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/production/first-admin-bootstrap.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/production/first-admin-bootstrap.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Operator-only production tooling (first-admin bootstrap, bootstrap restore preparation, go-live smoke).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/production/first-admin-cli.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Operator-only production tooling (first-admin bootstrap, bootstrap restore preparation, go-live smoke).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/production/first-admin-native.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/production/go-live-smoke.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Operator-only production tooling (first-admin bootstrap, bootstrap restore preparation, go-live smoke).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/production/prepare-bootstrap-restore.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/scripts/production/prepare-bootstrap-restore.ts",
+      "category": "UE_RELEASE_OPERATION_REQUIRED",
+      "reason": "Operator-only production tooling (first-admin bootstrap, bootstrap restore preparation, go-live smoke).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/clc/per-capita-calculator.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/financial-service/src/db/connection-scope.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/financial-service/src/db/index.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/financial-service/src/index.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/financial-service/src/middleware/authentication.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/financial-service/src/middleware/request-body.ts",
+      "category": "UE_SECURITY_REQUIRED",
+      "reason": "Authentication, tenant isolation, audit, rate limiting, financial gating or secret-handling control.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/financial-service/src/tests/unit/connection-scope.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/financial-service/src/tests/unit/index-startup.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/observability/__tests__/realtime-alerting-service.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/observability/realtime-alerting-service.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/platform-economics/__tests__/entitlement-guard.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/platform-economics/entitlement-guard.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/platform-economics/fee-adjustment-insert.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/platform-economics/transaction-fee-engine.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test of included UE source or UE tooling.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/services/platform-economics/transaction-fee-engine.ts",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Application runtime change for the canonical identity/organization/audit model, dues gating or per-organization numbering.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/tests/e2e/_helpers.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Test-only API fixture seed-cookie compatibility using the real Playwright cookie jar; preserves production login and authorization assertions, rejects remote targets and validates identity switching.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "apps/union-eyes/tsconfig.json",
+      "category": "UE_RUNTIME_REQUIRED",
+      "reason": "Typecheck configuration for the Next app.",
+      "runtime_required": true,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/EVIDENCE_OFFLOAD_MANIFEST.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Production hardening package, runbook, release dependency/plan records, manifest or evidence pin.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/README.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Production hardening package, runbook, release dependency/plan records, manifest or evidence pin.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/README.md",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_APPLICATION_IDENTITY_CENSUS_BASELINE.json",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_APPLICATION_IDENTITY_CONTRACT.json",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_APPLICATION_IDENTITY_CONTRACT.md",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_BOOTSTRAP_V2_CURRENT_DEFAULT_PROOF.json",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_BOOTSTRAP_V2_LOCAL_VALIDATION.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_FINAL_ACCEPTANCE_LEDGER.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_LEGACY_UPGRADE_ASSESSMENT.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_ACCEPTANCE_CONTROLS.json",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.json",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_APP_SCHEMA_COMPATIBILITY.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_AUTHENTICATED_500_DIAGNOSTICS.BEFORE_D1_D2.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_AUTHENTICATED_500_DIAGNOSTICS.json",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_AUTHENTICATED_500_ROOT_CAUSES.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_CALLER_CONTROL_GRAPH.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_FAILED_STATEMENT_PROBE.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_FINAL_V2_ACCEPTANCE_BLOCKERS.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_FINAL_V2_ACCEPTANCE_BLOCKERS.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_FINANCIAL_SCOPE_AUTHORITY.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_MUTATING_CALLER_INVENTORY.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_NEXT_RUNTIME_ACCEPTANCE.json",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_ROUTE_BUCKET_EXECUTION.HTTP_GET_NEEDS_EXPLICIT_FIXTURE.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_ROUTE_BUCKET_EXECUTION.HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_ROUTE_BUCKET_EXECUTION.HTTP_SHARED_GUARD_MUTATION.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_ROUTE_BUCKET_EXECUTION.NOT_IMPLEMENTED_501.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_ROUTE_BUCKET_EXECUTION.READ_ONLY_FALSE_POSITIVE_GET.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_ROUTE_BUCKET_EXECUTION.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Qualified bootstrap V2 evidence/ledger document (small).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_ROUTE_BUCKET_TRIAGE.json",
+      "category": "EVIDENCE_REQUIRED_BY_EXECUTABLE_TEST",
+      "reason": "Read by a UE test or acceptance script that runs in CI or at bootstrap.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/production/COMMERCIAL_STRIPE_BOUNDARY.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Production hardening package, runbook, release dependency/plan records, manifest or evidence pin.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/production/README.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Production hardening package, runbook, release dependency/plan records, manifest or evidence pin.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/production/RUNBOOK_DATABASE_BOOTSTRAP.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Production hardening package, runbook, release dependency/plan records, manifest or evidence pin.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/production/RUNBOOK_FIRST_ADMIN_BOOTSTRAP.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Production hardening package, runbook, release dependency/plan records, manifest or evidence pin.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/production/UE_PRODUCTION_HARDENING_PACKAGE.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Production hardening package, runbook, release dependency/plan records, manifest or evidence pin.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/production/UE_RELEASE_MANIFEST_V2.json",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Production hardening package, runbook, release dependency/plan records, manifest or evidence pin.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/production/UE_RELEASE_PLAN_REFREEZE.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Production hardening package, runbook, release dependency/plan records, manifest or evidence pin.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "docs/union-eyes/production/UE_RELEASE_SHARED_DEPENDENCIES.md",
+      "category": "UE_DOCUMENTATION_REQUIRED",
+      "reason": "Production hardening package, runbook, release dependency/plan records, manifest or evidence pin.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/main.bicep",
+      "category": "UE_INFRA_REQUIRED",
+      "reason": "Production Bicep for the UE V2 deployment (private endpoints, managed identity ACR pull, storage, Redis, apps, alerts); not deployed by this PR.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/main.parameters.example.json",
+      "category": "UE_INFRA_REQUIRED",
+      "reason": "Production Bicep for the UE V2 deployment (private endpoints, managed identity ACR pull, storage, Redis, apps, alerts); not deployed by this PR.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/modules/acr-pull.bicep",
+      "category": "UE_INFRA_REQUIRED",
+      "reason": "Production Bicep for the UE V2 deployment (private endpoints, managed identity ACR pull, storage, Redis, apps, alerts); not deployed by this PR.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/modules/alerts.bicep",
+      "category": "UE_INFRA_REQUIRED",
+      "reason": "Production Bicep for the UE V2 deployment (private endpoints, managed identity ACR pull, storage, Redis, apps, alerts); not deployed by this PR.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/modules/apps.bicep",
+      "category": "UE_INFRA_REQUIRED",
+      "reason": "Production Bicep for the UE V2 deployment (private endpoints, managed identity ACR pull, storage, Redis, apps, alerts); not deployed by this PR.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/modules/private-endpoint.bicep",
+      "category": "UE_INFRA_REQUIRED",
+      "reason": "Production Bicep for the UE V2 deployment (private endpoints, managed identity ACR pull, storage, Redis, apps, alerts); not deployed by this PR.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/modules/redis.bicep",
+      "category": "UE_INFRA_REQUIRED",
+      "reason": "Production Bicep for the UE V2 deployment (private endpoints, managed identity ACR pull, storage, Redis, apps, alerts); not deployed by this PR.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/modules/storage.bicep",
+      "category": "UE_INFRA_REQUIRED",
+      "reason": "Production Bicep for the UE V2 deployment (private endpoints, managed identity ACR pull, storage, Redis, apps, alerts); not deployed by this PR.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "packages/db/drizzle/0041_platform_authorization_authority.sql",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/package.json",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/__tests__/platform-authorization.schema.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Unit test of an included shared source file.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/audit-hash.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/auth-client.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/execution-boundary.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/index.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/org-session-authority.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/privilege-expectations.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/role-prerequisites.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/authorization-audit.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/org-registry.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/schema/index.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/db/src/schema/platform-authorization.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/org/src/context/guards.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/README.md",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/package.json",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/__tests__/bearer-org-binding.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Unit test of an included shared source file.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/acceptance-auth.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/acceptance-trust.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/auth-db.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/authorization-context.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Unit test of an included shared source file.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/authorization-context.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/authorization-store.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/complete-auth.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/entra/config.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/entra/server.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Tests the shared UE seed-session compatibility boundary, production/canonical denial, existing active membership reads, role preservation and absence of identity persistence.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/entra/server.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Canonical UE provider/session identity resolution plus the bounded local non-canonical E2E seed-session compatibility repair; no production fallback or identity/membership/role persistence.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/entra/types.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/index.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/invites/handlers.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/invites/service.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/lifecycle/service.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/magic-link/handlers.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/magic-link/service.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/mfa/handlers.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/mfa/service.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/org-binding.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/password/auth-service.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Unit test of an included shared source file.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/password/auth-service.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/password/handlers.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Unit test of an included shared source file.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/password/handlers.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/password/index.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/password/session.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/policy/admin.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Unit test of an included shared source file.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/policy/admin.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/policy/service.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/provider-identity.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/risk/assess.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Unit test of an included shared source file.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": true
+    },
+    {
+      "path": "packages/platform-auth/src/risk/assess.ts",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Shared platform module UE imports directly or compiles against (see UE_RELEASE_SHARED_DEPENDENCIES.md).",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "tooling/contract-tests/stack-authority-ast.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Repository contract recognising an exact UE control helper (withOrgOwnedContext) or a documented path-specific false positive.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "tooling/contract-tests/ue-auth-reality.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Repository contract recognising an exact UE control helper (withOrgOwnedContext) or a documented path-specific false positive.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "tooling/contract-tests/ue-no-raw-db.test.ts",
+      "category": "TEST_REQUIRED_FOR_ABOVE",
+      "reason": "Repository contract recognising an exact UE control helper (withOrgOwnedContext) or a documented path-specific false positive.",
+      "runtime_required": false,
+      "test_required": true,
+      "shared_dependency": false
+    },
+    {
+      "path": "tooling/db/schema-snapshot.json",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Schema snapshot regenerated with the official tool after the shared schema index gained platform-authorization.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": true
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.json",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Repository inventory output regenerated with the official generator.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.md",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Repository inventory output regenerated with the official generator.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.json",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Repository inventory output regenerated with the official generator.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.md",
+      "category": "SHARED_PLATFORM_REQUIRED_BY_UE",
+      "reason": "Repository inventory output regenerated with the official generator.",
+      "runtime_required": false,
+      "test_required": false,
+      "shared_dependency": false
+    }
+  ],
+  "baseCommit": "bd45b3cbbc12805910a918d6e5f2495afee43245",
+  "CORA_FILES_IN_RELEASE": 0,
+  "FOREIGN_CI_INFRA_DUPLICATES": 0,
+  "FOREIGN_OPS_BASELINE_DUPLICATES": 0
+}

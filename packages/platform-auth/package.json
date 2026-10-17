@@ -8,6 +8,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./identity": "./src/identity.ts",
+    "./auth-execution": "./src/auth-db.ts",
+    "./provider-identity": "./src/provider-identity.ts",
+    "./org-binding": "./src/org-binding.ts",
     "./authorization": "./src/authorization.ts",
     "./authorization-context": "./src/authorization-context.ts",
     "./source-disclosure": "./src/source-disclosure.ts",

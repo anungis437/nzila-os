@@ -150,7 +150,7 @@ export const cneesstFilings = pgTable("cnesst_filings", {
 
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  createdBy: uuid("created_by"),
+  createdBy: text("created_by"),
 }, (table) => ({
   idxFilingsOrg: index("idx_cnesst_filings_org").on(table.organizationId),
   idxFilingsType: index("idx_cnesst_filings_type").on(table.filingType),

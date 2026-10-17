@@ -1,11 +1,12 @@
+import { closeAuthClients } from '../../packages/db/src/auth-client'
 import { randomUUID } from 'node:crypto'
 import { and, eq, sql } from 'drizzle-orm'
 import { afterAll, describe, expect, it } from 'vitest'
 
-import { db } from '@nzila/db/client'
-import { auditEvents } from '@nzila/db/schema'
-import { AuthorizationResolutionError } from '@nzila/platform-auth/authorization-context'
-import { resolveOrgContextFromIdentity } from './resolve-org'
+import { db } from '../../packages/db/src/client.ts'
+import { auditEvents } from '../../packages/db/src/schema/index.ts'
+import { AuthorizationResolutionError } from '../../packages/platform-auth/src/authorization-context.ts'
+import { resolveOrgContextFromIdentity } from '../../apps/cora/lib/resolve-org'
 
 const acceptanceDatabaseUrl = process.env.DATABASE_URL
 if (
@@ -19,6 +20,7 @@ if (
 
 describe.skipIf(!acceptanceDatabaseUrl)('Cora canonical authorization acceptance', () => {
   afterAll(async () => {
+    await closeAuthClients()
     await db.$client.end({ timeout: 5 })
   })
 

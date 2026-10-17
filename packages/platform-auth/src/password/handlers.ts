@@ -127,7 +127,16 @@ export async function handleLogin(request: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 401 })
     }
 
-    return NextResponse.json({ user: result.user })
+    return NextResponse.json({
+      user: result.user,
+      ...(result.requiresMfa
+        ? {
+            requiresMfa: true,
+            mfaChallengeToken: result.mfaChallengeToken,
+            mfaChallengeExpiresAt: result.mfaChallengeExpiresAt,
+          }
+        : {}),
+    })
   } catch (error) {
     console.error('[platform-auth] handleLogin failed:', error)
     const exposeDetails =

@@ -95,6 +95,7 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
     const request = { json: async () => ({ name: 'New IdP', providerType: 'oidc', attributeMapping: { email: 'email' } }) };
     const result = await capturedPostHandler!({
       request,
+      body: await request.json(),
       organizationId: 'org-real',
       userId: 'admin-user',
     }) as Record<string, unknown>;
@@ -117,7 +118,7 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
         createdBy: 'attacker-user',
       }),
     };
-    await capturedPostHandler!({ request, organizationId: 'org-real', userId: 'admin-user' });
+    await capturedPostHandler!({ request, body: await request.json(), organizationId: 'org-real', userId: 'admin-user' });
 
     expect(m.values).toHaveBeenCalledWith(
       expect.objectContaining({ organizationId: 'org-real', createdBy: 'admin-user' }),
@@ -135,7 +136,7 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
         oidcClientSecret: 'raw-oidc-secret',
       }),
     };
-    await capturedPostHandler!({ request, organizationId: 'org-real', userId: 'admin-user' });
+    await capturedPostHandler!({ request, body: await request.json(), organizationId: 'org-real', userId: 'admin-user' });
 
     expect(m.encryptSecret).toHaveBeenCalledWith('raw-oidc-secret');
     expect(m.values).toHaveBeenCalledWith(
@@ -155,8 +156,47 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
         attributeMapping: { email: 'email' },
       }),
     };
-    await capturedPostHandler!({ request, organizationId: 'org-real', userId: 'admin-user' });
+    await capturedPostHandler!({ request, body: await request.json(), organizationId: 'org-real', userId: 'admin-user' });
 
     expect(m.encryptSecret).not.toHaveBeenCalled();
+  });
+
+  it('POST uses the framework-parsed body without consuming the request again', async () => {
+    const request = new Request('http://127.0.0.1/api/enterprise/sso/providers', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'New IdP',
+        providerType: 'oidc',
+        attributeMapping: { email: 'email' },
+      }),
+    });
+    const body = await request.json();
+    m.returning.mockResolvedValue([{ id: 'sp-new', organizationId: 'org-real' }]);
+    await capturedPostHandler!({ request, body, organizationId: 'org-real', userId: 'admin-user' });
+    expect(request.bodyUsed).toBe(true);
+    expect(m.insert).toHaveBeenCalledOnce();
+  });
+
+  it('POST does not write if credential encryption refuses its authority', async () => {
+    m.encryptSecret.mockRejectedValueOnce(new Error('Production key authority unavailable'));
+    await expect(capturedPostHandler!({
+      body: {
+        name: 'New IdP',
+        providerType: 'oidc',
+        attributeMapping: { email: 'email' },
+        oidcClientSecret: 'owned-synthetic-credential-only',
+      },
+      organizationId: 'org-real',
+      userId: 'admin-user',
+    })).rejects.toThrow('Production key authority unavailable');
+    expect(m.insert).not.toHaveBeenCalled();
+  });
+
+  it('POST rejects an absent parsed body without writing', async () => {
+    await expect(capturedPostHandler!({
+      organizationId: 'org-real',
+      userId: 'admin-user',
+    })).rejects.toMatchObject({ status: 400 });
+    expect(m.insert).not.toHaveBeenCalled();
   });
 });

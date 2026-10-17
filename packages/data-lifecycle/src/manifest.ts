@@ -14,7 +14,7 @@ import { createHash } from 'node:crypto'
 // ── Types ───────────────────────────────────────────────────────────────────
 
 export type ResidencyType = 'managed' | 'sovereign' | 'hybrid'
-export type RetentionClass = 'PERMANENT' | '7_YEARS' | '3_YEARS' | '1_YEAR' | '90_DAYS' | '30_DAYS'
+export type RetentionClass = 'SESSION' | 'PERMANENT' | '7_YEARS' | '3_YEARS' | '1_YEAR' | '90_DAYS' | '30_DAYS'
 export type DeletionMethod = 'soft_delete' | 'hard_delete' | 'crypto_shred' | 'retention_expiry'
 export type DeletionVerification = 'audit_log' | 'deletion_certificate' | 'spot_check' | 'automated_scan'
 export type BackupFrequency = 'continuous' | 'daily' | 'weekly' | 'none'
@@ -412,19 +412,31 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
 
   // ── Cora ──────────────────────────────────────────────────────────
   {
+    // Cora-owned schema inventory: cora_evidence_records,
+    // cora_evidence_conclusions, cora_conclusion_evidence_refs,
+    // cora_farmer360_profiles, cora_farmer360_context_versions,
+    // cora_farmer360_assertions. These are not Conversation History and
+    // do not inherit its retention schedule or Agrimo/source-provider rights.
+    // Live-data retention/deletion and backup treatment are unapproved.
+    // Only disposable synthetic fixtures are exercised; runtime write
+    // policy/consent ports deny by default and source disclosure is WITHHOLD.
+    // See CORA_FARMER_360.md / CORA_SOURCE_DISCLOSURE_CONDITION_LEDGER.md.
     appId: 'cora',
-    appName: 'Cora AI Assistant',
+    appName: 'Cora Agricultural Intelligence',
     version: '1.0.0',
     lastUpdated: '2026-02-28',
     dataCategories: [
+      { name: 'Synthetic Qualification Records', description: 'Disposable synthetic-only cora_evidence_records, cora_evidence_conclusions, cora_conclusion_evidence_refs, cora_farmer360_profiles, cora_farmer360_context_versions and cora_farmer360_assertions. Live-data retention/deletion and backup treatment remain unapproved; no conversation-history or Agrimo schedule is inherited.', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
       { name: 'Conversation History', description: 'AI conversation logs and context', containsPii: true, containsFinancial: false, storageEngine: 'PostgreSQL' },
       { name: 'Audit Logs', description: 'AI operation audit trail', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
     ],
     retentionSchedules: [
+      { category: 'Synthetic Qualification Records', retentionClass: 'SESSION', retentionPeriod: 'Disposable acceptance run only; teardown deletes the database volume', legalBasis: 'Synthetic engineering qualification only; no authority to collect or retain live or personal data' },
       { category: 'Conversation History', retentionClass: '90_DAYS', retentionPeriod: '90 days', legalBasis: 'User experience — short-lived context' },
       { category: 'Audit Logs', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Audit trail integrity' },
     ],
     deletionPolicies: [
+      { category: 'Synthetic Qualification Records', method: 'hard_delete', verification: 'automated_scan', authorizedRoles: ['acceptance_harness'], reversible: false },
       { category: 'Conversation History', method: 'hard_delete', verification: 'automated_scan', authorizedRoles: ['platform_admin'], reversible: false },
       { category: 'Audit Logs', method: 'retention_expiry', verification: 'automated_scan', authorizedRoles: [], reversible: false },
     ],

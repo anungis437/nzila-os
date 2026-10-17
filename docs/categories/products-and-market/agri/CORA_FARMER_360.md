@@ -98,10 +98,10 @@ history.
 Reproduce on a machine with Docker and pnpm:
 
 ```powershell
-pnpm cora:acceptance:db:up
-pnpm cora:acceptance:db:bootstrap
-pnpm cora:acceptance:test
-pnpm cora:acceptance:db:down
+node scripts/cora-farmer360-acceptance.mjs up
+node scripts/cora-farmer360-acceptance.mjs bootstrap
+node scripts/cora-farmer360-acceptance.mjs test
+node scripts/cora-farmer360-acceptance.mjs down
 ```
 
 The DB-backed acceptance command is the required local verification for the

@@ -76,7 +76,7 @@ export const grievanceEvents = pgTable(
       .notNull()
       .references(() => grievances.id, { onDelete: "cascade" }),
     eventType: grievanceEventTypeEnum("event_type").notNull(),
-    actorUserId: uuid("actor_user_id").notNull(),
+    actorUserId: text("actor_user_id").notNull(),
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -102,9 +102,9 @@ export const grievanceCaseAccessAssignments = pgTable(
     grievanceId: uuid("grievance_id")
       .notNull()
       .references(() => grievances.id, { onDelete: "cascade" }),
-    userId: uuid("user_id").notNull(),
+    userId: text("user_id").notNull(),
     accessRole: caseAccessRoleEnum("access_role").notNull().default("secondary_lro"),
-    grantedBy: uuid("granted_by").notNull(),
+    grantedBy: text("granted_by").notNull(),
     grantedAt: timestamp("granted_at", { withTimezone: true }).notNull().defaultNow(),
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     canComment: boolean("can_comment").notNull().default(true),

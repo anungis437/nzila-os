@@ -4660,6 +4660,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@nzila/org':
+        specifier: workspace:*
+        version: link:../org
       '@nzila/platform-data-fabric':
         specifier: workspace:*
         version: link:../platform-data-fabric

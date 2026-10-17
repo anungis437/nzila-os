@@ -77,7 +77,7 @@ export const aiGrievanceTriages = pgTable('ai_grievance_triages', {
 
   // Human review
   status: aiTriageStatusEnum('status').notNull().default('pending'),
-  reviewedBy: uuid('reviewed_by'),
+  reviewedBy: text('reviewed_by'),
   reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
   reviewNotes: text('review_notes'),
   humanApproved: boolean('human_approved').default(false),

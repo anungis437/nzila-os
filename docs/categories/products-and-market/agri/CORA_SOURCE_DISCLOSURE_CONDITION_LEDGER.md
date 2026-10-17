@@ -165,7 +165,7 @@ capability promotion, or shared/production data mutation was performed.
 - `pnpm --filter @nzila/platform-auth typecheck` — passed.
 - `pnpm --filter @nzila/cora typecheck` — passed.
 - Focused ESLint runs for the changed platform-auth and CORA implementation/test files — passed.
-- `pnpm cora:acceptance:db:up`, `pnpm cora:acceptance:db:bootstrap`, `pnpm cora:acceptance:test`, and `pnpm cora:acceptance:db:down` — passed against the isolated disposable local PostgreSQL harness; teardown removed its container, network, and volume.
+- `node scripts/cora-farmer360-acceptance.mjs up`, `node scripts/cora-farmer360-acceptance.mjs bootstrap`, `node scripts/cora-farmer360-acceptance.mjs test`, and `node scripts/cora-farmer360-acceptance.mjs down` — passed against the isolated disposable local PostgreSQL harness; teardown removed its container, network, and volume.
 - `pnpm governance:audit` — passed with exit code 0. Documentation consistency reported 0 errors and existing warnings; governance audit chain completed.
 - `git diff --check` — passed.
 
@@ -195,8 +195,8 @@ capability promotion, or shared/production data mutation was performed.
   `1c337567635bb86ea0df7831557d8d2d22df1e6f`, upstream `origin/main`,
   ahead/behind `0/0` against the local reference without fetching.
   Existing modified/untracked work is preserved; no commit or merge occurred.
-- `pnpm cora:acceptance:db:up`, `pnpm cora:acceptance:db:bootstrap`,
-  `pnpm cora:acceptance:test`, and `pnpm cora:acceptance:db:down` passed.
+- `node scripts/cora-farmer360-acceptance.mjs up`, `node scripts/cora-farmer360-acceptance.mjs bootstrap`,
+  `node scripts/cora-farmer360-acceptance.mjs test`, and `node scripts/cora-farmer360-acceptance.mjs down` passed.
   The disposable PostgreSQL test proves canonical update-time projection,
   source `NOT NULL` enforcement without changing schema or source records,
   missing producer withholding, and omission of status from the read model.

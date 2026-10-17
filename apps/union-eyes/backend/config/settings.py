@@ -4,6 +4,7 @@ Django settings for UnionEyes
 
 import os
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 
 from dotenv import load_dotenv
 
@@ -111,6 +112,42 @@ DATABASES = {
     }
 }
 
+UE_CANONICAL_BOOTSTRAP_V2 = os.environ.get("UE_CANONICAL_BOOTSTRAP_V2") == "1"
+UE_V2_PROCESS_CONTEXT = os.environ.get("UE_V2_PROCESS_CONTEXT", "web")
+if UE_CANONICAL_BOOTSTRAP_V2:
+    if DEBUG or UE_V2_PROCESS_CONTEXT not in ("web", "worker"):
+        raise ImproperlyConfigured(
+            "Canonical V2 requires non-debug web or worker execution"
+        )
+    _v2_base_database = dict(DATABASES["default"])
+
+    def _v2_database(prefix, role=None):
+        user = os.environ.get(prefix + "_PGUSER")
+        password = os.environ.get(prefix + "_PGPASSWORD")
+        if not user or not password or user in ("postgres", "ue_v2_owner"):
+            raise ImproperlyConfigured(f"Dedicated {prefix} credentials required")
+        database = {**_v2_base_database, "USER": user, "PASSWORD": password}
+        if role:
+            database["OPTIONS"] = {"options": f"-c role={role}"}
+        return database
+
+    DATABASES["default"] = _v2_database("UE_V2_RUNTIME", "union_eyes_runtime")
+    DATABASES["ue_auth"] = _v2_database("UE_V2_AUTH")
+    DATABASES["ue_framework_request"] = _v2_database("UE_V2_FRAMEWORK_REQUEST")
+    DATABASES["ue_framework_worker"] = _v2_database(
+        "UE_V2_FRAMEWORK_WORKER", "ue_framework_worker"
+    )
+    DATABASE_ROUTERS = ["auth_core.canonical_context.CanonicalDatabaseRouter"]
+    AUTHENTICATION_BACKENDS = ["auth_core.canonical_context.CanonicalFrameworkBackend"]
+    MIDDLEWARE = [
+        (
+            "auth_core.canonical_context.CanonicalContextMiddleware"
+            if middleware == "django.contrib.auth.middleware.AuthenticationMiddleware"
+            else middleware
+        )
+        for middleware in MIDDLEWARE
+    ]
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -136,6 +173,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Authentication — OIDC (Entra External ID / Clerk)
 AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL") or os.environ.get("CLERK_JWKS_URL")
+AUTH_ISSUER = os.environ.get("AUTH_ISSUER")
+AUTH_AUDIENCE = os.environ.get("AUTH_AUDIENCE")
+AUTH_PROVIDER_NAMESPACE = os.environ.get("AUTH_PROVIDER_NAMESPACE", "entra")
 AUTH_SECRET = os.environ.get("AUTH_SECRET") or os.environ.get("CLERK_SECRET_KEY")
 AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET") or os.environ.get(
     "CLERK_WEBHOOK_SECRET"
@@ -203,6 +243,13 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ],
 }
+if UE_CANONICAL_BOOTSTRAP_V2:
+    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = [
+        "auth_core.canonical_context.CanonicalRequestAuthentication",
+    ]
+    REST_FRAMEWORK["EXCEPTION_HANDLER"] = (
+        "auth_core.canonical_context.canonical_exception_handler"
+    )
 
 # ---------------------------------------------------------------------------
 # Celery — Redis broker + result backend

@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { resolveOrgContext, getFarmer360 } = vi.hoisted(() => ({
+const { resolveOrgContext, getFarmer360, warn } = vi.hoisted(() => ({
+  warn: vi.fn(),
   resolveOrgContext: vi.fn(),
   getFarmer360: vi.fn(),
 }))
+vi.mock('@nzila/os-core/telemetry', () => ({ logger: { warn, error: vi.fn() } }))
 vi.mock('@/lib/resolve-org', () => ({ resolveOrgContext }))
 vi.mock('@/lib/farmer-360/service', () => ({
   createFarmer360Service: () => ({ getFarmer360 }),
@@ -56,6 +58,15 @@ describe('Farmer 360 authenticated read route', () => {
     expect(getFarmer360).not.toHaveBeenCalled()
   })
 
+  it('denies a malformed organization context before reading data', async () => {
+    resolveOrgContext.mockResolvedValue({ permissions: ['cora:farmer360:read'] })
+    const response = await GET(new Request('http://localhost/api/farmer-360/test'), {
+      params: Promise.resolve({ profileId }),
+    })
+    expect(response.status).toBe(403)
+    expect(getFarmer360).not.toHaveBeenCalled()
+  })
+
   it('returns the org-scoped Farmer 360 read model', async () => {
     const response = await GET(new Request(`http://localhost/api/farmer-360/${profileId}`), {
       params: Promise.resolve({ profileId }),
@@ -103,7 +114,6 @@ describe('Farmer 360 authenticated read route', () => {
       requestId: 'request-1',
       authorizationAudit: audit,
     })
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     const response = await GET(new Request(`http://localhost/api/farmer-360/${profileId}`), {
       params: Promise.resolve({ profileId }),
@@ -120,6 +130,6 @@ describe('Farmer 360 authenticated read route', () => {
         externalIdentityReference: 'hashed-reference',
       }),
     )
-    warn.mockRestore()
+    warn.mockClear()
   })
 })

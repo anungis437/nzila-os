@@ -34,20 +34,15 @@ export const CORA_FARMER360_READ_PERMISSION = 'cora:farmer360:read'
 export const CORA_ENTERPRISE_CONTEXT_WRITE_PERMISSION = 'cora:enterprise-context:write'
 export const CORA_FARMER_ASSERTION_WRITE_PERMISSION = 'cora:farmer-assertion:write'
 
-type Farmer360WriteAction = 'enterprise-context.write' | 'farmer-assertion.record'
-
-export interface Farmer360AuditIntent {
-  readonly action: Farmer360WriteAction
-  readonly orgId: string
-  readonly actorId: string
-  readonly requestId: string
-  readonly resourceId: string
-  readonly authorization: {
-    readonly policyEvaluationIds: readonly string[]
-    readonly consentRef?: string
-    readonly consentEvaluatedAt?: string
-  }
-}
+import type {
+  Farmer360WriteAction,
+  Farmer360AuditIntent,
+  Farmer360PersistencePort,
+} from '@nzila/db/cora-farmer360-contracts'
+export type {
+  Farmer360AuditIntent,
+  Farmer360PersistencePort,
+} from '@nzila/db/cora-farmer360-contracts'
 
 export interface Farmer360SourceSnapshot {
   readonly sections: readonly Farmer360Section[]
@@ -62,37 +57,6 @@ export interface Farmer360RequestContext extends OrgContext {
   readonly membershipState: 'active' | 'invited' | 'suspended' | 'revoked'
   readonly membershipRoleSource?: 'canonical' | 'fallback'
   readonly identityProvider: string
-}
-
-export interface Farmer360PersistencePort {
-  readonly getProfile: (context: DbContext, profileId: string) => Promise<Farmer360Profile | null>
-  readonly getProfileBySubject: (
-    context: DbContext,
-    subjectRef: CoraEnterpriseContextInput['subjectRef'],
-  ) => Promise<Farmer360Profile | null>
-  readonly appendEnterpriseContextVersion: (
-    context: DbContext,
-    input: CoraEnterpriseContextInput,
-    audit: Farmer360AuditIntent,
-  ) => Promise<Farmer360Profile>
-  // Persistence must atomically append Cora evidence, the assertion, and audit intent.
-  readonly appendFarmerAssertion: (
-    context: DbContext,
-    assertion: Omit<
-      Farmer360Assertion,
-      'id' | 'orgId' | 'evidence' | 'verificationState' | 'assertedBy' | 'assertedAt'
-    > & {
-      readonly purpose: string
-      readonly consentRef: string
-      readonly source: FarmerAssertionInput['source']
-      readonly observedAt: string
-    },
-    audit: Farmer360AuditIntent,
-  ) => Promise<Farmer360Assertion>
-  readonly listFarmerAssertions: (
-    context: DbContext,
-    profileId: string,
-  ) => Promise<readonly Farmer360Assertion[]>
 }
 
 export interface Farmer360ServicePorts {

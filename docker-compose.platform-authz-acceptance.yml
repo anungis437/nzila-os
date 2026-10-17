@@ -14,7 +14,7 @@ services:
       - ./packages/db/drizzle/0041_platform_authorization_authority.sql:/acceptance/0041_platform_authorization_authority.sql:ro
     healthcheck:
       test:
-        ['CMD-SHELL', 'pg_isready -U platform_authz_acceptance -d nzila_platform_authz_acceptance']
+        ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U platform_authz_acceptance -d nzila_platform_authz_acceptance']
       interval: 2s
       timeout: 3s
       retries: 30

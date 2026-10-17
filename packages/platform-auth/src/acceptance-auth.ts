@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { jwtVerify, SignJWT } from 'jose'
 import { and, eq, sql } from 'drizzle-orm'
-import { db as defaultDb } from '@nzila/db/client'
+import type { Database } from '@nzila/db/client'
+import { authDb, withAuthContext } from './auth-db'
 import { authOrganizationUsers, authUsers } from '@nzila/db/schema'
 
 export const ACCEPTANCE_AUTH_COOKIE = 'ue_acceptance_auth'
@@ -41,9 +42,9 @@ type AcceptanceJwtPayload = {
 }
 
 export type AcceptanceDb = {
-  select: typeof defaultDb.select
-  transaction?: typeof defaultDb.transaction
-  execute?: typeof defaultDb.execute
+  select: Database['select']
+  transaction?: Database['transaction']
+  execute?: Database['execute']
 }
 
 async function withAcceptanceAuthDbContext<T>(
@@ -179,8 +180,7 @@ export async function resolveAcceptanceAuthUser(input: {
 
   if (!allowedUserIds(env).has(verified.userId)) return null
 
-  const db = input.db ?? defaultDb
-  return withAcceptanceAuthDbContext(db, verified.userId, async (scopedDb) => {
+  const resolve = async (scopedDb: AcceptanceDb) => {
     const [authRow] = await scopedDb
       .select({
         id: authUsers.userId,
@@ -215,5 +215,7 @@ export async function resolveAcceptanceAuthUser(input: {
       sessionId: `acceptance:${verified.jti}`,
       jti: verified.jti,
     }
-  })
+  }
+  if (input.db) return withAcceptanceAuthDbContext(input.db, verified.userId, resolve)
+  return withAuthContext({ phase: 'identity', userId: verified.userId }, () => resolve(authDb))
 }

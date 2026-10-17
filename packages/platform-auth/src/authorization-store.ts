@@ -1,26 +1,19 @@
 import { and, eq } from 'drizzle-orm'
 import { db } from '@nzila/db/client'
 import {
-  authUsers,
   orgs,
   platformApplicationPermissionGrants,
-  platformIdentityBindings,
   platformOrganizationMemberships,
 } from '@nzila/db/schema'
 import type {
   ApplicationPermissionGrant,
   AuthorizationAuthorityStore,
-  ExternalIdentityBinding,
-  IdentityBindingState,
   OrganizationMembership,
   PermissionGrantState,
   PlatformMembershipState,
 } from './authorization-context'
 
-function identityState(value: string): IdentityBindingState {
-  if (value === 'active' || value === 'disabled' || value === 'revoked') return value
-  throw new Error(`Unknown platform identity binding state: ${value}`)
-}
+import { resolveExternalAuthIdentity } from './provider-identity'
 
 function membershipState(value: string): PlatformMembershipState {
   if (value === 'active' || value === 'invited' || value === 'suspended' || value === 'revoked') {
@@ -36,47 +29,7 @@ function grantState(value: string): PermissionGrantState {
 
 export const platformAuthorizationStore: AuthorizationAuthorityStore = {
   async findIdentityBinding(provider, providerSubject) {
-    const [row] = await db
-      .select({
-        id: platformIdentityBindings.id,
-        provider: platformIdentityBindings.provider,
-        providerSubject: platformIdentityBindings.providerSubject,
-        platformUserId: platformIdentityBindings.platformUserId,
-        state: platformIdentityBindings.state,
-        verifiedAt: platformIdentityBindings.verifiedAt,
-        principalId: authUsers.userId,
-        isActive: authUsers.isActive,
-        lifecycleState: authUsers.lifecycleState,
-      })
-      .from(platformIdentityBindings)
-      .innerJoin(authUsers, eq(platformIdentityBindings.platformUserId, authUsers.userId))
-      .where(
-        and(
-          eq(platformIdentityBindings.provider, provider),
-          eq(platformIdentityBindings.providerSubject, providerSubject),
-        ),
-      )
-      .limit(1)
-
-    if (!row) return null
-    const binding = {
-      id: row.id,
-      provider: row.provider,
-      providerSubject: row.providerSubject,
-      platformUserId: row.platformUserId,
-      state: identityState(row.state),
-      verifiedAt: row.verifiedAt,
-      principal: {
-        id: row.principalId,
-        state:
-          row.isActive === true && row.lifecycleState === 'active'
-            ? 'active'
-            : row.lifecycleState === 'deprovisioned'
-              ? 'deprovisioned'
-              : 'suspended',
-      },
-    } satisfies ExternalIdentityBinding
-    return binding
+    return resolveExternalAuthIdentity(provider, providerSubject)
   },
 
   async listMemberships(platformUserId) {
