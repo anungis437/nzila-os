@@ -1,7 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [
-    "**/.env.*local"
+    "**/.env.*local",
+    "packages/config/**",
+    "packages/**/eslint*.mjs"
   ],
   "globalPassThroughEnv": [
     "USERNAME",
@@ -30,6 +32,9 @@
         "^build"
       ],
       "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/**/*.json",
+        "$TURBO_ROOT$/governance/**/*.json",
         "src/**",
         "app/**",
         "components/**",
@@ -70,6 +75,8 @@
         "^build"
       ],
       "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/eslint.config.*",
         "src/**",
         "app/**",
         "components/**",
@@ -84,6 +91,16 @@
         "^build"
       ],
       "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/tsconfig*.json",
+        "$TURBO_ROOT$/docs/**/*.json",
+        "$TURBO_ROOT$/governance/**/*.json",
+        "$TURBO_ROOT$/scripts/**/*.ts",
+        "$TURBO_ROOT$/scripts/**/*.mjs",
+        "$TURBO_ROOT$/tooling/**/*.ts",
+        "$TURBO_ROOT$/tooling/**/*.mjs",
+        "!$TURBO_ROOT$/scripts/**/*.test.ts",
+        "!$TURBO_ROOT$/tooling/**/*.test.ts",
         "src/**",
         "app/**",
         "components/**",
@@ -120,5 +137,6 @@
     "clean": {
       "cache": false
     }
-  }
+  },
+  "cacheDir": ".turbo/cache"
 }
