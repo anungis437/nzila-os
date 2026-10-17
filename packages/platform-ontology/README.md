@@ -39,3 +39,17 @@ registerOntologyType({
 ## Drizzle Schema
 
 Import `ontologyEntities` and `ontologyRelationships` from `@nzila/platform-ontology/schema` for DB access.
+
+## Institutional vocabulary
+
+`@nzila/platform-ontology/institutional` provides the additive institutional kinds,
+directed relations and `institutionalRelationshipAllowed` validator used by the
+local operating runtime. InstitutionalProduct is deliberately separate from
+commerce Product. Source/reference types and precise consumption, ownership,
+affected-estate, intended-implementation and evidence relations do not change
+legacy ontology validators, registries, Drizzle tables or relationship meanings.
+Type-pair validity is not permission: both endpoint visibility and action-specific
+scope/authority must still pass the institutional boundary.
+
+See the [CP4 closeout](../../docs/architecture/NZILA_OS_CP4_OPERATING_RUNTIME_CLOSEOUT.md)
+for scoped proof and limitations; no production graph migration was performed.

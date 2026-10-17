@@ -12,6 +12,7 @@ Canonical platform contract interfaces for the Nzila OS monorepo.
 | **Evidence** | `@nzila/platform-contracts/evidence` | Evidence export for audit trails |
 | **Environment** | `@nzila/platform-contracts/environment` | Environment declaration and validation |
 | **Change** | `@nzila/platform-contracts/change` | Change awareness (deploys, flags, config) |
+| **Institutional foundation** | `@nzila/platform-contracts` | Explicit scope/reference/binding schemas and trusted-context shape; no inferred institutional authority |
 
 ## Usage
 
@@ -21,6 +22,12 @@ import { isValidHealthResponse } from '@nzila/platform-contracts/schemas'
 ```
 
 ## Related
+
+Institutional contracts are additive and versioned independently of the existing
+org/control-system schemas. Runtime context schemas validate shape, not trust:
+server-composed adapters must resolve identity, scope, policies and recorded
+authority. See the [accepted operating contract](../../docs/architecture/NZILA_OS_INSTITUTIONAL_OPERATING_MODEL.md)
+and [local runtime foundation](../institutional-intelligence/README.md).
 
 - `@nzila/platform-ai-contract` — AI output contracts (separate package, narrower scope)
 - `docs/platform/PLATFORM_SURFACE_MODEL.md` — Operating shell model

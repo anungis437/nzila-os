@@ -19,6 +19,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@nzila/platform-contracts": "workspace:*",
+    "@nzila/nar": "workspace:*",
     "zod": "^3.24.0"
   },
   "devDependencies": {

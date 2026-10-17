@@ -9,6 +9,8 @@
  * See @nzila/platform-ai-contract for AI-specific output contracts.
  */
 
+export * from './institutional.js'
+
 // ── App Registry (Control-Plane Authority) ──
 export {
   governanceRequirementSchema,

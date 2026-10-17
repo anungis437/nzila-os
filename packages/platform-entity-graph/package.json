@@ -6,6 +6,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
+    "./directed": "./src/directed.ts",
     ".": "./src/index.ts",
     "./types": "./src/types.ts",
     "./traversal": "./src/traversal.ts"

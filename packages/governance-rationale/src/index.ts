@@ -1,4 +1,5 @@
 export * from './schema'
+export * from './institutional'
 export { GovernanceRationaleEngine } from './engine'
 export { computeRationaleHash, replayRationale, buildCanonicalPayload } from './replay'
 export type { GovernanceRationaleStore } from './store'

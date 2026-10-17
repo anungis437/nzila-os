@@ -5173,6 +5173,12 @@ importers:
 
   packages/governance-rationale:
     dependencies:
+      '@nzila/nar':
+        specifier: workspace:*
+        version: link:../nar
+      '@nzila/platform-contracts':
+        specifier: workspace:*
+        version: link:../platform-contracts
       zod:
         specifier: ^3.24.0
         version: 3.25.76
@@ -5395,6 +5401,27 @@ importers:
 
   packages/institutional-intelligence:
     dependencies:
+      '@nzila/decision-intelligence-engine':
+        specifier: workspace:*
+        version: link:../decision-intelligence-engine
+      '@nzila/governance-rationale':
+        specifier: workspace:*
+        version: link:../governance-rationale
+      '@nzila/nar':
+        specifier: workspace:*
+        version: link:../nar
+      '@nzila/platform-contracts':
+        specifier: workspace:*
+        version: link:../platform-contracts
+      '@nzila/platform-entity-graph':
+        specifier: workspace:*
+        version: link:../platform-entity-graph
+      '@nzila/platform-ontology':
+        specifier: workspace:*
+        version: link:../platform-ontology
+      '@nzila/platform-policy-engine':
+        specifier: workspace:*
+        version: link:../platform-policy-engine
       zod:
         specifier: ^3.24.0
         version: 3.25.76

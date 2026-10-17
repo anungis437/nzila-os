@@ -10,7 +10,9 @@
     "./schema": "./src/schema.ts",
     "./lineage": "./src/lineage.ts",
     "./dependency": "./src/dependency.ts",
-    "./store": "./src/store.ts"
+    "./store": "./src/store.ts",
+    "./foundation": "./src/foundation/index.ts",
+    "./operating": "./src/operating/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -19,6 +21,13 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@nzila/platform-entity-graph": "workspace:*",
+    "@nzila/platform-ontology": "workspace:*",
+    "@nzila/platform-contracts": "workspace:*",
+    "@nzila/governance-rationale": "workspace:*",
+    "@nzila/decision-intelligence-engine": "workspace:*",
+    "@nzila/platform-policy-engine": "workspace:*",
+    "@nzila/nar": "workspace:*",
     "zod": "^3.24.0"
   },
   "devDependencies": {
