@@ -302,6 +302,12 @@
       "presentInOriginal925Delta": true
     },
     {
+      "path": "tooling/contract-tests/affected-typecheck-plan.test.ts",
+      "category": "SYNTHETIC_REGRESSION_PROOF",
+      "reason": "Updates the exact executable universe for the new package and proves its OS-core, AI-core and Console dependent closure; planner and enforcement rules stay intact.",
+      "presentInOriginal925Delta": false
+    },
+    {
       "path": "tooling/repo-inventory/output/inventory.json",
       "category": "MANDATORY_GENERATED_INVENTORY",
       "reason": "Regenerated with the canonical generator for the accepted source and test inventory.",

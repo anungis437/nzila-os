@@ -38,6 +38,8 @@ that same commit. The maintainer requested the security-design-reviewed label.
 The subsequent correction records one exact historical scanner fingerprint for
 the published alphabetical fake red-team key; application/security source is
 unchanged. No approval is inferred from other products. Merge is not authorized.
+The typecheck contract fixture now counts the new package (233 executable
+targets) and verifies its critical dependent closure; enforcement is unchanged.
 Final PR receipts must identify the tested source commit and tree separately
 from the qualification helper workflow revision.
 

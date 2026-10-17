@@ -372,11 +372,24 @@ describe('real workspace typecheck closure', () => {
   it('counts the executable typecheck universe', () => {
     expect(graph.ok).toBe(true)
     if (!graph.ok) return
-    expect(graph.typecheckPackages).toHaveLength(232)
+    expect(graph.typecheckPackages).toHaveLength(233)
+    expect(graph.typecheckPackages).toContain('@nzila/platform-restricted-data')
     expect(graph.typecheckPackages).toContain('@nzila/fx')
     expect(graph.typecheckPackages).toContain('@nzila/cfo')
     expect(graph.typecheckPackages).toContain('@nzila/webhooks')
     expect(graph.hasTypecheck.has('@nzila/civic')).toBe(true)
+  })
+
+  it('includes Restricted data and its critical consumers in the real typecheck closure', () => {
+    if (!graph.ok) throw new Error('graph')
+    expect(expandTypecheckClosure(['@nzila/platform-restricted-data'], graph)).toEqual(
+      expect.arrayContaining([
+        '@nzila/platform-restricted-data',
+        '@nzila/os-core',
+        '@nzila/ai-core',
+        '@nzila/console',
+      ]),
+    )
   })
 
   it('proves the fx to cfo dependent and the webhooks leaf on the real graph', () => {
