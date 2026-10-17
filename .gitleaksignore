@@ -202,3 +202,6 @@ fac513edd8009cfde75f3e5bba223ecc95e5a114:scripts/cora-farmer360-acceptance.mjs:n
 # Current harness source locations for the same reviewed published fixtures.
 scripts/platform-authz-acceptance.mjs:nzila-database-url-with-password:7
 scripts/cora-farmer360-acceptance.mjs:nzila-database-url-with-password:7
+
+# Cora disposable bootstrap guard: public database identifiers in a SQL allowlist, not credentials.
+packages/db/bootstrap/platform-authz-fixture.ts:generic-api-key:62
