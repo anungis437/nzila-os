@@ -372,11 +372,11 @@ describe('real workspace typecheck closure', () => {
   it('counts the executable typecheck universe', () => {
     expect(graph.ok).toBe(true)
     if (!graph.ok) return
-    expect(graph.typecheckPackages).toHaveLength(231)
+    expect(graph.typecheckPackages).toHaveLength(232)
     expect(graph.typecheckPackages).toContain('@nzila/fx')
     expect(graph.typecheckPackages).toContain('@nzila/cfo')
     expect(graph.typecheckPackages).toContain('@nzila/webhooks')
-    expect(graph.hasTypecheck.has('@nzila/civic')).toBe(false)
+    expect(graph.hasTypecheck.has('@nzila/civic')).toBe(true)
   })
 
   it('proves the fx to cfo dependent and the webhooks leaf on the real graph', () => {
@@ -410,7 +410,7 @@ describe('real workspace typecheck closure', () => {
     })
     expect(leaf.MODE).toBe('AFFECTED')
     expect(leaf.AFFECTED_PACKAGES).toEqual(['@nzila/webhooks'])
-    expect(leaf.TASK_COUNT).toBeLessThan(231)
+    expect(leaf.TASK_COUNT).toBeLessThan(graph.typecheckPackages.length)
 
     const civic = composeTypecheckPlan({
       baseSha: 'base',
@@ -420,9 +420,10 @@ describe('real workspace typecheck closure', () => {
       packageDirs: dirs,
       graph,
     })
-    expect(civic.MODE).toBe('FULL')
-    expect(civic.FALLBACK_REASON).toBe('zero-task-affected')
-    expect(civic.TASK_COUNT).toBe(231)
+    expect(civic.MODE).toBe('AFFECTED')
+    expect(civic.FALLBACK_REASON).toBe('')
+    expect(civic.AFFECTED_PACKAGES).toEqual(['@nzila/civic'])
+    expect(civic.TASK_COUNT).toBe(1)
   })
 })
 

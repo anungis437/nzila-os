@@ -11,7 +11,7 @@
 | Workspace Packages (apps|packages|services|tooling) | 259 |
 | GitHub Workflows | 59 |
 | Contract Test Files | 292 |
-| TS/JS Test Files | 2783 |
+| TS/JS Test Files | 2790 |
 | Python Test Files | 36 |
 
 ## Apps
@@ -21,7 +21,7 @@
 | abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 304 | CourtLens — governed access-to-justice and legal matter-intelligence platform. |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 106 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 238 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
-| civic | Next.js | — | ✅ | ✅ | ❌ | ❌ | 0 |  |
+| civic | Next.js | — | ✅ | ✅ | ❌ | ❌ | 24 |  |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 448 | Internal operations console — platform governance, compliance, analytics, integr |
 | control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 332 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 127 | Cora is Agricultural Institutional Infrastructure. |

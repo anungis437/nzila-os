@@ -1,0 +1,397 @@
+{
+  "schemaVersion": 1,
+  "mode": "ARCHIVAL_REVIEW_ONLY",
+  "originalHead": "e5599baee4c89982ffe4880f3bbb09f5b02a5b92",
+  "reconciliationMain": "43329c53e444dc8833d15fa3f192b8dc2b254b71",
+  "runtimeAuthorized": false,
+  "humanAdmissionAuthorized": false,
+  "productionAuthorized": false,
+  "customerDataAuthorized": false,
+  "generatedInventoryAuthority": "pnpm inventory:generate",
+  "retainedInventories": [
+    {
+      "originalPath": ".civic-runtime/slice1/checkpoints/retained-inventory.json",
+      "originalSha256": "d46a3f5b8d728f21776171e2b0123c5ac8f57afd41ce0f909dcdada935805da9",
+      "archivePath": "docs/public-service/operations/civic-archive/slice1-retained-inventory.json",
+      "normalizedLfSha256": "5699023a9e0baa9dedd3482f047efe7e12ab46bc30ae04344708fabfe55c2a83"
+    },
+    {
+      "originalPath": ".civic-runtime/slice2/final-retained-manifest.json",
+      "originalSha256": "6337a66bf7e23234716f4833fdf63f6b8dd43d6a279a42e7a450a25d711fb0c8",
+      "archivePath": "docs/public-service/operations/civic-archive/slice2-retained-manifest.json",
+      "normalizedLfSha256": "6337a66bf7e23234716f4833fdf63f6b8dd43d6a279a42e7a450a25d711fb0c8"
+    },
+    {
+      "originalPath": ".civic-runtime/slice2/final-source-inventory.json",
+      "originalSha256": "1baeb6dc8fa890e58770799b03a77195eaf96950626bf759d8a920f36300ccd3",
+      "archivePath": "docs/public-service/operations/civic-archive/slice2-source-inventory.json",
+      "normalizedLfSha256": "1baeb6dc8fa890e58770799b03a77195eaf96950626bf759d8a920f36300ccd3"
+    }
+  ],
+  "entries": [
+    {
+      "path": "apps/civic/README.md",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation."
+    },
+    {
+      "path": "apps/civic/package.json",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "7e73302cf427d94228fb692488aca20058ecfaa8a2f942a64da0cea84c4ee098"
+    },
+    {
+      "path": "apps/civic/slice1.tsconfig.json",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "dad4da6e543ef66b9e8846d30d77be9a48e3ac33408761cf5a624567b747300f"
+    },
+    {
+      "path": "apps/civic/slice1.vitest.config.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "d0c7b03adb7b3015a7540c59773f50aa8627cc942266e5429a5c2c9b9c97a453"
+    },
+    {
+      "path": "apps/civic/slice2.tsconfig.json",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "f081bdf7320d17acdaf3e2c98074b4744cf29325ac53124e9bceee6115dd99d8"
+    },
+    {
+      "path": "apps/civic/slice2.vitest.config.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "a76113a180b01b4c2bfcd27d783d945382ac5a890dc3adfde35882183d5d7f94"
+    },
+    {
+      "path": "apps/civic/src/authorization.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "7721dda976c84d43fde64a62b8d43bdd9bfb82c65b774a714e049b855efe0095"
+    },
+    {
+      "path": "apps/civic/src/kernel.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "985ef3cb8c6dae693510ae8e4c14e1cbd8749a52bde62735c31b0d5ce1be0456"
+    },
+    {
+      "path": "apps/civic/src/proof.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "909f1b565afa8209d1d4d000a8b09fee12bf1bf0f20144964e78bc62c1e4b8fa"
+    },
+    {
+      "path": "apps/civic/src/scenario.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "601d59b7441d16a835195e07fa4858c94d32fd7acaa030ec8da67e6a453d6007"
+    },
+    {
+      "path": "apps/civic/src/slice1/authorization.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "49858632d8298a83cdc21f0334455d8bccbf4555ec00e3838e4cfbe5b9312e79"
+    },
+    {
+      "path": "apps/civic/src/slice1/model.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "0b7107c64889bf03e24f6eeccff2d5ba1b468375cc0cf6850bc1a16ccc4d5ee3"
+    },
+    {
+      "path": "apps/civic/src/slice1/scenario.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "6fc375c3e2f8976c3a20303b94bce492f9ce19421e2af0ac003b95c4fe4bdb5a"
+    },
+    {
+      "path": "apps/civic/src/slice1/store.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "c86b76b3c510d90db168a56d2d962a0dcf615ad95fe2046d7c5b18f348739063"
+    },
+    {
+      "path": "apps/civic/src/slice1/worker.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "d3e86bc70562792bd95bfc48d8914478da43e7c6359b05b82df3f754768caf71"
+    },
+    {
+      "path": "apps/civic/src/slice2/anchor.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "b60a53559b0dd2b56f34432b3f4e2048bda262b4b07ba5a1d1e0ab06a5d1276f"
+    },
+    {
+      "path": "apps/civic/src/slice2/authorization.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "de0795500643ab5ba3539fab82cf2fcc5a3a1ec7cc462683d6c62e0fa52e3c6c"
+    },
+    {
+      "path": "apps/civic/src/slice2/harness.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "baa9a0a681e7cc0308c419ac8d6d558cf7a4b5fa06a4a1e905ce8a753b53e304"
+    },
+    {
+      "path": "apps/civic/src/slice2/store.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "b6f59fbcb237610d5b4da03f47ccbe34a9eaee1d537f6f7d512fd3de5d4d5da3"
+    },
+    {
+      "path": "apps/civic/src/slice2/worker.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "be9698490c68dba465c6d348631169d496d9c19d877681f651ba5132b4f71902"
+    },
+    {
+      "path": "apps/civic/tests/slice0.test.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "9034a038a5671c90bd069e81773e069b2bd6720c384e36948339a898bafa5776"
+    },
+    {
+      "path": "apps/civic/tests/slice1/boundaries.test.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "4219b57c7bf50a1bde291bb396139038b10bd2ee7aebcbc09bd5b3bd6db418e3"
+    },
+    {
+      "path": "apps/civic/tests/slice1/continuity.test.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "140910dbd4180639dc193ff0e4f22da76522ce8d3719b22b226d8a8c60846048"
+    },
+    {
+      "path": "apps/civic/tests/slice2/boundary.test.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "5ee3279c4776624755f8cdb93b0f6e4572ac56c8c21fc89801a6429b91495ba1"
+    },
+    {
+      "path": "apps/civic/tests/slice2/grant-lifecycle.test.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "71259723bae8cc3751d955bdbc0904be2db82aced08d7ad29f7ca4c0f83199a3"
+    },
+    {
+      "path": "apps/civic/tests/slice2/hardening.test.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "32953836c8469794f0ec17077fe22f66601cea7e33ce596ebdc136c82500ec80"
+    },
+    {
+      "path": "apps/civic/tests/slice2/performance.test.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "0d3961e1a741ad3b32604adcfc6d907923210d1bbbcddab14c415108de559a88"
+    },
+    {
+      "path": "apps/civic/tsconfig.json",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "4921795c0a94b224a77cd7fd859b05af6c15085b685f884a32bde293eeb1a4bc"
+    },
+    {
+      "path": "apps/civic/vitest.config.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "f59ec65696896bd1a0da502ac99729bbafa287ff502fdea39730219ebb178f71"
+    },
+    {
+      "path": "docs/oci/CIVIC_OCI_DOCTRINE_INTEGRITY.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "087ba56b48378371ea43923c2eff3116c538a9135ce707c69767d0f63c148c3d"
+    },
+    {
+      "path": "docs/public-service/operations/CIVIC_CONTROLLED_HUMAN_VALIDATION_PLAN.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "ee65c0a785db2201064189f011b5b8703d00413bd9a7433cd4e6c2bb0f005bc0"
+    },
+    {
+      "path": "docs/public-service/operations/CIVIC_HUMAN_VALIDATION_ROUND_1_AUTHORIZATION.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "370b4d25f067889ad77d88f88e75077f8ec489e8cf22c68eadfe2142f428140c"
+    },
+    {
+      "path": "docs/public-service/operations/CIVIC_HUMAN_VALIDATION_ROUND_1_MATERIALS.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "35cfab75645624659f6eb18d2696743a4883a6f344f4888dd4b39882758129d0"
+    },
+    {
+      "path": "docs/public-service/operations/CIVIC_RUNTIME_SLICE_0_AUTHORIZATION_PACKET.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "2131b922750a1a3f1c3fe05b684cbc868c498ddbec8a41550af13852f83b3744"
+    },
+    {
+      "path": "docs/public-service/operations/CIVIC_RUNTIME_SLICE_0_PROOF.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "9f87a4e9f9ffc89fbc9692e1819195cf544694a9791c35843bcbbe7bbffbe7c3"
+    },
+    {
+      "path": "docs/public-service/operations/CIVIC_RUNTIME_SLICE_1_AUTHORIZATION_PACKET.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "cba5063802838437bede1aebc1789a191852163c84a905d5b9122c3d5813dd88"
+    },
+    {
+      "path": "docs/public-service/operations/CIVIC_RUNTIME_SLICE_1_PROOF.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "aa9be82f1ef6e2cfb59a4357b09fb108b5759a60fd803f182db02570f2606ad1"
+    },
+    {
+      "path": "docs/public-service/operations/CIVIC_RUNTIME_SLICE_2_AUTHORIZATION_PACKET.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "aec2316b5b2524f3d3d7b2696e2b3444e7498691443ffd950ed946d443b12893"
+    },
+    {
+      "path": "docs/public-service/operations/CIVIC_RUNTIME_SLICE_2_PROOF.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "659d092e73cf026392792ba698aef4c03c6e802c5afb87d570fd2df5e75e066e"
+    },
+    {
+      "path": "docs/public-service/operations/three-reality-hardening-report.md",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Preserve historical decisions and proof dispositions without renewing their authority.",
+      "normalizedLfSha256": "5864532436bcd833d131745a4a5d2b3bcb5714fc0b62fd899252f3f31347d79b"
+    },
+    {
+      "path": "governance/foundations/civic-oci-doctrine.contract.json",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
+      "normalizedLfSha256": "c2194ca8f5f00116f96de040f96f4778b37d2adfb8cb61ea0efd43368be7085f"
+    },
+    {
+      "path": "scripts/lib/civic-oci-doctrine.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation."
+    },
+    {
+      "path": "scripts/lib/civic-retained-evidence.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation."
+    },
+    {
+      "path": "tooling/contract-tests/affected-typecheck-plan.test.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation."
+    },
+    {
+      "path": "tooling/contract-tests/civic-oci-doctrine-integrity.test.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation."
+    },
+    {
+      "path": "tooling/contract-tests/no-console.test.ts",
+      "category": "DURABLE_SOURCE",
+      "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation."
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.json",
+      "category": "MANDATORY_GENERATED_INVENTORY",
+      "reason": "Regenerate using current repository inventory tooling; not part of a runtime execution grant."
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.md",
+      "category": "MANDATORY_GENERATED_INVENTORY",
+      "reason": "Regenerate using current repository inventory tooling; not part of a runtime execution grant."
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.json",
+      "category": "MANDATORY_GENERATED_INVENTORY",
+      "reason": "Regenerate using current repository inventory tooling; not part of a runtime execution grant."
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.md",
+      "category": "MANDATORY_GENERATED_INVENTORY",
+      "reason": "Regenerate using current repository inventory tooling; not part of a runtime execution grant."
+    },
+    {
+      "path": "apps/civic/.env.example",
+      "category": "DURABLE_SOURCE",
+      "reason": "Unchanged frozen proof metadata, included to make archival source fingerprints complete.",
+      "normalizedLfSha256": "2a181f4d729c4d28782612aec73ee8941c4f3de62d5567b4ef8e0fba8c8466a9"
+    },
+    {
+      "path": "apps/civic/control-manifest.json",
+      "category": "DURABLE_SOURCE",
+      "reason": "Unchanged frozen proof metadata, included to make archival source fingerprints complete.",
+      "normalizedLfSha256": "0abba7656739f424e49628c0f808400a429005419230b9ebafbb5bd531f790bb"
+    },
+    {
+      "path": "apps/civic/maturity.json",
+      "category": "DURABLE_SOURCE",
+      "reason": "Unchanged frozen proof metadata, included to make archival source fingerprints complete.",
+      "normalizedLfSha256": "80f8d4522caa8cedac60342e9861af803eeb27223a76ac99537c1cd20aad2c67"
+    },
+    {
+      "path": "docs/public-service/operations/civic-archive/slice1-retained-inventory.json",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Public synthetic inventory metadata only; original raw payloads and custody anchors remain outside Git.",
+      "normalizedLfSha256": "5699023a9e0baa9dedd3482f047efe7e12ab46bc30ae04344708fabfe55c2a83"
+    },
+    {
+      "path": "docs/public-service/operations/civic-archive/slice2-retained-manifest.json",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Public synthetic inventory metadata only; original raw payloads and custody anchors remain outside Git.",
+      "normalizedLfSha256": "6337a66bf7e23234716f4833fdf63f6b8dd43d6a279a42e7a450a25d711fb0c8"
+    },
+    {
+      "path": "docs/public-service/operations/civic-archive/slice2-source-inventory.json",
+      "category": "DURABLE_ARCHIVAL_EVIDENCE",
+      "reason": "Public synthetic inventory metadata only; original raw payloads and custody anchors remain outside Git.",
+      "normalizedLfSha256": "1baeb6dc8fa890e58770799b03a77195eaf96950626bf759d8a920f36300ccd3"
+    },
+    {
+      "path": "docs/public-service/operations/civic-archive/CIVIC_PORTFOLIO_PATH_MANIFEST.json",
+      "category": "RELEASE_PACKAGING",
+      "reason": "Finite path classification and immutable historical fingerprints for portable archival review."
+    },
+    {
+      "path": "docs/public-service/operations/civic-archive/CIVIC_CURRENT_DISPOSITION.md",
+      "category": "RELEASE_PACKAGING",
+      "reason": "Current archival posture, proof custody and limits; no retrospective editing of authorization packets."
+    },
+    {
+      "path": "scripts/validate-civic-oci-doctrine.ts",
+      "category": "RELEASE_PACKAGING",
+      "reason": "Use explicit portable archival review in repository CI, separate from runtime and human admission."
+    }
+  ],
+  "excluded": [
+    {
+      "path": ".civic-runtime/**",
+      "category": "LOCAL_EVIDENCE_RETAIN",
+      "reason": "Original terminated synthetic payloads; verified read-only at their original custody location, never rerun or committed."
+    },
+    {
+      "path": ".civic-anchor/**",
+      "category": "LOCAL_EVIDENCE_RETAIN",
+      "reason": "Original custody anchors remain outside Git."
+    },
+    {
+      "path": ".civic-research/**",
+      "category": "LOCAL_EVIDENCE_RETAIN",
+      "reason": "Controlled research custody remains local; participant approvals and outreach are not conferred by archive review."
+    },
+    {
+      "path": ".turbo/**",
+      "category": "TEMPORARY_GENERATED_ARTIFACTS",
+      "reason": "Local caches and qualification logs are not release source."
+    }
+  ],
+  "supersededImplementation": []
+}

@@ -1,13 +1,27 @@
 # CIVIC
 
-Public-institution continuity lane — the second lane of the two-lane
-commercial spine alongside Union Eyes. Currently in discovery /
-market-engagement phase; **no runtime code exists in this directory yet.**
+CIVIC is the public-institution continuity lane alongside Union Eyes. The product
+remains in discovery / market engagement. **CIVIC_PRODUCT_GO_LIVE = NO_GO.**
 
-- Thesis and positioning: [`docs/CIVIC_OCI_ALIGNMENT.md`](../../docs/CIVIC_OCI_ALIGNMENT.md), [`docs/public-service/civic-thesis.md`](../../docs/public-service/civic-thesis.md)
-- Catalog entry: [`governance/portfolio/product-catalog.json`](../../governance/portfolio/product-catalog.json) (`id: "civic"`)
-- Commercial spine context: [`governance/portfolio/README.md`](../../governance/portfolio/README.md)
+This directory retains the bounded synthetic Slice 0 kernel, Slice 1 local durable
+proof and Slice 2 hardening source. All three proofs were accepted with limitations
+and their execution permissions are terminated. They are historical proof source,
+not a deployed application or an approved real pilot. No Slice 3 is authorized.
 
-This directory exists so the portfolio catalog's 1:1 `apps/` mapping validator
-(`scripts/lib/portfolio-governance.ts`) has a real directory to point at. Do
-not add product code here until a pilot is actually scoped and approved.
+- [Thesis and positioning](../../docs/CIVIC_OCI_ALIGNMENT.md)
+- [Public-service thesis](../../docs/public-service/civic-thesis.md)
+- [Portfolio catalog](../../governance/portfolio/product-catalog.json)
+- [Current archive disposition](../../docs/public-service/operations/civic-archive/CIVIC_CURRENT_DISPOSITION.md)
+
+The kernel separates authentication, application membership and delegated human
+institutional authority. Retained synthetic proofs do not establish live operating
+readiness, real institutional adoption or approval to use customer data.
+
+Repository CI reviews frozen source, historical decisions and inventory commitments
+with `scripts/validate-civic-oci-doctrine.ts`. It does not execute terminated proofs
+or claim to verify raw payloads absent from the checkout. Original runtime and
+controlled-human admission functions retain their original branch, workstation,
+custody, expiry, participant and authorization checks.
+
+Do not run proof commands as part of archival qualification. Their presence
+preserves the historical implementation; it grants no execution permission.

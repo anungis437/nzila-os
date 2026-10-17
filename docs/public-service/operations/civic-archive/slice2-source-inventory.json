@@ -1,0 +1,52 @@
+{
+  "classification": "LOCAL_SYNTHETIC_PROOF_ARTIFACT",
+  "createdAt": "2026-10-12T20:33:31.358Z",
+  "normalization": "UTF8 CRLF to LF only",
+  "entries": [
+    {
+      "file": "apps\\civic\\slice2.tsconfig.json",
+      "normalizedLfSha256": "f081bdf7320d17acdaf3e2c98074b4744cf29325ac53124e9bceee6115dd99d8"
+    },
+    {
+      "file": "apps\\civic\\slice2.vitest.config.ts",
+      "normalizedLfSha256": "a76113a180b01b4c2bfcd27d783d945382ac5a890dc3adfde35882183d5d7f94"
+    },
+    {
+      "file": "apps\\civic\\src\\slice2\\anchor.ts",
+      "normalizedLfSha256": "b60a53559b0dd2b56f34432b3f4e2048bda262b4b07ba5a1d1e0ab06a5d1276f"
+    },
+    {
+      "file": "apps\\civic\\src\\slice2\\authorization.ts",
+      "normalizedLfSha256": "de0795500643ab5ba3539fab82cf2fcc5a3a1ec7cc462683d6c62e0fa52e3c6c"
+    },
+    {
+      "file": "apps\\civic\\src\\slice2\\harness.ts",
+      "normalizedLfSha256": "baa9a0a681e7cc0308c419ac8d6d558cf7a4b5fa06a4a1e905ce8a753b53e304"
+    },
+    {
+      "file": "apps\\civic\\src\\slice2\\store.ts",
+      "normalizedLfSha256": "b6f59fbcb237610d5b4da03f47ccbe34a9eaee1d537f6f7d512fd3de5d4d5da3"
+    },
+    {
+      "file": "apps\\civic\\src\\slice2\\worker.ts",
+      "normalizedLfSha256": "be9698490c68dba465c6d348631169d496d9c19d877681f651ba5132b4f71902"
+    },
+    {
+      "file": "apps\\civic\\tests\\slice2\\boundary.test.ts",
+      "normalizedLfSha256": "5ee3279c4776624755f8cdb93b0f6e4572ac56c8c21fc89801a6429b91495ba1"
+    },
+    {
+      "file": "apps\\civic\\tests\\slice2\\grant-lifecycle.test.ts",
+      "normalizedLfSha256": "71259723bae8cc3751d955bdbc0904be2db82aced08d7ad29f7ca4c0f83199a3"
+    },
+    {
+      "file": "apps\\civic\\tests\\slice2\\hardening.test.ts",
+      "normalizedLfSha256": "32953836c8469794f0ec17077fe22f66601cea7e33ce596ebdc136c82500ec80"
+    },
+    {
+      "file": "apps\\civic\\tests\\slice2\\performance.test.ts",
+      "normalizedLfSha256": "0d3961e1a741ad3b32604adcfc6d907923210d1bbbcddab14c415108de559a88"
+    }
+  ],
+  "aggregateNormalizedSha256": "486f56431033db5d5bdfdb03905d0ff7ad736834bce33d3adfe25c56f492901f"
+}

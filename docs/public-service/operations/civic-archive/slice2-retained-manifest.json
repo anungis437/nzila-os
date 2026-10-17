@@ -1,0 +1,1045 @@
+{
+  "classification": "LOCAL_SYNTHETIC_PROOF_ARTIFACT",
+  "custodian": "Aubert Nungisa",
+  "createdAt": "2026-10-12T20:34:00.007Z",
+  "humanAcceptance": "PENDING",
+  "executionTerminatedAt": "2026-10-12T20:28:37.5704126+00:00",
+  "sourceInventory": "final-source-inventory.json",
+  "selfExcluded": true,
+  "payloadCount": 204,
+  "payloadBytes": 61518537,
+  "roots": [
+    {
+      "root": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing\\.civic-runtime\\slice2",
+      "files": 162,
+      "bytes": 61502143
+    },
+    {
+      "root": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing\\.civic-anchor\\slice2",
+      "files": 42,
+      "bytes": 16394
+    }
+  ],
+  "entries": [
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-missing-fixture-1791824477999\\docs\\public-service\\operations\\CIVIC_RUNTIME_SLICE_0_PROOF.md",
+      "bytes": 12931,
+      "sha256": "d9d3fdfdd41ca5412ef107510be3de8a2bf004b02b0d71b25b431e1b067b4830"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-missing-fixture-1791824477999\\docs\\public-service\\operations\\CIVIC_RUNTIME_SLICE_1_PROOF.md",
+      "bytes": 15304,
+      "sha256": "52d7ee68415f5a63bcb1074a7f8dcd3174257f2fb7d6875f80d2ef8303f9a618"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-missing-fixture-1791824477999\\docs\\public-service\\operations\\CIVIC_RUNTIME_SLICE_2_AUTHORIZATION_PACKET.md",
+      "bytes": 39703,
+      "sha256": "b163dc4498aa1a62140ee3dd1ac57bab7a2bfdc8912c4aa8e540ead2644b2f19"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-missing-fixture-1791824477999\\governance\\foundations\\civic-oci-doctrine.contract.json",
+      "bytes": 7250,
+      "sha256": "cdb30d38d8fc13352c0ffef5a78c7eb018355667775de104479b9589d25f4c2e"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-revoked-fixture-1791824351878\\docs\\public-service\\operations\\CIVIC_RUNTIME_SLICE_0_PROOF.md",
+      "bytes": 12931,
+      "sha256": "d9d3fdfdd41ca5412ef107510be3de8a2bf004b02b0d71b25b431e1b067b4830"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-revoked-fixture-1791824351878\\docs\\public-service\\operations\\CIVIC_RUNTIME_SLICE_1_PROOF.md",
+      "bytes": 15304,
+      "sha256": "52d7ee68415f5a63bcb1074a7f8dcd3174257f2fb7d6875f80d2ef8303f9a618"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-revoked-fixture-1791824351878\\docs\\public-service\\operations\\CIVIC_RUNTIME_SLICE_2_AUTHORIZATION_PACKET.md",
+      "bytes": 39703,
+      "sha256": "b163dc4498aa1a62140ee3dd1ac57bab7a2bfdc8912c4aa8e540ead2644b2f19"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-revoked-fixture-1791824351878\\governance\\foundations\\civic-oci-doctrine.contract.json",
+      "bytes": 9261,
+      "sha256": "ed782a166189f6059237c0f5aae4d0b71649622c477d8c3df34765d10c3b0403"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-terminated-fixture-1791824412930\\docs\\public-service\\operations\\CIVIC_RUNTIME_SLICE_0_PROOF.md",
+      "bytes": 12931,
+      "sha256": "d9d3fdfdd41ca5412ef107510be3de8a2bf004b02b0d71b25b431e1b067b4830"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-terminated-fixture-1791824412930\\docs\\public-service\\operations\\CIVIC_RUNTIME_SLICE_1_PROOF.md",
+      "bytes": 15304,
+      "sha256": "52d7ee68415f5a63bcb1074a7f8dcd3174257f2fb7d6875f80d2ef8303f9a618"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-terminated-fixture-1791824412930\\docs\\public-service\\operations\\CIVIC_RUNTIME_SLICE_2_AUTHORIZATION_PACKET.md",
+      "bytes": 39703,
+      "sha256": "b163dc4498aa1a62140ee3dd1ac57bab7a2bfdc8912c4aa8e540ead2644b2f19"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-terminated-fixture-1791824412930\\docs\\public-service\\operations\\CIVIC_RUNTIME_SLICE_2_PROOF.md",
+      "bytes": 103,
+      "sha256": "c295a624987858f15baca59370cc62b90b10c2a117e8ac366bcae4f96fff7bed"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\grant-terminated-fixture-1791824412930\\governance\\foundations\\civic-oci-doctrine.contract.json",
+      "bytes": 9239,
+      "sha256": "84b61b439d3ea51e79d9aa2f2298ad4d3c96bd38f30180c319bdd4513058b2fd"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-authority.sqlite",
+      "bytes": 69632,
+      "sha256": "64f97ab279c8a60239c5c547b97d3dffdcbbe7b16b8f783a1f80311928d60625"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-checkpoint-only.sqlite",
+      "bytes": 69632,
+      "sha256": "48d754fcaa79369d673a9f1ba2e9af7576f3a16523da3ff2610fb15ca5f8b0da"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-coherent-both.sqlite",
+      "bytes": 69632,
+      "sha256": "3ea033fdd5db1502c8d9abc0d255b7b1d65f94e2866ced2eda1256d407a82c65"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-coherent-truncation.sqlite",
+      "bytes": 69632,
+      "sha256": "b03ed1e2604107ec6ed391a5c5051c5bd9b7da69c7c3439f51c47bcd3ba0b037"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-decision-row.sqlite",
+      "bytes": 69632,
+      "sha256": "079dcb0729a94e4ac60ce46d94a5821d0a6bc9a2a51477aa6c576056f5e15224"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-foreign-checkpoint.sqlite",
+      "bytes": 69632,
+      "sha256": "48d754fcaa79369d673a9f1ba2e9af7576f3a16523da3ff2610fb15ca5f8b0da"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-inconsistent-both.sqlite",
+      "bytes": 69632,
+      "sha256": "3d838bbbbcf77e25e4edf19e44a7edd575b05f24b6d783bb4b85fd72baa99d4f"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-nested-event.sqlite",
+      "bytes": 69632,
+      "sha256": "78600a807070c4a2c379a8e577392be962d38a5b996f2b39cb0ab0f9816997d4"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-receipt-row.sqlite",
+      "bytes": 69632,
+      "sha256": "8e419753fbad95ec19597e0d24160d25cd3b5e419c9ab74ef2cab6feab434db6"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-reordering.sqlite",
+      "bytes": 69632,
+      "sha256": "fb2fa8b9ed4a686ba50c70ad6a82e62fb402deba1f4fbbe9fc9874684aa57078"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-stale-anchor.sqlite",
+      "bytes": 69632,
+      "sha256": "48d754fcaa79369d673a9f1ba2e9af7576f3a16523da3ff2610fb15ca5f8b0da"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791817025904-attack-store-only.sqlite",
+      "bytes": 69632,
+      "sha256": "3d838bbbbcf77e25e4edf19e44a7edd575b05f24b6d783bb4b85fd72baa99d4f"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-authority.sqlite",
+      "bytes": 69632,
+      "sha256": "2ab72e6314ff9ae3d414e270763b64816a08aab191aa18470e8fcfdb378965db"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-checkpoint-only.sqlite",
+      "bytes": 69632,
+      "sha256": "d65387890e24576e757d14c912a53b1f6373769f93fe45cd107dc610284872ee"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-coherent-both.sqlite",
+      "bytes": 69632,
+      "sha256": "b643ad5693d564495c49323be90769d5aa30053fa4c31788c0467f5b5dfa6f92"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-coherent-truncation.sqlite",
+      "bytes": 69632,
+      "sha256": "2ed6ab9e17944a5699b07c2e1b9219992ac7417b072cfdb5b5621d8b6dbf1dbf"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-decision-row.sqlite",
+      "bytes": 69632,
+      "sha256": "2980b3d1324f16cbc7af7ffc08ae2ac9b693a45bf31b004b7c774f7b75d61801"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-foreign-checkpoint.sqlite",
+      "bytes": 69632,
+      "sha256": "d65387890e24576e757d14c912a53b1f6373769f93fe45cd107dc610284872ee"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-inconsistent-both.sqlite",
+      "bytes": 69632,
+      "sha256": "8459e7ef3e2bec170537dbfa4044429e3537b57a9e94c8dad7d0d7c3082b2c71"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-nested-event.sqlite",
+      "bytes": 69632,
+      "sha256": "f17f532c0473152c24e48726a98ee66839fbc74c05c693a818d9ef7f48a4db32"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-receipt-row.sqlite",
+      "bytes": 69632,
+      "sha256": "d3415569a80871e7e573485a26446c5936c229689cafb9288c6d5394a3fcf79d"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-reordering.sqlite",
+      "bytes": 69632,
+      "sha256": "804d264071a7027c9ca22fecf61dcbe50e5abe36e5f9b3762c5fd0f9d36b1b3d"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-stale-anchor.sqlite",
+      "bytes": 69632,
+      "sha256": "d65387890e24576e757d14c912a53b1f6373769f93fe45cd107dc610284872ee"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\adversarial-copies\\hardening-1791825256587-attack-store-only.sqlite",
+      "bytes": 69632,
+      "sha256": "8459e7ef3e2bec170537dbfa4044429e3537b57a9e94c8dad7d0d7c3082b2c71"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\boundary-exact-1791824270813-results.json",
+      "bytes": 67859,
+      "sha256": "404dae3f5adb8526bd38435b208cf59dc614cd82d72801fc38b3b4e263fce5fa"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\boundary-exact-1791824270813-worker-25000-0.json",
+      "bytes": 30290,
+      "sha256": "883dd6b7ec26b30badb16efea4304957d78501e6d506d58c3f276d01e8c68f22"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\boundary-exact-1791824270813.sqlite",
+      "bytes": 69632,
+      "sha256": "bb8cf009f77c5dd48a1d612a778d7f56d5e4936bdf5442d19c39d81a4d54719e"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\boundary-expiry-1791824308156-results.json",
+      "bytes": 1368,
+      "sha256": "2cc10a3e0de688e72b3eaf35e40fec46623f2d319e6d9de6216411dde3462ad9"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\boundary-expiry-1791824308156.sqlite",
+      "bytes": 69632,
+      "sha256": "b1c9c7ead08225ea0598daa842154a9ba8135afff46cba4f08a0a9cad6cf6e98"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-authority.json",
+      "bytes": 425,
+      "sha256": "450e5de8df91feae022fc421aec5c31a0ea004757ab5448b63fabf4164922991"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-checkpoint-only.json",
+      "bytes": 425,
+      "sha256": "edfc5af6522f59677d62b10eb377886b020e44f8a6aaad2616ffb524797c83bf"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-coherent-both.json",
+      "bytes": 425,
+      "sha256": "5668fc7742b870429a115ef49d519c4bd0c405ef3429880badf2c05af9114c16"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-coherent-truncation.json",
+      "bytes": 425,
+      "sha256": "83cff6221d95b7c2779e835a8a53c01547ff4e5123a4b3394ea98febbf3f2ce5"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-decision-row.json",
+      "bytes": 425,
+      "sha256": "450e5de8df91feae022fc421aec5c31a0ea004757ab5448b63fabf4164922991"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-foreign-checkpoint.json",
+      "bytes": 425,
+      "sha256": "cab35fb1b092ab579b679a29738f49a92fb8c2aa22e451ea3b4c2c98a947cea9"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-inconsistent-both.json",
+      "bytes": 425,
+      "sha256": "edfc5af6522f59677d62b10eb377886b020e44f8a6aaad2616ffb524797c83bf"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-nested-event.json",
+      "bytes": 425,
+      "sha256": "450e5de8df91feae022fc421aec5c31a0ea004757ab5448b63fabf4164922991"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-receipt-row.json",
+      "bytes": 425,
+      "sha256": "450e5de8df91feae022fc421aec5c31a0ea004757ab5448b63fabf4164922991"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-reordering.json",
+      "bytes": 425,
+      "sha256": "450e5de8df91feae022fc421aec5c31a0ea004757ab5448b63fabf4164922991"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-stale-anchor.json",
+      "bytes": 425,
+      "sha256": "83cff6221d95b7c2779e835a8a53c01547ff4e5123a4b3394ea98febbf3f2ce5"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-attack-store-only.json",
+      "bytes": 425,
+      "sha256": "450e5de8df91feae022fc421aec5c31a0ea004757ab5448b63fabf4164922991"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-crash-after-append.json",
+      "bytes": 421,
+      "sha256": "82f23fb3895e8a218dc79ad9e8e7a1dc63c584bb01f76338136fb720d09befda"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-crash-before-append.json",
+      "bytes": 421,
+      "sha256": "5472729b1f383b0f5c0fcd6193fbc3155d18475c8f58f8ef2a7573e8b9795eca"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-crash-before-lock.json",
+      "bytes": 421,
+      "sha256": "a4d477d91b0475c241255c74ae66d501bb32c545d193f47cd9b938f1d0421389"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-crash-committed.json",
+      "bytes": 421,
+      "sha256": "f1cbed1ea8cda06450e0f63440f5801bae3416d66e0e7d3ced80ed6ce82de2b7"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-crash-locked.json",
+      "bytes": 421,
+      "sha256": "2b14a4a0a427bf442a4780df32ce9bbc8cdc197b332c8c32293514f2e5a17b6b"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-crash-precommit.json",
+      "bytes": 421,
+      "sha256": "a8e28c6df71f3f3707bed754216b1bd7e1c1aa5ccbe716cb30e79f867ee74cbb"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-current.json",
+      "bytes": 425,
+      "sha256": "450e5de8df91feae022fc421aec5c31a0ea004757ab5448b63fabf4164922991"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-authority.json",
+      "bytes": 1402,
+      "sha256": "ea245e5947d3dd9e19149274b815a30ba50937aa691eca4ed2eeae256eccf7d3"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-checkpoint-only.json",
+      "bytes": 1401,
+      "sha256": "525a0a69956f76dd3d71b57c2b80bcdfc880fc2b63f03f602e8076e45483df54"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-coherent-both.json",
+      "bytes": 1397,
+      "sha256": "fbaea807e76e0d938ff8a9e658a98155daf40bd03075c3b87c0a14edebc2c8a2"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-coherent-truncation.json",
+      "bytes": 1347,
+      "sha256": "2ddb58bc7b687be8e2e42c277ccda8fc9227c66402f270c99bd3aed80bafbe8a"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-decision-row.json",
+      "bytes": 1392,
+      "sha256": "dee420f270436f746724fb21db55e1e66cab18fdf38b5502cd456619bc53bd7f"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-foreign-checkpoint.json",
+      "bytes": 1407,
+      "sha256": "7c70c6c8d506ca35770b5339f55c6a3369c4e294b66b308b8c6a6655a5d5cfdd"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-inconsistent-both.json",
+      "bytes": 1405,
+      "sha256": "072cd86fe1437370ef79abc7a0a1040d1917bc44babc5ac342f91aaff970ffca"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-nested-event.json",
+      "bytes": 1408,
+      "sha256": "8c0c6c1699588e483cf4f0c35427ca83ef18b98a69b0b7e7076e55dfbfdc0a8b"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-receipt-row.json",
+      "bytes": 1382,
+      "sha256": "8375d006f32c5e13a190aa4833ddd94e20fb2844b4bad806a48158e333a85114"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-reordering.json",
+      "bytes": 1404,
+      "sha256": "b5b245376e5b9edff00ec46d995f546c7aa561e56086a3c7abd0642d66519929"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-stale-anchor.json",
+      "bytes": 1333,
+      "sha256": "b4da0ce909e80e5971e54f691a110e8d7a6d5e59ab8a65244b20078be2857409"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-detection-store-only.json",
+      "bytes": 1380,
+      "sha256": "2c3325f66a46688d3a777443028273a9b43deec08d8ff0e826ce468369fa8d47"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\hardening-1791825256587-old.json",
+      "bytes": 425,
+      "sha256": "83cff6221d95b7c2779e835a8a53c01547ff4e5123a4b3394ea98febbf3f2ce5"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-1791824947942-16-a.json",
+      "bytes": 428,
+      "sha256": "cc2037024ba5c1b3be0a1ab1e7daa70ba946fdabb8f373505ee1558f4cea3f1b"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-1791824947942-16-b.json",
+      "bytes": 428,
+      "sha256": "7201840a381d30a4c55159c642e32d981998a46b6e15773b6ba980aa29f987f7"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-1791824947942-256-a.json",
+      "bytes": 429,
+      "sha256": "8f8267db323c0417cba0a02902ea6bb3ea4ac6ee68278e76e159ab0b5c4fbb38"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-1791824947942-256-b.json",
+      "bytes": 429,
+      "sha256": "930fd7987214b61f0c136434a5a60cfba1c173753404c9d345a6a4622fb7bdab"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-1791824947942-64-a.json",
+      "bytes": 428,
+      "sha256": "9f70cbecd99cf2f2668dc5e29eb3035a3af4a99455d954a2b41accfdc8c5d9c1"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-1791824947942-64-b.json",
+      "bytes": 428,
+      "sha256": "5cb3f5ba48dbd2818ff36151441094c49236d904630ca336a81cd2e6369e1943"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-followup-integrity-1791830752938-16-a.json",
+      "bytes": 428,
+      "sha256": "d59a0f3a9ccea943c09d0752561f5627dc1f77095f8d7a587607cb9a4b326028"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-followup-integrity-1791835216680-16-a.json",
+      "bytes": 428,
+      "sha256": "ac85f665bf52f8cd7f11ea52792d2a1f3288c1ebd9ddb5ec42b7779560413951"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-followup-integrity-1791835216680-16-b.json",
+      "bytes": 428,
+      "sha256": "55748ea8019445c9b6fee40c77ccebdf84a44a48f2646e2527555e9109b60a17"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-followup-integrity-1791835216680-256-a.json",
+      "bytes": 429,
+      "sha256": "342fe0ccad9e087fc381f3468bc5437813a115ee039e5339b1f32924d5d348e2"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-followup-integrity-1791835216680-256-b.json",
+      "bytes": 429,
+      "sha256": "de009afed1e28ccf13ee4297a56b15fe093a1932ad05f31bbff14d37da337007"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-followup-integrity-1791835216680-64-a.json",
+      "bytes": 428,
+      "sha256": "f6ba2eafe0f6cd874e2c01b895f34a6bdfdf7c1e01790309689488329ceb8f34"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\checkpoints\\performance-followup-integrity-1791835216680-64-b.json",
+      "bytes": 428,
+      "sha256": "048e5263d1acf495d37c5926b45a1cd71f578978c030f0ec12ba2957f9267cc2"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\corrected-boundary-console.txt",
+      "bytes": 783,
+      "sha256": "0babff636ad6de048f40fe9b744158671fcc645480f316d777577f06693191bf"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\corrected-hardening-console.txt",
+      "bytes": 432,
+      "sha256": "d3598407048402c8bc9157a6d754cb9670c3709f0be65146e43c3d63f4778207"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\corrected-performance-console.txt",
+      "bytes": 430,
+      "sha256": "39ba15ea72b1946a41112bca2d58e31c62ec719cafc881e379716acd7a27a89b"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\corrected-proof-outcome-1791828959855.json",
+      "bytes": 31257,
+      "sha256": "4d034e2902eaf3e2af3b039d429a9817daef1dd083b9f3479a0c8eee9a61f667"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\corrected-sourcechecks-console.txt",
+      "bytes": 442,
+      "sha256": "4c01a73849850e6cd883cf67bc67f841a4ddba6a159f5f141d4aca29bfbc135c"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\final-contested-rerun-console.txt",
+      "bytes": 1848,
+      "sha256": "31cf7b97421f0f5c18cb76642c48673904ab977107ed691cdadb25224641b36f"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\final-hardening-console.txt",
+      "bytes": 1838,
+      "sha256": "b3a027bdb83d892dc1a9e0ef3a0793b44a1938eb9cdfc2b0fd3272de991bf615"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\final-performance-retention-cleanup.json",
+      "bytes": 418,
+      "sha256": "28ffa6764a6825faa17e64dd9c8ff8414da5a40ebf219e6a45393e78ec0ee1af"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\final-performance-retention-plan.json",
+      "bytes": 114488,
+      "sha256": "00e1c03313eebbd0ba3833e24abd1564d411ae58791a154f4efbb8b0a13754cd"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\final-performance-summary.json",
+      "bytes": 23868,
+      "sha256": "2f39d6a66b90adeb59f7f622a3926aa226d58eec1cbd403ff24fbb8607201719"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\final-performance-support-evidence.jsonl.gz",
+      "bytes": 43280030,
+      "sha256": "363205ad0b7cce1c8c2444df05cb3448c7e28f1026d3084b30fb82734d0ba456"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\final-source-inventory.json",
+      "bytes": 2085,
+      "sha256": "1baeb6dc8fa890e58770799b03a77195eaf96950626bf759d8a920f36300ccd3"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\generated-artifact-inventory-final-1791828959855.json",
+      "bytes": 427629,
+      "sha256": "4dc284383ce8bc726b4b3d413b6023e8566b6d65bd44d4e95d3656c504439043"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\grant-lifecycle-1791824351889-revoked-results.json",
+      "bytes": 6171,
+      "sha256": "9ab2d695998c21c0e4034f81e0d286292dc8cea229864c11d2d497f5ce497f97"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\grant-lifecycle-1791824351889-revoked.sqlite",
+      "bytes": 69632,
+      "sha256": "f8e324ecc5809523cf614c304daeadfdc4d6af0a2a40296f3d5055f8d8f7a898"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\grant-lifecycle-1791824412948-terminated-results.json",
+      "bytes": 6247,
+      "sha256": "7942a46c20350b2a4766b6c1b1978d467fa6cc51ccb334a21882e54887cfc117"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\grant-lifecycle-1791824412948-terminated.sqlite",
+      "bytes": 69632,
+      "sha256": "1da0be97a010445f90c77b3cfe073c8544fe1b92e21792b3bf8314c3c0b51552"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\grant-lifecycle-1791824478013-missing-results.json",
+      "bytes": 5901,
+      "sha256": "a5222298fd6eb6531e527aa19edd55a83b93a6251b4885ce42256f4733165805"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\grant-lifecycle-1791824478013-missing.sqlite",
+      "bytes": 69632,
+      "sha256": "5e549784f4de640aeb4a43c3dc0ed062125f676b161f07478addc4ef3e817892"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791819099262-contested-14.sqlite",
+      "bytes": 69632,
+      "sha256": "8a6e65dbc7c094de2fb13e4ef8e583989fc370c396f69cc17cab2932e5a4abb3"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791819099262-decision-0.sqlite",
+      "bytes": 77824,
+      "sha256": "227903f1a6fc89681930a453fb7afad2b94bfb6638f0c8a4f1fd4e2c7f65aa98"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791822114991-contested-18.sqlite",
+      "bytes": 69632,
+      "sha256": "3e761cdebca31fca18b82bb22b54408c9eae0129fa43561a62fc1bda5945d7d7"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791824551926-results.json",
+      "bytes": 13278,
+      "sha256": "17c565d96a53a45032c6c1f46295817f6f74c707cb2261ba21bb67ab72b0380a"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-canonical.sqlite",
+      "bytes": 69632,
+      "sha256": "b4b1b1f6aa807ca5dfa30b2ed4a83987e84be648b53bd0d17309287dee4eb926"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-contested-0.sqlite",
+      "bytes": 77824,
+      "sha256": "884791cdca67d25162321ef686439a0d2742963c9dd03202a9cc7839db511cb4"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-contested-1.sqlite",
+      "bytes": 69632,
+      "sha256": "15544061091a3aea43ba9b3e10ea8cfa754bbfed19555e5cec296fa3f7974a4a"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-crash-after-append.sqlite",
+      "bytes": 69632,
+      "sha256": "f05591b4de42fdeff7cb58ca8c87ad6f1078f664f99925e325367c2055570317"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-crash-before-append.sqlite",
+      "bytes": 69632,
+      "sha256": "9bc65ed6fdcd5fabfa7716c05da0772a23e549b84d37b3b06603d46b1577d894"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-crash-before-lock.sqlite",
+      "bytes": 69632,
+      "sha256": "840cbe9c893a2f18fffe3b4d2b8063f6bc9d98c6e0fe8d827e63f959fdc11968"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-crash-committed.sqlite",
+      "bytes": 69632,
+      "sha256": "a7f30677ddd50255061cfd9f9fe7d54651ac6dae1679a869c934583ef45efc0e"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-crash-locked.sqlite",
+      "bytes": 69632,
+      "sha256": "bbc3adda7514eb67caf1194e1d32d44bebd9ab95cd8e8b58ded82f5e97e030b1"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-crash-precommit.sqlite",
+      "bytes": 69632,
+      "sha256": "5db53349ee1461f4e6c585c74f78e53910e910dc016a6e3061bc68ae6845ccad"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-decision-0.sqlite",
+      "bytes": 77824,
+      "sha256": "03db06137fa3d04e9f7a9586f4b47075591fefc689ccf6ebc58530dc356e9f05"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-decision-1.sqlite",
+      "bytes": 77824,
+      "sha256": "0364173b6015de292f3aabd4e52004eb6b9a9ce057afc0e4b47d8ad1330dbce8"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-expired-delegation.sqlite",
+      "bytes": 57344,
+      "sha256": "fee059d2b6c7ed51853832896f38a7c52166736b809b8e619a1733de39955e1d"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-expired-instrument.sqlite",
+      "bytes": 57344,
+      "sha256": "a4bf3eaaa91acedeacacc3c3e03f0cff987f432df7684b329b46de932554d132"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-expiry-0.sqlite",
+      "bytes": 57344,
+      "sha256": "9b5131c9a97fb2a5027300fc6d36d613d1bffeca53e6889ae37f7b050b3dc6d7"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-expiry-1.sqlite",
+      "bytes": 57344,
+      "sha256": "fee059d2b6c7ed51853832896f38a7c52166736b809b8e619a1733de39955e1d"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-isolation.sqlite",
+      "bytes": 294912,
+      "sha256": "3087c723773c5c7550fc1c4d4b9e7223d4a5726ef648191ed621bf5fc1eff06d"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-negative.sqlite",
+      "bytes": 77824,
+      "sha256": "a2719d238d0b284cfc63ecf809f3cb22c88c1f6c8f8e6634281b85a9cc648a79"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-results.json",
+      "bytes": 1992552,
+      "sha256": "92c37cd0e574931185326ce2d757d23e1b5e965e17365eda0a258ee6994c1d3d"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-revocation-0.sqlite",
+      "bytes": 69632,
+      "sha256": "a948125275a7ae316cb9a63a8cdd7a9bb440095abf558d57a863a44dcca3387d"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-revocation-1.sqlite",
+      "bytes": 69632,
+      "sha256": "769a9a43e6f3af6d393cd1e40063135ae4c1b565a9bae4917bf17b8ec06ffed5"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-rollback-0.sqlite",
+      "bytes": 69632,
+      "sha256": "31976ec53f6d316a4404be8449aaefb5250d599a9d7e86c348fa65e80df20959"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\hardening-1791825256587-rollback-1.sqlite",
+      "bytes": 69632,
+      "sha256": "e02d35ff2a6c9ec2a4fb075b30860dc5984a97a32e5ad0bc67a8c22917d4adcb"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\minimum-retention-cleanup-1791829761628.json",
+      "bytes": 680840,
+      "sha256": "93928fb0dae6f352b3ac3f21dc7c9cee4f3e888ec1996a5caea6ae8d75701c5a"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\minimum-retention-plan-1791829550397.json",
+      "bytes": 648536,
+      "sha256": "06b6223ea42880236a15d34547f1b45213cc12598844aa497a05110fa3d8eb22"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\negative-details-1791827088240-results.json",
+      "bytes": 257454,
+      "sha256": "eac5bd6f22d374f0ce52e715928065ee4f04b83ae8cd4aba2fc86d293bc2c5ca"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-1791824947942-base-16.sqlite",
+      "bytes": 315392,
+      "sha256": "473b7a103985b9009d95e14ba981927d410489c2bdaf5366e74658906d4eb152"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-1791824947942-base-256.sqlite",
+      "bytes": 4452352,
+      "sha256": "ee8a2c3408a486038c233e2c4b93b1773ed6c388e9dedca7ab8e0ce96a18f3b3"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-1791824947942-base-64.sqlite",
+      "bytes": 1146880,
+      "sha256": "bba7ab281c5f1aed39e49799d37eab02a08d761200ab48a91c2a6e90d968fe16"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-1791824947942-results.json",
+      "bytes": 93630,
+      "sha256": "90d0e77adb9470ea87c640f722824b8953fda9c8c7844d319520f79cde87504f"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-final-heavy-console.txt",
+      "bytes": 4806,
+      "sha256": "fb2ed89f127521c2eab8e7d977bb4f0f5fd8edb676f199e806c188f70d6b44fe"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-final-light-console.txt",
+      "bytes": 4829,
+      "sha256": "7873c3262e2388ced1a8177cc40aa5cb14f967d4868370176762489fffe96e4e"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-final-mutation-console.txt",
+      "bytes": 3645,
+      "sha256": "da9d46ad8e12ebcf46a964f5e8f3d7d28290354d3797dd48c13e0d56b8f3ed02"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-authorization-1791833554594-results.json",
+      "bytes": 162812,
+      "sha256": "2d29dcdc5fb25194833303e1bb00c25de775498ba737d79ab85fb80c0e0dfde0"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-decision-1791835461017-results.json",
+      "bytes": 238155,
+      "sha256": "fd09c0842cee73763ca79e251ddaa6bd7d1ed63dc48d28da6b45681cd6b1b1e1"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-heavy-console.txt",
+      "bytes": 1471,
+      "sha256": "17aae1f01232c163c4cf2bef25e502d6ce8ae25cd55e02613a03271e1e604743"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-integrity-1791835216680-results.json",
+      "bytes": 198591,
+      "sha256": "e3b58411452210e2728651cd69f7a75f9b4f66d484ccc1c8a78121601d656dcb"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-light-console.txt",
+      "bytes": 250,
+      "sha256": "35c6d9cbb3f59d104e8627ba0da82f9265db87044bb3c74b5ebcff316cca484e"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-mutation-console.txt",
+      "bytes": 250,
+      "sha256": "66461610436651ae537fcac48692c0726e7c621eb5829563b67f8b7b07b7ec47"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-plan-1791830330081.json",
+      "bytes": 13159,
+      "sha256": "e660f609b3bb2b7d0bef772e35541ccfbbf6b790f99306368a63006a7e727db4"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-read-1791834228542-results.json",
+      "bytes": 172285,
+      "sha256": "77ed1c176289ca997444ea7a990d44d14bc7ca8926c66e23773052418ab95044"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-replay-1791835082672-results.json",
+      "bytes": 187213,
+      "sha256": "2db07cf6edf19e685c27cd57e62ee8a288e66dcd20e98d7217377099b558c95d"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-restart-1791833554610-results.json",
+      "bytes": 210416,
+      "sha256": "e16ebdd8d7fb2f2951a2f4e0302f5c04dfaf0ad6a5c684aa435d0cb2a9f228c7"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\performance-followup-write-1791833554591-results.json",
+      "bytes": 238004,
+      "sha256": "df23b474bc1413cd0cb0a6f5b9d0c621399a70fd2d3e690445ae85f17b7fbab6"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\proof-limitations-1791820189096.json",
+      "bytes": 2090,
+      "sha256": "68940d66acbced3b02fcb67103cd3fdd3e2dce3eb7dd74723b22f6c0eb29fcb9"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\proof-outcome-1791822692858.json",
+      "bytes": 7724,
+      "sha256": "9f6931515ee17e1f6cd6350ab17bffef64e2258da472bd744765c19963101ddf"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\raw-negative-driver-attempts-1791827812313.json",
+      "bytes": 1178,
+      "sha256": "29001a260596c95d5c733f645e60ae7429c2d7d72eb38389615b8c0e8ae7c0f6"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\raw-negative-native-console.txt",
+      "bytes": 871,
+      "sha256": "91c253c6b3637b9bc38eac7af404f147e1edf780a7436573501475585167a587"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\retained-artifact-manifest-1791829814183.json",
+      "bytes": 79153,
+      "sha256": "7da36e902843d6f54ba3cd44cc97b17dbef11317345001a0841b6698161dfe86"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\retained-machine-evidence-1791829550397.json.gz",
+      "bytes": 2193092,
+      "sha256": "210c28fc24efedc751398cd55cbd5d814739bd005537d542fa1c8873a090a1f0"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\source-inventory-final-1791819209821.json",
+      "bytes": 2772,
+      "sha256": "725cbd0820536fd55d4e79851676cbb581247b03f99aaa1daffd2a9b5075bc36"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\source-inventory-final-1791823732046.json",
+      "bytes": 3057,
+      "sha256": "4a6cbfd24c6397ba2c564ec785540b33b9b417081c2f604207f5ebc377df0e44"
+    },
+    {
+      "file": ".civic-runtime\\slice2\\source-inventory-final-1791828959855.json",
+      "bytes": 4069,
+      "sha256": "0c20b2d1610d391cac31b156ec0f474769c58fc5b61edfc0479254fdcc8e36d7"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-after-append-receipt.json",
+      "bytes": 608,
+      "sha256": "919210a88a5fecde22ed9f4c12d6346a409a4269054d0649dc6c223698f84d6e"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-after-append-trusted-pin.json",
+      "bytes": 164,
+      "sha256": "21bc58833d3ac72a9735d5d65f63b89dbe91a55607234e203bb42aad1bc768c8"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-before-append-receipt.json",
+      "bytes": 608,
+      "sha256": "1312e716354c2cf5a05bb1e9c817ca330564e8a2c984a68e5622f0beaa432d20"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-before-append-trusted-pin.json",
+      "bytes": 164,
+      "sha256": "7dba067433a4c2d80da210bbd8df2a1e5ee593b91b45a70e390156b47c71a7bd"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-before-lock-receipt.json",
+      "bytes": 608,
+      "sha256": "4d0fe893e53b633a67fdf9cbd9ff8954f0437d5cf128479c7330a681853ac6e6"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-before-lock-trusted-pin.json",
+      "bytes": 164,
+      "sha256": "043a189259cc6c5d11db5047d837cd241395a65d46e293cc0ec364a550130464"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-committed-receipt.json",
+      "bytes": 608,
+      "sha256": "97f632173c7face0c0fff635196387a54b35fea56aeb9a49124a56cd1a826989"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-committed-trusted-pin.json",
+      "bytes": 164,
+      "sha256": "d75dc13e13ca7f781894dadcc5e0f873ff4e570aa36f33ba0c3ca3d1a3883d32"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-locked-receipt.json",
+      "bytes": 608,
+      "sha256": "eb9e14ef0c12ca5ccad635c47a056de46a1fdcb11f0b882f548260b46d77af62"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-locked-trusted-pin.json",
+      "bytes": 164,
+      "sha256": "23a34ad95ad54dad36c2de6c7b02e45364177af17075e8dcdc35d816551481c1"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-precommit-receipt.json",
+      "bytes": 608,
+      "sha256": "e984cf39ef4bf253f1c6c9956e6a8fd8fd05f55531ff6ce092e7ec17855e9558"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-crash-precommit-trusted-pin.json",
+      "bytes": 164,
+      "sha256": "2cb194adaf1a4c62be06d5f113ece376865433ae4f5c8752666743ff90a338a6"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-current-receipt.json",
+      "bytes": 674,
+      "sha256": "f628b47c14dc6f2725fa9a5b52f25281d3f18c7a98f182acd359df70335eceb9"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-current-trusted-pin.json",
+      "bytes": 164,
+      "sha256": "33688e12c39929f204aca4fc6ac5094498d956161815cae95b3e1421b6746f24"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-old-receipt.json",
+      "bytes": 612,
+      "sha256": "1bd8aeaae3185d9718f099bcd5a9aea5e1176e42d781418c35cda0d3995eb2cd"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\hardening-1791825256587-old-trusted-pin.json",
+      "bytes": 164,
+      "sha256": "267b8af35728bf965583f74b0f00e9f448a3f9154825abd838ae161d189b081b"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-16-a-receipt.json",
+      "bytes": 615,
+      "sha256": "f5f9c063d2886ceab084e468491c137b4dab9a8772d37f548a18fcb1922d07b2"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-16-a-trusted-pin.json",
+      "bytes": 165,
+      "sha256": "34a9fb4f91aa090a6f15d3b39a143ee28c3bfa81164b3f9c1410ae83f71bbc8e"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-16-b-receipt.json",
+      "bytes": 615,
+      "sha256": "af73680c592e5b19c18fd9daa687a3111686d0bc57b7e10023379b1499873a8f"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-16-b-trusted-pin.json",
+      "bytes": 165,
+      "sha256": "8673efcc406f90942d44345ec38988a4278727fb65be4e338b17e0ed6854b7ea"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-256-a-receipt.json",
+      "bytes": 616,
+      "sha256": "ab01aa8a1b3347d3ed6a33f99b80b6ba2f0087fc6b8af8627f22f9daa064dd01"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-256-a-trusted-pin.json",
+      "bytes": 166,
+      "sha256": "5100fcc6322ab9960480b4a16571f7e2810da3ff803b81bbe7dc09e3df3e7cfe"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-256-b-receipt.json",
+      "bytes": 616,
+      "sha256": "623fd90ffdf0369ec28b8ca65f02cf0062165bffc818a6df9b9a6bef8cec3daf"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-256-b-trusted-pin.json",
+      "bytes": 166,
+      "sha256": "8536c702fbb26667aee1a5b9e625d7e7e3711c6aa7bab6b98ce2ce4d05f5f69f"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-64-a-receipt.json",
+      "bytes": 615,
+      "sha256": "ce169b6086c4cb0557e7354dd6ee1fd2787651c8d88fa64348bca221054e5cde"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-64-a-trusted-pin.json",
+      "bytes": 165,
+      "sha256": "76bb568a12b16114c164b5a19f293c2cb838da539e87135546f416359e7a1e23"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-64-b-receipt.json",
+      "bytes": 615,
+      "sha256": "0a5bdeda3b3cfcb9b4bdedcc0470d62ef67884324a5e1b92ae033a6326756e49"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-1791824947942-64-b-trusted-pin.json",
+      "bytes": 165,
+      "sha256": "9ad06d7427b6a75918ce6bd20b3712d7643ca8e19202e181843952c2cf27f86d"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791830752938-16-a-receipt.json",
+      "bytes": 615,
+      "sha256": "bb03f392937a71bcab17031b9391018b197639ac890c11c8a0d395182fbb8254"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791830752938-16-a-trusted-pin.json",
+      "bytes": 165,
+      "sha256": "bbf3cdfac9d98377def03b15bb23027baf4113be22f660131337230bb34d9cd8"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-16-a-receipt.json",
+      "bytes": 615,
+      "sha256": "acaf27bc68f07157f60337459e93ef070ab8a0fc7ae6137a7b7f1d98d9c3dd77"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-16-a-trusted-pin.json",
+      "bytes": 165,
+      "sha256": "fa5b83ffd6574515d6ab6d305b0e7c2efb40d9aec0a5b117fe968276ef7d6ca7"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-16-b-receipt.json",
+      "bytes": 615,
+      "sha256": "e7defb0f28a0f0566b56011a5a691813387f85256a79e96527888bb951aef1b1"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-16-b-trusted-pin.json",
+      "bytes": 165,
+      "sha256": "ad8e5ea7e8020051a930e8db9e15e327cb4498734c65c3df22b25ae3de6c7c30"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-256-a-receipt.json",
+      "bytes": 616,
+      "sha256": "b98a1b2bd5f97dcac8861d05a17b9ca1858305b4b739b8efcb920b0d2a85d2ab"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-256-a-trusted-pin.json",
+      "bytes": 166,
+      "sha256": "850913a19fab14b4487ad251ece3a03b3ccb4c50ad17fcdb90137937bd4edc5a"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-256-b-receipt.json",
+      "bytes": 616,
+      "sha256": "98720da569011d88784cc5dbb7585862618562f394c7286377ea91b3aaf0f08a"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-256-b-trusted-pin.json",
+      "bytes": 166,
+      "sha256": "13f272c048361b5dc15019bc7705466654089086c4f9071f590ade5b57cda272"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-64-a-receipt.json",
+      "bytes": 615,
+      "sha256": "cc091dd9b9d2c672921c335abab9ec6dd349f95d13d74875239fe864c09ccd58"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-64-a-trusted-pin.json",
+      "bytes": 165,
+      "sha256": "108d656bea7b33d24d7fb4dec1ffd3bc48fadd4380b6af20658fcbe8102ccaef"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-64-b-receipt.json",
+      "bytes": 615,
+      "sha256": "45b314eca304192c0063fd703cbd051089cd4136270324ec455811a3d7821882"
+    },
+    {
+      "file": ".civic-anchor\\slice2\\performance-followup-integrity-1791835216680-64-b-trusted-pin.json",
+      "bytes": 165,
+      "sha256": "55e92871b2a63bfeed7698d1af6d347644ec0f20707896ba1365beb05117d84b"
+    }
+  ]
+}

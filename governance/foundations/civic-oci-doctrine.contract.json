@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "identity": {
     "canonicalMethod": "OCI",
     "civicRole": "public-service-front-door",
@@ -83,10 +83,120 @@
   "runtimeAuthorization": {
     "authorized": false,
     "applicationRoot": "apps/civic",
+    "slice0": {
+      "enabled": true,
+      "scope": "synthetic-runtime-slice-0",
+      "decisionArtifact": "docs/public-service/operations/CIVIC_RUNTIME_SLICE_0_AUTHORIZATION_PACKET.md",
+      "startingSha": "1c337567635bb86ea0df7831557d8d2d22df1e6f",
+      "branch": "civic/three-reality-hardening",
+      "worktree": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing",
+      "effectiveAt": "2026-10-10T16:17:50Z",
+      "expiresAt": "2026-10-17T16:17:50Z",
+      "revokedAt": null,
+      "dataBoundary": "SYNTHETIC_ONLY",
+      "production": false,
+      "deployment": false,
+      "slice1": false,
+      "runtimeRoot": "apps/civic",
+      "proofOwner": "Aubert Nungisa",
+      "sharedReuse": [
+        "@nzila/platform-contracts/identity",
+        "@nzila/platform-contracts/org-scope",
+        "@nzila/platform-contracts/role",
+        "@nzila/platform-contracts/audit-event"
+      ],
+      "writablePaths": [
+        "apps/civic/src",
+        "apps/civic/tests",
+        "apps/civic/fixtures",
+        "apps/civic/package.json",
+        "apps/civic/README.md",
+        "apps/civic/tsconfig.json",
+        "apps/civic/vitest.config.ts",
+        "docs/public-service/operations/CIVIC_RUNTIME_SLICE_0_AUTHORIZATION_PACKET.md",
+        "docs/public-service/operations/CIVIC_RUNTIME_SLICE_0_PROOF.md",
+        "governance/foundations/civic-oci-doctrine.contract.json",
+        "scripts/lib/civic-oci-doctrine.ts",
+        "tooling/contract-tests/civic-oci-doctrine-integrity.test.ts",
+        "docs/oci/CIVIC_OCI_DOCTRINE_INTEGRITY.md"
+      ]
+    },
+    "slice1": {
+      "enabled": true,
+      "scope": "synthetic-local-runtime-slice-1",
+      "decisionArtifact": "docs/public-service/operations/CIVIC_RUNTIME_SLICE_1_AUTHORIZATION_PACKET.md",
+      "startingSha": "1c337567635bb86ea0df7831557d8d2d22df1e6f",
+      "branch": "civic/three-reality-hardening",
+      "worktree": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing",
+      "effectiveAt": "2026-10-10T17:56:14Z",
+      "expiresAt": "2026-10-17T17:56:14Z",
+      "revokedAt": null,
+      "dataBoundary": "SYNTHETIC_ONLY",
+      "production": false,
+      "deployment": false,
+      "slice2": false,
+      "proofOwner": "Aubert Nungisa",
+      "checkpointCustodian": "Aubert Nungisa",
+      "storageDirectory": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing\\.civic-runtime\\slice1",
+      "checkpointDirectory": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing\\.civic-runtime\\slice1\\checkpoints",
+      "writablePaths": [
+        "apps/civic/src/slice1", "apps/civic/tests/slice1",
+        "apps/civic/slice1.tsconfig.json", "apps/civic/slice1.vitest.config.ts",
+        "docs/public-service/operations/CIVIC_RUNTIME_SLICE_1_AUTHORIZATION_PACKET.md",
+        "docs/public-service/operations/CIVIC_RUNTIME_SLICE_1_PROOF.md",
+        "governance/foundations/civic-oci-doctrine.contract.json",
+        "scripts/lib/civic-oci-doctrine.ts",
+        "tooling/contract-tests/civic-oci-doctrine-integrity.test.ts",
+        "docs/oci/CIVIC_OCI_DOCTRINE_INTEGRITY.md"
+      ],
+      "sharedReuse": [
+        "@nzila/platform-contracts/identity", "@nzila/platform-contracts/org-scope",
+        "@nzila/platform-contracts/role", "@nzila/platform-contracts/audit-event"
+      ]
+    },
     "authority": [
       "apps/civic/README.md",
       "docs/CIVIC_OCI_ALIGNMENT.md"
     ],
+    "slice2": {
+      "enabled": true,
+      "scope": "synthetic-local-runtime-slice-2",
+      "decisionArtifact": "docs/public-service/operations/CIVIC_RUNTIME_SLICE_2_AUTHORIZATION_PACKET.md",
+      "startingSha": "1c337567635bb86ea0df7831557d8d2d22df1e6f",
+      "branch": "civic/three-reality-hardening",
+      "worktree": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing",
+      "effectiveAt": "2026-10-12T14:38:49.5329498+00:00",
+      "expiresAt": "2026-10-19T14:38:49.5329498+00:00",
+      "revokedAt": "2026-10-12T20:28:37.5704126+00:00",
+      "dataBoundary": "SYNTHETIC_ONLY",
+      "production": false,
+      "deployment": false,
+      "slice3": false,
+      "proofOwner": "Aubert Nungisa",
+      "anchorCustodian": "Aubert Nungisa",
+      "storageDirectory": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing\\.civic-runtime\\slice2",
+      "checkpointDirectory": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing\\.civic-runtime\\slice2\\checkpoints",
+      "adversarialDirectory": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing\\.civic-runtime\\slice2\\adversarial-copies",
+      "anchorDirectory": "C:\\APPS\\nzila-os.worktrees\\pasted-text-processing\\.civic-anchor\\slice2",
+      "writablePaths": [
+        "apps/civic/src/slice2",
+        "apps/civic/tests/slice2",
+        "apps/civic/slice2.tsconfig.json",
+        "apps/civic/slice2.vitest.config.ts",
+        "docs/public-service/operations/CIVIC_RUNTIME_SLICE_2_AUTHORIZATION_PACKET.md",
+        "docs/public-service/operations/CIVIC_RUNTIME_SLICE_2_PROOF.md",
+        "governance/foundations/civic-oci-doctrine.contract.json",
+        "scripts/lib/civic-oci-doctrine.ts",
+        "tooling/contract-tests/civic-oci-doctrine-integrity.test.ts",
+        "docs/oci/CIVIC_OCI_DOCTRINE_INTEGRITY.md"
+      ],
+      "sharedReuse": [
+        "@nzila/platform-contracts/identity",
+        "@nzila/platform-contracts/org-scope",
+        "@nzila/platform-contracts/role",
+        "@nzila/platform-contracts/audit-event"
+      ]
+    },
     "rationale": "A dedicated boolean is required because no existing machine authority distinguishes an intentional app placeholder from authorization to add product runtime code."
   },
   "historicalScope": {

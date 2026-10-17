@@ -2,5 +2,10 @@
   "name": "@nzila/civic",
   "version": "0.0.0",
   "private": true,
-  "description": "CIVIC — cautious public-institution continuity lane. Stub placeholder; no runtime code yet. See docs/CIVIC_OCI_ALIGNMENT.md and governance/portfolio/product-catalog.json (id: \"civic\")."
+  "description": "CIVIC local synthetic Slice 0 proof only; no production or deployment authorization.",
+  "scripts": {
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "proof": "tsx --tsconfig tsconfig.json src/proof.ts"
+  }
 }
