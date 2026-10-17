@@ -34,6 +34,13 @@
  *   - Partner-scoped (e.g., `partners`, `deals` — use `partner_id`, not `org_id`)
  */
 export const ORG_SCOPED_TABLES = [
+  // Cora-owned evidence and Farmer 360 records (never Agrimo writes).
+  'coraEvidenceRecords',
+  'coraEvidenceConclusions',
+  'coraConclusionEvidenceRefs',
+  'coraFarmer360Profiles',
+  'coraFarmer360ContextVersions',
+  'coraFarmer360Assertions',
   // ── orgs.ts ─────────────────────────────────────────
   'orgRoles',
   'orgMembers',
@@ -377,6 +384,7 @@ export type OrgScopedTableName = (typeof ORG_SCOPED_TABLES)[number]
  * Each exclusion must have a documented reason.
  */
 export const NON_ORG_SCOPED_TABLES = [
+  { table: 'platformMethodologyVersions', reason: 'Global versioned methodology reference registry; contains no organization-owned records' },
   // Root entity table — id IS the Org
   { table: 'orgs', reason: '`id` IS the Org identifier — root table' },
   // Global person registry — shared across Orgs

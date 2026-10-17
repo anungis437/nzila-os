@@ -1,0 +1,577 @@
+{
+  "schemaVersion": "1.0",
+  "protocolVersion": "cora-comprehension-1.0",
+  "captureKind": "SYNTHETIC_ANALYST_DRY_RUN",
+  "humanEvidence": false,
+  "researchAuthorizationRef": null,
+  "capturePolicyRef": null,
+  "consentConfirmed": false,
+  "reference": {
+    "basename": "slice8-reference.html",
+    "sha256": "03c3b5ebe656bfa99c7c43567ac4a3d2a66519415778f0d49f19343eaf7d0ccd"
+  },
+  "sessionId": "synthetic-analyst-design-only",
+  "persona": "PRODUCER_OPERATOR",
+  "environment": {
+    "browser": "Analyst local HTML text inspection; not a human browser session",
+    "viewportWidth": null,
+    "viewportHeight": null,
+    "language": "English design",
+    "accessibilityNotes": "No assistive-technology or human accessibility session performed."
+  },
+  "retestOf": [],
+  "scenarioOrder": ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9"],
+  "priorExposure": "ANALYST_DESIGN_ONLY",
+  "cueExposure": ["Gallery titles reveal outcomes; analyst reviewed reference and answer key."],
+  "observations": [
+    {
+      "observationId": "constructed-critical",
+      "scenario": "S1",
+      "questionId": "Q08",
+      "answer": "Constructed adverse answer: the technical match means the operator is approved.",
+      "firstAnswerScore": 0,
+      "baselineStatus": "ANSWERED",
+      "missingReason": null,
+      "confidence": "HIGH",
+      "confidenceMissingReason": null,
+      "misconceptionFlags": ["MATCHED_EQUALS_APPROVED"],
+      "assistanceBeforeLock": false,
+      "followUp": null,
+      "navigation": {
+        "elapsedSeconds": null,
+        "pausedSeconds": null,
+        "activeSeconds": null,
+        "measurementStatus": "NOT_OBSERVED",
+        "missingReason": "Analyst construction, not observed human navigation.",
+        "expansionsOpened": null,
+        "uniqueDisclosuresOpened": null,
+        "backtrackingCount": null,
+        "routeTrace": []
+      },
+      "uiLocationsUsed": ["Overview"],
+      "terminologyConfusion": [
+        {
+          "term": "technical match",
+          "paraphrase": "Constructed confusion with approval.",
+          "suggestedPhrase": null
+        }
+      ],
+      "moderatorNotes": "Synthetic negative control; no person said this.",
+      "recommendedAdjustment": "Test whether the veto blocks high totals; do not infer a UX failure.",
+      "severity": "CRITICAL_GOVERNANCE_MISUNDERSTANDING",
+      "review": {
+        "initialReviewerRef": "synthetic-analyst",
+        "secondReviewerRef": null,
+        "status": "NOT_REVIEWED"
+      }
+    },
+    {
+      "observationId": "constructed-partial",
+      "scenario": "S2",
+      "questionId": "Q11",
+      "answer": "Constructed correct answer: supplemental-review is missing and the recipient decision is not recorded.",
+      "firstAnswerScore": 2,
+      "baselineStatus": "ANSWERED",
+      "missingReason": null,
+      "confidence": "LOW",
+      "confidenceMissingReason": null,
+      "misconceptionFlags": [],
+      "assistanceBeforeLock": false,
+      "followUp": null,
+      "navigation": {
+        "elapsedSeconds": null,
+        "pausedSeconds": null,
+        "activeSeconds": null,
+        "measurementStatus": "NOT_OBSERVED",
+        "missingReason": "No human timing; correct low-confidence schema case.",
+        "expansionsOpened": null,
+        "uniqueDisclosuresOpened": null,
+        "backtrackingCount": null,
+        "routeTrace": []
+      },
+      "uiLocationsUsed": ["Requirement", "Decision"],
+      "terminologyConfusion": [
+        {
+          "term": "supplemental-review",
+          "paraphrase": "Constructed uncertainty about the review term, not the missing criterion.",
+          "suggestedPhrase": "Additional independent review"
+        }
+      ],
+      "moderatorNotes": "Synthetic case separates correctness from confidence.",
+      "recommendedAdjustment": "Capture language uncertainty separately from score.",
+      "severity": "MEDIUM_LANGUAGE_FRICTION",
+      "review": {
+        "initialReviewerRef": "synthetic-analyst",
+        "secondReviewerRef": null,
+        "status": "NOT_REVIEWED"
+      }
+    },
+    {
+      "observationId": "constructed-history",
+      "scenario": "S3",
+      "questionId": "Q15",
+      "answer": "Constructed correct answer: the old match and audit remain historical, but new use is not authorized.",
+      "firstAnswerScore": 2,
+      "baselineStatus": "ANSWERED",
+      "missingReason": null,
+      "confidence": "MEDIUM",
+      "confidenceMissingReason": null,
+      "misconceptionFlags": [],
+      "assistanceBeforeLock": false,
+      "followUp": {
+        "prompt": "What on the page led you to that interpretation?",
+        "answer": "Constructed follow-up: historical label and permission warning.",
+        "kind": "NEUTRAL_PROBE"
+      },
+      "navigation": {
+        "elapsedSeconds": null,
+        "pausedSeconds": null,
+        "activeSeconds": null,
+        "measurementStatus": "NOT_OBSERVED",
+        "missingReason": "No observed session.",
+        "expansionsOpened": null,
+        "uniqueDisclosuresOpened": null,
+        "backtrackingCount": null,
+        "routeTrace": []
+      },
+      "uiLocationsUsed": ["Lineage", "Permissions"],
+      "terminologyConfusion": [],
+      "moderatorNotes": "Synthetic historical-rights separation case.",
+      "recommendedAdjustment": null,
+      "severity": "NO_FINDING",
+      "review": {
+        "initialReviewerRef": "synthetic-analyst",
+        "secondReviewerRef": null,
+        "status": "NOT_REVIEWED"
+      }
+    },
+    {
+      "observationId": "constructed-prompted",
+      "scenario": "S4",
+      "questionId": "Q17",
+      "answer": "Constructed assisted answer: follow the authorized successor, not the replaced run.",
+      "firstAnswerScore": 1,
+      "baselineStatus": "ANSWERED",
+      "missingReason": null,
+      "confidence": "MEDIUM",
+      "confidenceMissingReason": null,
+      "misconceptionFlags": [],
+      "assistanceBeforeLock": true,
+      "followUp": null,
+      "navigation": {
+        "elapsedSeconds": null,
+        "pausedSeconds": null,
+        "activeSeconds": null,
+        "measurementStatus": "NOT_OBSERVED",
+        "missingReason": "No actual user navigation.",
+        "expansionsOpened": null,
+        "uniqueDisclosuresOpened": null,
+        "backtrackingCount": null,
+        "routeTrace": []
+      },
+      "uiLocationsUsed": ["Lineage", "Authorized successor runs"],
+      "terminologyConfusion": [],
+      "moderatorNotes": "Synthetic case verifies assistance cannot receive full credit.",
+      "recommendedAdjustment": "Keep assistance flag and block guardrail closure.",
+      "severity": "HIGH_COMPREHENSION_FAILURE",
+      "review": {
+        "initialReviewerRef": "synthetic-analyst",
+        "secondReviewerRef": null,
+        "status": "NOT_REVIEWED"
+      }
+    },
+    {
+      "observationId": "constructed-conflict",
+      "scenario": "S5",
+      "questionId": "Q16",
+      "answer": "Constructed correct answer: two issuers disagree; Cora has no winner; issuers clarify and recipient review determines next steps.",
+      "firstAnswerScore": 2,
+      "baselineStatus": "ANSWERED",
+      "missingReason": null,
+      "confidence": "HIGH",
+      "confidenceMissingReason": null,
+      "misconceptionFlags": [],
+      "assistanceBeforeLock": false,
+      "followUp": null,
+      "navigation": {
+        "elapsedSeconds": null,
+        "pausedSeconds": null,
+        "activeSeconds": null,
+        "measurementStatus": "NOT_OBSERVED",
+        "missingReason": "Analyst answer-key test, not observation.",
+        "expansionsOpened": null,
+        "uniqueDisclosuresOpened": null,
+        "backtrackingCount": null,
+        "routeTrace": []
+      },
+      "uiLocationsUsed": ["Requirement", "Sources disagree"],
+      "terminologyConfusion": [],
+      "moderatorNotes": "Conflict remains separately testable despite stopped lifecycle.",
+      "recommendedAdjustment": null,
+      "severity": "NO_FINDING",
+      "review": {
+        "initialReviewerRef": "synthetic-analyst",
+        "secondReviewerRef": null,
+        "status": "NOT_REVIEWED"
+      }
+    },
+    {
+      "observationId": "constructed-denial",
+      "scenario": "S6",
+      "questionId": "Q01",
+      "answer": "Constructed correct answer: the evidence is not disclosed, so I cannot identify it.",
+      "firstAnswerScore": 2,
+      "baselineStatus": "ANSWERED",
+      "missingReason": null,
+      "confidence": "HIGH",
+      "confidenceMissingReason": null,
+      "misconceptionFlags": [],
+      "assistanceBeforeLock": false,
+      "followUp": null,
+      "navigation": {
+        "elapsedSeconds": null,
+        "pausedSeconds": null,
+        "activeSeconds": null,
+        "measurementStatus": "NOT_OBSERVED",
+        "missingReason": "No human timing.",
+        "expansionsOpened": null,
+        "uniqueDisclosuresOpened": null,
+        "backtrackingCount": null,
+        "routeTrace": []
+      },
+      "uiLocationsUsed": ["Workflow unavailable"],
+      "terminologyConfusion": [],
+      "moderatorNotes": "Denial is not a request to guess hidden fixture identities.",
+      "recommendedAdjustment": null,
+      "severity": "NO_FINDING",
+      "review": {
+        "initialReviewerRef": "synthetic-analyst",
+        "secondReviewerRef": null,
+        "status": "NOT_REVIEWED"
+      }
+    },
+    {
+      "observationId": "constructed-timeout",
+      "scenario": "S7",
+      "questionId": "Q20",
+      "answer": null,
+      "firstAnswerScore": 0,
+      "baselineStatus": "TIMED_OUT",
+      "missingReason": null,
+      "confidence": null,
+      "confidenceMissingReason": "Constructed timeout with no explanation/confidence.",
+      "misconceptionFlags": [],
+      "assistanceBeforeLock": false,
+      "followUp": null,
+      "navigation": {
+        "elapsedSeconds": 135,
+        "pausedSeconds": 15,
+        "activeSeconds": 120,
+        "measurementStatus": "CENSORED",
+        "missingReason": null,
+        "expansionsOpened": 2,
+        "uniqueDisclosuresOpened": 1,
+        "backtrackingCount": 1,
+        "routeTrace": ["Reuse", "Technical reuse and friction details", "Reuse"]
+      },
+      "uiLocationsUsed": ["Reuse"],
+      "terminologyConfusion": [],
+      "moderatorNotes": "All seconds/counts constructed to test pause/censor semantics; no actual measurement.",
+      "recommendedAdjustment": "Retain censored time; do not count it as a completed find.",
+      "severity": "HIGH_COMPREHENSION_FAILURE",
+      "review": {
+        "initialReviewerRef": "synthetic-analyst",
+        "secondReviewerRef": null,
+        "status": "NOT_REVIEWED"
+      }
+    },
+    {
+      "observationId": "constructed-stale",
+      "scenario": "S8",
+      "questionId": "Q10",
+      "answer": "Constructed correct answer: stale evidence is not current.",
+      "firstAnswerScore": 2,
+      "baselineStatus": "ANSWERED",
+      "missingReason": null,
+      "confidence": "HIGH",
+      "confidenceMissingReason": null,
+      "misconceptionFlags": [],
+      "assistanceBeforeLock": false,
+      "followUp": null,
+      "navigation": {
+        "elapsedSeconds": null,
+        "pausedSeconds": null,
+        "activeSeconds": null,
+        "measurementStatus": "NOT_OBSERVED",
+        "missingReason": "No observed human time.",
+        "expansionsOpened": null,
+        "uniqueDisclosuresOpened": null,
+        "backtrackingCount": null,
+        "routeTrace": []
+      },
+      "uiLocationsUsed": ["Overview", "Evidence currentness"],
+      "terminologyConfusion": [],
+      "moderatorNotes": "Freshness guardrail probe, no human evidence.",
+      "recommendedAdjustment": null,
+      "severity": "NO_FINDING",
+      "review": {
+        "initialReviewerRef": "synthetic-analyst",
+        "secondReviewerRef": null,
+        "status": "NOT_REVIEWED"
+      }
+    },
+    {
+      "observationId": "constructed-incomplete",
+      "scenario": "S9",
+      "questionId": "Q15",
+      "answer": null,
+      "firstAnswerScore": null,
+      "baselineStatus": "NOT_ADMINISTERED",
+      "missingReason": "Constructed interruption case for incomplete denominator.",
+      "confidence": null,
+      "confidenceMissingReason": "Task was not administered.",
+      "misconceptionFlags": [],
+      "assistanceBeforeLock": false,
+      "followUp": null,
+      "navigation": {
+        "elapsedSeconds": null,
+        "pausedSeconds": null,
+        "activeSeconds": null,
+        "measurementStatus": "NOT_OBSERVED",
+        "missingReason": "Task not administered.",
+        "expansionsOpened": null,
+        "uniqueDisclosuresOpened": null,
+        "backtrackingCount": null,
+        "routeTrace": []
+      },
+      "uiLocationsUsed": [],
+      "terminologyConfusion": [],
+      "moderatorNotes": "Do not infer a pass from remaining answered rows.",
+      "recommendedAdjustment": "Report incomplete coverage; retain original capture.",
+      "severity": "NO_FINDING",
+      "review": {
+        "initialReviewerRef": "synthetic-analyst",
+        "secondReviewerRef": null,
+        "status": "NOT_REVIEWED"
+      }
+    }
+  ],
+  "analystChecks": [
+    {
+      "persona": "PRODUCER_OPERATOR",
+      "scenario": "S1",
+      "result": "DESIGN_TESTABLE",
+      "note": "Approval question open; require explanation beyond visible label."
+    },
+    {
+      "persona": "PRODUCER_OPERATOR",
+      "scenario": "S2",
+      "result": "DESIGN_TESTABLE",
+      "note": "Supplemental-review missing and qualified use both visible."
+    },
+    {
+      "persona": "PRODUCER_OPERATOR",
+      "scenario": "S3",
+      "result": "DESIGN_TESTABLE",
+      "note": "Historical result and prohibited new use are separate."
+    },
+    {
+      "persona": "PRODUCER_OPERATOR",
+      "scenario": "S4",
+      "result": "DESIGN_TESTABLE",
+      "note": "Authorized successor present; does not refresh source."
+    },
+    {
+      "persona": "PRODUCER_OPERATOR",
+      "scenario": "S5",
+      "result": "DESIGN_TESTABLE",
+      "note": "Conflict/no-winner visible despite stopped workflow."
+    },
+    {
+      "persona": "PRODUCER_OPERATOR",
+      "scenario": "S6",
+      "result": "DESIGN_TESTABLE",
+      "note": "Unknown identity earns credit; do not guess hidden evidence."
+    },
+    {
+      "persona": "PRODUCER_OPERATOR",
+      "scenario": "S7",
+      "result": "DESIGN_TESTABLE",
+      "note": "Reconstruction explained; raw codes retained as language target."
+    },
+    {
+      "persona": "PRODUCER_OPERATOR",
+      "scenario": "S8",
+      "result": "DESIGN_TESTABLE",
+      "note": "Stale warning tests currentness, not rendering latency."
+    },
+    {
+      "persona": "PRODUCER_OPERATOR",
+      "scenario": "S9",
+      "result": "DESIGN_TESTABLE",
+      "note": "Expiry and past match distinguishable."
+    },
+    {
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "scenario": "S1",
+      "result": "DESIGN_TESTABLE",
+      "note": "Provider/issuer identities distinct."
+    },
+    {
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "scenario": "S2",
+      "result": "DESIGN_TESTABLE",
+      "note": "Reuse is not transferred rights or acceptance."
+    },
+    {
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "scenario": "S3",
+      "result": "DESIGN_TESTABLE",
+      "note": "Historical viewing not new use authorization."
+    },
+    {
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "scenario": "S4",
+      "result": "DESIGN_TESTABLE",
+      "note": "Lineage supports successor interpretation."
+    },
+    {
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "scenario": "S5",
+      "result": "DESIGN_TESTABLE",
+      "note": "Two sources and issuers available for comparison."
+    },
+    {
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "scenario": "S6",
+      "result": "DESIGN_TESTABLE",
+      "note": "No details means exact denial cause remains unknown."
+    },
+    {
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "scenario": "S7",
+      "result": "DESIGN_TESTABLE",
+      "note": "Similar content not proof of governed reuse."
+    },
+    {
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "scenario": "S8",
+      "result": "DESIGN_TESTABLE",
+      "note": "Stale cannot be recommended as current evidence."
+    },
+    {
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "scenario": "S9",
+      "result": "DESIGN_TESTABLE",
+      "note": "Expired current check does not erase history."
+    },
+    {
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "scenario": "S1",
+      "result": "DESIGN_TESTABLE",
+      "note": "Cora check separate from issuer and recipient authority."
+    },
+    {
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "scenario": "S2",
+      "result": "DESIGN_TESTABLE",
+      "note": "Partial requirement explicitly lists missing criterion."
+    },
+    {
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "scenario": "S3",
+      "result": "DESIGN_TESTABLE",
+      "note": "Revocation not retroactive rewrite of technical result."
+    },
+    {
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "scenario": "S4",
+      "result": "DESIGN_TESTABLE",
+      "note": "New requirement version belongs to successor context."
+    },
+    {
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "scenario": "S5",
+      "result": "DESIGN_TESTABLE",
+      "note": "Correction process identified, no interactive correction promised."
+    },
+    {
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "scenario": "S6",
+      "result": "DESIGN_TESTABLE",
+      "note": "Do not require undisclosed requirement to score full credit."
+    },
+    {
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "scenario": "S7",
+      "result": "DESIGN_TESTABLE",
+      "note": "Trace rejection can be explained without copying code names."
+    },
+    {
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "scenario": "S8",
+      "result": "DESIGN_TESTABLE",
+      "note": "Current sufficiency cannot be inferred from stale data."
+    },
+    {
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "scenario": "S9",
+      "result": "DESIGN_TESTABLE",
+      "note": "Historic check and current validity separate."
+    },
+    {
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "scenario": "S1",
+      "result": "DESIGN_TESTABLE",
+      "note": "Decision owner displayed, no inferred disposition."
+    },
+    {
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "scenario": "S2",
+      "result": "DESIGN_TESTABLE",
+      "note": "Independent decision transfer question remains hypothetical, no real institution."
+    },
+    {
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "scenario": "S3",
+      "result": "DESIGN_TESTABLE",
+      "note": "Past result not currently actionable institutional input."
+    },
+    {
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "scenario": "S4",
+      "result": "DESIGN_TESTABLE",
+      "note": "Successor not approval by recipient."
+    },
+    {
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "scenario": "S5",
+      "result": "DESIGN_TESTABLE",
+      "note": "Recipient review separate from issuer clarification."
+    },
+    {
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "scenario": "S6",
+      "result": "DESIGN_TESTABLE",
+      "note": "No rejection outcome implied by inaccessible view."
+    },
+    {
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "scenario": "S7",
+      "result": "DESIGN_TESTABLE",
+      "note": "Rejected pseudo-reuse is not a recipient decision."
+    },
+    {
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "scenario": "S8",
+      "result": "DESIGN_TESTABLE",
+      "note": "Source currentness independent of recipient authority."
+    },
+    {
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "scenario": "S9",
+      "result": "DESIGN_TESTABLE",
+      "note": "Current expiry leaves bounded history rather than fresh authority."
+    }
+  ]
+}

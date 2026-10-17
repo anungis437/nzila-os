@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-16T11:36:39.440Z",
+  "capturedAt": "2026-10-17T05:47:32.953Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -33,6 +33,14 @@
     "packages/db/src/schema/commerce.ts": {
       "hash": "753d237ab94893599c0ce1b2d97ca903bceee94a8f49c4f428daf9f7e3cddf67",
       "size": 49545
+    },
+    "packages/db/src/schema/cora-evidence.ts": {
+      "hash": "a1b710beb8010df8e7629755b19367ced12aad1d26a9d371c11c0839ebf7e6f6",
+      "size": 9152
+    },
+    "packages/db/src/schema/cora-farmer360.ts": {
+      "hash": "eda327959536477fc03e36cbda05b26d817f3f98add5c671cad6f330d17febc7",
+      "size": 4692
     },
     "packages/db/src/schema/decision-aggregates.ts": {
       "hash": "c795603f1014e48c90a770860e8461c421599c9948e70aacc9f7c08b676b73b7",
@@ -143,8 +151,8 @@
       "size": 5342
     },
     "packages/db/src/schema/index.ts": {
-      "hash": "bd8beadc0cbda8d3bbcf5abb437bd9067fedb674759a05685dc80bb5b589ab66",
-      "size": 2149
+      "hash": "aee22bcd7afcb97805be3beb5bb37fa00b0b82d33b3d4b1cf91a4e968de004ff",
+      "size": 2244
     },
     "packages/db/src/schema/integrations.ts": {
       "hash": "eb14da7e696b470fcc94eff69b3e3630820ca584acc5d5a0f216fe0f43e85d65",
@@ -153,6 +161,10 @@
     "packages/db/src/schema/itsm.ts": {
       "hash": "4ed7378199511c1e2a2198a04b3a4d71a607a591986c4d5d2a09b96a45769720",
       "size": 29260
+    },
+    "packages/db/src/schema/methodology.ts": {
+      "hash": "0c92c251f1e5a216a9d5eaec8dbc2563d010c257f9c63c20ddcaaa4a5c3b045a",
+      "size": 2083
     },
     "packages/db/src/schema/ml.ts": {
       "hash": "b42ea0a14e68bedc08ccbe2582a0288c18ae3f2b08d42cd592a89f48b77d1304",
@@ -243,5 +255,5 @@
       "size": 38020
     }
   },
-  "compositeHash": "54db4efa2a3bf087093730d527e2a14dabe81e4aa39b5829074a59dc56c9a735"
+  "compositeHash": "5067b894f750709bcbee61d7ce99c93319b9680b7fd2b525cea7730aad78d6cb"
 }

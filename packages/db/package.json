@@ -7,6 +7,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./cora-farmer360": "./src/cora-farmer360.ts",
+    "./cora-farmer360-contracts": "./src/cora-farmer360-contracts.ts",
     "./schema": "./src/schema/index.ts",
     "./client": "./src/client.ts",
     "./auth-client": "./src/auth-client.ts",
@@ -32,6 +34,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@nzila/org": "workspace:*",
     "@nzila/platform-data-fabric": "workspace:*",
     "@nzila/platform-decision-graph": "workspace:*",
     "@nzila/platform-event-fabric": "workspace:*",

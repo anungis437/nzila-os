@@ -1,153 +1,186 @@
-/**
- * Cora — Org Context Resolution Tests
- *
- * Tests the mapAuthRoleToAgriRole logic (through resolveOrgContext)
- * and error handling for unauthenticated / no-org states.
- *
- * @see lib/resolve-org.ts
- */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock platform auth
 const mockAuth = vi.fn()
-const mockCurrentUser = vi.fn()
-const mockIsSuperAdmin = vi.fn()
+const mockResolveAuthorizationContext = vi.fn()
 vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: () => mockAuth(),
-  currentUser: () => mockCurrentUser(),
 }))
-vi.mock('@nzila/os-core/config/super-admins', () => ({
-  isSuperAdmin: (email: string | undefined) => mockIsSuperAdmin(email),
+vi.mock('@nzila/platform-auth/authorization-context', () => ({
+  resolveAuthorizationContext: (input: unknown) => mockResolveAuthorizationContext(input),
 }))
 
 import { resolveOrgContext } from '../resolve-org'
 import { locales, defaultLocale } from '../locales'
 
+const resolvedContext = {
+  platformUser: { id: 'platform-user-1', state: 'active' },
+  identity: { bindingId: 'identity-1', provider: 'entra' },
+  organization: { id: 'org-001' },
+  membership: {
+    id: 'membership-1',
+    platformUserId: 'platform-user-1',
+    organizationId: 'org-001',
+    role: 'cooperative_manager',
+    state: 'active',
+    effectiveFrom: new Date('2026-01-01T00:00:00.000Z'),
+    effectiveTo: null,
+    organizationState: 'active',
+  },
+  applicationId: 'cora',
+  permissions: ['cora:farmer360:read'],
+  requestId: 'request-1',
+  correlationId: 'correlation-1',
+  audit: {
+    event: 'application_authorization',
+    decision: 'ALLOW',
+    reason: 'AUTHORIZATION_CONTEXT_RESOLVED',
+    platformUserId: 'platform-user-1',
+    identityBindingId: 'identity-1',
+    identityProvider: 'entra',
+    externalIdentityReference: 'redacted-hash',
+    organizationId: 'org-001',
+    membershipId: 'membership-1',
+    applicationId: 'cora',
+    permissionGrantIds: ['grant-1'],
+    occurredAt: '2026-01-02T00:00:00.000Z',
+    correlationId: 'correlation-1',
+  },
+}
+
 describe('resolveOrgContext', () => {
   beforeEach(() => {
-    vi.stubGlobal('crypto', { randomUUID: () => 'test-uuid-1234' })
-    mockCurrentUser.mockResolvedValue({ primaryEmailAddress: { emailAddress: 'regular@example.com' }, emailAddresses: [] })
-    mockIsSuperAdmin.mockReturnValue(false)
+    mockResolveAuthorizationContext.mockResolvedValue(resolvedContext)
   })
 
-  it('throws Unauthorized when userId is missing', async () => {
-    mockAuth.mockResolvedValue({ userId: null, orgId: null, orgRole: null, sessionClaims: null })
+  it('rejects an unauthenticated request', async () => {
+    mockAuth.mockResolvedValue({ userId: null })
     await expect(resolveOrgContext()).rejects.toThrow('Unauthorized')
+    expect(mockResolveAuthorizationContext).not.toHaveBeenCalled()
   })
 
-  it('throws when no active organization', async () => {
-    mockAuth.mockResolvedValue({ userId: 'user-1', orgId: null, orgRole: null, sessionClaims: null })
-    await expect(resolveOrgContext()).rejects.toThrow('No active organization')
+  it('rejects Union Eyes acceptance identity without reusing its token', async () => {
+    mockAuth.mockResolvedValue({
+      userId: 'ue-user',
+      identityProvider: 'union-eyes-acceptance',
+      providerSubject: null,
+    })
+    await expect(resolveOrgContext()).rejects.toThrow('Unauthorized')
+    expect(mockResolveAuthorizationContext).not.toHaveBeenCalled()
   })
 
-  it('resolves context with viewer role for org:member', async () => {
+  it('fails closed when provider identity metadata is absent', async () => {
+    mockAuth.mockResolvedValue({ userId: 'session-user', orgId: 'org-from-claim' })
+    await expect(resolveOrgContext()).rejects.toThrow('Unauthorized')
+    expect(mockResolveAuthorizationContext).not.toHaveBeenCalled()
+  })
+
+  it('resolves identity, membership, role, and permissions from platform authority', async () => {
+    mockAuth.mockResolvedValue({
+      userId: 'provider-session-id',
+      orgId: 'group-claim-org',
+      orgRole: 'org:admin',
+      identityProvider: 'entra',
+      providerSubject: 'tenant-1:entra-object-1',
+      orgSelectionSource: 'entra-group-legacy',
+      sessionClaims: { roles: ['admin'], publicMetadata: { agriRole: 'admin' } },
+    })
+
+    const context = await resolveOrgContext()
+
+    expect(mockResolveAuthorizationContext).toHaveBeenCalledWith({
+      identityProvider: 'entra',
+      providerSubject: 'tenant-1:entra-object-1',
+      applicationId: 'cora',
+      requestedOrganizationId: undefined,
+      requestId: undefined,
+      correlationId: undefined,
+    })
+    expect(context).toMatchObject({
+      orgId: 'org-001',
+      actorId: 'platform-user-1',
+      role: 'manager',
+      membershipRoleSource: 'canonical',
+      permissions: ['cora:farmer360:read'],
+      appId: 'cora',
+      membershipId: 'membership-1',
+      identityProvider: 'entra',
+    })
+    expect(context.actorId).not.toBe('provider-session-id')
+  })
+
+  it('does not use a legacy default membership as selected organization authority', async () => {
     mockAuth.mockResolvedValue({
       userId: 'user-1',
-      orgId: 'org-001',
-      orgRole: 'org:member',
-      sessionClaims: null,
+      orgId: 'legacy-first-org',
+      identityProvider: 'nzila-password',
+      providerSubject: 'person@example.com',
+      orgSelectionSource: 'legacy-membership-default',
     })
 
-    const ctx = await resolveOrgContext()
-    expect(ctx.orgId).toBe('org-001')
-    expect(ctx.actorId).toBe('user-1')
-    expect(ctx.role).toBe('viewer')
+    await resolveOrgContext()
+    expect(mockResolveAuthorizationContext).toHaveBeenCalledWith(
+      expect.objectContaining({ requestedOrganizationId: undefined }),
+    )
   })
 
-  it('resolves context with admin role for org:admin', async () => {
+  it('passes only an explicit Cora organization selection for membership verification', async () => {
     mockAuth.mockResolvedValue({
-      userId: 'user-2',
-      orgId: 'org-001',
+      userId: 'user-1',
+      identityProvider: 'entra',
+      providerSubject: 'tenant-1:object-1',
+    })
+
+    await resolveOrgContext({ requestedOrganizationId: 'org-requested' })
+    expect(mockResolveAuthorizationContext).toHaveBeenCalledWith(
+      expect.objectContaining({ requestedOrganizationId: 'org-requested' }),
+    )
+  })
+
+  it('preserves the application authorization audit metadata', async () => {
+    mockAuth.mockResolvedValue({
+      userId: 'user-1',
+      identityProvider: 'entra',
+      providerSubject: 'tenant-1:object-1',
+    })
+    const context = await resolveOrgContext()
+    expect(context.authorizationAudit).toEqual(resolvedContext.audit)
+  })
+
+  it('defaults unknown canonical membership roles to viewer without changing permissions', async () => {
+    mockAuth.mockResolvedValue({
+      userId: 'user-1',
+      identityProvider: 'nzila-password',
+      providerSubject: 'person@example.com',
+    })
+    mockResolveAuthorizationContext.mockResolvedValue({
+      ...resolvedContext,
+      membership: { ...resolvedContext.membership, role: 'unrecognized' },
+      permissions: [],
+    })
+
+    const context = await resolveOrgContext()
+    expect(context.role).toBe('viewer')
+    expect(context.membershipRoleSource).toBe('fallback')
+    expect(context.permissions).toEqual([])
+  })
+
+  it('does not derive source-disclosure role eligibility from provider role claims', async () => {
+    mockAuth.mockResolvedValue({
+      userId: 'user-1',
+      identityProvider: 'entra',
+      providerSubject: 'tenant-1:object-1',
       orgRole: 'org:admin',
-      sessionClaims: null,
+      sessionClaims: { roles: ['admin'], publicMetadata: { agriRole: 'admin' } },
+    })
+    mockResolveAuthorizationContext.mockResolvedValue({
+      ...resolvedContext,
+      membership: { ...resolvedContext.membership, role: 'unknown-provider-role' },
     })
 
-    const ctx = await resolveOrgContext()
-    expect(ctx.role).toBe('admin')
-  })
+    const context = await resolveOrgContext()
 
-  it('prefers publicMetadata.agriRole over orgRole', async () => {
-    mockAuth.mockResolvedValue({
-      userId: 'user-3',
-      orgId: 'org-001',
-      orgRole: 'org:member',
-      sessionClaims: { publicMetadata: { agriRole: 'cooperative_manager' } },
-    })
-
-    const ctx = await resolveOrgContext()
-    expect(ctx.role).toBe('cooperative_manager')
-  })
-
-  it('ignores invalid agriRole from session claims', async () => {
-    mockAuth.mockResolvedValue({
-      userId: 'user-4',
-      orgId: 'org-001',
-      orgRole: 'org:admin',
-      sessionClaims: { publicMetadata: { agriRole: 'superuser' } },
-    })
-
-    const ctx = await resolveOrgContext()
-    // 'superuser' is not in the valid list, falls back to orgRole mapping
-    expect(ctx.role).toBe('admin')
-  })
-
-  it('returns read-only permissions for Cora', async () => {
-    mockAuth.mockResolvedValue({
-      userId: 'user-5',
-      orgId: 'org-001',
-      orgRole: 'org:admin',
-      sessionClaims: null,
-    })
-
-    const ctx = await resolveOrgContext()
-    expect(ctx.permissions).toEqual([
-      'agri:read',
-      'agri:dashboard:view',
-      'agri:intelligence:view',
-      'agri:evidence:view',
-    ])
-  })
-
-  it('defaults unknown orgRole to viewer', async () => {
-    mockAuth.mockResolvedValue({
-      userId: 'user-6',
-      orgId: 'org-001',
-      orgRole: 'org:custom_role',
-      sessionClaims: null,
-    })
-
-    const ctx = await resolveOrgContext()
-    expect(ctx.role).toBe('viewer')
-  })
-
-  it('elevates member role to admin for super-admin email', async () => {
-    mockIsSuperAdmin.mockReturnValue(true)
-    mockAuth.mockResolvedValue({
-      userId: 'user-7',
-      orgId: 'org-001',
-      orgRole: 'org:member',
-      sessionClaims: null,
-    })
-
-    const ctx = await resolveOrgContext()
-    expect(ctx.role).toBe('admin')
-  })
-
-  it('uses fallback emailAddresses value for super-admin check', async () => {
-    mockIsSuperAdmin.mockImplementation((email) => email === 'fallback@example.com')
-    mockCurrentUser.mockResolvedValue({
-      primaryEmailAddress: null,
-      emailAddresses: [{ emailAddress: 'fallback@example.com' }],
-    })
-    mockAuth.mockResolvedValue({
-      userId: 'user-8',
-      orgId: 'org-001',
-      orgRole: 'org:member',
-      sessionClaims: null,
-    })
-
-    const ctx = await resolveOrgContext()
-    expect(ctx.role).toBe('admin')
+    expect(context.role).toBe('viewer')
+    expect(context.membershipRoleSource).toBe('fallback')
   })
 
   it('exports locale constants', () => {

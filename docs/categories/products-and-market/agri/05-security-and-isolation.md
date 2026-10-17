@@ -1,5 +1,9 @@
 # Agri Stack — Security and Isolation
 
+> Cora and Agrimo are peer products. These controls describe the current
+> implementation; Cora's current read-only restriction remains active.
+> See [ADR-AGRI-001](ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md).
+
 ## Org Isolation
 
 ### Row-Level Security (RLS)
@@ -40,6 +44,10 @@ it('batch allocation across orgs is rejected', ...)
 - **Session claims** carry org context + custom agri roles
 
 ## Authorization
+
+The Cora rows below describe currently implemented permissions, not its full
+product scope. Any future Cora-owned mutation requires an explicit,
+separately reviewed authorization and tenancy design.
 
 | Role | Agrimo Permissions | Cora Permissions |
 |------|-------------------|------------------|

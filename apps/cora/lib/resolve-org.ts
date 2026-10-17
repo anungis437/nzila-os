@@ -1,79 +1,129 @@
 /**
- * Org context resolution — Cora Insights (read-only).
+ * Cora authorization context resolved from canonical NzilaOS authority.
  *
- * Resolves a fully typed `AgriOrgContext` from auth session.
- * Cora is a read-only intelligence platform — the resolved context
- * enforces read-only permissions only.
- *
- * @module resolve-org
+ * Provider claims supply identity signals only. Organization and permissions
+ * come from the platform-owned binding, membership, and grant records.
  */
-import { auth, currentUser } from '@nzila/platform-auth/entra/server'
-import type { AgriOrgContext } from '@nzila/agri-core'
-import type { AgriOrgRole } from '@nzila/agri-core'
+import { resolveAuthorizationContext } from '@nzila/platform-auth/authorization-context'
+import type {
+  AuthorizationAuditMetadata,
+  AuthorizationContext,
+} from '@nzila/platform-auth/authorization-context'
+import type { AgriOrgContext, AgriOrgRole } from '@nzila/agri-core'
 
-import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
+export interface CoraAuthorizationContext extends AgriOrgContext {
+  readonly appId: 'cora'
+  readonly identityBindingId: string
+  readonly identityBindingState: 'active'
+  readonly membershipRoleSource: 'canonical' | 'fallback'
+  readonly membershipId: string
+  readonly membershipState: 'active'
+  readonly identityProvider: string
+  readonly correlationId: string
+  readonly authorizationAudit: AuthorizationAuditMetadata
+}
 
-/**
- * Resolve org context from auth session (read-only).
- *
- * @throws Error('Unauthorized') if unauthenticated
- * @throws Error('No active organization') if no org selected
- */
-export async function resolveOrgContext(): Promise<AgriOrgContext> {
-  const { userId, orgId, orgRole, sessionClaims } = await auth()
+export interface ResolveOrgContextOptions {
+  /** Must be an application-supplied selection, never a provider group claim. */
+  readonly requestedOrganizationId?: string
+  readonly requiredPermissions?: readonly string[]
+  readonly requestId?: string
+  readonly correlationId?: string
+}
 
-  if (!userId) {
+export interface CoraIdentitySignals {
+  readonly identityProvider: string
+  readonly providerSubject: string
+}
+
+export async function resolveOrgContext(
+  options: ResolveOrgContextOptions = {},
+): Promise<CoraAuthorizationContext> {
+  const { auth } = await import('@nzila/platform-auth/entra/server')
+  const session = await auth()
+  if (!session.userId) throw new Error('Unauthorized')
+  if (
+    session.identityProvider === 'union-eyes-acceptance' ||
+    !session.identityProvider ||
+    !session.providerSubject
+  ) {
     throw new Error('Unauthorized')
   }
 
-  if (!orgId) {
-    throw new Error('No active organization — select an org before accessing Cora Insights.')
-  }
+  return resolveOrgContextFromIdentity(
+    {
+      identityProvider: session.identityProvider,
+      providerSubject: session.providerSubject,
+    },
+    options,
+  )
+}
 
-  let role = mapAuthRoleToAgriRole(orgRole, sessionClaims)
+export async function resolveOrgContextFromIdentity(
+  identity: CoraIdentitySignals,
+  options: ResolveOrgContextOptions = {},
+): Promise<CoraAuthorizationContext> {
+  const context = await resolveAuthorizationContext({
+    identityProvider: identity.identityProvider,
+    providerSubject: identity.providerSubject,
+    applicationId: 'cora',
+    requestedOrganizationId: options.requestedOrganizationId,
+    ...(options.requiredPermissions ? { requiredPermissions: options.requiredPermissions } : {}),
+    requestId: options.requestId,
+    correlationId: options.correlationId,
+  })
 
-  // Super-admin email override
-  if (role !== 'admin') {
-    const user = await currentUser()
-    const email = user?.primaryEmailAddress?.emailAddress
-                ?? user?.emailAddresses?.[0]?.emailAddress
-    if (isSuperAdmin(email)) {
-      role = 'admin' as AgriOrgRole
-    }
-  }
+  return toCoraContext(context)
+}
 
+function toCoraContext(context: AuthorizationContext): CoraAuthorizationContext {
+  const membershipRoleSource = isCanonicalMembershipRole(context.membership.role)
+    ? 'canonical'
+    : 'fallback'
   return {
-    orgId,
-    actorId: userId,
-    role,
-    // Cora is read-only — no write permissions
-    permissions: ['agri:read', 'agri:dashboard:view', 'agri:intelligence:view', 'agri:evidence:view'],
-    requestId: crypto.randomUUID(),
+    orgId: context.organization.id,
+    actorId: context.platformUser.id,
+    appId: 'cora',
+    identityBindingId: context.identity.bindingId,
+    identityBindingState: 'active',
+    role: mapMembershipRole(context.membership.role),
+    membershipRoleSource,
+    permissions: context.permissions,
+    requestId: context.requestId,
+    membershipId: context.membership.id,
+    membershipState: 'active',
+    identityProvider: context.identity.provider,
+    correlationId: context.correlationId,
+    authorizationAudit: context.audit,
   }
 }
 
-function mapAuthRoleToAgriRole(
-  orgRole: string | undefined | null,
-  sessionClaims: Record<string, unknown> | undefined | null,
-): AgriOrgRole {
-  const metaRole = (
-    sessionClaims as { publicMetadata?: { agriRole?: string } } | undefined
-  )?.publicMetadata?.agriRole
-
-  if (
-    metaRole &&
-    ['admin', 'cooperative_manager', 'field_agent', 'warehouse_manager', 'buyer', 'viewer'].includes(
-      metaRole,
-    )
-  ) {
-    return metaRole as AgriOrgRole
+function isCanonicalMembershipRole(role: string): boolean {
+  switch (role) {
+    case 'admin':
+    case 'org_admin':
+    case 'cooperative_manager':
+    case 'field_agent':
+    case 'warehouse_manager':
+    case 'buyer':
+    case 'viewer':
+      return true
+    default:
+      return false
   }
+}
 
-  switch (orgRole) {
-    case 'org:admin':
+function mapMembershipRole(role: string): AgriOrgRole {
+  switch (role) {
+    case 'admin':
+    case 'org_admin':
       return 'admin'
-    case 'org:member':
-      return 'viewer'
+    case 'cooperative_manager':
+      return 'manager'
+    case 'field_agent':
+    case 'warehouse_manager':
+    case 'buyer':
+      return 'operator'
     default:
       return 'viewer'
   }

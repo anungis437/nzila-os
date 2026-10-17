@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.1",
+  "protocolVersion": "cora-comprehension-1.0",
+  "captureKind": "PRE_RECRUITMENT_TEMPLATE",
+  "humanEvidence": false,
+  "studyVersion": "cora-human-validation-round-1-v1.0",
+  "referenceVersion": "cora-slice8-reference-v1.0",
+  "reference": {
+    "basename": "slice8-reference.html",
+    "sha256": "03c3b5ebe656bfa99c7c43567ac4a3d2a66519415778f0d49f19343eaf7d0ccd"
+  },
+  "sessionId": "P04",
+  "persona": "ADVISER_SERVICE_PROVIDER"
+}

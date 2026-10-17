@@ -1,0 +1,16 @@
+export const syntheticProCertDirectoryRecord = {
+  registryRef: 'synthetic-operator-001',
+  sourceReference: 'synthetic://pro-cert/client-directory/operators/001',
+  rawStatus: 'Certified',
+  program: 'COR',
+  scope: ['crop production'],
+  products: ['synthetic oats'],
+  statusObservedAt: '2026-01-02T00:00:00.000Z',
+  sourceCreatedAt: '2025-10-01T00:00:00.000Z',
+  sourceUpdatedAt: '2026-01-02T00:00:00.000Z',
+  operatorName: 'Synthetic Example Farm',
+  contactName: 'Synthetic Contact',
+  contactEmail: 'synthetic@example.invalid',
+  phone: '+1-555-0100',
+  address: '100 Fictional Road',
+} as const

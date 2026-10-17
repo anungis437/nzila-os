@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: nzila_platform_authz_acceptance
+      POSTGRES_USER: platform_authz_acceptance
+      POSTGRES_PASSWORD: platform_authz_acceptance_local_only
+    ports:
+      - '127.0.0.1:55442:5432'
+    volumes:
+      - platform_authz_acceptance_data:/var/lib/postgresql/data
+      - ./packages/db/bootstrap/platform-authz-acceptance.sql:/acceptance/bootstrap.sql:ro
+      - ./packages/db/bootstrap/platform-authz-acceptance-fixtures.sql:/acceptance/fixtures.sql:ro
+      - ./packages/db/drizzle/0041_platform_authorization_authority.sql:/acceptance/0041_platform_authorization_authority.sql:ro
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U platform_authz_acceptance -d nzila_platform_authz_acceptance']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  platform_authz_acceptance_data:

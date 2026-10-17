@@ -1,4 +1,11 @@
-# 🌾 Agrotech Vertical — CORA & AgrimoOps
+# Historical Draft — Agrotech Vertical: CORA & AgrimoOps
+
+> **SUPERSEDED — 2026-10-07.** Retained as a historical draft; its market,
+> capability, and product-boundary claims have not been revalidated. Do not
+> treat it as current product doctrine. The accepted boundary is recorded in
+> [ADR-AGRI-001](../../../../docs/categories/products-and-market/agri/ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md).
+
+<!-- Historical content follows; it has not been revalidated. -->
 
 **Market:** Agricultural supply chain, farm management, commodity trading, cooperative platforms  
 **TAM:** $8.6B+ (Canadian AgTech market by 2028)  

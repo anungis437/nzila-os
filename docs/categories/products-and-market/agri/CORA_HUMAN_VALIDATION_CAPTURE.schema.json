@@ -1,0 +1,414 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:cora:human-validation:capture:1.1",
+  "title": "Cora comprehension research capture (not runtime data)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "protocolVersion",
+    "captureKind",
+    "humanEvidence",
+    "reference",
+    "sessionId",
+    "persona"
+  ],
+  "properties": {
+    "schemaVersion": { "enum": ["1.0", "1.1"] },
+    "protocolVersion": { "const": "cora-comprehension-1.0" },
+    "captureKind": {
+      "enum": ["SYNTHETIC_ANALYST_DRY_RUN", "HUMAN_SESSION", "PRE_RECRUITMENT_TEMPLATE"]
+    },
+    "studyVersion": { "const": "cora-human-validation-round-1-v1.0" },
+    "referenceVersion": { "const": "cora-slice8-reference-v1.0" },
+    "humanEvidence": { "type": "boolean" },
+    "researchAuthorizationRef": { "$ref": "#/definitions/nullableText" },
+    "capturePolicyRef": { "$ref": "#/definitions/nullableText" },
+    "consentConfirmed": { "type": "boolean" },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basename", "sha256"],
+      "properties": {
+        "basename": { "const": "slice8-reference.html" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "sessionId": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" },
+    "persona": { "$ref": "#/definitions/persona" },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["browser", "viewportWidth", "viewportHeight", "language", "accessibilityNotes"],
+      "properties": {
+        "browser": { "type": "string", "minLength": 1 },
+        "viewportWidth": { "type": ["integer", "null"], "minimum": 1 },
+        "viewportHeight": { "type": ["integer", "null"], "minimum": 1 },
+        "language": { "type": "string", "minLength": 1 },
+        "accessibilityNotes": { "type": "string", "minLength": 1 }
+      }
+    },
+    "retestOf": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sessionId", "observationId", "referenceSha256"],
+        "properties": {
+          "sessionId": { "type": "string", "minLength": 1 },
+          "observationId": { "type": "string", "minLength": 1 },
+          "referenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "scenarioOrder": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/scenario" },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "priorExposure": {
+      "enum": ["NONE", "PREVIOUS_SYNTHETIC_REFERENCE", "RETEST", "ANALYST_DESIGN_ONLY"]
+    },
+    "cueExposure": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "observations": { "type": "array", "items": { "$ref": "#/definitions/observation" } },
+    "analystChecks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["persona", "scenario", "result", "note"],
+        "properties": {
+          "persona": { "$ref": "#/definitions/persona" },
+          "scenario": { "$ref": "#/definitions/scenario" },
+          "result": { "enum": ["DESIGN_TESTABLE", "UX_VALIDATION_BLOCKER"] },
+          "note": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "captureKind": { "const": "PRE_RECRUITMENT_TEMPLATE" } } },
+      "then": {
+        "required": ["studyVersion", "referenceVersion"],
+        "propertyNames": {
+          "enum": [
+            "schemaVersion",
+            "protocolVersion",
+            "captureKind",
+            "humanEvidence",
+            "studyVersion",
+            "referenceVersion",
+            "reference",
+            "sessionId",
+            "persona"
+          ]
+        },
+        "properties": {
+          "schemaVersion": { "const": "1.1" },
+          "humanEvidence": { "const": false },
+          "sessionId": { "pattern": "^P(0[1-9]|1[0-2])$" }
+        }
+      },
+      "else": {
+        "required": [
+          "researchAuthorizationRef",
+          "capturePolicyRef",
+          "consentConfirmed",
+          "environment",
+          "retestOf",
+          "scenarioOrder",
+          "priorExposure",
+          "cueExposure",
+          "observations",
+          "analystChecks"
+        ],
+        "properties": {
+          "schemaVersion": { "const": "1.0" },
+          "studyVersion": false,
+          "referenceVersion": false
+        }
+      }
+    },
+    {
+      "if": { "properties": { "captureKind": { "const": "HUMAN_SESSION" } } },
+      "then": {
+        "properties": {
+          "humanEvidence": { "const": true },
+          "researchAuthorizationRef": { "type": "string", "minLength": 1 },
+          "capturePolicyRef": { "type": "string", "minLength": 1 },
+          "consentConfirmed": { "const": true },
+          "analystChecks": { "maxItems": 0 },
+          "priorExposure": { "enum": ["NONE", "PREVIOUS_SYNTHETIC_REFERENCE", "RETEST"] }
+        }
+      },
+      "else": {
+        "properties": {
+          "humanEvidence": { "const": false },
+          "researchAuthorizationRef": { "type": "null" },
+          "capturePolicyRef": { "type": "null" },
+          "consentConfirmed": { "const": false },
+          "priorExposure": { "const": "ANALYST_DESIGN_ONLY" }
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "nullableText": { "type": ["string", "null"], "minLength": 1 },
+    "nullableSeconds": { "type": ["number", "null"], "minimum": 0 },
+    "persona": {
+      "enum": [
+        "PRODUCER_OPERATOR",
+        "ADVISER_SERVICE_PROVIDER",
+        "CERTIFIER_PROGRAM_ADMIN",
+        "INSTITUTIONAL_RECIPIENT"
+      ]
+    },
+    "scenario": { "enum": ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9"] },
+    "question": { "type": "string", "pattern": "^Q(0[1-9]|1[0-9]|20)$" },
+    "flag": {
+      "enum": [
+        "CORA_CERTIFIED_OPERATOR",
+        "MATCHED_EQUALS_APPROVED",
+        "CORA_OWNS_FINAL_DECISION",
+        "STALE_OR_HISTORY_IS_CURRENT",
+        "DECISION_TRANSFERS_INSTITUTIONS",
+        "REUSE_TRANSFERS_RIGHTS",
+        "CONFLICT_ALREADY_RESOLVED",
+        "REVOCATION_ERASES_HISTORY",
+        "PROVIDER_EQUALS_ISSUER",
+        "DISCLOSURE_GRANTS_KEEP_EXPORT_RESTORE"
+      ]
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observationId",
+        "scenario",
+        "questionId",
+        "answer",
+        "firstAnswerScore",
+        "baselineStatus",
+        "missingReason",
+        "confidence",
+        "confidenceMissingReason",
+        "misconceptionFlags",
+        "assistanceBeforeLock",
+        "followUp",
+        "navigation",
+        "uiLocationsUsed",
+        "terminologyConfusion",
+        "moderatorNotes",
+        "recommendedAdjustment",
+        "severity",
+        "review"
+      ],
+      "properties": {
+        "observationId": { "type": "string", "minLength": 1 },
+        "scenario": { "$ref": "#/definitions/scenario" },
+        "questionId": { "$ref": "#/definitions/question" },
+        "answer": { "$ref": "#/definitions/nullableText" },
+        "firstAnswerScore": { "enum": [0, 1, 2, null] },
+        "baselineStatus": {
+          "enum": [
+            "ANSWERED",
+            "TIMED_OUT",
+            "NOT_ADMINISTERED",
+            "INTERRUPTED",
+            "TAUGHT_CONTAMINATED"
+          ]
+        },
+        "missingReason": { "$ref": "#/definitions/nullableText" },
+        "confidence": { "enum": ["LOW", "MEDIUM", "HIGH", null] },
+        "confidenceMissingReason": { "$ref": "#/definitions/nullableText" },
+        "misconceptionFlags": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/flag" },
+          "uniqueItems": true
+        },
+        "assistanceBeforeLock": { "type": "boolean" },
+        "followUp": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["prompt", "answer", "kind"],
+          "properties": {
+            "prompt": { "type": "string", "minLength": 1 },
+            "answer": { "$ref": "#/definitions/nullableText" },
+            "kind": { "enum": ["NEUTRAL_PROBE", "DEBRIEF_TEACHING"] }
+          }
+        },
+        "navigation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "elapsedSeconds",
+            "pausedSeconds",
+            "activeSeconds",
+            "measurementStatus",
+            "missingReason",
+            "expansionsOpened",
+            "uniqueDisclosuresOpened",
+            "backtrackingCount",
+            "routeTrace"
+          ],
+          "properties": {
+            "elapsedSeconds": { "$ref": "#/definitions/nullableSeconds" },
+            "pausedSeconds": { "$ref": "#/definitions/nullableSeconds" },
+            "activeSeconds": { "$ref": "#/definitions/nullableSeconds" },
+            "measurementStatus": { "enum": ["FOUND", "CENSORED", "NOT_OBSERVED"] },
+            "missingReason": { "$ref": "#/definitions/nullableText" },
+            "expansionsOpened": { "type": ["integer", "null"], "minimum": 0 },
+            "uniqueDisclosuresOpened": { "type": ["integer", "null"], "minimum": 0 },
+            "backtrackingCount": { "type": ["integer", "null"], "minimum": 0 },
+            "routeTrace": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "measurementStatus": { "const": "NOT_OBSERVED" } } },
+              "then": {
+                "properties": {
+                  "elapsedSeconds": { "type": "null" },
+                  "pausedSeconds": { "type": "null" },
+                  "activeSeconds": { "type": "null" },
+                  "missingReason": { "type": "string", "minLength": 1 }
+                }
+              },
+              "else": {
+                "properties": {
+                  "elapsedSeconds": { "type": "number", "minimum": 0 },
+                  "pausedSeconds": { "type": "number", "minimum": 0 },
+                  "activeSeconds": { "type": "number", "minimum": 0 },
+                  "missingReason": { "type": "null" }
+                }
+              }
+            }
+          ]
+        },
+        "uiLocationsUsed": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "terminologyConfusion": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["term", "paraphrase", "suggestedPhrase"],
+            "properties": {
+              "term": { "type": "string", "minLength": 1 },
+              "paraphrase": { "type": "string", "minLength": 1 },
+              "suggestedPhrase": { "$ref": "#/definitions/nullableText" }
+            }
+          }
+        },
+        "moderatorNotes": { "type": "string", "minLength": 1 },
+        "recommendedAdjustment": { "$ref": "#/definitions/nullableText" },
+        "severity": {
+          "enum": [
+            "CRITICAL_GOVERNANCE_MISUNDERSTANDING",
+            "HIGH_COMPREHENSION_FAILURE",
+            "MEDIUM_LANGUAGE_FRICTION",
+            "LOW_PRESENTATION_FRICTION",
+            "NO_FINDING"
+          ]
+        },
+        "review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["initialReviewerRef", "secondReviewerRef", "status"],
+          "properties": {
+            "initialReviewerRef": { "type": "string", "minLength": 1 },
+            "secondReviewerRef": { "$ref": "#/definitions/nullableText" },
+            "status": { "enum": ["NOT_REVIEWED", "AGREED", "DISPUTED"] }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "status": { "enum": ["AGREED", "DISPUTED"] } } },
+              "then": {
+                "properties": { "secondReviewerRef": { "type": "string", "minLength": 1 } }
+              }
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "misconceptionFlags": { "minItems": 1 } } },
+          "then": {
+            "properties": {
+              "firstAnswerScore": { "const": 0 },
+              "severity": { "const": "CRITICAL_GOVERNANCE_MISUNDERSTANDING" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "severity": { "const": "CRITICAL_GOVERNANCE_MISUNDERSTANDING" } }
+          },
+          "then": { "properties": { "misconceptionFlags": { "minItems": 1 } } }
+        },
+        {
+          "if": { "properties": { "assistanceBeforeLock": { "const": true } } },
+          "then": { "properties": { "firstAnswerScore": { "enum": [0, 1, null] } } }
+        },
+        {
+          "if": { "properties": { "firstAnswerScore": { "const": null } } },
+          "then": {
+            "properties": {
+              "missingReason": { "type": "string", "minLength": 1 },
+              "baselineStatus": {
+                "enum": ["NOT_ADMINISTERED", "INTERRUPTED", "TAUGHT_CONTAMINATED"]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "missingReason": { "type": "null" },
+              "baselineStatus": { "enum": ["ANSWERED", "TIMED_OUT"] }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "baselineStatus": {
+                "enum": ["NOT_ADMINISTERED", "INTERRUPTED", "TAUGHT_CONTAMINATED"]
+              }
+            }
+          },
+          "then": { "properties": { "firstAnswerScore": { "type": "null" } } }
+        },
+        {
+          "if": { "properties": { "baselineStatus": { "const": "ANSWERED" } } },
+          "then": { "properties": { "answer": { "type": "string", "minLength": 1 } } }
+        },
+        {
+          "if": { "properties": { "baselineStatus": { "const": "TIMED_OUT" } } },
+          "then": { "properties": { "firstAnswerScore": { "const": 0 } } }
+        },
+        {
+          "if": { "properties": { "confidence": { "const": null } } },
+          "then": {
+            "properties": { "confidenceMissingReason": { "type": "string", "minLength": 1 } }
+          },
+          "else": { "properties": { "confidenceMissingReason": { "type": "null" } } }
+        },
+        {
+          "if": { "properties": { "baselineStatus": { "const": "NOT_ADMINISTERED" } } },
+          "then": {
+            "properties": { "confidence": { "type": "null" }, "answer": { "type": "null" } }
+          }
+        },
+        {
+          "if": { "properties": { "firstAnswerScore": { "const": 0 } } },
+          "then": {
+            "properties": {
+              "severity": {
+                "enum": ["CRITICAL_GOVERNANCE_MISUNDERSTANDING", "HIGH_COMPREHENSION_FAILURE"]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

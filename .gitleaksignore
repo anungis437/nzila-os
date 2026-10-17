@@ -192,3 +192,16 @@ infrastructure/bicep/ue-v2/main.bicep:generic-api-key:274
 
 # Union Eyes V2 release: clean-room fixture builds a loopback URL with a per-run random role password (randomBytes) that is never persisted.
 apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture.ts:nzila-database-url-with-password:126
+
+# Cora acceptance harnesses: published, disposable Docker fixture credentials,
+# fixed loopback endpoints only. They are not production or provider secrets.
+# Review: matching dedicated compose fixture + loopback-only acceptance checks.
+# Exact historical findings only; no rule or path exclusion is introduced.
+fac513edd8009cfde75f3e5bba223ecc95e5a114:scripts/platform-authz-acceptance.mjs:nzila-database-url-with-password:7
+fac513edd8009cfde75f3e5bba223ecc95e5a114:scripts/cora-farmer360-acceptance.mjs:nzila-database-url-with-password:6
+# Current harness source locations for the same reviewed published fixtures.
+scripts/platform-authz-acceptance.mjs:nzila-database-url-with-password:7
+scripts/cora-farmer360-acceptance.mjs:nzila-database-url-with-password:7
+
+# Cora disposable bootstrap guard: public database identifiers in a SQL allowlist, not credentials.
+packages/db/bootstrap/platform-authz-fixture.ts:generic-api-key:62
