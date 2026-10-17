@@ -16,7 +16,7 @@ export const CANONICAL_CONTEXTS = [
     ciJob: 'lint-and-typecheck',
     family: 'engineering',
     evidence:
-      'pnpm lint, then tooling/ci/affected-typecheck-plan.mjs. Doctrine PROVE_AFFECTED_OR_RUN_FULL. Workspace-package changes typecheck the changed packages and their dependents. Lockfiles, turbo.json, pnpm-workspace.yaml, root package.json, .npmrc, shared tsconfig/jsconfig inputs, paths outside a workspace package, unresolved SCM, and a zero-task affected result run pnpm typecheck. Proven documentation stays not applicable. A zero-task result is not a pass and is not NOT_APPLICABLE.',
+      'pnpm lint runs alongside tooling/ci/affected-typecheck-plan.mjs. Doctrine PROVE_AFFECTED_OR_RUN_FULL. Workspace-package changes typecheck the changed packages and their dependents. Lockfiles, turbo.json, pnpm-workspace.yaml, root package.json, .npmrc, shared tsconfig/jsconfig inputs, paths outside a workspace package, unresolved SCM, and a zero-task affected result select the full typecheck universe. CI partitions that complete plan across four required runners; unsharded invocation runs pnpm typecheck. Proven documentation stays not applicable. A zero-task affected plan is not a pass and is not NOT_APPLICABLE.',
   },
   {
     name: 'Merge Authority / Unit Tests',
@@ -49,7 +49,7 @@ export const CANONICAL_CONTEXTS = [
     ciJob: 'build',
     family: 'engineering',
     evidence:
-      'CI job Build All runs pnpm exec turbo run build --affected for workspace-package changes. Lockfiles, turbo.json, pnpm-workspace.yaml, root package.json, .npmrc, and any other changed path that is not inside a workspace package and is not proven documentation run pnpm build (turbo build). Proven documentation stays not applicable. A zero-task --affected result is not a pass for those paths. Package-scoped affected closure is not a full portfolio build on every change. PORTFOLIO_BUILD_AUTHORITY remains UNRESOLVED.',
+      'CI job Build All requires every active-build runner. governance/ci/build-scope.json declares the routine active apps; shared package builds and their dependency builds remain included. Both workspace-package changes and root/global/unknown inputs compile the complete declared CI scope, partitioned across four runners; unchanged targets reuse source-validated Turbo results. Dormant apps are excluded as root build targets by owner direction. Unknown app identities, invalid scope, or an empty executable scope fail closed. Proven documentation stays not applicable. This does not claim a full dormant-portfolio build. PORTFOLIO_BUILD_AUTHORITY remains UNRESOLVED.',
   },
   {
     name: 'Merge Authority / Architectural Contracts',

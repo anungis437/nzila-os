@@ -124,13 +124,21 @@ describe('affected build portfolio fallback', () => {
   })
 
   it('does not let merge authority mark those inputs not applicable', () => {
-    for (const path of ['pnpm-lock.yaml', 'turbo.json', 'pnpm-workspace.yaml', 'package.json', '.npmrc']) {
+    for (const path of [
+      'pnpm-lock.yaml',
+      'turbo.json',
+      'pnpm-workspace.yaml',
+      'package.json',
+      '.npmrc',
+    ]) {
       expect(classifyChangedPaths([path]).contexts['Merge Authority / Affected Build'], path).toBe(
         'REQUIRES_EXECUTION',
       )
     }
     expect(
-      classifyChangedPaths(['something-unexpected.bin']).contexts['Merge Authority / Affected Build'],
+      classifyChangedPaths(['something-unexpected.bin']).contexts[
+        'Merge Authority / Affected Build'
+      ],
     ).toBe('REQUIRES_EXECUTION')
     expect(
       classifyChangedPaths(['docs/engineering-convergence/ci-execution/CI_AUTHORITY_SURFACE.md'])
@@ -164,43 +172,54 @@ describe('affected build portfolio fallback', () => {
     expect(dirs).not.toContain('tooling/ci')
 
     expect(planAffectedBuild(['apps/web/app/page.tsx'], dirs).mode).toBe('affected')
-    expect(planAffectedBuild(['tooling/contract-tests/affected-build-plan.test.ts'], dirs).mode).toBe(
-      'full',
-    )
+    expect(
+      planAffectedBuild(['tooling/contract-tests/affected-build-plan.test.ts'], dirs).mode,
+    ).toBe('full')
   })
 })
 
-describe('CI Build All invokes the portfolio fallback', () => {
-  function buildJob(): { 'continue-on-error'?: boolean; steps?: Array<{ name?: string; run?: string; 'continue-on-error'?: boolean }> } {
+describe('CI Build All compiles the declared routine scope', () => {
+  function buildJob(): {
+    'continue-on-error'?: boolean
+    steps?: Array<{ name?: string; run?: string; 'continue-on-error'?: boolean }>
+  } {
     const doc = parse(readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')) as {
-      jobs: { build: { 'continue-on-error'?: boolean; steps?: Array<{ name?: string; run?: string; 'continue-on-error'?: boolean }> } }
+      jobs: {
+        'build-worker': {
+          'continue-on-error'?: boolean
+          steps?: Array<{ name?: string; run?: string; 'continue-on-error'?: boolean }>
+        }
+      }
     }
-    return doc.jobs.build
+    return doc.jobs['build-worker']
   }
 
-  it('runs pnpm build for the fallback and --affected only for workspace package changes', () => {
+  it('compiles the complete owner-declared scope for both root and package changes', () => {
     const job = buildJob()
     expect(job['continue-on-error']).not.toBe(true)
-    const step = job.steps?.find((candidate) => typeof candidate.run === 'string' && candidate.run.includes('affected-build-plan.mjs'))
+    const step = job.steps?.find(
+      (candidate) =>
+        typeof candidate.run === 'string' && candidate.run.includes('affected-build-plan.mjs'),
+    )
     expect(step?.run).toBeTruthy()
     expect(step?.['continue-on-error']).not.toBe(true)
 
     const run = step?.run ?? ''
     expect(run).toContain('node tooling/ci/affected-build-plan.mjs --base "$BASE" --head "$HEAD"')
-    expect(run).toContain('pnpm build')
-    expect(run).toContain('TURBO_SCM_BASE="$BASE" TURBO_SCM_HEAD="$HEAD"')
-    expect(run).toContain('pnpm exec turbo run build --affected')
+    expect(run).toContain('node tooling/ci/run-scoped-build-shard.mjs')
+    expect(run).toContain('BUILD_BASE="$BASE" BUILD_HEAD="$HEAD"')
+    expect(run).not.toContain('pnpm build')
+    expect(run).not.toContain('pnpm exec turbo run build --affected')
     expect(run).not.toMatch(/\|\|\s*true/)
     expect(run).toContain('not_applicable')
     expect(run).toContain('exit 1')
 
-    const fullBranch = run.slice(run.indexOf('full)'), run.indexOf('affected)'))
-    expect(fullBranch).toContain('pnpm build')
-    expect(fullBranch).not.toContain('--affected')
-
-    const affectedBranch = run.slice(run.indexOf('affected)'), run.indexOf('not_applicable)'))
-    expect(affectedBranch).toContain('pnpm exec turbo run build --affected')
-    expect(affectedBranch).not.toContain('pnpm build')
+    const executableBranch = run.slice(
+      run.indexOf('full|affected)'),
+      run.indexOf('not_applicable)'),
+    )
+    expect(executableBranch).toContain('run_scoped_build')
+    expect(run).toContain('SCM base unavailable; compiling the complete active CI scope')
   })
 
   it('keeps Reliability Guard SRE-only without test:fast or portfolio pnpm build (E5-F)', () => {

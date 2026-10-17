@@ -1,5 +1,9 @@
 /**
- * Build All portfolio fallback (E5_B).
+ * Conservative build applicability/fallback classification (E5_B).
+ *
+ * CI executes the full declared routine scope for either executable mode:
+ * governance/ci/build-scope.json selects active apps; shared builds remain.
+ * A `full` classification does not override that owner-declared app scope.
  *
  * `turbo run build --affected` maps files outside a pnpm workspace package to
  * the root package `//`. The root `build` script is `turbo build`, which Turbo

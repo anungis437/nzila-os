@@ -32,7 +32,7 @@ concurrency:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    name: E2E · ${{ matrix.app }}
+    name: ${{ matrix.app == 'union-eyes' && format('UE E2E worker ({0}/4)', matrix.shard) || format('E2E · {0}', matrix.app) }}
     # staging env supplies AZURE_CLIENT_ID/TENANT_ID for OIDC snapshot retrieve
     # (repo-level secrets lack those; staging has no protection reviewers).
     environment: staging
@@ -43,18 +43,34 @@ jobs:
         include:
           - app: web
             port: 3000
+            shard: 1
+            shards: 1
           - app: console
             port: 3001
+            shard: 1
+            shards: 1
           - app: union-eyes
             port: 3002
-          - app: flow
-            port: 3003
-          - app: partners
-            port: 3004
-          - app: cfo
-            port: 3005
+            shard: 1
+            shards: 4
           - app: control-plane
             port: 3010
+            shard: 1
+            shards: 1
+          # Each runner restores its own localhost database and uses one browser
+          # worker. Keep file-level ordering and all existing test assertions.
+          - app: union-eyes
+            port: 3002
+            shard: 2
+            shards: 4
+          - app: union-eyes
+            port: 3002
+            shard: 3
+            shards: 4
+          - app: union-eyes
+            port: 3002
+            shard: 4
+            shards: 4
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
@@ -221,7 +237,7 @@ jobs:
           ORCHESTRATOR_API_URL: http://localhost:4000
 
       - name: Run Playwright tests
-        run: pnpm --filter @nzila/${{ matrix.app }} e2e
+        run: pnpm --filter @nzila/${{ matrix.app }} e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}
         env:
           CI: true
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
@@ -243,7 +259,8 @@ jobs:
         # this we get a blind timeout and no way to see which tests failed.
         if: failure() || cancelled()
         with:
-          name: playwright-report-${{ matrix.app }}
+          name: playwright-report-${{ matrix.app }}-${{ matrix.shard }}
+          overwrite: true
           path: apps/${{ matrix.app }}/playwright-report/
           retention-days: 14
 
@@ -251,7 +268,8 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure() || cancelled()
         with:
-          name: playwright-results-${{ matrix.app }}
+          name: playwright-results-${{ matrix.app }}-${{ matrix.shard }}
+          overwrite: true
           path: apps/${{ matrix.app }}/test-results/
           retention-days: 14
           if-no-files-found: ignore
@@ -269,6 +287,63 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure() || cancelled()
         with:
-          name: app-server-log-${{ matrix.app }}
+          name: app-server-log-${{ matrix.app }}-${{ matrix.shard }}
+          overwrite: true
           path: /tmp/app-server.log
           retention-days: 14
+
+  union-eyes-result:
+    name: E2E · union-eyes
+    needs: [e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      # A matrix job exposes only its combined result. Read this attempt's UE
+      # workers so another app's failure cannot be mistaken for a UE failure,
+      # and missing/cancelled/foreign-head workers can never pass this gate.
+      - name: Require every Union Eyes shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_RUN: ${{ github.run_id }}
+          EXPECTED_ATTEMPT: ${{ github.run_attempt }}
+          SHARD_JOBS_FILE: ${{ runner.temp }}/ue-e2e-jobs.json
+          SHARD_RECEIPT_FILE: ${{ runner.temp }}/ue-e2e-receipt.json
+        run: |
+          set -euo pipefail
+          gh api --paginate --slurp \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${EXPECTED_RUN}/attempts/${EXPECTED_ATTEMPT}/jobs?per_page=100" \
+            > "$SHARD_JOBS_FILE"
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs'
+          const head = process.env.EXPECTED_HEAD
+          const run = Number(process.env.EXPECTED_RUN)
+          const attempt = Number(process.env.EXPECTED_ATTEMPT)
+          if (!/^[a-f0-9]{40}$/.test(head ?? '') || !Number.isSafeInteger(run) || run < 1 || !Number.isSafeInteger(attempt) || attempt < 1)
+            throw new Error('Invalid frozen E2E run identity')
+          const pages = JSON.parse(readFileSync(process.env.SHARD_JOBS_FILE, 'utf8'))
+          if (!Array.isArray(pages) || !pages.length || pages.some(page => !Array.isArray(page.jobs)))
+            throw new Error('Invalid E2E job listing')
+          const workers = pages.flatMap(page => page.jobs).filter(job => job.name?.startsWith('UE E2E worker ('))
+          const expected = [1, 2, 3, 4].map(index => `UE E2E worker (${index}/4)`)
+          if (workers.length !== 4 || new Set(workers.map(job => job.id)).size !== 4 || expected.some(name => workers.filter(job => job.name === name).length !== 1))
+            throw new Error('Missing, duplicate or unexpected Union Eyes shard')
+          for (const job of workers) {
+            if (!Number.isSafeInteger(job.id) || job.id < 1 || job.head_sha !== head || job.run_id !== run || job.run_attempt !== attempt || job.status !== 'completed' || job.conclusion !== 'success')
+              throw new Error(`Union Eyes shard did not pass on this frozen run: ${job.name}`)
+          }
+          const receipt = { head, run, attempt, workers: workers.map(({ id, name, conclusion }) => ({ id, name, conclusion })) }
+          writeFileSync(process.env.SHARD_RECEIPT_FILE, `${JSON.stringify(receipt, null, 2)}\n`)
+          console.log(JSON.stringify(receipt))
+          NODE
+
+      - name: Upload Union Eyes shard receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-e2e-shard-receipt
+          overwrite: true
+          path: ${{ runner.temp }}/ue-e2e-receipt.json
+          if-no-files-found: error
