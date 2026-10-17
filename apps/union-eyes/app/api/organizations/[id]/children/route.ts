@@ -1,21 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@nzila/platform-auth/entra/server';
-import { db } from '@/db/db';
-import { organizations } from '@/db/schema-organizations';
-import { eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@nzila/platform-auth/entra/server'
+import { db } from '@/db/db'
+import { organizations } from '@/db/schema-organizations'
+import { eq } from 'drizzle-orm'
+import { withSystemContext } from '@/lib/db/with-rls-context'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: Promise<{ id: string }> }
 
 export async function GET(_req: NextRequest, { params }: Params) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { id } = await params;
-  const rows = await db.select().from(organizations).where(eq(organizations.parentId, id));
+  const { id } = await params
+  const rows = await withSystemContext(() =>
+    db.select().from(organizations).where(eq(organizations.parentId, id)),
+  )
 
-  const mapped = rows.map(row => ({
+  const mapped = rows.map((row) => ({
     id: row.id,
     name: row.name,
     slug: row.slug,
@@ -31,7 +34,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     status: row.status,
     clc_affiliated: row.clcAffiliated,
     created_at: row.createdAt,
-  }));
+  }))
 
-  return NextResponse.json({ data: mapped });
+  return NextResponse.json({ data: mapped })
 }

@@ -1,8 +1,13 @@
 # Agri Stack — Market Map
 
-## Target Markets
+> Product operating contexts are governed by
+> [ADR-AGRI-001](ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md).
+> Market and capability rows below are planning material, not validation or
+> proof of implemented capability.
 
-### Primary: Sub-Saharan Africa
+## Agrimo Operating Context
+
+### Principal: DRC and comparable emerging markets
 
 - **Coffee cooperatives** (DRC, Rwanda, Uganda, Ethiopia, Kenya)
 - **Cocoa aggregators** (Côte d'Ivoire, Ghana, Cameroon)
@@ -10,11 +15,16 @@
 - **Cotton cooperatives** (Mali, Burkina Faso, Benin)
 - **Sesame and soy traders** (Nigeria, Ethiopia, Sudan)
 
-### Secondary: Latin America & Southeast Asia
+Other emerging-market regions may be considered as Agrimo markets subject
+to product and localization decisions.
 
-- **Coffee cooperatives** (Colombia, Guatemala, Honduras)
-- **Palm oil aggregators** (Indonesia, Malaysia)
-- **Spice cooperatives** (India, Vietnam)
+## Cora Operating Context
+
+### Primary: Canada and data-rich agricultural environments
+
+Cora's accepted product direction centers Canadian producers, farms,
+associations, processors/value-added operations, research, policy, and
+food-system participants. This does not claim current market validation.
 
 ## Buyer Personas
 

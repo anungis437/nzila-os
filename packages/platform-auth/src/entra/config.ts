@@ -133,9 +133,11 @@ export const authConfig: NextAuthConfig = {
         token.isExternalUser = AZURE_AD_TENANT_ID
           ? entraProfile.tid !== AZURE_AD_TENANT_ID
           : false
-        // Map first group to activeOrgId (org selection happens client-side)
+        // Retain this first-group selector for legacy consumers only. It is
+        // explicitly tagged and is not canonical membership or permission.
         if (entraProfile.groups && entraProfile.groups.length > 0) {
           token.activeOrgId = entraProfile.groups[0]
+          token.activeOrgSource = 'entra-group-legacy'
         }
 
         // Auto-provision user on first sign-in (if hook is registered)
@@ -167,6 +169,7 @@ export const authConfig: NextAuthConfig = {
         idToken: token.idToken as string | undefined,
         roles: (token.roles as string[]) ?? [],
         activeOrgId: token.activeOrgId as string | undefined,
+        activeOrgSource: token.activeOrgSource as 'entra-group-legacy' | undefined,
         orgRole: token.orgRole as string | undefined,
         entraObjectId: token.entraObjectId as string | undefined,
         tenantId: token.tenantId as string | undefined,

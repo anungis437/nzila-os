@@ -11,12 +11,13 @@
  * Auth: `withApi({ auth: { cron: true } })` requires `x-cron-secret` or a
  * `Bearer <CRON_SECRET_KEY>` Authorization header. Never publicly reachable.
  */
-import { NextResponse } from 'next/server';
-import { withApi } from '@/lib/api/framework';
-import { runDeadlineReminderWorker } from '@/lib/deadline-engine';
+import { NextResponse } from 'next/server'
+import { withApi } from '@/lib/api/framework'
+import { withSystemContext } from '@/lib/db/with-rls-context'
+import { runDeadlineReminderWorker } from '@/lib/deadline-engine'
 
-export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 export const GET = withApi(
   {
@@ -27,7 +28,8 @@ export const GET = withApi(
     },
   },
   async () => {
-    const result = await runDeadlineReminderWorker();
-    return NextResponse.json(result);
+    // The worker's queue, execution and convergence tables are SYSTEM-scoped work state.
+    const result = await withSystemContext(() => runDeadlineReminderWorker())
+    return NextResponse.json(result)
   },
-);
+)

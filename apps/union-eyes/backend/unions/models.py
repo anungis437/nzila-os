@@ -69,13 +69,48 @@ class AwardHistory(BaseModel):
 
 
 class RewardWalletLedger(BaseModel):
-    """Migrated from drizzle: award-templates-schema.ts"""
+    """Prospective current credit ledger authority (UE bootstrap V2 2.0).
 
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    Append-only under the existing storage-authority privileges. Expiration
+    metadata is captured on issuance; expiration debits are separate entries.
+    This declaration does not migrate historical points-based ledger data.
+    """
+
+    org = models.ForeignKey(
+        "auth_core.Organizations",
+        db_column="org_id",
+        on_delete=models.CASCADE,
+        related_name="reward_wallet_entries",
+    )
+    user_id = models.CharField(max_length=255)
+    event_type = models.CharField(
+        max_length=16,
+        choices=[(value, value) for value in ("earn", "spend", "expire", "revoke", "adjust", "refund")],
+    )
+    amount_credits = models.IntegerField()
+    balance_after = models.IntegerField()
+    source_type = models.CharField(
+        max_length=32,
+        choices=[(value, value) for value in ("award", "redemption", "admin_adjustment", "system")],
+    )
+    source_id = models.UUIDField(null=True, blank=True)
+    memo = models.TextField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "reward_wallet_ledger"
         verbose_name = "RewardWalletLedger"
+        constraints = [
+            models.CheckConstraint(condition=models.Q(balance_after__gte=0), name="wallet_balance_non_negative"),
+            models.CheckConstraint(
+                condition=models.Q(event_type__in=("earn", "spend", "expire", "revoke", "adjust", "refund")),
+                name="wallet_event_type_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(source_type__in=("award", "redemption", "admin_adjustment", "system")),
+                name="wallet_source_type_valid",
+            ),
+        ]
 
 
 class BudgetPool(BaseModel):

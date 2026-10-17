@@ -2,12 +2,18 @@
 
 > Agricultural field operations — harvest tracking, production management, logistics, warehousing, and certifications with a Django backend.
 
+**Product boundary:** Agrimo is a first-class product for cooperative,
+offline-first, and emerging-market agricultural operations, principally in
+the DRC. It is neither a Cora tenant nor a Cora deployment profile. Cora is
+a separate first-class product for food-economy intelligence and
+coordination. See [ADR-AGRI-001](../../docs/categories/products-and-market/agri/ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md).
+
 ## Stack
 
 - **Framework:** Next.js 16 (App Router) + Django backend sidecar
 - **Auth:** `@nzila/platform-auth` (email/password + optional Entra SSO)
 - **UI:** `@nzila/ui` + Tailwind CSS
-- **Packages:** `@nzila/agri-core`, `agri-db`, `agri-intelligence`, `agri-supply-chain`, `agri-traceability`, `agri-forecasting`
+- **Packages:** Shared `@nzila/agri-core`; Agrimo operational packages include `agri-db`, `agri-intelligence`, `agri-supply-chain`, `agri-traceability`, and `agri-forecasting`
 - **Port:** 3010
 
 ## Quick Start

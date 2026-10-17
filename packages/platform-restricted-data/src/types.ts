@@ -30,6 +30,7 @@ export interface Actor {
 
 export interface RestrictedRecord {
   id: string
+  appId: string
   orgId: string
   principalId: string
   classification: 'RESTRICTED'
@@ -77,6 +78,7 @@ export interface RestrictedAuditEvent {
 }
 
 export interface BreakGlassScope {
+  orgId: string
   appDomain: string
   resource: string
   action: 'read' | 'write'

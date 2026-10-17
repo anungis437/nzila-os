@@ -21,9 +21,9 @@
  * HTTP response — if any required revocation step fails, this route
  * returns 502, not 200. The lookup/mutation of organizationMembers below
  * runs under withSystemContext(): a platform-admin caller (gated by
- * PLATFORM_ADMIN_USER_IDS below) has no ordinary tenant RLS context for
+ * canonical authority in V2, legacy PLATFORM_ADMIN_USER_IDS otherwise) has no ordinary tenant RLS context for
  * an arbitrary target organization, so execution must be under the
- * system role, not the tenant runtime role. The PLATFORM_ADMIN_USER_IDS
+ * system role, not the tenant runtime role. The platform-authority
  * check itself stays OUTSIDE/BEFORE withSystemContext — the authorization
  * decision is made on the caller's real identity before any system-
  * privileged execution begins.
@@ -35,22 +35,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { createLogger } from '@nzila/os-core/telemetry';
 import { revokeMemberAccess, reactivateMemberAccess } from '@/lib/services/member-access-revocation-service';
+import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 
 const logger = createLogger('union-eyes.admin.users');
 
 export const dynamic = 'force-dynamic';
 
-function isPlatformAdmin(userId: string): boolean {
-  const ids = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
-    .split(',').map(s => s.trim()).filter(Boolean);
-  return ids.includes(userId);
-}
-
 type Params = { params: Promise<{ userId: string }> };
 
 export async function PUT(req: NextRequest, { params }: Params) {
   const { userId: callerId } = await auth();
-  if (!callerId || !isPlatformAdmin(callerId)) {
+  if (!callerId || !(await isPlatformAdminUser(callerId))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -124,7 +119,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   const { userId: callerId } = await auth();
-  if (!callerId || !isPlatformAdmin(callerId)) {
+  if (!callerId || !(await isPlatformAdminUser(callerId))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -171,5 +166,3 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
   }
 }
-
-

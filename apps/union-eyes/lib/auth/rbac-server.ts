@@ -17,6 +17,9 @@ import { eq, and } from "drizzle-orm";
 import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRoute } from "./roles";
 import { createLogger } from '@nzila/os-core'
 import { withSystemContext } from '@/lib/db/with-rls-context'
+import { currentStateContextEnabled } from './canonical-bootstrap'
+import { getCanonicalOrganizationContext } from './canonical-context'
+import { resolvePlatformOrgRole } from './platform-org-role'
 
 const logger = createLogger('rbac-server')
 
@@ -62,51 +65,6 @@ function resolveNzilaRole(raw: string | null | undefined): UserRole | null {
 }
 
 /**
- * Map platform auth organization roles to UnionEyes app roles.
- * These are roles stored in user_management.organization_users.role
- * and need to be normalized to UserRole equivalents.
- */
-function resolvePlatformOrgRole(raw: string | null | undefined): UserRole | null {
-  if (!raw) return null;
-  const key = raw.toLowerCase();
-  
-  // Direct matches - platform roles that have equivalent app roles
-  const directMap: Record<string, UserRole> = {
-    'admin': UserRole.ADMIN,
-    'system_admin': UserRole.SYSTEM_ADMIN,
-    'app_owner': UserRole.APP_OWNER,
-    'platform_lead': UserRole.PLATFORM_LEAD,
-    'steward': UserRole.STEWARD,
-    'chief_steward': UserRole.CHIEF_STEWARD,
-    'member': UserRole.MEMBER,
-    'officer': UserRole.OFFICER,
-    'clerk': UserRole.CLERK,
-    'president': UserRole.PRESIDENT,
-    'vice_president': UserRole.VICE_PRESIDENT,
-    'secretary_treasurer': UserRole.SECRETARY_TREASURER,
-    'bargaining_committee': UserRole.BARGAINING_COMMITTEE,
-    'health_safety_rep': UserRole.HEALTH_SAFETY_REP,
-  };
-  
-  if (directMap[key]) return directMap[key];
-  
-  // Executive roles
-  if (key === 'executive' || key === 'ceo') return UserRole.PRESIDENT;
-  
-  // Governance roles
-  if (key === 'compliance_manager') return UserRole.COMPLIANCE_MANAGER;
-  if (key === 'auditor' || key === 'auditor_readonly') return UserRole.COMPLIANCE_MANAGER;
-  if (key === 'governance') return UserRole.OFFICER; // governance role -> officer (governance rep)
-  
-  // Staff roles
-  if (key === 'support_agent') return UserRole.SUPPORT_AGENT;
-  if (key === 'staff' || key === 'support_staff') return UserRole.SUPPORT_AGENT;
-  
-  // Default to null (not resolved)
-  return null;
-}
-
-/**
  * Get user role from database.
  *
  * Resolution order (PRIORITIZES SELECTED ORGANIZATION):
@@ -124,6 +82,13 @@ export async function getUserRole(
   userId: string,
   organizationId?: string | null,
 ): Promise<UserRole> {
+  if (currentStateContextEnabled()) {
+    const context = await getCanonicalOrganizationContext({
+      organizationId,
+      expectedActorUserId: userId,
+    });
+    return context.role;
+  }
   try {
     // DEV ONLY: DEV_ROLE_OVERRIDE forces any role for local testing.
     //   Set DEV_ROLE_OVERRIDE=steward in .env.local to simulate that role.
@@ -367,5 +332,3 @@ export async function requireUnionRepOrHigher(): Promise<{ userId: string; role:
   
   return authData;
 }
-
-

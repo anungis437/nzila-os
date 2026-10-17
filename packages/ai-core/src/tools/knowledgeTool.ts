@@ -27,6 +27,7 @@ import type { ToolCallEntry, TextChunk } from '@nzila/tools-runtime'
 import { chunkText } from '@nzila/tools-runtime'
 import type { AiIngestKnowledgeSourceProposal } from '../schemas'
 import { createHash } from 'node:crypto'
+import { guardRestrictedGatewayRequest } from '../restricted-guard'
 
 // ── Idempotency ─────────────────────────────────────────────────────────────
 
@@ -161,12 +162,17 @@ export async function ingestKnowledgeSource(
   proposal: AiIngestKnowledgeSourceProposal,
   actorClerkUserId: string,
 ): Promise<IngestionResult> {
+  guardRestrictedGatewayRequest({
+    classification: proposal.classification,
+    modelPathId: proposal.modelPathId,
+    dataClass: proposal.retention.dataClass,
+  })
   // ── NZ-RISK-011: Circular knowledge corruption guard ──────────────────
   // AI-generated content must never be fed back into the knowledge base.
   // Only curated, human-authored sources (manual text, uploaded documents,
   // verified external URLs) are acceptable.
   const BLOCKED_ORIGINS = ['ai_generated', 'llm_output', 'chatbot_response', 'triage_output', 'clause_reasoning']
-  const sourceOrigin = (proposal as Record<string, unknown>).sourceOrigin as string | undefined
+  const sourceOrigin = proposal.sourceOrigin?.trim().toLowerCase()
   if (sourceOrigin && BLOCKED_ORIGINS.includes(sourceOrigin)) {
     throw new Error(
       `Knowledge ingestion blocked: source origin "${sourceOrigin}" is AI-generated. ` +
@@ -292,6 +298,8 @@ export async function ingestKnowledgeSource(
         profileKey: proposal.profileKey,
         input: batchTexts,
         dataClass: retention.dataClass,
+        classification: proposal.classification,
+        modelPathId: proposal.modelPathId,
       })
 
       for (let j = 0; j < batch.length; j++) {

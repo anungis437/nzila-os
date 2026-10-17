@@ -12,6 +12,8 @@ import { authOrganizationUsers } from '@nzila/db/schema'
 import { cookies } from "next/headers";
 import { logger } from "./logger";
 import { withSystemContext } from "@/lib/db/with-rls-context";
+import { currentStateContextEnabled } from "@/lib/auth/canonical-bootstrap";
+import { getCanonicalOrganizationContext } from "@/lib/auth/canonical-context";
 /**
  * Default organization ID used for system operations
  * This points to the Default Organization where all users start
@@ -59,6 +61,10 @@ export function isDefaultOrgFallbackAllowed(): boolean {
  * @throws Error if no organization found
  */
 export async function getOrganizationIdForUser(userId: string): Promise<string> {
+  if (currentStateContextEnabled()) {
+    const context = await getCanonicalOrganizationContext({ expectedActorUserId: userId });
+    return context.organizationId;
+  }
   // Bootstrap membership lookups must run on the system connection.
   // Tenant RLS on organization_members / organization_users is org-scoped;
   // without an org id yet, runtime sees zero rows. withSystemContext is the

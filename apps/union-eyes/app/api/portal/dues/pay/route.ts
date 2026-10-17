@@ -1,168 +1,108 @@
 /**
  * GET  /api/portal/dues/pay  — member's payment history (recent)
- * POST /api/portal/dues/pay  — record a dues payment
+ * POST /api/portal/dues/pay  — initiate a Stripe dues payment
  *
- * Records dues payments against the member_dues_ledger.
- * For Stripe payments, the actual charge flow goes through the payment
- * processor / Stripe webhook; this endpoint records the ledger entry
- * and links to the external payment reference.
+ * The member cannot assert payment. This endpoint only creates a server-owned pending dues
+ * payment and a Stripe PaymentIntent; the ledger is credited exclusively by the verified
+ * Stripe webhook (lib/dues/dues-settlement.ts). The amount, organization and member are all
+ * derived server-side.
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@nzila/platform-auth/entra/server';
-import { db } from '@/db/db';
-import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
-import { z } from 'zod';
-import { moneyToNumber, subtractMoney } from '@/lib/decimal-safe';
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@nzila/platform-auth/entra/server'
+import { db } from '@/db/db'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { requireUserForOrganization } from '@/lib/api-auth-guard'
+import { memberDuesLedger } from '@/db/schema/dues-finance-schema'
+import { eq, and, desc } from 'drizzle-orm'
+import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework'
+import { stripe } from '@/lib/stripe'
+import { DuesInitiationError, initiateDuesPayment } from '@/lib/dues/dues-payment-service'
+import { assertMemberDuesPaymentEnabled } from '@/lib/dues/member-dues-flag'
 import { createLogger } from '@nzila/os-core'
 
 const logger = createLogger('portal:dues:pay')
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 // ── GET: recent payment history ───────────────────────────────────
 export async function GET(req: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId } = await auth()
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const orgId = req.nextUrl.searchParams.get('organizationId')
-      || req.headers.get('x-organization-id');
+    const orgId =
+      req.nextUrl.searchParams.get('organizationId') || req.headers.get('x-organization-id')
     if (!orgId) {
-      return NextResponse.json(
-        { error: 'Missing organizationId' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Missing organizationId' }, { status: 400 })
     }
 
-    const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') ?? '20', 10), 100);
+    const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') ?? '20', 10), 100)
 
-    const payments = await db
-      .select({
-        id: memberDuesLedger.id,
-        type: memberDuesLedger.transactionType,
-        amount: memberDuesLedger.amount,
-        balanceAfter: memberDuesLedger.balanceAfter,
-        date: memberDuesLedger.transactionDate,
-        description: memberDuesLedger.description,
-        paymentMethod: memberDuesLedger.paymentMethod,
-        paymentReference: memberDuesLedger.paymentReference,
-        receiptNumber: memberDuesLedger.receiptNumber,
-        status: memberDuesLedger.status,
-      })
-      .from(memberDuesLedger)
-      .where(
-        and(
-          eq(memberDuesLedger.userId, userId),
-          eq(memberDuesLedger.organizationId, orgId),
-        ),
-      )
-      .orderBy(desc(memberDuesLedger.transactionDate))
-      .limit(limit);
+    // The organization comes from the client; only a live canonical member may read its ledger.
+    try {
+      await requireUserForOrganization(orgId)
+    } catch {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
-    return NextResponse.json({ success: true, data: { payments } });
+    const payments = await withRLSContext({ organizationId: orgId }, async () =>
+      db
+        .select({
+          id: memberDuesLedger.id,
+          type: memberDuesLedger.transactionType,
+          amount: memberDuesLedger.amount,
+          balanceAfter: memberDuesLedger.balanceAfter,
+          date: memberDuesLedger.transactionDate,
+          description: memberDuesLedger.description,
+          paymentMethod: memberDuesLedger.paymentMethod,
+          paymentReference: memberDuesLedger.paymentReference,
+          receiptNumber: memberDuesLedger.receiptNumber,
+          status: memberDuesLedger.status,
+        })
+        .from(memberDuesLedger)
+        .where(and(eq(memberDuesLedger.userId, userId), eq(memberDuesLedger.organizationId, orgId)))
+        .orderBy(desc(memberDuesLedger.transactionDate))
+        .limit(limit),
+    )
+
+    return NextResponse.json({ success: true, data: { payments } })
   } catch (error) {
-    logger.error('[portal/dues/pay] GET Error:', error instanceof Error ? error : { detail: error });
+    logger.error('[portal/dues/pay] GET Error:', error instanceof Error ? error : { detail: error })
     return NextResponse.json(
       { success: false, error: 'Failed to fetch payment history' },
       { status: 500 },
-    );
+    )
   }
 }
 
-// ── POST: record a dues payment ──────────────────────────────────
-const paymentSchema = z.object({
-  organizationId: z.string().uuid(),
-  amount: z.number().positive(),
-  paymentMethod: z.enum([
-    'stripe',
-    'bank_transfer',
-    'check',
-    'cash',
-    'direct_debit',
-    'payroll_deduction',
-    'ewallet',
-  ]),
-  paymentReference: z.string().optional(),
-  description: z.string().optional(),
-});
-
-export async function POST(req: NextRequest) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await req.json();
-    const parsed = paymentSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: parsed.error.flatten() },
-        { status: 400 },
-      );
-    }
-
-    const { organizationId, amount, paymentMethod, paymentReference, description } = parsed.data;
-
-    // Compute current balance before this payment
-    const [current] = await db
-      .select({
-        balance: sql<string>`COALESCE(
-          SUM(CASE WHEN ${memberDuesLedger.transactionType} = 'charge' THEN ${memberDuesLedger.amount} ELSE 0 END) -
-          SUM(CASE WHEN ${memberDuesLedger.transactionType} IN ('payment','credit','adjustment','write_off') THEN ${memberDuesLedger.amount} ELSE 0 END),
-          0
-        )`,
-      })
-      .from(memberDuesLedger)
-      .where(
-        and(
-          eq(memberDuesLedger.userId, userId),
-          eq(memberDuesLedger.organizationId, organizationId),
-          eq(memberDuesLedger.status, 'posted'),
-        ),
-      );
-
-    const balanceBefore = moneyToNumber(current?.balance ?? '0');
-    const balanceAfter = moneyToNumber(subtractMoney(balanceBefore, amount));
-
-    // Insert ledger entry
-    const [entry] = await db
-      .insert(memberDuesLedger)
-      .values({
-        userId,
+// ── POST: initiate a server-owned Stripe dues payment ────────────
+export const POST = withApi(
+  {
+    auth: { minRole: 'member' },
+    rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
+    openapi: {
+      tags: ['Dues'],
+      summary: "Initiate a Stripe payment for the member's outstanding dues",
+    },
+  },
+  async ({ organizationId, userId }) => {
+    assertMemberDuesPaymentEnabled()
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
+    try {
+      return await initiateDuesPayment({
         organizationId,
-        transactionType: 'payment',
-        transactionDate: new Date(),
-        effectiveDate: new Date(),
-        amount: amount.toFixed(2),
-        balanceBefore: balanceBefore.toFixed(2),
-        balanceAfter: balanceAfter.toFixed(2),
-        paymentMethod,
-        paymentReference: paymentReference ?? null,
-        description: description ?? `Dues payment via ${paymentMethod}`,
-        status: 'posted',
-        createdBy: userId,
+        userId,
+        gateway: stripe as unknown as Parameters<typeof initiateDuesPayment>[0]['gateway'],
+        providerConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
       })
-      .returning({ id: memberDuesLedger.id });
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        ledgerEntryId: entry.id,
-        amountPaid: amount.toFixed(2),
-        balanceBefore: balanceBefore.toFixed(2),
-        balanceAfter: balanceAfter.toFixed(2),
-      },
-    });
-  } catch (error) {
-    logger.error('[portal/dues/pay] POST Error:', error instanceof Error ? error : { detail: error });
-    return NextResponse.json(
-      { success: false, error: 'Failed to record payment' },
-      { status: 500 },
-    );
-  }
-}
-
+    } catch (error) {
+      if (error instanceof DuesInitiationError) {
+        if (error.code === 'NOTHING_DUE') throw ApiError.conflict(error.message)
+        throw ApiError.externalService('stripe', error.message)
+      }
+      throw error
+    }
+  },
+)

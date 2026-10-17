@@ -44,7 +44,7 @@ export function buildRestrictedAuditEvent(input: RestrictedAuditInput): Restrict
       'Restricted audit requires purpose, data category, and authorization basis.',
     )
   }
-  if (!input.actorId || !input.serviceOrAgent || !input.action || !input.resourceId || !input.principalId) {
+  if (!input.actorId || !input.orgId || !input.serviceOrAgent || !input.action || !input.resourceId || !input.principalId) {
     throw new PlaneError(
       'RESTRICTED_AUDIT_METADATA_REQUIRED',
       'Restricted audit requires actor, service or agent, action, resource id, and principal scope.',
@@ -89,5 +89,5 @@ export function buildRestrictedAuditEvent(input: RestrictedAuditInput): Restrict
 export function recordRestrictedAudit(input: RestrictedAuditInput): RestrictedAuditEvent {
   const event = buildRestrictedAuditEvent(input)
   getState().audit.push(event)
-  return event
+  return structuredClone(event)
 }

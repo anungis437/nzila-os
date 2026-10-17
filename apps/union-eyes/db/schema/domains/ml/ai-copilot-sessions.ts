@@ -48,7 +48,7 @@ export const aiCopilotSessions = pgTable('ai_copilot_sessions', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
-  userId: uuid('user_id').notNull(), // the steward / officer
+  userId: text('user_id').notNull(), // the steward / officer
   userRole: varchar('user_role', { length: 50 }).notNull(), // steward | officer | admin
 
   // Request

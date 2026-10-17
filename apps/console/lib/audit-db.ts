@@ -25,7 +25,7 @@ import { auditEvents } from '@nzila/db/schema'
 import { computeEntryHash } from '@nzila/os-core/hash'
 import { eq, desc, and, gte, lte, SQL } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
-import { buildRestrictedAuditEvent } from '@nzila/platform-restricted-data'
+import { buildRestrictedAuditEvent, classifyRecord } from '@nzila/platform-restricted-data'
 
 const logger = createLogger('audit-db')
 
@@ -133,20 +133,16 @@ export const AUDIT_ACTIONS = {
 export async function recordAuditEvent(
   input: RecordAuditEventInput,
 ): Promise<{ id: string; hash: string; previousHash: string | null }> {
-  // 1. Get the latest event for this entity (for hash chain)
-  const [latest] = await platformDb
-    .select({ hash: auditEvents.hash })
-    .from(auditEvents)
-    .where(eq(auditEvents.orgId, input.orgId))
-    .orderBy(desc(auditEvents.createdAt))
-    .limit(1)
-
-  const previousHash = latest?.hash ?? null
-
-  let beforeJson = input.beforeJson
-  let afterJson = input.afterJson
+  // Do not let an omitted or invalid envelope label downgrade a Restricted
+  // snapshot. Classification and required metadata are checked before DB I/O.
+  classifyRecord({
+    appId: 'console-audit',
+    explicitTier: input.classification,
+    fields: { before: input.beforeJson, after: input.afterJson },
+  })
+  let restrictedMetadata: ReturnType<typeof buildRestrictedAuditEvent> | undefined
   if (input.classification === 'RESTRICTED') {
-    const metadata = buildRestrictedAuditEvent({
+    restrictedMetadata = buildRestrictedAuditEvent({
       actorId: input.actorClerkUserId,
       serviceOrAgent: input.serviceOrAgent ?? input.actorRole ?? 'unspecified',
       action: input.action,
@@ -163,8 +159,24 @@ export async function recordAuditEvent(
       beforeJson: input.beforeJson,
       afterJson: input.afterJson,
     })
+  }
+  // 1. Get the latest event for this entity (for hash chain)
+  const [latest] = await platformDb
+    .select({ hash: auditEvents.hash })
+    .from(auditEvents)
+    .where(eq(auditEvents.orgId, input.orgId))
+    .orderBy(desc(auditEvents.createdAt))
+    .limit(1)
+
+  const previousHash = latest?.hash ?? null
+
+  let beforeJson = input.beforeJson
+  let afterJson = input.afterJson
+  if (restrictedMetadata) {
+    const metadata = restrictedMetadata
     beforeJson = undefined
     afterJson = {
+      classification: 'RESTRICTED',
       auditId: metadata.id,
       at: metadata.at,
       actorId: metadata.actorId,

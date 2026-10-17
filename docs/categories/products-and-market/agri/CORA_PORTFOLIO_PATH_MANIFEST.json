@@ -1,0 +1,2115 @@
+{
+  "mission_base": "01bb54ffde86d050b996a3a5fe7cc0f55d2ab804",
+  "original_pr_928_head": "fac513edd8009cfde75f3e5bba223ecc95e5a114",
+  "local_cora_divergences_unresolved": 0,
+  "scope": "Synthetic engineering qualification; no live provider, collection, production or research activation",
+  "paths": [
+    {
+      "path": ".gitleaksignore",
+      "category": "RELEASE_PACKAGING",
+      "reason": "Exact reviewed public disposable-fixture findings only; no rule/path exemption.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "README.business.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/abr/lib/audit-log.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/agrimo/README.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/README.md",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/app/api/farmer-360/[profileId]/route.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/app/api/farmer-360/[profileId]/route.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/components/workflow/operator-workflow.test.tsx",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/components/workflow/operator-workflow.tsx",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/components/workflow/synthetic-workflow-gallery.tsx",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/__tests__/resolve-org.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/authorization-acceptance.integration.test.ts",
+      "category": "MOVED_PRODUCT_PROOF",
+      "reason": "Database fixture moved out of app runtime to tooling/cora-acceptance/authorization.integration.test.ts, preserving acceptance scenarios and reconciling canonical auth.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "apps/cora/lib/evidence-foundation/contracts.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-foundation/index.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-foundation/service.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-foundation/service.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-resolution/contracts.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-resolution/fixtures/synthetic-cross-institution.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-resolution/resolve.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-resolution/resolve.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-reuse/authority.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-reuse/authority.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-reuse/contracts.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-reuse/fixtures/synthetic-organic-journey.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-reuse/metrics.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-reuse/resolve-use.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-reuse/reuse.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/evidence-reuse/reuse.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/acceptance.integration.test.ts",
+      "category": "MOVED_PRODUCT_PROOF",
+      "reason": "Database fixture moved out of app runtime to tooling/cora-acceptance/farmer360.integration.test.ts, preserving acceptance scenarios and reconciling canonical auth.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/adapters.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/adapters.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/contracts.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/index.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/service.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/service.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/institutional-workflow/contracts.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/institutional-workflow/fixtures/synthetic-runtime.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/institutional-workflow/ledger.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/institutional-workflow/service.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/institutional-workflow/service.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/operator-workflow/render-synthetic.tsx",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/operator-workflow/synthetic-journeys.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/operator-workflow/view.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/operator-workflow/view.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/organic-evidence/contracts.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/organic-evidence/contracts.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/organic-evidence/index.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/organic-evidence/pro-cert-directory.fixture.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/organic-evidence/pro-cert-directory.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/resolve-org.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/adapt/contracts.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/adapt/fixture.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/adapt/ingest.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/adapt/ingest.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/adapt/mapping.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/fieldview/contracts.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/fieldview/fixture.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/fieldview/ingest.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/fieldview/mapping.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/capsule.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/capsule.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/capture.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/capture.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/continuity-fidelity.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/continuity-ledger.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/continuity-ledger.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/contracts.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/contracts.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/core-adapter-boundary.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/deletion.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/deletion.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/export.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/fixtures/multi-provider-routes.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/fixtures/source-independence-routes.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/fixtures/synthetic-routes.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/identity-resolution.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/index.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/integrity.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/multi-provider-proof.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/multi-provider-proof.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/provenance.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/provenance.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/rehydrate.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/revocation.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/revocation.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/rights.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/rights.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/semantic-mapping.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/semantic-mapping.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/source-independence.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/source-independence.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/test-harness.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/test-harness.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/next.config.ts",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/package.json",
+      "category": "PRODUCT_SOURCE",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "apps/cora/vitest.config.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Cora-only implementation, validation or app configuration; no Agrimo write authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docker-compose.cora-farmer360-acceptance.yml",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docker-compose.platform-authz-acceptance.yml",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/architecture/NZILA_APPLICATION_AUTHORIZATION_MODEL.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/platform-and-operations/migration/app-alignment/cora.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/README.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/00-overview.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/01-market-map.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/02-architecture.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/03-data-model.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/04-events-and-integrations.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/05-security-and-isolation.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/ADR/ADR-AGRI-002-cora-food-economy-ceiling.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_ADAPT_MAPPING_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_ADAPT_STANDARD_FILE_QUALIFICATION.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_AUTHORIZATION_COMPOSITION.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_BUYER_PUBLIC_EVIDENCE_QUALIFICATION.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_C1_AUTHORITY_CASE_F360_ACCEPTANCE_001.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_C1_AUTHORITY_CASE_ORGANIC_PUBLIC_CERTIFICATION_001.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_C1_SOURCE_AUTHORITY_INTAKE.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_CEILING_CAPABILITY_TRUTH.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_CFA_DISCOVERY_CAPTURE.schema.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_CFA_DISCOVERY_CAPTURE_TEMPLATE.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_CFA_DISCOVERY_POST_SESSION_DECISION.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_CFA_DISCOVERY_SESSION_GUIDE.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_CONNECTOR_GOVERNANCE_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_CONTINUITY_CAPSULE_V1_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_CONTINUITY_FIDELITY_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_CROSS_INSTITUTIONAL_REUSE_EVENT_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_DATA_SOVEREIGNTY_AND_CONTINUITY_ARCHITECTURE.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_DISCLOSURE_HUMAN_DECISION_REGISTER.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_DISCLOSURE_INSTITUTIONAL_ACTIVATION_CHECKLIST.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_DISCLOSURE_PRIVACY_LEGAL_PACKET.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_DISCLOSURE_PRODUCT_BOUNDARY_PACKET.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_DISCLOSURE_SOURCE_AUTHORITY_PACKET.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_DOMAIN_OWNERSHIP_MATRIX.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_EVIDENCE_FOUNDATION.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_EVIDENCE_MOBILITY_FRICTION_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_FARMER_360.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_FIRST_CROSS_INSTITUTIONAL_PROOF_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_FV001_AUTHORIZATION_MODEL.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_FV001_CAPABILITY_RIGHTS_MATRIX.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_FV001_CONTINUITY_FEASIBILITY_MATRIX.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_FV001_DISCOVERY_GAPS.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_FV001_JD001_COMPARISON.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_FV001_PUBLIC_CAPABILITY_EVIDENCE_LEDGER.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_FV001_REFERENCE_CONNECTOR_ARCHITECTURE.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_GOVERNED_INSTITUTIONAL_WORKFLOW_SLICE_7.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_COMPREHENSION_RUBRIC.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_COMPREHENSION_VALIDATION_PROTOCOL.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_ANALYSIS_SPEC.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_AUTHORIZATION_DECISION_PACK.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_CAPTURE.schema.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_CAPTURE_SCHEMA.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_CONSENT_DATA_HANDLING_DRAFT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_CONSENT_DECISION_REGISTER.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_DATA_MAP.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_DRY_RUN.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_MODERATOR_SCRIPT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_OPERATING_MODEL_RECOMMENDATION.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_OUTREACH_DRAFTS.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_ROUND_1_MANIFEST.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_ROUND_1_PLAN.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_HUMAN_VALIDATION_SESSION_QA_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_IMPLEMENTATION_SEAM_AUDIT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_INSTITUTIONAL_CONTROL_POINT_MAP.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_INSTITUTIONAL_EVIDENCE_REUSE_SLICE_6.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_INSTITUTIONAL_WORKFLOW_RUNTIME_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_ADVERSARIAL_REVIEW.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_AUTHORIZATION_MODEL.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_CAPABILITY_RIGHTS_MATRIX.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_CONTINUITY_FEASIBILITY.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_CONTINUITY_FEASIBILITY_MATRIX.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_DEERE_DISCOVERY_AGENDA.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_DEERE_HUMAN_DISCOVERY_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_DEERE_OUTREACH_DRAFT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_DEERE_RIGHTS_QUESTION_SET.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_DEERE_TECHNICAL_QUESTION_SET.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_DISCOVERY_GAPS.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_DISCOVERY_SEND_PACK.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_IMPLEMENTATION_PLANNING_GATES.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_OFFICIAL_DOCS_EXHAUSTION_RECORD.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_PUBLIC_CAPABILITY_EVIDENCE_LEDGER.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_REFERENCE_CONNECTOR_ARCHITECTURE.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_REHYDRATION_TEST_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_JD001_RIGHTS_OUTCOME_MATRIX.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_MULTI_PROVIDER_PROOF_SLICE_5.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_OPERATOR_WORKFLOW_UX_SLICE_8.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_OPERATOR_WORKFLOW_VIEW_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_ORGANIC_CERTIFIER_DATA_ACCESS_REQUEST.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_ORGANIC_EVIDENCE_TAXONOMY.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_ORGANIC_FIRST_LIVE_SOURCE_DECISION.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_ORGANIC_INSTITUTIONAL_GRAPH.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_ORGANIC_INTERNATIONAL_EXTENSION.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_ORGANIC_PASSPORT_AND_CHANGE_WATCH.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_ORGANIC_PUBLIC_SOURCE_REGISTRY.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_ORGANIC_SOURCE_ACCESS_DECISION_RECORD.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_PORTFOLIO_CLOSURE.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_PORTFOLIO_DIVERGENCE_RECONCILIATION.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_PORTFOLIO_PATH_MANIFEST.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_PROVIDER_NEUTRAL_CONTINUITY_KERNEL_SLICE_1.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SCIC_DISCOVERY_QUESTION_SET.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SCIC_HUMAN_DISCOVERY_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SCIC_OUTREACH_DRAFT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SCIC_PROOF_ARCHITECTURE_OPTIONS.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SCIC_PUBLIC_EVIDENCE_QUALIFICATION.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SECOND_CONSUMER_DISCOVERY_GAPS.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SECOND_CONSUMER_EVIDENCE_LEDGER.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SECOND_CONSUMER_HANDOFF_RECONSTRUCTION.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SECOND_CONSUMER_SELECTION_MATRIX.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SOURCE_DISCLOSURE_APPROVAL_RECORD_TEMPLATE.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SOURCE_DISCLOSURE_AUTHORIZATION_PACKET.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SOURCE_DISCLOSURE_CONDITION_LEDGER.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SOURCE_INDEPENDENCE_PROOF_SLICE_3.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_STRESS_TEST_FRAMEWORK.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_STRESS_TEST_PHASE_DECISION_MEMO.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_STRESS_TEST_REGISTRY.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_STRESS_TEST_REGISTRY.schema.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SYNTHETIC_CROSS_INSTITUTIONAL_RESOLUTION_PROOF.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_SYNTHETIC_VALIDATION_SESSION_GUIDE.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_WORKFLOW_AUDIT_AND_IDEMPOTENCY_CONTRACT.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/CORA_WORKFLOW_UX_TRUTH_AND_AUTHORITY_GUIDE.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P01.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P02.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P03.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P04.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P05.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P06.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P07.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P08.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P09.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P10.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P11.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/categories/products-and-market/agri/human-validation-round-1/P12.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/documentation-index.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/ops/ownership-registry.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/ops/release-governance/release-governance-audit.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "docs/platform/portfolio-matrix.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "governance/business/investor-materials/one-pager-cora.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "governance/business/verticals/agrotech/README.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "governance/business/verticals/agrotech/strategy/product-roadmap.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "governance/foundations/repo/package-lifecycle.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "governance/portfolio/product-catalog.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "package.json",
+      "category": "BASELINE_RESTORED",
+      "reason": "Remove the five new forbidden thin aliases; retain main scripts and document explicit existing harness commands.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/data-lifecycle/src/manifest.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/bootstrap/cora-farmer360-acceptance-fixtures.sql",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/bootstrap/cora-farmer360-acceptance.sql",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/bootstrap/platform-authz-acceptance-fixtures.sql",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/bootstrap/platform-authz-acceptance.sql",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/bootstrap/platform-authz-fixture.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/drizzle/0039_cora_evidence_foundation.sql",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/drizzle/0040_cora_farmer360.sql",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/drizzle/0041_platform_authorization_authority.sql",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/db/package.json",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/src/__tests__/cora-evidence.schema.test.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/src/__tests__/cora-farmer360.schema.test.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/src/__tests__/platform-authorization.schema.test.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/db/src/audit-hash.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/db/src/authorization-audit.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/db/src/cora-farmer360-contracts.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/src/cora-farmer360.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/src/org-registry.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/src/schema/cora-evidence.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/src/schema/cora-farmer360.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/src/schema/index.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/src/schema/methodology.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/db/src/schema/platform-authorization.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/org/src/context/guards.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/platform-auth/package.json",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/platform-auth/src/acceptance-trust.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/platform-auth/src/authorization-context.acceptance.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/platform-auth/src/authorization-context.test.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/platform-auth/src/authorization-context.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/platform-auth/src/authorization-store.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/platform-auth/src/cora-acceptance-auth.acceptance.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/platform-auth/src/cora-acceptance-auth.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/platform-auth/src/cora-acceptance-auth.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/platform-auth/src/entra/config.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/platform-auth/src/entra/server.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/platform-auth/src/entra/types.ts",
+      "category": "BASELINE_ALREADY_ABSORBED",
+      "reason": "Original PR path has no remaining difference from mission main; main is authoritative.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": false
+    },
+    {
+      "path": "packages/platform-auth/src/index.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/platform-auth/src/source-disclosure.test.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "packages/platform-auth/src/source-disclosure.ts",
+      "category": "SHARED_PLATFORM_REPAIR",
+      "reason": "Cora schema/persistence, explicit org registry, synthetic lifecycle, source disclosure or reuse of shared canonical audit primitives; current main authentication retained.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "plan/architecture-cora-parallel-provider-neutral-1.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "platform/products/cora.json",
+      "category": "GENERATED_RELEASE_PACKAGING",
+      "reason": "Canonical generator output refreshed for the reconciled source; no hand-edited gate waiver.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "category": "RELEASE_PACKAGING",
+      "reason": "Workspace dependencies and removal of forbidden new thin script aliases.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "reports/portfolio-investor-view.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "reports/portfolio-ops-dashboard.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "reports/portfolio-status.json",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "reports/portfolio-status.md",
+      "category": "AUTHORITATIVE_DOCUMENTATION",
+      "reason": "Cora ownership/product boundary, source limitations, governed research/proof or reconciliation documentation carried from PR #928.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "scripts/cora-farmer360-acceptance.mjs",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "scripts/platform-authz-acceptance.mjs",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/contract-tests/cora-readonly.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Existing Cora boundary contract; enforcement remains enabled.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/cora-acceptance/authorization.integration.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/cora-acceptance/farmer360.integration.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/cora-stress-test/README.md",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/cora-stress-test/governance.test.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/cora-stress-test/governance.ts",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/cora-stress-test/package.json",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/cora-stress-test/tsconfig.json",
+      "category": "PRODUCT_PROOF",
+      "reason": "Disposable synthetic qualification harness/fixture, reconciled to canonical auth gateway; no production authority.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/db/schema-snapshot.json",
+      "category": "GENERATED_RELEASE_PACKAGING",
+      "reason": "Canonical generator output refreshed for the reconciled source; no hand-edited gate waiver.",
+      "in_original_pr_928": false,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.json",
+      "category": "GENERATED_RELEASE_PACKAGING",
+      "reason": "Canonical generator output refreshed for the reconciled source; no hand-edited gate waiver.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.md",
+      "category": "GENERATED_RELEASE_PACKAGING",
+      "reason": "Canonical generator output refreshed for the reconciled source; no hand-edited gate waiver.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.json",
+      "category": "GENERATED_RELEASE_PACKAGING",
+      "reason": "Canonical generator output refreshed for the reconciled source; no hand-edited gate waiver.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.md",
+      "category": "GENERATED_RELEASE_PACKAGING",
+      "reason": "Canonical generator output refreshed for the reconciled source; no hand-edited gate waiver.",
+      "in_original_pr_928": true,
+      "net_change_from_mission_main": true
+    }
+  ]
+}

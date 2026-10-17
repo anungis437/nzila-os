@@ -14,6 +14,7 @@ import { claims, claimUpdates } from '@/db/schema'
 import { defensibilityPacks } from '@/db/schema/defensibility-packs-schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
+import { clientErrorResponse } from '@/lib/api/authorization-denial'
 
 export const dynamic = 'force-dynamic'
 
@@ -114,6 +115,8 @@ export async function GET(
       generated_at: new Date().toISOString(),
     })
   } catch (err) {
+    const denied = clientErrorResponse(err)
+    if (denied) return denied
     logger.error('Evidence pack export failed', { error: String(err) })
     return NextResponse.json(
       { error: 'Failed to export evidence' },

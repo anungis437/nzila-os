@@ -9,6 +9,8 @@ updates:
       time: "08:00"
       timezone: "UTC"
     open-pull-requests-limit: 10
+    # Merges to main must not trigger a full-CI rebase of every open PR; rebase on request (@dependabot rebase).
+    rebase-strategy: disabled
     groups:
       dev-tooling:
         patterns:
@@ -53,6 +55,8 @@ updates:
       time: "08:00"
       timezone: "UTC"
     open-pull-requests-limit: 5
+    # Merges to main must not trigger a full-CI rebase of every open PR; rebase on request (@dependabot rebase).
+    rebase-strategy: disabled
     labels:
       - "dependencies"
       - "github-actions"
@@ -67,6 +71,8 @@ updates:
       time: "08:00"
       timezone: "UTC"
     open-pull-requests-limit: 5
+    # Merges to main must not trigger a full-CI rebase of every open PR; rebase on request (@dependabot rebase).
+    rebase-strategy: disabled
     labels:
       - "dependencies"
       - "python"

@@ -47,10 +47,14 @@ function fixtureGraph() {
       ['packages/db', '@nzila/db'],
       ['tooling/openapi-gen', '@nzila/openapi-gen'],
     ]),
-    dependents: new Map<string, Set<string>>([
-      ['@nzila/fx', new Set(['@nzila/cfo'])],
+    dependents: new Map<string, Set<string>>([['@nzila/fx', new Set(['@nzila/cfo'])]]),
+    hasTypecheck: new Set([
+      '@nzila/fx',
+      '@nzila/cfo',
+      '@nzila/webhooks',
+      '@nzila/web',
+      '@nzila/db',
     ]),
-    hasTypecheck: new Set(['@nzila/fx', '@nzila/cfo', '@nzila/webhooks', '@nzila/web', '@nzila/db']),
     typecheckPackages: ['@nzila/cfo', '@nzila/db', '@nzila/fx', '@nzila/web', '@nzila/webhooks'],
   }
 }
@@ -131,9 +135,24 @@ describe('affected typecheck plan contract', () => {
     expect(
       parseTurboTypecheckPackages({
         tasks: [
-          { taskId: '@nzila/fx#typecheck', task: 'typecheck', package: '@nzila/fx', command: 'tsc --noEmit' },
-          { taskId: '@nzila/cfo#typecheck', task: 'typecheck', package: '@nzila/cfo', command: 'tsc --noEmit' },
-          { taskId: '@nzila/civic#typecheck', task: 'typecheck', package: '@nzila/civic', command: '<NONEXISTENT>' },
+          {
+            taskId: '@nzila/fx#typecheck',
+            task: 'typecheck',
+            package: '@nzila/fx',
+            command: 'tsc --noEmit',
+          },
+          {
+            taskId: '@nzila/cfo#typecheck',
+            task: 'typecheck',
+            package: '@nzila/cfo',
+            command: 'tsc --noEmit',
+          },
+          {
+            taskId: '@nzila/civic#typecheck',
+            task: 'typecheck',
+            package: '@nzila/civic',
+            command: '<NONEXISTENT>',
+          },
           { taskId: '//#build', task: 'build', package: '//', command: 'turbo build' },
         ],
       }),
@@ -240,7 +259,14 @@ describe('affected typecheck SCM fail-closed', () => {
 
   it('refuses affected when the base is missing, zero, or has no merge-base', () => {
     expect(
-      assessScm({ base: '', head: 'head', baseExists: false, headExists: true, ancestor: false, headInCheckout: true }),
+      assessScm({
+        base: '',
+        head: 'head',
+        baseExists: false,
+        headExists: true,
+        ancestor: false,
+        headInCheckout: true,
+      }),
     ).toMatchObject({ confident: false, kind: 'unresolved-scm', mode: 'FULL' })
     expect(
       assessScm({
@@ -346,11 +372,11 @@ describe('real workspace typecheck closure', () => {
   it('counts the executable typecheck universe', () => {
     expect(graph.ok).toBe(true)
     if (!graph.ok) return
-    expect(graph.typecheckPackages).toHaveLength(231)
+    expect(graph.typecheckPackages).toHaveLength(232)
     expect(graph.typecheckPackages).toContain('@nzila/fx')
     expect(graph.typecheckPackages).toContain('@nzila/cfo')
     expect(graph.typecheckPackages).toContain('@nzila/webhooks')
-    expect(graph.hasTypecheck.has('@nzila/civic')).toBe(false)
+    expect(graph.hasTypecheck.has('@nzila/civic')).toBe(true)
   })
 
   it('proves the fx to cfo dependent and the webhooks leaf on the real graph', () => {
@@ -384,7 +410,7 @@ describe('real workspace typecheck closure', () => {
     })
     expect(leaf.MODE).toBe('AFFECTED')
     expect(leaf.AFFECTED_PACKAGES).toEqual(['@nzila/webhooks'])
-    expect(leaf.TASK_COUNT).toBeLessThan(231)
+    expect(leaf.TASK_COUNT).toBeLessThan(graph.typecheckPackages.length)
 
     const civic = composeTypecheckPlan({
       baseSha: 'base',
@@ -394,22 +420,26 @@ describe('real workspace typecheck closure', () => {
       packageDirs: dirs,
       graph,
     })
-    expect(civic.MODE).toBe('FULL')
-    expect(civic.FALLBACK_REASON).toBe('zero-task-affected')
-    expect(civic.TASK_COUNT).toBe(231)
+    expect(civic.MODE).toBe('AFFECTED')
+    expect(civic.FALLBACK_REASON).toBe('')
+    expect(civic.AFFECTED_PACKAGES).toEqual(['@nzila/civic'])
+    expect(civic.TASK_COUNT).toBe(1)
   })
 })
 
 describe('CI Lint & Typecheck invokes the fail-closed planner', () => {
   const ci = parse(readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')) as {
     on: { pull_request: { branches: string[] }; push: { branches: string[] } }
-    jobs: {
-      'lint-and-typecheck': {
+    jobs: Record<
+      string,
+      {
         name?: string
+        needs?: string[]
+        if?: string
         'continue-on-error'?: boolean
         steps?: Array<{ name?: string; run?: string; with?: { 'fetch-depth'?: number } }>
       }
-    }
+    >
   }
   const script = readFileSync(join(ROOT, 'tooling', 'ci', 'run-affected-typecheck.sh'), 'utf8')
 
@@ -419,15 +449,30 @@ describe('CI Lint & Typecheck invokes the fail-closed planner', () => {
     expect(job['continue-on-error']).not.toBe(true)
     expect(ci.on.pull_request.branches).toEqual(['main'])
     expect(ci.on.push.branches).toEqual(['main'])
-    const checkout = job.steps?.find((step) => step.with && 'fetch-depth' in (step.with ?? {}))
+    expect(job.needs).toEqual(['classify', 'lint', 'typecheck'])
+    expect(job.if).toContain('always()')
+    expect(job.if).toContain("needs.classify.outputs.lint_and_typecheck == 'APPLICABLE'")
+    const gate = job.steps?.find((step) => step.name === 'Require both checks')
+    expect(gate?.run).toContain('test "$LINT_RESULT" = success')
+    expect(gate?.run).toContain('test "$TYPECHECK_RESULT" = success')
+    expect(gate?.run).not.toMatch(/\|\|\s*true/)
+    const lintJob = ci.jobs.lint
+    const typecheckJob = ci.jobs.typecheck
+    expect(lintJob.needs).toEqual(['classify'])
+    expect(typecheckJob.needs).toEqual(['classify'])
+    expect(lintJob['continue-on-error']).not.toBe(true)
+    expect(typecheckJob['continue-on-error']).not.toBe(true)
+    const checkout = lintJob.steps?.find((step) => step.with && 'fetch-depth' in (step.with ?? {}))
     expect(checkout?.with?.['fetch-depth']).toBe(0)
-    const lint = job.steps?.find((step) => step.name === 'Lint')
+    const lint = lintJob.steps?.find((step) => step.name === 'Lint')
     expect(lint?.run).toBe('pnpm lint')
   })
 
   it('runs the planner and refuses a zero-task or unknown mode', () => {
-    const job = ci.jobs['lint-and-typecheck']
-    const step = job.steps?.find((candidate) => candidate.run?.includes('run-affected-typecheck.sh'))
+    const job = ci.jobs.typecheck
+    const step = job.steps?.find((candidate) =>
+      candidate.run?.includes('run-affected-typecheck.sh'),
+    )
     expect(step?.name).toBe('Typecheck affected packages or full universe')
     expect(step?.run).toContain('bash tooling/ci/run-affected-typecheck.sh')
     const envText = JSON.stringify(step)
@@ -449,7 +494,10 @@ describe('CI Lint & Typecheck invokes the fail-closed planner', () => {
     expect(fullBranch).not.toContain('--affected')
     expect(fullBranch).not.toContain('--filter')
 
-    const affectedBranch = script.slice(script.indexOf('AFFECTED)'), script.indexOf('NOT_APPLICABLE)'))
+    const affectedBranch = script.slice(
+      script.indexOf('AFFECTED)'),
+      script.indexOf('NOT_APPLICABLE)'),
+    )
     expect(affectedBranch).toContain('--filter=')
     expect(affectedBranch).toContain('pnpm exec turbo run typecheck')
     expect(affectedBranch).not.toContain('--affected')

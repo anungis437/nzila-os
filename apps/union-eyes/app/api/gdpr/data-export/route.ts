@@ -28,7 +28,7 @@ const gdprDataExportSchema = z.object({
   requestDetails: z.record(z.unknown()).optional(),
 });
 
-export const POST = withApiAuth(async (request: NextRequest) => {
+export const POST = withApiAuth(async (request: NextRequest, context: { organizationId?: string }) => {
   try {
     const user = await getCurrentUser();
     if (!user || !user.id) {
@@ -52,6 +52,11 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     
     const { organizationId, preferredFormat, requestDetails } = validation.data;
     const format = preferredFormat || "json";
+
+    // A subject-access request may only be filed for the caller's own selected organization.
+    if (context?.organizationId && organizationId !== context.organizationId) {
+      return NextResponse.json({ error: 'Forbidden: organization does not match the active organization' }, { status: 403 });
+    }
 
     if (!organizationId) {
       return standardErrorResponse(

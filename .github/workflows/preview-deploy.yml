@@ -21,21 +21,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
-      - name: Lint
-        run: pnpm lint
+        with:
+          turbo-cache-key: preview-build
 
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Unit tests
-        run: pnpm test
-
-      - name: Build
-        run: pnpm build
+      # Canonical CI owns required lint, typecheck and test evidence. This
+      # independent preview build is not a replacement for those merge gates.
+      - name: Build active preview targets
+        run: node tooling/ci/run-scoped-build-shard.mjs 1 1
         env:
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
           AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+          NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Preview deploy
         run: |

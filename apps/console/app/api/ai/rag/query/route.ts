@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { orgId, appKey, profileKey, query, topK, dataClass } = parsed.data
+    const { orgId, appKey, profileKey, query, topK, dataClass, classification, modelPathId } = parsed.data
 
     const access = await requireOrgAccess(orgId)
     if (!access.ok) return access.response
@@ -39,6 +39,8 @@ export async function POST(req: NextRequest) {
       profileKey,
       input: query,
       dataClass,
+      classification,
+      modelPathId,
     })
 
     const queryVector = queryEmbedding.embeddings[0]
@@ -96,6 +98,8 @@ export async function POST(req: NextRequest) {
           profileKey,
           input: ragPrompt,
           dataClass,
+          classification,
+          modelPathId,
         })
         answer = ragResult.content
         answerTokensIn = ragResult.tokensIn

@@ -94,7 +94,7 @@ export async function handleVerifyMagicLink(request: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 401 })
     }
 
-    return NextResponse.json({ user: result.user })
+    return NextResponse.json({ user: result.user, requiresMfa: result.requiresMfa, challengeToken: result.challengeToken })
   } catch {
     return NextResponse.json(
       { error: 'Internal server error' },

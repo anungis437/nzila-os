@@ -71,9 +71,42 @@ class ClcBargainingTrends(BaseModel):
         db_table = 'clc_bargaining_trends'
         verbose_name = 'ClcBargainingTrends'
 
-class ClcSyncLog(BaseModel):
-    """Migrated from drizzle: clc-partnership-schema.ts"""
-    sync_type = models.CharField(max_length=255, null=True, blank=True)
+class ClcSyncLog(OrganizationModel):
+    """Tenant sync audit used by the current CLC collection routes."""
+    sync_type = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        choices=[(value, value) for value in (
+            'full_sync', 'incremental_sync', 'remittance_sync',
+            'member_update', 'wage_update', 'dispute_update',
+        )],
+    )
+    status = models.CharField(
+        max_length=32,
+        default='pending',
+        choices=[(value, value) for value in (
+            'pending', 'in_progress', 'completed', 'failed',
+            'partial', 'manual_review_required',
+        )],
+    )
+    direction = models.CharField(max_length=20)
+    sync_start_date = models.DateTimeField(null=True, blank=True)
+    sync_end_date = models.DateTimeField(null=True, blank=True)
+    records_processed = models.IntegerField(default=0, null=True)
+    records_succeeded = models.IntegerField(default=0, null=True)
+    records_failed = models.IntegerField(default=0, null=True)
+    records_skipped = models.IntegerField(default=0, null=True)
+    error_message = models.TextField(null=True, blank=True)
+    error_details = models.JSONField(null=True, blank=True)
+    data_hash = models.CharField(max_length=255, null=True, blank=True)
+    sync_data = models.JSONField(null=True, blank=True)
+    verification_status = models.CharField(max_length=50, null=True, blank=True)
+    verification_notes = models.TextField(null=True, blank=True)
+    is_verified = models.BooleanField(default=False, null=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    verified_by = models.CharField(max_length=255, null=True, blank=True)
+    initiated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'clc_sync_log'
@@ -417,7 +450,7 @@ class DuesTransactions(BaseModel):
     TRANSACTION_TYPE_CHOICES = [('charge', 'Charge'), ('payment', 'Payment'), ('adjustment', 'Adjustment'), ('refund', 'Refund'), ('waiver', 'Waiver'), ('late_fee', 'Late Fee')]
 
     organization_id = models.UUIDField()
-    member_id = models.UUIDField()
+    member_id = models.TextField()
     assignment_id = models.UUIDField(null=True, blank=True)
     rule_id = models.UUIDField(null=True, blank=True)
     transaction_type = models.CharField(choices=TRANSACTION_TYPE_CHOICES, max_length=20, null=True, blank=True)
@@ -783,7 +816,8 @@ class DuesRates(BaseModel):
 
 class MemberDuesLedger(BaseModel):
     """Migrated from drizzle: dues-finance-schema.ts"""
-    user_id = models.UUIDField()
+    # Application user ids are text (platform identity), not UUIDs.
+    user_id = models.TextField()
     organization_id = models.UUIDField()
     transaction_type = models.TextField()
     transaction_date = models.DateTimeField()
@@ -796,7 +830,7 @@ class MemberDuesLedger(BaseModel):
 
 class MemberArrears(BaseModel):
     """Migrated from drizzle: dues-finance-schema.ts"""
-    user_id = models.UUIDField(unique=True)
+    user_id = models.TextField(unique=True)
     organization_id = models.UUIDField()
     total_owed = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
 
@@ -827,7 +861,7 @@ class RemittanceLineItems(BaseModel):
     employee_number = models.TextField(null=True, blank=True)
     employee_name = models.TextField(null=True, blank=True)
     employment_type = models.TextField(null=True, blank=True)
-    user_id = models.UUIDField(null=True, blank=True)
+    user_id = models.TextField(null=True, blank=True)
     match_confidence = models.IntegerField(null=True, blank=True)
     match_method = models.TextField(null=True, blank=True)
     amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
@@ -853,7 +887,7 @@ class RemittanceExceptions(BaseModel):
 
 class PaymentPlans(BaseModel):
     """Migrated from drizzle: dues-finance-schema.ts"""
-    user_id = models.UUIDField()
+    user_id = models.TextField()
     organization_id = models.UUIDField()
     plan_name = models.TextField()
     total_owed = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)

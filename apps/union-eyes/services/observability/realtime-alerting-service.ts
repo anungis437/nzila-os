@@ -7,6 +7,7 @@ import {
   notificationTracking,
 } from '@/db/schema';
 import { and, desc, eq, sql } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
 
 interface AlertSignal {
   organizationId: string;
@@ -62,9 +63,11 @@ async function getOrCreateRealtimeRule(signal: AlertSignal) {
 async function emitSignal(signal: AlertSignal) {
   const rule = await getOrCreateRealtimeRule(signal);
 
-  const [execution] = await db
+  const execution = { id: randomUUID() };
+  await db
     .insert(alertExecutions)
     .values({
+      id: execution.id,
       alertRuleId: rule.id,
       triggeredBy: 'threshold',
       triggerData: {
@@ -84,8 +87,7 @@ async function emitSignal(signal: AlertSignal) {
       startedAt: new Date(),
       completedAt: new Date(),
       executionTimeMs: 1,
-    })
-    .returning();
+    });
 
   await db.insert(notificationTracking).values({
     organizationId: signal.organizationId,

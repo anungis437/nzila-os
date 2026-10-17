@@ -10,11 +10,11 @@
  * Shared across all Nzila apps via @nzila/platform-auth/password.
  */
 import { randomBytes, createHash } from 'crypto'
-import { db } from '@nzila/db/client'
+import type { db } from '@nzila/db/client'
 import { authUserSessions } from '@nzila/db/schema'
 import { eq, and, gt, sql } from 'drizzle-orm'
 import { cookies } from 'next/headers'
-import { authDb } from '../auth-db'
+import { authDb, getAuthContext, withAuthContext } from '../auth-db'
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -62,7 +62,7 @@ export async function createSession(
   const tokenHash = hashToken(token)
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS)
 
-  const [session] = await dbExecutor
+  const [session] = (await dbExecutor
     .insert(authUserSessions)
     .values({
       userId: options.userId,
@@ -79,7 +79,7 @@ export async function createSession(
       userId: authUserSessions.userId,
       organizationId: authUserSessions.organizationId,
       expiresAt: authUserSessions.expiresAt,
-    }) as [{ sessionId: string; userId: string; organizationId: string | null; expiresAt: Date }]
+    })) as [{ sessionId: string; userId: string; organizationId: string | null; expiresAt: Date }]
 
   return {
     token,
@@ -101,7 +101,18 @@ export async function validateSession(
   dbExecutor: typeof db = authDb,
 ): Promise<SessionData | null> {
   const tokenHash = hashToken(token)
+  if (dbExecutor === authDb) {
+    return withAuthContext({ phase: 'lookup', selector: { kind: 'session', tokenHash } }, () =>
+      validateSessionWithExecutor(tokenHash, authDb),
+    )
+  }
+  return validateSessionWithExecutor(tokenHash, dbExecutor)
+}
 
+async function validateSessionWithExecutor(
+  tokenHash: string,
+  dbExecutor: typeof db,
+): Promise<SessionData | null> {
   const [session] = await dbExecutor
     .select({
       sessionId: authUserSessions.sessionId,
@@ -164,12 +175,7 @@ export async function revokeAllUserSessions(
   await dbExecutor
     .update(authUserSessions)
     .set({ isActive: false })
-    .where(
-      and(
-        eq(authUserSessions.userId, userId),
-        eq(authUserSessions.isActive, true),
-      ),
-    )
+    .where(and(eq(authUserSessions.userId, userId), eq(authUserSessions.isActive, true)))
 }
 
 /**
@@ -185,23 +191,100 @@ export async function rotateSession(
   return createSession(options, dbExecutor)
 }
 
+export class SessionRebindDenied extends Error {
+  constructor() {
+    super('Live session authority is required to change organization')
+    this.name = 'SessionRebindDenied'
+  }
+}
+
+/** Caller must hold the validated actor's identity transaction until response preparation completes. */
+export async function rebindSessionOrganization(options: {
+  userId: string
+  organizationId: string
+  token: string
+}): Promise<{ token: string; session: SessionData }> {
+  const context = getAuthContext()
+  if (context?.phase !== 'identity' || context.userId !== options.userId)
+    throw new Error(
+      'Session organization rebinding requires the authenticated identity transaction',
+    )
+  const [previous] = await authDb
+    .select({
+      sessionId: authUserSessions.sessionId,
+      ipAddress: authUserSessions.ipAddress,
+      userAgent: authUserSessions.userAgent,
+      deviceInfo: authUserSessions.deviceInfo,
+    })
+    .from(authUserSessions)
+    .where(
+      and(
+        eq(authUserSessions.userId, options.userId),
+        eq(authUserSessions.sessionTokenHash, hashToken(options.token)),
+        eq(authUserSessions.isActive, true),
+        gt(authUserSessions.expiresAt, sql`statement_timestamp()`),
+      ),
+    )
+    .limit(1)
+    .for('update')
+  if (!previous) throw new SessionRebindDenied()
+  const token = generateSessionToken()
+  const tokenHash = hashToken(token)
+  const [session] = await authDb
+    .insert(authUserSessions)
+    .values({
+      userId: options.userId,
+      organizationId: options.organizationId,
+      sessionToken: tokenHash,
+      sessionTokenHash: tokenHash,
+      ipAddress: previous.ipAddress,
+      userAgent: previous.userAgent,
+      deviceInfo: previous.deviceInfo,
+      createdAt: sql`statement_timestamp()`,
+      expiresAt: sql`(SELECT expires_at FROM user_management.user_sessions
+      WHERE session_id=${previous.sessionId})`,
+      isActive: true,
+    })
+    .returning({
+      sessionId: authUserSessions.sessionId,
+      userId: authUserSessions.userId,
+      organizationId: authUserSessions.organizationId,
+      expiresAt: authUserSessions.expiresAt,
+    })
+  if (!session) throw new Error('Organization-bound session was not created')
+  const [revoked] = await authDb
+    .update(authUserSessions)
+    .set({ isActive: false })
+    .where(
+      and(
+        eq(authUserSessions.sessionId, previous.sessionId),
+        eq(authUserSessions.userId, options.userId),
+        eq(authUserSessions.isActive, true),
+      ),
+    )
+    .returning({ sessionId: authUserSessions.sessionId })
+  if (!revoked) throw new SessionRebindDenied()
+  return { token, session }
+}
+
 // ─── Cookie Management ──────────────────────────────────────────────────────
+
+export function sessionCookieAttributes(expiresAt: Date) {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    expires: expiresAt,
+    path: '/',
+  }
+}
 
 /**
  * Set the session cookie on the response.
  */
-export async function setSessionCookie(
-  token: string,
-  expiresAt: Date,
-): Promise<void> {
+export async function setSessionCookie(token: string, expiresAt: Date): Promise<void> {
   const cookieStore = await cookies()
-  cookieStore.set(SESSION_COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    expires: expiresAt,
-    path: '/',
-  })
+  cookieStore.set(SESSION_COOKIE_NAME, token, sessionCookieAttributes(expiresAt))
 }
 
 /**
@@ -238,6 +321,17 @@ export async function getSessionFromCookie(
  * Call from a cron job.
  */
 export async function purgeExpiredSessions(): Promise<number> {
+  return withAuthContext(
+    {
+      phase: 'cleanup',
+      actorUserId: 'auth-session-retention',
+      reason: 'Inactive sessions expired more than seven days',
+    },
+    purgeExpiredSessionsWithContext,
+  )
+}
+
+async function purgeExpiredSessionsWithContext(): Promise<number> {
   const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
   const result = await authDb
     .delete(authUserSessions)

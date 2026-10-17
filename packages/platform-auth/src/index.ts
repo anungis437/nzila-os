@@ -35,6 +35,30 @@ export {
   checkPrivilegedAction,
 } from './authorization'
 
+export {
+  createSourceDisclosureAuthority,
+  preflightSourceDisclosureActivation,
+  sourceDisclosurePolicySchema,
+  sourceDisclosureFactContractSchema,
+  sourceDisclosureFreshnessPolicySchema,
+  sourceDisclosureEvidenceRecordSchema,
+  sourceDisclosureProvenanceSchema,
+  type SourceDisclosureAuditEvent,
+  type SourceDisclosureAuthorityPorts,
+  type SourceDisclosureDecision,
+  type SourceDisclosureDecisionResult,
+  type SourceDisclosureActivationPreflightResult,
+  type SourceDisclosureEvaluationInput,
+  type SourceDisclosureFactIdentity,
+  type SourceDisclosureReason,
+  type SourceDisclosurePolicy,
+  type SourceDisclosureFactContract,
+  type SourceDisclosureFreshnessPolicy,
+  type SourceDisclosureEvidenceRecord,
+  type SourceDisclosureProvenance,
+  type SourceDisclosureRecipient,
+} from './source-disclosure'
+
 // ── Guards ──────────────────────────────────────────────────────────────────
 export {
   requireAuth,
@@ -93,3 +117,26 @@ export {
   type AcceptanceAuthUser,
   type AcceptanceDb,
 } from './acceptance-auth'
+
+// ── Application-scoped local/test acceptance identity ────────────────────
+export {
+  mintAcceptanceIdentityToken,
+  verifyAcceptanceIdentityToken,
+  type AcceptanceTrustProfile,
+  type AcceptanceIdentityClaims,
+  type AcceptanceIdentityVerification,
+} from './acceptance-trust'
+
+export {
+  CORA_ACCEPTANCE_APPLICATION,
+  CORA_ACCEPTANCE_PROVIDER,
+  CORA_ACCEPTANCE_ISSUER,
+  CORA_ACCEPTANCE_AUDIENCE,
+  CORA_ACCEPTANCE_TOKEN_VERSION,
+  CORA_ACCEPTANCE_MAX_TTL_SECONDS,
+  createCoraAcceptanceTrustProfile,
+  verifyCoraAcceptanceIdentity,
+  authenticateCoraAcceptanceIdentity,
+  type CoraAcceptanceAuthEnv,
+  type CoraAcceptanceIdentity,
+} from './cora-acceptance-auth'

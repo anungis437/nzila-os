@@ -1,0 +1,916 @@
+{
+  "contract": "APPLICATION_USER_ID=TEXT",
+  "candidateColumns": 77,
+  "classificationCounts": {
+    "APPLICATION_USER_ID": 45,
+    "DOMAIN_ENTITY_UUID": 18,
+    "DEAD_OR_UNREACHABLE": 14
+  },
+  "unclassifiedCurrentIdentityColumns": 0,
+  "unclassifiedColumns": [],
+  "contractViolations": [],
+  "applicationUserIdColumns": [
+    "ai_clause_reasonings.reviewed_by",
+    "ai_copilot_sessions.user_id",
+    "ai_grievance_triages.reviewed_by",
+    "cnesst_filings.created_by",
+    "document_access_grants.granted_by",
+    "document_access_grants.user_id",
+    "dues_transactions.member_id",
+    "employer_communications.created_by",
+    "employer_communications.sender_user_id",
+    "employer_contacts.created_by",
+    "external_document_access_grants.granted_by",
+    "external_document_access_grants.revoked_by",
+    "external_document_access_grants.user_id",
+    "external_matter_access_grants.granted_by",
+    "external_matter_access_grants.revoked_by",
+    "external_matter_access_grants.user_id",
+    "grievance_case_access_assignments.granted_by",
+    "grievance_case_access_assignments.user_id",
+    "grievance_deadlines.confirmed_by",
+    "grievance_deadlines.override_by",
+    "grievance_deadlines.superseded_by",
+    "grievance_events.actor_user_id",
+    "grievance_timeline.created_by",
+    "grievances.created_by",
+    "grievances.last_updated_by",
+    "hazard_reports.created_by",
+    "hazard_reports.updated_by",
+    "org_configurations.updated_by",
+    "organization_relationships.created_by",
+    "organizations.created_by",
+    "payment_plans.user_id",
+    "ppe_equipment.created_by",
+    "ppe_equipment.updated_by",
+    "remittance_line_items.user_id",
+    "representation_authorities.created_by",
+    "representation_authorities.representative_user_id",
+    "representation_authorities.revoked_by",
+    "safety_inspections.created_by",
+    "safety_inspections.updated_by",
+    "safety_training_records.created_by",
+    "safety_training_records.updated_by",
+    "wcb_claims.created_by",
+    "wcb_employer_assessments.created_by",
+    "workplace_incidents.created_by",
+    "workplace_incidents.updated_by"
+  ],
+  "entries": [
+    {
+      "table": "ai_clause_reasonings",
+      "column": "reviewed_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "ai_copilot_sessions",
+      "column": "user_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "lib/ai/steward-copilot.ts :: aiCopilotSessions.userId, userId),"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "ai_grievance_triages",
+      "column": "reviewed_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "board_packet_distributions",
+      "column": "recipient_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Live code references the column without the authenticated user id; treated as an entity reference.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "cnesst_filings",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "cnesst_filings",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "collective_agreements",
+      "column": "superseded_by",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Identifies the superseding collective agreement (an entity), not a user.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "cookie_consents",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [
+        "lib/gdpr/consent-manager.ts :: userId: data.userId"
+      ],
+      "rationale": "Foreign key to profiles.id (uuid entity key). Non-launch GDPR cookie capability.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "dispatch_assignments",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Live code references the column without the authenticated user id; treated as an entity reference.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "document_access_grants",
+      "column": "granted_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "document_access_grants",
+      "column": "user_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/documents/repository/[id]/route.ts :: documentAccessGrants.userId, userId),",
+        "app/api/documents/[id]/download/route.ts :: documentAccessGrants.userId, userId),",
+        "app/api/grievances/[id]/route.ts :: documentAccessGrants.userId, userId),",
+        "app/api/search/universal/route.ts :: documentAccessGrants.userId, userId),"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "dues_transactions",
+      "column": "member_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "services/clc/per-capita-calculator.ts :: raw SQL member_id = ${userId}"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "employer_communications",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/employers/communications/route.ts :: createdBy: userId"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "employer_communications",
+      "column": "sender_user_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/employers/communications/route.ts :: senderUserId: userId"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "employer_contacts",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/employers/communications/contacts/route.ts :: createdBy: userId"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "employment_history",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "external_document_access_grants",
+      "column": "granted_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/external/grievances/[id]/documents/upload/route.ts :: grantedBy: context.actor.userId",
+        "lib/services/external-document-grant-service.ts :: grantedBy: params.actorId"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "external_document_access_grants",
+      "column": "revoked_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "lib/services/external-document-grant-service.ts :: revokedBy: params.actorId"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "external_document_access_grants",
+      "column": "user_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/external/grievances/[id]/documents/route.ts :: externalDocumentAccessGrants.userId, context.actor.userId),",
+        "app/api/external/grievances/[id]/documents/upload/route.ts :: userId: context.actor.userId",
+        "lib/services/external-document-grant-service.ts :: userId: updated.userId",
+        "lib/services/external-resource-authorization-service.ts :: externalDocumentAccessGrants.userId, input.actor.userId),"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "external_matter_access_grants",
+      "column": "granted_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "external_matter_access_grants",
+      "column": "revoked_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "external_matter_access_grants",
+      "column": "user_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "lib/services/external-resource-authorization-service.ts :: externalMatterAccessGrants.userId, input.actor.userId),",
+        "lib/services/external-resource-authorization-service.ts :: userId: params.actorUserId"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "grievance_case_access_assignments",
+      "column": "granted_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/grievances/[id]/access/route.ts :: grantedBy: userId"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "grievance_case_access_assignments",
+      "column": "user_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/grievances/[id]/access/route.ts :: userId: parsed.data.userId",
+        "lib/services/case-access-service.ts :: grievanceCaseAccessAssignments.userId, input.userId),",
+        "lib/services/case-access-service.ts :: grievanceCaseAccessAssignments.userId, params.userId),",
+        "lib/services/case-access-service.ts :: userId: input.userId"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "grievance_deadlines",
+      "column": "confirmed_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "lib/services/deadline-confirmation-service.ts :: confirmedBy: params.actorId"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "grievance_deadlines",
+      "column": "override_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "lib/services/deadline-confirmation-service.ts :: overrideBy: params.actorId"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "grievance_deadlines",
+      "column": "superseded_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "lib/services/deadline-confirmation-service.ts :: supersededBy: params.actorId"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "grievance_events",
+      "column": "actor_user_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/cases/[caseId]/escalate/route.ts :: actorUserId: ctx.userId ?? ''",
+        "app/api/grievances/import/route.ts :: actorUserId: userId",
+        "app/api/grievances/route.ts :: actorUserId: userId",
+        "app/api/grievances/[id]/assign/route.ts :: actorUserId: userId"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "grievance_timeline",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "grievances",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/cases/[caseId]/escalate/route.ts :: createdBy: ctx.userId ?? undefined",
+        "app/api/grievances/import/route.ts :: createdBy: userId",
+        "app/api/grievances/route.ts :: createdBy: userId",
+        "app/api/grievances/[id]/convert/route.ts :: createdBy: userId"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "grievances",
+      "column": "last_updated_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "gss_applications",
+      "column": "foreign_worker_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Live code references the column without the authenticated user id; treated as an entity reference.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "hazard_reports",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/health-safety/hazards/route.ts :: createdBy: raw.createdBy"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "hazard_reports",
+      "column": "updated_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "lmbp_compliance_alerts",
+      "column": "foreign_worker_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Live code references the column without the authenticated user id; treated as an entity reference.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "member_breaks",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "member_consents",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "member_contact_preferences",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "member_employment_details",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "member_employment",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [
+        "lib/services/billing-cycle-service.ts :: memberEmployment.memberId, organizationMembers.id),",
+        "db/queries/member-segments-queries.ts :: memberEmployment.memberId, organizationMembers.id),"
+      ],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "member_history_events",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "member_leaves",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "mfa_configurations",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "notification_tracking",
+      "column": "recipient_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "org_configurations",
+      "column": "updated_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "organization_relationships",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "organization_users",
+      "column": "organization_user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "organizations",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/clause-library/route.ts :: createdBy: userId",
+        "app/api/clause-library/[id]/route.ts :: createdBy: sharedClauseLibrary.createdBy",
+        "app/api/clause-library/[id]/route.ts :: createdBy: r!.createdBy",
+        "lib/ingestion/batch-ingest.ts :: createdBy: opts.createdBy"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "organizer_impacts",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "payment_plans",
+      "column": "user_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/dues/payment-plans/route.ts :: userId: body.userId"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "pension_benefit_claims",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Live code references the column without the authenticated user id; treated as an entity reference.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "pension_contributions",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Live code references the column without the authenticated user id; treated as an entity reference.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "pension_members",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [
+        "app/api/pension/members/route.ts :: pensionMembers.userId stores the organization_members.id (UUID PK),",
+        "app/api/pension/members/route.ts :: pensionMembers.userId} = ("
+      ],
+      "rationale": "app/api/pension/members documents that it stores the organization_members.id uuid primary key.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "pension_t4a_records",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Live code references the column without the authenticated user id; treated as an entity reference.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "pension_trustees",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Pension trustee rows reference pension entities by uuid; no application user id is written.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "ppe_equipment",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "ppe_equipment",
+      "column": "updated_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "preventive_withdrawals",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "remittance_line_items",
+      "column": "user_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/dues/reconciliation/auto-match/route.ts :: remittanceLineItems.userId),",
+        "app/api/dues/reconciliation/queue/route.ts :: remittanceLineItems.userId,",
+        "app/api/dues/reconciliation/queue/route.ts :: userId: remittanceLineItems.userId",
+        "lib/services/payroll-integration-service.ts :: userId: organizationMembers.userId"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "representation_authorities",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "representation_authorities",
+      "column": "representative_user_id",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "lib/services/external-resource-authorization-service.ts :: representationAuthorities.representativeUserId, input.actor.userId),"
+      ],
+      "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "representation_authorities",
+      "column": "represented_person_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Live code references the column without the authenticated user id; treated as an entity reference.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "representation_authorities",
+      "column": "revoked_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "lib/services/representation-authority-service.ts :: revokedBy: params.actorId"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "right_of_refusal_events",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "safety_inspections",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "safety_inspections",
+      "column": "updated_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "safety_training_records",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "safety_training_records",
+      "column": "updated_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "stewards",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [
+        "app/api/ai/pension/members/[id]/projection/route.ts :: userId: context.userId",
+        "app/api/ai/pension/members/[id]/projection/route.ts :: userId: context.userId!",
+        "app/api/ai/pension/plans/[id]/funding/route.ts :: userId: context.userId",
+        "app/api/ai/pension/plans/[id]/funding/route.ts :: userId: context.userId!"
+      ],
+      "rationale": "The steward dashboard documents this uuid as matching organization_members.id (member entity key), not the text application user id.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "user_management.organization_users",
+      "column": "organization_user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "voter_eligibility",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "wcb_claims",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "wcb_claims",
+      "column": "worker_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "wcb_employer_assessments",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "workplace_incidents",
+      "column": "created_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [
+        "app/api/health-safety/incidents/route.ts :: createdBy: raw.createdBy"
+      ],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "workplace_incidents",
+      "column": "injured_person_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "workplace_incidents",
+      "column": "updated_by",
+      "currentType": "text",
+      "classification": "APPLICATION_USER_ID",
+      "targetType": "text",
+      "evidence": [],
+      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    }
+  ],
+  "sourcePlanDigest": "5ba116ec82c491577f4eee6ee7e19ef83472d62fd3d2b263b6e3212f9970597e"
+}

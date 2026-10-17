@@ -14,7 +14,7 @@ import {
 } from './principal'
 import { residencyClaims } from './residency'
 import { inspectSecretIngestion } from './secrets'
-import { resetPlatformState } from './state'
+import { getState, resetPlatformState } from './state'
 import { PlaneError, type EvidenceClass } from './types'
 
 export interface RedTeamResult {
@@ -36,6 +36,7 @@ function caught(fn: () => void): PlaneError | null {
   }
 }
 
+/** Internal synthetic diagnostic harness, deliberately absent from the public API. */
 export function rerunRedTeam(): RedTeamResult[] {
   resetPlatformState()
   const record = putRestrictedRecord({
@@ -93,21 +94,24 @@ export function rerunRedTeam(): RedTeamResult[] {
     reason: 'synthetic emergency access for one record',
     durationMinutes: 15,
     scope: {
+      orgId: 'org-synthetic-1',
       appDomain: 'synthetic-app',
       resource: record.id,
       action: 'read',
       principalId: 'principal-synthetic-a',
     },
-    now: new Date('2026-01-01T00:00:00.000Z'),
   })
+  // Fault injection stays inside the test harness; public access requests cannot
+  // supply an earlier clock to revive an expired activation.
+  getState().breakGlass.find((item) => item.id === activation.id)!.expiresAt = new Date(Date.now() - 1).toISOString()
   const expired = evaluateBreakGlassAccess({
     activationId: activation.id,
+    actorId: 'admin-synthetic',
     orgId: 'org-synthetic-1',
     principalId: 'principal-synthetic-a',
     appDomain: 'synthetic-app',
     resource: record.id,
     action: 'read',
-    now: new Date('2026-01-01T00:20:00.000Z'),
   })
   const fullScope = caught(() => {
     activateBreakGlass({
@@ -144,7 +148,6 @@ export function rerunRedTeam(): RedTeamResult[] {
     actor: { kind: 'principal', id: 'principal-synthetic-a' },
     purpose: 'synthetic erasure',
     authorizationBasis: 'principal_self_access',
-    now: new Date('2026-02-01T00:00:00.000Z'),
   })
 
   const cross = caught(() => {

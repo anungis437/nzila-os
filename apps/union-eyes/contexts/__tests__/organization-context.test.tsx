@@ -130,6 +130,105 @@ describe('contexts/organization-context', () => {
     expect(result.current.organizationId).toBe('org-2');
   });
 
+  it('uses the authoritative canonical selection instead of legacy cookies or primary membership', async () => {
+    document.cookie = 'selected_organization_id=org-1; path=/';
+    const second = { ...ORG, id: 'org-2', slug: 'org-2' };
+    routeFetch([
+      ['/api/users/me/organizations', () => resp({ json: async () => ({
+        organizationAuthority: 'CANONICAL_CURRENT_STATE_V2',
+        activeOrganizationId: second.id,
+        organizations: [ORG, second],
+        memberships: [{ organizationId: ORG.id, isPrimary: true }],
+      }) })],
+      ['/path', () => resp({ json: async () => ({ data: [], organizationAuthority: 'CANONICAL_CURRENT_STATE_V2' }) })],
+    ]);
+    const { result } = renderHook(() => useOrganization(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.organizationId).toBe(second.id);
+    expect(document.cookie).toContain('selected_organization_id=org-1');
+    expect(mocks.mockFetch.mock.calls.some(([url]) => url.includes('/profile'))).toBe(false);
+  });
+
+  it('does not synthesize or recover organization authority from an empty canonical response', async () => {
+    routeFetch([
+      ['/api/users/me/organizations', () => resp({ json: async () => ({
+        organizationAuthority: 'CANONICAL_CURRENT_STATE_V2',
+        activeOrganizationId: null,
+        organizations: [],
+        memberships: [{ organizationId: 'missing', isPrimary: true }],
+      }) })],
+      ['/profile', () => resp({ json: async () => ({ organization: ORG }) })],
+    ]);
+    const { result } = renderHook(() => useOrganization(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.organizationId).toBeNull();
+    expect(result.current.organization).toBeNull();
+    expect(result.current.userOrganizations).toEqual([]);
+    expect(mocks.mockFetch).toHaveBeenCalledTimes(1);
+    expect(document.cookie).toBe('');
+  });
+
+  it('rejects a canonical selection outside the supplied authorized organization list', async () => {
+    routeFetch([
+      ['/api/users/me/organizations', () => resp({ json: async () => ({
+        organizationAuthority: 'CANONICAL_CURRENT_STATE_V2',
+        activeOrganizationId: 'foreign',
+        organizations: [ORG],
+        memberships: [],
+      }) })],
+    ]);
+    const { result } = renderHook(() => useOrganization(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.organizationId).toBeNull();
+    expect(result.current.error).toContain('not in the authorized list');
+    expect(mocks.mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('switches a canonical organization without writing legacy selection cookies', async () => {
+    document.cookie = 'selected_org_id=old; path=/';
+    const second = { ...ORG, id: 'org-2', slug: 'org-2' };
+    routeFetch([
+      ['/api/users/me/organizations', () => resp({ json: async () => ({
+        organizationAuthority: 'CANONICAL_CURRENT_STATE_V2',
+        activeOrganizationId: ORG.id,
+        organizations: [ORG, second],
+        memberships: [],
+      }) })],
+      ['/api/organizations/switch', () => resp({ json: async () => ({
+        success: true,
+        organizationAuthority: 'CANONICAL_CURRENT_STATE_V2',
+        activeOrganizationId: second.id,
+        organization: second,
+      }) })],
+      ['/path', () => resp({ json: async () => ({ data: [], organizationAuthority: 'CANONICAL_CURRENT_STATE_V2' }) })],
+    ]);
+    const { result } = renderHook(() => useOrganization(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await act(async () => { await result.current.switchOrganization(second.id); });
+    expect(result.current.organizationId).toBe(second.id);
+    expect(document.cookie).toBe('selected_org_id=old');
+    expect(mocks.mockReload).toHaveBeenCalledOnce();
+  });
+
+  it('surfaces canonical hierarchy load failures instead of an empty-success fallback', async () => {
+    routeFetch([
+      ['/api/users/me/organizations', () => resp({ json: async () => ({
+        organizationAuthority: 'CANONICAL_CURRENT_STATE_V2',
+        activeOrganizationId: ORG.id,
+        organizations: [ORG],
+        memberships: [],
+      }) })],
+      ['/path', () => resp({ ok: false, status: 500 })],
+      ['/tree', () => resp({ ok: false, status: 403 })],
+    ]);
+    const { result } = renderHook(() => useOrganization(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error).toContain('canonical organization path: 500');
+    await act(async () => { await result.current.loadOrganizationTree(); });
+    expect(result.current.error).toContain('canonical organization tree: 403');
+    expect(result.current.organizationTree).toEqual([]);
+  });
+
   it('resolves organizations by membership id when the org list is empty', async () => {
     routeFetch([
       [

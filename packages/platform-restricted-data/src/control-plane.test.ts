@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import { buildRestrictedAuditEvent } from './audit'
 import { activateBreakGlass, evaluateBreakGlassAccess } from './break-glass'
 import { classifyRecord, declareRestrictedCapability } from './classification'
@@ -62,8 +62,11 @@ function seedPair() {
 
 describe('restricted data control plane', () => {
   beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-17T12:00:00Z'))
     resetPlatformState()
   })
+  afterEach(() => vi.useRealTimers())
 
   it('keeps unlabelled non-sensitive data Internal and fails closed for Restricted fields', () => {
     expect(classifyRecord({ appId: 'ordinary-app', fields: { title: 'runbook' } })).toEqual({
@@ -226,6 +229,7 @@ describe('restricted data control plane', () => {
   })
 
   it('scopes break-glass, expires it, and does not create a standing grant', () => {
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
     expect(() => activateBreakGlass({
       actorId: 'admin-synthetic',
       reason: 'synthetic emergency access',
@@ -237,34 +241,36 @@ describe('restricted data control plane', () => {
       reason: 'synthetic emergency access',
       durationMinutes: 15,
       scope: {
+        orgId: 'org-synthetic-1',
         appDomain: 'synthetic-app',
         resource: 'rec-1',
         action: 'read',
         principalId: 'principal-synthetic-a',
       },
-      now: new Date('2026-01-01T00:00:00.000Z'),
     })
     expect(activation.standingGrantCreated).toBe(false)
     expect(getState().grants.size).toBe(0)
+    vi.setSystemTime(new Date('2026-01-01T00:10:00Z'))
     const active = evaluateBreakGlassAccess({
       activationId: activation.id,
+      actorId: 'admin-synthetic',
       orgId: 'org-synthetic-1',
       principalId: 'principal-synthetic-a',
       appDomain: 'synthetic-app',
       resource: 'rec-1',
       action: 'read',
-      now: new Date('2026-01-01T00:10:00.000Z'),
     })
     expect(active.allowed).toBe(true)
     expect(active.standingGrantCreated).toBe(false)
+    vi.setSystemTime(new Date('2026-01-01T00:16:00Z'))
     const expired = evaluateBreakGlassAccess({
       activationId: activation.id,
+      actorId: 'admin-synthetic',
       orgId: 'org-synthetic-1',
       principalId: 'principal-synthetic-a',
       appDomain: 'synthetic-app',
       resource: 'rec-1',
       action: 'read',
-      now: new Date('2026-01-01T00:16:00.000Z'),
     })
     expect(expired.allowed).toBe(false)
     expect(getState().grants.size).toBe(0)
@@ -358,7 +364,6 @@ describe('restricted data control plane', () => {
       actor: { kind: 'principal', id: 'principal-synthetic-a' },
       purpose: 'synthetic erasure',
       authorizationBasis: 'principal_self_access',
-      now: new Date('2026-02-01T00:00:00.000Z'),
     })
     expect(deleted.primary).toBe('ACTIVE_DATA_DELETED')
     expect(deleted.backups).toBe('HISTORICAL_BACKUP_AGING_OUT')

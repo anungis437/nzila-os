@@ -1,0 +1,125 @@
+[
+  {
+    "path": "apps/cora/next-env.d.ts",
+    "PR_928_VERSION": {
+      "commit": "fac513edd8009cfde75f3e5bba223ecc95e5a114",
+      "sha256": "7b550dda9686c16f36a17bf9051d5dbf31e98555b30d114ac49fc49a1e712651"
+    },
+    "LOCAL_WORKSPACE_VERSION": {
+      "path": "C:/APPS/nzila-os/apps/cora/next-env.d.ts",
+      "sha256": "1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b"
+    },
+    "MAIN_VERSION": {
+      "commit": "01bb54ffde86d050b996a3a5fe7cc0f55d2ab804",
+      "sha256": "7b550dda9686c16f36a17bf9051d5dbf31e98555b30d114ac49fc49a1e712651"
+    },
+    "SEMANTIC_DIFFERENCE": "Local generated Next.js root-params import only; main and PR byte equality: true",
+    "AUTHORITATIVE_VERSION": "MAIN_EQUALS_PR_928",
+    "REASON": "Use tracked framework declaration; local .next output is generated and is not source authority."
+  },
+  {
+    "path": "apps/cora/lib/source-continuity/adapters/fieldview/fixture.ts",
+    "PR_928_VERSION": {
+      "commit": "fac513edd8009cfde75f3e5bba223ecc95e5a114",
+      "sha256": "3773a5a94fed2ba8a690c01d1061a1836bd1f4bd2e4a2baffe3eeffd2af5ea5a"
+    },
+    "LOCAL_WORKSPACE_VERSION": {
+      "path": "C:/APPS/nzila-os/apps/cora/lib/source-continuity/adapters/fieldview/fixture.ts",
+      "sha256": "786120912abbceb3339521e51e00ba23b0343e99078c23016b8b60c4d4127bcf"
+    },
+    "MAIN_VERSION": "ABSENT",
+    "SEMANTIC_DIFFERENCE": "TypeScript AST identical; formatting only",
+    "AUTHORITATIVE_VERSION": "PR_928",
+    "REASON": "Accepted synthetic-only provider-neutral doctrine, rights guards and all executable/test ASTs are unchanged; preserve the committed reviewed candidate rather than formatter-only local edits."
+  },
+  {
+    "path": "apps/cora/lib/source-continuity/adapters/fieldview/ingest.ts",
+    "PR_928_VERSION": {
+      "commit": "fac513edd8009cfde75f3e5bba223ecc95e5a114",
+      "sha256": "7c70067a713292517718ac26d0a3c650066b3ce72b3b055b575877708ae3dede"
+    },
+    "LOCAL_WORKSPACE_VERSION": {
+      "path": "C:/APPS/nzila-os/apps/cora/lib/source-continuity/adapters/fieldview/ingest.ts",
+      "sha256": "df6903ef12523cb2692875f47c1a523d25d173aa651bc4861f10404c311b33a7"
+    },
+    "MAIN_VERSION": "ABSENT",
+    "SEMANTIC_DIFFERENCE": "TypeScript AST identical; formatting only",
+    "AUTHORITATIVE_VERSION": "PR_928",
+    "REASON": "Accepted synthetic-only provider-neutral doctrine, rights guards and all executable/test ASTs are unchanged; preserve the committed reviewed candidate rather than formatter-only local edits."
+  },
+  {
+    "path": "apps/cora/lib/source-continuity/fixtures/multi-provider-routes.ts",
+    "PR_928_VERSION": {
+      "commit": "fac513edd8009cfde75f3e5bba223ecc95e5a114",
+      "sha256": "4a0735125db725bec36b59ebc02305b4780e71766372827a158adbf8e8d49fae"
+    },
+    "LOCAL_WORKSPACE_VERSION": {
+      "path": "C:/APPS/nzila-os/apps/cora/lib/source-continuity/fixtures/multi-provider-routes.ts",
+      "sha256": "5e56157ff70f1f0f8f38527aeb2c6af5dbe2411359e2f852f54aedb43f9279b7"
+    },
+    "MAIN_VERSION": "ABSENT",
+    "SEMANTIC_DIFFERENCE": "TypeScript AST identical; formatting only",
+    "AUTHORITATIVE_VERSION": "PR_928",
+    "REASON": "Accepted synthetic-only provider-neutral doctrine, rights guards and all executable/test ASTs are unchanged; preserve the committed reviewed candidate rather than formatter-only local edits."
+  },
+  {
+    "path": "apps/cora/lib/source-continuity/multi-provider-proof.test.ts",
+    "PR_928_VERSION": {
+      "commit": "fac513edd8009cfde75f3e5bba223ecc95e5a114",
+      "sha256": "aa79e6df390e01187e34fcf563063da6243b6b7e12786693595b04a42d60c8de"
+    },
+    "LOCAL_WORKSPACE_VERSION": {
+      "path": "C:/APPS/nzila-os/apps/cora/lib/source-continuity/multi-provider-proof.test.ts",
+      "sha256": "2125592f8bae2dc0faa00cf43f23b11eda0b87af24b6b41466eac76d3ff07a27"
+    },
+    "MAIN_VERSION": "ABSENT",
+    "SEMANTIC_DIFFERENCE": "TypeScript AST identical; formatting only",
+    "AUTHORITATIVE_VERSION": "PR_928",
+    "REASON": "Accepted synthetic-only provider-neutral doctrine, rights guards and all executable/test ASTs are unchanged; preserve the committed reviewed candidate rather than formatter-only local edits."
+  },
+  {
+    "path": "apps/cora/lib/source-continuity/multi-provider-proof.ts",
+    "PR_928_VERSION": {
+      "commit": "fac513edd8009cfde75f3e5bba223ecc95e5a114",
+      "sha256": "63763000c172d354c0b5a61660d9460791d8351350c43e2f66a2d5edce391803"
+    },
+    "LOCAL_WORKSPACE_VERSION": {
+      "path": "C:/APPS/nzila-os/apps/cora/lib/source-continuity/multi-provider-proof.ts",
+      "sha256": "b578517e3651c3e35a59ac52ecee9bb075aab99e4342085a109f76cb0f43c83a"
+    },
+    "MAIN_VERSION": "ABSENT",
+    "SEMANTIC_DIFFERENCE": "TypeScript AST identical; formatting only",
+    "AUTHORITATIVE_VERSION": "PR_928",
+    "REASON": "Accepted synthetic-only provider-neutral doctrine, rights guards and all executable/test ASTs are unchanged; preserve the committed reviewed candidate rather than formatter-only local edits."
+  },
+  {
+    "path": "docs/categories/products-and-market/agri/ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md",
+    "PR_928_VERSION": {
+      "commit": "fac513edd8009cfde75f3e5bba223ecc95e5a114",
+      "sha256": "454298c906284e1d0a44a9b92a904ccbee27cf1d773a0e012b0a6b3b9227c5f5"
+    },
+    "LOCAL_WORKSPACE_VERSION": {
+      "path": "C:/APPS/nzila-os/docs/categories/products-and-market/agri/ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md",
+      "sha256": "e9654d08a5cdc3a94c18abad6ef028ba4025f6c501c1333086bd477ae7722ba7"
+    },
+    "MAIN_VERSION": "ABSENT",
+    "SEMANTIC_DIFFERENCE": "Markdown formatting only",
+    "AUTHORITATIVE_VERSION": "PR_928",
+    "REASON": "Committed Cora candidate preserves identical semantics; avoid formatter-only source churn."
+  },
+  {
+    "path": "docs/categories/products-and-market/agri/CORA_IMPLEMENTATION_SEAM_AUDIT.md",
+    "PR_928_VERSION": {
+      "commit": "fac513edd8009cfde75f3e5bba223ecc95e5a114",
+      "sha256": "f9c5efbccb4f42cb2ad62f1e7e255432ddfdaca8dd1d2cf0d4482851d1b3a132"
+    },
+    "LOCAL_WORKSPACE_VERSION": {
+      "path": "C:/APPS/nzila-os/docs/categories/products-and-market/agri/CORA_IMPLEMENTATION_SEAM_AUDIT.md",
+      "sha256": "3c6a73e2af3ba2cf9bcf168eaa5625eb9c645c553396682f464c3445178f5fac"
+    },
+    "MAIN_VERSION": "ABSENT",
+    "SEMANTIC_DIFFERENCE": "Markdown formatting only",
+    "AUTHORITATIVE_VERSION": "PR_928",
+    "REASON": "Committed Cora candidate preserves identical semantics; avoid formatter-only source churn."
+  }
+]

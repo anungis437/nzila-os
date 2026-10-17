@@ -1,0 +1,117 @@
+{
+  "classification": "LOCAL_SYNTHETIC_PROOF_ARTIFACT",
+  "files": [
+    {
+      "path": "benchmark-1791659085308.sqlite",
+      "sha256": "eb8acce023e3e5f38dd45afb13b07b4148e10cc19ef745ce0ee36a6dac37b4f3",
+      "bytes": 352256
+    },
+    {
+      "path": "commit-expiry-1791658995752.sqlite",
+      "sha256": "a9ad0dbfeb904b55a1009c4aabbacdb0317ab190227bc1c03ec4cd74d7887e6c",
+      "bytes": 49152
+    },
+    {
+      "path": "expiry-proof-1791658992271.sqlite",
+      "sha256": "dd3d1cdbe92799962f662b0fcabf849b3904851f9976856f23d64ab8d514fa80",
+      "bytes": 40960
+    },
+    {
+      "path": "proof-1791658253183-concurrency.sqlite",
+      "sha256": "4bb1a53a286c43a9f984b15b3f5adf7ab23c825d7db6dd5cbb4b9ab24f5cb86e",
+      "bytes": 118784
+    },
+    {
+      "path": "proof-1791658253183-crash.sqlite",
+      "sha256": "8784f3e4f1b8394d8c90480cc8014af1b292ce99679b0f6cfa12811f3556c33c",
+      "bytes": 57344
+    },
+    {
+      "path": "proof-1791658253183-idempotent.sqlite",
+      "sha256": "46af8410015f7d7bd18da6ac7134cb9d5e5b3011addfcdf6e415f2bc7a9126f9",
+      "bytes": 212992
+    },
+    {
+      "path": "proof-1791658253183-membership.sqlite",
+      "sha256": "dc3eda2ec78d3a6152231360106a2b8dc344c5fcfc2a957da8415d5e43106b11",
+      "bytes": 139264
+    },
+    {
+      "path": "proof-1791658253183-rollback.sqlite",
+      "sha256": "dcbdff5e9c96366a779adfe01ed66a8027b756ed236b4818bfcec199252000f9",
+      "bytes": 57344
+    },
+    {
+      "path": "proof-1791658253183-same-key-race.sqlite",
+      "sha256": "3eb38bbb3c62f2840f4ae21f80efbc57357dc94e27aa1d00fced53fd4127e92c",
+      "bytes": 118784
+    },
+    {
+      "path": "proof-1791658253183-tamper-authority.sqlite",
+      "sha256": "4661822b623d4c67d09b78614a36bddd26322633a980e34bfe626b85fa62ea7e",
+      "bytes": 262144
+    },
+    {
+      "path": "proof-1791658253183-tamper-nested.sqlite",
+      "sha256": "3729eb1bd30ef412154917bcf5ad4f16aae735bc0911c6aa0a04a139e7a0d081",
+      "bytes": 262144
+    },
+    {
+      "path": "proof-1791658253183-tamper-predecessor.sqlite",
+      "sha256": "b0287ae30ccb41a73f312bf42fb410e2dda06aeb493757b3cf1c9bc62979ec1d",
+      "bytes": 262144
+    },
+    {
+      "path": "proof-1791658253183-tamper-truncate.sqlite",
+      "sha256": "70a501c75027760357d82302c1b7a314ef153f9546149f3d1d85fabaf1857afc",
+      "bytes": 262144
+    },
+    {
+      "path": "proof-1791658253183.sqlite",
+      "sha256": "5d2c5d95b49d834906b5b917f79d767e3a8064b285a0bf38abf00dfbeada3007",
+      "bytes": 262144
+    },
+    {
+      "path": "checkpoints\\final-proof-summary.json",
+      "sha256": "94caaadf954d8f80a59347a62050d1f6c0f84ee0ebcc4165302f5500d81e26e3",
+      "bytes": 609
+    },
+    {
+      "path": "checkpoints\\performance-1791659085308.json",
+      "sha256": "53b1adf329823944e116703fee461041da8159e6e6d1ef44f48ff01b82ce117a",
+      "bytes": 384
+    },
+    {
+      "path": "checkpoints\\proof-1791658253183-tamper-authority.sqlite-detection.json",
+      "sha256": "b462c743a4876cc5992186bf243d2386eff64ba03610601fe7c96fe8821804f7",
+      "bytes": 118
+    },
+    {
+      "path": "checkpoints\\proof-1791658253183-tamper-nested.sqlite-detection.json",
+      "sha256": "56b7fd242b076aed0f0d9e5b4121e9f20f10681afd794141570e154b3ca4cd94",
+      "bytes": 115
+    },
+    {
+      "path": "checkpoints\\proof-1791658253183-tamper-predecessor.sqlite-detection.json",
+      "sha256": "06c666fb1a24aa51cb0839b19d483cfd1648ea99f0a6b7fca7bfe9e3c86bbc07",
+      "bytes": 120
+    },
+    {
+      "path": "checkpoints\\proof-1791658253183-tamper-truncate.sqlite-detection.json",
+      "sha256": "9559f8dfeac4f00bb0c5ead66c6dc8e8cc7e37ce3e26cbb8b06cfc0f925c52f8",
+      "bytes": 117
+    },
+    {
+      "path": "checkpoints\\proof-1791658253183-tamper-truncate.sqlite-SYN-A-ORG-checkpoint.json",
+      "sha256": "d10b5cb2f80eef6fdc692c44a786269cc7cf251edd5a7007a4280d78929b3c16",
+      "bytes": 514
+    },
+    {
+      "path": "checkpoints\\proof-1791658253183.sqlite-SYN-A-ORG-checkpoint.json",
+      "sha256": "d10b5cb2f80eef6fdc692c44a786269cc7cf251edd5a7007a4280d78929b3c16",
+      "bytes": 514
+    }
+  ],
+  "custodian": "Aubert Nungisa",
+  "createdAt": "2026-10-10T19:10:46.7558803Z"
+}

@@ -1,0 +1,366 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:cora:stress-test:registry:1.0",
+  "title": "Cora local stress-test governance registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "executionPermission",
+    "inheritedGates",
+    "organicSourceRights",
+    "routes",
+    "tests"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "executionPermission": { "const": "NONE_GRANTED" },
+    "inheritedGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "CORA_ORGANIC_PUBLIC_EVIDENCE_FOUNDATION",
+        "CORA_ORGANIC_PHASE_2",
+        "CORA_ORGANIC_PHASE_2C",
+        "CORA_ORGANIC_FIRST_LIVE_SOURCE",
+        "PRO_CERT_SOURCE_PROOF",
+        "PUBLIC_SOURCE_RUNTIME_PROOF",
+        "PHASE_3_PERMISSION",
+        "PRODUCTION_ACTIVATION",
+        "COMMERCIAL_PILOT_COMMITMENT",
+        "MATERIAL_ROUTE_EXPANSION"
+      ],
+      "properties": {
+        "CORA_ORGANIC_PUBLIC_EVIDENCE_FOUNDATION": { "const": "PASS" },
+        "CORA_ORGANIC_PHASE_2": { "const": "PASS" },
+        "CORA_ORGANIC_PHASE_2C": { "const": "PASS" },
+        "CORA_ORGANIC_FIRST_LIVE_SOURCE": { "const": "BLOCKED_RIGHTS_CONFIRMATION" },
+        "PRO_CERT_SOURCE_PROOF": { "const": "REQUIRES_SOURCE_CONFIRMATION" },
+        "PUBLIC_SOURCE_RUNTIME_PROOF": { "const": "NOT_YET_PROVEN" },
+        "PHASE_3_PERMISSION": { "const": "NONE_GRANTED" },
+        "PRODUCTION_ACTIVATION": { "const": "BLOCKED_STRESS_TEST" },
+        "COMMERCIAL_PILOT_COMMITMENT": { "const": "BLOCKED_STRESS_TEST" },
+        "MATERIAL_ROUTE_EXPANSION": { "const": "BLOCKED_STRESS_TEST" }
+      }
+    },
+    "organicSourceRights": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/sourceRight" },
+      "minProperties": 11,
+      "maxProperties": 11,
+      "propertyNames": {
+        "enum": [
+          "PUBLICATION_AUTHORITY",
+          "ACCESS_METHOD",
+          "AUTOMATED_ACCESS_RIGHTS",
+          "MANUAL_ACCESS_RIGHTS",
+          "INTERNAL_PROCESSING_RIGHTS",
+          "RETENTION_RIGHTS",
+          "REUSE_RIGHTS",
+          "REPUBLICATION_RIGHTS",
+          "COMMERCIAL_USE_RIGHTS",
+          "ATTRIBUTION_REQUIREMENTS",
+          "TIMESTAMP_SEMANTICS"
+        ]
+      }
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/definitions/route" }
+    },
+    "tests": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": { "$ref": "#/definitions/test" }
+    }
+  },
+  "definitions": {
+    "sourceRight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "scope", "evidenceRefs", "requiredForTest"],
+      "properties": {
+        "state": {
+          "enum": [
+            "ESTABLISHED_ALLOWED",
+            "ESTABLISHED_PROHIBITED",
+            "REQUIRES_CONFIRMATION",
+            "NOT_ESTABLISHED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "scope": { "$ref": "#/definitions/text" },
+        "evidenceRefs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/text" }
+        },
+        "requiredForTest": { "type": ["boolean", "null"] }
+      }
+    },
+    "text": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "nullableText": { "anyOf": [{ "$ref": "#/definitions/text" }, { "type": "null" }] },
+    "refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/definitions/text" }
+    },
+    "phase": { "type": "integer", "minimum": 0, "maximum": 5 },
+    "state": {
+      "enum": [
+        "PASS",
+        "PASS_WITH_CONDITIONS",
+        "REDIRECT_POLICY",
+        "REDESIGN",
+        "BLOCKED_EVIDENCE",
+        "FAIL",
+        "NOT_STARTED"
+      ]
+    },
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "criterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "operator", "value"],
+      "properties": {
+        "metric": { "$ref": "#/definitions/text" },
+        "operator": { "enum": ["GT", "GTE", "LT", "LTE", "EQ"] },
+        "value": { "type": "number" }
+      }
+    },
+    "criteria": {
+      "anyOf": [
+        { "type": "null" },
+        { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/criterion" } }
+      ]
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reference", "at"],
+      "properties": {
+        "reference": { "$ref": "#/definitions/text" },
+        "at": { "$ref": "#/definitions/text" }
+      }
+    },
+    "test": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "route",
+        "phase",
+        "version",
+        "hypothesis",
+        "metricDefinitions",
+        "passCriteria",
+        "redirectCriteria",
+        "killCriteria",
+        "evidenceRequired",
+        "owner",
+        "participantClass",
+        "plannedDecisionDate",
+        "approval",
+        "lockedAt",
+        "lockedHash",
+        "observations",
+        "decision",
+        "deviations",
+        "thresholdChanges"
+      ],
+      "properties": {
+        "id": { "$ref": "#/definitions/text" },
+        "route": { "enum": ["ROUTE_A", "ROUTE_B"] },
+        "phase": { "$ref": "#/definitions/phase" },
+        "version": { "type": "integer", "minimum": 1 },
+        "hypothesis": { "$ref": "#/definitions/text" },
+        "metricDefinitions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "unit"],
+            "properties": {
+              "id": { "$ref": "#/definitions/text" },
+              "unit": { "$ref": "#/definitions/text" }
+            }
+          }
+        },
+        "passCriteria": { "$ref": "#/definitions/criteria" },
+        "redirectCriteria": { "$ref": "#/definitions/criteria" },
+        "killCriteria": { "$ref": "#/definitions/criteria" },
+        "evidenceRequired": { "$ref": "#/definitions/refs" },
+        "owner": { "$ref": "#/definitions/nullableText" },
+        "participantClass": { "$ref": "#/definitions/text" },
+        "plannedDecisionDate": { "$ref": "#/definitions/nullableText" },
+        "approval": { "anyOf": [{ "$ref": "#/definitions/approval" }, { "type": "null" }] },
+        "lockedAt": { "$ref": "#/definitions/nullableText" },
+        "lockedHash": { "anyOf": [{ "$ref": "#/definitions/digest" }, { "type": "null" }] },
+        "observations": {
+          "anyOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["at", "evidenceRefs", "values"],
+              "properties": {
+                "at": { "$ref": "#/definitions/text" },
+                "evidenceRefs": { "$ref": "#/definitions/refs" },
+                "values": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["metric", "value", "unit"],
+                    "properties": {
+                      "metric": { "$ref": "#/definitions/text" },
+                      "value": { "type": "number" },
+                      "unit": { "$ref": "#/definitions/text" }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "decision": {
+          "anyOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "date",
+                "result",
+                "numericResult",
+                "memoRef",
+                "evidenceRefs",
+                "owner",
+                "lockedHash",
+                "conditionsClosed"
+              ],
+              "properties": {
+                "date": { "$ref": "#/definitions/text" },
+                "result": { "$ref": "#/definitions/state" },
+                "numericResult": { "enum": ["PASS", "REDIRECT_POLICY", "FAIL", "REDESIGN"] },
+                "memoRef": { "$ref": "#/definitions/text" },
+                "evidenceRefs": { "$ref": "#/definitions/refs" },
+                "owner": { "$ref": "#/definitions/text" },
+                "lockedHash": { "$ref": "#/definitions/digest" },
+                "conditionsClosed": { "type": "boolean" }
+              }
+            }
+          ]
+        },
+        "deviations": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/text" }
+        },
+        "thresholdChanges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "fromVersion",
+              "toVersion",
+              "beforeHash",
+              "afterHash",
+              "approvedAt",
+              "approvalRef",
+              "rationale",
+              "prospectiveEvidenceScope"
+            ],
+            "properties": {
+              "fromVersion": { "type": "integer", "minimum": 1 },
+              "toVersion": { "type": "integer", "minimum": 2 },
+              "beforeHash": { "$ref": "#/definitions/digest" },
+              "afterHash": { "$ref": "#/definitions/digest" },
+              "approvedAt": { "$ref": "#/definitions/text" },
+              "approvalRef": { "$ref": "#/definitions/text" },
+              "rationale": { "$ref": "#/definitions/text" },
+              "prospectiveEvidenceScope": { "$ref": "#/definitions/text" }
+            }
+          }
+        }
+      }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "handoff",
+        "selectionEvidence",
+        "phases",
+        "phase4",
+        "phase5",
+        "indicators"
+      ],
+      "properties": {
+        "id": { "enum": ["ROUTE_A", "ROUTE_B"] },
+        "handoff": { "$ref": "#/definitions/text" },
+        "selectionEvidence": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/text" }
+        },
+        "phases": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["phase", "disposition"],
+            "properties": {
+              "phase": { "$ref": "#/definitions/phase" },
+              "disposition": { "$ref": "#/definitions/state" }
+            }
+          }
+        },
+        "phase4": { "$ref": "#/definitions/baselineResult" },
+        "phase5": { "$ref": "#/definitions/baselineResult" },
+        "indicators": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "recipientDelta",
+            "producerNetValuePositive",
+            "problemJustifiesIntervention",
+            "directSourceBaselineSufficient",
+            "policyRequired",
+            "evidenceRefs"
+          ],
+          "properties": {
+            "recipientDelta": { "type": ["boolean", "null"] },
+            "producerNetValuePositive": { "type": ["boolean", "null"] },
+            "problemJustifiesIntervention": { "type": ["boolean", "null"] },
+            "directSourceBaselineSufficient": { "type": ["boolean", "null"] },
+            "policyRequired": { "type": ["boolean", "null"] },
+            "evidenceRefs": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "#/definitions/text" }
+            }
+          }
+        }
+      }
+    },
+    "baselineResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baselineRef", "resultRef"],
+      "properties": {
+        "baselineRef": { "$ref": "#/definitions/nullableText" },
+        "resultRef": { "$ref": "#/definitions/nullableText" }
+      }
+    }
+  }
+}

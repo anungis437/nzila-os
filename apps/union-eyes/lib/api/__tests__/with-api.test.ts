@@ -205,6 +205,51 @@ describe('withApi()', () => {
     expect(res.status).toBe(400);
   });
 
+  it('leaves the original body readable for handlers that still call request.json()', async () => {
+    const withSchema = withApi({ body: z.object({ name: z.string() }) }, async (ctx) => ({
+      parsed: ctx.body.name,
+      reread: await ctx.request.json(),
+    }));
+    const withoutSchema = withApi({}, async (ctx) => ({
+      parsed: ctx.body,
+      reread: await ctx.request.json(),
+    }));
+    for (const handler of [withSchema, withoutSchema]) {
+      const res = await handler(
+        makeRequest('http://localhost:3000/api/test', {
+          method: 'POST',
+          body: JSON.stringify({ name: 'Alice' }),
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      );
+      expect(res.status).toBe(200);
+      expect((await res.json()).data.reread).toEqual({ name: 'Alice' });
+    }
+  });
+
+  it('maps authorization denials raised inside handlers to 403 rather than 500', async () => {
+    const entitlement = Object.assign(new Error('x'), { code: 'ENTITLEMENT_REQUIRED' });
+    const denied = withApi({}, async () => {
+      throw entitlement;
+    });
+    expect((await denied(makeRequest())).status).toBe(403);
+
+    const role = withApi({}, async () => {
+      throw new Error('Forbidden: Requires one of roles: steward, admin');
+    });
+    expect((await role(makeRequest())).status).toBe(403);
+
+    const unexpected = withApi({}, async () => {
+      throw new Error('boom');
+    });
+    expect((await unexpected(makeRequest())).status).toBe(500);
+
+    const validation = withApi({}, async () => {
+      z.object({ name: z.string() }).parse({});
+    });
+    expect((await validation(makeRequest())).status).toBe(400);
+  });
+
   // ── Query validation ──────────────────────────────────────────────────
 
   it('parses query params through Zod schema', async () => {

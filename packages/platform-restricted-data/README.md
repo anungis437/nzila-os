@@ -16,4 +16,19 @@ One class is not a substitute for another. Provider zero-retention text in the d
 
 Principal-scoped Restricted storage and reads, explicit service and agent grants, verifier minimum disclosure, `redactObservabilityRecord`, Restricted audit metadata, `evaluateRestrictedModelPath`, principal export, retention statements, deletion semantics, legal hold, and scoped break-glass.
 
-Sequence after this change: merge through normal governance, rebase CIVITAS, rerun Phase 2.5, record a new disposition, and open Phase 3 only if that gate permits it.
+This is an in-process reference control plane, not an authenticated persistence
+service. Trusted application adapters must derive actor and org/principal scope
+from canonical platform authentication. Grant, storage and legal-hold mutation
+functions are administrative interfaces for those trusted adapters, not public
+request handlers. Mutable state, resets and the destructive synthetic red-team
+harness are not exported from the public package API. Returned records and grants
+are detached snapshots; request-supplied clocks cannot revive expired access.
+
+Restricted classification is retained by the AI request schemas and routes.
+Restricted knowledge ingestion is rejected before proposal/source persistence;
+Restricted model requests stay denied. No live provider contract, CMK, residency
+or backup/replica propagation claim is upgraded by these source-level checks.
+
+CIVITAS privacy stays HOLD and Phase 3 stays CLOSED. A future privacy evaluation
+and a new explicit maintainer decision are required before any consideration of
+Phase 3; this change grants no such decision or production/data authorization.

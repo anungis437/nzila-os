@@ -6,7 +6,13 @@ import type { AiFeature, DataClass } from './types'
 
 // ── Request validation schemas ──────────────────────────────────────────────
 
+const GOVERNANCE_MODEL_FIELDS = {
+  classification: z.enum(['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'RESTRICTED']).optional(),
+  modelPathId: z.string().min(1).max(120).optional(),
+}
+
 export const AiGenerateRequestSchema = z.object({
+  ...GOVERNANCE_MODEL_FIELDS,
   orgId: z.string().uuid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
@@ -32,6 +38,7 @@ export const AiGenerateRequestSchema = z.object({
 export const AiChatStreamRequestSchema = AiGenerateRequestSchema
 
 export const AiEmbedRequestSchema = z.object({
+  ...GOVERNANCE_MODEL_FIELDS,
   orgId: z.string().uuid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
@@ -40,6 +47,7 @@ export const AiEmbedRequestSchema = z.object({
 })
 
 export const AiRagQueryRequestSchema = z.object({
+  ...GOVERNANCE_MODEL_FIELDS,
   orgId: z.string().uuid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
@@ -50,6 +58,7 @@ export const AiRagQueryRequestSchema = z.object({
 })
 
 export const AiExtractRequestSchema = z.object({
+  ...GOVERNANCE_MODEL_FIELDS,
   orgId: z.string().uuid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
@@ -118,6 +127,8 @@ export const FinanceStripeMonthlyReportsProposalSchema = z.object({
 export type FinanceStripeMonthlyReportsProposal = z.infer<typeof FinanceStripeMonthlyReportsProposalSchema>
 
 export const AiIngestKnowledgeSourceProposalSchema = z.object({
+  ...GOVERNANCE_MODEL_FIELDS,
+  sourceOrigin: z.string().max(120).optional(),
   orgId: z.string().uuid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
@@ -145,10 +156,14 @@ export const AiIngestKnowledgeSourceProposalSchema = z.object({
   retention: z.object({
     dataClass: z.enum(['public', 'internal', 'sensitive', 'regulated']),
     retentionDays: z.number().int().min(1).default(90),
-  }),
+  }).strict(),
   citations: z.object({
     requireCitations: z.boolean().default(true),
   }).default({}),
+}).superRefine((proposal, context) => {
+  if (proposal.classification === 'RESTRICTED') {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['classification'], message: 'Restricted knowledge ingestion is disabled; no source or proposal payload may be persisted.' })
+  }
 })
 
 export type AiIngestKnowledgeSourceProposal = z.infer<typeof AiIngestKnowledgeSourceProposalSchema>

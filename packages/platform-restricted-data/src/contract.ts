@@ -26,7 +26,7 @@ export const CIVITAS_PLATFORM_CONTRACT = {
     'Rebase the CIVITAS branch onto that revision.',
     'Rerun the Phase 2.5 privacy evaluation.',
     'Record a new disposition.',
-    'Open Phase 3 only if that gate permits it.',
+    'Keep Phase 3 CLOSED; any future opening requires privacy readiness and a new explicit maintainer decision.',
   ],
 } as const
 

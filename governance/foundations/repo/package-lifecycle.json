@@ -141,7 +141,7 @@
     "zonga-streaming-aws":                  { "tier": "INCUBATING", "product": "zonga" },
     "agrimo-core":                          { "tier": "INCUBATING", "product": "agrimo" },
     "agrimo-intelligence":                  { "tier": "INCUBATING", "product": "agrimo" },
-    "agri-core":                            { "tier": "INCUBATING", "product": "agrimo" },
+    "agri-core":                            { "tier": "INCUBATING" },
     "agri-db":                              { "tier": "INCUBATING", "product": "agrimo" },
     "agri-events":                          { "tier": "INCUBATING", "product": "agrimo" },
     "agri-adapters":                        { "tier": "INCUBATING", "product": "agrimo" },

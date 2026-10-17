@@ -19,6 +19,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { join } from 'node:path'
+import { isCivicArchivedProofCli } from '../../scripts/lib/civic-oci-doctrine'
 import {
   ROOT,
   walkSync,
@@ -65,6 +66,11 @@ function isExcludedPath(rel: string): boolean {
 
 describe('NO_CONSOLE_001 — No console in runtime code', () => {
   const exceptions = loadExceptions('governance/exceptions/no-console.json')
+  const archivedProofClis = new Set(
+    ['apps/civic/src/proof.ts', 'apps/civic/src/slice1/worker.ts'].filter((artifact) =>
+      isCivicArchivedProofCli(ROOT, artifact),
+    ),
+  )
 
   it('no governance exceptions are expired', () => {
     expect(
@@ -86,6 +92,7 @@ describe('NO_CONSOLE_001 — No console in runtime code', () => {
         const rel = relPath(file)
         if (isExcludedPath(rel)) continue
         if (isExcepted(rel, exceptions.entries)) continue
+        if (archivedProofClis.has(rel)) continue
 
         const content = readContent(file)
         const lines = content.split('\n')

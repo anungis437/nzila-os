@@ -20,7 +20,7 @@ export function proposeDelegation(input: {
       'The platform does not determine incapacity. A delegation cannot use a system incapacity condition.',
     )
   }
-  if (!input.scope.trim() || input.durationMinutes <= 0) {
+  if (!input.scope.trim() || !Number.isSafeInteger(input.durationMinutes) || input.durationMinutes <= 0) {
     throw new PlaneError('DELEGATION_SCOPE_REQUIRED', 'A delegation needs a scope and a finite duration.')
   }
   const record: DelegationRecord = {
@@ -36,7 +36,7 @@ export function proposeDelegation(input: {
     accessGranted: false,
   }
   getState().delegations.push(record)
-  return record
+  return structuredClone(record)
 }
 
 export function reviewDelegation(input: {
@@ -53,7 +53,7 @@ export function reviewDelegation(input: {
   record.reviewer = input.reviewer
   record.reviewedAt = new Date().toISOString()
   record.accessGranted = false
-  return record
+  return structuredClone(record)
 }
 
 export function activateDelegation(input: {
@@ -74,7 +74,7 @@ export function activateDelegation(input: {
   return {
     accessGranted: false,
     code: 'DELEGATE_ACCESS_NOT_ENABLED',
-    delegation: record,
+    delegation: structuredClone(record),
   }
 }
 
@@ -84,5 +84,5 @@ export function revokeDelegation(delegationId: string): DelegationRecord {
   record.status = 'REVOKED'
   record.revokedAt = new Date().toISOString()
   record.accessGranted = false
-  return record
+  return structuredClone(record)
 }

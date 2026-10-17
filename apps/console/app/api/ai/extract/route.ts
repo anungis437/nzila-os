@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { orgId, appKey, profileKey, promptKey, input, variables, dataClass, trace } = parsed.data
+    const { orgId, appKey, profileKey, promptKey, input, variables, dataClass, trace, classification, modelPathId } = parsed.data
 
     const access = await requireOrgAccess(orgId)
     if (!access.ok) return access.response
@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
       input,
       variables,
       dataClass,
+      classification,
+      modelPathId,
       trace,
     })
 
@@ -58,6 +60,8 @@ export async function POST(req: NextRequest) {
         profileKey,
         input: `The following text should be valid JSON. Fix it and return only valid JSON:\n\n${result.content}`,
         dataClass,
+        classification,
+        modelPathId,
         trace,
       })
 

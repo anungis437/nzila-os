@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       logger.error('PayPal webhook configuration missing');
       return NextResponse.json(
         { error: 'PayPal webhook not configured' },
-        { status: 500 }
+        { status: 503 }
       );
     }
 

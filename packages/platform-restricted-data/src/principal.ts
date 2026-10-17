@@ -27,6 +27,9 @@ export function putRestrictedRecord(input: {
   decisions?: RestrictedRecord['decisions']
   explicitTier: 'RESTRICTED'
 }): RestrictedRecord {
+  if (input.explicitTier !== 'RESTRICTED' || [input.appId, input.orgId, input.principalId, input.category, input.jurisdiction].some((value) => typeof value !== 'string' || !value.trim())) {
+    throw new PlaneError('RESTRICTED_SCOPE_REQUIRED', 'Restricted storage requires an explicit Restricted tier and complete app, org, principal and category scope.')
+  }
   classifyRecord({
     appId: input.appId,
     explicitTier: input.explicitTier,
@@ -36,19 +39,20 @@ export function putRestrictedRecord(input: {
   rejectSecretIngestion(JSON.stringify(input.fields))
   const record: RestrictedRecord = {
     id: randomUUID(),
+    appId: input.appId,
     orgId: input.orgId,
     principalId: input.principalId,
     classification: 'RESTRICTED',
     category: input.category,
-    fields: input.fields,
-    relationships: input.relationships ?? [],
-    evidenceRefs: input.evidenceRefs ?? [],
+    fields: structuredClone(input.fields),
+    relationships: structuredClone(input.relationships ?? []),
+    evidenceRefs: structuredClone(input.evidenceRefs ?? []),
     jurisdiction: input.jurisdiction,
-    decisions: input.decisions ?? [],
+    decisions: structuredClone(input.decisions ?? []),
     createdAt: new Date().toISOString(),
   }
   getState().records.set(record.id, record)
-  return record
+  return structuredClone(record)
 }
 
 export function grantRestrictedAccess(input: {
@@ -66,16 +70,23 @@ export function grantRestrictedAccess(input: {
   if (!input.purpose.trim() || !input.authorizationBasis.trim()) {
     throw new PlaneError('GRANT_BASIS_REQUIRED', 'A Restricted grant requires purpose and authorization basis.')
   }
-  if (FLEET_AGENTS.includes(input.actorId as (typeof FLEET_AGENTS)[number]) && input.actorId === input.grantedBy) {
-    throw new PlaneError('FLEET_SELF_GRANT', 'An agent cannot grant itself Restricted access by fleet membership.')
+  if (input.actorId === input.grantedBy) {
+    throw new PlaneError('FLEET_SELF_GRANT', 'A service or agent cannot issue itself a Restricted access grant.')
   }
+  if (
+    !input.orgId?.trim() || !input.principalId?.trim() || !input.actorId?.trim() || !input.grantedBy?.trim() ||
+    !['service', 'agent'].includes(input.actorKind) ||
+    !Array.isArray(input.actions) || input.actions.length === 0 || input.actions.some((action) => !['read', 'export'].includes(action)) ||
+    (input.disclosureProfile !== undefined && input.disclosureProfile !== 'VERIFIER') ||
+    (input.expiresAt !== undefined && !Number.isFinite(Date.parse(input.expiresAt)))
+  ) throw new PlaneError('INVALID_RESTRICTED_GRANT', 'Restricted grants require explicit valid identity, actions, disclosure and expiry fields.')
   const grant: AccessGrant = {
     id: randomUUID(),
     orgId: input.orgId,
     principalId: input.principalId,
     actorKind: input.actorKind,
     actorId: input.actorId,
-    actions: input.actions,
+    actions: [...input.actions],
     purpose: input.purpose,
     authorizationBasis: input.authorizationBasis,
     disclosureProfile: input.disclosureProfile,
@@ -84,10 +95,11 @@ export function grantRestrictedAccess(input: {
     createdAt: new Date().toISOString(),
   }
   getState().grants.set(grant.id, grant)
-  return grant
+  return structuredClone(grant)
 }
 
 export interface ReadRequest {
+  action?: 'read' | 'export'
   orgId: string
   principalId: string
   recordId: string
@@ -102,7 +114,6 @@ export interface ReadRequest {
   breakGlassId?: string
   appDomain?: string
   resource?: string
-  now?: Date
 }
 
 function project(record: RestrictedRecord, fields: readonly string[]): Record<string, unknown> {
@@ -120,13 +131,18 @@ export function readRestrictedRecord(request: ReadRequest): {
   classification: 'RESTRICTED'
   principalId: string
 } {
+  const action = request.action ?? 'read'
+  if (!['read', 'export'].includes(action) || (request.disclosureProfile !== undefined && request.disclosureProfile !== 'VERIFIER'))
+    throw new PlaneError('INVALID_RESTRICTED_REQUEST', 'Unknown Restricted action or disclosure profile.')
+  const time = Date.now()
+  if (!Number.isFinite(time)) throw new PlaneError('INVALID_ACCESS_TIME', 'Restricted access requires a valid time.')
   const record = getState().records.get(request.recordId)
   const baseAudit = {
     actorId: request.actor.id,
     serviceOrAgent: request.serviceOrAgent,
-    action: 'restricted.read',
+    action: `restricted.${action}`,
     resourceId: request.recordId,
-    category: record?.category ?? 'unknown',
+    category: record?.orgId === request.orgId && record.principalId === request.principalId ? record.category : 'unknown',
     orgId: request.orgId,
     principalId: request.principalId,
     purpose: request.purpose,
@@ -136,9 +152,9 @@ export function readRestrictedRecord(request: ReadRequest): {
   }
 
   const deny = (code: string, message: string): never => {
-    if (request.purpose.trim() && request.authorizationBasis.trim()) {
-      recordRestrictedAudit({ ...baseAudit, outcome: 'deny' })
-    }
+    // Denial metadata cannot be used to inject arbitrary Restricted prose into
+    // the audit store. These labels describe a denial, never an authorization.
+    recordRestrictedAudit({ ...baseAudit, purpose: 'ACCESS_DENIED', authorizationBasis: 'NO_VALID_AUTHORIZATION', outcome: 'deny' })
     throw new PlaneError(code, message)
   }
 
@@ -155,14 +171,17 @@ export function readRestrictedRecord(request: ReadRequest): {
   let breakGlassReason: string | undefined
   let profile = request.disclosureProfile
   if (request.breakGlassId) {
+    if (request.actor.kind !== 'principal' || action !== 'read') deny('BREAK_GLASS_DENIED', 'Break-glass is a human read scope, not an agent or export grant.')
+    if ((request.resource && request.resource !== record.id) || (request.appDomain && request.appDomain !== record.appId))
+      deny('BREAK_GLASS_DENIED', 'Request hints cannot replace the actual record resource or application.')
     const emergency = evaluateBreakGlassAccess({
       activationId: request.breakGlassId,
+      actorId: request.actor.id,
       orgId: request.orgId,
       principalId: request.principalId,
-      appDomain: request.appDomain ?? '',
-      resource: request.resource ?? record.id,
+      appDomain: record.appId,
+      resource: record.id,
       action: 'read',
-      now: request.now,
     })
     if (!emergency.allowed || !emergency.activation) deny('BREAK_GLASS_DENIED', emergency.reason)
     if (!emergency.activation) {
@@ -178,8 +197,9 @@ export function readRestrictedRecord(request: ReadRequest): {
     const grant = [...getState().grants.values()].find((item) => {
       if (item.orgId !== request.orgId || item.principalId !== record.principalId) return false
       if (item.actorKind !== request.actor.kind || item.actorId !== request.actor.id) return false
-      if (!item.actions.includes('read')) return false
-      if (item.expiresAt && Date.parse(item.expiresAt) <= (request.now ?? new Date()).getTime()) return false
+      if (!item.actions.includes(action)) return false
+      if (item.purpose !== request.purpose || item.authorizationBasis !== request.authorizationBasis) return false
+      if (item.expiresAt && (!Number.isFinite(Date.parse(item.expiresAt)) || Date.parse(item.expiresAt) <= time)) return false
       return true
     })
     if (!grant) {
@@ -188,32 +208,33 @@ export function readRestrictedRecord(request: ReadRequest): {
     if (!grant) {
       throw new PlaneError('AGENT_DENIED', 'Service and agent Restricted access requires an explicit grant. Fleet membership is not a grant.')
     }
-    if (request.actor.actingForPrincipalId && request.actor.actingForPrincipalId !== record.principalId) {
+    if (request.actor.actingForPrincipalId !== record.principalId) {
       deny('CROSS_PRINCIPAL_DENIED', 'An actor for one principal cannot read another principal record.')
     }
-    profile = request.disclosureProfile ?? grant.disclosureProfile
+    profile = grant.disclosureProfile ?? request.disclosureProfile
   }
 
   if (profile === 'VERIFIER') {
+    if (action === 'export') deny('VERIFIER_EXPORT_DENIED', 'VERIFIER minimum disclosure does not permit a principal export bundle.')
     const requested = request.requestedFields ?? [...VERIFIER_FIELDS]
     const extra = requested.filter((field) => !VERIFIER_FIELDS.includes(field as (typeof VERIFIER_FIELDS)[number]))
     if (extra.length > 0) {
-      deny('OVER_BROAD_DISCLOSURE', `VERIFIER disclosure refuses fields outside minimum necessary: ${extra.join(', ')}.`)
+      deny('OVER_BROAD_DISCLOSURE', 'VERIFIER disclosure refuses fields outside minimum necessary.')
     }
-    recordRestrictedAudit({ ...baseAudit, outcome: 'allow', breakGlassReason })
+    recordRestrictedAudit({ ...baseAudit, afterJson: record.fields, outcome: 'allow', breakGlassReason })
     return {
       allowed: true,
-      fields: project(record, VERIFIER_FIELDS),
+      fields: structuredClone(project(record, VERIFIER_FIELDS)),
       recordId: record.id,
       classification: 'RESTRICTED',
       principalId: record.principalId,
     }
   }
 
-  recordRestrictedAudit({ ...baseAudit, outcome: 'allow', breakGlassReason })
+  recordRestrictedAudit({ ...baseAudit, afterJson: record.fields, outcome: 'allow', breakGlassReason })
   return {
     allowed: true,
-    fields: { ...record.fields },
+    fields: structuredClone(record.fields),
     recordId: record.id,
     classification: 'RESTRICTED',
     principalId: record.principalId,

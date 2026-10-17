@@ -71,6 +71,12 @@ const RESTRICTED_PAYLOAD_KEYS = new Set([
   'response',
 ])
 
+const RESTRICTED_METADATA_KEYS = new Set([
+  'classification', 'dataclassification', 'level', 'timestamp', 'requestid',
+  'traceid', 'orgid', 'actorid', 'userid', 'appname', 'action', 'code',
+  'status', 'statuscode', 'durationms', 'missionid', 'correlationid', 'errorname',
+])
+
 const STRING_PATTERNS: RegExp[] = [
   /Bearer\s+\S+/gi,
   /sk-[A-Za-z0-9]{20,}/g,
@@ -95,16 +101,22 @@ export function scrubSensitiveString(value: string): string {
 }
 
 function isRestrictedMark(value: unknown): boolean {
-  return value === 'RESTRICTED' || value === 'restricted'
+  return typeof value === 'string' && value.toUpperCase() === 'RESTRICTED'
 }
 
 export function redactObservabilityRecord<T>(value: T, parentRestricted = false): T {
   return redactValue(value, parentRestricted) as T
 }
 
-function redactValue(value: unknown, parentRestricted: boolean): unknown {
+function redactValue(value: unknown, parentRestricted: boolean, seen = new WeakSet<object>()): unknown {
+  if (value && typeof value === 'object') {
+    if (seen.has(value)) return '[Circular]'
+    seen.add(value)
+  }
   if (Array.isArray(value)) {
-    return value.map((entry) => redactValue(entry, parentRestricted))
+    const result = value.map((entry) => redactValue(entry, parentRestricted, seen))
+    seen.delete(value)
+    return result
   }
   if (value && typeof value === 'object') {
     const source = value as Record<string, unknown>
@@ -114,13 +126,16 @@ function redactValue(value: unknown, parentRestricted: boolean): unknown {
       isRestrictedMark(source.dataClassification)
     const out: Record<string, unknown> = {}
     for (const [key, child] of Object.entries(source)) {
-      const lowered = key.toLowerCase()
-      if (ALWAYS_REDACT_KEYS.has(lowered) || (restricted && RESTRICTED_PAYLOAD_KEYS.has(lowered))) {
+      const lowered = key.toLowerCase().replace(/[_-]/g, '')
+      if (restricted && lowered === 'errorstack' && typeof child === 'string') {
+        out[key] = child.split('\n').filter((line) => /^\s+at\s/.test(line)).map(scrubSensitiveString).join('\n')
+      } else if (ALWAYS_REDACT_KEYS.has(lowered) || (restricted && (RESTRICTED_PAYLOAD_KEYS.has(lowered) || !RESTRICTED_METADATA_KEYS.has(lowered)))) {
         out[key] = '[REDACTED]'
       } else {
-        out[key] = redactValue(child, restricted)
+        out[key] = redactValue(child, restricted, seen)
       }
     }
+    seen.delete(value)
     return out
   }
   if (typeof value === 'string') return scrubSensitiveString(value)

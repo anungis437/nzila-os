@@ -2,10 +2,10 @@
  * Admin mutations for org auth policy.
  *
  * Read happens via `getOrgAuthPolicy` in ./service. Writes here are gated
- * at the HTTP route layer — service functions assume the caller is already
- * authorised. Every change produces an audit entry with before/after diff.
+ * both at the HTTP route layer and by a validated tenant-admin execution
+ * context. Every change produces an audit entry with before/after diff.
  */
-import { db } from '@nzila/db/client'
+import { authDb as db, withTenantAuthContext, withAuthSavepoint, insertAuthRow } from '../auth-db'
 import { authOrgPolicies, authAuditLog } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { getOrgAuthPolicy, type OrgAuthPolicy } from './service'
@@ -66,7 +66,10 @@ export async function updateOrgAuthPolicy(
 ): Promise<UpdatePolicyResult> {
   const err = validatePatch(input.patch)
   if (err) return { success: false, error: err }
+  return withTenantAuthContext(input.actorUserId, input.organizationId, () => updateWithContext(input))
+}
 
+async function updateWithContext(input: UpdatePolicyInput): Promise<UpdatePolicyResult> {
   const before = await getOrgAuthPolicy(input.organizationId)
 
   // Upsert. If no row existed, insert with defaults + patch.
@@ -109,7 +112,7 @@ export async function updateOrgAuthPolicy(
       })
       .where(eq(authOrgPolicies.organizationId, input.organizationId))
   } else {
-    await db.insert(authOrgPolicies).values({
+    await insertAuthRow(authOrgPolicies, {
       organizationId: input.organizationId,
       allowLocalAuth: input.patch.allowLocalAuth ?? true,
       allowMagicLink: input.patch.allowMagicLink ?? true,
@@ -127,7 +130,7 @@ export async function updateOrgAuthPolicy(
 
   // Audit with diff
   try {
-    await db.insert(authAuditLog).values({
+    await withAuthSavepoint(async () => db.insert(authAuditLog).values({
       userId: input.actorUserId,
       eventType: 'org_policy_updated',
       metadata: {
@@ -135,7 +138,7 @@ export async function updateOrgAuthPolicy(
         before,
         after,
       },
-    })
+    }))
   } catch {
     // best-effort
   }

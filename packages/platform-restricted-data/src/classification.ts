@@ -50,10 +50,22 @@ export interface ClassificationDecision {
 
 function restrictedFieldsPresent(fields: Record<string, unknown> | undefined): string[] {
   if (!fields) return []
-  const names = new Set(RESTRICTED_PERSONAL_FIELDS.map((field) => field.toLowerCase()))
-  return Object.entries(fields)
-    .filter(([key, value]) => names.has(key.toLowerCase()) && value != null && value !== '')
-    .map(([key]) => key)
+  const normalize = (key: string) => key.toLowerCase().replace(/[_-]/g, '')
+  const names = new Set(RESTRICTED_PERSONAL_FIELDS.map(normalize))
+  const found: string[] = []
+  const seen = new WeakSet<object>()
+  const visit = (value: unknown, path: string) => {
+    if (!value || typeof value !== 'object' || seen.has(value)) return
+    seen.add(value)
+    for (const [key, child] of Object.entries(value)) {
+      const field = path ? `${path}.${key}` : key
+      if (names.has(normalize(key)) && child != null && child !== '') found.push(field)
+      if (['classification', 'dataclassification'].includes(normalize(key)) && typeof child === 'string' && child.toUpperCase() === 'RESTRICTED') found.push(field)
+      visit(child, field)
+    }
+  }
+  visit(fields, '')
+  return found
 }
 
 /**
@@ -76,8 +88,8 @@ export function classifyRecord(input: ClassifyInput): ClassificationDecision {
     )
   }
 
-  if (input.explicitTier && !PLATFORM_TIERS.includes(input.explicitTier)) {
-    throw new PlaneError('UNKNOWN_TIER', `Unknown classification tier "${input.explicitTier}".`)
+  if (input.explicitTier != null && !PLATFORM_TIERS.includes(input.explicitTier)) {
+    throw new PlaneError('UNKNOWN_TIER', 'Unknown classification tier.')
   }
 
   if (sensitiveFields.length > 0 && input.explicitTier !== 'RESTRICTED') {

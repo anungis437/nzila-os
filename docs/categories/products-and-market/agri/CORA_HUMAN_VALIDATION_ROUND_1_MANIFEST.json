@@ -1,0 +1,364 @@
+{
+  "manifestVersion": "1.0",
+  "studyRoundId": "CORA_HUMAN_VALIDATION_ROUND_1",
+  "studyVersion": "cora-human-validation-round-1-v1.0",
+  "dateFrozen": "2026-10-10",
+  "freezeScope": "PREPARATION_INSTRUMENTS_ONLY",
+  "status": "READY_FOR_AUTHORIZATION",
+  "humanSessionsConducted": 0,
+  "authorization": {
+    "sampleApprovedInPrinciple": true,
+    "localFormativeThresholdsAccepted": true,
+    "recruitmentAuthorized": false,
+    "outreachAuthorized": false,
+    "schedulingAuthorized": false,
+    "humanCaptureAuthorized": false,
+    "privacyLegalApproval": "NOT_ESTABLISHED",
+    "consentPolicy": "DRAFT_REQUIRES_FINALIZATION",
+    "personnelAssigned": false
+  },
+  "reference": {
+    "basename": "slice8-reference.html",
+    "version": "cora-slice8-reference-v1.0",
+    "sha256": "03c3b5ebe656bfa99c7c43567ac4a3d2a66519415778f0d49f19343eaf7d0ccd",
+    "syntheticOnly": true,
+    "locatorKind": "LOCAL_SESSION_ARTIFACT",
+    "locator": "slice8-reference.html in the existing session files directory",
+    "embeddedVersion": false
+  },
+  "instruments": {
+    "protocol": {
+      "file": "CORA_HUMAN_COMPREHENSION_VALIDATION_PROTOCOL.md",
+      "version": "cora-comprehension-1.0",
+      "sha256": "f31dd1763279bf2b656e72b66f4e0e2b499cc53a81757b4b7eac3aadedda3ea2"
+    },
+    "rubric": {
+      "file": "CORA_HUMAN_COMPREHENSION_RUBRIC.md",
+      "version": "cora-comprehension-1.0",
+      "sha256": "31a263bc5da80099b29ccbfa99491bb857dc93c17c02ca8e1957130e5ed04f08"
+    },
+    "captureSchema": {
+      "file": "CORA_HUMAN_VALIDATION_CAPTURE.schema.json",
+      "version": "1.1",
+      "schemaId": "urn:cora:human-validation:capture:1.1",
+      "blankInstanceVersion": "1.1",
+      "humanInstanceVersion": "1.0",
+      "legacyDryRunInstanceVersion": "1.0",
+      "sha256": "5d3537e2940328cbc9182b0622ac62dcf8e7643b5ec0b4669631702cd039979b"
+    },
+    "sessionGuide": {
+      "file": "CORA_SYNTHETIC_VALIDATION_SESSION_GUIDE.md",
+      "version": "cora-comprehension-1.0",
+      "versionOrigin": "Accepted protocol umbrella version; content hash pins guide",
+      "sha256": "37febc535bd83da7ccfb8b48554b2a632f659e4e16c526cc21a282e4affa9d10"
+    },
+    "moderatorScript": {
+      "file": "CORA_HUMAN_VALIDATION_MODERATOR_SCRIPT.md",
+      "version": "cora-round1-moderator-1.0",
+      "sha256": "cad5bd63923a7a699223dbb7ea5a8593b7d38319e65c3e6dd1c8d6a3721d02df"
+    },
+    "consentDraft": {
+      "file": "CORA_HUMAN_VALIDATION_CONSENT_DATA_HANDLING_DRAFT.md",
+      "version": "cora-round1-consent-draft-1.0",
+      "sha256": "d656e49b69727ad08d7e9bfc051e3111e7e27f3d4b87ae32c995efa15314fb7e"
+    },
+    "sessionQA": {
+      "file": "CORA_HUMAN_VALIDATION_SESSION_QA_CONTRACT.md",
+      "version": "cora-round1-qa-1.0",
+      "sha256": "a1f347995975283e6ec1863806035bea49012d4353342f8bc2e88de176d0619f"
+    },
+    "analysisSpec": {
+      "file": "CORA_HUMAN_VALIDATION_ANALYSIS_SPEC.md",
+      "version": "cora-round1-analysis-1.0",
+      "sha256": "5b1848a6a7a032949c6af1d112f17aa40e9dfd0b698ef2a727005880b560a8c7"
+    },
+    "outreachDrafts": {
+      "file": "CORA_HUMAN_VALIDATION_OUTREACH_DRAFTS.md",
+      "version": "cora-round1-outreach-draft-1.0",
+      "sha256": "9532b15f31644632d34feadf4a8d7ca4e854c68edaa72530092077c18f74d2b0"
+    },
+    "roundPlan": {
+      "file": "CORA_HUMAN_VALIDATION_ROUND_1_PLAN.md",
+      "version": "cora-human-validation-round-1-v1.0",
+      "sha256": "45caa0e3092e5951f8994a4c87200b75b6d2b0cfe7d752abba616ae94d17900f"
+    }
+  },
+  "participantCount": 12,
+  "participantsPerPersona": 3,
+  "scenarioQuestions": {
+    "S1": [
+      "Q01",
+      "Q02",
+      "Q03",
+      "Q04",
+      "Q05",
+      "Q06",
+      "Q07",
+      "Q08",
+      "Q09",
+      "Q10",
+      "Q11",
+      "Q12",
+      "Q13",
+      "Q18"
+    ],
+    "S2": ["Q05", "Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "Q18", "Q19"],
+    "S3": ["Q07", "Q08", "Q09", "Q10", "Q14", "Q15", "Q18"],
+    "S4": ["Q07", "Q08", "Q09", "Q10", "Q15", "Q17"],
+    "S5": ["Q02", "Q03", "Q04", "Q07", "Q08", "Q09", "Q11", "Q16"],
+    "S6": ["Q01", "Q05", "Q08", "Q11", "Q18"],
+    "S7": ["Q07", "Q08", "Q12", "Q13", "Q20"],
+    "S8": ["Q10", "Q11"],
+    "S9": ["Q07", "Q10", "Q15"]
+  },
+  "guardrailQuestionIds": [
+    "Q02",
+    "Q03",
+    "Q04",
+    "Q06",
+    "Q08",
+    "Q09",
+    "Q10",
+    "Q12",
+    "Q14",
+    "Q15",
+    "Q16",
+    "Q17",
+    "Q18",
+    "Q19",
+    "Q20"
+  ],
+  "scenarioEntries": {
+    "S1": ["scenario-0"],
+    "S2": ["scenario-1"],
+    "S3": ["scenario-2"],
+    "S4": ["scenario-3", "scenario-4"],
+    "S5": ["scenario-5"],
+    "S6": ["scenario-6"],
+    "S7": ["scenario-9"],
+    "S8": ["scenario-7"],
+    "S9": ["scenario-8"]
+  },
+  "sessionBurden": {
+    "responsesPerParticipant": 61,
+    "maximumPointsPerParticipant": 122,
+    "reservationMinutes": 90,
+    "optionalStagedSittings": 2,
+    "optionalSittingMinutes": 45,
+    "breakAfterAssignedCoreScenarioCount": 4,
+    "skipOfferActiveSeconds": 120,
+    "estimatesObserved": false,
+    "branchingSelected": false
+  },
+  "advancementGate": {
+    "scope": "LOCAL_FORMATIVE_ONLY",
+    "requiresExplicitNextWorkDecision": true,
+    "minimumComprehensionFraction": 0.85,
+    "minimumParticipantPoints": 104,
+    "eachGuardrailScore": 2,
+    "qualifyingCohortCriticalFlags": 0,
+    "unresolvedCriticalFindings": 0,
+    "unresolvedHighFindings": 0,
+    "unresolvedScoreDisputes": 0,
+    "maximumPersonaMeanGapFraction": 0.1,
+    "minimumIndependentCompleteValidSessions": 12,
+    "minimumValidSessionsPerPersona": 3,
+    "unresolvedProtocolDefects": 0,
+    "authorizesLiveOrProductionUse": false
+  },
+  "stopRules": {
+    "sameCriticalFlagDistinctParticipants": 2,
+    "immediateReviewOnFirstCriticalFlag": true,
+    "pauseOn": [
+      "REFERENCE_DEFECT",
+      "LEADING_MODERATION",
+      "MATERIAL_CAPTURE_LOSS",
+      "MISLEADING_SYNTHETIC_SCENARIO",
+      "CONSENT_OR_PRIVACY_FAILURE"
+    ],
+    "resumeRequiresAubertAuthorization": true
+  },
+  "retestRules": {
+    "originalFailedScenarioRequired": true,
+    "unaffectedScenarioRequired": true,
+    "differentPersonaRequired": true,
+    "newReferenceVersionOnUXChange": true,
+    "freezeOldCohort": true,
+    "blindPoolingAllowed": false,
+    "targetedRetestFillsFullSlot": false
+  },
+  "reviewRules": {
+    "secondReviewRequiredFor": [
+      "CRITICAL_GOVERNANCE_MISUNDERSTANDING",
+      "HIGH_COMPREHENSION_FAILURE",
+      "DISPUTED_SCORE"
+    ],
+    "distinctIndependentReviewerRequired": true,
+    "desiredOutcomeBriefingAllowed": false,
+    "comparisonStatuses": ["AGREED", "DISAGREED", "REQUIRES_ADJUDICATION"],
+    "captureStatusMapping": {
+      "AGREED": "AGREED",
+      "DISAGREED": "DISPUTED",
+      "REQUIRES_ADJUDICATION": "DISPUTED"
+    },
+    "actualReviewerAssignments": null
+  },
+  "slots": [
+    {
+      "participantId": "P01",
+      "persona": "PRODUCER_OPERATOR",
+      "fixture": "human-validation-round-1/P01.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9"]
+    },
+    {
+      "participantId": "P02",
+      "persona": "PRODUCER_OPERATOR",
+      "fixture": "human-validation-round-1/P02.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S2", "S3", "S4", "S5", "S6", "S7", "S1", "S9", "S8"]
+    },
+    {
+      "participantId": "P03",
+      "persona": "PRODUCER_OPERATOR",
+      "fixture": "human-validation-round-1/P03.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S3", "S4", "S5", "S6", "S7", "S1", "S2", "S8", "S9"]
+    },
+    {
+      "participantId": "P04",
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "fixture": "human-validation-round-1/P04.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S4", "S5", "S6", "S7", "S1", "S2", "S3", "S9", "S8"]
+    },
+    {
+      "participantId": "P05",
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "fixture": "human-validation-round-1/P05.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S5", "S6", "S7", "S1", "S2", "S3", "S4", "S8", "S9"]
+    },
+    {
+      "participantId": "P06",
+      "persona": "ADVISER_SERVICE_PROVIDER",
+      "fixture": "human-validation-round-1/P06.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S6", "S7", "S1", "S2", "S3", "S4", "S5", "S9", "S8"]
+    },
+    {
+      "participantId": "P07",
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "fixture": "human-validation-round-1/P07.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S7", "S1", "S2", "S3", "S4", "S5", "S6", "S8", "S9"]
+    },
+    {
+      "participantId": "P08",
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "fixture": "human-validation-round-1/P08.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S9", "S8"]
+    },
+    {
+      "participantId": "P09",
+      "persona": "CERTIFIER_PROGRAM_ADMIN",
+      "fixture": "human-validation-round-1/P09.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S2", "S3", "S4", "S5", "S6", "S7", "S1", "S8", "S9"]
+    },
+    {
+      "participantId": "P10",
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "fixture": "human-validation-round-1/P10.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S3", "S4", "S5", "S6", "S7", "S1", "S2", "S9", "S8"]
+    },
+    {
+      "participantId": "P11",
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "fixture": "human-validation-round-1/P11.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S4", "S5", "S6", "S7", "S1", "S2", "S3", "S8", "S9"]
+    },
+    {
+      "participantId": "P12",
+      "persona": "INSTITUTIONAL_RECIPIENT",
+      "fixture": "human-validation-round-1/P12.json",
+      "eligibility": "NOT_ASSESSED",
+      "recruitmentSource": null,
+      "conflictBias": "NOT_ASSESSED",
+      "status": "PLANNED_UNCONTACTED",
+      "consentStatus": "NOT_REQUESTED",
+      "sessionStatus": "NOT_SCHEDULED",
+      "reviewerAssignment": null,
+      "plannedScenarioOrder": ["S5", "S6", "S7", "S1", "S2", "S3", "S4", "S9", "S8"]
+    }
+  ]
+}

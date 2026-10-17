@@ -1,5 +1,8 @@
 # Agri Stack — Architecture
 
+> Product ownership is governed by [ADR-AGRI-001](ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md).
+> The diagrams and flows below describe current implementation, not product subordination.
+
 ## System Architecture
 
 ```
@@ -8,7 +11,9 @@
 │                                                                         │
 │   ┌──────────────────────┐       ┌──────────────────────┐              │
 │   │    apps/agrimo        │       │    apps/cora          │              │
-│   │    (Agrimo)       │       │    (Cora Insights)    │              │
+│   │  Agrimo           │       │  Cora                │              │
+│   │  operations       │       │  food-economy         │              │
+│   │                   │       │  intelligence         │              │
 │   │                      │       │                       │              │
 │   │  /agrimo/dashboard    │       │  /cora/dashboard      │              │
 │   │  /agrimo/producers    │       │  /cora/yield-forecast │              │
@@ -20,7 +25,7 @@
 │   │  /agrimo/payments     │       │                       │              │
 │   │  /agrimo/certs        │       │                       │              │
 │   └──────────┬───────────┘       └───────────┬───────────┘              │
-│              │ server actions                 │ read-only queries        │
+│              │ current execution paths        │ placeholder Cora pages   │
 └──────────────┼────────────────────────────────┼─────────────────────────┘
                │                                │
 ┌──────────────┼────────────────────────────────┼─────────────────────────┐
@@ -29,7 +34,7 @@
 │   ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐    │
 │   │  agri-core       │  │  agri-db         │  │ agri-intelligence│    │
 │   │  types, enums,   │  │  schema, repos,  │  │ yield models,    │    │
-│   │  schemas, FSMs   │  │  RLS, migrations │  │ loss rates,      │    │
+│   │  schemas, FSMs   │  │ org predicates  │  │ loss rates,      │    │
 │   └──────────────────┘  └──────────────────┘  │ payout sim       │    │
 │                                                └──────────────────┘    │
 │   ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐    │
@@ -52,7 +57,7 @@
 
 ## Layering Rules
 
-Each app follows strict layering:
+Target layering for data-backed workflows:
 
 ```
 Route (app/agrimo/*)
@@ -86,20 +91,34 @@ User action
             → Email / SMS / Slack / CRM
 ```
 
-### Read Path (Cora)
+### Current Cora App State
 
 ```
-Dashboard request
-  → Server Action (resolveOrgContext)
-    → agri-intelligence compute()
-      → agri-db read-only scoped query
-        → Return computed metrics
+Dashboard routes
+  → placeholder UI
+
+Platform/auth/health routes
+  → shared platform runtime
 ```
+
+The Phase 0B audit found no live Cora agricultural repository or
+intelligence-query call. The shared packages below are available
+dependencies/primitives, not proof of an active Cora read path. Future
+Cora-owned data flows must be designed behind the ownership and authorization
+seams in [ADR-AGRI-002](ADR/ADR-AGRI-002-cora-food-economy-ceiling.md).
 
 ## Deployment Profiles
 
+Cora and Agrimo are independently deployable first-class products. The
+profiles below describe possible deployment shapes, not product dependency.
+
 | Profile | Agrimo | Cora | DB | Integrations |
 |---------|-------|------|-----|-------------|
-| **Managed** | Cloud (Vercel/Azure) | Cloud | Shared Neon/Azure PG | Managed |
-| **Sovereign** | On-premise | On-premise | Customer DB | Customer-managed |
-| **Hybrid** | On-premise | Cloud | Split (ops local, analytics cloud) | Mixed |
+| **Managed** | Independently deployable | Independently deployable | Governed shared or separate storage | Managed where configured |
+| **Sovereign** | Where supported | Where supported | Customer-managed where supported | Customer-managed |
+| **Hybrid** | Independent | Independent | Governed split or shared storage | Mixed |
+
+The current Cora surface is read-only, but that is an implementation
+contract/test constraint; Cora currently has no live agricultural query
+path. Future Cora-owned workflows require separately designed authorization
+and data boundaries; this doctrine update does not authorize writes.

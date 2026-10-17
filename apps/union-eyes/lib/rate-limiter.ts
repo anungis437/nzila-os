@@ -32,6 +32,25 @@ interface RedisClient {
   pipeline(): RedisPipeline;
 }
 
+// A rate-limit check sits in front of every authenticated request, so it must never wait on a
+// Redis command that does not settle (for example a half-open connection after an outage).
+// Each check is bounded; on timeout the normal fail-closed/fail-open policy applies and the
+// circuit breaker opens, so latency stays bounded and the limiter recovers by itself.
+const RATE_LIMIT_STORE_TIMEOUT_MS = Number(process.env.RATE_LIMIT_STORE_TIMEOUT_MS) || 2000;
+
+function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`Rate limit store timed out after ${ms}ms`)),
+      ms,
+    );
+  });
+  return Promise.race([work, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
 function createRedisClient(): RedisClient | null {
   // Prefer Upstash (serverless/production)
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
@@ -44,31 +63,58 @@ function createRedisClient(): RedisClient | null {
 
   // Fallback to ioredis via REDIS_URL (local dev / Docker)
   if (process.env.REDIS_URL) {
-    const io = new IORedis(process.env.REDIS_URL, {
-      maxRetriesPerRequest: 2,
-      enableReadyCheck: false,
-      lazyConnect: true,
-    });
-    io.on('error', (err) => logger.error('[rate-limiter] ioredis error', { error: err.message }));
+    const redisUrl = process.env.REDIS_URL;
+    const connect = (): IORedis => {
+      const client = new IORedis(redisUrl, {
+        maxRetriesPerRequest: 2,
+        enableReadyCheck: false,
+        lazyConnect: true,
+        connectTimeout: 5000,
+        commandTimeout: RATE_LIMIT_STORE_TIMEOUT_MS,
+        keepAlive: 10000,
+      });
+      client.on('error', (err) => logger.error('[rate-limiter] ioredis error', { error: err.message }));
+      return client;
+    };
+    let io = connect();
 
     return {
       pipeline(): RedisPipeline {
-        const p = io.pipeline();
+        // Pin the client used for this pipeline so concurrent failures replace it only once.
+        const client = io;
+        const p = client.pipeline();
         return {
           zremrangebyscore(key, min, max) { p.zremrangebyscore(key, min, max); },
           zcard(key) { p.zcard(key); },
           zadd(key, opts) { p.zadd(key, opts.score, opts.member); },
           expire(key, seconds) { p.expire(key, seconds); },
           async exec() {
-            const results = await p.exec();
-            // ioredis returns [[err, val], ...] — extract values to match Upstash shape
-            return (results ?? []).map(([, val]) => val);
+            try {
+              const results = await p.exec();
+              // ioredis returns [[err, val], ...] and does not reject when individual commands fail
+              // (for example while Redis is unreachable). Surface any failure so checkRateLimit applies
+              // its fail-closed/fail-open policy instead of reading missing values as a zero count.
+              if (!results) throw new Error('Redis pipeline returned no result');
+              const failed = results.find(([err]) => err);
+              if (failed) throw failed[0];
+              // Extract values to match the Upstash shape
+              return results.map(([, val]) => val);
+            } catch (error) {
+              // A timed-out command means the socket is dead or half-open (for example the backend
+              // restarted behind a proxy). A stuck client did not recover on its own in staging while a
+              // new process connected immediately, so discard it and open a fresh connection.
+              if (error instanceof Error && /timed out/i.test(error.message) && io === client) {
+                io = connect();
+                client.disconnect();
+                if (client.stream && !client.stream.destroyed) client.stream.destroy();
+              }
+              throw error;
+            }
           },
         };
       },
     };
   }
-
   return null;
 }
 
@@ -212,7 +258,7 @@ export async function checkRateLimit(
       // Set expiry (window + 10 seconds buffer)
       pipeline.expire(redisKey, window + 10);
 
-      const results = await pipeline.exec();
+      const results = await withTimeout(pipeline.exec(), RATE_LIMIT_STORE_TIMEOUT_MS + 500);
       
       // Extract count before adding current request
       const currentCount = (results[1] as number) || 0;

@@ -114,6 +114,13 @@ describe('AiIngestKnowledgeSourceProposalSchema', () => {
     expect(result.success).toBe(true)
   })
 
+  it('rejects Restricted knowledge proposals before they can be persisted and does not strip nested tier declarations', () => {
+    expect(AiIngestKnowledgeSourceProposalSchema.safeParse({ ...validProposal, classification: 'RESTRICTED' }).success).toBe(false)
+    expect(AiIngestKnowledgeSourceProposalSchema.safeParse({ ...validProposal, retention: { ...validProposal.retention, classification: 'RESTRICTED' } }).success).toBe(false)
+    const provenance = AiIngestKnowledgeSourceProposalSchema.parse({ ...validProposal, sourceOrigin: 'ai_generated' })
+    expect(provenance.sourceOrigin).toBe('ai_generated')
+  })
+
   it('fills ingestion defaults', () => {
     const minimal = {
       orgId: ENTITY_ID,

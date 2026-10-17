@@ -1,6 +1,12 @@
 import { defineProject } from 'vitest/config'
+import { fileURLToPath } from 'node:url'
 
 export default defineProject({
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('.', import.meta.url)),
+    },
+  },
   test: {
     // Dynamic-import barrel/route tests can exceed the 5s vitest default under
     // monorepo-scale parallel runners on Windows; 30s provides comfortable headroom.
@@ -8,7 +14,7 @@ export default defineProject({
     hookTimeout: 30_000,
     name: 'cora',
     environment: 'node',
-    include: ['**/*.test.ts', '**/*.test.tsx'],
+    include: ['**/*.test.ts', '**/*.test.tsx', '../../tooling/cora-acceptance/*.test.ts'],
     coverage: {
       provider: 'v8',
       include: [

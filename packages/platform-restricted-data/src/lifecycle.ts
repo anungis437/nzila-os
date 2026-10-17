@@ -26,6 +26,9 @@ export function stateRetention(input: {
       'This plane does not invent a CIVITAS retention duration.',
     )
   }
+  if (input.durationDays !== null && (!Number.isSafeInteger(input.durationDays) || input.durationDays < 0)) {
+    throw new PlaneError('INVALID_RETENTION_DURATION', 'A retention duration must be a finite non-negative whole number or explicitly unassigned.')
+  }
   const statement: RetentionStatement = {
     category: input.category,
     policyId: input.policyId,
@@ -40,12 +43,12 @@ export function stateRetention(input: {
     statement.deletionEligible = !statement.preservationRequired
   }
   getState().retention.set(statement.category, statement)
-  return statement
+  return structuredClone(statement)
 }
 
 function holdCovers(hold: LegalHold, orgId: string, principalId: string, recordId: string, category: string, now: Date): boolean {
   if (hold.releasedAt) return false
-  if (Date.parse(hold.expiresAt) <= now.getTime()) return false
+  if (Date.parse(hold.start) > now.getTime() || Date.parse(hold.expiresAt) <= now.getTime()) return false
   if (hold.scope.orgId !== orgId) return false
   if (hold.scope.principalId && hold.scope.principalId !== principalId) return false
   if (hold.scope.resourceId && hold.scope.resourceId !== recordId) return false
@@ -63,7 +66,7 @@ export function placeLegalHold(input: {
   reviewDue: string
   expiresAt: string
 }): LegalHold {
-  if (input.authorityKind === 'application' || input.authorityKind === 'civitas') {
+  if (input.authorityKind !== 'platform_legal' && input.authorityKind !== 'platform_privacy') {
     throw new PlaneError(
       'HOLD_AUTHORITY_REQUIRED',
       'An application, including CIVITAS, cannot declare a legal hold. Platform legal or privacy authority is required.',
@@ -75,9 +78,13 @@ export function placeLegalHold(input: {
   if (!input.reviewDue || !input.expiresAt) {
     throw new PlaneError('HOLD_NOT_INDEFINITE', 'A legal hold requires a review date and an expiry. Indefinite invisible retention is rejected.')
   }
+  const dates = [input.start, input.reviewDue, input.expiresAt].map(Date.parse)
+  if (!input.scope.orgId?.trim() || dates.some((time) => !Number.isFinite(time)) || dates[0]! > dates[1]! || dates[1]! > dates[2]! || dates[0]! >= dates[2]!) {
+    throw new PlaneError('HOLD_INVALID_SCOPE_OR_DATES', 'A legal hold requires an organization and ordered finite start, review and expiry dates.')
+  }
   const hold: LegalHold = {
     id: randomUUID(),
-    scope: input.scope,
+    scope: structuredClone(input.scope),
     reason: input.reason.trim(),
     authorityRef: input.authorityRef.trim(),
     authorityKind: input.authorityKind,
@@ -87,7 +94,7 @@ export function placeLegalHold(input: {
     expiresAt: input.expiresAt,
   }
   getState().holds.push(hold)
-  return hold
+  return structuredClone(hold)
 }
 
 export function releaseLegalHold(holdId: string, release: { releasedBy: string; releaseEvent: string }): LegalHold {
@@ -98,7 +105,7 @@ export function releaseLegalHold(holdId: string, release: { releasedBy: string; 
   }
   hold.releasedAt = new Date().toISOString()
   hold.releaseEvent = `${release.releasedBy}: ${release.releaseEvent.trim()}`
-  return hold
+  return structuredClone(hold)
 }
 
 export function deleteRestrictedRecord(input: {
@@ -108,12 +115,18 @@ export function deleteRestrictedRecord(input: {
   actor: Actor
   purpose: string
   authorizationBasis: string
-  now?: Date
 }): DeletionRecord {
-  const now = input.now ?? new Date()
+  const now = new Date()
+  if (!Number.isFinite(now.getTime())) throw new PlaneError('INVALID_ACCESS_TIME', 'Deletion requires a valid time.')
   const record = getState().records.get(input.recordId)
   if (!record || record.orgId !== input.orgId || record.principalId !== input.principalId) {
     throw new PlaneError('NOT_FOUND', 'Restricted record is not in this principal scope.')
+  }
+  if (input.actor.kind !== 'principal' || input.actor.id !== record.principalId) {
+    throw new PlaneError('PRINCIPAL_DELETE_REQUIRED', 'Only the owning principal may delete this Restricted record; read and export grants do not confer deletion.')
+  }
+  if (getState().retention.get(record.category)?.preservationRequired) {
+    throw new PlaneError('PRESERVATION_REQUIRED', 'The declared category retention statement requires preservation.')
   }
   const blocked = getState().holds.find((hold) => holdCovers(hold, input.orgId, input.principalId, input.recordId, record.category, now))
   if (blocked) {
@@ -129,6 +142,7 @@ export function deleteRestrictedRecord(input: {
     principalId: record.principalId,
     purpose: input.purpose,
     authorizationBasis: input.authorizationBasis,
+    afterJson: record.fields,
     outcome: 'allow',
   })
   getState().records.delete(record.id)
@@ -154,7 +168,7 @@ export function deleteRestrictedRecord(input: {
     retainsFieldValues: false,
   }
   getState().tombstones.set(record.id, tombstone)
-  return tombstone
+  return structuredClone(tombstone)
 }
 
 export function exportPrincipalRecords(input: {
@@ -185,6 +199,7 @@ export function exportPrincipalRecords(input: {
   )
   const exported = records.map((record) => {
     const read = readRestrictedRecord({
+      action: 'export',
       orgId: input.orgId,
       principalId: input.principalId,
       recordId: record.id,
@@ -199,9 +214,9 @@ export function exportPrincipalRecords(input: {
       category: record.category,
       jurisdiction: record.jurisdiction,
       createdAt: record.createdAt,
-      relationships: record.relationships,
-      evidenceRefs: record.evidenceRefs,
-      decisions: record.decisions,
+      relationships: structuredClone(record.relationships),
+      evidenceRefs: structuredClone(record.evidenceRefs),
+      decisions: structuredClone(record.decisions),
       fields: read.fields,
     }
   })

@@ -22,7 +22,6 @@ export type {
   RetentionStatement,
 } from './types'
 
-export { resetPlatformState, getState } from './state'
 export { classifyRecord, declareRestrictedCapability, appDeclaresRestricted, RESTRICTED_PERSONAL_FIELDS } from './classification'
 export { redactObservabilityRecord, scrubSensitiveString } from './observability'
 export { inspectSecretIngestion, rejectSecretIngestion, HIGH_CONFIDENCE_SECRET_PATTERNS } from './secrets'
@@ -60,5 +59,4 @@ export {
 } from './lifecycle'
 export { activateDelegation, proposeDelegation, reviewDelegation, revokeDelegation } from './continuity'
 export { CIVITAS_PLATFORM_CONTRACT, CONTROL_EVIDENCE } from './contract'
-export { rerunRedTeam } from './redteam'
 export type { RedTeamResult } from './redteam'

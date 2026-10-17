@@ -38,11 +38,16 @@ vi.mock('@/db', () => ({
   },
 }));
 
-vi.mock('@/db/schema/recognition-rewards-schema', () => ({
+vi.mock('@/db/schema/domains/infrastructure/rewards', () => ({
   recognitionAwards: 'recognition_awards',
   rewardWalletLedger: 'reward_wallet_ledger',
   rewardBudgetEnvelopes: 'reward_budget_envelopes',
   rewardRedemptions: 'reward_redemptions',
+}));
+
+vi.mock('@/db/schema', () => ({
+  organizationMembers: 'organization_members',
+  users: 'user_management.users',
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -124,6 +129,19 @@ describe('export-service', () => {
 
   // ──────────────── exportLedgerToCSV ────────────────
   describe('exportLedgerToCSV', () => {
+    it('queries canonical credit fields and tenant-binds member enrichment without changing CSV headings', async () => {
+      const csv = await exportLedgerToCSV('org-1');
+      const query = mocks.mockExecute.mock.calls[0][0];
+      const template = query[0].join('');
+      expect(template).toContain('rwl.amount_credits AS amount');
+      expect(template).toContain('rwl.memo AS description');
+      expect(template).toContain('om.organization_id = rwl.org_id::text');
+      expect(template).toContain('u.user_id = rwl.user_id');
+      expect(template).not.toMatch(/rwl\.amount,|rwl\.description|auth_user/);
+      expect(query).toContain('user_management.users');
+      expect(csv).toContain('amount,balance_after,user_name,email,source_type,source_id,description');
+    });
+
     it('returns CSV with headers when empty', async () => {
       mocks.mockExecute.mockResolvedValue([]);
       const csv = await exportLedgerToCSV('org-1');

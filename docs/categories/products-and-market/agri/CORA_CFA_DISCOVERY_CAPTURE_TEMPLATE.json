@@ -1,0 +1,447 @@
+{
+  "schemaVersion": "1.0",
+  "captureKind": "PRE_SESSION_TEMPLATE",
+  "humanEvidence": false,
+  "externalDocuments": [
+    {
+      "name": "NLI_CFA_Discovery_Brief_v3_Oct2026",
+      "availability": "NOT_AVAILABLE_IN_INSPECTED_REPO_SESSION",
+      "reference": null,
+      "lineByLineComparisonClaimed": false
+    },
+    {
+      "name": "CORA_Stress_Test_Playbook_v3_Oct2026",
+      "availability": "NOT_AVAILABLE_IN_INSPECTED_REPO_SESSION",
+      "reference": null,
+      "lineByLineComparisonClaimed": false
+    }
+  ],
+  "frozenState": {
+    "CORA_STRESS_TEST_REPO_SYNC": "PASS",
+    "GATE_A_DOCTRINE_CONSISTENCY": "CLOSED",
+    "GATE_B_BEACHHEAD_CONSISTENCY": "IN_PROGRESS",
+    "HANDOFF_A": "CANADA_ORGANIC_EVIDENCE",
+    "HANDOFF_B": "PENDING_CFA_SELECTION",
+    "GATE_C_EXECUTION": "NOT_AUTHORIZED",
+    "CORA_ORGANIC_FIRST_LIVE_SOURCE": "BLOCKED_RIGHTS_CONFIRMATION",
+    "PUBLIC_SOURCE_RUNTIME_PROOF": "NOT_YET_PROVEN",
+    "PRODUCTION_ACTIVATION": "BLOCKED_STRESS_TEST",
+    "COMMERCIAL_PILOT_COMMITMENT": "BLOCKED_STRESS_TEST"
+  },
+  "session": {
+    "sessionId": null,
+    "status": "NOT_CONDUCTED",
+    "authorizationRef": null,
+    "handlingPolicyRef": null,
+    "facilitatorRef": null,
+    "startedAt": null,
+    "endedAt": null,
+    "speakerContexts": [],
+    "recordReliability": "NOT_ASSESSED",
+    "reliabilityReason": null
+  },
+  "claims": [],
+  "workflowSteps": [],
+  "handoffBCandidates": [],
+  "recipients": [],
+  "producers": [],
+  "netValueHypotheses": [],
+  "verificationQueue": [],
+  "corrections": [],
+  "postSession": {
+    "handoffBDiscovery": "NOT_ASSESSED",
+    "discoveryHandoffBState": "PENDING_CFA_SELECTION",
+    "credibleCandidateIds": [],
+    "candidateRanking": null,
+    "handoffAChallenge": "UNASSESSED",
+    "handoffAFinding": null,
+    "handoffAClaimIds": [],
+    "directSourceBaselineSufficient": "UNKNOWN",
+    "noGoFinding": null,
+    "noGoApprovalRef": null,
+    "essentialGaps": [],
+    "phase0PreparationPlanRef": null,
+    "disposition": "NOT_ASSESSED",
+    "reason": null,
+    "decisionOwner": null,
+    "decisionAt": null,
+    "evidenceClaimIds": [],
+    "nextAuthorizedAction": "NONE_AUTHORIZED_BY_THIS_PACKAGE"
+  },
+  "entryTemplates": {
+    "claim": {
+      "claimId": null,
+      "speaker": null,
+      "roleContext": null,
+      "claimType": null,
+      "route": "UNKNOWN",
+      "handoffStep": null,
+      "claim": null,
+      "wordingKind": null,
+      "example": null,
+      "evidenceBasis": null,
+      "confidence": "UNKNOWN",
+      "needsVerification": null,
+      "possibleInstitution": null,
+      "possibleRecipientRole": null,
+      "possibleProducerImpact": null,
+      "authorityQuestion": null,
+      "verificationQuestion": null,
+      "followUpOwner": null,
+      "followUpNeeded": null,
+      "sourceSession": null,
+      "capturedAt": null
+    },
+    "workflowStep": {
+      "stepId": null,
+      "route": "UNKNOWN",
+      "candidateId": null,
+      "claimIds": [],
+      "actor": null,
+      "source": null,
+      "subject": null,
+      "recipient": null,
+      "evidenceRequested": null,
+      "recipientDecision": null,
+      "transferMechanism": null,
+      "verificationMethod": null,
+      "verificationReason": null,
+      "frictionClass": "UNKNOWN_PENDING_VERIFICATION",
+      "classificationVerified": false,
+      "authorityMechanism": null,
+      "producerEffort": {
+        "status": "UNKNOWN_TO_BE_BASELINED",
+        "value": null,
+        "unit": null,
+        "basisClaimIds": [],
+        "sampleAndPeriod": null,
+        "limitation": null
+      },
+      "institutionalEffort": {
+        "status": "UNKNOWN_TO_BE_BASELINED",
+        "value": null,
+        "unit": null,
+        "basisClaimIds": [],
+        "sampleAndPeriod": null,
+        "limitation": null
+      },
+      "elapsedTime": {
+        "status": "UNKNOWN_TO_BE_BASELINED",
+        "value": null,
+        "unit": null,
+        "basisClaimIds": [],
+        "sampleAndPeriod": null,
+        "limitation": null
+      },
+      "failureReworkPoints": null,
+      "bestCurrentBaseline": null,
+      "remainingQuestions": []
+    },
+    "handoffBCandidate": {
+      "candidateId": null,
+      "claimIds": [],
+      "commodityContext": null,
+      "producerType": null,
+      "originatingInstitution": null,
+      "evidenceData": null,
+      "currentHolder": null,
+      "recipientInstitution": null,
+      "recipientDecision": null,
+      "currentTransferMechanism": null,
+      "repeatedProducerAction": null,
+      "reasonForReverification": null,
+      "frequency": {
+        "status": "UNKNOWN_TO_BE_BASELINED",
+        "value": null,
+        "unit": null,
+        "basisClaimIds": [],
+        "sampleAndPeriod": null,
+        "limitation": null
+      },
+      "elapsedTime": {
+        "status": "UNKNOWN_TO_BE_BASELINED",
+        "value": null,
+        "unit": null,
+        "basisClaimIds": [],
+        "sampleAndPeriod": null,
+        "limitation": null
+      },
+      "producerTimeBurden": {
+        "status": "UNKNOWN_TO_BE_BASELINED",
+        "value": null,
+        "unit": null,
+        "basisClaimIds": [],
+        "sampleAndPeriod": null,
+        "limitation": null
+      },
+      "directCost": {
+        "status": "UNKNOWN_TO_BE_BASELINED",
+        "value": null,
+        "unit": null,
+        "basisClaimIds": [],
+        "sampleAndPeriod": null,
+        "limitation": null
+      },
+      "decisionDelay": {
+        "status": "UNKNOWN_TO_BE_BASELINED",
+        "value": null,
+        "unit": null,
+        "basisClaimIds": [],
+        "sampleAndPeriod": null,
+        "limitation": null
+      },
+      "marketAccessConsequence": null,
+      "digitalReadiness": "UNKNOWN",
+      "privacySensitivity": null,
+      "authorityMechanism": null,
+      "regulatoryObligation": null,
+      "auditObligation": null,
+      "contractualObligation": null,
+      "independentJudgmentRequirement": null,
+      "habitualManualProcess": null,
+      "candidateBehaviouralDelta": null,
+      "shadowRecipientId": null,
+      "captureWorkstreamCandidate": "UNKNOWN",
+      "captureBurdenSeparate": null,
+      "authorityQuestions": {
+        "ORIGINATOR": {
+          "question": "Who originates the evidence?",
+          "proposedAnswer": null,
+          "claimIds": [],
+          "status": "UNVERIFIED_PHASE_0_REQUIRED"
+        },
+        "ACCESS_GOVERNANCE": {
+          "question": "Who controls or governs access?",
+          "proposedAnswer": null,
+          "claimIds": [],
+          "status": "UNVERIFIED_PHASE_0_REQUIRED"
+        },
+        "CONSENT_RELEVANCE": {
+          "question": "Is producer consent actually the relevant basis?",
+          "proposedAnswer": null,
+          "claimIds": [],
+          "status": "UNVERIFIED_PHASE_0_REQUIRED"
+        },
+        "INSTRUCTION": {
+          "question": "Does instruction apply within established authority?",
+          "proposedAnswer": null,
+          "claimIds": [],
+          "status": "UNVERIFIED_PHASE_0_REQUIRED"
+        },
+        "CONTRACTUAL_AUTHORITY": {
+          "question": "Is there contractual authority and what is its scope?",
+          "proposedAnswer": null,
+          "claimIds": [],
+          "status": "UNVERIFIED_PHASE_0_REQUIRED"
+        },
+        "INSTITUTIONAL_MANDATE": {
+          "question": "Is there an institutional mandate?",
+          "proposedAnswer": null,
+          "claimIds": [],
+          "status": "UNVERIFIED_PHASE_0_REQUIRED"
+        },
+        "LEGAL_REGULATORY_BASIS": {
+          "question": "Is there a legal or regulatory basis requiring qualified review?",
+          "proposedAnswer": null,
+          "claimIds": [],
+          "status": "UNVERIFIED_PHASE_0_REQUIRED"
+        },
+        "RECIPIENT_INDEPENDENT_VERIFICATION": {
+          "question": "What must the recipient verify independently?",
+          "proposedAnswer": null,
+          "claimIds": [],
+          "status": "UNVERIFIED_PHASE_0_REQUIRED"
+        },
+        "WRONG_STALE_LIABILITY": {
+          "question": "Who carries liability for wrong or stale evidence?",
+          "proposedAnswer": null,
+          "claimIds": [],
+          "status": "UNVERIFIED_PHASE_0_REQUIRED"
+        },
+        "NON_REUSABLE_EVIDENCE": {
+          "question": "What evidence may never legitimately be reused?",
+          "proposedAnswer": null,
+          "claimIds": [],
+          "status": "UNVERIFIED_PHASE_0_REQUIRED"
+        }
+      },
+      "criteria": {
+        "producerBurden": { "status": "UNKNOWN", "claimIds": [], "reason": null },
+        "handoffIdentifiable": { "status": "UNKNOWN", "claimIds": [], "reason": null },
+        "recipientIdentifiable": { "status": "UNKNOWN", "claimIds": [], "reason": null },
+        "decisionConsequence": { "status": "UNKNOWN", "claimIds": [], "reason": null },
+        "differentFromOrganic": { "status": "UNKNOWN", "claimIds": [], "reason": null },
+        "measurableFriction": { "status": "UNKNOWN", "claimIds": [], "reason": null },
+        "verificationCulture": { "status": "UNKNOWN", "claimIds": [], "reason": null },
+        "authorityQuestionsIdentified": { "status": "UNKNOWN", "claimIds": [], "reason": null },
+        "shadowParticipantsPlausible": { "status": "UNKNOWN", "claimIds": [], "reason": null }
+      },
+      "defeatingContradiction": null
+    },
+    "recipient": {
+      "recipientId": null,
+      "claimIds": [],
+      "institution": null,
+      "route": "UNKNOWN",
+      "recipientFunction": null,
+      "decisionBeingMade": null,
+      "evidenceCurrentlyRequested": null,
+      "currentVerificationMethod": null,
+      "reasonForVerification": null,
+      "possibleBehaviouralDelta": null,
+      "thresholdStatus": "DRAFT_DISCOVERY_ONLY",
+      "authorityToParticipate": null,
+      "contactRoute": null,
+      "relationshipSource": null,
+      "contactAuthorization": null,
+      "status": "NOT_VERIFIED"
+    },
+    "producer": {
+      "producerRef": null,
+      "claimIds": [],
+      "commodityContext": null,
+      "recordReadiness": "UNKNOWN",
+      "candidateRoute": "UNKNOWN",
+      "experienceRelevantToHandoff": null,
+      "introductionReferralSource": null,
+      "participationInterest": "UNKNOWN",
+      "compensationExpectations": null,
+      "consentEthicsRequirements": null,
+      "contactAuthorization": null,
+      "status": "NOT_VERIFIED"
+    },
+    "netValueHypothesis": {
+      "route": "UNKNOWN",
+      "candidateId": null,
+      "claimIds": [],
+      "thresholdStatus": "DRAFT_DISCOVERY_ONLY",
+      "dimensions": {
+        "producerTime": {
+          "hypothesis": null,
+          "measure": {
+            "status": "UNKNOWN_TO_BE_BASELINED",
+            "value": null,
+            "unit": null,
+            "basisClaimIds": [],
+            "sampleAndPeriod": null,
+            "limitation": null
+          }
+        },
+        "directCost": {
+          "hypothesis": null,
+          "measure": {
+            "status": "UNKNOWN_TO_BE_BASELINED",
+            "value": null,
+            "unit": null,
+            "basisClaimIds": [],
+            "sampleAndPeriod": null,
+            "limitation": null
+          }
+        },
+        "administrativeBurden": {
+          "hypothesis": null,
+          "measure": {
+            "status": "UNKNOWN_TO_BE_BASELINED",
+            "value": null,
+            "unit": null,
+            "basisClaimIds": [],
+            "sampleAndPeriod": null,
+            "limitation": null
+          }
+        },
+        "risk": {
+          "hypothesis": null,
+          "measure": {
+            "status": "UNKNOWN_TO_BE_BASELINED",
+            "value": null,
+            "unit": null,
+            "basisClaimIds": [],
+            "sampleAndPeriod": null,
+            "limitation": null
+          }
+        },
+        "optionality": {
+          "hypothesis": null,
+          "measure": {
+            "status": "UNKNOWN_TO_BE_BASELINED",
+            "value": null,
+            "unit": null,
+            "basisClaimIds": [],
+            "sampleAndPeriod": null,
+            "limitation": null
+          }
+        },
+        "switchingAbility": {
+          "hypothesis": null,
+          "measure": {
+            "status": "UNKNOWN_TO_BE_BASELINED",
+            "value": null,
+            "unit": null,
+            "basisClaimIds": [],
+            "sampleAndPeriod": null,
+            "limitation": null
+          }
+        },
+        "marketAccess": {
+          "hypothesis": null,
+          "measure": {
+            "status": "UNKNOWN_TO_BE_BASELINED",
+            "value": null,
+            "unit": null,
+            "basisClaimIds": [],
+            "sampleAndPeriod": null,
+            "limitation": null
+          }
+        },
+        "decisionLatency": {
+          "hypothesis": null,
+          "measure": {
+            "status": "UNKNOWN_TO_BE_BASELINED",
+            "value": null,
+            "unit": null,
+            "basisClaimIds": [],
+            "sampleAndPeriod": null,
+            "limitation": null
+          }
+        },
+        "privacyExposure": {
+          "hypothesis": null,
+          "measure": {
+            "status": "UNKNOWN_TO_BE_BASELINED",
+            "value": null,
+            "unit": null,
+            "basisClaimIds": [],
+            "sampleAndPeriod": null,
+            "limitation": null
+          }
+        },
+        "liabilityExposure": {
+          "hypothesis": null,
+          "measure": {
+            "status": "UNKNOWN_TO_BE_BASELINED",
+            "value": null,
+            "unit": null,
+            "basisClaimIds": [],
+            "sampleAndPeriod": null,
+            "limitation": null
+          }
+        }
+      }
+    },
+    "verification": {
+      "verificationId": null,
+      "claimIds": [],
+      "category": null,
+      "question": null,
+      "proposedSource": null,
+      "status": "UNVERIFIED",
+      "evidenceRefs": [],
+      "verifiedScope": null,
+      "verifier": null,
+      "verifiedAt": null,
+      "limitationReason": null,
+      "followUpOwner": null,
+      "actionAuthorizationRef": null
+    }
+  }
+}

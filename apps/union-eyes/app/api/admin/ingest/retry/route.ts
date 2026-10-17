@@ -8,7 +8,7 @@
  */
 
 import { withApi, z, ApiError } from '@/lib/api/framework';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withOrgOwnedContext as withSystemContext } from '@/lib/db/org-owned-context';
 import { db } from '@/db/db';
 import { eq, and, inArray } from 'drizzle-orm';
 import {

@@ -11,22 +11,20 @@ import { authenticateUser } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
 import { enforcePolicies } from '@/lib/policy-enforcement'
 import { createLogger } from '@nzila/os-core'
-import { activateBreakGlass, PlaneError } from '@nzila/platform-restricted-data'
+import { activateBreakGlass, revokeBreakGlass, PlaneError } from '@nzila/platform-restricted-data'
 
 const logger = createLogger('api:admin:break-glass')
 
 const BreakGlassSchema = z.object({
   reason: z.string().min(10, 'Reason must be at least 10 characters'),
   durationMinutes: z.number().int().min(5).max(240).default(60),
-  scope: z.union([
-    z.string(),
-    z.object({
-      appDomain: z.string().min(1),
-      resource: z.string().min(1),
-      action: z.enum(['read', 'write']),
-      principalId: z.string().min(1).optional(),
-    }),
-  ]),
+  scope: z.object({
+    orgId: z.string().uuid(),
+    appDomain: z.string().min(1),
+    resource: z.string().min(1),
+    action: z.enum(['read', 'write']),
+    principalId: z.string().min(1).optional(),
+  }).strict(),
 })
 
 export async function POST(req: NextRequest) {
@@ -53,7 +51,7 @@ export async function POST(req: NextRequest) {
         scope: parsed.data.scope,
         durationMinutes: parsed.data.durationMinutes,
       },
-      orgId: auth.userId, // break-glass is platform-scoped
+      orgId: parsed.data.scope.orgId,
       environment: process.env.NODE_ENV ?? 'development',
     })
 
@@ -109,14 +107,20 @@ export async function POST(req: NextRequest) {
       policyEnforced: true,
     }
 
-    await recordAuditEvent({
-      orgId: auth.userId,
-      targetType: 'break_glass',
-      targetId: activation.id,
-      action: 'break_glass.activated',
-      actorClerkUserId: auth.userId,
-      afterJson: activation,
-    })
+    try {
+      await recordAuditEvent({
+        orgId: parsed.data.scope.orgId,
+        targetType: 'break_glass',
+        targetId: activation.id,
+        action: 'break_glass.activated',
+        actorClerkUserId: auth.userId,
+        afterJson: activation,
+      })
+    } catch (error) {
+      // An activation without a durable audit receipt must not remain usable.
+      revokeBreakGlass(scoped.id)
+      throw error
+    }
 
     logger.info('Break-glass activated', {
       userId: auth.userId,

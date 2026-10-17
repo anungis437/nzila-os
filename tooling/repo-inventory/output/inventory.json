@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-16T00:00:00.000Z",
+  "generatedAt": "2026-10-17T00:00:00.000Z",
   "appCount": 28,
   "packageCount": 225,
-  "workspacePackageCount": 259,
+  "workspacePackageCount": 260,
   "workflowCount": 59,
-  "contractTestCount": 291,
-  "tsTestFileCount": 2695,
-  "pythonTestFileCount": 35,
+  "contractTestCount": 292,
+  "tsTestFileCount": 2794,
+  "pythonTestFileCount": 36,
   "apps": [
     {
       "name": "abr",
@@ -122,7 +122,7 @@
       "dependsOnPlatformAuth": false,
       "nzilaDeps": [],
       "purpose": "",
-      "codeFileCount": 0
+      "codeFileCount": 24
     },
     {
       "name": "console",
@@ -187,7 +187,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 448
+      "codeFileCount": 449
     },
     {
       "name": "control-plane",
@@ -277,14 +277,16 @@
         "db",
         "evidence",
         "governed-workflow",
+        "org",
         "os-core",
         "platform-auth",
+        "platform-policy-engine",
         "platform-shell",
         "schema-core",
         "ui"
       ],
-      "purpose": "Agricultural intelligence dashboard — yield forecasting, price signals, risk analysis, cooperative performance, and impact traceability.",
-      "codeFileCount": 43
+      "purpose": "Cora is Agricultural Institutional Infrastructure.",
+      "codeFileCount": 127
     },
     {
       "name": "flow",
@@ -689,7 +691,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 5274
+      "codeFileCount": 5403
     },
     {
       "name": "union-eyes-demo",

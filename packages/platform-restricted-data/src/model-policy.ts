@@ -2,6 +2,7 @@ import { inspectSecretIngestion } from './secrets'
 import { getState } from './state'
 import {
   PlaneError,
+  PLATFORM_TIERS,
   type EvidenceClass,
   type ModelPath,
   type PlatformTier,
@@ -70,6 +71,9 @@ export function evaluateRestrictedModelPath(input: {
   modelPathId?: string
   text?: string
 }): ModelPathDecision {
+  if (input.classification != null && !PLATFORM_TIERS.includes(input.classification)) {
+    return { decision: 'DENY', allowed: false, reason: 'Unknown governance classification; model processing is denied.', restrictedModelProcessingEnabled: false }
+  }
   if (input.classification !== 'RESTRICTED') {
     return {
       decision: 'NOT_APPLICABLE',
@@ -114,7 +118,7 @@ export function bodiesSafeForPersistence(input: {
   requestBody: unknown
   responseBody: unknown
 }): { requestBody: unknown; responseBody: unknown; persisted: boolean } {
-  if (input.classification === 'RESTRICTED') {
+  if (input.classification === 'RESTRICTED' || (input.classification != null && !PLATFORM_TIERS.includes(input.classification))) {
     const omitted = { persisted: false, reason: 'restricted_body_omitted' }
     return { requestBody: omitted, responseBody: { ...omitted }, persisted: false }
   }

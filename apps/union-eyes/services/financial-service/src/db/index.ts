@@ -1,9 +1,7 @@
-import { config } from 'dotenv';
-config(); // Load environment variables first
-
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from './schema';
+import { financialConnectionString } from './connection-scope';
 type LoggerType = {
   info: (message: string, context?: Record<string, unknown>) => void;
   warn: (message: string, context?: Record<string, unknown>) => void;
@@ -22,17 +20,14 @@ function getLogger(): LoggerType {
 }
 
 // Database connection configuration — lazily initialised so test files can
-// load without throwing when DATABASE_URL is absent.
+// load without throwing when FINANCIAL_DATABASE_URL is absent.
 
 let _client: ReturnType<typeof postgres> | null = null;
 let _db: ReturnType<typeof drizzle> | null = null;
 
 function getClient() {
   if (!_client) {
-    const connectionString = process.env.DATABASE_URL || '';
-    if (!connectionString) {
-      throw new Error('DATABASE_URL environment variable is not set');
-    }
+    const connectionString = financialConnectionString(process.env);
     _client = postgres(connectionString, {
       max: 10, // Connection pool size
       idle_timeout: 20,
@@ -51,7 +46,7 @@ function getDb() {
 
 /**
  * Lazy-initialised Drizzle database instance.
- * Throws on first access if DATABASE_URL is not set.
+ * Throws on first access if the dedicated financial connection is not configured.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const db: ReturnType<typeof drizzle<typeof schema>> = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {

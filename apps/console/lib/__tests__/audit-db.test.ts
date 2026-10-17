@@ -117,6 +117,35 @@ describe('audit-db', () => {
     vi.clearAllMocks()
   })
 
+  it.each([undefined, 'PUBLIC', 'INTERNAL', 'CONFIDENTIAL'] as const)('rejects a Restricted snapshot labelled %s before database I/O', async (classification) => {
+    await expect(recordAuditEvent({ orgId: 'org-synthetic', actorClerkUserId: 'actor-synthetic', action: 'restricted.update', targetType: 'synthetic', classification, afterJson: { envelope: { classification: 'RESTRICTED', text: 'private synthetic narrative' } } })).rejects.toThrow(/explicit tier|Restricted/)
+    expect(h.platformDbMock.select).not.toHaveBeenCalled()
+    expect(h.platformDbMock.insert).not.toHaveBeenCalled()
+  })
+
+  it('rejects unlabelled nested sensitive fields and missing Restricted audit metadata before DB I/O', async () => {
+    const input = { orgId: 'org-synthetic', actorClerkUserId: 'actor-synthetic', action: 'restricted.update', targetType: 'synthetic' }
+    await expect(recordAuditEvent({ ...input, afterJson: { nested: { bank_account: 'synthetic-account' } } })).rejects.toThrow(/explicit tier/)
+    await expect(recordAuditEvent({ ...input, classification: 'RESTRICTED', afterJson: { bankAccount: 'synthetic-account' } })).rejects.toThrow(/purpose/)
+    expect(h.platformDbMock.select).not.toHaveBeenCalled()
+    expect(h.platformDbMock.insert).not.toHaveBeenCalled()
+  })
+
+  it('hashes and stores only the Restricted audit metadata, never raw snapshots', async () => {
+    const written: Record<string, unknown>[] = []
+    h.platformDbMock.select.mockImplementationOnce(() => selectLatestHashChain('synthetic-prev'))
+    h.platformDbMock.insert.mockImplementationOnce(() => ({ values: (values: Record<string, unknown>) => {
+      written.push(values)
+      return { returning: () => Promise.resolve([{ id: 'synthetic-audit', hash: String(values.hash) }]) }
+    } }))
+    await recordAuditEvent({ orgId: 'org-synthetic', actorClerkUserId: 'actor-synthetic', action: 'restricted.update', targetType: 'synthetic', targetId: 'resource-synthetic', classification: 'RESTRICTED', principalId: 'principal-synthetic', purpose: 'synthetic review', authorizationBasis: 'principal-grant', dataCategory: 'synthetic-category', beforeJson: { bankAccount: 'old-synthetic-account' }, afterJson: { bankAccount: 'new-synthetic-account' } })
+    expect(written).toHaveLength(1)
+    expect(written[0]?.beforeJson).toBeUndefined()
+    expect(written[0]?.afterJson).toMatchObject({ classification: 'RESTRICTED', payloadStored: false })
+    expect(JSON.stringify(written)).not.toContain('synthetic-account')
+    expect(JSON.stringify(h.computeEntryHashMock.mock.calls)).not.toContain('synthetic-account')
+  })
+
   it('records audit event and links previous hash', async () => {
     h.platformDbMock.select.mockImplementationOnce(() => selectLatestHashChain('prev_hash'))
     h.platformDbMock.insert.mockImplementationOnce(() => ({
