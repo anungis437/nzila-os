@@ -61,7 +61,7 @@ export const pushDevices = pgTable(
     organizationId: uuid('organization_id')
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
-    profileId: uuid('profile_id')
+    profileId: text('profile_id')
       .notNull()
       .references(() => profiles.userId, { onDelete: 'cascade' }),
 
@@ -363,4 +363,3 @@ export type NewPushNotification = typeof pushNotifications.$inferInsert;
 
 export type PushDelivery = typeof pushDeliveries.$inferSelect;
 export type NewPushDelivery = typeof pushDeliveries.$inferInsert;
-

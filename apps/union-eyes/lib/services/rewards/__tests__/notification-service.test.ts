@@ -88,9 +88,8 @@ vi.mock('@/db', () => {
 });
 
 vi.mock('@/db/schema', () => ({
-  recognitionAwards: { id: 'id', orgId: 'orgId', recipientUserId: 'recipientUserId' },
-  rewardRedemptions: { id: 'id', orgId: 'orgId' },
-  rewardWalletLedger: { userId: 'userId', pointsChange: 'pointsChange', expiresAt: 'expiresAt' },
+  recognitionAwards: { id: 'id', orgId: 'awardOrgId', status: 'awardStatus', recipientUserId: 'recipientUserId' },
+  rewardRedemptions: { id: 'id', orgId: 'redemptionOrgId', createdAt: 'redemptionCreatedAt' },
   organizations: { id: 'id', name: 'name' },
   users: { userId: 'userId', email: 'email' },
   organizationMembers: {
@@ -99,6 +98,13 @@ vi.mock('@/db/schema', () => ({
     name: 'name',
     role: 'role',
     email: 'email',
+  },
+}));
+
+vi.mock('@/db/schema/domains/infrastructure/rewards', () => ({
+  rewardWalletLedger: {
+    id: 'ledgerId', orgId: 'ledgerOrgId', userId: 'ledgerUserId',
+    eventType: 'ledgerEventType', amountCredits: 'amountCredits', expiresAt: 'expiresAt',
   },
 }));
 
@@ -410,6 +416,29 @@ describe('notification-service', () => {
 
       expect(result).toEqual([]);
     });
+
+    it('scopes earning scans and membership enrichment to the ledger tenant', async () => {
+      const { eq, sql } = await import('drizzle-orm');
+      await getExpiringCreditsUsers(7, 100, 'org-1');
+      expect(eq).toHaveBeenCalledWith('ledgerOrgId', 'org-1');
+      expect(eq).toHaveBeenCalledWith('ledgerEventType', 'earn');
+      expect(eq).toHaveBeenCalledWith('userId', 'ledgerUserId');
+      expect(eq).toHaveBeenCalledWith('id', 'ledgerOrgId');
+      expect(sql).toHaveBeenCalledWith(expect.any(Array), 'amountCredits');
+      expect(sql).toHaveBeenCalledWith(expect.any(Array), 'ledgerOrgId');
+    });
+
+    it('does not report a schema failure as an empty scan or successful batch', async () => {
+      const { db } = await import('@/db');
+      (db.select as ReturnType<typeof vi.fn>).mockImplementationOnce(() => {
+        throw new Error('column expires_at missing');
+      });
+      await expect(getExpiringCreditsUsers(7)).rejects.toThrow('column expires_at missing');
+      (db.select as ReturnType<typeof vi.fn>).mockImplementationOnce(() => {
+        throw new Error('column expires_at missing');
+      });
+      expect((await notifyExpiringCredits(7)).success).toBe(false);
+    });
   });
 
   /* ============================= notifyExpiringCredits ============================= */
@@ -563,25 +592,57 @@ describe('notification-service (extended paths)', () => {
       const result = await getNotificationStats('org-1');
       expect(result.success).toBe(true);
       expect((result as { data: { pendingAwards: number } }).data.pendingAwards).toBe(7);
+      const { eq } = await import('drizzle-orm');
+      expect(eq).toHaveBeenCalledWith('awardOrgId', 'org-1');
+      expect(eq).toHaveBeenCalledWith('redemptionOrgId', 'org-1');
+      expect((result as { data: { totalExpiringNotifications7Days: null } }).data.totalExpiringNotifications7Days).toBeNull();
     });
   });
 
   describe('scheduleExpirationNotifications', () => {
-    it('inserts ledger entry for scheduled expiration', async () => {
+    it('confirms persisted earning expiry without inserting a second credit or zero row', async () => {
       const { db } = await import('@/db');
-      // select for latest balance
-      const limit1 = vi.fn().mockResolvedValue([{ balanceAfter: 500 }]);
-      const orderBy1 = vi.fn().mockReturnValue({ limit: limit1 });
-      const where1 = vi.fn().mockReturnValue({ orderBy: orderBy1 });
+      const expiresAt = new Date(Date.now() + 30 * 86400000);
+      const limit1 = vi.fn().mockResolvedValue([{ amountCredits: 100, expiresAt }]);
+      const where1 = vi.fn().mockReturnValue({ limit: limit1 });
       const from1 = vi.fn().mockReturnValue({ where: where1 });
       (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({ from: from1 });
-      // insert
-      mocks.mockReturning.mockResolvedValueOnce([{ id: 'mock-uuid' }]);
-      mocks.mockValues.mockReturnValue({ returning: mocks.mockReturning });
-      mocks.mockInsert.mockReturnValue({ values: mocks.mockValues });
-
-      const result = await scheduleExpirationNotifications('u1', 100, new Date(Date.now() + 30 * 86400000));
+      const result = await scheduleExpirationNotifications('u1', 100, expiresAt, 'org-1', 'entry-1');
       expect(result.success).toBe(true);
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+      expect(where1).toHaveBeenCalledWith([
+        ['ledgerId', 'entry-1'], ['ledgerOrgId', 'org-1'],
+        ['ledgerUserId', 'u1'], ['ledgerEventType', 'earn'],
+      ]);
+    });
+
+    it('rejects a missing earning expiry rather than manufacturing scheduling success', async () => {
+      const { db } = await import('@/db');
+      const limit = vi.fn().mockResolvedValue([{ amountCredits: 100, expiresAt: null }]);
+      const where = vi.fn().mockReturnValue({ limit });
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({ where }),
+      });
+      const result = await scheduleExpirationNotifications('u1', 100, new Date(), 'org-1', 'entry-1');
+      expect(result.success).toBe(false);
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+    });
+
+    it('reports schema failure explicitly', async () => {
+      const { db } = await import('@/db');
+      (db.select as ReturnType<typeof vi.fn>).mockImplementationOnce(() => {
+        throw new Error('column expires_at missing');
+      });
+      const result = await scheduleExpirationNotifications('u1', 100, new Date(), 'org-1', 'entry-1');
+      expect(result.success).toBe(false);
+      expect(result.error).toBeInstanceOf(Error);
+    });
+
+    it('rejects missing tenant scope before querying', async () => {
+      const { db } = await import('@/db');
+      const result = await scheduleExpirationNotifications('u1', 100, new Date(), '', 'entry-1');
+      expect(result.success).toBe(false);
+      expect(db.select).not.toHaveBeenCalled();
     });
   });
 });

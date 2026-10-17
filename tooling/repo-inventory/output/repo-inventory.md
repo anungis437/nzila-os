@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-10-16 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-10-17 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -11,8 +11,8 @@
 | Workspace Packages (apps|packages|services|tooling) | 258 |
 | GitHub Workflows | 59 |
 | Contract Test Files | 292 |
-| TS/JS Test Files | 2694 |
-| Python Test Files | 35 |
+| TS/JS Test Files | 2749 |
+| Python Test Files | 36 |
 
 ## Apps
 
@@ -38,7 +38,7 @@
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade infrastructure: deals, financing states, listings, |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 5275 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 5403 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | union-eyes-demo | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 80 |  |
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |

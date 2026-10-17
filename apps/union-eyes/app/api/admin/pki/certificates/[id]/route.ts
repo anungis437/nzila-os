@@ -1,18 +1,18 @@
 /**
  * CRUD item route for organizationMembers
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { organizationMembers } from '@/db/schema';
+import { crudRoutes } from '@/lib/api/crud-factory'
+import { organizationMembers } from '@/db/schema'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 const { GET, PATCH, DELETE } = crudRoutes({
   table: organizationMembers,
   pk: 'id',
-  tags: ["Members"],
+  tags: ['Members'],
   orgScoped: true,
   itemRoute: true,
   readRole: 'member',
   writeRole: 'steward',
-});
-export { GET, PATCH, DELETE };
+})
+export { GET, PATCH, DELETE }

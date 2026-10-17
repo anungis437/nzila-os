@@ -1,0 +1,46 @@
+{
+  "contractVersion": "2.0",
+  "lineage": "PROSPECTIVE_UE_BOOTSTRAP_V2",
+  "historicalMigrationReplayRequiredForFreshInstall": false,
+  "automaticDestructiveRepair": false,
+  "productionOrStagingAssessmentExecuted": false,
+  "states": [
+    {
+      "state": "V2_EXACT_WITH_AUTHENTICATED_SOURCE_AND_CATALOG_RECEIPT",
+      "classification": "AUTO_UPGRADE_SAFE",
+      "operation": "EXACT_NOOP_ONLY",
+      "requirements": [
+        "Exact current canonical catalog",
+        "Matching contract 2.0 receipt",
+        "Matching authenticated source-plan digest",
+        "Matching catalog digest"
+      ]
+    },
+    {
+      "state": "HISTORICAL_W4_W4P_W5_OR_PRE_V2_INSTALL",
+      "classification": "MANUAL_RECONCILIATION_REQUIRED",
+      "operation": "NONE_AUTHORIZED",
+      "requirements": [
+        "Separate human-approved compatibility mission",
+        "Current physical catalog inventory",
+        "Data ownership, nullability, duplicate membership and parent-key assessment",
+        "Per-database transaction and recovery plan",
+        "Synthetic rehearsal before any customer-data migration"
+      ]
+    },
+    {
+      "state": "DRIFTED_PARTIAL_UNOWNED_OR_UNVERIFIABLE_INSTALL",
+      "classification": "UNSUPPORTED_LEGACY_STATE",
+      "operation": "DENY",
+      "requirements": [
+        "Do not synthesize a V2 receipt",
+        "Do not silently alter or delete existing objects",
+        "Preserve observed state for a separately authorized investigation"
+      ]
+    }
+  ],
+  "w5Reopened": false,
+  "g3Reopened": false,
+  "mergeAuthorized": false,
+  "deployAuthorized": false
+}

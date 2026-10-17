@@ -42,11 +42,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { AuthOrgBindingError } from '@nzila/platform-auth/org-binding';
 import {
   ErrorCode,
   standardErrorResponse,
 } from './standardized-responses';
 import { ApiError } from './errors';
+import { secretsEqual } from './secret-compare';
 import {
   ROLE_HIERARCHY,
   getCurrentUser,
@@ -112,7 +115,8 @@ export interface WithApiOptions<
   /**
    * Run the handler inside a transaction-local RLS context
    * (`withRLSContext({ organizationId })`) so org-scoped RLS policies apply to
-   * the handler's own DB reads/writes. Opt-in — set by the CRUD factory for
+   * the handler's own DB reads/writes. Opt-in in legacy mode; mandatory for
+   * authenticated, org-required V2 handlers. Set by the CRUD factory for
    * org-scoped resources. Custom routes that manage their own context, or that
    * are system/public, leave this unset.
    */
@@ -253,6 +257,14 @@ function generateTraceId(): string {
 // ─── Implementation ──────────────────────────────────────────────────────────
 
 /**
+ * The framework parses the body from a clone so the original stream stays readable for
+ * handlers and legacy wrappers that delegate here and still call `request.json()`.
+ */
+function bodyReader(request: NextRequest): { json(): Promise<unknown> } {
+  return typeof request.clone === 'function' ? request.clone() : request;
+}
+
+/**
  * Build a Next.js route handler with declarative auth, validation, rate-limit,
  * error-handling and OpenAPI registration.
  *
@@ -330,7 +342,7 @@ export function withApi<
         const authBearer = request.headers.get('authorization')?.replace('Bearer ', '');
         const cronSecret = xCronHeader || authBearer || '';
         const expected = process.env.CRON_SECRET_KEY ?? process.env.CRON_SECRET ?? '';
-        if (!expected || cronSecret !== expected) {
+        if (!secretsEqual(cronSecret, expected)) {
           return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Invalid cron secret', undefined, traceId);
         }
       }
@@ -341,7 +353,11 @@ export function withApi<
       if (requireAuth || !requireCron) {
         try {
           user = await getCurrentUser();
-        } catch {
+        } catch (error) {
+          if (currentStateContextEnabled()) {
+            if (!(error instanceof AuthOrgBindingError)) throw error;
+            logger.warn('[withApi] Canonical authentication denied', { code: error.code, traceId });
+          }
           // getCurrentUser throws on auth service errors
         }
 
@@ -352,7 +368,7 @@ export function withApi<
 
       // ── 4. Role / permission checks ────────────────────────────────────
       let resolvedOrganizationId = user?.organizationId ?? null;
-      if (user) {
+      if (user && !currentStateContextEnabled()) {
         try {
           const { getOrganizationIdForUser } = await import('@/lib/organization-utils');
           const { withRLSContext } = await import('@/lib/db/with-rls-context');
@@ -379,7 +395,7 @@ export function withApi<
         let userLevel = ROLE_HIERARCHY[userRole] ?? 0;
 
         // If auth provider metadata role is insufficient, resolve from DB via getUserRole
-        if (userLevel < minRoleLevel) {
+        if (userLevel < minRoleLevel && !currentStateContextEnabled()) {
           try {
             const { getUserRole } = await import('@/lib/auth/rbac-server');
             const { getOrganizationIdForUser } = await import('@/lib/organization-utils');
@@ -404,7 +420,7 @@ export function withApi<
 
       if (user && allowedRoles) {
         let userRole = normalizeRole(user.role ?? 'member');
-        if (!allowedRoles.includes(userRole)) {
+        if (!allowedRoles.includes(userRole) && !currentStateContextEnabled()) {
           // Resolve from DB before rejecting
           try {
             const { getUserRole } = await import('@/lib/auth/rbac-server');
@@ -455,11 +471,18 @@ export function withApi<
       // are enforced here even if minRole was not explicitly declared.
       // Belt-and-suspenders: prevents accidental open access on admin routes.
       if (policy.enforceAdminOnly && user) {
+        if (currentStateContextEnabled() && user.isSystemAdmin !== true)
+          return standardErrorResponse(
+            ErrorCode.INSUFFICIENT_PERMISSIONS,
+            'Canonical platform administrator authority required',
+            undefined,
+            traceId,
+          );
         const adminLevel = ROLE_HIERARCHY['admin'] ?? 140;
         const metaRole = normalizeRole(user.role ?? 'member');
         let adminUserLevel = ROLE_HIERARCHY[metaRole] ?? 0;
 
-        if (adminUserLevel < adminLevel) {
+        if (adminUserLevel < adminLevel && !currentStateContextEnabled()) {
           try {
             const { getUserRole } = await import('@/lib/auth/rbac-server');
             const { getOrganizationIdForUser } = await import('@/lib/organization-utils');
@@ -534,7 +557,9 @@ export function withApi<
       if (options.body) {
         let rawBody: any;
         try {
-          rawBody = await request.json();
+          // Parse a clone: handlers (and legacy wrappers delegating here) may still read the body.
+          // Parse a clone: handlers may still read the body.
+          rawBody = await bodyReader(request).json();
         } catch {
           return standardErrorResponse(
             ErrorCode.INVALID_FORMAT,
@@ -562,7 +587,7 @@ export function withApi<
         // No Zod schema provided — still parse JSON body so handlers can
         // access it via ctx.body without calling request.json() themselves.
         try {
-          body = await request.json();
+          body = await bodyReader(request).json();
         } catch {
           // Body may be empty or non-JSON — leave as undefined
         }
@@ -608,11 +633,20 @@ export function withApi<
         // Opt-in: run org-scoped handlers inside a transaction-local RLS
         // context so the handler's own DB work is visible to the
         // RLS-constrained runtime role. Skip if already inside a tenant tx.
-        if (options.rlsOrgContext && resolvedOrganizationId) {
+        if (
+          (options.rlsOrgContext || (currentStateContextEnabled() && requireAuth && requireOrg)) &&
+          resolvedOrganizationId
+        ) {
           const { getActiveTenantDb } = await import('@/db/tenant-context-storage');
           if (!getActiveTenantDb()) {
             const { withRLSContext } = await import('@/lib/db/with-rls-context');
             return withRLSContext({ organizationId: resolvedOrganizationId }, runHandler);
+          }
+          if (currentStateContextEnabled()) {
+            const { validateRLSContext } = await import('@/lib/db/with-rls-context');
+            const active = await validateRLSContext();
+            if (active.userId !== user?.id || active.orgId !== resolvedOrganizationId)
+              throw ApiError.forbidden('Active database context does not match the canonical actor and organization');
           }
         }
         return runHandler();
@@ -691,9 +725,46 @@ export function withApi<
         return standardErrorResponse(error.code, error.message, error.details, traceId);
       }
 
+      // ── Authorization denials raised inside handlers are 403s, not server faults ──
+      const denial = error as { code?: unknown; message?: unknown; name?: unknown } | null;
+      if (denial?.name === 'ZodError' && Array.isArray((error as { issues?: unknown[] }).issues)) {
+        const issues = (error as { issues: { path: (string | number)[]; message: string }[] }).issues;
+        return standardErrorResponse(
+          ErrorCode.VALIDATION_ERROR,
+          issues[0]?.message ?? 'Validation failed',
+          { fields: issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })) },
+          traceId,
+        );
+      }
+      if (denial?.code === 'ENTITLEMENT_REQUIRED') {
+        return standardErrorResponse(
+          ErrorCode.INSUFFICIENT_PERMISSIONS,
+          'Module access denied',
+          undefined,
+          traceId,
+        );
+      }
+      if (denial?.name === 'TypeError' && typeof denial.message === 'string' && /Content-Type was not one of/.test(denial.message)) {
+        return standardErrorResponse(ErrorCode.INVALID_FORMAT, 'Unsupported content type', undefined, traceId);
+      }
+      if (denial?.name === 'SyntaxError' && typeof denial.message === 'string' && /JSON/.test(denial.message)) {
+        return standardErrorResponse(ErrorCode.INVALID_FORMAT, 'Request body must be valid JSON', undefined, traceId);
+      }
+      if (typeof denial?.message === 'string' && /^Forbidden: Requires /.test(denial.message)) {
+        return standardErrorResponse(
+          ErrorCode.INSUFFICIENT_PERMISSIONS,
+          denial.message,
+          undefined,
+          traceId,
+        );
+      }
+
       // ── Unexpected errors → 500 ───────────────────────────────────────
+      const cause = (error as { cause?: { message?: string; code?: string } } | null)?.cause;
       logger.error('Unhandled error in API route', {
         error: error instanceof Error ? error.message : String(error),
+        cause: cause?.message,
+        sqlstate: cause?.code,
         stack: error instanceof Error ? error.stack : undefined,
         path: request.nextUrl.pathname,
         traceId,
@@ -710,5 +781,3 @@ export function withApi<
     }
   };
 }
-
-

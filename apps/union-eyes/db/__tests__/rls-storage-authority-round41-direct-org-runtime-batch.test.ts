@@ -65,7 +65,8 @@ describe.each(CLOSED_COHORT)('round 41 DIRECT_ORG_RUNTIME_BATCH: $table', ({ tab
     expect(entry, `${table}: no manifest entry found`).toBeTruthy();
     expect(entry!.classification).toBe('TENANT_RLS_REQUIRED');
     expect(entry!.requiredRuntimePrivileges).toEqual(runtime);
-    expect(entry!.requiredSystemPrivileges).toEqual([]);
+    // Final closure sprint D1: the observability sweep reads ingestion_batches across organizations (SELECT only).
+    expect(entry!.requiredSystemPrivileges).toEqual(table === 'ingestion_batches' ? ['SELECT'] : []);
     expect(entry!.invocationAuthority).toBe('TENANT_USER');
     expect(entry!.dbExecutionPrincipal).toBe('TENANT_RUNTIME');
   });

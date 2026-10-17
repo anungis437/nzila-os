@@ -14,7 +14,7 @@
  * These can be added later as additional signals without changing the public
  * API of `assessRisk`.
  */
-import { authAuditLog, authUserSessions } from '@nzila/db/schema'
+import {  authUserSessions } from '@nzila/db/schema'
 import { and, eq, gt, sql } from 'drizzle-orm'
 import { authDb } from '../auth-db'
 
@@ -62,17 +62,10 @@ export async function assessRisk(input: AssessRiskInput): Promise<RiskAssessment
   // Signal 1: recent failed logins from this IP (against any account)
   if (input.ipAddress) {
     const windowStart = new Date(now.getTime() - FAILURE_WINDOW_MS)
-    const [row] = await authDb
-      .select({ count: sql<number>`count(*)::int` })
-      .from(authAuditLog)
-      .where(
-        and(
-          eq(authAuditLog.eventType, 'login_failed'),
-          eq(authAuditLog.ipAddress, input.ipAddress),
-          gt(authAuditLog.createdAt, windowStart),
-        ),
-      )
-    const failures = row?.count ?? 0
+    const [row] = await authDb.execute(sql`
+      SELECT user_management.auth_failed_login_count(
+        ${input.ipAddress}::text, ${windowStart.toISOString()}::timestamptz) AS count`)
+    const failures = Number(row?.count ?? 0)
     if (failures >= 10) {
       score += 40
       reasons.push(`${failures} failed logins from this IP in 15 minutes`)

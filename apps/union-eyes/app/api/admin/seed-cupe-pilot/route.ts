@@ -40,7 +40,19 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     const { reset = false } = body;
 
     // Load fixture JSON
-    const jsonContent = await readFile(CUPE_PILOT_JSON, 'utf-8');
+    // The pilot fixture is not shipped in the repository: the seeding capability is not implemented.
+    let jsonContent: string;
+    try {
+      jsonContent = await readFile(CUPE_PILOT_JSON, 'utf-8');
+    } catch (readError) {
+      if ((readError as NodeJS.ErrnoException).code === 'ENOENT') {
+        return NextResponse.json(
+          { success: false, error: 'NOT_IMPLEMENTED', message: 'CUPE pilot seed fixture is not available' },
+          { status: 501 },
+        );
+      }
+      throw readError;
+    }
     const fixture = JSON.parse(jsonContent);
 
     // Find or create the configured CUPE pilot organization

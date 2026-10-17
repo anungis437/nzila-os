@@ -10,15 +10,21 @@ import { OrganizationProvider } from "@/contexts/organization-context";
 import { CookieConsentProvider } from "@/components/gdpr/cookie-consent-provider";
 import { DemoModeOverlay } from "@/components/pilot/demo-mode-overlay";
 import { getUnionEyesSiteTopology } from '@/lib/site-topology';
-import { Poppins } from 'next/font/google';
+import localFont from 'next/font/local';
 import { getLocale } from 'next-intl/server';
 import './globals.css';
 
 export const dynamic = 'force-dynamic'
 
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+const poppins = localFont({
+  src: [
+    { path: '../public/fonts/poppins/Poppins-Light.ttf', weight: '300', style: 'normal' },
+    { path: '../public/fonts/poppins/Poppins-Regular.ttf', weight: '400', style: 'normal' },
+    { path: '../public/fonts/poppins/Poppins-Medium.ttf', weight: '500', style: 'normal' },
+    { path: '../public/fonts/poppins/Poppins-SemiBold.ttf', weight: '600', style: 'normal' },
+    { path: '../public/fonts/poppins/Poppins-Bold.ttf', weight: '700', style: 'normal' },
+  ],
+  display: 'swap',
   variable: '--font-poppins'
 });
 
@@ -194,4 +200,3 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     </html>
   );
 }
-

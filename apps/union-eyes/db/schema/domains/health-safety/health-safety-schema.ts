@@ -460,8 +460,8 @@ export const workplaceIncidents = pgTable("workplace_incidents", {
   // Audit Fields
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  createdBy: uuid("created_by"),
-  updatedBy: uuid("updated_by"),
+  createdBy: text("created_by"),
+  updatedBy: text("updated_by"),
 }, (table) => ({
   // Indexes for performance
   idxIncidentsOrg: index("idx_incidents_org").on(table.organizationId),
@@ -567,8 +567,8 @@ export const safetyInspections = pgTable("safety_inspections", {
   // Audit Fields
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  createdBy: uuid("created_by"),
-  updatedBy: uuid("updated_by"),
+  createdBy: text("created_by"),
+  updatedBy: text("updated_by"),
 }, (table) => ({
   idxInspectionsOrg: index("idx_inspections_org").on(table.organizationId),
   idxInspectionsStatus: index("idx_inspections_status").on(table.status),
@@ -664,8 +664,8 @@ export const hazardReports = pgTable("hazard_reports", {
   // Audit Fields
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  createdBy: uuid("created_by"),
-  updatedBy: uuid("updated_by"),
+  createdBy: text("created_by"),
+  updatedBy: text("updated_by"),
 }, (table) => ({
   idxHazardsOrg: index("idx_hazards_org").on(table.organizationId),
   idxHazardsStatus: index("idx_hazards_status").on(table.status),
@@ -879,8 +879,8 @@ export const safetyTrainingRecords = pgTable("safety_training_records", {
   // Audit Fields
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  createdBy: uuid("created_by"),
-  updatedBy: uuid("updated_by"),
+  createdBy: text("created_by"),
+  updatedBy: text("updated_by"),
 }, (table) => ({
   idxTrainingOrg: index("idx_training_org").on(table.organizationId),
   idxTrainingTrainee: index("idx_training_trainee").on(table.traineeId),
@@ -973,8 +973,8 @@ export const ppeEquipment = pgTable("ppe_equipment", {
   // Audit Fields
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  createdBy: uuid("created_by"),
-  updatedBy: uuid("updated_by"),
+  createdBy: text("created_by"),
+  updatedBy: text("updated_by"),
 }, (table) => ({
   idxPpeOrg: index("idx_ppe_org").on(table.organizationId),
   idxPpeStatus: index("idx_ppe_status").on(table.status),

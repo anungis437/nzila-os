@@ -138,7 +138,8 @@ export async function handleDisable(request: NextRequest) {
         { status: 400 },
       )
     }
-    await disableMfa(parsed.data.userId, parsed.data.actorUserId, parsed.data.reason)
+    const result = await disableMfa(parsed.data.userId, parsed.data.actorUserId, parsed.data.reason)
+    if (!result.success) return NextResponse.json({ error: 'MFA mutation not authorized' }, { status: 403 })
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

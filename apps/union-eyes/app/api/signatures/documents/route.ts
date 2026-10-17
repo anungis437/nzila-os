@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { clientErrorResponse } from '@/lib/api/authorization-denial';
 import { SignatureService } from "@/lib/signature/signature-service";
 
 import {
@@ -95,7 +96,9 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       },
     });
   } catch (error) {
-return standardErrorResponse(
+    const denied = clientErrorResponse(error);
+    if (denied) return denied;
+    return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Failed to create signature request',
       error

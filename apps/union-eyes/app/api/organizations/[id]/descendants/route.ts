@@ -1,24 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@nzila/platform-auth/entra/server';
-import { db } from '@/db/db';
-import { organizations } from '@/db/schema-organizations';
-import { sql } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@nzila/platform-auth/entra/server'
+import { db } from '@/db/db'
+import { organizations } from '@/db/schema-organizations'
+import { sql } from 'drizzle-orm'
+import { withSystemContext } from '@/lib/db/with-rls-context'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: Promise<{ id: string }> }
 
 /** GET /api/organizations/:id/descendants — orgs whose hierarchy_path contains this id */
 export async function GET(_req: NextRequest, { params }: Params) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { id } = await params;
+  const { id } = await params
 
-  const rows = await db.select().from(organizations)
-    .where(sql`${id} = ANY(${organizations.hierarchyPath}) AND ${organizations.id} != ${id}`);
+  const rows = await withSystemContext(() =>
+    db
+      .select()
+      .from(organizations)
+      .where(sql`${id} = ANY(${organizations.hierarchyPath}) AND ${organizations.id} != ${id}`),
+  )
 
-  const mapped = rows.map(row => ({
+  const mapped = rows.map((row) => ({
     id: row.id,
     name: row.name,
     slug: row.slug,
@@ -28,7 +33,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     hierarchy_level: row.hierarchyLevel,
     member_count: row.memberCount,
     status: row.status,
-  }));
+  }))
 
-  return NextResponse.json({ data: mapped });
+  return NextResponse.json({ data: mapped })
 }

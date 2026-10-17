@@ -21,8 +21,8 @@ describe('runtime schema authority oracle', () => {
     })
     expect(oracle.counts.runtimeUniverseTables).toBeGreaterThan(300)
     // Disposition-adjusted remaining no-owner set after lineage restoration inventory.
-    // Prior 8F+2G cohort (10) expanded as classification coverage improved (23 remaining).
-    expect(oracle.counts.runtimeTablesWithoutSchemaOwner).toBe(23)
+    // Current dedicated financial/runtime lineage reductions leave 10 unresolved owners.
+    expect(oracle.counts.runtimeTablesWithoutSchemaOwner).toBe(10)
     expect(oracle.counts.bootstrapMissingCreationTables).toBeGreaterThan(0)
   }, 60_000)
 
