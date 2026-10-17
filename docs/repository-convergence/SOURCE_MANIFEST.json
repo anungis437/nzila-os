@@ -1,0 +1,1049 @@
+{
+  "purpose": "Inert historical source preservation for repository convergence; no application/production qualification or merge recommendation.",
+  "base": "ede980d62959f91517b6c805787cb031d60fd420",
+  "source_files": 144,
+  "archive_sha256": "7fe18585e91d40fe43289f742fa71002183973dfe7c71b949ff8822eb51cea9c",
+  "origins": {
+    "0": {
+      "branch": "refs/heads/feat/union-eyes-v2-release-candidate",
+      "head": "a6a8920eae7c0aaf08e4e3cd8abc8eb8b9ec99d6"
+    },
+    "10": {
+      "branch": "refs/heads/ops/institutional-infra-chat-closeout",
+      "head": "5af5c686dc85c6398d9777886b14218c8b9d56a4"
+    }
+  },
+  "files": [
+    {
+      "path": "apps/cora/vitest.config.ts",
+      "zip_path": "0/apps/cora/vitest.config.ts",
+      "sha256": "a2750fe63ca028982d612f51acfb2b1812ea23680e96c4a3b0681865b414ff9d",
+      "bytes": 932,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "docs/ops/ownership-registry.md",
+      "zip_path": "0/docs/ops/ownership-registry.md",
+      "sha256": "0c5bf0e46386a7d1334fe9eb2a93e2d75ae1dc9139cd5bc3e050d06c3d8f9249",
+      "bytes": 4615,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "docs/ops/release-governance/release-governance-audit.md",
+      "zip_path": "0/docs/ops/release-governance/release-governance-audit.md",
+      "sha256": "4c12f2512e279b80f99251046dbb794db0aac207b905e59790e6b1251fd85b5c",
+      "bytes": 824,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "docs/platform/portfolio-matrix.md",
+      "zip_path": "0/docs/platform/portfolio-matrix.md",
+      "sha256": "ee5552167804327a33f408e622342e220dcd0c05d7b3ff2948d33991478d0c62",
+      "bytes": 4263,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "governance/business/verticals/agrotech/strategy/product-roadmap.md",
+      "zip_path": "0/governance/business/verticals/agrotech/strategy/product-roadmap.md",
+      "sha256": "2a7423ce2126e2072201fc225412e75a09182b11c960804131cdc98f2c96778e",
+      "bytes": 9292,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "infrastructure/gitops/README.md",
+      "zip_path": "0/infrastructure/gitops/README.md",
+      "sha256": "3d318150c041b3c3db0aa558fd9691d1a153619d1454ec700cf86b7598d5b108",
+      "bytes": 2537,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "package.json",
+      "zip_path": "0/package.json",
+      "sha256": "6d1e362e6a15b42b4c38d761b65def82ad3dd5a3307f712d24e08e06f1b1657e",
+      "bytes": 29240,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "zip_path": "0/pnpm-lock.yaml",
+      "sha256": "cf3f8b5825ca0bc09fe186a33f2856807f3b457777fab2fbe44012d81074e783",
+      "bytes": 1267635,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "tooling/contract-tests/cora-readonly.test.ts",
+      "zip_path": "0/tooling/contract-tests/cora-readonly.test.ts",
+      "sha256": "02551d4fdba2afd89537af663fd27fe2f52a67ceaf33d379c62583970e8cec51",
+      "bytes": 11818,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/app/api/farmer-360/[profileId]/route.test.ts",
+      "zip_path": "0/apps/cora/app/api/farmer-360/[profileId]/route.test.ts",
+      "sha256": "38ed0acf15ddb708c0fb1a74f789195de036034404086f8de371615133d56ad0",
+      "bytes": 4389,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/app/api/farmer-360/[profileId]/route.ts",
+      "zip_path": "0/apps/cora/app/api/farmer-360/[profileId]/route.ts",
+      "sha256": "0026f427e426b3fc61c79f52816684ec98d660fdf2da52757d16aafca184b394",
+      "bytes": 2810,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/authorization-acceptance.integration.test.ts",
+      "zip_path": "0/apps/cora/lib/authorization-acceptance.integration.test.ts",
+      "sha256": "f85fe350d7b4fbcd4d723d85d176bbbcbf3bb5fd726b00a476d63a13e60c51c3",
+      "bytes": 3020,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/acceptance.integration.test.ts",
+      "zip_path": "0/apps/cora/lib/farmer-360/acceptance.integration.test.ts",
+      "sha256": "43a527f73c35c970fb9992ffefe77e2db7fa138b9867b6375cf8e90a2dcd8794",
+      "bytes": 19907,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/adapters.ts",
+      "zip_path": "0/apps/cora/lib/farmer-360/adapters.ts",
+      "sha256": "fa51d67ea43ace8587db9606e2d98eb775b4c8439a4d357019721d2cda03bcfd",
+      "bytes": 17253,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/contracts.ts",
+      "zip_path": "0/apps/cora/lib/farmer-360/contracts.ts",
+      "sha256": "6f3edbdb3fdec446cf6dc425455fdf11c20619ad171d5f841bb96d1700cb1be2",
+      "bytes": 10784,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/farmer-360/service.ts",
+      "zip_path": "0/apps/cora/lib/farmer-360/service.ts",
+      "sha256": "bf6589bc1f89c0082826552d69a5935a5232aed23f66230658d8898a4c99a0cb",
+      "bytes": 21322,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/operator-workflow/render-synthetic.tsx",
+      "zip_path": "0/apps/cora/lib/operator-workflow/render-synthetic.tsx",
+      "sha256": "fbe48b8eed2e13cc8b397fafa17185316302dc161bd9c4d02e7a2eac7646865d",
+      "bytes": 1465,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/fieldview/fixture.ts",
+      "zip_path": "0/apps/cora/lib/source-continuity/adapters/fieldview/fixture.ts",
+      "sha256": "3b13d913e1751e014818be58fcc60731f9aea291a575f3a7e35bfb6f9b4e7e49",
+      "bytes": 2462,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/adapters/fieldview/ingest.ts",
+      "zip_path": "0/apps/cora/lib/source-continuity/adapters/fieldview/ingest.ts",
+      "sha256": "6e2d5f70ce7b92026f6bae0cca6ab28e4a106ac820d1dad1dac4877a985a01a3",
+      "bytes": 7067,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/fixtures/multi-provider-routes.ts",
+      "zip_path": "0/apps/cora/lib/source-continuity/fixtures/multi-provider-routes.ts",
+      "sha256": "6d32601df1c570babbec6cad490989587b1cc9aa308cf87a319e631f6f749a0d",
+      "bytes": 14652,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/multi-provider-proof.test.ts",
+      "zip_path": "0/apps/cora/lib/source-continuity/multi-provider-proof.test.ts",
+      "sha256": "5f72a0651d96880c2381b9bec527650deb5b14d8292368a28f43d2febc3d845e",
+      "bytes": 5191,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/cora/lib/source-continuity/multi-provider-proof.ts",
+      "zip_path": "0/apps/cora/lib/source-continuity/multi-provider-proof.ts",
+      "sha256": "82f53b18e24a0580e3b13e24b93ddaed3226372d5ce276b7e432e08c354d23d4",
+      "bytes": 14433,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/union-eyes/AGENTS.md",
+      "zip_path": "0/apps/union-eyes/AGENTS.md",
+      "sha256": "63f2c50380ed6303237cce215ce27af1d620d094c215e28d1b1538a3c070e3bb",
+      "bytes": 678,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/union-eyes/CLAUDE.md",
+      "zip_path": "0/apps/union-eyes/CLAUDE.md",
+      "sha256": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
+      "bytes": 11,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/union-eyes/scripts/staging/run-staging-stripe-delivery-proof.ts",
+      "zip_path": "0/apps/union-eyes/scripts/staging/run-staging-stripe-delivery-proof.ts",
+      "sha256": "fd24b07abb364f04a6f774c27885b1e43461a3c2f2df310d81815fad3ce917af",
+      "bytes": 7439,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/union-eyes/scripts/staging/run-staging-stripe-proof.ts",
+      "zip_path": "0/apps/union-eyes/scripts/staging/run-staging-stripe-proof.ts",
+      "sha256": "3415bb896215a6832fc9cc6d07473818e7fdbd48a1be88bec1d16e07b30ae7e0",
+      "bytes": 7850,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/web/AGENTS.md",
+      "zip_path": "0/apps/web/AGENTS.md",
+      "sha256": "63f2c50380ed6303237cce215ce27af1d620d094c215e28d1b1538a3c070e3bb",
+      "bytes": 678,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "apps/web/CLAUDE.md",
+      "zip_path": "0/apps/web/CLAUDE.md",
+      "sha256": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
+      "bytes": 11,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "docker-compose.cora-farmer360-acceptance.yml",
+      "zip_path": "0/docker-compose.cora-farmer360-acceptance.yml",
+      "sha256": "e26cc9a952ffefa9908085337aab5a634c85ad5f3fedb1e3729c19ef954f86d4",
+      "bytes": 832,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "docker-compose.platform-authz-acceptance.yml",
+      "zip_path": "0/docker-compose.platform-authz-acceptance.yml",
+      "sha256": "18e2cc7c2b388df835ddda7a22bd43b3ea97a5cc6a80167b624a6f5d6ac35f59",
+      "bytes": 895,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "docs/architecture/NZILA_APPLICATION_AUTHORIZATION_MODEL.md",
+      "zip_path": "0/docs/architecture/NZILA_APPLICATION_AUTHORIZATION_MODEL.md",
+      "sha256": "f4f11d85ee93f142b9a0d2cfa3b527097b66e8dd30541e458977105938e4c2a2",
+      "bytes": 22600,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "docs/architecture/NZILA_OS_SHARED_DB_FOUNDATION_HANDOFF.md",
+      "zip_path": "0/docs/architecture/NZILA_OS_SHARED_DB_FOUNDATION_HANDOFF.md",
+      "sha256": "7385ac81f9061b2b1d4e26f7614d4ff481f14e438d3386a122214d205fcf720f",
+      "bytes": 19068,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "infrastructure/landing-zone/G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+      "zip_path": "0/infrastructure/landing-zone/G2_PRIVATE_CONTROL_PLANE_EVIDENCE.md",
+      "sha256": "8417e1c2def05aa20aca98f415c7014351e144a7ae2091a91a8343c71e96e356",
+      "bytes": 46944,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "infrastructure/landing-zone/g3-readiness-evidence/g3r2-frozen-source/main.bicep",
+      "zip_path": "0/infrastructure/landing-zone/g3-readiness-evidence/g3r2-frozen-source/main.bicep",
+      "sha256": "c3a21482cb4cfe37655bd74528edcab01d63b7734f7f38827365684d339afd18",
+      "bytes": 3371,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "infrastructure/landing-zone/g3-readiness-evidence/g3r2-frozen-source/modules/workload.bicep",
+      "zip_path": "0/infrastructure/landing-zone/g3-readiness-evidence/g3r2-frozen-source/modules/workload.bicep",
+      "sha256": "cf8865fa6d088cdf87677906b18818db471e0f8aabfe5b8a4b453e8e66e44dee",
+      "bytes": 2129,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "infrastructure/landing-zone/synthetic-health/.dockerignore",
+      "zip_path": "0/infrastructure/landing-zone/synthetic-health/.dockerignore",
+      "sha256": "f9882c1cb73d933043f7ec22d669e736e3a9fa67c0b12d6ad1a91e90916348f8",
+      "bytes": 20,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "infrastructure/landing-zone/synthetic-health/Dockerfile",
+      "zip_path": "0/infrastructure/landing-zone/synthetic-health/Dockerfile",
+      "sha256": "db13c7ec24ec1ae80b564fa03d0a664edf7cb9b1bef797a4172b32c821bb9fda",
+      "bytes": 464,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "infrastructure/landing-zone/synthetic-health/server.mjs",
+      "zip_path": "0/infrastructure/landing-zone/synthetic-health/server.mjs",
+      "sha256": "f218e68391b87049585f211b0333dd9a0ae96cf5c8ecc5595ab2becec7932c45",
+      "bytes": 1280,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "infrastructure/landing-zone/synthetic-health/server.test.mjs",
+      "zip_path": "0/infrastructure/landing-zone/synthetic-health/server.test.mjs",
+      "sha256": "8d706ff061cd8a18cdabccfd2373cb075a69006f8aa2aad737808761dfdde27b",
+      "bytes": 1577,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "scripts/cora-farmer360-acceptance.mjs",
+      "zip_path": "0/scripts/cora-farmer360-acceptance.mjs",
+      "sha256": "f69ab8a6fcde8f732f854eb65f4b5b3fe21f046939e9705216f8965b419f116c",
+      "bytes": 2548,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": "scripts/platform-authz-acceptance.mjs",
+      "zip_path": "0/scripts/platform-authz-acceptance.mjs",
+      "sha256": "e68c263f99c656788e5830c875c10f856be534b8bdc6208f5c19f10ab50bffe9",
+      "bytes": 6366,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-execution-lane/bicep/input-registry-phase.bicep",
+      "zip_path": "10/.azure/g3-execution-lane/bicep/input-registry-phase.bicep",
+      "sha256": "64bfcb36eae02bab1ba983f348fed4eae4b434617fdfeb69ee4269143a73d55b",
+      "bytes": 1430,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-final-readiness/bicep/application-phase.bicep",
+      "zip_path": "10/.azure/g3-final-readiness/bicep/application-phase.bicep",
+      "sha256": "3b150cefb05fcb0a92d0963ef401cfd4389d51cbdcf554bb96294b6b8f0733e2",
+      "bytes": 3233,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-final-readiness/bicep/environment-phase.bicep",
+      "zip_path": "10/.azure/g3-final-readiness/bicep/environment-phase.bicep",
+      "sha256": "8ee71c14ddc881a558b62b7658c21f9411f2b7af6c4806be4437ba12d2ed0d80",
+      "bytes": 934,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-final-readiness/runtime/go.mod",
+      "zip_path": "10/.azure/g3-final-readiness/runtime/go.mod",
+      "sha256": "c5e3ae978a699eb5441e1548fe6318639d4d00848f55a6c12521e57ca31b13b9",
+      "bytes": 52,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-final-readiness/runtime/main.go",
+      "zip_path": "10/.azure/g3-final-readiness/runtime/main.go",
+      "sha256": "e6c0a6b2dce6c794e508fffc118cb10de95eac20b6cf2257d2b5bc77a7b3f2bb",
+      "bytes": 20893,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-final-readiness/runtime/main_test.go",
+      "zip_path": "10/.azure/g3-final-readiness/runtime/main_test.go",
+      "sha256": "63d48ec92b1687a0a8396a747ceb0126e8a992a6e48f5bcfaf102e1b3a8af7f0",
+      "bytes": 13414,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-input-readiness/offline-component-rehearsal-corrected/source/go.mod",
+      "zip_path": "10/.azure/g3-input-readiness/offline-component-rehearsal-corrected/source/go.mod",
+      "sha256": "c5e3ae978a699eb5441e1548fe6318639d4d00848f55a6c12521e57ca31b13b9",
+      "bytes": 52,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-input-readiness/offline-component-rehearsal-corrected/source/main.go",
+      "zip_path": "10/.azure/g3-input-readiness/offline-component-rehearsal-corrected/source/main.go",
+      "sha256": "e6c0a6b2dce6c794e508fffc118cb10de95eac20b6cf2257d2b5bc77a7b3f2bb",
+      "bytes": 20893,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-input-readiness/offline-component-rehearsal-corrected/source/main_test.go",
+      "zip_path": "10/.azure/g3-input-readiness/offline-component-rehearsal-corrected/source/main_test.go",
+      "sha256": "63d48ec92b1687a0a8396a747ceb0126e8a992a6e48f5bcfaf102e1b3a8af7f0",
+      "bytes": 13414,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-input-readiness/offline-component-rehearsal/source/go.mod",
+      "zip_path": "10/.azure/g3-input-readiness/offline-component-rehearsal/source/go.mod",
+      "sha256": "c5e3ae978a699eb5441e1548fe6318639d4d00848f55a6c12521e57ca31b13b9",
+      "bytes": 52,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-input-readiness/offline-component-rehearsal/source/main.go",
+      "zip_path": "10/.azure/g3-input-readiness/offline-component-rehearsal/source/main.go",
+      "sha256": "e6c0a6b2dce6c794e508fffc118cb10de95eac20b6cf2257d2b5bc77a7b3f2bb",
+      "bytes": 20893,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-input-readiness/offline-component-rehearsal/source/main_test.go",
+      "zip_path": "10/.azure/g3-input-readiness/offline-component-rehearsal/source/main_test.go",
+      "sha256": "63d48ec92b1687a0a8396a747ceb0126e8a992a6e48f5bcfaf102e1b3a8af7f0",
+      "bytes": 13414,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-input-readiness/probe/go.mod",
+      "zip_path": "10/.azure/g3-input-readiness/probe/go.mod",
+      "sha256": "bb6743e83715e9346c438d929b9b6e84a5a974b64fc880fc62b0204e3b9365d7",
+      "bytes": 52,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-input-readiness/probe/main.go",
+      "zip_path": "10/.azure/g3-input-readiness/probe/main.go",
+      "sha256": "df073a331f87e58b52b6753984e6e20e8e7d58ead3a91417fde6d5e988056892",
+      "bytes": 8527,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-input-readiness/probe/main_test.go",
+      "zip_path": "10/.azure/g3-input-readiness/probe/main_test.go",
+      "sha256": "5f8a199509b2911cb867508f55c3fbc4b14f0cdf7ed47f01e3a0e715a8db68ab",
+      "bytes": 5135,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-live-readiness/bicep/route-table.bicep",
+      "zip_path": "10/.azure/g3-live-readiness/bicep/route-table.bicep",
+      "sha256": "6ad7afea60ca4421fe41b9f5e0ac6179fc8c8ca65a9037ccd0487ad1302793ec",
+      "bytes": 929,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-readiness/bicep/foundation.bicep",
+      "zip_path": "10/.azure/g3-readiness/bicep/foundation.bicep",
+      "sha256": "9d36c2eed752dd82ae243d52f9253bc4325a74975309a30781b5da2b8b6923b0",
+      "bytes": 7179,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-readiness/bicep/identities.bicep",
+      "zip_path": "10/.azure/g3-readiness/bicep/identities.bicep",
+      "sha256": "613ecb2cdb4902c7cdd10a0ae2ac68b0758db73532241ef337c9c9f1c8f09e98",
+      "bytes": 989,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-readiness/bicep/internal-dns.bicep",
+      "zip_path": "10/.azure/g3-readiness/bicep/internal-dns.bicep",
+      "sha256": "9545de9daf12a4feb58cd48b146180439b2f3a17202a59565a536ef14a77d686",
+      "bytes": 805,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-readiness/bicep/private-endpoint.bicep",
+      "zip_path": "10/.azure/g3-readiness/bicep/private-endpoint.bicep",
+      "sha256": "f156a5648aef7ab87bbc5e0a1f58d815ce1194548fa826615475f178f5f3a745",
+      "bytes": 1397,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-readiness/bicep/registry-roles.bicep",
+      "zip_path": "10/.azure/g3-readiness/bicep/registry-roles.bicep",
+      "sha256": "ffbb411d5e100ec048c682faaea11dbfb7b62baf5dc46ce2cc6f58a131923f3a",
+      "bytes": 1670,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-readiness/bicep/runtime.bicep",
+      "zip_path": "10/.azure/g3-readiness/bicep/runtime.bicep",
+      "sha256": "8aaa004ea1581d39c06686361ab3900bc04caffe286ae12187a8cf8b6d0f9e6f",
+      "bytes": 4241,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-readiness/bicep/secret-role.bicep",
+      "zip_path": "10/.azure/g3-readiness/bicep/secret-role.bicep",
+      "sha256": "676467dcfec2433f026b371426c1dea522c21a7dda40c61b22dd295db3875e0f",
+      "bytes": 757,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-readiness/runtime/go.mod",
+      "zip_path": "10/.azure/g3-readiness/runtime/go.mod",
+      "sha256": "75219b0e9e88693ff20b685b5608aab6f7678b72efbe7c136b0c86b1c65e2da3",
+      "bytes": 60,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-readiness/runtime/main.go",
+      "zip_path": "10/.azure/g3-readiness/runtime/main.go",
+      "sha256": "b78d26e79e5e3588c6b61e0b1edd17e5d1c07bebb32ca08776f2e448a9940d1d",
+      "bytes": 7318,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3-readiness/runtime/main_test.go",
+      "zip_path": "10/.azure/g3-readiness/runtime/main_test.go",
+      "sha256": "ac89322b726242ad20cff89552fdae0c0ba67620ef21f9d0a93612377a595914",
+      "bytes": 6470,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-bootstrap-retry/infra/cse.bicep",
+      "zip_path": "10/.azure/g3a-bootstrap-retry/infra/cse.bicep",
+      "sha256": "d9a138357ae9315e714430c10088375f8fcf543e6935d87cdea5fd915db15516",
+      "bytes": 838,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-bootstrap-retry/infra/main.bicep",
+      "zip_path": "10/.azure/g3a-bootstrap-retry/infra/main.bicep",
+      "sha256": "bd6e406a5c2705ca409d22e1dbb048e0791d309f4ecfd14298c7ed67f7b62bec",
+      "bytes": 638,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-bootstrap-retry/infra/transport.bicep",
+      "zip_path": "10/.azure/g3a-bootstrap-retry/infra/transport.bicep",
+      "sha256": "613634e106653e41dc6603598ecaecc8d6d3cb47628d29080d498b141dcf9ee4",
+      "bytes": 5202,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-bootstrap-retry/infra/vm.bicep",
+      "zip_path": "10/.azure/g3a-bootstrap-retry/infra/vm.bicep",
+      "sha256": "95754acd3af16b142ebdfd70305c1bcef86fac2b8f50affd61c831bc37cc298d",
+      "bytes": 2397,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-ca-closure/bicep/builder.bicep",
+      "zip_path": "10/.azure/g3a-ca-closure/bicep/builder.bicep",
+      "sha256": "f53b210b9979b469a68f151cfabe8e14cc9307dd6ee5beac02467977fb37515a",
+      "bytes": 2876,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-ca-closure/bicep/main.bicep",
+      "zip_path": "10/.azure/g3a-ca-closure/bicep/main.bicep",
+      "sha256": "27baa74a23f904d292d4b30807cb0c55ec716703041cf4daae1aef6f7d9dfacc",
+      "bytes": 8325,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-ca-closure/bicep/repository-reader.bicep",
+      "zip_path": "10/.azure/g3a-ca-closure/bicep/repository-reader.bicep",
+      "sha256": "c44a8234bf7ddc59363f3e0e6a31616fd7aaf36ae0652a45d2435d35c2e1e561",
+      "bytes": 1315,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-ca-closure/bicep/target-role.bicep",
+      "zip_path": "10/.azure/g3a-ca-closure/bicep/target-role.bicep",
+      "sha256": "f05d96f020d6dbc191e871dcee5bf61c53b7fb0b91fa0559258a18fc08c8dda6",
+      "bytes": 1393,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-ca-live/infra/cse.bicep",
+      "zip_path": "10/.azure/g3a-ca-live/infra/cse.bicep",
+      "sha256": "90524c65ff435c12266b3fd7f366d025c30e9af4dac9b871d1ce064bd9b92767",
+      "bytes": 830,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-ca-live/infra/main.bicep",
+      "zip_path": "10/.azure/g3a-ca-live/infra/main.bicep",
+      "sha256": "bd6e406a5c2705ca409d22e1dbb048e0791d309f4ecfd14298c7ed67f7b62bec",
+      "bytes": 638,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-ca-live/infra/transport.bicep",
+      "zip_path": "10/.azure/g3a-ca-live/infra/transport.bicep",
+      "sha256": "eb191fd7ec6d2b6b81b0dca8dbf70e5cb26aa0f4946cc94a3755a16df54a1275",
+      "bytes": 5203,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-ca-live/infra/vm.bicep",
+      "zip_path": "10/.azure/g3a-ca-live/infra/vm.bicep",
+      "sha256": "95754acd3af16b142ebdfd70305c1bcef86fac2b8f50affd61c831bc37cc298d",
+      "bytes": 2397,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-compressor/harness/go.mod",
+      "zip_path": "10/.azure/g3a-compressor/harness/go.mod",
+      "sha256": "c4597de3702d6b0cd8ad51518c47cef4153d3ac2ad9f4209a5c3ff3460abd388",
+      "bytes": 50,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-compressor/harness/main.go",
+      "zip_path": "10/.azure/g3a-compressor/harness/main.go",
+      "sha256": "7c1e4e11da0e70c8c813818f697d09e4eb1b9913a917750460a42efa3922b451",
+      "bytes": 2264,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-compressor/harness/main_test.go",
+      "zip_path": "10/.azure/g3a-compressor/harness/main_test.go",
+      "sha256": "4d04962a4a6234001c35a2322ce914e7a4fb072b0e46dd473dab354f340004c8",
+      "bytes": 1549,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-controller-repair/assembler/compressor.go",
+      "zip_path": "10/.azure/g3a-controller-repair/assembler/compressor.go",
+      "sha256": "54e1367e9435fac7040a05d9b9c6307e6cd65a224827451e2e350abbbf059442",
+      "bytes": 1733,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-controller-repair/assembler/go.mod",
+      "zip_path": "10/.azure/g3a-controller-repair/assembler/go.mod",
+      "sha256": "3689d09b0cc8743498b34b70db4318d5ca5a6a0fc90f1dfad38c47b9e04c8418",
+      "bytes": 48,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-controller-repair/assembler/main.go",
+      "zip_path": "10/.azure/g3a-controller-repair/assembler/main.go",
+      "sha256": "2abc8b0c9b12d9a40da5049710f9b52efd5672602a891bb2a1c5d78faa34875e",
+      "bytes": 16390,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-controller-repair/assembler/main_test.go",
+      "zip_path": "10/.azure/g3a-controller-repair/assembler/main_test.go",
+      "sha256": "9a93c65c68ad10e5d79cf9925455c2892591298c3c826a3e5c32e3c6477aca81",
+      "bytes": 4020,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-controller-repair/assembler/manifest_regression_test.go",
+      "zip_path": "10/.azure/g3a-controller-repair/assembler/manifest_regression_test.go",
+      "sha256": "ce8c25053220d7ab845be55b839ca3dd81a6864c1cacfa1156c295107643eed5",
+      "bytes": 3862,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-controller-repair/inputs/controller-compressor.go",
+      "zip_path": "10/.azure/g3a-controller-repair/inputs/controller-compressor.go",
+      "sha256": "54e1367e9435fac7040a05d9b9c6307e6cd65a224827451e2e350abbbf059442",
+      "bytes": 1733,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-controller-repair/inputs/controller-go.mod",
+      "zip_path": "10/.azure/g3a-controller-repair/inputs/controller-go.mod",
+      "sha256": "3689d09b0cc8743498b34b70db4318d5ca5a6a0fc90f1dfad38c47b9e04c8418",
+      "bytes": 48,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-controller-repair/inputs/controller-main.go",
+      "zip_path": "10/.azure/g3a-controller-repair/inputs/controller-main.go",
+      "sha256": "2abc8b0c9b12d9a40da5049710f9b52efd5672602a891bb2a1c5d78faa34875e",
+      "bytes": 16390,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-controller-repair/inputs/controller-main_test.go",
+      "zip_path": "10/.azure/g3a-controller-repair/inputs/controller-main_test.go",
+      "sha256": "9a93c65c68ad10e5d79cf9925455c2892591298c3c826a3e5c32e3c6477aca81",
+      "bytes": 4020,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-full-rehearsal/assembler/compressor.go",
+      "zip_path": "10/.azure/g3a-full-rehearsal/assembler/compressor.go",
+      "sha256": "54e1367e9435fac7040a05d9b9c6307e6cd65a224827451e2e350abbbf059442",
+      "bytes": 1733,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-full-rehearsal/assembler/go.mod",
+      "zip_path": "10/.azure/g3a-full-rehearsal/assembler/go.mod",
+      "sha256": "3689d09b0cc8743498b34b70db4318d5ca5a6a0fc90f1dfad38c47b9e04c8418",
+      "bytes": 48,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-full-rehearsal/assembler/main.go",
+      "zip_path": "10/.azure/g3a-full-rehearsal/assembler/main.go",
+      "sha256": "8b2076f4a3041e5e0eca191faa8c890bb4fd00a60a67d20f66c1a6d5406b818f",
+      "bytes": 16397,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-full-rehearsal/assembler/main_test.go",
+      "zip_path": "10/.azure/g3a-full-rehearsal/assembler/main_test.go",
+      "sha256": "9a93c65c68ad10e5d79cf9925455c2892591298c3c826a3e5c32e3c6477aca81",
+      "bytes": 4020,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-full-rehearsal/inputs/controller-compressor.go",
+      "zip_path": "10/.azure/g3a-full-rehearsal/inputs/controller-compressor.go",
+      "sha256": "54e1367e9435fac7040a05d9b9c6307e6cd65a224827451e2e350abbbf059442",
+      "bytes": 1733,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-full-rehearsal/inputs/controller-go.mod",
+      "zip_path": "10/.azure/g3a-full-rehearsal/inputs/controller-go.mod",
+      "sha256": "3689d09b0cc8743498b34b70db4318d5ca5a6a0fc90f1dfad38c47b9e04c8418",
+      "bytes": 48,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-full-rehearsal/inputs/controller-main.go",
+      "zip_path": "10/.azure/g3a-full-rehearsal/inputs/controller-main.go",
+      "sha256": "8b2076f4a3041e5e0eca191faa8c890bb4fd00a60a67d20f66c1a6d5406b818f",
+      "bytes": 16397,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-full-rehearsal/inputs/controller-main_test.go",
+      "zip_path": "10/.azure/g3a-full-rehearsal/inputs/controller-main_test.go",
+      "sha256": "9a93c65c68ad10e5d79cf9925455c2892591298c3c826a3e5c32e3c6477aca81",
+      "bytes": 4020,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-go1256/harness/go.mod",
+      "zip_path": "10/.azure/g3a-go1256/harness/go.mod",
+      "sha256": "c4597de3702d6b0cd8ad51518c47cef4153d3ac2ad9f4209a5c3ff3460abd388",
+      "bytes": 50,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-go1256/harness/main.go",
+      "zip_path": "10/.azure/g3a-go1256/harness/main.go",
+      "sha256": "7c1e4e11da0e70c8c813818f697d09e4eb1b9913a917750460a42efa3922b451",
+      "bytes": 2264,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-go1256/harness/main_test.go",
+      "zip_path": "10/.azure/g3a-go1256/harness/main_test.go",
+      "sha256": "4d04962a4a6234001c35a2322ce914e7a4fb072b0e46dd473dab354f340004c8",
+      "bytes": 1549,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-go1256/prepared-assembler/compressor.go",
+      "zip_path": "10/.azure/g3a-go1256/prepared-assembler/compressor.go",
+      "sha256": "51f30490aedc43f5bfa0e7e175f6c07c969d589455b667c6d39aca782edbc981",
+      "bytes": 1443,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-go1256/prepared-assembler/go.mod",
+      "zip_path": "10/.azure/g3a-go1256/prepared-assembler/go.mod",
+      "sha256": "3689d09b0cc8743498b34b70db4318d5ca5a6a0fc90f1dfad38c47b9e04c8418",
+      "bytes": 48,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-go1256/prepared-assembler/main.go",
+      "zip_path": "10/.azure/g3a-go1256/prepared-assembler/main.go",
+      "sha256": "2d07247b612eeef500a47b6b60de329e59b37332ca802754b19b1fe1b3c3ca54",
+      "bytes": 13840,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-live/infra/cse-final.bicep",
+      "zip_path": "10/.azure/g3a-hard-live/infra/cse-final.bicep",
+      "sha256": "0a270b6c077471eef7cf55af49ff6baf9710a49583f533740ddfba913685ce7b",
+      "bytes": 853,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-live/infra/cse.bicep",
+      "zip_path": "10/.azure/g3a-hard-live/infra/cse.bicep",
+      "sha256": "af943d2d72f87e55b17ebe2375f2a8a74526ee880b79b0f9de4e579a2d547a71",
+      "bytes": 887,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-live/infra/main.bicep",
+      "zip_path": "10/.azure/g3a-hard-live/infra/main.bicep",
+      "sha256": "bd6e406a5c2705ca409d22e1dbb048e0791d309f4ecfd14298c7ed67f7b62bec",
+      "bytes": 638,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-live/infra/transport.bicep",
+      "zip_path": "10/.azure/g3a-hard-live/infra/transport.bicep",
+      "sha256": "eb191fd7ec6d2b6b81b0dca8dbf70e5cb26aa0f4946cc94a3755a16df54a1275",
+      "bytes": 5203,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-live/infra/vm.bicep",
+      "zip_path": "10/.azure/g3a-hard-live/infra/vm.bicep",
+      "sha256": "95754acd3af16b142ebdfd70305c1bcef86fac2b8f50affd61c831bc37cc298d",
+      "bytes": 2397,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision-readonly-inputs/close_layout.py",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision-readonly-inputs/close_layout.py",
+      "sha256": "5c43cf8cea09220ebab832491ceef2c9750d8c2716442f36c5467bb57d8ebdf5",
+      "bytes": 13129,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision-readonly-inputs/kernel_constructor_linux_test.go",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision-readonly-inputs/kernel_constructor_linux_test.go",
+      "sha256": "6582e221b2766c84ddae9e6d95265da13e14bff8fe25a466cc2f121475980f7a",
+      "bytes": 14781,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision-readonly-inputs/launcher.go",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision-readonly-inputs/launcher.go",
+      "sha256": "a9aff2cceb04bbc35cb377b4b854f2cfa95b8aeef7bd5d81d5ebb24614797fa6",
+      "bytes": 4620,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision-readonly-inputs/prepare_layout.py",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision-readonly-inputs/prepare_layout.py",
+      "sha256": "009d1847df0c47482d9daf833203faf2982aa83b8db18f7b0ac02d4e2c571840",
+      "bytes": 12815,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision-readonly-inputs/static_marker_test.go",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision-readonly-inputs/static_marker_test.go",
+      "sha256": "15639b42f7583eb993e29b6e66a0baa68212f00a4f6e2fef910c4557305c69bd",
+      "bytes": 116,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision-readonly-inputs/validate_layout.py",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision-readonly-inputs/validate_layout.py",
+      "sha256": "8f201728bcd86f7bdc6ec8af3713b0deade5c53d386165ce6c4f00bf413f081d",
+      "bytes": 7465,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision/close_revision.py",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision/close_revision.py",
+      "sha256": "d1d6d9759ed633aeaa416468249f8671302bce81d8e5f9f2f1e6247ac1245c7e",
+      "bytes": 11012,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision/dispatch.go",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision/dispatch.go",
+      "sha256": "5fc2513f66c27002a4cf195c6d8c33d5194a19e3ff3783f8e6e4608d03584cca",
+      "bytes": 9004,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision/dispatch_test.go",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision/dispatch_test.go",
+      "sha256": "c7149b1d369abbd5dbf1b7897416e879a4115072f7f4fe960af0463cf15d6058",
+      "bytes": 11124,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision/launcher.go",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision/launcher.go",
+      "sha256": "a9aff2cceb04bbc35cb377b4b854f2cfa95b8aeef7bd5d81d5ebb24614797fa6",
+      "bytes": 4620,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision/prepare_revision.py",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision/prepare_revision.py",
+      "sha256": "19dbf93f85a0bf086aa23f53d4bd961db28410ca99b9ebdcd3314ec10a09f204",
+      "bytes": 6384,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision/production_linux.go",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision/production_linux.go",
+      "sha256": "488531c99f21247dfc44441250fcd2fe34918e2fd82b52362dae4f3e1b2c398b",
+      "bytes": 20567,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision/production_linux_test.go",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision/production_linux_test.go",
+      "sha256": "d9ec6cef567d9665823ae1b8984538122940f61a8cc093f344becdcf74b8f41b",
+      "bytes": 7027,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision/proof_linux.go",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision/proof_linux.go",
+      "sha256": "43a9ddfcc26d3003a02b328160e0d1a77ee4ea1fb983ca769be2dab78d16129f",
+      "bytes": 39351,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision/validate_revision.py",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision/validate_revision.py",
+      "sha256": "b7016a96f19e0bccd8ccef2a35ebd2dd44d51934365c0f1dc244a352e7777e94",
+      "bytes": 5198,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-hard-runner-source/revision/verify_primitives.go",
+      "zip_path": "10/.azure/g3a-hard-runner-source/revision/verify_primitives.go",
+      "sha256": "1622e60b3d325c9bfa66f43f5cde8a2251274e98fdaa186c36e69180453c5bc2",
+      "bytes": 9389,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-isolation-live/infra/cse.bicep",
+      "zip_path": "10/.azure/g3a-isolation-live/infra/cse.bicep",
+      "sha256": "af943d2d72f87e55b17ebe2375f2a8a74526ee880b79b0f9de4e579a2d547a71",
+      "bytes": 887,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-isolation-live/infra/main.bicep",
+      "zip_path": "10/.azure/g3a-isolation-live/infra/main.bicep",
+      "sha256": "bd6e406a5c2705ca409d22e1dbb048e0791d309f4ecfd14298c7ed67f7b62bec",
+      "bytes": 638,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-isolation-live/infra/transport.bicep",
+      "zip_path": "10/.azure/g3a-isolation-live/infra/transport.bicep",
+      "sha256": "eb191fd7ec6d2b6b81b0dca8dbf70e5cb26aa0f4946cc94a3755a16df54a1275",
+      "bytes": 5203,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-isolation-live/infra/vm.bicep",
+      "zip_path": "10/.azure/g3a-isolation-live/infra/vm.bicep",
+      "sha256": "95754acd3af16b142ebdfd70305c1bcef86fac2b8f50affd61c831bc37cc298d",
+      "bytes": 2397,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-live-bootstrap/infra/cse.bicep",
+      "zip_path": "10/.azure/g3a-live-bootstrap/infra/cse.bicep",
+      "sha256": "5b23cefae4c2b3105b47f9b302af467bc295bda070c473b1a51a551e9bf00bdb",
+      "bytes": 841,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-live-bootstrap/infra/main.bicep",
+      "zip_path": "10/.azure/g3a-live-bootstrap/infra/main.bicep",
+      "sha256": "bd6e406a5c2705ca409d22e1dbb048e0791d309f4ecfd14298c7ed67f7b62bec",
+      "bytes": 638,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-live-bootstrap/infra/transport.bicep",
+      "zip_path": "10/.azure/g3a-live-bootstrap/infra/transport.bicep",
+      "sha256": "613634e106653e41dc6603598ecaecc8d6d3cb47628d29080d498b141dcf9ee4",
+      "bytes": 5202,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-live-bootstrap/infra/vm.bicep",
+      "zip_path": "10/.azure/g3a-live-bootstrap/infra/vm.bicep",
+      "sha256": "95754acd3af16b142ebdfd70305c1bcef86fac2b8f50affd61c831bc37cc298d",
+      "bytes": 2397,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-live-bootstrap/probe/main.go",
+      "zip_path": "10/.azure/g3a-live-bootstrap/probe/main.go",
+      "sha256": "3963bc4a7235027766092d90d576a415dac0b45d6ee47e6741677cbd6d604c69",
+      "bytes": 716,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-portable/assembler/go.mod",
+      "zip_path": "10/.azure/g3a-portable/assembler/go.mod",
+      "sha256": "3689d09b0cc8743498b34b70db4318d5ca5a6a0fc90f1dfad38c47b9e04c8418",
+      "bytes": 48,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-portable/assembler/main.go",
+      "zip_path": "10/.azure/g3a-portable/assembler/main.go",
+      "sha256": "e3d894c3e31af394f4d8d7498bb640332484e9cc2213a4d8f60df5fa04bc8bdb",
+      "bytes": 13836,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-portable/assembler/main_test.go",
+      "zip_path": "10/.azure/g3a-portable/assembler/main_test.go",
+      "sha256": "d1224ca23f249777794a53a97493dba6f67116ff8e5740daad143acc4c624de3",
+      "bytes": 3347,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-runner-v2-local-qualification/inputs/controller-compressor.go",
+      "zip_path": "10/.azure/g3a-runner-v2-local-qualification/inputs/controller-compressor.go",
+      "sha256": "54e1367e9435fac7040a05d9b9c6307e6cd65a224827451e2e350abbbf059442",
+      "bytes": 1733,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-runner-v2-local-qualification/inputs/controller-go.mod",
+      "zip_path": "10/.azure/g3a-runner-v2-local-qualification/inputs/controller-go.mod",
+      "sha256": "3689d09b0cc8743498b34b70db4318d5ca5a6a0fc90f1dfad38c47b9e04c8418",
+      "bytes": 48,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-runner-v2-local-qualification/inputs/controller-main.go",
+      "zip_path": "10/.azure/g3a-runner-v2-local-qualification/inputs/controller-main.go",
+      "sha256": "2abc8b0c9b12d9a40da5049710f9b52efd5672602a891bb2a1c5d78faa34875e",
+      "bytes": 16390,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-runner-v2-local-qualification/inputs/controller-main_test.go",
+      "zip_path": "10/.azure/g3a-runner-v2-local-qualification/inputs/controller-main_test.go",
+      "sha256": "9a93c65c68ad10e5d79cf9925455c2892591298c3c826a3e5c32e3c6477aca81",
+      "bytes": 4020,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-transaction/bicep/repository-reader.bicep",
+      "zip_path": "10/.azure/g3a-transaction/bicep/repository-reader.bicep",
+      "sha256": "c44a8234bf7ddc59363f3e0e6a31616fd7aaf36ae0652a45d2435d35c2e1e561",
+      "bytes": 1315,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    },
+    {
+      "path": ".azure/g3a-transaction/bicep/repository-writer.bicep",
+      "zip_path": "10/.azure/g3a-transaction/bicep/repository-writer.bicep",
+      "sha256": "ffa25cd9c5fe494bed6b308f6edd3d4dc6c3c39285de8b74a6ffc9c80ec44d07",
+      "bytes": 1454,
+      "reason": "Unmatched source/configuration or harness variant: preserve as an inert source archive for disposition, never apply to main automatically."
+    }
+  ],
+  "security_findings": [
+    {
+      "file": "0\\scripts\\platform-authz-acceptance.mjs",
+      "rule": "nzila-database-url-with-password",
+      "line": 7,
+      "classification": "LOOPBACK_SYNTHETIC_POSTGRES_TEST_FIXTURE",
+      "live_secret": false
+    },
+    {
+      "file": "0\\scripts\\cora-farmer360-acceptance.mjs",
+      "rule": "nzila-database-url-with-password",
+      "line": 5,
+      "classification": "LOOPBACK_SYNTHETIC_POSTGRES_TEST_FIXTURE",
+      "live_secret": false
+    },
+    {
+      "file": "0\\package.json",
+      "rule": "nzila-database-url-with-password",
+      "line": 143,
+      "classification": "LOOPBACK_SYNTHETIC_POSTGRES_TEST_FIXTURE",
+      "live_secret": false
+    }
+  ]
+}
