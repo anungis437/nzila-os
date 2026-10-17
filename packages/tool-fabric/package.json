@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Agent Tool Fabric domain layer: tool provenance, trust decisions, deny-by-default install/execution policy, SKILL.md metadata ingestion, and harness-generation lifecycle. No executor.",
+  "description": "Agent Tool Fabric domain layer: tool provenance, verified trust decisions, authority/request separation, deny-by-default install/execution policy, durable trust ledger, audit, SKILL.md metadata ingestion, harness-generation lifecycle. No executor.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
   },
   "scripts": {
     "test": "vitest run",
@@ -14,6 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@nzila/audit": "workspace:*",
     "zod": "^3.25.0"
   },
   "devDependencies": {

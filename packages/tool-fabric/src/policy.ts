@@ -4,10 +4,27 @@
  * Pure decision functions. There is deliberately no executor here: a future
  * broker must call these, apply `brokerDirectives`, and write the audit
  * record. Every `allowed: true` requires every check to pass.
+ *
+ * Authority and approval are never read from the request. The intent states
+ * only identity and desired action; the caller supplies separately resolved
+ * context, and runtime brand checks (not types) reject anything not minted by
+ * the authority / governance modules.
  */
-import { HIGH_RISK_SIDE_EFFECTS, type PolicyDecision, type ToolExecutionRequest, type ToolInstallRequest } from './types'
+import {
+  hashIntent,
+  isResolvedAgentAuthority,
+  toolExecutionIntentSchema,
+  type ToolExecutionIntent,
+} from './authority'
+import { isVerifiedGovernanceDecision, type VerifiedGovernanceDecision } from './governance'
 import type { ToolProviderRegistry } from './providers'
 import type { ToolRegistry } from './registry'
+import {
+  HIGH_RISK_SIDE_EFFECTS,
+  type PolicyDecision,
+  type ResolvedAgentAuthority,
+  type ToolInstallRequest,
+} from './types'
 
 const SHELL_AND_INTERPRETERS = new Set([
   'sh', 'bash', 'zsh', 'fish', 'dash', 'ksh', 'csh',
@@ -23,6 +40,25 @@ const BLOCKED_ENV_KEYS = new Set([
 const SECRET_LIKE_ENV = /(SECRET|TOKEN|PASSWORD|PASSWD|API_?KEY|CREDENTIAL|PRIVATE_?KEY)/i
 const ENV_KEY = /^[A-Z_][A-Z0-9_]*$/
 const SECRET_REF = /^secretref:[a-z0-9][a-z0-9._/-]*$/i
+
+export const DEFAULT_MAX_AUTHORITY_AGE_MS = 5 * 60 * 1000
+
+export interface ToolPolicyOptions {
+  readonly now?: () => Date
+  /** Resolved authority older than this is stale and denied. */
+  readonly maxAuthorityAgeMs?: number
+}
+
+export interface ExecutionPolicyContext {
+  /** Produced by resolveAgentAuthority(); anything else is denied. */
+  readonly authority: ResolvedAgentAuthority | null
+  /** Produced by verifyGovernanceDecision() for intent.approvalRef, if any. */
+  readonly approval: VerifiedGovernanceDecision | null
+}
+
+export interface InstallPolicyContext {
+  readonly installApproval: VerifiedGovernanceDecision | null
+}
 
 function normalizePath(p: string): string | null {
   if (p.includes('\0')) return null
@@ -43,12 +79,19 @@ function within(path: string, roots: readonly string[]): boolean {
 }
 
 export class ToolPolicy {
+  private readonly now: () => Date
+  private readonly maxAuthorityAgeMs: number
+
   constructor(
     private readonly tools: ToolRegistry,
     private readonly providers: ToolProviderRegistry,
-  ) {}
+    options: ToolPolicyOptions = {},
+  ) {
+    this.now = options.now ?? (() => new Date())
+    this.maxAuthorityAgeMs = options.maxAuthorityAgeMs ?? DEFAULT_MAX_AUTHORITY_AGE_MS
+  }
 
-  evaluateInstall(req: ToolInstallRequest): PolicyDecision {
+  evaluateInstall(req: ToolInstallRequest, ctx: InstallPolicyContext = { installApproval: null }): PolicyDecision {
     const reasons: string[] = []
     if (!req.auditCorrelationId.trim()) reasons.push('missing audit correlation id')
     if (req.requestedBy.kind !== 'GOVERNED_INSTALLER') {
@@ -61,6 +104,7 @@ export class ToolPolicy {
       if (record.status !== 'APPROVED' && record.status !== 'RESTRICTED') {
         reasons.push(`tool trust status is ${record.status}; installation requires APPROVED or RESTRICTED`)
       }
+      if (record.suspension) reasons.push(`tool is suspended (${record.suspension.kind})`)
       if (!req.digest || req.digest !== record.descriptor.identity.digest) {
         reasons.push('digest does not match the approved digest')
       }
@@ -70,6 +114,15 @@ export class ToolPolicy {
       ) {
         reasons.push('package coordinates do not match the approved coordinates')
       }
+      const a = ctx.installApproval
+      if (!isVerifiedGovernanceDecision(a)) {
+        reasons.push('installation requires a verified TOOL_INSTALL governance decision')
+      } else {
+        if (a.kind !== 'TOOL_INSTALL' || a.outcome !== 'APPROVE') reasons.push('governance decision does not authorise installation')
+        if (a.subject !== req.toolKey) reasons.push('installation decision applies to a different tool')
+        if (a.subjectDigest !== record.descriptor.identity.digest) reasons.push('installation decision is not bound to the approved digest')
+        if (a.status !== 'ACTIVE') reasons.push(`installation decision is ${a.status}`)
+      }
     }
     if (!req.isolatedEnvironment) reasons.push('installation requires an isolated environment')
     if (!req.licenseAccepted) reasons.push('licence has not been accepted')
@@ -78,9 +131,42 @@ export class ToolPolicy {
     return this.finish(reasons, req.auditCorrelationId, null)
   }
 
-  evaluateExecution(req: ToolExecutionRequest): PolicyDecision {
+  /**
+   * @param intentInput untrusted request; validated against a strict schema so
+   *   self-asserted authority (e.g. `permittedCapabilities`) is rejected.
+   */
+  evaluateExecution(intentInput: unknown, ctx: ExecutionPolicyContext): PolicyDecision {
+    const parsed = toolExecutionIntentSchema.safeParse(intentInput)
+    if (!parsed.success) {
+      const corr =
+        typeof (intentInput as { auditCorrelationId?: unknown } | null)?.auditCorrelationId === 'string'
+          ? ((intentInput as { auditCorrelationId: string }).auditCorrelationId)
+          : 'unknown'
+      return this.finish(
+        [`intent rejected: ${parsed.error.issues.map((i) => i.message || i.code).slice(0, 3).join('; ')}`],
+        corr,
+        null,
+      )
+    }
+    const req: ToolExecutionIntent = parsed.data
     const reasons: string[] = []
     if (!req.auditCorrelationId.trim()) reasons.push('missing audit correlation id')
+
+    // Authority: must be a runtime-minted resolution for exactly this agent.
+    const authority = ctx.authority
+    if (!isResolvedAgentAuthority(authority)) {
+      reasons.push('no trusted authority resolution for the requesting agent')
+      return this.finish(reasons, req.auditCorrelationId, null)
+    }
+    if (authority.agentId !== req.requestingAgentId) {
+      reasons.push('requesting agent does not match the resolved authority')
+      return this.finish(reasons, req.auditCorrelationId, null)
+    }
+    const age = this.now().getTime() - new Date(authority.resolvedAt).getTime()
+    if (!(age >= -1000 && age <= this.maxAuthorityAgeMs)) {
+      reasons.push('resolved authority is stale')
+      return this.finish(reasons, req.auditCorrelationId, null)
+    }
 
     const record = this.tools.get(req.toolKey)
     if (!record) {
@@ -91,17 +177,21 @@ export class ToolPolicy {
       reasons.push(`tool trust status is ${record.status}; execution requires APPROVED or RESTRICTED`)
       return this.finish(reasons, req.auditCorrelationId, null)
     }
+    if (record.suspension) {
+      reasons.push(`tool is suspended pending a new trust decision (${record.suspension.kind})`)
+      return this.finish(reasons, req.auditCorrelationId, null)
+    }
     const grant = record.grant
     if (!grant) {
       reasons.push('tool has no grant')
       return this.finish(reasons, req.auditCorrelationId, null)
     }
 
-    // Agent authority and capability binding.
-    if (!req.requestedBy.permittedCapabilities.includes(req.capability)) {
+    // Capability binding: platform authority AND tool grant.
+    if (!authority.capabilities.includes(req.capability)) {
       reasons.push('requesting agent is not authorised for this capability')
     }
-    if (!grant.allowedAgents.includes(req.requestedBy.agentId)) {
+    if (!grant.allowedAgents.includes(req.requestingAgentId)) {
       reasons.push('requesting agent is not granted this tool')
     }
     if (!grant.allowedCapabilities.includes(req.capability)) {
@@ -138,7 +228,7 @@ export class ToolPolicy {
 
     // Environment and secrets.
     const forced = this.providers.forcedEnvFor(record.descriptor.identity.providerId)
-    for (const [k] of Object.entries(req.env.allow)) {
+    for (const k of Object.keys(req.env.allow)) {
       if (!ENV_KEY.test(k)) reasons.push(`env key "${k}" is malformed`)
       else if (BLOCKED_ENV_KEYS.has(k)) reasons.push(`env key "${k}" is blocked`)
       else if (SECRET_LIKE_ENV.test(k)) reasons.push(`env key "${k}" looks like a secret; use secret references`)
@@ -152,16 +242,29 @@ export class ToolPolicy {
       reasons.push('secret references require CREDENTIAL_ACCESS to be declared')
     }
 
-    // Side effects and approval.
+    // Side effects.
     for (const s of req.sideEffects) {
       if (!grant.allowedSideEffects.includes(s)) reasons.push(`side effect ${s} is not granted`)
     }
+
+    // Per-request approval: a verified decision bound to exactly this intent.
     const needsApproval =
       record.status === 'RESTRICTED' || req.sideEffects.some((s) => HIGH_RISK_SIDE_EFFECTS.includes(s))
-    if (needsApproval && req.approvalState !== 'APPROVED') {
-      reasons.push('per-request approval is required and has not been given')
+    if (needsApproval) {
+      const a = ctx.approval
+      if (!isVerifiedGovernanceDecision(a)) {
+        reasons.push('per-request approval is required and no verified approval was supplied')
+      } else {
+        if (a.kind !== 'TOOL_EXECUTION_APPROVAL' || a.outcome !== 'APPROVE') {
+          reasons.push('governance decision does not approve this execution')
+        }
+        if (a.status !== 'ACTIVE') reasons.push(`approval is ${a.status}`)
+        if (a.subject !== req.toolKey) reasons.push('approval applies to a different tool')
+        if (a.subjectDigest !== record.descriptor.identity.digest) reasons.push('approval is not bound to the approved digest')
+        if (a.boundIntentHash !== hashIntent(req)) reasons.push('approval is not bound to this intent')
+        if (a.validUntil && new Date(a.validUntil).getTime() <= this.now().getTime()) reasons.push('approval has expired')
+      }
     }
-    if (req.approvalState === 'DENIED') reasons.push('request approval was denied')
 
     // Limits.
     if (!(req.timeoutMs > 0)) reasons.push('timeout must be positive')

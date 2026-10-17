@@ -1,20 +1,29 @@
 /**
  * @nzila/tool-fabric — tool registry and trust state machine
  *
- * The registry is the ONLY place trust status and grants are held, and
- * `decide()` is the only mutation path. Descriptors (including anything
- * parsed from registries, SKILL.md or tool output) enter as DISCOVERED and
- * cannot carry trust fields: the descriptor schema is strict.
+ * `decide()` and `reaffirm()` are the only paths that change trust state, and
+ * both require a runtime-verified governance decision (see ./governance.ts):
+ * caller-supplied "decidedBy" / "decisionRef" claims are not accepted.
+ * Descriptors enter as DISCOVERED and cannot carry trust fields (strict
+ * schema). History is append-only; historic descriptors and decisions are
+ * retained, never rewritten.
  */
 import { z } from 'zod'
 
+import { classifyDrift } from './drift'
+import { isVerifiedGovernanceDecision, type VerifiedGovernanceDecision } from './governance'
+import { isResolvedAgentAuthority } from './authority'
 import {
+  TOOL_EVIDENCE_KINDS,
   TOOL_SIDE_EFFECTS,
   TOOL_SOURCE_CLASSES,
   toolKey,
-  type AgentAuthority,
-  type PrincipalRef,
+  type DriftFinding,
+  type GovernanceDecisionOutcome,
+  type ResolvedAgentAuthority,
   type ToolDescriptor,
+  type ToolEvidenceKind,
+  type ToolEvidenceRef,
   type ToolGrant,
   type ToolKey,
   type ToolRecord,
@@ -62,6 +71,16 @@ export const toolDescriptorSchema: z.ZodType<ToolDescriptor> = z
   })
   .strict()
 
+export const toolEvidenceRefSchema: z.ZodType<ToolEvidenceRef> = z
+  .object({
+    kind: z.enum(TOOL_EVIDENCE_KINDS),
+    ref: z.string().min(1),
+    trustClass: z.enum(['NZILA_VERIFIED', 'EXTERNAL_UNTRUSTED']),
+    sha256: z.string().regex(/^[0-9a-f]{64}$/).optional(),
+    capturedAt: z.string().min(1),
+  })
+  .strict()
+
 const DIGEST_PATTERN = /^sha256:[0-9a-f]{64}$/
 const EXACT_VERSION = /^\d+(?:\.\d+)*(?:[-+.][0-9A-Za-z.-]+)?$/
 
@@ -74,23 +93,47 @@ const TRANSITIONS: Readonly<Record<ToolTrustStatus, readonly ToolTrustStatus[]>>
   REVOKED: [],
 }
 
-const GENERATED_EVIDENCE_PREFIXES = [
-  'code-review:',
-  'security-review:',
-  'capability-review:',
-  'tests:',
-  'provenance:',
-] as const
+const OUTCOME_FOR: Readonly<Record<ToolTrustStatus, GovernanceDecisionOutcome | null>> = {
+  DISCOVERED: null,
+  EVALUATING: 'EVALUATE',
+  APPROVED: 'APPROVE',
+  RESTRICTED: 'RESTRICT',
+  REJECTED: 'REJECT',
+  REVOKED: 'REVOKE',
+}
+
+const REQUIRED_APPROVAL_EVIDENCE: readonly ToolEvidenceKind[] = ['DIGEST_VERIFICATION', 'LICENSE']
+const REQUIRED_GENERATED_EVIDENCE: readonly ToolEvidenceKind[] = [
+  'CODE_REVIEW',
+  'SECURITY_REVIEW',
+  'CAPABILITY_REVIEW',
+  'TEST_REPORT',
+  'PROVENANCE',
+]
+
+function isLive(status: ToolTrustStatus): boolean {
+  return status === 'APPROVED' || status === 'RESTRICTED'
+}
 
 export interface TrustDecisionInput {
   readonly toolKey: ToolKey
   readonly to: ToolTrustStatus
-  readonly decidedBy: PrincipalRef
-  readonly decisionRef: string
+  readonly governance: VerifiedGovernanceDecision
   readonly rationale: string
   readonly decidedAt: string
-  readonly evidence: readonly string[]
+  readonly evidence: readonly ToolEvidenceRef[]
   readonly grant?: ToolGrant
+}
+
+export interface ReaffirmInput {
+  readonly toolKey: ToolKey
+  /** The artifact now being approved; replaces the descriptor, old one is retained. */
+  readonly observed: unknown
+  readonly governance: VerifiedGovernanceDecision
+  readonly rationale: string
+  readonly decidedAt: string
+  readonly evidence: readonly ToolEvidenceRef[]
+  readonly grant: ToolGrant
 }
 
 export type CapabilityPlan =
@@ -101,6 +144,7 @@ export type CapabilityPlan =
 export interface DiscoveryCandidate {
   readonly toolKey: ToolKey
   readonly status: ToolTrustStatus
+  readonly suspended: boolean
   readonly executableByAgent: boolean
 }
 
@@ -114,7 +158,15 @@ export class ToolRegistry {
     if (this.records.has(key)) {
       throw new Error(`Tool "${key}" is already registered`)
     }
-    const record: ToolRecord = { descriptor, status: 'DISCOVERED', grant: null, decisions: [] }
+    const record: ToolRecord = {
+      descriptor,
+      status: 'DISCOVERED',
+      grant: null,
+      decisions: [],
+      suspension: null,
+      driftHistory: [],
+      descriptorHistory: [],
+    }
     this.records.set(key, record)
     return record
   }
@@ -127,23 +179,34 @@ export class ToolRegistry {
     return Array.from(this.records.values())
   }
 
+  /** Execution eligibility at the state level: live status, a grant, and not suspended. */
+  isEligible(key: ToolKey): boolean {
+    const r = this.records.get(key)
+    return !!r && isLive(r.status) && r.grant !== null && r.suspension === null
+  }
+
   decide(input: TrustDecisionInput): ToolRecord {
     const record = this.records.get(input.toolKey)
     if (!record) throw new Error(`Unknown tool "${input.toolKey}"`)
 
+    const g = this.requireGovernance(input.governance, input.toolKey)
     if (!TRANSITIONS[record.status].includes(input.to)) {
       throw new Error(`Illegal trust transition ${record.status} -> ${input.to}`)
     }
-    if (input.decidedBy.kind !== 'HUMAN_REVIEWER' && input.decidedBy.kind !== 'GOVERNANCE_BODY') {
-      throw new Error('Trust decisions require a human reviewer or governance body')
+    if (!input.rationale.trim()) throw new Error('Trust decisions require a rationale')
+    if (g.kind !== (input.to === 'REVOKED' ? 'TOOL_REVOCATION' : 'TOOL_TRUST')) {
+      throw new Error(`Governance decision kind ${g.kind} cannot authorise ${input.to}`)
     }
-    if (!input.decidedBy.id.trim() || !input.decisionRef.trim() || !input.rationale.trim()) {
-      throw new Error('Trust decisions require decidedBy, decisionRef and rationale')
+    if (g.outcome !== OUTCOME_FOR[input.to]) {
+      throw new Error(`Governance decision outcome ${g.outcome} does not authorise ${input.to}`)
     }
 
     let grant: ToolGrant | null = record.grant
     if (input.to === 'APPROVED' || input.to === 'RESTRICTED') {
-      grant = this.validateApproval(record, input)
+      if (record.suspension) {
+        throw new Error('Tool is suspended by upstream drift; a reaffirmation is required')
+      }
+      grant = this.validateApproval(record.descriptor, g, input.evidence, input.grant)
     } else if (input.to === 'REVOKED' || input.to === 'REJECTED') {
       grant = null
     }
@@ -152,38 +215,127 @@ export class ToolRegistry {
       toolKey: input.toolKey,
       from: record.status,
       to: input.to,
-      decidedBy: input.decidedBy,
-      decisionRef: input.decisionRef,
+      governance: g,
       rationale: input.rationale,
       decidedAt: input.decidedAt,
       grant: grant ?? undefined,
-      evidence: input.evidence,
+      evidence: input.evidence.map((e) => toolEvidenceRefSchema.parse(e)),
     }
     const next: ToolRecord = {
-      descriptor: record.descriptor,
+      ...record,
       status: input.to,
       grant,
+      suspension: input.to === 'REVOKED' || input.to === 'REJECTED' ? null : record.suspension,
       decisions: [...record.decisions, decision],
     }
     this.records.set(input.toolKey, next)
     return next
   }
 
-  private validateApproval(record: ToolRecord, input: TrustDecisionInput): ToolGrant {
-    const { identity, provenance, commands, declaredSideEffects, sourceClass } = record.descriptor
+  /** Records an upstream observation. Material drift on a live tool suspends it. */
+  recordDrift(key: ToolKey, observedInput: unknown | null, observedAt: string): ToolRecord {
+    const record = this.records.get(key)
+    if (!record) throw new Error(`Unknown tool "${key}"`)
+    const observed = observedInput === null ? null : toolDescriptorSchema.parse(observedInput)
+    const finding: DriftFinding = classifyDrift(record.descriptor, observed)
+    const suspend = finding.material && isLive(record.status) && record.suspension === null
+    const next: ToolRecord = {
+      ...record,
+      suspension: suspend
+        ? { kind: finding.kind, since: observedAt, changedFields: finding.changedFields }
+        : record.suspension,
+      driftHistory: [...record.driftHistory, { ...finding, observedAt }],
+    }
+    this.records.set(key, next)
+    return next
+  }
+
+  /** The only way out of a suspension short of revocation: a new verified decision. */
+  reaffirm(input: ReaffirmInput): ToolRecord {
+    const record = this.records.get(input.toolKey)
+    if (!record) throw new Error(`Unknown tool "${input.toolKey}"`)
+    if (!record.suspension || !isLive(record.status)) {
+      throw new Error('Reaffirmation applies only to a suspended approved tool')
+    }
+    const observed = toolDescriptorSchema.parse(input.observed)
+    if (toolKey(observed.identity) !== input.toolKey) {
+      throw new Error('Reaffirmed artifact must keep the same tool identity')
+    }
+    const g = this.requireGovernance(input.governance, input.toolKey)
+    if (g.kind !== 'TOOL_TRUST' || (g.outcome !== 'APPROVE' && g.outcome !== 'RESTRICT')) {
+      throw new Error('Reaffirmation requires a TOOL_TRUST decision with outcome APPROVE or RESTRICT')
+    }
+    if (!input.rationale.trim()) throw new Error('Reaffirmation requires a rationale')
+
+    const grant = this.validateApproval(observed, g, input.evidence, input.grant)
+    const to: ToolTrustStatus = g.outcome === 'APPROVE' ? 'APPROVED' : 'RESTRICTED'
+    const decision: ToolTrustDecision = {
+      toolKey: input.toolKey,
+      from: record.status,
+      to,
+      governance: g,
+      rationale: input.rationale,
+      decidedAt: input.decidedAt,
+      grant,
+      evidence: input.evidence.map((e) => toolEvidenceRefSchema.parse(e)),
+    }
+    const next: ToolRecord = {
+      descriptor: observed,
+      status: to,
+      grant,
+      suspension: null,
+      decisions: [...record.decisions, decision],
+      driftHistory: record.driftHistory,
+      descriptorHistory: [...record.descriptorHistory, record.descriptor],
+    }
+    this.records.set(input.toolKey, next)
+    return next
+  }
+
+  private requireGovernance(value: unknown, key: ToolKey): VerifiedGovernanceDecision {
+    if (!isVerifiedGovernanceDecision(value)) {
+      throw new Error('Trust decisions require a verified governance decision')
+    }
+    if (value.status !== 'ACTIVE') throw new Error(`Governance decision is ${value.status}`)
+    if (value.subject !== key) throw new Error('Governance decision applies to a different tool')
+    return value
+  }
+
+  private validateApproval(
+    descriptor: ToolDescriptor,
+    g: VerifiedGovernanceDecision,
+    evidenceInput: readonly ToolEvidenceRef[],
+    grant: ToolGrant | undefined,
+  ): ToolGrant {
+    const { identity, provenance, commands, declaredSideEffects, sourceClass } = descriptor
     const problems: string[] = []
 
     if (!identity.digest || !DIGEST_PATTERN.test(identity.digest)) {
       problems.push('approval requires a pinned sha256 digest')
+    } else if (g.subjectDigest !== identity.digest) {
+      problems.push('governance decision is not bound to this artifact digest')
     }
-    if (!EXACT_VERSION.test(identity.version)) {
-      problems.push('approval requires an exact version')
-    }
+    if (!EXACT_VERSION.test(identity.version)) problems.push('approval requires an exact version')
     if (!identity.license?.trim()) problems.push('approval requires a reviewed licence')
     if (provenance.mutableUpstream) problems.push('approval refused: upstream is a mutable ref')
-    if (input.evidence.length === 0) problems.push('approval requires evidence')
 
-    const grant = input.grant
+    const evidence = evidenceInput.map((e) => toolEvidenceRefSchema.safeParse(e))
+    if (evidence.some((e) => !e.success)) problems.push('evidence references are malformed')
+    const attested = new Set(g.evidenceRefs)
+    const countable = new Set<ToolEvidenceKind>()
+    for (const e of evidence) {
+      if (e.success && e.data.trustClass === 'NZILA_VERIFIED' && attested.has(e.data.ref)) {
+        countable.add(e.data.kind)
+      }
+    }
+    const required =
+      sourceClass === 'GENERATED_HARNESS'
+        ? [...REQUIRED_APPROVAL_EVIDENCE, ...REQUIRED_GENERATED_EVIDENCE]
+        : REQUIRED_APPROVAL_EVIDENCE
+    for (const kind of required) {
+      if (!countable.has(kind)) problems.push(`approval requires governance-attested ${kind} evidence`)
+    }
+
     if (!grant) {
       problems.push('approval requires an explicit grant')
     } else {
@@ -207,33 +359,26 @@ export class ToolRegistry {
       if (!(grant.maxTimeoutMs > 0)) problems.push('grant requires a positive maxTimeoutMs')
     }
 
-    if (sourceClass === 'GENERATED_HARNESS') {
-      for (const prefix of GENERATED_EVIDENCE_PREFIXES) {
-        if (!input.evidence.some((e) => e.startsWith(prefix))) {
-          problems.push(`generated harness approval requires "${prefix}" evidence`)
-        }
-      }
-    }
-
     if (problems.length > 0 || !grant) {
       throw new Error(`Approval rejected: ${problems.join('; ')}`)
     }
     return grant
   }
 
-  /** True when an agent holds a live grant for the capability on this tool. */
-  isGrantedTo(key: ToolKey, agent: AgentAuthority, capability: string): boolean {
+  /** True when the resolved authority holds a live, unsuspended grant for the capability. */
+  isGrantedTo(key: ToolKey, agent: ResolvedAgentAuthority, capability: string): boolean {
+    if (!isResolvedAgentAuthority(agent)) return false
     const r = this.records.get(key)
-    if (!r || (r.status !== 'APPROVED' && r.status !== 'RESTRICTED') || !r.grant) return false
+    if (!r || !this.isEligible(key) || !r.grant) return false
     return (
-      agent.permittedCapabilities.includes(capability) &&
+      agent.capabilities.includes(capability) &&
       r.grant.allowedAgents.includes(agent.agentId) &&
       r.grant.allowedCapabilities.includes(capability)
     )
   }
 
   /** Discovery never confers execution; `executableByAgent` is informational. */
-  discover(agent: AgentAuthority, capability: string): readonly DiscoveryCandidate[] {
+  discover(agent: ResolvedAgentAuthority, capability: string): readonly DiscoveryCandidate[] {
     const out: DiscoveryCandidate[] = []
     for (const [key, r] of this.records) {
       const claimed = r.descriptor.claimedCapabilities.includes(capability)
@@ -242,13 +387,14 @@ export class ToolRegistry {
       out.push({
         toolKey: key,
         status: r.status,
+        suspended: r.suspension !== null,
         executableByAgent: this.isGrantedTo(key, agent, capability),
       })
     }
     return out
   }
 
-  planCapability(agent: AgentAuthority, capability: string): CapabilityPlan {
+  planCapability(agent: ResolvedAgentAuthority, capability: string): CapabilityPlan {
     const found = this.discover(agent, capability)
     const usable = found.filter((c) => c.executableByAgent).map((c) => c.toolKey)
     if (usable.length > 0) return { path: 'A_APPROVED', tools: usable }
@@ -257,7 +403,7 @@ export class ToolRegistry {
     return { path: 'C_NO_CANDIDATE', harnessGenerationMayBeRequested: true }
   }
 
-  /** Reports why an observed descriptor no longer matches what was approved. */
+  /** Legacy string-reason drift report (Phase 1). Prefer recordDrift/classifyDrift. */
   detectDrift(observed: ToolDescriptor): readonly string[] {
     const record = this.records.get(toolKey(observed.identity))
     if (!record) return ['tool is not registered']

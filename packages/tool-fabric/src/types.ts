@@ -114,30 +114,140 @@ export interface ToolGrant {
   readonly maxTimeoutMs: number
 }
 
+// ── Evidence ────────────────────────────────────────────────────────────────
+
+export const TOOL_EVIDENCE_KINDS = [
+  'SOURCE_REPOSITORY',
+  'LICENSE',
+  'PACKAGE_METADATA',
+  'DIGEST_VERIFICATION',
+  'DEPENDENCY_INSPECTION',
+  'CODE_REVIEW',
+  'SECURITY_REVIEW',
+  'CAPABILITY_REVIEW',
+  'GENERATED_HARNESS_VALIDATION',
+  'TEST_REPORT',
+  'PROVENANCE',
+] as const
+export type ToolEvidenceKind = (typeof TOOL_EVIDENCE_KINDS)[number]
+
+/**
+ * NZILA_VERIFIED evidence only counts when the verified governance decision
+ * itself attests the reference (see GovernanceDecisionSnapshot.evidenceRefs).
+ * EXTERNAL_UNTRUSTED marks material taken from READMEs, SKILL.md, registries
+ * or tool output; it is retained for review but never satisfies a requirement.
+ */
+export type ToolEvidenceTrustClass = 'NZILA_VERIFIED' | 'EXTERNAL_UNTRUSTED'
+
+export interface ToolEvidenceRef {
+  readonly kind: ToolEvidenceKind
+  readonly ref: string
+  readonly trustClass: ToolEvidenceTrustClass
+  readonly sha256?: string
+  readonly capturedAt: string
+}
+
+// ── Governance decision binding ─────────────────────────────────────────────
+
+export const GOVERNANCE_DECISION_KINDS = [
+  'TOOL_TRUST',
+  'TOOL_REVOCATION',
+  'TOOL_EXECUTION_APPROVAL',
+  'TOOL_INSTALL',
+] as const
+export type GovernanceDecisionKind = (typeof GOVERNANCE_DECISION_KINDS)[number]
+
+export const GOVERNANCE_DECISION_OUTCOMES = ['EVALUATE', 'APPROVE', 'RESTRICT', 'REJECT', 'REVOKE'] as const
+export type GovernanceDecisionOutcome = (typeof GOVERNANCE_DECISION_OUTCOMES)[number]
+
+/**
+ * What an authoritative governance system reports about a decision. Produced
+ * only by a GovernanceDecisionVerifier; Tool Fabric never accepts caller
+ * claims such as "decidedBy: some-human".
+ */
+export interface GovernanceDecisionSnapshot {
+  readonly decisionRef: string
+  readonly kind: GovernanceDecisionKind
+  /** Tool key the decision applies to. */
+  readonly subject: string
+  /** Artifact digest the decision is bound to (required for approvals/installs). */
+  readonly subjectDigest: string | null
+  readonly outcome: GovernanceDecisionOutcome
+  /** Role (never a person identifier) the authoritative system confirmed. */
+  readonly decidedByRole: string
+  /** Why that role was entitled to decide (policy / delegation reference). */
+  readonly authorityBasis: string
+  /** Evidence references the decision attests. */
+  readonly evidenceRefs: readonly string[]
+  /** Identifier of the verifier / backing system that vouched for this snapshot. */
+  readonly source: string
+  readonly verifiedAt: string
+  readonly status: 'ACTIVE' | 'REVOKED' | 'SUPERSEDED'
+  /** Execution approvals only: hash of the single intent this approval covers. */
+  readonly boundIntentHash?: string
+  readonly validUntil?: string
+}
+
 export interface ToolTrustDecision {
   readonly toolKey: ToolKey
   readonly from: ToolTrustStatus
   readonly to: ToolTrustStatus
-  readonly decidedBy: PrincipalRef
-  /** Reference to the governance decision / review record. */
-  readonly decisionRef: string
+  readonly governance: GovernanceDecisionSnapshot
   readonly rationale: string
   readonly decidedAt: string
   readonly grant?: ToolGrant
-  readonly evidence: readonly string[]
+  readonly evidence: readonly ToolEvidenceRef[]
+}
+
+// ── Drift ───────────────────────────────────────────────────────────────────
+
+export const DRIFT_KINDS = [
+  'UNCHANGED',
+  'METADATA_CHANGED',
+  'DIGEST_CHANGED',
+  'SIDE_EFFECTS_WIDENED',
+  'SOURCE_BECAME_MUTABLE',
+  'VERSION_MISSING',
+  'PROVENANCE_UNVERIFIABLE',
+] as const
+export type DriftKind = (typeof DRIFT_KINDS)[number]
+
+export interface DriftFinding {
+  readonly kind: DriftKind
+  /** Material drift suspends execution eligibility pending a new trust decision. */
+  readonly material: boolean
+  readonly changedFields: readonly string[]
+}
+
+export interface ToolSuspension {
+  readonly kind: DriftKind
+  readonly since: string
+  readonly changedFields: readonly string[]
 }
 
 export interface ToolRecord {
   readonly descriptor: ToolDescriptor
   readonly status: ToolTrustStatus
   readonly grant: ToolGrant | null
+  /** Append-only: never rewritten, only extended. */
   readonly decisions: readonly ToolTrustDecision[]
+  readonly suspension: ToolSuspension | null
+  readonly driftHistory: readonly (DriftFinding & { readonly observedAt: string })[]
+  /** Previously approved descriptors, retained as historic evidence. */
+  readonly descriptorHistory: readonly ToolDescriptor[]
 }
 
-export interface AgentAuthority {
+/**
+ * Resolved (trusted) agent authority. This is an INTERNAL representation: it
+ * is only ever produced by resolveAgentAuthority() from a trusted resolver
+ * and is never accepted from a request. See ./authority.ts.
+ */
+export interface ResolvedAgentAuthority {
   readonly agentId: string
-  /** Capabilities the platform has already authorised this agent to request. */
-  readonly permittedCapabilities: readonly string[]
+  readonly capabilities: readonly string[]
+  readonly source: string
+  readonly authorityRef: string
+  readonly resolvedAt: string
 }
 
 export type NetworkPolicy = 'NONE' | 'ALLOWLIST'
@@ -147,8 +257,6 @@ export interface EnvPolicy {
   readonly allow: Readonly<Record<string, string>>
 }
 
-export type ApprovalState = 'NOT_REQUIRED' | 'PENDING' | 'APPROVED' | 'DENIED'
-
 export interface ToolInstallRequest {
   readonly requestedBy: { readonly kind: 'AGENT' | 'GOVERNED_INSTALLER'; readonly id: string }
   readonly toolKey: ToolKey
@@ -157,24 +265,6 @@ export interface ToolInstallRequest {
   readonly isolatedEnvironment: boolean
   readonly licenseAccepted: boolean
   readonly dependencyInspectionRef: string | undefined
-  readonly auditCorrelationId: string
-}
-
-export interface ToolExecutionRequest {
-  readonly requestedBy: AgentAuthority
-  readonly capability: string
-  readonly toolKey: ToolKey
-  readonly command: string
-  readonly args: readonly string[]
-  readonly workingDirectory: string
-  readonly allowedFilesystemRoots: readonly string[]
-  readonly network: NetworkPolicy
-  readonly env: EnvPolicy
-  readonly secretRefs: readonly string[]
-  readonly timeoutMs: number
-  readonly expectedOutputs: readonly string[]
-  readonly sideEffects: readonly ToolSideEffect[]
-  readonly approvalState: ApprovalState
   readonly auditCorrelationId: string
 }
 
