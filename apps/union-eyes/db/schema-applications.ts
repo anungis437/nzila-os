@@ -28,6 +28,5 @@ export const applications = pgTable(
   })
 );
 
-// NOTE: applicationsRelations is defined in schema-organizations.ts
-// to avoid circular imports (organizations references applications for FK,
-// and applications needs organizations for the relation).
+// This registry does not own organization identity. The canonical organization
+// model has no application foreign key; see schema-authority/runtime-drift-dispositions.json.

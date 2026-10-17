@@ -5,6 +5,7 @@
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { withApi } from '@/lib/api/with-api';
 import { db } from '@/db/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { caseStudies } from '@/db/schema';
 import { eq, desc, count, type SQL } from 'drizzle-orm';
 
@@ -44,16 +45,19 @@ export const GET = withApi(
 
     const whereClause = conditions.length > 0 ? conditions[0] : undefined;
 
-    const baseQuery = db.select().from(caseStudies);
-    const countQuery = db.select({ total: count() }).from(caseStudies);
-
-    const [rows, totalResult] = await Promise.all([
-      (whereClause ? baseQuery.where(whereClause) : baseQuery)
-        .orderBy(desc((caseStudies as any as Record<string, unknown>)['createdAt'] as never))
-        .limit(limit)
-        .offset(offset),
-      whereClause ? countQuery.where(whereClause) : countQuery,
-    ]);
+    // Public marketing content has no actor: it is global reference data read through the
+    // SYSTEM role (SELECT only), never the ordinary tenant runtime connection.
+    const [rows, totalResult] = await withSystemContext(() => {
+      const baseQuery = db.select().from(caseStudies);
+      const countQuery = db.select({ total: count() }).from(caseStudies);
+      return Promise.all([
+        (whereClause ? baseQuery.where(whereClause) : baseQuery)
+          .orderBy(desc((caseStudies as any as Record<string, unknown>)['createdAt'] as never))
+          .limit(limit)
+          .offset(offset),
+        whereClause ? countQuery.where(whereClause) : countQuery,
+      ]);
+    });
 
     const total = totalResult[0]?.total ?? 0;
 

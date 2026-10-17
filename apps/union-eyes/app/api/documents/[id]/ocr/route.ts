@@ -19,8 +19,10 @@ import {
  */
 export const POST = async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params: pendingParams }: { params: Promise<{ id: string }> }
 ) => {
+  // Next 16 supplies route params as a Promise.
+  const params = await pendingParams;
   return withRoleAuth('steward', async (request, context) => {
     const { userId, organizationId } = context as { userId: string; organizationId: string };
 

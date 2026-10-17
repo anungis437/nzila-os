@@ -18,10 +18,10 @@ vi.mock('@/db/db', () => ({
   },
 }));
 
-vi.mock('@/db/schema', () => ({
+vi.mock('@/db/schema/domains/infrastructure/rewards', () => ({
   rewardWalletLedger: {
-    transactionType: 'transaction_type',
-    pointsChange: 'points_change',
+    eventType: 'event_type',
+    amountCredits: 'amount_credits',
     userId: 'user_id',
     orgId: 'org_id',
   },
@@ -132,16 +132,21 @@ describe('rewards-stats-utils', () => {
       });
     });
 
-    it('returns zeros on DB error', async () => {
+    it('propagates DB errors instead of fabricating an empty wallet', async () => {
       mocks.mockSelect.mockImplementation(() => {
         throw new Error('DB down');
       });
-      const result = await calculateRewardTotals('user-1', 'org-1');
-      expect(result).toEqual({
-        totalEarned: 0,
-        totalRedeemed: 0,
-        totalExpired: 0,
-        currentBalance: 0,
+      await expect(calculateRewardTotals('user-1', 'org-1')).rejects.toThrow('DB down');
+    });
+
+    it('preserves signed debit adjustments and string aggregate values', async () => {
+      setupSelectGroupByChain([
+        { eventType: 'earn', total: '100' },
+        { eventType: 'adjust', total: '-25' },
+        { eventType: 'refund', total: '10' },
+      ]);
+      expect(await calculateRewardTotals('user-1', 'org-1')).toEqual({
+        totalEarned: 85, totalRedeemed: 0, totalExpired: 0, currentBalance: 85,
       });
     });
 
@@ -174,12 +179,11 @@ describe('rewards-stats-utils', () => {
       expect(result).toBe(0);
     });
 
-    it('returns 0 on error', async () => {
+    it('propagates errors', async () => {
       mocks.mockSelect.mockImplementation(() => {
         throw new Error('DB error');
       });
-      const result = await getTotalEarned('user-1', 'org-1');
-      expect(result).toBe(0);
+      await expect(getTotalEarned('user-1', 'org-1')).rejects.toThrow('DB error');
     });
   });
 
@@ -198,12 +202,11 @@ describe('rewards-stats-utils', () => {
       expect(result).toBe(0);
     });
 
-    it('returns 0 on error', async () => {
+    it('propagates errors', async () => {
       mocks.mockSelect.mockImplementation(() => {
         throw new Error('DB error');
       });
-      const result = await getTotalRedeemed('user-1', 'org-1');
-      expect(result).toBe(0);
+      await expect(getTotalRedeemed('user-1', 'org-1')).rejects.toThrow('DB error');
     });
   });
 });

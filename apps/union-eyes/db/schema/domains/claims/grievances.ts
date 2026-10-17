@@ -153,8 +153,8 @@ export const grievances = pgTable("grievances", {
   // Metadata
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  createdBy: uuid("created_by"),
-  lastUpdatedBy: uuid("last_updated_by"),
+  createdBy: text("created_by"),
+  lastUpdatedBy: text("last_updated_by"),
 }, (table) => [
   index("idx_grievances_number").on(table.grievanceNumber),
   index("idx_grievances_status").on(table.status),
@@ -356,7 +356,7 @@ export const grievanceTimeline = pgTable("grievance_timeline", {
   }>>(),
   
   // Metadata
-  createdBy: uuid("created_by"),
+  createdBy: text("created_by"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   index("idx_grievance_timeline_grievance").on(table.grievanceId),
@@ -385,13 +385,13 @@ export const grievanceDeadlines = pgTable("grievance_deadlines", {
   calculatedDueDate: timestamp("calculated_due_date", { withTimezone: true }),
   calculationProvenance: jsonb("calculation_provenance").default({}),
   confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
-  confirmedBy: uuid("confirmed_by"),
+  confirmedBy: text("confirmed_by"),
   overrideDueDate: timestamp("override_due_date", { withTimezone: true }),
   overrideReason: text("override_reason"),
   overrideAt: timestamp("override_at", { withTimezone: true }),
-  overrideBy: uuid("override_by"),
+  overrideBy: text("override_by"),
   supersededAt: timestamp("superseded_at", { withTimezone: true }),
-  supersededBy: uuid("superseded_by"),
+  supersededBy: text("superseded_by"),
   
   // Reminders
   reminderDays: integer("reminder_days").array(), // days before deadline to send reminders

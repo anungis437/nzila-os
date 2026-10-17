@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getOverdueClaims, getClaimsApproachingDeadline } from "@/lib/workflow-engine";
 import { requireApiAuth } from '@/lib/api-auth-guard';
 import { logger } from '@/lib/logger';
+import { clientErrorResponse } from '@/lib/api/authorization-denial';
 
  
  
@@ -40,6 +41,8 @@ export async function GET(request: NextRequest) {
       claims: result,
     });
   } catch (error) {
+    const denied = clientErrorResponse(error);
+    if (denied) return denied;
     logger.error('Error getting overdue claims', error as Error);
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,

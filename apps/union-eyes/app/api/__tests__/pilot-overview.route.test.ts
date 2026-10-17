@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   requireUser: vi.fn(),
   hasMinRole: vi.fn(),
+  isPlatformAdminUser: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   withSystemContext: vi.fn(),
   logger: { error: vi.fn() },
@@ -27,6 +28,7 @@ const mockDb = {
 vi.mock('@/lib/api-auth-guard', () => ({
   requireUser: m.requireUser,
   hasMinRole: m.hasMinRole,
+  isPlatformAdminUser: m.isPlatformAdminUser,
 }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
@@ -52,8 +54,34 @@ describe('pilot/overview route', () => {
     m.executeQueue = [];
     m.requireUser.mockResolvedValue({ userId: 'u1' });
     m.hasMinRole.mockResolvedValue(true);
+    m.isPlatformAdminUser.mockResolvedValue(false);
     m.getOrganizationIdForUser.mockResolvedValue('platform_org');
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('V2 denies a platform-organization match without canonical administrator authority', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+    const { GET } = await loadRoute();
+
+    const response = await GET();
+
+    expect(response.status).toBe(403);
+    expect(m.isPlatformAdminUser).toHaveBeenCalledWith('u1');
+    expect(m.getOrganizationIdForUser).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('V2 permits canonical platform administration without legacy organization authority', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+    m.isPlatformAdminUser.mockResolvedValueOnce(true);
+    const { GET } = await loadRoute();
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(m.getOrganizationIdForUser).not.toHaveBeenCalled();
+    expect(m.withSystemContext).toHaveBeenCalledOnce();
   });
 
   it('GET returns 403 when role check fails', async () => {

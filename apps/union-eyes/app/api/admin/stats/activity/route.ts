@@ -4,7 +4,7 @@
  */
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema';
-import { desc, eq, sql } from 'drizzle-orm';
+import { desc, sql } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
@@ -27,7 +27,7 @@ export const GET = withApi(
         createdAt: organizationMembers.createdAt,
       })
       .from(organizationMembers)
-      .leftJoin(organizations, eq(sql`${organizations.id}::text`, organizationMembers.organizationId))
+      .leftJoin(organizations, sql`${organizations.id}::text = ${organizationMembers.organizationId}::text`)
       .orderBy(desc(organizationMembers.createdAt))
       .limit(limit);
 

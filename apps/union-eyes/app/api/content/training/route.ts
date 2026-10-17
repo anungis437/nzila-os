@@ -16,20 +16,26 @@ export const GET = withApi(
     const url = new URL(ctx.request.url);
     const activeOnly = url.searchParams.get('active') !== 'false';
 
+    // duration_label, completion_count and materials_url are not stored columns: they are derived
+    // from the canonical duration, registration and materials fields.
     let query = sql`
-      SELECT id, course_code, course_name, course_description,
-             course_category, delivery_method, duration_hours,
-             duration_label, completion_count, is_active, is_mandatory,
-             materials_url, created_at, updated_at
-      FROM training_courses
-      WHERE organization_id = ${orgId}::uuid
+      SELECT tc.id, tc.course_code, tc.course_name, tc.course_description,
+             tc.course_category, tc.delivery_method, tc.duration_hours,
+             CASE WHEN tc.duration_hours IS NOT NULL THEN tc.duration_hours::text || ' hours' END AS duration_label,
+             (SELECT count(*)::int FROM course_registrations cr
+               WHERE cr.course_id = tc.id AND cr.organization_id = tc.organization_id
+                 AND cr.attended IS TRUE) AS completion_count,
+             tc.is_active, tc.is_mandatory,
+             tc.course_materials_url AS materials_url, tc.created_at, tc.updated_at
+      FROM training_courses tc
+      WHERE tc.organization_id = ${orgId}::uuid
     `;
 
     if (activeOnly) {
-      query = sql`${query} AND is_active = true`;
+      query = sql`${query} AND tc.is_active = true`;
     }
 
-    query = sql`${query} ORDER BY is_mandatory DESC, completion_count DESC`;
+    query = sql`${query} ORDER BY tc.is_mandatory DESC, completion_count DESC`;
 
     const result = await withRLSContext(async () => db.execute(query));
     const rows = Array.from(result);

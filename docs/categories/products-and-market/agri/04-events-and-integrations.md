@@ -1,5 +1,8 @@
 # Agri Stack — Events and Integrations
 
+> This describes current event flows. It does not make Cora a subordinate
+> consumer of Agrimo; see [ADR-AGRI-001](ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md).
+
 ## Event Architecture
 
 All operational events follow the **transactional outbox pattern**:
@@ -66,12 +69,13 @@ All integrations are dispatched via `@nzila/integrations-runtime` dispatcher. No
 - All delivery attempts audited with timestamps
 - DLQ items can be replayed via ops console
 
-## Cora Event Consumption
+## Current Cora Data Consumption
 
-Cora does not directly subscribe to Agrimo events. Instead:
+Cora's current analytics surface does not directly subscribe to Agrimo events. Instead:
 
 1. Cora reads operational data from `agri-db` (read-only scoped queries)
 2. Cora computes metrics via `agri-intelligence`
-3. Cora writes results to intelligence tables (`agri_forecasts`, `agri_price_signals`, `agri_risk_scores`)
+3. The current analytics surface reads forecast, price-signal, and risk-score results; this description does not grant Cora app-level write access
 
-This keeps Cora fully decoupled from Agrimo's write path.
+This is a current implementation choice. It is not a requirement that all
+Cora capabilities derive from Agrimo or that Cora can never own workflows.

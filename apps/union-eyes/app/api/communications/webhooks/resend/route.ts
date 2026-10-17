@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
 
   if (!apiKey || !webhookSecret) {
     logger.error('[resend-webhook] Missing RESEND_API_KEY or RESEND_WEBHOOK_SECRET');
-    return NextResponse.json({ error: 'Webhook configuration missing' }, { status: 500 });
+    return NextResponse.json({ error: 'Webhook configuration missing' }, { status: 503 });
   }
 
   const svixId = request.headers.get('svix-id');

@@ -166,7 +166,8 @@ describe('round 49 system-principal ratchet: deadline-overdue cron', () => {
 
   it('the deadline-overdue cron route threads tx from withSystemContext into writeDeadlineAuditEvent', () => {
     const src = source('app/api/cron/deadline-overdue/route.ts');
-    expect(src).toMatch(/withSystemContext\(\(tx\)\s*=>\s*writeDeadlineAuditEvent/);
+    expect(src).toMatch(/withSystemContext\(async\s*\(tx\)\s*=>/);
+    expect(src).toMatch(/writeDeadlineAuditEvent\(\s*\{[\s\S]*?\},\s*tx,?\s*\)/);
   });
 });
 

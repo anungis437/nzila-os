@@ -7,7 +7,7 @@
  */
 
 import { withApi, ApiError } from '@/lib/api/framework';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withOrgOwnedContext as withSystemContext } from '@/lib/db/org-owned-context';
 import { getBatchDetail } from '@/lib/ingestion/migration-metrics';
 
 export const GET = withApi(

@@ -8,7 +8,7 @@
  *   - login form / discovery endpoint (decides which buttons to show)
  *   - invite service (when requireInvite=true, signup is disabled)
  */
-import { db } from '@nzila/db/client'
+import { authDb as db, getAuthContext, withAuthContext } from '../auth-db'
 import { authOrgPolicies, authUsers } from '@nzila/db/schema'
 import { eq, sql } from 'drizzle-orm'
 
@@ -39,8 +39,10 @@ const DEFAULT_POLICY: OrgAuthPolicy = {
 export async function getOrgAuthPolicy(
   organizationId: string | null | undefined,
 ): Promise<OrgAuthPolicy> {
-  try {
-    if (!organizationId) return DEFAULT_POLICY
+  if (!organizationId) return DEFAULT_POLICY
+  if (!getAuthContext())
+    return withAuthContext({ phase: 'issuance', operation: 'policy-discovery', email: 'discovery@invalid.local', organizationId },
+      () => getOrgAuthPolicy(organizationId))
     const [row] = await db
       .select()
       .from(authOrgPolicies)
@@ -62,9 +64,6 @@ export async function getOrgAuthPolicy(
         ? (row.mfaRequiredForRoles as unknown as string[])
         : [],
     }
-  } catch {
-    return { ...DEFAULT_POLICY, organizationId: organizationId ?? null }
-  }
 }
 
 export interface MethodAvailability {
@@ -91,11 +90,13 @@ export async function getAuthMethodAvailability(
   email?: string | null,
   organizationId?: string | null,
 ): Promise<MethodAvailability & { userExists: boolean | null }> {
+  if (!getAuthContext())
+    return withAuthContext({ phase: 'issuance', operation: 'policy-discovery', email: email ?? 'discovery@invalid.local', organizationId: organizationId ?? undefined },
+      () => getAuthMethodAvailability(email, organizationId))
   const policy = await getOrgAuthPolicy(organizationId)
 
   let userExists: boolean | null = null
   if (email && email.includes('@')) {
-    try {
       const normalised = email.toLowerCase().trim()
       const [row] = await db
         .select({ id: authUsers.userId })
@@ -103,9 +104,6 @@ export async function getAuthMethodAvailability(
         .where(sql`lower(${authUsers.email}) = ${normalised}`)
         .limit(1)
       userExists = Boolean(row)
-    } catch {
-      userExists = null
-    }
   }
 
   if (policy.requireSso) {

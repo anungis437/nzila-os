@@ -430,13 +430,16 @@ describe('real workspace typecheck closure', () => {
 describe('CI Lint & Typecheck invokes the fail-closed planner', () => {
   const ci = parse(readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')) as {
     on: { pull_request: { branches: string[] }; push: { branches: string[] } }
-    jobs: {
-      'lint-and-typecheck': {
+    jobs: Record<
+      string,
+      {
         name?: string
+        needs?: string[]
+        if?: string
         'continue-on-error'?: boolean
         steps?: Array<{ name?: string; run?: string; with?: { 'fetch-depth'?: number } }>
       }
-    }
+    >
   }
   const script = readFileSync(join(ROOT, 'tooling', 'ci', 'run-affected-typecheck.sh'), 'utf8')
 
@@ -446,14 +449,27 @@ describe('CI Lint & Typecheck invokes the fail-closed planner', () => {
     expect(job['continue-on-error']).not.toBe(true)
     expect(ci.on.pull_request.branches).toEqual(['main'])
     expect(ci.on.push.branches).toEqual(['main'])
-    const checkout = job.steps?.find((step) => step.with && 'fetch-depth' in (step.with ?? {}))
+    expect(job.needs).toEqual(['classify', 'lint', 'typecheck'])
+    expect(job.if).toContain('always()')
+    expect(job.if).toContain("needs.classify.outputs.lint_and_typecheck == 'APPLICABLE'")
+    const gate = job.steps?.find((step) => step.name === 'Require both checks')
+    expect(gate?.run).toContain('test "$LINT_RESULT" = success')
+    expect(gate?.run).toContain('test "$TYPECHECK_RESULT" = success')
+    expect(gate?.run).not.toMatch(/\|\|\s*true/)
+    const lintJob = ci.jobs.lint
+    const typecheckJob = ci.jobs.typecheck
+    expect(lintJob.needs).toEqual(['classify'])
+    expect(typecheckJob.needs).toEqual(['classify'])
+    expect(lintJob['continue-on-error']).not.toBe(true)
+    expect(typecheckJob['continue-on-error']).not.toBe(true)
+    const checkout = lintJob.steps?.find((step) => step.with && 'fetch-depth' in (step.with ?? {}))
     expect(checkout?.with?.['fetch-depth']).toBe(0)
-    const lint = job.steps?.find((step) => step.name === 'Lint')
+    const lint = lintJob.steps?.find((step) => step.name === 'Lint')
     expect(lint?.run).toBe('pnpm lint')
   })
 
   it('runs the planner and refuses a zero-task or unknown mode', () => {
-    const job = ci.jobs['lint-and-typecheck']
+    const job = ci.jobs.typecheck
     const step = job.steps?.find((candidate) =>
       candidate.run?.includes('run-affected-typecheck.sh'),
     )

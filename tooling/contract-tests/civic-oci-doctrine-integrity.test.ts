@@ -57,6 +57,8 @@ import {
   type CivicDoctrineValidationContext,
   validateCivicOciDoctrine,
   isCivicArchivedProofCli,
+  CIVIC_ARCHIVE_PATH_MANIFEST,
+  validateCivicArchiveReview,
 } from '../../scripts/lib/civic-oci-doctrine'
 
 const ROOT = join(__dirname, '..', '..')
@@ -375,6 +377,72 @@ function createRound1Fixture(): string {
     mkdirSync(join(root, '.civic-research/round1', directory), { recursive: true })
   return root
 }
+
+function createPortableArchiveFixture(): string {
+  const root = mkdtempSync(join(tmpdir(), 'civic-portable-archive-'))
+  fixtures.push(root)
+  const manifest = JSON.parse(readFileSync(join(ROOT, CIVIC_ARCHIVE_PATH_MANIFEST), 'utf8')) as {
+    entries: { path: string; normalizedLfSha256?: string }[]
+  }
+  const paths = new Set([
+    ...FIXTURE_PATHS,
+    CIVIC_ARCHIVE_PATH_MANIFEST,
+    ...manifest.entries.filter((entry) => entry.normalizedLfSha256).map((entry) => entry.path),
+  ])
+  for (const artifact of paths) {
+    mkdirSync(dirname(join(root, artifact)), { recursive: true })
+    cpSync(join(ROOT, artifact), join(root, artifact), { recursive: true })
+  }
+  return root
+}
+
+describe('portable CIVIC archive review without execution admission', () => {
+  it('reviews a detached checkout without original payloads, anchors or workstation authority', () => {
+    const root = createPortableArchiveFixture()
+    expect(validateCivicArchiveReview(root)).toEqual([])
+    expect(validateCivicOciDoctrine(root).length).toBeGreaterThan(0)
+    expect(validateCivicHumanRound1Admission(root).length).toBeGreaterThan(0)
+    expect(() => assertCivicSlice0Authorized(root)).toThrow('authorization terminated')
+    expect(() => assertCivicSlice1Authorized(root)).toThrow('authorization terminated')
+    expect(() => assertCivicSlice2Authorized(root)).toThrow('authorization terminated')
+  })
+
+  it('allows the four mandatory repository-generated inventory outputs without extending grants', () => {
+    const root = createPortableArchiveFixture()
+    for (const name of [
+      'inventory.json',
+      'inventory.md',
+      'repo-inventory.json',
+      'repo-inventory.md',
+    ]) {
+      const path = join(root, 'tooling/repo-inventory/output', name)
+      mkdirSync(dirname(path), { recursive: true })
+      writeFileSync(path, name.endsWith('.json') ? '{}\n' : '# Generated inventory\n')
+    }
+    expect(validateCivicArchiveReview(root)).toEqual([])
+    expect(validateCivicHumanRound1Admission(root).length).toBeGreaterThan(0)
+  })
+
+  it.each([
+    'apps/civic/src/kernel.ts',
+    'docs/public-service/operations/CIVIC_RUNTIME_SLICE_2_PROOF.md',
+    'governance/foundations/civic-oci-doctrine.contract.json',
+    'docs/public-service/operations/civic-archive/slice1-retained-inventory.json',
+    CIVIC_ARCHIVE_PATH_MANIFEST,
+  ])('rejects changes to frozen source, grants or commitments: %s', (artifact) => {
+    const root = createPortableArchiveFixture()
+    mutateText(root, artifact, (text) => text + '\nchanged archival artifact\n')
+    expect(validateCivicArchiveReview(root).length).toBeGreaterThan(0)
+  })
+
+  it('rejects new runtime source even when mandatory inventory is present', () => {
+    const root = createPortableArchiveFixture()
+    writeFileSync(join(root, 'apps/civic/src/unapproved.ts'), 'export const runtime = true\n')
+    expect(validateCivicArchiveReview(root).map((finding) => finding.id)).toContain(
+      'CIVIC_SLICE0_ARCHIVE_INVALID',
+    )
+  })
+})
 
 describe('archived CIVIC proof CLI classification', () => {
   it.each(['apps/civic/src/proof.ts', 'apps/civic/src/slice1/worker.ts'])(
@@ -1032,9 +1100,7 @@ describe('CIVIC / OCI doctrine integrity', () => {
     expect(() => scanCivicProofStorageSymlinks(root, inspect)).toThrow('inspection failure')
   })
   it('passes the current canonical repository state', () => {
-    expect(
-      validate(ROOT, { ...SLICE2_REVIEW_CONTEXT, now: new Date('2026-10-12T15:00:00Z') }),
-    ).toEqual([])
+    expect(validateCivicArchiveReview(ROOT)).toEqual([])
   })
 
   it('admits the immediate amended window before the superseded future timestamp', () => {

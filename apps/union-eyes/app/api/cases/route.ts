@@ -8,6 +8,7 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
 import { NextResponse } from 'next/server';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
@@ -153,8 +154,9 @@ export const POST = withApi(
       sourceIntakeId,
     } = parsed.data;
 
-    const rows = await withRLSContext(async (tx) =>
-      tx.execute(sql`
+    let audited = false;
+    const rows = await withRLSContext(async (tx) => {
+      const result = await tx.execute(sql`
         INSERT INTO claims (
           organization_id, member_id, claim_type, description,
           incident_date, location, desired_outcome,
@@ -181,13 +183,24 @@ export const POST = withApi(
                   claim_type AS "claimType", status, priority,
                   description, filed_date AS "filedDate",
                   created_at AS "createdAt"
-      `),
-    );
+      `);
+      const created = result[0] as Record<string, unknown> | undefined;
+      // Mandatory canonical audit shares this transaction: an audit failure rolls the case back.
+      audited = await appendMandatoryAudit(tx, {
+        organizationId,
+        action: 'claim.create',
+        resourceType: 'claims',
+        resourceId: created?.claimId as string | undefined,
+        userId,
+        details: { route: '/api/cases', claimType, priority, claimNumber: created?.claimNumber ?? null },
+      });
+      return result;
+    });
 
     const inserted = rows[0];
 
-    // Audit: log case creation with intake provenance
-    await auditLog({
+    // Audit: log case creation with intake provenance (legacy best-effort writer outside V2)
+    if (!audited) await auditLog({
       eventType: AuditEventType.CASE_CREATED,
       severity: AuditSeverity.MEDIUM,
       userId: userId ?? 'unknown',

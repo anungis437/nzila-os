@@ -7,7 +7,9 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 // Get batch job status
-export const GET = async (req: NextRequest, { params }: { params: { jobId: string } }) => {
+export const GET = async (req: NextRequest, { params: pendingParams }: { params: Promise<{ jobId: string }> }) => {
+  // Next 16 supplies route params as a Promise.
+  const params = await pendingParams;
   return withRoleAuth('steward', async (request, context) => {
     const _user = { id: context.userId, organizationId: context.organizationId };
 

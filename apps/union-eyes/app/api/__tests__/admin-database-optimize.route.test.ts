@@ -2,11 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
+  isPlatformAdminUser: vi.fn(),
   dbExecute: vi.fn(),
   withSystemContext: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
+vi.mock('@/lib/api-auth-guard', () => ({ isPlatformAdminUser: m.isPlatformAdminUser }));
 vi.mock('@/db/db', () => ({ db: { execute: m.dbExecute } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('drizzle-orm', () => ({ sql: vi.fn(() => 'SQL_ANALYZE') }));
@@ -20,6 +22,7 @@ describe('admin/database/optimize route', () => {
     vi.clearAllMocks();
     process.env.PLATFORM_ADMIN_USER_IDS = 'admin_1,admin_2';
     m.auth.mockResolvedValue({ userId: 'admin_1' });
+    m.isPlatformAdminUser.mockResolvedValue(true);
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.dbExecute.mockResolvedValue(undefined);
   });
@@ -27,10 +30,13 @@ describe('admin/database/optimize route', () => {
   it('returns 403 when user is not a platform admin', async () => {
     const { POST } = await loadRoute();
     m.auth.mockResolvedValueOnce({ userId: 'member_1' });
+    m.isPlatformAdminUser.mockResolvedValueOnce(false);
 
     const response = await POST();
 
     expect(response.status).toBe(403);
+    expect(m.isPlatformAdminUser).toHaveBeenCalledWith('member_1');
+    expect(m.dbExecute).not.toHaveBeenCalled();
     await expect(response.json()).resolves.toMatchObject({ error: 'Forbidden' });
   });
 

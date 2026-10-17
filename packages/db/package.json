@@ -7,13 +7,18 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./cora-farmer360": "./src/cora-farmer360.ts",
+    "./cora-farmer360-contracts": "./src/cora-farmer360-contracts.ts",
     "./schema": "./src/schema/index.ts",
     "./client": "./src/client.ts",
+    "./auth-client": "./src/auth-client.ts",
     "./system-client": "./src/system-client.ts",
     "./auth-storage-authority": "./src/auth-storage-authority/index.ts",
     "./raw": "./src/raw.ts",
     "./scoped": "./src/scoped.ts",
     "./audit": "./src/audit.ts",
+    "./audit-hash": "./src/audit-hash.ts",
+    "./authorization-audit": "./src/authorization-audit.ts",
     "./platform": "./src/platform.ts",
     "./org-registry": "./src/org-registry.ts",
     "./queries/trustcore": "./src/queries/trustcore.ts",
@@ -29,6 +34,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@nzila/org": "workspace:*",
     "@nzila/platform-data-fabric": "workspace:*",
     "@nzila/platform-decision-graph": "workspace:*",
     "@nzila/platform-event-fabric": "workspace:*",

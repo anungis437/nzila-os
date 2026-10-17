@@ -44,7 +44,7 @@ export async function handleAcceptInvite(request: NextRequest) {
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 })
     }
-    return NextResponse.json({ user: result.user })
+    return NextResponse.json({ user: result.user, requiresMfa: result.requiresMfa, challengeToken: result.challengeToken })
   } catch {
     return NextResponse.json(
       { error: 'Internal server error' },

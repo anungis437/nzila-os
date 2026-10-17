@@ -6,13 +6,14 @@ import { eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { z } from 'zod';
 import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
+import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
 
 export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ id: string }> };
 
 const createMemberSchema = z.object({
-  user_id: z.string().uuid(),
+  user_id: z.string().min(1).max(255),
   role: z.enum(['member', 'steward', 'admin', 'executive', 'observer']).default('member'),
   status: z.enum(['active', 'inactive', 'pending', 'suspended']).default('active'),
   name: z.string().min(1).max(255),
@@ -27,8 +28,15 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
-  const rows = await db.select().from(organizationMembers)
-    .where(eq(organizationMembers.organizationId, id));
+  // The caller must belong to the requested organization; reads run in its tenant context.
+  try {
+    await requireUserForOrganization(id);
+  } catch {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  const rows = await withRLSContext({ organizationId: id }, async () =>
+    db.select().from(organizationMembers).where(eq(organizationMembers.organizationId, id)),
+  );
 
   const mapped = rows.map(row => ({
     id: row.id,
@@ -79,8 +87,10 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const { user_id, role, status, name, email, phone, department, membership_number } = parsed.data;
 
-  const [created] = await withRLSContext(async () =>
-    db.insert(organizationMembers).values({
+  const [created] = await withRLSContext({ organizationId: id }, async (tx) => {
+    const inserted = await tx
+      .insert(organizationMembers)
+      .values({
       userId: user_id,
       organizationId: id,
       role,
@@ -90,8 +100,19 @@ export async function POST(req: NextRequest, { params }: Params) {
       phone,
       department,
       membershipNumber: membership_number,
-    }).returning()
-  );
+    })
+      .returning();
+    // Membership/role change is a launch-critical audited event; failure rolls the insert back.
+    await appendMandatoryAudit(tx, {
+      organizationId: id,
+      action: 'membership.create',
+      resourceType: 'organization_members',
+      resourceId: inserted[0]?.id,
+      userId: userCtx.userId,
+      details: { memberUserId: user_id, role, status, route: '/api/organizations/[id]/members' },
+    });
+    return inserted;
+  });
 
   return NextResponse.json({ data: created }, { status: 201 });
 }

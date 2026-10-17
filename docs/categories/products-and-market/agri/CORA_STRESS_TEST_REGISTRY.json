@@ -1,0 +1,445 @@
+{
+  "schemaVersion": "1.0",
+  "executionPermission": "NONE_GRANTED",
+  "inheritedGates": {
+    "CORA_ORGANIC_PUBLIC_EVIDENCE_FOUNDATION": "PASS",
+    "CORA_ORGANIC_PHASE_2": "PASS",
+    "CORA_ORGANIC_PHASE_2C": "PASS",
+    "CORA_ORGANIC_FIRST_LIVE_SOURCE": "BLOCKED_RIGHTS_CONFIRMATION",
+    "PRO_CERT_SOURCE_PROOF": "REQUIRES_SOURCE_CONFIRMATION",
+    "PUBLIC_SOURCE_RUNTIME_PROOF": "NOT_YET_PROVEN",
+    "PHASE_3_PERMISSION": "NONE_GRANTED",
+    "PRODUCTION_ACTIVATION": "BLOCKED_STRESS_TEST",
+    "COMMERCIAL_PILOT_COMMITMENT": "BLOCKED_STRESS_TEST",
+    "MATERIAL_ROUTE_EXPANSION": "BLOCKED_STRESS_TEST"
+  },
+  "organicSourceRights": {
+    "PUBLICATION_AUTHORITY": {
+      "state": "ESTABLISHED_ALLOWED",
+      "scope": "CFIA-mandated publication class only; individual record not instantiated; not a Cora use licence",
+      "evidenceRefs": ["CORA_C1_AUTHORITY_CASE_ORGANIC_PUBLIC_CERTIFICATION_001.md"],
+      "requiredForTest": null
+    },
+    "ACCESS_METHOD": {
+      "state": "REQUIRES_CONFIRMATION",
+      "scope": "Proposed bounded verification method only; no supported acquisition approved",
+      "evidenceRefs": ["CORA_ORGANIC_SOURCE_ACCESS_DECISION_RECORD.md"],
+      "requiredForTest": null
+    },
+    "AUTOMATED_ACCESS_RIGHTS": {
+      "state": "REQUIRES_CONFIRMATION",
+      "scope": "No automation or polling permission established",
+      "evidenceRefs": ["CORA_ORGANIC_FIRST_LIVE_SOURCE_DECISION.md"],
+      "requiredForTest": null
+    },
+    "MANUAL_ACCESS_RIGHTS": {
+      "state": "REQUIRES_CONFIRMATION",
+      "scope": "Public viewing/search is documented; record retrieval/retention for Cora proof is not approved",
+      "evidenceRefs": ["CORA_ORGANIC_FIRST_LIVE_SOURCE_DECISION.md"],
+      "requiredForTest": null
+    },
+    "INTERNAL_PROCESSING_RIGHTS": {
+      "state": "REQUIRES_CONFIRMATION",
+      "scope": "Processing and normalization for institutional verification unresolved",
+      "evidenceRefs": ["CORA_ORGANIC_SOURCE_ACCESS_DECISION_RECORD.md"],
+      "requiredForTest": null
+    },
+    "RETENTION_RIGHTS": {
+      "state": "REQUIRES_CONFIRMATION",
+      "scope": "No proof-copy retention duration or deletion rule established",
+      "evidenceRefs": ["CORA_ORGANIC_SOURCE_ACCESS_DECISION_RECORD.md"],
+      "requiredForTest": null
+    },
+    "REUSE_RIGHTS": {
+      "state": "REQUIRES_CONFIRMATION",
+      "scope": "No onward institutional verification reuse granted",
+      "evidenceRefs": ["CORA_C1_AUTHORITY_CASE_ORGANIC_PUBLIC_CERTIFICATION_001.md"],
+      "requiredForTest": null
+    },
+    "REPUBLICATION_RIGHTS": {
+      "state": "REQUIRES_CONFIRMATION",
+      "scope": "No Cora redisplay or public republication approved",
+      "evidenceRefs": ["CORA_C1_AUTHORITY_CASE_ORGANIC_PUBLIC_CERTIFICATION_001.md"],
+      "requiredForTest": null
+    },
+    "COMMERCIAL_USE_RIGHTS": {
+      "state": "REQUIRES_CONFIRMATION",
+      "scope": "Commercial verification scope unresolved",
+      "evidenceRefs": ["CORA_ORGANIC_FIRST_LIVE_SOURCE_DECISION.md"],
+      "requiredForTest": null
+    },
+    "ATTRIBUTION_REQUIREMENTS": {
+      "state": "NOT_ESTABLISHED",
+      "scope": "Source-specific credit/link/mark requirements unresolved",
+      "evidenceRefs": ["CORA_ORGANIC_FIRST_LIVE_SOURCE_DECISION.md"],
+      "requiredForTest": null
+    },
+    "TIMESTAMP_SEMANTICS": {
+      "state": "NOT_ESTABLISHED",
+      "scope": "Daily directory refresh is not record observation/effective/status-change time",
+      "evidenceRefs": ["CORA_ORGANIC_FIRST_LIVE_SOURCE_DECISION.md"],
+      "requiredForTest": null
+    }
+  },
+  "routes": [
+    {
+      "id": "ROUTE_A",
+      "handoff": "CANADA_ORGANIC_EVIDENCE",
+      "selectionEvidence": ["CORA_ORGANIC_INSTITUTIONAL_GRAPH.md"],
+      "phases": [
+        { "phase": 0, "disposition": "NOT_STARTED" },
+        { "phase": 1, "disposition": "NOT_STARTED" },
+        { "phase": 2, "disposition": "NOT_STARTED" },
+        { "phase": 3, "disposition": "NOT_STARTED" },
+        { "phase": 4, "disposition": "NOT_STARTED" },
+        { "phase": 5, "disposition": "NOT_STARTED" }
+      ],
+      "phase4": { "baselineRef": null, "resultRef": null },
+      "phase5": { "baselineRef": null, "resultRef": null },
+      "indicators": {
+        "recipientDelta": null,
+        "producerNetValuePositive": null,
+        "problemJustifiesIntervention": null,
+        "directSourceBaselineSufficient": null,
+        "policyRequired": null,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "ROUTE_B",
+      "handoff": "PENDING_CFA_SELECTION",
+      "selectionEvidence": [],
+      "phases": [
+        { "phase": 0, "disposition": "NOT_STARTED" },
+        { "phase": 1, "disposition": "NOT_STARTED" },
+        { "phase": 2, "disposition": "NOT_STARTED" },
+        { "phase": 3, "disposition": "NOT_STARTED" },
+        { "phase": 4, "disposition": "NOT_STARTED" },
+        { "phase": 5, "disposition": "NOT_STARTED" }
+      ],
+      "phase4": { "baselineRef": null, "resultRef": null },
+      "phase5": { "baselineRef": null, "resultRef": null },
+      "indicators": {
+        "recipientDelta": null,
+        "producerNetValuePositive": null,
+        "problemJustifiesIntervention": null,
+        "directSourceBaselineSufficient": null,
+        "policyRequired": null,
+        "evidenceRefs": []
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "A-P0",
+      "route": "ROUTE_A",
+      "phase": 0,
+      "version": 1,
+      "hypothesis": "Organic authority and lawful source use can be established against the best legitimate current verification workflow.",
+      "metricDefinitions": [
+        { "id": "authority_rights_and_baseline_coverage", "unit": "TO_BE_PREREGISTERED" }
+      ],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "Step-level actor/source/subject/recipient/verification/mandate/effort/time/rework map",
+        "All eleven Organic source-rights fields with authoritative evidence",
+        "Best legitimate direct-source comparison and sufficiency falsifier"
+      ],
+      "owner": null,
+      "participantClass": "Source authority and recipient workflow owners",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "A-P1",
+      "route": "ROUTE_A",
+      "phase": 1,
+      "version": 1,
+      "hypothesis": "Portable Organic evidence changes at least one legitimate recipient verification step materially.",
+      "metricDefinitions": [{ "id": "recipient_behaviour_delta", "unit": "TO_BE_PREREGISTERED" }],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "Comparable best legitimate baseline",
+        "Observed skip/substitute/narrow/accelerate/evidence/follow-up/re-entry/cost/latency/uncertainty changes",
+        "Recipient independent disposition"
+      ],
+      "owner": null,
+      "participantClass": "Authorized recipient decision practitioners",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "A-P2",
+      "route": "ROUTE_A",
+      "phase": 2,
+      "version": 1,
+      "hypothesis": "The actual Organic authority/access mechanism can enforce limits without coercion or false deletion promises.",
+      "metricDefinitions": [{ "id": "access_and_coercion_outcome", "unit": "TO_BE_PREREGISTERED" }],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "Conditional access/purpose/expiry/revocation/future withdrawal/deletion/retention/completed analysis/audit/fatigue/power-imbalance assessment",
+        "Evidence-backed applicability and retention limitations"
+      ],
+      "owner": null,
+      "participantClass": "Subject/source/recipient and qualified privacy authority",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "A-P3",
+      "route": "ROUTE_A",
+      "phase": 3,
+      "version": 1,
+      "hypothesis": "Organic responsibility remains defined across originator, transmitter, platform and recipient failures.",
+      "metricDefinitions": [
+        { "id": "responsibility_chain_coverage", "unit": "TO_BE_PREREGISTERED" }
+      ],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "All twelve framework incident scenarios, duty/owner/escalation and liability gaps",
+        "Nzila infrastructure versus federated authority tabletop"
+      ],
+      "owner": null,
+      "participantClass": "Accountable institutional/platform and legal governance roles",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "A-P4",
+      "route": "ROUTE_A",
+      "phase": 4,
+      "version": 1,
+      "hypothesis": "Organic portability improves producer net value rather than only institutional efficiency.",
+      "metricDefinitions": [{ "id": "producer_net_value", "unit": "TO_BE_PREREGISTERED" }],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "Time/cost/admin/risk/optionality/provider change/market access/latency/repeated documents/privacy-liability baseline and result",
+        "Pre-registered trade-off and capture-cost treatment"
+      ],
+      "owner": null,
+      "participantClass": "Producer/operator and affected institutional practitioners",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "A-P5",
+      "route": "ROUTE_A",
+      "phase": 5,
+      "version": 1,
+      "hypothesis": "Organic feasibility represents less-ready producers and separates capture burden from portability.",
+      "metricDefinitions": [{ "id": "readiness_segment_coverage", "unit": "TO_BE_PREREGISTERED" }],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "API/system/structured/unstructured/email-adviser/paper/mixed baseline and result",
+        "CAPTURE_WORKSTREAM_REQUIRED where applicable with separate cost/time/burden"
+      ],
+      "owner": null,
+      "participantClass": "Producers across readiness segments",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "B-P0",
+      "route": "ROUTE_B",
+      "phase": 0,
+      "version": 1,
+      "hypothesis": "Pending B has an evidenced different setting, re-entry burden, recipient and lawful authority/access path.",
+      "metricDefinitions": [
+        { "id": "authority_and_baseline_coverage", "unit": "TO_BE_PREREGISTERED" }
+      ],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "Actual CFA discovery selection evidence; no B inferred",
+        "Step-level actor/evidence/source/subject/recipient/verification/reasons/mandates/authority/effort/time/rework map",
+        "Best legitimate current-state verification baseline"
+      ],
+      "owner": null,
+      "participantClass": "Pending selection: source and recipient workflow owners",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "B-P1",
+      "route": "ROUTE_B",
+      "phase": 1,
+      "version": 1,
+      "hypothesis": "Pending B portability changes a legitimate recipient step materially.",
+      "metricDefinitions": [{ "id": "recipient_behaviour_delta", "unit": "TO_BE_PREREGISTERED" }],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "Selected B recipient and behavioural test",
+        "Comparable baseline and observed skip/substitute/narrow/accelerate/evidence/follow-up/re-entry/uncertainty/cost/latency changes"
+      ],
+      "owner": null,
+      "participantClass": "Pending selection: recipient practitioners",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "B-P2",
+      "route": "ROUTE_B",
+      "phase": 2,
+      "version": 1,
+      "hypothesis": "Pending B actual authority mechanism supports bounded access without coercion.",
+      "metricDefinitions": [{ "id": "access_and_coercion_outcome", "unit": "TO_BE_PREREGISTERED" }],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "Actual selected mechanism, not presumed consent",
+        "Access/purpose/expiry/revocation/future withdrawal/deletion/lawful retention/completed analyses/audit/fatigue/power-imbalance assessment"
+      ],
+      "owner": null,
+      "participantClass": "Pending selection: subjects and source/recipient/privacy authorities",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "B-P3",
+      "route": "ROUTE_B",
+      "phase": 3,
+      "version": 1,
+      "hypothesis": "Pending B has defined distributed responsibility in all governance incidents.",
+      "metricDefinitions": [
+        { "id": "responsibility_chain_coverage", "unit": "TO_BE_PREREGISTERED" }
+      ],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "All twelve incident scenarios and chain duty/owner/escalation/liability map",
+        "Nzila infrastructure versus federated authority tabletop"
+      ],
+      "owner": null,
+      "participantClass": "Pending selection: institutional/platform/legal owners",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "B-P4",
+      "route": "ROUTE_B",
+      "phase": 4,
+      "version": 1,
+      "hypothesis": "Pending B yields positive producer net value on multidimensional comparison.",
+      "metricDefinitions": [{ "id": "producer_net_value", "unit": "TO_BE_PREREGISTERED" }],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "Route-specific ten-dimension Phase 4 baseline and result",
+        "Who benefits/bears capture cost and approved trade-off rules"
+      ],
+      "owner": null,
+      "participantClass": "Pending selection: producers and affected institutions",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    },
+    {
+      "id": "B-P5",
+      "route": "ROUTE_B",
+      "phase": 5,
+      "version": 1,
+      "hypothesis": "Pending B readiness segmentation does not exclude less-ready producers to prove feasibility.",
+      "metricDefinitions": [{ "id": "readiness_segment_coverage", "unit": "TO_BE_PREREGISTERED" }],
+      "passCriteria": null,
+      "redirectCriteria": null,
+      "killCriteria": null,
+      "evidenceRequired": [
+        "All six readiness classes and capture prerequisite assessment",
+        "Separate CAPTURE_WORKSTREAM_REQUIRED costs/burden where evidenced"
+      ],
+      "owner": null,
+      "participantClass": "Pending selection: producers across readiness classes",
+      "plannedDecisionDate": null,
+      "approval": null,
+      "lockedAt": null,
+      "lockedHash": null,
+      "observations": null,
+      "decision": null,
+      "deviations": [],
+      "thresholdChanges": []
+    }
+  ]
+}

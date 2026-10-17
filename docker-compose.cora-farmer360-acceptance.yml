@@ -1,0 +1,24 @@
+# TEST_ONLY / NON_PRODUCTION / DISPOSABLE local acceptance database.
+# Its project name and named volume are unique; never point an app at a shared DB.
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: cora_acceptance
+      POSTGRES_PASSWORD: cora_acceptance_local_only
+      POSTGRES_DB: cora_farmer360_acceptance
+    ports:
+      - '127.0.0.1:55441:5432'
+    volumes:
+      - cora_farmer360_acceptance_data:/var/lib/postgresql/data
+      - ./packages/db/bootstrap:/acceptance/bootstrap:ro
+      - ./packages/db/drizzle:/acceptance/migrations:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U cora_acceptance -d cora_farmer360_acceptance']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 3s
+
+volumes:
+  cora_farmer360_acceptance_data:

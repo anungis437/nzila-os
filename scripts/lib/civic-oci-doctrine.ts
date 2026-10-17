@@ -2826,6 +2826,59 @@ export function validateCivicOciDoctrine(
   return findings
 }
 
+export const CIVIC_ARCHIVE_PATH_MANIFEST =
+  'docs/public-service/operations/civic-archive/CIVIC_PORTFOLIO_PATH_MANIFEST.json'
+// Packaging fingerprint only. It grants neither runtime nor human admission.
+const ARCHIVE_PATH_MANIFEST_SHA256 =
+  'b94a05c7852c131f6e9d42a724762a4bdcc87d669fd89035e2db0a8a25d8d02f'
+
+/**
+ * Portable review of terminated proofs. Execution and human research continue
+ * through the original admission functions and their original custody checks.
+ * CI verifies source and inventory commitments, not excluded raw payloads.
+ */
+export function validateCivicArchiveReview(root: string): DoctrineFinding[] {
+  const findings: DoctrineFinding[] = []
+  const contract = loadContract(root, findings)
+  if (!contract) return findings
+  validateContract(contract, findings)
+  validateAuthorityPaths(root, contract, findings)
+  validateAnchors(root, findings)
+  validateMethodStructure(root, contract, findings)
+  validateFrontDoor(root, contract, findings)
+  validateRuntimeAliases(root, contract, findings)
+  validateArchivedSlice0(root, findings, true, true)
+  try {
+    const text = readRegularArchivalArtifact(root, CIVIC_ARCHIVE_PATH_MANIFEST)
+      .toString('utf8')
+      .replace(/\r\n/g, '\n')
+    if (createHash('sha256').update(text).digest('hex') !== ARCHIVE_PATH_MANIFEST_SHA256)
+      throw new Error('Archival packaging manifest changed; no inherited review or authority')
+    const manifest = JSON.parse(text) as {
+      entries: { path: string; normalizedLfSha256?: string }[]
+    }
+    for (const entry of manifest.entries) {
+      if (!entry.normalizedLfSha256) continue
+      const content = readRegularArchivalArtifact(root, entry.path)
+        .toString('utf8')
+        .replace(/\r\n/g, '\n')
+      if (createHash('sha256').update(content).digest('hex') !== entry.normalizedLfSha256)
+        throw new Error(`Frozen archival artifact changed: ${entry.path}`)
+    }
+  } catch (error) {
+    findings.push(
+      finding(
+        'CIVIC_ARCHIVE_PACKAGING_INVALID',
+        CIVIC_ARCHIVE_PATH_MANIFEST,
+        ARCHIVAL_AUTHORITY,
+        'unchanged terminated proof source, decisions and inventory commitments; no execution',
+        error instanceof Error ? error.message : String(error),
+      ),
+    )
+  }
+  return findings
+}
+
 export function validateCivicHumanRound1Admission(
   root: string,
   context?: CivicDoctrineValidationContext,

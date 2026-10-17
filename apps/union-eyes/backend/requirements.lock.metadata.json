@@ -1,0 +1,2463 @@
+{
+  "ALL_LOCK_DIGESTS_MATCH": true,
+  "CROSS_TARGET_MARKER_EVALUATION": "Host pip marker environment differs; explicit Linux 3.11 transitive validation recorded separately",
+  "DECLARED_DIRECT_DEPENDENCIES": [
+    {
+      "DECLARED_CONSTRAINT": ">=1.16.1",
+      "DISTRIBUTION": "azure-identity",
+      "EXTRAS": [],
+      "LINE": 25,
+      "LOCKED_VERSION": "1.26.0"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=4.7.0",
+      "DISTRIBUTION": "azure-keyvault-secrets",
+      "EXTRAS": [],
+      "LINE": 27,
+      "LOCKED_VERSION": "4.11.3"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=12.19.0",
+      "DISTRIBUTION": "azure-storage-blob",
+      "EXTRAS": [],
+      "LINE": 26,
+      "LOCKED_VERSION": "12.31.0"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=23.12.1",
+      "DISTRIBUTION": "black",
+      "EXTRAS": [],
+      "LINE": 43,
+      "LOCKED_VERSION": "26.10.1"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=5.3.4",
+      "DISTRIBUTION": "celery",
+      "EXTRAS": ["redis"],
+      "LINE": 12,
+      "LOCKED_VERSION": "5.6.3"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=48.0.1",
+      "DISTRIBUTION": "cryptography",
+      "EXTRAS": [],
+      "LINE": 34,
+      "LOCKED_VERSION": "50.0.2"
+    },
+    {
+      "DECLARED_CONSTRAINT": "<5.3.0,>=5.2.1",
+      "DISTRIBUTION": "django",
+      "EXTRAS": [],
+      "LINE": 2,
+      "LOCKED_VERSION": "5.2.18"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=2.6.0",
+      "DISTRIBUTION": "django-celery-beat",
+      "EXTRAS": [],
+      "LINE": 15,
+      "LOCKED_VERSION": "2.9.0"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=2.5.1",
+      "DISTRIBUTION": "django-celery-results",
+      "EXTRAS": [],
+      "LINE": 16,
+      "LOCKED_VERSION": "2.6.0"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=4.3.0",
+      "DISTRIBUTION": "django-cors-headers",
+      "EXTRAS": [],
+      "LINE": 4,
+      "LOCKED_VERSION": "4.9.0"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=23.5",
+      "DISTRIBUTION": "django-filter",
+      "EXTRAS": [],
+      "LINE": 5,
+      "LOCKED_VERSION": "26.2"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=5.4.0",
+      "DISTRIBUTION": "django-redis",
+      "EXTRAS": [],
+      "LINE": 14,
+      "LOCKED_VERSION": "7.0.0"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=3.15.2",
+      "DISTRIBUTION": "djangorestframework",
+      "EXTRAS": [],
+      "LINE": 3,
+      "LOCKED_VERSION": "3.18.3"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=7.0.0",
+      "DISTRIBUTION": "flake8",
+      "EXTRAS": [],
+      "LINE": 44,
+      "LOCKED_VERSION": "7.4.1"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=21.2.0",
+      "DISTRIBUTION": "gunicorn",
+      "EXTRAS": [],
+      "LINE": 9,
+      "LOCKED_VERSION": "26.2.0"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=1.26.3",
+      "DISTRIBUTION": "numpy",
+      "EXTRAS": [],
+      "LINE": 49,
+      "LOCKED_VERSION": "2.2.6"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=2.2.0",
+      "DISTRIBUTION": "pandas",
+      "EXTRAS": [],
+      "LINE": 48,
+      "LOCKED_VERSION": "2.3.2"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=2.9.9",
+      "DISTRIBUTION": "psycopg2-binary",
+      "EXTRAS": [],
+      "LINE": 6,
+      "LOCKED_VERSION": "2.9.13"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=2.8.0",
+      "DISTRIBUTION": "pyjwt",
+      "EXTRAS": [],
+      "LINE": 33,
+      "LOCKED_VERSION": "2.15.1"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=7.4.3",
+      "DISTRIBUTION": "pytest",
+      "EXTRAS": [],
+      "LINE": 41,
+      "LOCKED_VERSION": "9.1.1"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=4.7.0",
+      "DISTRIBUTION": "pytest-django",
+      "EXTRAS": [],
+      "LINE": 42,
+      "LOCKED_VERSION": "4.14.0"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=1.0.0",
+      "DISTRIBUTION": "python-dotenv",
+      "EXTRAS": [],
+      "LINE": 37,
+      "LOCKED_VERSION": "1.2.4"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=5.0.1",
+      "DISTRIBUTION": "redis",
+      "EXTRAS": [],
+      "LINE": 13,
+      "LOCKED_VERSION": "6.4.0"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=2.32.4",
+      "DISTRIBUTION": "requests",
+      "EXTRAS": [],
+      "LINE": 38,
+      "LOCKED_VERSION": "2.34.2"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=1.5.0",
+      "DISTRIBUTION": "scikit-learn",
+      "EXTRAS": [],
+      "LINE": 47,
+      "LOCKED_VERSION": "1.7.2"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=8.0.0",
+      "DISTRIBUTION": "twilio",
+      "EXTRAS": [],
+      "LINE": 30,
+      "LOCKED_VERSION": "9.11.2"
+    },
+    {
+      "DECLARED_CONSTRAINT": ">=1.1.0",
+      "DISTRIBUTION": "upstash-redis",
+      "EXTRAS": [],
+      "LINE": 22,
+      "LOCKED_VERSION": "1.8.0"
+    }
+  ],
+  "INDEX": "https://pypi.org/simple",
+  "LOCKED_DISTRIBUTIONS": [
+    {
+      "ARTIFACT_FILENAME": "aiohappyeyeballs-2.7.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "9243213661e29250eb41368e5daa826fc017156c3b8a11440826b2e3ed376472",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/71/43/1947f06babed6b3f1d7f38b0c767f52df66bfb2bc10b468c4a7de9eceff2/aiohappyeyeballs-2.7.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "aiohappyeyeballs",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "2.7.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "aiohttp-3.14.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "ARTIFACT_SHA256": "f887c3b7fb3058fc1ccd917f52078540c18d938d12018cb9edd64b6811d20c57",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/da/6c/1f83990fea249dcb10f48086726953546efc9199c96b6be7114532ac361f/aiohttp-3.14.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "aiohttp",
+      "REQUIRES_DIST": [
+        "Brotli>=1.2; (platform_python_implementation == \"CPython\" and sys_platform != \"android\" and sys_platform != \"ios\") and extra == \"speedups\"",
+        "aiodns>=3.3.0; (sys_platform != \"android\" and sys_platform != \"ios\") and extra == \"speedups\"",
+        "aiohappyeyeballs>=2.5.0",
+        "aiosignal>=1.4.0",
+        "async-timeout<6.0,>=4.0; python_version < \"3.11\"",
+        "attrs>=17.3.0",
+        "backports.zstd; (platform_python_implementation == \"CPython\" and python_version < \"3.14\" and sys_platform != \"android\" and sys_platform != \"ios\") and extra == \"speedups\"",
+        "brotlicffi>=1.2; platform_python_implementation != \"CPython\" and extra == \"speedups\"",
+        "frozenlist>=1.1.1",
+        "multidict<7.0,>=4.5",
+        "propcache>=0.2.0",
+        "typing_extensions>=4.4; python_version < \"3.13\"",
+        "yarl<2.0,>=1.25.1"
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "3.14.4"
+    },
+    {
+      "ARTIFACT_FILENAME": "aiohttp_retry-2.9.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "66d2759d1921838256a05a3f80ad7e724936f083e35be5abb5e16eed6be6dc54",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/1a/99/84ba7273339d0f3dfa57901b846489d2e5c2cd731470167757f1935fffbd/aiohttp_retry-2.9.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "aiohttp-retry",
+      "REQUIRES_DIST": ["aiohttp"],
+      "REQUIRES_PYTHON": ">=3.7",
+      "VERSION": "2.9.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "aiosignal-1.4.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "053243f8b92b990551949e63930a839ff0cf0b0ebbe0597b0f3fb19e1a0fe82e",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/fb/76/641ae371508676492379f16e2fa48f4e2c11741bd63c48be4b12a6b09cba/aiosignal-1.4.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "aiosignal",
+      "REQUIRES_DIST": ["frozenlist>=1.1.0", "typing-extensions>=4.2; python_version < \"3.13\""],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "1.4.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "amqp-5.4.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "ac2b816a14a380ed10c5ebbf85a334fd68111fa476496867a5ccd2fd09926d5e",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/28/8e/25f762f8cf0da76c7b1a66a9cadc291168537598c533954b0e2c9de3a0a3/amqp-5.4.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "amqp",
+      "REQUIRES_DIST": ["vine<6.0.0,>=5.0.0"],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "5.4.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "anyio-4.15.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/12/b8/4bd346e22b28902df4d651910f5242c28d84e4a5c2435ca5c3f797ed7e2e/anyio-4.15.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "anyio",
+      "REQUIRES_DIST": [
+        "exceptiongroup>=1.0.2; python_version < \"3.11\"",
+        "idna>=2.8",
+        "trio>=0.32.0; extra == \"trio\"",
+        "typing_extensions>=4.16.0; python_version < \"3.15\""
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "4.15.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "asgiref-3.12.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "fe386d1c2bff7259ea95929266d12a8cf9a8b5a1c2598402967d8792e7a7c094",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/c0/1b/54f4ad77cd8a584fa70746c47df988e002cf1ee1eba43364d46f87803647/asgiref-3.12.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "asgiref",
+      "REQUIRES_DIST": [
+        "mypy>=1.14.0; extra == \"mypy\"",
+        "pytest-asyncio; extra == \"tests\"",
+        "pytest; extra == \"tests\"",
+        "typing_extensions>=4; python_version < \"3.11\""
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "3.12.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "attrs-26.1.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "attrs",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "26.1.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "azure_core-1.41.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "522b4011e8180b1a3dcd2024396a4e7fe9ac37fb8597db47163d230b5efe892d",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/5b/db/325c6d7312d2200251c52323878281045aaffcb5586612296484e4280eaa/azure_core-1.41.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "azure-core",
+      "REQUIRES_DIST": [
+        "aiohttp>=3.0; extra == \"aio\"",
+        "opentelemetry-api~=1.26; extra == \"tracing\"",
+        "requests>=2.21.0",
+        "typing-extensions>=4.6.0"
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "1.41.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "azure_identity-1.26.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "3c60d9682b3ac01507388d474cb5a5ffbe54152a96b6cdcaa7013da9315cf186",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/b2/d5/ae45ce8009d0d015304b206c7c4a6cbab02c03f8f07eedefb32b099ccee3/azure_identity-1.26.0-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "azure-identity",
+      "REQUIRES_DIST": [
+        "azure-core>=1.31.0",
+        "cryptography>=2.5",
+        "msal-extensions>=1.2.0",
+        "msal>=1.39.0",
+        "typing-extensions>=4.0.0"
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "1.26.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "azure_keyvault_secrets-4.11.3-py3-none-any.whl",
+      "ARTIFACT_SHA256": "c77cc80f33d07e1b8cbbda5e7b6b8a1da1471ca917796f9895603a0c2b5f9c2f",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/dc/8e/726acb7b6cd8d28cafd06531d6daf7e390667ebbbc4ff39f7cfc5bd75652/azure_keyvault_secrets-4.11.3-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "azure-keyvault-secrets",
+      "REQUIRES_DIST": ["azure-core>=1.31.0", "isodate>=0.6.1", "typing-extensions>=4.6.0"],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "4.11.3"
+    },
+    {
+      "ARTIFACT_FILENAME": "azure_storage_blob-12.31.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "0c0cb601d3462491d09ea96023cd791bb9dd4b173bf950daf3cff34ff47ba5b5",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/9b/57/d1f45fbccc0dfbe6b6db7e5fa06199e35219c712f3743677bec1b4e7d78b/azure_storage_blob-12.31.0-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "azure-storage-blob",
+      "REQUIRES_DIST": [
+        "azure-core>=1.37.0",
+        "azure-core[aio]>=1.37.0; extra == \"aio\"",
+        "azure-storage-extensions<1.0.0,>=0.1.0; extra == \"ext-checksums\"",
+        "cryptography>=2.1.4",
+        "isodate>=0.6.1",
+        "typing-extensions>=4.6.0"
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "12.31.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "billiard-4.3.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "2c7075283191d9c0add66cf8fca8e06ba599e75fe7319b67186759f8877dfdaf",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/bb/b1/360936699597063a2d9863aa94ccc3a6951e906ced032a9a1d8e562fc56b/billiard-4.3.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "billiard",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "4.3.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "black-26.10.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "ARTIFACT_SHA256": "ff57f63029aa1353fa8b1b0c8971fd88a6c92dc766608d2eee33ad2deb23270e",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/d5/e9/9616d58f69f0e4bfa89ebe8686b6ef50f4b4f0f91237ae4c76f34dabf8aa/black-26.10.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "black",
+      "REQUIRES_DIST": [
+        "aiohttp>=3.10; extra == 'd'",
+        "click>=8.0.0",
+        "colorama>=0.4.3; extra == 'colorama'",
+        "ipython>=7.8.0; extra == 'jupyter'",
+        "mypy-extensions>=0.4.3",
+        "packaging>=22.0",
+        "pathspec>=1.0.0",
+        "platformdirs>=2",
+        "pytokens~=0.4.0",
+        "tokenize-rt>=3.2.0; extra == 'jupyter'",
+        "tomli>=1.1.0; python_version < '3.11'",
+        "typing-extensions>=4.0.1; python_version < '3.11'",
+        "uvloop>=0.15.2; (sys_platform != 'win32') and extra == 'uvloop'",
+        "winloop>=0.5.0; (sys_platform == 'win32') and extra == 'uvloop'"
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "26.10.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "celery-5.6.3-py3-none-any.whl",
+      "ARTIFACT_SHA256": "0808f42f80909c4d5833202360ffafb2a4f83f4d8e23e1285d926610e9a7afa6",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/cf/c9/6eccdda96e098f7ae843162db2d3c149c6931a24fda69fe4ab84d0027eb5/celery-5.6.3-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "celery",
+      "REQUIRES_DIST": [
+        "Django>=2.2.28; extra == \"django\"",
+        "azure-identity>=1.19.0; extra == \"azureblockblob\"",
+        "azure-storage-blob>=12.15.0; extra == \"azureblockblob\"",
+        "billiard<5.0,>=4.2.1",
+        "boto3>=1.26.143; extra == \"dynamodb\"",
+        "boto3>=1.26.143; extra == \"s3\"",
+        "boto3>=1.26.143; extra == \"sqs\"",
+        "brotli>=1.0.0; platform_python_implementation == \"CPython\" and extra == \"brotli\"",
+        "brotlipy>=0.7.0; platform_python_implementation == \"PyPy\" and extra == \"brotli\"",
+        "cassandra-driver<4,>=3.25.0; extra == \"cassandra\"",
+        "click-didyoumean>=0.3.0",
+        "click-plugins>=1.1.1",
+        "click-repl>=0.2.0",
+        "click<9.0,>=8.1.2",
+        "couchbase>=3.0.0; (platform_python_implementation != \"PyPy\" and (platform_system != \"Windows\" or python_version < \"3.10\")) and extra == \"couchbase\"",
+        "cryptography==46.0.5; extra == \"auth\"",
+        "elastic-transport<=9.2.1; extra == \"elasticsearch\"",
+        "elasticsearch<=9.3.0; extra == \"elasticsearch\"",
+        "ephem==4.2; platform_python_implementation != \"PyPy\" and extra == \"solar\"",
+        "eventlet>=0.32.0; python_version < \"3.10\" and extra == \"eventlet\"",
+        "exceptiongroup>=1.3.0; python_version < \"3.11\"",
+        "gevent>=1.5.0; extra == \"gevent\"",
+        "google-cloud-firestore==2.23.0; extra == \"gcs\"",
+        "google-cloud-storage>=2.10.0; extra == \"gcs\"",
+        "grpcio==1.76.0; extra == \"gcs\"",
+        "kazoo>=1.3.1; extra == \"zookeeper\"",
+        "kombu>=5.6.0",
+        "kombu[mongodb]; extra == \"mongodb\"",
+        "kombu[msgpack]; extra == \"msgpack\"",
+        "kombu[redis]; extra == \"redis\"",
+        "kombu[sqlalchemy]; extra == \"sqlalchemy\"",
+        "kombu[sqs]>=5.5.0; extra == \"sqs\"",
+        "kombu[yaml]; extra == \"yaml\"",
+        "librabbitmq>=2.0.0; python_version < \"3.11\" and extra == \"librabbitmq\"",
+        "pyArango>=2.0.2; extra == \"arangodb\"",
+        "pycouchdb==1.16.0; extra == \"couchdb\"",
+        "pycurl<7.45.4,>=7.43.0.5; (sys_platform != \"win32\" and platform_python_implementation == \"CPython\" and python_version < \"3.9\") and extra == \"sqs\"",
+        "pycurl>=7.45.4; (sys_platform != \"win32\" and platform_python_implementation == \"CPython\" and python_version >= \"3.9\") and extra == \"sqs\"",
+        "pydantic>=2.12.0a1; python_version >= \"3.14\" and extra == \"pydantic\"",
+        "pydantic>=2.4; python_version < \"3.14\" and extra == \"pydantic\"",
+        "pydocumentdb==2.3.5; extra == \"cosmosdbsql\"",
+        "pylibmc==1.6.3; platform_system != \"Windows\" and extra == \"memcache\"",
+        "pyro4==4.82; python_version < \"3.11\" and extra == \"pyro\"",
+        "pytest-celery[all]>=1.3.0; extra == \"pytest\"",
+        "python-consul2==0.1.5; extra == \"consul\"",
+        "python-dateutil>=2.8.2",
+        "python-memcached>=1.61; extra == \"pymemcache\"",
+        "softlayer_messaging>=1.0.3; extra == \"slmq\"",
+        "tblib==3.2.2; extra == \"tblib\"",
+        "tzlocal",
+        "urllib3>=1.26.16; extra == \"sqs\"",
+        "vine<6.0,>=5.1.0",
+        "zstandard==0.23.0; extra == \"zstd\""
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "5.6.3"
+    },
+    {
+      "ARTIFACT_FILENAME": "certifi-2026.7.22-py3-none-any.whl",
+      "ARTIFACT_SHA256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/0b/a7/71ac2cff56fec219ed242bb11b8efb69fcc4bec75db06fb7bfe35de520e6/certifi-2026.7.22-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "certifi",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.7",
+      "VERSION": "2026.7.22"
+    },
+    {
+      "ARTIFACT_FILENAME": "cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "ARTIFACT_SHA256": "34e261f78cb6ceaaa36f42f2613f4380d94d9c759a9c73c769ee6e0247364632",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/f7/a4/4399daaf8f7dfee9d7c3327fdb0426ee041cc63edc358b93911ceb2bfc7a/cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "cffi",
+      "REQUIRES_DIST": ["pycparser; implementation_name != \"PyPy\""],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "2.1.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "ARTIFACT_SHA256": "211d5a3eb6af8f513b8d4ca19a8c1b7accab1b5f0d3175f9826b03c1a920dc1f",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/e4/ed/cf505d3011ffceb12c2067a7a5d3cfe92b875d4d44bb0ff0d69375e2c184/charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "charset-normalizer",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.7",
+      "VERSION": "3.5.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "click-8.5.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/58/50/6c0d534c5f134586a8e1ba4e330569e32f057e33372ae556463212fb4cd3/click-8.5.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "click",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "8.5.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "click_didyoumean-0.3.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "5c4bb6007cfea5f2fd6583a2fb6701a22a41eb98957e63d0fac41c10e7c3117c",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/1b/5b/974430b5ffdb7a4f1941d13d83c64a0395114503cc357c6b9ae4ce5047ed/click_didyoumean-0.3.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "click-didyoumean",
+      "REQUIRES_DIST": ["click (>=7)"],
+      "REQUIRES_PYTHON": ">=3.6.2",
+      "VERSION": "0.3.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "click_plugins-1.1.1.2-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "008d65743833ffc1f5417bf0e78e8d2c23aab04d9745ba817bd3e71b0feb6aa6",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/3d/9a/2abecb28ae875e39c8cad711eb1186d8d14eab564705325e77e4e6ab9ae5/click_plugins-1.1.1.2-py2.py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "click-plugins",
+      "REQUIRES_DIST": [
+        "click>=4.0",
+        "coveralls; extra == \"dev\"",
+        "pytest-cov; extra == \"dev\"",
+        "pytest>=3.6; extra == \"dev\"",
+        "wheel; extra == \"dev\""
+      ],
+      "REQUIRES_PYTHON": null,
+      "VERSION": "1.1.1.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "click_repl-0.4.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "5cb10881d4c5ebaa8695eceb69911af3062ee78342812b713564b17aad333eb5",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/a4/f6/12dc0f2e0159c2b416818b7fedcda15b520043773364a81d7389809a5af5/click_repl-0.4.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "click-repl",
+      "REQUIRES_DIST": [
+        "click<9.0,>=7.0",
+        "flake8>=6.0.0; extra == \"testing\"",
+        "mypy>=1.9.0; extra == \"testing\"",
+        "prompt_toolkit>=3.0.36",
+        "pytest-cov>=4.0.0; extra == \"testing\"",
+        "pytest>=7.2.1; extra == \"testing\"",
+        "tox>=4.4.3; extra == \"testing\"",
+        "typing-extensions>=4.7.0"
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "0.4.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "cloudpickle-3.1.2-py3-none-any.whl",
+      "ARTIFACT_SHA256": "9acb47f6afd73f60dc1df93bb801b472f05ff42fa6c84167d25cb206be1fbf4a",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/88/39/799be3f2f0f38cc727ee3b4f1445fe6d5e4133064ec2e4115069418a5bb6/cloudpickle-3.1.2-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "cloudpickle",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.8",
+      "VERSION": "3.1.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "colorama-0.4.6-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "colorama",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7",
+      "VERSION": "0.4.6"
+    },
+    {
+      "ARTIFACT_FILENAME": "cron_descriptor-1.4.5-py3-none-any.whl",
+      "ARTIFACT_SHA256": "736b3ae9d1a99bc3dbfc5b55b5e6e7c12031e7ba5de716625772f8b02dcd6013",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/88/20/2cfe598ead23a715a00beb716477cfddd3e5948cf203c372d02221e5b0c6/cron_descriptor-1.4.5-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "cron-descriptor",
+      "REQUIRES_DIST": ["polib ; extra == 'dev'"],
+      "REQUIRES_PYTHON": null,
+      "VERSION": "1.4.5"
+    },
+    {
+      "ARTIFACT_FILENAME": "cryptography-50.0.2-cp311-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "ARTIFACT_SHA256": "630ebfea3bf689d075f82316324ff7433dc447fe6bc1bfc76524b74b4a9567d2",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/21/69/64cef1f702bf6657e0cc186ed1a2891d50d29fb41586b254e1c07adea261/cryptography-50.0.2-cp311-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "cryptography",
+      "REQUIRES_DIST": [
+        "bcrypt>=3.1.5 ; extra == 'ssh'",
+        "cffi>=2.0.0 ; platform_python_implementation != 'PyPy'",
+        "typing-extensions>=4.13.2 ; python_full_version < '3.11'"
+      ],
+      "REQUIRES_PYTHON": ">=3.9, !=3.9.0, !=3.9.1",
+      "VERSION": "50.0.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "django-5.2.18-py3-none-any.whl",
+      "ARTIFACT_SHA256": "92ed81d500be6408ecd704d7bd1366c534f30427bffcc63c5fefb129561aec7c",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/d6/01/6568ec52b26548ca1b83d33249f7274db3bf74698f42c0da42ec9db1a24a/django-5.2.18-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "django",
+      "REQUIRES_DIST": [
+        "argon2-cffi>=19.1.0; extra == \"argon2\"",
+        "asgiref>=3.8.1",
+        "bcrypt; extra == \"bcrypt\"",
+        "sqlparse>=0.3.1",
+        "tzdata; sys_platform == \"win32\""
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "5.2.18"
+    },
+    {
+      "ARTIFACT_FILENAME": "django_celery_beat-2.9.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "4a9e5ebe26d6f8d7215e1fc5c46e466016279dc102435a28141108649bdf2157",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/71/ae/9befa7ae37f5e5c41be636a254fcf47ff30dd5c88bd115070e252f6b9162/django_celery_beat-2.9.0-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "django-celery-beat",
+      "REQUIRES_DIST": [
+        "Django<6.1,>=2.2",
+        "backports.zoneinfo; python_version < \"3.9\"",
+        "celery<6.0,>=5.2.3",
+        "cron-descriptor<2.0.0,>=1.2.32",
+        "django-timezone-field>=5.0",
+        "importlib-metadata<5.0; python_version < \"3.8\"",
+        "python-crontab>=2.3.4",
+        "tzdata"
+      ],
+      "REQUIRES_PYTHON": ">=3.8",
+      "VERSION": "2.9.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "django_celery_results-2.6.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "b9ccdca2695b98c7cbbb8dea742311ba9a92773d71d7b4944a676e69a7df1c73",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/2c/da/70f0f3c5364735344c4bc89e53413bcaae95b4fc1de4e98a7a3b9fb70c88/django_celery_results-2.6.0-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "django-celery-results",
+      "REQUIRES_DIST": ["Django>=3.2.25", "celery<6.0,>=5.2.7"],
+      "REQUIRES_PYTHON": null,
+      "VERSION": "2.6.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "django_cors_headers-4.9.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "15c7f20727f90044dcee2216a9fd7303741a864865f0c3657e28b7056f61b449",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/30/d8/19ed1e47badf477d17fb177c1c19b5a21da0fd2d9f093f23be3fb86c5fab/django_cors_headers-4.9.0-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "django-cors-headers",
+      "REQUIRES_DIST": ["asgiref>=3.6", "django>=4.2"],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "4.9.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "django_filter-26.2-py3-none-any.whl",
+      "ARTIFACT_SHA256": "df8f737841d6359df00b84dda9b5ab59067fe60292091f1bdae1e3e6281cedb0",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/4a/92/6b098caa5b980a9d13a8db4825b7670410fa572e9195e39648f7700f2a37/django_filter-26.2-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "django-filter",
+      "REQUIRES_DIST": ["Django>=5.2", "djangorestframework ; extra == \"drf\""],
+      "REQUIRES_PYTHON": ">=3.11",
+      "VERSION": "26.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "django_redis-7.0.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "4b23aa6e0cd0937bb1242e9a463809e6004de3ca2150f34e986306bb6220d688",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/7e/9f/09cdb9a1eebe8533b02a7694ca787acfc1e4d93b5b6175ff99366d4e6d64/django_redis-7.0.0-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "django-redis",
+      "REQUIRES_DIST": [
+        "Django<7.0,>=5.2",
+        "lz4>=0.15; extra == \"lz4\"",
+        "msgpack>=0.6.0; extra == \"msgpack\"",
+        "pyzstd>=0.15; extra == \"pyzstd\"",
+        "redis>=4.0.2",
+        "redis[hiredis]>=4.0.2; extra == \"hiredis\"",
+        "typing_extensions>=4.12; python_version <= \"3.12\""
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "7.0.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "django_timezone_field-7.2.2-py3-none-any.whl",
+      "ARTIFACT_SHA256": "30354d0f37462a0b9b5c289e271580a6be9b58dea30e7bf88435372882c8fa7a",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/2b/5f/c8dfb67105c4ef391a3e9d0bcd35b7eae4c4c9d023d612c3999ae1cb32ef/django_timezone_field-7.2.2-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "django-timezone-field",
+      "REQUIRES_DIST": [
+        "Django (>=4.2,<6.2)",
+        "backports.zoneinfo (>=0.2.1,<0.3.0) ; python_version < \"3.9\""
+      ],
+      "REQUIRES_PYTHON": ">=3.8,<4.0",
+      "VERSION": "7.2.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "djangorestframework-3.18.3-py3-none-any.whl",
+      "ARTIFACT_SHA256": "8544bb674846731b1e3c9b309236ee1dc412905a0aa725be2ec193ca950a7d12",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/c4/dd/de5f4543765bec94e036a5e9593a42f8fa7efec8de78eb56b9ca834385f3/djangorestframework-3.18.3-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "djangorestframework",
+      "REQUIRES_DIST": ["django>=5.2"],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "3.18.3"
+    },
+    {
+      "ARTIFACT_FILENAME": "flake8-7.4.1-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "78480274a6d7289d9cb8eafeda241fac57d4ea687d26e32dfdca37b72cdeddad",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/b5/d4/8e58a7221419bf8cb194f362ab26abf504c983135975e4c785fac0852886/flake8-7.4.1-py2.py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "flake8",
+      "REQUIRES_DIST": [
+        "mccabe<0.8.0,>=0.7.0",
+        "pycodestyle<2.16.0,>=2.15.0",
+        "pyflakes<4.1.0,>=4.0.0"
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "7.4.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+      "ARTIFACT_SHA256": "2552f44204b744fba866e573be4c1f9048d6a324dfe14475103fd51613eb1d1f",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/11/b1/71a477adc7c36e5fb628245dfbdea2166feae310757dea848d02bd0689fd/frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "frozenlist",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "1.8.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "gunicorn-26.2.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "bd249d0b3f7972f7432f0a6b6ff3b3ee2d129f70cd1ff6c09a9dd9e29a2b88e3",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/fe/85/7522a52e5e2f42faf1a129113ab63e548c42e103e9af395b7bfe65e403e2/gunicorn-26.2.0-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "gunicorn",
+      "REQUIRES_DIST": [
+        "coverage; extra == \"testing\"",
+        "gevent>=24.10.1; extra == \"gevent\"",
+        "gevent>=24.10.1; extra == \"testing\"",
+        "gunicorn_h1c>=0.6.9; extra == \"fast\"",
+        "h2>=4.4.1; extra == \"http2\"",
+        "h2>=4.4.1; extra == \"testing\"",
+        "httpx[http2]>=0.23.0; extra == \"testing\"",
+        "inotify>=0.2.10; sys_platform == \"linux\" and extra == \"testing\"",
+        "packaging; extra == \"gevent\"",
+        "packaging; extra == \"testing\"",
+        "pytest-asyncio; extra == \"testing\"",
+        "pytest-cov; extra == \"testing\"",
+        "pytest>=9.0.3; extra == \"testing\"",
+        "setproctitle; extra == \"setproctitle\"",
+        "tornado>=6.5.7; extra == \"tornado\"",
+        "uvloop>=0.19.0; extra == \"testing\""
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "26.2.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "h11-0.16.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "h11",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.8",
+      "VERSION": "0.16.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "httpcore-1.0.9-py3-none-any.whl",
+      "ARTIFACT_SHA256": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/7e/f5/f66802a942d491edb555dd61e3a9961140fd64c90bce1eafd741609d334d/httpcore-1.0.9-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "httpcore",
+      "REQUIRES_DIST": [
+        "anyio<5.0,>=4.0; extra == 'asyncio'",
+        "certifi",
+        "h11>=0.16",
+        "h2<5,>=3; extra == 'http2'",
+        "socksio==1.*; extra == 'socks'",
+        "trio<1.0,>=0.22.0; extra == 'trio'"
+      ],
+      "REQUIRES_PYTHON": ">=3.8",
+      "VERSION": "1.0.9"
+    },
+    {
+      "ARTIFACT_FILENAME": "httpx-0.28.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "httpx",
+      "REQUIRES_DIST": [
+        "anyio",
+        "brotli; (platform_python_implementation == 'CPython') and extra == 'brotli'",
+        "brotlicffi; (platform_python_implementation != 'CPython') and extra == 'brotli'",
+        "certifi",
+        "click==8.*; extra == 'cli'",
+        "h2<5,>=3; extra == 'http2'",
+        "httpcore==1.*",
+        "idna",
+        "pygments==2.*; extra == 'cli'",
+        "rich<14,>=10; extra == 'cli'",
+        "socksio==1.*; extra == 'socks'",
+        "zstandard>=0.18.0; extra == 'zstd'"
+      ],
+      "REQUIRES_PYTHON": ">=3.8",
+      "VERSION": "0.28.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "idna-3.20-py3-none-any.whl",
+      "ARTIFACT_SHA256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/58/a2/bb081bab032533a855d44de1d56f8e8426114ff1ba5d1f07a438a0a654f8/idna-3.20-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "idna",
+      "REQUIRES_DIST": [
+        "coverage >= 7.10.0 ; extra == \"all\"",
+        "hypothesis >= 6.141.1 ; extra == \"all\"",
+        "mypy >= 1.11.2 ; extra == \"all\"",
+        "pytest >= 8.3.2 ; extra == \"all\"",
+        "ruff >= 0.16.0 ; extra == \"all\"",
+        "ty >= 0.0.37 ; extra == \"all\""
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "3.20"
+    },
+    {
+      "ARTIFACT_FILENAME": "iniconfig-2.3.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/56/43/4ca9e49d27a1fcf6bece6f6aec0ea46bb9112489b93d4b688fb415457bdb/iniconfig-2.3.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "iniconfig",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "2.3.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "isodate-0.7.2-py3-none-any.whl",
+      "ARTIFACT_SHA256": "28009937d8031054830160fce6d409ed342816b543597cece116d966c6d99e15",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/15/aa/0aca39a37d3c7eb941ba736ede56d689e7be91cab5d9ca846bde3999eba6/isodate-0.7.2-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "isodate",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.7",
+      "VERSION": "0.7.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "joblib-1.6.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "3dbbf9f6e4b592a2357b854608e980fe6390d131d7a82f011a377ef2ebef7aba",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/18/53/84099323c2ec4be98d935f63c033ac4151ee83836ca1050ede3b3aadf155/joblib-1.6.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "joblib",
+      "REQUIRES_DIST": [
+        "cloudpickle>=3.0",
+        "distributed; extra == \"docs\"",
+        "distributed; extra == \"test\"",
+        "lz4; extra == \"docs\"",
+        "lz4; extra == \"test\"",
+        "matplotlib; extra == \"docs\"",
+        "memory_profiler; extra == \"test\"",
+        "numpy; extra == \"docs\"",
+        "numpy; extra == \"test\"",
+        "numpydoc; extra == \"docs\"",
+        "pandas; extra == \"docs\"",
+        "psutil; extra == \"docs\"",
+        "pydata-sphinx-theme; extra == \"docs\"",
+        "pytest-asyncio; extra == \"test\"",
+        "pytest-cov; extra == \"test\"",
+        "pytest-run-parallel; extra == \"test\"",
+        "pytest-timeout; extra == \"test\"",
+        "pytest; extra == \"test\"",
+        "sphinx-copybutton; extra == \"docs\"",
+        "sphinx-design; extra == \"docs\"",
+        "sphinx-gallery; extra == \"docs\"",
+        "sphinx; extra == \"docs\"",
+        "threadpoolctl; extra == \"test\"",
+        "tqdm; extra == \"docs\""
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "1.6.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "kombu-5.6.2-py3-none-any.whl",
+      "ARTIFACT_SHA256": "efcfc559da324d41d61ca311b0c64965ea35b4c55cc04ee36e55386145dace93",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/fb/0f/834427d8c03ff1d7e867d3db3d176470c64871753252b21b4f4897d1fa45/kombu-5.6.2-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "kombu",
+      "REQUIRES_DIST": [
+        "PyYAML>=3.10; extra == \"yaml\"",
+        "amqp<6.0.0,>=5.1.1",
+        "azure-identity>=1.12.0; extra == \"azurestoragequeues\"",
+        "azure-servicebus>=7.10.0; extra == \"azureservicebus\"",
+        "azure-storage-queue>=12.6.0; extra == \"azurestoragequeues\"",
+        "boto3>=1.26.143; extra == \"sqs\"",
+        "confluent-kafka>=2.2.0; extra == \"confluentkafka\"",
+        "google-cloud-monitoring>=2.16.0; extra == \"gcpubsub\"",
+        "google-cloud-pubsub>=2.18.4; extra == \"gcpubsub\"",
+        "grpcio==1.75.1; extra == \"gcpubsub\"",
+        "kazoo>=2.8.0; extra == \"zookeeper\"",
+        "librabbitmq>=2.0.0; python_version < \"3.11\" and extra == \"librabbitmq\"",
+        "msgpack==1.1.2; extra == \"msgpack\"",
+        "packaging",
+        "protobuf==6.32.1; extra == \"gcpubsub\"",
+        "pycurl>=7.43.0.5; (sys_platform != \"win32\" and platform_python_implementation == \"CPython\") and extra == \"sqs\"",
+        "pymongo==4.15.3; extra == \"mongodb\"",
+        "pyro4==4.82; extra == \"pyro\"",
+        "python-consul2==0.1.5; extra == \"consul\"",
+        "qpid-python==1.36.0-1; extra == \"qpid\"",
+        "qpid-tools==1.36.0-1; extra == \"qpid\"",
+        "redis!=4.5.5,!=5.0.2,<6.5,>=4.5.2; extra == \"redis\"",
+        "softlayer_messaging>=1.0.3; extra == \"slmq\"",
+        "sqlalchemy<2.1,>=1.4.48; extra == \"sqlalchemy\"",
+        "tzdata>=2025.2",
+        "urllib3>=1.26.16; extra == \"sqs\"",
+        "vine==5.1.0"
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "5.6.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "mccabe-0.7.0-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/27/1a/1f68f9ba0c207934b35b86a8ca3aad8395a3d6dd7921c0686e23853ff5a9/mccabe-0.7.0-py2.py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "mccabe",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.6",
+      "VERSION": "0.7.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "msal-1.39.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "2d2577886906cd7293850dffa2da29119966c213bfc6ec0cecf8bf7621e1ca77",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/a4/32/178457385925ce301c7b3232bd85665d4df57da39568b62dcfc74031873f/msal-1.39.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "msal",
+      "REQUIRES_DIST": [
+        "PyJWT[crypto] <3,>=1.0.0",
+        "cryptography <51,>=2.5",
+        "pymsalruntime <0.21,>=0.20 ; (python_version >= \"3.9\" and platform_system == \"Darwin\") and extra == 'broker'",
+        "pymsalruntime <0.21,>=0.20 ; (python_version >= \"3.9\" and platform_system == \"Linux\") and extra == 'broker'",
+        "pymsalruntime <0.21,>=0.20 ; (python_version >= \"3.9\" and platform_system == \"Windows\") and extra == 'broker'",
+        "requests <3,>=2.0.0"
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "1.39.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "msal_extensions-1.3.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "96d3de4d034504e969ac5e85bae8106c8373b5c6568e4c8fa7af2eca9dbe6bca",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/5e/75/bd9b7bb966668920f06b200e84454c8f3566b102183bc55c5473d96cb2b9/msal_extensions-1.3.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "msal-extensions",
+      "REQUIRES_DIST": ["msal<2,>=1.29", "portalocker<4,>=1.4; extra == \"portalocker\""],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "1.3.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "multidict-6.9.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "ARTIFACT_SHA256": "e8f1e362c9352b50ed120f001046fdbb80810c9d56580f4c3fc13bbe30823387",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/27/50/f420de3683f9b047fc5588064d84043ef57a7152ef451b8373dfc7068d22/multidict-6.9.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "multidict",
+      "REQUIRES_DIST": ["typing-extensions>=4.1.0; python_version < \"3.11\""],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "6.9.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "mypy_extensions-1.1.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "1be4cccdb0f2482337c4743e60421de3a356cd97508abadd57d47403e94f5505",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/79/7b/2c79738432f5c924bef5071f933bcc9efd0473bac3b4aa584a6f7c1c8df8/mypy_extensions-1.1.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "mypy-extensions",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.8",
+      "VERSION": "1.1.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "numpy-2.2.6-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "ARTIFACT_SHA256": "ba10f8411898fc418a521833e014a77d3ca01c15b0c6cdcce6a0d2897e6dbbdf",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/b3/dd/2238b898e51bd6d389b7389ffb20d7f4c10066d80351187ec8e303a5a475/numpy-2.2.6-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "numpy",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "2.2.6"
+    },
+    {
+      "ARTIFACT_FILENAME": "packaging-26.3-py3-none-any.whl",
+      "ARTIFACT_SHA256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "packaging",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "26.3"
+    },
+    {
+      "ARTIFACT_FILENAME": "pandas-2.3.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "ARTIFACT_SHA256": "1d81573b3f7db40d020983f78721e9bfc425f411e616ef019a10ebf597aedb2e",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/8b/ef/0e2ffb30b1f7fbc9a588bd01e3c14a0d96854d09a887e15e30cc19961227/pandas-2.3.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "pandas",
+      "REQUIRES_DIST": [
+        "PyQt5>=5.15.9; extra == \"all\"",
+        "PyQt5>=5.15.9; extra == \"clipboard\"",
+        "SQLAlchemy>=2.0.0; extra == \"all\"",
+        "SQLAlchemy>=2.0.0; extra == \"mysql\"",
+        "SQLAlchemy>=2.0.0; extra == \"postgresql\"",
+        "SQLAlchemy>=2.0.0; extra == \"sql-other\"",
+        "adbc-driver-postgresql>=0.8.0; extra == \"all\"",
+        "adbc-driver-postgresql>=0.8.0; extra == \"postgresql\"",
+        "adbc-driver-postgresql>=0.8.0; extra == \"sql-other\"",
+        "adbc-driver-sqlite>=0.8.0; extra == \"all\"",
+        "adbc-driver-sqlite>=0.8.0; extra == \"sql-other\"",
+        "beautifulsoup4>=4.11.2; extra == \"all\"",
+        "beautifulsoup4>=4.11.2; extra == \"html\"",
+        "bottleneck>=1.3.6; extra == \"all\"",
+        "bottleneck>=1.3.6; extra == \"performance\"",
+        "dataframe-api-compat>=0.1.7; extra == \"all\"",
+        "dataframe-api-compat>=0.1.7; extra == \"consortium-standard\"",
+        "fastparquet>=2022.12.0; extra == \"all\"",
+        "fsspec>=2022.11.0; extra == \"all\"",
+        "fsspec>=2022.11.0; extra == \"fss\"",
+        "gcsfs>=2022.11.0; extra == \"all\"",
+        "gcsfs>=2022.11.0; extra == \"gcp\"",
+        "html5lib>=1.1; extra == \"all\"",
+        "html5lib>=1.1; extra == \"html\"",
+        "hypothesis>=6.46.1; extra == \"all\"",
+        "hypothesis>=6.46.1; extra == \"test\"",
+        "jinja2>=3.1.2; extra == \"all\"",
+        "jinja2>=3.1.2; extra == \"output-formatting\"",
+        "lxml>=4.9.2; extra == \"all\"",
+        "lxml>=4.9.2; extra == \"html\"",
+        "lxml>=4.9.2; extra == \"xml\"",
+        "matplotlib>=3.6.3; extra == \"all\"",
+        "matplotlib>=3.6.3; extra == \"plot\"",
+        "numba>=0.56.4; extra == \"all\"",
+        "numba>=0.56.4; extra == \"performance\"",
+        "numexpr>=2.8.4; extra == \"all\"",
+        "numexpr>=2.8.4; extra == \"performance\"",
+        "numpy>=1.22.4; python_version < \"3.11\"",
+        "numpy>=1.23.2; python_version == \"3.11\"",
+        "numpy>=1.26.0; python_version >= \"3.12\"",
+        "odfpy>=1.4.1; extra == \"all\"",
+        "odfpy>=1.4.1; extra == \"excel\"",
+        "openpyxl>=3.1.0; extra == \"all\"",
+        "openpyxl>=3.1.0; extra == \"excel\"",
+        "pandas-gbq>=0.19.0; extra == \"all\"",
+        "pandas-gbq>=0.19.0; extra == \"gcp\"",
+        "psycopg2>=2.9.6; extra == \"all\"",
+        "psycopg2>=2.9.6; extra == \"postgresql\"",
+        "pyarrow>=10.0.1; extra == \"all\"",
+        "pyarrow>=10.0.1; extra == \"feather\"",
+        "pyarrow>=10.0.1; extra == \"parquet\"",
+        "pyarrow>=10.0.1; extra == \"pyarrow\"",
+        "pymysql>=1.0.2; extra == \"all\"",
+        "pymysql>=1.0.2; extra == \"mysql\"",
+        "pyreadstat>=1.2.0; extra == \"all\"",
+        "pyreadstat>=1.2.0; extra == \"spss\"",
+        "pytest-xdist>=2.2.0; extra == \"all\"",
+        "pytest-xdist>=2.2.0; extra == \"test\"",
+        "pytest>=7.3.2; extra == \"all\"",
+        "pytest>=7.3.2; extra == \"test\"",
+        "python-calamine>=0.1.7; extra == \"all\"",
+        "python-calamine>=0.1.7; extra == \"excel\"",
+        "python-dateutil>=2.8.2",
+        "pytz>=2020.1",
+        "pyxlsb>=1.0.10; extra == \"all\"",
+        "pyxlsb>=1.0.10; extra == \"excel\"",
+        "qtpy>=2.3.0; extra == \"all\"",
+        "qtpy>=2.3.0; extra == \"clipboard\"",
+        "s3fs>=2022.11.0; extra == \"all\"",
+        "s3fs>=2022.11.0; extra == \"aws\"",
+        "scipy>=1.10.0; extra == \"all\"",
+        "scipy>=1.10.0; extra == \"computation\"",
+        "tables>=3.8.0; extra == \"all\"",
+        "tables>=3.8.0; extra == \"hdf5\"",
+        "tabulate>=0.9.0; extra == \"all\"",
+        "tabulate>=0.9.0; extra == \"output-formatting\"",
+        "tzdata>=2022.7",
+        "xarray>=2022.12.0; extra == \"all\"",
+        "xarray>=2022.12.0; extra == \"computation\"",
+        "xlrd>=2.0.1; extra == \"all\"",
+        "xlrd>=2.0.1; extra == \"excel\"",
+        "xlsxwriter>=3.0.5; extra == \"all\"",
+        "xlsxwriter>=3.0.5; extra == \"excel\"",
+        "zstandard>=0.19.0; extra == \"all\"",
+        "zstandard>=0.19.0; extra == \"compression\""
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "2.3.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "pathspec-1.1.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "a00ce642f577bf7f473932318056212bc4f8bfdf53128c78bbd5af0b9b20b189",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/f1/d9/7fb5aa316bc299258e68c73ba3bddbc499654a07f151cba08f6153988714/pathspec-1.1.1-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "pathspec",
+      "REQUIRES_DIST": [
+        "google-re2 >=1.1 ; extra == \"re2\"",
+        "hyperscan >=0.7 ; extra == \"hyperscan\"",
+        "typing-extensions >=4 ; extra == \"optional\""
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "1.1.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "platformdirs-4.12.4-py3-none-any.whl",
+      "ARTIFACT_SHA256": "78bfb9db2a8471ed7eebe3c3c932da413911042994e699b384fbb4493fa872d7",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/f4/ba/223e00b885e960edd5d4b4d178c88acce019bd5b83786093681b8c393492/platformdirs-4.12.4-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "platformdirs",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "4.12.4"
+    },
+    {
+      "ARTIFACT_FILENAME": "pluggy-1.6.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "pluggy",
+      "REQUIRES_DIST": [
+        "coverage; extra == \"testing\"",
+        "pre-commit; extra == \"dev\"",
+        "pytest-benchmark; extra == \"testing\"",
+        "pytest; extra == \"testing\"",
+        "tox; extra == \"dev\""
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "1.6.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "prompt_toolkit-3.0.53-py3-none-any.whl",
+      "ARTIFACT_SHA256": "01c0891d7f9237d5e339f7d3e42cdae80b7534abb1c7c0e3352efba6231492f2",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/54/6f/84908cad2d6aa5144abcf7b42709fe4fdb459bc640ec7ac5786e7693dabc/prompt_toolkit-3.0.53-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "prompt-toolkit",
+      "REQUIRES_DIST": ["wcwidth>=0.1.4"],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "3.0.53"
+    },
+    {
+      "ARTIFACT_FILENAME": "propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "ARTIFACT_SHA256": "6e9368e87a3efc285e559131092c5db643eb8e56de4ee42064d5baec22ef2bb5",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/c7/06/519a5ebb48b6f94beb48396e55c905f12246a25c3a3608a7ec7bceabf50e/propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "propcache",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "0.5.4"
+    },
+    {
+      "ARTIFACT_FILENAME": "psycopg2_binary-2.9.13-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "ARTIFACT_SHA256": "930e7e58b33a4f9c39e7532d7a40147925cf3372baed4229cbebe0cf3ba9ce6b",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/97/63/057c65532bd12cdf9d4f568e59c2a078a38e9ba8f7f251292968dc781905/psycopg2_binary-2.9.13-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "psycopg2-binary",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">= 3.10",
+      "VERSION": "2.9.13"
+    },
+    {
+      "ARTIFACT_FILENAME": "pycodestyle-2.15.0-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "12fd2f73c7b8ee8845a0431111df8faf4c1a07d6e64e2ee7f0c74014dab14181",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/56/e2/480bcdb153feecde4d736b18c908c7eee4846f11d7547d2e0c71499af630/pycodestyle-2.15.0-py2.py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "pycodestyle",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "2.15.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "pycparser-3.11-py3-none-any.whl",
+      "ARTIFACT_SHA256": "51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/90/11/0e6f11117525ff0eec40ebac3d313376f102df93ca44ad9e893ee85e4f89/pycparser-3.11-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "pycparser",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "3.11"
+    },
+    {
+      "ARTIFACT_FILENAME": "pyflakes-4.0.3-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "330ba92b8c1db2eb0b8f4068f6c58674e2649a99e334769aa50e3e9c5b11c23a",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/44/b0/554d720d71083ccd24ba2f376c048544c073570e7bb18b34d769cef77f66/pyflakes-4.0.3-py2.py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "pyflakes",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "4.0.3"
+    },
+    {
+      "ARTIFACT_FILENAME": "pygments-2.21.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/71/46/17f022dd3e953bf20a04a028a21ec746d942f8d2af30fa0f124fa0e6a684/pygments-2.21.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "pygments",
+      "REQUIRES_DIST": ["colorama>=0.4.6; extra == 'windows-terminal'"],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "2.21.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "pyjwt-2.15.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "42d59d631f7768a1028a64c7ff581a9bf7519804daf91fc5b6c56e30eec5e193",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/50/ca/44de4e75f8aadc457f0634be3b542815078ded46dca30efb960edeecad6e/pyjwt-2.15.1-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "pyjwt",
+      "REQUIRES_DIST": [
+        "cryptography>=3.4.0; extra == \"crypto\"",
+        "typing_extensions>=4.0; python_version < \"3.11\""
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "2.15.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "pytest-9.1.1-py3-none-any.whl",
+      "ARTIFACT_SHA256": "37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/24/25/1de2678b631f5a49215c6c96fff41ba892b0a34df68d6d80292b1b48aa7f/pytest-9.1.1-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "pytest",
+      "REQUIRES_DIST": [
+        "argcomplete; extra == \"dev\"",
+        "attrs>=19.2; extra == \"dev\"",
+        "colorama>=0.4; sys_platform == \"win32\"",
+        "exceptiongroup>=1; python_version < \"3.11\"",
+        "hypothesis>=3.56; extra == \"dev\"",
+        "iniconfig>=1.0.1",
+        "mock; extra == \"dev\"",
+        "packaging>=22",
+        "pluggy<2,>=1.5",
+        "pygments>=2.7.2",
+        "requests; extra == \"dev\"",
+        "setuptools; extra == \"dev\"",
+        "tomli>=1; python_version < \"3.11\"",
+        "xmlschema; extra == \"dev\""
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "9.1.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "pytest_django-4.14.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "c533b08d89cc675efcd5398eea270b34547e35f9a3608e2c9748dd88428ea187",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/9c/03/850bffad2b581c440ca51c039d74504d5a422c94bda0bdb8a8ba5068d48b/pytest_django-4.14.0-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "pytest-django",
+      "REQUIRES_DIST": [
+        "django>=5.2; extra == \"django\"",
+        "pytest>=7.0.0",
+        "sphinx-rtd-theme; extra == \"docs\"",
+        "sphinx; extra == \"docs\""
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "4.14.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "python_crontab-3.4.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "5237313e8ea8196295ef4ebd905ec800cb235e0cb009c6306580b1e025dbcdce",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/18/61/f8bc92ff12d349e18782cc1ea226ad1f6beb869715811aa7d310860b60cc/python_crontab-3.4.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "python-crontab",
+      "REQUIRES_DIST": [
+        "cron-descriptor; extra == \"cron-description\"",
+        "croniter; extra == \"cron-schedule\""
+      ],
+      "REQUIRES_PYTHON": null,
+      "VERSION": "3.4.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "python-dateutil",
+      "REQUIRES_DIST": ["six >=1.5"],
+      "REQUIRES_PYTHON": "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7",
+      "VERSION": "2.9.0.post0"
+    },
+    {
+      "ARTIFACT_FILENAME": "python_dotenv-1.2.4-py3-none-any.whl",
+      "ARTIFACT_SHA256": "42269a8a5b3fd54ffa6f3d84b18abed50064717576b4ecf03dc4a55d8aa04fdc",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/60/d1/38f3a3405989a89ac18390803e70c6ad7c7760da4f9b83cbeca0c44a0c72/python_dotenv-1.2.4-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "python-dotenv",
+      "REQUIRES_DIST": ["click>=5.0; extra == \"cli\""],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "1.2.4"
+    },
+    {
+      "ARTIFACT_FILENAME": "pytokens-0.4.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "ARTIFACT_SHA256": "b49750419d300e2b5a3813cf229d4e5a4c728dae470bcc89867a9ad6f25a722d",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/17/50/bc0394b4ad5b1601be22fa43652173d47e4c9efbf0044c62e9a59b747c56/pytokens-0.4.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "pytokens",
+      "REQUIRES_DIST": [
+        "black; extra == \"dev\"",
+        "build; extra == \"dev\"",
+        "mypy; extra == \"dev\"",
+        "pytest-cov; extra == \"dev\"",
+        "pytest; extra == \"dev\"",
+        "setuptools; extra == \"dev\"",
+        "tox; extra == \"dev\"",
+        "twine; extra == \"dev\"",
+        "wheel; extra == \"dev\""
+      ],
+      "REQUIRES_PYTHON": ">=3.8",
+      "VERSION": "0.4.1"
+    },
+    {
+      "ARTIFACT_FILENAME": "pytz-2026.5-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "e658af3757f9e26a9d25dd2aff38335acd92bc9104f890a894b2c1ba28311b03",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/4f/ef/c66110d46fb800dda0bf33164182dfadabe26a90e4476844d502a23dca8e/pytz-2026.5-py2.py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "pytz",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": null,
+      "VERSION": "2026.5"
+    },
+    {
+      "ARTIFACT_FILENAME": "redis-6.4.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "f0544fa9604264e9464cdf4814e7d4830f74b165d52f2a330a760a88dd248b7f",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/e8/02/89e2ed7e85db6c93dfa9e8f691c5087df4e3551ab39081a4d7c6d1f90e05/redis-6.4.0-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "redis",
+      "REQUIRES_DIST": [
+        "async-timeout>=4.0.3; python_full_version < '3.11.3'",
+        "cryptography>=36.0.1; extra == 'ocsp'",
+        "hiredis>=3.2.0; extra == 'hiredis'",
+        "pyjwt>=2.9.0; extra == 'jwt'",
+        "pyopenssl>=20.0.1; extra == 'ocsp'",
+        "requests>=2.31.0; extra == 'ocsp'"
+      ],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "6.4.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "requests-2.34.2-py3-none-any.whl",
+      "ARTIFACT_SHA256": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/a0/f4/c67b0b3f1b9245e8d266f0f112c500d50e5b4e83cb6f3b71b6528104182a/requests-2.34.2-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "requests",
+      "REQUIRES_DIST": [
+        "PySocks!=1.5.7,>=1.5.6; extra == \"socks\"",
+        "certifi>=2023.5.7",
+        "chardet<8,>=3.0.2; extra == \"use-chardet-on-py3\"",
+        "charset_normalizer<4,>=2",
+        "idna<4,>=2.5",
+        "urllib3<3,>=1.26"
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "2.34.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "scikit_learn-1.7.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "ARTIFACT_SHA256": "89877e19a80c7b11a2891a27c21c4894fb18e2c2e077815bcade10d34287b20d",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/ef/0e/97dbca66347b8cf0ea8b529e6bb9367e337ba2e8be0ef5c1a545232abfde/scikit_learn-1.7.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "scikit-learn",
+      "REQUIRES_DIST": [
+        "Pillow>=8.4.0; extra == \"docs\"",
+        "conda-lock==3.0.1; extra == \"maintenance\"",
+        "cython>=3.0.10; extra == \"build\"",
+        "joblib>=1.2.0",
+        "joblib>=1.2.0; extra == \"install\"",
+        "matplotlib>=3.5.0; extra == \"benchmark\"",
+        "matplotlib>=3.5.0; extra == \"docs\"",
+        "matplotlib>=3.5.0; extra == \"examples\"",
+        "matplotlib>=3.5.0; extra == \"tests\"",
+        "memory_profiler>=0.57.0; extra == \"benchmark\"",
+        "memory_profiler>=0.57.0; extra == \"docs\"",
+        "meson-python>=0.17.1; extra == \"build\"",
+        "mypy>=1.15; extra == \"tests\"",
+        "numpy>=1.22.0",
+        "numpy>=1.22.0; extra == \"build\"",
+        "numpy>=1.22.0; extra == \"install\"",
+        "numpydoc>=1.2.0; extra == \"docs\"",
+        "numpydoc>=1.2.0; extra == \"tests\"",
+        "pandas>=1.4.0; extra == \"benchmark\"",
+        "pandas>=1.4.0; extra == \"docs\"",
+        "pandas>=1.4.0; extra == \"examples\"",
+        "pandas>=1.4.0; extra == \"tests\"",
+        "plotly>=5.14.0; extra == \"docs\"",
+        "plotly>=5.14.0; extra == \"examples\"",
+        "polars>=0.20.30; extra == \"docs\"",
+        "polars>=0.20.30; extra == \"tests\"",
+        "pooch>=1.6.0; extra == \"docs\"",
+        "pooch>=1.6.0; extra == \"examples\"",
+        "pooch>=1.6.0; extra == \"tests\"",
+        "pyamg>=4.2.1; extra == \"tests\"",
+        "pyarrow>=12.0.0; extra == \"tests\"",
+        "pydata-sphinx-theme>=0.15.3; extra == \"docs\"",
+        "pytest-cov>=2.9.0; extra == \"tests\"",
+        "pytest>=7.1.2; extra == \"tests\"",
+        "ruff>=0.11.7; extra == \"tests\"",
+        "scikit-image>=0.19.0; extra == \"docs\"",
+        "scikit-image>=0.19.0; extra == \"examples\"",
+        "scikit-image>=0.19.0; extra == \"tests\"",
+        "scipy>=1.8.0",
+        "scipy>=1.8.0; extra == \"build\"",
+        "scipy>=1.8.0; extra == \"install\"",
+        "seaborn>=0.9.0; extra == \"docs\"",
+        "seaborn>=0.9.0; extra == \"examples\"",
+        "sphinx-copybutton>=0.5.2; extra == \"docs\"",
+        "sphinx-design>=0.5.0; extra == \"docs\"",
+        "sphinx-design>=0.6.0; extra == \"docs\"",
+        "sphinx-gallery>=0.17.1; extra == \"docs\"",
+        "sphinx-prompt>=1.4.0; extra == \"docs\"",
+        "sphinx-remove-toctrees>=1.0.0.post1; extra == \"docs\"",
+        "sphinx>=7.3.7; extra == \"docs\"",
+        "sphinxcontrib-sass>=0.3.4; extra == \"docs\"",
+        "sphinxext-opengraph>=0.9.1; extra == \"docs\"",
+        "threadpoolctl>=3.1.0",
+        "threadpoolctl>=3.1.0; extra == \"install\"",
+        "towncrier>=24.8.0; extra == \"docs\""
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "1.7.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "scipy-1.16.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "ARTIFACT_SHA256": "0151a0749efeaaab78711c78422d413c583b8cdd2011a3c1d6c794938ee9fdb2",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/ca/6e/8942461cf2636cdae083e3eb72622a7fbbfa5cf559c7d13ab250a5dbdc01/scipy-1.16.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "scipy",
+      "REQUIRES_DIST": [
+        "Cython; extra == \"test\"",
+        "array-api-strict>=2.3.1; extra == \"test\"",
+        "asv; extra == \"test\"",
+        "cython-lint>=0.12.2; extra == \"dev\"",
+        "doit>=0.36.0; extra == \"dev\"",
+        "gmpy2; extra == \"test\"",
+        "hypothesis>=6.30; extra == \"test\"",
+        "intersphinx_registry; extra == \"doc\"",
+        "jupyterlite-pyodide-kernel; extra == \"doc\"",
+        "jupyterlite-sphinx>=0.19.1; extra == \"doc\"",
+        "jupytext; extra == \"doc\"",
+        "linkify-it-py; extra == \"doc\"",
+        "matplotlib>=3.5; extra == \"doc\"",
+        "meson; extra == \"test\"",
+        "mpmath; extra == \"test\"",
+        "mypy==1.10.0; extra == \"dev\"",
+        "myst-nb>=1.2.0; extra == \"doc\"",
+        "ninja; sys_platform != \"emscripten\" and extra == \"test\"",
+        "numpy<2.6,>=1.25.2",
+        "numpydoc; extra == \"doc\"",
+        "pooch; extra == \"doc\"",
+        "pooch; extra == \"test\"",
+        "pycodestyle; extra == \"dev\"",
+        "pydata-sphinx-theme>=0.15.2; extra == \"doc\"",
+        "pydevtool; extra == \"dev\"",
+        "pytest-cov; extra == \"test\"",
+        "pytest-timeout; extra == \"test\"",
+        "pytest-xdist; extra == \"test\"",
+        "pytest>=8.0.0; extra == \"test\"",
+        "rich-click; extra == \"dev\"",
+        "ruff>=0.0.292; extra == \"dev\"",
+        "scikit-umfpack; extra == \"test\"",
+        "sphinx-copybutton; extra == \"doc\"",
+        "sphinx-design>=0.4.0; extra == \"doc\"",
+        "sphinx<8.2.0,>=5.0.0; extra == \"doc\"",
+        "threadpoolctl; extra == \"test\"",
+        "types-psutil; extra == \"dev\"",
+        "typing_extensions; extra == \"dev\""
+      ],
+      "REQUIRES_PYTHON": ">=3.11",
+      "VERSION": "1.16.3"
+    },
+    {
+      "ARTIFACT_FILENAME": "six-1.17.0-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "six",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*",
+      "VERSION": "1.17.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "sqlparse-0.6.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "b861c0288ce2fa56209a9a6412d2e066ac664b3873b89c26c9d8415e8e32996f",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/d9/50/f00935da0ec7cbf325f8dc4f772ae46fbc7b672dd62876e73f0a94adda57/sqlparse-0.6.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "sqlparse",
+      "REQUIRES_DIST": ["build; extra == 'dev'", "furo; extra == 'doc'", "sphinx; extra == 'doc'"],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "0.6.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "threadpoolctl-3.7.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "cd8b60b5641b45c67bbf73c64c843235fc2d8a480c87389f52f5dbee893b86be",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/43/3f/f88a53f60a472b46f4023f56d204dd7de33d34c5d2acbfa0d70a674e639e/threadpoolctl-3.7.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "threadpoolctl",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "3.7.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "twilio-9.11.2-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "dbc2cc950885dd9af573e9d1b489b8c757230bd8e3154806f4bf0def40fc59da",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/43/ec/d8ed73dce0ac722ed7bb6c7823424be405db4a93cf810802f68fed5528ad/twilio-9.11.2-py2.py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "twilio",
+      "REQUIRES_DIST": [
+        "PyJWT<3.0.0,>=2.0.0",
+        "aiohttp-retry>=2.8.3",
+        "aiohttp>=3.8.4",
+        "requests>=2.0.0"
+      ],
+      "REQUIRES_PYTHON": ">=3.7.0",
+      "VERSION": "9.11.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "typing_extensions-4.16.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "typing-extensions",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "4.16.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "tzdata-2026.5-py2.py3-none-any.whl",
+      "ARTIFACT_SHA256": "b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/94/21/1e5995a1c920cce14e4bffae20c665ec10e7ed03ab25e006cd741092b718/tzdata-2026.5-py2.py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "tzdata",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=2",
+      "VERSION": "2026.5"
+    },
+    {
+      "ARTIFACT_FILENAME": "tzlocal-5.4.4-py3-none-any.whl",
+      "ARTIFACT_SHA256": "aae09f0126a8a86fa736be266eb4a471380d26a0de3bc14844e7821fee3e2a15",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/9e/a4/017a7a6cbe387d961a688ec31364ae60a5c4e22c96ae9921b79a947c855d/tzlocal-5.4.4-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "tzlocal",
+      "REQUIRES_DIST": [
+        "check_manifest; extra == \"testing\"",
+        "pyroma; extra == \"testing\"",
+        "pytest-cov; extra == \"testing\"",
+        "pytest-mock>=3.3; extra == \"testing\"",
+        "pytest>=4.3; extra == \"testing\"",
+        "ruff; extra == \"testing\"",
+        "tzdata; platform_system == \"Windows\"",
+        "zest.releaser; extra == \"devenv\""
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "5.4.4"
+    },
+    {
+      "ARTIFACT_FILENAME": "upstash_redis-1.8.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "e08f18d9a955b2b224ab8d1611a9782bc21054a83afb3b88df36809ff87096fa",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/05/04/a350e6b9b910c6006826dd63deb45be30fed85b826351588df27671bd92b/upstash_redis-1.8.0-py3-none-any.whl",
+      "DIRECT": true,
+      "DISTRIBUTION": "upstash-redis",
+      "REQUIRES_DIST": ["httpx (>=0.23.0,<1)"],
+      "REQUIRES_PYTHON": ">=3.8,<4.0",
+      "VERSION": "1.8.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "urllib3-2.8.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/92/9d/c4e665119135114480843e7ab388fa94d8480650450e6f8e26b70d323a4c/urllib3-2.8.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "urllib3",
+      "REQUIRES_DIST": [
+        "backports-zstd>=1.0.0; (python_version < '3.14') and extra == 'zstd'",
+        "brotli>=1.2.0; (platform_python_implementation == 'CPython') and extra == 'brotli'",
+        "brotlicffi>=1.2.0.0; (platform_python_implementation != 'CPython') and extra == 'brotli'",
+        "h2<5,>=4; extra == 'h2'",
+        "pysocks!=1.5.7,<2.0,>=1.5.6; extra == 'socks'"
+      ],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "2.8.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "vine-5.1.0-py3-none-any.whl",
+      "ARTIFACT_SHA256": "40fdf3c48b2cfe1c38a49e9ae2da6fda88e4794c810050a728bd7413811fb1dc",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/03/ff/7c0c86c43b3cbb927e0ccc0255cb4057ceba4799cd44ae95174ce8e8b5b2/vine-5.1.0-py3-none-any.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "vine",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.6",
+      "VERSION": "5.1.0"
+    },
+    {
+      "ARTIFACT_FILENAME": "wcwidth-0.9.2-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "ARTIFACT_SHA256": "751bef0ab404b6a1dc028b56b4b85d46486be1c55833f80da533e42dc691f389",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/db/6c/f940133c71427c208575910e981942bd78c98b1f7cd0d1425ca4b7457c04/wcwidth-0.9.2-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "wcwidth",
+      "REQUIRES_DIST": [],
+      "REQUIRES_PYTHON": ">=3.9",
+      "VERSION": "0.9.2"
+    },
+    {
+      "ARTIFACT_FILENAME": "yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "ARTIFACT_SHA256": "d5add7b4ca7afeea91d52e4d4e4db3b1fe9885b71f07054560d8c4296b7441a2",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/95/0c/a71501bbc1a674ff72c4d6c2b75f4d9a5af819f5244c3a7558080a8802c5/yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "DIRECT": false,
+      "DISTRIBUTION": "yarl",
+      "REQUIRES_DIST": ["idna>=2.0", "multidict>=4.0", "propcache>=0.2.1"],
+      "REQUIRES_PYTHON": ">=3.10",
+      "VERSION": "1.25.1"
+    }
+  ],
+  "PACKAGE_AUTHORITY": "pip requirements.txt",
+  "PACKAGE_INDEX_ACCESS_OCCURRED": true,
+  "REQUIREMENTS_SHA256": "a7f30b7fd83f9758d8307a795a4cfa4c60f7bee9d2b25ff3dcb9b6a19daf87de",
+  "RESOLVER": {
+    "NAME": "pip",
+    "VERSION": "25.3"
+  },
+  "RESOLVER_FLAGS": [
+    "--isolated",
+    "install",
+    "--dry-run",
+    "--ignore-installed",
+    "--only-binary=:all:",
+    "--python-version",
+    "3.11.14",
+    "--platform",
+    "manylinux2014_x86_64",
+    "--implementation",
+    "cp",
+    "--abi",
+    "cp311",
+    "--index-url",
+    "https://pypi.org/simple",
+    "-r",
+    "apps/union-eyes/backend/requirements.txt"
+  ],
+  "RESOLVER_MARKER_ENVIRONMENT": {
+    "implementation_name": "cpython",
+    "implementation_version": "3.13.12",
+    "os_name": "nt",
+    "platform_machine": "AMD64",
+    "platform_python_implementation": "CPython",
+    "platform_release": "11",
+    "platform_system": "Windows",
+    "platform_version": "10.0.26200",
+    "python_full_version": "3.13.12",
+    "python_version": "3.13",
+    "sys_platform": "win32"
+  },
+  "RUN_1_LOCK_DIGEST": "310eb938f4f7c25b6f93323031981ede60a0d2ef2d68e017a5c9ced33e326fe6",
+  "RUN_2_LOCK_DIGEST": "310eb938f4f7c25b6f93323031981ede60a0d2ef2d68e017a5c9ced33e326fe6",
+  "TARGET": {
+    "ABI": "cp311",
+    "EXACT_PATCH": "3.11.14",
+    "IMPLEMENTATION": "cp",
+    "PLATFORM": "manylinux2014_x86_64",
+    "PYTHON": "3.11.14"
+  },
+  "TARGET_REQUIREMENTS_UNRESOLVED": [],
+  "TRANSITIVE_REQUIREMENT_EDGES": [
+    {
+      "FROM": "aiohttp",
+      "REQUIREMENT": "aiohappyeyeballs>=2.5.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "aiohappyeyeballs"
+    },
+    {
+      "FROM": "aiohttp",
+      "REQUIREMENT": "aiosignal>=1.4.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "aiosignal"
+    },
+    {
+      "FROM": "aiohttp",
+      "REQUIREMENT": "attrs>=17.3.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "attrs"
+    },
+    {
+      "FROM": "aiohttp",
+      "REQUIREMENT": "frozenlist>=1.1.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "frozenlist"
+    },
+    {
+      "FROM": "aiohttp",
+      "REQUIREMENT": "multidict<7.0,>=4.5",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "multidict"
+    },
+    {
+      "FROM": "aiohttp",
+      "REQUIREMENT": "propcache>=0.2.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "propcache"
+    },
+    {
+      "FROM": "aiohttp",
+      "REQUIREMENT": "typing_extensions>=4.4; python_version < \"3.13\"",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "typing-extensions"
+    },
+    {
+      "FROM": "aiohttp",
+      "REQUIREMENT": "yarl<2.0,>=1.25.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "yarl"
+    },
+    {
+      "FROM": "aiohttp-retry",
+      "REQUIREMENT": "aiohttp",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "aiohttp"
+    },
+    {
+      "FROM": "aiosignal",
+      "REQUIREMENT": "frozenlist>=1.1.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "frozenlist"
+    },
+    {
+      "FROM": "aiosignal",
+      "REQUIREMENT": "typing-extensions>=4.2; python_version < \"3.13\"",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "typing-extensions"
+    },
+    {
+      "FROM": "amqp",
+      "REQUIREMENT": "vine<6.0.0,>=5.0.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "vine"
+    },
+    {
+      "FROM": "anyio",
+      "REQUIREMENT": "idna>=2.8",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "idna"
+    },
+    {
+      "FROM": "anyio",
+      "REQUIREMENT": "typing_extensions>=4.16.0; python_version < \"3.15\"",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "typing-extensions"
+    },
+    {
+      "FROM": "azure-core",
+      "REQUIREMENT": "requests>=2.21.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "requests"
+    },
+    {
+      "FROM": "azure-core",
+      "REQUIREMENT": "typing-extensions>=4.6.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "typing-extensions"
+    },
+    {
+      "FROM": "azure-identity",
+      "REQUIREMENT": "azure-core>=1.31.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "azure-core"
+    },
+    {
+      "FROM": "azure-identity",
+      "REQUIREMENT": "cryptography>=2.5",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "cryptography"
+    },
+    {
+      "FROM": "azure-identity",
+      "REQUIREMENT": "msal-extensions>=1.2.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "msal-extensions"
+    },
+    {
+      "FROM": "azure-identity",
+      "REQUIREMENT": "msal>=1.39.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "msal"
+    },
+    {
+      "FROM": "azure-identity",
+      "REQUIREMENT": "typing-extensions>=4.0.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "typing-extensions"
+    },
+    {
+      "FROM": "azure-keyvault-secrets",
+      "REQUIREMENT": "azure-core>=1.31.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "azure-core"
+    },
+    {
+      "FROM": "azure-keyvault-secrets",
+      "REQUIREMENT": "isodate>=0.6.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "isodate"
+    },
+    {
+      "FROM": "azure-keyvault-secrets",
+      "REQUIREMENT": "typing-extensions>=4.6.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "typing-extensions"
+    },
+    {
+      "FROM": "azure-storage-blob",
+      "REQUIREMENT": "azure-core>=1.37.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "azure-core"
+    },
+    {
+      "FROM": "azure-storage-blob",
+      "REQUIREMENT": "cryptography>=2.1.4",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "cryptography"
+    },
+    {
+      "FROM": "azure-storage-blob",
+      "REQUIREMENT": "isodate>=0.6.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "isodate"
+    },
+    {
+      "FROM": "azure-storage-blob",
+      "REQUIREMENT": "typing-extensions>=4.6.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "typing-extensions"
+    },
+    {
+      "FROM": "black",
+      "REQUIREMENT": "click>=8.0.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "click"
+    },
+    {
+      "FROM": "black",
+      "REQUIREMENT": "mypy-extensions>=0.4.3",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "mypy-extensions"
+    },
+    {
+      "FROM": "black",
+      "REQUIREMENT": "packaging>=22.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "packaging"
+    },
+    {
+      "FROM": "black",
+      "REQUIREMENT": "pathspec>=1.0.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pathspec"
+    },
+    {
+      "FROM": "black",
+      "REQUIREMENT": "platformdirs>=2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "platformdirs"
+    },
+    {
+      "FROM": "black",
+      "REQUIREMENT": "pytokens~=0.4.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pytokens"
+    },
+    {
+      "FROM": "celery",
+      "REQUIREMENT": "billiard<5.0,>=4.2.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "billiard"
+    },
+    {
+      "FROM": "celery",
+      "REQUIREMENT": "click-didyoumean>=0.3.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "click-didyoumean"
+    },
+    {
+      "FROM": "celery",
+      "REQUIREMENT": "click-plugins>=1.1.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "click-plugins"
+    },
+    {
+      "FROM": "celery",
+      "REQUIREMENT": "click-repl>=0.2.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "click-repl"
+    },
+    {
+      "FROM": "celery",
+      "REQUIREMENT": "click<9.0,>=8.1.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "click"
+    },
+    {
+      "FROM": "celery",
+      "REQUIREMENT": "kombu>=5.6.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "kombu"
+    },
+    {
+      "FROM": "celery",
+      "REQUIREMENT": "kombu[redis]; extra == \"redis\"",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "kombu"
+    },
+    {
+      "FROM": "celery",
+      "REQUIREMENT": "python-dateutil>=2.8.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "python-dateutil"
+    },
+    {
+      "FROM": "celery",
+      "REQUIREMENT": "tzlocal",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "tzlocal"
+    },
+    {
+      "FROM": "celery",
+      "REQUIREMENT": "vine<6.0,>=5.1.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "vine"
+    },
+    {
+      "FROM": "cffi",
+      "REQUIREMENT": "pycparser; implementation_name != \"PyPy\"",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pycparser"
+    },
+    {
+      "FROM": "click-didyoumean",
+      "REQUIREMENT": "click (>=7)",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "click"
+    },
+    {
+      "FROM": "click-plugins",
+      "REQUIREMENT": "click>=4.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "click"
+    },
+    {
+      "FROM": "click-repl",
+      "REQUIREMENT": "click<9.0,>=7.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "click"
+    },
+    {
+      "FROM": "click-repl",
+      "REQUIREMENT": "prompt_toolkit>=3.0.36",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "prompt-toolkit"
+    },
+    {
+      "FROM": "click-repl",
+      "REQUIREMENT": "typing-extensions>=4.7.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "typing-extensions"
+    },
+    {
+      "FROM": "cryptography",
+      "REQUIREMENT": "cffi>=2.0.0 ; platform_python_implementation != 'PyPy'",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "cffi"
+    },
+    {
+      "FROM": "django",
+      "REQUIREMENT": "asgiref>=3.8.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "asgiref"
+    },
+    {
+      "FROM": "django",
+      "REQUIREMENT": "sqlparse>=0.3.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "sqlparse"
+    },
+    {
+      "FROM": "django-celery-beat",
+      "REQUIREMENT": "Django<6.1,>=2.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "django"
+    },
+    {
+      "FROM": "django-celery-beat",
+      "REQUIREMENT": "celery<6.0,>=5.2.3",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "celery"
+    },
+    {
+      "FROM": "django-celery-beat",
+      "REQUIREMENT": "cron-descriptor<2.0.0,>=1.2.32",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "cron-descriptor"
+    },
+    {
+      "FROM": "django-celery-beat",
+      "REQUIREMENT": "django-timezone-field>=5.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "django-timezone-field"
+    },
+    {
+      "FROM": "django-celery-beat",
+      "REQUIREMENT": "python-crontab>=2.3.4",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "python-crontab"
+    },
+    {
+      "FROM": "django-celery-beat",
+      "REQUIREMENT": "tzdata",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "tzdata"
+    },
+    {
+      "FROM": "django-celery-results",
+      "REQUIREMENT": "Django>=3.2.25",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "django"
+    },
+    {
+      "FROM": "django-celery-results",
+      "REQUIREMENT": "celery<6.0,>=5.2.7",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "celery"
+    },
+    {
+      "FROM": "django-cors-headers",
+      "REQUIREMENT": "asgiref>=3.6",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "asgiref"
+    },
+    {
+      "FROM": "django-cors-headers",
+      "REQUIREMENT": "django>=4.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "django"
+    },
+    {
+      "FROM": "django-filter",
+      "REQUIREMENT": "Django>=5.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "django"
+    },
+    {
+      "FROM": "django-redis",
+      "REQUIREMENT": "Django<7.0,>=5.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "django"
+    },
+    {
+      "FROM": "django-redis",
+      "REQUIREMENT": "redis>=4.0.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "redis"
+    },
+    {
+      "FROM": "django-redis",
+      "REQUIREMENT": "typing_extensions>=4.12; python_version <= \"3.12\"",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "typing-extensions"
+    },
+    {
+      "FROM": "django-timezone-field",
+      "REQUIREMENT": "Django (>=4.2,<6.2)",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "django"
+    },
+    {
+      "FROM": "djangorestframework",
+      "REQUIREMENT": "django>=5.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "django"
+    },
+    {
+      "FROM": "flake8",
+      "REQUIREMENT": "mccabe<0.8.0,>=0.7.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "mccabe"
+    },
+    {
+      "FROM": "flake8",
+      "REQUIREMENT": "pycodestyle<2.16.0,>=2.15.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pycodestyle"
+    },
+    {
+      "FROM": "flake8",
+      "REQUIREMENT": "pyflakes<4.1.0,>=4.0.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pyflakes"
+    },
+    {
+      "FROM": "httpcore",
+      "REQUIREMENT": "certifi",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "certifi"
+    },
+    {
+      "FROM": "httpcore",
+      "REQUIREMENT": "h11>=0.16",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "h11"
+    },
+    {
+      "FROM": "httpx",
+      "REQUIREMENT": "anyio",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "anyio"
+    },
+    {
+      "FROM": "httpx",
+      "REQUIREMENT": "certifi",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "certifi"
+    },
+    {
+      "FROM": "httpx",
+      "REQUIREMENT": "httpcore==1.*",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "httpcore"
+    },
+    {
+      "FROM": "httpx",
+      "REQUIREMENT": "idna",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "idna"
+    },
+    {
+      "FROM": "joblib",
+      "REQUIREMENT": "cloudpickle>=3.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "cloudpickle"
+    },
+    {
+      "FROM": "kombu",
+      "REQUIREMENT": "amqp<6.0.0,>=5.1.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "amqp"
+    },
+    {
+      "FROM": "kombu",
+      "REQUIREMENT": "packaging",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "packaging"
+    },
+    {
+      "FROM": "kombu",
+      "REQUIREMENT": "redis!=4.5.5,!=5.0.2,<6.5,>=4.5.2; extra == \"redis\"",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "redis"
+    },
+    {
+      "FROM": "kombu",
+      "REQUIREMENT": "tzdata>=2025.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "tzdata"
+    },
+    {
+      "FROM": "kombu",
+      "REQUIREMENT": "vine==5.1.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "vine"
+    },
+    {
+      "FROM": "msal",
+      "REQUIREMENT": "PyJWT[crypto] <3,>=1.0.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pyjwt"
+    },
+    {
+      "FROM": "msal",
+      "REQUIREMENT": "cryptography <51,>=2.5",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "cryptography"
+    },
+    {
+      "FROM": "msal",
+      "REQUIREMENT": "requests <3,>=2.0.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "requests"
+    },
+    {
+      "FROM": "msal-extensions",
+      "REQUIREMENT": "msal<2,>=1.29",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "msal"
+    },
+    {
+      "FROM": "pandas",
+      "REQUIREMENT": "numpy>=1.23.2; python_version == \"3.11\"",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "numpy"
+    },
+    {
+      "FROM": "pandas",
+      "REQUIREMENT": "python-dateutil>=2.8.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "python-dateutil"
+    },
+    {
+      "FROM": "pandas",
+      "REQUIREMENT": "pytz>=2020.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pytz"
+    },
+    {
+      "FROM": "pandas",
+      "REQUIREMENT": "tzdata>=2022.7",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "tzdata"
+    },
+    {
+      "FROM": "prompt-toolkit",
+      "REQUIREMENT": "wcwidth>=0.1.4",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "wcwidth"
+    },
+    {
+      "FROM": "pyjwt",
+      "REQUIREMENT": "cryptography>=3.4.0; extra == \"crypto\"",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "cryptography"
+    },
+    {
+      "FROM": "pytest",
+      "REQUIREMENT": "iniconfig>=1.0.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "iniconfig"
+    },
+    {
+      "FROM": "pytest",
+      "REQUIREMENT": "packaging>=22",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "packaging"
+    },
+    {
+      "FROM": "pytest",
+      "REQUIREMENT": "pluggy<2,>=1.5",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pluggy"
+    },
+    {
+      "FROM": "pytest",
+      "REQUIREMENT": "pygments>=2.7.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pygments"
+    },
+    {
+      "FROM": "pytest-django",
+      "REQUIREMENT": "pytest>=7.0.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pytest"
+    },
+    {
+      "FROM": "python-dateutil",
+      "REQUIREMENT": "six >=1.5",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "six"
+    },
+    {
+      "FROM": "requests",
+      "REQUIREMENT": "certifi>=2023.5.7",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "certifi"
+    },
+    {
+      "FROM": "requests",
+      "REQUIREMENT": "charset_normalizer<4,>=2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "charset-normalizer"
+    },
+    {
+      "FROM": "requests",
+      "REQUIREMENT": "idna<4,>=2.5",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "idna"
+    },
+    {
+      "FROM": "requests",
+      "REQUIREMENT": "urllib3<3,>=1.26",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "urllib3"
+    },
+    {
+      "FROM": "scikit-learn",
+      "REQUIREMENT": "joblib>=1.2.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "joblib"
+    },
+    {
+      "FROM": "scikit-learn",
+      "REQUIREMENT": "numpy>=1.22.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "numpy"
+    },
+    {
+      "FROM": "scikit-learn",
+      "REQUIREMENT": "scipy>=1.8.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "scipy"
+    },
+    {
+      "FROM": "scikit-learn",
+      "REQUIREMENT": "threadpoolctl>=3.1.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "threadpoolctl"
+    },
+    {
+      "FROM": "scipy",
+      "REQUIREMENT": "numpy<2.6,>=1.25.2",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "numpy"
+    },
+    {
+      "FROM": "twilio",
+      "REQUIREMENT": "PyJWT<3.0.0,>=2.0.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "pyjwt"
+    },
+    {
+      "FROM": "twilio",
+      "REQUIREMENT": "aiohttp-retry>=2.8.3",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "aiohttp-retry"
+    },
+    {
+      "FROM": "twilio",
+      "REQUIREMENT": "aiohttp>=3.8.4",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "aiohttp"
+    },
+    {
+      "FROM": "twilio",
+      "REQUIREMENT": "requests>=2.0.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "requests"
+    },
+    {
+      "FROM": "upstash-redis",
+      "REQUIREMENT": "httpx (>=0.23.0,<1)",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "httpx"
+    },
+    {
+      "FROM": "yarl",
+      "REQUIREMENT": "idna>=2.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "idna"
+    },
+    {
+      "FROM": "yarl",
+      "REQUIREMENT": "multidict>=4.0",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "multidict"
+    },
+    {
+      "FROM": "yarl",
+      "REQUIREMENT": "propcache>=0.2.1",
+      "RESOLVED": true,
+      "TARGET_MARKER_APPLIES": true,
+      "TO": "propcache"
+    }
+  ]
+}

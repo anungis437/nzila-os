@@ -98,7 +98,8 @@ class Claims(BaseModel):
 
     # Identity (legacy PK migrated to unique field)
     claim_id = models.UUIDField(default=uuid.uuid4, unique=True)
-    claim_number = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    # Human-readable per-organization number; uniqueness is organization-scoped (see Meta.constraints).
+    claim_number = models.CharField(max_length=50, null=True, blank=True)
 
     # Ownership
     organization_id = models.UUIDField(null=True, blank=True)
@@ -174,6 +175,12 @@ class Claims(BaseModel):
             models.Index(fields=["organization_id"], name="idx_claims_org"),
             models.Index(fields=["member_id"], name="idx_claims_member"),
             models.Index(fields=["status"], name="idx_claims_status"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization_id", "claim_number"],
+                name="claims_org_claim_number_uniq",
+            ),
         ]
 
     def __str__(self):
@@ -433,8 +440,8 @@ class Grievances(BaseModel):
 
     # Ownership
     organization_id = models.UUIDField(null=True, blank=True)
-    created_by = models.UUIDField(null=True, blank=True)
-    last_updated_by = models.UUIDField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    last_updated_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "grievances"

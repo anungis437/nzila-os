@@ -10,7 +10,10 @@ const m = vi.hoisted(() => ({
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/db/schema-organizations', () => ({ organizations: { id: 'id', name: 'name', organizationType: 'organizationType' } }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: m.withRLSContext,
+  withSystemContext: async (fn: () => Promise<unknown>) => fn(),
+}));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: vi.fn(() => 'eq'), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };

@@ -7,10 +7,15 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createHash } from "crypto";
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
-import { createDocument } from "@/lib/services/document-service";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from "@/lib/rate-limiter";
-import { putBlob } from "@/lib/blob-client";
+import { putBlob, deleteBlob } from "@/lib/blob-client";
+import { db } from "@/db/db";
+import { documents } from "@/db/schema";
+import { appendMandatoryAudit } from "@/lib/audit/mandatory-audit";
+import type { RLSTx } from "@/lib/db/with-rls-context";
+import { withOrgOwnedContext } from "@/lib/db/org-owned-context";
+import { logger } from "@/lib/logger";
 import { isMalwareScanError } from "@/lib/security/clamav";
 
 const ALLOWED_MIME_TYPES_LIST = [
@@ -258,29 +263,57 @@ export const POST = withRoleAuth('member', async (request, context) => {
     );
 
     // Create document record
-    const document = await createDocument({
-      organizationId,
-      folderId: folderId || null,
-      name,
-      fileUrl: blob.url,
-      fileSize: file.size,
-      fileType: file.name.split(".").pop() || "unknown",
-      mimeType: file.type,
-      description: description || null,
-      tags: tags || null,
-      category: category || null,
-      contentText: null,
-      isConfidential,
-      accessLevel: accessLevel as "standard" | "restricted" | "confidential",
-      uploadedBy: userId,
-      checksum,
-      metadata: {
-        originalFileName: file.name,
-        uploadedAt: new Date().toISOString(),
-        blobKey: blob.pathname,
-        malwareScan: blob.malwareScan,
-      },
-    });
+    let document: typeof documents.$inferSelect;
+    try {
+      // The document row and its mandatory canonical audit record commit together.
+      document = await withOrgOwnedContext(() => db.transaction(async (tx) => {
+        const [created] = await tx.insert(documents).values({
+          organizationId,
+          folderId: folderId || null,
+          name,
+          fileUrl: blob.url,
+          fileSize: file.size,
+          fileType: file.name.split(".").pop() || "unknown",
+          mimeType: file.type,
+          description: description || null,
+          tags: tags || null,
+          category: category || null,
+          contentText: null,
+          isConfidential,
+          accessLevel: accessLevel as "standard" | "restricted" | "confidential",
+          uploadedBy: userId,
+          checksum,
+          metadata: {
+            originalFileName: file.name,
+            uploadedAt: new Date().toISOString(),
+            blobKey: blob.pathname,
+            malwareScan: blob.malwareScan,
+          },
+        }).returning();
+        await appendMandatoryAudit(tx as unknown as RLSTx, {
+          organizationId,
+          action: 'document.upload',
+          resourceType: 'documents',
+          resourceId: created.id,
+          userId,
+          details: {
+            route: '/api/documents/upload',
+            fileName: file.name,
+            fileSize: file.size,
+            mimeType: file.type,
+            checksum,
+            malwareScan: blob.malwareScan?.status ?? null,
+          },
+        });
+        return created;
+      }));
+    } catch (persistError) {
+      // Do not leave an orphaned Blob when the database or mandatory audit step fails.
+      await deleteBlob(blob.url).catch((cleanupError) =>
+        logger.warn('Orphaned upload blob cleanup failed', { error: String(cleanupError) }),
+      );
+      throw persistError;
+    }
 
     logApiAuditEvent({
       timestamp: new Date().toISOString(),

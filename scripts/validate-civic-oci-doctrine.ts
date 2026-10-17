@@ -1,10 +1,10 @@
 #!/usr/bin/env npx tsx
 
 import { findRepoRoot } from './lib/portfolio-governance'
-import { formatDoctrineFinding, validateCivicOciDoctrine } from './lib/civic-oci-doctrine'
+import { formatDoctrineFinding, validateCivicArchiveReview } from './lib/civic-oci-doctrine'
 
 const root = findRepoRoot()
-const findings = validateCivicOciDoctrine(root)
+const findings = validateCivicArchiveReview(root)
 
 if (findings.length > 0) {
   console.error('\n[validate-civic-oci-doctrine] FAIL')
@@ -13,4 +13,6 @@ if (findings.length > 0) {
 }
 
 console.log('\n[validate-civic-oci-doctrine] PASS')
-console.log('CIVIC / OCI constitutional invariants and runtime boundary are intact.')
+console.log(
+  'CIVIC / OCI invariants and terminated archive commitments are intact; no execution admission.',
+)

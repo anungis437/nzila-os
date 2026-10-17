@@ -43,10 +43,12 @@ A new **Executive Operating System** (Founder Focus Engine, Chief of Staff, Trea
 ## Customer-facing product lines
 
 ### Agriculture — Agrimo + Cora
-Two-surface agricultural operating system for Sub-Saharan supply chains: **Agrimo** runs field operations, **Cora** runs the intelligence on top of them.
+Two first-class agricultural products share governed agricultural primitives but serve distinct contexts. **Cora** owns food-economy intelligence and coordination for Canada and data-rich agricultural environments; **Agrimo** owns operational agriculture for cooperative, offline-first, and emerging-market contexts, with the DRC as its principal context. Neither product is subordinate to the other.
 
-- **Agrimo** (field operations) — dual-stack Next.js + Django platform managing the full agricultural supply chain: producer onboarding, harvest & lot tracking, production management, warehouse intake/dispatch, logistics, certifications, mobile-money payouts, and farm-to-buyer traceability with hash-verified evidence sealing. Packages: `agri-core`, `agri-db`, `agri-intelligence`, `agri-supply-chain`, `agri-traceability`, `agri-forecasting`.
-- **Cora** (intelligence dashboard) — read-only analytics companion surfacing yield forecasting, price signals, risk & resilience scoring, cooperative performance, and supply-chain impact traceability. Built for co-op managers, buyers, and funders who need insight without write access to field data.
+- **Agrimo** (field operations) — dual-stack Next.js + Django platform managing agricultural operations: producer onboarding, harvest & lot tracking, production management, warehouse intake/dispatch, logistics, certifications, and traceability with hash-verified evidence sealing. It uses shared `agri-core` plus operational packages including `agri-db`, `agri-intelligence`, `agri-supply-chain`, `agri-traceability`, and `agri-forecasting`.
+- **Cora** (food-economy intelligence and coordination) — intended to support farmer/farm intelligence, value creation, opportunities, associations, collective action, governed evidence reuse, frameworks, capital readiness, and food-system outcomes. Current implementation remains incubating and read-only; this summary does not claim those intended capabilities are implemented.
+
+See [ADR-AGRI-001](docs/categories/products-and-market/agri/ADR/ADR-AGRI-001-cora-agrimo-product-boundary.md) for the authoritative boundary and migration status.
 
 ### Commerce — Flow
 Multi-vertical commerce operating system spanning the full order-to-cash and procure-to-pay lifecycle. State-machine-driven workflows, configurable pricing engine, and automated commerce-governance checks on every mutation.

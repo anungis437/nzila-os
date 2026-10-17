@@ -42,15 +42,6 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
-      - name: Restore turbo cache
-        uses: actions/cache@v5
-        with:
-          path: node_modules/.cache/turbo
-          key: turbo-contract-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
-          restore-keys: |
-            turbo-contract-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-            turbo-contract-${{ runner.os }}-
-
       - name: Contract - RLS Org Isolation (INV-31)
         run: pnpm contract-tests -- ue-no-raw-db
         continue-on-error: false
@@ -85,14 +76,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
+        with:
+          turbo-cache-key: pilot-lint-typecheck
 
       - name: Lint
-        run: pnpm --filter @nzila/union-eyes lint
+        run: pnpm exec turbo run lint --filter=@nzila/union-eyes
 
       - name: Typecheck
-        run: pnpm --filter @nzila/union-eyes typecheck
+        run: pnpm exec turbo run typecheck --filter=@nzila/union-eyes
         env:
-          NODE_OPTIONS: "--max-old-space-size=8192"
+          NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Financial Service Typecheck
         run: pnpm --filter financial-service typecheck

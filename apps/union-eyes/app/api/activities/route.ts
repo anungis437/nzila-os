@@ -6,7 +6,8 @@
  */
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withOrgOwnedContext } from '@/lib/db/org-owned-context';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { sql } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -25,9 +26,19 @@ export const GET = withApi(
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50')));
     const offset = (page - 1) * limit;
 
-    return withSystemContext(async () => {
-      // Table lives in audit_security schema; PK is audit_id, metadata holds details
-      const rows = await db.execute(sql`
+    return withOrgOwnedContext(async () => {
+      // Canonical V2 reads the hash-chained public.audit_logs under tenant RLS (event payload in
+      // details->'details'); legacy reads the audit_security table with metadata as details.
+      const rows = currentStateContextEnabled()
+        ? await db.execute(sql`
+        SELECT audit_id AS id, user_id, organization_id, action,
+               resource_type, resource_id, COALESCE(details->'details', details) AS details, created_at
+        FROM public.audit_logs
+        WHERE organization_id = ${organizationId}::uuid
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `)
+        : await db.execute(sql`
         SELECT audit_id AS id, user_id, organization_id, action,
                resource_type, resource_id, metadata AS details, created_at
         FROM audit_security.audit_logs

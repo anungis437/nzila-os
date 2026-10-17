@@ -9,10 +9,8 @@ export { applications } from "./schema-applications";
 export { 
   organizations, 
   organizationsRelations,
-  applicationsRelations,
   organizationTypeEnum,
   caJurisdictionEnum,
   labourSectorEnum,
   organizationStatusEnum
 } from "./schema-organizations";
-
