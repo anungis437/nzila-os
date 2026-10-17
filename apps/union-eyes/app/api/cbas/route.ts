@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { listCBAs, createCBA, type CBAFilters } from '@/lib/services/cba-service';
 import { getCurrentUser, requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +53,7 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(url.searchParams.get('limit') || '20', 10);
 
   try {
-    const result = await listCBAs(filters, { page, limit });
+    const result = await withRLSContext(async () => listCBAs(filters, { page, limit }));
     return NextResponse.json(result);
   } catch {
     return NextResponse.json({ error: 'Failed to list CBAs' }, { status: 500 });
@@ -87,7 +88,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden: requires steward role' }, { status: 403 });
     }
 
-    const cba = await createCBA(validation.data);
+    const cba = await withRLSContext({ organizationId: validation.data.organizationId }, async () =>
+      createCBA(validation.data),
+    );
     return NextResponse.json(cba, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Failed to create CBA' }, { status: 500 });

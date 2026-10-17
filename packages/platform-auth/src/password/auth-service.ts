@@ -7,7 +7,6 @@
  * Shared across all Nzila apps via @nzila/platform-auth/password.
  */
 import { randomBytes, createHash } from 'crypto'
-import { db } from '@nzila/db/client'
 import {
   authUsers,
   authPasswordResetTokens,
@@ -16,7 +15,7 @@ import {
   authMfaTotp,
   authOrgPolicies,
 } from '@nzila/db/schema'
-import { eq, and, sql, gt } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import {
   hashPassword,
   verifyPassword,
@@ -33,7 +32,7 @@ import {
 } from './session'
 import { issueMfaChallenge } from '../mfa/service'
 import { assessRisk } from '../risk/assess'
-import { authDb } from '../auth-db'
+import { authDb, withAuthContext, withAuthSavepoint, checkAuthRequestRateLimit, insertAuthRow } from '../auth-db'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -98,7 +97,6 @@ export interface AuthUser {
 const MAX_FAILED_ATTEMPTS = 5
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
 const RESET_TOKEN_EXPIRY_MS = 60 * 60 * 1000 // 1 hour
-const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000 // 15-minute window
 const MAX_RESET_REQUESTS = 3 // Max resets per window per IP
 
 function isPlaywrightE2EAuthRequest(input: { userAgent?: string | null }): boolean {
@@ -136,13 +134,13 @@ async function logAuditEvent(
   } = {},
 ): Promise<void> {
   try {
-    await authDb.insert(authAuditLog).values({
+    await withAuthSavepoint(async () => authDb.insert(authAuditLog).values({
       userId: opts.userId ?? null,
       eventType: event,
       ipAddress: opts.ipAddress ?? null,
       userAgent: opts.userAgent ?? null,
       metadata: opts.metadata ?? {},
-    })
+    }))
   } catch {
     // Audit logging is best-effort — never block auth flows
   }
@@ -151,23 +149,18 @@ async function logAuditEvent(
 // ─── Rate Limiting (DB-backed) ──────────────────────────────────────────────
 
 async function checkResetRateLimit(ipAddress: string): Promise<boolean> {
-  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS)
-  const result = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(authAuditLog)
-    .where(
-      and(
-        eq(authAuditLog.eventType, 'password_reset_request'),
-        eq(authAuditLog.ipAddress, ipAddress),
-        gt(authAuditLog.createdAt, windowStart),
-      ),
-    )
-  return (result[0]?.count ?? 0) < MAX_RESET_REQUESTS
+  void ipAddress
+  return checkAuthRequestRateLimit(MAX_RESET_REQUESTS)
 }
 
 // ─── Signup ─────────────────────────────────────────────────────────────────
 
 export async function signup(input: SignupInput): Promise<AuthResult> {
+  return withAuthContext({ phase: 'issuance', operation: 'signup', email: input.email, ipAddress: input.ipAddress },
+    () => signupWithContext(input))
+}
+
+async function signupWithContext(input: SignupInput): Promise<AuthResult> {
   // 1. Validate password policy
   const validation = validatePassword(input.password)
   if (!validation.valid) {
@@ -176,7 +169,8 @@ export async function signup(input: SignupInput): Promise<AuthResult> {
 
   // 2. Check for existing user (case-insensitive email)
   const email = input.email.toLowerCase().trim()
-  const existing = await db
+  if (!(await checkAuthRequestRateLimit(5))) return { success: false, error: 'Too many requests. Please try again later.' }
+  const existing = await authDb
     .select({ userId: authUsers.userId })
     .from(authUsers)
     .where(sql`lower(${authUsers.email}) = ${email}`)
@@ -194,9 +188,7 @@ export async function signup(input: SignupInput): Promise<AuthResult> {
 
   // 4. Create user
   const userId = crypto.randomUUID()
-  const [newUser] = await db
-    .insert(authUsers)
-    .values({
+  const [newUser] = await insertAuthRow(authUsers, {
       userId,
       email,
       passwordHash: passwordHashValue,
@@ -207,12 +199,6 @@ export async function signup(input: SignupInput): Promise<AuthResult> {
       emailVerified: false,
       isActive: true,
     })
-    .returning({
-      id: authUsers.userId,
-      email: authUsers.email,
-      firstName: authUsers.firstName,
-      lastName: authUsers.lastName,
-    }) as [{ id: string; email: string; firstName: string | null; lastName: string | null }]
 
   // 5. Create session
   const { token, session } = await createSession({
@@ -234,10 +220,10 @@ export async function signup(input: SignupInput): Promise<AuthResult> {
   return {
     success: true,
     user: {
-      id: newUser.id,
-      email: newUser.email,
-      firstName: newUser.firstName,
-      lastName: newUser.lastName,
+      id: newUser!.userId,
+      email: newUser!.email,
+      firstName: newUser!.firstName,
+      lastName: newUser!.lastName,
     },
   }
 }
@@ -245,6 +231,16 @@ export async function signup(input: SignupInput): Promise<AuthResult> {
 // ─── Login ──────────────────────────────────────────────────────────────────
 
 export async function login(input: LoginInput): Promise<AuthResult> {
+  const outcome = await withAuthContext(
+    { phase: 'lookup', selector: { kind: 'email', email: input.email } },
+    () => loginWithLookup(input),
+  )
+  // Release the lookup transaction before promotion; concurrent logins must
+  // not each hold a pool connection while waiting for a second connection.
+  return typeof outcome === 'function' ? outcome() : outcome
+}
+
+async function loginWithLookup(input: LoginInput): Promise<AuthResult | (() => Promise<AuthResult>)> {
   const email = input.email.toLowerCase().trim()
   const isPlaywrightE2E = isPlaywrightE2EAuthRequest(input)
 
@@ -326,7 +322,8 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     }
   }
 
-  const passwordValid = await verifyPassword(user.passwordHash, input.password)
+  const verifiedPasswordHash = user.passwordHash
+  const passwordValid = await verifyPassword(verifiedPasswordHash, input.password)
   if (!passwordValid) {
     const attempts = (user.failedLoginAttempts ?? 0) + 1
     const lockUntil =
@@ -358,6 +355,8 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     return { success: false, error: 'Invalid email or password' }
   }
 
+  // Only the verified password (not the email selector) authorizes own-user work.
+  return () => withAuthContext({ phase: 'identity', userId: user.userId }, async () => {
   // 5. Reset failed attempts on success
   await authDb
     .update(authUsers)
@@ -370,7 +369,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     .where(eq(authUsers.userId, user.userId))
 
   // 6. Rehash if needed (parameter upgrade)
-  if (needsRehash(user.passwordHash)) {
+  if (needsRehash(verifiedPasswordHash)) {
     const newHash = await hashPassword(input.password)
     await authDb
       .update(authUsers)
@@ -526,6 +525,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     },
     riskTier: risk.tier,
   }
+  })
 }
 
 // ─── Logout ─────────────────────────────────────────────────────────────────
@@ -533,8 +533,10 @@ export async function login(input: LoginInput): Promise<AuthResult> {
 export async function logout(): Promise<void> {
   const session = await getSessionFromCookie()
   if (session) {
-    await revokeSession(session.sessionId)
-    await logAuditEvent('logout', { userId: session.userId })
+    await withAuthContext({ phase: 'identity', userId: session.userId }, async () => {
+      await revokeSession(session.sessionId)
+      await logAuditEvent('logout', { userId: session.userId })
+    })
   }
   await clearSessionCookie()
 }
@@ -548,6 +550,11 @@ export async function logout(): Promise<void> {
 export async function forgotPassword(
   input: ForgotPasswordInput,
 ): Promise<{ success: true; token?: string }> {
+  return withAuthContext({ phase: 'issuance', operation: 'reset-issue', email: input.email, ipAddress: input.ipAddress },
+    () => forgotPasswordWithContext(input))
+}
+
+async function forgotPasswordWithContext(input: ForgotPasswordInput): Promise<{ success: true; token?: string }> {
   const email = input.email.toLowerCase().trim()
 
   // Rate limit by IP
@@ -559,7 +566,7 @@ export async function forgotPassword(
   }
 
   // Find user
-  const [user] = await db
+  const [user] = await authDb
     .select({ userId: authUsers.userId })
     .from(authUsers)
     .where(sql`lower(${authUsers.email}) = ${email}`)
@@ -577,7 +584,7 @@ export async function forgotPassword(
   }
 
   // Invalidate any existing unused tokens for this user
-  await db
+  await authDb
     .update(authPasswordResetTokens)
     .set({ usedAt: new Date() })
     .where(
@@ -592,7 +599,7 @@ export async function forgotPassword(
   const tokenHash = createHash('sha256').update(rawToken).digest('hex')
   const expiresAt = new Date(Date.now() + RESET_TOKEN_EXPIRY_MS)
 
-  await db.insert(authPasswordResetTokens).values({
+  await insertAuthRow(authPasswordResetTokens, {
     userId: user.userId,
     tokenHash,
     expiresAt,
@@ -611,6 +618,12 @@ export async function forgotPassword(
 export async function resetPassword(
   input: ResetPasswordInput,
 ): Promise<AuthResult> {
+  const tokenHash = createHash('sha256').update(input.token).digest('hex')
+  return withAuthContext({ phase: 'redemption', selector: { kind: 'reset', tokenHash } },
+    () => resetPasswordWithContext(input))
+}
+
+async function resetPasswordWithContext(input: ResetPasswordInput): Promise<AuthResult> {
   // 1. Validate new password
   const validation = validatePassword(input.newPassword)
   if (!validation.valid) {
@@ -619,7 +632,7 @@ export async function resetPassword(
 
   // 2. Hash token and look up
   const tokenHash = createHash('sha256').update(input.token).digest('hex')
-  const [resetToken] = await db
+  const [resetToken] = await authDb
     .select({
       id: authPasswordResetTokens.id,
       userId: authPasswordResetTokens.userId,
@@ -629,6 +642,7 @@ export async function resetPassword(
     .from(authPasswordResetTokens)
     .where(eq(authPasswordResetTokens.tokenHash, tokenHash))
     .limit(1)
+    .for('update')
 
   if (!resetToken) {
     return { success: false, error: 'Invalid or expired reset link' }
@@ -649,7 +663,7 @@ export async function resetPassword(
   const passwordHashValue = await hashPassword(input.newPassword)
 
   // 4. Update user password
-  await db
+  await authDb
     .update(authUsers)
     .set({
       passwordHash: passwordHashValue,
@@ -658,12 +672,6 @@ export async function resetPassword(
       accountLockedUntil: null,
     })
     .where(eq(authUsers.userId, resetToken.userId))
-
-  // 5. Mark token as used
-  await db
-    .update(authPasswordResetTokens)
-    .set({ usedAt: new Date() })
-    .where(eq(authPasswordResetTokens.id, resetToken.id))
 
   // 6. Revoke all existing sessions (force re-login)
   await revokeAllUserSessions(resetToken.userId)
@@ -674,6 +682,8 @@ export async function resetPassword(
     ipAddress: input.ipAddress,
     userAgent: input.userAgent,
   })
+  await authDb.update(authPasswordResetTokens).set({ usedAt: new Date() })
+    .where(eq(authPasswordResetTokens.id, resetToken.id))
 
   return { success: true }
 }
@@ -688,6 +698,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
   const session = await getSessionFromCookie()
   if (!session) return null
 
+  return withAuthContext({ phase: 'identity', userId: session.userId }, async () => {
   const [user] = await authDb
     .select({
       id: authUsers.userId,
@@ -697,7 +708,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
     })
     .from(authUsers)
     .where(
-      and(eq(authUsers.userId, session.userId), eq(authUsers.isActive, true)),
+      and(eq(authUsers.userId, session.userId), eq(authUsers.isActive, true), eq(authUsers.lifecycleState, 'active')),
     )
     .limit(1)
 
@@ -708,4 +719,5 @@ export async function getAuthUser(): Promise<AuthUser | null> {
     organizationId: session.organizationId,
     sessionId: session.sessionId,
   }
+  })
 }

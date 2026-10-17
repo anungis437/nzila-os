@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "activeApps": [
+    "union-eyes",
+    "cora",
+    "civic",
+    "web",
+    "console",
+    "control-plane",
+    "orchestrator-api"
+  ]
+}

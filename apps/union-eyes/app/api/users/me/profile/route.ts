@@ -5,10 +5,41 @@ import { profiles } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { getOrganizationIdForUser, getOrganizationInfo } from '@/lib/organization-utils';
 import { getUserRole } from '@/lib/auth/rbac-server';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  if (currentStateContextEnabled()) {
+    // Canonical V2: identity and organization come from the private actor and active membership
+    // choices; there is no email-based profile linking and no bare database connection.
+    const { getCanonicalOrganizationChoices, canonicalOrganizationError } = await import(
+      '@/lib/auth/canonical-organization-selection'
+    );
+    try {
+      const choices = await getCanonicalOrganizationChoices();
+      const active = choices.activeOrganizationId;
+      const organization = choices.organizations.find((entry) => entry.id === active) ?? null;
+      const membership = choices.memberships.find((entry) => entry.organizationId === active) ?? null;
+      return NextResponse.json({
+        user: { id: membership?.userId ?? null, name: '', email: '', phone: '' },
+        profile: null,
+        organization: organization
+          ? {
+              id: organization.id,
+              name: organization.name,
+              slug: organization.slug,
+              type: organization.type,
+            }
+          : null,
+        role: membership?.role ?? 'member',
+        organizationAuthority: choices.organizationAuthority,
+      });
+    } catch (error) {
+      return canonicalOrganizationError(error, 'load profile for');
+    }
+  }
+
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

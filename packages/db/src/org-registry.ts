@@ -451,6 +451,10 @@ export const NON_ORG_SCOPED_TABLES = [
   { table: 'policyApprovalActions', reason: 'Scoped via chain_id FK → policyApprovalChains (FK chain to Org-scoped)' },
   { table: 'policyReplayResults', reason: 'Scoped via session_id FK → policyReplaySessions (Org-scoped)' },
   { table: 'policyConflicts', reason: 'Scoped via policy_id FK → governedPolicies (Org-scoped); cross-policy conflict ledger has no direct org_id column' },
+  // platform-authorization.ts (shared platform authorization authority)
+  { table: 'platformIdentityBindings', reason: 'Global provider-identity to platform-user binding; an identity is not owned by one Org' },
+  { table: 'platformOrganizationMemberships', reason: 'Scoped by its organization_id column (not org_id); read only through platform authorization-context, never via the org-scoped client' },
+  { table: 'platformApplicationPermissionGrants', reason: 'Scoped by its organization_id column (not org_id) and membership FK; read only through platform authorization-context' },
 ] as const
 
 /**

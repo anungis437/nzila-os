@@ -51,7 +51,7 @@ const DANGEROUS_PATTERNS = [
 ];
 
 /** Pattern that indicates the call IS inside withRLSContext */
-const RLS_GUARD_PATTERN = /withRLSContext|withExplicitUserContext|withSystemContext/;
+const RLS_GUARD_PATTERN = /withRLSContext|withExplicitUserContext|withSystemContext|withOrgOwnedContext/;
 
 function scanDirectory(dir: string): Array<{ file: string; line: number; content: string; label: string }> {
   const violations: Array<{ file: string; line: number; content: string; label: string }> = [];

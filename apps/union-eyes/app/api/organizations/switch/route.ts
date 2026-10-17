@@ -1,28 +1,25 @@
 /**
  * POST /api/organizations/switch
  *
- * Validates that the authenticated user is a member of the requested organization
- * (or is a platform admin) and returns the org data so the client can update its context.
- * Replaces Django proxy with direct Drizzle/PostgreSQL query.
+ * V2 rotates a password session or validates a provider selection hint using private memberships.
+ * Legacy mode validates public membership/admin authority and returns organization metadata.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizations, organizationMembers } from '@/db/schema-organizations';
 import { and, eq } from 'drizzle-orm';
+import { isPlatformAdminUser } from '@/lib/api-auth-guard';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 
 export const dynamic = 'force-dynamic';
 
-/** Check if the given userId is in the PLATFORM_ADMIN_USER_IDS env var. */
-function isPlatformAdmin(userId: string): boolean {
-  const ids = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
-    .split(',')
-    .map(s => s.trim())
-    .filter(Boolean);
-  return ids.includes(userId);
-}
-
 export async function POST(req: NextRequest) {
+  if (currentStateContextEnabled()) {
+    const { handleCanonicalOrganizationSwitch } =
+      await import('@/lib/auth/canonical-organization-selection')
+    return handleCanonicalOrganizationSwitch(req)
+  }
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -40,7 +37,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'organizationId is required' }, { status: 400 });
   }
 
-  const isAdmin = isPlatformAdmin(userId);
+  const isAdmin = await isPlatformAdminUser(userId);
 
   // Look up org by UUID
   const orgs = await db

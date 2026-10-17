@@ -1074,8 +1074,31 @@ class SafetyCertifications(BaseModel):
         verbose_name = 'SafetyCertifications'
 
 class PolicyRules(BaseModel):
-    """Migrated from drizzle: policy-engine-schema.ts"""
+    """Canonical current policy-engine rule contract."""
     name = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    organization = models.ForeignKey(
+        'auth_core.Organizations', on_delete=models.CASCADE, related_name='policy_rules'
+    )
+    rule_type = models.CharField(max_length=50)
+    category = models.CharField(max_length=50)
+    conditions = models.JSONField()
+    actions = models.JSONField()
+    exceptions = models.JSONField(null=True, blank=True)
+    enforced = models.BooleanField(default=True, null=True)
+    severity = models.CharField(max_length=20, default='medium', null=True)
+    effective_date = models.DateField()
+    expiration_date = models.DateField(null=True, blank=True)
+    source_document = models.CharField(max_length=255, null=True, blank=True)
+    legal_reference = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=50, default='active', null=True)
+    version = models.IntegerField(default=1, null=True)
+    previous_version_id = models.UUIDField(null=True, blank=True)
+    approved_by = models.CharField(max_length=255, null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True)
 
     class Meta:
         db_table = 'policy_rules'
@@ -1087,14 +1110,36 @@ class PolicyRules(BaseModel):
 class PolicyEvaluations(BaseModel):
     """Migrated from drizzle: policy-engine-schema.ts"""
     rule = models.ForeignKey('PolicyRules', on_delete=models.CASCADE, related_name='policy_evaluations_rule_set')
+    subject_type = models.CharField(max_length=50)
+    subject_id = models.UUIDField()
+    evaluated_at = models.DateTimeField(auto_now_add=True, null=True)
+    input_data = models.JSONField()
+    passed = models.BooleanField()
+    failure_reason = models.TextField(null=True, blank=True)
+    action_taken = models.TextField(null=True, blank=True)
+    context = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'policy_evaluations'
         verbose_name = 'PolicyEvaluations'
 
-class RetentionPolicies(BaseModel):
-    """Migrated from drizzle: policy-engine-schema.ts"""
+class RetentionPolicies(OrganizationModel):
+    """Canonical current retention-policy contract."""
     name = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    data_type = models.CharField(max_length=100)
+    data_category = models.CharField(max_length=50, null=True, blank=True)
+    retention_period_years = models.IntegerField()
+    retention_trigger = models.CharField(max_length=50)
+    action_on_expiry = models.CharField(max_length=50)
+    can_be_held = models.BooleanField(default=True, null=True)
+    minimum_retention = models.IntegerField(null=True, blank=True)
+    legal_basis = models.TextField(null=True, blank=True)
+    regulatory_reference = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=50, default='active', null=True)
+    effective_date = models.DateField()
+    created_by = models.CharField(max_length=255)
+    metadata = models.JSONField(default=dict, null=True)
 
     class Meta:
         db_table = 'retention_policies'
@@ -1103,9 +1148,27 @@ class RetentionPolicies(BaseModel):
     def __str__(self):
         return str(self.name)
 
-class LegalHolds(BaseModel):
-    """Migrated from drizzle: policy-engine-schema.ts"""
+class LegalHolds(OrganizationModel):
+    """Canonical current legal-hold contract."""
     name = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField()
+    case_number = models.CharField(max_length=100, null=True, blank=True)
+    data_types = ArrayField(models.TextField())
+    date_range_start = models.DateField(null=True, blank=True)
+    date_range_end = models.DateField(null=True, blank=True)
+    custodians = models.JSONField(null=True, blank=True)
+    status = models.CharField(max_length=50, default='active', null=True)
+    issued_date = models.DateField()
+    released_date = models.DateField(null=True, blank=True)
+    expiration_date = models.DateField(null=True, blank=True)
+    legal_authority = models.TextField(null=True, blank=True)
+    attorney = models.CharField(max_length=255, null=True, blank=True)
+    matter_description = models.TextField(null=True, blank=True)
+    notifications_sent = models.BooleanField(default=False, null=True)
+    notifications_sent_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    released_by = models.CharField(max_length=255, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True)
 
     class Meta:
         db_table = 'legal_holds'
@@ -1117,6 +1180,16 @@ class LegalHolds(BaseModel):
 class PolicyExceptions(BaseModel):
     """Migrated from drizzle: policy-engine-schema.ts"""
     rule = models.ForeignKey('PolicyRules', on_delete=models.CASCADE, related_name='policy_exceptions_rule_set')
+    subject_type = models.CharField(max_length=50)
+    subject_id = models.UUIDField()
+    reason = models.TextField()
+    approved_by = models.CharField(max_length=255)
+    approved_at = models.DateTimeField()
+    effective_date = models.DateField()
+    expiration_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=50, default='active', null=True)
+    created_by = models.CharField(max_length=255)
+    metadata = models.JSONField(default=dict, null=True)
 
     class Meta:
         db_table = 'policy_exceptions'

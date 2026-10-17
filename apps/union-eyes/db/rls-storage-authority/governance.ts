@@ -175,7 +175,7 @@ export const governanceEntries: StorageAuthorityEntry[] = [
     reason: "ICRA_PSEUDONYMOUS_NO_LOGIN=APPROVED, ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY=REJECTED (PR #752): the pseudonymous product model is intentional, but assessmentId alone must never authorize DB access. lib/icra/assessment-capability.ts adds a hashed, purpose-bound bearer capability; every route touching an existing assessment now verifies it before entering withSystemContext. Verified 2026-09-01 (round 7, ICRA capability architecture): only reached via withSystemContext() in the capability-gated submit routes. No direct organization_id column.",
     supportingCapability: ["app/api/icra/submit/route.ts","app/api/icra/[assessmentId]/submit/route.ts"],
     requiredRuntimePrivileges: [],
-    requiredSystemPrivileges: [],
+    requiredSystemPrivileges: ["SELECT", "INSERT", "DELETE"],
     invocationAuthority: "SYSTEM_SCHEDULE",
     dbExecutionPrincipal: "SYSTEM_RUNTIME",
     reviewPriority: "NONE",

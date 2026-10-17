@@ -5,8 +5,10 @@ const m = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   createRateLimitHeaders: vi.fn(),
   logApiAuditEvent: vi.fn(),
-  createDocument: vi.fn(),
+  insertDocument: vi.fn(),
+  appendMandatoryAudit: vi.fn(),
   putBlob: vi.fn(),
+  deleteBlob: vi.fn(),
   isMalwareScanError: vi.fn(),
 }));
 
@@ -17,8 +19,16 @@ vi.mock('@/lib/rate-limiter', () => ({
   RATE_LIMITS: { DOCUMENT_UPLOAD: { windowMs: 60000, maxRequests: 100 } },
 }));
 vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
-vi.mock('@/lib/services/document-service', () => ({ createDocument: m.createDocument }));
-vi.mock('@/lib/blob-client', () => ({ putBlob: m.putBlob }));
+vi.mock('@/db/db', () => ({
+  db: {
+    transaction: async (fn: (tx: unknown) => unknown) =>
+      fn({ insert: () => ({ values: (v: unknown) => ({ returning: () => m.insertDocument(v) }) }) }),
+  },
+}));
+vi.mock('@/db/schema', () => ({ documents: {} }));
+vi.mock('@/lib/db/org-owned-context', () => ({ withOrgOwnedContext: (operation: () => unknown) => operation() }));
+vi.mock('@/lib/audit/mandatory-audit', () => ({ appendMandatoryAudit: m.appendMandatoryAudit }));
+vi.mock('@/lib/blob-client', () => ({ putBlob: m.putBlob, deleteBlob: m.deleteBlob }));
 vi.mock('@/lib/security/clamav', () => ({ isMalwareScanError: m.isMalwareScanError }));
 
 async function loadRoute() {
@@ -37,7 +47,9 @@ describe('documents/upload route', () => {
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '0' });
     m.putBlob.mockResolvedValue({ url: 'https://blob.test/doc', pathname: 'documents/path', malwareScan: { status: 'clean' } });
-    m.createDocument.mockResolvedValue({ id: 'doc_1', name: 'Test document' });
+    m.insertDocument.mockResolvedValue([{ id: 'doc_1', name: 'Test document' }]);
+    m.appendMandatoryAudit.mockResolvedValue(undefined);
+    m.deleteBlob.mockResolvedValue(undefined);
     m.isMalwareScanError.mockReturnValue(false);
   });
 
@@ -62,7 +74,7 @@ describe('documents/upload route', () => {
       organizationId: 'org_1',
     });
     expect(response.status).toBe(403);
-    expect(m.createDocument).not.toHaveBeenCalled();
+    expect(m.insertDocument).not.toHaveBeenCalled();
   });
 
   it('rejects a write when server organization context is missing', async () => {
@@ -76,7 +88,7 @@ describe('documents/upload route', () => {
       userId: 'u1',
     });
     expect(response.status).toBe(403);
-    expect(m.createDocument).not.toHaveBeenCalled();
+    expect(m.insertDocument).not.toHaveBeenCalled();
   });
 
   it('uploads a valid document stamped with the server organization', async () => {
@@ -92,11 +104,28 @@ describe('documents/upload route', () => {
       organizationId: 'org_1',
     });
     expect(response.status).toBe(201);
-    expect(m.createDocument).toHaveBeenCalledWith(expect.objectContaining({
-      organizationId: 'org_1',
-    }));
+    expect(m.insertDocument).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org_1' }));
+    expect(m.appendMandatoryAudit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ organizationId: 'org_1', action: 'document.upload', resourceId: 'doc_1' }),
+    );
   });
 
+  it('removes the stored blob and fails when the mandatory audit write fails', async () => {
+    const { POST } = await loadRoute();
+    m.appendMandatoryAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+    const file = new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' });
+    const form = new FormData();
+    form.set('file', file);
+    form.set('organizationId', 'org_1');
+
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
+      userId: 'u1',
+      organizationId: 'org_1',
+    });
+    expect(response.status).toBeGreaterThanOrEqual(500);
+    expect(m.deleteBlob).toHaveBeenCalledWith('https://blob.test/doc');
+  });
   it('returns 429 when rate-limited', async () => {
     const { POST } = await loadRoute();
     m.checkRateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 60 });

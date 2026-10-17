@@ -77,13 +77,13 @@ describe('payments/webhooks/paypal route', () => {
     vi.unstubAllGlobals();
   });
 
-  it('returns 500 when PayPal webhook config is missing', async () => {
+  it('returns 503 when PayPal webhook config is missing', async () => {
     const { POST } = await loadRoute();
     delete process.env.PAYPAL_WEBHOOK_ID;
 
     const response = await POST(makeRequest({ id: 'evt-1', event_type: 'PAYMENT.CAPTURE.COMPLETED', resource: {} }));
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(503);
     await expect(response.json()).resolves.toMatchObject({ error: 'PayPal webhook not configured' });
   });
 

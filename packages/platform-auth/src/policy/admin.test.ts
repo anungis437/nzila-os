@@ -20,6 +20,12 @@ vi.mock('@nzila/db/client', () => ({
     update: mockUpdate,
   },
 }))
+vi.mock('../auth-db', () => ({
+  authDb: { select: mockSelect, insert: mockInsert, update: mockUpdate },
+  withTenantAuthContext: (_user: string, _org: string, work: () => Promise<unknown>) => work(),
+  withAuthSavepoint: (work: () => Promise<unknown>) => work(),
+  insertAuthRow: vi.fn(),
+}))
 
 vi.mock('drizzle-orm', async () => {
   const actual = await vi.importActual<typeof import('drizzle-orm')>('drizzle-orm')

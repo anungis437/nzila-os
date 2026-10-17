@@ -1,0 +1,345 @@
+{
+  "summary": {
+    "rootCallers": 901,
+    "mutatingCallers": 512,
+    "mutatingBound": 512,
+    "mutatingUnmapped": 0,
+    "mutatingExceptionCallers": 158,
+    "exceptionClassCount": 10,
+    "unclassifiedExceptionCallers": 0,
+    "financialMutatingCallers": 52,
+    "financialClassCount": 6,
+    "unclassifiedFinancialCallers": [],
+    "unresolvedControls": []
+  },
+  "controlTable": [
+    {
+      "controlId": "CANONICAL_SESSION_INLINE",
+      "source": [
+        "lib/api-auth-guard.ts",
+        "lib/organization-utils.ts"
+      ],
+      "authority": "Canonical auth() session; organization resolved from live canonical membership",
+      "callerClass": "Handlers that call auth()/requireUser* directly",
+      "runtimeEvidence": [
+        "lib/__tests__/api-auth-guard-canonical.test.ts",
+        "scripts/bootstrap-v2/auth-native.test.ts",
+        "scripts/bootstrap-v2/organization-selection-native.test.ts"
+      ],
+      "callerCount": 87,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    },
+    {
+      "controlId": "WITH_API",
+      "source": [
+        "lib/api/with-api.ts",
+        "lib/api/authorization-denial.ts"
+      ],
+      "authority": "Authentication, rate limit, schema validation, tenant RLS transaction, 4xx mapping",
+      "callerClass": "Routes wrapped by withApi",
+      "runtimeEvidence": [
+        "lib/api/__tests__/with-api.test.ts",
+        "lib/api/__tests__/with-api-canonical.test.ts",
+        "lib/api/__tests__/with-api-org-bootstrap.test.ts"
+      ],
+      "callerCount": 255,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    },
+    {
+      "controlId": "TENANT_RLS_TRANSACTION",
+      "source": [
+        "lib/organization-middleware.ts",
+        "lib/db/with-rls-context.ts",
+        "lib/db/org-owned-context.ts"
+      ],
+      "authority": "Canonical organization binding then SET LOCAL ROLE union_eyes_runtime with RLS",
+      "callerClass": "withOrganizationAuth routes and manual withRLSContext handlers",
+      "runtimeEvidence": [
+        "lib/__tests__/organization-middleware.test.ts",
+        "lib/db/__tests__/with-rls-context.test.ts",
+        "scripts/bootstrap-v2/runtime-security-native.test.ts"
+      ],
+      "callerCount": 34,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    },
+    {
+      "controlId": "ROLE_AUTHORIZATION",
+      "source": [
+        "lib/api-auth-guard.ts"
+      ],
+      "authority": "Minimum-role and admin wrappers over the canonical session; denial is 403",
+      "callerClass": "withRoleAuth/withMinRole/withAdminAuth routes",
+      "runtimeEvidence": [
+        "lib/__tests__/api-auth-guard.test.ts",
+        "lib/__tests__/api-auth-guard-params.test.ts"
+      ],
+      "callerCount": 93,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    },
+    {
+      "controlId": "SYSTEM_CONTEXT_CONTRACT",
+      "source": [
+        "lib/db/with-rls-context.ts",
+        "db/rls-storage-authority",
+        "scripts/bootstrap-v2/system-mutation-contracts.ts"
+      ],
+      "authority": "Relation-specific SYSTEM privileges derived from source; no generic cross-organization authority",
+      "callerClass": "withSystemContext callers (51 mutation relations; D1 SELECT-only cron relations)",
+      "runtimeEvidence": [
+        "scripts/bootstrap-v2/system-mutation-contracts.test.ts",
+        "scripts/bootstrap-v2/system-mutation-native.test.ts",
+        "scripts/bootstrap-v2/system-component-integration.test.ts"
+      ],
+      "callerCount": 0,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    },
+    {
+      "controlId": "AUTH_TOKEN_FLOW",
+      "source": [
+        "backend/auth_core",
+        "app/api/auth"
+      ],
+      "authority": "Single-use hashed token or credential possession; AUTH service owns issuance and consumption",
+      "callerClass": "forgot-password, reset-password, invite accept, magic-link verify",
+      "runtimeEvidence": [
+        "scripts/bootstrap-v2/auth-native.test.ts",
+        "app/api/__tests__/auth-forgot-password.route.test.ts",
+        "app/api/__tests__/auth-magic-link-request.route.test.ts"
+      ],
+      "callerCount": 5,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    },
+    {
+      "controlId": "CRON_CREDENTIAL",
+      "source": [
+        "lib/api/with-api.ts",
+        "app/api/cron",
+        "app/api/rewards/cron/route.ts"
+      ],
+      "authority": "x-cron-secret / bearer secret compared in constant time; no human actor",
+      "callerClass": "Scheduled jobs",
+      "runtimeEvidence": [
+        "app/api/__tests__/cron-sla-watchdog.route.test.ts",
+        "app/api/__tests__/cron-observability-alerts.route.test.ts",
+        "app/api/__tests__/rewards-cron.route.test.ts"
+      ],
+      "callerCount": 6,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    },
+    {
+      "controlId": "WEBHOOK_SIGNATURE",
+      "source": [
+        "lib/webhook-security.ts",
+        "app/api/payments/webhooks",
+        "app/api/communications/webhooks"
+      ],
+      "authority": "Provider signature verification; missing configuration is 503, bad signature is 4xx",
+      "callerClass": "Stripe, PayPal, Resend, Shopify webhooks",
+      "runtimeEvidence": [
+        "lib/__tests__/webhook-security.test.ts",
+        "app/api/__tests__/payments-stripe-webhook.route.test.ts",
+        "app/api/__tests__/communications-webhooks-resend.route.test.ts"
+      ],
+      "callerCount": 4,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    },
+    {
+      "controlId": "CAPABILITY_OR_PUBLIC_INTAKE_SYSTEM_CONTRACT",
+      "source": [
+        "app/api/icra",
+        "app/api/ocra",
+        "app/api/oci",
+        "app/api/workbook/start",
+        "lib/icra/claim-tokens.ts"
+      ],
+      "authority": "Pseudonymous capability token or public intake; writes only through relation-specific SYSTEM contracts",
+      "callerClass": "ICRA/OCRA/OCI, workbook start, pilot apply, tracking and unsubscribe",
+      "runtimeEvidence": [
+        "app/api/__tests__/icra-start.route.test.ts",
+        "app/api/__tests__/icra-assessmentId-answer.route.test.ts",
+        "app/api/__tests__/communications-unsubscribe.route.test.ts"
+      ],
+      "callerCount": 11,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    },
+    {
+      "controlId": "FINANCIAL_AUTHORITY",
+      "source": [
+        "db/rls-storage-authority/finance.ts",
+        "app/api/finance",
+        "app/api/dues"
+      ],
+      "authority": "Tenant RLS plus role authorization for every financial mutation; SYSTEM only for platform payments",
+      "callerClass": "Dues, invoice/billing, payment/remittance, expense/budget, donation, reporting, reconciliation",
+      "runtimeEvidence": [
+        "scripts/bootstrap-v2/financial-http-boundary.test.ts",
+        "app/api/__tests__/dues-balance.route.test.ts",
+        "app/api/__tests__/finance-invoices-id-payments.route.test.ts"
+      ],
+      "callerCount": 0,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    },
+    {
+      "controlId": "AUDIT_CHAIN",
+      "source": [
+        "lib/audit-logger.ts",
+        "backend/core/services.py"
+      ],
+      "authority": "Canonical public.audit_logs, per-organization sorted-key SHA-256 chain, advisory-locked head",
+      "callerClass": "Every audited mutation",
+      "runtimeEvidence": [
+        "lib/__tests__/audit-logger-canonical.test.ts",
+        "scripts/bootstrap-v2/audit-chain-native.test.ts"
+      ],
+      "callerCount": 0,
+      "status": "EVIDENCE_BOUND_PENDING_FINAL_RUN"
+    }
+  ],
+  "callerBindingCounts": {
+    "AUTH_TOKEN_FLOW": 5,
+    "CANONICAL_SESSION_INLINE": 87,
+    "CAPABILITY_OR_PUBLIC_INTAKE_SYSTEM_CONTRACT": 11,
+    "CRON_CREDENTIAL": 6,
+    "DELEGATED_TO_GUARDED_ROUTE": 14,
+    "ENVIRONMENT_GATE": 1,
+    "EXTERNAL_MATTER_GRANT": 1,
+    "ROLE_AUTHORIZATION": 93,
+    "SEPARATE_SERVICE_BOUNDARY": 1,
+    "TENANT_RLS_TRANSACTION": 34,
+    "WEBHOOK_SIGNATURE": 4,
+    "WITH_API": 255
+  },
+  "exceptionClasses": [
+    {
+      "classId": "E1_CRON_SYSTEM",
+      "callerCount": 6,
+      "representativeCaller": "apps/union-eyes/app/api/cron/billing-lifecycle/route.ts",
+      "representativeProof": [
+        "app/api/__tests__/cron-sla-watchdog.route.test.ts",
+        "app/api/__tests__/rewards-cron.route.test.ts"
+      ]
+    },
+    {
+      "classId": "E2_SIGNED_WEBHOOK",
+      "callerCount": 4,
+      "representativeCaller": "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
+      "representativeProof": [
+        "app/api/__tests__/payments-stripe-webhook.route.test.ts",
+        "lib/__tests__/webhook-security.test.ts"
+      ]
+    },
+    {
+      "classId": "E3_TOKEN_FLOW",
+      "callerCount": 5,
+      "representativeCaller": "apps/union-eyes/app/api/auth/forgot-password/route.ts",
+      "representativeProof": [
+        "scripts/bootstrap-v2/auth-native.test.ts",
+        "app/api/__tests__/auth-forgot-password.route.test.ts"
+      ]
+    },
+    {
+      "classId": "E4_CAPABILITY_OR_PUBLIC_INTAKE",
+      "callerCount": 11,
+      "representativeCaller": "apps/union-eyes/app/api/communications/track/click/route.ts",
+      "representativeProof": [
+        "app/api/__tests__/icra-start.route.test.ts",
+        "app/api/__tests__/communications-unsubscribe.route.test.ts"
+      ]
+    },
+    {
+      "classId": "E5_DELEGATED_WRAPPER",
+      "callerCount": 14,
+      "representativeCaller": "apps/union-eyes/app/api/continuity/archives/route.ts",
+      "representativeProof": [
+        "lib/api/__tests__/with-api.test.ts"
+      ]
+    },
+    {
+      "classId": "E6_ENVIRONMENT_OR_SERVICE_BOUNDARY",
+      "callerCount": 2,
+      "representativeCaller": "apps/union-eyes/app/api/staging-proof/deadline-engine/scenario/route.ts",
+      "representativeProof": [
+        "scripts/bootstrap-v2/connection-environment-surface.test.ts"
+      ]
+    },
+    {
+      "classId": "E7_IDENTITY_OR_MEMBERSHIP_MUTATION",
+      "callerCount": 8,
+      "representativeCaller": "apps/union-eyes/actions/admin-actions.ts",
+      "representativeProof": [
+        "scripts/bootstrap-v2/organization-selection-native.test.ts",
+        "lib/__tests__/api-auth-guard-canonical.test.ts"
+      ]
+    },
+    {
+      "classId": "E8_TENANT_ACTOR_SYSTEM_CONTEXT",
+      "callerCount": 54,
+      "representativeCaller": "apps/union-eyes/app/api/admin/duplicates/route.ts",
+      "representativeProof": [
+        "scripts/bootstrap-v2/system-mutation-native.test.ts",
+        "scripts/bootstrap-v2/system-component-integration.test.ts"
+      ]
+    },
+    {
+      "classId": "E9_INLINE_SESSION_HANDLER",
+      "callerCount": 9,
+      "representativeCaller": "apps/union-eyes/app/api/cases/[caseId]/assign/route.ts",
+      "representativeProof": [
+        "lib/__tests__/api-auth-guard-canonical.test.ts",
+        "scripts/bootstrap-v2/auth-native.test.ts"
+      ]
+    },
+    {
+      "classId": "E10_FINANCIAL_MUTATION",
+      "callerCount": 45,
+      "representativeCaller": "apps/union-eyes/actions/rewards-actions.ts",
+      "representativeProof": [
+        "scripts/bootstrap-v2/financial-http-boundary.test.ts"
+      ]
+    }
+  ],
+  "financialClasses": [
+    {
+      "classId": "F1_DUES",
+      "callerCount": 11,
+      "representativeProof": [
+        "app/api/__tests__/dues-balance.route.test.ts"
+      ]
+    },
+    {
+      "classId": "F2_INVOICE_BILLING",
+      "callerCount": 12,
+      "representativeProof": [
+        "app/api/__tests__/billing-send-invoice.route.test.ts"
+      ]
+    },
+    {
+      "classId": "F3_PAYMENT_REMITTANCE",
+      "callerCount": 16,
+      "representativeProof": [
+        "app/api/__tests__/finance-invoices-id-payments.route.test.ts"
+      ]
+    },
+    {
+      "classId": "F4_EXPENSE_BUDGET",
+      "callerCount": 14,
+      "representativeProof": [
+        "app/api/__tests__/rewards-cron.route.test.ts"
+      ]
+    },
+    {
+      "classId": "F5_DONATION",
+      "callerCount": 1,
+      "representativeProof": [
+        "scripts/bootstrap-v2/financial-http-boundary.test.ts"
+      ]
+    },
+    {
+      "classId": "F6_RECONCILIATION_LEDGER_SYSTEM",
+      "callerCount": 30,
+      "representativeProof": [
+        "scripts/bootstrap-v2/system-mutation-native.test.ts"
+      ]
+    }
+  ]
+}

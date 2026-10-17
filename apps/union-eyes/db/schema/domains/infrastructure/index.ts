@@ -30,9 +30,8 @@
  * Lines: ~3,000 (largest domain)
  * 
  * Duplicates to resolve:
- * - clcSyncLog (3 locations - use clc-partnership-schema)
+ * - clcSyncLog (3 locations - use clc-sync for tenant-scoped routes)
  * - clcWebhookLog (3 locations)
- * - rewardWalletLedger (2 locations)
  * - automationRules (2 locations)
  */
 
@@ -65,11 +64,12 @@ export * from './exit-interviews';
 // automationRules and AutomationRule - use automation.ts (primary definition)
 export { automationRules, type AutomationRule } from './automation';
 
-// awardStatusEnum and rewardWalletLedger - use awards.ts (primary award definitions)
-export { awardStatusEnum, rewardWalletLedger } from './awards';
+// Award templates retain their status vocabulary; wallet storage uses credits.
+export { awardStatusEnum } from './awards';
+export { rewardWalletLedger } from './rewards';
 
-// clcSyncLog and clcSyncStatusEnum - use clc-partnership.ts (main CLC integration)
-export { clcSyncLog, clcSyncStatusEnum } from './clc-partnership';
+// Tenant CLC routes use clc-sync; global partnership callers import their declaration directly.
+export { clcSyncLog, clcSyncStatusEnum } from './clc-sync';
 
 // clcSyncLogRelations - use clc-sync.ts (primary sync relations)
 export { clcSyncLogRelations } from './clc-sync';

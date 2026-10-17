@@ -28,6 +28,7 @@ export interface LedgerEntryOptions {
   sourceType: 'award' | 'redemption' | 'admin_adjustment' | 'system';
   sourceId?: string;
   memo?: string;
+  expiresAt?: Date;
 }
 
 interface OutstandingBalanceRow {
@@ -102,7 +103,7 @@ export async function listLedger(
 
 /**
  * Apply a ledger entry (transactional)
- * Calculates new balance and ensures non-negative balance (unless override)
+ * Calculates new balance and enforces the canonical non-negative constraint.
  * 
  * IMPORTANT: This function should be called within a transaction
  */
@@ -111,9 +112,13 @@ export async function applyLedgerEntry(
   options: LedgerEntryOptions,
   allowNegativeBalance = false
 ): Promise<RewardWalletLedgerEntry> {
-  const { orgId, userId, eventType, amountCredits, sourceType, sourceId, memo } = options;
+  const { orgId, userId, eventType, amountCredits, sourceType, sourceId, memo, expiresAt } = options;
+  if (expiresAt && (eventType !== 'earn' || amountCredits <= 0 || !Number.isFinite(expiresAt.getTime()))) {
+    throw new Error('Expiration requires a positive earning entry and a valid date');
+  }
 
-  // Get current balance (lock row for update to prevent race conditions)
+  // Read the current balance. Caller transaction alone does not serialize
+  // concurrent first-entry or same-wallet writes.
   const [latestEntry] = await tx
     .select()
     .from(rewardWalletLedger)
@@ -128,7 +133,10 @@ export async function applyLedgerEntry(
   const newBalance = currentBalance + amountCredits;
 
   // Validate non-negative balance
-  if (!allowNegativeBalance && newBalance < 0) {
+  if (newBalance < 0) {
+    if (allowNegativeBalance) {
+      throw new Error('Negative balances are prohibited by the canonical ledger contract');
+    }
     throw new Error(
       `Insufficient balance. Current: ${currentBalance}, Requested: ${Math.abs(amountCredits)}`
     );
@@ -146,6 +154,7 @@ export async function applyLedgerEntry(
       sourceType,
       sourceId,
       memo,
+      expiresAt,
     })
     .returning();
 
@@ -154,7 +163,7 @@ export async function applyLedgerEntry(
 
 /**
  * Admin adjustment: manually adjust wallet balance
- * Allows negative balance with explicit override
+ * The legacy override parameter cannot bypass the storage balance constraint.
  */
 export async function adminAdjustBalance(
   orgId: string,
@@ -276,4 +285,3 @@ export async function getBulkBalances(
 
   return balanceMap;
 }
-

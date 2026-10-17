@@ -11,7 +11,7 @@ export const paymentProcessorEnum = pgEnum('payment_processor', ['stripe', 'whop
 export const duesTransactions = pgTable('dues_transactions', {
   id: uuid('id').defaultRandom().primaryKey(),
   organizationId: uuid('organization_id').notNull(),
-  memberId: uuid('member_id').notNull(),
+  memberId: text('member_id').notNull(),
   assignmentId: uuid('assignment_id'),
   ruleId: uuid('rule_id'),
   

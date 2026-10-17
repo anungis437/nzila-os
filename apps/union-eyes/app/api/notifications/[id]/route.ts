@@ -57,6 +57,10 @@ export const PATCH = withApi(
       }
     }
 
+    if (Object.keys(updateData).length === 0) {
+      throw ApiError.badRequest('No updatable fields supplied');
+    }
+
     const [updated] = await db
       .update(inAppNotifications)
       .set(updateData)

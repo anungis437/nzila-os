@@ -17,8 +17,8 @@
     "change_manager"
   ],
   "approval_status": "APPROVED",
-  "implementation_window_start": "2026-10-05T00:00:00.000Z",
-  "implementation_window_end": "2026-10-09T23:59:59.000Z",
+  "implementation_window_start": "2026-10-05T00:00:00Z",
+  "implementation_window_end": "2026-10-09T23:59:59Z",
   "rollback_plan": "Run apps/union-eyes scripts/apply-prod-rls-closure-twelve-tables.ts --rollback (db/migrations/20261005_prod_rls_closure_twelve_tables_rollback.sql): drops the created policies and disables RLS/FORCE on the same 12 tables, restoring the captured pre-change state. Validated on the production-schema clone (returns to 1155/1167). Safe because the tables hold 0 rows and the runtime role has no privileges on them.",
   "test_evidence_refs": [
     "apps/union-eyes/scripts/__tests__/rls-closure-twelve-tables.test.ts",
@@ -27,7 +27,14 @@
   ],
   "linked_prs": [],
   "linked_commits": [],
-  "status": "APPROVED",
-  "created_at": "2026-10-05T20:20:00.000Z",
-  "updated_at": "2026-10-05T20:20:00.000Z"
+  "status": "COMPLETED",
+  "created_at": "2026-10-05T20:20:00Z",
+  "updated_at": "2026-10-07T03:00:00.000Z",
+  "completed_at": "2026-10-06T19:10:00.000Z",
+  "post_implementation_review": {
+    "outcome": "SUCCESS",
+    "incidents_triggered": false,
+    "incident_refs": [],
+    "observations": "Applied once on 2026-10-06 as union_eyes_migration_admin after a passing production dry-run (transaction rolled back). 12/12 tables now RLS+FORCE with runtime and system policies. rls-verify preflight against production: 1167/1167; union_eyes_runtime rolsuper=false, rolbypassrls=false. Production /api/ready and /api/health stayed 200. SQL sha256 (LF) 717800a3cc493b0d1a22350eb9d4325f0e657fa7491446b5ecd425330fb5c882. Pre-validated on a schema-faithful clone (apply, re-apply, rollback, 94/94 cross-tenant tests). No grants were added; the runtime role still has no privileges on these tables, so tenant isolation of live traffic through them is not exercised yet. Whether to grant the manifest requiredRuntimePrivileges is a separate decision."
+  }
 }

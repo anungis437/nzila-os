@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { existsSync, readFileSync } from 'node:fs'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { execFileSync } from 'node:child_process'
 
@@ -8,6 +8,21 @@ const REPO_ROOT = resolve(APP_ROOT, '..', '..')
 const TSX_CLI = resolve(REPO_ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs')
 const REPORT_JSON = resolve(REPO_ROOT, 'reports', 'union-eyes-explicit-grant-dry-run.json')
 const REPORT_MD = resolve(REPO_ROOT, 'reports', 'union-eyes-explicit-grant-dry-run.md')
+
+// Generators intentionally write reports. Preserve committed evidence byte-for-byte
+// after validating fresh output so running this suite never changes release source.
+let originalReports: Array<{ path: string; contents: Buffer | null }> = []
+beforeAll(() => {
+  originalReports = [REPORT_JSON, REPORT_MD].map(path => ({
+    path, contents: existsSync(path) ? readFileSync(path) : null,
+  }))
+})
+afterAll(() => {
+  for (const { path, contents } of originalReports) {
+    if (contents !== null) writeFileSync(path, contents)
+    else if (existsSync(path)) unlinkSync(path)
+  }
+})
 
 describe('generate-explicit-grant-dry-run', () => {
   it('runs without throwing and produces an internally consistent plan', () => {

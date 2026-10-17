@@ -1,6 +1,8 @@
 {
   "extends": "@nzila/config/tsconfig/nextjs",
   "compilerOptions": {
+    "declaration": false,
+    "declarationMap": false,
     "noImplicitAny": true,
     "useUnknownInCatchVariables": false,
     "jsx": "preserve",

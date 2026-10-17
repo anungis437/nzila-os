@@ -34,7 +34,10 @@ const mockDb: any = {
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (fn: () => Promise<unknown>) => fn() }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (fn: () => Promise<unknown>) => fn(),
+  withSystemContext: async (fn: () => Promise<unknown>) => fn(),
+}));
 vi.mock('@/lib/api-auth-guard', () => ({
   requireUserForOrganization: m.requireUserForOrganization,
   ROLE_HIERARCHY: { member: 1, steward: 2, admin: 3, owner: 4 },

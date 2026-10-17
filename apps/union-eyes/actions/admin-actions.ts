@@ -15,6 +15,9 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';import { organization
 import { organizations, orgConfigurations, orgUsage } from "@/db/schema";
 import { eq, and, desc, sql, count, like, or, ne, sum as _sum } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { auth } from '@nzila/platform-auth/entra/server';
+import { appendMandatoryAudit } from "@/lib/audit/mandatory-audit";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import { revalidatePath } from "next/cache";
 import type {
   UserRole,
@@ -245,6 +248,16 @@ export async function updateUserRole(
         eq(organizationUsers.organizationId, organizationId)
       ));
 
+    // Role change is a mandatory audited event in the same transaction as the update.
+    await appendMandatoryAudit(tx as unknown as RLSTx, {
+      organizationId,
+      action: 'membership.role_change',
+      resourceType: 'organization_users',
+      resourceId: userId,
+      userId: (await auth()).userId ?? undefined,
+      details: { targetUserId: userId, newRole },
+    });
+
     logger.info("User role updated", {
       userId,
       organizationId,
@@ -292,6 +305,15 @@ export async function toggleUserStatus(
         eq(organizationUsers.organizationId, organizationId)
       ));
 
+    await appendMandatoryAudit(tx as unknown as RLSTx, {
+      organizationId,
+      action: 'membership.status_change',
+      resourceType: 'organization_users',
+      resourceId: userId,
+      userId: (await auth()).userId ?? undefined,
+      details: { targetUserId: userId, isActive: !user.isActive },
+    });
+
     logger.info("User status toggled", {
       userId,
       organizationId,
@@ -321,6 +343,15 @@ export async function deleteUserFromOrg(
         eq(organizationUsers.userId, userId),
         eq(organizationUsers.organizationId, organizationId)
       ));
+
+    await appendMandatoryAudit(tx as unknown as RLSTx, {
+      organizationId,
+      action: 'membership.remove',
+      resourceType: 'organization_users',
+      resourceId: userId,
+      userId: (await auth()).userId ?? undefined,
+      details: { targetUserId: userId },
+    });
 
     logger.info("User removed from org", {
       userId,

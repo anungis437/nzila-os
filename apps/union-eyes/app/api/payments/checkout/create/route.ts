@@ -9,6 +9,7 @@
 
 import { NextRequest } from 'next/server';
 import { PaymentService } from '@/lib/services/payment-service';
+import { isMemberDuesPaymentEnabled } from '@/lib/dues/member-dues-flag';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -34,6 +35,13 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!isMemberDuesPaymentEnabled()) {
+      return NextResponse.json(
+        { code: 'NOT_IMPLEMENTED', message: 'Member dues payment is not enabled in this deployment' },
+        { status: 501 },
+      );
     }
 
     const body = await request.json();

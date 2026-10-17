@@ -4,6 +4,10 @@
  */
 
 import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, index } from "drizzle-orm/pg-core";
+import { rewardWalletLedger } from './rewards';
+
+// Compatibility export: award and wallet callers share the current credit ledger.
+export { rewardWalletLedger } from './rewards';
 
 export const awardCategoryEnum = {
   PERFORMANCE: 'performance',
@@ -91,24 +95,6 @@ export const awardHistory = pgTable("award_history", {
   index("idx_award_history_template").on(table.templateId),
 ]);
 
-export const rewardWalletLedger = pgTable("reward_wallet_ledger", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).notNull(),
-  transactionType: varchar("transaction_type", { length: 50 }).notNull(),
-  pointsChange: integer("points_change").notNull(),
-  balanceAfter: integer("balance_after").notNull(),
-  awardId: uuid("award_id"),
-  referenceType: varchar("reference_type", { length: 50 }),
-  referenceId: varchar("reference_id", { length: 255 }),
-  expiresAt: timestamp("expires_at", { withTimezone: true }),
-  description: text("description"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index("idx_wallet_ledger_user").on(table.userId),
-  index("idx_wallet_ledger_type").on(table.transactionType),
-  index("idx_wallet_ledger_expires").on(table.expiresAt),
-]);
-
 export const budgetPool = pgTable("budget_pool", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -150,4 +136,3 @@ export type AwardTemplate = typeof awardTemplates.$inferSelect;
 export type AwardHistoryRecord = typeof awardHistory.$inferSelect;
 export type RewardWallet = typeof rewardWalletLedger.$inferSelect;
 export type BudgetPool = typeof budgetPool.$inferSelect;
-

@@ -331,7 +331,7 @@ function populateLineageFiles(): LineageSource[] {
       case 'DJANGO_MIGRATIONS':
         baseFiles = walkFiles(
           join(APP_ROOT, 'backend'),
-          (file) => file.endsWith('.py') && file.includes(`${join('', 'migrations')}\\`),
+          (file) => file.endsWith('.py') && file.replace(/\\/g, '/').includes('/migrations/'),
         )
         break
       case 'UNION_EYES_LEGACY_SQL':

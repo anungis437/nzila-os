@@ -17,15 +17,24 @@
     "change_manager"
   ],
   "approval_status": "APPROVED",
-  "implementation_window_start": "2026-10-05T00:00:00.000Z",
-  "implementation_window_end": "2026-10-12T23:59:59.000Z",
+  "implementation_window_start": "2026-10-05T00:00:00Z",
+  "implementation_window_end": "2026-10-12T23:59:59Z",
   "rollback_plan": "The deploy job captures the previous revision and image and, if the post-deploy proof fails, runs az containerapp update back to that image automatically. Manual rollback: az containerapp update --name nzila-os-web-prod --resource-group nzila-canada-prod-rg --image <previous image or digest from the run summary>. Note: for this first release the previous image is the mutable :latest tag (a staging build); every later release is digest-pinned and rolls back to a real prior artifact.",
   "test_evidence_refs": [
     "https://github.com/anungis437/nzila-os/pull/910"
   ],
   "linked_prs": [],
   "linked_commits": [],
-  "status": "APPROVED",
-  "created_at": "2026-10-05T21:10:00.000Z",
-  "updated_at": "2026-10-05T21:10:00.000Z"
+  "status": "COMPLETED",
+  "created_at": "2026-10-05T21:10:00Z",
+  "updated_at": "2026-10-07T03:00:00.000Z",
+  "completed_at": "2026-10-07T03:00:00.000Z",
+  "post_implementation_review": {
+    "outcome": "SUCCESS",
+    "incidents_triggered": true,
+    "incident_refs": [
+      "First run 37523571187: post-deploy proof passed on the old revision and auto-rolled back; fixed in #917"
+    ],
+    "observations": "Second run 37565749040 (source ee2192c72524eafc1a9aeb191e2d062b55b40579) succeeded: nzila/web:prod-ee2192c7... = sha256:d2237c188a8733a36bd0ebafd37f50dff22e055a46f16c7b0ab6174a38321c37, deployed by digest as revision nzila-os-web-prod--0000007. Verified independently: homepage 200, only Union Eyes link is https://app.unioneyes.app, no retired or staging Union Eyes host; app.unioneyes.app/api/ready 200. nzila-os-web-prod no longer references nzila/web:latest. Rollback target for the next release is this digest; the previously verified artifact nzila/web:prod-442eaef2... = sha256:7ad545da... also remains tagged. The first run exposed a proof race (old revision still serving), fixed by requiring a new ready revision. Parity note: ABR, CFO, control-plane and platform-admin URLs still use the same values as gitops-deploy.yml."
+  }
 }
