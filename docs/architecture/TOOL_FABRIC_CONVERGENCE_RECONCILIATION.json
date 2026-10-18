@@ -8,7 +8,7 @@
     "restricted_935": "42167333ff07d9b5c8507f2da0bb170dd8cb8f7a",
     "civitas_922": "d3b63cd92f06c734ffb8c41b2c8dc48e65d6f0c6"
   },
-  "file_count": 102,
+  "file_count": 109,
   "files": [
     {
       "path": ".lefthook-local.yml",
@@ -267,8 +267,8 @@
       "path": "docs/architecture/TOOL_FABRIC_BASELINE_GOVERNANCE_DECISIONS.json",
       "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
       "upstream_blobs": {},
-      "final_blob": "f26b48274b7272bc623d67b533d837a6f3a67981",
-      "working_bytes_sha256": "c4c8cbf8a39c89331b408447c2b9e136baeca4c74e3cc6f2ed4b96b1bf29f4ba"
+      "final_blob": "4a5d9775c30ddff4444c99d377e8fb58f471cc14",
+      "working_bytes_sha256": "793a1de1606dbbf908518571896442bc904916c50ecdd9dd1b09b2468f822811"
     },
     {
       "path": "docs/architecture/TOOL_FABRIC_BASELINE_GOVERNANCE_DECISIONS.md",
@@ -281,8 +281,8 @@
       "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE.md",
       "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
       "upstream_blobs": {},
-      "final_blob": "e4eb4b44232107a700c7807eca34a653812394a0",
-      "working_bytes_sha256": "7fe300a7b5da23802998dd8e3054610dfed52564fee472446b061558c5facc07"
+      "final_blob": "28aa0c8164b24f59f6e257c8eb2aaf6b628c7d81",
+      "working_bytes_sha256": "e3379bc56b395d08f8a79a9fc3605fd901f4a509dc7cf42c62cf8c17fb811f96"
     },
     {
       "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_ACCEPTANCE.json",
@@ -309,8 +309,8 @@
       "path": "docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md",
       "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
       "upstream_blobs": {},
-      "final_blob": "8d86d1777e0876d9afad0723f8967b8756250ad2",
-      "working_bytes_sha256": "a56e6f237510e1875d01129823948133f64c5ab0720205b5a258e77946faa2ee"
+      "final_blob": "491c8b0dae9e24d4666af8b89b0ed66ac0a65dc5",
+      "working_bytes_sha256": "fec1c1bdeef163b0ee5aa992ca96c8d35cf56071300a2ef77a229b0caef6932f"
     },
     {
       "path": "docs/architecture/VALIDATION_LEVELS.md",
@@ -320,18 +320,60 @@
       "working_bytes_sha256": "8c81b766ffa996fddc5660295467638daf74ed5e30885d2d737c8b2a45d371aa"
     },
     {
+      "path": "docs/engineering-convergence/ci-execution/CI_AUTHORITY_SURFACE.md",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "2980ff860f5c9d7ae2514566d881ab7e360aa8a4",
+      "working_bytes_sha256": "25f565d5508c7f08e8c19452603e8dc459269a22316e5a6867aaf75c587426a7"
+    },
+    {
       "path": "governance/exceptions/arch-layer.json",
       "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
       "upstream_blobs": {},
-      "final_blob": "a1406ef710c8f647090c6eed3d0091a9a362b14e",
-      "working_bytes_sha256": "51bb70c1a81cc92424ac6bf20f9fe1fad5ad970a2baa3a1401684f6fd1d7fc9a"
+      "final_blob": "c0edca91685cb7325a4a4808e8c33b9da36ace78",
+      "working_bytes_sha256": "4c0fc42c91552d788bb9cd33851ed28d4d4aa25075b43f76be9f7d6fe5b43b97"
     },
     {
       "path": "governance/exceptions/no-console.json",
       "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
       "upstream_blobs": {},
-      "final_blob": "285bfdf5c5cfb80affbd6e6f30317ddf0665cc0d",
-      "working_bytes_sha256": "b3f2d7752a151fe08970b16e72db10d771179a245affc8e70ceeba407d1c9380"
+      "final_blob": "af1ae12c08fc28c7a73dfe90f5ce85d247d17478",
+      "working_bytes_sha256": "e0479092a79662ad637e48d2953761dddb9508524496648678aa3adb7c471b78"
+    },
+    {
+      "path": "governance/exceptions/no-direct-provider.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "3738b185a26618a9c2921afac5b985210489ff88",
+      "working_bytes_sha256": "2770b51b148a939216e72d3a177e1f835c3f3c4a513702939bc9889346bf43fa"
+    },
+    {
+      "path": "governance/exceptions/no-raw-db-in-actions.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "6f18b67af25b9f0eea6c6901ce606ed0e81e4529",
+      "working_bytes_sha256": "c074034be940ac8bb41fecb03d2e889871f2a7ccfe999cf4e7e7f999a61967c0"
+    },
+    {
+      "path": "governance/exceptions/org-required-server-actions.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "28a3719572c8f3cb7b9aa243bafcce8561c23838",
+      "working_bytes_sha256": "4dd6d7b7823becee841814e0ccc5bdf54e362e851a2e00c3e7f72aad50086e9e"
+    },
+    {
+      "path": "governance/exceptions/platform-concern-adoption-exceptions.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "c1f5f3ccc32b148cc96253574537e033f0be8af6",
+      "working_bytes_sha256": "6f343b507015f2fa76ab67dc3bff650a023165e84c7e7455cecb61df9cd0eb04"
+    },
+    {
+      "path": "governance/exceptions/stack-authority.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "0f9e9d9c1a66fc774e2d1a4b0a431f38c7d932e5",
+      "working_bytes_sha256": "d988e69e3692fc92824913c0aac9d5040d0fe6d66b596223740c70f118c0cbbe"
     },
     {
       "path": "governance/foundations/repo/package-lifecycle.json",
@@ -654,8 +696,8 @@
       "upstream_blobs": {
         "phase2_937": "566e4455ada012f6f7f4e73ef3ca9d06a76f1c82"
       },
-      "final_blob": "715395f2076007c0e28c6ede90097765d55bd644",
-      "working_bytes_sha256": "41ec4a183576542a7b52c67f3904e9f2b0eba0315657f16c20894285a28eeff8"
+      "final_blob": "0111d112642e35716892113f000b057a81940ba4",
+      "working_bytes_sha256": "d8e77f45a641e27fbd6f83a994fb4c8c90e994cca52927da14c8ad4fe0e14e12"
     },
     {
       "path": "packages/tool-fabric/src/policy.ts",
@@ -764,6 +806,13 @@
       "upstream_blobs": {},
       "final_blob": "bb8a8bab70e6f15113541e9dd77a83c46b029b08",
       "working_bytes_sha256": "6ff2f5b356acbb24da1c841eb5750964cdaf38833535e24b9802ed61179c93fd"
+    },
+    {
+      "path": "tooling/ci/merge-authority/sarif-reporting.mjs",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "01eebf4d4573b9ac7196b22270eb7d50cc7f6906",
+      "working_bytes_sha256": "f783b2984ad1d91959aa5082f2347093dacd2dcc398b217657ebacfc46bf846f"
     },
     {
       "path": "tooling/contract-tests/affected-typecheck-plan.test.ts",
@@ -876,8 +925,8 @@
     "upstream lockfile resolution snapshots"
   ],
   "reconciled_against": {
-    "commit": "66caddf08340c5cc960acad2890477ad2b265465",
-    "tree": "7e37a537d992d26fa4f7f813dc67c513463f8d06",
+    "commit": "669cfea330d6f7c6482936b8d52f948fe7a33c97",
+    "tree": "20370563468e2951f2abd480476297eddf6f2273",
     "base": "ede980d62959f91517b6c805787cb031d60fd420"
   }
 }
