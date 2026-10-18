@@ -1,8 +1,16 @@
 # Tool Fabric baseline exceptions: consolidated owner approval matrix
 
-**Mission:** TF-FINAL-CONVERGENCE-001. **Status:** decision request, **not an approval**. No exception expiry, rule or test is changed by this document.
+**Mission:** TF-FINAL-CONVERGENCE-001. **Status:** owner decision recorded 2026-10-18 (see below). The matrix itself changes no expiry, rule or test.
 
 Source of record: [decision register](./TOOL_FABRIC_BASELINE_GOVERNANCE_DECISIONS.json) (original 33 selected entries; 16 retired, 17 retained). These exceptions are pre-existing baseline debt on `main`, not defects introduced by Tool Fabric, and they do not block prospect-facing development. They block only the repository-wide expiry contract assertions until dispositioned.
+
+## Owner decision recorded
+
+On 2026-10-18 the repository owner (Aubert Nungisa, `@anungis437`) directed, for PR #941, that every expired baseline exception be resolved so the architectural contract gate can pass, and approved merge once all required checks are green. Applied as option **(E)** under the established owner-accepted bridge process:
+
+- All 65 entries expired on 2026-10-18 across `arch-layer`, `no-console`, `no-direct-provider`, `no-raw-db-in-actions`, `org-required-server-actions`, `platform-concern-adoption-exceptions` and `stack-authority` carry a `bridge-2` justification naming the owner, date and this PR, and are time-boxed to **2026-11-17** (30 days).
+- This is a time-boxed bridge, not a remediation. The underlying violations remain and are tracked for real fixes by the owning teams; the 4 engineering scopes and the structural choices in the 13 rows above are still outstanding work.
+- No rule, test or enforcement was weakened. The entries expire again on 2026-11-17 unless remediated and retired.
 
 ## Requested decision (one batch)
 

@@ -5,14 +5,14 @@
     {
       "path": "apps/union-eyes/actions/admin-actions.ts",
       "owner": "@nzila/union-eyes",
-      "justification": "Legacy direct @/db/db import — migration to withRLSContext tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Legacy direct @/db/db import — migration to withRLSContext tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/union-eyes/actions/member-segments-actions.ts",
       "owner": "@nzila/union-eyes",
-      "justification": "Legacy direct @/db import — migration to withRLSContext tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Legacy direct @/db import — migration to withRLSContext tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
+      "expiresOn": "2026-11-17"
     }
   ]
 }

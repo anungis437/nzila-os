@@ -3063,5 +3063,14 @@
     ],
     "remainingDisposition": "Unchanged 16 cumulative retirements / 17 retained entries; 153 findings / 141 rule-file pairs. No ledger, rule, expiry or full-qualification change.",
     "limitations": "Separate focused new-source evidence only. The parent-supplied exact-9a and staged-3c full runs are historical source-bound receipts, not proof of this correction. No full suites, giant compiler, dependency install, Linux runner changes or commit; repository remains HOLD with mandatory full type gate resource blocked."
+  },
+  "ownerBridge2": {
+    "approvedBy": "Aubert Nungisa (@anungis437)",
+    "date": "2026-10-18",
+    "reference": "PR #941",
+    "option": "E: individually recorded, time-boxed bridge",
+    "newExpiry": "2026-11-17",
+    "expiredEntriesBridged": 65,
+    "scope": "All expired entries in governance/exceptions ledgers; no rule or enforcement changed; remediation remains tracked"
   }
 }

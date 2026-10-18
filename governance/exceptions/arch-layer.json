@@ -6,32 +6,32 @@
     {
       "path": "apps/console/**",
       "owner": "platform-team",
-      "justification": "Console app has legacy unscoped DB imports across ~60 routes. Migration to createScopedDb(entityId) + service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Console app has legacy unscoped DB imports across ~60 routes. Migration to createScopedDb(entityId) + service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry A02, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/union-eyes/**",
       "owner": "union-eyes-team",
-      "justification": "Django-migrated app with direct DB access patterns. Migration tracked alongside console/partners. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Django-migrated app with direct DB access patterns. Migration tracked alongside console/partners. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry A04, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/flow/**",
       "owner": "commerce-team",
-      "justification": "Flow commerce app — legacy direct DB access in API routes. Migration to service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Flow commerce app — legacy direct DB access in API routes. Migration to service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry A05, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/control-plane/**",
       "owner": "platform-team",
-      "justification": "Control plane db-bridge provides scoped DB bridge for internal admin operations. Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Control plane db-bridge provides scoped DB bridge for internal admin operations. Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry A07, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/nzila-hq/**",
       "owner": "platform-core",
-      "justification": "Nzila HQ is INCUBATING with its own DB client in server/db/. Migration to shared service layer tracked before PILOT promotion. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Nzila HQ is INCUBATING with its own DB client in server/db/. Migration to shared service layer tracked before PILOT promotion. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry A11, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     }
   ]
 }

@@ -6,74 +6,74 @@
     {
       "path": "apps/union-eyes/lib/console-wrapper.ts",
       "owner": "platform-team",
-      "justification": "Console-wrapper intentionally stores and overrides console methods to route them to structured logger in production. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Console-wrapper intentionally stores and overrides console methods to route them to structured logger in production. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N03, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/cfo/app/*/dashboard/error.tsx",
       "owner": "platform-team",
-      "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N06, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/cfo/app/*/dashboard/*/error.tsx",
       "owner": "platform-team",
-      "justification": "Client-side error boundary for sub-sections runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Client-side error boundary for sub-sections runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N07, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/cfo/app/*/dashboard/*/*/error.tsx",
       "owner": "platform-team",
-      "justification": "Client-side error boundary for nested sub-sections (e.g., documents/upload, workflows/new) runs in browser context where @nzila/os-core is not available. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Client-side error boundary for nested sub-sections (e.g., documents/upload, workflows/new) runs in browser context where @nzila/os-core is not available. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N08, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/zonga/app/*/dashboard/error.tsx",
       "owner": "platform-team",
-      "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N09, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/zonga/app/*/dashboard/*/error.tsx",
       "owner": "platform-team",
-      "justification": "Client-side error boundary for sub-sections runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Client-side error boundary for sub-sections runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N10, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/partners/app/**/admin/error.tsx",
       "owner": "platform-team",
-      "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N11, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/partners/app/**/portal/error.tsx",
       "owner": "platform-team",
-      "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N12, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/nacp-exams/app/*/dashboard/error.tsx",
       "owner": "platform-team",
-      "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N13, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/console/components/ui/ErrorPanel.tsx",
       "owner": "platform-team",
-      "justification": "Client error boundary runs in browser context where @nzila/os-core is not available — console.error is the browser RUM sink for Next.js error digest reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Client error boundary runs in browser context where @nzila/os-core is not available — console.error is the browser RUM sink for Next.js error digest reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N19, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
       "owner": "platform-core",
-      "justification": "Client error boundary runs in browser context where @nzila/os-core is not available — console.error surfaces incident IDs via devtools. Will adopt os-core browser logger before PILOT promotion. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Client error boundary runs in browser context where @nzila/os-core is not available — console.error surfaces incident IDs via devtools. Will adopt os-core browser logger before PILOT promotion. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N20, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     },
     {
       "path": "apps/union-eyes/instrumentation.ts",
       "owner": "platform-team",
-      "justification": "Turbopack instrumentation loader cannot instantiate relative module factories from inside register() catch path — console.error is the only safe fallback here. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
+      "justification": "Turbopack instrumentation loader cannot instantiate relative module factories from inside register() catch path — console.error is the only safe fallback here. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry N22, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
+      "expiresOn": "2026-11-17"
     }
   ]
 }
