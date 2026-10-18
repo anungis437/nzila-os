@@ -19,7 +19,7 @@ No rule, exception expiry, test or required CI check is weakened by this policy.
 
 | Hook | Before | After |
 | --- | --- | --- |
-| `typecheck-staged` | `--filter "...[HEAD]"`: changed packages **and every dependent** (any change to a shared package such as `os-core`, or to a root-level file, selected the whole 261-package workspace) | [typecheck-changed.mjs](../../scripts/typecheck-changed.mjs): only packages containing staged TypeScript files, one task at a time, without rebuilding the upstream dependency graph (	urbo --only) |
+| `typecheck-staged` | `--filter "...[HEAD]"`: changed packages **and every dependent** (any change to a shared package such as `os-core`, or to a root-level file, selected the whole 261-package workspace) | [typecheck-changed.mjs](../../scripts/typecheck-changed.mjs): only packages containing staged TypeScript files, one task at a time, building upstream dependencies through Turbo cache so declarations exist on a fresh checkout |
 | `contract-tests` (pre-push) | Entire contract suite, ~300 files, every push | Contract test files added or changed by the push |
 
 Unchanged: `gitleaks --staged`, staged lint, brand-leakage, link-check and

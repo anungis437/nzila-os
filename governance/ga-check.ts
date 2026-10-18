@@ -251,7 +251,10 @@ gate('NO-DIRECT-PROVIDER: Apps use SDK wrappers only', () => {
   const exceptionFile = join(ROOT, 'governance/exceptions/no-direct-provider.json')
   if (existsSync(exceptionFile)) {
     const exceptions = JSON.parse(readFileSync(exceptionFile, 'utf-8'))
+    const today = new Date()
     for (const entry of exceptions.entries ?? []) {
+      // An expired exception no longer exempts the path.
+      if (!entry.expiresOn || new Date(entry.expiresOn) < today) continue
       exceptionPaths.push(entry.path.replace(/\\/g, '/'))
     }
   }

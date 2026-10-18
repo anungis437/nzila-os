@@ -150,8 +150,14 @@ export class GovernedToolGate {
       }
     }
 
-    const policy = new ToolPolicy(registry, this.deps.providers, { now: this.now, ...this.deps.policy })
-    return this.finish(base, ctx, policy.evaluateExecution(intent, { authority, approval, invocation }))
+    let decision: ReturnType<ToolPolicy['evaluateExecution']>
+    try {
+      const policy = new ToolPolicy(registry, this.deps.providers, { now: this.now, ...this.deps.policy })
+      decision = policy.evaluateExecution(intent, { authority, approval, invocation })
+    } catch {
+      decision = deny(base.correlationId, ['POLICY_EVALUATION_ERROR'])
+    }
+    return this.finish(base, ctx, decision)
   }
 
   /** Install evaluation for a governed installer; agents are always denied. */

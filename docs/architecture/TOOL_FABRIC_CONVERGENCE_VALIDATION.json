@@ -423,7 +423,7 @@
       "head": "0637b7793359c2e63ac3af1f076e92ae75eabf69",
       "source_sha256": "53a33af4631f98c30353b32009a7ac333770de495a571e6142c2a94245330b2f",
       "source_manifest": "secrets-branch.source.json",
-      "command": "gitleaks git --log-opts=ede980d62959f91517b6c805787cb031d60fd420..HEAD --config .gitleaks.toml --redact --no-banner --report-format json --report-path C:\\Users\\AubertNungisa\\.copilot\\session-state\\770e8706-672d-4f49-a930-cbf9fb3d253e\\files\\tool-fabric-qualification\\secrets-branch.findings.json",
+      "command": "gitleaks git --log-opts=ede980d62959f91517b6c805787cb031d60fd420..HEAD --config .gitleaks.toml --redact --no-banner --report-format json --report-path <evidence-dir>\\tool-fabric-qualification\\secrets-branch.findings.json",
       "started_at": "2026-10-18T03:23:26.3714212+00:00",
       "finished_at": "2026-10-18T03:23:45.3181888+00:00",
       "exit_code": 0,
@@ -441,7 +441,7 @@
       "head": "ede980d62959f91517b6c805787cb031d60fd420",
       "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
       "source_manifest": "secrets-candidate.source.json",
-      "command": "gitleaks dir packages\\tool-fabric --config .gitleaks.toml --redact --no-banner --report-format json --report-path C:\\Users\\AubertNungisa\\.copilot\\session-state\\770e8706-672d-4f49-a930-cbf9fb3d253e\\files\\tool-fabric-qualification\\secrets-candidate.findings.json",
+      "command": "gitleaks dir packages\\tool-fabric --config .gitleaks.toml --redact --no-banner --report-format json --report-path <evidence-dir>\\tool-fabric-qualification\\secrets-candidate.findings.json",
       "started_at": "2026-10-17T22:33:21.5576953+00:00",
       "finished_at": "2026-10-17T22:33:56.0264488+00:00",
       "exit_code": 0,
@@ -458,7 +458,7 @@
       "head": "ede980d62959f91517b6c805787cb031d60fd420",
       "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
       "source_manifest": "secrets-history.source.json",
-      "command": "pnpm secret-scan --redact --report-format json --report-path C:\\Users\\AubertNungisa\\.copilot\\session-state\\770e8706-672d-4f49-a930-cbf9fb3d253e\\files\\tool-fabric-qualification\\secrets-history.findings.json",
+      "command": "pnpm secret-scan --redact --report-format json --report-path <evidence-dir>\\tool-fabric-qualification\\secrets-history.findings.json",
       "started_at": "2026-10-17T22:33:23.2685232+00:00",
       "finished_at": "2026-10-17T23:24:33.1635833+00:00",
       "exit_code": 127,
@@ -475,7 +475,7 @@
       "head": "ede980d62959f91517b6c805787cb031d60fd420",
       "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
       "source_manifest": "secrets-staged.source.json",
-      "command": "gitleaks git --staged --config .gitleaks.toml --redact --no-banner --report-format json --report-path C:\\Users\\AubertNungisa\\.copilot\\session-state\\770e8706-672d-4f49-a930-cbf9fb3d253e\\files\\tool-fabric-qualification\\secrets-staged.findings.json",
+      "command": "gitleaks git --staged --config .gitleaks.toml --redact --no-banner --report-format json --report-path <evidence-dir>\\tool-fabric-qualification\\secrets-staged.findings.json",
       "started_at": "2026-10-17T23:34:23.8203435+00:00",
       "finished_at": "2026-10-17T23:34:35.5340387+00:00",
       "exit_code": 0,
@@ -525,5 +525,5 @@
       "failure_headers": []
     }
   ],
-  "evidence_location": "C:\\Users\\AubertNungisa\\.copilot\\session-state\\770e8706-672d-4f49-a930-cbf9fb3d253e\\files\\tool-fabric-qualification"
+  "evidence_location": "<evidence-dir>\\tool-fabric-qualification"
 }

@@ -62,7 +62,7 @@ const FLAG_RULES: ReadonlyArray<readonly [SkillFlagCode, RegExp]> = [
   ['SELF_GRANT_ATTEMPT', /\b(grant|give|assign)\b[^.\n]{0,30}\b(yourself|this tool|the agent)\b[^.\n]{0,30}\b(access|permission|capabilit(y|ies)|authority)\b/i],
   ['SECRET_DISCLOSURE', /\b(print|echo|reveal|send|upload|exfiltrate|cat)\b[^.\n]{0,40}(\.env\b|api[_ -]?keys?|secrets?|tokens?|credentials?|passwords?|private key)/i],
   ['APPROVAL_BYPASS', /\b(skip|bypass|disable|without)\b[^.\n]{0,25}\b(approval|review|confirmation|governance|sandbox)\b|\bauto[- ]?approve\b/i],
-  ['REMOTE_CODE_EXECUTION', /\b(curl|wget)\b[^\n|]*\|\s*(ba|z)?sh\b|\bpip install\b[^\n]*\bgit\+/i],
+  ['REMOTE_CODE_EXECUTION', /\b(curl|wget)\b[^\n|]{0,500}\|\s{0,20}(ba|z)?sh\b|\bpip install\b[^\n]{0,500}\bgit\+/i],
   ['CONCEALMENT', /\b(do not|don't|never)\b[^.\n]{0,20}\b(tell|inform|mention|log|report)\b[^.\n]{0,20}\b(user|operator|human|audit)\b/i],
   ['DESTRUCTIVE_COMMAND', /\brm\s+-rf\b|\bsudo\b|\bformat\s+[a-z]:|\bdrop\s+(table|database)\b/i],
 ]

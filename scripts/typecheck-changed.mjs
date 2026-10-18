@@ -5,7 +5,8 @@ import { spawnSync } from 'node:child_process';
 
 // Level 1 (development) typecheck: only the workspace packages that contain
 // staged TypeScript files. Dependents and the full workspace are qualified by
-// CI (see docs/architecture/VALIDATION_LEVELS.md). --only skips upstream ^build\n// tasks, so the local gate does not rebuild the dependency graph; CI runs the full graph.
+// CI (see docs/architecture/VALIDATION_LEVELS.md). Upstream ^build tasks still run
+// (Turbo-cached) so declarations such as ./dist exist on a fresh checkout.
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const staged = spawnSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACMR'], {
   cwd: repoRoot,
@@ -38,7 +39,7 @@ if (names.size === 0) {
 console.log(`typecheck-changed: ${[...names].sort().join(', ')}`);
 const result = spawnSync(
   'pnpm',
-  ['exec', 'turbo', 'run', 'typecheck', ...[...names].sort().map((name) => `--filter=${name}`), '--only', '--concurrency=1', '--output-logs=errors-only'],
+  ['exec', 'turbo', 'run', 'typecheck', ...[...names].sort().map((name) => `--filter=${name}`), '--concurrency=1', '--output-logs=errors-only'],
   { cwd: repoRoot, stdio: 'inherit', shell: process.platform === 'win32' },
 );
 process.exit(result.status ?? 1);

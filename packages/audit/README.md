@@ -49,9 +49,13 @@ larger chains require host pagination/consistent snapshot support before rollout
 Exports and root snapshot creation retain their existing 100,000-entry bound;
 hosts must not use those helpers as complete-chain exports/anchors above it.
 
-Direct declared consumers are enforcement and platform-integrations. The latter
-delegates through an audit-engine port; its contract test covers v2 export
-round-trips, nested tampering and propagated serialization errors.
+Direct declared consumers are enforcement, platform-integrations and tool-fabric. The
+platform-integrations package delegates through an audit-engine port; its contract
+test covers v2 export round-trips, nested tampering and propagated serialization
+errors. The tool-fabric trust ledger computes `hashVersion: 2` entries with
+`computeAuditHash`, validates them with `auditEntrySchema`, and verifies them with
+`verifyChain(entries, { requireFullCoverage: true })`, so any change to the hash
+contract also affects the trust ledger.
 
 ## Durable rollout prerequisites
 

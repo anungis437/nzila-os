@@ -72,6 +72,8 @@ export interface HarnessLifecycleRecord {
   readonly state: HarnessState
   readonly authorisedBy: PrincipalRef | null
   readonly passedGates: readonly HarnessReviewGate[]
+  /** Who passed each review gate and when, so separation of duties can be audited. */
+  readonly gateReviews: ReadonlyArray<{ readonly gate: HarnessReviewGate; readonly by: string; readonly at: string }>
   readonly candidate: ToolDescriptor | null
   readonly history: ReadonlyArray<{ readonly at: string; readonly to: HarnessState; readonly by: string }>
 }
@@ -90,6 +92,7 @@ export class HarnessLifecycle {
       state: 'REQUESTED',
       authorisedBy: null,
       passedGates: [],
+      gateReviews: [],
       candidate: null,
       history: [{ at, to: 'REQUESTED', by: request.requestingAgent }],
     }
@@ -139,7 +142,7 @@ export class HarnessLifecycle {
     }
     if (r.passedGates.includes(gate)) return r
     const passedGates = [...r.passedGates, gate]
-    const updated: HarnessLifecycleRecord = { ...r, passedGates }
+    const updated: HarnessLifecycleRecord = { ...r, passedGates, gateReviews: [...r.gateReviews, { gate, by: by.id, at }] }
     this.records.set(requestId, updated)
     return updated
   }

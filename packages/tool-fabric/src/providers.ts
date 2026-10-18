@@ -128,7 +128,23 @@ const UNKNOWN_EFFECTS_FLOOR: readonly ToolSideEffect[] = [
 /** True when the install command does not resolve to an immutable artefact. */
 export function isMutableInstall(installCmd: string): boolean {
   if (/git\+/.test(installCmd)) return !COMMIT_PIN.test(installCmd)
-  return !/==\s*\d/.test(installCmd)
+  const tokens = installCmd.trim().split(/\s+/)
+  const install = tokens.indexOf('install')
+  if (install < 0) return true
+  // Immutable only when every package is an exact, non-wildcard == pin and no option
+  // can redirect resolution (custom index, find-links, requirements, editable, URL).
+  const REDIRECTING = /^(-i|--index-url|--extra-index-url|-f|--find-links|-r|--requirement|-e|--editable|-c|--constraint)(=|$)/
+  const packages: string[] = []
+  for (const token of tokens.slice(install + 1)) {
+    if (token.includes('://')) return true
+    if (token.startsWith('-')) {
+      if (REDIRECTING.test(token)) return true
+      continue
+    }
+    packages.push(token)
+  }
+  if (packages.length === 0) return true
+  return !packages.every((token) => /^[A-Za-z0-9][A-Za-z0-9._-]*(\[[A-Za-z0-9,._-]+\])?==\d[A-Za-z0-9.+!_-]*$/.test(token))
 }
 
 /**

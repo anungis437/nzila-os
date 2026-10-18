@@ -268,7 +268,7 @@
       "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
       "upstream_blobs": {},
       "final_blob": "4a5d9775c30ddff4444c99d377e8fb58f471cc14",
-      "working_bytes_sha256": "793a1de1606dbbf908518571896442bc904916c50ecdd9dd1b09b2468f822811"
+      "working_bytes_sha256": "2acbe850f342666e6b4518992e2ed6d9249d7194414ce90c06035792c538c941"
     },
     {
       "path": "docs/architecture/TOOL_FABRIC_BASELINE_GOVERNANCE_DECISIONS.md",
@@ -303,21 +303,21 @@
       "resolution": "generated convergence acceptance evidence; self-hash omitted",
       "upstream_blobs": {},
       "final_blob": "1a81a65c6b40f6a2240ce1a247505962ae9e529d",
-      "working_bytes_sha256": "747e56df8b2d6604d910fc94bd7bcc822243fb1bca89d6c724d1df753ea1e43c"
+      "working_bytes_sha256": "448cb5ffed0526e5e766f23130f8d4396cf581c4c1c6fe56af13db3a385904ca"
     },
     {
       "path": "docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md",
       "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
       "upstream_blobs": {},
       "final_blob": "491c8b0dae9e24d4666af8b89b0ed66ac0a65dc5",
-      "working_bytes_sha256": "fec1c1bdeef163b0ee5aa992ca96c8d35cf56071300a2ef77a229b0caef6932f"
+      "working_bytes_sha256": "e1e445b9f597cce1a372136b7b347bc1d1904cba13034f3f17b2bf145a170035"
     },
     {
       "path": "docs/architecture/VALIDATION_LEVELS.md",
       "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
       "upstream_blobs": {},
       "final_blob": "51909518c3ef62c7cc847f30f3bd28b57acdc4e0",
-      "working_bytes_sha256": "8c81b766ffa996fddc5660295467638daf74ed5e30885d2d737c8b2a45d371aa"
+      "working_bytes_sha256": "2e03708a75c171c2a10c1db6be994223c89a09524636fc2baa9f067dc340409d"
     },
     {
       "path": "docs/engineering-convergence/ci-execution/CI_AUTHORITY_SURFACE.md",
@@ -401,7 +401,7 @@
         "audit_938": "0f8e5024bea85617f849a722a1dd6564debd335a"
       },
       "final_blob": "f3d91c4845fcc581314ebf966365cfe0627dd3a9",
-      "working_bytes_sha256": "0bbc4859da74fee7297c664dde652777c214830fefb450f532630f8c2e1c01b2"
+      "working_bytes_sha256": "82af16c7a731f76e1f6d2eac05595986cc44b1d78356403c3ba8a9d4254786a6"
     },
     {
       "path": "packages/audit/src/engine.ts",
@@ -629,7 +629,7 @@
         "phase2_937": "f7c496fe8569854d986221bd04d2bc72c751af3f"
       },
       "final_blob": "f4df34187611ac67651264e4bbf09dc2e2779736",
-      "working_bytes_sha256": "b63fad9e5ec5067bea369769be2cf4ac2702353caa89a4aa38cdc235bc814bd5"
+      "working_bytes_sha256": "0a36384add973ba1465331947f389c9f79b500e1bdc991d3ddcdc8f55ec7659f"
     },
     {
       "path": "packages/tool-fabric/src/governance.ts",
@@ -648,7 +648,7 @@
         "phase2_937": "8ca127f956650683c98ff84aa6505f0650a03f28"
       },
       "final_blob": "8ca127f956650683c98ff84aa6505f0650a03f28",
-      "working_bytes_sha256": "b85291db86ce9e72a1ab3ea15af090a573941534fe0389f0b8c498004a1f3e38"
+      "working_bytes_sha256": "aa865ab64e92baf14995584516f0a49f87c624c89f9e04818d3d28b7e5741d60"
     },
     {
       "path": "packages/tool-fabric/src/index.ts",
@@ -707,7 +707,7 @@
         "phase2_937": "a0fc8b14fce1a6701607a19bb3e0056c715e518e"
       },
       "final_blob": "616c4dab12bfa314f1b7add1aefb01e4bcb2ac8b",
-      "working_bytes_sha256": "a552d5d90442cde4a19f658cfd5e5c0425018b119b8c3c50e4e9e949797f3f7b"
+      "working_bytes_sha256": "b04a5de7966fc46f5007a7b2fd3120626f3fc52b53a50387cc82eacdbbe55ee6"
     },
     {
       "path": "packages/tool-fabric/src/providers.ts",
@@ -717,7 +717,7 @@
         "phase2_937": "ef0a3e0764a3d685a119443697a769ddb2499060"
       },
       "final_blob": "8d9fa65845ee787c7e9785c5c27c607e8b26f7d5",
-      "working_bytes_sha256": "0acaa9f8267e317e9e6fbb756e0b265866fe2b550307a6efa405857e84520ed8"
+      "working_bytes_sha256": "49a507cd2ba00c07b82b288d534cdba914e2ae25ed85143a3523c39713e19b09"
     },
     {
       "path": "packages/tool-fabric/src/registry.ts",
@@ -737,7 +737,7 @@
         "phase2_937": "bef5d8c80ff9c5193f5e2d67feee3ea48f9ef487"
       },
       "final_blob": "bef5d8c80ff9c5193f5e2d67feee3ea48f9ef487",
-      "working_bytes_sha256": "e7556eeee2e5dbaace1ee90ed74522ff499446bf1c5359b1fa167aced8adf84a"
+      "working_bytes_sha256": "0dfa23f9b92d2ca0e4add2b282c822473f9b6df24fa5904af1e53860df989e9e"
     },
     {
       "path": "packages/tool-fabric/src/testing.ts",
@@ -756,7 +756,7 @@
         "phase2_937": "b872d79879a9b4dd46a9b2903a2af71785a3a52d"
       },
       "final_blob": "820ffdb7c677d271d8f242aee49d660b6aa27df0",
-      "working_bytes_sha256": "9b1f178f8843350b0a963530bb05b3819a18af327e84e261e6ba908309a226a7"
+      "working_bytes_sha256": "1f6c45382135f7f149a8d2103329662380c4995d03e0b84ea762a71979e26168"
     },
     {
       "path": "packages/tool-fabric/src/types.ts",
@@ -805,7 +805,7 @@
       "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
       "upstream_blobs": {},
       "final_blob": "bb8a8bab70e6f15113541e9dd77a83c46b029b08",
-      "working_bytes_sha256": "6ff2f5b356acbb24da1c841eb5750964cdaf38833535e24b9802ed61179c93fd"
+      "working_bytes_sha256": "ef39721f926e6da45fe6aad38a46f1c746338ea08d44cd5a97c7d8d413c675f4"
     },
     {
       "path": "tooling/ci/merge-authority/sarif-reporting.mjs",
@@ -925,8 +925,8 @@
     "upstream lockfile resolution snapshots"
   ],
   "reconciled_against": {
-    "commit": "669cfea330d6f7c6482936b8d52f948fe7a33c97",
-    "tree": "20370563468e2951f2abd480476297eddf6f2273",
+    "commit": "b49cfb578410559b387363b436c155708900e5d3",
+    "tree": "2a90635b0e1679b5edb8a4da028ff11abd7fac86",
     "base": "ede980d62959f91517b6c805787cb031d60fd420"
   }
 }

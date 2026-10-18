@@ -218,7 +218,7 @@
       "path": "apps/console/**",
       "owner": "platform-team",
       "currentJustification": "Console app has legacy unscoped DB imports across ~60 routes. Migration to createScopedDb(entityId) + service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 450,
       "scannedFileCount": 106,
@@ -543,6 +543,14 @@
         "sourceWork": "Extract remaining 54 schema-dependent routes using genuine services and the existing authority. Preserve anonymous survey share-token/rate-limit/audit sequencing, ITSM executive-org selection, sales platform-role aggregates, QBO auth/CSRF/encryption/transaction/cookie redirects and both Stripe webhook signature/idempotency/payment sequences.",
         "actualDecision": "No mandatory new policy decision demonstrated for unchanged-authority extraction. Changing anonymous-token authority, OAuth organization binding, global visibility, tenant predicates or payment policy would be a separate semantic decision, not a precondition invented for refactoring.",
         "nextTests": "Per-route guard/status/DB-predicate/order tests; QBO CSRF and transaction rollback, survey token/rate-limit, Stripe replay/idempotency and transaction rejection tests before those extractions."
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -598,7 +606,7 @@
       "path": "apps/union-eyes/**",
       "owner": "union-eyes-team",
       "currentJustification": "Django-migrated app with direct DB access patterns. Migration tracked alongside console/partners. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 5103,
       "scannedFileCount": 972,
@@ -730,6 +738,14 @@
         "sourceWork": "Extract two case and thirteen lifecycle route operations while retaining withRLSContext or withApi admin/entitlement plus withSystemContext callbacks, actor/default mappings and existing query filters.",
         "actualDecision": "No new approval needed merely for context-preserving extraction. Replacing the global lifecycle policy registry with tenant-scoped storage is a distinct authority/data-model decision and is not needed for extraction. UE NO_GO is not a refactor ban.",
         "nextTests": "Case RLS/organization predicates and denial tests; lifecycle admin/entitlement denials, callback context, actor/default mappings and failure ordering."
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -743,7 +759,7 @@
       "path": "apps/flow/**",
       "owner": "commerce-team",
       "currentJustification": "Flow commerce app — legacy direct DB access in API routes. Migration to service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 438,
       "scannedFileCount": 24,
@@ -813,6 +829,14 @@
         "sourceWork": "Extract remaining api/metrics, api/ops/summary and api/quotes data operations without changing existing scope or fallback behavior.",
         "actualDecision": "A platform-wide aggregate visibility change is separate from unchanged-semantics extraction; no blanket prior-owner approval barrier.",
         "nextTests": "Current guard, aggregate visibility, query predicate and fallback/order selectors for the three routes."
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -884,7 +908,7 @@
       "path": "apps/control-plane/**",
       "owner": "platform-team",
       "currentJustification": "Control plane db-bridge provides scoped DB bridge for internal admin operations. Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 334,
       "scannedFileCount": 127,
@@ -1140,6 +1164,14 @@
         "sourceWork": "Classify remaining 31 server files by actual endpoint/service/repository role and extract route-owned operations using real dependency boundaries. No blanket server exclusion or import alias evasion.",
         "actualDecision": "Whether genuine server repositories/factories should fall under endpoint architecture policy is a real structural rule-role decision requiring architecture governance. Additional endpoint/service extraction remains normal engineering, not automatically owner-only.",
         "nextTests": "Per-role dependency-direction tests and guard/history/persistence/rejection tests for each further slice; no rule weakening in this change."
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -1325,7 +1357,7 @@
       "path": "apps/nzila-hq/**",
       "owner": "platform-core",
       "currentJustification": "Nzila HQ is INCUBATING with its own DB client in server/db/. Migration to shared service layer tracked before PILOT promotion. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 108,
       "scannedFileCount": 14,
@@ -1366,6 +1398,14 @@
             "kind": "drizzle() instantiation"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -1459,7 +1499,7 @@
       "path": "apps/union-eyes/lib/console-wrapper.ts",
       "owner": "platform-team",
       "currentJustification": "Console-wrapper intentionally stores and overrides console methods to route them to structured logger in production. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 1,
       "scannedFileCount": 1,
@@ -1492,6 +1532,14 @@
         "count": 0,
         "matchingFileCount": 0,
         "locations": []
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -1590,7 +1638,7 @@
       "path": "apps/cfo/app/*/dashboard/error.tsx",
       "owner": "platform-team",
       "currentJustification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 1,
       "scannedFileCount": 1,
@@ -1628,6 +1676,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -1641,7 +1697,7 @@
       "path": "apps/cfo/app/*/dashboard/*/error.tsx",
       "owner": "platform-team",
       "currentJustification": "Client-side error boundary for sub-sections runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 18,
       "scannedFileCount": 18,
@@ -1769,6 +1825,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -1782,7 +1846,7 @@
       "path": "apps/cfo/app/*/dashboard/*/*/error.tsx",
       "owner": "platform-team",
       "currentJustification": "Client-side error boundary for nested sub-sections (e.g., documents/upload, workflows/new) runs in browser context where @nzila/os-core is not available. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 3,
       "scannedFileCount": 3,
@@ -1835,6 +1899,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -1848,7 +1920,7 @@
       "path": "apps/zonga/app/*/dashboard/error.tsx",
       "owner": "platform-team",
       "currentJustification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 1,
       "scannedFileCount": 1,
@@ -1886,6 +1958,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -1899,7 +1979,7 @@
       "path": "apps/zonga/app/*/dashboard/*/error.tsx",
       "owner": "platform-team",
       "currentJustification": "Client-side error boundary for sub-sections runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 6,
       "scannedFileCount": 6,
@@ -1967,6 +2047,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -1980,7 +2068,7 @@
       "path": "apps/partners/app/**/admin/error.tsx",
       "owner": "platform-team",
       "currentJustification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 2,
       "scannedFileCount": 2,
@@ -2028,6 +2116,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -2041,7 +2137,7 @@
       "path": "apps/partners/app/**/portal/error.tsx",
       "owner": "platform-team",
       "currentJustification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 2,
       "scannedFileCount": 2,
@@ -2089,6 +2185,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -2102,7 +2206,7 @@
       "path": "apps/nacp-exams/app/*/dashboard/error.tsx",
       "owner": "platform-team",
       "currentJustification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 1,
       "scannedFileCount": 1,
@@ -2140,6 +2244,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -2445,7 +2557,7 @@
       "path": "apps/console/components/ui/ErrorPanel.tsx",
       "owner": "platform-team",
       "currentJustification": "Client error boundary runs in browser context where @nzila/os-core is not available — console.error is the browser RUM sink for Next.js error digest reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 1,
       "scannedFileCount": 1,
@@ -2483,6 +2595,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -2496,7 +2616,7 @@
       "path": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
       "owner": "platform-core",
       "currentJustification": "Client error boundary runs in browser context where @nzila/os-core is not available — console.error surfaces incident IDs via devtools. Will adopt os-core browser logger before PILOT promotion. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 1,
       "scannedFileCount": 1,
@@ -2534,6 +2654,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     },
     {
@@ -2605,7 +2733,7 @@
       "path": "apps/union-eyes/instrumentation.ts",
       "owner": "platform-team",
       "currentJustification": "Turbopack instrumentation loader cannot instantiate relative module factories from inside register() catch path — console.error is the only safe fallback here. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18",
+      "currentExpiry": "2026-11-17",
       "proposedExpiry": null,
       "matchedSourceFileCount": 1,
       "scannedFileCount": 1,
@@ -2669,6 +2797,14 @@
             "kind": "console.error"
           }
         ]
+      },
+      "ownerBridge2": {
+        "approvedBy": "Aubert Nungisa (@anungis437)",
+        "date": "2026-10-18",
+        "reference": "PR #941",
+        "priorExpiry": "2026-10-18",
+        "newExpiry": "2026-11-17",
+        "note": "Time-boxed bridge, not a remediation; classification and obligations above are unchanged."
       }
     }
   ],

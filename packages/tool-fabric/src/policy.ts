@@ -274,7 +274,8 @@ export class ToolPolicy {
     // Environment and secrets.
     const forced = this.providers.forcedEnvFor(record.descriptor.identity.providerId)
     for (const k of Object.keys(req.env.allow)) {
-      if (!grant.allowedEnv?.[k]?.includes(req.env.allow[k]!)) reasons.push('ENVIRONMENT_NOT_EXPLICITLY_GRANTED')
+      const allowedValues = grant.allowedEnv && Object.hasOwn(grant.allowedEnv, k) ? grant.allowedEnv[k] : undefined
+      if (!Array.isArray(allowedValues) || !allowedValues.includes(req.env.allow[k]!)) reasons.push('ENVIRONMENT_NOT_EXPLICITLY_GRANTED')
       if (!ENV_KEY.test(k)) reasons.push(`env key "${k}" is malformed`)
       else if (BLOCKED_ENV_KEYS.has(k)) reasons.push(`env key "${k}" is blocked`)
       else if (SECRET_LIKE_ENV.test(k)) reasons.push(`env key "${k}" looks like a secret; use secret references`)
