@@ -20,8 +20,14 @@ const publicPaths = [
   '/trial',
 ]
 
+/* Platform diagnostics (build metadata, process/database readiness) carry no business
+   data and are probed unauthenticated by deployment checks. Exact match only, so no
+   lookalike path becomes public. */
+const publicDiagnosticPaths = ['/api/ready', '/api/version']
+
 function isPublicPath(pathname: string): boolean {
   if (pathname === '/') return true
+  if (publicDiagnosticPaths.includes(pathname)) return true
   return publicPaths.some(p => pathname.startsWith(p))
 }
 

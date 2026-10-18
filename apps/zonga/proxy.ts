@@ -34,6 +34,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/auth(.*)',
   '/api/health(.*)',
   '/api/ready(.*)',
+  '/api/version(.*)',
 ])
 
 const isMarketingPath = (pathname: string) =>
@@ -57,91 +58,128 @@ const intlMiddleware = createMiddleware({
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-/* ── Main middleware ── */
-export const proxy = authMiddleware(async (auth, request: NextRequest) => {
-  try {
-    // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
-    if (process.env.NODE_ENV !== 'development') {
-      const ip =
-        request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-        request.headers.get('x-real-ip') ??
-        'unknown'
-      const rl = await checkRateLimitDistributed(ip, {
-        max: RATE_LIMIT_MAX,
-        windowMs: RATE_LIMIT_WINDOW_MS,
-      })
-      if (!rl.allowed) {
+/* ── Fail-closed upstream failure handler ── */
+function failClosed(err: unknown): NextResponse {
+  // Fail-CLOSED: an upstream failure (auth, rate-limit) must NOT silently
+  // bypass authentication. In dev we still let the request through so
+  // local work isn't blocked by Redis/Entra hiccups.
+  void err
+  const requestId = crypto.randomUUID()
+  if (process.env.NODE_ENV === 'development') {
+    const fallback = NextResponse.next()
+    fallback.headers.set('x-request-id', requestId)
+    return fallback
+  }
+  return NextResponse.json(
+    {
+      error: 'Service Unavailable',
+      message:
+        'A required upstream service is temporarily unavailable. Please retry.',
+      code: 'MIDDLEWARE_FAILURE',
+    },
+    { status: 503, headers: { 'x-request-id': requestId } },
+  )
+}
+
+/* ── Guards that run before authentication; a returned response short-circuits ── */
+async function preAuthGuards(request: NextRequest): Promise<NextResponse | undefined> {
+  // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
+  if (process.env.NODE_ENV !== 'development') {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
+      'unknown'
+    const rl = await checkRateLimitDistributed(ip, {
+      max: RATE_LIMIT_MAX,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+    })
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too Many Requests' },
+        {
+          status: 429,
+          headers: rateLimitHeaders(rl, RATE_LIMIT_MAX),
+        },
+      )
+    }
+  }
+
+  // ── Org-scoped rate limiting (per-org + route-group buckets) ────────
+  if (process.env.NODE_ENV !== 'development') {
+    const orgId = request.headers.get('x-org-id')
+    if (orgId && request.nextUrl.pathname.startsWith('/api')) {
+      const orgRl = await checkOrgRateLimitDistributed(
+        orgId,
+        request.nextUrl.pathname,
+        request.method,
+      )
+      if (!orgRl.allowed) {
         return NextResponse.json(
-          { error: 'Too Many Requests' },
+          {
+            error: 'Org Rate Limit Exceeded',
+            message: `Rate limit exceeded for route group: ${orgRl.routeGroup}`,
+            code: 'ORG_RATE_LIMIT_EXCEEDED',
+          },
           {
             status: 429,
-            headers: rateLimitHeaders(rl, RATE_LIMIT_MAX),
+            headers: orgRateLimitHeaders(orgRl),
           },
         )
       }
     }
+  }
 
-    // ── Org-scoped rate limiting (per-org + route-group buckets) ────────
-    if (process.env.NODE_ENV !== 'development') {
-      const orgId = request.headers.get('x-org-id')
-      if (orgId && request.nextUrl.pathname.startsWith('/api')) {
-        const orgRl = await checkOrgRateLimitDistributed(
-          orgId,
-          request.nextUrl.pathname,
-          request.method,
+  /* Skip locale redirect for pure marketing & auth pages */
+  if (isMarketingPath(request.nextUrl.pathname) || isAuthPath(request.nextUrl.pathname)) {
+    const response = NextResponse.next();
+    response.headers.set('x-request-id', crypto.randomUUID());
+    return response;
+  }
+
+  // ── Idempotency-Key enforcement (fail-closed in pilot/prod) ──────────
+  if (process.env.NODE_ENV !== 'development') {
+    if (
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
+      request.nextUrl.pathname.startsWith('/api') &&
+      !request.nextUrl.pathname.startsWith('/api/auth') &&
+      !request.nextUrl.pathname.startsWith('/api/webhooks') &&
+      !request.nextUrl.pathname.startsWith('/api/health') &&
+      !request.nextUrl.pathname.startsWith('/api/cron')
+    ) {
+      if (!request.headers.get('idempotency-key')) {
+        return NextResponse.json(
+          {
+            error: 'Missing Idempotency-Key header',
+            message:
+              'All mutation requests (POST, PUT, PATCH, DELETE) must include an Idempotency-Key header.',
+            code: 'IDEMPOTENCY_KEY_REQUIRED',
+          },
+          { status: 400 },
         )
-        if (!orgRl.allowed) {
-          return NextResponse.json(
-            {
-              error: 'Org Rate Limit Exceeded',
-              message: `Rate limit exceeded for route group: ${orgRl.routeGroup}`,
-              code: 'ORG_RATE_LIMIT_EXCEEDED',
-            },
-            {
-              status: 429,
-              headers: orgRateLimitHeaders(orgRl),
-            },
-          )
-        }
       }
     }
+  }
 
-    /* Skip locale redirect for pure marketing & auth pages */
-    if (isMarketingPath(request.nextUrl.pathname) || isAuthPath(request.nextUrl.pathname)) {
-      const response = NextResponse.next();
-      response.headers.set('x-request-id', crypto.randomUUID());
-      return response;
-    }
+  return undefined
+}
 
-    // ── Idempotency-Key enforcement (fail-closed in pilot/prod) ──────────
-    if (process.env.NODE_ENV !== 'development') {
-      if (
-        ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
-        request.nextUrl.pathname.startsWith('/api') &&
-        !request.nextUrl.pathname.startsWith('/api/auth') &&
-        !request.nextUrl.pathname.startsWith('/api/webhooks') &&
-        !request.nextUrl.pathname.startsWith('/api/health') &&
-        !request.nextUrl.pathname.startsWith('/api/cron')
-      ) {
-        if (!request.headers.get('idempotency-key')) {
-          return NextResponse.json(
-            {
-              error: 'Missing Idempotency-Key header',
-              message:
-                'All mutation requests (POST, PUT, PATCH, DELETE) must include an Idempotency-Key header.',
-              code: 'IDEMPOTENCY_KEY_REQUIRED',
-            },
-            { status: 400 },
-          )
-        }
-      }
-    }
+/* ── Main middleware ── */
+export const proxy = authMiddleware(async (auth, request: NextRequest) => {
+  try {
+    const early = await preAuthGuards(request)
+    if (early) return early
+  } catch (err) {
+    return failClosed(err)
+  }
 
-    /* Protect non-public routes */
-    if (!isPublicRoute(request)) {
-      await auth.protect();
-    }
+  /* Protect non-public routes. auth.protect() reports an unauthenticated request by
+     throwing a sign-in challenge that authMiddleware converts into a redirect, so it must
+     stay outside the fail-closed try/catch (which would misreport it as a 503 outage). */
+  if (!isPublicRoute(request)) {
+    await auth.protect();
+  }
 
+  try {
     /* Skip i18n for API routes — they don't need locale prefixing */
     if (request.nextUrl.pathname.startsWith('/api')) {
       const response = NextResponse.next();
@@ -154,28 +192,9 @@ export const proxy = authMiddleware(async (auth, request: NextRequest) => {
     response.headers.set('x-request-id', crypto.randomUUID());
     return response;
   } catch (err) {
-    // Fail-CLOSED: an upstream failure (auth, rate-limit) must NOT silently
-    // bypass authentication. In dev we still let the request through so
-    // local work isn't blocked by Redis/Entra hiccups.
-    void err
-    const requestId = crypto.randomUUID()
-    if (process.env.NODE_ENV === 'development') {
-      const fallback = NextResponse.next()
-      fallback.headers.set('x-request-id', requestId)
-      return fallback
-    }
-    return NextResponse.json(
-      {
-        error: 'Service Unavailable',
-        message:
-          'A required upstream service is temporarily unavailable. Please retry.',
-        code: 'MIDDLEWARE_FAILURE',
-      },
-      { status: 503, headers: { 'x-request-id': requestId } },
-    )
+    return failClosed(err)
   }
 });
-
 export const config = {
   matcher: [
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',

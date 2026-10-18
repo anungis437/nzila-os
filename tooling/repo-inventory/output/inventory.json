@@ -5,7 +5,7 @@
   "workspacePackageCount": 260,
   "workflowCount": 59,
   "contractTestCount": 297,
-  "tsTestFileCount": 2804,
+  "tsTestFileCount": 2806,
   "pythonTestFileCount": 36,
   "apps": [
     {
@@ -328,7 +328,7 @@
         "ui"
       ],
       "purpose": "Commerce vertical — end-to-end order management, quoting, invoicing, inventory, supplier management, and Shopify/Zoho integrations.",
-      "codeFileCount": 437
+      "codeFileCount": 438
     },
     {
       "name": "maestria",
@@ -849,7 +849,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 461
+      "codeFileCount": 462
     }
   ],
   "workflows": [
