@@ -24,10 +24,14 @@ pre-commit:
       run: node scripts/lint-staged-eslint.mjs {staged_files}
       fail_text: "Lint errors found. Run `pnpm lint` to see details."
 
+    # Validation level 1 (development): typecheck only packages with staged TS files.
+    # Dependents and the full workspace are qualified once per candidate SHA by
+    # CI (.github/workflows/ci.yml, tooling/ci/run-affected-typecheck.sh).
+    # See docs/architecture/VALIDATION_LEVELS.md. Bounded to one task at a time.
     typecheck-staged:
       glob: "*.{ts,tsx}"
-      run: pnpm typecheck --filter "...[HEAD]" --output-logs errors-only
-      fail_text: "Type errors found. Run `pnpm typecheck` to see details."
+      run: node scripts/typecheck-changed.mjs
+      fail_text: "Type errors found in changed packages. Run `node scripts/typecheck-changed.mjs` to see details."
 
     brand-leakage:
       glob: "*.{ts,tsx,js,jsx,json,md}"
@@ -75,11 +79,16 @@ pre-commit:
 
 pre-push:
   commands:
+    # Validation level 1 (development): run only contract test files added or
+    # changed by the push. The complete contract suite is a required CI gate
+    # (ci.yml `contract-tests`) and is the PR/merge qualification, run once per
+    # final candidate SHA. Run `pnpm contract-tests` locally for the full suite.
     contract-tests:
+      glob: "tooling/contract-tests/**/*.test.ts"
       run: >
         pnpm exec vitest run
         --config tooling/contract-tests/vitest.config.ts
-        --dir tooling/contract-tests
+        {push_files}
       fail_text: |
-        Contract tests failed. Run `pnpm contract-tests` to see details.
+        Changed contract tests failed. Run `pnpm contract-tests` to see details.
         Do not push code that violates repo invariants.
