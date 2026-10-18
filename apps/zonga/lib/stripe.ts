@@ -19,6 +19,8 @@ import {
   type MatchResult,
 } from '@nzila/payments-stripe'
 import type { PayoutRail, ZongaCurrency as _ZongaCurrency } from '@nzila/zonga-core'
+import { writeDiagnostic } from '@nzila/os-core/telemetry'
+import { logger } from './logger'
 export type { _ZongaCurrency as ZongaCurrency }
 
 export {
@@ -126,7 +128,7 @@ export async function executeMobileMoneyPayout(opts: {
 }): Promise<{ reference: string; status: 'pending' | 'queued' }> {
   const secretKey = process.env.FLUTTERWAVE_SECRET_KEY
   if (!secretKey) {
-    console.warn('[zonga] FLUTTERWAVE_SECRET_KEY not set — mobile money payout queued locally')
+    writeDiagnostic(logger, 'warn', 'Mobile money provider not configured — payout queued locally')
     const reference = `momo_${opts.rail}_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`
     return { reference, status: 'queued' }
   }

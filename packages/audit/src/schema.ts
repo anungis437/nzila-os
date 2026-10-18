@@ -13,11 +13,14 @@ export const auditEntrySchema = z.object({
   payload: z.record(z.unknown()),
   prevHash: z.string(),
   hash: z.string(),
+  // Absent means the historical, top-level-only v1 hash contract.
+  hashVersion: z.union([z.literal(1), z.literal(2)]).optional(),
   traceId: z.string().optional(),
   spanId: z.string().optional(),
 })
 
 export type AuditEntry = z.infer<typeof auditEntrySchema>
+export type AuditHashVersion = 1 | 2
 
 // ─── Audit Input (before hashing) ───────────────────────────────────────────
 
@@ -53,6 +56,9 @@ export type RootHashSnapshot = z.infer<typeof rootHashSnapshotSchema>
 export const verificationResultSchema = z.object({
   valid: z.boolean(),
   entriesChecked: z.number().int().nonnegative(),
+  // Optional on historical serialized verification reports; current verifiers always emit both.
+  hashCoverage: z.enum(['FULL', 'LEGACY_PARTIAL']).optional(),
+  legacyEntriesChecked: z.number().int().nonnegative().optional(),
   firstEntry: z.string().uuid().optional(),
   lastEntry: z.string().uuid().optional(),
   brokenAt: z.string().uuid().optional(),

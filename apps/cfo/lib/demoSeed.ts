@@ -8,6 +8,12 @@
  * This script is not a production data authority.
  */
 
+import { createLogger, writeDiagnostic } from '@nzila/os-core/telemetry'
+
+const logger = createLogger('cfo:demo-seed')
+const report = (message: string) => writeDiagnostic(logger, 'info', message)
+const reportFailure = () => writeDiagnostic(logger, 'error', 'Demo seed failed')
+
 export interface DemoOrg {
   id: string
   name: string
@@ -68,15 +74,15 @@ export async function seedDemo() {
   const budgets = createDemoBudgets(org.id)
   const analytics = createDemoAnalytics()
 
-  console.log(`[demo:seed] CFO demo data created`)
-  console.log(`  Org: ${org.name}`)
-  console.log(`  Users: ${users.length}`)
-  console.log(`  Budgets: ${budgets.length}`)
-  console.log(`  Analytics: ready`)
+  report(`[demo:seed] CFO demo data created`)
+  report(`  Org: ${org.name}`)
+  report(`  Users: ${users.length}`)
+  report(`  Budgets: ${budgets.length}`)
+  report(`  Analytics: ready`)
 
   return { org, users, budgets, analytics }
 }
 
 if (process.argv[1]?.includes('demoSeed')) {
-  seedDemo().catch(console.error)
+  seedDemo().catch(reportFailure)
 }

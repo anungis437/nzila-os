@@ -58,6 +58,7 @@ export default defineConfig({
       'packages/fx',
       'packages/tax',
       'packages/tools-runtime',
+      'packages/tool-fabric',
       'packages/ui',
       // Integration platform
       'packages/integrations-core',

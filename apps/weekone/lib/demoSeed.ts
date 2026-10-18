@@ -5,6 +5,12 @@
  * and weekly briefs for founder baseline demonstrations.
  */
 
+import { createLogger, writeDiagnostic } from '@nzila/os-core/telemetry'
+
+const logger = createLogger('weekone:demo-seed')
+const report = (message: string) => writeDiagnostic(logger, 'info', message)
+const reportFailure = () => writeDiagnostic(logger, 'error', 'Demo seed failed')
+
 export interface DemoWeeköneOrg {
   id: number
   name: string
@@ -302,15 +308,15 @@ export async function seedWeekOneDemo() {
   const priorities = createDemoPriorities(org.id)
   const brief = createDemoWeeklyBrief(org.id)
 
-  console.log(`[demo:seed] WeekOne demo data created`)
-  console.log(`  Org: ${org.name}`)
-  console.log(`  User: ${user.name}`)
-  console.log(`  Subscription: ${subscription.plan}`)
-  console.log(`  Cash Snapshots: ${cashSnapshots.length}`)
-  console.log(`  Invoices: ${invoices.length}`)
-  console.log(`  Deals: ${deals.length}`)
-  console.log(`  Priorities: ${priorities.length}`)
-  console.log(`  Weekly Brief: ready`)
+  report(`[demo:seed] WeekOne demo data created`)
+  report(`  Org: ${org.name}`)
+  report(`  User: ${user.name}`)
+  report(`  Subscription: ${subscription.plan}`)
+  report(`  Cash Snapshots: ${cashSnapshots.length}`)
+  report(`  Invoices: ${invoices.length}`)
+  report(`  Deals: ${deals.length}`)
+  report(`  Priorities: ${priorities.length}`)
+  report(`  Weekly Brief: ready`)
 
   return {
     user,
@@ -325,5 +331,5 @@ export async function seedWeekOneDemo() {
 }
 
 if (process.argv[1]?.includes('demoSeed')) {
-  seedWeekOneDemo().catch(console.error)
+  seedWeekOneDemo().catch(reportFailure)
 }

@@ -30,4 +30,17 @@ describe("exportAuditLog", () => {
     expect(lines).toHaveLength(2); // header + 1 row
     expect(lines[0]).toContain("id,timestamp,actorId,orgId,action,resource");
   });
+
+  it("escapes quotes, commas and newlines in all CSV fields", async () => {
+    const store = new InMemoryAuditStore();
+    await new AuditEngine(store).record({
+      actorId: 'actor,"quoted"\nnext', orgId: "org", action: 'say "hello"',
+      resource: "r", traceId: 'trace"id', payload: { message: '"nested"' },
+    });
+    const result = await exportAuditLog(store, { orgId: "org", format: "csv" });
+    expect(result.data).toContain('"actor,""quoted""\nnext"');
+    expect(result.data).toContain('"say ""hello"""');
+    expect(result.data).toContain('"trace""id"');
+    expect(result.data).toContain('"{""message"":""\\""nested\\""""}"');
+  });
 });

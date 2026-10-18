@@ -8,6 +8,7 @@ import { appendFileSync } from 'node:fs'
  *
  * NOT_CONFIGURED means the code-scanning destination is unavailable.
  * CONFIGURED means the destination answered and publication is a separate activation.
+ *   It is evidence-only like NOT_CONFIGURED: enabling code scanning must not fail CI.
  * FAILURE means the probe itself did not produce either of those states.
  */
 
@@ -30,6 +31,7 @@ export function classifySarifProbe(statusCode, body) {
 
 function reportingState(classification) {
   if (classification === 'NOT_CONFIGURED') return 'NOT_CONFIGURED'
+  if (classification === 'CONFIGURED') return 'CONFIGURED'
   return 'FAILURE'
 }
 
@@ -100,9 +102,9 @@ async function main() {
   }
   writeSummary(result.state, result.detail)
   process.stdout.write(`SARIF_REPORTING=${result.state}\n${result.detail}\n`)
-  if (result.state === 'NOT_CONFIGURED') {
+  if (result.state === 'NOT_CONFIGURED' || result.state === 'CONFIGURED') {
     process.stdout.write(
-      `::warning title=SARIF_REPORTING::NOT_CONFIGURED — ${result.detail}\n`,
+      `::warning title=SARIF_REPORTING::${result.state} — ${result.detail}\n`,
     )
     process.exit(0)
   }

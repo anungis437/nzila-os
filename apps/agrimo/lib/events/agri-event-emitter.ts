@@ -11,19 +11,17 @@ import {
   type AgriDomainEvent,
   type AgriEventType,
 } from '@nzila/agri-events'
+import { createLogger, writeDiagnostic } from '@nzila/os-core/telemetry'
 
 const bus = createAgriEventBus()
+const logger = createLogger('agrimo:agri-event')
 
 // ── Audit logging handler — logs every domain event for observability ────
 bus.onAny(async (event: AgriDomainEvent) => {
-  console.info('[agri-event]', JSON.stringify({
-    eventId: event.id,
+  writeDiagnostic(logger, 'info', 'Agri event emitted', {
     type: event.type,
-    orgId: event.metadata.orgId,
-    actorId: event.metadata.actorId,
-    correlationId: event.metadata.correlationId,
     createdAt: event.createdAt,
-  }))
+  })
 })
 
 // ── Webhook handler — POST to org-configured webhook URL ────────────────
@@ -37,8 +35,8 @@ bus.on(AgriEventTypes.LOT_CERTIFIED, async (event: AgriDomainEvent) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: event.type, payload: event.payload, metadata: event.metadata }),
     })
-  } catch (err) {
-    console.error('[agri-event] Webhook delivery failed', event.type, err)
+  } catch {
+    writeDiagnostic(logger, 'error', 'Webhook delivery failed')
   }
 })
 
@@ -52,8 +50,8 @@ bus.on(AgriEventTypes.SHIPMENT_CLOSED, async (event: AgriDomainEvent) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: event.type, payload: event.payload, metadata: event.metadata }),
     })
-  } catch (err) {
-    console.error('[agri-event] Webhook delivery failed', event.type, err)
+  } catch {
+    writeDiagnostic(logger, 'error', 'Webhook delivery failed')
   }
 })
 
@@ -67,8 +65,8 @@ bus.on(AgriEventTypes.PAYMENT_EXECUTED, async (event: AgriDomainEvent) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: event.type, payload: event.payload, metadata: event.metadata }),
     })
-  } catch (err) {
-    console.error('[agri-event] Webhook delivery failed', event.type, err)
+  } catch {
+    writeDiagnostic(logger, 'error', 'Webhook delivery failed')
   }
 })
 

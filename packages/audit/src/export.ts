@@ -28,6 +28,11 @@ export async function exportAuditLog(
     toDate: options.toDate,
     limit: 100_000,
   })
+  for (const entry of entries) {
+    if (entry.hashVersion !== undefined && entry.hashVersion !== 1 && entry.hashVersion !== 2) {
+      throw new Error('Unsupported audit hash version')
+    }
+  }
 
   const format = options.format ?? 'json'
 
@@ -60,6 +65,7 @@ function entriesToCsv(entries: AuditEntry[]): string {
     'traceId',
     'spanId',
     'payload',
+    'hashVersion',
   ]
 
   const rows = entries.map((e) =>
@@ -75,9 +81,10 @@ function entriesToCsv(entries: AuditEntry[]): string {
       e.hash,
       e.traceId ?? '',
       e.spanId ?? '',
-      JSON.stringify(e.payload).replace(/"/g, '""'),
+      JSON.stringify(e.payload),
+      String(e.hashVersion ?? 1),
     ]
-      .map((v) => `"${v}"`)
+      .map((v) => `"${v.replace(/"/g, '""')}"`)
       .join(','),
   )
 

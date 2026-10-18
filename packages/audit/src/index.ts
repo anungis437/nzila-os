@@ -4,6 +4,7 @@
 
 export {
   type AuditEntry,
+  type AuditHashVersion,
   type AuditInput,
   type RootHashSnapshot,
   type VerificationResult,
@@ -25,6 +26,7 @@ export {
 } from './store.js'
 
 export {
+  type AuditVerificationOptions,
   verifyChain,
   verifyOrgChain,
 } from './verify.js'

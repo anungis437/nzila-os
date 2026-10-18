@@ -1,0 +1,932 @@
+{
+  "schema_version": 1,
+  "anchors": {
+    "main": "ede980d62959f91517b6c805787cb031d60fd420",
+    "phase1_936": "eb94efa32ab74acb2a2ba2ab96c46149d5ccfb31",
+    "phase2_937": "b514d693ff1c5688c0284eae7f3f6ef121ad3c0a",
+    "audit_938": "f78368ce02e59fdc79884c767213406ba444ddf0",
+    "restricted_935": "42167333ff07d9b5c8507f2da0bb170dd8cb8f7a",
+    "civitas_922": "d3b63cd92f06c734ffb8c41b2c8dc48e65d6f0c6"
+  },
+  "file_count": 109,
+  "files": [
+    {
+      "path": ".lefthook-local.yml",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": null,
+      "working_bytes_sha256": null
+    },
+    {
+      "path": "apps/abr/app/api/abr/incidents/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "78b09c9797e4c6793b52a4d1694628438514cd03",
+      "working_bytes_sha256": "d7da30b8c4e9f1998d45785af9886a6395585876eb31ceb1fe17506855c56d9e"
+    },
+    {
+      "path": "apps/abr/modules/incidents/nar-proof-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f60f0b55adb68804666f4c714121af6d517c46f4",
+      "working_bytes_sha256": "72ece8799b0622eeb40bd3cac83da2b66cdd7665beca3e863b4059f8c2606a9b"
+    },
+    {
+      "path": "apps/agrimo/app/api/webhooks/clerk/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "6251828f5d4a97d0a8bd4a00981d87aa044330c0",
+      "working_bytes_sha256": "9f5e839af307c50bbc3ee974a5d2cc9fbb5c599e0e4c72fab1a3033788a0eaad"
+    },
+    {
+      "path": "apps/agrimo/lib/events/agri-event-emitter.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "e9aabd63740aac7df85ec4a9620f287b49e7c40b",
+      "working_bytes_sha256": "19184b00969a2f79660b2e4573e9da7bda6c69d9121122cd9a5ad87dc11d4824"
+    },
+    {
+      "path": "apps/agrimo/lib/org-registry.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "680a7ec617eef670e91788e2c91279b770a85da9",
+      "working_bytes_sha256": "43cbe5eb9909d7eef31c214c5f312c1115d6e24d8c0697291b69a0ef499e4bd0"
+    },
+    {
+      "path": "apps/agrimo/lib/services/identity-sync-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "a263a5d681714617a1972794d71308e7c3263491",
+      "working_bytes_sha256": "be46943aecfd7c2750084a040256dac32542d6e1011679d34ff73bbcae797ac8"
+    },
+    {
+      "path": "apps/cfo/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "94854eae37c1824cde050311f907b4fb568a7b66",
+      "working_bytes_sha256": "25e7da4642c481ca5549e83908f62cc6d3dffdd99ec2c5a92790001c4d30e3b1"
+    },
+    {
+      "path": "apps/console/app/api/ai/actions/approve/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "0e776362a69e652afa22d30fdeacfcf122da21c1",
+      "working_bytes_sha256": "ee4805554e412570b394c585718f5fbfb7c643126e6ed731569155a0ddcd08ab"
+    },
+    {
+      "path": "apps/console/app/api/ai/actions/execute/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "2151c6ed092002af1098b4bd3c7ef5bff093000e",
+      "working_bytes_sha256": "e2b20a33f876bfddabed5904d3bc9fd12c6e58d88e4aa9bda5fb4dae570027e5"
+    },
+    {
+      "path": "apps/console/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "a6633cd3145fccdf339f2653723a887a12fd6088",
+      "working_bytes_sha256": "e44ee3a082e32cdb3b452eb78e740645e1e72f4e870a0554cca54a8ae4e69c15"
+    },
+    {
+      "path": "apps/console/lib/services/ai-action-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f88a5ce4d64d9854e0421c96757a5b20611f985c",
+      "working_bytes_sha256": "3b09cc72ec4c093905ccb091f5b8dfc9761b875eab2f8aa29fb0a3c1970b4603"
+    },
+    {
+      "path": "apps/control-plane/app/api/audit/record/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "1b4263abbc55a7588f25a0102d4073905b3f71f5",
+      "working_bytes_sha256": "73dd7028ac337ffe0f5e3619851d91f97e7bb014b4fad3689d50167c8f286561"
+    },
+    {
+      "path": "apps/control-plane/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "9141165750a33543ebab76ac17d417dd669cb2cd",
+      "working_bytes_sha256": "2f290a50f1f91f32ed30858d5c94f190745f39197ee934822cb173ef5bc2bd5e"
+    },
+    {
+      "path": "apps/control-plane/lib/repositories/audit-record-repository.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f02cd819b7e7cb94531aca6b244abdb4ad37dfa7",
+      "working_bytes_sha256": "db2848baa534c34d422e491136b95e4b6ed6c0ef0255155b77f587efcb2998c6"
+    },
+    {
+      "path": "apps/control-plane/lib/services/audit-proof-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "6e3f82906eb832a52502d03eecc2b6d22356ebe7",
+      "working_bytes_sha256": "cfd39bb8842222b6cdb67105712367ac53d7e5f61248b847d331118f9b7e50da"
+    },
+    {
+      "path": "apps/flow/app/api/governance/telemetry/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "47a81a968d8c8ee5aa39e4b6ebb249aa464f12de",
+      "working_bytes_sha256": "b6ffc35021a9c2ddb8abd213cd3cc85bb6293ff317292732e26e228510d1268a"
+    },
+    {
+      "path": "apps/flow/lib/services/governance-metrics-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "9844def8dd056a982e116d9f704e784aebe7453b",
+      "working_bytes_sha256": "9f6cf7ac0b6f2628dce4592af1034286071f1c50d83b009e5bbcb46d5c91ba06"
+    },
+    {
+      "path": "apps/nzila-hq/server/db/audit.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "80f1d272e7b86b8a3420306d28618ceced61299f",
+      "working_bytes_sha256": "5a9c10a7094adbb4080c611764185df23daf0341470645fe0b0b8f09743d911e"
+    },
+    {
+      "path": "apps/orchestrator-api/src/routes/execute.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "0d2727d7a9ef6245b4d1b4a4505798a6bda65501",
+      "working_bytes_sha256": "b7afd9e579d52162b89e23a440ef06122017afc57ebfff6a17be9c0743804375"
+    },
+    {
+      "path": "apps/orchestrator-api/src/services/nar-proof-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "30ce815eb811bab35c2010ebdd98fefcf4cc0b34",
+      "working_bytes_sha256": "04c1edb47630e2eb089985f190d33a2ea32f2f35e06bd9f6ba296a866526d9b5"
+    },
+    {
+      "path": "apps/partners/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "894ed24b555d6cc9bceacac7f5a8b78cc330f95f",
+      "working_bytes_sha256": "8a5cb08b34185d802725b33d9c608447b787e5fbe5b919e6fe3019be19d843a4"
+    },
+    {
+      "path": "apps/platform-admin/app/api/admin/org/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "987ecd0e401a1530a10c08b8982b7a98733401ee",
+      "working_bytes_sha256": "adb8620bee831e021413c4760db1d7a7f870d6f664ac35c3449b3055c70ba05a"
+    },
+    {
+      "path": "apps/platform-admin/lib/nar-proof-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "4aa2d0e97a347b0cc24c8df8476a003e4041f8b8",
+      "working_bytes_sha256": "692d112a8843af099106a6505ea3ca2409caf345b88653d139cbdd630e3d70dd"
+    },
+    {
+      "path": "apps/union-eyes/app/api/auth/mfa/enroll/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "3be5a754722a162bf61a47ea1c428e84e4341739",
+      "working_bytes_sha256": "bab6c27720b43a801896bf966f8d44481608da71b586c3a50590988be0b9d079"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/mfa-enrollment-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "3f6713f520d1fef789d09cc28611b705bbfa8d15",
+      "working_bytes_sha256": "6215d5afc60c3aa919b31529db6ee55376f3763dc291e1ac23f4d2017983ab10"
+    },
+    {
+      "path": "apps/web/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "c734b9e50c54c4069d685f2bda538aa0a9f11634",
+      "working_bytes_sha256": "66dcd94a85e8eee1803f0ac7d8cae2e827bf20642f892e8f537a5223098e0d3a"
+    },
+    {
+      "path": "apps/weekone/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "741ba1aea793fbeb067e19c8d59822cb34c3ed43",
+      "working_bytes_sha256": "132cab083da8e39570f30dbd6be013e03032520c0a2504fc8e50a266b86547dc"
+    },
+    {
+      "path": "apps/zonga/app/api/payouts/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "76fa1fc914080573d83f3a0e8413b71cd1aa2fba",
+      "working_bytes_sha256": "6a3097f2c6b0777d1b792d534d6c2567f87cea28c19867c12661ed10e4f34ee4"
+    },
+    {
+      "path": "apps/zonga/lib/__tests__/mobile-money-diagnostics.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "3d329aee006df09bb21af45bbfe0e77be9a558c4",
+      "working_bytes_sha256": "adf823e6253c09f16b553256bc785cf732e3e4b86a8548f1bce3b489a7d9cce1"
+    },
+    {
+      "path": "apps/zonga/lib/nar-proof-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "541c9b3d4a4daf5c190f7393f8fa8296d8ad6068",
+      "working_bytes_sha256": "1c64b44431c7056832b7c05ffbded4fd983c11df009afe4a7b92f296aa71bfcd"
+    },
+    {
+      "path": "apps/zonga/lib/stripe.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "28a797c26b278774bf7019906b026ad6591396eb",
+      "working_bytes_sha256": "fd61d76ca3ca31bc974fb68704ca5aabe1471cc3011c8dbc59b7f9074afc576b"
+    },
+    {
+      "path": "docs/architecture/ADR-TF-001-cli-anything-external-tool-provider.md",
+      "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
+      "upstream_blobs": {
+        "phase1_936": "3d34f49596a46a0020dfa554e66ac0c7b8c13c01",
+        "phase2_937": "3d34f49596a46a0020dfa554e66ac0c7b8c13c01"
+      },
+      "final_blob": "3d34f49596a46a0020dfa554e66ac0c7b8c13c01",
+      "working_bytes_sha256": "ecc676a9fbd84a70941fa0e5256d89e83286ca9d02a75ac0acf8b7ea2f82b05a"
+    },
+    {
+      "path": "docs/architecture/ADR-TF-002-authority-binding-and-trust-persistence.md",
+      "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
+      "upstream_blobs": {
+        "phase2_937": "5c271c86ef517afc48c94688217a24d83bc15422"
+      },
+      "final_blob": "0019cee2cdc2e72d65bb1e8ce933e8c934ce2240",
+      "working_bytes_sha256": "ad813117d97a88a1e4d1d8320352a74db6424906b43832dbcc0a1df51e22ea17"
+    },
+    {
+      "path": "docs/architecture/AGENT_TOOL_FABRIC.md",
+      "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
+      "upstream_blobs": {
+        "phase1_936": "c24b98beb710d078b1c0fd88e4c3f23951d7c59b",
+        "phase2_937": "427bf10830fb4bf6b495b7f1027c8c076138e558"
+      },
+      "final_blob": "8054d3335854aacb80efe8eb64e98e5761fc6dae",
+      "working_bytes_sha256": "f9e68e17641b82ca7ba035db2b89f5900934b1ece978b777c5808ecbd03401e9"
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_BASELINE_GOVERNANCE_DECISIONS.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "4a5d9775c30ddff4444c99d377e8fb58f471cc14",
+      "working_bytes_sha256": "2acbe850f342666e6b4518992e2ed6d9249d7194414ce90c06035792c538c941"
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_BASELINE_GOVERNANCE_DECISIONS.md",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "e59375f9a3ceaf3f29034c4bd7cc8aef868568ad",
+      "working_bytes_sha256": "bf1114f2825473184622aae262338561bf8e43d4df7710558e043572b7edb9c5"
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE.md",
+      "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
+      "upstream_blobs": {},
+      "final_blob": "28aa0c8164b24f59f6e257c8eb2aaf6b628c7d81",
+      "working_bytes_sha256": "e3379bc56b395d08f8a79a9fc3605fd901f4a509dc7cf42c62cf8c17fb811f96"
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_ACCEPTANCE.json",
+      "resolution": "generated convergence acceptance evidence; self-hash omitted",
+      "upstream_blobs": {},
+      "final_blob": "348337898942ab1e9790ebe6c9d80c47ea5e4c18",
+      "working_bytes_sha256": "0cb60802e5aa6f5eb24067343526cef0cdbc973f167d6d370085249710ea0ebe"
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_RECONCILIATION.json",
+      "resolution": "generated convergence acceptance evidence; self-hash omitted",
+      "upstream_blobs": {},
+      "final_blob": null,
+      "working_bytes_sha256": null
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_VALIDATION.json",
+      "resolution": "generated convergence acceptance evidence; self-hash omitted",
+      "upstream_blobs": {},
+      "final_blob": "1a81a65c6b40f6a2240ce1a247505962ae9e529d",
+      "working_bytes_sha256": "448cb5ffed0526e5e766f23130f8d4396cf581c4c1c6fe56af13db3a385904ca"
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "491c8b0dae9e24d4666af8b89b0ed66ac0a65dc5",
+      "working_bytes_sha256": "e1e445b9f597cce1a372136b7b347bc1d1904cba13034f3f17b2bf145a170035"
+    },
+    {
+      "path": "docs/architecture/VALIDATION_LEVELS.md",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "51909518c3ef62c7cc847f30f3bd28b57acdc4e0",
+      "working_bytes_sha256": "2e03708a75c171c2a10c1db6be994223c89a09524636fc2baa9f067dc340409d"
+    },
+    {
+      "path": "docs/engineering-convergence/ci-execution/CI_AUTHORITY_SURFACE.md",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "2980ff860f5c9d7ae2514566d881ab7e360aa8a4",
+      "working_bytes_sha256": "25f565d5508c7f08e8c19452603e8dc459269a22316e5a6867aaf75c587426a7"
+    },
+    {
+      "path": "governance/exceptions/arch-layer.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "c0edca91685cb7325a4a4808e8c33b9da36ace78",
+      "working_bytes_sha256": "4c0fc42c91552d788bb9cd33851ed28d4d4aa25075b43f76be9f7d6fe5b43b97"
+    },
+    {
+      "path": "governance/exceptions/no-console.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "af1ae12c08fc28c7a73dfe90f5ce85d247d17478",
+      "working_bytes_sha256": "e0479092a79662ad637e48d2953761dddb9508524496648678aa3adb7c471b78"
+    },
+    {
+      "path": "governance/exceptions/no-direct-provider.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "3738b185a26618a9c2921afac5b985210489ff88",
+      "working_bytes_sha256": "2770b51b148a939216e72d3a177e1f835c3f3c4a513702939bc9889346bf43fa"
+    },
+    {
+      "path": "governance/exceptions/no-raw-db-in-actions.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "6f18b67af25b9f0eea6c6901ce606ed0e81e4529",
+      "working_bytes_sha256": "c074034be940ac8bb41fecb03d2e889871f2a7ccfe999cf4e7e7f999a61967c0"
+    },
+    {
+      "path": "governance/exceptions/org-required-server-actions.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "28a3719572c8f3cb7b9aa243bafcce8561c23838",
+      "working_bytes_sha256": "4dd6d7b7823becee841814e0ccc5bdf54e362e851a2e00c3e7f72aad50086e9e"
+    },
+    {
+      "path": "governance/exceptions/platform-concern-adoption-exceptions.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "c1f5f3ccc32b148cc96253574537e033f0be8af6",
+      "working_bytes_sha256": "6f343b507015f2fa76ab67dc3bff650a023165e84c7e7455cecb61df9cd0eb04"
+    },
+    {
+      "path": "governance/exceptions/stack-authority.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "0f9e9d9c1a66fc774e2d1a4b0a431f38c7d932e5",
+      "working_bytes_sha256": "d988e69e3692fc92824913c0aac9d5040d0fe6d66b596223740c70f118c0cbbe"
+    },
+    {
+      "path": "governance/foundations/repo/package-lifecycle.json",
+      "resolution": "main lifecycle retained; mark new package INCUBATING",
+      "upstream_blobs": {
+        "main": "4ff245a24b5365fb8eacec3c19b00592ed248fc2",
+        "phase1_936": "ecf42a11eb133e92ee5d243ddd321877cb20bac1",
+        "phase2_937": "ecf42a11eb133e92ee5d243ddd321877cb20bac1",
+        "audit_938": "4ff245a24b5365fb8eacec3c19b00592ed248fc2"
+      },
+      "final_blob": "cf722ecf3c15b8c39eb2ee55c859463db4c4dcaa",
+      "working_bytes_sha256": "c81e50c45e2632c4c94fdffcacdd59c5491609e0528b19ec785e3b37603e889e"
+    },
+    {
+      "path": "lefthook.yml",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "898dbb3a65ce9896be6f1a7461b0191c14207d10",
+      "working_bytes_sha256": "868bda113d33db144fb2557dce89139d16217707ce5aafc6e4aec74f95d12407"
+    },
+    {
+      "path": "packages/audit/README.md",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "audit_938": "0f8e5024bea85617f849a722a1dd6564debd335a"
+      },
+      "final_blob": "f3d91c4845fcc581314ebf966365cfe0627dd3a9",
+      "working_bytes_sha256": "82af16c7a731f76e1f6d2eac05595986cc44b1d78356403c3ba8a9d4254786a6"
+    },
+    {
+      "path": "packages/audit/src/engine.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "b42a2ce71a448628da04356923a74657c2cec7c4",
+        "phase1_936": "b42a2ce71a448628da04356923a74657c2cec7c4",
+        "phase2_937": "b42a2ce71a448628da04356923a74657c2cec7c4",
+        "audit_938": "c16d1534cd7449f669549680845b6c0b3ffa01db"
+      },
+      "final_blob": "836096ffd7f6f5102d12b0d8f86d2677e5ecad67",
+      "working_bytes_sha256": "23734f9fd331243a9fc8da7e2e55711e8556034f6b9ef2d6915d41af6454e458"
+    },
+    {
+      "path": "packages/audit/src/export.test.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "f8cac155cb740ebe966e01b6d7a7fe11ab382164",
+        "phase1_936": "f8cac155cb740ebe966e01b6d7a7fe11ab382164",
+        "phase2_937": "f8cac155cb740ebe966e01b6d7a7fe11ab382164",
+        "audit_938": "f8cac155cb740ebe966e01b6d7a7fe11ab382164"
+      },
+      "final_blob": "81fc4898bd85894ed1705b8320c96972b5aba457",
+      "working_bytes_sha256": "7d8d85736c59528dec715c1c84b2d6207c94dd9a6214f8a4fabb9fbdd44ae836"
+    },
+    {
+      "path": "packages/audit/src/export.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "de533ecffa80ab3baff794e6833b37c0f4c32c28",
+        "phase1_936": "de533ecffa80ab3baff794e6833b37c0f4c32c28",
+        "phase2_937": "de533ecffa80ab3baff794e6833b37c0f4c32c28",
+        "audit_938": "a9620c6a30612646449cf779745a33f41456dea3"
+      },
+      "final_blob": "9bfbc3925b590035f223b2e3cf445a45ee3d02f5",
+      "working_bytes_sha256": "e24ad5942adc2e24e8ebf318068256d61c93364c5a4e114858774613abbace79"
+    },
+    {
+      "path": "packages/audit/src/hash-compatibility.test.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "audit_938": "a0330f05c9d2d23e86e3fb492479d0a5c70761af"
+      },
+      "final_blob": "c0bd07168f3928c0a8693be9dcae235850f1d125",
+      "working_bytes_sha256": "aa926aeae6be5fb71fa433a7a7349e4f5422e55535fee2b6d2ca9a70825ad216"
+    },
+    {
+      "path": "packages/audit/src/index.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "2e7f03b4f390d718f0eadadbff1f2eb471af7816",
+        "phase1_936": "2e7f03b4f390d718f0eadadbff1f2eb471af7816",
+        "phase2_937": "2e7f03b4f390d718f0eadadbff1f2eb471af7816",
+        "audit_938": "7cae3cab6a3838a91581a2bbfd92a925c3bb6721"
+      },
+      "final_blob": "7cae3cab6a3838a91581a2bbfd92a925c3bb6721",
+      "working_bytes_sha256": "ca34ba44441f23bf831a14600a085f5001d1c18ac6eb58a01c84d169c2744d97"
+    },
+    {
+      "path": "packages/audit/src/nested-integrity.test.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "audit_938": "303c4a59cc3dcf784d4404f34588a1934d0f2291"
+      },
+      "final_blob": "14ab20bff42dc14994e62aa8df3384e84d72ddd2",
+      "working_bytes_sha256": "5e66ab816dfe1b79a058fda9e4e7c52c37c07a0b2c742ce782013ba97ea62e53"
+    },
+    {
+      "path": "packages/audit/src/schema.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "550616ead005779f87eec40ad9e57b8faa8dbd24",
+        "phase1_936": "550616ead005779f87eec40ad9e57b8faa8dbd24",
+        "phase2_937": "550616ead005779f87eec40ad9e57b8faa8dbd24",
+        "audit_938": "3dcbbd185f3b6968191d8edba16d4f63206d1814"
+      },
+      "final_blob": "3dcbbd185f3b6968191d8edba16d4f63206d1814",
+      "working_bytes_sha256": "48e26cb68d0fbd3793c110b5654791e3fbaccd13a045f03775fb1a418550a0a5"
+    },
+    {
+      "path": "packages/audit/src/store.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "241aa45cc48b1f8d9cd1071a17284fab04fa41ee",
+        "phase1_936": "241aa45cc48b1f8d9cd1071a17284fab04fa41ee",
+        "phase2_937": "241aa45cc48b1f8d9cd1071a17284fab04fa41ee",
+        "audit_938": "241aa45cc48b1f8d9cd1071a17284fab04fa41ee"
+      },
+      "final_blob": "7e1f267ae70a7ad2ed6ce9aba9c31698d6502030",
+      "working_bytes_sha256": "35971177068befa22d8b8f1cbc4cdbcd617fc40da197a510b2f2834f2e0c2469"
+    },
+    {
+      "path": "packages/audit/src/verify.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "ad5855c4e77e82a1a114ccd034228c04cb0581fb",
+        "phase1_936": "ad5855c4e77e82a1a114ccd034228c04cb0581fb",
+        "phase2_937": "ad5855c4e77e82a1a114ccd034228c04cb0581fb",
+        "audit_938": "8b9460c68b58ce607dd1484f0116ffe7bbcb5de7"
+      },
+      "final_blob": "583d4735a5caa498b2d79ee0c18bf83354779231",
+      "working_bytes_sha256": "1d9b2be0249063445a4b2325a230f673732d5757b263707f7c6e35182a1ae136"
+    },
+    {
+      "path": "packages/os-core/src/telemetry/diagnostic.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "5baecd4fa4fe7eb32bdfa654a5f74d624b677f61",
+      "working_bytes_sha256": "9df67f6e268f162d87c9b080f688fff1c6448816049ee01db4ccf42479b3d7bf"
+    },
+    {
+      "path": "packages/os-core/src/telemetry/diagnostic.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f61fcb819112ca09d39daae95ae45346a4827ead",
+      "working_bytes_sha256": "1f6a638115a3a606ed47c51f678b83f138d8030b2d075720698bae2749b67999"
+    },
+    {
+      "path": "packages/os-core/src/telemetry/index.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "b41619a642e185a849e7bedf9c01d6398da24531",
+      "working_bytes_sha256": "53ba60b6f6b6dba5627bebf3a480b07bd2e4d819e4201d0c0552f544f4510509"
+    },
+    {
+      "path": "packages/platform-integrations/src/audit-hooks.test.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "audit_938": "18cd0720f9f30d10d02794c309230652ed4a3b17"
+      },
+      "final_blob": "9632fd8095847aa2f5f91eb4312a74e817a6d59c",
+      "working_bytes_sha256": "87699321df81bb2575650cf219ba127b753f59173faac1a944164f94577dc79d"
+    },
+    {
+      "path": "packages/tool-fabric/README.md",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "0ac06552c3e457cd56d512c8128710851b6902fa",
+        "phase2_937": "0c665d85c466f3d5abd6be661f62278834a3d085"
+      },
+      "final_blob": "727fa7f30c583f6cc0b16130e36908125c1fb325",
+      "working_bytes_sha256": "68557559d71d091b9b882110be53a78a0320c190452bb6964e8dce24c73613bd"
+    },
+    {
+      "path": "packages/tool-fabric/eslint.config.mjs",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "0b6debbdb7b3f5d0a13725c0f92c6468f8e2c05c",
+      "working_bytes_sha256": "0398d4fead4d04e8ccb879fad0614967a6a20fce1ebf5d2c48b4650a5fb7b063"
+    },
+    {
+      "path": "packages/tool-fabric/package.json",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "de5f5c95215934c57181d9b12d9b0e34bec63166",
+        "phase2_937": "c3c5313652629e174a17c1a01407e275a714fc32"
+      },
+      "final_blob": "0bc19703ba0d3639ec0648d73a8c2915539ce719",
+      "working_bytes_sha256": "2d4a897fa5dcc122346406972a767b9100ebe0a09cfd336c2aff16060c2015e4"
+    },
+    {
+      "path": "packages/tool-fabric/package.meta.json",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "58f5306383fc869075a48d4c20db96c319a6f714",
+        "phase2_937": "58f5306383fc869075a48d4c20db96c319a6f714"
+      },
+      "final_blob": "58f5306383fc869075a48d4c20db96c319a6f714",
+      "working_bytes_sha256": "580e3fc1d5cc761a6913f86d153c58c1554bfaed70585c33b736822c700597a1"
+    },
+    {
+      "path": "packages/tool-fabric/src/audit.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "059bbecdfb9ea5e54f35986db9b1e4a226c58303"
+      },
+      "final_blob": "bb40da2c94eeb091b337bae08ff2a0c873b493a5",
+      "working_bytes_sha256": "b132f1c0133d0b3d1f9296438ac68f92a79510fa4f39f1f85444b64a480f50bf"
+    },
+    {
+      "path": "packages/tool-fabric/src/authority.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "730c718ff8068f4dc0ee55116137f919b22cd8aa"
+      },
+      "final_blob": "ceef12d11dc61ac2673629c89c7664583353e807",
+      "working_bytes_sha256": "a349d85a70da6a7c66e887e991d974462713d4d4cae91d4dfbbbffafae8fbf4c"
+    },
+    {
+      "path": "packages/tool-fabric/src/broker-boundary.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "796b461e4551f7b86355aaf6ac8fe645dd1078ea",
+      "working_bytes_sha256": "a2983ad148dac6b2621783c728293e702f1de389ee1641d49c4ba4ff6912494e"
+    },
+    {
+      "path": "packages/tool-fabric/src/convergence.test.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "b1fce0e1fc92a0f2191250badce7ae03138ef23f",
+      "working_bytes_sha256": "b4591cf98b5087c7d87051607298f7663394e190b59f617bc89c070e33c5039d"
+    },
+    {
+      "path": "packages/tool-fabric/src/drift.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "2236b64749b047723c0516394db5e3e4e9d3c7a8"
+      },
+      "final_blob": "577025857c1d361a0870569fee66f1e2a979e5fe",
+      "working_bytes_sha256": "cf83cd0a8fa1837ec5a2854cafe319128d7594410354706cdb9e60b16a3c71c5"
+    },
+    {
+      "path": "packages/tool-fabric/src/fixtures.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "2e94caeaa723d8153012e424738a49de398796aa"
+      },
+      "final_blob": "c43861fb1fbe73828a1263b0e8da6328e33735b7",
+      "working_bytes_sha256": "f3e3e44edddc4a083ffc06201a40b6b00c0a86f67ee98fccfe2e5025fc9197a2"
+    },
+    {
+      "path": "packages/tool-fabric/src/gate.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "f7c496fe8569854d986221bd04d2bc72c751af3f"
+      },
+      "final_blob": "f4df34187611ac67651264e4bbf09dc2e2779736",
+      "working_bytes_sha256": "0a36384add973ba1465331947f389c9f79b500e1bdc991d3ddcdc8f55ec7659f"
+    },
+    {
+      "path": "packages/tool-fabric/src/governance.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "fa04378b83fd94a8a8ac2a490e61c092e4da03a0"
+      },
+      "final_blob": "a301e38db2da7bfdcb4a5f5ca1735d6c3bf16b1f",
+      "working_bytes_sha256": "42c43f3f1e9273671bfc1ba38f7ed3b35ccd8988b20f0d7f749c517fd3de2ac1"
+    },
+    {
+      "path": "packages/tool-fabric/src/harness.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "8ca127f956650683c98ff84aa6505f0650a03f28",
+        "phase2_937": "8ca127f956650683c98ff84aa6505f0650a03f28"
+      },
+      "final_blob": "8ca127f956650683c98ff84aa6505f0650a03f28",
+      "working_bytes_sha256": "aa865ab64e92baf14995584516f0a49f87c624c89f9e04818d3d28b7e5741d60"
+    },
+    {
+      "path": "packages/tool-fabric/src/index.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "0496e35c761d3cf438e005c167963a1ee2d1cbd0",
+        "phase2_937": "63dd847afbd14b70a8e6919675d55d22052bf596"
+      },
+      "final_blob": "72f0c317ef2d325c24bbb6e13c8932c8d689a09c",
+      "working_bytes_sha256": "d77be204d7749df346f3be2d5216d4be77d55e47529294faaa5624014e2d7434"
+    },
+    {
+      "path": "packages/tool-fabric/src/invocation.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "931fde2df3040db4dc4000ba5ebd52f9a99be619",
+      "working_bytes_sha256": "1fa02e3fd59d3ea87bbe46c9b63299cfe16dcfd737d12950e4bfba3b15c7a49e"
+    },
+    {
+      "path": "packages/tool-fabric/src/ledger-atomic.test.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "1899e1d3e05eda8cce2a5d26906c691f10bdaafc",
+      "working_bytes_sha256": "bfdafb07cdbc16d3958482224c93a67559b19966be21ace83eeca1bfacd7065c"
+    },
+    {
+      "path": "packages/tool-fabric/src/ledger-store.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "cd9bb24f60aefc9db523e2bd7568d4986ef6b839",
+      "working_bytes_sha256": "4d14ee1dbbd2b281b5a71c90705fb9a5b803d8ac8bb816c2495947c7b44bb76a"
+    },
+    {
+      "path": "packages/tool-fabric/src/ledger.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "797d21e5a1958d2cf245ea6e73913df7ec51e271"
+      },
+      "final_blob": "c662e36382c85f8f2d56377e2cab39f65c81aba3",
+      "working_bytes_sha256": "17e018d810703338ef87feff9cf056a4f3ebdb1321c79b0868c7006f70e072fc"
+    },
+    {
+      "path": "packages/tool-fabric/src/phase2.test.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "566e4455ada012f6f7f4e73ef3ca9d06a76f1c82"
+      },
+      "final_blob": "0111d112642e35716892113f000b057a81940ba4",
+      "working_bytes_sha256": "d8e77f45a641e27fbd6f83a994fb4c8c90e994cca52927da14c8ad4fe0e14e12"
+    },
+    {
+      "path": "packages/tool-fabric/src/policy.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "5463e3909ca64bedf428d84f2047ea70ab1ccdb9",
+        "phase2_937": "a0fc8b14fce1a6701607a19bb3e0056c715e518e"
+      },
+      "final_blob": "616c4dab12bfa314f1b7add1aefb01e4bcb2ac8b",
+      "working_bytes_sha256": "b04a5de7966fc46f5007a7b2fd3120626f3fc52b53a50387cc82eacdbbe55ee6"
+    },
+    {
+      "path": "packages/tool-fabric/src/providers.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "ef0a3e0764a3d685a119443697a769ddb2499060",
+        "phase2_937": "ef0a3e0764a3d685a119443697a769ddb2499060"
+      },
+      "final_blob": "8d9fa65845ee787c7e9785c5c27c607e8b26f7d5",
+      "working_bytes_sha256": "49a507cd2ba00c07b82b288d534cdba914e2ae25ed85143a3523c39713e19b09"
+    },
+    {
+      "path": "packages/tool-fabric/src/registry.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "c6a788a2ee56dcec709cefb28f071fcea25e9205",
+        "phase2_937": "5ffc43d7980f8de730f5c67be14c908483478c8c"
+      },
+      "final_blob": "89c4754eee8eb3e6c40ebee9984dcd9237a097e3",
+      "working_bytes_sha256": "2a27cb9e0dcb0dd59955bb0eb5878e768cf702a337e8ca0ef62c1d810f5731af"
+    },
+    {
+      "path": "packages/tool-fabric/src/skill.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "bef5d8c80ff9c5193f5e2d67feee3ea48f9ef487",
+        "phase2_937": "bef5d8c80ff9c5193f5e2d67feee3ea48f9ef487"
+      },
+      "final_blob": "bef5d8c80ff9c5193f5e2d67feee3ea48f9ef487",
+      "working_bytes_sha256": "0dfa23f9b92d2ca0e4add2b282c822473f9b6df24fa5904af1e53860df989e9e"
+    },
+    {
+      "path": "packages/tool-fabric/src/testing.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "f905f9b627787456a877a3820aad24888ec25e6e"
+      },
+      "final_blob": "f905f9b627787456a877a3820aad24888ec25e6e",
+      "working_bytes_sha256": "0349f14321f672d35f1fdb886f9ed2bddd46f76497656e7fa34a444d1f4f0a50"
+    },
+    {
+      "path": "packages/tool-fabric/src/tool-fabric.test.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "6d3d383ba2d1c902e08c4756733ea91ccfbce8a7",
+        "phase2_937": "b872d79879a9b4dd46a9b2903a2af71785a3a52d"
+      },
+      "final_blob": "820ffdb7c677d271d8f242aee49d660b6aa27df0",
+      "working_bytes_sha256": "1f6c45382135f7f149a8d2103329662380c4995d03e0b84ea762a71979e26168"
+    },
+    {
+      "path": "packages/tool-fabric/src/types.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "058fd6c85fa1bf65a5379fbffddd95dc347a7bb4",
+        "phase2_937": "2f98e7057fcee22d9ce9ca95dcf3f43ee2312322"
+      },
+      "final_blob": "852ffca2d05df0c2092dc5d38867b043fb020bad",
+      "working_bytes_sha256": "a8a60575e56b54f403304d8c744454cbf3c630a857318e59f6e9c8d698a7ca97"
+    },
+    {
+      "path": "packages/tool-fabric/tsconfig.json",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "0f1d9eca5022ad746f5ac51213ea5bf565a30dec",
+        "phase2_937": "0f1d9eca5022ad746f5ac51213ea5bf565a30dec"
+      },
+      "final_blob": "0f1d9eca5022ad746f5ac51213ea5bf565a30dec",
+      "working_bytes_sha256": "5d24f4bd0a83a2d0de569aacd3c8240608ddf68d2c2bbc7ff54407f698c2ae08"
+    },
+    {
+      "path": "packages/tool-fabric/vitest.config.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "cae12b9bde66c15534cf00d82009885155e67b0d",
+        "phase2_937": "cae12b9bde66c15534cf00d82009885155e67b0d"
+      },
+      "final_blob": "cae12b9bde66c15534cf00d82009885155e67b0d",
+      "working_bytes_sha256": "40412498ae5fe91b9ce2485957801503a4e3f6e0f392cb087d04f4dbb69de93c"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "resolution": "main resolutions retained; add Tool Fabric importer using existing locked versions",
+      "upstream_blobs": {
+        "main": "477c771ffa879b3a2ae6538f80f38314082f3bce",
+        "phase1_936": "34d2fe00226a465ab71d6ef647ce10e3431ee431",
+        "phase2_937": "f18fa9d5f7b92bd4a65f7b6302e979c39350a843",
+        "audit_938": "477c771ffa879b3a2ae6538f80f38314082f3bce"
+      },
+      "final_blob": "69975ddcd5ba7a7745e866ea456bed2593e9428c",
+      "working_bytes_sha256": "ea878e4f22531771bc5d3fb14d7a73935c45696a724425b2cbc51d6278fb8595"
+    },
+    {
+      "path": "scripts/typecheck-changed.mjs",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "bb8a8bab70e6f15113541e9dd77a83c46b029b08",
+      "working_bytes_sha256": "ef39721f926e6da45fe6aad38a46f1c746338ea08d44cd5a97c7d8d413c675f4"
+    },
+    {
+      "path": "tooling/ci/merge-authority/sarif-reporting.mjs",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "01eebf4d4573b9ac7196b22270eb7d50cc7f6906",
+      "working_bytes_sha256": "f783b2984ad1d91959aa5082f2347093dacd2dcc398b217657ebacfc46bf846f"
+    },
+    {
+      "path": "tooling/contract-tests/affected-typecheck-plan.test.ts",
+      "resolution": "new Tool Fabric typecheck task raises exact executable universe from 232 to 233; explicitly assert new package inclusion; main 232 contract passes",
+      "upstream_blobs": {},
+      "final_blob": "7862750cb8f57863eb4b7e8bcf9c1752c2d8eef9",
+      "working_bytes_sha256": "365e24b07ee27c8758e132887cb4b8381b2a976efa00932e0053f9f4877612a1"
+    },
+    {
+      "path": "tooling/contract-tests/tool-fabric-baseline-logging.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "ecebf08f0e466ec9ce054ceb00d6b8ae06d0124c",
+      "working_bytes_sha256": "8501ad5090d31391a81337602dda5acb7795a6cf99a8cfb4a367bf45bb8419cf"
+    },
+    {
+      "path": "tooling/contract-tests/tool-fabric-baseline-proof-order.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "2576f287e425006b2c5cdff630a2665ea171b7fb",
+      "working_bytes_sha256": "198591d02911ed77d29b22a7ce49d19a32a658128f4857fb247d9c3a535558e8"
+    },
+    {
+      "path": "tooling/contract-tests/tool-fabric-baseline-routes.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f07ed81b7b262a07b9e7ffda8d0403e4c9ad1320",
+      "working_bytes_sha256": "67768e9e05f01a152a0764cac2655510a40d67160be4b7546198c17ea8c14dfb"
+    },
+    {
+      "path": "tooling/contract-tests/tool-fabric-baseline-seeds.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "c6d9ea75d956673f95ff9e6be99b35d539f133fa",
+      "working_bytes_sha256": "0bce392434b1cea4432f946dee1a6671e21cb325f76be32afff6b94d425a2880"
+    },
+    {
+      "path": "tooling/contract-tests/tool-fabric-baseline-services.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "2d63d8547529a382470f96096fad819030f22927",
+      "working_bytes_sha256": "0fb116843a2ad43f39ce861290fd8142e62d3f4d1a755f9dda1636338294f850"
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.json",
+      "resolution": "regenerated from staged candidate; never imported upstream inventory",
+      "upstream_blobs": {
+        "main": "74e5e1ed2f05ec344a345ca9c1c0389207b948f7",
+        "phase1_936": "4083e03a51a69359a64072f3038d43a54c8761ca",
+        "phase2_937": "ee49df569e68852d00f25d1b640151429007e32f",
+        "audit_938": "70856ea67ff7e5755c817b725b3ed6c845d83da3"
+      },
+      "final_blob": "378ef7664d0e48ecef8507cde1c37371e1acaeea",
+      "working_bytes_sha256": "ad2a918a3addba07a12a14e1a04f0601da85443d893688f50f870c51ad91cd3f"
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.md",
+      "resolution": "regenerated from staged candidate; never imported upstream inventory",
+      "upstream_blobs": {
+        "main": "d4460091a15ce97deb3abf20a5359bfa0ba3d58d",
+        "phase1_936": "621c5f5a0f2d491193f5ba124483f17b099b7684",
+        "phase2_937": "07b9028cbe19d59c2f340deebf2c1bab640db67c",
+        "audit_938": "2f8fbf3e7b6b12a45cd2a007db250baf55c6d1a5"
+      },
+      "final_blob": "85da7f7b62e79a138028622e839bc0dd961e3310",
+      "working_bytes_sha256": "f93aa0fe60c2b131330af4ad9ca3474fa0a7a83722ab1ba6f3ff87ddd42ba48a"
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.json",
+      "resolution": "regenerated from staged candidate; never imported upstream inventory",
+      "upstream_blobs": {
+        "main": "74e5e1ed2f05ec344a345ca9c1c0389207b948f7",
+        "phase1_936": "4083e03a51a69359a64072f3038d43a54c8761ca",
+        "phase2_937": "ee49df569e68852d00f25d1b640151429007e32f",
+        "audit_938": "70856ea67ff7e5755c817b725b3ed6c845d83da3"
+      },
+      "final_blob": "378ef7664d0e48ecef8507cde1c37371e1acaeea",
+      "working_bytes_sha256": "ad2a918a3addba07a12a14e1a04f0601da85443d893688f50f870c51ad91cd3f"
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.md",
+      "resolution": "regenerated from staged candidate; never imported upstream inventory",
+      "upstream_blobs": {
+        "main": "d4460091a15ce97deb3abf20a5359bfa0ba3d58d",
+        "phase1_936": "621c5f5a0f2d491193f5ba124483f17b099b7684",
+        "phase2_937": "07b9028cbe19d59c2f340deebf2c1bab640db67c",
+        "audit_938": "2f8fbf3e7b6b12a45cd2a007db250baf55c6d1a5"
+      },
+      "final_blob": "85da7f7b62e79a138028622e839bc0dd961e3310",
+      "working_bytes_sha256": "f93aa0fe60c2b131330af4ad9ca3474fa0a7a83722ab1ba6f3ff87ddd42ba48a"
+    },
+    {
+      "path": "vitest.config.ts",
+      "resolution": "main workspace projects retained; add Tool Fabric project",
+      "upstream_blobs": {
+        "main": "b2b35ebb0bcb17a5fcf5784eadf17d22d7a84f84",
+        "phase1_936": "b2b35ebb0bcb17a5fcf5784eadf17d22d7a84f84",
+        "phase2_937": "b2b35ebb0bcb17a5fcf5784eadf17d22d7a84f84",
+        "audit_938": "b2b35ebb0bcb17a5fcf5784eadf17d22d7a84f84"
+      },
+      "final_blob": "e465280901deda7b9ed77dee41a3669b1a24957d",
+      "working_bytes_sha256": "cd7c2d436e599993da9e9bd5ff2e1bdb0eb654b8c562a0ab2181fd6506e04c9d"
+    }
+  ],
+  "not_imported": [
+    "#935 Restricted-data domains",
+    "#922 CIVITAS domains",
+    "#925 superseded predecessor",
+    "upstream generated inventories",
+    "upstream lockfile resolution snapshots"
+  ],
+  "reconciled_against": {
+    "commit": "b49cfb578410559b387363b436c155708900e5d3",
+    "tree": "2a90635b0e1679b5edb8a4da028ff11abd7fac86",
+    "base": "ede980d62959f91517b6c805787cb031d60fd420"
+  }
+}

@@ -1,0 +1,529 @@
+{
+  "schema_version": 1,
+  "anchors": {
+    "main": "ede980d62959f91517b6c805787cb031d60fd420",
+    "phase1_936": "eb94efa32ab74acb2a2ba2ab96c46149d5ccfb31",
+    "phase2_937": "b514d693ff1c5688c0284eae7f3f6ef121ad3c0a",
+    "audit_938": "f78368ce02e59fdc79884c767213406ba444ddf0",
+    "restricted_935": "42167333ff07d9b5c8507f2da0bb170dd8cb8f7a",
+    "civitas_922": "d3b63cd92f06c734ffb8c41b2c8dc48e65d6f0c6"
+  },
+  "candidate_branch": "fix/tool-fabric-single-pass-convergence",
+  "implementation_commit": "0637b7793359c2e63ac3af1f076e92ae75eabf69",
+  "implementation_tree": "578d82a3fa00ca183869a64d2ced44d92eea32ad",
+  "base_commit": "ede980d62959f91517b6c805787cb031d60fd420",
+  "qualification_binding": "Receipts bind actual tested file bytes; reconciliation maps them to normalized Git blobs. Evidence report self-hashes are excluded to avoid recursion. Final commit/tree must be recorded in delivery receipt.",
+  "gates": {
+    "CONVERGENCE_CODE": "PASS_WITH_LIMITATIONS",
+    "REPOSITORY_QUALIFICATION": "HOLD",
+    "AUDIT_DEPENDENCY": "HOLD",
+    "FLEET_IDENTITY": "DENY_ONLY",
+    "TRUST_PERSISTENCE": "CONTRACT_ONLY",
+    "BROKER_READINESS": "HOLD",
+    "EXECUTION_AUTHORIZATION": "CLOSED",
+    "INSTALL_AUTHORIZATION": "CLOSED",
+    "CIVITAS_PHASE_3": "CLOSED"
+  },
+  "missing_receipts": [],
+  "receipt_integrity_issues": [],
+  "failed_checks": [
+    "typecheck",
+    "fast",
+    "contracts",
+    "ownership",
+    "secrets-history"
+  ],
+  "interrupted_checks_not_complete_suite_results": [
+    "typecheck",
+    "fast",
+    "contracts",
+    "secrets-history"
+  ],
+  "failures_without_exact_main_receipt": [
+    "typecheck",
+    "fast",
+    "contracts",
+    "secrets-history"
+  ],
+  "remote_ci": "NOT_RUN; no remote CI success or human review is inferred from local tests",
+  "normal_commit_hooks": {
+    "result": "PASS; implementation commit created with normal hooks, no bypass",
+    "log": "commit-attempt.log",
+    "log_sha256": "cde42844a54388c1573424146eae8f1e2c4b3d44470a69ae03a991a933e187c5",
+    "affected_typecheck": "11 successful tasks; not a substitute for repository-wide typecheck",
+    "other_passed_hooks": [
+      "staged secrets",
+      "staged ESLint",
+      "brand leakage",
+      "Markdown links",
+      "inventory staging safety and regeneration"
+    ]
+  },
+  "independent_reviews": {
+    "audit_938": "HOLD: exact-source human review and production writer/reader rollout not supplied",
+    "restricted_935": "HOLD: current-main consumers tested; exact #935 branch compatibility not certified; no domain files imported",
+    "civitas_922": "HOLD: privacy gate unchanged, personal-data Phase 3 CLOSED"
+  },
+  "targeted_exact_main_reproductions": {
+    "head": "ede980d62959f91517b6c805787cb031d60fd420",
+    "contracts": {
+      "log": "contracts-targeted-main.log",
+      "log_sha256": "3f2854d2dc02409c9ec1486226b1be8229afc1e9cb69cbf4b47155905c578fc8",
+      "exit_code": 1,
+      "result": "43 tests: 39 passed, 4 failed. Main executable-typecheck universe contract passes at 232. Two expired-exception checks and two embedded shell/Python checks fail on exact main. Candidate adds one typecheck package; its count is now 233 and targeted 21/21 passes."
+    },
+    "fast_smoke": {
+      "log": "fast-targeted-main.log",
+      "log_sha256": "c1bf0693b282483606cd3c4cea0200ce5eeaef82b01c1d9c60aa94d799989e26",
+      "exit_code": 1,
+      "result": "Both selected precedents and cron/calendar-sync tests time out on exact main at the unchanged 120000ms bound; cron also reports DATABASE_URL absent. Remaining 39 tests were deselected by the explicit baseline selector, not disabled in source or candidate qualification."
+    },
+    "governance_financial": {
+      "log": "governance-targeted-main.log",
+      "log_sha256": "a513649eab58707dda05b53b969c26861bdc42f41138372c09210429e26919f7",
+      "exit_code": 0,
+      "result": "The selected financial-service job-cancellation file passes on exact main without timeout changes. Earlier full candidate governance failure occurred under resource pressure; not classified as a baseline code defect or waived. The final aggregate governance receipt supersedes that attempt; its passing rerun used the supported VITEST_MAX_WORKERS=1 environment cap, with no source skips or timeout changes."
+    },
+    "additional_contracts": {
+      "log": "contracts-additional-main.log",
+      "log_sha256": "dfacf9c664a3368c52d8a6d60c6334adb234b18cbaa7eb6d77ef86eeceeb557b",
+      "exit_code": 1,
+      "result": "Polyglot contract passes on exact main; its candidate timeout remains resource-sensitive, not labeled a reproduced baseline defect. Stack authority reports eight expired exceptions on exact main, plus an unclassified apps/artifacts directory in that baseline environment; no exception is extended or directory silently deleted."
+    }
+  },
+  "dependency_setup": "pnpm install --frozen-lockfile --offline --ignore-scripts passed; lifecycle/native build qualification not claimed",
+  "resource_interruption": "Concurrent initial attempts exhausted shared-host memory. Bounded reruns recovered repository lint and governance PASS, but free memory again fell to about 1.5 GB with unchanged contract/worker timeouts. Only own remaining full typecheck/fast/contracts trees were stopped to protect the shared host. Their final interruption receipts are NOT complete-suite results; no timeout, skip, exception or baseline was changed.",
+  "resource_blocker": {
+    "reason": "Shared-host free memory fell to 1.5 GB despite bounded worker retries; contract workers exceeded unchanged timeouts and stalled termination. Stop only own remaining full qualification trees; do not claim full-suite completion or baseline waiver. Expired architectural exceptions independently reproduce on exact main and block the required pre-push gate.",
+    "at": "2026-10-18T03:35:52.2482237+00:00",
+    "stopped_roots": [
+      {
+        "ProcessId": 62132,
+        "ParentProcessId": 64912,
+        "CommandLine": "node   \"C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence\\node_modules\\.bin\\\\..\\vitest\\vitest.mjs\" run --project contract-tests \"--maxWorkers=1\""
+      },
+      {
+        "ProcessId": 19220,
+        "ParentProcessId": 63928,
+        "CommandLine": "node   \"C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence\\node_modules\\.bin\\\\..\\turbo\\bin\\turbo\" typecheck \"--concurrency=2\""
+      },
+      {
+        "ProcessId": 65052,
+        "ParentProcessId": 63016,
+        "CommandLine": "node   \"C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence\\node_modules\\.bin\\\\..\\vitest\\vitest.mjs\" run --project=!contract-tests \"--maxWorkers=1\""
+      }
+    ],
+    "process_ids": [
+      62132,
+      59896,
+      19220,
+      66348,
+      65052,
+      10668,
+      60316,
+      62212,
+      59548,
+      64252,
+      39516,
+      49056,
+      61136,
+      40304,
+      51668,
+      19176
+    ]
+  },
+  "delivery": {
+    "mode": "MANDATE_GOVERNANCE_BLOCKED_LOCAL_FALLBACK",
+    "remote_branch_pushed": false,
+    "draft_pr_created": false,
+    "reason": "Independently reproduced expired architectural exceptions block the required pre-push contract gate. Full qualification is incomplete under shared-host resource limits. Do not bypass hooks or claim remote CI.",
+    "draft_pr_body": "TOOL_FABRIC_CONVERGENCE_PR.md in the session deliverables",
+    "patch": "TOOL_FABRIC_CONVERGENCE_CANDIDATE.patch in the session deliverables"
+  },
+  "receipts": [
+    {
+      "id": "audit",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "audit.source.json",
+      "command": "pnpm --filter @nzila/audit test",
+      "started_at": "2026-10-17T23:30:13.5057662+00:00",
+      "finished_at": "2026-10-17T23:30:34.1512864+00:00",
+      "exit_code": 0,
+      "log": "audit.log",
+      "log_sha256": "ecbbd3f9ff04b866d1f015286c576bf8d87e44a800274afeb9841e338ef4c0c6",
+      "remote_ci": false,
+      "test_file_summary": [
+        "7 passed (7)"
+      ],
+      "test_summary": [
+        "50 passed (50)"
+      ],
+      "failure_headers": []
+    },
+    {
+      "id": "consumer-audit",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "consumer-audit.source.json",
+      "command": "pnpm --filter @nzila/platform-integrations exec vitest run src\\audit-hooks.test.ts",
+      "started_at": "2026-10-17T23:30:13.7523809+00:00",
+      "finished_at": "2026-10-17T23:30:32.5405616+00:00",
+      "exit_code": 0,
+      "log": "consumer-audit.log",
+      "log_sha256": "10a6b004abf487fe44d59797d54f9bd89b3322250cf0e2a45a4390c6324320db",
+      "remote_ci": false,
+      "test_file_summary": [
+        "1 passed (1)"
+      ],
+      "test_summary": [
+        "2 passed (2)"
+      ],
+      "failure_headers": []
+    },
+    {
+      "id": "consumer-core",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "consumer-core.source.json",
+      "command": "pnpm exec vitest run --project os-core --project ai-core --project tools-runtime --maxWorkers=4",
+      "started_at": "2026-10-17T23:34:23.3525242+00:00",
+      "finished_at": "2026-10-17T23:35:41.2988377+00:00",
+      "exit_code": 0,
+      "log": "consumer-core.log",
+      "log_sha256": "1d4e23140311d0c679b0a2a2cfa08e3c5facfb2890c64880610020200b2851fc",
+      "remote_ci": false,
+      "test_file_summary": [
+        "71 passed (71)"
+      ],
+      "test_summary": [
+        "943 passed | 1 skipped (944)"
+      ],
+      "failure_headers": []
+    },
+    {
+      "id": "consumer-doctrine",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "consumer-doctrine.source.json",
+      "command": "pnpm --filter @nzila/doctrine-enforcement test",
+      "started_at": "2026-10-17T23:30:13.4933232+00:00",
+      "finished_at": "2026-10-17T23:30:33.9670915+00:00",
+      "exit_code": 0,
+      "log": "consumer-doctrine.log",
+      "log_sha256": "5936cd03cf3e70aa603733f72d0f30c181b1ebeeb1556b1ec72a31e1097f90b0",
+      "remote_ci": false,
+      "test_file_summary": [
+        "1 passed (1)"
+      ],
+      "test_summary": [
+        "12 passed (12)"
+      ],
+      "failure_headers": []
+    },
+    {
+      "id": "contracts",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "contracts.source.json",
+      "command": "pnpm contract-tests --maxWorkers=1",
+      "started_at": "2026-10-18T02:26:51.4030151+00:00",
+      "finished_at": "2026-10-18T03:35:52.9480586+00:00",
+      "exit_code": -1,
+      "log": "contracts.log",
+      "log_sha256": "46c37124c21c43cb71529d7151bf7763b455b9f0767c176cc1a6b24fc0abf435",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "dependencies",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "dependencies.source.json",
+      "command": "pnpm deps:check",
+      "started_at": "2026-10-17T22:44:23.3340885+00:00",
+      "finished_at": "2026-10-17T22:48:20.4989413+00:00",
+      "exit_code": 0,
+      "log": "dependencies.log",
+      "log_sha256": "526e8a783f77f06ae3455b1bf795e943fafbf967b051636ac93e32d5a502e768",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "docs",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "0637b7793359c2e63ac3af1f076e92ae75eabf69",
+      "source_sha256": "53a33af4631f98c30353b32009a7ac333770de495a571e6142c2a94245330b2f",
+      "source_manifest": "docs.source.json",
+      "command": "pnpm validate:docs",
+      "started_at": "2026-10-18T03:40:40.7237147+00:00",
+      "finished_at": "2026-10-18T03:41:23.1370579+00:00",
+      "exit_code": 0,
+      "log": "docs.log",
+      "log_sha256": "a367b049248b10d48b8b9a6cab84c0c62a9b9fceb4498217c4afd1ff074ec27e",
+      "remote_ci": false,
+      "vitest_max_workers_environment": null,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "fast",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "0637b7793359c2e63ac3af1f076e92ae75eabf69",
+      "source_sha256": "53a33af4631f98c30353b32009a7ac333770de495a571e6142c2a94245330b2f",
+      "source_manifest": "fast.source.json",
+      "command": "pnpm test:fast --maxWorkers=1",
+      "started_at": "2026-10-18T02:56:27.4824086+00:00",
+      "finished_at": "2026-10-18T03:35:52.9439847+00:00",
+      "exit_code": -1,
+      "log": "fast.log",
+      "log_sha256": "f9d47a5b70a34c3a9fd45b050898ef6a54cb35a2d8bc107baf74fe5c7d88ac3a",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "governance",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "0637b7793359c2e63ac3af1f076e92ae75eabf69",
+      "source_sha256": "53a33af4631f98c30353b32009a7ac333770de495a571e6142c2a94245330b2f",
+      "source_manifest": "governance.source.json",
+      "command": "pnpm governance:audit",
+      "started_at": "2026-10-18T03:02:07.3832433+00:00",
+      "finished_at": "2026-10-18T03:15:36.7669457+00:00",
+      "exit_code": 0,
+      "log": "governance.log",
+      "log_sha256": "7431f8aadb9abdf97c778470ff72857358d4b8709f1543cce8d19aa549a510ce",
+      "remote_ci": false,
+      "test_file_summary": [
+        "31 passed (31)"
+      ],
+      "test_summary": [
+        "564 passed (564)"
+      ],
+      "failure_headers": []
+    },
+    {
+      "id": "lint",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "lint.source.json",
+      "command": "pnpm lint --concurrency=2",
+      "started_at": "2026-10-17T23:40:07.1305525+00:00",
+      "finished_at": "2026-10-18T00:55:21.3661927+00:00",
+      "exit_code": 0,
+      "log": "lint.log",
+      "log_sha256": "59a331b97ac223dd8dcc2ba6fd2cee103900ea7ea8c7110167dc3ca08cc5a05e",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "ownership-main",
+      "working_directory": "C:\\APPS\\nzila-os",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "dc52de27a16fc19dd5fe0266b8df5c317c1c347e5f7e37203c396802dc1ad6f6",
+      "source_manifest": "ownership-main.source.json",
+      "command": "pnpm package:ownership:check",
+      "started_at": "2026-10-17T23:26:35.1263906+00:00",
+      "finished_at": "2026-10-17T23:26:48.6815611+00:00",
+      "exit_code": 1,
+      "log": "ownership-main.log",
+      "log_sha256": "301b8238eb225aa5186bcda86013524c2a775f597a97605c267c4441e476ea7c",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "ownership",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "ownership.source.json",
+      "command": "pnpm package:ownership:check",
+      "started_at": "2026-10-17T22:44:15.2702908+00:00",
+      "finished_at": "2026-10-17T22:48:20.5909597+00:00",
+      "exit_code": 1,
+      "log": "ownership.log",
+      "log_sha256": "4083eb69bf7b233aded3032d91c9b194db763cb675746a91fca00f0454b66201",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "release",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "release.source.json",
+      "command": "pnpm release:validate:refs --ref fix/tool-fabric-single-pass-convergence",
+      "started_at": "2026-10-17T22:44:23.1385359+00:00",
+      "finished_at": "2026-10-17T22:48:17.2098261+00:00",
+      "exit_code": 0,
+      "log": "release.log",
+      "log_sha256": "21938493d296572d1be73f19ba9795b74e9503cc6f8ad3862f15cdb760fd7279",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "scoped-lint",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "scoped-lint.source.json",
+      "command": "pnpm --filter @nzila/tool-fabric lint",
+      "started_at": "2026-10-17T23:29:06.6345872+00:00",
+      "finished_at": "2026-10-17T23:29:37.4245976+00:00",
+      "exit_code": 0,
+      "log": "scoped-lint.log",
+      "log_sha256": "1f49301671a92428a0d259ea2afd7ffbee62943899c6b6a4122727fa2ef01386",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "scoped-types",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "scoped-types.source.json",
+      "command": "pnpm --filter @nzila/tool-fabric --filter @nzila/audit typecheck",
+      "started_at": "2026-10-17T23:29:06.7984584+00:00",
+      "finished_at": "2026-10-17T23:29:37.8082042+00:00",
+      "exit_code": 0,
+      "log": "scoped-types.log",
+      "log_sha256": "2abd82a68e1ea47500771e9c0693e83b28fdc898a2454013daaaccdb50cba8a4",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "secrets-branch",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "0637b7793359c2e63ac3af1f076e92ae75eabf69",
+      "source_sha256": "53a33af4631f98c30353b32009a7ac333770de495a571e6142c2a94245330b2f",
+      "source_manifest": "secrets-branch.source.json",
+      "command": "gitleaks git --log-opts=ede980d62959f91517b6c805787cb031d60fd420..HEAD --config .gitleaks.toml --redact --no-banner --report-format json --report-path <evidence-dir>\\tool-fabric-qualification\\secrets-branch.findings.json",
+      "started_at": "2026-10-18T03:23:26.3714212+00:00",
+      "finished_at": "2026-10-18T03:23:45.3181888+00:00",
+      "exit_code": 0,
+      "log": "secrets-branch.log",
+      "log_sha256": "68a4daa26de519d1e259eb3794ef31aa160262f324b489399e839af6764b620e",
+      "remote_ci": false,
+      "vitest_max_workers_environment": null,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "secrets-candidate",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "secrets-candidate.source.json",
+      "command": "gitleaks dir packages\\tool-fabric --config .gitleaks.toml --redact --no-banner --report-format json --report-path <evidence-dir>\\tool-fabric-qualification\\secrets-candidate.findings.json",
+      "started_at": "2026-10-17T22:33:21.5576953+00:00",
+      "finished_at": "2026-10-17T22:33:56.0264488+00:00",
+      "exit_code": 0,
+      "log": "secrets-candidate.log",
+      "log_sha256": "e671eb1074ab4a0f8df74dd7e457de404b547982f0eb67ca4c00bb83f1ee7254",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "secrets-history",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "secrets-history.source.json",
+      "command": "pnpm secret-scan --redact --report-format json --report-path <evidence-dir>\\tool-fabric-qualification\\secrets-history.findings.json",
+      "started_at": "2026-10-17T22:33:23.2685232+00:00",
+      "finished_at": "2026-10-17T23:24:33.1635833+00:00",
+      "exit_code": 127,
+      "log": "secrets-history.log",
+      "log_sha256": "eef1cbb5189c6fddaafd40758a202ce4836f8a7d3ade9a05eaafb56f7d18273b",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "secrets-staged",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "secrets-staged.source.json",
+      "command": "gitleaks git --staged --config .gitleaks.toml --redact --no-banner --report-format json --report-path <evidence-dir>\\tool-fabric-qualification\\secrets-staged.findings.json",
+      "started_at": "2026-10-17T23:34:23.8203435+00:00",
+      "finished_at": "2026-10-17T23:34:35.5340387+00:00",
+      "exit_code": 0,
+      "log": "secrets-staged.log",
+      "log_sha256": "84fc1f93f73d2451583b6df334c1144b1fd5ee76047abc5f1ef7917cd45663d6",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "tool-fabric",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "tool-fabric.source.json",
+      "command": "pnpm --filter @nzila/tool-fabric test",
+      "started_at": "2026-10-17T23:29:06.7592613+00:00",
+      "finished_at": "2026-10-17T23:29:26.6865369+00:00",
+      "exit_code": 0,
+      "log": "tool-fabric.log",
+      "log_sha256": "5efac8866d6542e5d947b4aad9b6a0a2cbd779659ac9b9016048f8463c808407",
+      "remote_ci": false,
+      "test_file_summary": [
+        "4 passed (4)"
+      ],
+      "test_summary": [
+        "162 passed (162)"
+      ],
+      "failure_headers": []
+    },
+    {
+      "id": "typecheck",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "0637b7793359c2e63ac3af1f076e92ae75eabf69",
+      "source_sha256": "53a33af4631f98c30353b32009a7ac333770de495a571e6142c2a94245330b2f",
+      "source_manifest": "typecheck.source.json",
+      "command": "pnpm typecheck --concurrency=2",
+      "started_at": "2026-10-18T02:52:50.9716227+00:00",
+      "finished_at": "2026-10-18T03:35:52.9298590+00:00",
+      "exit_code": -1,
+      "log": "typecheck.log",
+      "log_sha256": "93b5d1186112a62b50120b279c46fd4638385c2598f497e7d460aec85d9cf23b",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    }
+  ],
+  "evidence_location": "<evidence-dir>\\tool-fabric-qualification"
+}

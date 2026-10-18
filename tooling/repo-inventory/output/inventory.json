@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-17T00:00:00.000Z",
+  "generatedAt": "2026-10-18T00:00:00.000Z",
   "appCount": 28,
-  "packageCount": 224,
-  "workspacePackageCount": 259,
+  "packageCount": 225,
+  "workspacePackageCount": 260,
   "workflowCount": 59,
-  "contractTestCount": 292,
-  "tsTestFileCount": 2790,
+  "contractTestCount": 297,
+  "tsTestFileCount": 2804,
   "pythonTestFileCount": 36,
   "apps": [
     {
@@ -36,7 +36,7 @@
         "ui"
       ],
       "purpose": "CourtLens — governed access-to-justice and legal matter-intelligence platform.",
-      "codeFileCount": 304
+      "codeFileCount": 305
     },
     {
       "name": "agrimo",
@@ -73,7 +73,7 @@
         "ui"
       ],
       "purpose": "Agricultural field operations — harvest tracking, production management, logistics, warehousing, and certifications with a Django backend.",
-      "codeFileCount": 106
+      "codeFileCount": 108
     },
     {
       "name": "cfo",
@@ -186,7 +186,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 448
+      "codeFileCount": 449
     },
     {
       "name": "control-plane",
@@ -251,7 +251,7 @@
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 332
+      "codeFileCount": 334
     },
     {
       "name": "cora",
@@ -328,7 +328,7 @@
         "ui"
       ],
       "purpose": "Commerce vertical — end-to-end order management, quoting, invoicing, inventory, supplier management, and Shopify/Zoho integrations.",
-      "codeFileCount": 436
+      "codeFileCount": 437
     },
     {
       "name": "maestria",
@@ -474,7 +474,7 @@
         "policies"
       ],
       "purpose": "Fastify-based API server for workflow orchestration, job dispatch, and platform proof-center operations.",
-      "codeFileCount": 35
+      "codeFileCount": 36
     },
     {
       "name": "partners",
@@ -544,7 +544,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 189
+      "codeFileCount": 190
     },
     {
       "name": "test-scaffold-gp",
@@ -690,7 +690,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 5403
+      "codeFileCount": 5404
     },
     {
       "name": "union-eyes-demo",
@@ -849,7 +849,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 459
+      "codeFileCount": 461
     }
   ],
   "workflows": [

@@ -75,7 +75,7 @@ A newer pull-request commit cancels the previous in-progress CI run and the prev
 
 Source job: `IaC Security Validation` (`iac-scan`). Command: `checkov --directory infrastructure/bicep --framework bicep`, with the existing `CKV_AZURE_99`, `CKV_AZURE_139`, `CKV_AZURE_163`, `CKV_AZURE_166`, and `CKV_AZURE_189` skips. The Checkov bicep runner collects files with `rglob("*.bicep")` only.
 
-The merge-critical result is that Checkov process. `IaC SARIF Reporting` is evidence-only. It does not feed `Merge Authority / IaC Security`. When GitHub code scanning is not enabled, that job records `SARIF_REPORTING = NOT_CONFIGURED` and does not call `upload-sarif`. A reporting failure stays visible on `IaC SARIF Reporting` and cannot change the Checkov result. The CI-skip fast path runs the same Checkov command and does not upload SARIF.
+The merge-critical result is that Checkov process. `IaC SARIF Reporting` is evidence-only. It does not feed `Merge Authority / IaC Security`. When GitHub code scanning is not enabled, that job records `SARIF_REPORTING = NOT_CONFIGURED` and does not call `upload-sarif`. When code scanning is enabled but SARIF publication is not activated, it records `SARIF_REPORTING = CONFIGURED` with a warning and also passes. A probe failure stays visible on `IaC SARIF Reporting` and cannot change the Checkov result. The CI-skip fast path runs the same Checkov command and does not upload SARIF.
 
 Applicable:
 

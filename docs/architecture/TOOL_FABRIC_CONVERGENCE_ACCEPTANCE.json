@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "gates": {
+    "CONVERGENCE_CODE": "PASS_WITH_LIMITATIONS",
+    "REPOSITORY_QUALIFICATION": "HOLD",
+    "AUDIT_DEPENDENCY": "HOLD",
+    "FLEET_IDENTITY": "DENY_ONLY",
+    "TRUST_PERSISTENCE": "CONTRACT_ONLY",
+    "BROKER_READINESS": "HOLD",
+    "EXECUTION_AUTHORIZATION": "CLOSED",
+    "INSTALL_AUTHORIZATION": "CLOSED",
+    "CIVITAS_PHASE_3": "CLOSED"
+  },
+  "matrix": [
+    {
+      "id": "A",
+      "control_and_test_evidence": "Independent runtime-branded host identity; exact subject/org/mission/invocation/authority binding; spoof, expiry, revocation and cross-mission tests in `convergence.test.ts` and `phase2.test.ts`",
+      "disposition": "DENY_ONLY production adapter",
+      "external_owner_and_proof": "Fleet/platform-auth maintainers: canonical authenticated fleet/mission authority"
+    },
+    {
+      "id": "B",
+      "control_and_test_evidence": "Strict installation schema; agent, forged installer kind, malformed input and forged approvals deny in foundation/Phase 2 tests",
+      "disposition": "Installation CLOSED, not authenticated installer implementation",
+      "external_owner_and_proof": "Platform governance: separate installer attestation, target environment and grant"
+    },
+    {
+      "id": "C",
+      "control_and_test_evidence": "Exactly one command, mandatory declared effects, effective union, destructive/credential/publication risk floors; C00-C02",
+      "disposition": "Policy contract tested",
+      "external_owner_and_proof": "Tool reviewers: measured binary behavior, not descriptor assertions"
+    },
+    {
+      "id": "D",
+      "control_and_test_evidence": "Entire bounded canonical v2 request hash; each security field mutation, distinct approval participants, nonce/expiry, downgrade rejection; D01-D04 and replay gate regression",
+      "disposition": "Atomic lease interface denies; execution CLOSED",
+      "external_owner_and_proof": "Broker/storage owners: durable consumption transaction tied to trust revision and measured invocation"
+    },
+    {
+      "id": "E",
+      "control_and_test_evidence": "Fresh scoped verified decisions, stable content re-verification, revocation/rebinding checks, mutation actor/role contracts, author/reviewer/approver separation; Phase 2 and atomic ledger tests",
+      "disposition": "Host authorization contract only",
+      "external_owner_and_proof": "Governance/fleet owners: real role entitlements, delegation/revocation and observer source evidence"
+    },
+    {
+      "id": "F",
+      "control_and_test_evidence": "Requested filesystem/output scope intersects BOTH grant and mission roots; Windows/POSIX lexical escape denial; CPU/memory/disk/output/process/time bounds; F01-F02",
+      "disposition": "Lexical policy tested; physical containment UNVERIFIED",
+      "external_owner_and_proof": "Broker/SRE: realpath, symlink/junction/reparse and creation/rename race proofs"
+    },
+    {
+      "id": "G",
+      "control_and_test_evidence": "All network paths deny; wrappers/interpreters denied; explicit per-tool environment values, bounded secret references and forced provider analytics opt-out; G01 and foundation regressions",
+      "disposition": "Runtime network/process/sandbox HOLD",
+      "external_owner_and_proof": "Broker/security: redirect, DNS rebinding, proxy, child process, loader and vault enforcement"
+    },
+    {
+      "id": "H",
+      "control_and_test_evidence": "Pinned digest, immutable returned trust records, security-significant identity/license/source/commands/effects/capability drift suspends until verified reaffirmation; H and Phase 2 drift tests",
+      "disposition": "Policy contract tested",
+      "external_owner_and_proof": "Supply-chain owners: installed artifact measurement, signed provenance and upstream observer"
+    },
+    {
+      "id": "I",
+      "control_and_test_evidence": "Coherent snapshot, revision/count/head integrity, atomic expected-head append, stale writer/fork/tamper/truncation/restart simulation, host-authorized mutation; 35 atomic contract tests",
+      "disposition": "CONTRACT_ONLY; memory adapter is not durable",
+      "external_owner_and_proof": "Storage/SRE: approved durable adapter, crash recovery, backup/restore and concurrency proofs"
+    },
+    {
+      "id": "J",
+      "control_and_test_evidence": "Shared canonical audit v2, nested tamper coverage, legacy `LEGACY_PARTIAL`, version/downgrade rejection, payload snapshot and CSV/JSON round trips; 50 audit tests and consumer regression",
+      "disposition": "Local compatibility tested; rollout HOLD",
+      "external_owner_and_proof": "Audit maintainers: exact-source #938 review, marker persistence, legacy custody and live writer/reader rollout"
+    },
+    {
+      "id": "K",
+      "control_and_test_evidence": "Main-based integration, existing shared `AuditStore` interface preserved; current-main logger/AI/tools/doctrine/audit consumers tested; no Restricted or CIVITAS domain import",
+      "disposition": "#935 exact-branch compatibility review remains independent, not certified here",
+      "external_owner_and_proof": "Restricted-data security/privacy maintainers; CIVITAS Phase 3 CLOSED"
+    },
+    {
+      "id": "L",
+      "control_and_test_evidence": "Bounded discovery/skill schemas, untrusted text carries `authority: NONE`, generated harness remains candidate and needs full independent trust evidence; original lifecycle/skill tests and L01",
+      "disposition": "Discovery-only domain model; no provider installed/invoked",
+      "external_owner_and_proof": "Provider/governance owners: per-artifact license, dependency/SBOM and review evidence"
+    }
+  ],
+  "matrix_source": "TOOL_FABRIC_CONVERGENCE.md",
+  "validation": "TOOL_FABRIC_CONVERGENCE_VALIDATION.json"
+}

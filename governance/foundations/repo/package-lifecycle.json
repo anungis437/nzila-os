@@ -36,6 +36,7 @@
     "platform-rfp-generator":               { "tier": "ACTIVE_FLAGSHIP", "product": "union-eyes" },
     "platform-procurement-proof":           { "tier": "ACTIVE_FLAGSHIP", "product": "union-eyes" },
 
+    "tool-fabric":                          { "tier": "INCUBATING" },
     "platform-auth":                        { "tier": "ACTIVE_SHARED_CORE" },
     "platform-contracts":                   { "tier": "ACTIVE_SHARED_CORE" },
     "platform-ai-contract":                 { "tier": "ACTIVE_SHARED_CORE" },

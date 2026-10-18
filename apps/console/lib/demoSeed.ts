@@ -5,6 +5,12 @@
  * and platform observability demonstrations.
  */
 
+import { createLogger, writeDiagnostic } from '@nzila/os-core/telemetry'
+
+const logger = createLogger('console:demo-seed')
+const report = (message: string) => writeDiagnostic(logger, 'info', message)
+const reportFailure = () => writeDiagnostic(logger, 'error', 'Demo seed failed')
+
 export interface ConsoleDemoTenant {
   id: string
   name: string
@@ -38,13 +44,13 @@ export async function seedDemo() {
   const tenant = createDemoTenant()
   const signals = createDemoSignals()
 
-  console.log('[demo:seed] Console demo data created')
-  console.log(`  Tenant: ${tenant.name}`)
-  console.log(`  Signals: ${signals.length}`)
+  report('[demo:seed] Console demo data created')
+  report(`  Tenant: ${tenant.name}`)
+  report(`  Signals: ${signals.length}`)
 
   return { tenant, signals }
 }
 
 if (process.argv[1]?.includes('demoSeed')) {
-  seedDemo().catch(console.error)
+  seedDemo().catch(reportFailure)
 }
