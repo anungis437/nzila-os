@@ -253,8 +253,10 @@ gate('NO-DIRECT-PROVIDER: Apps use SDK wrappers only', () => {
     const exceptions = JSON.parse(readFileSync(exceptionFile, 'utf-8'))
     const today = new Date()
     for (const entry of exceptions.entries ?? []) {
-      // An expired exception no longer exempts the path.
-      if (!entry.expiresOn || new Date(entry.expiresOn) < today) continue
+      // Same semantics as the contract tests (`new Date(expiresOn) < now`). A missing,
+      // invalid or expired date never exempts the path.
+      const expiry = new Date(entry.expiresOn)
+      if (!entry.expiresOn || Number.isNaN(expiry.getTime()) || expiry < today) continue
       exceptionPaths.push(entry.path.replace(/\\/g, '/'))
     }
   }
