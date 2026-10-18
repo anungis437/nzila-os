@@ -4,7 +4,8 @@
 # Deploys Nzila OS apps to Azure Container Apps
 # using environment-aware configuration from infrastructure/gitops/.
 #
-# Automatic staging deploys begin only after exact-tip CI succeeds and include
+# Automatic staging deploys are DISABLED unless the repository variable
+# GITOPS_AUTO_DEPLOY is 'true'. When enabled they begin only after exact-tip CI succeeds and include
 # only non-incubating apps changed by that merge. Manual dispatch remains the
 # explicit path for incubating apps and broader environment selections.
 ##
@@ -54,7 +55,12 @@ env:
 jobs:
   # ── Determine deployment parameters ───────────────────────────────────────
   plan:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    # Fail-closed: automatic (workflow_run) deploys run only when the repository
+    # variable GITOPS_AUTO_DEPLOY is exactly 'true'. Unset/any other value = no auto deploy.
+    # Manual workflow_dispatch is unaffected.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && vars.GITOPS_AUTO_DEPLOY == 'true')
     runs-on: ubuntu-latest
     name: Plan Deployment
     outputs:
