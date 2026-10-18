@@ -50,7 +50,10 @@ jobs:
           LEFTHOOK: "0"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # Placeholder gates only run on explicit dispatch so pushes to main never queue
+  # production approvals that can sit waiting indefinitely.
   staging-gate:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: governance
     environment: staging
@@ -59,6 +62,7 @@ jobs:
         run: echo "Staging gate check passed"
 
   production-gate:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: staging-gate
     environment:
