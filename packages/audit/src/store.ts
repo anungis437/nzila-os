@@ -1,8 +1,12 @@
-import type { AuditEntry } from './schema.js'
+import { auditEntrySchema, type AuditEntry } from './schema.js'
 
 // ─── Store Interface ────────────────────────────────────────────────────────
 
 export interface AuditStore {
+  /** Preserve hashVersion verbatim, including absence on historical entries.
+   * Durable writers must atomically compare the org head to entry.prevHash and
+   * append, rejecting conflicts. The read-then-append engine is not a CAS.
+   */
   append(entry: AuditEntry): Promise<void>
   getLastEntry(orgId: string): Promise<AuditEntry | undefined>
   getEntry(id: string): Promise<AuditEntry | undefined>
@@ -13,13 +17,23 @@ export interface AuditStore {
   getEntryCount(orgId: string): Promise<number>
 }
 
+function freezeJson(value: unknown): void {
+  if (value !== null && typeof value === 'object') {
+    for (const child of Object.values(value)) freezeJson(child)
+    Object.freeze(value)
+  }
+}
+
 // ─── In-Memory Store (testing / development) ────────────────────────────────
 
 export class InMemoryAuditStore implements AuditStore {
   private readonly entries: AuditEntry[] = []
 
   async append(entry: AuditEntry): Promise<void> {
-    this.entries.push(Object.freeze({ ...entry }))
+    auditEntrySchema.parse(entry)
+    const persisted = JSON.parse(JSON.stringify(entry)) as AuditEntry
+    freezeJson(persisted)
+    this.entries.push(persisted)
   }
 
   async getLastEntry(orgId: string): Promise<AuditEntry | undefined> {
@@ -60,6 +74,6 @@ export class InMemoryAuditStore implements AuditStore {
 
   /** Test helper — returns all entries */
   getAll(): readonly AuditEntry[] {
-    return this.entries
+    return [...this.entries]
   }
 }

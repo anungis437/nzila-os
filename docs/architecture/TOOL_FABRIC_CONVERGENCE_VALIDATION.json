@@ -1,0 +1,388 @@
+{
+  "schema_version": 1,
+  "anchors": {
+    "main": "ede980d62959f91517b6c805787cb031d60fd420",
+    "phase1_936": "eb94efa32ab74acb2a2ba2ab96c46149d5ccfb31",
+    "phase2_937": "b514d693ff1c5688c0284eae7f3f6ef121ad3c0a",
+    "audit_938": "f78368ce02e59fdc79884c767213406ba444ddf0",
+    "restricted_935": "42167333ff07d9b5c8507f2da0bb170dd8cb8f7a",
+    "civitas_922": "d3b63cd92f06c734ffb8c41b2c8dc48e65d6f0c6"
+  },
+  "candidate_branch": "fix/tool-fabric-single-pass-convergence",
+  "base_commit": "ede980d62959f91517b6c805787cb031d60fd420",
+  "qualification_binding": "Receipts bind actual tested file bytes; reconciliation maps them to normalized Git blobs. Evidence report self-hashes are excluded to avoid recursion. Final commit/tree must be recorded in delivery receipt.",
+  "gates": {
+    "CONVERGENCE_CODE": "PASS_WITH_LIMITATIONS",
+    "REPOSITORY_QUALIFICATION": "HOLD",
+    "AUDIT_DEPENDENCY": "HOLD",
+    "FLEET_IDENTITY": "DENY_ONLY",
+    "TRUST_PERSISTENCE": "CONTRACT_ONLY",
+    "BROKER_READINESS": "HOLD",
+    "EXECUTION_AUTHORIZATION": "CLOSED",
+    "INSTALL_AUTHORIZATION": "CLOSED",
+    "CIVITAS_PHASE_3": "CLOSED"
+  },
+  "missing_receipts": [
+    "typecheck",
+    "fast",
+    "contracts"
+  ],
+  "receipt_integrity_issues": [
+    {
+      "id": "contracts",
+      "error": "Log changed after receipt; active rerun or interrupted attempt. Not accepted as evidence."
+    },
+    {
+      "id": "typecheck",
+      "error": "Log changed after receipt; active rerun or interrupted attempt. Not accepted as evidence."
+    }
+  ],
+  "failed_checks": [
+    "governance",
+    "ownership",
+    "secrets-history"
+  ],
+  "failures_without_exact_main_receipt": [
+    "governance",
+    "secrets-history"
+  ],
+  "remote_ci": "NOT_RUN; no remote CI success or human review is inferred from local tests",
+  "independent_reviews": {
+    "audit_938": "HOLD: exact-source human review and production writer/reader rollout not supplied",
+    "restricted_935": "HOLD: current-main consumers tested; exact #935 branch compatibility not certified; no domain files imported",
+    "civitas_922": "HOLD: privacy gate unchanged, personal-data Phase 3 CLOSED"
+  },
+  "dependency_setup": "pnpm install --frozen-lockfile --offline --ignore-scripts passed; lifecycle/native build qualification not claimed",
+  "resource_interruption": "Concurrent initial lint/typecheck/contracts attempts were stopped when shared-host free memory fell to 0.6 GB. Interrupted logs retained. No pass, timeout extension, skipped test, or baseline waiver is inferred; final receipts describe reruns.",
+  "receipts": [
+    {
+      "id": "audit",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "audit.source.json",
+      "command": "pnpm --filter @nzila/audit test",
+      "started_at": "2026-10-17T23:30:13.5057662+00:00",
+      "finished_at": "2026-10-17T23:30:34.1512864+00:00",
+      "exit_code": 0,
+      "log": "audit.log",
+      "log_sha256": "ecbbd3f9ff04b866d1f015286c576bf8d87e44a800274afeb9841e338ef4c0c6",
+      "remote_ci": false,
+      "test_file_summary": [
+        "7 passed (7)"
+      ],
+      "test_summary": [
+        "50 passed (50)"
+      ],
+      "failure_headers": []
+    },
+    {
+      "id": "consumer-audit",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "consumer-audit.source.json",
+      "command": "pnpm --filter @nzila/platform-integrations exec vitest run src\\audit-hooks.test.ts",
+      "started_at": "2026-10-17T23:30:13.7523809+00:00",
+      "finished_at": "2026-10-17T23:30:32.5405616+00:00",
+      "exit_code": 0,
+      "log": "consumer-audit.log",
+      "log_sha256": "10a6b004abf487fe44d59797d54f9bd89b3322250cf0e2a45a4390c6324320db",
+      "remote_ci": false,
+      "test_file_summary": [
+        "1 passed (1)"
+      ],
+      "test_summary": [
+        "2 passed (2)"
+      ],
+      "failure_headers": []
+    },
+    {
+      "id": "consumer-core",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "consumer-core.source.json",
+      "command": "pnpm exec vitest run --project os-core --project ai-core --project tools-runtime --maxWorkers=4",
+      "started_at": "2026-10-17T23:34:23.3525242+00:00",
+      "finished_at": "2026-10-17T23:35:41.2988377+00:00",
+      "exit_code": 0,
+      "log": "consumer-core.log",
+      "log_sha256": "1d4e23140311d0c679b0a2a2cfa08e3c5facfb2890c64880610020200b2851fc",
+      "remote_ci": false,
+      "test_file_summary": [
+        "71 passed (71)"
+      ],
+      "test_summary": [
+        "943 passed | 1 skipped (944)"
+      ],
+      "failure_headers": []
+    },
+    {
+      "id": "consumer-doctrine",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "consumer-doctrine.source.json",
+      "command": "pnpm --filter @nzila/doctrine-enforcement test",
+      "started_at": "2026-10-17T23:30:13.4933232+00:00",
+      "finished_at": "2026-10-17T23:30:33.9670915+00:00",
+      "exit_code": 0,
+      "log": "consumer-doctrine.log",
+      "log_sha256": "5936cd03cf3e70aa603733f72d0f30c181b1ebeeb1556b1ec72a31e1097f90b0",
+      "remote_ci": false,
+      "test_file_summary": [
+        "1 passed (1)"
+      ],
+      "test_summary": [
+        "12 passed (12)"
+      ],
+      "failure_headers": []
+    },
+    {
+      "id": "dependencies",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "dependencies.source.json",
+      "command": "pnpm deps:check",
+      "started_at": "2026-10-17T22:44:23.3340885+00:00",
+      "finished_at": "2026-10-17T22:48:20.4989413+00:00",
+      "exit_code": 0,
+      "log": "dependencies.log",
+      "log_sha256": "526e8a783f77f06ae3455b1bf795e943fafbf967b051636ac93e32d5a502e768",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "docs",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "docs.source.json",
+      "command": "pnpm validate:docs",
+      "started_at": "2026-10-17T22:38:18.4710444+00:00",
+      "finished_at": "2026-10-17T22:40:03.5743404+00:00",
+      "exit_code": 0,
+      "log": "docs.log",
+      "log_sha256": "a367b049248b10d48b8b9a6cab84c0c62a9b9fceb4498217c4afd1ff074ec27e",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "governance",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "governance.source.json",
+      "command": "pnpm governance:audit",
+      "started_at": "2026-10-17T22:38:18.4783742+00:00",
+      "finished_at": "2026-10-17T23:15:41.2762925+00:00",
+      "exit_code": 1,
+      "log": "governance.log",
+      "log_sha256": "e8ebc836662440fbf01438eee520e8208aabc995a24339d41ff639841b373c51",
+      "remote_ci": false,
+      "test_file_summary": [
+        "1 failed | 18 passed (19)"
+      ],
+      "test_summary": [
+        "1 failed | 474 passed (475)"
+      ],
+      "failure_headers": [
+        "\n FAIL  |financial-service| src/tests/unit/job-cancellation-service.test.ts > JobCancellationService (Gate 13) > 10. schema contract: job execution/cancellation/audit tables are defined",
+        "Error: Test timed out in 30000ms.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/burn-rate-predictor.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/arrears-detection.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/dues-calculation-workflow.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/financial-reports.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/replay-engine.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/index-startup.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/arrears-management-workflow.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/compliance-engine.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/evidence-chain.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/reconciliation-engine.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/analytics-processor.test.ts.",
+        "Error: [vitest-pool]: Failed to start forks worker for test files C:/APPS/nzila-os.worktrees/tool-fabric-convergence/apps/union-eyes/services/financial-service/src/tests/unit/connection-scope.test.ts."
+      ]
+    },
+    {
+      "id": "lint",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "lint.source.json",
+      "command": "pnpm lint --concurrency=2",
+      "started_at": "2026-10-17T23:40:07.1305525+00:00",
+      "finished_at": "2026-10-18T00:55:21.3661927+00:00",
+      "exit_code": 0,
+      "log": "lint.log",
+      "log_sha256": "59a331b97ac223dd8dcc2ba6fd2cee103900ea7ea8c7110167dc3ca08cc5a05e",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "ownership-main",
+      "working_directory": "C:\\APPS\\nzila-os",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "dc52de27a16fc19dd5fe0266b8df5c317c1c347e5f7e37203c396802dc1ad6f6",
+      "source_manifest": "ownership-main.source.json",
+      "command": "pnpm package:ownership:check",
+      "started_at": "2026-10-17T23:26:35.1263906+00:00",
+      "finished_at": "2026-10-17T23:26:48.6815611+00:00",
+      "exit_code": 1,
+      "log": "ownership-main.log",
+      "log_sha256": "301b8238eb225aa5186bcda86013524c2a775f597a97605c267c4441e476ea7c",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "ownership",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "ownership.source.json",
+      "command": "pnpm package:ownership:check",
+      "started_at": "2026-10-17T22:44:15.2702908+00:00",
+      "finished_at": "2026-10-17T22:48:20.5909597+00:00",
+      "exit_code": 1,
+      "log": "ownership.log",
+      "log_sha256": "4083eb69bf7b233aded3032d91c9b194db763cb675746a91fca00f0454b66201",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "release",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "release.source.json",
+      "command": "pnpm release:validate:refs --ref fix/tool-fabric-single-pass-convergence",
+      "started_at": "2026-10-17T22:44:23.1385359+00:00",
+      "finished_at": "2026-10-17T22:48:17.2098261+00:00",
+      "exit_code": 0,
+      "log": "release.log",
+      "log_sha256": "21938493d296572d1be73f19ba9795b74e9503cc6f8ad3862f15cdb760fd7279",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "scoped-lint",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "scoped-lint.source.json",
+      "command": "pnpm --filter @nzila/tool-fabric lint",
+      "started_at": "2026-10-17T23:29:06.6345872+00:00",
+      "finished_at": "2026-10-17T23:29:37.4245976+00:00",
+      "exit_code": 0,
+      "log": "scoped-lint.log",
+      "log_sha256": "1f49301671a92428a0d259ea2afd7ffbee62943899c6b6a4122727fa2ef01386",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "scoped-types",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "scoped-types.source.json",
+      "command": "pnpm --filter @nzila/tool-fabric --filter @nzila/audit typecheck",
+      "started_at": "2026-10-17T23:29:06.7984584+00:00",
+      "finished_at": "2026-10-17T23:29:37.8082042+00:00",
+      "exit_code": 0,
+      "log": "scoped-types.log",
+      "log_sha256": "2abd82a68e1ea47500771e9c0693e83b28fdc898a2454013daaaccdb50cba8a4",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "secrets-candidate",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "secrets-candidate.source.json",
+      "command": "gitleaks dir packages\\tool-fabric --config .gitleaks.toml --redact --no-banner --report-format json --report-path C:\\Users\\AubertNungisa\\.copilot\\session-state\\770e8706-672d-4f49-a930-cbf9fb3d253e\\files\\tool-fabric-qualification\\secrets-candidate.findings.json",
+      "started_at": "2026-10-17T22:33:21.5576953+00:00",
+      "finished_at": "2026-10-17T22:33:56.0264488+00:00",
+      "exit_code": 0,
+      "log": "secrets-candidate.log",
+      "log_sha256": "e671eb1074ab4a0f8df74dd7e457de404b547982f0eb67ca4c00bb83f1ee7254",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "secrets-history",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "10e72968090fa4efe2a87cbd252d08ef64313d3b17c626853976b97e1f6b94eb",
+      "source_manifest": "secrets-history.source.json",
+      "command": "pnpm secret-scan --redact --report-format json --report-path C:\\Users\\AubertNungisa\\.copilot\\session-state\\770e8706-672d-4f49-a930-cbf9fb3d253e\\files\\tool-fabric-qualification\\secrets-history.findings.json",
+      "started_at": "2026-10-17T22:33:23.2685232+00:00",
+      "finished_at": "2026-10-17T23:24:33.1635833+00:00",
+      "exit_code": 127,
+      "log": "secrets-history.log",
+      "log_sha256": "eef1cbb5189c6fddaafd40758a202ce4836f8a7d3ade9a05eaafb56f7d18273b",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "secrets-staged",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "secrets-staged.source.json",
+      "command": "gitleaks git --staged --config .gitleaks.toml --redact --no-banner --report-format json --report-path C:\\Users\\AubertNungisa\\.copilot\\session-state\\770e8706-672d-4f49-a930-cbf9fb3d253e\\files\\tool-fabric-qualification\\secrets-staged.findings.json",
+      "started_at": "2026-10-17T23:34:23.8203435+00:00",
+      "finished_at": "2026-10-17T23:34:35.5340387+00:00",
+      "exit_code": 0,
+      "log": "secrets-staged.log",
+      "log_sha256": "84fc1f93f73d2451583b6df334c1144b1fd5ee76047abc5f1ef7917cd45663d6",
+      "remote_ci": false,
+      "test_file_summary": [],
+      "test_summary": [],
+      "failure_headers": []
+    },
+    {
+      "id": "tool-fabric",
+      "working_directory": "C:\\APPS\\nzila-os.worktrees\\tool-fabric-convergence",
+      "head": "ede980d62959f91517b6c805787cb031d60fd420",
+      "source_sha256": "8d29d3676e9b7cabcfa383414e4da48100e5af61bde788db8d9408b6ec1df5b7",
+      "source_manifest": "tool-fabric.source.json",
+      "command": "pnpm --filter @nzila/tool-fabric test",
+      "started_at": "2026-10-17T23:29:06.7592613+00:00",
+      "finished_at": "2026-10-17T23:29:26.6865369+00:00",
+      "exit_code": 0,
+      "log": "tool-fabric.log",
+      "log_sha256": "5efac8866d6542e5d947b4aad9b6a0a2cbd779659ac9b9016048f8463c808407",
+      "remote_ci": false,
+      "test_file_summary": [
+        "4 passed (4)"
+      ],
+      "test_summary": [
+        "162 passed (162)"
+      ],
+      "failure_headers": []
+    }
+  ],
+  "evidence_location": "C:\\Users\\AubertNungisa\\.copilot\\session-state\\770e8706-672d-4f49-a930-cbf9fb3d253e\\files\\tool-fabric-qualification"
+}

@@ -372,7 +372,8 @@ describe('real workspace typecheck closure', () => {
   it('counts the executable typecheck universe', () => {
     expect(graph.ok).toBe(true)
     if (!graph.ok) return
-    expect(graph.typecheckPackages).toHaveLength(232)
+    expect(graph.typecheckPackages).toHaveLength(233)
+    expect(graph.typecheckPackages).toContain('@nzila/tool-fabric')
     expect(graph.typecheckPackages).toContain('@nzila/fx')
     expect(graph.typecheckPackages).toContain('@nzila/cfo')
     expect(graph.typecheckPackages).toContain('@nzila/webhooks')

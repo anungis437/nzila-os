@@ -1,0 +1,535 @@
+{
+  "schema_version": 1,
+  "anchors": {
+    "main": "ede980d62959f91517b6c805787cb031d60fd420",
+    "phase1_936": "eb94efa32ab74acb2a2ba2ab96c46149d5ccfb31",
+    "phase2_937": "b514d693ff1c5688c0284eae7f3f6ef121ad3c0a",
+    "audit_938": "f78368ce02e59fdc79884c767213406ba444ddf0",
+    "restricted_935": "42167333ff07d9b5c8507f2da0bb170dd8cb8f7a",
+    "civitas_922": "d3b63cd92f06c734ffb8c41b2c8dc48e65d6f0c6"
+  },
+  "file_count": 53,
+  "files": [
+    {
+      "path": "docs/architecture/ADR-TF-001-cli-anything-external-tool-provider.md",
+      "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
+      "upstream_blobs": {
+        "phase1_936": "3d34f49596a46a0020dfa554e66ac0c7b8c13c01",
+        "phase2_937": "3d34f49596a46a0020dfa554e66ac0c7b8c13c01"
+      },
+      "final_blob": "3d34f49596a46a0020dfa554e66ac0c7b8c13c01",
+      "working_bytes_sha256": "ecc676a9fbd84a70941fa0e5256d89e83286ca9d02a75ac0acf8b7ea2f82b05a"
+    },
+    {
+      "path": "docs/architecture/ADR-TF-002-authority-binding-and-trust-persistence.md",
+      "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
+      "upstream_blobs": {
+        "phase2_937": "5c271c86ef517afc48c94688217a24d83bc15422"
+      },
+      "final_blob": "0019cee2cdc2e72d65bb1e8ce933e8c934ce2240",
+      "working_bytes_sha256": "ad813117d97a88a1e4d1d8320352a74db6424906b43832dbcc0a1df51e22ea17"
+    },
+    {
+      "path": "docs/architecture/AGENT_TOOL_FABRIC.md",
+      "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
+      "upstream_blobs": {
+        "phase1_936": "c24b98beb710d078b1c0fd88e4c3f23951d7c59b",
+        "phase2_937": "427bf10830fb4bf6b495b7f1027c8c076138e558"
+      },
+      "final_blob": "8054d3335854aacb80efe8eb64e98e5761fc6dae",
+      "working_bytes_sha256": "f9e68e17641b82ca7ba035db2b89f5900934b1ece978b777c5808ecbd03401e9"
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE.md",
+      "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
+      "upstream_blobs": {},
+      "final_blob": "fe2a791e695bb1b8e82e71b7d8502b8d8181d811",
+      "working_bytes_sha256": "da00e39d9aba2898db55daabe7320dd4fedbbf7f6eae058804684dd1cd2f719f"
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_ACCEPTANCE.json",
+      "resolution": "generated convergence acceptance evidence; self-hash omitted",
+      "upstream_blobs": {},
+      "final_blob": null,
+      "working_bytes_sha256": null
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_RECONCILIATION.json",
+      "resolution": "generated convergence acceptance evidence; self-hash omitted",
+      "upstream_blobs": {},
+      "final_blob": null,
+      "working_bytes_sha256": null
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_VALIDATION.json",
+      "resolution": "generated convergence acceptance evidence; self-hash omitted",
+      "upstream_blobs": {},
+      "final_blob": null,
+      "working_bytes_sha256": null
+    },
+    {
+      "path": "governance/foundations/repo/package-lifecycle.json",
+      "resolution": "main lifecycle retained; mark new package INCUBATING",
+      "upstream_blobs": {
+        "main": "4ff245a24b5365fb8eacec3c19b00592ed248fc2",
+        "phase1_936": "ecf42a11eb133e92ee5d243ddd321877cb20bac1",
+        "phase2_937": "ecf42a11eb133e92ee5d243ddd321877cb20bac1",
+        "audit_938": "4ff245a24b5365fb8eacec3c19b00592ed248fc2"
+      },
+      "final_blob": "cf722ecf3c15b8c39eb2ee55c859463db4c4dcaa",
+      "working_bytes_sha256": "c81e50c45e2632c4c94fdffcacdd59c5491609e0528b19ec785e3b37603e889e"
+    },
+    {
+      "path": "packages/audit/README.md",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "audit_938": "0f8e5024bea85617f849a722a1dd6564debd335a"
+      },
+      "final_blob": "f3d91c4845fcc581314ebf966365cfe0627dd3a9",
+      "working_bytes_sha256": "0bbc4859da74fee7297c664dde652777c214830fefb450f532630f8c2e1c01b2"
+    },
+    {
+      "path": "packages/audit/src/engine.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "b42a2ce71a448628da04356923a74657c2cec7c4",
+        "phase1_936": "b42a2ce71a448628da04356923a74657c2cec7c4",
+        "phase2_937": "b42a2ce71a448628da04356923a74657c2cec7c4",
+        "audit_938": "c16d1534cd7449f669549680845b6c0b3ffa01db"
+      },
+      "final_blob": "836096ffd7f6f5102d12b0d8f86d2677e5ecad67",
+      "working_bytes_sha256": "23734f9fd331243a9fc8da7e2e55711e8556034f6b9ef2d6915d41af6454e458"
+    },
+    {
+      "path": "packages/audit/src/export.test.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "f8cac155cb740ebe966e01b6d7a7fe11ab382164",
+        "phase1_936": "f8cac155cb740ebe966e01b6d7a7fe11ab382164",
+        "phase2_937": "f8cac155cb740ebe966e01b6d7a7fe11ab382164",
+        "audit_938": "f8cac155cb740ebe966e01b6d7a7fe11ab382164"
+      },
+      "final_blob": "81fc4898bd85894ed1705b8320c96972b5aba457",
+      "working_bytes_sha256": "7d8d85736c59528dec715c1c84b2d6207c94dd9a6214f8a4fabb9fbdd44ae836"
+    },
+    {
+      "path": "packages/audit/src/export.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "de533ecffa80ab3baff794e6833b37c0f4c32c28",
+        "phase1_936": "de533ecffa80ab3baff794e6833b37c0f4c32c28",
+        "phase2_937": "de533ecffa80ab3baff794e6833b37c0f4c32c28",
+        "audit_938": "a9620c6a30612646449cf779745a33f41456dea3"
+      },
+      "final_blob": "9bfbc3925b590035f223b2e3cf445a45ee3d02f5",
+      "working_bytes_sha256": "e24ad5942adc2e24e8ebf318068256d61c93364c5a4e114858774613abbace79"
+    },
+    {
+      "path": "packages/audit/src/hash-compatibility.test.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "audit_938": "a0330f05c9d2d23e86e3fb492479d0a5c70761af"
+      },
+      "final_blob": "c0bd07168f3928c0a8693be9dcae235850f1d125",
+      "working_bytes_sha256": "aa926aeae6be5fb71fa433a7a7349e4f5422e55535fee2b6d2ca9a70825ad216"
+    },
+    {
+      "path": "packages/audit/src/index.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "2e7f03b4f390d718f0eadadbff1f2eb471af7816",
+        "phase1_936": "2e7f03b4f390d718f0eadadbff1f2eb471af7816",
+        "phase2_937": "2e7f03b4f390d718f0eadadbff1f2eb471af7816",
+        "audit_938": "7cae3cab6a3838a91581a2bbfd92a925c3bb6721"
+      },
+      "final_blob": "7cae3cab6a3838a91581a2bbfd92a925c3bb6721",
+      "working_bytes_sha256": "ca34ba44441f23bf831a14600a085f5001d1c18ac6eb58a01c84d169c2744d97"
+    },
+    {
+      "path": "packages/audit/src/nested-integrity.test.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "audit_938": "303c4a59cc3dcf784d4404f34588a1934d0f2291"
+      },
+      "final_blob": "14ab20bff42dc14994e62aa8df3384e84d72ddd2",
+      "working_bytes_sha256": "5e66ab816dfe1b79a058fda9e4e7c52c37c07a0b2c742ce782013ba97ea62e53"
+    },
+    {
+      "path": "packages/audit/src/schema.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "550616ead005779f87eec40ad9e57b8faa8dbd24",
+        "phase1_936": "550616ead005779f87eec40ad9e57b8faa8dbd24",
+        "phase2_937": "550616ead005779f87eec40ad9e57b8faa8dbd24",
+        "audit_938": "3dcbbd185f3b6968191d8edba16d4f63206d1814"
+      },
+      "final_blob": "3dcbbd185f3b6968191d8edba16d4f63206d1814",
+      "working_bytes_sha256": "48e26cb68d0fbd3793c110b5654791e3fbaccd13a045f03775fb1a418550a0a5"
+    },
+    {
+      "path": "packages/audit/src/store.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "241aa45cc48b1f8d9cd1071a17284fab04fa41ee",
+        "phase1_936": "241aa45cc48b1f8d9cd1071a17284fab04fa41ee",
+        "phase2_937": "241aa45cc48b1f8d9cd1071a17284fab04fa41ee",
+        "audit_938": "241aa45cc48b1f8d9cd1071a17284fab04fa41ee"
+      },
+      "final_blob": "7e1f267ae70a7ad2ed6ce9aba9c31698d6502030",
+      "working_bytes_sha256": "35971177068befa22d8b8f1cbc4cdbcd617fc40da197a510b2f2834f2e0c2469"
+    },
+    {
+      "path": "packages/audit/src/verify.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "main": "ad5855c4e77e82a1a114ccd034228c04cb0581fb",
+        "phase1_936": "ad5855c4e77e82a1a114ccd034228c04cb0581fb",
+        "phase2_937": "ad5855c4e77e82a1a114ccd034228c04cb0581fb",
+        "audit_938": "8b9460c68b58ce607dd1484f0116ffe7bbcb5de7"
+      },
+      "final_blob": "583d4735a5caa498b2d79ee0c18bf83354779231",
+      "working_bytes_sha256": "1d9b2be0249063445a4b2325a230f673732d5757b263707f7c6e35182a1ae136"
+    },
+    {
+      "path": "packages/platform-integrations/src/audit-hooks.test.ts",
+      "resolution": "audit #938 dependency; reconciled canonical v2 and explicit legacy coverage",
+      "upstream_blobs": {
+        "audit_938": "18cd0720f9f30d10d02794c309230652ed4a3b17"
+      },
+      "final_blob": "9632fd8095847aa2f5f91eb4312a74e817a6d59c",
+      "working_bytes_sha256": "87699321df81bb2575650cf219ba127b753f59173faac1a944164f94577dc79d"
+    },
+    {
+      "path": "packages/tool-fabric/README.md",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "0ac06552c3e457cd56d512c8128710851b6902fa",
+        "phase2_937": "0c665d85c466f3d5abd6be661f62278834a3d085"
+      },
+      "final_blob": "727fa7f30c583f6cc0b16130e36908125c1fb325",
+      "working_bytes_sha256": "68557559d71d091b9b882110be53a78a0320c190452bb6964e8dce24c73613bd"
+    },
+    {
+      "path": "packages/tool-fabric/eslint.config.mjs",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "0b6debbdb7b3f5d0a13725c0f92c6468f8e2c05c",
+      "working_bytes_sha256": "0398d4fead4d04e8ccb879fad0614967a6a20fce1ebf5d2c48b4650a5fb7b063"
+    },
+    {
+      "path": "packages/tool-fabric/package.json",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "de5f5c95215934c57181d9b12d9b0e34bec63166",
+        "phase2_937": "c3c5313652629e174a17c1a01407e275a714fc32"
+      },
+      "final_blob": "0bc19703ba0d3639ec0648d73a8c2915539ce719",
+      "working_bytes_sha256": "2d4a897fa5dcc122346406972a767b9100ebe0a09cfd336c2aff16060c2015e4"
+    },
+    {
+      "path": "packages/tool-fabric/package.meta.json",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "58f5306383fc869075a48d4c20db96c319a6f714",
+        "phase2_937": "58f5306383fc869075a48d4c20db96c319a6f714"
+      },
+      "final_blob": "58f5306383fc869075a48d4c20db96c319a6f714",
+      "working_bytes_sha256": "580e3fc1d5cc761a6913f86d153c58c1554bfaed70585c33b736822c700597a1"
+    },
+    {
+      "path": "packages/tool-fabric/src/audit.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "059bbecdfb9ea5e54f35986db9b1e4a226c58303"
+      },
+      "final_blob": "bb40da2c94eeb091b337bae08ff2a0c873b493a5",
+      "working_bytes_sha256": "b132f1c0133d0b3d1f9296438ac68f92a79510fa4f39f1f85444b64a480f50bf"
+    },
+    {
+      "path": "packages/tool-fabric/src/authority.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "730c718ff8068f4dc0ee55116137f919b22cd8aa"
+      },
+      "final_blob": "ceef12d11dc61ac2673629c89c7664583353e807",
+      "working_bytes_sha256": "a349d85a70da6a7c66e887e991d974462713d4d4cae91d4dfbbbffafae8fbf4c"
+    },
+    {
+      "path": "packages/tool-fabric/src/broker-boundary.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "796b461e4551f7b86355aaf6ac8fe645dd1078ea",
+      "working_bytes_sha256": "a2983ad148dac6b2621783c728293e702f1de389ee1641d49c4ba4ff6912494e"
+    },
+    {
+      "path": "packages/tool-fabric/src/convergence.test.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "b1fce0e1fc92a0f2191250badce7ae03138ef23f",
+      "working_bytes_sha256": "b4591cf98b5087c7d87051607298f7663394e190b59f617bc89c070e33c5039d"
+    },
+    {
+      "path": "packages/tool-fabric/src/drift.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "2236b64749b047723c0516394db5e3e4e9d3c7a8"
+      },
+      "final_blob": "577025857c1d361a0870569fee66f1e2a979e5fe",
+      "working_bytes_sha256": "cf83cd0a8fa1837ec5a2854cafe319128d7594410354706cdb9e60b16a3c71c5"
+    },
+    {
+      "path": "packages/tool-fabric/src/fixtures.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "2e94caeaa723d8153012e424738a49de398796aa"
+      },
+      "final_blob": "c43861fb1fbe73828a1263b0e8da6328e33735b7",
+      "working_bytes_sha256": "f3e3e44edddc4a083ffc06201a40b6b00c0a86f67ee98fccfe2e5025fc9197a2"
+    },
+    {
+      "path": "packages/tool-fabric/src/gate.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "f7c496fe8569854d986221bd04d2bc72c751af3f"
+      },
+      "final_blob": "f4df34187611ac67651264e4bbf09dc2e2779736",
+      "working_bytes_sha256": "b63fad9e5ec5067bea369769be2cf4ac2702353caa89a4aa38cdc235bc814bd5"
+    },
+    {
+      "path": "packages/tool-fabric/src/governance.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "fa04378b83fd94a8a8ac2a490e61c092e4da03a0"
+      },
+      "final_blob": "a301e38db2da7bfdcb4a5f5ca1735d6c3bf16b1f",
+      "working_bytes_sha256": "42c43f3f1e9273671bfc1ba38f7ed3b35ccd8988b20f0d7f749c517fd3de2ac1"
+    },
+    {
+      "path": "packages/tool-fabric/src/harness.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "8ca127f956650683c98ff84aa6505f0650a03f28",
+        "phase2_937": "8ca127f956650683c98ff84aa6505f0650a03f28"
+      },
+      "final_blob": "8ca127f956650683c98ff84aa6505f0650a03f28",
+      "working_bytes_sha256": "b85291db86ce9e72a1ab3ea15af090a573941534fe0389f0b8c498004a1f3e38"
+    },
+    {
+      "path": "packages/tool-fabric/src/index.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "0496e35c761d3cf438e005c167963a1ee2d1cbd0",
+        "phase2_937": "63dd847afbd14b70a8e6919675d55d22052bf596"
+      },
+      "final_blob": "72f0c317ef2d325c24bbb6e13c8932c8d689a09c",
+      "working_bytes_sha256": "d77be204d7749df346f3be2d5216d4be77d55e47529294faaa5624014e2d7434"
+    },
+    {
+      "path": "packages/tool-fabric/src/invocation.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "931fde2df3040db4dc4000ba5ebd52f9a99be619",
+      "working_bytes_sha256": "1fa02e3fd59d3ea87bbe46c9b63299cfe16dcfd737d12950e4bfba3b15c7a49e"
+    },
+    {
+      "path": "packages/tool-fabric/src/ledger-atomic.test.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "1899e1d3e05eda8cce2a5d26906c691f10bdaafc",
+      "working_bytes_sha256": "bfdafb07cdbc16d3958482224c93a67559b19966be21ace83eeca1bfacd7065c"
+    },
+    {
+      "path": "packages/tool-fabric/src/ledger-store.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {},
+      "final_blob": "cd9bb24f60aefc9db523e2bd7568d4986ef6b839",
+      "working_bytes_sha256": "4d14ee1dbbd2b281b5a71c90705fb9a5b803d8ac8bb816c2495947c7b44bb76a"
+    },
+    {
+      "path": "packages/tool-fabric/src/ledger.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "797d21e5a1958d2cf245ea6e73913df7ec51e271"
+      },
+      "final_blob": "c662e36382c85f8f2d56377e2cab39f65c81aba3",
+      "working_bytes_sha256": "17e018d810703338ef87feff9cf056a4f3ebdb1321c79b0868c7006f70e072fc"
+    },
+    {
+      "path": "packages/tool-fabric/src/phase2.test.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "566e4455ada012f6f7f4e73ef3ca9d06a76f1c82"
+      },
+      "final_blob": "715395f2076007c0e28c6ede90097765d55bd644",
+      "working_bytes_sha256": "41ec4a183576542a7b52c67f3904e9f2b0eba0315657f16c20894285a28eeff8"
+    },
+    {
+      "path": "packages/tool-fabric/src/policy.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "5463e3909ca64bedf428d84f2047ea70ab1ccdb9",
+        "phase2_937": "a0fc8b14fce1a6701607a19bb3e0056c715e518e"
+      },
+      "final_blob": "616c4dab12bfa314f1b7add1aefb01e4bcb2ac8b",
+      "working_bytes_sha256": "a552d5d90442cde4a19f658cfd5e5c0425018b119b8c3c50e4e9e949797f3f7b"
+    },
+    {
+      "path": "packages/tool-fabric/src/providers.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "ef0a3e0764a3d685a119443697a769ddb2499060",
+        "phase2_937": "ef0a3e0764a3d685a119443697a769ddb2499060"
+      },
+      "final_blob": "8d9fa65845ee787c7e9785c5c27c607e8b26f7d5",
+      "working_bytes_sha256": "0acaa9f8267e317e9e6fbb756e0b265866fe2b550307a6efa405857e84520ed8"
+    },
+    {
+      "path": "packages/tool-fabric/src/registry.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "c6a788a2ee56dcec709cefb28f071fcea25e9205",
+        "phase2_937": "5ffc43d7980f8de730f5c67be14c908483478c8c"
+      },
+      "final_blob": "89c4754eee8eb3e6c40ebee9984dcd9237a097e3",
+      "working_bytes_sha256": "2a27cb9e0dcb0dd59955bb0eb5878e768cf702a337e8ca0ef62c1d810f5731af"
+    },
+    {
+      "path": "packages/tool-fabric/src/skill.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "bef5d8c80ff9c5193f5e2d67feee3ea48f9ef487",
+        "phase2_937": "bef5d8c80ff9c5193f5e2d67feee3ea48f9ef487"
+      },
+      "final_blob": "bef5d8c80ff9c5193f5e2d67feee3ea48f9ef487",
+      "working_bytes_sha256": "e7556eeee2e5dbaace1ee90ed74522ff499446bf1c5359b1fa167aced8adf84a"
+    },
+    {
+      "path": "packages/tool-fabric/src/testing.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase2_937": "f905f9b627787456a877a3820aad24888ec25e6e"
+      },
+      "final_blob": "f905f9b627787456a877a3820aad24888ec25e6e",
+      "working_bytes_sha256": "0349f14321f672d35f1fdb886f9ed2bddd46f76497656e7fa34a444d1f4f0a50"
+    },
+    {
+      "path": "packages/tool-fabric/src/tool-fabric.test.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "6d3d383ba2d1c902e08c4756733ea91ccfbce8a7",
+        "phase2_937": "b872d79879a9b4dd46a9b2903a2af71785a3a52d"
+      },
+      "final_blob": "820ffdb7c677d271d8f242aee49d660b6aa27df0",
+      "working_bytes_sha256": "9b1f178f8843350b0a963530bb05b3819a18af327e84e261e6ba908309a226a7"
+    },
+    {
+      "path": "packages/tool-fabric/src/types.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "058fd6c85fa1bf65a5379fbffddd95dc347a7bb4",
+        "phase2_937": "2f98e7057fcee22d9ce9ca95dcf3f43ee2312322"
+      },
+      "final_blob": "852ffca2d05df0c2092dc5d38867b043fb020bad",
+      "working_bytes_sha256": "a8a60575e56b54f403304d8c744454cbf3c630a857318e59f6e9c8d698a7ca97"
+    },
+    {
+      "path": "packages/tool-fabric/tsconfig.json",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "0f1d9eca5022ad746f5ac51213ea5bf565a30dec",
+        "phase2_937": "0f1d9eca5022ad746f5ac51213ea5bf565a30dec"
+      },
+      "final_blob": "0f1d9eca5022ad746f5ac51213ea5bf565a30dec",
+      "working_bytes_sha256": "5d24f4bd0a83a2d0de569aacd3c8240608ddf68d2c2bbc7ff54407f698c2ae08"
+    },
+    {
+      "path": "packages/tool-fabric/vitest.config.ts",
+      "resolution": "Phase 2 #937 (includes Phase 1 #936); hardened for A-L convergence",
+      "upstream_blobs": {
+        "phase1_936": "cae12b9bde66c15534cf00d82009885155e67b0d",
+        "phase2_937": "cae12b9bde66c15534cf00d82009885155e67b0d"
+      },
+      "final_blob": "cae12b9bde66c15534cf00d82009885155e67b0d",
+      "working_bytes_sha256": "40412498ae5fe91b9ce2485957801503a4e3f6e0f392cb087d04f4dbb69de93c"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "resolution": "main resolutions retained; add Tool Fabric importer using existing locked versions",
+      "upstream_blobs": {
+        "main": "477c771ffa879b3a2ae6538f80f38314082f3bce",
+        "phase1_936": "34d2fe00226a465ab71d6ef647ce10e3431ee431",
+        "phase2_937": "f18fa9d5f7b92bd4a65f7b6302e979c39350a843",
+        "audit_938": "477c771ffa879b3a2ae6538f80f38314082f3bce"
+      },
+      "final_blob": "69975ddcd5ba7a7745e866ea456bed2593e9428c",
+      "working_bytes_sha256": "ea878e4f22531771bc5d3fb14d7a73935c45696a724425b2cbc51d6278fb8595"
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.json",
+      "resolution": "regenerated from staged candidate; never imported upstream inventory",
+      "upstream_blobs": {
+        "main": "74e5e1ed2f05ec344a345ca9c1c0389207b948f7",
+        "phase1_936": "4083e03a51a69359a64072f3038d43a54c8761ca",
+        "phase2_937": "ee49df569e68852d00f25d1b640151429007e32f",
+        "audit_938": "70856ea67ff7e5755c817b725b3ed6c845d83da3"
+      },
+      "final_blob": "6b65be0d7b3c5200c986c0c4dfadb2e608a7acd0",
+      "working_bytes_sha256": "f6aa684d1791d33d5b63f8fc3d62f5a7293bdcc90e7100ee14a003efaed69341"
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.md",
+      "resolution": "regenerated from staged candidate; never imported upstream inventory",
+      "upstream_blobs": {
+        "main": "d4460091a15ce97deb3abf20a5359bfa0ba3d58d",
+        "phase1_936": "621c5f5a0f2d491193f5ba124483f17b099b7684",
+        "phase2_937": "07b9028cbe19d59c2f340deebf2c1bab640db67c",
+        "audit_938": "2f8fbf3e7b6b12a45cd2a007db250baf55c6d1a5"
+      },
+      "final_blob": "2fe46cc9d898e4dbc6d376e493048578b3323558",
+      "working_bytes_sha256": "ca5c68206df83955cc3e314e65e3d2065a43c20b1f2827200e61acd2f4b70f6b"
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.json",
+      "resolution": "regenerated from staged candidate; never imported upstream inventory",
+      "upstream_blobs": {
+        "main": "74e5e1ed2f05ec344a345ca9c1c0389207b948f7",
+        "phase1_936": "4083e03a51a69359a64072f3038d43a54c8761ca",
+        "phase2_937": "ee49df569e68852d00f25d1b640151429007e32f",
+        "audit_938": "70856ea67ff7e5755c817b725b3ed6c845d83da3"
+      },
+      "final_blob": "6b65be0d7b3c5200c986c0c4dfadb2e608a7acd0",
+      "working_bytes_sha256": "f6aa684d1791d33d5b63f8fc3d62f5a7293bdcc90e7100ee14a003efaed69341"
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.md",
+      "resolution": "regenerated from staged candidate; never imported upstream inventory",
+      "upstream_blobs": {
+        "main": "d4460091a15ce97deb3abf20a5359bfa0ba3d58d",
+        "phase1_936": "621c5f5a0f2d491193f5ba124483f17b099b7684",
+        "phase2_937": "07b9028cbe19d59c2f340deebf2c1bab640db67c",
+        "audit_938": "2f8fbf3e7b6b12a45cd2a007db250baf55c6d1a5"
+      },
+      "final_blob": "2fe46cc9d898e4dbc6d376e493048578b3323558",
+      "working_bytes_sha256": "ca5c68206df83955cc3e314e65e3d2065a43c20b1f2827200e61acd2f4b70f6b"
+    },
+    {
+      "path": "vitest.config.ts",
+      "resolution": "main workspace projects retained; add Tool Fabric project",
+      "upstream_blobs": {
+        "main": "b2b35ebb0bcb17a5fcf5784eadf17d22d7a84f84",
+        "phase1_936": "b2b35ebb0bcb17a5fcf5784eadf17d22d7a84f84",
+        "phase2_937": "b2b35ebb0bcb17a5fcf5784eadf17d22d7a84f84",
+        "audit_938": "b2b35ebb0bcb17a5fcf5784eadf17d22d7a84f84"
+      },
+      "final_blob": "e465280901deda7b9ed77dee41a3669b1a24957d",
+      "working_bytes_sha256": "cd7c2d436e599993da9e9bd5ff2e1bdb0eb654b8c562a0ab2181fd6506e04c9d"
+    }
+  ],
+  "not_imported": [
+    "#935 Restricted-data domains",
+    "#922 CIVITAS domains",
+    "#925 superseded predecessor",
+    "upstream generated inventories",
+    "upstream lockfile resolution snapshots"
+  ]
+}
