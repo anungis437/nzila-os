@@ -16,12 +16,6 @@
       "expiresOn": "2026-10-18"
     },
     {
-      "path": "apps/partners/**",
-      "owner": "partners-team",
-      "justification": "Partners app has legacy unscoped DB import in partner-auth. Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
       "path": "apps/union-eyes/**",
       "owner": "union-eyes-team",
       "justification": "Django-migrated app with direct DB access patterns. Migration tracked alongside console/partners. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",

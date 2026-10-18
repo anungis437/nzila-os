@@ -4,33 +4,9 @@
   "description": "Allowed exceptions to the no-console runtime invariant",
   "entries": [
     {
-      "path": "apps/union-eyes/db/seeds/**",
-      "owner": "union-eyes-team",
-      "justification": "Seed scripts are CLI programs — console output is appropriate for development tooling. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
-      "path": "apps/union-eyes/lib/client-logger.ts",
-      "owner": "platform-team",
-      "justification": "Client-safe logger wraps console.* as the browser output sink — console calls here ARE the structured output. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
       "path": "apps/union-eyes/lib/console-wrapper.ts",
       "owner": "platform-team",
       "justification": "Console-wrapper intentionally stores and overrides console methods to route them to structured logger in production. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
-      "path": "apps/union-eyes/lib/logger.ts",
-      "owner": "platform-team",
-      "justification": "App-specific logger implementation uses console as the output sink — console calls here ARE the structured output. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
-      "path": "apps/union-eyes/public/service-worker.js",
-      "owner": "union-eyes-team",
-      "justification": "Service Worker runs in browser context where @nzila/os-core is not available — console is the only logging mechanism. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
       "expiresOn": "2026-10-18"
     },
     {
@@ -79,18 +55,6 @@
       "path": "apps/nacp-exams/app/*/dashboard/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
-      "path": "apps/union-eyes/lib/api.ts",
-      "owner": "platform-team",
-      "justification": "Client-safe API logger for union-eyes — os-core createLogger uses Node.js APIs unavailable in Turbopack client bundles. Console is used as the structured output sink. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
-      "path": "apps/union-eyes/lib/api/index.ts",
-      "owner": "platform-team",
-      "justification": "Client-safe API logger for union-eyes — os-core createLogger uses Node.js APIs unavailable in Turbopack client bundles. Console is used as the structured output sink. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
       "expiresOn": "2026-10-18"
     },
     {
