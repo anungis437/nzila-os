@@ -246,3 +246,27 @@ The original #936/#937/#938/#935/#922 branches remain independently governed.
 
 Rollback is a revert of this candidate only before any production wiring.
 There is no deployed state or production data migration to reverse.
+
+## Candidate status (rapid reconciliation)
+
+This section supersedes earlier status statements in this document about
+uncommitted or pending local work. It makes no claim beyond the evidence listed.
+
+- **Code:** deny-only Tool Fabric policy/trust contracts and shared audit v2 are
+  committed. Installation, execution and CIVITAS Phase 3 remain **CLOSED**; broker
+  readiness is **HOLD**; merge and deployment are not authorized.
+- **Baseline governance:** of the 33 selected exceptions, 16 are retired, 4 are
+  ordinary engineering scopes, and 13 need owner decisions; see the
+  [owner approval matrix](./TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md). No expiry or rule
+  was changed. These are pre-existing `main` debt, not introduced defects.
+- **Validation workflow:** development hooks and PR/release gates are separated in
+  [VALIDATION_LEVELS.md](./VALIDATION_LEVELS.md). Full typecheck, lint, contract
+  tests, fast tests and governance audits run in CI against the exact candidate SHA.
+- **Local evidence (not a full qualification):** isolated Linux runs of the earlier
+  committed source: lint 172/172, contracts and fast-suite failures independently
+  reproduced on `main`. The final source received focused regression tests, a
+  changed-package typecheck gate at commit time and full contracts that showed one
+  introduced naming violation, now fixed and covered by a regression test. Its
+  complete CI run is the pending qualification; it is not claimed as passed here.
+- **Dependencies:** #936 and #937 are the foundation, #938 is reconciled for shared
+  audit v2, #935 keeps its independent security gate, and #922 keeps its privacy HOLD.

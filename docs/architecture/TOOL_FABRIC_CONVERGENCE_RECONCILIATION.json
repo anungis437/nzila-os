@@ -8,8 +8,232 @@
     "restricted_935": "42167333ff07d9b5c8507f2da0bb170dd8cb8f7a",
     "civitas_922": "d3b63cd92f06c734ffb8c41b2c8dc48e65d6f0c6"
   },
-  "file_count": 54,
+  "file_count": 102,
   "files": [
+    {
+      "path": ".lefthook-local.yml",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": null,
+      "working_bytes_sha256": null
+    },
+    {
+      "path": "apps/abr/app/api/abr/incidents/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "78b09c9797e4c6793b52a4d1694628438514cd03",
+      "working_bytes_sha256": "d7da30b8c4e9f1998d45785af9886a6395585876eb31ceb1fe17506855c56d9e"
+    },
+    {
+      "path": "apps/abr/modules/incidents/nar-proof-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f60f0b55adb68804666f4c714121af6d517c46f4",
+      "working_bytes_sha256": "72ece8799b0622eeb40bd3cac83da2b66cdd7665beca3e863b4059f8c2606a9b"
+    },
+    {
+      "path": "apps/agrimo/app/api/webhooks/clerk/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "6251828f5d4a97d0a8bd4a00981d87aa044330c0",
+      "working_bytes_sha256": "9f5e839af307c50bbc3ee974a5d2cc9fbb5c599e0e4c72fab1a3033788a0eaad"
+    },
+    {
+      "path": "apps/agrimo/lib/events/agri-event-emitter.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "e9aabd63740aac7df85ec4a9620f287b49e7c40b",
+      "working_bytes_sha256": "19184b00969a2f79660b2e4573e9da7bda6c69d9121122cd9a5ad87dc11d4824"
+    },
+    {
+      "path": "apps/agrimo/lib/org-registry.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "680a7ec617eef670e91788e2c91279b770a85da9",
+      "working_bytes_sha256": "43cbe5eb9909d7eef31c214c5f312c1115d6e24d8c0697291b69a0ef499e4bd0"
+    },
+    {
+      "path": "apps/agrimo/lib/services/identity-sync-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "a263a5d681714617a1972794d71308e7c3263491",
+      "working_bytes_sha256": "be46943aecfd7c2750084a040256dac32542d6e1011679d34ff73bbcae797ac8"
+    },
+    {
+      "path": "apps/cfo/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "94854eae37c1824cde050311f907b4fb568a7b66",
+      "working_bytes_sha256": "25e7da4642c481ca5549e83908f62cc6d3dffdd99ec2c5a92790001c4d30e3b1"
+    },
+    {
+      "path": "apps/console/app/api/ai/actions/approve/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "0e776362a69e652afa22d30fdeacfcf122da21c1",
+      "working_bytes_sha256": "ee4805554e412570b394c585718f5fbfb7c643126e6ed731569155a0ddcd08ab"
+    },
+    {
+      "path": "apps/console/app/api/ai/actions/execute/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "2151c6ed092002af1098b4bd3c7ef5bff093000e",
+      "working_bytes_sha256": "e2b20a33f876bfddabed5904d3bc9fd12c6e58d88e4aa9bda5fb4dae570027e5"
+    },
+    {
+      "path": "apps/console/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "a6633cd3145fccdf339f2653723a887a12fd6088",
+      "working_bytes_sha256": "e44ee3a082e32cdb3b452eb78e740645e1e72f4e870a0554cca54a8ae4e69c15"
+    },
+    {
+      "path": "apps/console/lib/services/ai-action-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f88a5ce4d64d9854e0421c96757a5b20611f985c",
+      "working_bytes_sha256": "3b09cc72ec4c093905ccb091f5b8dfc9761b875eab2f8aa29fb0a3c1970b4603"
+    },
+    {
+      "path": "apps/control-plane/app/api/audit/record/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "1b4263abbc55a7588f25a0102d4073905b3f71f5",
+      "working_bytes_sha256": "73dd7028ac337ffe0f5e3619851d91f97e7bb014b4fad3689d50167c8f286561"
+    },
+    {
+      "path": "apps/control-plane/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "9141165750a33543ebab76ac17d417dd669cb2cd",
+      "working_bytes_sha256": "2f290a50f1f91f32ed30858d5c94f190745f39197ee934822cb173ef5bc2bd5e"
+    },
+    {
+      "path": "apps/control-plane/lib/repositories/audit-record-repository.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f02cd819b7e7cb94531aca6b244abdb4ad37dfa7",
+      "working_bytes_sha256": "db2848baa534c34d422e491136b95e4b6ed6c0ef0255155b77f587efcb2998c6"
+    },
+    {
+      "path": "apps/control-plane/lib/services/audit-proof-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "6e3f82906eb832a52502d03eecc2b6d22356ebe7",
+      "working_bytes_sha256": "cfd39bb8842222b6cdb67105712367ac53d7e5f61248b847d331118f9b7e50da"
+    },
+    {
+      "path": "apps/flow/app/api/governance/telemetry/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "47a81a968d8c8ee5aa39e4b6ebb249aa464f12de",
+      "working_bytes_sha256": "b6ffc35021a9c2ddb8abd213cd3cc85bb6293ff317292732e26e228510d1268a"
+    },
+    {
+      "path": "apps/flow/lib/services/governance-metrics-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "9844def8dd056a982e116d9f704e784aebe7453b",
+      "working_bytes_sha256": "9f6cf7ac0b6f2628dce4592af1034286071f1c50d83b009e5bbcb46d5c91ba06"
+    },
+    {
+      "path": "apps/nzila-hq/server/db/audit.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "80f1d272e7b86b8a3420306d28618ceced61299f",
+      "working_bytes_sha256": "5a9c10a7094adbb4080c611764185df23daf0341470645fe0b0b8f09743d911e"
+    },
+    {
+      "path": "apps/orchestrator-api/src/routes/execute.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "0d2727d7a9ef6245b4d1b4a4505798a6bda65501",
+      "working_bytes_sha256": "b7afd9e579d52162b89e23a440ef06122017afc57ebfff6a17be9c0743804375"
+    },
+    {
+      "path": "apps/orchestrator-api/src/services/nar-proof-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "30ce815eb811bab35c2010ebdd98fefcf4cc0b34",
+      "working_bytes_sha256": "04c1edb47630e2eb089985f190d33a2ea32f2f35e06bd9f6ba296a866526d9b5"
+    },
+    {
+      "path": "apps/partners/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "894ed24b555d6cc9bceacac7f5a8b78cc330f95f",
+      "working_bytes_sha256": "8a5cb08b34185d802725b33d9c608447b787e5fbe5b919e6fe3019be19d843a4"
+    },
+    {
+      "path": "apps/platform-admin/app/api/admin/org/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "987ecd0e401a1530a10c08b8982b7a98733401ee",
+      "working_bytes_sha256": "adb8620bee831e021413c4760db1d7a7f870d6f664ac35c3449b3055c70ba05a"
+    },
+    {
+      "path": "apps/platform-admin/lib/nar-proof-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "4aa2d0e97a347b0cc24c8df8476a003e4041f8b8",
+      "working_bytes_sha256": "692d112a8843af099106a6505ea3ca2409caf345b88653d139cbdd630e3d70dd"
+    },
+    {
+      "path": "apps/union-eyes/app/api/auth/mfa/enroll/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "3be5a754722a162bf61a47ea1c428e84e4341739",
+      "working_bytes_sha256": "bab6c27720b43a801896bf966f8d44481608da71b586c3a50590988be0b9d079"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/mfa-enrollment-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "3f6713f520d1fef789d09cc28611b705bbfa8d15",
+      "working_bytes_sha256": "6215d5afc60c3aa919b31529db6ee55376f3763dc291e1ac23f4d2017983ab10"
+    },
+    {
+      "path": "apps/web/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "c734b9e50c54c4069d685f2bda538aa0a9f11634",
+      "working_bytes_sha256": "66dcd94a85e8eee1803f0ac7d8cae2e827bf20642f892e8f537a5223098e0d3a"
+    },
+    {
+      "path": "apps/weekone/lib/demoSeed.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "741ba1aea793fbeb067e19c8d59822cb34c3ed43",
+      "working_bytes_sha256": "132cab083da8e39570f30dbd6be013e03032520c0a2504fc8e50a266b86547dc"
+    },
+    {
+      "path": "apps/zonga/app/api/payouts/route.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "76fa1fc914080573d83f3a0e8413b71cd1aa2fba",
+      "working_bytes_sha256": "6a3097f2c6b0777d1b792d534d6c2567f87cea28c19867c12661ed10e4f34ee4"
+    },
+    {
+      "path": "apps/zonga/lib/__tests__/mobile-money-diagnostics.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "3d329aee006df09bb21af45bbfe0e77be9a558c4",
+      "working_bytes_sha256": "adf823e6253c09f16b553256bc785cf732e3e4b86a8548f1bce3b489a7d9cce1"
+    },
+    {
+      "path": "apps/zonga/lib/nar-proof-service.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "541c9b3d4a4daf5c190f7393f8fa8296d8ad6068",
+      "working_bytes_sha256": "1c64b44431c7056832b7c05ffbded4fd983c11df009afe4a7b92f296aa71bfcd"
+    },
+    {
+      "path": "apps/zonga/lib/stripe.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "28a797c26b278774bf7019906b026ad6591396eb",
+      "working_bytes_sha256": "fd61d76ca3ca31bc974fb68704ca5aabe1471cc3011c8dbc59b7f9074afc576b"
+    },
     {
       "path": "docs/architecture/ADR-TF-001-cli-anything-external-tool-provider.md",
       "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
@@ -40,18 +264,32 @@
       "working_bytes_sha256": "f9e68e17641b82ca7ba035db2b89f5900934b1ece978b777c5808ecbd03401e9"
     },
     {
+      "path": "docs/architecture/TOOL_FABRIC_BASELINE_GOVERNANCE_DECISIONS.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f26b48274b7272bc623d67b533d837a6f3a67981",
+      "working_bytes_sha256": "c4c8cbf8a39c89331b408447c2b9e136baeca4c74e3cc6f2ed4b96b1bf29f4ba"
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_BASELINE_GOVERNANCE_DECISIONS.md",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "e59375f9a3ceaf3f29034c4bd7cc8aef868568ad",
+      "working_bytes_sha256": "bf1114f2825473184622aae262338561bf8e43d4df7710558e043572b7edb9c5"
+    },
+    {
       "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE.md",
       "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
       "upstream_blobs": {},
-      "final_blob": "910e24e78cad5c9e37c0cb00a1ef0d75ffbbd560",
-      "working_bytes_sha256": "39cdf55a3a2f29ab0028682bfc2feeb426e89523861cba375ace521da2528441"
+      "final_blob": "e4eb4b44232107a700c7807eca34a653812394a0",
+      "working_bytes_sha256": "7fe300a7b5da23802998dd8e3054610dfed52564fee472446b061558c5facc07"
     },
     {
       "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_ACCEPTANCE.json",
       "resolution": "generated convergence acceptance evidence; self-hash omitted",
       "upstream_blobs": {},
-      "final_blob": null,
-      "working_bytes_sha256": null
+      "final_blob": "348337898942ab1e9790ebe6c9d80c47ea5e4c18",
+      "working_bytes_sha256": "0cb60802e5aa6f5eb24067343526cef0cdbc973f167d6d370085249710ea0ebe"
     },
     {
       "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_RECONCILIATION.json",
@@ -64,8 +302,36 @@
       "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_VALIDATION.json",
       "resolution": "generated convergence acceptance evidence; self-hash omitted",
       "upstream_blobs": {},
-      "final_blob": null,
-      "working_bytes_sha256": null
+      "final_blob": "1a81a65c6b40f6a2240ce1a247505962ae9e529d",
+      "working_bytes_sha256": "747e56df8b2d6604d910fc94bd7bcc822243fb1bca89d6c724d1df753ea1e43c"
+    },
+    {
+      "path": "docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "8d86d1777e0876d9afad0723f8967b8756250ad2",
+      "working_bytes_sha256": "a56e6f237510e1875d01129823948133f64c5ab0720205b5a258e77946faa2ee"
+    },
+    {
+      "path": "docs/architecture/VALIDATION_LEVELS.md",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "51909518c3ef62c7cc847f30f3bd28b57acdc4e0",
+      "working_bytes_sha256": "8c81b766ffa996fddc5660295467638daf74ed5e30885d2d737c8b2a45d371aa"
+    },
+    {
+      "path": "governance/exceptions/arch-layer.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "a1406ef710c8f647090c6eed3d0091a9a362b14e",
+      "working_bytes_sha256": "51bb70c1a81cc92424ac6bf20f9fe1fad5ad970a2baa3a1401684f6fd1d7fc9a"
+    },
+    {
+      "path": "governance/exceptions/no-console.json",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "285bfdf5c5cfb80affbd6e6f30317ddf0665cc0d",
+      "working_bytes_sha256": "b3f2d7752a151fe08970b16e72db10d771179a245affc8e70ceeba407d1c9380"
     },
     {
       "path": "governance/foundations/repo/package-lifecycle.json",
@@ -78,6 +344,13 @@
       },
       "final_blob": "cf722ecf3c15b8c39eb2ee55c859463db4c4dcaa",
       "working_bytes_sha256": "c81e50c45e2632c4c94fdffcacdd59c5491609e0528b19ec785e3b37603e889e"
+    },
+    {
+      "path": "lefthook.yml",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "898dbb3a65ce9896be6f1a7461b0191c14207d10",
+      "working_bytes_sha256": "868bda113d33db144fb2557dce89139d16217707ce5aafc6e4aec74f95d12407"
     },
     {
       "path": "packages/audit/README.md",
@@ -189,6 +462,27 @@
       },
       "final_blob": "583d4735a5caa498b2d79ee0c18bf83354779231",
       "working_bytes_sha256": "1d9b2be0249063445a4b2325a230f673732d5757b263707f7c6e35182a1ae136"
+    },
+    {
+      "path": "packages/os-core/src/telemetry/diagnostic.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "5baecd4fa4fe7eb32bdfa654a5f74d624b677f61",
+      "working_bytes_sha256": "9df67f6e268f162d87c9b080f688fff1c6448816049ee01db4ccf42479b3d7bf"
+    },
+    {
+      "path": "packages/os-core/src/telemetry/diagnostic.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f61fcb819112ca09d39daae95ae45346a4827ead",
+      "working_bytes_sha256": "1f6a638115a3a606ed47c51f678b83f138d8030b2d075720698bae2749b67999"
+    },
+    {
+      "path": "packages/os-core/src/telemetry/index.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "b41619a642e185a849e7bedf9c01d6398da24531",
+      "working_bytes_sha256": "53ba60b6f6b6dba5627bebf3a480b07bd2e4d819e4201d0c0552f544f4510509"
     },
     {
       "path": "packages/platform-integrations/src/audit-hooks.test.ts",
@@ -465,11 +759,53 @@
       "working_bytes_sha256": "ea878e4f22531771bc5d3fb14d7a73935c45696a724425b2cbc51d6278fb8595"
     },
     {
+      "path": "scripts/typecheck-changed.mjs",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "bb8a8bab70e6f15113541e9dd77a83c46b029b08",
+      "working_bytes_sha256": "6ff2f5b356acbb24da1c841eb5750964cdaf38833535e24b9802ed61179c93fd"
+    },
+    {
       "path": "tooling/contract-tests/affected-typecheck-plan.test.ts",
       "resolution": "new Tool Fabric typecheck task raises exact executable universe from 232 to 233; explicitly assert new package inclusion; main 232 contract passes",
       "upstream_blobs": {},
       "final_blob": "7862750cb8f57863eb4b7e8bcf9c1752c2d8eef9",
       "working_bytes_sha256": "365e24b07ee27c8758e132887cb4b8381b2a976efa00932e0053f9f4877612a1"
+    },
+    {
+      "path": "tooling/contract-tests/tool-fabric-baseline-logging.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "ecebf08f0e466ec9ce054ceb00d6b8ae06d0124c",
+      "working_bytes_sha256": "8501ad5090d31391a81337602dda5acb7795a6cf99a8cfb4a367bf45bb8419cf"
+    },
+    {
+      "path": "tooling/contract-tests/tool-fabric-baseline-proof-order.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "2576f287e425006b2c5cdff630a2665ea171b7fb",
+      "working_bytes_sha256": "198591d02911ed77d29b22a7ce49d19a32a658128f4857fb247d9c3a535558e8"
+    },
+    {
+      "path": "tooling/contract-tests/tool-fabric-baseline-routes.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "f07ed81b7b262a07b9e7ffda8d0403e4c9ad1320",
+      "working_bytes_sha256": "67768e9e05f01a152a0764cac2655510a40d67160be4b7546198c17ea8c14dfb"
+    },
+    {
+      "path": "tooling/contract-tests/tool-fabric-baseline-seeds.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "c6d9ea75d956673f95ff9e6be99b35d539f133fa",
+      "working_bytes_sha256": "0bce392434b1cea4432f946dee1a6671e21cb325f76be32afff6b94d425a2880"
+    },
+    {
+      "path": "tooling/contract-tests/tool-fabric-baseline-services.test.ts",
+      "resolution": "post-qualification baseline-governance correction or validation-workflow policy; not part of the original #936/#937 sources",
+      "upstream_blobs": {},
+      "final_blob": "2d63d8547529a382470f96096fad819030f22927",
+      "working_bytes_sha256": "0fb116843a2ad43f39ce861290fd8142e62d3f4d1a755f9dda1636338294f850"
     },
     {
       "path": "tooling/repo-inventory/output/inventory.json",
@@ -538,5 +874,10 @@
     "#925 superseded predecessor",
     "upstream generated inventories",
     "upstream lockfile resolution snapshots"
-  ]
+  ],
+  "reconciled_against": {
+    "commit": "66caddf08340c5cc960acad2890477ad2b265465",
+    "tree": "7e37a537d992d26fa4f7f813dc67c513463f8d06",
+    "base": "ede980d62959f91517b6c805787cb031d60fd420"
+  }
 }
