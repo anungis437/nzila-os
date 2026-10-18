@@ -98,10 +98,60 @@ cannot mint a governance decision, modify the trust ledger, install or execute a
 All in-process adapters and clocks are host configuration; runtime branding protects
 against forged data, not hostile code already executing inside the process.
 
+### Final local disposition and delivery blocker
+
+The implementation is committed as `0637b7793359c2e63ac3af1f076e92ae75eabf69`
+(tree `578d82a3fa00ca183869a64d2ced44d92eea32ad`) through normal pre-commit
+hooks. No hook was bypassed. Staged secrets, ESLint, affected typecheck
+(11 tasks), brand leakage, Markdown links and inventory checks passed.
+
+Verified local results:
+
+- Tool Fabric: 162 tests passed; shared audit: 50 tests passed.
+- Current-main core consumers: 943 passed and one existing skipped;
+  doctrine: 12 passed; audit hooks: two passed.
+- Related executable-typecheck-universe contract: 21 tests passed.
+  The new package legitimately changes that universe from 232 to 233; its
+  inclusion is explicitly asserted. The original 232 assertion passes on main.
+- Changed-package typecheck and lint passed.
+- Repository lint passed all 172 tasks; documentation validation,
+  dependency boundaries and release-reference policy passed.
+- Aggregate `governance:audit` passed after using the supported
+  `VITEST_MAX_WORKERS=1` environment setting, without changing any timeout,
+  test source or exclusion. Earlier resource-sensitive failures were not waived.
+- Both staged files and the entire committed convergence delta passed Gitleaks.
+  Full historical secret scanning did not complete and is not represented as clean.
+
+**Full qualification is NOT complete.** Repository-wide typecheck, fast tests
+and all 292 architectural contract files were launched, but the shared host
+again fell to approximately 1.5 GB free memory despite bounded concurrency.
+Unchanged test deadlines and worker termination timed out. Only this task's
+remaining command trees were stopped to protect the shared host. Their logs,
+nonzero interruption receipts and enumerated contract-file universe are
+preserved; no complete-suite success is claimed.
+
+Independent exact-main reproduction confirms 29 package-ownership findings,
+expired architectural exceptions (raw DB actions, organization-scoped server
+actions and stack authority), and Windows shell/Python portability failures.
+The two selected Union Eyes smoke failures also reproduce on exact main;
+the calendar route reports missing `DATABASE_URL`. Other scan timeouts are
+resource-sensitive or unclassified, not mislabeled as baseline defects.
+No exception deadline, timeout, skip, app source or baseline is changed.
+
+The required pre-push architectural gate cannot be treated as passing while
+these independently reproduced failures remain. Accordingly, no push, remote CI
+or draft PR is claimed. Delivery uses the mandate's governance-blocked fallback:
+a clean local committed candidate, a file/hash reconciliation manifest,
+preserved candidate patch and ready-to-open draft PR body. Maintainers must
+resolve the independent baseline/environment gates and finish qualification on
+an adequately provisioned runner before publishing this candidate.
+
 ### Explicit external gates
 
 | Gate | Decision |
 | --- | --- |
+| CONVERGENCE_CODE | PASS_WITH_LIMITATIONS for the tested, deny-only policy/control candidate |
+| REPOSITORY_QUALIFICATION | HOLD: incomplete full suites, baseline/environment blockers, no remote CI |
 | FLEET_IDENTITY | DENY_ONLY |
 | TRUST_PERSISTENCE | CONTRACT_ONLY |
 | AUDIT_DEPENDENCY | HOLD pending independent review and durable rollout proof |
@@ -110,10 +160,9 @@ against forged data, not hostile code already executing inside the process.
 | INSTALL_AUTHORIZATION | CLOSED |
 | CIVITAS_PHASE_3 | CLOSED |
 
-`CONVERGENCE_CODE` and `REPOSITORY_QUALIFICATION` are determined by the final
-exact-source validation dossier, not by this table. Baseline failures, outstanding CI
-and human review must remain visible. No test skip or timeout expansion is authorized
-to turn a failing qualification green.
+The exact-source validation dossier records the evidence behind these decisions.
+Baseline failures, outstanding CI and human review remain visible. No test skip
+or timeout expansion is authorized to turn a failing qualification green.
 
 ### Dependencies, telemetry and rollback
 

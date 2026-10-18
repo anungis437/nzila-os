@@ -8,7 +8,7 @@
     "restricted_935": "42167333ff07d9b5c8507f2da0bb170dd8cb8f7a",
     "civitas_922": "d3b63cd92f06c734ffb8c41b2c8dc48e65d6f0c6"
   },
-  "file_count": 53,
+  "file_count": 54,
   "files": [
     {
       "path": "docs/architecture/ADR-TF-001-cli-anything-external-tool-provider.md",
@@ -43,8 +43,8 @@
       "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE.md",
       "resolution": "architecture and consolidated evidence aligned with fail-closed candidate",
       "upstream_blobs": {},
-      "final_blob": "fe2a791e695bb1b8e82e71b7d8502b8d8181d811",
-      "working_bytes_sha256": "da00e39d9aba2898db55daabe7320dd4fedbbf7f6eae058804684dd1cd2f719f"
+      "final_blob": "910e24e78cad5c9e37c0cb00a1ef0d75ffbbd560",
+      "working_bytes_sha256": "39cdf55a3a2f29ab0028682bfc2feeb426e89523861cba375ace521da2528441"
     },
     {
       "path": "docs/architecture/TOOL_FABRIC_CONVERGENCE_ACCEPTANCE.json",
@@ -465,6 +465,13 @@
       "working_bytes_sha256": "ea878e4f22531771bc5d3fb14d7a73935c45696a724425b2cbc51d6278fb8595"
     },
     {
+      "path": "tooling/contract-tests/affected-typecheck-plan.test.ts",
+      "resolution": "new Tool Fabric typecheck task raises exact executable universe from 232 to 233; explicitly assert new package inclusion; main 232 contract passes",
+      "upstream_blobs": {},
+      "final_blob": "7862750cb8f57863eb4b7e8bcf9c1752c2d8eef9",
+      "working_bytes_sha256": "365e24b07ee27c8758e132887cb4b8381b2a976efa00932e0053f9f4877612a1"
+    },
+    {
       "path": "tooling/repo-inventory/output/inventory.json",
       "resolution": "regenerated from staged candidate; never imported upstream inventory",
       "upstream_blobs": {
@@ -473,8 +480,8 @@
         "phase2_937": "ee49df569e68852d00f25d1b640151429007e32f",
         "audit_938": "70856ea67ff7e5755c817b725b3ed6c845d83da3"
       },
-      "final_blob": "6b65be0d7b3c5200c986c0c4dfadb2e608a7acd0",
-      "working_bytes_sha256": "f6aa684d1791d33d5b63f8fc3d62f5a7293bdcc90e7100ee14a003efaed69341"
+      "final_blob": "378ef7664d0e48ecef8507cde1c37371e1acaeea",
+      "working_bytes_sha256": "ad2a918a3addba07a12a14e1a04f0601da85443d893688f50f870c51ad91cd3f"
     },
     {
       "path": "tooling/repo-inventory/output/inventory.md",
@@ -485,8 +492,8 @@
         "phase2_937": "07b9028cbe19d59c2f340deebf2c1bab640db67c",
         "audit_938": "2f8fbf3e7b6b12a45cd2a007db250baf55c6d1a5"
       },
-      "final_blob": "2fe46cc9d898e4dbc6d376e493048578b3323558",
-      "working_bytes_sha256": "ca5c68206df83955cc3e314e65e3d2065a43c20b1f2827200e61acd2f4b70f6b"
+      "final_blob": "85da7f7b62e79a138028622e839bc0dd961e3310",
+      "working_bytes_sha256": "f93aa0fe60c2b131330af4ad9ca3474fa0a7a83722ab1ba6f3ff87ddd42ba48a"
     },
     {
       "path": "tooling/repo-inventory/output/repo-inventory.json",
@@ -497,8 +504,8 @@
         "phase2_937": "ee49df569e68852d00f25d1b640151429007e32f",
         "audit_938": "70856ea67ff7e5755c817b725b3ed6c845d83da3"
       },
-      "final_blob": "6b65be0d7b3c5200c986c0c4dfadb2e608a7acd0",
-      "working_bytes_sha256": "f6aa684d1791d33d5b63f8fc3d62f5a7293bdcc90e7100ee14a003efaed69341"
+      "final_blob": "378ef7664d0e48ecef8507cde1c37371e1acaeea",
+      "working_bytes_sha256": "ad2a918a3addba07a12a14e1a04f0601da85443d893688f50f870c51ad91cd3f"
     },
     {
       "path": "tooling/repo-inventory/output/repo-inventory.md",
@@ -509,8 +516,8 @@
         "phase2_937": "07b9028cbe19d59c2f340deebf2c1bab640db67c",
         "audit_938": "2f8fbf3e7b6b12a45cd2a007db250baf55c6d1a5"
       },
-      "final_blob": "2fe46cc9d898e4dbc6d376e493048578b3323558",
-      "working_bytes_sha256": "ca5c68206df83955cc3e314e65e3d2065a43c20b1f2827200e61acd2f4b70f6b"
+      "final_blob": "85da7f7b62e79a138028622e839bc0dd961e3310",
+      "working_bytes_sha256": "f93aa0fe60c2b131330af4ad9ca3474fa0a7a83722ab1ba6f3ff87ddd42ba48a"
     },
     {
       "path": "vitest.config.ts",
