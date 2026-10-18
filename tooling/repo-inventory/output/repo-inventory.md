@@ -11,7 +11,7 @@
 | Workspace Packages (apps|packages|services|tooling) | 260 |
 | GitHub Workflows | 59 |
 | Contract Test Files | 297 |
-| TS/JS Test Files | 2804 |
+| TS/JS Test Files | 2806 |
 | Python Test Files | 36 |
 
 ## Apps
@@ -25,7 +25,7 @@
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 449 | Internal operations console — platform governance, compliance, analytics, integr |
 | control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 334 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 127 | Cora is Agricultural Institutional Infrastructure. |
-| flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 437 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
+| flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 438 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
 | maestria | Next.js | 3021 | ✅ | ✅ | ❌ | ✅ | 73 |  |
 | mobility | Next.js | 3012 | ✅ | ✅ | ✅ | ✅ | 41 | Investment migration advisory platform — case management, program intelligence,  |
 | mobility-client-portal | Next.js | 3013 | ✅ | ✅ | ❌ | ✅ | 32 | Client-facing portal for investment migration applicants to track cases, upload  |
@@ -45,7 +45,7 @@
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 27 |  |
 | web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 93 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 100 |  |
-| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 461 | Africa-first music distribution, streaming, and royalty management platform. |
+| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 462 | Africa-first music distribution, streaming, and royalty management platform. |
 
 ## Workflows
 
