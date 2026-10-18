@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { and, desc, eq } from 'drizzle-orm'
 import { requireApiAuth, requireAuditReadAuth, handleAuthError } from '@/lib/api-auth'
-import { platformDb } from '@nzila/db/platform'
-import { auditRecords } from '@nzila/db/schema'
-import { createNarRecord, getNarSigningSecret, uploadNarToAzureImmutableBlob } from '@nzila/nar'
+import { recordDecisionProof, getAuditRecordHistory } from '@/lib/services/audit-proof-service'
 import type { DecisionRecord } from '@nzila/decision-core'
 
 const BodySchema = z.object({
@@ -75,65 +72,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const previous = await platformDb
-      .select({ hash: auditRecords.narHash })
-      .from(auditRecords)
-      .where(eq(auditRecords.organizationId, orgHeader))
-      .orderBy(desc(auditRecords.createdAt))
-      .limit(1)
-
     const decision = input.decision as DecisionRecord
-
-    const narWithoutStorage = await createNarRecord({
+    const nar = await recordDecisionProof({
       decision,
       decisionType: input.decisionType,
       actionType: input.actionType,
-      previousHash: previous[0]?.hash,
-      isGenesis: !previous[0]?.hash,
-      keyId: process.env.NAR_SIGNING_KEY_ID,
-      secret: await getNarSigningSecret(),
-    })
-
-    const storage = await uploadNarToAzureImmutableBlob(narWithoutStorage)
-
-    const nar = await createNarRecord({
-      recordId: narWithoutStorage.id,
-      decision,
-      decisionType: input.decisionType,
-      actionType: input.actionType,
-      previousHash: previous[0]?.hash,
-      isGenesis: !previous[0]?.hash,
-      createdAt: narWithoutStorage.createdAt,
-      keyId: process.env.NAR_SIGNING_KEY_ID,
-      secret: await getNarSigningSecret(),
-      storage,
-    })
-
-    await platformDb.insert(auditRecords).values({
-      id: nar.id,
-      decisionRecordId: nar.decisionRecordId,
-      organizationId: nar.organizationId,
-      decisionType: nar.decisionType,
-      actionType: nar.actionType,
-      actorId: nar.actorId,
-      actorType: nar.actorType,
-      resourceType: nar.resourceType,
-      resourceId: nar.resourceId,
-      policyId: nar.policyId,
-      policyVersion: nar.policyVersion,
-      inputHash: nar.inputHash,
-      outcomeHash: nar.outcomeHash,
-      payload: nar.payload,
-      narHash: nar.seal.hash,
-      narSignature: nar.seal.signature,
-      previousHash: nar.seal.previousHash,
-      keyId: nar.seal.keyId,
-      storageType: nar.storage?.type,
-      storageUri: nar.storage?.uri,
-      immutable: nar.storage?.immutable,
-      retentionUntil: nar.storage?.retentionUntil ? new Date(nar.storage.retentionUntil) : null,
-      createdAt: new Date(nar.createdAt),
-    })
+    }, orgHeader)
 
     return NextResponse.json({
       ok: true,
@@ -170,14 +114,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const records = await platformDb
-      .select()
-      .from(auditRecords)
-      .where(resourceId
-        ? and(eq(auditRecords.organizationId, orgId), eq(auditRecords.resourceId, resourceId))
-        : eq(auditRecords.organizationId, orgId))
-      .orderBy(desc(auditRecords.createdAt))
-      .limit(100)
+    const records = await getAuditRecordHistory(orgId, resourceId)
 
     return NextResponse.json({ ok: true, data: records })
   } catch (error) {

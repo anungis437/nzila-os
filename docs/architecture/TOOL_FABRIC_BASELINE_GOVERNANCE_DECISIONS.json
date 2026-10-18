@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "mission": "TF-FINAL-CONVERGENCE-001",
-  "status": "SEVEN_AUTHORIZED_RETIREMENTS_APPLIED_REMAINING_OWNER_DECISIONS_BLOCKED",
+  "status": "SAFE_CORRECTIONS_APPLIED_16_RETIRED_17_RETAINED_NO_GATE_CLEARANCE",
   "snapshot": {
     "evaluatedAt": "2026-10-18T00:14:38-04:00",
     "head": "c1564ffde70e47eb6a047c9ab0b205ae66b81bcf",
@@ -18,12 +18,26 @@
     "approvalGranted": false,
     "exceptionRenewals": 0,
     "exceptionDatesChanged": false,
-    "sourceOrRuleChanges": false,
+    "sourceOrRuleChanges": true,
     "proposedExpiryPolicy": "All proposedExpiry values are null. No evidence establishes an approved extension or a justified completion deadline. Historical owner-accepted bridge text is preserved as provenance, not interpreted as current approval.",
-    "retirementMeaning": "The original seven RETIRED classifications have now been implemented by exact ledger-entry removal under the user's explicit same-task authorization. All other classifications remain proposals requiring recorded owner/governance decisions.",
+    "retirementMeaning": "Initial seven plus nine source-corrected entirely clean scopes retired; four partial remediation scopes and thirteen owner-decision entries retained.",
     "safeRetirementAuthorized": true,
-    "approvalGrantedScope": "approvalGranted=false means no new exception, renewal, residual-risk acceptance, or gate clearance is approved. The user separately authorized only A03, N01, N02, N04, N05, N14 and N15 for removal.",
-    "unionEyes": "Read README, readiness rerun 25, then capability registry before source evaluation. UE_SAAS_OPERATIONAL_READINESS remains NO_GO — RUNTIME_PROOF_REQUIRED. No UE change or Phase 3B activity is authorized."
+    "approvalGrantedScope": "No exception, renewal, risk acceptance or gate clearance. Mission expressly authorizes safe source corrections and retirement of entire clean scopes.",
+    "unionEyes": "Required three programme files read in order before MFA edit. Safe refactor authorized; NO_GO and Phase 3B/readiness restrictions unchanged.",
+    "sourceChanges": true,
+    "ruleChanges": false,
+    "safeRefactorPolicyAssessment": {
+      "finding": "No binding repository rule requires blanket prior human permission for the 13 safe behavior-preserving remediation scopes. Existing mission authorization covers implemented slices; CODEOWNERS/PR review is eventual review, not prior-edit authorization.",
+      "evidence": [
+        "AGENTS.md:9 maintainers retain architecture/risk/production decisions; does not require advance permission for every safe refactor.",
+        "AGENTS.md:43 explicit approval applies to destructive Git/database operations; none performed.",
+        "AGENTS.md:44 scoped changes; AGENTS.md:73-76 UE readiness and Phase 3B restrictions, not a source-refactor prohibition.",
+        ".github/PULL_REQUEST_TEMPLATE.md:34-54 ordinary review/checklists, not blanket prior-edit permission.",
+        "governance/privacy/policies/data-classification-standard.md:30 prohibits Restricted logs and requires Confidential redaction.",
+        "governance/security/APPLICATION_SECURITY_POLICY.md:77-81 audit requirements; :86 Security Lead vulnerability-waiver approval is not safe-refactor authorization."
+      ],
+      "reviewMeaning": "Original requiredApprovers remain historical exception/risk/structural-policy decision roles. Safe source correction uses ordinary app/CODEOWNERS/governance review; no invented prior waiver or approval is requested."
+    }
   },
   "methodology": {
     "evaluation": "Read-only counterfactual: evaluate each entry against the implemented rule before exception suppression. Transpile the existing TypeScript rule modules and governance-helpers with the installed TypeScript compiler in memory; use their actual walkSync, relPath, isExcepted/minimatch, isRouteFile, isExcludedPath and regex objects. Do not execute Vitest describe blocks or application modules.",
@@ -38,11 +52,25 @@
       "Examples are bounded to two matching file+line locations per entry. Counts cover every current matching scanned file, without printing code snippets, credentials or runtime payload values.",
       "No full suite, expensive suite, application execution, external service call or subagent was used."
     ],
-    "classificationVocabulary": ["RETIRED", "REMEDIATE", "LEGITIMATE EXCEPTION", "OWNER DECISION REQUIRED", "INVALID"]
+    "classificationVocabulary": [
+      "RETIRED",
+      "REMEDIATE",
+      "LEGITIMATE EXCEPTION",
+      "OWNER DECISION REQUIRED",
+      "INVALID"
+    ]
   },
   "retirementExecution": {
-    "authorization": "Explicit same-task user instruction received 2026-10-18T00:36:12.318-04:00; safe baseline retirement only. No staging or commit authorized.",
-    "retiredIds": ["A03", "N01", "N02", "N04", "N05", "N14", "N15"],
+    "authorization": "Existing user mandate to complete available safe baseline correction; parent-agent delegation recorded at 2026-10-18T00:36:12.318-04:00. This timestamp is not a human approval. The bounded implementation agent did not stage or commit; the parent preserved the changes in b5ae0a4776b71cebf57e50b387b2e42e21a307e5.",
+    "retiredIds": [
+      "A03",
+      "N01",
+      "N02",
+      "N04",
+      "N05",
+      "N14",
+      "N15"
+    ],
     "retiredEntries": 7,
     "originalEntries": 33,
     "remainingEntries": 26,
@@ -51,8 +79,22 @@
     "remainingMatchingViolations": 208,
     "remainingMatchingRuleFilePairs": 160,
     "byRule": {
-      "ARCH_LAYER_001": {"originalEntries": 11, "retiredEntries": 1, "remainingEntries": 10, "remainingExpiredEntries": 10, "remainingMatchingViolations": 123, "remainingMatchingFiles": 114},
-      "NO_CONSOLE_001": {"originalEntries": 22, "retiredEntries": 6, "remainingEntries": 16, "remainingExpiredEntries": 16, "remainingMatchingViolations": 85, "remainingMatchingFiles": 46}
+      "ARCH_LAYER_001": {
+        "originalEntries": 11,
+        "retiredEntries": 1,
+        "remainingEntries": 10,
+        "remainingExpiredEntries": 10,
+        "remainingMatchingViolations": 123,
+        "remainingMatchingFiles": 114
+      },
+      "NO_CONSOLE_001": {
+        "originalEntries": 22,
+        "retiredEntries": 6,
+        "remainingEntries": 16,
+        "remainingExpiredEntries": 16,
+        "remainingMatchingViolations": 85,
+        "remainingMatchingFiles": 46
+      }
     },
     "ledgerHashesSha256": {
       "governance/exceptions/arch-layer.json": {
@@ -71,583 +113,2955 @@
       "All 26 remaining selected-ledger entries are expired. Other unchanged expiry blockers remain NO_RAW_DB_IN_ACTIONS_001=2, ORG_REQUIRED_SERVER_ACTIONS_001=33, STACK_AUTHORITY_001=8.",
       "No new exception, browser-console permanent authorization, renewal, source/rule/test change, or governance gate clearance is granted. UE remains NO_GO — RUNTIME_PROOF_REQUIRED; no UE source change or Phase 3B is authorized."
     ],
-    "validation": "Read-only actual-rule counterfactual of all seven retired scopes, exact original-ledger-minus-authorized-path comparison, retained-entry/date/order equality, SHA-256 before/after verification, JSON/report count checks and focused whitespace validation. No suites or agents."
+    "validation": "Read-only actual-rule counterfactual of all seven retired scopes, exact original-ledger-minus-authorized-path comparison, retained-entry/date/order equality, SHA-256 before/after verification, JSON/report count checks and focused whitespace validation. No suites or agents.",
+    "phase": "Historical initial seven-entry retirement; original hashes and authority preserved."
   },
   "summary": {
-    "scope": "Original 33-entry adjudication at snapshot; current ledger disposition is retirementExecution.",
+    "scope": "Historical original 33-entry adjudication, unchanged as provenance; safeCorrectionExecution.currentSummary is authoritative for current disposition/matches.",
     "entries": 33,
     "byRule": {
-      "ARCH_LAYER_001": {"entries": 11, "expiredEntries": 11, "matchingViolations": 123, "matchingFiles": 114},
-      "NO_CONSOLE_001": {"entries": 22, "expiredEntries": 22, "matchingViolations": 85, "matchingFiles": 46}
+      "ARCH_LAYER_001": {
+        "entries": 11,
+        "expiredEntries": 11,
+        "matchingViolations": 123,
+        "matchingFiles": 114
+      },
+      "NO_CONSOLE_001": {
+        "entries": 22,
+        "expiredEntries": 22,
+        "matchingViolations": 85,
+        "matchingFiles": 46
+      }
     },
-    "byClassification": {"RETIRED": 7, "REMEDIATE": 13, "LEGITIMATE EXCEPTION": 0, "OWNER DECISION REQUIRED": 13, "INVALID": 0},
+    "byClassification": {
+      "RETIRED": 7,
+      "REMEDIATE": 13,
+      "LEGITIMATE EXCEPTION": 0,
+      "OWNER DECISION REQUIRED": 13,
+      "INVALID": 0
+    },
     "matchingViolations": 208,
-    "otherExpiryBlockers": {"NO_RAW_DB_IN_ACTIONS_001": 2, "ORG_REQUIRED_SERVER_ACTIONS_001": 33, "STACK_AUTHORITY_001": 8},
+    "otherExpiryBlockers": {
+      "NO_RAW_DB_IN_ACTIONS_001": 2,
+      "ORG_REQUIRED_SERVER_ACTIONS_001": 33,
+      "STACK_AUTHORITY_001": 8,
+      "NO_DIRECT_PROVIDER": 4
+    },
     "expirySemantics": "loadExceptions uses new Date(expiresOn) < today, not end of local day. 2026-10-18 means 2026-10-18T00:00:00Z and is expired at this snapshot. Expired entries still suppress matching source because isExcepted does not filter expiry; the separate expiry assertion remains a blocker."
   },
   "entries": [
     {
       "id": "A01",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/orchestrator-api/**", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/orchestrator-api/**",
+      "owner": "platform-team",
       "currentJustification": "Standalone non-Next.js service with its own DB client. Migration planned — see docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 35, "scannedFileCount": 12,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/orchestrator-api/src/routes/execute.ts", "line": 36, "kind": "direct schema import"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 35,
+      "scannedFileCount": 12,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/orchestrator-api/src/routes/execute.ts",
+            "line": 36,
+            "kind": "direct schema import"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "Fastify routes are explicitly in scope. The remaining match is a route-local NAR proof adapter, not evidence that all standalone service files need exemption.",
-      "sourceEvidence": ["apps/orchestrator-api/src/routes/execute.ts:41 adapter construction", "apps/orchestrator-api/src/routes/execute.ts:53 platformDb audit insert"],
+      "sourceEvidence": [
+        "apps/orchestrator-api/src/routes/execute.ts:41 adapter construction",
+        "apps/orchestrator-api/src/routes/execute.ts:53 platformDb audit insert"
+      ],
       "proposedCorrection": "Extract the NAR audit repository and proof-adapter construction into a service-owned module; keep execute.ts calling the service with authenticated scope. Remove the app-wide exception after unsuppressed route evaluation.",
       "residualRisk": "The schema match is not itself an unscoped query; platformDb operations and authorization must remain governed after extraction. Other local imports are outside this regex.",
-      "requiredReviewers": ["platform-team", "architecture governance maintainer", "NAR policy owner"],
-      "nextAction": "Owner creates a focused adapter-extraction change with authorization/audit tests, then requests exception retirement."
+      "requiredReviewers": [
+        "platform-team",
+        "architecture governance maintainer",
+        "NAR policy owner"
+      ],
+      "nextAction": "Owner creates a focused adapter-extraction change with authorization/audit tests, then requests exception retirement.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      },
+      "safeCorrectionExecution": {
+        "implementation": "Extracted Fastify NAR adapter construction/persistence into services/nar-proof-service.ts; invocation, organization predicate, hash ordering and deferred secret resolution preserved.",
+        "beforeMatchingViolations": 1,
+        "afterMatchingViolations": 0,
+        "fullyCleanScope": true,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Review focused implementation/receipts; scope retired after unsuppressed actual-rule zero result."
     },
     {
       "id": "A02",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/console/**", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/console/**",
+      "owner": "platform-team",
       "currentJustification": "Console app has legacy unscoped DB imports across ~60 routes. Migration to createScopedDb(entityId) + service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 450, "scannedFileCount": 106,
-      "matchingViolations": {"count": 56, "matchingFileCount": 56, "examples": [{"file": "apps/console/app/api/ai/actions/approve/route.ts", "line": 11, "kind": "direct schema import"}, {"file": "apps/console/app/api/ai/actions/execute/route.ts", "line": 10, "kind": "direct schema import"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 450,
+      "scannedFileCount": 106,
+      "matchingViolations": {
+        "count": 56,
+        "matchingFileCount": 56,
+        "examples": [
+          {
+            "file": "apps/console/app/api/ai/actions/approve/route.ts",
+            "line": 11,
+            "kind": "direct schema import"
+          },
+          {
+            "file": "apps/console/app/api/ai/actions/execute/route.ts",
+            "line": 10,
+            "kind": "direct schema import"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "All 56 rule matches are schema imports. The historical ~60 unscoped-import description is not a present-day count or proof of unscoped behavior.",
-      "sourceEvidence": ["apps/console/app/api/ai/actions/approve/route.ts:10 platformDb import", "apps/console/app/api/ai/actions/approve/route.ts:18 requireOrgAccess import"],
+      "sourceEvidence": [
+        "apps/console/app/api/ai/actions/approve/route.ts:10 platformDb import",
+        "apps/console/app/api/ai/actions/approve/route.ts:18 requireOrgAccess import"
+      ],
       "proposedCorrection": "Move table-dependent query/mutation logic from each matched route into repositories called through scoped services. Preserve requireOrgAccess and action review authorization. Retire the blanket exception after all 56 schema-bearing routes pass without suppression.",
       "residualRisk": "Moving imports alone can hide rather than resolve authorization debt. platformDb and local aliases are not rejected by ARCH_LAYER_001.",
-      "requiredReviewers": ["platform-team", "architecture governance maintainer", "tenant-isolation reviewer"],
-      "nextAction": "Inventory the 56 current route responsibilities and submit service-extraction batches with scoped access regression tests."
+      "requiredReviewers": [
+        "platform-team",
+        "architecture governance maintainer",
+        "tenant-isolation reviewer"
+      ],
+      "nextAction": "Inventory the 56 current route responsibilities and submit service-extraction batches with scoped access regression tests.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "REMEDIATE",
+      "currentMatchingViolations": {
+        "count": 54,
+        "matchingFileCount": 54,
+        "locations": [
+          {
+            "file": "apps/console/app/api/ai/actions/finance/stripe-monthly-reports/route.ts",
+            "line": 10,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ai/actions/knowledge/ingest/route.ts",
+            "line": 10,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ai/actions/propose/route.ts",
+            "line": 12,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ai/prompts/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ai/prompts/versions/route.ts",
+            "line": 10,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/analytics/route.ts",
+            "line": 23,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/approvals/route.ts",
+            "line": 8,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/assurance/route.ts",
+            "line": 13,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/audit/tamper-status/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/audit/verify-chain/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/audit-insights/export/route.ts",
+            "line": 10,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/cost/rollup/route.ts",
+            "line": 3,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/evidence-packs/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/close/route.ts",
+            "line": 17,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/close/[periodId]/route.ts",
+            "line": 10,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/governance-links/route.ts",
+            "line": 12,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/indirect-tax/accounts/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/indirect-tax/periods/route.ts",
+            "line": 12,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/indirect-tax/periods/[periodId]/route.ts",
+            "line": 12,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/indirect-tax/summary/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/tax/filings/route.ts",
+            "line": 15,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/tax/installments/route.ts",
+            "line": 12,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/tax/notices/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/tax/profiles/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/tax/years/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/tax/years/[taxYearId]/route.ts",
+            "line": 23,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/finance/year-end-pack/route.ts",
+            "line": 24,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/governance/votes/route.ts",
+            "line": 15,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/healthcare/responses/[responseId]/review/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/healthcare/surveys/responses/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/healthcare/surveys/route.ts",
+            "line": 6,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/healthcare/surveys/[surveyId]/export-summary/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/healthcare/surveys/[surveyId]/status/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/itsm/clients/route.ts",
+            "line": 6,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ml/models/active/route.ts",
+            "line": 14,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ml/models/route.ts",
+            "line": 14,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ml/runs/inference/route.ts",
+            "line": 15,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ml/runs/training/route.ts",
+            "line": 15,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ml/scores/stripe/daily/route.ts",
+            "line": 20,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ml/scores/stripe/transactions/route.ts",
+            "line": 24,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ml/scores/ue/cases/priority/route.ts",
+            "line": 28,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/ml/scores/ue/cases/sla-risk/route.ts",
+            "line": 29,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/orgs/route.ts",
+            "line": 9,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/orgs/[orgId]/people/route.ts",
+            "line": 13,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/qbo/callback/route.ts",
+            "line": 18,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/qbo/status/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/qbo/sync/route.ts",
+            "line": 21,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/sales/signals/route.ts",
+            "line": 14,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/stripe/customer-portal/route.ts",
+            "line": 15,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/stripe/refunds/approve/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/stripe/refunds/route.ts",
+            "line": 15,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/stripe/subscriptions/route.ts",
+            "line": 16,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/stripe/webhooks/route.ts",
+            "line": 20,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/console/app/api/webhooks/stripe/route.ts",
+            "line": 13,
+            "kind": "@nzila/db/schema (direct schema import)"
+          }
+        ]
+      },
+      "safeCorrectionExecution": {
+        "implementation": "Approve/execute route DB operations extracted into Console ai-action-service.ts. Lookup, authorization, status checks, update, audit/review and execution ordering preserved. 54 remaining schema-import routes are ordinary further service-extraction engineering, not proven unscoped queries.",
+        "beforeMatchingViolations": 56,
+        "afterMatchingViolations": 54,
+        "fullyCleanScope": false,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Extract remaining 54 schema-dependent routes using genuine services and the existing authority. Preserve anonymous survey share-token/rate-limit/audit sequencing, ITSM executive-org selection, sales platform-role aggregates, QBO auth/CSRF/encryption/transaction/cookie redirects and both Stripe webhook signature/idempotency/payment sequences.",
+      "remainingAssessment": {
+        "sourceWork": "Extract remaining 54 schema-dependent routes using genuine services and the existing authority. Preserve anonymous survey share-token/rate-limit/audit sequencing, ITSM executive-org selection, sales platform-role aggregates, QBO auth/CSRF/encryption/transaction/cookie redirects and both Stripe webhook signature/idempotency/payment sequences.",
+        "actualDecision": "No mandatory new policy decision demonstrated for unchanged-authority extraction. Changing anonymous-token authority, OAuth organization binding, global visibility, tenant predicates or payment policy would be a separate semantic decision, not a precondition invented for refactoring.",
+        "nextTests": "Per-route guard/status/DB-predicate/order tests; QBO CSRF and transaction rollback, survey token/rate-limit, Stripe replay/idempotency and transaction rejection tests before those extractions."
+      }
     },
     {
       "id": "A03",
-      "requiredApprovers": ["partners-team exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/partners/**", "owner": "partners-team",
+      "requiredApprovers": [
+        "partners-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/partners/**",
+      "owner": "partners-team",
       "currentJustification": "Partners app has legacy unscoped DB import in partner-auth. Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 112, "scannedFileCount": 10,
-      "matchingViolations": {"count": 0, "matchingFileCount": 0, "examples": []},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 112,
+      "scannedFileCount": 10,
+      "matchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "examples": []
+      },
       "classification": "RETIRED",
       "finding": "Ten files are scanned but none matches. The cited partner-auth module is outside this rule's route/server path universe.",
-      "sourceEvidence": ["apps/partners/lib/partner-auth.ts:17 platformDb import", "apps/partners/lib/partner-auth.ts:18 schema import", "apps/partners/lib/partner-auth.ts:291 platformDb execute"],
+      "sourceEvidence": [
+        "apps/partners/lib/partner-auth.ts:17 platformDb import",
+        "apps/partners/lib/partner-auth.ts:18 schema import",
+        "apps/partners/lib/partner-auth.ts:291 platformDb execute"
+      ],
       "proposedCorrection": "Remove the obsolete apps/partners/** arch-layer ledger entry in an owner-reviewed change. Separately assess partner-auth service boundaries and org scoping under an applicable rule, without widening this exception.",
       "residualRisk": "Zero route matches does not certify the out-of-scope auth module or eliminate its DB behavior.",
-      "requiredReviewers": ["partners-team", "architecture governance maintainer"],
-      "nextAction": "Request ledger retirement with an unsuppressed ten-file scan and separate auth-module ownership follow-up."
+      "requiredReviewers": [
+        "partners-team",
+        "architecture governance maintainer"
+      ],
+      "nextAction": "Request ledger retirement with an unsuppressed ten-file scan and separate auth-module ownership follow-up.",
+      "historicalClassification": "RETIRED",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      }
     },
     {
       "id": "A04",
-      "requiredApprovers": ["union-eyes-team exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/union-eyes/**", "owner": "union-eyes-team",
+      "requiredApprovers": [
+        "union-eyes-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/union-eyes/**",
+      "owner": "union-eyes-team",
       "currentJustification": "Django-migrated app with direct DB access patterns. Migration tracked alongside console/partners. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 5103, "scannedFileCount": 972,
-      "matchingViolations": {"count": 16, "matchingFileCount": 16, "examples": [{"file": "apps/union-eyes/app/api/auth/mfa/enroll/route.ts", "line": 13, "kind": "direct schema import"}, {"file": "apps/union-eyes/app/api/cases/intake/route.ts", "line": 29, "kind": "direct schema import"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 5103,
+      "scannedFileCount": 972,
+      "matchingViolations": {
+        "count": 16,
+        "matchingFileCount": 16,
+        "examples": [
+          {
+            "file": "apps/union-eyes/app/api/auth/mfa/enroll/route.ts",
+            "line": 13,
+            "kind": "direct schema import"
+          },
+          {
+            "file": "apps/union-eyes/app/api/cases/intake/route.ts",
+            "line": 29,
+            "kind": "direct schema import"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "All 16 matches are schema imports; 972 scanned files are not 972 violations. Current stack-authority implementation lists UE as TS-authoritative while still enforcing app-layer RLS contexts.",
-      "sourceEvidence": ["apps/union-eyes/app/api/auth/mfa/enroll/route.ts:11 local DB import not detected by this regex", "tooling/contract-tests/stack-authority.test.ts:63 TS authority entry", "tooling/contract-tests/stack-authority.test.ts:340 UE app-layer mutation guard"],
+      "sourceEvidence": [
+        "apps/union-eyes/app/api/auth/mfa/enroll/route.ts:11 local DB import not detected by this regex",
+        "tooling/contract-tests/stack-authority.test.ts:63 TS authority entry",
+        "tooling/contract-tests/stack-authority.test.ts:340 UE app-layer mutation guard"
+      ],
       "proposedCorrection": "Owner schedules service/repository extraction for the 16 matched routes, preserving auth, RLS/system-context boundaries and NAR audit semantics. Replace the app-wide exclusion only through reviewed retirement after unsuppressed evaluation; do not describe UE as generally Django-authoritative.",
       "residualRisk": "Most local @/db route imports are invisible to this rule. Source extraction cannot satisfy the outstanding deployed runtime-proof gate.",
-      "requiredReviewers": ["union-eyes-team", "architecture governance maintainer", "UE runtime-acceptance owner", "tenant-isolation reviewer"],
-      "nextAction": "Keep NO_GO and Phase 3B prohibition intact; request scoped remediation planning, not a renewed blanket waiver."
+      "requiredReviewers": [
+        "union-eyes-team",
+        "architecture governance maintainer",
+        "UE runtime-acceptance owner",
+        "tenant-isolation reviewer"
+      ],
+      "nextAction": "Keep NO_GO and Phase 3B prohibition intact; request scoped remediation planning, not a renewed blanket waiver.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "REMEDIATE",
+      "currentMatchingViolations": {
+        "count": 15,
+        "matchingFileCount": 15,
+        "locations": [
+          {
+            "file": "apps/union-eyes/app/api/cases/intake/route.ts",
+            "line": 29,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts",
+            "line": 21,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/conflicts/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/conflicts/[conflictId]/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/deprecation-watch/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/policies/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/policies/[id]/approvals/route.ts",
+            "line": 8,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/policies/[id]/conflicts/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/policies/[id]/lineage/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/policies/[id]/replay/route.ts",
+            "line": 8,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/policies/[id]/route.ts",
+            "line": 11,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/policies/[id]/versions/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/policy-events/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/snapshots/route.ts",
+            "line": 8,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/union-eyes/app/api/governance/lifecycle/snapshots/[at]/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          }
+        ]
+      },
+      "safeCorrectionExecution": {
+        "implementation": "MFA email lookup extracted into mfa-enrollment-service.ts. Authentication, exact user predicate/projection/limit and enroll ordering preserved. Remaining 15 routes comprise two RLS-context case routes and thirteen admin/entitlement-gated system-context lifecycle routes. Context-preserving extraction is ordinary engineering.",
+        "beforeMatchingViolations": 16,
+        "afterMatchingViolations": 15,
+        "fullyCleanScope": false,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Extract two case and thirteen lifecycle route operations while retaining withRLSContext or withApi admin/entitlement plus withSystemContext callbacks, actor/default mappings and existing query filters.",
+      "remainingAssessment": {
+        "sourceWork": "Extract two case and thirteen lifecycle route operations while retaining withRLSContext or withApi admin/entitlement plus withSystemContext callbacks, actor/default mappings and existing query filters.",
+        "actualDecision": "No new approval needed merely for context-preserving extraction. Replacing the global lifecycle policy registry with tenant-scoped storage is a distinct authority/data-model decision and is not needed for extraction. UE NO_GO is not a refactor ban.",
+        "nextTests": "Case RLS/organization predicates and denial tests; lifecycle admin/entitlement denials, callback context, actor/default mappings and failure ordering."
+      }
     },
     {
       "id": "A05",
-      "requiredApprovers": ["commerce-team exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/flow/**", "owner": "commerce-team",
+      "requiredApprovers": [
+        "commerce-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/flow/**",
+      "owner": "commerce-team",
       "currentJustification": "Flow commerce app — legacy direct DB access in API routes. Migration to service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 438, "scannedFileCount": 24,
-      "matchingViolations": {"count": 4, "matchingFileCount": 4, "examples": [{"file": "apps/flow/app/api/governance/telemetry/route.ts", "line": 13, "kind": "direct package import"}, {"file": "apps/flow/app/api/metrics/route.ts", "line": 12, "kind": "direct package import"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 438,
+      "scannedFileCount": 24,
+      "matchingViolations": {
+        "count": 4,
+        "matchingFileCount": 4,
+        "examples": [
+          {
+            "file": "apps/flow/app/api/governance/telemetry/route.ts",
+            "line": 13,
+            "kind": "direct package import"
+          },
+          {
+            "file": "apps/flow/app/api/metrics/route.ts",
+            "line": 12,
+            "kind": "direct package import"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "Real route-owned DB queries remain; telemetry route performs direct aggregate reads, not merely a schema-only type import.",
-      "sourceEvidence": ["apps/flow/app/api/governance/telemetry/route.ts:54 direct db.select", "apps/flow/app/api/governance/telemetry/route.ts:56 direct db.select"],
+      "sourceEvidence": [
+        "apps/flow/app/api/governance/telemetry/route.ts:54 direct db.select",
+        "apps/flow/app/api/governance/telemetry/route.ts:56 direct db.select"
+      ],
       "proposedCorrection": "Move telemetry/metrics and the other matched route queries into scoped repositories behind service APIs. Explicitly distinguish authorized platform aggregates from per-org reads; retain authentication and telemetry instrumentation.",
       "residualRisk": "Unscoped aggregate exposure is not resolved merely by renaming db or moving an import.",
-      "requiredReviewers": ["commerce-team", "architecture governance maintainer", "tenant-isolation reviewer"],
-      "nextAction": "Implement scoped query services with cross-org negative tests, then retire apps/flow/**."
+      "requiredReviewers": [
+        "commerce-team",
+        "architecture governance maintainer",
+        "tenant-isolation reviewer"
+      ],
+      "nextAction": "Implement scoped query services with cross-org negative tests, then retire apps/flow/**.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "REMEDIATE",
+      "currentMatchingViolations": {
+        "count": 3,
+        "matchingFileCount": 3,
+        "locations": [
+          {
+            "file": "apps/flow/app/api/metrics/route.ts",
+            "line": 12,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/flow/app/api/ops/summary/route.ts",
+            "line": 11,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/flow/app/api/quotes/route.ts",
+            "line": 9,
+            "kind": "@nzila/db/schema (direct schema import)"
+          }
+        ]
+      },
+      "safeCorrectionExecution": {
+        "implementation": "Governance telemetry counts extracted into governance-metrics-service.ts with separate awaited queries and original partial fallback. Three remaining routes need scoped service extraction; existing aggregate semantics were not changed.",
+        "beforeMatchingViolations": 4,
+        "afterMatchingViolations": 3,
+        "fullyCleanScope": false,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Extract remaining api/metrics, api/ops/summary and api/quotes data operations without changing existing scope or fallback behavior.",
+      "remainingAssessment": {
+        "sourceWork": "Extract remaining api/metrics, api/ops/summary and api/quotes data operations without changing existing scope or fallback behavior.",
+        "actualDecision": "A platform-wide aggregate visibility change is separate from unchanged-semantics extraction; no blanket prior-owner approval barrier.",
+        "nextTests": "Current guard, aggregate visibility, query predicate and fallback/order selectors for the three routes."
+      }
     },
     {
       "id": "A06",
-      "requiredApprovers": ["agri-team exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/agrimo/**", "owner": "agri-team",
+      "requiredApprovers": [
+        "agri-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/agrimo/**",
+      "owner": "agri-team",
       "currentJustification": "Agrimo webhook handler imports @nzila/db for org/member sync. Migration to service layer planned. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 52, "scannedFileCount": 5,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/agrimo/app/api/webhooks/clerk/route.ts", "line": 15, "kind": "direct package import"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 52,
+      "scannedFileCount": 5,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/agrimo/app/api/webhooks/clerk/route.ts",
+            "line": 15,
+            "kind": "direct package import"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "The matched barrel import supplies tables; the handler also performs platformDb org/member writes. The app-wide exception is broader than the one matched webhook file.",
-      "sourceEvidence": ["apps/agrimo/app/api/webhooks/clerk/route.ts:14 platformDb import", "apps/agrimo/app/api/webhooks/clerk/route.ts:84 org insert", "apps/agrimo/app/api/webhooks/clerk/route.ts:140 member insert"],
+      "sourceEvidence": [
+        "apps/agrimo/app/api/webhooks/clerk/route.ts:14 platformDb import",
+        "apps/agrimo/app/api/webhooks/clerk/route.ts:84 org insert",
+        "apps/agrimo/app/api/webhooks/clerk/route.ts:140 member insert"
+      ],
       "proposedCorrection": "Extract verified-webhook organization synchronization into an idempotent service/repository. Keep signature verification at the boundary and derive scope from the verified event, not arbitrary client data.",
       "residualRisk": "Identity synchronization retries and privileged platform writes need authorization/idempotency tests beyond import enforcement.",
-      "requiredReviewers": ["agri-team", "architecture governance maintainer", "identity/security reviewer"],
-      "nextAction": "Submit webhook service extraction and replay tests, then remove apps/agrimo/**."
+      "requiredReviewers": [
+        "agri-team",
+        "architecture governance maintainer",
+        "identity/security reviewer"
+      ],
+      "nextAction": "Submit webhook service extraction and replay tests, then remove apps/agrimo/**.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      },
+      "safeCorrectionExecution": {
+        "implementation": "Five Clerk identity handlers extracted into identity-sync-service.ts; signature/timestamp verification stays at boundary. Role mapping, predicates, upsert/deactivation behavior and responses preserved; diagnostics exclude raw IDs/errors.",
+        "beforeMatchingViolations": 1,
+        "afterMatchingViolations": 0,
+        "fullyCleanScope": true,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Review focused implementation/receipts; scope retired after unsuppressed actual-rule zero result."
     },
     {
       "id": "A07",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/control-plane/**", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/control-plane/**",
+      "owner": "platform-team",
       "currentJustification": "Control plane db-bridge provides scoped DB bridge for internal admin operations. Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 334, "scannedFileCount": 127,
-      "matchingViolations": {"count": 41, "matchingFileCount": 32, "examples": [{"file": "apps/control-plane/app/api/audit/export/route.ts", "line": 5, "kind": "direct schema import"}, {"file": "apps/control-plane/app/api/audit/record/route.ts", "line": 6, "kind": "direct schema import"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 334,
+      "scannedFileCount": 127,
+      "matchingViolations": {
+        "count": 41,
+        "matchingFileCount": 32,
+        "examples": [
+          {
+            "file": "apps/control-plane/app/api/audit/export/route.ts",
+            "line": 5,
+            "kind": "direct schema import"
+          },
+          {
+            "file": "apps/control-plane/app/api/audit/record/route.ts",
+            "line": 6,
+            "kind": "direct schema import"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "Twenty package-import and 21 schema-import matches span routes and server modules. Current implementation scans all server/ files, including the intended DB bridge.",
-      "sourceEvidence": ["apps/control-plane/server/db-bridge.ts:11 direct db import", "apps/control-plane/server/db-bridge.ts:16 direct package import", "apps/control-plane/server/db-bridge.ts:20 direct package import"],
+      "sourceEvidence": [
+        "apps/control-plane/server/db-bridge.ts:11 direct db import",
+        "apps/control-plane/server/db-bridge.ts:16 direct package import",
+        "apps/control-plane/server/db-bridge.ts:20 direct package import"
+      ],
       "proposedCorrection": "Extract route-owned DB logic behind governed services. Architecture owner must separately define endpoint-vs-repository classification for server/ using an explicit module boundary and import-direction tests; do not simply exempt the whole app or claim the bridge is scoped from its name.",
       "residualRisk": "A repository-location false positive and genuine route coupling coexist. Narrowing server scope without an import boundary could hide unsafe admin reads.",
-      "requiredReviewers": ["platform-team", "architecture governance maintainer", "control-plane authorization owner"],
-      "nextAction": "Review 32 matched files by module role, fix route coupling, and propose a test-backed structural server boundary before retirement."
+      "requiredReviewers": [
+        "platform-team",
+        "architecture governance maintainer",
+        "control-plane authorization owner"
+      ],
+      "nextAction": "Review 32 matched files by module role, fix route coupling, and propose a test-backed structural server boundary before retirement.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "REMEDIATE",
+      "currentMatchingViolations": {
+        "count": 40,
+        "matchingFileCount": 31,
+        "locations": [
+          {
+            "file": "apps/control-plane/app/api/audit/export/route.ts",
+            "line": 5,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/app/api/audit/verify/route.ts",
+            "line": 6,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/app/api/control-plane/authority/authorize-workflow/route.ts",
+            "line": 20,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/app/api/control-plane/governance/actions/route.ts",
+            "line": 24,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/app/api/control-plane/governance/actions/route.ts",
+            "line": 29,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/app/api/intelligence/benchmarks/route.ts",
+            "line": 6,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/app/api/intelligence/metrics/route.ts",
+            "line": 7,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/app/api/intelligence/pipeline-health/route.ts",
+            "line": 6,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/app/api/intelligence/policy-insights/route.ts",
+            "line": 6,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/app/api/pipeline-health/route.ts",
+            "line": 14,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/accounts.ts",
+            "line": 9,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/accounts.ts",
+            "line": 10,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/automations.ts",
+            "line": 13,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/deals.ts",
+            "line": 11,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/deals.ts",
+            "line": 18,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/entitlements-db.ts",
+            "line": 16,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/events.ts",
+            "line": 14,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/follow-ups.ts",
+            "line": 10,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/ingestion.ts",
+            "line": 10,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/ingestion.ts",
+            "line": 11,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/partners.ts",
+            "line": 7,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/partners.ts",
+            "line": 8,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/pilots.ts",
+            "line": 10,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/proof.ts",
+            "line": 8,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/proof.ts",
+            "line": 9,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/proposals.ts",
+            "line": 7,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/adapters/proposals.ts",
+            "line": 14,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/authority/decision.ts",
+            "line": 21,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/authority/governed-policy-service.ts",
+            "line": 22,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/authority/policy-approval-service.ts",
+            "line": 35,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/authority/policy-conflict-analyzer.ts",
+            "line": 29,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/authority/policy-deprecation-service.ts",
+            "line": 21,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/authority/policy-governance-events-service.ts",
+            "line": 22,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/authority/policy-replay-engine.ts",
+            "line": 37,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/authority/policy-snapshot-service.ts",
+            "line": 39,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/db-bridge.ts",
+            "line": 11,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/db-bridge.ts",
+            "line": 16,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/db-bridge.ts",
+            "line": 20,
+            "kind": "@nzila/db (direct package)"
+          },
+          {
+            "file": "apps/control-plane/server/governance/state-machine.ts",
+            "line": 25,
+            "kind": "@nzila/db/schema (direct schema import)"
+          },
+          {
+            "file": "apps/control-plane/server/revenue-snapshots.ts",
+            "line": 1,
+            "kind": "@nzila/db (direct package)"
+          }
+        ]
+      },
+      "safeCorrectionExecution": {
+        "implementation": "Audit-record endpoint now calls audit-proof-service.ts and audit-record-repository.ts. Preserved previous hash, first secret/create, immutable upload, second secret/create, persistence and history predicates/order/limit. Remaining 40 matches in 31 server files need module-role classification and additional engineering.",
+        "beforeMatchingViolations": 41,
+        "afterMatchingViolations": 40,
+        "fullyCleanScope": false,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Classify remaining 31 server files by actual endpoint/service/repository role and extract route-owned operations using real dependency boundaries. No blanket server exclusion or import alias evasion.",
+      "remainingAssessment": {
+        "sourceWork": "Classify remaining 31 server files by actual endpoint/service/repository role and extract route-owned operations using real dependency boundaries. No blanket server exclusion or import alias evasion.",
+        "actualDecision": "Whether genuine server repositories/factories should fall under endpoint architecture policy is a real structural rule-role decision requiring architecture governance. Additional endpoint/service extraction remains normal engineering, not automatically owner-only.",
+        "nextTests": "Per-role dependency-direction tests and guard/history/persistence/rejection tests for each further slice; no rule weakening in this change."
+      }
     },
     {
       "id": "A08",
-      "requiredApprovers": ["faircase-team exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/abr/app/api/abr/incidents/route.ts", "owner": "faircase-team",
+      "requiredApprovers": [
+        "faircase-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/abr/app/api/abr/incidents/route.ts",
+      "owner": "faircase-team",
       "currentJustification": "Legacy NAR proof adapter in route still imports @nzila/db/schema. Service-layer extraction tracked in ENFORCEMENT_UPGRADE backlog. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/abr/app/api/abr/incidents/route.ts", "line": 19, "kind": "direct schema import"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/abr/app/api/abr/incidents/route.ts",
+            "line": 19,
+            "kind": "direct schema import"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "The incidents route already calls an incidents service but still constructs the NAR audit adapter locally.",
-      "sourceEvidence": ["apps/abr/app/api/abr/incidents/route.ts:80 NAR adapter construction", "apps/abr/app/api/abr/incidents/route.ts:92 platformDb audit insert"],
+      "sourceEvidence": [
+        "apps/abr/app/api/abr/incidents/route.ts:80 NAR adapter construction",
+        "apps/abr/app/api/abr/incidents/route.ts:92 platformDb audit insert"
+      ],
       "proposedCorrection": "Move NAR proof persistence and adapter construction into a dedicated service/repository, preserving decision enforcement and the existing incidents service boundary.",
       "residualRisk": "ABR's Django-authority and NAR audit requirements must remain reconciled; schema extraction alone does not authorize TS domain writes.",
-      "requiredReviewers": ["faircase-team", "architecture governance maintainer", "NAR policy owner", "ABR stack-authority owner"],
-      "nextAction": "Submit focused proof-adapter extraction with audit-chain tests, then retire this exact-path entry."
+      "requiredReviewers": [
+        "faircase-team",
+        "architecture governance maintainer",
+        "NAR policy owner",
+        "ABR stack-authority owner"
+      ],
+      "nextAction": "Submit focused proof-adapter extraction with audit-chain tests, then retire this exact-path entry.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      },
+      "safeCorrectionExecution": {
+        "implementation": "ABR incidents NAR adapter extracted into modules/incidents/nar-proof-service.ts without changing adapter initialization or persistence.",
+        "beforeMatchingViolations": 1,
+        "afterMatchingViolations": 0,
+        "fullyCleanScope": true,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Review focused implementation/receipts; scope retired after unsuppressed actual-rule zero result."
     },
     {
       "id": "A09",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/platform-admin/app/api/admin/org/route.ts", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/platform-admin/app/api/admin/org/route.ts",
+      "owner": "platform-team",
       "currentJustification": "Legacy NAR proof adapter currently defined in route. Planned move to repository/service module. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/platform-admin/app/api/admin/org/route.ts", "line": 17, "kind": "direct schema import"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/platform-admin/app/api/admin/org/route.ts",
+            "line": 17,
+            "kind": "direct schema import"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "Org-scoped route and control-plane client coexist with a local DB-backed NAR adapter.",
-      "sourceEvidence": ["apps/platform-admin/app/api/admin/org/route.ts:23 NAR adapter construction", "apps/platform-admin/app/api/admin/org/route.ts:35 platformDb audit insert"],
+      "sourceEvidence": [
+        "apps/platform-admin/app/api/admin/org/route.ts:23 NAR adapter construction",
+        "apps/platform-admin/app/api/admin/org/route.ts:35 platformDb audit insert"
+      ],
       "proposedCorrection": "Extract the NAR audit repository/adapter into a service module without removing withOrgScope, entitlement checks or enforceDecision.",
       "residualRisk": "Admin access and evidence-chain integrity remain sensitive even when the import test passes.",
-      "requiredReviewers": ["platform-team", "architecture governance maintainer", "NAR policy owner"],
-      "nextAction": "Submit extraction plus unauthorized-org and audit-continuity tests; retire the exact-path entry."
+      "requiredReviewers": [
+        "platform-team",
+        "architecture governance maintainer",
+        "NAR policy owner"
+      ],
+      "nextAction": "Submit extraction plus unauthorized-org and audit-continuity tests; retire the exact-path entry.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      },
+      "safeCorrectionExecution": {
+        "implementation": "Platform Admin NAR adapter extracted into lib/nar-proof-service.ts without changing guards, initialization or persistence.",
+        "beforeMatchingViolations": 1,
+        "afterMatchingViolations": 0,
+        "fullyCleanScope": true,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Review focused implementation/receipts; scope retired after unsuppressed actual-rule zero result."
     },
     {
       "id": "A10",
-      "requiredApprovers": ["zonga-team exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/zonga/app/api/payouts/route.ts", "owner": "zonga-team",
+      "requiredApprovers": [
+        "zonga-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/zonga/app/api/payouts/route.ts",
+      "owner": "zonga-team",
       "currentJustification": "Route-local NAR proof adapter still uses schema import pending service-layer migration. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/zonga/app/api/payouts/route.ts", "line": 16, "kind": "direct schema import"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/zonga/app/api/payouts/route.ts",
+            "line": 16,
+            "kind": "direct schema import"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "Payout actions are delegated, but proof persistence is still constructed in the route.",
-      "sourceEvidence": ["apps/zonga/app/api/payouts/route.ts:35 NAR adapter construction", "apps/zonga/app/api/payouts/route.ts:47 platformDb audit insert"],
+      "sourceEvidence": [
+        "apps/zonga/app/api/payouts/route.ts:35 NAR adapter construction",
+        "apps/zonga/app/api/payouts/route.ts:47 platformDb audit insert"
+      ],
       "proposedCorrection": "Extract the NAR persistence adapter into a payment-governance service/repository. Preserve role/org checks, decision gating and payout idempotency.",
       "residualRisk": "A layering-only correction must not weaken financial authorization or evidence continuity.",
-      "requiredReviewers": ["zonga-team", "architecture governance maintainer", "payments/NAR policy owner"],
-      "nextAction": "Submit proof-adapter extraction with payout authorization and audit tests; retire the exact-path entry."
+      "requiredReviewers": [
+        "zonga-team",
+        "architecture governance maintainer",
+        "payments/NAR policy owner"
+      ],
+      "nextAction": "Submit proof-adapter extraction with payout authorization and audit tests; retire the exact-path entry.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      },
+      "safeCorrectionExecution": {
+        "implementation": "Zonga payout NAR adapter extracted into lib/nar-proof-service.ts without changing guards, payout/provider semantics or audit persistence.",
+        "beforeMatchingViolations": 1,
+        "afterMatchingViolations": 0,
+        "fullyCleanScope": true,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Review focused implementation/receipts; scope retired after unsuppressed actual-rule zero result."
     },
     {
       "id": "A11",
-      "requiredApprovers": ["platform-core exception owner", "architecture governance maintainer"], "rule": "ARCH_LAYER_001", "ledger": "governance/exceptions/arch-layer.json",
-      "path": "apps/nzila-hq/**", "owner": "platform-core",
+      "requiredApprovers": [
+        "platform-core exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "ARCH_LAYER_001",
+      "ledger": "governance/exceptions/arch-layer.json",
+      "path": "apps/nzila-hq/**",
+      "owner": "platform-core",
       "currentJustification": "Nzila HQ is INCUBATING with its own DB client in server/db/. Migration to shared service layer tracked before PILOT promotion. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 108, "scannedFileCount": 14,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/nzila-hq/server/db/client.ts", "line": 38, "kind": "drizzle() instantiation"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 108,
+      "scannedFileCount": 14,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/nzila-hq/server/db/client.ts",
+            "line": 38,
+            "kind": "drizzle() instantiation"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "The sole match is an intentional server-only DB factory, classified as a route only because the implementation treats every server/ file as an endpoint.",
-      "sourceEvidence": ["apps/nzila-hq/server/db/client.ts:10 server-only boundary", "apps/nzila-hq/server/db/client.ts:38 DB factory"],
+      "sourceEvidence": [
+        "apps/nzila-hq/server/db/client.ts:10 server-only boundary",
+        "apps/nzila-hq/server/db/client.ts:38 DB factory"
+      ],
       "proposedCorrection": "Choose shared service migration or a documented DB-infrastructure module role with explicit allowed import directions and endpoint-to-service-only tests. Remove the app-wide exemption; if a narrowly scoped factory exception is proposed, require a fresh reviewed rationale and lifecycle decision.",
       "residualRisk": "INCUBATING is not authority for an app-wide bypass. A server/db exclusion without dependency tests could permit route-to-DB coupling.",
-      "requiredReviewers": ["platform-core", "architecture governance maintainer", "data-layer owner"],
-      "nextAction": "Architecture owner decides module classification before a focused rule/migration proposal. No expiry or approval is supplied here."
+      "requiredReviewers": [
+        "platform-core",
+        "architecture governance maintainer",
+        "data-layer owner"
+      ],
+      "nextAction": "Architecture owner decides module classification before a focused rule/migration proposal. No expiry or approval is supplied here.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "locations": [
+          {
+            "file": "apps/nzila-hq/server/db/client.ts",
+            "line": 38,
+            "kind": "drizzle() instantiation"
+          }
+        ]
+      }
     },
     {
       "id": "N01",
-      "requiredApprovers": ["union-eyes-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/union-eyes/db/seeds/**", "owner": "union-eyes-team",
+      "requiredApprovers": [
+        "union-eyes-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/union-eyes/db/seeds/**",
+      "owner": "union-eyes-team",
       "currentJustification": "Seed scripts are CLI programs — console output is appropriate for development tooling. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 2, "scannedFileCount": 0,
-      "matchingViolations": {"count": 0, "matchingFileCount": 0, "examples": []},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 2,
+      "scannedFileCount": 0,
+      "matchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "examples": []
+      },
       "classification": "RETIRED",
       "finding": "The actual rule already excludes every /seeds/ path. This glob matches source files but no scanned files.",
       "proposedCorrection": "Remove the redundant ledger entry. Keep existing non-runtime seed classification; separately prevent CLI seed entrypoints from becoming runtime imports.",
       "residualRisk": "Excluded seed contents are not assessed as runtime code; retirement does not certify CLI output or seed safety.",
-      "requiredReviewers": ["union-eyes-team", "logging governance maintainer"],
-      "nextAction": "Request ledger-only retirement with evidence that scannedFileCount remains zero."
+      "requiredReviewers": [
+        "union-eyes-team",
+        "logging governance maintainer"
+      ],
+      "nextAction": "Request ledger-only retirement with evidence that scannedFileCount remains zero.",
+      "historicalClassification": "RETIRED",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      }
     },
     {
       "id": "N02",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/union-eyes/lib/client-logger.ts", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/union-eyes/lib/client-logger.ts",
+      "owner": "platform-team",
       "currentJustification": "Client-safe logger wraps console.* as the browser output sink — console calls here ARE the structured output. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 0, "matchingFileCount": 0, "examples": []},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "examples": []
+      },
       "classification": "RETIRED",
       "finding": "The current client logger sends Sentry breadcrumbs/captureMessage and has no direct console calls. The justification describes an obsolete sink.",
-      "sourceEvidence": ["apps/union-eyes/lib/client-logger.ts:40 writeBreadcrumb", "apps/union-eyes/lib/client-logger.ts:48 Sentry breadcrumb", "apps/union-eyes/lib/client-logger.ts:60 createClientLogger"],
+      "sourceEvidence": [
+        "apps/union-eyes/lib/client-logger.ts:40 writeBreadcrumb",
+        "apps/union-eyes/lib/client-logger.ts:48 Sentry breadcrumb",
+        "apps/union-eyes/lib/client-logger.ts:60 createClientLogger"
+      ],
       "proposedCorrection": "Retire the obsolete console exception; preserve browser-safe module separation and separately review telemetry payload/redaction and unavailable-sink behavior.",
       "residualRisk": "The Sentry-unavailable path is a no-op and metadata privacy is not certified by a zero-console result.",
-      "requiredReviewers": ["platform-team", "logging governance maintainer", "privacy/observability reviewer"],
-      "nextAction": "Request exact-path ledger retirement with an unsuppressed scan; do not infer telemetry delivery."
+      "requiredReviewers": [
+        "platform-team",
+        "logging governance maintainer",
+        "privacy/observability reviewer"
+      ],
+      "nextAction": "Request exact-path ledger retirement with an unsuppressed scan; do not infer telemetry delivery.",
+      "historicalClassification": "RETIRED",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      }
     },
     {
       "id": "N03",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/union-eyes/lib/console-wrapper.ts", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/union-eyes/lib/console-wrapper.ts",
+      "owner": "platform-team",
       "currentJustification": "Console-wrapper intentionally stores and overrides console methods to route them to structured logger in production. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 0, "matchingFileCount": 0, "examples": []},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "examples": []
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "Zero literal matches is not retirement proof for the logging policy: this module intentionally uses Reflect.get/set to capture/replace console methods, with comments describing grep avoidance.",
-      "sourceEvidence": ["apps/union-eyes/lib/console-wrapper.ts:12 Reflect/bracket rationale", "apps/union-eyes/lib/console-wrapper.ts:26 console acquisition", "apps/union-eyes/lib/console-wrapper.ts:28 original-method capture", "apps/union-eyes/lib/console-wrapper.ts:49 console replacement", "apps/union-eyes/lib/console-wrapper.ts:91 original-console export"],
+      "sourceEvidence": [
+        "apps/union-eyes/lib/console-wrapper.ts:12 Reflect/bracket rationale",
+        "apps/union-eyes/lib/console-wrapper.ts:26 console acquisition",
+        "apps/union-eyes/lib/console-wrapper.ts:28 original-method capture",
+        "apps/union-eyes/lib/console-wrapper.ts:49 console replacement",
+        "apps/union-eyes/lib/console-wrapper.ts:91 original-console export"
+      ],
       "proposedCorrection": "Retire the obsolete literal-pattern waiver only alongside an explicit decision on console interception. Prefer an injected structured sink; if interception is retained, define one adapter-only role with AST checks covering Reflect/bracket/alias access, redaction, recursion protection and no runtime original-console escape.",
       "residualRisk": "Current lexical enforcement cannot see this behavior. Stringifying arbitrary arguments before forwarding can bypass field-oriented redaction; global replacement can affect framework logging.",
-      "requiredReviewers": ["platform-team", "logging governance maintainer", "privacy/security reviewer", "UE runtime owner"],
-      "nextAction": "Owner reviews interception semantics and proposes a narrow tested structural boundary, not a renewed or permanent blanket waiver."
+      "requiredReviewers": [
+        "platform-team",
+        "logging governance maintainer",
+        "privacy/security reviewer",
+        "UE runtime owner"
+      ],
+      "nextAction": "Owner reviews interception semantics and proposes a narrow tested structural boundary, not a renewed or permanent blanket waiver.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      }
     },
     {
       "id": "N04",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/union-eyes/lib/logger.ts", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/union-eyes/lib/logger.ts",
+      "owner": "platform-team",
       "currentJustification": "App-specific logger implementation uses console as the output sink — console calls here ARE the structured output. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 0, "matchingFileCount": 0, "examples": []},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "examples": []
+      },
       "classification": "RETIRED",
       "finding": "The current logger uses process stdout/stderr plus asynchronous Sentry, not console as stated.",
-      "sourceEvidence": ["apps/union-eyes/lib/logger.ts:174 structured output section", "apps/union-eyes/lib/logger.ts:187 stream write", "apps/union-eyes/lib/logger.ts:192 Sentry dispatch"],
+      "sourceEvidence": [
+        "apps/union-eyes/lib/logger.ts:174 structured output section",
+        "apps/union-eyes/lib/logger.ts:187 stream write",
+        "apps/union-eyes/lib/logger.ts:192 Sentry dispatch"
+      ],
       "proposedCorrection": "Retire the stale console ledger entry; retain structured transport and independent tests for context isolation, redaction, severity and sink failures.",
       "residualRisk": "Direct stream output and Sentry behavior are outside the console regex; no privacy or runtime-delivery approval follows.",
-      "requiredReviewers": ["platform-team", "logging governance maintainer", "observability reviewer"],
-      "nextAction": "Request ledger retirement with zero unsuppressed direct-console matches."
+      "requiredReviewers": [
+        "platform-team",
+        "logging governance maintainer",
+        "observability reviewer"
+      ],
+      "nextAction": "Request ledger retirement with zero unsuppressed direct-console matches.",
+      "historicalClassification": "RETIRED",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      }
     },
     {
       "id": "N05",
-      "requiredApprovers": ["union-eyes-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/union-eyes/public/service-worker.js", "owner": "union-eyes-team",
+      "requiredApprovers": [
+        "union-eyes-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/union-eyes/public/service-worker.js",
+      "owner": "union-eyes-team",
       "currentJustification": "Service Worker runs in browser context where @nzila/os-core is not available — console is the only logging mechanism. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 0, "matchingFileCount": 0, "examples": []},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "examples": []
+      },
       "classification": "RETIRED",
       "finding": "The current _swLog posts structured messages to connected clients. Source contradicts the claim that console is the only mechanism.",
-      "sourceEvidence": ["apps/union-eyes/public/service-worker.js:27 _swLog", "apps/union-eyes/public/service-worker.js:31 client.postMessage"],
+      "sourceEvidence": [
+        "apps/union-eyes/public/service-worker.js:27 _swLog",
+        "apps/union-eyes/public/service-worker.js:31 client.postMessage"
+      ],
       "proposedCorrection": "Retire the unused exception; separately specify sanitized service-worker event schema and a browser-client telemetry consumer with bounded failures, rather than authorizing console globally.",
       "residualRisk": "No connected client means no log delivery. Client fan-out and JSON stringification are not assessed by this import/console gate.",
-      "requiredReviewers": ["union-eyes-team", "logging governance maintainer", "browser/privacy reviewer"],
-      "nextAction": "Request exact-path ledger retirement without claiming service-worker telemetry is operationally proven."
+      "requiredReviewers": [
+        "union-eyes-team",
+        "logging governance maintainer",
+        "browser/privacy reviewer"
+      ],
+      "nextAction": "Request exact-path ledger retirement without claiming service-worker telemetry is operationally proven.",
+      "historicalClassification": "RETIRED",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      }
     },
     {
       "id": "N06",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/cfo/app/*/dashboard/error.tsx", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/cfo/app/*/dashboard/error.tsx",
+      "owner": "platform-team",
       "currentJustification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/cfo/app/[locale]/dashboard/error.tsx", "line": 23, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/error.tsx",
+            "line": 23,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "A real browser useEffect emits the Error object. Browser incompatibility of a Node logger does not require direct console calls in every boundary or establish permanent approval.",
       "proposedCorrection": "Adopt a browser-safe error reporter with sanitized event code/digest and bounded telemetry transport; boundaries call that reporter. If a console fallback is desired, isolate it in one reviewed adapter with development-only default and explicit failure/privacy tests.",
       "residualRisk": "Raw Error objects can expose sensitive detail; console is not evidence of remote RUM capture.",
-      "requiredReviewers": ["platform-team", "CFO application owner", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Select and approve the browser reporting contract, implement it in a separate change, then retire this glob."
+      "requiredReviewers": [
+        "platform-team",
+        "CFO application owner",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Select and approve the browser reporting contract, implement it in a separate change, then retire this glob.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "locations": [
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/error.tsx",
+            "line": 23,
+            "kind": "console.error"
+          }
+        ]
+      }
     },
     {
       "id": "N07",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/cfo/app/*/dashboard/*/error.tsx", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/cfo/app/*/dashboard/*/error.tsx",
+      "owner": "platform-team",
       "currentJustification": "Client-side error boundary for sub-sections runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 18, "scannedFileCount": 18,
-      "matchingViolations": {"count": 18, "matchingFileCount": 18, "examples": [{"file": "apps/cfo/app/[locale]/dashboard/advisory-ai/error.tsx", "line": 17, "kind": "console.error"}, {"file": "apps/cfo/app/[locale]/dashboard/ai-insights/error.tsx", "line": 17, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 18,
+      "scannedFileCount": 18,
+      "matchingViolations": {
+        "count": 18,
+        "matchingFileCount": 18,
+        "examples": [
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/advisory-ai/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/ai-insights/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "Eighteen live boundary files have direct console errors; the wildcard also exempts future subsection boundaries.",
       "proposedCorrection": "Replace all 18 local sinks with the reviewed browser-safe reporting contract from N06; enforce no direct boundary console and restrict any approved sink to one adapter.",
       "residualRisk": "A wildcard waiver permits new unreviewed browser output and provides no guarantee of sanitized remote telemetry.",
-      "requiredReviewers": ["platform-team", "CFO application owner", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Owner approves a shared reporter design and migration of all 18 boundary files; remove the wildcard only after unsuppressed validation."
+      "requiredReviewers": [
+        "platform-team",
+        "CFO application owner",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Owner approves a shared reporter design and migration of all 18 boundary files; remove the wildcard only after unsuppressed validation.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 18,
+        "matchingFileCount": 18,
+        "locations": [
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/advisory-ai/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/ai-insights/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/alerts/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/audit/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/client-portal/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/clients/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/documents/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/integrations/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/ledger/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/messages/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/notifications/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/platform-admin/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/reports/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/security/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/settings/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/tasks/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/tax-tools/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/workflows/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          }
+        ]
+      }
     },
     {
       "id": "N08",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/cfo/app/*/dashboard/*/*/error.tsx", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/cfo/app/*/dashboard/*/*/error.tsx",
+      "owner": "platform-team",
       "currentJustification": "Client-side error boundary for nested sub-sections (e.g., documents/upload, workflows/new) runs in browser context where @nzila/os-core is not available. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 3, "scannedFileCount": 3,
-      "matchingViolations": {"count": 3, "matchingFileCount": 3, "examples": [{"file": "apps/cfo/app/[locale]/dashboard/documents/upload/error.tsx", "line": 17, "kind": "console.error"}, {"file": "apps/cfo/app/[locale]/dashboard/workflows/new/error.tsx", "line": 17, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 3,
+      "scannedFileCount": 3,
+      "matchingViolations": {
+        "count": 3,
+        "matchingFileCount": 3,
+        "examples": [
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/documents/upload/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/workflows/new/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "Three nested boundaries emit directly. Module-runtime constraints support a browser-safe transport, not a depth-based blanket exemption.",
       "proposedCorrection": "Migrate all three nested boundaries to the N06 reporter; keep document/workflow content out of event payloads and preserve reset/retry UI.",
       "residualRisk": "Nested document/workflow errors may contain sensitive detail, and deeper future routes inherit an unreviewed waiver.",
-      "requiredReviewers": ["platform-team", "CFO application owner", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Include the three nested files in the shared reporter decision and retire the depth wildcard after targeted boundary tests."
+      "requiredReviewers": [
+        "platform-team",
+        "CFO application owner",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Include the three nested files in the shared reporter decision and retire the depth wildcard after targeted boundary tests.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 3,
+        "matchingFileCount": 3,
+        "locations": [
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/documents/upload/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/workflows/new/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/cfo/app/[locale]/dashboard/workflows/[id]/error.tsx",
+            "line": 17,
+            "kind": "console.error"
+          }
+        ]
+      }
     },
     {
       "id": "N09",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/zonga/app/*/dashboard/error.tsx", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/zonga/app/*/dashboard/error.tsx",
+      "owner": "platform-team",
       "currentJustification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/zonga/app/[locale]/dashboard/error.tsx", "line": 16, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/zonga/app/[locale]/dashboard/error.tsx",
+            "line": 16,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "The browser boundary contains a real direct console error. No present evidence authorizes a permanent exception.",
       "proposedCorrection": "Use a browser-safe digest/event reporter with allowlisted metadata and bounded transport. Isolate any expressly approved development console sink in the reporter adapter, not the boundary.",
       "residualRisk": "Browser output can disclose error details and is not remote telemetry delivery.",
-      "requiredReviewers": ["platform-team", "zonga-team", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Obtain the browser reporting contract decision, implement and test separately, then retire the wildcard."
+      "requiredReviewers": [
+        "platform-team",
+        "zonga-team",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Obtain the browser reporting contract decision, implement and test separately, then retire the wildcard.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "locations": [
+          {
+            "file": "apps/zonga/app/[locale]/dashboard/error.tsx",
+            "line": 16,
+            "kind": "console.error"
+          }
+        ]
+      }
     },
     {
       "id": "N10",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/zonga/app/*/dashboard/*/error.tsx", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/zonga/app/*/dashboard/*/error.tsx",
+      "owner": "platform-team",
       "currentJustification": "Client-side error boundary for sub-sections runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 6, "scannedFileCount": 6,
-      "matchingViolations": {"count": 6, "matchingFileCount": 6, "examples": [{"file": "apps/zonga/app/[locale]/dashboard/artists/error.tsx", "line": 16, "kind": "console.error"}, {"file": "apps/zonga/app/[locale]/dashboard/browse/error.tsx", "line": 16, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 6,
+      "scannedFileCount": 6,
+      "matchingViolations": {
+        "count": 6,
+        "matchingFileCount": 6,
+        "examples": [
+          {
+            "file": "apps/zonga/app/[locale]/dashboard/artists/error.tsx",
+            "line": 16,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/zonga/app/[locale]/dashboard/browse/error.tsx",
+            "line": 16,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "Six subsection boundaries emit direct console errors; their broad justification does not distinguish acceptable event content.",
       "proposedCorrection": "Migrate six boundaries to N09's approved browser reporter. Add an import-boundary check that prevents direct console or Node-only logger imports in client boundaries.",
       "residualRisk": "Future subsection files inherit the wildcard and can log arbitrary errors unless the structural boundary is enforced.",
-      "requiredReviewers": ["platform-team", "zonga-team", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Review and migrate all six files under a single sanitized reporting contract, then retire the glob."
+      "requiredReviewers": [
+        "platform-team",
+        "zonga-team",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Review and migrate all six files under a single sanitized reporting contract, then retire the glob.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 6,
+        "matchingFileCount": 6,
+        "locations": [
+          {
+            "file": "apps/zonga/app/[locale]/dashboard/artists/error.tsx",
+            "line": 16,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/zonga/app/[locale]/dashboard/browse/error.tsx",
+            "line": 16,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/zonga/app/[locale]/dashboard/events/error.tsx",
+            "line": 16,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/zonga/app/[locale]/dashboard/notifications/error.tsx",
+            "line": 16,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/zonga/app/[locale]/dashboard/playlists/error.tsx",
+            "line": 16,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/zonga/app/[locale]/dashboard/tracks/error.tsx",
+            "line": 16,
+            "kind": "console.error"
+          }
+        ]
+      }
     },
     {
       "id": "N11",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/partners/app/**/admin/error.tsx", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/partners/app/**/admin/error.tsx",
+      "owner": "platform-team",
       "currentJustification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 2, "scannedFileCount": 2,
-      "matchingViolations": {"count": 2, "matchingFileCount": 2, "examples": [{"file": "apps/partners/app/admin/error.tsx", "line": 13, "kind": "console.error"}, {"file": "apps/partners/app/[locale]/admin/error.tsx", "line": 13, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 2,
+      "scannedFileCount": 2,
+      "matchingViolations": {
+        "count": 2,
+        "matchingFileCount": 2,
+        "examples": [
+          {
+            "file": "apps/partners/app/admin/error.tsx",
+            "line": 13,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/partners/app/[locale]/admin/error.tsx",
+            "line": 13,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "Minimatch ** matches zero directories as well as locale directories; both admin boundaries are covered and contain real console calls.",
       "proposedCorrection": "Route both admin-boundary events through a browser-safe sanitized reporter, with no privileged admin data in payloads; isolate any approved fallback sink.",
       "residualRisk": "Admin errors can disclose privileged detail; browser context does not establish a necessity or approval for raw console output.",
-      "requiredReviewers": ["platform-team", "partners-team", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Approve the browser admin-error event schema and migrate both files before retiring the glob."
+      "requiredReviewers": [
+        "platform-team",
+        "partners-team",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Approve the browser admin-error event schema and migrate both files before retiring the glob.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 2,
+        "matchingFileCount": 2,
+        "locations": [
+          {
+            "file": "apps/partners/app/admin/error.tsx",
+            "line": 13,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/partners/app/[locale]/admin/error.tsx",
+            "line": 13,
+            "kind": "console.error"
+          }
+        ]
+      }
     },
     {
       "id": "N12",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/partners/app/**/portal/error.tsx", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/partners/app/**/portal/error.tsx",
+      "owner": "platform-team",
       "currentJustification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 2, "scannedFileCount": 2,
-      "matchingViolations": {"count": 2, "matchingFileCount": 2, "examples": [{"file": "apps/partners/app/portal/error.tsx", "line": 13, "kind": "console.error"}, {"file": "apps/partners/app/[locale]/portal/error.tsx", "line": 13, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 2,
+      "scannedFileCount": 2,
+      "matchingViolations": {
+        "count": 2,
+        "matchingFileCount": 2,
+        "examples": [
+          {
+            "file": "apps/partners/app/portal/error.tsx",
+            "line": 13,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/partners/app/[locale]/portal/error.tsx",
+            "line": 13,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "The localized and unlocalized portal boundaries each emit direct console errors.",
       "proposedCorrection": "Use the same approved browser reporter as N11 with partner-safe event code/digest only; preserve boundary reset semantics and forbid direct boundary console.",
       "residualRisk": "Partner-specific error content is not made safe by an admin/portal wildcard or by running in a browser.",
-      "requiredReviewers": ["platform-team", "partners-team", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Include both portal variants in the reporter decision, migration and targeted tests, then retire the glob."
+      "requiredReviewers": [
+        "platform-team",
+        "partners-team",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Include both portal variants in the reporter decision, migration and targeted tests, then retire the glob.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 2,
+        "matchingFileCount": 2,
+        "locations": [
+          {
+            "file": "apps/partners/app/portal/error.tsx",
+            "line": 13,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/partners/app/[locale]/portal/error.tsx",
+            "line": 13,
+            "kind": "console.error"
+          }
+        ]
+      }
     },
     {
       "id": "N13",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/nacp-exams/app/*/dashboard/error.tsx", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/nacp-exams/app/*/dashboard/error.tsx",
+      "owner": "platform-team",
       "currentJustification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/nacp-exams/app/[locale]/dashboard/error.tsx", "line": 13, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/nacp-exams/app/[locale]/dashboard/error.tsx",
+            "line": 13,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "The client dashboard boundary has one direct console error; the historical necessity claim has no present structural approval.",
       "proposedCorrection": "Adopt a browser-safe digest/event reporter that excludes candidate/exam data. Keep Node telemetry out of the client graph and any approved sink inside a narrow adapter.",
       "residualRisk": "Exam/candidate errors may contain sensitive data, and a console emission does not prove remote error reporting.",
-      "requiredReviewers": ["platform-team", "NACP application owner", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Approve and test the sanitized browser-reporting contract, then retire this boundary exception."
+      "requiredReviewers": [
+        "platform-team",
+        "NACP application owner",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Approve and test the sanitized browser-reporting contract, then retire this boundary exception.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "locations": [
+          {
+            "file": "apps/nacp-exams/app/[locale]/dashboard/error.tsx",
+            "line": 13,
+            "kind": "console.error"
+          }
+        ]
+      }
     },
     {
       "id": "N14",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/union-eyes/lib/api.ts", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/union-eyes/lib/api.ts",
+      "owner": "platform-team",
       "currentJustification": "Client-safe API logger for union-eyes — os-core createLogger uses Node.js APIs unavailable in Turbopack client bundles. Console is used as the structured output sink. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 0, "matchingFileCount": 0, "examples": []},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "examples": []
+      },
       "classification": "RETIRED",
       "finding": "The module now uses createClientLogger; the current sink is not console.",
-      "sourceEvidence": ["apps/union-eyes/lib/api.ts:8 client logger import", "apps/union-eyes/lib/api.ts:10 namespaced logger", "apps/union-eyes/lib/api.ts:56 error reporting"],
+      "sourceEvidence": [
+        "apps/union-eyes/lib/api.ts:8 client logger import",
+        "apps/union-eyes/lib/api.ts:10 namespaced logger",
+        "apps/union-eyes/lib/api.ts:56 error reporting"
+      ],
       "proposedCorrection": "Retire the unused exact-path exception; preserve the browser-safe logger and independently review sanitization of API error metadata.",
       "residualRisk": "Replacing console with telemetry does not by itself sanitize response/error data.",
-      "requiredReviewers": ["platform-team", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Request ledger retirement based on zero direct matches; retain independent telemetry/privacy ownership."
+      "requiredReviewers": [
+        "platform-team",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Request ledger retirement based on zero direct matches; retain independent telemetry/privacy ownership.",
+      "historicalClassification": "RETIRED",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      }
     },
     {
       "id": "N15",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/union-eyes/lib/api/index.ts", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/union-eyes/lib/api/index.ts",
+      "owner": "platform-team",
       "currentJustification": "Client-safe API logger for union-eyes — os-core createLogger uses Node.js APIs unavailable in Turbopack client bundles. Console is used as the structured output sink. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 0, "matchingFileCount": 0, "examples": []},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "examples": []
+      },
       "classification": "RETIRED",
       "finding": "This second API module also uses createClientLogger and has no direct console match.",
-      "sourceEvidence": ["apps/union-eyes/lib/api/index.ts:8 client logger import", "apps/union-eyes/lib/api/index.ts:10 namespaced logger", "apps/union-eyes/lib/api/index.ts:55 error reporting"],
+      "sourceEvidence": [
+        "apps/union-eyes/lib/api/index.ts:8 client logger import",
+        "apps/union-eyes/lib/api/index.ts:10 namespaced logger",
+        "apps/union-eyes/lib/api/index.ts:55 error reporting"
+      ],
       "proposedCorrection": "Retire the unused exact-path exception; keep client-only sink separation and sanitized API-error reporting under the observability contract.",
       "residualRisk": "A zero-console result does not certify the contents or delivery of the alternate telemetry event.",
-      "requiredReviewers": ["platform-team", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Request ledger-only retirement with an unsuppressed scan of this exact module."
+      "requiredReviewers": [
+        "platform-team",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Request ledger-only retirement with an unsuppressed scan of this exact module.",
+      "historicalClassification": "RETIRED",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      }
     },
     {
       "id": "N16",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/*/lib/demoSeed.ts", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/*/lib/demoSeed.ts",
+      "owner": "platform-team",
       "currentJustification": "Demo seed scripts are CLI programs invoked via npx tsx — console output is appropriate for development tooling. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 7, "scannedFileCount": 7,
-      "matchingViolations": {"count": 38, "matchingFileCount": 6, "examples": [{"file": "apps/cfo/lib/demoSeed.ts", "line": 71, "kind": "console.log"}, {"file": "apps/console/lib/demoSeed.ts", "line": 41, "kind": "console.log"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 7,
+      "scannedFileCount": 7,
+      "matchingViolations": {
+        "count": 38,
+        "matchingFileCount": 6,
+        "examples": [
+          {
+            "file": "apps/cfo/lib/demoSeed.ts",
+            "line": 71,
+            "kind": "console.log"
+          },
+          {
+            "file": "apps/console/lib/demoSeed.ts",
+            "line": 41,
+            "kind": "console.log"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "CLI guards exist, but lib/demoSeed.ts is scanned runtime territory and control-plane server/data.ts imports seed exports. The filename wildcard is not a valid global non-runtime boundary.",
-      "sourceEvidence": ["apps/control-plane/server/data.ts:20 runtime seed-module import", "apps/control-plane/lib/demoSeed.ts:346 exported seedDemo", "apps/control-plane/lib/demoSeed.ts:380 CLI guard"],
-      "perFileCounts": [{"file": "apps/cfo/lib/demoSeed.ts", "count": 5}, {"file": "apps/console/lib/demoSeed.ts", "count": 3}, {"file": "apps/control-plane/lib/demoSeed.ts", "count": 10}, {"file": "apps/flow/lib/demoSeed.ts", "count": 0}, {"file": "apps/partners/lib/demoSeed.ts", "count": 5}, {"file": "apps/web/lib/demoSeed.ts", "count": 6}, {"file": "apps/weekone/lib/demoSeed.ts", "count": 9}],
+      "sourceEvidence": [
+        "apps/control-plane/server/data.ts:20 runtime seed-module import",
+        "apps/control-plane/lib/demoSeed.ts:346 exported seedDemo",
+        "apps/control-plane/lib/demoSeed.ts:380 CLI guard"
+      ],
+      "perFileCounts": [
+        {
+          "file": "apps/cfo/lib/demoSeed.ts",
+          "count": 5
+        },
+        {
+          "file": "apps/console/lib/demoSeed.ts",
+          "count": 3
+        },
+        {
+          "file": "apps/control-plane/lib/demoSeed.ts",
+          "count": 10
+        },
+        {
+          "file": "apps/flow/lib/demoSeed.ts",
+          "count": 0
+        },
+        {
+          "file": "apps/partners/lib/demoSeed.ts",
+          "count": 5
+        },
+        {
+          "file": "apps/web/lib/demoSeed.ts",
+          "count": 6
+        },
+        {
+          "file": "apps/weekone/lib/demoSeed.ts",
+          "count": 9
+        }
+      ],
       "proposedCorrection": "Split CLI logging entrypoints into existing scripts/ tooling boundaries and retain pure non-logging fixture/data exports only where explicitly allowed. Enforce that runtime modules cannot import CLI entrypoints. Keep runtime fixtures honestly classified; do not broaden exclusions to all demoSeed filenames.",
       "residualRisk": "CLI invocation guards reduce actual execution but do not make exported logging functions unreachable. Runtime fallback/demo semantics require separate product-truth review.",
-      "requiredReviewers": ["platform-team", "affected application owners", "logging governance maintainer", "control-plane data owner"],
-      "nextAction": "Separate the six logging CLI entrypoints from runtime-importable exports, test import direction, then retire the cross-app wildcard."
+      "requiredReviewers": [
+        "platform-team",
+        "affected application owners",
+        "logging governance maintainer",
+        "control-plane data owner"
+      ],
+      "nextAction": "Separate the six logging CLI entrypoints from runtime-importable exports, test import direction, then retire the cross-app wildcard.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      },
+      "safeCorrectionExecution": {
+        "implementation": "Six demo seeds use structured safe diagnostics, including rejection aliases missed by the lexical rule. Public exports/fixtures and CLI guards retained. CLI presentation intentionally changes from positional console output to structured JSON; Control Plane exit 1 and other handled rejections retained.",
+        "beforeMatchingViolations": 38,
+        "afterMatchingViolations": 0,
+        "fullyCleanScope": true,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Review focused implementation/receipts; scope retired after unsuppressed actual-rule zero result."
     },
     {
       "id": "N17",
-      "requiredApprovers": ["agri-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/agrimo/lib/events/agri-event-emitter.ts", "owner": "agri-team",
+      "requiredApprovers": [
+        "agri-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/agrimo/lib/events/agri-event-emitter.ts",
+      "owner": "agri-team",
       "currentJustification": "Event emitter uses console for structured event logging and webhook error reporting — will migrate to os-core logger. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 4, "matchingFileCount": 1, "examples": [{"file": "apps/agrimo/lib/events/agri-event-emitter.ts", "line": 19, "kind": "console.info"}, {"file": "apps/agrimo/lib/events/agri-event-emitter.ts", "line": 41, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 4,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/agrimo/lib/events/agri-event-emitter.ts",
+            "line": 19,
+            "kind": "console.info"
+          },
+          {
+            "file": "apps/agrimo/lib/events/agri-event-emitter.ts",
+            "line": 41,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "One event observation and three webhook error branches directly use console. JSON formatting alone does not satisfy the no-console invariant.",
       "proposedCorrection": "Use the server structured logger with allowlisted event identifiers, org/correlation context and sanitized provider error classification; exclude event payloads and raw transport errors.",
       "residualRisk": "Changing the sink must preserve webhook error observability without exposing payloads or changing delivery/retry semantics.",
-      "requiredReviewers": ["agri-team", "logging governance maintainer", "privacy/observability reviewer"],
-      "nextAction": "Replace four direct call sites, test logging metadata and webhook failure behavior, then retire this entry."
+      "requiredReviewers": [
+        "agri-team",
+        "logging governance maintainer",
+        "privacy/observability reviewer"
+      ],
+      "nextAction": "Replace four direct call sites, test logging metadata and webhook failure behavior, then retire this entry.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      },
+      "safeCorrectionExecution": {
+        "implementation": "Agrimo emitter uses fixed structured diagnostics with event type/createdAt only; subscriptions, transport body and emission behavior unchanged.",
+        "beforeMatchingViolations": 4,
+        "afterMatchingViolations": 0,
+        "fullyCleanScope": true,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Review focused implementation/receipts; scope retired after unsuppressed actual-rule zero result."
     },
     {
       "id": "N18",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/zonga/lib/stripe.ts", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/zonga/lib/stripe.ts",
+      "owner": "platform-team",
       "currentJustification": "Payment integration logs missing secrets at startup — will migrate to os-core logger. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/zonga/lib/stripe.ts", "line": 129, "kind": "console.warn"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/zonga/lib/stripe.ts",
+            "line": 129,
+            "kind": "console.warn"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "The surviving call is a missing-provider-configuration warning on the mobile-money payout path, not evidence that secret values are printed or that startup is the only execution context.",
       "proposedCorrection": "Use the server structured logger for a fixed provider-configuration event and bounded status metadata; never include credential values or payment payloads. Preserve queued-payout behavior pending separate payments-owner review.",
       "residualRisk": "Silencing a warning would hide queued payout state; a logger migration is not payment-provider readiness evidence.",
-      "requiredReviewers": ["platform-team", "zonga-team", "payments owner", "logging governance maintainer"],
-      "nextAction": "Replace the one warning with a structured configuration event and test the missing-provider path, then retire this entry."
+      "requiredReviewers": [
+        "platform-team",
+        "zonga-team",
+        "payments owner",
+        "logging governance maintainer"
+      ],
+      "nextAction": "Replace the one warning with a structured configuration event and test the missing-provider path, then retire this entry.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      },
+      "safeCorrectionExecution": {
+        "implementation": "Zonga mobile-money queued branch uses fixed structured warning; queued reference, no-fetch behavior, configured payload/status and rejection propagation retained.",
+        "beforeMatchingViolations": 1,
+        "afterMatchingViolations": 0,
+        "fullyCleanScope": true,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Review focused implementation/receipts; scope retired after unsuppressed actual-rule zero result."
     },
     {
       "id": "N19",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/console/components/ui/ErrorPanel.tsx", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/console/components/ui/ErrorPanel.tsx",
+      "owner": "platform-team",
       "currentJustification": "Client error boundary runs in browser context where @nzila/os-core is not available — console.error is the browser RUM sink for Next.js error digest reporting. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/console/components/ui/ErrorPanel.tsx", "line": 55, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/console/components/ui/ErrorPanel.tsx",
+            "line": 55,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "The client panel emits message/digest to console in useEffect. Calling this RUM does not prove remote ingestion or approved permanent use.",
       "proposedCorrection": "Inject a browser-safe error-reporting adapter with allowlisted scope/digest/event code, preserve copy-incident/reset UI, and keep any approved development console transport in one narrow sink.",
       "residualRisk": "Error messages may contain sensitive data, and local console output is not durable incident evidence.",
-      "requiredReviewers": ["platform-team", "console application owner", "logging governance maintainer", "privacy reviewer"],
-      "nextAction": "Approve the panel reporting contract and verify client-bundle safety and sanitized failure reporting before retiring the entry."
+      "requiredReviewers": [
+        "platform-team",
+        "console application owner",
+        "logging governance maintainer",
+        "privacy reviewer"
+      ],
+      "nextAction": "Approve the panel reporting contract and verify client-bundle safety and sanitized failure reporting before retiring the entry.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "locations": [
+          {
+            "file": "apps/console/components/ui/ErrorPanel.tsx",
+            "line": 55,
+            "kind": "console.error"
+          }
+        ]
+      }
     },
     {
       "id": "N20",
-      "requiredApprovers": ["platform-core exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/nzila-hq/components/primitives/ErrorPanel.tsx", "owner": "platform-core",
+      "requiredApprovers": [
+        "platform-core exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
+      "owner": "platform-core",
       "currentJustification": "Client error boundary runs in browser context where @nzila/os-core is not available — console.error surfaces incident IDs via devtools. Will adopt os-core browser logger before PILOT promotion. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 1, "matchingFileCount": 1, "examples": [{"file": "apps/nzila-hq/components/primitives/ErrorPanel.tsx", "line": 31, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
+            "line": 31,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "The panel emits incident ID plus the Error object. INCUBATING/PILOT intentions do not authorize the existing sink indefinitely.",
       "proposedCorrection": "Select a verified browser-safe reporter, send sanitized stable incident metadata and retain the visible incident-ID handoff. Do not import an unverified Node logger into the client graph or exempt the whole component permanently.",
       "residualRisk": "The raw Error object may disclose detail; a generated display ID does not establish server correlation or telemetry delivery.",
-      "requiredReviewers": ["platform-core", "logging governance maintainer", "browser observability owner", "privacy reviewer"],
-      "nextAction": "Approve the browser reporter and stable incident-correlation contract, implement separately, then retire this exception."
+      "requiredReviewers": [
+        "platform-core",
+        "logging governance maintainer",
+        "browser observability owner",
+        "privacy reviewer"
+      ],
+      "nextAction": "Approve the browser reporter and stable incident-correlation contract, implement separately, then retire this exception.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 1,
+        "matchingFileCount": 1,
+        "locations": [
+          {
+            "file": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
+            "line": 31,
+            "kind": "console.error"
+          }
+        ]
+      }
     },
     {
       "id": "N21",
-      "requiredApprovers": ["platform-core exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/nzila-hq/server/db/audit.ts", "owner": "platform-core",
+      "requiredApprovers": [
+        "platform-core exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/nzila-hq/server/db/audit.ts",
+      "owner": "platform-core",
       "currentJustification": "Server-side audit logger in incubating app — console.error used as fallback when DB insert fails. Will adopt os-core structured logger before PILOT promotion. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 2, "matchingFileCount": 1, "examples": [{"file": "apps/nzila-hq/server/db/audit.ts", "line": 58, "kind": "console.error"}, {"file": "apps/nzila-hq/server/db/audit.ts", "line": 73, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 2,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/nzila-hq/server/db/audit.ts",
+            "line": 58,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/nzila-hq/server/db/audit.ts",
+            "line": 73,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "REMEDIATE",
       "finding": "Two server-side fallback branches log audit insert/list failures. The rationale mentions only insert failure.",
       "proposedCorrection": "Use a DB-independent structured failure sink with sanitized action/error classification for both branches. Avoid recursively writing audit-failure telemetry through the failing DB audit path.",
       "residualRisk": "Audit writes currently fail without throwing to the primary operation; changing the logger must not falsely imply audit durability or hide read failures.",
-      "requiredReviewers": ["platform-core", "logging governance maintainer", "audit/compliance owner"],
-      "nextAction": "Replace both sinks and test DB failure, logger failure and recursion prevention, then retire this exact-path entry."
+      "requiredReviewers": [
+        "platform-core",
+        "logging governance maintainer",
+        "audit/compliance owner"
+      ],
+      "nextAction": "Replace both sinks and test DB failure, logger failure and recursion prevention, then retire this exact-path entry.",
+      "historicalClassification": "REMEDIATE",
+      "currentDisposition": "RETIRED",
+      "currentMatchingViolations": {
+        "count": 0,
+        "matchingFileCount": 0,
+        "locations": []
+      },
+      "safeCorrectionExecution": {
+        "implementation": "HQ audit uses fixed structured diagnostics without raw caught errors; absent-DB and failed insert/list fallbacks retained.",
+        "beforeMatchingViolations": 2,
+        "afterMatchingViolations": 0,
+        "fullyCleanScope": true,
+        "priorHumanApprovalRequiredForSafeRefactor": false,
+        "review": "Ordinary CODEOWNERS/app/governance PR review remains required; no waiver, renewal, policy change or residual-risk acceptance granted."
+      },
+      "currentNextAction": "Review focused implementation/receipts; scope retired after unsuppressed actual-rule zero result."
     },
     {
       "id": "N22",
-      "requiredApprovers": ["platform-team exception owner", "architecture governance maintainer"], "rule": "NO_CONSOLE_001", "ledger": "governance/exceptions/no-console.json",
-      "path": "apps/union-eyes/instrumentation.ts", "owner": "platform-team",
+      "requiredApprovers": [
+        "platform-team exception owner",
+        "architecture governance maintainer"
+      ],
+      "rule": "NO_CONSOLE_001",
+      "ledger": "governance/exceptions/no-console.json",
+      "path": "apps/union-eyes/instrumentation.ts",
+      "owner": "platform-team",
       "currentJustification": "Turbopack instrumentation loader cannot instantiate relative module factories from inside register() catch path — console.error is the only safe fallback here. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "currentExpiry": "2026-10-18", "proposedExpiry": null,
-      "matchedSourceFileCount": 1, "scannedFileCount": 1,
-      "matchingViolations": {"count": 4, "matchingFileCount": 1, "examples": [{"file": "apps/union-eyes/instrumentation.ts", "line": 31, "kind": "console.error"}, {"file": "apps/union-eyes/instrumentation.ts", "line": 40, "kind": "console.error"}]},
+      "currentExpiry": "2026-10-18",
+      "proposedExpiry": null,
+      "matchedSourceFileCount": 1,
+      "scannedFileCount": 1,
+      "matchingViolations": {
+        "count": 4,
+        "matchingFileCount": 1,
+        "examples": [
+          {
+            "file": "apps/union-eyes/instrumentation.ts",
+            "line": 31,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/union-eyes/instrumentation.ts",
+            "line": 40,
+            "kind": "console.error"
+          }
+        ]
+      },
       "classification": "OWNER DECISION REQUIRED",
       "finding": "Two demo-deployment refusal paths and two OTel-init error/stack paths use console. The loader-specific explanation does not justify all four emissions or the entire instrumentation file.",
-      "sourceEvidence": ["apps/union-eyes/instrumentation.ts:31 guard refusal", "apps/union-eyes/instrumentation.ts:40 guard-evaluation failure", "apps/union-eyes/instrumentation.ts:56 OTel failure", "apps/union-eyes/instrumentation.ts:57 raw stack emission"],
+      "sourceEvidence": [
+        "apps/union-eyes/instrumentation.ts:31 guard refusal",
+        "apps/union-eyes/instrumentation.ts:40 guard-evaluation failure",
+        "apps/union-eyes/instrumentation.ts:56 OTel failure",
+        "apps/union-eyes/instrumentation.ts:57 raw stack emission"
+      ],
       "proposedCorrection": "Design a bootstrap-safe Node error sink using fixed event codes and redacted bounded data, with no catch-path relative dynamic import. Preserve fail-closed guard exits. Reproduce the loader failure under supported builds before deciding whether any narrow console fallback is genuinely unavoidable.",
       "residualRisk": "Raw startup stacks/messages may expose detail, while suppressing failures can obscure guard refusal or observability loss. Build compatibility is not proved by comments.",
-      "requiredReviewers": ["platform-team", "UE runtime owner", "logging governance maintainer", "privacy/security reviewer"],
-      "nextAction": "Owner supplies loader reproduction and bootstrap-sink design/tests; request explicit narrow approval only if alternatives fail. Do not renew the file-wide waiver."
+      "requiredReviewers": [
+        "platform-team",
+        "UE runtime owner",
+        "logging governance maintainer",
+        "privacy/security reviewer"
+      ],
+      "nextAction": "Owner supplies loader reproduction and bootstrap-sink design/tests; request explicit narrow approval only if alternatives fail. Do not renew the file-wide waiver.",
+      "historicalClassification": "OWNER DECISION REQUIRED",
+      "currentDisposition": "OWNER DECISION REQUIRED",
+      "currentMatchingViolations": {
+        "count": 4,
+        "matchingFileCount": 1,
+        "locations": [
+          {
+            "file": "apps/union-eyes/instrumentation.ts",
+            "line": 31,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/union-eyes/instrumentation.ts",
+            "line": 40,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/union-eyes/instrumentation.ts",
+            "line": 56,
+            "kind": "console.error"
+          },
+          {
+            "file": "apps/union-eyes/instrumentation.ts",
+            "line": 57,
+            "kind": "console.error"
+          }
+        ]
+      }
     }
   ],
   "otherOwnerDecisions": [
     {
-      "id": "B01", "rule": "NO_RAW_DB_IN_ACTIONS_001", "classification": "OWNER DECISION REQUIRED",
-      "ledger": "governance/exceptions/no-raw-db-in-actions.json", "currentEntries": 2, "expiredEntries": 2,
-      "owners": ["@nzila/union-eyes"],
-      "expiredPaths": ["apps/union-eyes/actions/admin-actions.ts", "apps/union-eyes/actions/member-segments-actions.ts"],
-      "evidence": ["tooling/contract-tests/no-raw-db-in-actions.test.ts:38 action roots", "tooling/contract-tests/no-raw-db-in-actions.test.ts:158 expiry assertion", "apps/union-eyes/actions/admin-actions.ts:13 local DB import", "apps/union-eyes/actions/member-segments-actions.ts:14 local DB import"],
+      "id": "B01",
+      "rule": "NO_RAW_DB_IN_ACTIONS_001",
+      "classification": "OWNER DECISION REQUIRED",
+      "ledger": "governance/exceptions/no-raw-db-in-actions.json",
+      "currentEntries": 2,
+      "expiredEntries": 2,
+      "owners": [
+        "@nzila/union-eyes"
+      ],
+      "expiredPaths": [
+        "apps/union-eyes/actions/admin-actions.ts",
+        "apps/union-eyes/actions/member-segments-actions.ts"
+      ],
+      "evidence": [
+        "tooling/contract-tests/no-raw-db-in-actions.test.ts:38 action roots",
+        "tooling/contract-tests/no-raw-db-in-actions.test.ts:158 expiry assertion",
+        "apps/union-eyes/actions/admin-actions.ts:13 local DB import",
+        "apps/union-eyes/actions/member-segments-actions.ts:14 local DB import"
+      ],
       "finding": "Independent expiry blocker remains. The actual rule scans immediate *-actions.ts files, checks raw/local DB patterns over whole contents, and has RLS-guard token allowances; it is not equivalent to ARCH_LAYER_001.",
       "proposedCorrection": "UE owner verifies authorization/RLS at every local DB operation and migrates through governed DAL/scoped services. Reevaluate both exceptions against the exact action rule before removal; a token/import alone is not tenant-isolation proof.",
       "residualRisk": "Source token-based guard recognition is weaker than execution-level authorization and live RLS evidence.",
       "proposedExpiry": null,
-      "requiredReviewers": ["@nzila/union-eyes", "tenant-isolation reviewer", "architecture governance maintainer"],
+      "requiredReviewers": [
+        "@nzila/union-eyes",
+        "tenant-isolation reviewer",
+        "architecture governance maintainer"
+      ],
       "nextAction": "Create a separately owned action-scoping remediation decision with negative tests; do not renew expiry."
     },
     {
-      "id": "B02", "rule": "ORG_REQUIRED_SERVER_ACTIONS_001", "classification": "OWNER DECISION REQUIRED",
-      "ledger": "governance/exceptions/org-required-server-actions.json", "currentEntries": 33, "expiredEntries": 33,
-      "owners": ["@nzila/cfo", "@nzila/partners", "@nzila/union-eyes", "@nzila/zonga"],
-      "ownerEntryCounts": {"@nzila/cfo": 12, "@nzila/partners": 5, "@nzila/union-eyes": 10, "@nzila/zonga": 6},
-      "evidence": ["tooling/contract-tests/server-action-org-scoping.test.ts:39 action roots", "tooling/contract-tests/server-action-org-scoping.test.ts:52 immediate action-file discovery", "tooling/contract-tests/server-action-org-scoping.test.ts:72 single-quoted use-server detection", "tooling/contract-tests/server-action-org-scoping.test.ts:91 expiry assertion"],
+      "id": "B02",
+      "rule": "ORG_REQUIRED_SERVER_ACTIONS_001",
+      "classification": "OWNER DECISION REQUIRED",
+      "ledger": "governance/exceptions/org-required-server-actions.json",
+      "currentEntries": 33,
+      "expiredEntries": 33,
+      "owners": [
+        "@nzila/cfo",
+        "@nzila/partners",
+        "@nzila/union-eyes",
+        "@nzila/zonga"
+      ],
+      "ownerEntryCounts": {
+        "@nzila/cfo": 12,
+        "@nzila/partners": 5,
+        "@nzila/union-eyes": 10,
+        "@nzila/zonga": 6
+      },
+      "evidence": [
+        "tooling/contract-tests/server-action-org-scoping.test.ts:39 action roots",
+        "tooling/contract-tests/server-action-org-scoping.test.ts:52 immediate action-file discovery",
+        "tooling/contract-tests/server-action-org-scoping.test.ts:72 single-quoted use-server detection",
+        "tooling/contract-tests/server-action-org-scoping.test.ts:91 expiry assertion"
+      ],
       "finding": "All 33 entries expire independently of source matches. Implementation checks only immediate *-actions.ts and the literal single-quoted 'use server' token; double-quoted directives such as UE's can evade the missing-resolveOrgContext test. The separate bare-auth check is not suppressed by these exceptions.",
       "proposedCorrection": "Owners classify each action as tenant or explicitly privileged platform operation, enforce authenticated org context at execution, and propose AST-based directive/call detection. Preserve the independent no-bare-auth requirement; do not merely add resolveOrgContext text.",
       "residualRisk": "Quote-sensitive and text-presence checks are not proof that every query is scoped or authorized.",
       "proposedExpiry": null,
-      "requiredReviewers": ["affected application owners", "identity/tenant-isolation reviewer", "architecture governance maintainer"],
+      "requiredReviewers": [
+        "affected application owners",
+        "identity/tenant-isolation reviewer",
+        "architecture governance maintainer"
+      ],
       "nextAction": "Assign per-owner action-scoping work and review actual call paths before any ledger retirement; no blanket renewal."
     },
     {
-      "id": "B03", "rule": "STACK_AUTHORITY_001", "classification": "OWNER DECISION REQUIRED",
-      "ledger": "governance/exceptions/stack-authority.json", "currentEntries": 26, "expiredEntries": 8,
-      "owners": ["@nzila/union-eyes", "@nzila/abr"],
-      "expiredPaths": ["apps/union-eyes/actions/admin-actions.ts", "apps/union-eyes/actions/analytics-actions.ts", "apps/union-eyes/app/api/portal/dues/pay/route.ts", "apps/union-eyes/app/*/dashboard/layout.tsx", "apps/union-eyes/app/api/grievances/**/route.ts", "apps/union-eyes/app/api/cases/intake/route.ts", "apps/union-eyes/app/api/cases/*/escalate/route.ts", "apps/union-eyes/app/api/exit-interviews/**/route.ts"],
-      "evidence": ["tooling/contract-tests/stack-authority.test.ts:40 Django-authoritative apps array contains ABR only", "tooling/contract-tests/stack-authority.test.ts:63 UE is TS-authoritative", "tooling/contract-tests/stack-authority.test.ts:340 UE app-layer context check", "tooling/contract-tests/stack-authority.test.ts:428 UE AST context check", "tooling/contract-tests/stack-authority.test.ts:467 expiry assertion"],
+      "id": "B03",
+      "rule": "STACK_AUTHORITY_001",
+      "classification": "OWNER DECISION REQUIRED",
+      "ledger": "governance/exceptions/stack-authority.json",
+      "currentEntries": 26,
+      "expiredEntries": 8,
+      "owners": [
+        "@nzila/union-eyes",
+        "@nzila/abr"
+      ],
+      "expiredPaths": [
+        "apps/union-eyes/actions/admin-actions.ts",
+        "apps/union-eyes/actions/analytics-actions.ts",
+        "apps/union-eyes/app/api/portal/dues/pay/route.ts",
+        "apps/union-eyes/app/*/dashboard/layout.tsx",
+        "apps/union-eyes/app/api/grievances/**/route.ts",
+        "apps/union-eyes/app/api/cases/intake/route.ts",
+        "apps/union-eyes/app/api/cases/*/escalate/route.ts",
+        "apps/union-eyes/app/api/exit-interviews/**/route.ts"
+      ],
+      "evidence": [
+        "tooling/contract-tests/stack-authority.test.ts:40 Django-authoritative apps array contains ABR only",
+        "tooling/contract-tests/stack-authority.test.ts:63 UE is TS-authoritative",
+        "tooling/contract-tests/stack-authority.test.ts:340 UE app-layer context check",
+        "tooling/contract-tests/stack-authority.test.ts:428 UE AST context check",
+        "tooling/contract-tests/stack-authority.test.ts:467 expiry assertion"
+      ],
       "finding": "Eight expiries remain, not 26. UE is TS-authoritative but still has explicit app-layer mutation/RLS checks. Its two expired actions/* entries do not suppress those app-only checks; the six app globs cannot be retired merely because UE is no longer in the Django array. The remaining 18 future-dated entries are not renewed or adjudicated here.",
       "proposedCorrection": "Reconcile authority documentation with current code; assess the two action-path entries for obsolete scan scope and the six app-path entries against both regex and alias-aware AST mutation checks. Retain withRLSContext/withSystemContext and audited mutation requirements; treat ABR authority separately.",
       "residualRisk": "Changing authority labels does not remove tenant/audit obligations, and removing an expired entry may reveal genuine mutation violations.",
       "proposedExpiry": null,
-      "requiredReviewers": ["@nzila/union-eyes", "@nzila/abr", "architecture governance maintainer", "tenant-isolation/audit reviewer"],
+      "requiredReviewers": [
+        "@nzila/union-eyes",
+        "@nzila/abr",
+        "architecture governance maintainer",
+        "tenant-isolation/audit reviewer"
+      ],
       "nextAction": "Owner produces current mutation-path evidence and an explicit per-entry retirement/remediation proposal. No source mutation counts are claimed for this separately scoped decision."
     }
   ],
   "closureCriteria": [
-    "Seven explicitly authorized redundant entries are retired in the ledgers. Owners review the remaining 26 proposals and submit separate scoped changes; no new exception or renewal is approved.",
+    "Sixteen cumulative redundant/fully clean entries retired. Four remaining REMEDIATE scopes need source engineering; thirteen owner-decision entries need the specifically recorded decisions. No exception renewal or gate clearance.",
     "Retirement candidates must pass the actual rule without their entry, not just have an existing directory.",
     "Remediation must preserve authorization, audit, runtime error behavior and import direction; no renamed alias or reflected console access may be used to evade governance.",
     "Structural exceptions require documented narrow module roles, explicit reviewer/approver decision, regression tests and lifecycle ownership. Browser necessity or INCUBATING status alone is insufficient.",
-    "Recompute all 33 entries and JSON summaries after any source/rule/ledger change. Required repository gates and external runtime proof remain separate from this bounded documentation evaluation."
-  ]
+    "Original 33-entry evidence is historical; current per-entry unsuppressed locations and execution summary record 153 matches / 141 rule-file pairs. Full repository gates and external runtime proof remain separate."
+  ],
+  "repositoryQualificationUpdate": {
+    "reportedAt": "2026-10-18T07:24:29.066-04:00",
+    "provenance": "Parent-supplied isolated Linux qualification receipts; not rerun by this bounded implementation agent.",
+    "qualifiedSource": "9a877f10d07aa8e84d690425dad4f6221dc9d076",
+    "repositoryDisposition": "HOLD",
+    "appliesToSafeCorrectionSource": false,
+    "fullFast": {
+      "passed": 30446,
+      "failed": 35,
+      "existingSkipped": 596,
+      "files": 2256,
+      "failureHeaders": 41,
+      "suiteFailures": 6,
+      "assertionFailures": 35,
+      "independentMainReproduction": "All 41 failure headers reproduced independently on exact main."
+    },
+    "failedSelectorRecovery": {
+      "environmentCorrection": "Removed conflicting generic private DATABASE_URL input; repaired missing Python/cryptography using a non-root venv. Generic DB input conflicted with guarded acceptance/default fixture modes.",
+      "passed": 93,
+      "existingConditionalAuthSkipped": 54,
+      "remainingSuiteFailures": 2,
+      "remainingFailureBoundary": "Docker-dependent suites: no privileged daemon/socket available.",
+      "authFixtureAuthorityBoundary": "Dedicated fixture preparation stopped before migration 0041. Its first three lines explicitly require separate approval for ANY environment. No migration or equivalent DDL workaround was applied. This is a concrete prior-approval boundary, not blanket CODEOWNERS-as-prior-approval."
+    },
+    "contracts": {
+      "passed": 10112,
+      "expiryOnlyAssertionsFailed": 6,
+      "independentReproduction": "Five rule tests plus fleet meta reproduced independently.",
+      "additionalExpiredEntriesOutsideSelected33": {
+        "noDirectProvider": 4,
+        "rawActions": 2,
+        "orgActions": 33,
+        "stackAuthority": 8
+      }
+    },
+    "otherLinuxChecks": {
+      "fullLint": "PASS; 172",
+      "docs": "PASS",
+      "governance": "PASS; 564",
+      "ownership": "PASS",
+      "release": "PASS",
+      "repository": "PASS",
+      "dependencies": "PASS",
+      "supplyChain": "PASS",
+      "ownershipPlatformDistinction": "Historical Windows ownership29 is not the Linux outcome."
+    },
+    "unionEyesFullTypecheck": {
+      "result": "RESOURCE_INTERRUPTED",
+      "exitCode": 137,
+      "hostRerunAuthorized": false
+    },
+    "limitations": "Exact-9a full receipts do not qualify the new working-tree corrections. Only separately bound focused new-source tests/lints support those edits. No repository gate clearance, UE readiness claim, auth migration approval or privileged Docker access is inferred."
+  },
+  "safeCorrectionExecution": {
+    "phase": "Approved behavior-preserving corrections after original seven retirements",
+    "sourceQualification": "Current working-tree edits; not covered by independent Linux run on 9a877f10.",
+    "focusedValidationBinding": {
+      "sourceAndTestFiles": 38,
+      "sha256": "9e7fb8212e9a7d0fbf6214888d1e513c3772338c02f6c73dd0d06eae93aa2830",
+      "algorithm": "Filter changedPaths to .ts, sort paths lexicographically; SHA256 of UTF-8 newline-joined path + NUL + SHA256(raw file bytes), with no trailing newline.",
+      "meaning": "Historical pre-AUTH-001-correction 38-file binding, preserved verbatim as receipt provenance. Two of these files subsequently changed; see authPurityCorrection for separate new-source validation. Not current-byte or full/staging qualification."
+    },
+    "newlyRetiredIds": [
+      "A01",
+      "A06",
+      "A08",
+      "A09",
+      "A10",
+      "N16",
+      "N17",
+      "N18",
+      "N21"
+    ],
+    "initialRetiredIdsPreserved": [
+      "A03",
+      "N01",
+      "N02",
+      "N04",
+      "N05",
+      "N14",
+      "N15"
+    ],
+    "currentSummary": {
+      "originalEntries": 33,
+      "initialRetired": 7,
+      "newlyRetired": 9,
+      "cumulativeRetired": 16,
+      "remainingEntries": 17,
+      "remainingExpiredEntries": 17,
+      "byCurrentDisposition": {
+        "RETIRED": 16,
+        "REMEDIATE": 4,
+        "OWNER DECISION REQUIRED": 13,
+        "LEGITIMATE EXCEPTION": 0,
+        "INVALID": 0
+      },
+      "matchingViolations": 153,
+      "matchingRuleFilePairs": 141,
+      "byRule": {
+        "ARCH_LAYER_001": {
+          "originalEntries": 11,
+          "cumulativeRetired": 6,
+          "remainingEntries": 5,
+          "remainingExpiredEntries": 5,
+          "matchingViolations": 113,
+          "matchingFiles": 104
+        },
+        "NO_CONSOLE_001": {
+          "originalEntries": 22,
+          "cumulativeRetired": 10,
+          "remainingEntries": 12,
+          "remainingExpiredEntries": 12,
+          "matchingViolations": 40,
+          "matchingFiles": 37
+        }
+      },
+      "otherExpiryBlockers": {
+        "NO_RAW_DB_IN_ACTIONS_001": 2,
+        "ORG_REQUIRED_SERVER_ACTIONS_001": 33,
+        "STACK_AUTHORITY_001": 8,
+        "NO_DIRECT_PROVIDER": 4
+      }
+    },
+    "ledgerHashesSha256": {
+      "governance/exceptions/arch-layer.json": {
+        "before": "a086c7268928e769b491e5d1c224525ae02cf592c78c4b759ddf8c70f9593000",
+        "after": "51bb70c1a81cc92424ac6bf20f9fe1fad5ad970a2baa3a1401684f6fd1d7fc9a",
+        "removedIds": [
+          "A01",
+          "A06",
+          "A08",
+          "A09",
+          "A10"
+        ],
+        "remainingEntries": 5,
+        "retainedValuesAndOrderUnchanged": true
+      },
+      "governance/exceptions/no-console.json": {
+        "before": "b84b681b454264d044c5898736f191b477efddd67e18ba5d1f83ebf59fb41b3a",
+        "after": "b3f2d7752a151fe08970b16e72db10d771179a245affc8e70ceeba407d1c9380",
+        "removedIds": [
+          "N16",
+          "N17",
+          "N18",
+          "N21"
+        ],
+        "remainingEntries": 12,
+        "retainedValuesAndOrderUnchanged": true
+      }
+    },
+    "unsuppressedRuleMethod": "Executed unchanged actual rule modules with actual walker and civic exclusion; only exception suppression bypassed in memory.",
+    "ruleStrengthAndExpirySemanticsUnchanged": true,
+    "consistencyValidation": {
+      "result": "PASS",
+      "checks": [
+        "JSON parses without duplicate keys.",
+        "All original fields of all 33 historical entries equal the b5ae0a4776b71cebf57e50b387b2e42e21a307e5 report.",
+        "Current ledgers equal the initial-seven-retirement ledgers minus exactly the nine newly clean IDs, with retained values/order/dates unchanged.",
+        "Both before/after ledger SHA-256 values match exact bytes.",
+        "Current disposition counts are 16 RETIRED, 4 REMEDIATE, 13 OWNER DECISION REQUIRED; all proposed expiries null.",
+        "Current full location arrays sum to 153 matches and 141 rule/file pairs.",
+        "At the historical pre-AUTH-001-correction phase all 38 source/test bytes matched focusedValidationBinding; all 42 changedPaths existed. The separately bound authPurityCorrection supersedes current-byte coverage for its changed files.",
+        "No staged changes; git diff --check passes."
+      ]
+    },
+    "receipts": [
+      {
+        "command": "pnpm exec vitest run tooling/contract-tests/tool-fabric-baseline-services.test.ts tooling/contract-tests/tool-fabric-baseline-proof-order.test.ts tooling/contract-tests/tool-fabric-baseline-logging.test.ts tooling/contract-tests/tool-fabric-baseline-routes.test.ts tooling/contract-tests/tool-fabric-baseline-seeds.test.ts packages/os-core/src/telemetry/diagnostic.test.ts apps/zonga/lib/__tests__/mobile-money-diagnostics.test.ts --maxWorkers=1 --no-file-parallelism",
+        "result": "57 tests / 7 files passed",
+        "startedAtLocal": "06:59:57",
+        "durationSeconds": 73.31
+      },
+      {
+        "command": "pnpm exec vitest run apps/union-eyes/app/api/__tests__/auth-mfa-enroll.route.test.ts apps/zonga/tests/security/payout-authorization.test.ts --maxWorkers=1 --no-file-parallelism",
+        "result": "13 tests / 2 files passed",
+        "startedAtLocal": "07:02:27",
+        "durationSeconds": 4.32
+      },
+      {
+        "command": "From packages/nar: pnpm exec vitest run src/adapter.test.ts --maxWorkers=1 --no-file-parallelism",
+        "result": "2 tests / 1 file passed",
+        "startedAtLocal": "07:14:21",
+        "durationSeconds": 29.85
+      },
+      {
+        "command": "node --max-old-space-size=768 node_modules/eslint/bin/eslint.js --config apps/console/eslint.config.mjs <all 37 changed .ts paths except mobile-money-diagnostics>; then same CLI with apps/zonga/eslint.config.mjs apps/zonga/lib/__tests__/mobile-money-diagnostics.test.ts",
+        "result": "Final pass: all 38 source/test files, exit 0. Only the existing root pages-directory configuration notice; no lint errors, rule changes or suppressions."
+      },
+      {
+        "command": "TypeScript strict selected-root semantic checks with real dependencies and app-aware @/ resolution",
+        "result": "Shared diagnostic helper/test, four NAR factories, Console/Flow services, Agrimo identity service and Control Plane repository/proof service passed. Dependency implementation diagnostics intentionally not checked in the smaller selected-root runs."
+      }
+    ],
+    "proofLimitations": [
+      "Focused tests use mocks/VM transpilation and do not prove live storage, tenant isolation, payment delivery, production logging infrastructure or UE staging readiness.",
+      "Aggregate service-root typechecks exceeded 896 MiB V8 heap; smaller groups passed for nine new service/repository roots. UE enrollment alone still exceeded a 1024 MiB heap cap, so no semantic-typecheck success is claimed for that module. Its focused runtime selector passed. This is not a full project typecheck/build.",
+      "No full suites/builds, dependency installs, expiry changes, new agents, staging or commits. Independent Linux qualification on 9a877f10 is exact-old-source evidence only and does not qualify these edits.",
+      "writeDiagnostic redacts metadata/context identities, then fixed stderr, then fixed process warning on failure. No raw payload/error or recursive DB audit. If every sink including warning throws, preserving the primary operation necessarily leaves no further diagnostic sink."
+    ],
+    "changedPaths": [
+      "apps/abr/app/api/abr/incidents/route.ts",
+      "apps/abr/modules/incidents/nar-proof-service.ts",
+      "apps/agrimo/app/api/webhooks/clerk/route.ts",
+      "apps/agrimo/lib/events/agri-event-emitter.ts",
+      "apps/agrimo/lib/services/identity-sync-service.ts",
+      "apps/cfo/lib/demoSeed.ts",
+      "apps/console/app/api/ai/actions/approve/route.ts",
+      "apps/console/app/api/ai/actions/execute/route.ts",
+      "apps/console/lib/demoSeed.ts",
+      "apps/console/lib/services/ai-action-service.ts",
+      "apps/control-plane/app/api/audit/record/route.ts",
+      "apps/control-plane/lib/demoSeed.ts",
+      "apps/control-plane/lib/repositories/audit-record-repository.ts",
+      "apps/control-plane/lib/services/audit-proof-service.ts",
+      "apps/flow/app/api/governance/telemetry/route.ts",
+      "apps/flow/lib/services/governance-metrics-service.ts",
+      "apps/nzila-hq/server/db/audit.ts",
+      "apps/orchestrator-api/src/routes/execute.ts",
+      "apps/orchestrator-api/src/services/nar-proof-service.ts",
+      "apps/partners/lib/demoSeed.ts",
+      "apps/platform-admin/app/api/admin/org/route.ts",
+      "apps/platform-admin/lib/nar-proof-service.ts",
+      "apps/union-eyes/app/api/auth/mfa/enroll/route.ts",
+      "apps/union-eyes/lib/services/mfa-enrollment-service.ts",
+      "apps/web/lib/demoSeed.ts",
+      "apps/weekone/lib/demoSeed.ts",
+      "apps/zonga/app/api/payouts/route.ts",
+      "apps/zonga/lib/__tests__/mobile-money-diagnostics.test.ts",
+      "apps/zonga/lib/nar-proof-service.ts",
+      "apps/zonga/lib/stripe.ts",
+      "docs/architecture/TOOL_FABRIC_BASELINE_GOVERNANCE_DECISIONS.json",
+      "docs/architecture/TOOL_FABRIC_BASELINE_GOVERNANCE_DECISIONS.md",
+      "governance/exceptions/arch-layer.json",
+      "governance/exceptions/no-console.json",
+      "packages/os-core/src/telemetry/diagnostic.test.ts",
+      "packages/os-core/src/telemetry/diagnostic.ts",
+      "packages/os-core/src/telemetry/index.ts",
+      "tooling/contract-tests/tool-fabric-baseline-logging.test.ts",
+      "tooling/contract-tests/tool-fabric-baseline-proof-order.test.ts",
+      "tooling/contract-tests/tool-fabric-baseline-routes.test.ts",
+      "tooling/contract-tests/tool-fabric-baseline-seeds.test.ts",
+      "tooling/contract-tests/tool-fabric-baseline-services.test.ts"
+    ],
+    "requiredAuthorityBlockers": "Thirteen original owner decisions retained, including N03 indirect/browser sink and A11 infrastructure role. Raw actions 2 / org scoping 33 / stack authority 8 / direct-provider 4 expired blockers unchanged; no renewal or gate clearance. Four remaining REMEDIATE scopes contain ordinary additional engineering, with only specifically identified semantic/structural changes requiring decisions. Auth fixture migration 0041 explicitly requires separate approval for ANY environment; no migration or equivalent DDL workaround applied."
+  },
+  "authPurityCorrection": {
+    "baselineStagedTree": "3c7447deae892eed1b71fb4ea4590ffc55aee488",
+    "introducedFailure": "AUTH-001 Agrimo: reproduced 19 provider-specific naming matches in identity-sync-service.ts; one focused test failed before correction.",
+    "implementation": "Use neutral authOrgId/userId in the service. New org-registry.ts is the real organization identity storage adapter: it owns lookup, creation and update against the unchanged legacy column. Follows Flow lib/org-resolver.ts compatibility resolution and platform-auth src/clerk-adapter.ts neutral identity naming; no computed-string evasion, exemption, scanner change or data migration.",
+    "preserved": "All five exported webhook handlers, raw webhook extraction and route verification/dispatch, exact provider-ID lookup predicate and limit, legacy persisted insert key/defaults, membership predicates/roles/status, update timestamps/order, rejection propagation and diagnostic timing.",
+    "sourceAndTestPaths": [
+      "apps/agrimo/lib/org-registry.ts",
+      "apps/agrimo/lib/services/identity-sync-service.ts",
+      "tooling/contract-tests/tool-fabric-baseline-services.test.ts"
+    ],
+    "focusedValidationBinding": {
+      "sha256": "425301a66e1aca7491c0bc613cd299250440d1751b51fe1039d01888d3329512",
+      "algorithm": "Sort sourceAndTestPaths lexicographically; SHA256 of UTF-8 newline-joined path + NUL + SHA256(raw file bytes), with no trailing newline."
+    },
+    "receipts": [
+      {
+        "command": "pnpm exec vitest run tooling\\contract-tests\\auth-purity.test.ts tooling\\contract-tests\\tool-fabric-baseline-services.test.ts tooling\\contract-tests\\tool-fabric-baseline-routes.test.ts -t 'agrimo has no Clerk-style variable names|A06' --maxWorkers=1 --no-file-parallelism",
+        "result": "9 passed / 307 filtered out by selector; 3 files passed; 08:14:43, 15.20s. Includes unchanged AUTH-001 scanner, identity defaults/mapping/predicates/removals/update/rejection regressions and signed webhook route regression."
+      },
+      {
+        "command": "node node_modules\\eslint\\bin\\eslint.js --config apps\\agrimo\\eslint.config.mjs apps\\agrimo\\lib\\services\\identity-sync-service.ts apps\\agrimo\\lib\\org-registry.ts tooling\\contract-tests\\tool-fabric-baseline-services.test.ts",
+        "result": "Exit 0; existing root pages-directory advisory only."
+      },
+      {
+        "command": "TypeScript createProgram with Agrimo parsed compiler options, exactly the two correction implementation roots, noEmit, incremental false, skipLibCheck, node types; node heap capped at 768 MiB.",
+        "result": "2 selected implementation roots and real dependency closure; 0 semantic diagnostics. Does not typecheck the whole app or dependency implementations."
+      }
+    ],
+    "remainingDisposition": "Unchanged 16 cumulative retirements / 17 retained entries; 153 findings / 141 rule-file pairs. No ledger, rule, expiry or full-qualification change.",
+    "limitations": "Separate focused new-source evidence only. The parent-supplied exact-9a and staged-3c full runs are historical source-bound receipts, not proof of this correction. No full suites, giant compiler, dependency install, Linux runner changes or commit; repository remains HOLD with mandatory full type gate resource blocked."
+  }
 }

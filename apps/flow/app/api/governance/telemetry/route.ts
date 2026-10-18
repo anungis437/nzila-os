@@ -10,8 +10,7 @@
 import { NextResponse } from 'next/server'
 import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
-import { db, flowDomainEvents, flowPayments } from '@nzila/db'
-import { sql, eq } from 'drizzle-orm'
+import { countAuditEvents, countPaymentGateBlocks } from '@/lib/services/governance-metrics-service'
 import {
   getWorkflowTransitionErrorCount,
   getEventEmissionGapCount,
@@ -51,10 +50,8 @@ export async function GET(request: Request) {
       let dbPaymentGateBlocks = paymentGateBlocks
 
       try {
-        const [ae] = await db.select({ count: sql<number>`count(*)` }).from(flowDomainEvents)
-        dbAuditEventVolume = ae?.count ?? 0
-        const [pg] = await db.select({ count: sql<number>`count(*)` }).from(flowPayments).where(eq(flowPayments.status, 'overdue'))
-        dbPaymentGateBlocks = pg?.count ?? 0
+        dbAuditEventVolume = await countAuditEvents()
+        dbPaymentGateBlocks = await countPaymentGateBlocks()
       } catch {
         // Fallback to in-process counters if DB unavailable
       }

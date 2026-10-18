@@ -8,10 +8,8 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/api-auth-guard'
-import { db } from '@/db/db'
+import { findMfaEnrollmentUser } from '@/lib/services/mfa-enrollment-service'
 import { enrollMfa } from '@nzila/platform-auth/mfa'
-import { authUsers } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
 
 export const runtime = 'nodejs'
 
@@ -20,11 +18,7 @@ export async function POST(_request: NextRequest) {
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const [user] = await db
-    .select({ email: authUsers.email })
-    .from(authUsers)
-    .where(eq(authUsers.userId, userId))
-    .limit(1)
+  const user = await findMfaEnrollmentUser(userId)
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }

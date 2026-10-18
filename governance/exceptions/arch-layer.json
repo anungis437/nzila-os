@@ -4,12 +4,6 @@
   "description": "Allowed exceptions to the architecture layering invariant (no direct DB from routes)",
   "entries": [
     {
-      "path": "apps/orchestrator-api/**",
-      "owner": "platform-team",
-      "justification": "Standalone non-Next.js service with its own DB client. Migration planned — see docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
       "path": "apps/console/**",
       "owner": "platform-team",
       "justification": "Console app has legacy unscoped DB imports across ~60 routes. Migration to createScopedDb(entityId) + service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
@@ -28,33 +22,9 @@
       "expiresOn": "2026-10-18"
     },
     {
-      "path": "apps/agrimo/**",
-      "owner": "agri-team",
-      "justification": "Agrimo webhook handler imports @nzila/db for org/member sync. Migration to service layer planned. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
       "path": "apps/control-plane/**",
       "owner": "platform-team",
       "justification": "Control plane db-bridge provides scoped DB bridge for internal admin operations. Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
-      "path": "apps/abr/app/api/abr/incidents/route.ts",
-      "owner": "faircase-team",
-      "justification": "Legacy NAR proof adapter in route still imports @nzila/db/schema. Service-layer extraction tracked in ENFORCEMENT_UPGRADE backlog. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
-      "path": "apps/platform-admin/app/api/admin/org/route.ts",
-      "owner": "platform-team",
-      "justification": "Legacy NAR proof adapter currently defined in route. Planned move to repository/service module. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
-      "expiresOn": "2026-10-18"
-    },
-    {
-      "path": "apps/zonga/app/api/payouts/route.ts",
-      "owner": "zonga-team",
-      "justification": "Route-local NAR proof adapter still uses schema import pending service-layer migration. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked]",
       "expiresOn": "2026-10-18"
     },
     {

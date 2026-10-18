@@ -6,6 +6,12 @@
  * via `tsx apps/weekone/lib/demoSeed.ts` (no app-to-app coupling).
  */
 
+import { createLogger, writeDiagnostic } from '@nzila/os-core/telemetry'
+
+const logger = createLogger('web:demo-seed')
+const report = (message: string) => writeDiagnostic(logger, 'info', message)
+const reportFailure = () => writeDiagnostic(logger, 'error', 'Demo seed failed')
+
 export interface DemoOrg {
   id: string
   name: string
@@ -68,16 +74,16 @@ export async function seedDemo() {
   const pages = createDemoPages()
   const analytics = createDemoAnalytics()
 
-  console.log(`[demo:seed] Web demo data created`)
-  console.log(`  Web Org: ${org.name}`)
-  console.log(`  Web Users: ${users.length}`)
-  console.log(`  Web Pages: ${pages.length}`)
-  console.log(`  Web Analytics: ready`)
-  console.log(`  (WeekOne demo data: run \`tsx apps/weekone/lib/demoSeed.ts\` separately)`)
+  report(`[demo:seed] Web demo data created`)
+  report(`  Web Org: ${org.name}`)
+  report(`  Web Users: ${users.length}`)
+  report(`  Web Pages: ${pages.length}`)
+  report(`  Web Analytics: ready`)
+  report(`  (WeekOne demo data: run \`tsx apps/weekone/lib/demoSeed.ts\` separately)`)
 
   return { web: { org, users, pages, analytics } }
 }
 
 if (process.argv[1]?.includes('demoSeed')) {
-  seedDemo().catch(console.error)
+  seedDemo().catch(reportFailure)
 }

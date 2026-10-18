@@ -7,6 +7,7 @@ export { createRequestContext, getRequestContext, runWithContext, contextToHeade
 export type { RequestContext } from './requestContext'
 export { createLogger, logger, childLogger, redactFields } from './logger'
 export type { Logger, LogLevel, LogEntry } from './logger'
+export { writeDiagnostic } from './diagnostic'
 export { initOtel, withSpan } from './otel'
 export type { OtelConfig } from './otel'
 export { metrics, initMetrics, SLO_DEFINITIONS, computeNormalizedErrorRates } from './metrics'

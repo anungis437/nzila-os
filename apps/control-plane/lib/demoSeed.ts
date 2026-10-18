@@ -10,6 +10,10 @@ import type { CrossAppInsight, OperationalSignal } from "@nzila/platform-intelli
 import type { Anomaly } from "@nzila/platform-anomaly-engine/types";
 import type { Recommendation } from "@nzila/platform-agent-workflows/types";
 import type { ModuleStatus, ProcurementSummary } from "@/types";
+import { createLogger, writeDiagnostic } from "@nzila/os-core/telemetry";
+
+const logger = createLogger("control-plane:demo-seed");
+const report = (message: string) => writeDiagnostic(logger, "info", message);
 
 // ── Fixed timestamp for determinism ─────────────────────
 
@@ -353,17 +357,15 @@ export async function seedDemo() {
   const modules = seedModules();
   const procurement = seedProcurement();
 
-  /* eslint-disable no-console */
-  console.log("[demo:seed] Control Plane demo data created");
-  console.log(`  Governance: ${governance.policy_engine}`);
-  console.log(`  Timeline entries: ${timeline.length}`);
-  console.log(`  Insights: ${insights.length}`);
-  console.log(`  Signals: ${signals.length}`);
-  console.log(`  Anomalies: ${anomalies.length}`);
-  console.log(`  Recommendations: ${recommendations.length}`);
-  console.log(`  Modules: ${modules.length}`);
-  console.log(`  Procurement pack: ${procurement.packId}`);
-  /* eslint-enable no-console */
+  report("[demo:seed] Control Plane demo data created");
+  report(`  Governance: ${governance.policy_engine}`);
+  report(`  Timeline entries: ${timeline.length}`);
+  report(`  Insights: ${insights.length}`);
+  report(`  Signals: ${signals.length}`);
+  report(`  Anomalies: ${anomalies.length}`);
+  report(`  Recommendations: ${recommendations.length}`);
+  report(`  Modules: ${modules.length}`);
+  report(`  Procurement pack: ${procurement.packId}`);
 
   return {
     governance,
@@ -378,10 +380,8 @@ export async function seedDemo() {
 }
 
 if (process.argv[1]?.includes("demoSeed")) {
-  seedDemo().catch((err) => {
-    /* eslint-disable no-console */
-    console.error(err);
-    /* eslint-enable no-console */
+  seedDemo().catch(() => {
+    writeDiagnostic(logger, "error", "Demo seed failed");
     process.exit(1);
   });
 }

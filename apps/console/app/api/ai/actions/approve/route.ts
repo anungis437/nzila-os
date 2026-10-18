@@ -7,9 +7,7 @@
  * Moves from awaiting_approval → approved/rejected.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { aiActions } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
+import { findAiAction, updateAiAction } from '@/lib/services/ai-action-service'
 import { recordAiReviewDecision } from '@nzila/ai-sdk'
 import {
   AiActionApproveRequestSchema,
@@ -32,11 +30,7 @@ export async function POST(req: NextRequest) {
     const { actionId, approved, notes } = parsed.data
 
     // 1. Find the action
-    const [action] = await platformDb
-      .select()
-      .from(aiActions)
-      .where(eq(aiActions.id, actionId))
-      .limit(1)
+    const action = await findAiAction(actionId)
 
     if (!action) {
       return NextResponse.json({ error: 'Action not found' }, { status: 404 })
@@ -59,15 +53,12 @@ export async function POST(req: NextRequest) {
 
     // 4. Update status
     const newStatus = approved ? 'approved' : 'rejected'
-    await platformDb
-      .update(aiActions)
-      .set({
+    await updateAiAction(actionId, {
         status: newStatus,
         approvedBy: access.context.userId,
         approvedAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(aiActions.id, actionId))
 
     // 5. Audit event
     await appendAiAuditEvent({
@@ -107,7 +98,7 @@ export async function POST(req: NextRequest) {
         { status: aiErr.statusCode },
       )
     }
-    logger.error('[AI Action Approve Error]', err instanceof Error ? err : { detail: err })
+    logger.error('[AI Action Approve Error]')
     return NextResponse.json(
       { error: 'Internal server error', code: 'unknown' },
       { status: 500 },

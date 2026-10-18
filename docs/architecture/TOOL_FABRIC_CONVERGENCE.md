@@ -152,14 +152,18 @@ The candidate removes this obsolete temporary override rather than relying on
 it to publish. Canonical `lefthook.yml` is unchanged. Earlier commit-hook logs
 with `gitleaks (skip) by condition` are not secret-scan passes; separate scanner
 receipts remain the evidence for those deltas. Enabling the gate does not clear
-the underlying expired-exception, historical scanner or human-approval blockers.
+expired-exception gates, resolve historical scanner findings or supply human
+approval. Historical full-scan findings do not predict a range-scoped PR scan.
 
 ### Prior local qualification cycle (historical evidence)
 
 The implementation is committed as `0637b7793359c2e63ac3af1f076e92ae75eabf69`
 (tree `578d82a3fa00ca183869a64d2ced44d92eea32ad`) through normal pre-commit
-hooks. No hook was bypassed. Staged secrets, ESLint, affected typecheck
-(11 tasks), brand leakage, Markdown links and inventory checks passed.
+invocation. Its log records the baseline override skipping Gitleaks; the final
+mission removes that override as described above. Staged ESLint, affected
+typecheck (11 tasks), brand leakage, Markdown links and inventory checks passed.
+Standalone staged/delta secret scans have separate receipts; they are not proof
+that the skipped hook ran.
 
 Verified local results:
 

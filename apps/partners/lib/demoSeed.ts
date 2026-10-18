@@ -5,6 +5,12 @@
  * for pilot demonstrations.
  */
 
+import { createLogger, writeDiagnostic } from '@nzila/os-core/telemetry'
+
+const logger = createLogger('partners:demo-seed')
+const report = (message: string) => writeDiagnostic(logger, 'info', message)
+const reportFailure = () => writeDiagnostic(logger, 'error', 'Demo seed failed')
+
 export interface DemoOrg {
   id: string
   name: string
@@ -64,15 +70,15 @@ export async function seedDemo() {
   const partners = createDemoPartners()
   const analytics = createDemoAnalytics()
 
-  console.log(`[demo:seed] Partners demo data created`)
-  console.log(`  Org: ${org.name}`)
-  console.log(`  Users: ${users.length}`)
-  console.log(`  Partners: ${partners.length}`)
-  console.log(`  Analytics: ready`)
+  report(`[demo:seed] Partners demo data created`)
+  report(`  Org: ${org.name}`)
+  report(`  Users: ${users.length}`)
+  report(`  Partners: ${partners.length}`)
+  report(`  Analytics: ready`)
 
   return { org, users, partners, analytics }
 }
 
 if (process.argv[1]?.includes('demoSeed')) {
-  seedDemo().catch(console.error)
+  seedDemo().catch(reportFailure)
 }

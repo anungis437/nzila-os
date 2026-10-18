@@ -14,6 +14,9 @@
 import 'server-only'
 import { getHqDb } from './client'
 import { auditLog } from './schema'
+import { createLogger, writeDiagnostic } from '@nzila/os-core/telemetry'
+
+const logger = createLogger('hq:audit')
 
 export type AuditAction =
   | 'export.report'
@@ -51,11 +54,10 @@ export async function recordAudit(entry: AuditEntryInput): Promise<void> {
       ipAddress: entry.ipAddress ?? null,
       userAgent: entry.userAgent ?? null,
     })
-  } catch (err) {
+  } catch {
     // Never throw to caller — audit failure must not block primary op.
     // Surface to stderr so observability picks it up.
-     
-    console.error('[audit] insert failed', { action: entry.action, err: String(err) })
+    writeDiagnostic(logger, 'error', 'Audit insert failed')
   }
 }
 
@@ -68,9 +70,8 @@ export async function listRecentAudit(limit = 50) {
   if (!db) return []
   try {
     return await db.select().from(auditLog).orderBy(auditLog.occurredAt).limit(limit)
-  } catch (err) {
-     
-    console.error('[audit] list failed', String(err))
+  } catch {
+    writeDiagnostic(logger, 'error', 'Audit list failed')
     return []
   }
 }
