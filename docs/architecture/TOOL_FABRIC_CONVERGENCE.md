@@ -270,3 +270,33 @@ uncommitted or pending local work. It makes no claim beyond the evidence listed.
   complete CI run is the pending qualification; it is not claimed as passed here.
 - **Dependencies:** #936 and #937 are the foundation, #938 is reconciled for shared
   audit v2, #935 keeps its independent security gate, and #922 keeps its privacy HOLD.
+## Final disposition (merged)
+
+Supersedes the "Candidate status" section above for merge state only.
+
+- **Merged:** PR #941 into `main` as merge commit
+  `c2e3c61ce619a78639b827b40b6478d65dc66d0c` on 2026-10-18, head
+  `3785a04aa0d5d18c3cbdd0b7f645c25e907d897d`, through the protected default ruleset
+  (no bypass, no force).
+- **Governance evidence at the merged head:** all 16 ruleset-required status checks
+  succeeded; one approving review from `anungisa` (not the author) at the exact head;
+  base equal to `main` (strict up-to-date policy satisfied). The `mikethecounsel`
+  review request is not a ruleset or CODEOWNERS-enforced requirement
+  (`require_code_owner_review: false`, no required reviewers) and was not treated as
+  mandatory. Labels `security-design-reviewed`, `owner-approved` and
+  `approved-experiment` were applied at the repository owner's direction; the only
+  security review on file is the static AI review, not a human `@nzila/security`
+  acceptance.
+- **Accepted architecture:** Tool Fabric deny-only policy and trust contracts
+  (`packages/tool-fabric`): authenticated host invocation, full-scope single-use
+  approvals, bounded arguments, effect/risk floors, filesystem and network scope
+  denial, immutable tool identity, trusted governance decisions with revocation and
+  separation of duties, atomic trust-ledger contracts and audit v2. No redesign.
+- **Dependent PRs:** #936 and #937 closed as superseded by #941 (no separate merge).
+  #938 is not merged; it keeps its independent audit review gate and now needs a
+  rebase onto `main` (conflicts in `packages/audit`). #935 keeps its independent
+  security review; #922 keeps its privacy HOLD; #925 remains closed.
+- **Workstream:** Tool Fabric Phase 1-2 engineering is closed.
+- **Still CLOSED / HOLD:** installation, execution, CIVITAS Phase 3, broker
+  readiness (HOLD), deployment, and the 13 owner decisions in the
+  [owner approval matrix](./TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md).
