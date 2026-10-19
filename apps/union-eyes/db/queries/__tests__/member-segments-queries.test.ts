@@ -10,7 +10,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ queue: [] as unknown[] }));
+const mocks = vi.hoisted(() => ({ queue: [] as unknown[], rls: [] as unknown[] }));
 
 function shift() {
   return mocks.queue.length ? mocks.queue.shift() : [];
@@ -40,7 +40,11 @@ function makeTx() {
 }
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (op: (tx: unknown) => Promise<unknown>) => op(makeTx()),
+  withRLSContext: async (ctxOrOp: unknown, maybeOp?: unknown) => {
+    const operation = typeof ctxOrOp === 'function' ? ctxOrOp : maybeOp;
+    mocks.rls.push(typeof ctxOrOp === 'function' ? { organizationId: null } : ctxOrOp);
+    return (operation as (tx: unknown) => Promise<unknown>)(makeTx());
+  },
 }));
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
@@ -54,22 +58,29 @@ function push(...rows: unknown[]) {
 
 beforeEach(() => {
   mocks.queue = [];
+  mocks.rls = [];
   vi.clearAllMocks();
 });
 
 describe('member-segments-queries — CRUD', () => {
   it('createSegment returns the created segment', async () => {
     push([{ id: 's1', name: 'Seg' }]);
-    expect(await q.createSegment({ name: 'Seg' } as never)).toEqual({ id: 's1', name: 'Seg' });
+    expect(await q.createSegment({ name: 'Seg', organizationId: 'org1' } as never)).toEqual({ id: 's1', name: 'Seg' });
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
   });
   it('createSegment throws on error', async () => {
     push(new Error('db'));
-    await expect(q.createSegment({ name: 'X' } as never)).rejects.toThrow('Failed to create segment');
+    await expect(q.createSegment({ name: 'X', organizationId: 'org1' } as never)).rejects.toThrow('Failed to create segment');
+  });
+  it('createSegment refuses to open an unscoped RLS context', async () => {
+    await expect(q.createSegment({ name: 'X' } as never)).rejects.toThrow('Organization context required');
+    expect(mocks.rls).toEqual([]);
   });
 
   it('getSegments without userId', async () => {
     push([{ id: 's1' }]);
     expect(await q.getSegments('org1')).toHaveLength(1);
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
   });
   it('getSegments with userId (adds public/owner filter)', async () => {
     push([{ id: 's1' }, { id: 's2' }]);
@@ -91,24 +102,33 @@ describe('member-segments-queries — CRUD', () => {
     await expect(q.getSegmentById('s1', 'org1')).rejects.toThrow('Failed to get segment');
   });
 
-  it('updateSegment returns the updated segment', async () => {
+  it('updateSegment returns the updated segment inside the authorized organization', async () => {
     push([{ id: 's1', name: 'New' }]);
-    expect(await q.updateSegment('s1', { name: 'New' } as never)).toEqual({ id: 's1', name: 'New' });
+    expect(await q.updateSegment('s1', { name: 'New', organizationId: 'org-b' } as never, 'org1')).toEqual({
+      id: 's1',
+      name: 'New',
+    });
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
   });
-  it('updateSegment throws when not found', async () => {
+  it('updateSegment throws when not found in the authorized organization', async () => {
     push([]);
-    await expect(q.updateSegment('missing', { name: 'X' } as never)).rejects.toThrow(
+    await expect(q.updateSegment('missing', { name: 'X' } as never, 'org1')).rejects.toThrow(
       'Failed to update segment',
     );
   });
 
-  it('deleteSegment soft-deletes without throwing', async () => {
+  it('deleteSegment soft-deletes inside the authorized organization', async () => {
+    push([{ id: 's1' }]);
+    await expect(q.deleteSegment('s1', 'org1')).resolves.toBeUndefined();
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
+  });
+  it('deleteSegment does not report success when the segment is outside the organization', async () => {
     push([]);
-    await expect(q.deleteSegment('s1')).resolves.toBeUndefined();
+    await expect(q.deleteSegment('foreign-segment', 'org1')).rejects.toThrow('Failed to delete segment');
   });
   it('deleteSegment throws on error', async () => {
     push(new Error('db'));
-    await expect(q.deleteSegment('s1')).rejects.toThrow('Failed to delete segment');
+    await expect(q.deleteSegment('s1', 'org1')).rejects.toThrow('Failed to delete segment');
   });
 });
 
@@ -140,6 +160,7 @@ describe('member-segments-queries — advanced search', () => {
     });
     expect(r.members).toHaveLength(1);
     expect(r.total).toBe(1);
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
   });
   it('searchMembersAdvanced with seniority sort', async () => {
     push([{ id: 'm1' }], [{ count: 5 }]);
@@ -182,22 +203,24 @@ describe('member-segments-queries — advanced search', () => {
 describe('member-segments-queries — executions & exports', () => {
   it('logSegmentExecution returns the row', async () => {
     push([{ id: 'exec1' }]);
-    expect(await q.logSegmentExecution({ segmentId: 's1' } as never)).toEqual({ id: 'exec1' });
+    expect(await q.logSegmentExecution({ segmentId: 's1' } as never, 'org1')).toEqual({ id: 'exec1' });
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
   });
   it('logSegmentExecution throws on error', async () => {
     push(new Error('db'));
-    await expect(q.logSegmentExecution({ segmentId: 's1' } as never)).rejects.toThrow(
+    await expect(q.logSegmentExecution({ segmentId: 's1' } as never, 'org1')).rejects.toThrow(
       'Failed to log segment execution',
     );
   });
 
-  it('getSegmentExecutions returns history', async () => {
+  it('getSegmentExecutions returns history for the authorized organization', async () => {
     push([{ id: 'exec1' }]);
-    expect(await q.getSegmentExecutions('s1')).toHaveLength(1);
+    expect(await q.getSegmentExecutions('s1', 'org1')).toHaveLength(1);
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
   });
   it('getSegmentExecutions throws on error', async () => {
     push(new Error('db'));
-    await expect(q.getSegmentExecutions('s1')).rejects.toThrow('Failed to get segment executions');
+    await expect(q.getSegmentExecutions('s1', 'org1')).rejects.toThrow('Failed to get segment executions');
   });
 
   it('logSegmentExport returns the row', async () => {
@@ -214,6 +237,7 @@ describe('member-segments-queries — executions & exports', () => {
   it('getExportHistory returns history', async () => {
     push([{ id: 'exp1' }]);
     expect(await q.getExportHistory('org1')).toHaveLength(1);
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
   });
   it('getExportHistory throws on error', async () => {
     push(new Error('db'));

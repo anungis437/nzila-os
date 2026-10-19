@@ -26,6 +26,32 @@ import { eq, and, or, desc, asc, sql, gte, lte, inArray, SQL } from "drizzle-orm
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 
+/**
+ * Bind segment SQL to the organization the action already authorized.
+ * An empty id fails closed instead of falling through to a different session org.
+ * Callers must authorize membership before passing organizationId: this helper
+ * attaches that id to the transaction, it does not decide access.
+ */
+function withSegmentOrganization<T>(
+  organizationId: string | null | undefined,
+  operation: (tx: RLSTx) => Promise<T>,
+): Promise<T> {
+  if (typeof organizationId !== "string" || organizationId.trim() === "") {
+    return Promise.reject(new Error("Organization context required"));
+  }
+  return withRLSContext({ organizationId }, operation);
+}
+
+function segmentUpdatePatch(
+  data: Partial<InsertMemberSegment>,
+): Partial<InsertMemberSegment> {
+  const patch: Partial<InsertMemberSegment> = { ...data };
+  delete patch.organizationId;
+  delete patch.createdBy;
+  delete patch.id;
+  return patch;
+}
+
 // =============================================================================
 // SEGMENT CRUD
 // =============================================================================
@@ -37,7 +63,7 @@ export async function createSegment(
   data: InsertMemberSegment
 ): Promise<SelectMemberSegment> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(data.organizationId, async (tx: RLSTx) => {
     try {
       const [segment] = await tx
         .insert(memberSegments)
@@ -60,7 +86,7 @@ export async function getSegments(
   userId?: string
 ): Promise<SelectMemberSegment[]> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const conditions: SQL[] = [
         eq(memberSegments.organizationId, organizationId),
@@ -97,7 +123,7 @@ export async function getSegmentById(
   organizationId: string
 ): Promise<SelectMemberSegment | null> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const [segment] = await tx
         .select()
@@ -123,18 +149,24 @@ export async function getSegmentById(
  */
 export async function updateSegment(
   id: string,
-  data: Partial<InsertMemberSegment>
+  data: Partial<InsertMemberSegment>,
+  organizationId: string,
 ): Promise<SelectMemberSegment> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const [updated] = await tx
         .update(memberSegments)
         .set({
-          ...data,
+          ...segmentUpdatePatch(data),
           updatedAt: new Date(),
         })
-        .where(eq(memberSegments.id, id))
+        .where(
+          and(
+            eq(memberSegments.id, id),
+            eq(memberSegments.organizationId, organizationId),
+          ),
+        )
         .returning();
       
       if (!updated) {
@@ -153,15 +185,26 @@ export async function updateSegment(
  * Delete a segment (soft delete by setting isActive = false)
  */
 export async function deleteSegment(
-  id: string
+  id: string,
+  organizationId: string,
 ): Promise<void> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
-      await tx
+      const updated = await tx
         .update(memberSegments)
         .set({ isActive: false, updatedAt: new Date() })
-        .where(eq(memberSegments.id, id));
+        .where(
+          and(
+            eq(memberSegments.id, id),
+            eq(memberSegments.organizationId, organizationId),
+          ),
+        )
+        .returning({ id: memberSegments.id });
+
+      if (updated.length === 0) {
+        throw new Error(`Segment ${id} not found`);
+      }
     } catch (error) {
       logger.error("Failed to delete segment", error as Error, { id });
       throw new Error("Failed to delete segment");
@@ -190,7 +233,7 @@ export async function searchMembersAdvanced(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ members: any[]; total: number }> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const page = options?.page || 1;
       const limit = options?.limit || 50;
@@ -348,7 +391,7 @@ export async function executeSegment(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ members: any[]; total: number }> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       // Get segment
       const segment = await getSegmentById(segmentId, organizationId);
@@ -377,16 +420,21 @@ export async function executeSegment(
         executionTimeMs,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         filtersSnapshot: segment.filters as any,
-      });
+      }, organizationId);
 
-      // Update segment metadata
+      // Update segment metadata inside the authorized organization only.
       await tx
         .update(memberSegments)
         .set({
           lastExecutedAt: new Date(),
           executionCount: sql`${memberSegments.executionCount} + 1`,
         })
-        .where(eq(memberSegments.id, segmentId));
+        .where(
+          and(
+            eq(memberSegments.id, segmentId),
+            eq(memberSegments.organizationId, organizationId),
+          ),
+        );
 
       return result;
     } catch (error) {
@@ -404,10 +452,11 @@ export async function executeSegment(
  * Log segment execution for audit trail
  */
 export async function logSegmentExecution(
-  data: InsertSegmentExecution
+  data: InsertSegmentExecution,
+  organizationId: string,
 ): Promise<SelectSegmentExecution> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const [execution] = await tx
         .insert(segmentExecutions)
@@ -427,15 +476,21 @@ export async function logSegmentExecution(
  */
 export async function getSegmentExecutions(
   segmentId: string,
+  organizationId: string,
   limit: number = 50
 ): Promise<SelectSegmentExecution[]> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       return await tx
         .select()
         .from(segmentExecutions)
-        .where(eq(segmentExecutions.segmentId, segmentId))
+        .where(
+          and(
+            eq(segmentExecutions.segmentId, segmentId),
+            sql`exists (select 1 from ${memberSegments} where ${memberSegments.id} = ${segmentExecutions.segmentId} and ${memberSegments.organizationId} = ${organizationId})`,
+          ),
+        )
         .orderBy(desc(segmentExecutions.executedAt))
         .limit(limit);
     } catch (error) {
@@ -456,7 +511,7 @@ export async function logSegmentExport(
   data: InsertSegmentExport
 ): Promise<SelectSegmentExport> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(data.organizationId, async (tx: RLSTx) => {
     try {
       const [exportLog] = await tx
         .insert(segmentExports)
@@ -479,7 +534,7 @@ export async function getExportHistory(
   limit: number = 100
 ): Promise<SelectSegmentExport[]> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       return await tx
         .select()

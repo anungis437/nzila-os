@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   revalidatePath: vi.fn(),
   loggerError: vi.fn(),
   dbLimit: vi.fn(),
+  authorize: vi.fn(),
   q: {
     createSegment: vi.fn(),
     getSegments: vi.fn(),
@@ -41,6 +42,10 @@ vi.mock('@/db/schema-organizations', () => ({ organizations: { id: 'id', name: '
 vi.mock('@/db/queries/member-segments-queries', () => mocks.q);
 vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidatePath }));
 vi.mock('@/lib/logger', () => ({ logger: { error: mocks.loggerError } }));
+vi.mock('@/lib/member-segments/authorize-segment-access', () => ({
+  authorizeMemberSegmentAccess: mocks.authorize,
+  MEMBER_SEGMENT_EXPORT_ENTITLEMENT: 'export_suite',
+}));
 
 import * as actions from '../member-segments-actions';
 
@@ -48,6 +53,11 @@ describe('member-segments-actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.auth.mockResolvedValue({ userId: 'user-1' });
+    mocks.authorize.mockImplementation(async (organizationId: string) => ({
+      ok: true,
+      userId: 'user-1',
+      organizationId,
+    }));
     mocks.currentUser.mockResolvedValue({ fullName: 'Jane Doe' });
     mocks.dbLimit.mockResolvedValue([{ name: 'Acme Union' }]);
     for (const fn of Object.values(mocks.q)) fn.mockResolvedValue('OK');
@@ -63,19 +73,24 @@ describe('member-segments-actions', () => {
 
   describe('CRUD', () => {
     it('createMemberSegmentAction: success, unauth, error', async () => {
-      expect((await actions.createMemberSegmentAction({} as never)).isSuccess).toBe(true);
+      expect((await actions.createMemberSegmentAction({ organizationId: 'org' } as never)).isSuccess).toBe(true);
+      expect(mocks.q.createSegment).toHaveBeenCalledWith(
+        expect.objectContaining({ organizationId: 'org', createdBy: 'user-1' }),
+      );
 
-      mocks.auth.mockResolvedValueOnce({ userId: null });
-      expect((await actions.createMemberSegmentAction({} as never)).isSuccess).toBe(false);
+      mocks.authorize.mockResolvedValueOnce({ ok: false, message: 'Unauthorized' });
+      expect((await actions.createMemberSegmentAction({ organizationId: 'org' } as never)).isSuccess).toBe(false);
+      expect(mocks.q.createSegment).toHaveBeenCalledTimes(1);
 
       mocks.q.createSegment.mockRejectedValueOnce(new Error('x'));
-      expect((await actions.createMemberSegmentAction({} as never)).isSuccess).toBe(false);
+      expect((await actions.createMemberSegmentAction({ organizationId: 'org' } as never)).isSuccess).toBe(false);
     });
 
     it('getMemberSegmentsAction: success (private), unauth, error', async () => {
       expect((await actions.getMemberSegmentsAction('org', true)).isSuccess).toBe(true);
+      expect(mocks.q.getSegments).toHaveBeenCalledWith('org', 'user-1');
 
-      mocks.auth.mockResolvedValueOnce({ userId: null });
+      mocks.authorize.mockResolvedValueOnce({ ok: false, message: 'Unauthorized' });
       expect((await actions.getMemberSegmentsAction('org')).isSuccess).toBe(false);
 
       mocks.q.getSegments.mockRejectedValueOnce(new Error('x'));
@@ -84,6 +99,7 @@ describe('member-segments-actions', () => {
 
     it('getMemberSegmentByIdAction: found, not found, error', async () => {
       expect((await actions.getMemberSegmentByIdAction('s1', 'org')).isSuccess).toBe(true);
+      expect(mocks.authorize).toHaveBeenCalledWith('org', undefined);
 
       mocks.q.getSegmentById.mockResolvedValueOnce(null);
       const nf = await actions.getMemberSegmentByIdAction('s1', 'org');
@@ -94,23 +110,25 @@ describe('member-segments-actions', () => {
     });
 
     it('updateMemberSegmentAction: success, unauth, error', async () => {
-      expect((await actions.updateMemberSegmentAction('s1', {})).isSuccess).toBe(true);
+      expect((await actions.updateMemberSegmentAction('s1', 'org', {})).isSuccess).toBe(true);
+      expect(mocks.q.updateSegment).toHaveBeenCalledWith('s1', {}, 'org');
 
-      mocks.auth.mockResolvedValueOnce({ userId: null });
-      expect((await actions.updateMemberSegmentAction('s1', {})).isSuccess).toBe(false);
+      mocks.authorize.mockResolvedValueOnce({ ok: false, message: 'Unauthorized' });
+      expect((await actions.updateMemberSegmentAction('s1', 'org', {})).isSuccess).toBe(false);
 
       mocks.q.updateSegment.mockRejectedValueOnce(new Error('x'));
-      expect((await actions.updateMemberSegmentAction('s1', {})).isSuccess).toBe(false);
+      expect((await actions.updateMemberSegmentAction('s1', 'org', {})).isSuccess).toBe(false);
     });
 
     it('deleteMemberSegmentAction: success, unauth, error', async () => {
-      expect((await actions.deleteMemberSegmentAction('s1')).isSuccess).toBe(true);
+      expect((await actions.deleteMemberSegmentAction('s1', 'org')).isSuccess).toBe(true);
+      expect(mocks.q.deleteSegment).toHaveBeenCalledWith('s1', 'org');
 
-      mocks.auth.mockResolvedValueOnce({ userId: null });
-      expect((await actions.deleteMemberSegmentAction('s1')).isSuccess).toBe(false);
+      mocks.authorize.mockResolvedValueOnce({ ok: false, message: 'Unauthorized' });
+      expect((await actions.deleteMemberSegmentAction('s1', 'org')).isSuccess).toBe(false);
 
       mocks.q.deleteSegment.mockRejectedValueOnce(new Error('x'));
-      expect((await actions.deleteMemberSegmentAction('s1')).isSuccess).toBe(false);
+      expect((await actions.deleteMemberSegmentAction('s1', 'org')).isSuccess).toBe(false);
     });
   });
 
@@ -118,7 +136,7 @@ describe('member-segments-actions', () => {
     it('searchMembersAdvancedAction: success, unauth, error', async () => {
       expect((await actions.searchMembersAdvancedAction('org', {} as never)).isSuccess).toBe(true);
 
-      mocks.auth.mockResolvedValueOnce({ userId: null });
+      mocks.authorize.mockResolvedValueOnce({ ok: false, message: 'Unauthorized' });
       expect((await actions.searchMembersAdvancedAction('org', {} as never)).isSuccess).toBe(false);
 
       mocks.q.searchMembersAdvanced.mockRejectedValueOnce(new Error('x'));
@@ -128,18 +146,25 @@ describe('member-segments-actions', () => {
     it('executeSegmentAction: success, unauth, error', async () => {
       expect((await actions.executeSegmentAction('s1', 'org')).isSuccess).toBe(true);
 
-      mocks.auth.mockResolvedValueOnce({ userId: null });
+      mocks.authorize.mockResolvedValueOnce({ ok: false, message: 'Unauthorized' });
       expect((await actions.executeSegmentAction('s1', 'org')).isSuccess).toBe(false);
 
       mocks.q.executeSegment.mockRejectedValueOnce(new Error('x'));
       expect((await actions.executeSegmentAction('s1', 'org')).isSuccess).toBe(false);
     });
 
-    it('getSegmentExecutionHistoryAction: success, error', async () => {
-      expect((await actions.getSegmentExecutionHistoryAction('s1')).isSuccess).toBe(true);
+    it('getSegmentExecutionHistoryAction: success, missing segment, error', async () => {
+      mocks.q.getSegmentById.mockResolvedValueOnce({ id: 's1' });
+      expect((await actions.getSegmentExecutionHistoryAction('s1', 'org')).isSuccess).toBe(true);
+      expect(mocks.q.getSegmentExecutions).toHaveBeenCalledWith('s1', 'org');
 
+      mocks.q.getSegmentById.mockResolvedValueOnce(null);
+      const missing = await actions.getSegmentExecutionHistoryAction('s1', 'org');
+      expect(missing).toEqual({ isSuccess: false, message: 'Segment not found' });
+
+      mocks.q.getSegmentById.mockResolvedValueOnce({ id: 's1' });
       mocks.q.getSegmentExecutions.mockRejectedValueOnce(new Error('x'));
-      expect((await actions.getSegmentExecutionHistoryAction('s1')).isSuccess).toBe(false);
+      expect((await actions.getSegmentExecutionHistoryAction('s1', 'org')).isSuccess).toBe(false);
     });
   });
 
@@ -161,9 +186,16 @@ describe('member-segments-actions', () => {
     });
 
     it('rejects when unauthenticated', async () => {
-      mocks.auth.mockResolvedValueOnce({ userId: null });
+      mocks.authorize.mockResolvedValueOnce({ ok: false, message: 'Unauthorized' });
       const r = await actions.exportMembersAction('org', null, 's1', 'csv', ['name']);
-      expect(r.isSuccess).toBe(false);
+      expect(r).toEqual({ isSuccess: false, message: 'Unauthorized' });
+      expect(mocks.q.executeSegment).not.toHaveBeenCalled();
+    });
+
+    it('requires the export entitlement before reading members', async () => {
+      const r = await actions.exportMembersAction('org', null, 's1', 'csv', ['name']);
+      expect(r.isSuccess).toBe(true);
+      expect(mocks.authorize).toHaveBeenCalledWith('org', { entitlement: 'export_suite' });
     });
 
     it('falls back to assembled name when fullName is missing', async () => {
@@ -196,9 +228,12 @@ describe('member-segments-actions', () => {
   describe('getExportHistoryAction', () => {
     it('success, unauth, error', async () => {
       expect((await actions.getExportHistoryAction('org', 10)).isSuccess).toBe(true);
+      expect(mocks.authorize).toHaveBeenCalledWith('org', { entitlement: 'export_suite' });
 
-      mocks.auth.mockResolvedValueOnce({ userId: null });
-      expect((await actions.getExportHistoryAction('org')).isSuccess).toBe(false);
+      mocks.authorize.mockResolvedValueOnce({ ok: false, message: 'Forbidden' });
+      const denied = await actions.getExportHistoryAction('org-b');
+      expect(denied).toEqual({ isSuccess: false, message: 'Forbidden' });
+      expect(mocks.q.getExportHistory).not.toHaveBeenCalledWith('org-b', undefined);
 
       mocks.q.getExportHistory.mockRejectedValueOnce(new Error('x'));
       expect((await actions.getExportHistoryAction('org')).isSuccess).toBe(false);

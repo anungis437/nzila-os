@@ -10,7 +10,7 @@
  * @module actions/member-segments-actions
  */
 
-import { auth, currentUser } from '@nzila/platform-auth/entra/server';
+import { currentUser } from '@nzila/platform-auth/entra/server';
 import { db } from "@/db";
 import { organizations } from "@/db/schema-organizations";
 import {
@@ -39,7 +39,27 @@ import type {
 import { ActionResult } from "@/types/actions/actions-types";
 import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
-import { eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import {
+  authorizeMemberSegmentAccess,
+  MEMBER_SEGMENT_EXPORT_ENTITLEMENT,
+  type SegmentAccessDenial,
+  type SegmentAccessGrant,
+} from "@/lib/member-segments/authorize-segment-access";
+
+function denied(decision: SegmentAccessDenial): ActionResult<never> {
+  return { isSuccess: false, message: decision.message };
+}
+
+async function requireSegmentAccess(
+  organizationId: string,
+  entitlement?: string,
+): Promise<SegmentAccessGrant | SegmentAccessDenial> {
+  return authorizeMemberSegmentAccess(
+    organizationId,
+    entitlement ? { entitlement } : undefined,
+  );
+}
 
 // =============================================================================
 // SEGMENT CRUD ACTIONS
@@ -52,17 +72,13 @@ export async function createMemberSegmentAction(
   data: Omit<InsertMemberSegment, "createdBy">
 ): Promise<ActionResult<SelectMemberSegment>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        isSuccess: false,
-        message: "Unauthorized - must be logged in to create segments",
-      };
-    }
+    const access = await requireSegmentAccess(data.organizationId);
+    if (!access.ok) return denied(access);
 
     const segment = await createSegment({
       ...data,
-      createdBy: userId,
+      organizationId: access.organizationId,
+      createdBy: access.userId,
     });
 
     revalidatePath("/dashboard/members");
@@ -90,17 +106,12 @@ export async function getMemberSegmentsAction(
   includePrivate: boolean = false
 ): Promise<ActionResult<SelectMemberSegment[]>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        isSuccess: false,
-        message: "Unauthorized",
-      };
-    }
+    const access = await requireSegmentAccess(organizationId);
+    if (!access.ok) return denied(access);
 
     const segments = await getSegments(
-      organizationId,
-      includePrivate ? userId : undefined
+      access.organizationId,
+      includePrivate ? access.userId : undefined
     );
 
     return {
@@ -125,7 +136,10 @@ export async function getMemberSegmentByIdAction(
   organizationId: string
 ): Promise<ActionResult<SelectMemberSegment>> {
   try {
-    const segment = await getSegmentById(id, organizationId);
+    const access = await requireSegmentAccess(organizationId);
+    if (!access.ok) return denied(access);
+
+    const segment = await getSegmentById(id, access.organizationId);
     if (!segment) {
       return {
         isSuccess: false,
@@ -152,18 +166,14 @@ export async function getMemberSegmentByIdAction(
  */
 export async function updateMemberSegmentAction(
   id: string,
+  organizationId: string,
   data: Partial<InsertMemberSegment>
 ): Promise<ActionResult<SelectMemberSegment>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        isSuccess: false,
-        message: "Unauthorized",
-      };
-    }
+    const access = await requireSegmentAccess(organizationId);
+    if (!access.ok) return denied(access);
 
-    const updated = await updateSegment(id, data);
+    const updated = await updateSegment(id, data, access.organizationId);
 
     revalidatePath("/dashboard/members");
     revalidatePath("/dashboard/admin/segments");
@@ -186,18 +196,14 @@ export async function updateMemberSegmentAction(
  * Delete a segment
  */
 export async function deleteMemberSegmentAction(
-  id: string
+  id: string,
+  organizationId: string,
 ): Promise<ActionResult<void>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        isSuccess: false,
-        message: "Unauthorized",
-      };
-    }
+    const access = await requireSegmentAccess(organizationId);
+    if (!access.ok) return denied(access);
 
-    await deleteSegment(id);
+    await deleteSegment(id, access.organizationId);
 
     revalidatePath("/dashboard/members");
     revalidatePath("/dashboard/admin/segments");
@@ -233,15 +239,10 @@ export async function searchMembersAdvancedAction(
   }
 ): Promise<ActionResult<{ members: any[]; total: number }>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        isSuccess: false,
-        message: "Unauthorized",
-      };
-    }
+    const access = await requireSegmentAccess(organizationId);
+    if (!access.ok) return denied(access);
 
-    const result = await searchMembersAdvanced(organizationId, filters, options);
+    const result = await searchMembersAdvanced(access.organizationId, filters, options);
 
     return {
       isSuccess: true,
@@ -269,15 +270,10 @@ export async function executeSegmentAction(
   }
 ): Promise<ActionResult<{ members: any[]; total: number }>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        isSuccess: false,
-        message: "Unauthorized",
-      };
-    }
+    const access = await requireSegmentAccess(organizationId);
+    if (!access.ok) return denied(access);
 
-    const result = await executeSegment(segmentId, organizationId, userId, options);
+    const result = await executeSegment(segmentId, access.organizationId, access.userId, options);
 
     return {
       isSuccess: true,
@@ -297,10 +293,22 @@ export async function executeSegmentAction(
  * Get execution history for a segment
  */
 export async function getSegmentExecutionHistoryAction(
-  segmentId: string
+  segmentId: string,
+  organizationId: string,
 ): Promise<ActionResult<SelectSegmentExecution[]>> {
   try {
-    const executions = await getSegmentExecutions(segmentId);
+    const access = await requireSegmentAccess(organizationId);
+    if (!access.ok) return denied(access);
+
+    const segment = await getSegmentById(segmentId, access.organizationId);
+    if (!segment) {
+      return {
+        isSuccess: false,
+        message: "Segment not found",
+      };
+    }
+
+    const executions = await getSegmentExecutions(segmentId, access.organizationId);
 
     return {
       isSuccess: true,
@@ -339,13 +347,11 @@ export async function exportMembersAction(
   purpose?: string
 ): Promise<ActionResult<{ exportId: string; watermark: string }>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        isSuccess: false,
-        message: "Unauthorized",
-      };
-    }
+    const access = await requireSegmentAccess(
+      organizationId,
+      MEMBER_SEGMENT_EXPORT_ENTITLEMENT,
+    );
+    if (!access.ok) return denied(access);
 
     // Get members data
     let members: any[];
@@ -353,12 +359,12 @@ export async function exportMembersAction(
 
     if (segmentId) {
       // Execute segment
-      const result = await executeSegment(segmentId, organizationId, userId, { limit: 10000 });
+      const result = await executeSegment(segmentId, access.organizationId, access.userId, { limit: 10000 });
       members = result.members;
       totalCount = result.total;
     } else if (filters) {
       // Execute ad-hoc search
-      const result = await searchMembersAdvanced(organizationId, filters, { limit: 10000 });
+      const result = await searchMembersAdvanced(access.organizationId, filters, { limit: 10000 });
       members = result.members;
       totalCount = result.total;
     } else {
@@ -372,20 +378,20 @@ export async function exportMembersAction(
     const userDisplayName = clerkUser?.fullName
       || [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ")
       || clerkUser?.primaryEmailAddress?.emailAddress
-      || userId;
+      || access.userId;
 
     const [org] = await db
       .select({ name: organizations.name })
       .from(organizations)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .where(or(eq(organizations.id, organizationId as any), eq(organizations.slug, organizationId)))
+      .where(eq(organizations.id, access.organizationId as any))
       .limit(1);
 
-    const organizationName = org?.name || organizationId;
+    const organizationName = org?.name || access.organizationId;
 
     // Generate watermark
     const watermark = generateExportWatermark(
-      userId,
+      access.userId,
       userDisplayName,
       organizationName
     );
@@ -395,9 +401,9 @@ export async function exportMembersAction(
 
     // Log export
     const exportLog = await logSegmentExport({
-      organizationId,
+      organizationId: access.organizationId,
       segmentId: segmentId || undefined,
-      exportedBy: userId,
+      exportedBy: access.userId,
       format,
       includeFields,
       memberCount: totalCount,
@@ -434,15 +440,13 @@ export async function getExportHistoryAction(
   limit?: number
 ): Promise<ActionResult<SelectSegmentExport[]>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        isSuccess: false,
-        message: "Unauthorized",
-      };
-    }
+    const access = await requireSegmentAccess(
+      organizationId,
+      MEMBER_SEGMENT_EXPORT_ENTITLEMENT,
+    );
+    if (!access.ok) return denied(access);
 
-    const history = await getExportHistory(organizationId, limit);
+    const history = await getExportHistory(access.organizationId, limit);
 
     return {
       isSuccess: true,
