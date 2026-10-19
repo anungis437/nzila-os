@@ -32,4 +32,13 @@ describe('organization member query importers', () => {
     expect(source).toMatch(/import \{ getMemberByUserId \} from "@\/db\/queries\/organization-members-queries"/)
     expect(source).not.toMatch(/\b(createMember|updateMember|deleteMember|addOrganizationMember)\b/)
   })
+
+  it('keeps role assignment on the tenant allow-list and the role-management grant', () => {
+    const service = readFileSync(resolve(APP_ROOT, 'lib/services/member-service.ts'), 'utf8')
+    const policy = readFileSync(resolve(APP_ROOT, 'lib/member-integrity/authorize-member-access.ts'), 'utf8')
+    expect(service).toMatch(/assertTenantAssignableRole/)
+    expect(service).toMatch(/assign_role/)
+    expect(policy).toMatch(/TENANT_SELF_SERVICE_ASSIGNABLE_ROLES/)
+    expect(policy).toMatch(/MEMBER_ROLE_ADMIN_ROLES = \['admin'\]/)
+  })
 })
