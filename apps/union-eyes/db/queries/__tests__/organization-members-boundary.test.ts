@@ -204,13 +204,17 @@ describe('organization member query grants', () => {
     await expect(q.updateMember(ORG_A, 'm1', { organizationId: ORG_B }, administer)).rejects.toThrow('Forbidden')
     expect(mocks.updates).toEqual([])
 
+    mocks.selectQueue.push([{ id: 'm1', status: 'active', organizationId: ORG_A }])
     const updated = await q.updateMember(ORG_A, 'm1', { status: 'inactive', name: 'Hidden' }, administer)
     expect(updated?.status).toBe('inactive')
     expect(mocks.audits.at(-1)).toMatchObject({ operation: 'status_change' })
     expect(JSON.stringify(mocks.audits)).not.toContain('Hidden')
 
     mocks.auditFails = true
-    await expect(q.deleteMember(ORG_A, 'm1', administer)).rejects.toThrow('Member audit was not persisted')
+    const removal = await authorizeMemberAccess(ORG_A, 'remove_member')
+    if (!removal.ok) throw new Error('expected removal grant')
+    mocks.selectQueue.push([{ id: 'm1', userId: 'member-user', role: 'member', organizationId: ORG_A }])
+    await expect(q.deleteMember(ORG_A, 'm1', removal)).rejects.toThrow('Member audit was not persisted')
     expect(mocks.outcomes).toContain('rollback')
     expect(mocks.updates.filter((patch) => patch.deletedAt)).toEqual([])
   })
@@ -231,5 +235,41 @@ describe('organization member query grants', () => {
     expect(existing).toMatchObject({ id: 'existing' })
     expect(mocks.inserts).toEqual([])
     expect(mocks.audits).toEqual([])
+  })
+
+  it('keeps removal, exemption, and status rules on the query boundary', async () => {
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    const administer = await authorizeMemberAccess(ORG_A, 'administer')
+    const removal = await authorizeMemberAccess(ORG_A, 'remove_member')
+    if (!administer.ok || !removal.ok) throw new Error('expected grants')
+
+    await expect(q.createMember({
+      organizationId: ORG_A,
+      userId: 'exempt-user',
+      name: 'Exempt',
+      email: 'exempt@example.com',
+      role: 'member',
+      exemptFromPerCapita: true,
+      exemptionApprovedBy: 'forged-approver',
+    }, administer)).rejects.toThrow('Forbidden')
+    await expect(q.updateMember(ORG_A, 'm1', { exemptionReason: 'hardship' }, administer)).rejects.toThrow('Forbidden')
+    await expect(q.updateMember(ORG_A, 'm1', { exemptionApprovedBy: ADMIN }, administer)).rejects.toThrow('Forbidden')
+    await expect(q.deleteMember(ORG_A, 'm1', administer)).rejects.toThrow('Forbidden')
+    expect(mocks.inserts).toEqual([])
+    expect(mocks.updates).toEqual([])
+
+    mocks.selectQueue.push([{ id: 'self', userId: ADMIN, role: 'member', organizationId: ORG_A }])
+    await expect(q.deleteMember(ORG_A, 'self', removal)).rejects.toThrow('Forbidden')
+    mocks.selectQueue.push([{ id: 'only-admin', userId: 'other-admin', role: 'admin', organizationId: ORG_A }])
+    mocks.selectQueue.push([{ count: 0 }])
+    await expect(q.deleteMember(ORG_A, 'only-admin', removal)).rejects.toThrow('Forbidden')
+    expect(await q.deleteMember(ORG_A, 'missing', removal)).toBe(false)
+    expect(mocks.updates.filter((patch) => patch.deletedAt)).toEqual([])
+
+    mocks.selectQueue.push([])
+    expect(await q.updateMember(ORG_A, 'missing', { status: 'inactive' }, administer)).toBeUndefined()
+    mocks.selectQueue.push([{ id: 'm1', status: 'inactive', organizationId: ORG_A }])
+    await expect(q.updateMember(ORG_A, 'm1', { status: 'on-leave' }, administer)).rejects.toThrow('Forbidden')
+    expect(mocks.updates).toEqual([])
   })
 })

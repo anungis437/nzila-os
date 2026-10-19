@@ -16,7 +16,7 @@
 import 'server-only'
 
 import { organizationMembers, type SelectOrganizationMember, type InsertOrganizationMember } from "../schema/organization-members-schema";
-import { eq, and, isNull, desc, sql } from "drizzle-orm";
+import { eq, and, isNull, ne, desc, sql } from "drizzle-orm";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import {
   assertRegisteredMemberGrant,
@@ -26,8 +26,23 @@ import {
   type MemberCapability,
 } from "@/lib/member-integrity/authorize-member-access";
 import { persistDurableMemberAudit } from "@/lib/member-integrity/durable-member-audit";
+import {
+  assertMemberRemovalPolicy,
+  assertMemberStatusTransition,
+  FINANCIAL_EXEMPTION_FIELDS,
+  rejectClientFinancialExemption,
+} from "@/lib/member-integrity/member-write-policy";
 
-const PROTECTED_UPDATE_FIELDS = ["id", "userId", "organizationId", "role", "createdAt", "deletedAt", "joinedAt"] as const;
+const PROTECTED_UPDATE_FIELDS = [
+  "id",
+  "userId",
+  "organizationId",
+  "role",
+  "createdAt",
+  "deletedAt",
+  "joinedAt",
+  ...FINANCIAL_EXEMPTION_FIELDS,
+] as const;
 
 function assertOrganization(organizationId: string): string {
   if (typeof organizationId !== "string" || organizationId.trim() === "") {
@@ -66,6 +81,7 @@ function membershipInsert(
   delete source.createdAt;
   delete source.organizationId;
   delete source.role;
+  for (const field of FINANCIAL_EXEMPTION_FIELDS) delete source[field];
   return { ...source, organizationId, role } as InsertOrganizationMember;
 }
 
@@ -136,6 +152,7 @@ export async function createMember(
   grant: MemberAccessGrant,
   tx?: RLSTx,
 ): Promise<SelectOrganizationMember> {
+  rejectClientFinancialExemption(member, "create");
   const organizationId = assertOrganization(member.organizationId ?? "");
   const role = member.role ?? "member";
   assertTenantAssignableRole(role);
@@ -194,6 +211,19 @@ export async function updateMember(
   const scoped = assertOrganization(organizationId);
   const scopedGrant = requireMutationGrant(grant, scoped, "administer");
   return inOrganization(scoped, tx, async (db, organizationId) => {
+    if (updates.status !== undefined) {
+      const current = await db
+        .select()
+        .from(organizationMembers)
+        .where(and(
+          eq(organizationMembers.id, id),
+          eq(organizationMembers.organizationId, organizationId),
+          isNull(organizationMembers.deletedAt),
+        ))
+        .limit(1);
+      if (!current[0]) return undefined;
+      assertMemberStatusTransition(String(current[0].status), String(updates.status));
+    }
     const result = await db
       .update(organizationMembers)
       .set({ ...updates, updatedAt: new Date() })
@@ -221,8 +251,36 @@ export async function deleteMember(
   tx?: RLSTx,
 ): Promise<boolean> {
   const scoped = assertOrganization(organizationId);
-  const scopedGrant = requireMutationGrant(grant, scoped, "administer");
+  const scopedGrant = requireMutationGrant(grant, scoped, "remove_member");
   return inOrganization(scoped, tx, async (db, organizationId) => {
+    const existing = await db
+      .select()
+      .from(organizationMembers)
+      .where(and(
+        eq(organizationMembers.id, id),
+        eq(organizationMembers.organizationId, organizationId),
+        isNull(organizationMembers.deletedAt),
+      ))
+      .limit(1);
+    const target = existing[0];
+    if (!target) return false;
+    const otherAdmins = target.role === "admin"
+      ? await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(organizationMembers)
+        .where(and(
+          eq(organizationMembers.organizationId, organizationId),
+          eq(organizationMembers.role, "admin"),
+          isNull(organizationMembers.deletedAt),
+          ne(organizationMembers.id, target.id),
+        ))
+      : [];
+    assertMemberRemovalPolicy({
+      actorUserId: scopedGrant.userId,
+      targetUserId: target.userId,
+      targetRole: target.role,
+      otherActiveAdminCount: Number(otherAdmins[0]?.count ?? 0),
+    });
     const result = await db
       .update(organizationMembers)
       .set({ deletedAt: new Date(), updatedAt: new Date() })

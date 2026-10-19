@@ -55,6 +55,7 @@ const adminGrant = {
   organizationId: 'org',
   capability: 'administer' as const,
 };
+const removeGrant = { ...adminGrant, capability: 'remove_member' as const };
 const roleGrant = { ...adminGrant, capability: 'assign_role' as const };
 
 import * as q from '../organization-members-queries';
@@ -120,10 +121,12 @@ describe('organization-members-queries', () => {
   });
 
   it('deleteMember returns true/false', async () => {
-    push([{ id: 'm1' }]);
-    expect(await q.deleteMember('org', 'm1', adminGrant)).toBe(true);
+    push([{ id: 'm1', userId: 'member-user', role: 'member' }]);
+    push([{ id: 'm1', deletedAt: new Date() }]);
+    expect(await q.deleteMember('org', 'm1', removeGrant)).toBe(true);
     push([]);
-    expect(await q.deleteMember('org', 'm9', adminGrant)).toBe(false);
+    expect(await q.deleteMember('org', 'm9', removeGrant)).toBe(false);
+    await expect(q.deleteMember('org', 'm1', adminGrant)).rejects.toThrow('Forbidden');
   });
 
   it('getMemberCount + getActiveMemberCount return counts (with fallback)', async () => {

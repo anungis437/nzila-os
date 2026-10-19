@@ -296,6 +296,7 @@ describe('member-service', () => {
 
   describe('deleteMember', () => {
     it('soft deletes and returns true', async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce(MEMBER);
       mocks.mockUpdate.mockReturnValue(chain([MEMBER]));
       expect(await deleteMember('org-1', 'm1')).toBe(true);
     });
@@ -340,6 +341,10 @@ describe('member-service', () => {
 
   describe('bulkUpdateMemberStatus', () => {
     it('updates status for all member ids', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { id: 'm1', status: 'active' },
+        { id: 'm2', status: 'active' },
+      ]));
       mocks.mockUpdate.mockReturnValue(chain([{ id: 'm1' }, { id: 'm2' }]));
       const result = await bulkUpdateMemberStatus('org-1', ['m1', 'm2'], 'inactive');
       expect(result.success).toBe(true);

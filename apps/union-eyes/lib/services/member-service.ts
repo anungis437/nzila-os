@@ -3,8 +3,10 @@
  *
  * Every administration call resolves `auth()` through `authorizeMemberAccess`
  * and runs inside `withRLSContext({ organizationId })` for that organization.
- * Role assignment uses the narrower role-management grant. Hard deletion is
- * refused. Generic updates cannot move organization ownership, identity, or role.
+ * Role assignment uses the narrower role-management grant. Soft deletion and
+ * duplicate suppression use the removal grant (`Permission.DELETE_MEMBER`).
+ * Hard deletion is refused. Generic updates cannot move organization
+ * ownership, identity, role, or per-capita exemption fields.
  *
  * This module does not prove that a deployed database enforces row-level security.
  */
@@ -13,7 +15,7 @@ import { organizationMembers } from "@/db/schema";
 import { eq, and, or, gte, lte, desc, asc, like, sql, inArray, count } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
-import { withRLSContext } from "@/lib/db/with-rls-context";
+import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import {
   assertTenantAssignableRole,
   authorizeMemberAccess,
@@ -23,6 +25,13 @@ import {
   type MemberCapability,
 } from "@/lib/member-integrity/authorize-member-access";
 import { persistDurableMemberAudit } from "@/lib/member-integrity/durable-member-audit";
+import {
+  assertMemberRemovalPolicy,
+  assertMemberStatusTransition,
+  FINANCIAL_EXEMPTION_FIELDS,
+  MEMBER_RECORD_STATUSES,
+  rejectClientFinancialExemption,
+} from "@/lib/member-integrity/member-write-policy";
 
 export type NewMember = typeof organizationMembers.$inferInsert;
 export type Member = typeof organizationMembers.$inferSelect;
@@ -65,8 +74,10 @@ const PROTECTED_UPDATE_FIELDS = [
   "createdAt",
   "deletedAt",
   "joinedAt",
+  ...FINANCIAL_EXEMPTION_FIELDS,
 ] as const;
 
+/** Profile fields copied during duplicate suppression. Exemption, approval, role, and status stay put. */
 const MERGE_FIELDS = [
   "name",
   "email",
@@ -80,10 +91,6 @@ const MERGE_FIELDS = [
   "unionJoinDate",
   "metadata",
   "memberCategory",
-  "exemptFromPerCapita",
-  "exemptionReason",
-  "exemptionApprovedBy",
-  "status",
   "isPrimary",
 ] as const;
 
@@ -114,7 +121,20 @@ function membershipInsert(data: NewMember, organizationId: string, role: string)
   delete source.createdAt;
   delete source.organizationId;
   delete source.role;
+  for (const field of FINANCIAL_EXEMPTION_FIELDS) delete source[field];
   return { ...source, organizationId, role } as NewMember;
+}
+
+async function otherActiveAdminCount(
+  tx: RLSTx,
+  organizationId: string,
+  targetId: string,
+): Promise<number> {
+  const admins = await tx.select().from(organizationMembers).where(and(
+    activeInOrganization(organizationId),
+    eq(organizationMembers.role, "admin"),
+  ));
+  return admins.filter((row) => row.id !== targetId).length;
 }
 
 async function requireGrant(organizationId: string, capability: MemberCapability): Promise<MemberAccessGrant> {
@@ -263,6 +283,7 @@ export async function listMembers(
 
 export async function createMember(data: NewMember): Promise<Member> {
   try {
+    rejectClientFinancialExemption(data, "create");
     const organizationId = assertOrganization(data?.organizationId ?? "");
     const role = data.role ?? "member";
     assertTenantAssignableRole(role);
@@ -313,6 +334,13 @@ export async function updateMember(
     rejectProtectedUpdate(data);
     const grant = await requireGrant(organizationId, "administer");
     return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      if (data.status !== undefined) {
+        const current = await tx.query.organizationMembers.findFirst({
+          where: activeInOrganization(grant.organizationId, id),
+        });
+        if (!current) return null;
+        assertMemberStatusTransition(String(current.status), String(data.status));
+      }
       const [updated] = await tx
         .update(organizationMembers)
         .set({ ...data, updatedAt: new Date() })
@@ -334,8 +362,20 @@ export async function updateMember(
 
 export async function deleteMember(organizationId: string, id: string): Promise<boolean> {
   try {
-    const grant = await requireGrant(organizationId, "administer");
+    const grant = await requireGrant(organizationId, "remove_member");
     return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const target = await tx.query.organizationMembers.findFirst({
+        where: activeInOrganization(grant.organizationId, id),
+      });
+      if (!target) return false;
+      assertMemberRemovalPolicy({
+        actorUserId: grant.userId,
+        targetUserId: target.userId,
+        targetRole: target.role,
+        otherActiveAdminCount: target.role === "admin"
+          ? await otherActiveAdminCount(tx, grant.organizationId, target.id)
+          : 0,
+      });
       const [deleted] = await tx
         .update(organizationMembers)
         .set({ deletedAt: new Date(), updatedAt: new Date() })
@@ -356,7 +396,7 @@ export async function deleteMember(organizationId: string, id: string): Promise<
 }
 
 export async function permanentlyDeleteMember(organizationId: string, _id: string): Promise<boolean> {
-  await requireGrant(organizationId, "administer");
+  await requireGrant(organizationId, "remove_member");
   throw new MemberBoundaryError("Membership records are retained. Soft-delete the member instead.");
 }
 
@@ -390,8 +430,21 @@ export async function bulkUpdateMemberStatus(
 ): Promise<BulkOperationResult> {
   try {
     const grant = await requireGrant(organizationId, "administer");
+    if (!(MEMBER_RECORD_STATUSES as readonly string[]).includes(status)) {
+      throw new MemberBoundaryError("Forbidden");
+    }
     if (memberIds.length === 0) return { success: true, processed: 0, failed: 0 };
     return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      if (new Set(memberIds).size !== memberIds.length) throw new MemberBoundaryError("Forbidden");
+      const current = await tx
+        .select()
+        .from(organizationMembers)
+        .where(and(
+          activeInOrganization(grant.organizationId),
+          inArray(organizationMembers.id, memberIds),
+        ));
+      if (current.length !== memberIds.length) throw new MemberBoundaryError("Forbidden");
+      for (const row of current) assertMemberStatusTransition(String(row.status), status);
       const updated = await tx
         .update(organizationMembers)
         .set({ status: status as MemberStatusValue, updatedAt: new Date() })
@@ -537,6 +590,12 @@ function pickMergeFields(source: Member, base: Partial<NewMember>): Partial<NewM
   return next;
 }
 
+/**
+ * Suppresses one duplicate membership row inside the authorized organization.
+ * This copies profile fields onto the canonical row and soft-deletes the
+ * duplicate. It does not reassign claims, dues, history, or other linked
+ * records, and it is not referential consolidation.
+ */
 export async function mergeMembers(
   organizationId: string,
   primaryMemberId: string,
@@ -545,7 +604,7 @@ export async function mergeMembers(
 ): Promise<Member> {
   try {
     if (primaryMemberId === duplicateMemberId) throw new MemberBoundaryError("Forbidden");
-    const grant = await requireGrant(organizationId, "administer");
+    const grant = await requireGrant(organizationId, "remove_member");
     return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
       const primary = await tx.query.organizationMembers.findFirst({
         where: activeInOrganization(grant.organizationId, primaryMemberId),
@@ -557,6 +616,14 @@ export async function mergeMembers(
       if (primary.organizationId !== grant.organizationId || duplicate.organizationId !== grant.organizationId) {
         throw new MemberBoundaryError("Forbidden");
       }
+      assertMemberRemovalPolicy({
+        actorUserId: grant.userId,
+        targetUserId: duplicate.userId,
+        targetRole: duplicate.role,
+        otherActiveAdminCount: duplicate.role === "admin"
+          ? await otherActiveAdminCount(tx, grant.organizationId, duplicate.id)
+          : 0,
+      });
 
       let patch: Partial<NewMember> = {};
       if (keepData === "duplicate") patch = pickMergeFields(duplicate, {});

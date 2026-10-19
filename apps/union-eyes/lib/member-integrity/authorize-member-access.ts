@@ -7,9 +7,12 @@
  * allow-listed organizational role. Platform roles are omitted.
  * `hasRole()` is not used.
  *
- * Administering a member record and assigning a role are different
- * decisions. Role assignment is the organizational `admin` role, which
- * already holds `MANAGE_ROLES`. The returned grant is frozen.
+ * Administering a member record, assigning a role, and removing a member
+ * are different decisions. Role assignment is the organizational `admin`
+ * role, which already holds `MANAGE_ROLES`. Removal follows
+ * `Permission.DELETE_MEMBER`. Among organizational roles that permission
+ * is held by `admin`; platform roles are still excluded here. The returned
+ * grant is frozen.
  *
  * This module does not prove that a deployed database enforces row-level security.
  */
@@ -17,6 +20,7 @@
 import { auth } from '@nzila/platform-auth/entra/server'
 import { TENANT_SELF_SERVICE_ASSIGNABLE_ROLES } from '@nzila/platform-auth/invites'
 import { PLATFORM_ELEVATED_ROLES, getUserRole, normalizeRole } from '@/lib/api-auth-guard'
+import { hasPermission, Permission, UserRole } from '@/lib/auth/roles'
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
 import { logger } from '@/lib/logger'
 import { userHasOrganizationAccess } from '@/lib/organization-utils'
@@ -34,7 +38,7 @@ export const MEMBER_ADMIN_ROLES = [
 /** Organizational role that holds `MANAGE_ROLES`. */
 export const MEMBER_ROLE_ADMIN_ROLES = ['admin'] as const
 
-export type MemberCapability = 'administer' | 'assign_role'
+export type MemberCapability = 'administer' | 'assign_role' | 'remove_member'
 
 export class MemberBoundaryError extends Error {
   constructor(message: string) {
@@ -78,6 +82,17 @@ export function rolePermitsMemberRoleAdmin(role: string | null | undefined): boo
   const normalized = organizationalRole(role)
   if (!normalized) return false
   return (MEMBER_ROLE_ADMIN_ROLES as readonly string[]).includes(normalized)
+}
+
+function isUserRole(role: string): role is UserRole {
+  return (Object.values(UserRole) as string[]).includes(role)
+}
+
+/** True only when the canonical permission matrix grants `DELETE_MEMBER`. */
+export function rolePermitsMemberRemoval(role: string | null | undefined): boolean {
+  const normalized = organizationalRole(role)
+  if (!normalized || !isUserRole(normalized)) return false
+  return hasPermission(normalized, Permission.DELETE_MEMBER)
 }
 
 export function assertTenantAssignableRole(role: string): void {
@@ -147,7 +162,9 @@ export async function authorizeMemberAccess(
 
   const allowed = capability === 'assign_role'
     ? rolePermitsMemberRoleAdmin(role)
-    : rolePermitsMemberAdmin(role)
+    : capability === 'remove_member'
+      ? rolePermitsMemberRemoval(role)
+      : rolePermitsMemberAdmin(role)
   if (!allowed) {
     await auditDenial(userId, requestedOrganizationId, capability)
     return { ok: false, message: 'Forbidden' }

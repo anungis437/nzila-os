@@ -266,6 +266,7 @@ describe("member-service", () => {
 
   describe("deleteMember (soft delete)", () => {
     it("returns true on success", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce({ id: "m-1", userId: "other-user", role: "member", status: "active" });
       const chain = uswr([{ id: "m-1" }]);
       mocks.mockUpdate.mockReturnValueOnce({ set: chain.set });
       expect(await deleteMember("org-1", "m-1")).toBe(true);
@@ -308,6 +309,11 @@ describe("member-service", () => {
 
   describe("bulkUpdateMemberStatus", () => {
     it("updates status for member IDs", async () => {
+      const selected = sfw([
+        { id: "m-1", status: "active" },
+        { id: "m-2", status: "active" },
+      ]);
+      mocks.mockSelect.mockReturnValueOnce({ from: selected.from });
       const chain = uswr([{ id: "m-1" }, { id: "m-2" }]);
       mocks.mockUpdate.mockReturnValueOnce({ set: chain.set });
       const result = await bulkUpdateMemberStatus("org-1", ["m-1", "m-2"], "active");
@@ -458,6 +464,7 @@ describe("member-service", () => {
     });
 
     it("deleteMember throws on error", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce({ id: "m-1", userId: "other-user", role: "member" });
       mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("DB"); });
       await expect(deleteMember("org-1", "m-1")).rejects.toThrow("Failed to delete member");
     });

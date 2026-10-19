@@ -197,7 +197,8 @@ import {
   searchMembers,
   updateMember,
 } from '@/lib/services/member-service'
-import { rolePermitsMemberAdmin, rolePermitsMemberRoleAdmin } from '../authorize-member-access'
+import { rolePermitsMemberAdmin, rolePermitsMemberRemoval, rolePermitsMemberRoleAdmin } from '../authorize-member-access'
+import { hasPermission, Permission, UserRole } from '@/lib/auth/roles'
 
 function asPrincipal(userId: string, organizationId: string, role: string) {
   mocks.auth.mockResolvedValue({ userId })
@@ -252,6 +253,24 @@ describe('member role policy', () => {
     expect(rolePermitsMemberRoleAdmin('admin')).toBe(true)
     expect(rolePermitsMemberRoleAdmin('officer')).toBe(false)
     expect(rolePermitsMemberRoleAdmin('super_admin')).toBe(false)
+  })
+
+  it('follows DELETE_MEMBER and withholds removal from other administer roles', () => {
+    const denied = [
+      UserRole.OFFICER,
+      UserRole.UNION_REP,
+      UserRole.PRESIDENT,
+      UserRole.VICE_PRESIDENT,
+      UserRole.SECRETARY_TREASURER,
+    ]
+    for (const role of denied) {
+      expect(hasPermission(role, Permission.DELETE_MEMBER)).toBe(false)
+      expect(rolePermitsMemberRemoval(role)).toBe(false)
+    }
+    expect(hasPermission(UserRole.ADMIN, Permission.DELETE_MEMBER)).toBe(true)
+    expect(rolePermitsMemberRemoval('admin')).toBe(true)
+    expect(hasPermission(UserRole.SYSTEM_ADMIN, Permission.DELETE_MEMBER)).toBe(true)
+    expect(rolePermitsMemberRemoval('system_admin')).toBe(false)
   })
 })
 
@@ -402,6 +421,119 @@ describe('member administration boundary', () => {
     expect(await bulkUpdateMemberStatus(ORG_A, [], 'inactive')).toEqual({ success: true, processed: 0, failed: 0 })
     await expect(mergeMembers(ORG_A, 'same', 'same', 'primary')).rejects.toThrow('Forbidden')
     expect(mocks.state.audits).toEqual([])
+  })
+
+  it('denies removal to every administer role that lacks DELETE_MEMBER', async () => {
+    seed({ id: 'm-keep', userId: 'member-user' })
+    seed({ id: 'm-dup', userId: 'dup-user' })
+    for (const role of ['officer', 'union_rep', 'president', 'vice_president', 'secretary_treasurer']) {
+      asPrincipal(OFFICER, ORG_A, role)
+      await expect(deleteMember(ORG_A, 'm-keep')).rejects.toThrow('Forbidden')
+      await expect(mergeMembers(ORG_A, 'm-keep', 'm-dup', 'primary')).rejects.toThrow('Forbidden')
+    }
+    expect(mocks.state.rows[0].deletedAt).toBeNull()
+    expect(mocks.state.audits).toEqual([])
+    expect(mocks.state.hardDeletes).toBe(0)
+  })
+
+  it('denies self-removal and removal of the final administrator', async () => {
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    seed({ id: 'self', userId: ADMIN, role: 'member' })
+    await expect(deleteMember(ORG_A, 'self')).rejects.toThrow('Forbidden')
+    expect(mocks.state.rows.find((row) => row.id === 'self')?.deletedAt).toBeNull()
+
+    seed({ id: 'only-admin', userId: 'other-admin', role: 'admin' })
+    await expect(deleteMember(ORG_A, 'only-admin')).rejects.toThrow('Forbidden')
+    expect(mocks.state.rows.find((row) => row.id === 'only-admin')?.deletedAt).toBeNull()
+
+    seed({ id: 'second-admin', userId: 'second-admin', role: 'admin' })
+    expect(await deleteMember(ORG_A, 'only-admin')).toBe(true)
+    expect(mocks.state.rows.find((row) => row.id === 'only-admin')?.deletedAt).toBeInstanceOf(Date)
+    expect(mocks.state.rows.find((row) => row.id === 'second-admin')?.deletedAt).toBeNull()
+    expect(mocks.state.outcomes).toContain('rollback')
+  })
+
+  it('does not remove a member that belongs to another organization', async () => {
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    seed({ id: 'foreign', organizationId: ORG_B, userId: 'foreign-user' })
+    expect(await deleteMember(ORG_A, 'foreign')).toBe(false)
+    expect(mocks.state.rows.find((row) => row.id === 'foreign')?.deletedAt).toBeNull()
+    expect(mocks.state.audits).toEqual([])
+  })
+
+  it('rolls a soft delete back when the durable audit fails', async () => {
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    seed({ id: 'm-audit', userId: 'member-user' })
+    mocks.state.auditFails = true
+    await expect(deleteMember(ORG_A, 'm-audit')).rejects.toThrow('Failed to delete member')
+    expect(mocks.state.rows.find((row) => row.id === 'm-audit')?.deletedAt).toBeNull()
+    expect(mocks.state.outcomes).toEqual(['rollback'])
+    expect(mocks.state.audits).toEqual([])
+  })
+
+  it('rejects financial exemption writes on create, update, and duplicate suppression', async () => {
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    seed({ id: 'primary', userId: 'primary-user', name: 'Primary', status: 'active' })
+    seed({
+      id: 'duplicate',
+      userId: 'duplicate-user',
+      name: 'Duplicate',
+      status: 'active',
+      exemptFromPerCapita: true,
+      exemptionReason: 'forged',
+      exemptionApprovedBy: 'forged-approver',
+    })
+    await expect(createMember({
+      organizationId: ORG_A,
+      userId: 'exempt-user',
+      name: 'Exempt',
+      email: 'exempt@example.com',
+      role: 'member',
+      exemptFromPerCapita: true,
+      exemptionApprovedBy: 'forged-approver',
+    })).rejects.toThrow('Forbidden')
+    await expect(updateMember(ORG_A, 'primary', { exemptFromPerCapita: false })).rejects.toThrow('Forbidden')
+    await expect(updateMember(ORG_A, 'primary', { exemptionReason: 'hardship' })).rejects.toThrow('Forbidden')
+    await expect(updateMember(ORG_A, 'primary', { exemptionApprovedBy: ADMIN })).rejects.toThrow('Forbidden')
+
+    const merged = await mergeMembers(ORG_A, 'primary', 'duplicate', 'duplicate')
+    expect(merged.name).toBe('Duplicate')
+    expect(merged.exemptFromPerCapita).toBeUndefined()
+    expect(merged.exemptionApprovedBy).toBeUndefined()
+    expect(mocks.state.rows.find((row) => row.id === 'primary')).toMatchObject({
+      name: 'Duplicate',
+      status: 'active',
+    })
+    expect(mocks.state.rows.find((row) => row.id === 'primary')?.exemptFromPerCapita).toBeUndefined()
+    expect(mocks.state.rows.find((row) => row.id === 'primary')?.exemptionApprovedBy).toBeUndefined()
+    expect(mocks.state.rows.find((row) => row.id === 'duplicate')?.deletedAt).toBeInstanceOf(Date)
+    expect(mocks.state.rows.filter((row) => row.userId === 'exempt-user')).toEqual([])
+  })
+
+  it('rejects invalid, duplicate, stale, and unsupported bulk status changes atomically', async () => {
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    seed({ id: 'live', status: 'active' })
+    seed({ id: 'left', status: 'inactive' })
+    seed({ id: 'gone', status: 'active', deletedAt: new Date() })
+    seed({ id: 'foreign', organizationId: ORG_B, userId: 'foreign-user', status: 'active' })
+
+    await expect(bulkUpdateMemberStatus(ORG_A, ['live'], 'suspended')).rejects.toThrow('Forbidden')
+    await expect(bulkUpdateMemberStatus(ORG_A, ['live', 'live'], 'inactive')).rejects.toThrow('Forbidden')
+    await expect(bulkUpdateMemberStatus(ORG_A, ['gone'], 'inactive')).rejects.toThrow('Forbidden')
+    await expect(bulkUpdateMemberStatus(ORG_A, ['left'], 'on-leave')).rejects.toThrow('Forbidden')
+    await expect(bulkUpdateMemberStatus(ORG_A, ['live', 'foreign'], 'inactive')).rejects.toThrow('Forbidden')
+
+    expect(mocks.state.rows.find((row) => row.id === 'live')?.status).toBe('active')
+    expect(mocks.state.rows.find((row) => row.id === 'left')?.status).toBe('inactive')
+    expect(mocks.state.rows.find((row) => row.id === 'foreign')?.status).toBe('active')
+    expect(mocks.state.audits).toEqual([])
+    expect(mocks.state.outcomes).toContain('rollback')
+
+    mocks.state.auditFails = true
+    const failed = await bulkUpdateMemberStatus(ORG_A, ['live'], 'inactive')
+    expect(failed.success).toBe(false)
+    expect(mocks.state.rows.find((row) => row.id === 'live')?.status).toBe('active')
+    expect(mocks.state.outcomes.filter((outcome) => outcome === 'rollback').length).toBeGreaterThan(1)
   })
 
   it('lets a session read only its own active membership', async () => {
