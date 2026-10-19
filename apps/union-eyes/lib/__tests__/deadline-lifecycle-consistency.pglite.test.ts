@@ -272,6 +272,26 @@ describe('deadline lifecycle: one effective due date and one status vocabulary',
       await db2.close();
     });
 
+    it('installs the guards inside one transaction even when Django-style DEFERRED foreign keys have pending trigger events', async () => {
+      // Found in the lineage rehearsal: the convergence UPDATEs queue deferred FK events and ALTER TABLE is refused while they are pending.
+      const db5 = new PGlite();
+      await db5.exec(`
+        CREATE TABLE grievances (id uuid PRIMARY KEY);
+        CREATE TABLE grievance_deadlines (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), grievance_id uuid NOT NULL,
+          calculated_due_date timestamptz, override_due_date timestamptz, superseded_at timestamptz,
+          CONSTRAINT gd_fk FOREIGN KEY (grievance_id) REFERENCES grievances(id) DEFERRABLE INITIALLY DEFERRED);
+        INSERT INTO grievances VALUES ('00000000-0000-0000-0000-0000000000d2');
+        INSERT INTO grievance_deadlines (grievance_id, calculated_due_date, override_due_date) VALUES ('00000000-0000-0000-0000-0000000000d2', '2026-11-01', '2026-11-05');
+        INSERT INTO grievance_deadlines (grievance_id, calculated_due_date, superseded_at) VALUES ('00000000-0000-0000-0000-0000000000d2', '2026-11-02', now());
+      `);
+      await db5.exec(`BEGIN; ALTER TABLE grievance_deadlines ADD COLUMN due_date timestamptz NULL; ALTER TABLE grievance_deadlines ADD COLUMN status varchar(50) NOT NULL DEFAULT 'pending';`);
+      await db5.exec(CONVERGE_AND_GUARD);
+      await db5.exec('COMMIT');
+      const r = (await db5.query<{ due_date: Date; status: string }>(`SELECT due_date, status FROM grievance_deadlines`)).rows;
+      expect(r.map((x) => `${x.due_date.toISOString().slice(0, 10)}:${x.status}`).sort()).toEqual(['2026-11-02:cancelled', '2026-11-05:pending']);
+      await db5.close();
+    });
+
     it('is a safe no-op on a Django-first table that has no lineage columns', async () => {
       const db3 = new PGlite();
       await db3.exec(`CREATE TABLE grievance_deadlines (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), due_date timestamptz, status varchar(50) NOT NULL DEFAULT 'pending')`);

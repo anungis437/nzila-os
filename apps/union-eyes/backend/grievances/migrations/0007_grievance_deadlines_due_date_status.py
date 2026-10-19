@@ -52,6 +52,10 @@ BEGIN
      WHERE superseded_at IS NOT NULL AND status NOT IN ('completed', 'cancelled');
   END IF;
 
+  -- The UPDATEs above queue deferred foreign-key trigger events (Django declares FKs DEFERRABLE INITIALLY DEFERRED); ALTER TABLE
+  -- is refused while they are pending ("cannot ALTER TABLE ... because it has pending trigger events"). Fire them now.
+  SET CONSTRAINTS ALL IMMEDIATE;
+
   IF v_has_override AND NOT EXISTS (
     SELECT 1 FROM pg_constraint WHERE conrelid = v_tbl AND conname = 'grievance_deadlines_override_is_effective'
   ) THEN
