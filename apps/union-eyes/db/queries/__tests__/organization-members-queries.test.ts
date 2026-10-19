@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({ queue: [] as unknown[] }));
 
 function makeChain() {
   const chain: Record<string, unknown> = {};
-  for (const m of ['from', 'where', 'orderBy', 'limit', 'values', 'set', 'returning']) {
+  for (const m of ['from', 'where', 'orderBy', 'limit', 'for', 'values', 'set', 'returning']) {
     chain[m] = () => chain;
   }
   (chain as { then: unknown }).then = (resolve: (v: unknown) => unknown, reject: (e: unknown) => unknown) => {
@@ -22,6 +22,7 @@ function makeChain() {
 }
 function makeTx() {
   return {
+    execute: async () => [],
     select: () => makeChain(),
     insert: () => makeChain(),
     update: () => makeChain(),
@@ -121,9 +122,11 @@ describe('organization-members-queries', () => {
   });
 
   it('deleteMember returns true/false', async () => {
-    push([{ id: 'm1', userId: 'member-user', role: 'member' }]);
+    push([]);
+    push([{ id: 'm1', userId: 'member-user', role: 'member', status: 'active' }]);
     push([{ id: 'm1', deletedAt: new Date() }]);
     expect(await q.deleteMember('org', 'm1', removeGrant)).toBe(true);
+    push([]);
     push([]);
     expect(await q.deleteMember('org', 'm9', removeGrant)).toBe(false);
     await expect(q.deleteMember('org', 'm1', adminGrant)).rejects.toThrow('Forbidden');

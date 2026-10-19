@@ -8,8 +8,15 @@
  *
  * Membership status on this table is `active`, `inactive`, or `on-leave`.
  * `inactive` cannot move directly to `on-leave`.
+ *
+ * An organization that has an active administrator must still have one after
+ * the transaction commits. Only an active, non-deleted `admin` counts.
+ * Callers serialize that decision with `lockAdministratorRoster`.
  */
 
+import { and, eq, sql } from 'drizzle-orm'
+import { organizationMembers } from '@/db/schema'
+import type { RLSTx } from '@/lib/db/with-rls-context'
 import { MemberBoundaryError } from '@/lib/member-integrity/authorize-member-access'
 
 export const FINANCIAL_EXEMPTION_FIELDS = [
@@ -58,13 +65,99 @@ export function rejectClientFinancialExemption(data: object, mode: 'create' | 'u
 export function assertMemberRemovalPolicy(input: {
   actorUserId: string
   targetUserId: string
-  targetRole: string
-  otherActiveAdminCount: number
 }): void {
   if (input.targetUserId === input.actorUserId) {
     throw new MemberBoundaryError('Forbidden')
   }
-  if (input.targetRole === 'admin' && input.otherActiveAdminCount < 1) {
-    throw new MemberBoundaryError('Forbidden')
+}
+
+export type AdministratorRosterRow = {
+  id: string
+  role: string
+  status: string
+  deletedAt: Date | string | null
+}
+
+export type AdministratorProjection = {
+  id: string
+  role?: string
+  status?: string
+  deletedAt?: Date | null
+}
+
+/** An administrator who can still administer: active membership, not deleted. */
+export function isEffectiveAdministrator(row: {
+  role: string
+  status: string
+  deletedAt?: Date | string | null
+}): boolean {
+  return row.role === 'admin' && row.status === 'active' && row.deletedAt == null
+}
+
+/**
+ * Rejects a projected membership mutation that would leave the organization
+ * without an active administrator. A roster that already has none does not
+ * block unrelated member edits.
+ */
+export function assertActiveAdministratorsRemain(
+  roster: readonly AdministratorRosterRow[],
+  changes: readonly AdministratorProjection[],
+): void {
+  const before = roster.filter(isEffectiveAdministrator).length
+  if (before < 1) return
+
+  const projected = new Map(roster.map((row) => [row.id, { ...row }]))
+  for (const change of changes) {
+    const current = projected.get(change.id)
+    if (!current) {
+      if (change.role === 'admin') {
+        projected.set(change.id, {
+          id: change.id,
+          role: 'admin',
+          status: change.status ?? 'active',
+          deletedAt: change.deletedAt ?? null,
+        })
+      }
+      continue
+    }
+    projected.set(change.id, {
+      ...current,
+      role: change.role ?? current.role,
+      status: change.status ?? current.status,
+      deletedAt: change.deletedAt !== undefined ? change.deletedAt : current.deletedAt,
+    })
   }
+
+  const after = [...projected.values()].filter(isEffectiveAdministrator).length
+  if (after < 1) throw new MemberBoundaryError('Forbidden')
+}
+
+/**
+ * Serializes administrator-authority mutations for one organization.
+ * The advisory lock is transaction-scoped. The following row lock is the
+ * roster those mutations must project against, so two commits cannot each
+ * observe a stale "another administrator remains" count.
+ */
+export async function lockAdministratorRoster(
+  tx: RLSTx,
+  organizationId: string,
+): Promise<AdministratorRosterRow[]> {
+  await tx.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtextextended(${`ue_active_admin:${organizationId}`}, 0))`,
+  )
+  const rows = await tx
+    .select()
+    .from(organizationMembers)
+    .where(and(
+      eq(organizationMembers.organizationId, organizationId),
+      eq(organizationMembers.role, 'admin'),
+      sql`${organizationMembers.deletedAt} IS NULL`,
+    ))
+    .for('update')
+  return rows.map((row) => ({
+    id: String(row.id),
+    role: String(row.role),
+    status: String(row.status),
+    deletedAt: row.deletedAt ?? null,
+  }))
 }

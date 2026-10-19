@@ -12,6 +12,10 @@ const mocks = vi.hoisted(() => {
     orgs: [] as string[],
     outcomes: [] as string[],
     audits: [] as Array<Record<string, unknown>>,
+    advisoryLocks: 0,
+    lockHeld: false,
+    lockWaiters: [] as Array<() => void>,
+    frames: [] as Array<{ snapshot: Array<Record<string, unknown>>; locked: boolean }>,
     auditFails: false,
     failUpdateId: null as string | null,
     hardDeletes: 0,
@@ -48,6 +52,7 @@ const mocks = vi.hoisted(() => {
       },
       orderBy() { return chain },
       limit() { return chain },
+      for() { return chain },
       offset() { return Promise.resolve(filtered.map((row) => ({ ...row }))) },
       then(resolve: (value: unknown) => unknown, reject: (error: unknown) => unknown) {
         return Promise.resolve(filtered.map((row) => ({ ...row }))).then(resolve, reject)
@@ -64,6 +69,20 @@ const mocks = vi.hoisted(() => {
       },
     },
     select,
+    execute: async (query: { _type?: string }) => {
+      if (query?._type !== 'advisoryLock') return
+      state.advisoryLocks += 1
+      if (state.lockHeld) {
+        await new Promise<void>((resolve) => state.lockWaiters.push(resolve))
+      } else {
+        state.lockHeld = true
+      }
+      const frame = state.frames[state.frames.length - 1]
+      if (frame) {
+        frame.locked = true
+        frame.snapshot = state.rows.map((row) => ({ ...row }))
+      }
+    },
     insert() {
       return {
         values(data: Record<string, unknown>) {
@@ -136,7 +155,11 @@ vi.mock('drizzle-orm', async (importOriginal) => {
     desc: (col: string) => col,
     asc: (col: string) => col,
     like: (col: string, val: unknown) => ({ _type: 'like', col, val }),
-    sql: Object.assign(() => ({ _type: 'isNullDeleted' }), { raw: () => ({ _type: 'isNullDeleted' }) }),
+    sql: Object.assign((strings: TemplateStringsArray) => {
+      const text = Array.isArray(strings) ? strings.join('') : ''
+      if (text.includes('pg_advisory_xact_lock')) return { _type: 'advisoryLock' }
+      return { _type: 'isNullDeleted' }
+    }, { raw: () => ({ _type: 'isNullDeleted' }) }),
     inArray: (col: string, val: unknown) => ({ _type: 'inArray', col, val }),
     count: () => 'count',
   }
@@ -151,15 +174,27 @@ vi.mock('@/lib/db/with-rls-context', () => ({
     const organizationId = hasContext ? (ctxOrOp as { organizationId?: string }).organizationId : undefined
     if (!organizationId) throw new Error('organization context required')
     mocks.state.orgs.push(organizationId)
-    const snapshot = mocks.state.rows.map((row) => ({ ...row }))
+    const frame = {
+      snapshot: mocks.state.rows.map((row) => ({ ...row })),
+      locked: false,
+    }
+    mocks.state.frames.push(frame)
     try {
       const result = await operation(mocks.db)
       mocks.state.outcomes.push('commit')
       return result
     } catch (error) {
-      mocks.state.rows.splice(0, mocks.state.rows.length, ...snapshot)
+      mocks.state.rows.splice(0, mocks.state.rows.length, ...frame.snapshot.map((row) => ({ ...row })))
       mocks.state.outcomes.push('rollback')
       throw error
+    } finally {
+      if (frame.locked) {
+        const next = mocks.state.lockWaiters.shift()
+        if (next) next()
+        else mocks.state.lockHeld = false
+      }
+      const index = mocks.state.frames.indexOf(frame)
+      if (index >= 0) mocks.state.frames.splice(index, 1)
     }
   },
 }))
@@ -235,6 +270,10 @@ beforeEach(() => {
   mocks.state.orgs.splice(0)
   mocks.state.outcomes.splice(0)
   mocks.state.audits.splice(0)
+  mocks.state.advisoryLocks = 0
+  mocks.state.lockHeld = false
+  mocks.state.lockWaiters.splice(0)
+  mocks.state.frames.splice(0)
   mocks.state.auditFails = false
   mocks.state.failUpdateId = null
   mocks.state.hardDeletes = 0
@@ -534,6 +573,75 @@ describe('member administration boundary', () => {
     expect(failed.success).toBe(false)
     expect(mocks.state.rows.find((row) => row.id === 'live')?.status).toBe('active')
     expect(mocks.state.outcomes.filter((outcome) => outcome === 'rollback').length).toBeGreaterThan(1)
+  })
+
+  it('keeps one active administrator across role, status, and removal', async () => {
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    seed({ id: 'admin-a', userId: 'admin-a-user', role: 'admin', status: 'active' })
+    seed({ id: 'admin-b', userId: 'admin-b-user', role: 'admin', status: 'active' })
+    seed({ id: 'inactive-admin', userId: 'inactive-admin-user', role: 'admin', status: 'inactive' })
+
+    await expect(bulkUpdateMemberRole(ORG_A, ['admin-a', 'admin-b'], 'member')).rejects.toThrow('Forbidden')
+    await expect(updateMember(ORG_A, 'admin-a', { status: 'inactive' })).resolves.toMatchObject({ status: 'inactive' })
+    await expect(updateMember(ORG_A, 'admin-b', { status: 'inactive' })).rejects.toThrow('Forbidden')
+    await expect(updateMember(ORG_A, 'admin-b', { status: 'on-leave' })).rejects.toThrow('Forbidden')
+    await expect(bulkUpdateMemberStatus(ORG_A, ['admin-b'], 'on-leave')).rejects.toThrow('Forbidden')
+    await expect(bulkUpdateMemberRole(ORG_A, ['admin-b'], 'member')).rejects.toThrow('Forbidden')
+    await expect(deleteMember(ORG_A, 'admin-b')).rejects.toThrow('Forbidden')
+    await expect(mergeMembers(ORG_A, 'admin-a', 'admin-b', 'primary')).rejects.toThrow('Forbidden')
+
+    expect(mocks.state.rows.find((row) => row.id === 'admin-b')).toMatchObject({
+      role: 'admin',
+      status: 'active',
+      deletedAt: null,
+    })
+    expect(mocks.state.rows.find((row) => row.id === 'inactive-admin')?.status).toBe('inactive')
+    expect(mocks.state.advisoryLocks).toBeGreaterThan(0)
+
+    const demoted = await bulkUpdateMemberRole(ORG_A, ['inactive-admin'], 'member')
+    expect(demoted).toMatchObject({ success: true, processed: 1 })
+    expect(mocks.state.rows.find((row) => row.id === 'admin-b')?.role).toBe('admin')
+    expect(mocks.state.rows.find((row) => row.id === 'inactive-admin')?.role).toBe('member')
+  })
+
+  it('stops an officer from disabling the last active administrator', async () => {
+    seed({ id: 'only-admin', userId: 'admin-user', role: 'admin', status: 'active' })
+    asPrincipal(OFFICER, ORG_A, 'officer')
+    await expect(updateMember(ORG_A, 'only-admin', { status: 'inactive' })).rejects.toThrow('Forbidden')
+    await expect(bulkUpdateMemberStatus(ORG_A, ['only-admin'], 'on-leave')).rejects.toThrow('Forbidden')
+    expect(mocks.state.rows.find((row) => row.id === 'only-admin')).toMatchObject({
+      role: 'admin',
+      status: 'active',
+      deletedAt: null,
+    })
+    expect(mocks.state.audits).toEqual([])
+  })
+
+  it('rolls an allowed administrator status change back when the audit write fails', async () => {
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    seed({ id: 'admin-a', userId: 'admin-a-user', role: 'admin', status: 'active' })
+    seed({ id: 'admin-b', userId: 'admin-b-user', role: 'admin', status: 'active' })
+    mocks.state.auditFails = true
+    await expect(updateMember(ORG_A, 'admin-a', { status: 'on-leave' })).rejects.toThrow('Failed to update member')
+    expect(mocks.state.rows.find((row) => row.id === 'admin-a')?.status).toBe('active')
+    expect(mocks.state.rows.find((row) => row.id === 'admin-b')?.status).toBe('active')
+    expect(mocks.state.outcomes).toEqual(['rollback'])
+    expect(mocks.state.audits).toEqual([])
+  })
+
+  it('serializes concurrent demotions so one active administrator remains', async () => {
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    seed({ id: 'admin-a', userId: 'admin-a-user', role: 'admin', status: 'active' })
+    seed({ id: 'admin-b', userId: 'admin-b-user', role: 'admin', status: 'active' })
+    const results = await Promise.allSettled([
+      bulkUpdateMemberRole(ORG_A, ['admin-a'], 'member'),
+      bulkUpdateMemberRole(ORG_A, ['admin-b'], 'member'),
+    ])
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1)
+    expect(results.filter((result) => result.status === 'rejected')).toHaveLength(1)
+    const remaining = mocks.state.rows.filter((row) => row.role === 'admin' && row.status === 'active' && row.deletedAt == null)
+    expect(remaining).toHaveLength(1)
+    expect(mocks.state.advisoryLocks).toBe(2)
   })
 
   it('lets a session read only its own active membership', async () => {

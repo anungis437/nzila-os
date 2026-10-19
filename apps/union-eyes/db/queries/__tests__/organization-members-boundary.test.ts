@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
 
 function selectChain() {
   const chain: Record<string, unknown> = {}
-  for (const method of ['from', 'where', 'orderBy', 'limit']) chain[method] = () => chain
+  for (const method of ['from', 'where', 'orderBy', 'limit', 'for']) chain[method] = () => chain
   chain.then = (resolve: (value: unknown) => unknown, reject: (error: unknown) => unknown) => {
     const value = mocks.selectQueue.length ? mocks.selectQueue.shift() : []
     return Promise.resolve(value).then(resolve, reject)
@@ -30,6 +30,7 @@ function selectChain() {
 
 function makeTx() {
   return {
+    execute: async () => undefined,
     select: () => selectChain(),
     insert: () => ({
       values: (row: Record<string, unknown>) => ({
@@ -204,7 +205,8 @@ describe('organization member query grants', () => {
     await expect(q.updateMember(ORG_A, 'm1', { organizationId: ORG_B }, administer)).rejects.toThrow('Forbidden')
     expect(mocks.updates).toEqual([])
 
-    mocks.selectQueue.push([{ id: 'm1', status: 'active', organizationId: ORG_A }])
+    mocks.selectQueue.push([])
+    mocks.selectQueue.push([{ id: 'm1', status: 'active', role: 'member', organizationId: ORG_A }])
     const updated = await q.updateMember(ORG_A, 'm1', { status: 'inactive', name: 'Hidden' }, administer)
     expect(updated?.status).toBe('inactive')
     expect(mocks.audits.at(-1)).toMatchObject({ operation: 'status_change' })
@@ -213,7 +215,8 @@ describe('organization member query grants', () => {
     mocks.auditFails = true
     const removal = await authorizeMemberAccess(ORG_A, 'remove_member')
     if (!removal.ok) throw new Error('expected removal grant')
-    mocks.selectQueue.push([{ id: 'm1', userId: 'member-user', role: 'member', organizationId: ORG_A }])
+    mocks.selectQueue.push([])
+    mocks.selectQueue.push([{ id: 'm1', userId: 'member-user', role: 'member', status: 'active', organizationId: ORG_A }])
     await expect(q.deleteMember(ORG_A, 'm1', removal)).rejects.toThrow('Member audit was not persisted')
     expect(mocks.outcomes).toContain('rollback')
     expect(mocks.updates.filter((patch) => patch.deletedAt)).toEqual([])
@@ -258,17 +261,23 @@ describe('organization member query grants', () => {
     expect(mocks.inserts).toEqual([])
     expect(mocks.updates).toEqual([])
 
-    mocks.selectQueue.push([{ id: 'self', userId: ADMIN, role: 'member', organizationId: ORG_A }])
+    mocks.selectQueue.push([])
+    mocks.selectQueue.push([{ id: 'self', userId: ADMIN, role: 'member', status: 'active', organizationId: ORG_A }])
     await expect(q.deleteMember(ORG_A, 'self', removal)).rejects.toThrow('Forbidden')
-    mocks.selectQueue.push([{ id: 'only-admin', userId: 'other-admin', role: 'admin', organizationId: ORG_A }])
-    mocks.selectQueue.push([{ count: 0 }])
+    mocks.selectQueue.push([
+      { id: 'only-admin', userId: 'other-admin', role: 'admin', status: 'active', deletedAt: null, organizationId: ORG_A },
+      { id: 'inactive-admin', userId: 'paused-admin', role: 'admin', status: 'inactive', deletedAt: null, organizationId: ORG_A },
+    ])
+    mocks.selectQueue.push([{ id: 'only-admin', userId: 'other-admin', role: 'admin', status: 'active', organizationId: ORG_A }])
     await expect(q.deleteMember(ORG_A, 'only-admin', removal)).rejects.toThrow('Forbidden')
     expect(await q.deleteMember(ORG_A, 'missing', removal)).toBe(false)
     expect(mocks.updates.filter((patch) => patch.deletedAt)).toEqual([])
 
     mocks.selectQueue.push([])
+    mocks.selectQueue.push([])
     expect(await q.updateMember(ORG_A, 'missing', { status: 'inactive' }, administer)).toBeUndefined()
-    mocks.selectQueue.push([{ id: 'm1', status: 'inactive', organizationId: ORG_A }])
+    mocks.selectQueue.push([])
+    mocks.selectQueue.push([{ id: 'm1', status: 'inactive', role: 'member', organizationId: ORG_A }])
     await expect(q.updateMember(ORG_A, 'm1', { status: 'on-leave' }, administer)).rejects.toThrow('Forbidden')
     expect(mocks.updates).toEqual([])
   })

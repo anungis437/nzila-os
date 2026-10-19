@@ -15,7 +15,7 @@ import { organizationMembers } from "@/db/schema";
 import { eq, and, or, gte, lte, desc, asc, like, sql, inArray, count } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
-import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import {
   assertTenantAssignableRole,
   authorizeMemberAccess,
@@ -26,9 +26,11 @@ import {
 } from "@/lib/member-integrity/authorize-member-access";
 import { persistDurableMemberAudit } from "@/lib/member-integrity/durable-member-audit";
 import {
+  assertActiveAdministratorsRemain,
   assertMemberRemovalPolicy,
   assertMemberStatusTransition,
   FINANCIAL_EXEMPTION_FIELDS,
+  lockAdministratorRoster,
   MEMBER_RECORD_STATUSES,
   rejectClientFinancialExemption,
 } from "@/lib/member-integrity/member-write-policy";
@@ -123,18 +125,6 @@ function membershipInsert(data: NewMember, organizationId: string, role: string)
   delete source.role;
   for (const field of FINANCIAL_EXEMPTION_FIELDS) delete source[field];
   return { ...source, organizationId, role } as NewMember;
-}
-
-async function otherActiveAdminCount(
-  tx: RLSTx,
-  organizationId: string,
-  targetId: string,
-): Promise<number> {
-  const admins = await tx.select().from(organizationMembers).where(and(
-    activeInOrganization(organizationId),
-    eq(organizationMembers.role, "admin"),
-  ));
-  return admins.filter((row) => row.id !== targetId).length;
 }
 
 async function requireGrant(organizationId: string, capability: MemberCapability): Promise<MemberAccessGrant> {
@@ -335,11 +325,13 @@ export async function updateMember(
     const grant = await requireGrant(organizationId, "administer");
     return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
       if (data.status !== undefined) {
+        const roster = await lockAdministratorRoster(tx, grant.organizationId);
         const current = await tx.query.organizationMembers.findFirst({
           where: activeInOrganization(grant.organizationId, id),
         });
         if (!current) return null;
         assertMemberStatusTransition(String(current.status), String(data.status));
+        assertActiveAdministratorsRemain(roster, [{ id: current.id, status: String(data.status) }]);
       }
       const [updated] = await tx
         .update(organizationMembers)
@@ -364,6 +356,7 @@ export async function deleteMember(organizationId: string, id: string): Promise<
   try {
     const grant = await requireGrant(organizationId, "remove_member");
     return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const roster = await lockAdministratorRoster(tx, grant.organizationId);
       const target = await tx.query.organizationMembers.findFirst({
         where: activeInOrganization(grant.organizationId, id),
       });
@@ -371,11 +364,8 @@ export async function deleteMember(organizationId: string, id: string): Promise<
       assertMemberRemovalPolicy({
         actorUserId: grant.userId,
         targetUserId: target.userId,
-        targetRole: target.role,
-        otherActiveAdminCount: target.role === "admin"
-          ? await otherActiveAdminCount(tx, grant.organizationId, target.id)
-          : 0,
       });
+      assertActiveAdministratorsRemain(roster, [{ id: target.id, deletedAt: new Date() }]);
       const [deleted] = await tx
         .update(organizationMembers)
         .set({ deletedAt: new Date(), updatedAt: new Date() })
@@ -436,6 +426,8 @@ export async function bulkUpdateMemberStatus(
     if (memberIds.length === 0) return { success: true, processed: 0, failed: 0 };
     return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
       if (new Set(memberIds).size !== memberIds.length) throw new MemberBoundaryError("Forbidden");
+      const roster = await lockAdministratorRoster(tx, grant.organizationId);
+      assertActiveAdministratorsRemain(roster, memberIds.map((id) => ({ id, status })));
       const current = await tx
         .select()
         .from(organizationMembers)
@@ -485,6 +477,8 @@ export async function bulkUpdateMemberRole(
     const grant = await requireGrant(organizationId, "assign_role");
     if (memberIds.length === 0) return { success: true, processed: 0, failed: 0 };
     return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const roster = await lockAdministratorRoster(tx, grant.organizationId);
+      assertActiveAdministratorsRemain(roster, memberIds.map((id) => ({ id, role })));
       const updated = await tx
         .update(organizationMembers)
         .set({ role: role as MemberRoleValue, updatedAt: new Date() })
@@ -606,6 +600,7 @@ export async function mergeMembers(
     if (primaryMemberId === duplicateMemberId) throw new MemberBoundaryError("Forbidden");
     const grant = await requireGrant(organizationId, "remove_member");
     return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const roster = await lockAdministratorRoster(tx, grant.organizationId);
       const primary = await tx.query.organizationMembers.findFirst({
         where: activeInOrganization(grant.organizationId, primaryMemberId),
       });
@@ -619,11 +614,8 @@ export async function mergeMembers(
       assertMemberRemovalPolicy({
         actorUserId: grant.userId,
         targetUserId: duplicate.userId,
-        targetRole: duplicate.role,
-        otherActiveAdminCount: duplicate.role === "admin"
-          ? await otherActiveAdminCount(tx, grant.organizationId, duplicate.id)
-          : 0,
       });
+      assertActiveAdministratorsRemain(roster, [{ id: duplicate.id, deletedAt: new Date() }]);
 
       let patch: Partial<NewMember> = {};
       if (keepData === "duplicate") patch = pickMergeFields(duplicate, {});

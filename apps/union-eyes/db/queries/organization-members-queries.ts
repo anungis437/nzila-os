@@ -16,7 +16,7 @@
 import 'server-only'
 
 import { organizationMembers, type SelectOrganizationMember, type InsertOrganizationMember } from "../schema/organization-members-schema";
-import { eq, and, isNull, ne, desc, sql } from "drizzle-orm";
+import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import {
   assertRegisteredMemberGrant,
@@ -27,9 +27,11 @@ import {
 } from "@/lib/member-integrity/authorize-member-access";
 import { persistDurableMemberAudit } from "@/lib/member-integrity/durable-member-audit";
 import {
+  assertActiveAdministratorsRemain,
   assertMemberRemovalPolicy,
   assertMemberStatusTransition,
   FINANCIAL_EXEMPTION_FIELDS,
+  lockAdministratorRoster,
   rejectClientFinancialExemption,
 } from "@/lib/member-integrity/member-write-policy";
 
@@ -212,6 +214,7 @@ export async function updateMember(
   const scopedGrant = requireMutationGrant(grant, scoped, "administer");
   return inOrganization(scoped, tx, async (db, organizationId) => {
     if (updates.status !== undefined) {
+      const roster = await lockAdministratorRoster(db, organizationId);
       const current = await db
         .select()
         .from(organizationMembers)
@@ -223,6 +226,7 @@ export async function updateMember(
         .limit(1);
       if (!current[0]) return undefined;
       assertMemberStatusTransition(String(current[0].status), String(updates.status));
+      assertActiveAdministratorsRemain(roster, [{ id: current[0].id, status: String(updates.status) }]);
     }
     const result = await db
       .update(organizationMembers)
@@ -253,6 +257,7 @@ export async function deleteMember(
   const scoped = assertOrganization(organizationId);
   const scopedGrant = requireMutationGrant(grant, scoped, "remove_member");
   return inOrganization(scoped, tx, async (db, organizationId) => {
+    const roster = await lockAdministratorRoster(db, organizationId);
     const existing = await db
       .select()
       .from(organizationMembers)
@@ -264,23 +269,11 @@ export async function deleteMember(
       .limit(1);
     const target = existing[0];
     if (!target) return false;
-    const otherAdmins = target.role === "admin"
-      ? await db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(organizationMembers)
-        .where(and(
-          eq(organizationMembers.organizationId, organizationId),
-          eq(organizationMembers.role, "admin"),
-          isNull(organizationMembers.deletedAt),
-          ne(organizationMembers.id, target.id),
-        ))
-      : [];
     assertMemberRemovalPolicy({
       actorUserId: scopedGrant.userId,
       targetUserId: target.userId,
-      targetRole: target.role,
-      otherActiveAdminCount: Number(otherAdmins[0]?.count ?? 0),
     });
+    assertActiveAdministratorsRemain(roster, [{ id: target.id, deletedAt: new Date() }]);
     const result = await db
       .update(organizationMembers)
       .set({ deletedAt: new Date(), updatedAt: new Date() })

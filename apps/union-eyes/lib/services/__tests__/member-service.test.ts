@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => {
     mockDb: {
       query: { organizationMembers: { findFirst: mockFindFirst } },
       select: mockSelect,
+      execute: vi.fn(async () => undefined),
       insert: mockInsert,
       update: mockUpdate,
       delete: mockDelete,
@@ -95,6 +96,18 @@ vi.mock("@/lib/member-integrity/durable-member-audit", () => ({
 
 /* ── helpers ────────────────────────────────────────────────────────────── */
 
+/** select → from → where → for('update'), and where() itself is awaitable */
+function selectable(data: unknown) {
+  const result = Promise.resolve(data);
+  const chain = {
+    from: () => chain,
+    where: () => chain,
+    for: () => result,
+    then: result.then.bind(result),
+  };
+  return { from: () => chain };
+}
+
 /** select → from → where (terminal) */
 function sfw(data: any) {
   const where = vi.fn().mockResolvedValue(data);
@@ -145,6 +158,9 @@ describe("member-service", () => {
     vi.clearAllMocks();
     mocks.mockFindFirst.mockReset();
     mocks.mockSelect.mockReset();
+    mocks.mockSelect.mockReturnValue(selectable([]));
+    mocks.mockDb.execute.mockReset();
+    mocks.mockDb.execute.mockResolvedValue(undefined);
     mocks.mockInsert.mockReset();
     mocks.mockUpdate.mockReset();
     mocks.mockDelete.mockReset();
@@ -309,17 +325,21 @@ describe("member-service", () => {
 
   describe("bulkUpdateMemberStatus", () => {
     it("updates status for member IDs", async () => {
-      const selected = sfw([
-        { id: "m-1", status: "active" },
-        { id: "m-2", status: "active" },
-      ]);
-      mocks.mockSelect.mockReturnValueOnce({ from: selected.from });
+      mocks.mockSelect
+        .mockReturnValueOnce(selectable([]))
+        .mockReturnValueOnce(selectable([
+          { id: "m-1", status: "active" },
+          { id: "m-2", status: "active" },
+        ]));
       const chain = uswr([{ id: "m-1" }, { id: "m-2" }]);
       mocks.mockUpdate.mockReturnValueOnce({ set: chain.set });
       const result = await bulkUpdateMemberStatus("org-1", ["m-1", "m-2"], "active");
       expect(result.success).toBe(true);
     });
     it("returns failure on error", async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(selectable([]))
+        .mockReturnValueOnce(selectable([{ id: "m-1", status: "active" }]));
       mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("fail"); });
       const result = await bulkUpdateMemberStatus("org-1", ["m-1"], "active");
       expect(result.success).toBe(false);

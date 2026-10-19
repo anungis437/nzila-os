@@ -17,6 +17,7 @@ vi.mock('@/db/db', () => ({
       organizationMembers: { findFirst: mocks.mockFindFirst },
     },
     select: mocks.mockSelect,
+    execute: vi.fn(async () => undefined),
     insert: mocks.mockInsert,
     update: mocks.mockUpdate,
     delete: mocks.mockDelete,
@@ -104,7 +105,7 @@ vi.mock('@/lib/member-integrity/durable-member-audit', () => ({
 function chain(result: any = undefined) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const c: any = {};
-  for (const m of ['from', 'where', 'orderBy', 'limit', 'offset', 'groupBy', 'set', 'values', 'returning']) {
+  for (const m of ['from', 'where', 'orderBy', 'limit', 'offset', 'groupBy', 'for', 'set', 'values', 'returning']) {
     c[m] = vi.fn(() => c);
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -164,6 +165,7 @@ describe('member-service', () => {
     vi.clearAllMocks();
     mocks.mockFindFirst.mockReset();
     mocks.mockSelect.mockReset();
+    mocks.mockSelect.mockReturnValue(chain([]));
     mocks.mockInsert.mockReset();
     mocks.mockUpdate.mockReset();
     mocks.mockDelete.mockReset();
@@ -341,10 +343,12 @@ describe('member-service', () => {
 
   describe('bulkUpdateMemberStatus', () => {
     it('updates status for all member ids', async () => {
-      mocks.mockSelect.mockReturnValueOnce(chain([
-        { id: 'm1', status: 'active' },
-        { id: 'm2', status: 'active' },
-      ]));
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([]))
+        .mockReturnValueOnce(chain([
+          { id: 'm1', status: 'active' },
+          { id: 'm2', status: 'active' },
+        ]));
       mocks.mockUpdate.mockReturnValue(chain([{ id: 'm1' }, { id: 'm2' }]));
       const result = await bulkUpdateMemberStatus('org-1', ['m1', 'm2'], 'inactive');
       expect(result.success).toBe(true);
@@ -352,6 +356,9 @@ describe('member-service', () => {
     });
 
     it('returns failure on error', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([]))
+        .mockReturnValueOnce(chain([{ id: 'm1', status: 'active' }]));
       mocks.mockUpdate.mockImplementation(() => { throw new Error('fail'); });
       const result = await bulkUpdateMemberStatus('org-1', ['m1'], 'inactive');
       expect(result.success).toBe(false);
