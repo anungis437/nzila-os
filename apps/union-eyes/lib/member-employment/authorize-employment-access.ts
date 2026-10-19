@@ -17,6 +17,8 @@
  * service caller for that action. An employment administrator who also holds
  * that finance authority receives `discloseCompensation` on the same grant.
  * Everyone else still administers employment, without individual pay figures.
+ * The returned grant is frozen and registered by object identity, so a later
+ * assignment cannot change its organization, user, capability, or disclosure.
  *
  * This module does not prove that a deployed database enforces row-level security.
  */
@@ -228,13 +230,13 @@ export async function authorizeEmploymentAccess(
     }
   }
 
-  const grant: EmploymentAccessGrant = {
+  const grant: EmploymentAccessGrant = Object.freeze({
     ok: true,
     userId,
     organizationId: requestedOrganizationId,
     capability,
     discloseCompensation,
-  }
+  })
   registeredGrants.add(grant)
   return grant
 }

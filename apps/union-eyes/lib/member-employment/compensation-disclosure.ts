@@ -6,8 +6,10 @@
  * bands (`minimumRate`, `maximumRate`, `standardRate`) are a different record
  * and stay with classification management.
  *
- * History snapshots are unrestricted JSON. The same pay keys are removed
- * from those snapshots unless the caller has the finance disclosure.
+ * Employment-history `previousValues` and `newValues` are unrestricted JSON.
+ * Removing known pay names does not cover `rateBefore`, `newRate`, or a
+ * nested object. Non-finance responses keep only the operational allowlist,
+ * and only when the value is a string, number, boolean, or null.
  */
 
 const COMPENSATION_KEYS = new Set([
@@ -21,16 +23,6 @@ const COMPENSATION_KEYS = new Set([
 
 function canonicalKey(key: string): string {
   return key.toLowerCase().replace(/_/g, '')
-}
-
-export function snapshotContainsCompensation(value: unknown, seen = new Set<unknown>()): boolean {
-  if (value === null || typeof value !== 'object') return false
-  if (seen.has(value)) return false
-  seen.add(value)
-  if (Array.isArray(value)) return value.some((item) => snapshotContainsCompensation(item, seen))
-  return Object.entries(value as Record<string, unknown>).some(([key, item]) => {
-    return COMPENSATION_KEYS.has(canonicalKey(key)) || snapshotContainsCompensation(item, seen)
-  })
 }
 
 export function redactCompensationTree(value: unknown, seen = new Set<unknown>()): unknown {
@@ -65,6 +57,74 @@ export function projectMemberEmployment<T>(row: T, discloseCompensation: boolean
   } as T
 }
 
+/**
+ * Fields an employment administrator may see in a history snapshot.
+ * These are operational facts already on the employment record. Individual
+ * pay, free text, and `customFields` are absent because a snapshot can hide
+ * an amount under any other name.
+ */
+export const OPERATIONAL_HISTORY_FIELDS = [
+  'employmentStatus',
+  'employmentType',
+  'hireDate',
+  'seniorityDate',
+  'terminationDate',
+  'expectedReturnDate',
+  'adjustedSeniorityDate',
+  'seniorityYears',
+  'jobTitle',
+  'jobCode',
+  'jobClassification',
+  'jobLevel',
+  'department',
+  'division',
+  'employerId',
+  'worksiteId',
+  'bargainingUnitId',
+  'payFrequency',
+  'regularHoursPerWeek',
+  'regularHoursPerPeriod',
+  'shiftType',
+  'shiftStartTime',
+  'shiftEndTime',
+  'operatesWeekends',
+  'operates24Hours',
+  'supervisorName',
+  'supervisorId',
+  'isProbationary',
+  'probationEndDate',
+  'checkoffAuthorized',
+  'checkoffDate',
+  'randExempt',
+] as const
+
+const OPERATIONAL_HISTORY_KEYS = new Set(OPERATIONAL_HISTORY_FIELDS.map(canonicalKey))
+
+function isHistoryPrimitive(value: unknown): boolean {
+  if (value === null) return true
+  if (typeof value === 'string' || typeof value === 'boolean') return true
+  return typeof value === 'number' && Number.isFinite(value)
+}
+
+export function projectOperationalHistorySnapshot(value: unknown): Record<string, unknown> | null {
+  if (value == null) return null
+  if (typeof value !== 'object' || Array.isArray(value)) return null
+  const projected: Record<string, unknown> = {}
+  for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+    if (!OPERATIONAL_HISTORY_KEYS.has(canonicalKey(key)) || !isHistoryPrimitive(item)) continue
+    projected[key] = item
+  }
+  return projected
+}
+
+export function historySnapshotExceedsOperationalDisclosure(value: unknown): boolean {
+  if (value == null) return false
+  if (typeof value !== 'object' || Array.isArray(value)) return true
+  return Object.entries(value as Record<string, unknown>).some(([key, item]) => {
+    return !OPERATIONAL_HISTORY_KEYS.has(canonicalKey(key)) || !isHistoryPrimitive(item)
+  })
+}
+
 export function projectEmploymentHistory<T extends { previousValues?: unknown; newValues?: unknown }>(
   row: T,
   discloseCompensation: boolean,
@@ -72,7 +132,7 @@ export function projectEmploymentHistory<T extends { previousValues?: unknown; n
   if (discloseCompensation) return row
   return {
     ...row,
-    previousValues: redactCompensationTree(row.previousValues ?? null),
-    newValues: redactCompensationTree(row.newValues ?? null),
+    previousValues: projectOperationalHistorySnapshot(row.previousValues),
+    newValues: projectOperationalHistorySnapshot(row.newValues),
   }
 }

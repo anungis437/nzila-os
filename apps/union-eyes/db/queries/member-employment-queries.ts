@@ -41,9 +41,9 @@ import {
 } from '@/lib/member-employment/authorize-employment-access'
 import {
   compensationWriteAttempted,
+  historySnapshotExceedsOperationalDisclosure,
   projectEmploymentHistory,
   projectMemberEmployment,
-  snapshotContainsCompensation,
 } from '@/lib/member-employment/compensation-disclosure'
 import { persistDurableEmploymentAudit } from '@/lib/member-employment/durable-employment-audit'
 
@@ -80,7 +80,10 @@ function assertCompensationWrite(scope: EmploymentActorScope, data: object): voi
 
 function assertHistoryDisclosure(scope: EmploymentActorScope, data: { previousValues?: unknown; newValues?: unknown }): void {
   if (scope.discloseCompensation) return
-  if (snapshotContainsCompensation(data.previousValues) || snapshotContainsCompensation(data.newValues)) {
+  if (
+    historySnapshotExceedsOperationalDisclosure(data.previousValues) ||
+    historySnapshotExceedsOperationalDisclosure(data.newValues)
+  ) {
     throw new EmploymentBoundaryError('Forbidden')
   }
 }

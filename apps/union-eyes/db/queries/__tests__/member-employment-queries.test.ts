@@ -330,7 +330,7 @@ describe('member employment query boundary', () => {
     expect(disclosed).toMatchObject({ hourlyRate: '25.00', baseSalary: '52000.00', grossWages: '1000.50' })
   })
 
-  it('withholds historical wage snapshots without a finance grant', async () => {
+  it('withholds historical snapshots that are not on the operational allowlist', async () => {
     await expect(q.createEmploymentHistory(scope, {
       organizationId: ORG_A,
       memberId: MEMBER,
@@ -338,18 +338,59 @@ describe('member employment query boundary', () => {
       previousValues: { hourlyRate: '20.00' },
       newValues: { hourly_rate: '25.00' },
     } as never)).rejects.toThrow('Forbidden')
+    await expect(q.createEmploymentHistory(scope, {
+      organizationId: ORG_A,
+      memberId: MEMBER,
+      changeType: 'wage_change',
+      previousValues: { rateBefore: '20.00' },
+      newValues: { newRate: '25.00', pay: { amount: '25.00' } },
+    } as never)).rejects.toThrow('Forbidden')
+
+    push([{ id: MEMBER, userId: 'member-user' }])
+    push([{ id: 'h1', previousValues: { jobTitle: 'Helper' }, newValues: { job_title: 'Welder' } }])
+    push([])
+    await expect(q.createEmploymentHistory(scope, {
+      organizationId: ORG_A,
+      memberId: MEMBER,
+      changeType: 'promotion',
+      previousValues: { jobTitle: 'Helper' },
+      newValues: { job_title: 'Welder' },
+    } as never)).resolves.toMatchObject({ id: 'h1' })
 
     push([{ id: MEMBER, userId: 'member-user' }])
     push([{
       id: 'h1',
       changeType: 'wage_change',
-      previousValues: { jobTitle: 'Helper', hourlyRate: '20.00' },
-      newValues: { jobTitle: 'Welder', gross_wages: '1000.50' },
+      previousValues: {
+        jobTitle: 'Helper',
+        hourlyRate: '20.00',
+        rateBefore: '20.00',
+        jobCode: ['W', { salary: '20.00' }],
+        details: { jobTitle: 'Helper', newRate: '25.00' },
+      },
+      newValues: {
+        jobTitle: { text: 'Welder', grossWages: '1000.50' },
+        newRate: '25.00',
+        employmentStatus: 'active',
+      },
     }])
     const [history] = await q.getEmploymentHistoryByMember(scope, MEMBER)
     expect(history.previousValues).toEqual({ jobTitle: 'Helper' })
-    expect(history.newValues).toEqual({ jobTitle: 'Welder' })
+    expect(history.newValues).toEqual({ employmentStatus: 'active' })
     expect(JSON.stringify(history)).not.toContain('20.00')
+    expect(JSON.stringify(history)).not.toContain('25.00')
     expect(JSON.stringify(history)).not.toContain('1000.50')
+    expect(JSON.stringify(history)).not.toContain('rateBefore')
+    expect(JSON.stringify(history)).not.toContain('newRate')
+
+    push([{ id: MEMBER, userId: 'member-user' }])
+    push([{
+      id: 'h2',
+      previousValues: { rateBefore: '20.00', nested: { salary: '20.00' } },
+      newValues: { newRate: '25.00' },
+    }])
+    const [disclosed] = await q.getEmploymentHistoryByMember(financeScope, MEMBER)
+    expect(disclosed.previousValues).toMatchObject({ rateBefore: '20.00' })
+    expect(disclosed.newValues).toEqual({ newRate: '25.00' })
   })
 })

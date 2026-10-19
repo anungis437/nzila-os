@@ -152,6 +152,25 @@ describe('authorizeEmploymentAccess', () => {
     })
     expect(() => assertRegisteredEmploymentGrant(decision)).not.toThrow()
     expect(() => assertRegisteredEmploymentGrant({ ...decision })).toThrow('Forbidden')
+    expect(Object.isFrozen(decision)).toBe(true)
+    expect(() => {
+      ;(decision as { discloseCompensation: boolean }).discloseCompensation = true
+    }).toThrow(TypeError)
+    expect(() => {
+      ;(decision as { organizationId: string }).organizationId = ORG_B
+    }).toThrow(TypeError)
+    expect(() => {
+      ;(decision as { userId: string }).userId = 'elevated-user'
+    }).toThrow(TypeError)
+    expect(() => {
+      ;(decision as { capability: 'finance' }).capability = 'finance'
+    }).toThrow(TypeError)
+    expect(decision).toMatchObject({
+      userId: ADMIN,
+      organizationId: ORG_A,
+      capability: 'administer',
+      discloseCompensation: false,
+    })
     expect(mocks.getUserRole).toHaveBeenCalledWith(ADMIN, ORG_A)
     expect(mocks.hasRole).not.toHaveBeenCalled()
   })
