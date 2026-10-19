@@ -6,7 +6,11 @@ const state = vi.hoisted(() => ({
   inserts: [] as unknown[],
   audits: [] as unknown[],
   contexts: [] as string[],
+  existingClaims: [] as Array<{ idempotencyHash?: string }>,
+  entitlementCalls: [] as unknown[][],
   auditFails: false,
+  entitled: true,
+  role: 'admin' as string | null,
   grant: {
     ok: true,
     userId: 'user-admin',
@@ -17,15 +21,30 @@ const state = vi.hoisted(() => ({
   memberImport: vi.fn(),
 }))
 
-function query(rows: unknown[]) {
+function query(selectRows: (clause: unknown) => unknown[]) {
+  let clause: unknown
   const chain = {
     from: () => chain,
-    where: () => chain,
-    limit: () => Promise.resolve(rows),
+    where: (next: unknown) => {
+      clause = next
+      return chain
+    },
+    limit: () => Promise.resolve(selectRows(clause)),
     then: (resolve: (value: unknown) => unknown, reject: (error: unknown) => unknown) =>
-      Promise.resolve(rows).then(resolve, reject),
+      Promise.resolve(selectRows(clause)).then(resolve, reject),
   }
   return chain
+}
+
+function rowsForClause(clause: unknown): unknown[] {
+  const parts = Array.isArray(clause) ? clause : []
+  const hash = parts.find((part) => (
+    part !== null &&
+    typeof part === 'object' &&
+    (part as { column?: string }).column === 'idempotencyHash'
+  )) as { value?: string } | undefined
+  if (!hash) return state.rows
+  return state.existingClaims.filter((claim) => claim.idempotencyHash === hash.value)
 }
 
 vi.mock('@/lib/logger', () => ({
@@ -49,6 +68,31 @@ vi.mock('@/lib/member-integrity/authorize-member-access', () => {
 })
 vi.mock('@/lib/services/member-service', () => ({
   importOrganizationMembers: (...args: unknown[]) => state.memberImport(...args),
+  MEMBER_IMPORT_KEYS: new Set([
+    'id', 'userId', 'organizationId', 'email', 'name', 'phone', 'department',
+    'location', 'position', 'status', 'role', 'exemptFromPerCapita',
+    'exemptionReason', 'exemptionApprovedBy',
+  ]),
+}))
+vi.mock('@/lib/api-auth-guard', () => ({
+  PLATFORM_ELEVATED_ROLES: ['system_admin', 'app_owner', 'national_officer'],
+  normalizeRole: (role: string) => role,
+  getUserRole: async () => state.role,
+}))
+vi.mock('@/services/platform-economics/entitlement-guard', () => ({
+  PLATFORM_MODULES: { GRIEVANCE_CASE_SUITE: 'grievance_case_suite' },
+  requireEntitlement: async (...args: unknown[]) => {
+    state.entitlementCalls.push(args)
+    if (!state.entitled) {
+      const error = new Error('No active entitlement')
+      error.name = 'EntitlementError'
+      throw error
+    }
+    return { allowed: true, featureKey: 'grievance_case_suite' }
+  },
+}))
+vi.mock('@/lib/claims/claim-number', () => ({
+  allocateClaimNumber: async () => 'CLM-20261019-0001',
 }))
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({
   currentStateContextEnabled: () => false,
@@ -80,6 +124,7 @@ vi.mock('@/db/schema', () => ({
     incidentDate: 'incidentDate',
     createdAt: 'createdAt',
     organizationId: 'organizationId',
+    idempotencyHash: 'idempotencyHash',
   },
   grievanceDocuments: {
     id: 'id',
@@ -107,7 +152,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
     const tx = {
       select: (shape?: Record<string, unknown>) => {
         state.inserts.push({ select: shape ? Object.keys(shape) : [] })
-        return query(state.rows)
+        return query(rowsForClause)
       },
       insert: () => ({
         values: (row: Record<string, unknown>) => {
@@ -116,7 +161,10 @@ vi.mock('@/lib/db/with-rls-context', () => ({
           }
           const result = Promise.resolve([{ claimId: 'created-claim' }])
           if (row.action === 'claim_import') state.audits.push(row)
-          else state.inserts.push(row)
+          else {
+            state.inserts.push(row)
+            if (typeof row.idempotencyHash === 'string') state.existingClaims.push(row)
+          }
           return Object.assign(result, {
             returning: async () => [{ claimId: 'created-claim' }],
           })
@@ -138,6 +186,8 @@ import {
   DataExportService,
   DataImportService,
   DOCUMENT_EXPORT_FIELDS,
+  MAX_IMPORT_BYTES,
+  MAX_IMPORT_ROWS,
   MEMBER_EXPORT_FIELDS,
   projectClaimExport,
   projectDocumentExport,
@@ -149,11 +199,26 @@ beforeEach(() => {
   state.inserts.splice(0)
   state.audits.splice(0)
   state.contexts.splice(0)
+  state.existingClaims.splice(0)
+  state.entitlementCalls.splice(0)
   state.auditFails = false
+  state.entitled = true
+  state.role = 'admin'
   state.grant = { ok: true, userId: 'user-admin', organizationId: ORG, capability: 'administer' }
   state.memberImport.mockReset()
   state.memberImport.mockResolvedValue({ imported: 0, errors: [] })
 })
+
+const CLAIM_ROW = {
+  memberId: 'm1',
+  claimType: 'other',
+  title: 'Schedule change',
+  incidentDate: '2026-01-15',
+}
+
+function claimWrites(): unknown[] {
+  return state.inserts.filter((row) => (row as { idempotencyHash?: string }).idempotencyHash)
+}
 
 describe('organization data portability', () => {
   it('refuses an export that has no organization', async () => {
@@ -314,20 +379,26 @@ describe('organization data portability', () => {
     const imported = await new DataImportService().import(
       'claims',
       ORG,
-      JSON.stringify([{ memberId: 'm1', claimType: 'other' }]),
+      JSON.stringify([CLAIM_ROW]),
       'json',
       { updateExisting: false, validateOnly: false },
     )
     expect(imported).toMatchObject({ success: true, imported: 1, errors: [] })
+    expect(state.entitlementCalls[0]).toEqual([ORG, 'grievance_case_suite', 'user-admin'])
     expect(state.audits[0]).toMatchObject({ action: 'claim_import', organizationId: ORG })
-    expect(state.inserts.some((row) => (row as { organizationId?: string }).organizationId === ORG)).toBe(true)
+    const created = state.inserts.find((row) => (row as { idempotencyHash?: string }).idempotencyHash) as {
+      claimNumber?: string
+      organizationId?: string
+    }
+    expect(created).toMatchObject({ organizationId: ORG, claimNumber: 'CLM-20261019-0001' })
+    expect(created.claimNumber).not.toMatch(/^IMP-/)
 
     state.rows = [{ id: 'm1' }]
     state.auditFails = true
     const failed = await new DataImportService().import(
       'claims',
       ORG,
-      JSON.stringify([{ memberId: 'm1' }]),
+      JSON.stringify([{ ...CLAIM_ROW, title: 'A different incident' }]),
       'json',
       { updateExisting: false, validateOnly: false },
     )
@@ -335,6 +406,134 @@ describe('organization data portability', () => {
     expect(failed.imported).toBe(0)
     expect(state.audits).toEqual([])
     expect(state.inserts.filter((row) => (row as { organizationId?: string }).organizationId)).toEqual([])
+  })
+
+  it('refuses claim import without the case entitlement or claim-import authority', async () => {
+    state.rows = [{ id: 'm1' }]
+    state.entitled = false
+    const denied = await new DataImportService().import(
+      'claims',
+      ORG,
+      JSON.stringify([CLAIM_ROW]),
+      'json',
+    )
+    expect(denied).toMatchObject({ success: false, imported: 0 })
+    expect(state.contexts).toEqual([])
+    expect(claimWrites()).toEqual([])
+
+    state.entitled = true
+    state.role = 'officer'
+    const officer = await new DataImportService().import(
+      'claims',
+      ORG,
+      JSON.stringify([CLAIM_ROW]),
+      'json',
+    )
+    expect(officer).toMatchObject({ success: false, imported: 0 })
+    expect(officer.errors[0]).toBe('Forbidden')
+    expect(claimWrites()).toEqual([])
+
+    state.role = 'clerk'
+    const clerk = await new DataImportService().import(
+      'claims',
+      ORG,
+      JSON.stringify([CLAIM_ROW]),
+      'json',
+    )
+    expect(clerk.success).toBe(false)
+    expect(clerk.imported).toBe(0)
+    expect(claimWrites()).toEqual([])
+  })
+
+  it('does not insert a duplicate claim or accept a client claim number', async () => {
+    state.rows = [{ id: 'm1' }]
+    const service = new DataImportService()
+    const first = await service.import('claims', ORG, JSON.stringify([CLAIM_ROW, CLAIM_ROW]), 'json')
+    expect(first).toMatchObject({ success: true, imported: 1, errors: [] })
+    expect(claimWrites()).toHaveLength(1)
+
+    const repeat = await service.import('claims', ORG, JSON.stringify([CLAIM_ROW]), 'json')
+    expect(repeat).toMatchObject({ success: true, imported: 0, errors: [] })
+    expect(claimWrites()).toHaveLength(1)
+
+    const forged = await service.import(
+      'claims',
+      ORG,
+      JSON.stringify([{ ...CLAIM_ROW, title: 'Forged number', claimNumber: 'CASE-CLIENT-1' }]),
+      'json',
+    )
+    expect(forged).toMatchObject({ success: false, imported: 0 })
+    expect(claimWrites()).toHaveLength(1)
+  })
+
+  it('rejects an oversized claim import before inserting', async () => {
+    const rows = Array.from({ length: MAX_IMPORT_ROWS + 1 }, () => CLAIM_ROW)
+    const result = await new DataImportService().import('claims', ORG, JSON.stringify(rows), 'json')
+    expect(result).toEqual({ success: false, imported: 0, errors: ['Import exceeds the supported size'] })
+    expect(state.contexts).toEqual([])
+    expect(claimWrites()).toEqual([])
+  })
+
+  it('parses quoted CSV fields and rejects a malformed file before membership writes', async () => {
+    const quoted = await new DataImportService().import(
+      'members',
+      ORG,
+      'name,email,role\r\n"Ada, Admin","ada ""A""@example.com",member\r\n',
+      'csv',
+      { updateExisting: false, validateOnly: true },
+    )
+    expect(quoted.success).toBe(true)
+    expect(state.memberImport).toHaveBeenCalledWith(
+      ORG,
+      [{ name: 'Ada, Admin', email: 'ada "A"@example.com', role: 'member' }],
+      { updateExisting: false, validateOnly: true },
+    )
+
+    state.memberImport.mockClear()
+    const malformed = await new DataImportService().import(
+      'members',
+      ORG,
+      'name,email,role\n"Ada,ada@example.com,admin\n',
+      'csv',
+    )
+    expect(malformed).toMatchObject({ success: false, imported: 0, errors: ['Malformed import'] })
+    expect(state.memberImport).not.toHaveBeenCalled()
+
+    const duplicateHeader = await new DataImportService().import(
+      'members',
+      ORG,
+      'role,role\nadmin,member\n',
+      'csv',
+    )
+    expect(duplicateHeader.success).toBe(false)
+    expect(state.memberImport).not.toHaveBeenCalled()
+
+    const unknownHeader = await new DataImportService().import(
+      'members',
+      ORG,
+      'email,userId,systemRole\nada@example.com,ada,admin\n',
+      'csv',
+    )
+    expect(unknownHeader.success).toBe(false)
+    expect(state.memberImport).not.toHaveBeenCalled()
+
+    const extraColumn = await new DataImportService().import(
+      'members',
+      ORG,
+      'email,userId\nada@example.com,ada,admin\n',
+      'csv',
+    )
+    expect(extraColumn.success).toBe(false)
+    expect(state.memberImport).not.toHaveBeenCalled()
+
+    const oversized = await new DataImportService().import(
+      'members',
+      ORG,
+      `email\n${'a'.repeat(MAX_IMPORT_BYTES)}`,
+      'csv',
+    )
+    expect(oversized.errors).toEqual(['Import exceeds the supported size'])
+    expect(state.memberImport).not.toHaveBeenCalled()
   })
 
   it('rejects unsupported import entities and formats', async () => {

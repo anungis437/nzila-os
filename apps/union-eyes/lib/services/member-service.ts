@@ -684,7 +684,7 @@ export async function calculateSeniority(organizationId: string, memberId: strin
   }
 }
 
-const MEMBER_IMPORT_KEYS = new Set([
+export const MEMBER_IMPORT_KEYS = new Set([
   "id",
   "userId",
   "organizationId",
