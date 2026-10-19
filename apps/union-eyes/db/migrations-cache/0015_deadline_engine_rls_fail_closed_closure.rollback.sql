@@ -11,7 +11,12 @@
 -- The script refuses to run unless the session carries an explicit, recorded security disposition:
 --   SELECT set_config('ue.fail_open_recovery_disposition', '<security disposition id>', false);
 -- and it is meant to be run inside a single transaction by the migration-admin principal. After it
--- runs, the deploy-time rls-verify preflight is EXPECTED TO FAIL until 0015 is re-applied.
+-- runs, the deploy-time rls-verify preflight is EXPECTED TO FAIL until the closure is restored.
+--
+-- RE-CLOSING: the governed executor still records 0015 as applied, so --apply is a no-op and will NOT
+-- re-close (rehearsed). Re-close by replaying 0015_deadline_engine_rls_fail_closed_closure.sql directly
+-- in one transaction as the migration-admin principal (it is idempotent and leaves the ledger unchanged),
+-- then re-run the rls-verify preflight.
 
 DO $$
 BEGIN

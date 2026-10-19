@@ -28,9 +28,27 @@
 -- other table. REUSES helpers from 0010/0012 (no new policy geometry). Idempotent. Missing tenant
 -- context fails closed; the system principal is granted by role (TO union_eyes_system).
 --
--- RELEASE ORDER (REQUIRED): apply only after an application revision whose deadline worker and
--- overdue scheduler run under withSystemContext() is serving traffic. Revisions built from
--- eae195f2 (and earlier) rely on the fail-open fallback and lose access to the queue.
+-- RELEASE ORDER (rehearsed; docs/union-eyes/reality-remediation/29_UE_PHASE3A_RUNTIME_REALITY_DOSSIER.md
+-- sections 14 and 18): CLOSURE FIRST, candidate application second. Apply this migration BEFORE the
+-- candidate revision is dispatched and before it receives any traffic. It does NOT depend on a newer
+-- revision already serving.
+--   * The serving revision (eae195f2) cannot reach a policy-dependent statement on these tables on the
+--     live schema: its deadline worker, overdue cron and assignment route each fail first on a missing
+--     relation or column (deadline_reassignment_convergence, grievance_deadlines.due_date/status),
+--     identically with and without this migration.
+--   * The candidate worker runs under withSystemContext() and works under both the legacy and the closed
+--     policy set, so the candidate is validated against the final policy state before traffic moves.
+--   * deploy-union-eyes.yml's post-deploy rls-verify preflight reads the database, not the revision; it
+--     stays red until this migration is applied, so applying it first keeps the governed run green.
+-- Prerequisites: approved CHG-2026-0112; stale 0%-traffic revisions deactivated so only the serving
+-- revision and the candidate run; ledger verified with the governed read-only check.
+-- Not covered here: the Django migration step is a separate blocker for deploying the candidate
+-- (content.0004 and grievances.0005 collide with a lineage-restored database).
+--
+-- Execution: only through the governed executor
+-- (tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs): --check, then --apply. With a
+-- staging-like ledger (0000-0005 recorded) it applies 0006-0015; on a staging-shaped database that changes
+-- exactly these three tables plus the ue_create_* helper function bodies.
 --
 -- Recovery: there is no routine rollback. See
 -- 0015_deadline_engine_rls_fail_closed_closure.rollback.sql (exceptional, security-disposition-gated).

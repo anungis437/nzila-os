@@ -263,3 +263,29 @@ describe('0015 - canonical placement and scope', () => {
     expect(entries().some((e) => e.tag.endsWith('.rollback'))).toBe(false);
   });
 });
+
+describe('0015 - one release order across the migration header, recovery file and change record', () => {
+  const chg = JSON.parse(read(resolve(REPO_ROOT, 'ops', 'change-records', 'CHG-2026-0112.json'))) as { description: string; rollback_plan: string };
+
+  it('states closure-first / candidate-second and never the superseded "apply after the new revision serves" order', () => {
+    expect(SQL_0015).toMatch(/CLOSURE FIRST, candidate application second/);
+    expect(chg.description).toMatch(/CLOSURE FIRST, CANDIDATE SECOND/);
+    for (const text of [SQL_0015, chg.description]) {
+      expect(text).not.toMatch(/apply only after an application revision/i);
+      expect(text).not.toMatch(/compatible application revision (is )?serving before/i);
+    }
+  });
+
+  it('routes execution through the governed executor and names the independent Django blocker', () => {
+    expect(SQL_0015).toContain('apply-union-eyes-scoped-migrations-existing-env.mjs');
+    expect(chg.description).toContain('apply-union-eyes-scoped-migrations-existing-env.mjs');
+    expect(SQL_0015).toMatch(/content\.0004 and grievances\.0005/);
+    expect(chg.description).toMatch(/content\.0004 and grievances\.0005/);
+  });
+
+  it('documents that the executor will not re-close after recovery and how to re-close', () => {
+    expect(SQL_RECOVERY).toMatch(/will NOT\s+-- re-close/);
+    expect(chg.rollback_plan).toMatch(/will not re-close/);
+    expect(chg.rollback_plan).toMatch(/replay 0015 directly/);
+  });
+});
