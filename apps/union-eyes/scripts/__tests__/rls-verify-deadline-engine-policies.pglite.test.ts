@@ -165,3 +165,195 @@ describe('rls-verify preflight: deadline-engine policy closure', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Predicate semantics. Structural checks (name, role, command, no OR / IS NULL / literal true) are NOT enough: a policy can
+// combine an identity comparison with a nonempty-context test, pass all of them, and still expose every tenant.
+// The verifier therefore pins the approved predicate text exactly (identical on PostgreSQL 15, 16 and 18) and these tests
+// prove, against a real catalog and a NOBYPASSRLS role, that (a) each widening shape really leaks and (b) the verifier
+// rejects it, and (c) the approved state really isolates tenants.
+// ---------------------------------------------------------------------------------------------------------------------
+const ORG_A = '00000000-0000-0000-0000-00000000000a';
+const ORG_B = '00000000-0000-0000-0000-00000000000b';
+const GRANTS = `GRANT SELECT, INSERT, UPDATE, DELETE ON deadline_reminders, deadline_audit_events, deadline_reminder_executions TO union_eyes_runtime, union_eyes_system`;
+
+async function seedTenants(db: PGlite): Promise<void> {
+  await db.exec(GRANTS);
+  for (const org of [ORG_A, ORG_B]) {
+    const id = crypto.randomUUID();
+    await db.query(
+      `INSERT INTO deadline_reminders (id, source_table, source_deadline_id, organization_id, offset_days, scheduled_for, recipient_role, recipient_email, recipient_email_hash)
+       VALUES ($1, 'grievance_deadlines', gen_random_uuid(), $2, 1, now(), 'assigned_steward', $3, $4)`,
+      [id, org, `${org}@example.invalid`, `h-${org}`],
+    );
+    await db.query(
+      `INSERT INTO deadline_audit_events (organization_id, source_table, source_deadline_id, event_type, actor_type, correlation_id)
+       VALUES ($1, 'grievance_deadlines', gen_random_uuid(), 'deadline.created', 'system', 'c')`,
+      [org],
+    );
+    await db.query(`INSERT INTO deadline_reminder_executions (reminder_id, attempt_number, outcome, worker_instance, correlation_id) VALUES ($1, 1, 'sent', 'w', 'c')`, [id]);
+  }
+}
+
+async function asRuntime(db: PGlite, ctx: string | null) {
+  await db.exec('RESET ROLE');
+  await db.exec('SET ROLE union_eyes_runtime');
+  await db.query(`SELECT set_config('app.current_org_id', $1, false)`, [ctx ?? '']);
+}
+const reset = (db: PGlite) => db.exec('RESET ROLE');
+const rows = async (db: PGlite, table: string) => (await db.query<{ organization_id?: string }>(`SELECT * FROM ${table}`)).rows;
+
+describe('approved state really isolates tenants (acceptance implies isolation)', () => {
+  it('with a tenant context set, only that tenant is visible, writable and deletable on all three tables; no context sees nothing', async () => {
+    const db = await closedDb();
+    await seedTenants(db);
+    expect((await verdicts(db)).failed).toEqual([]);
+    for (const table of ['deadline_reminders', 'deadline_audit_events']) {
+      await asRuntime(db, ORG_A);
+      const seen = await rows(db, table);
+      expect(seen.length, table).toBe(1);
+      expect(seen.every((r) => r.organization_id === ORG_A), table).toBe(true);
+      await asRuntime(db, null);
+      expect((await rows(db, table)).length, `${table} with no context`).toBe(0);
+    }
+    await asRuntime(db, ORG_A);
+    expect((await rows(db, 'deadline_reminder_executions')).length).toBe(1);
+    await asRuntime(db, null);
+    expect((await rows(db, 'deadline_reminder_executions')).length).toBe(0);
+    // cross-tenant write/delete affect nothing; a forged tenant insert is rejected
+    await asRuntime(db, ORG_A);
+    const upd = await db.query(`UPDATE deadline_reminders SET offset_days = 99 WHERE organization_id = $1`, [ORG_B]);
+    expect(upd.affectedRows).toBe(0);
+    const del = await db.query(`DELETE FROM deadline_reminders WHERE organization_id = $1`, [ORG_B]);
+    expect(del.affectedRows).toBe(0);
+    await db.exec('BEGIN');
+    await expect(
+      db.query(
+        `INSERT INTO deadline_reminders (source_table, source_deadline_id, organization_id, offset_days, scheduled_for, recipient_role, recipient_email, recipient_email_hash)
+         VALUES ('grievance_deadlines', gen_random_uuid(), $1, 1, now(), 'org_admin', 'x@example.invalid', 'hx')`,
+        [ORG_B],
+      ),
+    ).rejects.toThrow(/row-level security/);
+    await db.exec('ROLLBACK');
+    await reset(db);
+  });
+});
+
+// latent: not exploitable alone (UPDATE also needs SELECT visibility; the executions subquery is bounded by the parent's RLS) but one policy edit away from it.
+type Widening = { label: string; table: 'deadline_reminders' | 'deadline_audit_events' | 'deadline_reminder_executions'; drop: string; create: string; ctx: string; latent?: boolean };
+
+const IDENTITY = `organization_id::text = organization_id::text AND current_setting('app.current_org_id', true) <> ''`;
+const WIDENINGS: Widening[] = [
+  { label: 'identity comparison + nonempty context (select)', table: 'deadline_reminders', drop: 'ue_org_isolation_select', ctx: ORG_A,
+    create: `CREATE POLICY ue_org_isolation_select ON deadline_reminders FOR SELECT TO union_eyes_runtime USING (${IDENTITY})` },
+  { label: 'identity comparison + nonempty context (audit events select)', table: 'deadline_audit_events', drop: 'ue_org_isolation_select', ctx: ORG_A,
+    create: `CREATE POLICY ue_org_isolation_select ON deadline_audit_events FOR SELECT TO union_eyes_runtime USING (${IDENTITY})` },
+  { label: 'identity comparison + nonempty context (insert: forged tenant accepted)', table: 'deadline_reminders', drop: 'ue_org_isolation_insert', ctx: ORG_A,
+    create: `CREATE POLICY ue_org_isolation_insert ON deadline_reminders FOR INSERT TO union_eyes_runtime WITH CHECK (${IDENTITY})` },
+  { label: 'inequality (other tenants only)', table: 'deadline_reminders', drop: 'ue_org_isolation_select', ctx: ORG_A,
+    create: `CREATE POLICY ue_org_isolation_select ON deadline_reminders FOR SELECT TO union_eyes_runtime USING (organization_id::text <> current_setting('app.current_org_id', true))` },
+  { label: 'context length test only', table: 'deadline_reminders', drop: 'ue_org_isolation_select', ctx: ORG_A,
+    create: `CREATE POLICY ue_org_isolation_select ON deadline_reminders FOR SELECT TO union_eyes_runtime USING (length(current_setting('app.current_org_id', true)) > 0)` },
+  { label: 'context compared with itself (tautology)', table: 'deadline_reminders', drop: 'ue_org_isolation_select', ctx: ORG_A,
+    create: `CREATE POLICY ue_org_isolation_select ON deadline_reminders FOR SELECT TO union_eyes_runtime USING (organization_id::text <> '' AND current_setting('app.current_org_id', true) >= current_setting('app.current_org_id', true))` },
+  { label: 'prefix match on the context', table: 'deadline_reminders', drop: 'ue_org_isolation_select', ctx: ORG_A,
+    create: `CREATE POLICY ue_org_isolation_select ON deadline_reminders FOR SELECT TO union_eyes_runtime USING (organization_id::text LIKE left(current_setting('app.current_org_id', true), 30) || '%')` },
+  { label: 'multi-tenant list in the context', table: 'deadline_reminders', drop: 'ue_org_isolation_select', ctx: `${ORG_A},${ORG_B}`,
+    create: `CREATE POLICY ue_org_isolation_select ON deadline_reminders FOR SELECT TO union_eyes_runtime USING (organization_id::text = ANY (string_to_array(current_setting('app.current_org_id', true), ',')))` },
+  { label: 'update USING widened (identity + nonempty context)', table: 'deadline_reminders', drop: 'ue_org_isolation_update', ctx: ORG_A, latent: true,
+    create: `CREATE POLICY ue_org_isolation_update ON deadline_reminders FOR UPDATE TO union_eyes_runtime USING (${IDENTITY}) WITH CHECK (${IDENTITY})` },
+  { label: 'parent join dropped on executions (nonempty context only)', table: 'deadline_reminder_executions', drop: 'ue_parent_org_isolation_v2', ctx: ORG_A,
+    create: `CREATE POLICY ue_parent_org_isolation_v2 ON deadline_reminder_executions FOR ALL TO union_eyes_runtime USING (current_setting('app.current_org_id', true) <> '') WITH CHECK (current_setting('app.current_org_id', true) <> '')` },
+  { label: 'parent join compares the parent with itself (executions)', table: 'deadline_reminder_executions', drop: 'ue_parent_org_isolation_v2', ctx: ORG_A, latent: true,
+    create: `CREATE POLICY ue_parent_org_isolation_v2 ON deadline_reminder_executions FOR ALL TO union_eyes_runtime
+      USING (EXISTS (SELECT 1 FROM deadline_reminders parent WHERE parent.id = deadline_reminder_executions.reminder_id AND parent.organization_id::text = parent.organization_id::text) AND current_setting('app.current_org_id', true) <> '')
+      WITH CHECK (current_setting('app.current_org_id', true) <> '')` },
+];
+
+const leaksAnotherTenant = async (db: PGlite, w: Widening): Promise<boolean> => {
+  await asRuntime(db, w.ctx);
+  try {
+    if (w.table === 'deadline_reminder_executions') return (await rows(db, w.table)).length > 1;
+    if (w.create.includes('FOR INSERT')) {
+      await db.exec('BEGIN');
+      try {
+        await db.query(
+          `INSERT INTO deadline_reminders (source_table, source_deadline_id, organization_id, offset_days, scheduled_for, recipient_role, recipient_email, recipient_email_hash)
+           VALUES ('grievance_deadlines', gen_random_uuid(), $1, 1, now(), 'org_admin', 'x@example.invalid', 'hx')`,
+          [ORG_B],
+        );
+        return true;
+      } catch {
+        return false;
+      } finally {
+        await db.exec('ROLLBACK');
+      }
+    }
+    if (w.create.includes('FOR UPDATE')) {
+      const upd = await db.query(`UPDATE deadline_reminders SET offset_days = 77 WHERE organization_id = $1`, [ORG_B]);
+      return (upd.affectedRows ?? 0) > 0;
+    }
+    return (await rows(db, w.table)).some((r) => r.organization_id === ORG_B);
+  } finally {
+    await reset(db);
+  }
+};
+
+describe('predicate widening that passes the structural rules is rejected', () => {
+  for (const w of WIDENINGS) {
+    it(`${w.label}: ${w.latent ? 'latent widening' : 'it really leaks another tenant'}, and the verifier rejects it`, async () => {
+      const db = await closedDb();
+      await seedTenants(db);
+      await db.exec(`DROP POLICY ${w.drop} ON ${w.table}`);
+      await db.exec(w.create);
+      if (!w.latent) expect(await leaksAnotherTenant(db, w), 'the shape must be a genuine cross-tenant widening').toBe(true);
+      const { failed } = await verdicts(db);
+      expect(failed.length, `verifier accepted a leaking policy: ${w.label}`).toBeGreaterThan(0);
+      expect(JSON.stringify(failed)).toContain(w.drop);
+    });
+  }
+
+  it('a textually different but semantically equivalent rewrite is also rejected (fail-closed; update the contract in a reviewed PR)', async () => {
+    const db = await closedDb();
+    await seedTenants(db);
+    await db.exec(`DROP POLICY ue_org_isolation_select ON deadline_reminders`);
+    await db.exec(`CREATE POLICY ue_org_isolation_select ON deadline_reminders FOR SELECT TO union_eyes_runtime USING (lower(organization_id::text) = lower(current_setting('app.current_org_id', true)))`);
+    await asRuntime(db, ORG_A);
+    expect((await rows(db, 'deadline_reminders')).every((r) => r.organization_id === ORG_A)).toBe(true); // not a leak
+    await reset(db);
+    const { failed } = await verdicts(db);
+    expect(JSON.stringify(failed)).toContain('ue_org_isolation_select');
+    expect(JSON.stringify(failed)).toMatch(/approved predicate contract/);
+  });
+
+  it('an unexpected predicate on the part a command must not carry is rejected', async () => {
+    const db = await closedDb();
+    await db.exec(`DROP POLICY ue_org_isolation_select ON deadline_reminders`);
+    await db.exec(`CREATE POLICY ue_org_isolation_select ON deadline_reminders FOR SELECT TO union_eyes_runtime USING (organization_id::text = current_setting('app.current_org_id', true))`);
+    // SELECT policies carry no WITH CHECK in the catalog; the approved ones match exactly, so this equals the approved state
+    expect((await verdicts(db)).failed).toEqual([]);
+  });
+});
+
+describe('required deadline-engine tables versus an intentionally absent source-native schema', () => {
+  it('default: an absent table is a visible, non-failing NOT_PRESENT (source-native bootstrap)', () => {
+    const results = evaluateDeadlineEngineRlsClosure({ tables: [], policies: [] });
+    expect(results.every((r) => r.pass && /NOT_PRESENT/.test(r.detail))).toBe(true);
+  });
+
+  it('when the environment requires the tables (deployed staging/production), an absent table FAILS every check for it', () => {
+    const results = evaluateDeadlineEngineRlsClosure({ tables: [], policies: [] }, { requireDeadlineEngineTables: true });
+    expect(results).toHaveLength(DEADLINE_ENGINE_TABLES.length * 4);
+    expect(results.every((r) => !r.pass && /REQUIRED_TABLE_MISSING/.test(r.detail))).toBe(true);
+  });
+
+  it('one missing required table fails only that table; the present, approved tables still pass', async () => {
+    const db = await closedDb();
+    const tables = ((await db.query(DEADLINE_ENGINE_TABLES_QUERY)).rows as never[]).filter((t: { relname: string }) => t.relname !== 'deadline_audit_events');
+    const policies = ((await db.query(DEADLINE_ENGINE_POLICIES_QUERY)).rows as never[]).filter((p: { tablename: string }) => p.tablename !== 'deadline_audit_events');
+    const results = evaluateDeadlineEngineRlsClosure({ tables, policies }, { requireDeadlineEngineTables: true });
+    const failed = results.filter((r) => !r.pass);
+    expect(failed).toHaveLength(4);
+    expect(failed.every((r) => r.name.includes('deadline_audit_events') && /REQUIRED_TABLE_MISSING/.test(r.detail))).toBe(true);
+  });
+});

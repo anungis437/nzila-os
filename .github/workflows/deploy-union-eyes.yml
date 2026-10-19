@@ -2010,7 +2010,8 @@ jobs:
           export RLS_VERIFY_DATABASE_URL="$RUNTIME_URL"
           export RLS_VERIFY_SYSTEM_DATABASE_URL="$SYSTEM_URL"
 
-          pnpm --filter @nzila/union-eyes exec tsx scripts/rls-verify.ts --mode=preflight
+          # A deployed environment must carry the deadline-engine tables: an absent one is a failure here, not a source-native schema.
+          pnpm --filter @nzila/union-eyes exec tsx scripts/rls-verify.ts --mode=preflight --require-deadline-engine-tables
           PREFLIGHT_STATUS=$?
 
           unset RLS_VERIFY_DATABASE_URL RLS_VERIFY_SYSTEM_DATABASE_URL RUNTIME_URL SYSTEM_URL
