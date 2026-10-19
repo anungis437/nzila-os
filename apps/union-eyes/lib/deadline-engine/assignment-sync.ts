@@ -12,12 +12,13 @@
  * grievance row's unionRepId has been updated, so recipient re-resolution
  * reads the NEW assignment.
  */
-import { eq, and, ne, sql } from 'drizzle-orm';
+import { eq, and, notInArray, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { grievanceDeadlines, deadlineReassignmentConvergence } from '@/db/schema';
 import { logger } from '@/lib/logger';
 import { scheduleGrievanceDeadlineReminders } from './reminder-scheduler';
 import { writeDeadlineAuditEvent } from './audit';
+import { TERMINAL_DEADLINE_STATUSES } from './deadline-semantics';
 
 /** Loosely typed so callers can pass either the module-level `db` or a transaction handle (e.g. from withRLSContext). */
 type DbOrTx = typeof db;
@@ -62,7 +63,7 @@ export async function refreshDeadlineRemindersForGrievance(
     .where(
       and(
         eq(grievanceDeadlines.grievanceId, input.grievanceId),
-        ne(grievanceDeadlines.status, 'completed'),
+        notInArray(grievanceDeadlines.status, [...TERMINAL_DEADLINE_STATUSES]),
       ),
     );
 

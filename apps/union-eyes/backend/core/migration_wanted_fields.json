@@ -1,0 +1,449 @@
+{
+  "fields": [
+    {
+      "column": "access_level",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "varchar(50)",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": "standard"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "blob_container",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "blob_path",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "category",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "contains_legal_privilege",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "boolean",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": false
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "contains_medical_sensitive",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "boolean",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": false
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "contains_pii",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "boolean",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": false
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "content_text",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "content_type",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "disciplinary_sensitive",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "boolean",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": false
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "document_type",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "file_type",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "filename",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "folder_id",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "uuid",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "is_confidential",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "boolean",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": false
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "medical_sensitive",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "boolean",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": false
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "member_pii",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "boolean",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": false
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "privacy_label",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "varchar(32)",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": "team_confidential"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "sha256",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "size_bytes",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "bigint",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "status",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "varchar(20)",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": "active"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "tags",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text[]",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "title",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "text",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "uploaded_at",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "timestamp with time zone",
+      "has_remote": false,
+      "migration": "content.0004",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "documents",
+      "unique": false
+    },
+    {
+      "column": "idempotency_hash",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "varchar(64)",
+      "has_remote": false,
+      "migration": "grievances.0005",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "claims",
+      "unique": true
+    },
+    {
+      "column": "due_date",
+      "db_check": null,
+      "db_default": {
+        "kind": "none"
+      },
+      "db_type": "timestamp with time zone",
+      "has_remote": false,
+      "migration": "grievances.0007",
+      "null": true,
+      "python_default": {
+        "kind": "none"
+      },
+      "table": "grievance_deadlines",
+      "unique": false
+    },
+    {
+      "column": "status",
+      "db_check": null,
+      "db_default": {
+        "kind": "literal",
+        "value": "pending"
+      },
+      "db_type": "varchar(50)",
+      "has_remote": false,
+      "migration": "grievances.0007",
+      "null": false,
+      "python_default": {
+        "kind": "literal",
+        "value": "pending"
+      },
+      "table": "grievance_deadlines",
+      "unique": false
+    }
+  ],
+  "generatedBy": "core/emit_wanted_fields.py"
+}

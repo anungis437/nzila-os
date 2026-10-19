@@ -544,6 +544,14 @@ class GrievanceDeadlines(BaseModel):
         related_name="grievance_deadlines_grievance_set",
     )
     deadline_type = models.CharField(max_length=255, null=True, blank=True)
+    # Phase 3A: the deadline engine (reminder worker, overdue cron, assignment convergence) reads these two columns, which the
+    # Drizzle mirror declares and the canonical model lacked. `due_date` is the EFFECTIVE due date (deadline-confirmation-service
+    # writes it together with override_due_date); `status` is pending|extended|completed|cancelled|... Invariants (kept by the writers in
+    # lib/deadline-engine/deadline-semantics.ts and guarded by CHECK constraints in grievances.0007): an override in force equals
+    # due_date; a superseded deadline is completed or cancelled. The remaining declared-but-missing columns stay REQUIRED_LATER
+    # (db/schema-authority/runtime-drift-dispositions.json).
+    due_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=50, default="pending", db_default="pending")
 
     class Meta:
         db_table = "grievance_deadlines"
