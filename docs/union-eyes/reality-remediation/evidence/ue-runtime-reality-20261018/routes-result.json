@@ -1,0 +1,848 @@
+[
+ {
+  "persona": "member",
+  "label": "Workspace",
+  "href": "/dashboard/workspace",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 783,
+   "len": 475108,
+   "rid": "e149e555-8b17-47b8-b5f5-e1f1f4a2db4a",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "member",
+  "label": "Home",
+  "href": "/dashboard/inbox",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 441,
+   "len": 475173,
+   "rid": "438a2bc8-c405-4f15-b4c5-fb5217190410",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "member",
+  "label": "My Cases",
+  "href": "/dashboard/inbox?type=intake",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 168,
+   "len": 475240,
+   "rid": "65dfa105-7526-47d9-bc5c-2230eb9b865f",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "member",
+  "label": "Open Representation Case",
+  "href": "/dashboard/claims/new",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 182,
+   "len": 476219,
+   "rid": "371609a8-ba8c-4997-ba7a-4bcbfae0089c",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "member",
+  "label": "Messages",
+  "href": "/dashboard/inbox?type=message",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 169,
+   "len": 475243,
+   "rid": "5be6463c-00c1-4ad3-94d0-244aa9a5127b",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "member",
+  "label": "Documents",
+  "href": "/dashboard/documents",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 332,
+   "len": 474686,
+   "rid": "890c9328-9f7f-4df4-891b-d0074bff6a87",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "member",
+  "label": "Profile & Settings",
+  "href": "/dashboard/settings",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 299,
+   "len": 475344,
+   "rid": "53aaf556-6088-4ec4-bb7f-bd319f718f68",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "member",
+  "label": "Help & Support",
+  "href": "/dashboard/support",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 225,
+   "len": 474865,
+   "rid": "775d0c8e-5b7e-460f-b683-a6a129b51f55",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "staff",
+  "label": "Workspace",
+  "href": "/dashboard/workspace",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 158,
+   "len": 475108,
+   "rid": "e46d0d3b-7b03-4194-aeea-162f93263ed7",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "staff",
+  "label": "Operations (Casework Console)",
+  "href": "/dashboard/workbench",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 290,
+   "len": 475247,
+   "rid": "57e44efa-eb2d-419e-9ff2-058edc74a818",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "staff",
+  "label": "Operations Queue (Representation Cases)",
+  "href": "/dashboard/inbox?type=intake",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 177,
+   "len": 475240,
+   "rid": "a1e39a7e-4719-4b1a-a480-02c49707ab0c",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "staff",
+  "label": "Operations Priorities (Commitments & Deadlines)",
+  "href": "/dashboard/operations",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 491,
+   "len": 474626,
+   "rid": "3f87756f-aad8-4d2f-a76f-52303381aa0d",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "staff",
+  "label": "Members",
+  "href": "/dashboard/members",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 278,
+   "len": 475150,
+   "rid": "c3efb72a-2046-45d2-aa91-9a655b213c88",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "staff",
+  "label": "Documents",
+  "href": "/dashboard/documents",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 207,
+   "len": 474686,
+   "rid": "9c59e2ca-9219-4e98-a79c-25059ce2f073",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "staff",
+  "label": "Operations Communications",
+  "href": "/dashboard/correspondence",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 323,
+   "len": 476092,
+   "rid": "06fbc644-c7f6-492c-9480-2af8483515d8",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "staff",
+  "label": "Institutional Intelligence Reports",
+  "href": "/dashboard/intelligence",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 787,
+   "len": 475314,
+   "rid": "f8843ea5-51eb-4e68-b656-a3f481350e1f",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "staff",
+  "label": "Notifications",
+  "href": "/dashboard/notifications",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 281,
+   "len": 475227,
+   "rid": "e69c1335-9544-44eb-9739-5e10f1051f9f",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "staff",
+  "label": "Profile & Settings",
+  "href": "/dashboard/settings",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 206,
+   "len": 475344,
+   "rid": "218a4a0b-f4e5-4da5-bada-d94d01499907",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "executive",
+  "label": "Workspace",
+  "href": "/dashboard/workspace",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 125,
+   "len": 474553,
+   "rid": "d6b82a52-1190-40b2-be25-0f6205ee57c7",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "executive",
+  "label": "OCRA Intelligence (Executive Overview)",
+  "href": "/dashboard/intelligence?scope=executive",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 150,
+   "len": 474677,
+   "rid": "8a774744-c39d-44ec-979f-2358fafa380a",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "executive",
+  "label": "OCRA Signals (Continuity Insights)",
+  "href": "/dashboard/continuity-intelligence",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 132,
+   "len": 475148,
+   "rid": "9b04ed1d-b556-4589-958e-1c46ab8b8082",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "executive",
+  "label": "Operations Continuity",
+  "href": "/dashboard/executive-operating-intelligence",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 166,
+   "len": 474324,
+   "rid": "d8d76f89-8dcb-48b7-97fe-3c4aa84c72b6",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "executive",
+  "label": "Governance Continuity",
+  "href": "/dashboard/governance-center",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 150,
+   "len": 474253,
+   "rid": "87abf324-76ae-47c5-9317-05404ece43ca",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "executive",
+  "label": "Operations Outcomes (Member Outcomes Ledger)",
+  "href": "/dashboard/outcomes",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 132,
+   "len": 474619,
+   "rid": "6fa0466f-2fae-431f-bc8f-626213a12a88",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "executive",
+  "label": "Onboarding Survivability (Leadership Continuity)",
+  "href": "/dashboard/leadership",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 133,
+   "len": 475875,
+   "rid": "573d1cbe-5660-4d10-af38-6a484d59b029",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "executive",
+  "label": "Institutional Intelligence Reports",
+  "href": "/dashboard/intelligence",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 131,
+   "len": 474667,
+   "rid": "22d78b4e-0364-4fdd-a753-52b5b329525f",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "executive",
+  "label": "Governance Trust & Oversight",
+  "href": "/dashboard/trust",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 792,
+   "len": 501938,
+   "rid": "19ffc3ae-9757-4105-9cd0-c1f981d1ac4b",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "executive",
+  "label": "Profile & Settings",
+  "href": "/dashboard/settings",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 146,
+   "len": 474644,
+   "rid": "5534700e-cbfc-4a2b-8580-59799b1df17f",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "governance",
+  "label": "Workspace",
+  "href": "/dashboard/workspace",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 444,
+   "len": 474510,
+   "rid": "d8325fcd-46c2-49f0-b2b5-7a1ce8208190",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "governance",
+  "label": "Governance Continuity Overview",
+  "href": "/dashboard/governance",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 133,
+   "len": 474190,
+   "rid": "4aae50cb-3f38-4855-8c68-cbe1893f2797",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "governance",
+  "label": "Governance Trust & Explainability",
+  "href": "/dashboard/trust",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 134,
+   "len": 501938,
+   "rid": "54003d11-5ad7-4b61-9408-91baefc78b33",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "governance",
+  "label": "Governance Continuity Review",
+  "href": "/dashboard/workbench",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 142,
+   "len": 474614,
+   "rid": "f64bc575-c328-4024-8f3b-bd3527327abb",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "governance",
+  "label": "Governance Policy Continuity",
+  "href": "/dashboard/governance",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 126,
+   "len": 474190,
+   "rid": "04b28b0d-ec8b-47cd-a5b3-fc71f073426d",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "governance",
+  "label": "OCRA Continuity Signals",
+  "href": "/dashboard/continuity-intelligence",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 134,
+   "len": 475148,
+   "rid": "9e8cffc1-1fd9-4247-bafb-ef0eec1428fe",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "governance",
+  "label": "Institutional Intelligence Reports",
+  "href": "/dashboard/intelligence",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 135,
+   "len": 474624,
+   "rid": "579fbd3a-11f5-479b-8eda-59d4dad6adf6",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "governance",
+  "label": "Governance Audit & Evidence",
+  "href": "/dashboard/audits",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 143,
+   "len": 474107,
+   "rid": "1f896d82-5329-4fd2-93f8-cf33b0d8e850",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "governance",
+  "label": "Profile & Settings",
+  "href": "/dashboard/settings",
+  "auth": {
+   "status": 307,
+   "loc": "/login",
+   "ms": 130,
+   "len": 474644,
+   "rid": "b63dbdfc-aa1e-40da-8da5-d2aedaacbb0e",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "admin",
+  "label": "Workspace",
+  "href": "/dashboard/workspace",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 165,
+   "len": 475108,
+   "rid": "f95de44b-4250-4180-bbcd-ae63d0a8cf55",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "admin",
+  "label": "Organization",
+  "href": "/dashboard/admin/organizations",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 270,
+   "len": 476623,
+   "rid": "22e78ee8-bd92-4c66-ae20-f461a3f40ae5",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "admin",
+  "label": "Users & Roles",
+  "href": "/dashboard/admin/members",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 268,
+   "len": 475676,
+   "rid": "78ef8af2-85d2-4bf4-b574-4676bf19dc59",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "admin",
+  "label": "Pilot Configuration",
+  "href": "/dashboard/admin/onboarding",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 263,
+   "len": 476088,
+   "rid": "20f07aa1-2b8a-4388-99d1-68a4c6a0b244",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "admin",
+  "label": "Policies",
+  "href": "/dashboard/governance",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 297,
+   "len": 475236,
+   "rid": "965c346f-4024-4bf0-bbfb-d20c2d6c7526",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "admin",
+  "label": "Audit",
+  "href": "/dashboard/audits",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 380,
+   "len": 481813,
+   "rid": "9b43945e-06c0-43ce-92b4-adf1a4db592c",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "admin",
+  "label": "Security",
+  "href": "/dashboard/security",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 285,
+   "len": 476455,
+   "rid": "61cec078-ed5c-49e9-9b56-a5a6ee35f4e9",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "admin",
+  "label": "Exports",
+  "href": "/dashboard/movement-insights/export",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 235,
+   "len": 475047,
+   "rid": "1fb4c4c9-c33a-4779-95c2-64c287ccccef",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "admin",
+  "label": "Integrations",
+  "href": "/dashboard/integrations",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 265,
+   "len": 474930,
+   "rid": "a4560934-85b3-4e55-afa5-035a8072534e",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ },
+ {
+  "persona": "admin",
+  "label": "System Status",
+  "href": "/dashboard/operations",
+  "auth": {
+   "status": 307,
+   "loc": "/sign-up",
+   "ms": 273,
+   "len": 476474,
+   "rid": "a6e1cd62-4fa6-48be-80da-7ccc0db98ca4",
+   "err": false,
+   "snippet": ""
+  },
+  "anon": {
+   "status": 307,
+   "loc": "/login"
+  }
+ }
+]
