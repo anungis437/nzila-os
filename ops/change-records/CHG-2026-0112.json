@@ -1,12 +1,12 @@
 {
   "change_id": "CHG-2026-0112",
   "title": "Union Eyes staging: remove fail-open legacy RLS policies from the deadline-engine tables",
-  "description": "Mission UE-RUNTIME-REALITY-20261018. Business justification: the staging rls-verify preflight fails 1 of 1699 checks (manifest-rls deadline_reminder_executions UNENFORCED) and a runtime B3 probe shows union_eyes_runtime with NO organization context can read, and insert into, deadline_reminders, deadline_audit_events and deadline_reminder_executions for every tenant. Cause: pre-0108 permissive policies (deadline_reminders_tenant_isolation, deadline_audit_events_tenant_isolation, deadline_reminder_executions_read) fall back to the row's own organization when app.current_org_id is empty and are OR-ed with the 0108-style policies. Affected tables: deadline_reminders, deadline_audit_events, deadline_reminder_executions. Desired state: RLS + FORCE + runtime and system policies and no PUBLIC policy on all three. Migration plan: apply db/migrations/20261018_deadline_engine_rls_fail_closed_closure.sql once via scripts/apply-deadline-engine-rls-closure.ts as the migration-admin principal, in one transaction with in-transaction assertions. MUST be sequenced AFTER an application revision whose deadline worker and overdue scheduler run under withSystemContext (main, PR #923 or later) is serving staging traffic; the currently deployed image (eae195f2) relies on the fail-open fallback and would lose queue access. No grants, roles, functions or other tables are touched. Not applied to staging at the time of writing.",
+  "description": "Mission UE-RUNTIME-REALITY-20261018 (Phase 3A). Business justification: the staging rls-verify preflight fails 1 of 1699 checks (manifest-rls deadline_reminder_executions UNENFORCED) and a runtime probe shows union_eyes_runtime with NO organization context can read, and insert into, deadline_reminders, deadline_audit_events and deadline_reminder_executions for every tenant. Cause: the PERMISSIVE PUBLIC policies installed by root migrations/0045 (deadline_reminders_tenant_isolation, deadline_audit_events_tenant_isolation, deadline_reminder_executions_read) fall back to the row's own organization when app.current_org_id is empty and are OR-ed with the 0010-style policies; the same objects exist in existing staging and in the clean-room/fresh path. Affected tables (exact scope): deadline_reminders, deadline_audit_events, deadline_reminder_executions. Desired state: RLS + FORCE + runtime and system policies and no PUBLIC policy on all three. Migration: canonical scoped migration apps/union-eyes/db/migrations-cache/0015_deadline_engine_rls_fail_closed_closure.sql (journal idx 15), executed only through the governed executor tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs: --check first; --apply only when the ledger shows 0000-0014 applied (otherwise stop and reconcile the ledger; do not use a bespoke apply path, do not replay the frozen db/migrations lineage). Atomic per statement set with in-transaction post-condition assertions; idempotent; no grants, roles, functions or other tables. PREREQUISITES (all required before any staging apply): (1) an application revision whose deadline worker and overdue scheduler run under withSystemContext() (main b9a54a9b or later) built through CI and serving staging by pinned digest; (2) the staging schema prerequisites in the Phase 3A dossier section 12 verified; (3) approval by service_owner and change_manager; (4) credential containment disposition from COMMAND; (5) a fresh restore point recorded and a restore clone rehearsal on the exact release candidate. Not applied to staging at the time of writing.",
   "service": "union-eyes",
   "environment": "STAGING",
   "change_type": "NORMAL",
   "risk_level": "MEDIUM",
-  "impact_summary": "Three deadline-engine tables, one transaction, auto-rolled back on any failed assertion. Behaviour change: sessions without tenant context stop seeing or writing these tables; the system role keeps full access via TO union_eyes_system policies. Requires a compatible application revision first (see description).",
+  "impact_summary": "Three deadline-engine tables, one governed migration, auto-rolled back on any failed statement/assertion. Behaviour change: sessions without tenant context stop seeing or writing these tables; the system role keeps full access via TO union_eyes_system policies. Application revisions older than withSystemContext() in the deadline worker lose queue access (see prerequisites).",
   "requested_by": "UE-RUNTIME-REALITY-20261018",
   "approvers_required": [
     "service_owner",
@@ -16,12 +16,11 @@
   "approval_status": "PENDING",
   "implementation_window_start": "2026-10-20T00:00:00Z",
   "implementation_window_end": "2026-10-27T23:59:59Z",
-  "rollback_plan": "Run scripts/apply-deadline-engine-rls-closure.ts --rollback (db/migrations/20261018_deadline_engine_rls_fail_closed_closure_rollback.sql): restores the three legacy policies and deadline_reminder_executions NO FORCE ROW LEVEL SECURITY, the exact catalog state captured on 2026-10-18. Validated on a point-in-time restore clone of staging (rolled-back state reproduces the 7 fail-open probe failures; re-apply returns 38/38). Only valid together with a rollback of the application revision to eae195f2, because the restored policies are fail-open.",
+  "rollback_plan": "Primary recovery is forward and secure: redeploy an application revision compatible with the fail-closed policies (deadline work under withSystemContext()); the fail-closed state is never intentionally reverted. Database restore: point-in-time restore of nzila-staging-db to a new server (rehearsed 2026-10-19, about 15 minutes) and cut over only by approved change. Exceptional only, with an explicit recorded security disposition: apps/union-eyes/db/migrations-cache/0015_deadline_engine_rls_fail_closed_closure.rollback.sql restores the legacy fail-open policies; it refuses to run unless ue.fail_open_recovery_disposition is set, reopens cross-tenant access, and the deploy-time rls-verify preflight is expected to fail until 0015 is re-applied.",
   "test_evidence_refs": [
-    "apps/union-eyes/scripts/__tests__/deadline-engine-rls-closure.test.ts",
+    "apps/union-eyes/db/__tests__/deadline-engine-rls-fail-closed-closure-0015.pglite.test.ts",
     "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/b3-clone-before.json",
     "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/b3-clone-after.json",
-    "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/b3-clone-rolledback.json",
     "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/rls-verify-preflight-staging.txt",
     "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/rls-verify-preflight-clone-after.txt"
   ],
@@ -29,6 +28,5 @@
   "linked_commits": [],
   "status": "PROPOSED",
   "created_at": "2026-10-19T02:30:00Z",
-  "updated_at": "2026-10-19T02:30:00Z"
+  "updated_at": "2026-10-19T03:30:00Z"
 }
-

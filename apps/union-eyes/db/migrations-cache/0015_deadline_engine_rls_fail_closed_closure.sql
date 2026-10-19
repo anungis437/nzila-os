@@ -1,48 +1,48 @@
--- =============================================================================
--- 20261018_deadline_engine_rls_fail_closed_closure.sql
+-- 0015_deadline_engine_rls_fail_closed_closure
 --
--- Mission UE-RUNTIME-REALITY-20261018, Phase B (RLS tenant isolation).
+-- Mission UE-RUNTIME-REALITY-20261018 / change record CHG-2026-0112.
 --
--- Live staging finding (rls-verify --mode=preflight, 1698/1699): the deadline
--- engine tables still carry pre-0108 "tenant_isolation" policies that fall back
--- to the row's own organization when no tenant context is set:
+-- Live staging finding (rls-verify --mode=preflight as union_eyes_runtime: 1698/1699): the
+-- deadline-engine tables created by root migrations/0045_union_eyes_deadline_engine.sql still carry
+-- its PERMISSIVE "tenant_isolation" policies, addressed to PUBLIC, of the form
 --
 --   COALESCE(NULLIF(current_setting('app.current_org_id', true), ''), organization_id::text)
 --     = organization_id::text
 --
--- Those policies are PERMISSIVE and are OR-ed with the 0108-style policies, so
--- they defeat fail-closed behaviour: a union_eyes_runtime session with NO org
--- context could read and insert deadline_reminders / deadline_audit_events /
--- deadline_reminder_executions rows for every tenant. deadline_reminder_executions
--- additionally had no runtime/system policy owner and no FORCE ROW LEVEL SECURITY
--- (rls-verify: manifest-rls deadline_reminder_executions UNENFORCED).
+-- Permissive policies are OR-ed with the 0010-style ue_* policies, so a union_eyes_runtime session
+-- with NO organization context could read and insert rows of EVERY tenant. 0045 designed this
+-- fallback for workers that ran with an empty context; system work now runs as union_eyes_system
+-- under withSystemContext() and is authorized by role, so the fallback is obsolete and unsafe.
+-- deadline_reminder_executions additionally had no runtime/system policy owner and no FORCE RLS
+-- (the single preflight failure).
 --
--- This migration touches exactly three tables and nothing else:
+-- Reaches BOTH paths: the legacy policies come from 0045, which the clean-room/fresh path applies
+-- before scoped 0000-0014, and the same objects exist in existing staging. Appended after 0014.
+--
+-- Scope (exactly three tables, RLS only - same envelope as 0010-0014):
 --   deadline_reminders             direct org (organization_id)
 --   deadline_audit_events          direct org (organization_id)
 --   deadline_reminder_executions   parent-owned via deadline_reminders.id
 --
--- Deployment ordering (REQUIRED): the code that runs the reminder worker and the
--- overdue scheduler must execute under withSystemContext (main, PR #923 and later)
--- BEFORE this migration is applied. Builds older than that (for example the image
--- built from eae195f2) rely on the fail-open fallback and will lose access to the
--- queue when it is removed. Rollback: 20261018_deadline_engine_rls_fail_closed_closure_rollback.sql
--- (restores the exact legacy policies; only valid together with a rollback of the
--- application revision).
+-- Does NOT create/alter roles or passwords, does NOT grant or revoke privileges, does NOT touch any
+-- other table. REUSES helpers from 0010/0012 (no new policy geometry). Idempotent. Missing tenant
+-- context fails closed; the system principal is granted by role (TO union_eyes_system).
 --
--- Reuses ue_create_direct_org_rls_policy / ue_create_parent_owned_rls_policy_v2
--- installed by 0108 / 0012. Idempotent. Missing context fails closed; the system
--- principal is granted by role (TO union_eyes_system), not by session state.
--- =============================================================================
+-- RELEASE ORDER (REQUIRED): apply only after an application revision whose deadline worker and
+-- overdue scheduler run under withSystemContext() is serving traffic. Revisions built from
+-- eae195f2 (and earlier) rely on the fail-open fallback and lose access to the queue.
+--
+-- Recovery: there is no routine rollback. See
+-- 0015_deadline_engine_rls_fail_closed_closure.rollback.sql (exceptional, security-disposition-gated).
 
 SET LOCAL search_path = public;
-
+--> statement-breakpoint
 DO $$
 DECLARE
   v_tbl TEXT;
 BEGIN
   IF to_regprocedure('ue_create_direct_org_rls_policy(text,text,boolean)') IS NULL THEN
-    RAISE EXCEPTION 'deadline-engine RLS closure: ue_create_direct_org_rls_policy() is not installed (0108 not applied)';
+    RAISE EXCEPTION 'deadline-engine RLS closure: ue_create_direct_org_rls_policy() is not installed (0010 not applied)';
   END IF;
   IF to_regprocedure('ue_create_parent_owned_rls_policy_v2(text,text,text,text,boolean)') IS NULL THEN
     RAISE EXCEPTION 'deadline-engine RLS closure: ue_create_parent_owned_rls_policy_v2() is not installed (0012 not applied)';
@@ -70,18 +70,19 @@ BEGIN
     RAISE EXCEPTION 'deadline-engine RLS closure: public.deadline_reminder_executions.reminder_id (uuid) missing';
   END IF;
 END $$;
-
--- Remove the fail-open legacy policies (fallback to the row's own organization).
+--> statement-breakpoint
 DROP POLICY IF EXISTS deadline_reminders_tenant_isolation ON public.deadline_reminders;
+--> statement-breakpoint
 DROP POLICY IF EXISTS deadline_audit_events_tenant_isolation ON public.deadline_audit_events;
+--> statement-breakpoint
 DROP POLICY IF EXISTS deadline_reminder_executions_read ON public.deadline_reminder_executions;
-
+--> statement-breakpoint
 SELECT ue_create_direct_org_rls_policy('deadline_reminders', 'organization_id', FALSE);
+--> statement-breakpoint
 SELECT ue_create_direct_org_rls_policy('deadline_audit_events', 'organization_id', FALSE);
+--> statement-breakpoint
 SELECT ue_create_parent_owned_rls_policy_v2('deadline_reminder_executions', 'reminder_id', 'deadline_reminders', 'organization_id', FALSE);
-
--- Post-condition: RLS + FORCE + runtime policy + system policy on all three, and no
--- policy on any of them addressed to PUBLIC. Otherwise the whole transaction rolls back.
+--> statement-breakpoint
 DO $$
 DECLARE
   v_bad TEXT;

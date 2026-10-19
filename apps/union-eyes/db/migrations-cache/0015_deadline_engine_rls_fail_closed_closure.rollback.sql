@@ -1,22 +1,27 @@
--- =============================================================================
--- 20261018_deadline_engine_rls_fail_closed_closure_rollback.sql
+-- 0015_deadline_engine_rls_fail_closed_closure.rollback
 --
--- Reverts 20261018_deadline_engine_rls_fail_closed_closure.sql: drops the policies
--- it created and restores the exact legacy policies that existed on staging on
--- 2026-10-18 (including deadline_reminder_executions NO FORCE ROW LEVEL SECURITY).
+-- EXCEPTIONAL RECOVERY ONLY. NOT a routine rollback and NOT executed by any migration runner
+-- (it is not in meta/_journal.json).
 --
--- WARNING: the restored legacy policies are fail-open when no tenant context is
--- set. Use only to recover an application revision that predates withSystemContext
--- in the deadline worker (for example the image built from eae195f2), and re-apply
--- the closure as soon as a compatible revision is serving traffic. Re-running is a
--- no-op.
--- =============================================================================
+-- Restoring these policies RE-OPENS CROSS-TENANT ACCESS: with no organization context, any
+-- union_eyes_runtime session can read and write deadline_reminders, deadline_audit_events and
+-- deadline_reminder_executions of every tenant. Prefer restoring service by deploying an application
+-- revision compatible with the fail-closed policies (deadline work under withSystemContext()).
+--
+-- The script refuses to run unless the session carries an explicit, recorded security disposition:
+--   SELECT set_config('ue.fail_open_recovery_disposition', '<security disposition id>', false);
+-- and it is meant to be run inside a single transaction by the migration-admin principal. After it
+-- runs, the deploy-time rls-verify preflight is EXPECTED TO FAIL until 0015 is re-applied.
+
+DO $$
+BEGIN
+  IF coalesce(length(current_setting('ue.fail_open_recovery_disposition', true)), 0) < 8 THEN
+    RAISE EXCEPTION 'refusing: reopening cross-tenant access requires ue.fail_open_recovery_disposition (security disposition id) to be set';
+  END IF;
+END $$;
 
 SET LOCAL search_path = public;
 
--- deadline_reminders / deadline_audit_events already carried 0108-style ue_* policies
--- before the closure; the closure re-issues them idempotently, so only the legacy
--- policies need to be restored.
 DROP POLICY IF EXISTS deadline_reminders_tenant_isolation ON public.deadline_reminders;
 CREATE POLICY deadline_reminders_tenant_isolation ON public.deadline_reminders
   USING (COALESCE(NULLIF(current_setting('app.current_org_id', true), ''), organization_id::text) = organization_id::text)
