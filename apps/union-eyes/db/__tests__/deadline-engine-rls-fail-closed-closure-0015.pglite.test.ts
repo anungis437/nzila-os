@@ -13,7 +13,7 @@
  * switched with SET ROLE (SQL-engine enforcement evidence; the separately-authenticated server-role
  * proof is the live rls-verify run). Runs in-process on PGlite - no Docker/CI server required.
  */
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -26,7 +26,6 @@ const JOURNAL = resolve(CACHE, 'meta', '_journal.json');
 const TAG = '0015_deadline_engine_rls_fail_closed_closure';
 const read = (p: string) => readFileSync(p, 'utf8');
 const SQL_0015 = read(resolve(CACHE, `${TAG}.sql`));
-const SQL_RECOVERY = read(resolve(CACHE, `${TAG}.rollback.sql`));
 const ROOT_0045 = read(resolve(REPO_ROOT, 'migrations', '0045_union_eyes_deadline_engine.sql'));
 const code = (sql: string) => sql.replace(/--.*$/gm, '');
 
@@ -225,22 +224,28 @@ describe('0015 - fresh/clean-room path and preconditions', () => {
   });
 });
 
-describe('0015 - exceptional recovery file is gated by a recorded security disposition', () => {
-  it('refuses without ue.fail_open_recovery_disposition, and re-opens access only with it (then 0015 re-closes)', async () => {
+describe('0015 - no executable fail-open restore exists; recovery is forward, restore, or idempotent re-close', () => {
+  it('ships no rollback or recovery script and nothing in the repository reads a self-asserted disposition variable', () => {
+    const files = readdirSync(CACHE).filter((f) => f.startsWith(TAG));
+    expect(files).toEqual([`${TAG}.sql`]);
+    expect(SQL_0015).not.toMatch(/fail_open_recovery_disposition/);
+  });
+
+  it('replaying 0015 directly re-closes a hand-altered database and leaves the ledger untouched', async () => {
     const { db } = await legacyDb();
     await db.exec(SQL_0015.split('--> statement-breakpoint').join('\n'));
-    await expect(db.exec(SQL_RECOVERY)).rejects.toThrow(/security disposition/);
-    await db.exec(`SELECT set_config('ue.fail_open_recovery_disposition', 'SEC-DISP-TEST-0001', false)`);
-    await db.exec(SQL_RECOVERY);
+    // simulate a hand-made reopening (what the removed recovery script used to do)
+    await db.exec(`CREATE POLICY reopen_by_hand ON deadline_reminders USING (true) WITH CHECK (true)`);
     await as(db, 'union_eyes_runtime', null);
     expect(await count(db, 'deadline_reminders')).toBeGreaterThan(0);
     await db.exec('RESET ROLE');
+    await expect(db.exec(SQL_0015.split('--> statement-breakpoint').join('\n'))).rejects.toThrow(/post-condition failed/);
+    await db.exec('DROP POLICY reopen_by_hand ON deadline_reminders');
     await db.exec(SQL_0015.split('--> statement-breakpoint').join('\n'));
     await as(db, 'union_eyes_runtime', null);
     for (const t of TABLES) expect(await count(db, t), t).toBe(0);
   });
 });
-
 describe('0015 - canonical placement and scope', () => {
   const entries = () => (JSON.parse(read(JOURNAL)) as { entries: Array<{ idx: number; tag: string }> }).entries;
 
@@ -259,12 +264,12 @@ describe('0015 - canonical placement and scope', () => {
     expect(SQL_0015).toContain('RAISE EXCEPTION');
   });
 
-  it('the recovery file is not journaled (never run by an executor)', () => {
+  it('no rollback entry is journaled (an executor can never run a reversal)', () => {
     expect(entries().some((e) => e.tag.endsWith('.rollback'))).toBe(false);
   });
 });
 
-describe('0015 - one release order across the migration header, recovery file and change record', () => {
+describe('0015 - one release order across the migration header and the change record', () => {
   const chg = JSON.parse(read(resolve(REPO_ROOT, 'ops', 'change-records', 'CHG-2026-0112.json'))) as { description: string; rollback_plan: string };
 
   it('states closure-first / candidate-second and never the superseded "apply after the new revision serves" order', () => {
@@ -283,9 +288,10 @@ describe('0015 - one release order across the migration header, recovery file an
     expect(chg.description).toMatch(/content\.0004 and grievances\.0005/);
   });
 
-  it('documents that the executor will not re-close after recovery and how to re-close', () => {
-    expect(SQL_RECOVERY).toMatch(/will NOT\s+-- re-close/);
-    expect(chg.rollback_plan).toMatch(/will not re-close/);
+  it('states the recovery order (forward fix, approved restore, idempotent re-close) and offers no fail-open script', () => {
+    expect(SQL_0015).toMatch(/NO executable fail-open restore/);
+    expect(SQL_0015).toMatch(/re-close by replaying this file directly/);
+    expect(chg.rollback_plan).toMatch(/no executable fail-open restore/i);
     expect(chg.rollback_plan).toMatch(/replay 0015 directly/);
-  });
-});
+    for (const text of [SQL_0015, chg.rollback_plan]) expect(text).not.toMatch(/recovery file|rollback\.sql/i);
+  });});
