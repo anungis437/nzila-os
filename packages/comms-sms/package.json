@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@nzila/integrations-core": "workspace:*",
-    "twilio": "^5.10.7",
+    "twilio": "^6.2.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
