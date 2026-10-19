@@ -10,7 +10,11 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ queue: [] as unknown[], rls: [] as unknown[] }));
+const mocks = vi.hoisted(() => ({
+  queue: [] as unknown[],
+  rls: [] as unknown[],
+  wheres: [] as unknown[],
+}));
 
 function shift() {
   return mocks.queue.length ? mocks.queue.shift() : [];
@@ -18,7 +22,10 @@ function shift() {
 function makeChain() {
   const chain: Record<string, unknown> = {};
   for (const m of ['from', 'where', 'orderBy', 'limit', 'offset', 'leftJoin', 'values', 'set', 'returning']) {
-    chain[m] = () => chain;
+    chain[m] = (...args: unknown[]) => {
+      if (m === 'where') mocks.wheres.push(args[0]);
+      return chain;
+    };
   }
   (chain as { then: unknown }).then = (
     resolve: (v: unknown) => unknown,
@@ -56,9 +63,39 @@ function push(...rows: unknown[]) {
   mocks.queue.push(...rows);
 }
 
+const ORG_A = '11111111-1111-4111-8111-111111111111';
+const ORG_B = '22222222-2222-4222-8222-222222222222';
+const STEWARD_A = 'user-steward-a';
+const STEWARD_B = 'user-steward-b';
+
+const ownAndPublic = { actorUserId: STEWARD_A, includeOthersPrivate: false };
+const managePrivate = { actorUserId: STEWARD_A, includeOthersPrivate: true };
+
+function sqlLeaves(value: unknown, seen = new Set<unknown>()): string[] {
+  if (value === null || value === undefined) return [];
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return [String(value)];
+  if (typeof value !== 'object') return [];
+  if (seen.has(value)) return [];
+  seen.add(value);
+  const record = value as { name?: unknown; value?: unknown; queryChunks?: unknown };
+  const leaves: string[] = [];
+  if (typeof record.name === 'string') leaves.push(record.name);
+  if (typeof record.value === 'string' || typeof record.value === 'number' || typeof record.value === 'boolean') {
+    leaves.push(String(record.value));
+  }
+  if (Array.isArray(record.value)) {
+    for (const item of record.value) leaves.push(...sqlLeaves(item, seen));
+  }
+  if (Array.isArray(record.queryChunks)) {
+    for (const chunk of record.queryChunks) leaves.push(...sqlLeaves(chunk, seen));
+  }
+  return leaves;
+}
+
 beforeEach(() => {
   mocks.queue = [];
   mocks.rls = [];
+  mocks.wheres = [];
   vi.clearAllMocks();
 });
 
@@ -77,58 +114,91 @@ describe('member-segments-queries — CRUD', () => {
     expect(mocks.rls).toEqual([]);
   });
 
-  it('getSegments without userId', async () => {
+  it('getSegments always limits an ordinary steward to public and own segments', async () => {
     push([{ id: 's1' }]);
-    expect(await q.getSegments('org1')).toHaveLength(1);
-    expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
+    expect(await q.getSegments(ORG_A, ownAndPublic)).toHaveLength(1);
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: ORG_A });
+    const leaves = sqlLeaves(mocks.wheres.at(-1));
+    expect(leaves).toEqual(expect.arrayContaining(['is_public', 'created_by', STEWARD_A, ORG_A]));
+    expect(leaves).not.toContain(STEWARD_B);
   });
-  it('getSegments with userId (adds public/owner filter)', async () => {
+  it('getSegments omits the owner filter only when other private segments were authorized', async () => {
     push([{ id: 's1' }, { id: 's2' }]);
-    expect(await q.getSegments('org1', 'u1')).toHaveLength(2);
+    expect(await q.getSegments(ORG_A, managePrivate)).toHaveLength(2);
+    const leaves = sqlLeaves(mocks.wheres.at(-1));
+    expect(leaves).toContain(ORG_A);
+    expect(leaves).not.toContain('created_by');
+    expect(leaves).not.toContain(STEWARD_B);
+  });
+  it('getSegments binds the other organization and the other actor separately', async () => {
+    push([]);
+    await q.getSegments(ORG_B, { actorUserId: STEWARD_B, includeOthersPrivate: false });
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: ORG_B });
+    const leaves = sqlLeaves(mocks.wheres.at(-1));
+    expect(leaves).toEqual(expect.arrayContaining([ORG_B, STEWARD_B, 'created_by', 'is_public']));
+    expect(leaves).not.toContain(ORG_A);
+    expect(leaves).not.toContain(STEWARD_A);
+  });
+  it('getSegments refuses a missing actor before opening a database context', async () => {
+    await expect(
+      q.getSegments(ORG_A, { actorUserId: '  ', includeOthersPrivate: false }),
+    ).rejects.toThrow('Actor required');
+    expect(mocks.rls).toEqual([]);
   });
   it('getSegments throws on error', async () => {
     push(new Error('db'));
-    await expect(q.getSegments('org1')).rejects.toThrow('Failed to get segments');
+    await expect(q.getSegments('org1', ownAndPublic)).rejects.toThrow('Failed to get segments');
   });
 
   it('getSegmentById returns segment or null', async () => {
     push([{ id: 's1' }]);
-    expect(await q.getSegmentById('s1', 'org1')).toEqual({ id: 's1' });
+    expect(await q.getSegmentById('s1', 'org1', ownAndPublic)).toEqual({ id: 's1' });
+    const leaves = sqlLeaves(mocks.wheres.at(-1));
+    expect(leaves).toEqual(expect.arrayContaining(['created_by', STEWARD_A, 'is_public']));
     push([]);
-    expect(await q.getSegmentById('missing', 'org1')).toBeNull();
+    expect(await q.getSegmentById('missing', 'org1', ownAndPublic)).toBeNull();
   });
   it('getSegmentById throws on error', async () => {
     push(new Error('db'));
-    await expect(q.getSegmentById('s1', 'org1')).rejects.toThrow('Failed to get segment');
+    await expect(q.getSegmentById('s1', 'org1', ownAndPublic)).rejects.toThrow('Failed to get segment');
   });
 
   it('updateSegment returns the updated segment inside the authorized organization', async () => {
     push([{ id: 's1', name: 'New' }]);
-    expect(await q.updateSegment('s1', { name: 'New', organizationId: 'org-b' } as never, 'org1')).toEqual({
+    expect(await q.updateSegment('s1', { name: 'New', organizationId: 'org-b' } as never, 'org1', ownAndPublic)).toEqual({
       id: 's1',
       name: 'New',
     });
     expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
+    expect(sqlLeaves(mocks.wheres.at(-1))).toEqual(expect.arrayContaining(['created_by', STEWARD_A]));
   });
   it('updateSegment throws when not found in the authorized organization', async () => {
     push([]);
-    await expect(q.updateSegment('missing', { name: 'X' } as never, 'org1')).rejects.toThrow(
-      'Failed to update segment',
+    await expect(q.updateSegment('missing', { name: 'X' } as never, 'org1', ownAndPublic)).rejects.toThrow(
+      'Segment not found',
     );
+  });
+  it('updateSegment lets an authorized manager match another member private segment', async () => {
+    push([{ id: 's-private' }]);
+    await q.updateSegment('s-private', { name: 'Managed' } as never, ORG_A, managePrivate);
+    const leaves = sqlLeaves(mocks.wheres.at(-1));
+    expect(leaves).toContain(ORG_A);
+    expect(leaves).not.toContain('created_by');
   });
 
   it('deleteSegment soft-deletes inside the authorized organization', async () => {
     push([{ id: 's1' }]);
-    await expect(q.deleteSegment('s1', 'org1')).resolves.toBeUndefined();
+    await expect(q.deleteSegment('s1', 'org1', ownAndPublic)).resolves.toBeUndefined();
     expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
+    expect(sqlLeaves(mocks.wheres.at(-1))).toEqual(expect.arrayContaining(['created_by', STEWARD_A]));
   });
   it('deleteSegment does not report success when the segment is outside the organization', async () => {
     push([]);
-    await expect(q.deleteSegment('foreign-segment', 'org1')).rejects.toThrow('Failed to delete segment');
+    await expect(q.deleteSegment('foreign-segment', 'org1', ownAndPublic)).rejects.toThrow('Segment not found');
   });
   it('deleteSegment throws on error', async () => {
     push(new Error('db'));
-    await expect(q.deleteSegment('s1', 'org1')).rejects.toThrow('Failed to delete segment');
+    await expect(q.deleteSegment('s1', 'org1', ownAndPublic)).rejects.toThrow('Failed to delete segment');
   });
 });
 
@@ -195,7 +265,17 @@ describe('member-segments-queries — advanced search', () => {
   it('executeSegment throws when segment not found', async () => {
     push([]);
     await expect(q.executeSegment('missing', 'org1', 'u1')).rejects.toThrow(
-      'Failed to execute segment',
+      'Segment not found',
+    );
+  });
+  it('executeSegment keeps another steward private segment out of the lookup', async () => {
+    push([]);
+    await expect(
+      q.executeSegment('s-private', ORG_B, STEWARD_A, { includeOthersPrivate: false }),
+    ).rejects.toThrow('Segment not found');
+    expect(mocks.rls.at(-1)).toEqual({ organizationId: ORG_B });
+    expect(sqlLeaves(mocks.wheres.at(-1))).toEqual(
+      expect.arrayContaining([ORG_B, STEWARD_A, 'created_by', 'is_public']),
     );
   });
 });

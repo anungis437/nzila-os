@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   userHasOrganizationAccess: vi.fn(),
   hasRoleInOrganization: vi.fn(),
+  getUserRole: vi.fn(),
   requireEntitlement: vi.fn(),
   auditLog: vi.fn(),
   warn: vi.fn(),
@@ -32,6 +33,8 @@ vi.mock('@/lib/organization-utils', () => ({
 
 vi.mock('@/lib/api-auth-guard', () => ({
   hasRoleInOrganization: mocks.hasRoleInOrganization,
+  getUserRole: mocks.getUserRole,
+  normalizeRole: (role: string) => (role === 'super_admin' ? 'admin' : role === 'union_steward' ? 'steward' : role),
 }))
 
 vi.mock('@/lib/audit-logger', () => ({
@@ -50,9 +53,11 @@ vi.mock('@/services/platform-economics/entitlement-guard', () => ({
 }))
 
 import {
+  actorCanManagePrivateSegments,
   authorizeMemberSegmentAccess,
   MEMBER_SEGMENT_EXPORT_ENTITLEMENT,
   MEMBER_SEGMENT_MIN_ROLE,
+  resolveSegmentVisibility,
 } from '../authorize-segment-access'
 
 function grantMembership(userId: string, organizationId: string, roleAllowed: boolean) {
@@ -60,8 +65,8 @@ function grantMembership(userId: string, organizationId: string, roleAllowed: bo
   mocks.userHasOrganizationAccess.mockImplementation(async (candidate: string, org: string) => {
     return candidate === userId && org === organizationId
   })
-  mocks.hasRoleInOrganization.mockImplementation(async (org: string, role: string) => {
-    return roleAllowed && org === organizationId && role === MEMBER_SEGMENT_MIN_ROLE
+  mocks.hasRoleInOrganization.mockImplementation(async (org: string, role: string, actor?: string) => {
+    return roleAllowed && org === organizationId && role === MEMBER_SEGMENT_MIN_ROLE && actor === userId
   })
 }
 
@@ -79,7 +84,7 @@ describe('authorizeMemberSegmentAccess', () => {
 
     expect(decision).toEqual({ ok: true, userId: STEWARD_A, organizationId: ORG_A })
     expect(mocks.userHasOrganizationAccess).toHaveBeenCalledWith(STEWARD_A, ORG_A)
-    expect(mocks.hasRoleInOrganization).toHaveBeenCalledWith(ORG_A, 'steward')
+    expect(mocks.hasRoleInOrganization).toHaveBeenCalledWith(ORG_A, 'steward', STEWARD_A)
   })
 
   it('admits a legacy-compatible steward when the shared role gate accepts the principal', async () => {
@@ -88,7 +93,20 @@ describe('authorizeMemberSegmentAccess', () => {
     const decision = await authorizeMemberSegmentAccess(ORG_A)
 
     expect(decision.ok).toBe(true)
-    expect(mocks.hasRoleInOrganization).toHaveBeenCalledWith(ORG_A, MEMBER_SEGMENT_MIN_ROLE)
+    expect(mocks.hasRoleInOrganization).toHaveBeenCalledWith(ORG_A, MEMBER_SEGMENT_MIN_ROLE, STEWARD_A)
+  })
+
+  it('denies when the role gate is evaluated for a different principal than the membership check', async () => {
+    grantMembership(STEWARD_A, ORG_A, true)
+    mocks.hasRoleInOrganization.mockImplementation(async (_org: string, _role: string, actor?: string) => {
+      return actor === 'someone-else'
+    })
+
+    const decision = await authorizeMemberSegmentAccess(ORG_A)
+
+    expect(decision).toEqual({ ok: false, message: 'Forbidden' })
+    expect(mocks.userHasOrganizationAccess).toHaveBeenCalledWith(STEWARD_A, ORG_A)
+    expect(mocks.hasRoleInOrganization).toHaveBeenCalledWith(ORG_A, 'steward', STEWARD_A)
   })
 
   it('denies a read of another organization even when that organization exists for someone else', async () => {
@@ -186,6 +204,97 @@ describe('authorizeMemberSegmentAccess', () => {
 
     expect(decision).toEqual({ ok: false, message: 'Forbidden' })
     expect(mocks.userHasOrganizationAccess).not.toHaveBeenCalled()
+  })
+
+  it('lets an organization administrator manage another member private segments in that organization only', async () => {
+    mocks.getUserRole.mockImplementation(async (userId: string, organizationId: string) => {
+      if (userId === STEWARD_A && organizationId === ORG_A) return 'admin'
+      return null
+    })
+
+    await expect(actorCanManagePrivateSegments(STEWARD_A, ORG_A)).resolves.toBe(true)
+    await expect(actorCanManagePrivateSegments(STEWARD_A, ORG_B)).resolves.toBe(false)
+    expect(mocks.getUserRole).toHaveBeenCalledWith(STEWARD_A, ORG_A)
+    expect(mocks.getUserRole).toHaveBeenCalledWith(STEWARD_A, ORG_B)
+  })
+
+  it('does not infer private-segment management from rank', async () => {
+    for (const role of ['steward', 'union_steward', 'chief_steward', 'president', 'app_owner', 'member']) {
+      mocks.getUserRole.mockResolvedValueOnce(role)
+      await expect(actorCanManagePrivateSegments(MEMBER_A, ORG_A)).resolves.toBe(false)
+    }
+    mocks.getUserRole.mockResolvedValueOnce('super_admin')
+    await expect(actorCanManagePrivateSegments(MEMBER_A, ORG_A)).resolves.toBe(true)
+  })
+
+  it('fails closed when the bound role lookup throws', async () => {
+    mocks.getUserRole.mockRejectedValueOnce(new Error('role store unavailable'))
+    await expect(actorCanManagePrivateSegments(STEWARD_A, ORG_A)).resolves.toBe(false)
+  })
+
+  it('keeps another steward private segments out of the default list', async () => {
+    mocks.getUserRole.mockResolvedValue('steward')
+
+    const decision = await resolveSegmentVisibility(
+      { userId: STEWARD_A, organizationId: ORG_A },
+      'own-and-public',
+    )
+
+    expect(decision).toEqual({
+      ok: true,
+      visibility: { actorUserId: STEWARD_A, includeOthersPrivate: false },
+    })
+    expect(mocks.getUserRole).not.toHaveBeenCalled()
+  })
+
+  it('denies a request for other members private segments without the administrator allow-list', async () => {
+    mocks.getUserRole.mockResolvedValue('steward')
+
+    const decision = await resolveSegmentVisibility(
+      { userId: STEWARD_A, organizationId: ORG_A },
+      'include-others-private',
+    )
+
+    expect(decision).toEqual({ ok: false, message: 'Forbidden' })
+    expect(mocks.getUserRole).toHaveBeenCalledWith(STEWARD_A, ORG_A)
+    expect(mocks.auditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: STEWARD_A,
+        organizationId: ORG_A,
+        metadata: expect.objectContaining({ reason: 'private_segment_management_required' }),
+      }),
+    )
+  })
+
+  it('widens a single-segment read only for the administrator of that organization', async () => {
+    mocks.getUserRole.mockImplementation(async (userId: string, organizationId: string) => {
+      if (userId === STEWARD_A && organizationId === ORG_A) return 'admin'
+      if (userId === MEMBER_A && organizationId === ORG_A) return 'steward'
+      return null
+    })
+
+    const adminRecord = await resolveSegmentVisibility(
+      { userId: STEWARD_A, organizationId: ORG_A },
+      'record',
+    )
+    const stewardRecord = await resolveSegmentVisibility(
+      { userId: MEMBER_A, organizationId: ORG_A },
+      'record',
+    )
+    const otherOrganization = await resolveSegmentVisibility(
+      { userId: STEWARD_A, organizationId: ORG_B },
+      'include-others-private',
+    )
+
+    expect(adminRecord).toEqual({
+      ok: true,
+      visibility: { actorUserId: STEWARD_A, includeOthersPrivate: true },
+    })
+    expect(stewardRecord).toEqual({
+      ok: true,
+      visibility: { actorUserId: MEMBER_A, includeOthersPrivate: false },
+    })
+    expect(otherOrganization).toEqual({ ok: false, message: 'Forbidden' })
   })
 
   it('still denies when the in-organization audit write fails', async () => {

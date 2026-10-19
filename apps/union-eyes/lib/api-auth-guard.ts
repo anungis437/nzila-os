@@ -1270,19 +1270,26 @@ export async function hasRole(requiredRole: string): Promise<boolean> {
  */
 export async function hasRoleInOrganization(
   organizationId: string,
-  requiredRole: string
+  requiredRole: string,
+  expectedUserId?: string,
 ): Promise<boolean> {
   try {
     if (currentStateContextEnabled()) {
-      const context = await getCanonicalOrganizationContext({ organizationId });
+      const context = await getCanonicalOrganizationContext({
+        organizationId,
+        ...(expectedUserId ? { expectedActorUserId: expectedUserId } : {}),
+      });
+      // The canonical binder rejects a different auth() principal. This comparison
+      // also fails closed if a context is returned for someone else.
+      if (expectedUserId && context.userId !== expectedUserId) return false;
       return ROLE_HIERARCHY[normalizeRole(context.role)] >= ROLE_HIERARCHY[normalizeRole(requiredRole)];
     }
-    const user = await getCurrentUser();
-    if (!user) return false;
+    const actorUserId = expectedUserId ?? (await getCurrentUser())?.id;
+    if (!actorUserId) return false;
     
     const membership = await db.query.organizationMembers.findFirst({
       where: (om, { eq, and }) => and(
-        eq(om.userId, user.id),
+        eq(om.userId, actorUserId),
         eq(om.organizationId, organizationId),
         eq(om.status, 'active')
       ),

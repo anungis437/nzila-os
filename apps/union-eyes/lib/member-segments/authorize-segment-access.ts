@@ -18,7 +18,7 @@
  */
 
 import { auth } from '@nzila/platform-auth/entra/server'
-import { hasRoleInOrganization } from '@/lib/api-auth-guard'
+import { getUserRole, hasRoleInOrganization, normalizeRole } from '@/lib/api-auth-guard'
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
 import { logger } from '@/lib/logger'
 import { userHasOrganizationAccess } from '@/lib/organization-utils'
@@ -30,7 +30,22 @@ import {
 /** Staff member directory minimum. Legacy role names are normalized inside hasRoleInOrganization. */
 export const MEMBER_SEGMENT_MIN_ROLE = 'steward'
 
+/**
+ * Reading or changing another member's private segment is an organization
+ * administrator permission. It is an allow-list, not a rank. A higher
+ * ROLE_HIERARCHY value (president, chief steward, platform role) does not
+ * grant it. `super_admin` normalizes to `admin`.
+ */
+export const MEMBER_SEGMENT_MANAGE_ROLES = ['admin'] as const
+
 export const MEMBER_SEGMENT_EXPORT_ENTITLEMENT = PLATFORM_MODULES.EXPORT_SUITE
+
+export type SegmentVisibilityIntent = 'own-and-public' | 'include-others-private' | 'record'
+
+export type SegmentVisibilityScope = {
+  actorUserId: string
+  includeOthersPrivate: boolean
+}
 
 export type SegmentAccessGrant = {
   ok: true
@@ -118,6 +133,7 @@ export async function authorizeMemberSegmentAccess(
   const roleAllowed = await hasRoleInOrganization(
     requestedOrganizationId,
     MEMBER_SEGMENT_MIN_ROLE,
+    userId,
   )
   if (!roleAllowed) {
     await auditInOrganizationDenial(userId, requestedOrganizationId, 'insufficient_role')
@@ -134,4 +150,61 @@ export async function authorizeMemberSegmentAccess(
   }
 
   return { ok: true, userId, organizationId: requestedOrganizationId }
+}
+
+/**
+ * Same principal as `authorizeMemberSegmentAccess`: `userId` is the `auth()` id,
+ * and `getUserRole` binds that id in both canonical and legacy resolution.
+ * Fail closed when the role lookup throws.
+ */
+export async function actorCanManagePrivateSegments(
+  userId: string,
+  organizationId: string,
+): Promise<boolean> {
+  try {
+    const role = await getUserRole(userId, organizationId)
+    if (!role) return false
+    return (MEMBER_SEGMENT_MANAGE_ROLES as readonly string[]).includes(normalizeRole(role))
+  } catch (error) {
+    logger.warn('member-segment management check failed closed', {
+      userId,
+      organizationId,
+      error: error instanceof Error ? error.message : 'role_lookup_failed',
+    })
+    return false
+  }
+}
+
+/**
+ * `own-and-public` never returns another member's private segments.
+ * `include-others-private` is the explicit list request and is denied without
+ * the administrator allow-list. `record` widens a single-segment read or
+ * mutation only when that allow-list holds for this principal.
+ */
+export async function resolveSegmentVisibility(
+  access: { userId: string; organizationId: string },
+  intent: SegmentVisibilityIntent,
+): Promise<{ ok: true; visibility: SegmentVisibilityScope } | SegmentAccessDenial> {
+  if (intent === 'own-and-public') {
+    return {
+      ok: true,
+      visibility: { actorUserId: access.userId, includeOthersPrivate: false },
+    }
+  }
+  const canManage = await actorCanManagePrivateSegments(access.userId, access.organizationId)
+  if (intent === 'include-others-private' && !canManage) {
+    await auditInOrganizationDenial(
+      access.userId,
+      access.organizationId,
+      'private_segment_management_required',
+    )
+    return { ok: false, message: 'Forbidden' }
+  }
+  return {
+    ok: true,
+    visibility: {
+      actorUserId: access.userId,
+      includeOthersPrivate: canManage,
+    },
+  }
 }

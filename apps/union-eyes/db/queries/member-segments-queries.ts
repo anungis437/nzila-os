@@ -52,6 +52,34 @@ function segmentUpdatePatch(
   return patch;
 }
 
+/**
+ * Who may see or change a segment inside an organization that is already authorized.
+ *
+ * Ordinary access is public segments plus segments this actor created.
+ * `includeOthersPrivate` is set only by the action after an explicit
+ * organization-administrator check. This helper trusts that flag the same way
+ * it trusts `organizationId`: it does not decide the permission itself.
+ */
+export type SegmentVisibility = {
+  actorUserId: string;
+  includeOthersPrivate: boolean;
+};
+
+function visibleToActor(visibility: SegmentVisibility): SQL | undefined {
+  if (typeof visibility?.actorUserId !== "string" || visibility.actorUserId.trim() === "") {
+    throw new Error("Actor required");
+  }
+  if (visibility.includeOthersPrivate) return undefined;
+  return or(
+    eq(memberSegments.isPublic, true),
+    eq(memberSegments.createdBy, visibility.actorUserId),
+  )!;
+}
+
+function segmentNotFound(error: unknown): boolean {
+  return error instanceof Error && error.message === "Segment not found";
+}
+
 // =============================================================================
 // SEGMENT CRUD
 // =============================================================================
@@ -79,29 +107,21 @@ export async function createSegment(
 }
 
 /**
- * Get all segments for an organization
+ * Get active segments visible to the actor in an organization.
+ * The actor filter is always applied unless `includeOthersPrivate` was authorized.
  */
 export async function getSegments(
   organizationId: string,
-  userId?: string
+  visibility: SegmentVisibility,
 ): Promise<SelectMemberSegment[]> {
-   
+  const boundary = visibleToActor(visibility);
   return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const conditions: SQL[] = [
         eq(memberSegments.organizationId, organizationId),
         eq(memberSegments.isActive, true),
       ];
-
-      // If userId provided, filter to user's segments + public segments
-      if (userId) {
-        conditions.push(
-          or(
-            eq(memberSegments.createdBy, userId),
-            eq(memberSegments.isPublic, true)
-          )!
-        );
-      }
+      if (boundary) conditions.push(boundary);
 
       return await tx
         .select()
@@ -109,7 +129,10 @@ export async function getSegments(
         .where(and(...conditions))
         .orderBy(desc(memberSegments.lastExecutedAt), desc(memberSegments.createdAt));
     } catch (error) {
-      logger.error("Failed to get segments", error as Error, { organizationId, userId });
+      logger.error("Failed to get segments", error as Error, {
+        organizationId,
+        actorUserId: visibility.actorUserId,
+      });
       throw new Error("Failed to get segments");
     }
   });
@@ -120,20 +143,21 @@ export async function getSegments(
  */
 export async function getSegmentById(
   id: string,
-  organizationId: string
+  organizationId: string,
+  visibility: SegmentVisibility,
 ): Promise<SelectMemberSegment | null> {
-   
+  const boundary = visibleToActor(visibility);
   return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
+      const predicates: SQL[] = [
+        eq(memberSegments.id, id),
+        eq(memberSegments.organizationId, organizationId),
+      ];
+      if (boundary) predicates.push(boundary);
       const [segment] = await tx
         .select()
         .from(memberSegments)
-        .where(
-          and(
-            eq(memberSegments.id, id),
-            eq(memberSegments.organizationId, organizationId)
-          )
-        )
+        .where(and(...predicates))
         .limit(1);
       
       return segment || null;
@@ -151,30 +175,32 @@ export async function updateSegment(
   id: string,
   data: Partial<InsertMemberSegment>,
   organizationId: string,
+  visibility: SegmentVisibility,
 ): Promise<SelectMemberSegment> {
-   
+  const boundary = visibleToActor(visibility);
   return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
+      const predicates: SQL[] = [
+        eq(memberSegments.id, id),
+        eq(memberSegments.organizationId, organizationId),
+      ];
+      if (boundary) predicates.push(boundary);
       const [updated] = await tx
         .update(memberSegments)
         .set({
           ...segmentUpdatePatch(data),
           updatedAt: new Date(),
         })
-        .where(
-          and(
-            eq(memberSegments.id, id),
-            eq(memberSegments.organizationId, organizationId),
-          ),
-        )
+        .where(and(...predicates))
         .returning();
       
       if (!updated) {
-        throw new Error(`Segment ${id} not found`);
+        throw new Error("Segment not found");
       }
       
       return updated;
     } catch (error) {
+      if (segmentNotFound(error)) throw error;
       logger.error("Failed to update segment", error as Error, { id, data });
       throw new Error("Failed to update segment");
     }
@@ -187,25 +213,27 @@ export async function updateSegment(
 export async function deleteSegment(
   id: string,
   organizationId: string,
+  visibility: SegmentVisibility,
 ): Promise<void> {
-   
+  const boundary = visibleToActor(visibility);
   return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
+      const predicates: SQL[] = [
+        eq(memberSegments.id, id),
+        eq(memberSegments.organizationId, organizationId),
+      ];
+      if (boundary) predicates.push(boundary);
       const updated = await tx
         .update(memberSegments)
         .set({ isActive: false, updatedAt: new Date() })
-        .where(
-          and(
-            eq(memberSegments.id, id),
-            eq(memberSegments.organizationId, organizationId),
-          ),
-        )
+        .where(and(...predicates))
         .returning({ id: memberSegments.id });
 
       if (updated.length === 0) {
-        throw new Error(`Segment ${id} not found`);
+        throw new Error("Segment not found");
       }
     } catch (error) {
+      if (segmentNotFound(error)) throw error;
       logger.error("Failed to delete segment", error as Error, { id });
       throw new Error("Failed to delete segment");
     }
@@ -387,16 +415,20 @@ export async function executeSegment(
   options?: {
     page?: number;
     limit?: number;
+    includeOthersPrivate?: boolean;
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ members: any[]; total: number }> {
-   
+  const visibility: SegmentVisibility = {
+    actorUserId: executedBy,
+    includeOthersPrivate: options?.includeOthersPrivate === true,
+  };
+  const boundary = visibleToActor(visibility);
   return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
-      // Get segment
-      const segment = await getSegmentById(segmentId, organizationId);
+      const segment = await getSegmentById(segmentId, organizationId, visibility);
       if (!segment) {
-        throw new Error(`Segment ${segmentId} not found`);
+        throw new Error("Segment not found");
       }
 
       // Start timing
@@ -423,21 +455,22 @@ export async function executeSegment(
       }, organizationId);
 
       // Update segment metadata inside the authorized organization only.
+      const touched: SQL[] = [
+        eq(memberSegments.id, segmentId),
+        eq(memberSegments.organizationId, organizationId),
+      ];
+      if (boundary) touched.push(boundary);
       await tx
         .update(memberSegments)
         .set({
           lastExecutedAt: new Date(),
           executionCount: sql`${memberSegments.executionCount} + 1`,
         })
-        .where(
-          and(
-            eq(memberSegments.id, segmentId),
-            eq(memberSegments.organizationId, organizationId),
-          ),
-        );
+        .where(and(...touched));
 
       return result;
     } catch (error) {
+      if (segmentNotFound(error)) throw error;
       logger.error("Failed to execute segment", error as Error, { segmentId, organizationId });
       throw new Error("Failed to execute segment");
     }

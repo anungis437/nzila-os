@@ -42,9 +42,12 @@ import { logger } from "@/lib/logger";
 import { eq } from "drizzle-orm";
 import {
   authorizeMemberSegmentAccess,
+  resolveSegmentVisibility,
   MEMBER_SEGMENT_EXPORT_ENTITLEMENT,
   type SegmentAccessDenial,
   type SegmentAccessGrant,
+  type SegmentVisibilityIntent,
+  type SegmentVisibilityScope,
 } from "@/lib/member-segments/authorize-segment-access";
 
 function denied(decision: SegmentAccessDenial): ActionResult<never> {
@@ -59,6 +62,17 @@ async function requireSegmentAccess(
     organizationId,
     entitlement ? { entitlement } : undefined,
   );
+}
+
+async function requireSegmentVisibility(
+  access: SegmentAccessGrant,
+  intent: SegmentVisibilityIntent,
+): Promise<{ ok: true; visibility: SegmentVisibilityScope } | SegmentAccessDenial> {
+  return resolveSegmentVisibility(access, intent);
+}
+
+function segmentMissing(error: unknown): boolean {
+  return error instanceof Error && error.message === "Segment not found";
 }
 
 // =============================================================================
@@ -109,10 +123,13 @@ export async function getMemberSegmentsAction(
     const access = await requireSegmentAccess(organizationId);
     if (!access.ok) return denied(access);
 
-    const segments = await getSegments(
-      access.organizationId,
-      includePrivate ? access.userId : undefined
+    const scoped = await requireSegmentVisibility(
+      access,
+      includePrivate ? "include-others-private" : "own-and-public",
     );
+    if (!scoped.ok) return denied(scoped);
+
+    const segments = await getSegments(access.organizationId, scoped.visibility);
 
     return {
       isSuccess: true,
@@ -139,7 +156,10 @@ export async function getMemberSegmentByIdAction(
     const access = await requireSegmentAccess(organizationId);
     if (!access.ok) return denied(access);
 
-    const segment = await getSegmentById(id, access.organizationId);
+    const scoped = await requireSegmentVisibility(access, "record");
+    if (!scoped.ok) return denied(scoped);
+
+    const segment = await getSegmentById(id, access.organizationId, scoped.visibility);
     if (!segment) {
       return {
         isSuccess: false,
@@ -173,7 +193,10 @@ export async function updateMemberSegmentAction(
     const access = await requireSegmentAccess(organizationId);
     if (!access.ok) return denied(access);
 
-    const updated = await updateSegment(id, data, access.organizationId);
+    const scoped = await requireSegmentVisibility(access, "record");
+    if (!scoped.ok) return denied(scoped);
+
+    const updated = await updateSegment(id, data, access.organizationId, scoped.visibility);
 
     revalidatePath("/dashboard/members");
     revalidatePath("/dashboard/admin/segments");
@@ -184,6 +207,9 @@ export async function updateMemberSegmentAction(
       data: updated,
     };
   } catch (error) {
+    if (segmentMissing(error)) {
+      return { isSuccess: false, message: "Segment not found" };
+    }
     logger.error("Failed to update segment", error as Error, { id, data });
     return {
       isSuccess: false,
@@ -203,7 +229,10 @@ export async function deleteMemberSegmentAction(
     const access = await requireSegmentAccess(organizationId);
     if (!access.ok) return denied(access);
 
-    await deleteSegment(id, access.organizationId);
+    const scoped = await requireSegmentVisibility(access, "record");
+    if (!scoped.ok) return denied(scoped);
+
+    await deleteSegment(id, access.organizationId, scoped.visibility);
 
     revalidatePath("/dashboard/members");
     revalidatePath("/dashboard/admin/segments");
@@ -213,6 +242,9 @@ export async function deleteMemberSegmentAction(
       message: "Segment deleted successfully",
     };
   } catch (error) {
+    if (segmentMissing(error)) {
+      return { isSuccess: false, message: "Segment not found" };
+    }
     logger.error("Failed to delete segment", error as Error, { id });
     return {
       isSuccess: false,
@@ -273,7 +305,13 @@ export async function executeSegmentAction(
     const access = await requireSegmentAccess(organizationId);
     if (!access.ok) return denied(access);
 
-    const result = await executeSegment(segmentId, access.organizationId, access.userId, options);
+    const scoped = await requireSegmentVisibility(access, "record");
+    if (!scoped.ok) return denied(scoped);
+
+    const result = await executeSegment(segmentId, access.organizationId, access.userId, {
+      ...options,
+      includeOthersPrivate: scoped.visibility.includeOthersPrivate,
+    });
 
     return {
       isSuccess: true,
@@ -281,6 +319,9 @@ export async function executeSegmentAction(
       data: result,
     };
   } catch (error) {
+    if (segmentMissing(error)) {
+      return { isSuccess: false, message: "Segment not found" };
+    }
     logger.error("Failed to execute segment", error as Error, { segmentId, organizationId });
     return {
       isSuccess: false,
@@ -300,7 +341,10 @@ export async function getSegmentExecutionHistoryAction(
     const access = await requireSegmentAccess(organizationId);
     if (!access.ok) return denied(access);
 
-    const segment = await getSegmentById(segmentId, access.organizationId);
+    const scoped = await requireSegmentVisibility(access, "record");
+    if (!scoped.ok) return denied(scoped);
+
+    const segment = await getSegmentById(segmentId, access.organizationId, scoped.visibility);
     if (!segment) {
       return {
         isSuccess: false,
@@ -357,9 +401,16 @@ export async function exportMembersAction(
     let members: any[];
     let totalCount: number;
 
+    const scoped = segmentId
+      ? await requireSegmentVisibility(access, "record")
+      : { ok: true as const, visibility: { actorUserId: access.userId, includeOthersPrivate: false } };
+    if (!scoped.ok) return denied(scoped);
+
     if (segmentId) {
-      // Execute segment
-      const result = await executeSegment(segmentId, access.organizationId, access.userId, { limit: 10000 });
+      const result = await executeSegment(segmentId, access.organizationId, access.userId, {
+        limit: 10000,
+        includeOthersPrivate: scoped.visibility.includeOthersPrivate,
+      });
       members = result.members;
       totalCount = result.total;
     } else if (filters) {
@@ -424,6 +475,9 @@ export async function exportMembersAction(
       },
     };
   } catch (error) {
+    if (segmentMissing(error)) {
+      return { isSuccess: false, message: "Segment not found" };
+    }
     logger.error("Failed to export members", error as Error, { organizationId, format });
     return {
       isSuccess: false,
