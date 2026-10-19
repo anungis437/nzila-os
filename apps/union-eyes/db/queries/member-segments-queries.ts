@@ -55,25 +55,37 @@ function segmentUpdatePatch(
 /**
  * Who may see or change a segment inside an organization that is already authorized.
  *
- * Ordinary access is public segments plus segments this actor created.
- * `includeOthersPrivate` is set only by the action after an explicit
- * organization-administrator check. This helper trusts that flag the same way
- * it trusts `organizationId`: it does not decide the permission itself.
+ * Read and execute: public segments plus segments this actor created, unless
+ * `includeOthersPrivate` was set by an organization-administrator check.
+ * Update and delete: this actor's segments only, unless that same flag is set.
+ * Public visibility does not grant edit or delete. This helper trusts the flag
+ * the same way it trusts `organizationId`.
  */
 export type SegmentVisibility = {
   actorUserId: string;
   includeOthersPrivate: boolean;
 };
 
-function visibleToActor(visibility: SegmentVisibility): SQL | undefined {
+function requireSegmentActor(visibility: SegmentVisibility): string {
   if (typeof visibility?.actorUserId !== "string" || visibility.actorUserId.trim() === "") {
     throw new Error("Actor required");
   }
+  return visibility.actorUserId;
+}
+
+function visibleToActor(visibility: SegmentVisibility): SQL | undefined {
+  const actorUserId = requireSegmentActor(visibility);
   if (visibility.includeOthersPrivate) return undefined;
   return or(
     eq(memberSegments.isPublic, true),
-    eq(memberSegments.createdBy, visibility.actorUserId),
+    eq(memberSegments.createdBy, actorUserId),
   )!;
+}
+
+function mutableByActor(visibility: SegmentVisibility): SQL | undefined {
+  const actorUserId = requireSegmentActor(visibility);
+  if (visibility.includeOthersPrivate) return undefined;
+  return eq(memberSegments.createdBy, actorUserId);
 }
 
 function segmentNotFound(error: unknown): boolean {
@@ -177,7 +189,7 @@ export async function updateSegment(
   organizationId: string,
   visibility: SegmentVisibility,
 ): Promise<SelectMemberSegment> {
-  const boundary = visibleToActor(visibility);
+  const boundary = mutableByActor(visibility);
   return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const predicates: SQL[] = [
@@ -215,7 +227,7 @@ export async function deleteSegment(
   organizationId: string,
   visibility: SegmentVisibility,
 ): Promise<void> {
-  const boundary = visibleToActor(visibility);
+  const boundary = mutableByActor(visibility);
   return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const predicates: SQL[] = [
@@ -445,13 +457,15 @@ export async function executeSegment(
       const executionTimeMs = Date.now() - startTime;
 
       // Log execution
+      const otherPrivate = segment.isPublic !== true && segment.createdBy !== executedBy;
       await logSegmentExecution({
         segmentId,
         executedBy,
         resultCount: result.total,
         executionTimeMs,
+        // Another member's private definition stays out of the execution audit.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        filtersSnapshot: segment.filters as any,
+        filtersSnapshot: otherPrivate ? undefined : segment.filters as any,
       }, organizationId);
 
       // Update segment metadata inside the authorized organization only.

@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   queue: [] as unknown[],
   rls: [] as unknown[],
   wheres: [] as unknown[],
+  values: [] as unknown[],
 }));
 
 function shift() {
@@ -24,6 +25,7 @@ function makeChain() {
   for (const m of ['from', 'where', 'orderBy', 'limit', 'offset', 'leftJoin', 'values', 'set', 'returning']) {
     chain[m] = (...args: unknown[]) => {
       if (m === 'where') mocks.wheres.push(args[0]);
+      if (m === 'values') mocks.values.push(args[0]);
       return chain;
     };
   }
@@ -96,6 +98,7 @@ beforeEach(() => {
   mocks.queue = [];
   mocks.rls = [];
   mocks.wheres = [];
+  mocks.values = [];
   vi.clearAllMocks();
 });
 
@@ -170,7 +173,9 @@ describe('member-segments-queries — CRUD', () => {
       name: 'New',
     });
     expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
-    expect(sqlLeaves(mocks.wheres.at(-1))).toEqual(expect.arrayContaining(['created_by', STEWARD_A]));
+    const leaves = sqlLeaves(mocks.wheres.at(-1));
+    expect(leaves).toEqual(expect.arrayContaining(['created_by', STEWARD_A]));
+    expect(leaves).not.toContain('is_public');
   });
   it('updateSegment throws when not found in the authorized organization', async () => {
     push([]);
@@ -190,7 +195,9 @@ describe('member-segments-queries — CRUD', () => {
     push([{ id: 's1' }]);
     await expect(q.deleteSegment('s1', 'org1', ownAndPublic)).resolves.toBeUndefined();
     expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
-    expect(sqlLeaves(mocks.wheres.at(-1))).toEqual(expect.arrayContaining(['created_by', STEWARD_A]));
+    const leaves = sqlLeaves(mocks.wheres.at(-1));
+    expect(leaves).toEqual(expect.arrayContaining(['created_by', STEWARD_A]));
+    expect(leaves).not.toContain('is_public');
   });
   it('deleteSegment does not report success when the segment is outside the organization', async () => {
     push([]);
@@ -261,6 +268,19 @@ describe('member-segments-queries — advanced search', () => {
     );
     const r = await q.executeSegment('s1', 'org1', 'u1', { page: 1, limit: 10 });
     expect(r.total).toBe(1);
+  });
+  it('executeSegment omits another member private filters from the execution audit', async () => {
+    push(
+      [{ id: 's-private', filters: { status: ['active'] }, isPublic: false, createdBy: STEWARD_B }],
+      [{ id: 'm1' }],
+      [{ count: 1 }],
+      [{ id: 'exec1' }],
+      [],
+    );
+    await q.executeSegment('s-private', ORG_A, STEWARD_A, { includeOthersPrivate: true });
+    const logged = mocks.values.at(-1) as { filtersSnapshot?: unknown; resultCount?: number };
+    expect(logged.filtersSnapshot).toBeUndefined();
+    expect(logged.resultCount).toBe(1);
   });
   it('executeSegment throws when segment not found', async () => {
     push([]);

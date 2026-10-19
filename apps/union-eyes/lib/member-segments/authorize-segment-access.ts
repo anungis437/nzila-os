@@ -31,9 +31,9 @@ import {
 export const MEMBER_SEGMENT_MIN_ROLE = 'steward'
 
 /**
- * Reading or changing another member's private segment is an organization
- * administrator permission. It is an allow-list, not a rank. A higher
- * ROLE_HIERARCHY value (president, chief steward, platform role) does not
+ * Changing another member's segment, public or private, is an organization
+ * administrator permission. Reading another member's private segment uses the
+ * same allow-list. It is not a rank. A higher ROLE_HIERARCHY value does not
  * grant it. `super_admin` normalizes to `admin`.
  */
 export const MEMBER_SEGMENT_MANAGE_ROLES = ['admin'] as const
@@ -178,9 +178,97 @@ export async function actorCanManagePrivateSegments(
 /**
  * `own-and-public` never returns another member's private segments.
  * `include-others-private` is the explicit list request and is denied without
- * the administrator allow-list. `record` widens a single-segment read or
- * mutation only when that allow-list holds for this principal.
+ * the administrator allow-list. `record` widens a single-segment read only
+ * when that allow-list holds. Mutation of another member's segment is a
+ * separate check: public visibility does not grant it.
  */
+export function segmentMutationAllowed(
+  actorUserId: string,
+  segment: { createdBy: string },
+  canManageOthers: boolean,
+): boolean {
+  return segment.createdBy === actorUserId || canManageOthers
+}
+
+export type SensitiveSegmentOperation =
+  | 'read'
+  | 'list'
+  | 'execute'
+  | 'export'
+  | 'history'
+  | 'update'
+  | 'delete'
+
+export type SensitiveSegmentFact = {
+  segmentId: string
+  ownerUserId: string
+  isPublic: boolean
+}
+
+function sensitiveFacts(
+  actorUserId: string,
+  operation: SensitiveSegmentOperation,
+  segments: readonly SensitiveSegmentFact[],
+): SensitiveSegmentFact[] {
+  return segments.filter((segment) => {
+    if (segment.ownerUserId === actorUserId) return false
+    if (operation === 'update' || operation === 'delete') return true
+    return segment.isPublic === false
+  })
+}
+
+/**
+ * Records administrator access to another member's private segment, and every
+ * cross-owner update or delete. Metadata is ids and the public flag only.
+ * Returns false when a required audit write fails so the caller can stop.
+ * Returns true when the operation is not sensitive.
+ */
+export async function recordSensitiveSegmentAccess(input: {
+  actorUserId: string
+  organizationId: string
+  operation: SensitiveSegmentOperation
+  segments: readonly SensitiveSegmentFact[]
+}): Promise<boolean> {
+  const facts = sensitiveFacts(input.actorUserId, input.operation, input.segments)
+  if (facts.length === 0) return true
+  const eventType =
+    input.operation === 'update'
+      ? AuditEventType.DATA_UPDATE
+      : input.operation === 'delete'
+        ? AuditEventType.DATA_DELETE
+        : input.operation === 'export'
+          ? AuditEventType.DATA_EXPORT
+          : AuditEventType.DATA_ACCESS
+  try {
+    await auditLog({
+      eventType,
+      severity: AuditSeverity.HIGH,
+      userId: input.actorUserId,
+      organizationId: input.organizationId,
+      resource: 'member_segments',
+      action: `member_segment_${input.operation}`,
+      outcome: 'success',
+      metadata: {
+        crossOwner: true,
+        segments: facts.map((segment) => ({
+          segmentId: segment.segmentId,
+          ownerUserId: segment.ownerUserId,
+          isPublic: segment.isPublic,
+        })),
+      },
+    })
+    return true
+  } catch (error) {
+    logger.warn('member-segment sensitive access audit failed', {
+      userId: input.actorUserId,
+      organizationId: input.organizationId,
+      operation: input.operation,
+      error: error instanceof Error ? error.message : 'audit_failed',
+    })
+    return false
+  }
+}
+
 export async function resolveSegmentVisibility(
   access: { userId: string; organizationId: string },
   intent: SegmentVisibilityIntent,

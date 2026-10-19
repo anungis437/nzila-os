@@ -42,12 +42,16 @@ import { logger } from "@/lib/logger";
 import { eq } from "drizzle-orm";
 import {
   authorizeMemberSegmentAccess,
+  recordSensitiveSegmentAccess,
   resolveSegmentVisibility,
+  segmentMutationAllowed,
   MEMBER_SEGMENT_EXPORT_ENTITLEMENT,
   type SegmentAccessDenial,
   type SegmentAccessGrant,
   type SegmentVisibilityIntent,
   type SegmentVisibilityScope,
+  type SensitiveSegmentFact,
+  type SensitiveSegmentOperation,
 } from "@/lib/member-segments/authorize-segment-access";
 
 function denied(decision: SegmentAccessDenial): ActionResult<never> {
@@ -73,6 +77,33 @@ async function requireSegmentVisibility(
 
 function segmentMissing(error: unknown): boolean {
   return error instanceof Error && error.message === "Segment not found";
+}
+
+function segmentFact(segment: {
+  id: string;
+  createdBy: string;
+  isPublic: boolean;
+}): SensitiveSegmentFact {
+  return {
+    segmentId: segment.id,
+    ownerUserId: segment.createdBy,
+    isPublic: segment.isPublic,
+  };
+}
+
+async function auditSensitiveOrDeny(
+  access: SegmentAccessGrant,
+  operation: SensitiveSegmentOperation,
+  segments: readonly SensitiveSegmentFact[],
+): Promise<SegmentAccessDenial | null> {
+  const recorded = await recordSensitiveSegmentAccess({
+    actorUserId: access.userId,
+    organizationId: access.organizationId,
+    operation,
+    segments,
+  });
+  if (!recorded) return { ok: false, message: "Forbidden" };
+  return null;
 }
 
 // =============================================================================
@@ -130,6 +161,8 @@ export async function getMemberSegmentsAction(
     if (!scoped.ok) return denied(scoped);
 
     const segments = await getSegments(access.organizationId, scoped.visibility);
+    const audited = await auditSensitiveOrDeny(access, "list", segments.map(segmentFact));
+    if (audited) return denied(audited);
 
     return {
       isSuccess: true,
@@ -166,6 +199,8 @@ export async function getMemberSegmentByIdAction(
         message: "Segment not found",
       };
     }
+    const audited = await auditSensitiveOrDeny(access, "read", [segmentFact(segment)]);
+    if (audited) return denied(audited);
 
     return {
       isSuccess: true,
@@ -196,6 +231,13 @@ export async function updateMemberSegmentAction(
     const scoped = await requireSegmentVisibility(access, "record");
     if (!scoped.ok) return denied(scoped);
 
+    const existing = await getSegmentById(id, access.organizationId, scoped.visibility);
+    if (!existing || !segmentMutationAllowed(access.userId, existing, scoped.visibility.includeOthersPrivate)) {
+      return { isSuccess: false, message: "Segment not found" };
+    }
+    const audited = await auditSensitiveOrDeny(access, "update", [segmentFact(existing)]);
+    if (audited) return denied(audited);
+
     const updated = await updateSegment(id, data, access.organizationId, scoped.visibility);
 
     revalidatePath("/dashboard/members");
@@ -210,7 +252,7 @@ export async function updateMemberSegmentAction(
     if (segmentMissing(error)) {
       return { isSuccess: false, message: "Segment not found" };
     }
-    logger.error("Failed to update segment", error as Error, { id, data });
+    logger.error("Failed to update segment", error as Error, { id });
     return {
       isSuccess: false,
       message: "Failed to update segment",
@@ -231,6 +273,13 @@ export async function deleteMemberSegmentAction(
 
     const scoped = await requireSegmentVisibility(access, "record");
     if (!scoped.ok) return denied(scoped);
+
+    const existing = await getSegmentById(id, access.organizationId, scoped.visibility);
+    if (!existing || !segmentMutationAllowed(access.userId, existing, scoped.visibility.includeOthersPrivate)) {
+      return { isSuccess: false, message: "Segment not found" };
+    }
+    const audited = await auditSensitiveOrDeny(access, "delete", [segmentFact(existing)]);
+    if (audited) return denied(audited);
 
     await deleteSegment(id, access.organizationId, scoped.visibility);
 
@@ -308,6 +357,13 @@ export async function executeSegmentAction(
     const scoped = await requireSegmentVisibility(access, "record");
     if (!scoped.ok) return denied(scoped);
 
+    const segment = await getSegmentById(segmentId, access.organizationId, scoped.visibility);
+    if (!segment) {
+      return { isSuccess: false, message: "Segment not found" };
+    }
+    const audited = await auditSensitiveOrDeny(access, "execute", [segmentFact(segment)]);
+    if (audited) return denied(audited);
+
     const result = await executeSegment(segmentId, access.organizationId, access.userId, {
       ...options,
       includeOthersPrivate: scoped.visibility.includeOthersPrivate,
@@ -351,6 +407,8 @@ export async function getSegmentExecutionHistoryAction(
         message: "Segment not found",
       };
     }
+    const audited = await auditSensitiveOrDeny(access, "history", [segmentFact(segment)]);
+    if (audited) return denied(audited);
 
     const executions = await getSegmentExecutions(segmentId, access.organizationId);
 
@@ -407,6 +465,12 @@ export async function exportMembersAction(
     if (!scoped.ok) return denied(scoped);
 
     if (segmentId) {
+      const segment = await getSegmentById(segmentId, access.organizationId, scoped.visibility);
+      if (!segment) {
+        return { isSuccess: false, message: "Segment not found" };
+      }
+      const audited = await auditSensitiveOrDeny(access, "export", [segmentFact(segment)]);
+      if (audited) return denied(audited);
       const result = await executeSegment(segmentId, access.organizationId, access.userId, {
         limit: 10000,
         includeOthersPrivate: scoped.visibility.includeOthersPrivate,
