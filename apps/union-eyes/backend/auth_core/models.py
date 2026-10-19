@@ -11,6 +11,8 @@ import uuid
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
+from django.db.models import Func
+from django.db.models.functions import Now
 
 try:
     from pgvector.django import VectorField
@@ -512,10 +514,20 @@ class Profiles(BaseModel):
     PAYMENT_PROVIDER_CHOICES = [("stripe", "Stripe"), ("whop", "Whop")]
     WHOP_MEMBERSHIP_ID_CHOICES = [("free", "Free"), ("pro", "Pro")]
 
+    # Database defaults (Phase 3A): the Next.js layout inserts a profile through Drizzle (`values(default, ...)`), which relies on
+    # the database to supply these columns. Django's Python-side `default` never reaches the database, so a database built by
+    # Django had none and the insert failed with a NOT NULL violation on `id`. Scoped to this table; see
+    # auth_core/migrations/0007_profiles_database_defaults.py.
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        db_default=Func(function="gen_random_uuid", output_field=models.UUIDField()),
+        editable=False,
+    )
     user_id = models.TextField(unique=True)
     email = models.TextField(null=True, blank=True)
     membership = models.CharField(
-        choices=MEMBERSHIP_CHOICES, max_length=14, default="free"
+        choices=MEMBERSHIP_CHOICES, max_length=14, default="free", db_default="free"
     )
     payment_provider = models.CharField(
         choices=PAYMENT_PROVIDER_CHOICES,
@@ -523,6 +535,7 @@ class Profiles(BaseModel):
         null=True,
         blank=True,
         default="whop",
+        db_default="whop",
     )
     stripe_customer_id = models.TextField(null=True, blank=True)
     stripe_subscription_id = models.TextField(null=True, blank=True)
@@ -534,11 +547,11 @@ class Profiles(BaseModel):
     billing_cycle_start = models.DateTimeField(null=True, blank=True)
     billing_cycle_end = models.DateTimeField(null=True, blank=True)
     next_credit_renewal = models.DateTimeField(null=True, blank=True)
-    usage_credits = models.IntegerField(null=True, blank=True, default=0)
-    used_credits = models.IntegerField(null=True, blank=True, default=0)
-    status = models.TextField(null=True, blank=True, default="active")
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField(null=True, blank=True)
+    usage_credits = models.IntegerField(null=True, blank=True, default=0, db_default=0)
+    used_credits = models.IntegerField(null=True, blank=True, default=0, db_default=0)
+    status = models.TextField(null=True, blank=True, default="active", db_default="active")
+    created_at = models.DateTimeField(db_default=Now())
+    updated_at = models.DateTimeField(null=True, blank=True, db_default=Now())
 
     class Meta:
         db_table = "profiles"
