@@ -1,42 +1,42 @@
 "use server";
 
 /**
- * Member Employment Server Actions
- * 
- * Phase 1.2: Member Profile v2 - Employment Attributes
- * 
- * Server actions for member employment management including:
- * - Member Employment (core employment data)
- * - Employment History (change tracking)
- * - Member Leaves (leave management)
- * - Job Classifications (classification system)
- * 
- * @module actions/member-employment-actions
+ * Member employment server actions.
+ *
+ * Every action resolves `auth()` through `authorizeEmploymentAccess` and
+ * passes that sealed grant into the query layer. Reads require the same
+ * employment-administration allow-list as writes. Individual pay is included
+ * only when that grant has finance disclosure. Dues compensation requires the
+ * finance allow-list and `financial_intelligence_suite`.
+ * Member self-service is not granted.
  */
 
-import { auth } from '@nzila/platform-auth/entra/server';
+import { revalidatePath } from "next/cache";
+import { authorizeEmploymentAccess } from "@/lib/member-employment/authorize-employment-access";
+import { logger } from "@/lib/logger";
+import { EmploymentBoundaryError } from "@/db/queries/member-employment-queries";
 import {
-  createMemberEmployment,
-  getMemberEmploymentById,
-  getActiveMemberEmployment,
-  getAllMemberEmployment,
-  getEmploymentByOrganization,
-  updateMemberEmployment,
-  deleteMemberEmployment,
-  getEmploymentForDuesCalculation,
+  approveMemberLeave,
+  calculateSeniorityYears,
   createEmploymentHistory,
-  getEmploymentHistoryByMember,
-  createMemberLeave,
-  getActiveMemberLeaves,
-  getAllMemberLeaves,
-  updateMemberLeave,
   createJobClassification,
+  createMemberEmployment,
+  createMemberLeave,
+  deleteMemberEmployment,
+  getActiveMemberEmployment,
+  getActiveMemberLeaves,
+  getAllMemberEmployment,
+  getAllMemberLeaves,
+  getEmploymentByOrganization,
+  getEmploymentForDuesCalculation,
+  getEmploymentHistoryByMember,
   getJobClassificationByCode,
   getJobClassificationsByOrganization,
+  getMemberEmploymentById,
   updateJobClassification,
-  calculateSeniorityYears,
+  updateMemberEmployment,
+  updateMemberLeave,
 } from "@/db/queries/member-employment-queries";
-
 import type {
   MemberEmployment,
   NewMemberEmployment,
@@ -47,95 +47,90 @@ import type {
   JobClassification,
   NewJobClassification,
 } from "@/db/schema/domains/member/member-employment";
-
 import { ActionResult } from "@/types/actions/actions-types";
-import { revalidatePath } from "next/cache";
-import { logger } from "@/lib/logger";
 
-// =============================================================================
-// MEMBER EMPLOYMENT ACTIONS
-// =============================================================================
+function failure(message: string): ActionResult<never> {
+  return { isSuccess: false, message }
+}
+
+async function requireAdmin(organizationId: string | null | undefined) {
+  return authorizeEmploymentAccess(organizationId ?? '', 'administer')
+}
+
+function safeMessage(error: unknown, fallback: string): string {
+  if (error instanceof EmploymentBoundaryError) return error.message
+  return fallback
+}
+
+function logFailure(operation: string, error: unknown, fields: Record<string, string | undefined>): void {
+  logger.error(operation, new Error(operation), {
+    ...fields,
+    errorName: error instanceof Error ? error.name : 'error',
+  })
+}
+
+function revalidateEmployment(): void {
+  revalidatePath("/dashboard/admin/employment")
+  revalidatePath("/dashboard/members")
+}
 
 export async function createMemberEmploymentAction(
   data: NewMemberEmployment
 ): Promise<ActionResult<MemberEmployment>> {
+  const access = await requireAdmin(data?.organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { isSuccess: false, message: "Unauthorized" };
-    }
-
-    const employment = await createMemberEmployment(data);
-    revalidatePath("/dashboard/admin/employment");
-    revalidatePath("/dashboard/members");
-    return {
-      isSuccess: true,
-      message: "Employment record created successfully",
-      data: employment,
-    };
+    const employment = await createMemberEmployment(access, data)
+    revalidateEmployment()
+    return { isSuccess: true, message: "Employment record created successfully", data: employment }
   } catch (error) {
-    logger.error("Failed to create employment record", error as Error, { data });
-    return {
-      isSuccess: false,
-      message: error instanceof Error ? error.message : "Failed to create employment record",
-    };
+    logFailure("Failed to create employment record", error, { organizationId: access.organizationId })
+    return failure(safeMessage(error, "Failed to create employment record"))
   }
 }
 
 export async function getMemberEmploymentByIdAction(
-  id: string
+  id: string,
+  organizationId: string,
 ): Promise<ActionResult<MemberEmployment | null>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const employment = await getMemberEmploymentById(id);
-    return {
-      isSuccess: true,
-      message: "Employment record retrieved successfully",
-      data: employment,
-    };
+    const employment = await getMemberEmploymentById(access, id)
+    return { isSuccess: true, message: "Employment record retrieved successfully", data: employment }
   } catch (error) {
-    logger.error("Failed to get employment record", error as Error, { id });
-    return {
-      isSuccess: false,
-      message: "Failed to retrieve employment record",
-    };
+    logFailure("Failed to get employment record", error, { organizationId: access.organizationId, id })
+    return failure("Failed to retrieve employment record")
   }
 }
 
 export async function getActiveMemberEmploymentAction(
-  memberId: string
+  memberId: string,
+  organizationId: string,
 ): Promise<ActionResult<MemberEmployment | null>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const employment = await getActiveMemberEmployment(memberId);
-    return {
-      isSuccess: true,
-      message: "Active employment retrieved successfully",
-      data: employment,
-    };
+    const employment = await getActiveMemberEmployment(access, memberId)
+    return { isSuccess: true, message: "Active employment retrieved successfully", data: employment }
   } catch (error) {
-    logger.error("Failed to get active employment", error as Error, { memberId });
-    return {
-      isSuccess: false,
-      message: "Failed to retrieve active employment",
-    };
+    logFailure("Failed to get active employment", error, { organizationId: access.organizationId })
+    return failure("Failed to retrieve active employment")
   }
 }
 
 export async function getAllMemberEmploymentAction(
-  memberId: string
+  memberId: string,
+  organizationId: string,
 ): Promise<ActionResult<MemberEmployment[]>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const employmentRecords = await getAllMemberEmployment(memberId);
-    return {
-      isSuccess: true,
-      message: "Employment records retrieved successfully",
-      data: employmentRecords,
-    };
+    const employmentRecords = await getAllMemberEmployment(access, memberId)
+    return { isSuccess: true, message: "Employment records retrieved successfully", data: employmentRecords }
   } catch (error) {
-    logger.error("Failed to get all employment records", error as Error, { memberId });
-    return {
-      isSuccess: false,
-      message: "Failed to retrieve employment records",
-    };
+    logFailure("Failed to get all employment records", error, { organizationId: access.organizationId })
+    return failure("Failed to retrieve employment records")
   }
 }
 
@@ -143,19 +138,18 @@ export async function getEmploymentByOrganizationAction(
   organizationId: string,
   status?: string
 ): Promise<ActionResult<MemberEmployment[]>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const employmentRecords = await getEmploymentByOrganization(organizationId, status);
+    const employmentRecords = await getEmploymentByOrganization(access, status)
     return {
       isSuccess: true,
       message: "Organization employment records retrieved successfully",
       data: employmentRecords,
-    };
+    }
   } catch (error) {
-    logger.error("Failed to get organization employment", error as Error, { organizationId, status });
-    return {
-      isSuccess: false,
-      message: "Failed to retrieve organization employment records",
-    };
+    logFailure("Failed to get organization employment", error, { organizationId: access.organizationId })
+    return failure("Failed to retrieve organization employment records")
   }
 }
 
@@ -163,194 +157,129 @@ export async function updateMemberEmploymentAction(
   id: string,
   data: Partial<NewMemberEmployment>
 ): Promise<ActionResult<MemberEmployment>> {
+  const access = await requireAdmin(data?.organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { isSuccess: false, message: "Unauthorized" };
-    }
-
-    const updatedEmployment = await updateMemberEmployment(id, data);
-    revalidatePath("/dashboard/admin/employment");
-    revalidatePath("/dashboard/members");
-    return {
-      isSuccess: true,
-      message: "Employment record updated successfully",
-      data: updatedEmployment,
-    };
+    const updatedEmployment = await updateMemberEmployment(access, id, data)
+    revalidateEmployment()
+    return { isSuccess: true, message: "Employment record updated successfully", data: updatedEmployment }
   } catch (error) {
-    logger.error("Failed to update employment record", error as Error, { id, data });
-    return {
-      isSuccess: false,
-      message: error instanceof Error ? error.message : "Failed to update employment record",
-    };
+    logFailure("Failed to update employment record", error, { organizationId: access.organizationId, id })
+    return failure(safeMessage(error, "Failed to update employment record"))
   }
 }
 
 export async function deleteMemberEmploymentAction(
-  id: string
+  id: string,
+  organizationId: string,
 ): Promise<ActionResult<void>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { isSuccess: false, message: "Unauthorized" };
-    }
-
-    await deleteMemberEmployment(id);
-    revalidatePath("/dashboard/admin/employment");
-    revalidatePath("/dashboard/members");
-    return {
-      isSuccess: true,
-      message: "Employment record deleted successfully",
-    };
+    await deleteMemberEmployment(access, id)
+    revalidateEmployment()
+    return { isSuccess: true, message: "Employment record deleted successfully" }
   } catch (error) {
-    logger.error("Failed to delete employment record", error as Error, { id });
-    return {
-      isSuccess: false,
-      message: "Failed to delete employment record",
-    };
+    logFailure("Failed to delete employment record", error, { organizationId: access.organizationId, id })
+    return failure(safeMessage(error, "Failed to delete employment record"))
   }
 }
 
 export async function getEmploymentForDuesCalculationAction(
-  memberId: string
+  memberId: string,
+  organizationId: string,
 ): Promise<ActionResult<{
-  grossWages?: number;
-  baseSalary?: number;
-  hourlyRate?: number;
-  hoursWorked?: number;
-  employmentStatus: string;
-  payFrequency: string;
+  grossWages?: number
+  baseSalary?: number
+  hourlyRate?: number
+  hoursWorked?: number
+  employmentStatus: string
+  payFrequency: string
 } | null>> {
+  const access = await authorizeEmploymentAccess(organizationId, 'finance')
+  if (!access.ok) return failure(access.message)
   try {
-    const duesData = await getEmploymentForDuesCalculation(memberId);
-    return {
-      isSuccess: true,
-      message: "Dues calculation data retrieved successfully",
-      data: duesData,
-    };
+    const duesData = await getEmploymentForDuesCalculation(access, memberId)
+    return { isSuccess: true, message: "Dues calculation data retrieved successfully", data: duesData }
   } catch (error) {
-    logger.error("Failed to get dues calculation data", error as Error, { memberId });
-    return {
-      isSuccess: false,
-      message: "Failed to retrieve dues calculation data",
-    };
+    logFailure("Failed to get dues calculation data", error, { organizationId: access.organizationId })
+    return failure("Failed to retrieve dues calculation data")
   }
 }
-
-// =============================================================================
-// EMPLOYMENT HISTORY ACTIONS
-// =============================================================================
 
 export async function createEmploymentHistoryAction(
   data: NewEmploymentHistory
 ): Promise<ActionResult<EmploymentHistory>> {
+  const access = await requireAdmin(data?.organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { isSuccess: false, message: "Unauthorized" };
-    }
-
-    const history = await createEmploymentHistory(data);
-    revalidatePath("/dashboard/admin/employment");
-    return {
-      isSuccess: true,
-      message: "Employment history record created successfully",
-      data: history,
-    };
+    const history = await createEmploymentHistory(access, data)
+    revalidatePath("/dashboard/admin/employment")
+    return { isSuccess: true, message: "Employment history record created successfully", data: history }
   } catch (error) {
-    logger.error("Failed to create employment history", error as Error, { data });
-    return {
-      isSuccess: false,
-      message: "Failed to create employment history record",
-    };
+    logFailure("Failed to create employment history", error, { organizationId: access.organizationId })
+    return failure(safeMessage(error, "Failed to create employment history record"))
   }
 }
 
 export async function getEmploymentHistoryByMemberAction(
-  memberId: string
+  memberId: string,
+  organizationId: string,
 ): Promise<ActionResult<EmploymentHistory[]>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const history = await getEmploymentHistoryByMember(memberId);
-    return {
-      isSuccess: true,
-      message: "Employment history retrieved successfully",
-      data: history,
-    };
+    const history = await getEmploymentHistoryByMember(access, memberId)
+    return { isSuccess: true, message: "Employment history retrieved successfully", data: history }
   } catch (error) {
-    logger.error("Failed to get employment history", error as Error, { memberId });
-    return {
-      isSuccess: false,
-      message: "Failed to retrieve employment history",
-    };
+    logFailure("Failed to get employment history", error, { organizationId: access.organizationId })
+    return failure("Failed to retrieve employment history")
   }
 }
-
-// =============================================================================
-// MEMBER LEAVES ACTIONS
-// =============================================================================
 
 export async function createMemberLeaveAction(
   data: NewMemberLeave
 ): Promise<ActionResult<MemberLeave>> {
+  const access = await requireAdmin(data?.organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { isSuccess: false, message: "Unauthorized" };
-    }
-
-    const leave = await createMemberLeave(data);
-    revalidatePath("/dashboard/admin/employment");
-    revalidatePath("/dashboard/members");
-    return {
-      isSuccess: true,
-      message: "Leave request created successfully",
-      data: leave,
-    };
+    const leave = await createMemberLeave(access, data)
+    revalidateEmployment()
+    return { isSuccess: true, message: "Leave request created successfully", data: leave }
   } catch (error) {
-    logger.error("Failed to create leave request", error as Error, { data });
-    return {
-      isSuccess: false,
-      message: "Failed to create leave request",
-    };
+    logFailure("Failed to create leave request", error, { organizationId: access.organizationId })
+    return failure(safeMessage(error, "Failed to create leave request"))
   }
 }
 
 export async function getActiveMemberLeavesAction(
   memberId: string,
+  organizationId: string,
   currentDate?: Date
 ): Promise<ActionResult<MemberLeave[]>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const leaves = await getActiveMemberLeaves(memberId, currentDate);
-    return {
-      isSuccess: true,
-      message: "Active leaves retrieved successfully",
-      data: leaves,
-    };
+    const leaves = await getActiveMemberLeaves(access, memberId, currentDate)
+    return { isSuccess: true, message: "Active leaves retrieved successfully", data: leaves }
   } catch (error) {
-    logger.error("Failed to get active leaves", error as Error, { memberId });
-    return {
-      isSuccess: false,
-      message: "Failed to retrieve active leaves",
-    };
+    logFailure("Failed to get active leaves", error, { organizationId: access.organizationId })
+    return failure("Failed to retrieve active leaves")
   }
 }
 
 export async function getAllMemberLeavesAction(
-  memberId: string
+  memberId: string,
+  organizationId: string,
 ): Promise<ActionResult<MemberLeave[]>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const leaves = await getAllMemberLeaves(memberId);
-    return {
-      isSuccess: true,
-      message: "Leave records retrieved successfully",
-      data: leaves,
-    };
+    const leaves = await getAllMemberLeaves(access, memberId)
+    return { isSuccess: true, message: "Leave records retrieved successfully", data: leaves }
   } catch (error) {
-    logger.error("Failed to get leave records", error as Error, { memberId });
-    return {
-      isSuccess: false,
-      message: "Failed to retrieve leave records",
-    };
+    logFailure("Failed to get leave records", error, { organizationId: access.organizationId })
+    return failure("Failed to retrieve leave records")
   }
 }
 
@@ -358,88 +287,46 @@ export async function updateMemberLeaveAction(
   id: string,
   data: Partial<NewMemberLeave>
 ): Promise<ActionResult<MemberLeave>> {
+  const access = await requireAdmin(data?.organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { isSuccess: false, message: "Unauthorized" };
-    }
-
-    const updatedLeave = await updateMemberLeave(id, data);
-    revalidatePath("/dashboard/admin/employment");
-    revalidatePath("/dashboard/members");
-    return {
-      isSuccess: true,
-      message: "Leave record updated successfully",
-      data: updatedLeave,
-    };
+    const updatedLeave = await updateMemberLeave(access, id, data)
+    revalidateEmployment()
+    return { isSuccess: true, message: "Leave record updated successfully", data: updatedLeave }
   } catch (error) {
-    logger.error("Failed to update leave record", error as Error, { id, data });
-    return {
-      isSuccess: false,
-      message: "Failed to update leave record",
-    };
+    logFailure("Failed to update leave record", error, { organizationId: access.organizationId, id })
+    return failure(safeMessage(error, "Failed to update leave record"))
   }
 }
 
 export async function approveMemberLeaveAction(
-  id: string
+  id: string,
+  organizationId: string,
 ): Promise<ActionResult<MemberLeave>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        isSuccess: false,
-        message: "Unauthorized - must be logged in to approve leave requests",
-      };
-    }
-
-    const updatedLeave = await updateMemberLeave(id, {
-      isApproved: true,
-      approvedBy: userId,
-      approvedAt: new Date(),
-    });
-    revalidatePath("/dashboard/admin/employment");
-    revalidatePath("/dashboard/members");
-    return {
-      isSuccess: true,
-      message: "Leave request approved successfully",
-      data: updatedLeave,
-    };
+    const updatedLeave = await approveMemberLeave(access, id)
+    revalidateEmployment()
+    return { isSuccess: true, message: "Leave request approved successfully", data: updatedLeave }
   } catch (error) {
-    logger.error("Failed to approve leave request", error as Error, { id });
-    return {
-      isSuccess: false,
-      message: "Failed to approve leave request",
-    };
+    logFailure("Failed to approve leave request", error, { organizationId: access.organizationId, id })
+    return failure(safeMessage(error, "Failed to approve leave request"))
   }
 }
-
-// =============================================================================
-// JOB CLASSIFICATIONS ACTIONS
-// =============================================================================
 
 export async function createJobClassificationAction(
   data: NewJobClassification
 ): Promise<ActionResult<JobClassification>> {
+  const access = await requireAdmin(data?.organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { isSuccess: false, message: "Unauthorized" };
-    }
-
-    const classification = await createJobClassification(data);
-    revalidatePath("/dashboard/admin/employment");
-    return {
-      isSuccess: true,
-      message: "Job classification created successfully",
-      data: classification,
-    };
+    const classification = await createJobClassification(access, data)
+    revalidatePath("/dashboard/admin/employment")
+    return { isSuccess: true, message: "Job classification created successfully", data: classification }
   } catch (error) {
-    logger.error("Failed to create job classification", error as Error, { data });
-    return {
-      isSuccess: false,
-      message: "Failed to create job classification",
-    };
+    logFailure("Failed to create job classification", error, { organizationId: access.organizationId })
+    return failure(safeMessage(error, "Failed to create job classification"))
   }
 }
 
@@ -447,19 +334,14 @@ export async function getJobClassificationByCodeAction(
   organizationId: string,
   jobCode: string
 ): Promise<ActionResult<JobClassification | null>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const classification = await getJobClassificationByCode(organizationId, jobCode);
-    return {
-      isSuccess: true,
-      message: "Job classification retrieved successfully",
-      data: classification,
-    };
+    const classification = await getJobClassificationByCode(access, jobCode)
+    return { isSuccess: true, message: "Job classification retrieved successfully", data: classification }
   } catch (error) {
-    logger.error("Failed to get job classification", error as Error, { organizationId, jobCode });
-    return {
-      isSuccess: false,
-      message: "Failed to retrieve job classification",
-    };
+    logFailure("Failed to get job classification", error, { organizationId: access.organizationId })
+    return failure("Failed to retrieve job classification")
   }
 }
 
@@ -467,19 +349,14 @@ export async function getJobClassificationsByOrganizationAction(
   organizationId: string,
   activeOnly: boolean = true
 ): Promise<ActionResult<JobClassification[]>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const classifications = await getJobClassificationsByOrganization(organizationId, activeOnly);
-    return {
-      isSuccess: true,
-      message: "Job classifications retrieved successfully",
-      data: classifications,
-    };
+    const classifications = await getJobClassificationsByOrganization(access, activeOnly)
+    return { isSuccess: true, message: "Job classifications retrieved successfully", data: classifications }
   } catch (error) {
-    logger.error("Failed to get job classifications", error as Error, { organizationId, activeOnly });
-    return {
-      isSuccess: false,
-      message: "Failed to retrieve job classifications",
-    };
+    logFailure("Failed to get job classifications", error, { organizationId: access.organizationId })
+    return failure("Failed to retrieve job classifications")
   }
 }
 
@@ -487,49 +364,36 @@ export async function updateJobClassificationAction(
   id: string,
   data: Partial<NewJobClassification>
 ): Promise<ActionResult<JobClassification>> {
+  const access = await requireAdmin(data?.organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { isSuccess: false, message: "Unauthorized" };
-    }
-
-    const updatedClassification = await updateJobClassification(id, data);
-    revalidatePath("/dashboard/admin/employment");
-    return {
-      isSuccess: true,
-      message: "Job classification updated successfully",
-      data: updatedClassification,
-    };
+    const updatedClassification = await updateJobClassification(access, id, data)
+    revalidatePath("/dashboard/admin/employment")
+    return { isSuccess: true, message: "Job classification updated successfully", data: updatedClassification }
   } catch (error) {
-    logger.error("Failed to update job classification", error as Error, { id, data });
-    return {
-      isSuccess: false,
-      message: "Failed to update job classification",
-    };
+    logFailure("Failed to update job classification", error, { organizationId: access.organizationId, id })
+    return failure(safeMessage(error, "Failed to update job classification"))
   }
 }
 
-// =============================================================================
-// UTILITY ACTIONS
-// =============================================================================
-
 export async function calculateSeniorityYearsAction(
   seniorityDate: string,
+  organizationId: string,
   currentDate?: Date,
   memberId?: string
 ): Promise<ActionResult<number>> {
+  const access = await requireAdmin(organizationId)
+  if (!access.ok) return failure(access.message)
   try {
-    const years = await calculateSeniorityYears(new Date(seniorityDate), currentDate, memberId);
-    return {
-      isSuccess: true,
-      message: "Seniority years calculated successfully",
-      data: years,
-    };
+    const years = await calculateSeniorityYears(
+      access,
+      new Date(seniorityDate),
+      currentDate,
+      memberId,
+    )
+    return { isSuccess: true, message: "Seniority years calculated successfully", data: years }
   } catch (error) {
-    logger.error("Failed to calculate seniority years", error as Error, { seniorityDate, memberId });
-    return {
-      isSuccess: false,
-      message: "Failed to calculate seniority years",
-    };
+    logFailure("Failed to calculate seniority years", error, { organizationId: access.organizationId })
+    return failure(safeMessage(error, "Failed to calculate seniority years"))
   }
 }

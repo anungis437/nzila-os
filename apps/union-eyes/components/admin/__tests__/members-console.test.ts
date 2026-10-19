@@ -1,4 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// members-console is a client component that imports employment server actions.
+// Those actions import the server-only query module. Vitest evaluates that
+// graph without the Next.js server-action transform, so the test stubs the
+// marker the same way the other server-only unit tests do.
+vi.mock('server-only', () => ({}));
+
 import { filterMembers, buildMembersExportCsv } from '../members-console';
 
 const MEMBERS = [
