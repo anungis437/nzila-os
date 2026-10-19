@@ -1,447 +1,543 @@
 /**
- * Data Export/Import Service
- * 
- * Provides GDPR-compliant data export and bulk import functionality
- * Supports JSON, CSV, and Excel formats
+ * Organization data export and import.
+ *
+ * This is not the GDPR Article 15 exporter in `lib/gdpr/consent-manager.ts`.
+ * That class serves a data-subject request for one user. This service is a
+ * latent organization bulk path with no production importer. It stays unwired.
+ *
+ * Authorization comes from the signed-in session and `authorizeMemberAccess`.
+ * A caller-supplied user id or an omitted organization filter is not a tenant.
+ * Queries run inside that organization's database context and select an
+ * explicit column list. Durable file delivery is not implemented, so a job
+ * never reports a download URL or a completed file.
+ *
+ * Member import delegates to `importOrganizationMembers`. Claim import inserts
+ * only inside the authorized organization and audits that transaction.
  */
 
-import { logger } from '@/lib/logger';
-import { db } from '@/db';
-import { organizationMembers } from '@/db/schema';
-import { claims } from '@/db/schema';
-import { grievanceDocuments } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq, or, sql } from 'drizzle-orm'
+import { claims, grievanceDocuments, organizationMembers } from '@/db/schema'
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context'
+import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit'
+import { auditLogs } from '@/db/schema/domains/infrastructure/audit'
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
+import {
+  authorizeMemberAccess,
+  MemberBoundaryError,
+} from '@/lib/member-integrity/authorize-member-access'
+import { importOrganizationMembers } from '@/lib/services/member-service'
+import { logger } from '@/lib/logger'
 
-// Export configuration
 export interface ExportConfig {
-  format: 'json' | 'csv' | 'excel';
-  includeRelations: boolean;
-  dateFormat: string;
-  compression: boolean;
+  format: 'json' | 'csv' | 'excel'
+  includeRelations: boolean
+  dateFormat: string
+  compression: boolean
 }
 
-interface ExportJob {
-  id: string;
-  userId: string;
-  entityType: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  format: string;
-  recordCount: number;
-  fileUrl?: string;
-  error?: string;
-  createdAt: Date;
-  completedAt?: Date;
+export type ExportDelivery = 'not_implemented'
+
+export interface ExportJob {
+  id: string
+  userId: string
+  organizationId: string
+  entityType: string
+  status: 'pending' | 'processing' | 'delivery_unavailable' | 'failed'
+  format: string
+  recordCount: number
+  delivery: ExportDelivery
+  error?: string
+  createdAt: Date
+  completedAt?: Date
+}
+
+export const MEMBER_EXPORT_FIELDS = [
+  'id',
+  'name',
+  'email',
+  'role',
+  'status',
+  'department',
+  'membershipNumber',
+  'organizationId',
+  'createdAt',
+] as const
+
+export const CLAIM_EXPORT_FIELDS = [
+  'id',
+  'claimNumber',
+  'memberId',
+  'type',
+  'status',
+  'priority',
+  'incidentDate',
+  'submittedAt',
+  'organizationId',
+] as const
+
+export const DOCUMENT_EXPORT_FIELDS = [
+  'id',
+  'name',
+  'type',
+  'mimeType',
+  'version',
+  'uploadedAt',
+  'organizationId',
+] as const
+
+const EXPORT_ENTITIES = new Set(['members', 'claims', 'documents'])
+const IMPORT_ENTITIES = new Set(['members', 'claims'])
+const CLAIM_TYPES = new Set([
+  'grievance_discipline',
+  'grievance_schedule',
+  'grievance_pay',
+  'workplace_safety',
+  'discrimination_age',
+  'discrimination_gender',
+  'discrimination_race',
+  'discrimination_disability',
+  'discrimination_other',
+  'harassment_sexual',
+  'harassment_workplace',
+  'harassment_verbal',
+  'harassment_physical',
+  'wage_dispute',
+  'contract_dispute',
+  'retaliation',
+  'wrongful_termination',
+  'other',
+])
+const CLAIM_PRIORITIES = new Set(['low', 'medium', 'high', 'critical'])
+const CLAIM_IMPORT_KEYS = new Set([
+  'memberId',
+  'organizationId',
+  'claimNumber',
+  'claimType',
+  'type',
+  'priority',
+  'incidentDate',
+  'description',
+  'location',
+  'desiredOutcome',
+])
+
+type ExportRow = Record<string, unknown>
+
+function organizationOrThrow(organizationId: string): string {
+  if (typeof organizationId !== 'string' || organizationId.trim() === '') {
+    throw new MemberBoundaryError('Forbidden')
+  }
+  return organizationId.trim()
+}
+
+async function requireExportGrant(organizationId: string) {
+  const grant = await authorizeMemberAccess(organizationOrThrow(organizationId), 'administer')
+  if (!grant.ok) throw new MemberBoundaryError(grant.message)
+  return grant
+}
+
+export function projectMemberExport(row: {
+  id: string
+  name: string
+  email: string
+  role: string
+  status: string
+  department?: string | null
+  membershipNumber?: string | null
+  organizationId: string
+  createdAt?: Date | null
+}): ExportRow {
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    role: row.role,
+    status: row.status,
+    department: row.department ?? null,
+    membershipNumber: row.membershipNumber ?? null,
+    organizationId: row.organizationId,
+    createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : null,
+  }
+}
+
+export function projectClaimExport(row: {
+  claimId: string
+  claimNumber?: string | null
+  memberId?: string | null
+  isAnonymous?: boolean | null
+  claimType?: string | null
+  status: string
+  priority: string
+  incidentDate?: Date | null
+  createdAt?: Date | null
+  organizationId: string
+}): ExportRow {
+  return {
+    id: row.claimId,
+    claimNumber: row.claimNumber ?? null,
+    memberId: row.isAnonymous ? null : (row.memberId ?? null),
+    type: row.claimType ?? null,
+    status: row.status,
+    priority: row.priority,
+    incidentDate: row.incidentDate ? new Date(row.incidentDate).toISOString() : null,
+    submittedAt: row.createdAt ? new Date(row.createdAt).toISOString() : null,
+    organizationId: row.organizationId,
+  }
+}
+
+export function projectDocumentExport(row: {
+  id: string
+  documentName: string
+  documentType: string
+  mimeType?: string | null
+  version?: number | null
+  uploadedAt?: Date | null
+  organizationId: string
+}): ExportRow {
+  return {
+    id: row.id,
+    name: row.documentName,
+    type: row.documentType,
+    mimeType: row.mimeType ?? null,
+    version: row.version ?? null,
+    uploadedAt: row.uploadedAt ? new Date(row.uploadedAt).toISOString() : null,
+    organizationId: row.organizationId,
+  }
+}
+
+async function fetchExportRows(
+  tx: RLSTx,
+  entityType: string,
+  organizationId: string,
+): Promise<ExportRow[]> {
+  if (entityType === 'members') {
+    const rows = await tx
+      .select({
+        id: organizationMembers.id,
+        name: organizationMembers.name,
+        email: organizationMembers.email,
+        role: organizationMembers.role,
+        status: organizationMembers.status,
+        department: organizationMembers.department,
+        membershipNumber: organizationMembers.membershipNumber,
+        organizationId: organizationMembers.organizationId,
+        createdAt: organizationMembers.createdAt,
+      })
+      .from(organizationMembers)
+      .where(and(
+        eq(organizationMembers.organizationId, organizationId),
+        sql`${organizationMembers.deletedAt} IS NULL`,
+      ))
+    return rows.map(projectMemberExport)
+  }
+  if (entityType === 'claims') {
+    const rows = await tx
+      .select({
+        claimId: claims.claimId,
+        claimNumber: claims.claimNumber,
+        memberId: claims.memberId,
+        isAnonymous: claims.isAnonymous,
+        claimType: claims.claimType,
+        status: claims.status,
+        priority: claims.priority,
+        incidentDate: claims.incidentDate,
+        createdAt: claims.createdAt,
+        organizationId: claims.organizationId,
+      })
+      .from(claims)
+      .where(eq(claims.organizationId, organizationId))
+    return rows.map(projectClaimExport)
+  }
+  const rows = await tx
+    .select({
+      id: grievanceDocuments.id,
+      documentName: grievanceDocuments.documentName,
+      documentType: grievanceDocuments.documentType,
+      mimeType: grievanceDocuments.mimeType,
+      version: grievanceDocuments.version,
+      uploadedAt: grievanceDocuments.uploadedAt,
+      organizationId: grievanceDocuments.organizationId,
+    })
+    .from(grievanceDocuments)
+    .where(and(
+      eq(grievanceDocuments.organizationId, organizationId),
+      or(
+        eq(grievanceDocuments.isConfidential, false),
+        sql`${grievanceDocuments.isConfidential} IS NULL`,
+      ),
+    ))
+  return rows.map(projectDocumentExport)
+}
+
+function formatData(data: ExportRow[], format: string): string {
+  if (format === 'json') return JSON.stringify(data, null, 2)
+  if (format === 'csv') return jsonToCsv(data)
+  if (format === 'excel') {
+    throw new MemberBoundaryError('Excel (xlsx) export is not yet implemented. Use CSV or JSON instead.')
+  }
+  throw new MemberBoundaryError('Forbidden')
+}
+
+function jsonToCsv(data: ExportRow[]): string {
+  if (data.length === 0) return ''
+  const headers = Object.keys(data[0])
+  const csvRows = [headers.join(',')]
+  for (const row of data) {
+    const values = headers.map((header) => {
+      const value = row[header]
+      if (value === null || value === undefined) return ''
+      const stringValue = String(value)
+      if (stringValue.includes(',') || stringValue.includes('"')) {
+        return `"${stringValue.replace(/"/g, '""')}"`
+      }
+      return stringValue
+    })
+    csvRows.push(values.join(','))
+  }
+  return csvRows.join('\n')
+}
+
+function generateId(): string {
+  return `export_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
 }
 
 /**
- * Data Export Service
+ * Reads one authorized organization export.
+ * `organizationId` is the requested tenant. It is admitted only when the
+ * session holds member administration for that organization.
  */
 export class DataExportService {
-  /**
-   * Export data for a specific entity type
-   */
   async export(
-    userId: string,
     entityType: string,
-    filters: Record<string, unknown>,
-    config: Partial<ExportConfig> = {}
+    organizationId: string,
+    config: Partial<ExportConfig> = {},
   ): Promise<ExportJob> {
+    const format = config.format || 'json'
     const job: ExportJob = {
-      id: this.generateId(),
-      userId,
+      id: generateId(),
+      userId: '',
+      organizationId: typeof organizationId === 'string' ? organizationId : '',
       entityType,
       status: 'processing',
-      format: config.format || 'json',
+      format,
       recordCount: 0,
+      delivery: 'not_implemented',
       createdAt: new Date(),
-    };
+    }
 
     try {
-      logger.info('Starting export job', { jobId: job.id, entityType });
-
-      // Get data based on entity type
-      const data = await this.fetchData(entityType, filters);
-      job.recordCount = data.length;
-
-      // Format data
-      const _formatted = await this.formatData(data, config.format || 'json');
-
-      // In production, would upload to storage and return URL
-      // For now, return inline data
-      job.status = 'completed';
-      job.completedAt = new Date();
-      job.fileUrl = `exports/${job.id}.${config.format || 'json'}`;
-
-      logger.info('Export job completed', { jobId: job.id, recordCount: job.recordCount });
-
-      return job;
+      if (!EXPORT_ENTITIES.has(entityType)) throw new MemberBoundaryError('Unsupported export scope')
+      const grant = await requireExportGrant(organizationId)
+      job.userId = grant.userId
+      job.organizationId = grant.organizationId
+      const data = await withRLSContext({ organizationId: grant.organizationId }, (tx) =>
+        fetchExportRows(tx, entityType, grant.organizationId))
+      formatData(data, format)
+      job.recordCount = data.length
+      job.status = 'delivery_unavailable'
+      job.completedAt = new Date()
+      logger.info('Export prepared without a durable file', {
+        jobId: job.id,
+        entityType,
+        recordCount: job.recordCount,
+      })
+      return job
     } catch (error) {
-      job.status = 'failed';
-      job.error = (error as Error).message;
-      job.completedAt = new Date();
-      
-      logger.error('Export job failed', { jobId: job.id, error });
-      
-      return job;
+      job.status = 'failed'
+      job.error = error instanceof Error ? error.message : 'Forbidden'
+      job.completedAt = new Date()
+      job.recordCount = 0
+      logger.error('Export job failed', { jobId: job.id, errorName: error instanceof Error ? error.name : 'error' })
+      return job
     }
   }
 
-  /**
-   * Fetch data based on entity type
-   */
-  private async fetchData(entityType: string, filters: Record<string, unknown>): Promise<Record<string, unknown>[]> {
-    switch (entityType) {
-      case 'members':
-        return this.queryMembers(filters);
-      case 'claims':
-        return this.queryClaims(filters);
-      case 'documents':
-        return this.queryDocuments(filters);
-      default:
-        return [];
-    }
+  async getExportStatus(_jobId: string): Promise<ExportJob | null> {
+    return null
   }
+}
 
-  /**
-   * Query members from organization_members table
-   */
-  private async queryMembers(filters: Record<string, unknown>) {
-    let query = db.select().from(organizationMembers).$dynamic();
-    if (filters.organizationId) {
-      query = query.where(eq(organizationMembers.organizationId, filters.organizationId as string));
-    }
-    const rows = await query;
-    return rows.map((m) => ({
-      id: m.id,
-      userId: m.userId,
-      name: m.name,
-      email: m.email,
-      role: m.role,
-      status: m.status,
-      department: m.department,
-      membershipNumber: m.membershipNumber,
-      organizationId: m.organizationId,
-      createdAt: m.createdAt?.toISOString() ?? null,
-    }));
+function parseFile(content: string, format: string): Record<string, unknown>[] {
+  if (format === 'json') {
+    const parsed = JSON.parse(content) as unknown
+    if (!Array.isArray(parsed)) throw new MemberBoundaryError('Data must be an array')
+    return parsed as Record<string, unknown>[]
   }
+  if (format === 'csv') return csvToJson(content)
+  throw new MemberBoundaryError(`Unsupported format: ${format}`)
+}
 
-  /**
-   * Query claims from claims table
-   */
-  private async queryClaims(filters: Record<string, unknown>) {
-    let query = db.select().from(claims).$dynamic();
-    if (filters.organizationId) {
-      query = query.where(eq(claims.organizationId, filters.organizationId as string));
-    }
-    const rows = await query;
-    return rows.map((c) => ({
-      id: c.claimId,
-      claimNumber: c.claimNumber,
-      memberId: c.memberId,
-      type: c.claimType,
-      status: c.status,
-      priority: c.priority,
-      incidentDate: c.incidentDate?.toISOString() ?? null,
-      submittedAt: c.createdAt?.toISOString() ?? null,
-    }));
+function csvToJson(csv: string): Record<string, unknown>[] {
+  const lines = csv.split('\n').filter((line) => line.trim())
+  if (lines.length === 0) return []
+  const headers = lines[0].split(',').map((header) => header.trim())
+  const records: Record<string, unknown>[] = []
+  for (let i = 1; i < lines.length; i += 1) {
+    const values = parseCsvLine(lines[i])
+    const record: Record<string, unknown> = {}
+    headers.forEach((header, index) => {
+      record[header] = values[index] || ''
+    })
+    records.push(record)
   }
+  return records
+}
 
-  /**
-   * Query documents from grievance_documents table
-   */
-  private async queryDocuments(filters: Record<string, unknown>) {
-    let query = db.select().from(grievanceDocuments).$dynamic();
-    if (filters.organizationId) {
-      query = query.where(eq(grievanceDocuments.organizationId, filters.organizationId as string));
-    }
-    const rows = await query;
-    return rows.map((d) => ({
-      id: d.id,
-      name: d.documentName,
-      type: d.documentType,
-      filePath: d.filePath,
-      fileSize: d.fileSize,
-      mimeType: d.mimeType,
-      version: d.version,
-      uploadedAt: d.uploadedAt?.toISOString() ?? null,
-    }));
+function parseCsvLine(line: string): string[] {
+  const values: string[] = []
+  let current = ''
+  let inQuotes = false
+  for (const char of line) {
+    if (char === '"') inQuotes = !inQuotes
+    else if (char === ',' && !inQuotes) {
+      values.push(current.trim())
+      current = ''
+    } else current += char
   }
+  values.push(current.trim())
+  return values
+}
 
-  /**
-   * Format data to specified format
-   */
-  private async formatData(data: Record<string, unknown>[], format: string): Promise<string> {
-    switch (format) {
-      case 'json':
-        return JSON.stringify(data, null, 2);
-      case 'csv':
-        return this.jsonToCsv(data as Record<string, unknown>[]);
-      case 'excel':
-        // Excel/xlsx export is not yet implemented. Returning JSON would silently produce
-        // a file with a .xlsx extension that no spreadsheet program can open, so fail fast.
-        logger.warn('Excel export requested but xlsx serialization is not implemented; rejecting export.');
-        throw new Error('Excel (xlsx) export is not yet implemented. Use CSV or JSON instead.');
-      default:
-        return JSON.stringify(data);
-    }
+async function persistClaimImportAudit(
+  tx: RLSTx,
+  input: { actorUserId: string; organizationId: string; count: number },
+): Promise<void> {
+  const metadata = { operation: 'claim_import', outcome: 'success', count: input.count }
+  if (currentStateContextEnabled()) {
+    const written = await appendMandatoryAudit(tx, {
+      organizationId: input.organizationId,
+      action: 'claim_import',
+      resourceType: 'claim',
+      resourceId: null,
+      userId: input.actorUserId,
+      details: { eventType: 'data.create', severity: 'error', outcome: 'success', metadata },
+    })
+    if (!written) throw new Error('Claim import audit was not persisted')
+    return
   }
+  await tx.insert(auditLogs).values({
+    action: 'claim_import',
+    resourceType: 'claim',
+    resourceId: null,
+    userId: input.actorUserId,
+    organizationId: input.organizationId,
+    severity: 'error',
+    outcome: 'success',
+    metadata,
+  })
+}
 
-  /**
-   * Convert JSON to CSV
-   */
-  private jsonToCsv(data: Record<string, unknown>[]): string {
-    if (data.length === 0) return '';
-
-    const headers = Object.keys(data[0]);
-    const csvRows = [headers.join(',')];
-
-    for (const row of data) {
-      const values = headers.map(header => {
-        const value = row[header];
-        if (value === null || value === undefined) return '';
-        const stringValue = String(value);
-        // Escape quotes and wrap in quotes if contains comma
-        if (stringValue.includes(',') || stringValue.includes('"')) {
-          return `"${stringValue.replace(/"/g, '""')}"`;
+async function importClaims(
+  organizationId: string,
+  records: readonly Record<string, unknown>[],
+  validateOnly: boolean,
+): Promise<{ imported: number; errors: string[] }> {
+  const grant = await requireExportGrant(organizationId)
+  if (records.length === 0) return { imported: 0, errors: [] }
+  return withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+    const errors: string[] = []
+    const accepted: Array<typeof claims.$inferInsert> = []
+    for (let index = 0; index < records.length; index += 1) {
+      const record = records[index] ?? {}
+      const rowLabel = `Row ${index + 1}`
+      try {
+        for (const key of Object.keys(record)) {
+          if (!CLAIM_IMPORT_KEYS.has(key)) throw new MemberBoundaryError('Forbidden')
         }
-        return stringValue;
-      });
-      csvRows.push(values.join(','));
+        if (
+          record.organizationId !== undefined &&
+          record.organizationId !== grant.organizationId
+        ) {
+          throw new MemberBoundaryError('Forbidden')
+        }
+        if (typeof record.memberId !== 'string' || record.memberId.trim() === '') {
+          throw new MemberBoundaryError('Forbidden')
+        }
+        const claimType = String(record.claimType ?? record.type ?? 'other')
+        if (!CLAIM_TYPES.has(claimType)) throw new MemberBoundaryError('Forbidden')
+        const priority = String(record.priority ?? 'medium')
+        if (!CLAIM_PRIORITIES.has(priority)) throw new MemberBoundaryError('Forbidden')
+        const member = await tx
+          .select({ id: organizationMembers.id })
+          .from(organizationMembers)
+          .where(and(
+            eq(organizationMembers.id, record.memberId),
+            eq(organizationMembers.organizationId, grant.organizationId),
+            sql`${organizationMembers.deletedAt} IS NULL`,
+          ))
+          .limit(1)
+        if (!member[0]) throw new MemberBoundaryError('Forbidden')
+        const incidentDate = record.incidentDate ? new Date(String(record.incidentDate)) : new Date()
+        if (Number.isNaN(incidentDate.getTime())) throw new MemberBoundaryError('Forbidden')
+        accepted.push({
+          claimNumber: typeof record.claimNumber === 'string' && record.claimNumber.trim() !== ''
+            ? record.claimNumber
+            : `IMP-${Date.now()}-${index + 1}`,
+          organizationId: grant.organizationId,
+          memberId: record.memberId,
+          claimType: claimType as typeof claims.$inferInsert.claimType,
+          status: 'submitted',
+          priority: priority as typeof claims.$inferInsert.priority,
+          incidentDate,
+          location: typeof record.location === 'string' ? record.location : 'Imported',
+          description: typeof record.description === 'string' ? record.description : 'Imported claim',
+          desiredOutcome: typeof record.desiredOutcome === 'string' ? record.desiredOutcome : 'Imported',
+        })
+      } catch (error) {
+        errors.push(`${rowLabel}: ${error instanceof MemberBoundaryError ? error.message : 'Forbidden'}`)
+      }
     }
-
-    return csvRows.join('\n');
-  }
-
-  /**
-   * Get export status
-   */
-  async getExportStatus(jobId: string): Promise<ExportJob | null> {
-    // Export jobs are transient — look up by ID in the exports directory
-    logger.debug('Checking export status', { jobId });
-    // Jobs complete synchronously in this implementation; return null for unknown jobs
-    return null;
-  }
-
-  /**
-   * Generate unique ID
-   */
-  private generateId(): string {
-    return `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
+    if (errors.length > 0 || validateOnly) return { imported: 0, errors }
+    for (const values of accepted) {
+      const [created] = await tx.insert(claims).values(values).returning({ claimId: claims.claimId })
+      if (!created) throw new MemberBoundaryError('Forbidden')
+    }
+    await persistClaimImportAudit(tx, {
+      actorUserId: grant.userId,
+      organizationId: grant.organizationId,
+      count: accepted.length,
+    })
+    return { imported: accepted.length, errors: [] }
+  })
 }
 
 /**
- * Data Import Service
+ * Imports members or claims for the authorized organization.
+ * Member rows are applied by `importOrganizationMembers`. There is no direct
+ * membership update in this module.
  */
 export class DataImportService {
-  /**
-   * Import data from file
-   */
   async import(
-    userId: string,
     entityType: string,
+    organizationId: string,
     fileContent: string,
     format: 'json' | 'csv' | 'excel',
-    options: {
-      updateExisting: boolean;
-      validateOnly: boolean;
-    } = { updateExisting: true, validateOnly: false }
+    options: { updateExisting: boolean; validateOnly: boolean } = {
+      updateExisting: true,
+      validateOnly: false,
+    },
   ): Promise<{ success: boolean; imported: number; errors: string[] }> {
-    const errors: string[] = [];
-
     try {
-      // Parse file
-      const data = await this.parseFile(fileContent, format);
-
-      // Validate data
-      const validation = await this.validateData(entityType, data);
-      if (!validation.valid) {
-        return { success: false, imported: 0, errors: validation.errors };
+      if (!IMPORT_ENTITIES.has(entityType)) {
+        return { success: false, imported: 0, errors: [`Import not supported for entity type: ${entityType}`] }
       }
-
-      if (options.validateOnly) {
-        return { success: true, imported: 0, errors: [] };
+      const data = parseFile(fileContent, format)
+      if (entityType === 'members') {
+        const result = await importOrganizationMembers(organizationId, data, options)
+        return { success: result.errors.length === 0, imported: result.imported, errors: result.errors }
       }
-
-      // Import data
-      let imported = 0;
-      for (const record of data) {
-        try {
-          await this.importRecord(entityType, record, options.updateExisting);
-          imported++;
-        } catch (error) {
-          errors.push(`Failed to import record: ${(error as Error).message}`);
-        }
-      }
-
-      logger.info('Import completed', { entityType, imported, errors: errors.length });
-
-      return {
-        success: errors.length === 0,
-        imported,
-        errors,
-      };
+      const result = await importClaims(organizationId, data, options.validateOnly)
+      return { success: result.errors.length === 0, imported: result.imported, errors: result.errors }
     } catch (error) {
-      logger.error('Import failed', { error });
-      return { success: false, imported: 0, errors: [(error as Error).message] };
-    }
-  }
-
-  /**
-   * Parse file content
-   */
-  private async parseFile(content: string, format: string): Promise<Record<string, unknown>[]> {
-    switch (format) {
-      case 'json':
-        return JSON.parse(content);
-      case 'csv':
-        return this.csvToJson(content);
-      default:
-        throw new Error(`Unsupported format: ${format}`);
-    }
-  }
-
-  /**
-   * Convert CSV to JSON
-   */
-  private csvToJson(csv: string): Record<string, unknown>[] {
-    const lines = csv.split('\n').filter(line => line.trim());
-    if (lines.length === 0) return [];
-
-    const headers = lines[0].split(',').map(h => h.trim());
-    const records: Record<string, unknown>[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const values = this.parseCsvLine(lines[i]);
-      const record: Record<string, unknown> = {};
-      
-      headers.forEach((header, index) => {
-        record[header] = values[index] || '';
-      });
-      
-      records.push(record);
-    }
-
-    return records;
-  }
-
-  /**
-   * Parse CSV line handling quoted values
-   */
-  private parseCsvLine(line: string): string[] {
-    const values: string[] = [];
-    let current = '';
-    let inQuotes = false;
-
-    for (const char of line) {
-      if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
-        values.push(current.trim());
-        current = '';
-      } else {
-        current += char;
+      logger.error('Import failed', { errorName: error instanceof Error ? error.name : 'error' })
+      return {
+        success: false,
+        imported: 0,
+        errors: [error instanceof Error ? error.message : 'Import failed'],
       }
     }
-    values.push(current.trim());
-
-    return values;
-  }
-
-  /**
-   * Validate data
-   */
-  private async validateData(entityType: string, data: Record<string, unknown>[]): Promise<{
-    valid: boolean;
-    errors: string[];
-  }> {
-    const errors: string[] = [];
-
-    if (!Array.isArray(data)) {
-      return { valid: false, errors: ['Data must be an array'] };
-    }
-
-    // Entity-specific validation
-    for (let i = 0; i < data.length; i++) {
-      const record = data[i] as Record<string, unknown>;
-      
-      switch (entityType) {
-        case 'members':
-          if (!record.email) errors.push(`Row ${i + 1}: Email is required`);
-          break;
-        case 'claims':
-          if (!record.memberId) errors.push(`Row ${i + 1}: Member ID is required`);
-          break;
-      }
-    }
-
-    return { valid: errors.length === 0, errors };
-  }
-
-  /**
-   * Import single record
-   */
-  private async importRecord(
-    entityType: string,
-    record: Record<string, unknown>,
-    updateExisting: boolean
-  ): Promise<void> {
-    const data = record as Record<string, unknown>;
-
-    switch (entityType) {
-      case 'members': {
-        if (!data.email || !data.organizationId) {
-          throw new Error('email and organizationId are required for member import');
-        }
-        if (updateExisting && data.id) {
-          await db.update(organizationMembers)
-            .set({
-              name: data.name as string | undefined,
-              email: data.email as string,
-              role: data.role as string | undefined,
-              department: data.department as string | undefined,
-            })
-            .where(eq(organizationMembers.id, data.id as string));
-        } else {
-           
-          await db.insert(organizationMembers).values({
-            userId: (data.userId as string) || '',
-            organizationId: data.organizationId as string,
-            name: (data.name as string) || '',
-            email: data.email as string,
-            role: (data.role as string) || 'member',
-          } as unknown as typeof organizationMembers.$inferInsert);
-        }
-        break;
-      }
-      case 'claims': {
-        if (!data.memberId || !data.organizationId) {
-          throw new Error('memberId and organizationId are required for claim import');
-        }
-        // Claims are append-only for audit compliance — always insert
-         
-        await db.insert(claims).values({
-          claimNumber: (data.claimNumber as string) || `IMP-${Date.now()}`,
-          organizationId: data.organizationId as string,
-          memberId: data.memberId as string,
-          claimType: (data.claimType as string) || (data.type as string) || 'other',
-          status: 'submitted',
-          priority: (data.priority as string) || 'medium',
-          incidentDate: data.incidentDate ? new Date(data.incidentDate as string) : new Date(),
-          location: (data.location as string) || 'Imported',
-          description: (data.description as string) || 'Imported claim',
-          desiredOutcome: (data.desiredOutcome as string) || 'Imported',
-        } as unknown as typeof claims.$inferInsert);
-        break;
-      }
-      default:
-        throw new Error(`Import not supported for entity type: ${entityType}`);
-    }
-
-    logger.debug('Record imported', { entityType, updateExisting });
   }
 }
 
-// Export singletons
-export const dataExportService = new DataExportService();
-export const dataImportService = new DataImportService();
+export const dataExportService = new DataExportService()
+export const dataImportService = new DataImportService()
