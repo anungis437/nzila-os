@@ -306,7 +306,7 @@ Evidence reviewed (values never echoed): the session transcript (4.3 MB) was sca
 3. `union-eyes-acceptance-auth-secret` — never transmitted (tokens are signed locally) but now existed in operator memory; it authorizes staging impersonation of the allow-listed synthetic identities, including `ue-qa-admin-primary` and `ue-qa-platform-lead`. Rotate, and review whether acceptance auth should stay enabled on the shared staging app between acceptance runs.
 No evidence of disclosure or misuse was found, which is why this is not an emergency rotation.
 
-**Status (2026-10-19, later): the rotation decision remains OPEN with COMMAND.** The release-sequence rehearsal used no staging credential and no Azure resource. Any future remote database test must use the verified-TLS helper (`harness-v2/pg-tls.js`); the as-run harnesses stay evidence only.
+**Status (2026-10-19, later): the rotation decision remains OPEN with COMMAND.** **[Superseded as a blocker by section 22.1: the Principal deferred credential rotation; the finding and its severity stand.]** The release-sequence rehearsal used no staging credential and no Azure resource. Any future remote database test must use the verified-TLS helper (`harness-v2/pg-tls.js`); the as-run harnesses stay evidence only.
 
 ### 15.3 Methodology corrections
 * Verified-TLS connection factory: [harness-v2/pg-tls.js](./evidence/ue-runtime-reality-20261018/harness-v2/pg-tls.js) (+ credential-free self-test). It always verifies, passes `servername`, ignores a URL-supplied `sslmode`, refuses `NODE_TLS_REJECT_UNAUTHORIZED=0`, and accepts an extra PEM bundle via `UE_PG_CA_BUNDLE`. Azure serves a dual-signed chain anchored at DigiCert Global Root G2 (present in Node's default store) and Microsoft RSA Root CA 2017 (documented source URLs recorded in the file). The as-run harnesses are preserved unchanged as evidence and **must not be reused**.
@@ -330,7 +330,7 @@ No evidence of disclosure or misuse was found, which is why this is not an emerg
 ### 16.2 Exact approval blockers
 1. Approval of `CHG-2026-0112` (service_owner + change_manager). Separate changes are also needed for (a) revision hygiene, the deploy dispatch and the traffic shift, and (b) the Django/schema prerequisites; none exists.
 2. **Maintainer security disposition** covering the fail-open window that persists until R3, the exceptional-recovery rule (fail-open restore only with a recorded disposition), and the limits of the rehearsal.
-3. COMMAND's credential-containment disposition covering section 15.2 (rotation decision still open).
+3. COMMAND's credential-containment disposition covering section 15.2 (rotation decision still open). **[Superseded as a blocker by section 22.1: the Principal deferred credential rotation; the finding and its severity stand.]**
 4. A **governed read-only identity** for R1 (ledger and catalog check): the repository executors deliberately never acquire credentials themselves, and no such access was used or is claimed here. Without R1 the staging ledger and the 14.3 collision columns are unknown.
 5. A schema-authority change for `content.0004` and `grievances.0005` (guarded SQL for columns that already exist), plus the decisions on effective-due semantics and per-table default strategy.
 6. The restored-clone rehearsal on the exact candidate digest (R0/R5), which this loopback rehearsal does not replace.
@@ -349,6 +349,8 @@ Addendum (candidate qualification, section 19): candidate schema corrections and
 Addendum (final source hardening, section 20): the preflight now detects the permissive-policy blind spot (#948), the Django helper and R1 decide equivalence from the catalog, and the deadline lifecycle keeps one effective due date; 72-check rehearsal v3 at 7090fde8. Staging remains **NO_GO / BLOCKED**.
 
 Addendum (section 21): the verifier's predicate check is now an exact approved-predicate contract with required-table mode (#948 `e962cde63`), the schema work is PR #967, and receipt v4 (76/76 at `db554638a`) extends v3. Staging remains **NO_GO / BLOCKED**.
+
+Addendum (section 22): credential rotation and COMMAND's disposition are deferred by Principal decision and are not blockers; #967's V2 canonical fresh bootstrap is unqualified (the Django-first path is qualified); the founder approval matrix and integration order are in sections 22.4-22.5. Staging remains **NO_GO / BLOCKED**.
 
 ## 18. Release-sequence rehearsal (2026-10-19)
 
@@ -452,7 +454,7 @@ R0 approvals and dispositions → **R1** read-only catalog/ledger check (STOP on
 3. **PR for the schema-compat branch** (`fix/ue-phase3a-schema-compat`, stacked on #948): not opened, to avoid expanding the queue without instruction. The candidate cannot be deployed until it is reviewed and merged.
 4. **Convergence table:** `deadline_reassignment_convergence` still needs its own security-scope migration (RLS parity, system-only grants); root `0049` must not be applied as written. The worker cannot run on staging without it.
 5. **Deployable digest** rebuilt from merged `main`, and the **restored-clone rehearsal on that digest** (needs a trusted identity and COMMAND's containment disposition).
-6. **Maintainer security disposition** (fail-open window until R3; recovery policy; preflight blind spot) and **COMMAND's credential-containment disposition** — the rotation decision remains **OPEN**; none was recorded by COMMAND.
+6. **Maintainer security disposition** (fail-open window until R3; recovery policy; preflight blind spot) and **COMMAND's credential-containment disposition** — the rotation decision remains **OPEN**; none was recorded by COMMAND. **[Superseded as a blocker by section 22.1: the Principal deferred credential rotation; the finding and its severity stand.]**
 7. Tranche-1 default decisions, scheduled invocation with a safe sink, telemetry, synthetic authenticated identities (sections 16.1 and 3).
 
 **Staging recommendation: `NO_GO` / `BLOCKED`.** `UE_SAAS_OPERATIONAL_READINESS = NO_GO`; `UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL` (deployed state unchanged).
@@ -501,7 +503,7 @@ R1 (`release-sequence-rehearsal-v3/helpers/r1-readonly-check.js`) previously use
 
 1. **Principal authorization to merge #948 and #949** (both reported approved; the change record is still `PROPOSED`/`PENDING` and records no approver, because only the named approvers may set those fields) and a separately authorized, narrowly scoped PR for the schema-compat branch, which is a dependency of the staging candidate and needs its own required CI (it has none without a PR).
 2. **R1 on the real staging ledger** through a trusted identity that satisfies section 20.4.
-3. **COMMAND's credential-containment disposition** (the rotation decision is still open) and the maintainer security disposition.
+3. **COMMAND's credential-containment disposition** (the rotation decision is still open) **[Superseded as a blocker by section 22.1: the Principal deferred credential rotation; the finding and its severity stand.]** The maintainer security disposition remains required.
 4. **`deadline_reassignment_convergence`** still needs a secure canonical migration (RLS parity, system-only grants); the worker cannot run on staging without it.
 5. **Deployable digests** rebuilt from merged `main`, then the restored-clone rehearsal on that digest, then the governed staging changes (revision isolation, deploy, traffic) with real approvals.
 6. Dependabot PRs #950–#964 are outside this lane and are not touched.
@@ -541,4 +543,75 @@ Branch `fix/ue-phase3a-schema-compat` (head `db554638a`) is one draft PR, **stac
 * **Receipt binding.** Receipt v4 ran at `db554638a`. #967's head `f1ec341ff` differs from it by that single plan JSON file only (verified by diff); the rehearsal does not read the plan, so v4's claims apply to the head. #967 is back on its stacked base (#948's branch) so its review diff is only its own increment; its required CI result above was obtained with base `main`.
 ### 21.4 Remaining blockers
 
-Principal authorization to merge #948, #949 and then #967 (after its own required CI and retarget to `main`); R1 on the real staging ledger through a trusted read-only identity; COMMAND's credential-containment disposition and the maintainer security disposition; real approvals on `CHG-2026-0112` (still `PROPOSED`/`PENDING`, no approver recorded); the canonical `deadline_reassignment_convergence` migration with secure RLS and grants; deployable images rebuilt from merged `main` and a restored-clone qualification on them; Azure revision isolation and deployment rehearsal; real staging tenant-isolation negative tests; identity, worker, audit and observability acceptance. Source integration is **not** permission to deploy.
+Principal authorization to merge #948, #949 and then #967 (after its own required CI and retarget to `main`); R1 on the real staging ledger through a trusted read-only identity; COMMAND's credential-containment disposition (no longer a blocker, section 22.1) and the maintainer security disposition; real approvals on `CHG-2026-0112` (still `PROPOSED`/`PENDING`, no approver recorded); the canonical `deadline_reassignment_convergence` migration with secure RLS and grants; deployable images rebuilt from merged `main` and a restored-clone qualification on them; Azure revision isolation and deployment rehearsal; real staging tenant-isolation negative tests; identity, worker, audit and observability acceptance. Source integration is **not** permission to deploy.
+
+## 22. Principal decisions and final integration preparation (2026-10-19, evening)
+
+Additional to sections 0-21; nothing recorded earlier is rewritten. **`UE_SAAS_OPERATIONAL_READINESS = NO_GO`, `UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL` (deployed state unchanged), staging `NO_GO / BLOCKED`.** No staging resource was mutated, no secret was retrieved, rotated, reproduced or revealed, no merge was made, and no founder approval or `security-design-reviewed` label was recorded on the Principal's behalf.
+
+### 22.1 Credential hygiene is deferred (Principal decision), not a blocker
+
+* **Decision (recorded from the Principal's instruction of 2026-10-19; it is not a change-record approval).** COMMAND-managed credential rotation, and COMMAND's containment disposition, are **deferred until after functional-readiness work**. They no longer block source integration or otherwise authorized staging validation. `CHG-2026-0112` prerequisite (6) now says so; sections 15.2, 16.2, 19.8, 20.6 and 21.4 carry pointers to this section.
+* **Preserved unchanged: the findings and their severity.** DEV-1 (secret values retrieved although the brief said not to: staging runtime, system and administrator database connection secrets and the acceptance-auth signing secret; **77** successful `listSecrets` operations), DEV-2 (TLS verification disabled in the as-run harnesses), DEV-3 (a restore clone held a copy of staging records), DEV-4 and DEV-5 stand as written in section 15. No disclosure was found in the inspected artifacts; that statement is also unchanged and is not proof of non-exposure.
+* **Deferred Principal-owned remediation record (open).**
+
+| Item | Remediation (unchanged from section 15.2) | Owner | Trigger |
+|---|---|---|---|
+| `union_eyes_runtime` password (also `db-password`, the Django sidecar) | rotate both together and restart the revision | Principal (executed through COMMAND) | after functional readiness, or immediately on an active-compromise finding |
+| `union_eyes_system` and `nzilaadmin` passwords | fold into the same batch | same | same |
+| `union-eyes-acceptance-auth-secret` | rotate; decide whether acceptance auth stays enabled on shared staging between acceptance runs | same | same; **note:** runtime validation in section 22.5 uses acceptance auth, so it stays exposed until this item is done |
+| TLS | future remote database tests use the verified-TLS helper only (`harness-v2/pg-tls.js`); the as-run harnesses stay evidence only and must not be reused | every executing lane | always |
+| Pre-existing firewall rules (`phase-g-fix-120854`, `phaseg-fix2`, `codex-auth-bootstrap-20260915`) | review | COMMAND | deferred with the batch |
+
+* **What still holds regardless of the deferral.** (a) An **independently verified active compromise** affecting a proposed operation must be controlled **before** that operation. (b) Nobody retrieves, rotates, reproduces or reveals a secret under this workstream. (c) Any R1 inspection identity is separately authorized, least-privileged, time-bounded and read-only, over verified TLS. (d) Real change approvals and real runtime tenant-isolation tests stay required; deferral lowers no gate other than the COMMAND receipts.
+
+### 22.2 What is a genuine blocker, and what is deferred hygiene
+
+| Genuine blockers (unchanged gates) | Deferred (Principal-owned) |
+|---|---|
+| exact-HEAD founder security decision on #948; authorization to merge each PR | rotation of the credentials in 22.1 |
+| real approvals on `CHG-2026-0112` (service_owner, change_manager; still `PROPOSED`/`PENDING`, none recorded) and separate changes for revision isolation, deploy, traffic and the Django/schema step | COMMAND's containment disposition receipt |
+| maintainer security disposition (fail-open window until closure; recovery policy; exact-text RLS contract) | review of the three pre-existing firewall rules |
+| trusted read-only R1 evidence from the real staging ledger and catalog | decision on acceptance auth between runs |
+| canonical, secure `deadline_reassignment_convergence` migration (RLS parity, system-only grants) | |
+| images rebuilt from merged `main`; restored-clone qualification on them; Azure revision/label isolation; real staging tenant-isolation, identity, worker, audit and observability acceptance | |
+| V2 canonical fresh bootstrap regeneration (22.3), only for any path that uses it | |
+
+### 22.3 #967: what is qualified and what is not
+
+* **Django-first migration path: locally qualified.** On the exact head: Django 28/28 (10 PostgreSQL-backed), `manage.py check` clean, fresh Django-first `migrate` and `migrate --check` clean, the pending `makemigrations` diff identical to `main` (167 operations, 0 differences), 201 Union Eyes test files green, the lineage-restored shape migrates 79 -> 88 with no fakes and every drift fails closed (receipt v4), required CI green. This is the path staging uses.
+* **V2 canonical fresh bootstrap: UNQUALIFIED.** `docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json` pins source digests and carries derived DDL. On `main` its entries for `auth_core/models.py` (`8d4adfdef14a`), `grievances/models.py` (`9a53130f3c5e`) and `reminder-worker.ts` (`5fff99988b17`) equal the files exactly (verified by blob). #967 changes all three (`e7923d97728e`, `c386b4ea8bf9`, `c73109fc3cd3`). Only the `reminder-worker.ts` digest was re-pinned (see below); the model digests and the derived DDL are **stale**, so the plan and the artifacts derived from it **do not describe #967's schema** (no `profiles` database defaults, no `grievance_deadlines.due_date/status` or lifecycle CHECK guards). Do not treat them as current and do not use a V2 fresh bootstrap for a candidate until they are regenerated and tested.
+* **Owner and action.** There is no CODEOWNERS entry for this area; the Principal designates the Union Eyes schema-authority / bootstrap-v2 maintainer. The action needs the hash-locked Linux CPython 3.11 wheelhouse: `UE_V2_WHEELHOUSE=<dir> pnpm exec tsx apps/union-eyes/scripts/bootstrap-v2/plan.ts` (then `--self-test --check`), regenerate the derived artifacts and run `scripts/bootstrap-v2`. Unrelated governance artifacts are deliberately not regenerated (two other pins, `pnpm-lock.yaml` and `packages/platform-auth/src/index.ts`, already mismatch on `main`, verified by blob; they are not caused by #967).
+* **One-digest re-pin verified again on the exact head `60d2d5c64`.** The plan JSON differs from `main` by one line; the new value equals the sha256 of the committed `reminder-worker.ts` blob (`c73109fc...`) and the digest CI reported; the old value equals `main`'s blob; the multiset of mutation-bearing statements (`insert into`, `update ... set`, `delete from`, ORM mutators, `withSystemContext`) is identical between `main` and the head (9 entries), so the SYSTEM-mutation census is unchanged. Only that digest was touched.
+
+### 22.4 Founder approval matrix (nothing below is pre-approved or self-recorded)
+
+| PR | Head | Decision requested from the Principal | Scope of that decision | Not covered |
+|---|---|---|---|---|
+| #948 RLS correction | `bb526dca5` (see the PR for the final head) | **Founder security decision**: the exact-text predicate contract (it fails closed on equivalent rewrites and is not semantic verification), the staging exposure that persists until closure (deployed isolation stays FAIL), secure recovery (forward fix, approved PITR, idempotent replay; no fail-open restore), and that a deployed database whose deadline tables are not closed now fails the deploy preflight. The Principal applies `security-design-reviewed` if approving. | source integration of migration 0015, the verifier, the deploy-preflight flag and `CHG-2026-0112` as PROPOSED | any staging mutation (needs the real CHG approvals) |
+| #949 evidence | see the PR | **Evidence integrity and source integration**: v1-v4 receipts unchanged and bound to their SHAs; manifest verified on committed blobs; dossier sections 19-22. Docs only. | merging the record | it is not staging proof |
+| #966 safe worktree tooling | `f8b6809bc` | **Host-safety tooling**: junction-aware removal; the unaccounted loss of ignored/untracked material in the 76 affected `packages/*` directories is **retained** as a known, unresolved host loss (shadow-copy recovery needs elevation). Independent of the Phase 3A PRs. | merging the tool and procedure | recovery of the lost local material |
+| #967 schema and deadline lifecycle | `60d2d5c64` (stacked on #948) | **Schema/deadline source acceptance** including the **V2 fresh-bootstrap limitation** (22.3) and the one-digest re-pin; Django migrations commit individually and are not reversible by a traffic flip (recovery is the approved restore). | merging the source after #948 | V2 canonical bootstrap; any staging deploy |
+
+### 22.5 Safe integration order and exact dependencies
+
+1. **#948** first. Pinned to its exact head; mark ready only when authorized.
+2. **#949** immediately after: `CHG-2026-0112` and the dossier point at evidence and the R1 tool that exist only once #949 is on `main` (no CI gate enforces this; the record would otherwise reference absent paths). #949 touches only `docs/**` and does not conflict with #948.
+3. **#966** at any point; independent of 1, 2 and 4.
+4. **#967** after #948: retarget it to `main`, confirm its own diff (the 24 files plus the one re-pin, 25 against #948's branch; its overlap with #948 is only the four generated inventory files), confirm current required CI on that exact head (a stacked base runs only 4 trivial checks, which is not a pass), regenerate the inventory files only if they conflict, then merge. **Keep the #948 branch until #967 is retargeted and verified.** If the same merge procedure as #965 is used it is a merge commit pinned to the approved head (`gh pr merge <n> --merge --match-head-commit <sha>`), which requires the PR to be marked ready first.
+5. After each merge: record `main`'s SHA; do not call the repository clean while other PRs remain open (Dependabot #950-#964 and others are outside this lane). Remove temporary worktrees only with `tooling/scripts/safe-remove-worktree.mjs` (#966, or its branch copy until merged); never `git worktree remove --force` on a worktree that may hold a dependency junction.
+
+### 22.6 First executable steps toward functional readiness (after the authorized merges)
+
+No step below mutates staging unless it says so; every mutating step needs its approved change record and a recovery control first.
+
+1. **Rebuild** frontend and backend images from the merged `main` SHA through the governed build workflow (`ue-build-push-proof.yml` shape or the deploy workflow's own build); record immutable digests and pin them.
+2. **R1 identity** (mutating by nature, so it needs authorization): a dedicated, least-privileged, time-bounded read-only database identity: `CONNECT`; `USAGE` on `public` and `drizzle`; `SELECT` on `django_migrations` and `drizzle.__drizzle_migrations`; column `SELECT` on `documents.disciplinary_sensitive`, `documents.medical_sensitive`, `documents.member_pii`; able to see every row (superuser, `BYPASSRLS`, or owner of a table without FORCE RLS), or R1 STOPs by design; a short `VALID UNTIL`; a single-IP temporary firewall rule if one is needed (removed afterwards and verified from Azure resource state). Never pull its connection string through this agent host: the trusted runner injects `R1_DATABASE_URL`, with verified TLS (`UE_PG_CA_BUNDLE` if needed).
+3. **Run R1** read-only on the trusted runner: `node docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/release-sequence-rehearsal-v3/helpers/r1-readonly-check.js --repo <merged checkout> --out r1-result.json`. Expected `PROCEED` (exit 0). Any `STOP` (exit 2) halts the sequence and reconciles the state; never baseline the ledger blindly.
+4. **Re-read the Azure inventory** (revisions, traffic, labels, FQDNs; read-only) immediately before isolation; the 2026-10-19 count (130 revisions, 30 active, labels `ff989637` and `wave1`) is a snapshot, not a plan input.
+5. **`deadline_reassignment_convergence`**: author the canonical scoped migration (next journal index) with RLS parity (the approved organization-equality policies through the 0010 helper), `FORCE`, and system-only grants; add the table to the verifier's pinned contract in the same PR so the preflight covers it; root `0049` must not be applied as written. This is its own security-scoped PR.
+6. **Restored-clone qualification** on the rebuilt digests, with the authorized restore: R1 against the clone, the candidate Django migrations, the governed executor through `0015` (and the new convergence migration), preflight with `--require-deadline-engine-tables`, the live isolation probe, then delete the clone and its firewall rules and verify deletion from Azure state.
+7. **Approvals and sequence:** `CHG-2026-0112` approved by the real approvers; separate approved changes for revision isolation/deploy/traffic and for the Django/schema step; then R1 -> isolate revisions -> closure -> preflight and probe -> candidate migrations -> candidate revision at 0% -> label smokes -> staged traffic.
+8. **Runtime acceptance** at the exact candidate: authenticated personas and the 47-entry route matrix, member and employment workflows (now including #965), the worker with a non-delivering sink, audit persistence, the telemetry chain (observability is not deployed yet), and a recovery drill. These use acceptance auth (see the table in 22.1).
+
+`UE_SAAS_OPERATIONAL_READINESS` and the deployed `UE_RUNTIME_RLS_TENANT_ISOLATION` change only when this runtime evidence exists.
