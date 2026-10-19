@@ -1,0 +1,56 @@
+[
+ {
+  "id": "D.0",
+  "name": "Worker runs to completion against the live grievance_deadlines schema",
+  "pass": true,
+  "detail": "no errors"
+ },
+ {
+  "id": "D.1",
+  "name": "Concurrent workers (3) claim each due reminder exactly once",
+  "pass": true,
+  "detail": "claimedSum=12/12 perWorker=0/0/12 attempt_count>1: 0"
+ },
+ {
+  "id": "D.2",
+  "name": "One immutable execution row per claimed attempt (no duplicate delivery records)",
+  "pass": true,
+  "detail": "12 reminders with executions; max per reminder=1"
+ },
+ {
+  "id": "D.3",
+  "name": "Failed delivery is recorded as failure/retry (not silent success) with email disabled",
+  "pass": true,
+  "detail": "states={\"dead_letter\":12} totals sent=0 transient=0 permanent=12"
+ },
+ {
+  "id": "D.4",
+  "name": "Expired lease from an interrupted worker is recovered and the reminder is re-processed",
+  "pass": true,
+  "detail": "leasesRecovered=1 status=dead_letter owner=null attempts=2"
+ },
+ {
+  "id": "D.5",
+  "name": "Unexpired lease held by another worker is not stolen",
+  "pass": true,
+  "detail": "owner=live-worker status=claimed attempts=1"
+ },
+ {
+  "id": "D.6",
+  "name": "Failed deliveries reach a bounded terminal state (dead_letter) and never exceed max_attempts",
+  "pass": true,
+  "detail": "states={\"dead_letter\":13,\"claimed\":1} max attempt_count=2 max_attempts=5"
+ },
+ {
+  "id": "D.8",
+  "name": "Re-running the worker over terminal reminders does not create duplicate execution records",
+  "pass": true,
+  "detail": "executions before=13 after=13"
+ },
+ {
+  "id": "D.7",
+  "name": "Empty queue run reports zero work distinctly from failure",
+  "pass": true,
+  "detail": "{\"examined\":0,\"claimed\":0}"
+ }
+]
