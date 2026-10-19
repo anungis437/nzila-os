@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({ queue: [] as unknown[] }));
 
 function makeChain() {
   const chain: Record<string, unknown> = {};
-  for (const m of ['from', 'where', 'orderBy', 'limit', 'values', 'set', 'returning']) {
+  for (const m of ['from', 'where', 'orderBy', 'limit', 'for', 'values', 'set', 'returning']) {
     chain[m] = () => chain;
   }
   (chain as { then: unknown }).then = (resolve: (v: unknown) => unknown, reject: (e: unknown) => unknown) => {
@@ -22,6 +22,7 @@ function makeChain() {
 }
 function makeTx() {
   return {
+    execute: async () => [],
     select: () => makeChain(),
     insert: () => makeChain(),
     update: () => makeChain(),
@@ -29,9 +30,34 @@ function makeTx() {
   };
 }
 
-vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (op: (tx: unknown) => Promise<unknown>) => op(makeTx()),
+vi.mock('server-only', () => ({}));
+
+vi.mock('@/lib/member-integrity/authorize-member-access', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/member-integrity/authorize-member-access')>(
+    '@/lib/member-integrity/authorize-member-access',
+  );
+  return { ...actual, assertRegisteredMemberGrant: () => undefined };
+});
+
+vi.mock('@/lib/member-integrity/durable-member-audit', () => ({
+  persistDurableMemberAudit: async () => undefined,
 }));
+
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (ctxOrOp: unknown, maybeOp?: unknown) => {
+    const op = typeof ctxOrOp === 'function' ? ctxOrOp : maybeOp;
+    return (op as (tx: unknown) => Promise<unknown>)(makeTx());
+  },
+}));
+
+const adminGrant = {
+  ok: true as const,
+  userId: 'user-admin',
+  organizationId: 'org',
+  capability: 'administer' as const,
+};
+const removeGrant = { ...adminGrant, capability: 'remove_member' as const };
+const roleGrant = { ...adminGrant, capability: 'assign_role' as const };
 
 import * as q from '../organization-members-queries';
 
@@ -66,15 +92,16 @@ describe('organization-members-queries', () => {
 
   it('createMember returns created row / throws when none', async () => {
     push([{ id: 'm1' }]);
-    expect(await q.createMember({ organizationId: 'org', userId: 'u1' } as never)).toEqual({ id: 'm1' });
+    expect(await q.createMember({ organizationId: 'org', userId: 'u1' } as never, adminGrant)).toEqual({ id: 'm1' });
+    await expect(q.createMember({} as never, adminGrant)).rejects.toThrow('Forbidden');
     push([]);
-    await expect(q.createMember({} as never)).rejects.toThrow('Failed to create member');
+    await expect(q.createMember({ organizationId: 'org', userId: 'u1' } as never, adminGrant)).rejects.toThrow('Failed to create member');
   });
 
   it('addOrganizationMember returns existing when present', async () => {
     push([{ id: 'existing', userId: 'u1' }]); // getMemberByUserId lookup
     const r = await q.addOrganizationMember({
-      organizationId: 'org', userId: 'u1', role: 'member', name: 'A', email: 'a@b.c',
+      organizationId: 'org', userId: 'u1', role: 'member', name: 'A', email: 'a@b.c', grant: adminGrant,
     });
     expect(r).toEqual({ id: 'existing', userId: 'u1' });
   });
@@ -84,20 +111,25 @@ describe('organization-members-queries', () => {
     push([{ id: 'new1' }]); // createMember returning
     const r = await q.addOrganizationMember({
       organizationId: 'org', userId: 'u1', role: 'admin', isPrimary: true, name: 'A', email: 'a@b.c', phone: '555',
+      grant: roleGrant,
     });
     expect(r).toEqual({ id: 'new1' });
   });
 
   it('updateMember returns updated row', async () => {
     push([{ id: 'm1', name: 'New' }]);
-    expect(await q.updateMember('m1', { name: 'New' } as never)).toEqual({ id: 'm1', name: 'New' });
+    expect(await q.updateMember('org', 'm1', { name: 'New' } as never, adminGrant)).toEqual({ id: 'm1', name: 'New' });
   });
 
   it('deleteMember returns true/false', async () => {
-    push([{ id: 'm1' }]);
-    expect(await q.deleteMember('m1')).toBe(true);
     push([]);
-    expect(await q.deleteMember('m9')).toBe(false);
+    push([{ id: 'm1', userId: 'member-user', role: 'member', status: 'active' }]);
+    push([{ id: 'm1', deletedAt: new Date() }]);
+    expect(await q.deleteMember('org', 'm1', removeGrant)).toBe(true);
+    push([]);
+    push([]);
+    expect(await q.deleteMember('org', 'm9', removeGrant)).toBe(false);
+    await expect(q.deleteMember('org', 'm1', adminGrant)).rejects.toThrow('Forbidden');
   });
 
   it('getMemberCount + getActiveMemberCount return counts (with fallback)', async () => {

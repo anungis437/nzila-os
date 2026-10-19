@@ -1,26 +1,43 @@
 /**
  * Member Service - Organization Member Operations
- * 
- * Provides comprehensive member management including:
- * - Member CRUD operations
- * - Member search and filtering
- * - Bulk operations
- * - Engagement tracking
- * - Membership card management
- * - Member notes and documents
+ *
+ * Every administration call resolves `auth()` through `authorizeMemberAccess`
+ * and runs inside `withRLSContext({ organizationId })` for that organization.
+ * Role assignment uses the narrower role-management grant. Soft deletion and
+ * duplicate suppression use the removal grant (`Permission.DELETE_MEMBER`).
+ * Deactivating an active administrator uses that same removal grant.
+ * Hard deletion is refused. Generic updates cannot move organization
+ * ownership, identity, role, or per-capita exemption fields.
+ *
+ * This module does not prove that a deployed database enforces row-level security.
  */
 
-import { db } from "@/db/db";
-import { 
-  organizationMembers
-} from "@/db/schema";
+import { organizationMembers } from "@/db/schema";
 import { eq, and, or, gte, lte, desc, asc, like, sql, inArray, count } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
-
-// ============================================================================
-// Types
-// ============================================================================
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import {
+  assertTenantAssignableRole,
+  authorizeMemberAccess,
+  authorizeOwnMembership,
+  MemberBoundaryError,
+  type MemberAccessGrant,
+  type MemberCapability,
+} from "@/lib/member-integrity/authorize-member-access";
+import { persistDurableMemberAudit } from "@/lib/member-integrity/durable-member-audit";
+import {
+  assertActiveAdministratorsRemain,
+  assertMemberRemovalPolicy,
+  assertMemberStatusTransition,
+  deactivatesEffectiveAdministrator,
+  FINANCIAL_EXEMPTION_FIELDS,
+  lockAdministratorRoster,
+  type AdministratorProjection,
+  type AdministratorRosterRow,
+  MEMBER_RECORD_STATUSES,
+  rejectClientFinancialExemption,
+} from "@/lib/member-integrity/member-write-policy";
 
 export type NewMember = typeof organizationMembers.$inferInsert;
 export type Member = typeof organizationMembers.$inferSelect;
@@ -53,323 +70,411 @@ export interface BulkOperationResult {
   errors?: Array<{ row: number; error: string }>;
 }
 
-// ============================================================================
-// CRUD Operations
-// ============================================================================
+export { MemberBoundaryError };
 
-/**
- * Get member by ID
- */
-export async function getMemberById(id: string): Promise<Member | null> {
-  try {
-    const member = await db.query.organizationMembers.findFirst({
-      where: eq(organizationMembers.id, id),
-    });
+const PROTECTED_UPDATE_FIELDS = [
+  "id",
+  "userId",
+  "organizationId",
+  "role",
+  "createdAt",
+  "deletedAt",
+  "joinedAt",
+  ...FINANCIAL_EXEMPTION_FIELDS,
+] as const;
 
-    return member || null;
-  } catch (error) {
-    logger.error("Error fetching member by ID", { error, id });
-    throw new Error("Failed to fetch member");
+/** Profile fields copied during duplicate suppression. Exemption, approval, role, and status stay put. */
+const MERGE_FIELDS = [
+  "name",
+  "email",
+  "phone",
+  "department",
+  "location",
+  "position",
+  "hireDate",
+  "membershipNumber",
+  "seniority",
+  "unionJoinDate",
+  "metadata",
+  "memberCategory",
+  "isPrimary",
+] as const;
+
+function rethrow(error: unknown, fallback: string): never {
+  if (error instanceof MemberBoundaryError) throw error;
+  logger.error(fallback, { errorName: error instanceof Error ? error.name : "error" });
+  throw new Error(fallback);
+}
+
+function assertOrganization(organizationId: string): string {
+  if (typeof organizationId !== "string" || organizationId.trim() === "") {
+    throw new MemberBoundaryError("Forbidden");
+  }
+  return organizationId.trim();
+}
+
+function rejectProtectedUpdate(data: object): void {
+  const record = data as Record<string, unknown>;
+  for (const field of PROTECTED_UPDATE_FIELDS) {
+    if (record[field] !== undefined) throw new MemberBoundaryError("Forbidden");
   }
 }
 
-/**
- * Get member by user ID and organization
- */
-export async function getMemberByUserId(
-  userId: string,
-  organizationId: string
-): Promise<Member | null> {
-  try {
-    const member = await db.query.organizationMembers.findFirst({
-      where: and(
-        eq(organizationMembers.userId, userId),
-        eq(organizationMembers.organizationId, organizationId)
-      ),
-    });
+function membershipInsert(data: NewMember, organizationId: string, role: string): NewMember {
+  const source = { ...(data as Record<string, unknown>) };
+  delete source.id;
+  delete source.deletedAt;
+  delete source.createdAt;
+  delete source.organizationId;
+  delete source.role;
+  for (const field of FINANCIAL_EXEMPTION_FIELDS) delete source[field];
+  return { ...source, organizationId, role } as NewMember;
+}
 
-    return member || null;
+async function requireGrant(organizationId: string, capability: MemberCapability): Promise<MemberAccessGrant> {
+  const access = await authorizeMemberAccess(assertOrganization(organizationId), capability);
+  if (!access.ok) throw new MemberBoundaryError(access.message);
+  return access;
+}
+
+async function requireAdministratorDeactivationAuthority(
+  organizationId: string,
+  roster: readonly AdministratorRosterRow[],
+  changes: readonly AdministratorProjection[],
+): Promise<void> {
+  if (!deactivatesEffectiveAdministrator(roster, changes)) return;
+  await requireGrant(organizationId, "remove_member");
+}
+
+function activeInOrganization(organizationId: string, memberId?: string): SQL {
+  const conditions: SQL[] = [
+    eq(organizationMembers.organizationId, organizationId),
+    sql`${organizationMembers.deletedAt} IS NULL`,
+  ];
+  if (memberId) conditions.push(eq(organizationMembers.id, memberId));
+  return and(...conditions)!;
+}
+
+export async function readOwnMemberStatus(userId: string, organizationId: string): Promise<boolean> {
+  const access = await authorizeOwnMembership(userId, organizationId);
+  if (!access.ok) return false;
+  try {
+    return await withRLSContext({ organizationId: access.organizationId }, async (tx) => {
+      const member = await tx.query.organizationMembers.findFirst({
+        where: and(
+          eq(organizationMembers.userId, access.userId),
+          eq(organizationMembers.organizationId, access.organizationId),
+          sql`${organizationMembers.deletedAt} IS NULL`,
+        ),
+      });
+      return member?.status === "active";
+    });
   } catch (error) {
-    logger.error("Error fetching member by user ID", { error, userId, organizationId });
-    throw new Error("Failed to fetch member by user ID");
+    logger.warn("own member status check failed closed", {
+      errorName: error instanceof Error ? error.name : "error",
+    });
+    return false;
   }
 }
 
-/**
- * Get member by membership number
- */
+export async function getMemberById(organizationId: string, id: string): Promise<Member | null> {
+  try {
+    const grant = await requireGrant(organizationId, "administer");
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const member = await tx.query.organizationMembers.findFirst({
+        where: activeInOrganization(grant.organizationId, id),
+      });
+      return member ?? null;
+    });
+  } catch (error) {
+    rethrow(error, "Failed to fetch member");
+  }
+}
+
+export async function getMemberByUserId(userId: string, organizationId: string): Promise<Member | null> {
+  try {
+    const grant = await requireGrant(organizationId, "administer");
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const member = await tx.query.organizationMembers.findFirst({
+        where: and(
+          eq(organizationMembers.userId, userId),
+          activeInOrganization(grant.organizationId),
+        ),
+      });
+      return member ?? null;
+    });
+  } catch (error) {
+    rethrow(error, "Failed to fetch member by user ID");
+  }
+}
+
 export async function getMemberByMembershipNumber(
   membershipNumber: string,
-  organizationId: string
+  organizationId: string,
 ): Promise<Member | null> {
   try {
-    const member = await db.query.organizationMembers.findFirst({
-      where: and(
-        eq(organizationMembers.membershipNumber, membershipNumber),
-        eq(organizationMembers.organizationId, organizationId)
-      ),
+    const grant = await requireGrant(organizationId, "administer");
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const member = await tx.query.organizationMembers.findFirst({
+        where: and(
+          eq(organizationMembers.membershipNumber, membershipNumber),
+          activeInOrganization(grant.organizationId),
+        ),
+      });
+      return member ?? null;
     });
-
-    return member || null;
   } catch (error) {
-    logger.error("Error fetching member by membership number", {
-      error,
-      membershipNumber,
-      organizationId,
-    });
-    throw new Error("Failed to fetch member by membership number");
+    rethrow(error, "Failed to fetch member by membership number");
   }
 }
 
-/**
- * List members with filtering and pagination
- */
 export async function listMembers(
+  organizationId: string,
   filters: MemberFilters = {},
-  pagination: { page?: number; limit?: number; sortBy?: string; sortOrder?: "asc" | "desc" } = {}
+  pagination: { page?: number; limit?: number; sortBy?: string; sortOrder?: "asc" | "desc" } = {},
 ): Promise<{ members: Member[]; total: number; page: number; limit: number }> {
   try {
-    const {
-      page = 1,
-      limit = 50,
-      sortBy = "name",
-      sortOrder = "asc"
-    } = pagination;
-
-    const offset = (page - 1) * limit;
-
-    // Build WHERE conditions
-    const conditions: SQL[] = [];
-
-    if (filters.organizationId) {
-      conditions.push(eq(organizationMembers.organizationId, filters.organizationId));
+    const grant = await requireGrant(organizationId, "administer");
+    if (filters.organizationId && filters.organizationId !== grant.organizationId) {
+      throw new MemberBoundaryError("Forbidden");
     }
-
+    const { page = 1, limit = 50, sortBy = "name", sortOrder = "asc" } = pagination;
+    const offset = (page - 1) * limit;
+    const conditions: SQL[] = [activeInOrganization(grant.organizationId)];
     if (filters.status && filters.status.length > 0) {
       conditions.push(inArray(organizationMembers.status, filters.status as MemberStatusValue[]));
     }
-
     if (filters.role && filters.role.length > 0) {
       conditions.push(inArray(organizationMembers.role, filters.role as MemberRoleValue[]));
     }
-
-    if (filters.department) {
-      conditions.push(like(organizationMembers.department, `%${filters.department}%`));
-    }
-
+    if (filters.department) conditions.push(like(organizationMembers.department, `%${filters.department}%`));
     if (filters.searchQuery) {
       const searchTerm = `%${filters.searchQuery}%`;
-      conditions.push(
-        or(
-          like(organizationMembers.name, searchTerm),
-          like(organizationMembers.email, searchTerm),
-          like(organizationMembers.membershipNumber, searchTerm)
-        )!
-      );
+      conditions.push(or(
+        like(organizationMembers.name, searchTerm),
+        like(organizationMembers.email, searchTerm),
+        like(organizationMembers.membershipNumber, searchTerm),
+      )!);
     }
-
-    if (filters.hireDateFrom) {
-      conditions.push(gte(organizationMembers.hireDate, filters.hireDateFrom));
-    }
-
-    if (filters.hireDateTo) {
-      conditions.push(lte(organizationMembers.hireDate, filters.hireDateTo));
-    }
-
-    if (filters.unionJoinDateFrom) {
-      conditions.push(gte(organizationMembers.unionJoinDate, filters.unionJoinDateFrom));
-    }
-
-    if (filters.unionJoinDateTo) {
-      conditions.push(lte(organizationMembers.unionJoinDate, filters.unionJoinDateTo));
-    }
-
-    // Exclude soft-deleted records
-    conditions.push(sql`${organizationMembers.deletedAt} IS NULL`);
-
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-
-    // Get total count
-    const totalResult = await db
-      .select({ count: count() })
-      .from(organizationMembers)
-      .where(whereClause);
-
-    const total = totalResult[0]?.count || 0;
-
-    // Determine sort column
-    const sortColumn = sortBy === "name" 
+    if (filters.hireDateFrom) conditions.push(gte(organizationMembers.hireDate, filters.hireDateFrom));
+    if (filters.hireDateTo) conditions.push(lte(organizationMembers.hireDate, filters.hireDateTo));
+    if (filters.unionJoinDateFrom) conditions.push(gte(organizationMembers.unionJoinDate, filters.unionJoinDateFrom));
+    if (filters.unionJoinDateTo) conditions.push(lte(organizationMembers.unionJoinDate, filters.unionJoinDateTo));
+    const whereClause = and(...conditions);
+    const sortColumn = sortBy === "name"
       ? organizationMembers.name
       : sortBy === "email"
-      ? organizationMembers.email
-      : sortBy === "hireDate"
-      ? organizationMembers.hireDate
-      : organizationMembers.createdAt;
-
-    // Get members
-    const members = await db
-      .select()
-      .from(organizationMembers)
-      .where(whereClause)
-      .orderBy(sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn))
-      .limit(limit)
-      .offset(offset);
-
-    return {
-      members,
-      total,
-      page,
-      limit,
-    };
+        ? organizationMembers.email
+        : sortBy === "hireDate"
+          ? organizationMembers.hireDate
+          : organizationMembers.createdAt;
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const totalResult = await tx.select({ count: count() }).from(organizationMembers).where(whereClause);
+      const members = await tx
+        .select()
+        .from(organizationMembers)
+        .where(whereClause)
+        .orderBy(sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn))
+        .limit(limit)
+        .offset(offset);
+      return { members, total: totalResult[0]?.count || 0, page, limit };
+    });
   } catch (error) {
-    logger.error("Error listing members", { error, filters, pagination });
-    throw new Error("Failed to list members");
+    rethrow(error, "Failed to list members");
   }
 }
 
-/**
- * Create a new member
- */
 export async function createMember(data: NewMember): Promise<Member> {
   try {
-    const [member] = await db
-      .insert(organizationMembers)
-      .values(data)
-      .returning();
-
-    return member;
+    rejectClientFinancialExemption(data, "create");
+    const organizationId = assertOrganization(data?.organizationId ?? "");
+    const role = data.role ?? "member";
+    assertTenantAssignableRole(role);
+    const capability: MemberCapability = role === "member" ? "administer" : "assign_role";
+    const grant = await requireGrant(organizationId, capability);
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      if (data.userId) {
+        const existingUser = await tx.query.organizationMembers.findFirst({
+          where: and(
+            eq(organizationMembers.userId, data.userId),
+            activeInOrganization(grant.organizationId),
+          ),
+        });
+        if (existingUser) throw new MemberBoundaryError("Member already exists");
+      }
+      if (data.membershipNumber) {
+        const existingNumber = await tx.query.organizationMembers.findFirst({
+          where: and(
+            eq(organizationMembers.membershipNumber, data.membershipNumber),
+            activeInOrganization(grant.organizationId),
+          ),
+        });
+        if (existingNumber) throw new MemberBoundaryError("Member already exists");
+      }
+      const [member] = await tx.insert(organizationMembers).values(
+        membershipInsert(data, grant.organizationId, role),
+      ).returning();
+      if (!member) throw new MemberBoundaryError("Failed to create member");
+      await persistDurableMemberAudit(tx, {
+        actorUserId: grant.userId,
+        organizationId: grant.organizationId,
+        operation: role === "member" ? "create" : "role_change",
+        targetId: member.id,
+      });
+      return member;
+    });
   } catch (error) {
-    logger.error("Error creating member", { error, data });
-    throw new Error("Failed to create member");
+    rethrow(error, "Failed to create member");
   }
 }
 
-/**
- * Update member
- */
 export async function updateMember(
+  organizationId: string,
   id: string,
-  data: Partial<NewMember>
+  data: Partial<NewMember>,
 ): Promise<Member | null> {
   try {
-    const [updated] = await db
-      .update(organizationMembers)
-      .set({
-        ...data,
-        updatedAt: new Date(),
-      })
-      .where(eq(organizationMembers.id, id))
-      .returning();
-
-    return updated || null;
+    rejectProtectedUpdate(data);
+    const grant = await requireGrant(organizationId, "administer");
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      if (data.status !== undefined) {
+        const roster = await lockAdministratorRoster(tx, grant.organizationId);
+        const current = await tx.query.organizationMembers.findFirst({
+          where: activeInOrganization(grant.organizationId, id),
+        });
+        if (!current) return null;
+        assertMemberStatusTransition(String(current.status), String(data.status));
+        const projection = [{ id: current.id, status: String(data.status) }];
+        await requireAdministratorDeactivationAuthority(grant.organizationId, roster, projection);
+        assertActiveAdministratorsRemain(roster, projection);
+      }
+      const [updated] = await tx
+        .update(organizationMembers)
+        .set({ ...data, updatedAt: new Date() })
+        .where(activeInOrganization(grant.organizationId, id))
+        .returning();
+      if (!updated) return null;
+      await persistDurableMemberAudit(tx, {
+        actorUserId: grant.userId,
+        organizationId: grant.organizationId,
+        operation: data.status !== undefined ? "status_change" : "update",
+        targetId: updated.id,
+      });
+      return updated;
+    });
   } catch (error) {
-    logger.error("Error updating member", { error, id });
-    throw new Error("Failed to update member");
+    rethrow(error, "Failed to update member");
   }
 }
 
-/**
- * Soft delete member
- */
-export async function deleteMember(id: string): Promise<boolean> {
+export async function deleteMember(organizationId: string, id: string): Promise<boolean> {
   try {
-    const [deleted] = await db
-      .update(organizationMembers)
-      .set({
-        deletedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(organizationMembers.id, id))
-      .returning();
-
-    return !!deleted;
+    const grant = await requireGrant(organizationId, "remove_member");
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const roster = await lockAdministratorRoster(tx, grant.organizationId);
+      const target = await tx.query.organizationMembers.findFirst({
+        where: activeInOrganization(grant.organizationId, id),
+      });
+      if (!target) return false;
+      assertMemberRemovalPolicy({
+        actorUserId: grant.userId,
+        targetUserId: target.userId,
+      });
+      assertActiveAdministratorsRemain(roster, [{ id: target.id, deletedAt: new Date() }]);
+      const [deleted] = await tx
+        .update(organizationMembers)
+        .set({ deletedAt: new Date(), updatedAt: new Date() })
+        .where(activeInOrganization(grant.organizationId, id))
+        .returning();
+      if (!deleted) return false;
+      await persistDurableMemberAudit(tx, {
+        actorUserId: grant.userId,
+        organizationId: grant.organizationId,
+        operation: "soft_delete",
+        targetId: deleted.id,
+      });
+      return true;
+    });
   } catch (error) {
-    logger.error("Error deleting member", { error, id });
-    throw new Error("Failed to delete member");
+    rethrow(error, "Failed to delete member");
   }
 }
 
-/**
- * Permanently delete member (hard delete)
- */
-export async function permanentlyDeleteMember(id: string): Promise<boolean> {
-  try {
-    await db
-      .delete(organizationMembers)
-      .where(eq(organizationMembers.id, id));
-
-    return true;
-  } catch (error) {
-    logger.error("Error permanently deleting member", { error, id });
-    throw new Error("Failed to permanently delete member");
-  }
+export async function permanentlyDeleteMember(organizationId: string, _id: string): Promise<boolean> {
+  await requireGrant(organizationId, "remove_member");
+  throw new MemberBoundaryError("Membership records are retained. Soft-delete the member instead.");
 }
 
-// ============================================================================
-// Bulk Operations
-// ============================================================================
-
-/**
- * Bulk import members
- */
-export async function bulkImportMembers(
-  members: NewMember[]
-): Promise<BulkOperationResult> {
+export async function bulkImportMembers(members: NewMember[]): Promise<BulkOperationResult> {
   const errors: Array<{ row: number; error: string }> = [];
   let processed = 0;
-
-  try {
-    for (let i = 0; i < members.length; i++) {
-      try {
-        await createMember(members[i]);
-        processed++;
-      } catch (error) {
-        errors.push({
-          row: i + 1,
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
-      }
+  for (let i = 0; i < members.length; i++) {
+    try {
+      await createMember(members[i]);
+      processed++;
+    } catch (error) {
+      if (error instanceof MemberBoundaryError && members.length === 1) throw error;
+      errors.push({
+        row: i + 1,
+        error: error instanceof MemberBoundaryError ? error.message : "Failed to create member",
+      });
     }
-
-    return {
-      success: errors.length === 0,
-      processed,
-      failed: errors.length,
-      errors: errors.length > 0 ? errors : undefined,
-    };
-  } catch (error) {
-    logger.error("Error in bulk import", { error });
-    throw new Error("Failed to complete bulk import");
   }
+  return {
+    success: errors.length === 0,
+    processed,
+    failed: errors.length,
+    errors: errors.length > 0 ? errors : undefined,
+  };
 }
 
-/**
- * Bulk update member status
- */
 export async function bulkUpdateMemberStatus(
+  organizationId: string,
   memberIds: string[],
-  status: string
+  status: string,
 ): Promise<BulkOperationResult> {
   try {
-    await db
-      .update(organizationMembers)
-      .set({
-        status: status as MemberStatusValue,
-        updatedAt: new Date(),
-      })
-      .where(inArray(organizationMembers.id, memberIds));
-
-    return {
-      success: true,
-      processed: memberIds.length,
-      failed: 0,
-    };
-  } catch (error) {
-    logger.error("Error in bulk status update", {
-      error,
-      memberIdsCount: memberIds.length,
-      status,
+    const grant = await requireGrant(organizationId, "administer");
+    if (!(MEMBER_RECORD_STATUSES as readonly string[]).includes(status)) {
+      throw new MemberBoundaryError("Forbidden");
+    }
+    if (memberIds.length === 0) return { success: true, processed: 0, failed: 0 };
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      if (new Set(memberIds).size !== memberIds.length) throw new MemberBoundaryError("Forbidden");
+      const roster = await lockAdministratorRoster(tx, grant.organizationId);
+      const projection = memberIds.map((id) => ({ id, status }));
+      await requireAdministratorDeactivationAuthority(grant.organizationId, roster, projection);
+      assertActiveAdministratorsRemain(roster, projection);
+      const current = await tx
+        .select()
+        .from(organizationMembers)
+        .where(and(
+          activeInOrganization(grant.organizationId),
+          inArray(organizationMembers.id, memberIds),
+        ));
+      if (current.length !== memberIds.length) throw new MemberBoundaryError("Forbidden");
+      for (const row of current) assertMemberStatusTransition(String(row.status), status);
+      const updated = await tx
+        .update(organizationMembers)
+        .set({ status: status as MemberStatusValue, updatedAt: new Date() })
+        .where(and(
+          activeInOrganization(grant.organizationId),
+          inArray(organizationMembers.id, memberIds),
+        ))
+        .returning();
+      if (updated.length !== memberIds.length) throw new MemberBoundaryError("Forbidden");
+      await persistDurableMemberAudit(tx, {
+        actorUserId: grant.userId,
+        organizationId: grant.organizationId,
+        operation: "status_change",
+        targetId: null,
+        count: updated.length,
+      });
+      return { success: true, processed: updated.length, failed: 0 };
     });
+  } catch (error) {
+    if (error instanceof MemberBoundaryError) throw error;
+    logger.error("Error in bulk status update", { errorName: error instanceof Error ? error.name : "error" });
     return {
       success: false,
       processed: 0,
@@ -379,33 +484,39 @@ export async function bulkUpdateMemberStatus(
   }
 }
 
-/**
- * Bulk update member role
- */
 export async function bulkUpdateMemberRole(
+  organizationId: string,
   memberIds: string[],
-  role: string
+  role: string,
 ): Promise<BulkOperationResult> {
   try {
-    await db
-      .update(organizationMembers)
-      .set({
-        role: role as MemberRoleValue,
-        updatedAt: new Date(),
-      })
-      .where(inArray(organizationMembers.id, memberIds));
-
-    return {
-      success: true,
-      processed: memberIds.length,
-      failed: 0,
-    };
-  } catch (error) {
-    logger.error("Error in bulk role update", {
-      error,
-      memberIdsCount: memberIds.length,
-      role,
+    assertTenantAssignableRole(role);
+    const grant = await requireGrant(organizationId, "assign_role");
+    if (memberIds.length === 0) return { success: true, processed: 0, failed: 0 };
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const roster = await lockAdministratorRoster(tx, grant.organizationId);
+      assertActiveAdministratorsRemain(roster, memberIds.map((id) => ({ id, role })));
+      const updated = await tx
+        .update(organizationMembers)
+        .set({ role: role as MemberRoleValue, updatedAt: new Date() })
+        .where(and(
+          activeInOrganization(grant.organizationId),
+          inArray(organizationMembers.id, memberIds),
+        ))
+        .returning();
+      if (updated.length !== memberIds.length) throw new MemberBoundaryError("Forbidden");
+      await persistDurableMemberAudit(tx, {
+        actorUserId: grant.userId,
+        organizationId: grant.organizationId,
+        operation: "role_change",
+        targetId: null,
+        count: updated.length,
+      });
+      return { success: true, processed: updated.length, failed: 0 };
     });
+  } catch (error) {
+    if (error instanceof MemberBoundaryError) throw error;
+    logger.error("Error in bulk role update", { errorName: error instanceof Error ? error.name : "error" });
     return {
       success: false,
       processed: 0,
@@ -415,82 +526,47 @@ export async function bulkUpdateMemberRole(
   }
 }
 
-// ============================================================================
-// Search & Advanced Queries
-// ============================================================================
-
-/**
- * Advanced member search with full-text search
- */
 export async function searchMembers(
   organizationId: string,
-  searchQuery: string,
-  filters?: {
-    status?: string[];
-    role?: string[];
-    department?: string;
-  },
-  pagination?: { page?: number; limit?: number }
+  searchQuery = "",
+  filters?: { status?: string[]; role?: string[]; department?: string },
+  pagination?: { page?: number; limit?: number },
 ): Promise<{ members: Member[]; total: number }> {
-  const { page = 1, limit = 50 } = pagination || {};
-  const offset = (page - 1) * limit;
-
   try {
-    const conditions: SQL[] = [
-      eq(organizationMembers.organizationId, organizationId),
-      sql`${organizationMembers.deletedAt} IS NULL`,
-    ];
-
-    // Full-text search
+    const grant = await requireGrant(organizationId, "administer");
+    const { page = 1, limit = 50 } = pagination || {};
+    const offset = (page - 1) * limit;
+    const conditions: SQL[] = [activeInOrganization(grant.organizationId)];
     if (searchQuery) {
       const searchTerm = `%${searchQuery}%`;
-      conditions.push(
-        or(
-          like(organizationMembers.name, searchTerm),
-          like(organizationMembers.email, searchTerm),
-          like(organizationMembers.membershipNumber, searchTerm),
-          like(organizationMembers.department, searchTerm),
-          like(organizationMembers.position, searchTerm)
-        )!
-      );
+      conditions.push(or(
+        like(organizationMembers.name, searchTerm),
+        like(organizationMembers.email, searchTerm),
+        like(organizationMembers.membershipNumber, searchTerm),
+        like(organizationMembers.department, searchTerm),
+        like(organizationMembers.position, searchTerm),
+      )!);
     }
-
     if (filters?.status && filters.status.length > 0) {
       conditions.push(inArray(organizationMembers.status, filters.status as MemberStatusValue[]));
     }
-
     if (filters?.role && filters.role.length > 0) {
       conditions.push(inArray(organizationMembers.role, filters.role as MemberRoleValue[]));
     }
-
-    if (filters?.department) {
-      conditions.push(like(organizationMembers.department, `%${filters.department}%`));
-    }
-
+    if (filters?.department) conditions.push(like(organizationMembers.department, `%${filters.department}%`));
     const whereClause = and(...conditions);
-
-    const [totalResult, members] = await Promise.all([
-      db.select({ count: count() }).from(organizationMembers).where(whereClause),
-      db.select().from(organizationMembers).where(whereClause).limit(limit).offset(offset),
-    ]);
-
-    return {
-      members,
-      total: totalResult[0]?.count || 0,
-    };
-  } catch (error) {
-    logger.error("Error searching members", {
-      error,
-      organizationId,
-      searchQuery,
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const [totalResult, members] = await Promise.all([
+        tx.select({ count: count() }).from(organizationMembers).where(whereClause),
+        tx.select().from(organizationMembers).where(whereClause).limit(limit).offset(offset),
+      ]);
+      return { members, total: totalResult[0]?.count || 0 };
     });
-    throw new Error("Failed to search members");
+  } catch (error) {
+    rethrow(error, "Failed to search members");
   }
 }
 
-/**
- * Get member statistics
- */
 export async function getMemberStatistics(organizationId: string): Promise<{
   total: number;
   byStatus: Record<string, number>;
@@ -498,173 +574,140 @@ export async function getMemberStatistics(organizationId: string): Promise<{
   byDepartment: Record<string, number>;
 }> {
   try {
-    const members = await db
-      .select()
-      .from(organizationMembers)
-      .where(
-        and(
-          eq(organizationMembers.organizationId, organizationId),
-          sql`${organizationMembers.deletedAt} IS NULL`
-        )
-      );
-
-    const byStatus: Record<string, number> = {};
-    const byRole: Record<string, number> = {};
-    const byDepartment: Record<string, number> = {};
-
-    members.forEach((member) => {
-      // Count by status
-      byStatus[member.status] = (byStatus[member.status] || 0) + 1;
-
-      // Count by role
-      byRole[member.role] = (byRole[member.role] || 0) + 1;
-
-      // Count by department
-      if (member.department) {
-        byDepartment[member.department] = (byDepartment[member.department] || 0) + 1;
-      }
+    const grant = await requireGrant(organizationId, "administer");
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const members = await tx.select().from(organizationMembers).where(activeInOrganization(grant.organizationId));
+      const byStatus: Record<string, number> = {};
+      const byRole: Record<string, number> = {};
+      const byDepartment: Record<string, number> = {};
+      members.forEach((member) => {
+        byStatus[member.status] = (byStatus[member.status] || 0) + 1;
+        byRole[member.role] = (byRole[member.role] || 0) + 1;
+        if (member.department) byDepartment[member.department] = (byDepartment[member.department] || 0) + 1;
+      });
+      return { total: members.length, byStatus, byRole, byDepartment };
     });
-
-    return {
-      total: members.length,
-      byStatus,
-      byRole,
-      byDepartment,
-    };
   } catch (error) {
-    logger.error("Error getting member statistics", { error, organizationId });
-    throw new Error("Failed to get member statistics");
+    rethrow(error, "Failed to get member statistics");
   }
 }
 
+function pickMergeFields(source: Member, base: Partial<NewMember>): Partial<NewMember> {
+  const next = { ...base };
+  for (const field of MERGE_FIELDS) {
+    const value = source[field];
+    if (value != null) next[field] = value as never;
+  }
+  return next;
+}
+
 /**
- * Merge duplicate members
+ * Suppresses one duplicate membership row inside the authorized organization.
+ * This copies profile fields onto the canonical row and soft-deletes the
+ * duplicate. It does not reassign claims, dues, history, or other linked
+ * records, and it is not referential consolidation.
  */
 export async function mergeMembers(
+  organizationId: string,
   primaryMemberId: string,
   duplicateMemberId: string,
-  keepData: "primary" | "duplicate" | "merge"
+  keepData: "primary" | "duplicate" | "merge",
 ): Promise<Member> {
   try {
-    const [primary, duplicate] = await Promise.all([
-      getMemberById(primaryMemberId),
-      getMemberById(duplicateMemberId),
-    ]);
+    if (primaryMemberId === duplicateMemberId) throw new MemberBoundaryError("Forbidden");
+    const grant = await requireGrant(organizationId, "remove_member");
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const roster = await lockAdministratorRoster(tx, grant.organizationId);
+      const primary = await tx.query.organizationMembers.findFirst({
+        where: activeInOrganization(grant.organizationId, primaryMemberId),
+      });
+      const duplicate = await tx.query.organizationMembers.findFirst({
+        where: activeInOrganization(grant.organizationId, duplicateMemberId),
+      });
+      if (!primary || !duplicate) throw new MemberBoundaryError("One or both members not found");
+      if (primary.organizationId !== grant.organizationId || duplicate.organizationId !== grant.organizationId) {
+        throw new MemberBoundaryError("Forbidden");
+      }
+      assertMemberRemovalPolicy({
+        actorUserId: grant.userId,
+        targetUserId: duplicate.userId,
+      });
+      assertActiveAdministratorsRemain(roster, [{ id: duplicate.id, deletedAt: new Date() }]);
 
-    if (!primary || !duplicate) {
-      throw new Error("One or both members not found");
-    }
+      let patch: Partial<NewMember> = {};
+      if (keepData === "duplicate") patch = pickMergeFields(duplicate, {});
+      if (keepData === "merge") patch = pickMergeFields(duplicate, pickMergeFields(primary, {}));
+      rejectProtectedUpdate(patch);
 
-    let mergedData: Partial<NewMember> = {};
+      const [updated] = await tx
+        .update(organizationMembers)
+        .set({ ...patch, updatedAt: new Date() })
+        .where(activeInOrganization(grant.organizationId, primary.id))
+        .returning();
+      if (!updated) throw new MemberBoundaryError("One or both members not found");
 
-    if (keepData === "primary") {
-      mergedData = { ...primary };
-    } else if (keepData === "duplicate") {
-      mergedData = { ...duplicate };
-    } else {
-      // Merge: prefer non-null values from duplicate, then primary
-      mergedData = {
-        ...primary,
-        ...Object.fromEntries(
-          Object.entries(duplicate).filter(([_, v]) => v != null)
-        ),
-      };
-    }
+      const [removed] = await tx
+        .update(organizationMembers)
+        .set({ deletedAt: new Date(), updatedAt: new Date() })
+        .where(activeInOrganization(grant.organizationId, duplicate.id))
+        .returning();
+      if (!removed) throw new MemberBoundaryError("One or both members not found");
 
-    // Update primary member
-    const updated = await updateMember(primaryMemberId, mergedData);
-
-    // Soft delete duplicate
-    await deleteMember(duplicateMemberId);
-
-    return updated!;
-  } catch (error) {
-    logger.error("Error merging members", {
-      error,
-      primaryMemberId,
-      duplicateMemberId,
-      keepData,
+      await persistDurableMemberAudit(tx, {
+        actorUserId: grant.userId,
+        organizationId: grant.organizationId,
+        operation: "merge",
+        targetId: updated.id,
+        count: 2,
+      });
+      return updated;
     });
-    throw new Error("Failed to merge members");
+  } catch (error) {
+    rethrow(error, "Failed to merge members");
   }
 }
 
-/**
- * Calculate seniority for member
- */
-export async function calculateSeniority(memberId: string): Promise<string> {
+export async function calculateSeniority(organizationId: string, memberId: string): Promise<string> {
   try {
-    const member = await getMemberById(memberId);
-    if (!member || !member.unionJoinDate) {
-      return "N/A";
-    }
-
+    const member = await getMemberById(organizationId, memberId);
+    if (!member || !member.unionJoinDate) return "N/A";
     const joinDate = new Date(member.unionJoinDate);
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - joinDate.getTime());
     const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365.25));
     const diffMonths = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24 * 30.44));
-
     return `${diffYears} years, ${diffMonths} months`;
   } catch (error) {
-    logger.error("Error calculating seniority", { error, memberId });
+    if (error instanceof MemberBoundaryError) throw error;
+    logger.error("Error calculating seniority", { errorName: error instanceof Error ? error.name : "error" });
     return "N/A";
   }
 }
 
-/**
- * Get members by department
- */
-export async function getMembersByDepartment(
-  organizationId: string,
-  department: string
-): Promise<Member[]> {
+export async function getMembersByDepartment(organizationId: string, department: string): Promise<Member[]> {
   try {
-    const members = await db
-      .select()
-      .from(organizationMembers)
-      .where(
-        and(
-          eq(organizationMembers.organizationId, organizationId),
-          eq(organizationMembers.department, department),
-          sql`${organizationMembers.deletedAt} IS NULL`
-        )
-      );
-
-    return members;
-  } catch (error) {
-    logger.error("Error fetching members by department", {
-      error,
-      organizationId,
-      department,
+    const grant = await requireGrant(organizationId, "administer");
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      return tx.select().from(organizationMembers).where(and(
+        activeInOrganization(grant.organizationId),
+        eq(organizationMembers.department, department),
+      ));
     });
-    throw new Error("Failed to fetch members by department");
-  }
-}
-
-/**
- * Get members by role
- */
-export async function getMembersByRole(
-  organizationId: string,
-  role: string
-): Promise<Member[]> {
-  try {
-    const members = await db
-      .select()
-      .from(organizationMembers)
-      .where(
-        and(
-          eq(organizationMembers.organizationId, organizationId),
-          eq(organizationMembers.role, role as MemberRoleValue),
-          sql`${organizationMembers.deletedAt} IS NULL`
-        )
-      );
-
-    return members;
   } catch (error) {
-    logger.error("Error fetching members by role", { error, organizationId, role });
-    throw new Error("Failed to fetch members by role");
+    rethrow(error, "Failed to fetch members by department");
   }
 }
 
+export async function getMembersByRole(organizationId: string, role: string): Promise<Member[]> {
+  try {
+    const grant = await requireGrant(organizationId, "administer");
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      return tx.select().from(organizationMembers).where(and(
+        activeInOrganization(grant.organizationId),
+        eq(organizationMembers.role, role as MemberRoleValue),
+      ));
+    });
+  } catch (error) {
+    rethrow(error, "Failed to fetch members by role");
+  }
+}
