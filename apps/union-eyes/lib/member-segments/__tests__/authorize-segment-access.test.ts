@@ -41,10 +41,6 @@ vi.mock('@/lib/audit-logger', () => ({
   auditLog: mocks.auditLog,
   AuditEventType: {
     AUTHORITY_VIOLATION: 'authority.violation',
-    DATA_ACCESS: 'data.access',
-    DATA_UPDATE: 'data.update',
-    DATA_DELETE: 'data.delete',
-    DATA_EXPORT: 'data.export',
   },
   AuditSeverity: { HIGH: 'error' },
 }))
@@ -63,7 +59,6 @@ import {
   authorizeMemberSegmentAccess,
   MEMBER_SEGMENT_EXPORT_ENTITLEMENT,
   MEMBER_SEGMENT_MIN_ROLE,
-  recordSensitiveSegmentAccess,
   resolveSegmentVisibility,
   segmentMutationAllowed,
 } from '../authorize-segment-access'
@@ -312,55 +307,6 @@ describe('authorizeMemberSegmentAccess', () => {
     expect(segmentMutationAllowed(STEWARD_A, other, false)).toBe(false)
     expect(segmentMutationAllowed(STEWARD_A, other, true)).toBe(true)
     expect(segmentMutationAllowed(MEMBER_A, owned, false)).toBe(false)
-  })
-
-  it('audits cross-owner private access and mutations without filter or member payloads', async () => {
-    const recorded = await recordSensitiveSegmentAccess({
-      actorUserId: STEWARD_A,
-      organizationId: ORG_A,
-      operation: 'read',
-      segments: [
-        { segmentId: 'own-private', ownerUserId: STEWARD_A, isPublic: false },
-        { segmentId: 'public-other', ownerUserId: MEMBER_A, isPublic: true },
-        { segmentId: 'private-other', ownerUserId: MEMBER_A, isPublic: false },
-      ],
-    })
-    expect(recorded).toBe(true)
-    expect(mocks.auditLog).toHaveBeenCalledTimes(1)
-    const entry = mocks.auditLog.mock.calls[0][0]
-    expect(entry).toEqual(expect.objectContaining({
-      eventType: 'data.access',
-      userId: STEWARD_A,
-      organizationId: ORG_A,
-      outcome: 'success',
-    }))
-    expect(entry.metadata.segments).toEqual([
-      { segmentId: 'private-other', ownerUserId: MEMBER_A, isPublic: false },
-    ])
-    expect(JSON.stringify(entry)).not.toContain('filters')
-    expect(JSON.stringify(entry)).not.toContain('members')
-
-    mocks.auditLog.mockClear()
-    await recordSensitiveSegmentAccess({
-      actorUserId: STEWARD_A,
-      organizationId: ORG_A,
-      operation: 'update',
-      segments: [{ segmentId: 'public-other', ownerUserId: MEMBER_A, isPublic: true }],
-    })
-    expect(mocks.auditLog.mock.calls[0][0].eventType).toBe('data.update')
-    expect(mocks.auditLog.mock.calls[0][0].metadata.segments).toEqual([
-      { segmentId: 'public-other', ownerUserId: MEMBER_A, isPublic: true },
-    ])
-  })
-
-  it('fails closed when the sensitive access audit cannot be written', async () => {
-    mocks.auditLog.mockRejectedValueOnce(new Error('audit store unavailable'))
-    await expect(recordSensitiveSegmentAccess({
-      actorUserId: STEWARD_A,
-      organizationId: ORG_B,
-      operation: 'delete',
-      segments: [{ segmentId: 'private-other', ownerUserId: MEMBER_A, isPublic: false }],
-    })).resolves.toBe(false)
   })
 
   it('denies segment administration in an organization where membership or the admin role is absent', async () => {

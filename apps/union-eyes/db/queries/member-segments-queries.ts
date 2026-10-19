@@ -25,6 +25,10 @@ import { memberEmployment } from "../schema/domains/member/member-employment";
 import { eq, and, or, desc, asc, sql, gte, lte, inArray, SQL } from "drizzle-orm";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
+import {
+  persistDurableSegmentAudit,
+  type SegmentAuditRequest,
+} from "@/lib/member-segments/durable-segment-audit";
 
 /**
  * Bind segment SQL to the organization the action already authorized.
@@ -92,6 +96,14 @@ function segmentNotFound(error: unknown): boolean {
   return error instanceof Error && error.message === "Segment not found";
 }
 
+function auditFact(segment: { id: string; createdBy: string; isPublic: boolean }) {
+  return {
+    segmentId: segment.id,
+    ownerUserId: segment.createdBy,
+    isPublic: segment.isPublic,
+  };
+}
+
 // =============================================================================
 // SEGMENT CRUD
 // =============================================================================
@@ -135,11 +147,19 @@ export async function getSegments(
       ];
       if (boundary) conditions.push(boundary);
 
-      return await tx
+      const segments = await tx
         .select()
         .from(memberSegments)
         .where(and(...conditions))
         .orderBy(desc(memberSegments.lastExecutedAt), desc(memberSegments.createdAt));
+      await persistDurableSegmentAudit(tx, {
+        actorUserId: visibility.actorUserId,
+        organizationId,
+        operation: "list",
+        outcome: "success",
+        segments: segments.map(auditFact),
+      });
+      return segments;
     } catch (error) {
       logger.error("Failed to get segments", error as Error, {
         organizationId,
@@ -171,7 +191,16 @@ export async function getSegmentById(
         .from(memberSegments)
         .where(and(...predicates))
         .limit(1);
-      
+
+      if (segment) {
+        await persistDurableSegmentAudit(tx, {
+          actorUserId: visibility.actorUserId,
+          organizationId,
+          operation: "read",
+          outcome: "success",
+          segments: [auditFact(segment)],
+        });
+      }
       return segment || null;
     } catch (error) {
       logger.error("Failed to get segment", error as Error, { id, organizationId });
@@ -209,7 +238,14 @@ export async function updateSegment(
       if (!updated) {
         throw new Error("Segment not found");
       }
-      
+
+      await persistDurableSegmentAudit(tx, {
+        actorUserId: visibility.actorUserId,
+        organizationId,
+        operation: "update",
+        outcome: "success",
+        segments: [auditFact(updated)],
+      });
       return updated;
     } catch (error) {
       if (segmentNotFound(error)) throw error;
@@ -239,11 +275,23 @@ export async function deleteSegment(
         .update(memberSegments)
         .set({ isActive: false, updatedAt: new Date() })
         .where(and(...predicates))
-        .returning({ id: memberSegments.id });
+        .returning({
+          id: memberSegments.id,
+          createdBy: memberSegments.createdBy,
+          isPublic: memberSegments.isPublic,
+        });
 
       if (updated.length === 0) {
         throw new Error("Segment not found");
       }
+
+      await persistDurableSegmentAudit(tx, {
+        actorUserId: visibility.actorUserId,
+        organizationId,
+        operation: "delete",
+        outcome: "success",
+        segments: updated.map(auditFact),
+      });
     } catch (error) {
       if (segmentNotFound(error)) throw error;
       logger.error("Failed to delete segment", error as Error, { id });
@@ -466,7 +514,10 @@ export async function executeSegment(
         // Another member's private definition stays out of the execution audit.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         filtersSnapshot: otherPrivate ? undefined : segment.filters as any,
-      }, organizationId);
+      }, organizationId, {
+        actorUserId: executedBy,
+        segments: [auditFact(segment)],
+      });
 
       // Update segment metadata inside the authorized organization only.
       const touched: SQL[] = [
@@ -501,6 +552,7 @@ export async function executeSegment(
 export async function logSegmentExecution(
   data: InsertSegmentExecution,
   organizationId: string,
+  audit?: SegmentAuditRequest,
 ): Promise<SelectSegmentExecution> {
    
   return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
@@ -509,7 +561,19 @@ export async function logSegmentExecution(
         .insert(segmentExecutions)
         .values(data)
         .returning();
-      
+      if (!execution) {
+        throw new Error("Failed to log segment execution");
+      }
+
+      if (audit) {
+        await persistDurableSegmentAudit(tx, {
+          actorUserId: audit.actorUserId,
+          organizationId,
+          operation: "execute",
+          outcome: "success",
+          segments: audit.segments,
+        });
+      }
       return execution;
     } catch (error) {
       logger.error("Failed to log segment execution", error as Error, { data });
@@ -524,12 +588,13 @@ export async function logSegmentExecution(
 export async function getSegmentExecutions(
   segmentId: string,
   organizationId: string,
-  limit: number = 50
+  limit: number = 50,
+  audit?: SegmentAuditRequest,
 ): Promise<SelectSegmentExecution[]> {
    
   return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
-      return await tx
+      const executions = await tx
         .select()
         .from(segmentExecutions)
         .where(
@@ -540,6 +605,16 @@ export async function getSegmentExecutions(
         )
         .orderBy(desc(segmentExecutions.executedAt))
         .limit(limit);
+      if (audit) {
+        await persistDurableSegmentAudit(tx, {
+          actorUserId: audit.actorUserId,
+          organizationId,
+          operation: "history",
+          outcome: "success",
+          segments: audit.segments,
+        });
+      }
+      return executions;
     } catch (error) {
       logger.error("Failed to get segment executions", error as Error, { segmentId });
       throw new Error("Failed to get segment executions");
@@ -555,7 +630,8 @@ export async function getSegmentExecutions(
  * Log member data export
  */
 export async function logSegmentExport(
-  data: InsertSegmentExport
+  data: InsertSegmentExport,
+  audit?: SegmentAuditRequest,
 ): Promise<SelectSegmentExport> {
    
   return withSegmentOrganization(data.organizationId, async (tx: RLSTx) => {
@@ -564,7 +640,19 @@ export async function logSegmentExport(
         .insert(segmentExports)
         .values(data)
         .returning();
-      
+      if (!exportLog) {
+        throw new Error("Failed to log segment export");
+      }
+
+      if (audit) {
+        await persistDurableSegmentAudit(tx, {
+          actorUserId: audit.actorUserId,
+          organizationId: data.organizationId,
+          operation: "export",
+          outcome: "success",
+          segments: audit.segments,
+        });
+      }
       return exportLog;
     } catch (error) {
       logger.error("Failed to log segment export", error as Error, { data });

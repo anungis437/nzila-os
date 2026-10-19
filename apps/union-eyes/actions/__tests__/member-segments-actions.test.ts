@@ -8,7 +8,6 @@ const mocks = vi.hoisted(() => ({
   dbLimit: vi.fn(),
   authorize: vi.fn(),
   resolveVisibility: vi.fn(),
-  auditSensitive: vi.fn(),
   q: {
     createSegment: vi.fn(),
     getSegments: vi.fn(),
@@ -47,7 +46,6 @@ vi.mock('@/lib/logger', () => ({ logger: { error: mocks.loggerError } }));
 vi.mock('@/lib/member-segments/authorize-segment-access', () => ({
   authorizeMemberSegmentAccess: mocks.authorize,
   resolveSegmentVisibility: mocks.resolveVisibility,
-  recordSensitiveSegmentAccess: mocks.auditSensitive,
   segmentMutationAllowed: (actorUserId: string, segment: { createdBy: string }, canManageOthers: boolean) =>
     segment.createdBy === actorUserId || canManageOthers,
   MEMBER_SEGMENT_EXPORT_ENTITLEMENT: 'export_suite',
@@ -78,7 +76,6 @@ describe('member-segments-actions', () => {
     mocks.q.searchMembersAdvanced.mockResolvedValue({ members: [{ id: 'm1' }], total: 1 });
     mocks.q.executeSegment.mockResolvedValue({ members: [{ id: 'm1' }], total: 1 });
     mocks.q.getSegmentById.mockResolvedValue({ id: 's1', createdBy: 'user-1', isPublic: true });
-    mocks.auditSensitive.mockResolvedValue(true);
     mocks.q.logSegmentExport.mockResolvedValue({ id: 'export-1' });
     mocks.q.generateExportWatermark.mockReturnValue('WATERMARK');
     mocks.q.generateExportHash.mockReturnValue('HASH');
@@ -194,10 +191,6 @@ describe('member-segments-actions', () => {
         actorUserId: 'user-1',
         includeOthersPrivate: false,
       });
-      expect(mocks.auditSensitive).toHaveBeenCalledWith(expect.objectContaining({
-        operation: 'update',
-        segments: [{ segmentId: 's-public', ownerUserId: 'user-1', isPublic: true }],
-      }));
 
       mocks.q.getSegmentById.mockResolvedValueOnce({ id: 's-public', createdBy: 'steward-b', isPublic: true });
       const read = await actions.getMemberSegmentByIdAction('s-public', ORG_A);
@@ -221,7 +214,6 @@ describe('member-segments-actions', () => {
 
       expect(mocks.q.updateSegment).not.toHaveBeenCalled();
       expect(mocks.q.deleteSegment).not.toHaveBeenCalled();
-      expect(mocks.auditSensitive).not.toHaveBeenCalled();
     });
 
     it('lets an organization administrator change another member segment and audits the cross-owner write', async () => {
@@ -233,12 +225,6 @@ describe('member-segments-actions', () => {
       mocks.q.getSegmentById.mockResolvedValue({ id: 's-private', createdBy: 'steward-b', isPublic: false });
 
       expect((await actions.updateMemberSegmentAction('s-private', ORG_A, { name: 'Managed' })).isSuccess).toBe(true);
-      expect(mocks.auditSensitive).toHaveBeenCalledWith(expect.objectContaining({
-        actorUserId: 'user-1',
-        organizationId: ORG_A,
-        operation: 'update',
-        segments: [{ segmentId: 's-private', ownerUserId: 'steward-b', isPublic: false }],
-      }));
       expect(mocks.q.updateSegment).toHaveBeenCalledWith('s-private', { name: 'Managed' }, ORG_A, {
         actorUserId: 'user-1',
         includeOthersPrivate: true,
@@ -246,13 +232,13 @@ describe('member-segments-actions', () => {
 
       mocks.q.getSegmentById.mockResolvedValueOnce({ id: 's-public', createdBy: 'steward-b', isPublic: true });
       expect((await actions.deleteMemberSegmentAction('s-public', ORG_A)).isSuccess).toBe(true);
-      expect(mocks.auditSensitive).toHaveBeenCalledWith(expect.objectContaining({
-        operation: 'delete',
-        segments: [{ segmentId: 's-public', ownerUserId: 'steward-b', isPublic: true }],
-      }));
+      expect(mocks.q.deleteSegment).toHaveBeenCalledWith('s-public', ORG_A, {
+        actorUserId: 'user-1',
+        includeOthersPrivate: true,
+      });
     });
 
-    it('stops a cross-owner change when the audit write fails and hides a segment in the wrong organization', async () => {
+    it('does not report success when the audited update transaction fails and hides a segment in the wrong organization', async () => {
       const ORG_A = '11111111-1111-4111-8111-111111111111';
       const ORG_B = '22222222-2222-4222-8222-222222222222';
       mocks.resolveVisibility.mockResolvedValue({
@@ -260,11 +246,10 @@ describe('member-segments-actions', () => {
         visibility: { actorUserId: 'user-1', includeOthersPrivate: true },
       });
       mocks.q.getSegmentById.mockResolvedValue({ id: 's-private', createdBy: 'steward-b', isPublic: false });
-      mocks.auditSensitive.mockResolvedValueOnce(false);
+      mocks.q.updateSegment.mockRejectedValueOnce(new Error('Failed to update segment'));
 
       const unaudited = await actions.updateMemberSegmentAction('s-private', ORG_A, { name: 'Managed' });
-      expect(unaudited).toEqual({ isSuccess: false, message: 'Forbidden' });
-      expect(mocks.q.updateSegment).not.toHaveBeenCalled();
+      expect(unaudited).toEqual({ isSuccess: false, message: 'Failed to update segment' });
 
       mocks.authorize.mockResolvedValueOnce({ ok: false, message: 'Forbidden' });
       const wrongOrg = await actions.deleteMemberSegmentAction('s-private', ORG_B);
@@ -298,19 +283,22 @@ describe('member-segments-actions', () => {
     });
 
     it('getSegmentExecutionHistoryAction: success, missing segment, error', async () => {
-      mocks.q.getSegmentById.mockResolvedValueOnce({ id: 's1' });
+      mocks.q.getSegmentById.mockResolvedValueOnce({ id: 's1', createdBy: 'user-1', isPublic: true });
       expect((await actions.getSegmentExecutionHistoryAction('s1', 'org')).isSuccess).toBe(true);
       expect(mocks.q.getSegmentById).toHaveBeenCalledWith('s1', 'org', {
         actorUserId: 'user-1',
         includeOthersPrivate: false,
       });
-      expect(mocks.q.getSegmentExecutions).toHaveBeenCalledWith('s1', 'org');
+      expect(mocks.q.getSegmentExecutions).toHaveBeenCalledWith('s1', 'org', 50, {
+        actorUserId: 'user-1',
+        segments: [{ segmentId: 's1', ownerUserId: 'user-1', isPublic: true }],
+      });
 
       mocks.q.getSegmentById.mockResolvedValueOnce(null);
       const missing = await actions.getSegmentExecutionHistoryAction('s1', 'org');
       expect(missing).toEqual({ isSuccess: false, message: 'Segment not found' });
 
-      mocks.q.getSegmentById.mockResolvedValueOnce({ id: 's1' });
+      mocks.q.getSegmentById.mockResolvedValueOnce({ id: 's1', createdBy: 'user-1', isPublic: true });
       mocks.q.getSegmentExecutions.mockRejectedValueOnce(new Error('x'));
       expect((await actions.getSegmentExecutionHistoryAction('s1', 'org')).isSuccess).toBe(false);
     });

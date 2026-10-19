@@ -42,7 +42,6 @@ import { logger } from "@/lib/logger";
 import { eq } from "drizzle-orm";
 import {
   authorizeMemberSegmentAccess,
-  recordSensitiveSegmentAccess,
   resolveSegmentVisibility,
   segmentMutationAllowed,
   MEMBER_SEGMENT_EXPORT_ENTITLEMENT,
@@ -50,9 +49,8 @@ import {
   type SegmentAccessGrant,
   type SegmentVisibilityIntent,
   type SegmentVisibilityScope,
-  type SensitiveSegmentFact,
-  type SensitiveSegmentOperation,
 } from "@/lib/member-segments/authorize-segment-access";
+import type { SensitiveSegmentFact } from "@/lib/member-segments/durable-segment-audit";
 
 function denied(decision: SegmentAccessDenial): ActionResult<never> {
   return { isSuccess: false, message: decision.message };
@@ -81,29 +79,15 @@ function segmentMissing(error: unknown): boolean {
 
 function segmentFact(segment: {
   id: string;
-  createdBy: string;
-  isPublic: boolean;
-}): SensitiveSegmentFact {
+  createdBy?: string | null;
+  isPublic?: boolean | null;
+}): SensitiveSegmentFact | null {
+  if (typeof segment.createdBy !== "string" || segment.createdBy.length === 0) return null;
   return {
     segmentId: segment.id,
     ownerUserId: segment.createdBy,
-    isPublic: segment.isPublic,
+    isPublic: segment.isPublic === true,
   };
-}
-
-async function auditSensitiveOrDeny(
-  access: SegmentAccessGrant,
-  operation: SensitiveSegmentOperation,
-  segments: readonly SensitiveSegmentFact[],
-): Promise<SegmentAccessDenial | null> {
-  const recorded = await recordSensitiveSegmentAccess({
-    actorUserId: access.userId,
-    organizationId: access.organizationId,
-    operation,
-    segments,
-  });
-  if (!recorded) return { ok: false, message: "Forbidden" };
-  return null;
 }
 
 // =============================================================================
@@ -161,8 +145,6 @@ export async function getMemberSegmentsAction(
     if (!scoped.ok) return denied(scoped);
 
     const segments = await getSegments(access.organizationId, scoped.visibility);
-    const audited = await auditSensitiveOrDeny(access, "list", segments.map(segmentFact));
-    if (audited) return denied(audited);
 
     return {
       isSuccess: true,
@@ -199,9 +181,6 @@ export async function getMemberSegmentByIdAction(
         message: "Segment not found",
       };
     }
-    const audited = await auditSensitiveOrDeny(access, "read", [segmentFact(segment)]);
-    if (audited) return denied(audited);
-
     return {
       isSuccess: true,
       message: "Segment retrieved successfully",
@@ -235,9 +214,6 @@ export async function updateMemberSegmentAction(
     if (!existing || !segmentMutationAllowed(access.userId, existing, scoped.visibility.includeOthersPrivate)) {
       return { isSuccess: false, message: "Segment not found" };
     }
-    const audited = await auditSensitiveOrDeny(access, "update", [segmentFact(existing)]);
-    if (audited) return denied(audited);
-
     const updated = await updateSegment(id, data, access.organizationId, scoped.visibility);
 
     revalidatePath("/dashboard/members");
@@ -278,9 +254,6 @@ export async function deleteMemberSegmentAction(
     if (!existing || !segmentMutationAllowed(access.userId, existing, scoped.visibility.includeOthersPrivate)) {
       return { isSuccess: false, message: "Segment not found" };
     }
-    const audited = await auditSensitiveOrDeny(access, "delete", [segmentFact(existing)]);
-    if (audited) return denied(audited);
-
     await deleteSegment(id, access.organizationId, scoped.visibility);
 
     revalidatePath("/dashboard/members");
@@ -361,9 +334,6 @@ export async function executeSegmentAction(
     if (!segment) {
       return { isSuccess: false, message: "Segment not found" };
     }
-    const audited = await auditSensitiveOrDeny(access, "execute", [segmentFact(segment)]);
-    if (audited) return denied(audited);
-
     const result = await executeSegment(segmentId, access.organizationId, access.userId, {
       ...options,
       includeOthersPrivate: scoped.visibility.includeOthersPrivate,
@@ -407,10 +377,13 @@ export async function getSegmentExecutionHistoryAction(
         message: "Segment not found",
       };
     }
-    const audited = await auditSensitiveOrDeny(access, "history", [segmentFact(segment)]);
-    if (audited) return denied(audited);
-
-    const executions = await getSegmentExecutions(segmentId, access.organizationId);
+    const fact = segmentFact(segment);
+    const executions = await getSegmentExecutions(
+      segmentId,
+      access.organizationId,
+      50,
+      fact ? { actorUserId: access.userId, segments: [fact] } : undefined,
+    );
 
     return {
       isSuccess: true,
@@ -458,6 +431,7 @@ export async function exportMembersAction(
     // Get members data
     let members: any[];
     let totalCount: number;
+    let exportAudit: SensitiveSegmentFact | null = null;
 
     const scoped = segmentId
       ? await requireSegmentVisibility(access, "record")
@@ -469,8 +443,7 @@ export async function exportMembersAction(
       if (!segment) {
         return { isSuccess: false, message: "Segment not found" };
       }
-      const audited = await auditSensitiveOrDeny(access, "export", [segmentFact(segment)]);
-      if (audited) return denied(audited);
+      exportAudit = segmentFact(segment);
       const result = await executeSegment(segmentId, access.organizationId, access.userId, {
         limit: 10000,
         includeOthersPrivate: scoped.visibility.includeOthersPrivate,
@@ -526,7 +499,7 @@ export async function exportMembersAction(
       watermark,
       exportHash,
       purpose,
-    });
+    }, exportAudit ? { actorUserId: access.userId, segments: [exportAudit] } : undefined);
 
     revalidatePath("/dashboard/admin/exports");
 

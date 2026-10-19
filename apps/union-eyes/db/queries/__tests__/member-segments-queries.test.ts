@@ -8,13 +8,14 @@
  * pushes are ordered to match the sequential await order. Pure helpers
  * (generateExportWatermark/generateExportHash) need no DB.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { afterEach, describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   queue: [] as unknown[],
   rls: [] as unknown[],
   wheres: [] as unknown[],
   values: [] as unknown[],
+  outcomes: [] as Array<'commit' | 'rollback'>,
 }));
 
 function shift() {
@@ -52,7 +53,14 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (ctxOrOp: unknown, maybeOp?: unknown) => {
     const operation = typeof ctxOrOp === 'function' ? ctxOrOp : maybeOp;
     mocks.rls.push(typeof ctxOrOp === 'function' ? { organizationId: null } : ctxOrOp);
-    return (operation as (tx: unknown) => Promise<unknown>)(makeTx());
+    try {
+      const result = await (operation as (tx: unknown) => Promise<unknown>)(makeTx());
+      mocks.outcomes.push('commit');
+      return result;
+    } catch (error) {
+      mocks.outcomes.push('rollback');
+      throw error;
+    }
   },
 }));
 vi.mock('@/lib/logger', () => ({
@@ -95,11 +103,17 @@ function sqlLeaves(value: unknown, seen = new Set<unknown>()): string[] {
 }
 
 beforeEach(() => {
+  vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0');
   mocks.queue = [];
   mocks.rls = [];
   mocks.wheres = [];
   mocks.values = [];
+  mocks.outcomes = [];
   vi.clearAllMocks();
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
 });
 
 describe('member-segments-queries — CRUD', () => {
@@ -167,12 +181,16 @@ describe('member-segments-queries — CRUD', () => {
   });
 
   it('updateSegment returns the updated segment inside the authorized organization', async () => {
-    push([{ id: 's1', name: 'New' }]);
+    push([{ id: 's1', name: 'New', createdBy: STEWARD_A, isPublic: true }]);
     expect(await q.updateSegment('s1', { name: 'New', organizationId: 'org-b' } as never, 'org1', ownAndPublic)).toEqual({
       id: 's1',
       name: 'New',
+      createdBy: STEWARD_A,
+      isPublic: true,
     });
     expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
+    expect(mocks.outcomes).toEqual(['commit']);
+    expect(mocks.values).toEqual([]);
     const leaves = sqlLeaves(mocks.wheres.at(-1));
     expect(leaves).toEqual(expect.arrayContaining(['created_by', STEWARD_A]));
     expect(leaves).not.toContain('is_public');
@@ -182,18 +200,22 @@ describe('member-segments-queries — CRUD', () => {
     await expect(q.updateSegment('missing', { name: 'X' } as never, 'org1', ownAndPublic)).rejects.toThrow(
       'Segment not found',
     );
+    expect(mocks.values).toEqual([]);
+    expect(mocks.outcomes).toEqual(['rollback']);
   });
   it('updateSegment lets an authorized manager match another member private segment', async () => {
-    push([{ id: 's-private' }]);
+    push([{ id: 's-private', createdBy: STEWARD_B, isPublic: false }], []);
     await q.updateSegment('s-private', { name: 'Managed' } as never, ORG_A, managePrivate);
     const leaves = sqlLeaves(mocks.wheres.at(-1));
     expect(leaves).toContain(ORG_A);
     expect(leaves).not.toContain('created_by');
+    expect(mocks.outcomes).toEqual(['commit']);
   });
 
   it('deleteSegment soft-deletes inside the authorized organization', async () => {
-    push([{ id: 's1' }]);
+    push([{ id: 's1', createdBy: STEWARD_A, isPublic: false }]);
     await expect(q.deleteSegment('s1', 'org1', ownAndPublic)).resolves.toBeUndefined();
+    expect(mocks.values).toEqual([]);
     expect(mocks.rls.at(-1)).toEqual({ organizationId: 'org1' });
     const leaves = sqlLeaves(mocks.wheres.at(-1));
     expect(leaves).toEqual(expect.arrayContaining(['created_by', STEWARD_A]));
@@ -202,10 +224,14 @@ describe('member-segments-queries — CRUD', () => {
   it('deleteSegment does not report success when the segment is outside the organization', async () => {
     push([]);
     await expect(q.deleteSegment('foreign-segment', 'org1', ownAndPublic)).rejects.toThrow('Segment not found');
+    expect(mocks.values).toEqual([]);
+    expect(mocks.outcomes).toEqual(['rollback']);
   });
   it('deleteSegment throws on error', async () => {
     push(new Error('db'));
     await expect(q.deleteSegment('s1', 'org1', ownAndPublic)).rejects.toThrow('Failed to delete segment');
+    expect(mocks.values).toEqual([]);
+    expect(mocks.outcomes).toEqual(['rollback']);
   });
 });
 
@@ -272,15 +298,28 @@ describe('member-segments-queries — advanced search', () => {
   it('executeSegment omits another member private filters from the execution audit', async () => {
     push(
       [{ id: 's-private', filters: { status: ['active'] }, isPublic: false, createdBy: STEWARD_B }],
+      [],
       [{ id: 'm1' }],
       [{ count: 1 }],
       [{ id: 'exec1' }],
       [],
+      [],
     );
     await q.executeSegment('s-private', ORG_A, STEWARD_A, { includeOthersPrivate: true });
-    const logged = mocks.values.at(-1) as { filtersSnapshot?: unknown; resultCount?: number };
+    const logged = mocks.values.find(
+      (row) => row !== null && typeof row === 'object' && 'resultCount' in (row as object),
+    ) as { filtersSnapshot?: unknown; resultCount?: number };
     expect(logged.filtersSnapshot).toBeUndefined();
     expect(logged.resultCount).toBe(1);
+    const executeAudit = mocks.values.find(
+      (row) => row !== null && typeof row === 'object' && (row as { action?: string }).action === 'member_segment_execute',
+    ) as { outcome?: string; metadata?: { segments?: unknown } };
+    expect(executeAudit.outcome).toBe('success');
+    expect(executeAudit.metadata?.segments).toEqual([
+      { segmentId: 's-private', ownerUserId: STEWARD_B, isPublic: false },
+    ]);
+    expect(JSON.stringify(executeAudit)).not.toContain('active');
+    expect(mocks.outcomes).toEqual(['commit', 'commit', 'commit', 'commit']);
   });
   it('executeSegment throws when segment not found', async () => {
     push([]);
@@ -342,6 +381,108 @@ describe('member-segments-queries — executions & exports', () => {
   it('getExportHistory throws on error', async () => {
     push(new Error('db'));
     await expect(q.getExportHistory('org1')).rejects.toThrow('Failed to get export history');
+  });
+});
+
+describe('member-segments-queries — durable sensitive audit', () => {
+  const privateOther = {
+    id: 's-private',
+    createdBy: STEWARD_B,
+    isPublic: false,
+    name: 'Managed',
+    filters: {},
+  };
+
+  it('commits an administrator update only with a success audit written after the row returns', async () => {
+    push([privateOther], []);
+    const updated = await q.updateSegment('s-private', { name: 'Managed', filters: { status: ['active'] } } as never, ORG_A, managePrivate);
+    expect(updated).toMatchObject({ id: 's-private', createdBy: STEWARD_B });
+    expect(mocks.outcomes).toEqual(['commit']);
+    expect(mocks.values).toHaveLength(1);
+    const audit = mocks.values[0] as {
+      action: string;
+      outcome: string;
+      resourceId: string | null;
+      metadata: { segments: unknown; outcome: string };
+    };
+    expect(audit.action).toBe('member_segment_update');
+    expect(audit.outcome).toBe('success');
+    expect(audit.metadata.outcome).toBe('success');
+    expect(audit.resourceId).toBeNull();
+    expect(audit.metadata.segments).toEqual([
+      { segmentId: 's-private', ownerUserId: STEWARD_B, isPublic: false },
+    ]);
+    expect(JSON.stringify(audit)).not.toContain('active');
+    expect(JSON.stringify(audit)).not.toContain('filters');
+  });
+
+  it('rolls back an administrator update when the legacy audit insert fails', async () => {
+    push([privateOther], new Error('legacy_audit_down'));
+    await expect(
+      q.updateSegment('s-private', { name: 'Managed' } as never, ORG_A, managePrivate),
+    ).rejects.toThrow('Failed to update segment');
+    expect(mocks.outcomes).toEqual(['rollback']);
+    expect(mocks.values).toHaveLength(1);
+    expect((mocks.values[0] as { outcome?: string }).outcome).toBe('success');
+  });
+
+  it('rolls back an administrator delete when the legacy audit insert fails', async () => {
+    push([privateOther], new Error('legacy_audit_down'));
+    await expect(q.deleteSegment('s-private', ORG_A, managePrivate)).rejects.toThrow('Failed to delete segment');
+    expect(mocks.outcomes).toEqual(['rollback']);
+    expect((mocks.values[0] as { action?: string }).action).toBe('member_segment_delete');
+  });
+
+  it('writes no success audit when the segment is missing or the update SQL fails', async () => {
+    push([]);
+    await expect(q.updateSegment('missing', { name: 'X' } as never, ORG_A, managePrivate)).rejects.toThrow(
+      'Segment not found',
+    );
+    push(new Error('db'));
+    await expect(q.updateSegment('s-private', { name: 'X' } as never, ORG_A, managePrivate)).rejects.toThrow(
+      'Failed to update segment',
+    );
+    expect(mocks.values).toEqual([]);
+    expect(mocks.outcomes).toEqual(['rollback', 'rollback']);
+  });
+
+  it('does not return a private segment when its read audit fails', async () => {
+    push([privateOther], new Error('legacy_audit_down'));
+    await expect(q.getSegmentById('s-private', ORG_A, managePrivate)).rejects.toThrow('Failed to get segment');
+    expect(mocks.outcomes).toEqual(['rollback']);
+    expect((mocks.values[0] as { action?: string }).action).toBe('member_segment_read');
+  });
+
+  it('rolls the execution log back when the execute audit insert fails', async () => {
+    push(
+      [privateOther],
+      [],
+      [{ id: 'm1' }],
+      [{ count: 1 }],
+      [{ id: 'exec1' }],
+      new Error('legacy_audit_down'),
+    );
+    await expect(
+      q.executeSegment('s-private', ORG_A, STEWARD_A, { includeOthersPrivate: true }),
+    ).rejects.toThrow('Failed to execute segment');
+    expect(mocks.outcomes).toEqual(['commit', 'commit', 'rollback', 'rollback']);
+    expect(mocks.values.some((row) => (row as { action?: string }).action === 'member_segment_execute')).toBe(true);
+  });
+
+  it('rolls the export row back when the export audit insert fails', async () => {
+    push([{ id: 'exp1' }], new Error('legacy_audit_down'));
+    await expect(
+      q.logSegmentExport({ organizationId: ORG_A, filtersUsed: { status: ['active'] } } as never, {
+        actorUserId: STEWARD_A,
+        segments: [{ segmentId: 's-private', ownerUserId: STEWARD_B, isPublic: false }],
+      }),
+    ).rejects.toThrow('Failed to log segment export');
+    expect(mocks.outcomes).toEqual(['rollback']);
+    const audit = mocks.values.find((row) => (row as { action?: string }).action === 'member_segment_export') as {
+      outcome: string;
+    };
+    expect(audit.outcome).toBe('success');
+    expect(JSON.stringify(audit)).not.toContain('active');
   });
 });
 
