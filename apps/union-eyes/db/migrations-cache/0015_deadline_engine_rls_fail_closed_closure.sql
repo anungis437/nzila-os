@@ -41,9 +41,10 @@
 --   * deploy-union-eyes.yml's post-deploy rls-verify preflight reads the database, not the revision; it
 --     stays red until this migration is applied, so applying it first keeps the governed run green.
 -- Sequence: R1 read-only catalog/ledger check (STOP on any divergence from the rehearsed pre-state) -> isolate
--- every non-serving active revision -> THIS migration via the governed executor -> rls-verify preflight 1699/1699
--- AND the live isolation probe (the preflight does not detect an extra permissive policy) -> candidate Django
--- migrations -> candidate revision at 0% -> smokes -> traffic.
+-- every non-serving active revision -> THIS migration via the governed executor -> rls-verify preflight (all checks,
+-- including the deadline-engine policy-closure checks that pin the exact policy set on these three tables and reject any
+-- PUBLIC, foreign-role or widened policy) AND the independent live isolation probe -> candidate Django migrations ->
+-- candidate revision at 0% -> smokes -> traffic.
 -- Prerequisites: approved CHG-2026-0112; ALL non-serving active revisions deactivated and the ff989637/wave1
 -- labels removed (0% traffic weight is not isolation: every revision has a public FQDN and scale-to-zero revisions
 -- wake on request) so only the serving revision (rollback target) and the candidate run; ledger and catalog
