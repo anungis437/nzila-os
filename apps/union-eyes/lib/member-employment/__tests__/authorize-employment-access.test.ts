@@ -39,8 +39,10 @@ vi.mock('@/services/platform-economics/entitlement-guard', () => ({
 import {
   authorizeEmploymentAccess,
   EMPLOYMENT_DUES_ENTITLEMENT,
+  assertRegisteredEmploymentGrant,
   leaveApprovalAttempted,
   leaveSelfApprovalDenied,
+  leaveSubjectIdentityUnresolved,
   MEMBER_EMPLOYMENT_SELF_SERVICE,
   rolePermitsEmploymentAdmin,
   rolePermitsEmploymentFinance,
@@ -92,7 +94,13 @@ describe('employment role policy', () => {
     expect(leaveApprovalAttempted({ isApproved: true })).toBe(true)
     expect(leaveApprovalAttempted({ approvedBy: 'someone' })).toBe(true)
     expect(leaveSelfApprovalDenied(ADMIN, ADMIN)).toBe(true)
+    expect(leaveSelfApprovalDenied(ADMIN, ` ${ADMIN} `)).toBe(true)
     expect(leaveSelfApprovalDenied(ADMIN, MEMBER)).toBe(false)
+    expect(leaveSubjectIdentityUnresolved(null)).toBe(true)
+    expect(leaveSubjectIdentityUnresolved('')).toBe(true)
+    expect(leaveSubjectIdentityUnresolved('   ')).toBe(true)
+    expect(leaveSubjectIdentityUnresolved(MEMBER)).toBe(false)
+    expect(leaveSelfApprovalDenied(ADMIN, null)).toBe(false)
   })
 })
 
@@ -140,7 +148,10 @@ describe('authorizeEmploymentAccess', () => {
       userId: ADMIN,
       organizationId: ORG_A,
       capability: 'administer',
+      discloseCompensation: false,
     })
+    expect(() => assertRegisteredEmploymentGrant(decision)).not.toThrow()
+    expect(() => assertRegisteredEmploymentGrant({ ...decision })).toThrow('Forbidden')
     expect(mocks.getUserRole).toHaveBeenCalledWith(ADMIN, ORG_A)
     expect(mocks.hasRole).not.toHaveBeenCalled()
   })
@@ -160,6 +171,21 @@ describe('authorizeEmploymentAccess', () => {
     asMember(ADMIN, ORG_A, 'admin')
     expect(await authorizeEmploymentAccess(ORG_A, 'finance')).toEqual({ ok: false, message: 'Forbidden' })
     expect(mocks.requireEntitlement).toHaveBeenCalledTimes(1)
+  })
+
+  it('discloses compensation to an employment administrator who also holds finance authority', async () => {
+    asMember(ADMIN, ORG_A, 'secretary_treasurer')
+    const decision = await authorizeEmploymentAccess(ORG_A, 'administer')
+    expect(decision).toMatchObject({ ok: true, capability: 'administer', discloseCompensation: true })
+    expect(mocks.requireEntitlement).toHaveBeenCalledWith(ORG_A, EMPLOYMENT_DUES_ENTITLEMENT, ADMIN)
+  })
+
+  it('keeps employment administration when the finance entitlement is missing', async () => {
+    asMember(ADMIN, ORG_A, 'president')
+    const error = Object.assign(new Error('Entitlement required'), { code: 'ENTITLEMENT_REQUIRED' })
+    mocks.requireEntitlement.mockRejectedValue(error)
+    const decision = await authorizeEmploymentAccess(ORG_A, 'administer')
+    expect(decision).toMatchObject({ ok: true, capability: 'administer', discloseCompensation: false })
   })
 
   it('denies finance when the entitlement is missing', async () => {

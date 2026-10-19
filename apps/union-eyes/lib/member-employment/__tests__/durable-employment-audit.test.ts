@@ -87,6 +87,7 @@ describe('persistDurableEmploymentAudit', () => {
       operation: 'leave_approve',
       outcome: 'success',
       changeCategory: 'leave_approval',
+      eventType: 'data.update',
       targetId: TARGET,
     })
     expect(JSON.stringify(inserted[0])).not.toContain('hourly')
@@ -118,6 +119,26 @@ describe('persistDurableEmploymentAudit', () => {
     expect(JSON.stringify(insertCall)).toContain('public.audit_logs')
     expect(JSON.stringify(insertCall)).not.toContain('99.50')
     expect(auditLog).not.toHaveBeenCalled()
+  })
+
+  it('records a compensation read as access', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
+    const { tx, inserted } = legacyTx()
+    await persistDurableEmploymentAudit(tx, { ...mutation, operation: 'compensation_read' })
+    expect(inserted[0].action).toBe('member_employment_compensation_read')
+    expect(inserted[0].metadata).toMatchObject({
+      operation: 'compensation_read',
+      eventType: 'data.access',
+      changeCategory: 'compensation',
+    })
+    expect(JSON.stringify(inserted[0])).not.toContain('hourly')
+  })
+
+  it('records creation separately from an update', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
+    const { tx, inserted } = legacyTx()
+    await persistDurableEmploymentAudit(tx, { ...mutation, operation: 'create' })
+    expect(inserted[0].metadata).toMatchObject({ eventType: 'data.create' })
   })
 
   it('keeps a non-uuid target in metadata', async () => {

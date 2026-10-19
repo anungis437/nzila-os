@@ -133,7 +133,7 @@ const PATH_BINDINGS: [RegExp, ControlBinding][] = [
     {
       control: 'TENANT_RLS_TRANSACTION',
       basis:
-        'server-only query helper, not a Server Action. member-employment-actions authorizes the principal and organization, then passes that EmploymentActorScope. Mutations run inside withRLSContext for that organization.',
+        'server-only query helper, not a Server Action. Callers must pass the grant object registered by authorizeEmploymentAccess. Mutations run inside withRLSContext for that organization. Individual compensation is projected from discloseCompensation on that grant.',
     },
   ],
 ]

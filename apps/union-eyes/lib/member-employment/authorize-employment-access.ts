@@ -14,7 +14,9 @@
  *
  * Compensation reads for dues use the finance allow-list plus the existing
  * `financial_intelligence_suite` entitlement. There is no separate internal
- * service caller for that action.
+ * service caller for that action. An employment administrator who also holds
+ * that finance authority receives `discloseCompensation` on the same grant.
+ * Everyone else still administers employment, without individual pay figures.
  *
  * This module does not prove that a deployed database enforces row-level security.
  */
@@ -61,11 +63,21 @@ export const MEMBER_EMPLOYMENT_SELF_SERVICE = 'denied' as const
 
 export type EmploymentCapability = 'administer' | 'finance'
 
+export class EmploymentBoundaryError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'EmploymentBoundaryError'
+  }
+}
+
+const registeredGrants = new WeakSet<object>()
+
 export type EmploymentAccessGrant = {
   ok: true
   userId: string
   organizationId: string
   capability: EmploymentCapability
+  discloseCompensation: boolean
 }
 
 export type EmploymentAccessDenial = {
@@ -94,11 +106,28 @@ export function leaveApprovalAttempted(data: {
 }
 
 /**
+ * Approval needs the member row's current `userId`. A missing or blank link
+ * does not prove the approver is someone else.
+ */
+export function leaveSubjectIdentityUnresolved(subjectUserId: string | null | undefined): boolean {
+  return typeof subjectUserId !== 'string' || subjectUserId.trim() === ''
+}
+
+/**
  * The approver and the subject member must be different people.
  * `subjectUserId` comes from the member row, not from the caller payload.
  */
 export function leaveSelfApprovalDenied(actorUserId: string, subjectUserId: string | null | undefined): boolean {
-  return typeof subjectUserId === 'string' && subjectUserId.length > 0 && subjectUserId === actorUserId
+  if (leaveSubjectIdentityUnresolved(subjectUserId)) return false
+  return subjectUserId!.trim() === actorUserId
+}
+
+export function assertRegisteredEmploymentGrant(
+  value: unknown,
+): asserts value is EmploymentAccessGrant {
+  if (typeof value !== 'object' || value === null || !registeredGrants.has(value)) {
+    throw new EmploymentBoundaryError('Forbidden')
+  }
 }
 
 function isEntitlementDenial(error: unknown): boolean {
@@ -188,19 +217,24 @@ export async function authorizeEmploymentAccess(
     return { ok: false, message: 'Forbidden' }
   }
 
-  if (capability === 'finance') {
+  let discloseCompensation = false
+  if (capability === 'finance' || rolePermitsEmploymentFinance(role)) {
     try {
       await requireEntitlement(requestedOrganizationId, EMPLOYMENT_DUES_ENTITLEMENT, userId)
+      discloseCompensation = true
     } catch (error) {
       if (!isEntitlementDenial(error)) throw error
-      return { ok: false, message: 'Module access denied' }
+      if (capability === 'finance') return { ok: false, message: 'Module access denied' }
     }
   }
 
-  return {
+  const grant: EmploymentAccessGrant = {
     ok: true,
     userId,
     organizationId: requestedOrganizationId,
     capability,
+    discloseCompensation,
   }
+  registeredGrants.add(grant)
+  return grant
 }

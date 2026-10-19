@@ -61,6 +61,19 @@ function resourceTypeFor(operation: EmploymentAuditOperation): string {
   return 'member_employment'
 }
 
+export function employmentAuditEventType(operation: EmploymentAuditOperation): string {
+  if (operation === 'compensation_read') return 'data.access'
+  if (
+    operation === 'create' ||
+    operation === 'history' ||
+    operation === 'leave_create' ||
+    operation === 'classification_create'
+  ) {
+    return 'data.create'
+  }
+  return 'data.update'
+}
+
 function changeCategoryFor(operation: EmploymentAuditOperation): string {
   if (operation === 'leave_approve') return 'leave_approval'
   if (operation.startsWith('leave')) return 'leave'
@@ -101,10 +114,12 @@ export async function persistDurableEmploymentAudit(
     targetId: string | null
   },
 ): Promise<void> {
+  const eventType = employmentAuditEventType(input.operation)
   const metadata = {
     operation: input.operation,
     outcome: input.outcome,
     changeCategory: changeCategoryFor(input.operation),
+    eventType,
     targetId: input.targetId,
   }
   assertEmploymentAuditMetadata(metadata)
@@ -119,7 +134,7 @@ export async function persistDurableEmploymentAudit(
       resourceId,
       userId: input.actorUserId,
       details: {
-        eventType: 'data.update',
+        eventType,
         severity: 'error',
         outcome: input.outcome,
         metadata,

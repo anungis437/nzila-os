@@ -4,9 +4,10 @@
  * Member employment server actions.
  *
  * Every action resolves `auth()` through `authorizeEmploymentAccess` and
- * passes that principal and organization into the query layer. Reads require
- * the same employment-administration allow-list as writes. Dues compensation
- * requires the finance allow-list and `financial_intelligence_suite`.
+ * passes that sealed grant into the query layer. Reads require the same
+ * employment-administration allow-list as writes. Individual pay is included
+ * only when that grant has finance disclosure. Dues compensation requires the
+ * finance allow-list and `financial_intelligence_suite`.
  * Member self-service is not granted.
  */
 
@@ -48,15 +49,6 @@ import type {
 } from "@/db/schema/domains/member/member-employment";
 import { ActionResult } from "@/types/actions/actions-types";
 
-type EmploymentGrant = {
-  userId: string
-  organizationId: string
-}
-
-function scopeOf(grant: EmploymentGrant) {
-  return { organizationId: grant.organizationId, actorUserId: grant.userId }
-}
-
 function failure(message: string): ActionResult<never> {
   return { isSuccess: false, message }
 }
@@ -88,7 +80,7 @@ export async function createMemberEmploymentAction(
   const access = await requireAdmin(data?.organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const employment = await createMemberEmployment(scopeOf(access), data)
+    const employment = await createMemberEmployment(access, data)
     revalidateEmployment()
     return { isSuccess: true, message: "Employment record created successfully", data: employment }
   } catch (error) {
@@ -104,7 +96,7 @@ export async function getMemberEmploymentByIdAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const employment = await getMemberEmploymentById(scopeOf(access), id)
+    const employment = await getMemberEmploymentById(access, id)
     return { isSuccess: true, message: "Employment record retrieved successfully", data: employment }
   } catch (error) {
     logFailure("Failed to get employment record", error, { organizationId: access.organizationId, id })
@@ -119,7 +111,7 @@ export async function getActiveMemberEmploymentAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const employment = await getActiveMemberEmployment(scopeOf(access), memberId)
+    const employment = await getActiveMemberEmployment(access, memberId)
     return { isSuccess: true, message: "Active employment retrieved successfully", data: employment }
   } catch (error) {
     logFailure("Failed to get active employment", error, { organizationId: access.organizationId })
@@ -134,7 +126,7 @@ export async function getAllMemberEmploymentAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const employmentRecords = await getAllMemberEmployment(scopeOf(access), memberId)
+    const employmentRecords = await getAllMemberEmployment(access, memberId)
     return { isSuccess: true, message: "Employment records retrieved successfully", data: employmentRecords }
   } catch (error) {
     logFailure("Failed to get all employment records", error, { organizationId: access.organizationId })
@@ -149,7 +141,7 @@ export async function getEmploymentByOrganizationAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const employmentRecords = await getEmploymentByOrganization(scopeOf(access), status)
+    const employmentRecords = await getEmploymentByOrganization(access, status)
     return {
       isSuccess: true,
       message: "Organization employment records retrieved successfully",
@@ -168,7 +160,7 @@ export async function updateMemberEmploymentAction(
   const access = await requireAdmin(data?.organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const updatedEmployment = await updateMemberEmployment(scopeOf(access), id, data)
+    const updatedEmployment = await updateMemberEmployment(access, id, data)
     revalidateEmployment()
     return { isSuccess: true, message: "Employment record updated successfully", data: updatedEmployment }
   } catch (error) {
@@ -184,7 +176,7 @@ export async function deleteMemberEmploymentAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    await deleteMemberEmployment(scopeOf(access), id)
+    await deleteMemberEmployment(access, id)
     revalidateEmployment()
     return { isSuccess: true, message: "Employment record deleted successfully" }
   } catch (error) {
@@ -207,7 +199,7 @@ export async function getEmploymentForDuesCalculationAction(
   const access = await authorizeEmploymentAccess(organizationId, 'finance')
   if (!access.ok) return failure(access.message)
   try {
-    const duesData = await getEmploymentForDuesCalculation(scopeOf(access), memberId)
+    const duesData = await getEmploymentForDuesCalculation(access, memberId)
     return { isSuccess: true, message: "Dues calculation data retrieved successfully", data: duesData }
   } catch (error) {
     logFailure("Failed to get dues calculation data", error, { organizationId: access.organizationId })
@@ -221,7 +213,7 @@ export async function createEmploymentHistoryAction(
   const access = await requireAdmin(data?.organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const history = await createEmploymentHistory(scopeOf(access), data)
+    const history = await createEmploymentHistory(access, data)
     revalidatePath("/dashboard/admin/employment")
     return { isSuccess: true, message: "Employment history record created successfully", data: history }
   } catch (error) {
@@ -237,7 +229,7 @@ export async function getEmploymentHistoryByMemberAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const history = await getEmploymentHistoryByMember(scopeOf(access), memberId)
+    const history = await getEmploymentHistoryByMember(access, memberId)
     return { isSuccess: true, message: "Employment history retrieved successfully", data: history }
   } catch (error) {
     logFailure("Failed to get employment history", error, { organizationId: access.organizationId })
@@ -251,7 +243,7 @@ export async function createMemberLeaveAction(
   const access = await requireAdmin(data?.organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const leave = await createMemberLeave(scopeOf(access), data)
+    const leave = await createMemberLeave(access, data)
     revalidateEmployment()
     return { isSuccess: true, message: "Leave request created successfully", data: leave }
   } catch (error) {
@@ -268,7 +260,7 @@ export async function getActiveMemberLeavesAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const leaves = await getActiveMemberLeaves(scopeOf(access), memberId, currentDate)
+    const leaves = await getActiveMemberLeaves(access, memberId, currentDate)
     return { isSuccess: true, message: "Active leaves retrieved successfully", data: leaves }
   } catch (error) {
     logFailure("Failed to get active leaves", error, { organizationId: access.organizationId })
@@ -283,7 +275,7 @@ export async function getAllMemberLeavesAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const leaves = await getAllMemberLeaves(scopeOf(access), memberId)
+    const leaves = await getAllMemberLeaves(access, memberId)
     return { isSuccess: true, message: "Leave records retrieved successfully", data: leaves }
   } catch (error) {
     logFailure("Failed to get leave records", error, { organizationId: access.organizationId })
@@ -298,7 +290,7 @@ export async function updateMemberLeaveAction(
   const access = await requireAdmin(data?.organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const updatedLeave = await updateMemberLeave(scopeOf(access), id, data)
+    const updatedLeave = await updateMemberLeave(access, id, data)
     revalidateEmployment()
     return { isSuccess: true, message: "Leave record updated successfully", data: updatedLeave }
   } catch (error) {
@@ -314,7 +306,7 @@ export async function approveMemberLeaveAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const updatedLeave = await approveMemberLeave(scopeOf(access), id)
+    const updatedLeave = await approveMemberLeave(access, id)
     revalidateEmployment()
     return { isSuccess: true, message: "Leave request approved successfully", data: updatedLeave }
   } catch (error) {
@@ -329,7 +321,7 @@ export async function createJobClassificationAction(
   const access = await requireAdmin(data?.organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const classification = await createJobClassification(scopeOf(access), data)
+    const classification = await createJobClassification(access, data)
     revalidatePath("/dashboard/admin/employment")
     return { isSuccess: true, message: "Job classification created successfully", data: classification }
   } catch (error) {
@@ -345,7 +337,7 @@ export async function getJobClassificationByCodeAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const classification = await getJobClassificationByCode(scopeOf(access), jobCode)
+    const classification = await getJobClassificationByCode(access, jobCode)
     return { isSuccess: true, message: "Job classification retrieved successfully", data: classification }
   } catch (error) {
     logFailure("Failed to get job classification", error, { organizationId: access.organizationId })
@@ -360,7 +352,7 @@ export async function getJobClassificationsByOrganizationAction(
   const access = await requireAdmin(organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const classifications = await getJobClassificationsByOrganization(scopeOf(access), activeOnly)
+    const classifications = await getJobClassificationsByOrganization(access, activeOnly)
     return { isSuccess: true, message: "Job classifications retrieved successfully", data: classifications }
   } catch (error) {
     logFailure("Failed to get job classifications", error, { organizationId: access.organizationId })
@@ -375,7 +367,7 @@ export async function updateJobClassificationAction(
   const access = await requireAdmin(data?.organizationId)
   if (!access.ok) return failure(access.message)
   try {
-    const updatedClassification = await updateJobClassification(scopeOf(access), id, data)
+    const updatedClassification = await updateJobClassification(access, id, data)
     revalidatePath("/dashboard/admin/employment")
     return { isSuccess: true, message: "Job classification updated successfully", data: updatedClassification }
   } catch (error) {
@@ -394,7 +386,7 @@ export async function calculateSeniorityYearsAction(
   if (!access.ok) return failure(access.message)
   try {
     const years = await calculateSeniorityYears(
-      scopeOf(access),
+      access,
       new Date(seniorityDate),
       currentDate,
       memberId,

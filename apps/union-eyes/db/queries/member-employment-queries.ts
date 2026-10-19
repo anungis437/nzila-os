@@ -32,28 +32,55 @@ import { and, asc, desc, eq, gte, isNull, lte, or } from 'drizzle-orm'
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context'
 import { logger } from '@/lib/logger'
 import {
+  assertRegisteredEmploymentGrant,
+  EmploymentBoundaryError,
   leaveApprovalAttempted,
   leaveSelfApprovalDenied,
+  leaveSubjectIdentityUnresolved,
+  type EmploymentAccessGrant,
 } from '@/lib/member-employment/authorize-employment-access'
+import {
+  compensationWriteAttempted,
+  projectEmploymentHistory,
+  projectMemberEmployment,
+  snapshotContainsCompensation,
+} from '@/lib/member-employment/compensation-disclosure'
 import { persistDurableEmploymentAudit } from '@/lib/member-employment/durable-employment-audit'
 
-export class EmploymentBoundaryError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'EmploymentBoundaryError'
-  }
-}
+export { EmploymentBoundaryError }
 
-export type EmploymentActorScope = {
-  organizationId: string
-  actorUserId: string
-}
+export type EmploymentActorScope = EmploymentAccessGrant
 
 function assertScope(scope: EmploymentActorScope): void {
-  if (typeof scope?.organizationId !== 'string' || scope.organizationId.trim() === '') {
+  assertRegisteredEmploymentGrant(scope)
+  if (typeof scope.organizationId !== 'string' || scope.organizationId.trim() === '') {
     throw new EmploymentBoundaryError('Organization context required')
   }
-  if (typeof scope.actorUserId !== 'string' || scope.actorUserId.trim() === '') {
+  if (typeof scope.userId !== 'string' || scope.userId.trim() === '') {
+    throw new EmploymentBoundaryError('Forbidden')
+  }
+}
+
+function releaseEmployment<T>(scope: EmploymentActorScope, row: T): T {
+  return projectMemberEmployment(row, scope.discloseCompensation)
+}
+
+function releaseHistory<T extends { previousValues?: unknown; newValues?: unknown }>(
+  scope: EmploymentActorScope,
+  row: T,
+): T {
+  return projectEmploymentHistory(row, scope.discloseCompensation)
+}
+
+function assertCompensationWrite(scope: EmploymentActorScope, data: object): void {
+  if (!scope.discloseCompensation && compensationWriteAttempted(data)) {
+    throw new EmploymentBoundaryError('Forbidden')
+  }
+}
+
+function assertHistoryDisclosure(scope: EmploymentActorScope, data: { previousValues?: unknown; newValues?: unknown }): void {
+  if (scope.discloseCompensation) return
+  if (snapshotContainsCompensation(data.previousValues) || snapshotContainsCompensation(data.newValues)) {
     throw new EmploymentBoundaryError('Forbidden')
   }
 }
@@ -183,7 +210,7 @@ async function auditSuccess(
   targetId: string | null,
 ): Promise<void> {
   await persistDurableEmploymentAudit(tx, {
-    actorUserId: scope.actorUserId,
+    actorUserId: scope.userId,
     organizationId: scope.organizationId,
     operation,
     outcome: 'success',
@@ -197,18 +224,19 @@ export async function createMemberEmployment(
   tx?: RLSTx,
 ): Promise<MemberEmployment> {
   rejectOrgMove(scope, data.organizationId)
+  assertCompensationWrite(scope, data)
   return inScope(scope, tx, async (db) => {
     await requireMember(db, scope.organizationId, data.memberId)
     await assertEmploymentRefs(db, scope.organizationId, data)
     const [employment] = await db.insert(memberEmployment).values({
       ...data,
       organizationId: scope.organizationId,
-      createdBy: scope.actorUserId,
-      updatedBy: scope.actorUserId,
+      createdBy: scope.userId,
+      updatedBy: scope.userId,
     }).returning()
     if (!employment) throw new EmploymentBoundaryError('Employment record not found')
     await auditSuccess(db, scope, 'create', employment.id)
-    return employment
+    return releaseEmployment(scope, employment)
   })
 }
 
@@ -223,7 +251,7 @@ export async function getMemberEmploymentById(
       .from(memberEmployment)
       .where(and(eq(memberEmployment.id, id), eq(memberEmployment.organizationId, scope.organizationId)))
       .limit(1)
-    return employment ?? null
+    return employment ? releaseEmployment(scope, employment) : null
   })
 }
 
@@ -245,7 +273,7 @@ export async function getActiveMemberEmployment(
       ))
       .orderBy(desc(memberEmployment.hireDate))
       .limit(1)
-    return employment ?? null
+    return employment ? releaseEmployment(scope, employment) : null
   })
 }
 
@@ -265,6 +293,7 @@ export async function getAllMemberEmployment(
         eq(memberEmployment.organizationId, scope.organizationId),
       ))
       .orderBy(desc(memberEmployment.hireDate))
+      .then((rows) => rows.map((row) => releaseEmployment(scope, row)))
   })
 }
 
@@ -283,6 +312,7 @@ export async function getEmploymentByOrganization(
       .from(memberEmployment)
       .where(and(...conditions))
       .orderBy(asc(memberEmployment.jobTitle))
+      .then((rows) => rows.map((row) => releaseEmployment(scope, row)))
   })
 }
 
@@ -293,6 +323,7 @@ export async function updateMemberEmployment(
   tx?: RLSTx,
 ): Promise<MemberEmployment> {
   rejectOrgMove(scope, data.organizationId)
+  assertCompensationWrite(scope, data)
   return inScope(scope, tx, async (db) => {
     const [existing] = await db
       .select()
@@ -304,7 +335,7 @@ export async function updateMemberEmployment(
       throw new EmploymentBoundaryError('Forbidden')
     }
     await assertEmploymentRefs(db, scope.organizationId, data)
-    const patch: Partial<NewMemberEmployment> = { ...data, updatedAt: new Date(), updatedBy: scope.actorUserId }
+    const patch: Partial<NewMemberEmployment> = { ...data, updatedAt: new Date(), updatedBy: scope.userId }
     delete patch.organizationId
     delete patch.memberId
     delete patch.id
@@ -316,7 +347,7 @@ export async function updateMemberEmployment(
       .returning()
     if (!employment) throw new EmploymentBoundaryError('Employment record not found')
     await auditSuccess(db, scope, 'update', employment.id)
-    return employment
+    return releaseEmployment(scope, employment)
   })
 }
 
@@ -342,6 +373,7 @@ export async function getEmploymentForDuesCalculation(
   employmentStatus: string
   payFrequency: string
 } | null> {
+  if (!scope.discloseCompensation) throw new EmploymentBoundaryError('Forbidden')
   return inScope(scope, tx, async (db) => {
     const member = await loadMember(db, scope.organizationId, memberId)
     if (!member) return null
@@ -376,6 +408,7 @@ export async function createEmploymentHistory(
   tx?: RLSTx,
 ): Promise<EmploymentHistory> {
   rejectOrgMove(scope, data.organizationId)
+  assertHistoryDisclosure(scope, data)
   return inScope(scope, tx, async (db) => {
     await requireMember(db, scope.organizationId, data.memberId)
     if (data.memberEmploymentId) {
@@ -393,11 +426,11 @@ export async function createEmploymentHistory(
     const [history] = await db.insert(employmentHistory).values({
       ...data,
       organizationId: scope.organizationId,
-      createdBy: scope.actorUserId,
+      createdBy: scope.userId,
     }).returning()
     if (!history) throw new EmploymentBoundaryError('Employment record not found')
     await auditSuccess(db, scope, 'history', history.id)
-    return history
+    return releaseHistory(scope, history)
   })
 }
 
@@ -417,6 +450,7 @@ export async function getEmploymentHistoryByMember(
         eq(employmentHistory.organizationId, scope.organizationId),
       ))
       .orderBy(desc(employmentHistory.effectiveDate))
+      .then((rows) => rows.map((row) => releaseHistory(scope, row)))
   })
 }
 
@@ -457,7 +491,7 @@ export async function createMemberLeave(
       approvedBy: null,
       approvedAt: null,
       duesWaiverApproved: false,
-      createdBy: scope.actorUserId,
+      createdBy: scope.userId,
     }).returning()
     if (!leave) throw new EmploymentBoundaryError('Leave record not found')
     await auditSuccess(db, scope, 'leave_create', leave.id)
@@ -544,7 +578,7 @@ export async function updateMemberLeave(
       isApproved: existing.isApproved,
       approvedBy: existing.approvedBy,
       approvedAt: existing.approvedAt,
-      duesWaiverApproved: false,
+      duesWaiverApproved: existing.duesWaiverApproved,
     }
     delete patch.organizationId
     delete patch.memberId
@@ -574,14 +608,17 @@ export async function approveMemberLeave(
       .limit(1)
     if (!existing) throw new EmploymentBoundaryError('Leave record not found')
     const member = await requireMember(db, scope.organizationId, existing.memberId)
-    if (leaveSelfApprovalDenied(scope.actorUserId, member.userId)) {
+    if (leaveSubjectIdentityUnresolved(member.userId)) {
+      throw new EmploymentBoundaryError('Leave approval requires a resolved subject identity')
+    }
+    if (leaveSelfApprovalDenied(scope.userId, member.userId)) {
       throw new EmploymentBoundaryError('Leave approval requires a different member')
     }
     const [leave] = await db
       .update(memberLeaves)
       .set({
         isApproved: true,
-        approvedBy: scope.actorUserId,
+        approvedBy: scope.userId,
         approvedAt: new Date(),
         updatedAt: new Date(),
       })
@@ -608,7 +645,7 @@ export async function createJobClassification(
     const [classification] = await db.insert(jobClassifications).values({
       ...data,
       organizationId: scope.organizationId,
-      createdBy: scope.actorUserId,
+      createdBy: scope.userId,
     }).returning()
     if (!classification) throw new EmploymentBoundaryError('Job classification not found')
     await auditSuccess(db, scope, 'classification_create', classification.id)
@@ -616,6 +653,11 @@ export async function createJobClassification(
   })
 }
 
+/**
+ * Classification minimum, maximum, and standard rates are negotiated bands
+ * for a job code. They are not a member's individual compensation, so this
+ * read stays on the employment-administration grant.
+ */
 export async function getJobClassificationByCode(
   scope: EmploymentActorScope,
   jobCode: string,

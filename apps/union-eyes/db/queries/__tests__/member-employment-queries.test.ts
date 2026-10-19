@@ -3,7 +3,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const ORG_A = '11111111-1111-4111-8111-111111111111'
 const ORG_B = '22222222-2222-4222-8222-222222222222'
 const MEMBER = '33333333-3333-4333-8333-333333333333'
-const scope = { organizationId: ORG_A, actorUserId: 'user-admin-a' }
+const scope = {
+  ok: true as const,
+  userId: 'user-admin-a',
+  organizationId: ORG_A,
+  capability: 'administer' as const,
+  discloseCompensation: false,
+}
+const financeScope = {
+  ...scope,
+  capability: 'finance' as const,
+  discloseCompensation: true,
+}
 
 const mocks = vi.hoisted(() => ({
   queue: [] as unknown[],
@@ -44,6 +55,12 @@ function makeTx() {
 }
 
 vi.mock('server-only', () => ({}))
+vi.mock('@/lib/member-employment/authorize-employment-access', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/member-employment/authorize-employment-access')>(
+    '@/lib/member-employment/authorize-employment-access',
+  )
+  return { ...actual, assertRegisteredEmploymentGrant: () => {} }
+})
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (contextOrOp: unknown, maybeOp?: unknown) => {
     const hasContext = typeof contextOrOp !== 'function'
@@ -88,7 +105,7 @@ describe('member employment query boundary', () => {
     push([{ id: MEMBER, userId: 'member-user' }])
     push([{ id: 'e1', memberId: MEMBER, organizationId: ORG_A }])
     push([])
-    const row = await q.createMemberEmployment(scope, {
+    const row = await q.createMemberEmployment(financeScope, {
       organizationId: ORG_A,
       memberId: MEMBER,
       jobTitle: 'Welder',
@@ -188,7 +205,7 @@ describe('member employment query boundary', () => {
       payFrequency: 'bi_weekly',
     }])
     push([])
-    await expect(q.getEmploymentForDuesCalculation(scope, MEMBER)).resolves.toEqual({
+    await expect(q.getEmploymentForDuesCalculation(financeScope, MEMBER)).resolves.toEqual({
       grossWages: 1000.5,
       baseSalary: 52000,
       hourlyRate: 25,
@@ -198,7 +215,8 @@ describe('member employment query boundary', () => {
     })
 
     push([])
-    expect(await q.getEmploymentForDuesCalculation(scope, MEMBER)).toBeNull()
+    expect(await q.getEmploymentForDuesCalculation(financeScope, MEMBER)).toBeNull()
+    await expect(q.getEmploymentForDuesCalculation(scope, MEMBER)).rejects.toThrow('Forbidden')
   })
 
   it('rejects leave approval fields and attributes an authorized approval to the actor', async () => {
@@ -209,6 +227,34 @@ describe('member employment query boundary', () => {
       approvedBy: 'forged',
     } as never)).rejects.toThrow('Approval fields are assigned by the approval action')
     expect(mocks.orgs).toEqual([])
+
+    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A, duesWaiverApproved: true, isApproved: true, approvedBy: 'other' }])
+    push([{ id: 'l1', duesWaiverApproved: true, isApproved: true, approvedBy: 'other' }])
+    push([])
+    await q.updateMemberLeave(scope, 'l1', {
+      organizationId: ORG_A,
+      reason: 'date change',
+      duesWaiverApproved: false,
+      isApproved: false,
+    } as never)
+    expect(mocks.sets.at(-1)).toMatchObject({
+      duesWaiverApproved: true,
+      isApproved: true,
+      approvedBy: 'other',
+      reason: 'date change',
+    })
+
+    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
+    push([])
+    await expect(q.approveMemberLeave(scope, 'l1')).rejects.toThrow('Forbidden')
+
+    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
+    push([{ id: MEMBER, userId: null }])
+    await expect(q.approveMemberLeave(scope, 'l1')).rejects.toThrow('resolved subject identity')
+
+    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
+    push([{ id: MEMBER, userId: '   ' }])
+    await expect(q.approveMemberLeave(scope, 'l1')).rejects.toThrow('resolved subject identity')
 
     push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
     push([{ id: MEMBER, userId: 'user-admin-a' }])
@@ -249,5 +295,61 @@ describe('member employment query boundary', () => {
     const years = await q.calculateSeniorityYears(scope, seniority, now, MEMBER)
     expect(years).toBeCloseTo(4, 0)
     expect(mocks.orgs).toEqual([ORG_A, ORG_A])
+  })
+
+  it('withholds individual compensation from an employment administrator', async () => {
+    await expect(q.createMemberEmployment(scope, {
+      organizationId: ORG_A,
+      memberId: MEMBER,
+      hourlyRate: '99.50',
+    } as never)).rejects.toThrow('Forbidden')
+
+    push([{
+      id: 'e1',
+      organizationId: ORG_A,
+      hourlyRate: '25.00',
+      baseSalary: '52000.00',
+      grossWages: '1000.50',
+      jobTitle: 'Welder',
+      customFields: { badge_number: 'B-1', hourly_rate: '25.00' },
+    }])
+    const row = await q.getMemberEmploymentById(scope, 'e1')
+    expect(row).toMatchObject({ jobTitle: 'Welder', hourlyRate: null, baseSalary: null, grossWages: null })
+    expect(JSON.stringify(row)).not.toContain('25.00')
+    expect(JSON.stringify(row)).not.toContain('52000')
+    expect(JSON.stringify(row)).toContain('B-1')
+
+    push([{
+      id: 'e1',
+      hourlyRate: '25.00',
+      baseSalary: '52000.00',
+      grossWages: '1000.50',
+      jobTitle: 'Welder',
+    }])
+    const disclosed = await q.getMemberEmploymentById(financeScope, 'e1')
+    expect(disclosed).toMatchObject({ hourlyRate: '25.00', baseSalary: '52000.00', grossWages: '1000.50' })
+  })
+
+  it('withholds historical wage snapshots without a finance grant', async () => {
+    await expect(q.createEmploymentHistory(scope, {
+      organizationId: ORG_A,
+      memberId: MEMBER,
+      changeType: 'wage_change',
+      previousValues: { hourlyRate: '20.00' },
+      newValues: { hourly_rate: '25.00' },
+    } as never)).rejects.toThrow('Forbidden')
+
+    push([{ id: MEMBER, userId: 'member-user' }])
+    push([{
+      id: 'h1',
+      changeType: 'wage_change',
+      previousValues: { jobTitle: 'Helper', hourlyRate: '20.00' },
+      newValues: { jobTitle: 'Welder', gross_wages: '1000.50' },
+    }])
+    const [history] = await q.getEmploymentHistoryByMember(scope, MEMBER)
+    expect(history.previousValues).toEqual({ jobTitle: 'Helper' })
+    expect(history.newValues).toEqual({ jobTitle: 'Welder' })
+    expect(JSON.stringify(history)).not.toContain('20.00')
+    expect(JSON.stringify(history)).not.toContain('1000.50')
   })
 })

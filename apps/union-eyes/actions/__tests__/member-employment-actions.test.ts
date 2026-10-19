@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const ORG = '11111111-1111-4111-8111-111111111111'
-const grant = { ok: true as const, userId: 'user-admin-a', organizationId: ORG, capability: 'administer' as const }
+const grant = {
+  ok: true as const,
+  userId: 'user-admin-a',
+  organizationId: ORG,
+  capability: 'administer' as const,
+  discloseCompensation: false,
+}
 
 const mocks = vi.hoisted(() => ({
   authorize: vi.fn(),
@@ -83,7 +89,7 @@ describe('member employment actions', () => {
     } as never)
     expect(mocks.authorize).toHaveBeenCalledWith(ORG, 'administer')
     expect(mocks.q.createMemberEmployment).toHaveBeenCalledWith(
-      { organizationId: ORG, actorUserId: 'user-admin-a' },
+      grant,
       expect.objectContaining({ organizationId: ORG }),
     )
   })
@@ -110,7 +116,7 @@ describe('member employment actions', () => {
   })
 
   it('requires finance authorization for dues data', async () => {
-    mocks.authorize.mockResolvedValue({ ...grant, capability: 'finance' })
+    mocks.authorize.mockResolvedValue({ ...grant, capability: 'finance', discloseCompensation: true })
     const ok = await actions.getEmploymentForDuesCalculationAction('m1', ORG)
     expect(ok.isSuccess).toBe(true)
     expect(mocks.authorize).toHaveBeenCalledWith(ORG, 'finance')
@@ -123,10 +129,7 @@ describe('member employment actions', () => {
 
   it('approves leave through the server-owned approval query', async () => {
     await actions.approveMemberLeaveAction('l1', ORG)
-    expect(mocks.q.approveMemberLeave).toHaveBeenCalledWith(
-      { organizationId: ORG, actorUserId: 'user-admin-a' },
-      'l1',
-    )
+    expect(mocks.q.approveMemberLeave).toHaveBeenCalledWith(grant, 'l1')
     expect(mocks.q.updateMemberLeave).not.toHaveBeenCalled()
   })
 
