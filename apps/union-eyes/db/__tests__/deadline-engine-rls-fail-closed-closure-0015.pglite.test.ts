@@ -288,6 +288,23 @@ describe('0015 - one release order across the migration header and the change re
     expect(chg.description).toMatch(/content\.0004 and grievances\.0005/);
   });
 
+  it('keeps credential hygiene out of the prerequisites (deferred by Principal decision) while real approvals stay unset and an active compromise still blocks', () => {
+    const full = JSON.parse(read(resolve(REPO_ROOT, 'ops', 'change-records', 'CHG-2026-0112.json'))) as {
+      description: string;
+      approved_by: string[];
+      approval_status: string;
+      status: string;
+    };
+    expect(full.description).toMatch(/CREDENTIAL HYGIENE IS NOT A PREREQUISITE OF THIS CHANGE/);
+    expect(full.description).toMatch(/DEFERRED/);
+    expect(full.description).toMatch(/ACTIVE compromise that affects this operation must be controlled before/);
+    expect(full.description).not.toMatch(/\(6\) COMMAND credential-containment disposition/);
+    // no agent or script may record an approval on behalf of the real approvers
+    expect(full.approved_by).toEqual([]);
+    expect(full.approval_status).toBe('PENDING');
+    expect(full.status).toBe('PROPOSED');
+  });
+
   it('states the recovery order (forward fix, approved restore, idempotent re-close) and offers no fail-open script', () => {
     expect(SQL_0015).toMatch(/NO executable fail-open restore/);
     expect(SQL_0015).toMatch(/re-close by replaying this file directly/);
