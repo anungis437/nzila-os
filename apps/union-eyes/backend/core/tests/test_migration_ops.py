@@ -76,13 +76,16 @@ class TypeCompatibility(unittest.TestCase):
 
 
 def wanted(**kw):
-    base = dict(column="c", db_type="text", null=True, unique=False, db_default=NOT_PROVIDED, has_remote=False, db_check=None)
+    base = dict(
+        column="c", db_type="text", null=True, unique=False, db_default=NOT_PROVIDED, has_remote=False, db_check=None,
+        python_default=NOT_PROVIDED,
+    )
     base.update(kw)
     return ops.WantedField(**base)
 
 
 def column(**kw):
-    base = dict(fmt="text", not_null=False, default_expr=None, generated=False, identity=False)
+    base = dict(fmt="text", not_null=False, default_expr=None, generated=False, identity=False, type_kind="b", enum_labels=())
     base.update(kw)
     return ops.ColumnFacts(**base)
 
@@ -94,7 +97,12 @@ def index(**kw):
 
 
 def run_assess(w, c, indexes=(), nulls=False):
-    return ops.assess(w, c, list(indexes), w.column, lambda: nulls)
+    problems, warnings, _actions = ops.assess(w, c, list(indexes), w.column, lambda: nulls)
+    return problems, warnings
+
+
+def run_actions(w, c, indexes=(), nulls=False):
+    return ops.assess(w, c, list(indexes), w.column, lambda: nulls)[2]
 
 
 class Assess(unittest.TestCase):
@@ -114,10 +122,49 @@ class Assess(unittest.TestCase):
         self.assertTrue(any("unresolved wanted type" in p for p in problems), problems)
 
     def test_type_attribute_mismatches_are_rejected(self):
-        problems, _ = run_assess(wanted(db_type="varchar(64)"), column(fmt="character varying(32)"))
-        self.assertTrue(any("shorter" in p for p in problems), problems)
         problems, _ = run_assess(wanted(db_type="timestamp with time zone"), column(fmt="timestamp without time zone"))
         self.assertTrue(any("incompatible type" in p for p in problems), problems)
+        problems, _ = run_assess(wanted(db_type="character(10)"), column(fmt="character varying(10)"))
+        self.assertTrue(any("incompatible type" in p for p in problems), problems)
+        problems, _ = run_assess(wanted(db_type="integer"), column(fmt="smallint"))
+        self.assertTrue(any("narrower" in p for p in problems), problems)
+
+    def test_only_lossless_varchar_widening_is_planned(self):
+        self.assertEqual(run_assess(wanted(db_type="text"), column(fmt="character varying(50)"))[0], [])
+        self.assertEqual(run_actions(wanted(db_type="text"), column(fmt="character varying(50)")), ["widen:text"])
+        self.assertEqual(run_actions(wanted(db_type="varchar(64)"), column(fmt="character varying(32)")), ["widen:varchar(64)"])
+        self.assertEqual(run_actions(wanted(db_type="text"), column(fmt="text")), [])
+        for existing, wanted_type in [("character(5)", "text"), ("integer", "bigint"), ("numeric(8,2)", "numeric(10,2)"), ("character varying(5)[]", "text[]")]:
+            problems, _ = run_assess(wanted(db_type=wanted_type), column(fmt=existing))
+            self.assertTrue(problems, f"{existing} -> {wanted_type} must be rejected, never widened")
+            self.assertEqual(run_actions(wanted(db_type=wanted_type), column(fmt=existing)), [])
+
+    def test_enum_columns(self):
+        labels = ("team_confidential", "public", "restricted")
+        enum_col = column(fmt="document_privacy_label", type_kind="e", enum_labels=labels, not_null=True)
+        field = wanted(db_type="varchar(32)", null=False, python_default="team_confidential")
+        problems, warnings = run_assess(field, enum_col)
+        self.assertEqual(problems, [])
+        self.assertTrue(any("enum" in w for w in warnings), warnings)
+        # default is not a label
+        problems, _ = run_assess(wanted(db_type="varchar(32)", null=False, python_default="standard"), enum_col)
+        self.assertTrue(any("not a label" in p for p in problems), problems)
+        # a label longer than max_length
+        problems, _ = run_assess(wanted(db_type="varchar(8)", null=False, python_default="public"), enum_col)
+        self.assertTrue(any("longer than" in p for p in problems), problems)
+        # a callable default cannot be checked
+        problems, _ = run_assess(wanted(db_type="varchar(32)", null=False, python_default=lambda: "public"), enum_col)
+        self.assertTrue(any("callable" in p for p in problems), problems)
+        # enum for a non-text field
+        problems, _ = run_assess(wanted(db_type="integer", null=False), enum_col)
+        self.assertTrue(any("not a varchar/text field" in p for p in problems), problems)
+        # no labels at all
+        problems, _ = run_assess(field, column(fmt="empty_enum", type_kind="e", enum_labels=()))
+        self.assertTrue(any("no labels" in p for p in problems), problems)
+        # domains / composites / range types stay unresolved
+        for kind in ("d", "c", "r"):
+            problems, _ = run_assess(wanted(), column(fmt="some_type", type_kind=kind))
+            self.assertTrue(any("unresolved existing type" in p for p in problems), (kind, problems))
 
     def test_nullability(self):
         # nullable field, NOT NULL column: Django writes NULL explicitly -> reject
@@ -233,6 +280,7 @@ class DatabaseBehavior(unittest.TestCase):
         self._apply(models.JSONField(blank=True, default=dict, null=True))
         self._drop(); self._base("c varchar(100) NOT NULL")
         self._apply(models.CharField(default="x", max_length=50))
+        self.assertEqual(self._column_type(), "character varying(100)")  # wider than needed: left alone
 
     def test_incompatible_existing_definitions_fail_closed_and_change_nothing(self):
         self._sql("DROP DOMAIN IF EXISTS mo_dom CASCADE")
@@ -242,7 +290,7 @@ class DatabaseBehavior(unittest.TestCase):
             "integer type for boolean": ("c integer NOT NULL", models.BooleanField(default=False)),
             "timestamp without tz": ("c timestamp without time zone", models.DateTimeField(blank=True, null=True)),
             "json for jsonb": ("c json", models.JSONField(blank=True, null=True)),
-            "short varchar": ("c varchar(10) NOT NULL", models.CharField(default="x", max_length=50)),
+            "char(n) for text": ("c char(8)", models.TextField(blank=True, null=True)),
             "text array vs text": ("c text", ArrayField(models.TextField(), blank=True, null=True, size=None)),
             "unknown domain type": ("c mo_dom", models.TextField(blank=True, null=True)),
             "NOT NULL for a nullable field": ("c text NOT NULL", models.TextField(blank=True, null=True)),
@@ -253,6 +301,48 @@ class DatabaseBehavior(unittest.TestCase):
         for label, (column_def, field) in cases.items():
             with self.subTest(label):
                 self._drop(); self._base(column_def)
+                with self.assertRaisesRegex(RuntimeError, "not provably equivalent"):
+                    self._apply(field)
+
+    def _column_type(self):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT format_type(a.atttypid, a.atttypmod) FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid "
+                "WHERE c.relname = %s AND a.attname = 'c'", [self.TABLE],
+            )
+            return cursor.fetchone()[0]
+
+    def test_bounded_varchar_under_a_text_field_is_widened_losslessly(self):
+        self._base("c varchar(50) DEFAULT 'other'")
+        self._sql(f"INSERT INTO {self.TABLE} (c) VALUES ('keep-me')")
+        self._apply(models.TextField(blank=True, null=True))
+        self.assertEqual(self._column_type(), "text")
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT c FROM {self.TABLE}")
+            self.assertEqual(cursor.fetchall(), [("keep-me",)])
+
+    def test_varchar_is_lengthened_but_never_shortened_or_retyped(self):
+        self._base("c varchar(20)")
+        self._apply(models.CharField(blank=True, max_length=64, null=True))
+        self.assertEqual(self._column_type(), "character varying(64)")
+        self._drop(); self._base("c char(8)")
+        with self.assertRaisesRegex(RuntimeError, "not provably equivalent"):
+            self._apply(models.TextField(blank=True, null=True))
+        self.assertEqual(self._column_type(), "character(8)")  # untouched on failure
+
+    def test_enum_column_is_accepted_only_when_labels_and_default_fit(self):
+        self._sql("DROP TYPE IF EXISTS mo_label CASCADE")
+        self._sql("CREATE TYPE mo_label AS ENUM ('team_confidential', 'public')")
+        self.addCleanup(self._sql, "DROP TYPE IF EXISTS mo_label CASCADE")
+        self._base("c mo_label NOT NULL DEFAULT 'team_confidential'")
+        self._apply(models.CharField(default="team_confidential", max_length=32))
+        self.assertEqual(self._column_type(), "mo_label")  # never retyped
+        for label, field in {
+            "default outside the labels": models.CharField(default="standard", max_length=32),
+            "label longer than max_length": models.CharField(default="public", max_length=8),
+            "not a text field": models.IntegerField(default=0),
+        }.items():
+            with self.subTest(label):
                 with self.assertRaisesRegex(RuntimeError, "not provably equivalent"):
                     self._apply(field)
 

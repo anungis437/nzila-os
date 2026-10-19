@@ -17,6 +17,7 @@ import {
 import { addDays, addBusinessDays, differenceInDays } from "date-fns";
 import { createLogger } from "@nzila/os-core/telemetry";
 import { scheduleGrievanceDeadlineReminders, cancelGrievanceDeadlineReminders } from "@/lib/deadline-engine";
+import { effectiveDueDateUpdate, isTerminalDeadlineStatus } from "@/lib/deadline-engine/deadline-semantics";
 
 const logger = createLogger("union-eyes.deadline-tracking-system");
 
@@ -356,11 +357,18 @@ export async function requestDeadlineExtension(
       return { success: false, error: "Deadline not found" };
     }
 
+    // A completed or cancelled (superseded) deadline is terminal; extending it would resurrect it.
+    if (isTerminalDeadlineStatus(deadline.status)) {
+      return { success: false, error: "Deadline is already completed or cancelled" };
+    }
+
     // If no approval required, apply extension immediately
     if (!request.requiresApproval) {
       await db
         .update(grievanceDeadlines)
         .set({
+          // The effective due date moves with the extension (readers use due_date); an override in force moves with it.
+          ...effectiveDueDateUpdate(deadline, request.newDate),
           newDeadline: request.newDate,
           extensionGranted: true,
           status: "extended",
@@ -375,10 +383,11 @@ export async function requestDeadlineExtension(
         deadline.reminderDays || [7, 3, 1]
       );
     } else {
-      // Just save a note for the extension request
+      // Save the request and its proposed date so approval applies the requested date, not a default
       await db
         .update(grievanceDeadlines)
         .set({ 
+          newDeadline: request.newDate,
           notes: `Extension requested by ${request.requestedBy}: ${request.reason}. New date: ${request.newDate.toISOString()}`
         })
         .where(eq(grievanceDeadlines.id, request.deadlineId));
@@ -409,6 +418,10 @@ export async function approveDeadlineExtension(
       return { success: false, error: "Deadline not found" };
     }
 
+    if (isTerminalDeadlineStatus(deadline.status)) {
+      return { success: false, error: "Deadline is already completed or cancelled" };
+    }
+
     // Check if there&apos;s a pending extension in notes
     if (!deadline.notes || !deadline.notes.includes("Extension requested")) {
       return { success: false, error: "No pending extension request found" };
@@ -420,7 +433,7 @@ export async function approveDeadlineExtension(
     await db
       .update(grievanceDeadlines)
       .set({
-        dueDate: newDate,
+        ...effectiveDueDateUpdate(deadline, newDate),
         extensionGranted: true,
         status: "extended",
         notes: `${deadline.notes}\n\nExtension approved by ${approvedBy} on ${new Date().toISOString()}`,

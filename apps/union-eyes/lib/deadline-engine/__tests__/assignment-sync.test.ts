@@ -23,6 +23,7 @@ vi.mock('drizzle-orm', () => ({
   and: (...conds: unknown[]) => ({ and: conds }),
   eq: (col: unknown, val: unknown) => ({ eq: [col, val] }),
   ne: (col: unknown, val: unknown) => ({ ne: [col, val] }),
+  notInArray: (col: unknown, vals: unknown[]) => ({ notInArray: [col, vals] }),
   sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values }),
 }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
@@ -99,7 +100,7 @@ describe('assignment-sync: refreshDeadlineRemindersForGrievance', () => {
   });
 
   it('does not touch completed deadlines (query excludes them)', async () => {
-    mockActiveDeadlines([]); // simulates the ne(status, 'completed') filter excluding everything
+    mockActiveDeadlines([]); // simulates the terminal-status (completed, cancelled) filter excluding everything
     const result = await refreshDeadlineRemindersForGrievance({
       grievanceId: GRIEV,
       organizationId: ORG,

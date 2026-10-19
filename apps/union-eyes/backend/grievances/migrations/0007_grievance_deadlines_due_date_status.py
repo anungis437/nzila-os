@@ -2,33 +2,67 @@
 
 The reminder worker, the overdue cron and assignment convergence read ``due_date`` and ``status``; the live table built from
 the Django lineage lacked both (the confirmation columns from the historical SQL lineage were present, these two were not).
-Additive and guarded: a database that already has compatible columns is left alone.
+Additive and guarded: a database that already has equivalent columns is left alone (see core.migration_ops).
 
-Semantics (matches app/api/grievance-deadlines/*/confirmation and lib/services/deadline-confirmation-service.ts):
-``due_date`` is the effective due date; for existing rows it is derived as COALESCE(override_due_date, calculated_due_date).
-Rows already superseded become ``cancelled`` so the overdue cron and the worker's dispatch revalidation ignore them.
+Semantics (lib/deadline-engine/deadline-semantics.ts; app/api/grievance-deadlines/*/confirmation; deadline-confirmation-service):
+``due_date`` is the effective due date. ``override_due_date`` is the confirmed date when a human overrode the calculation and
+``calculated_due_date`` is the original system calculation. Two invariants hold for every writer:
+
+* I1  override_due_date IS NOT NULL  =>  due_date = override_due_date
+* I2  superseded_at IS NOT NULL      =>  status IN ('completed', 'cancelled')
+
+The migration (1) converges any existing rows to the invariants (due_date from the override, else from the calculation when
+it is missing; superseded rows become ``cancelled`` unless already ``completed``) and (2) installs CHECK constraints so a
+writer that forgets an invariant fails closed instead of leaving a stale duplicate. The constraints are installed only when
+the lineage columns they reference exist (a Django-first database has no override/superseded columns), are idempotent, and
+the backfill/constraints are not tracked in the Django state (like the lineage columns they protect).
 There is no completion marker beyond ``status``; completion paths that need ``completed_at`` stay REQUIRED_LATER and fail
 closed (no deadline can become ``completed`` until they are delivered).
-Reverse is a no-op: the columns may be owned by another lineage and hold data.
+Reverse is a no-op: the columns and constraints may be owned by another lineage and hold data.
 """
 from django.db import migrations, models
 
 from core.migration_ops import AddFieldIfNotExists
 
-BACKFILL = """
+CONVERGE_AND_GUARD = """
 DO $$
+DECLARE
+  v_tbl regclass := to_regclass(current_schema() || '.grievance_deadlines');
+  v_has_calc boolean;
+  v_has_override boolean;
+  v_has_superseded boolean;
 BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema()
-             AND table_name = 'grievance_deadlines' AND column_name = 'calculated_due_date')
-     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema()
-             AND table_name = 'grievance_deadlines' AND column_name = 'override_due_date') THEN
-    UPDATE grievance_deadlines
-       SET due_date = COALESCE(override_due_date, calculated_due_date)
-     WHERE due_date IS NULL;
+  IF v_tbl IS NULL THEN
+    RETURN;
   END IF;
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema()
-             AND table_name = 'grievance_deadlines' AND column_name = 'superseded_at') THEN
-    UPDATE grievance_deadlines SET status = 'cancelled' WHERE superseded_at IS NOT NULL AND status = 'pending';
+  SELECT bool_or(attname = 'calculated_due_date'), bool_or(attname = 'override_due_date'), bool_or(attname = 'superseded_at')
+    INTO v_has_calc, v_has_override, v_has_superseded
+    FROM pg_attribute WHERE attrelid = v_tbl AND attnum > 0 AND NOT attisdropped;
+
+  IF v_has_override THEN
+    UPDATE grievance_deadlines SET due_date = override_due_date
+     WHERE override_due_date IS NOT NULL AND due_date IS DISTINCT FROM override_due_date;
+  END IF;
+  IF v_has_calc THEN
+    UPDATE grievance_deadlines SET due_date = calculated_due_date
+     WHERE due_date IS NULL AND calculated_due_date IS NOT NULL;
+  END IF;
+  IF v_has_superseded THEN
+    UPDATE grievance_deadlines SET status = 'cancelled'
+     WHERE superseded_at IS NOT NULL AND status NOT IN ('completed', 'cancelled');
+  END IF;
+
+  IF v_has_override AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conrelid = v_tbl AND conname = 'grievance_deadlines_override_is_effective'
+  ) THEN
+    ALTER TABLE grievance_deadlines ADD CONSTRAINT grievance_deadlines_override_is_effective
+      CHECK (override_due_date IS NULL OR due_date IS NOT DISTINCT FROM override_due_date);
+  END IF;
+  IF v_has_superseded AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conrelid = v_tbl AND conname = 'grievance_deadlines_superseded_is_terminal'
+  ) THEN
+    ALTER TABLE grievance_deadlines ADD CONSTRAINT grievance_deadlines_superseded_is_terminal
+      CHECK (superseded_at IS NULL OR status IN ('completed', 'cancelled'));
   END IF;
 END $$;
 """
@@ -51,5 +85,5 @@ class Migration(migrations.Migration):
             name="status",
             field=models.CharField(db_default="pending", default="pending", max_length=50),
         ),
-        migrations.RunSQL(sql=BACKFILL, reverse_sql=migrations.RunSQL.noop),
+        migrations.RunSQL(sql=CONVERGE_AND_GUARD, reverse_sql=migrations.RunSQL.noop),
     ]

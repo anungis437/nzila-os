@@ -15,7 +15,11 @@ and a fresh Django-first database is built identically), but its database step:
 
   - type: the catalog type (``format_type``) must map to a known type and be at least as permissive as the Django type
     (same base type; varchar/char length and numeric precision/scale; timestamp with/without time zone, json/jsonb and
-    integer widths are never interchanged; arrays compare their element type). Unknown or domain types are rejected;
+    integer widths are never interchanged; arrays compare their element type). Unknown, domain and extension types are
+    rejected. Two verified exceptions, both lossless: a bounded ``varchar(n)`` under a longer ``varchar``/``text`` field is
+    WIDENED in place (metadata-only in PostgreSQL, logged); and an existing ENUM under a ``varchar``/``text`` field is
+    accepted only if every label fits the field's length and the field's default (when it has one) is one of the labels (the
+    enum is stricter than the field, so out-of-set values are rejected loudly by the database and are never stored);
   - nullability: a nullable column for a NOT NULL field is accepted only if it currently holds no NULLs (and is reported);
     a NOT NULL column for a nullable field is rejected because Django writes NULL explicitly;
   - defaults: a ``db_default`` field requires an equal literal database default; non-literal ``db_default`` expressions,
@@ -115,6 +119,23 @@ def parse_type(text: Optional[str]) -> Optional[PgType]:
     return PgType(base, array=array)
 
 
+def type_decision(existing: PgType, wanted: PgType) -> tuple[str, Optional[str]]:
+    """('ok' | 'widen' | 'reject', reason). 'widen' is only returned for a lossless varchar/text lengthening."""
+    reason = type_problem(existing, wanted)
+    if reason is None:
+        return "ok", None
+    if (
+        not existing.array
+        and not wanted.array
+        and existing.base == "character varying"
+        and existing.length is not None
+        and wanted.base in ("text", "character varying")
+        and (wanted.base == "text" or wanted.length is None or wanted.length > existing.length)
+    ):
+        return "widen", reason
+    return "reject", reason
+
+
 def type_problem(existing: PgType, wanted: PgType) -> Optional[str]:
     """Why the existing column type cannot stand in for the wanted one, or None when it can."""
     if existing.array != wanted.array:
@@ -158,6 +179,8 @@ class ColumnFacts:
     default_expr: Optional[str]
     generated: bool
     identity: bool
+    type_kind: str = "b"  # pg_type.typtype: b base, e enum, d domain, c composite, r range
+    enum_labels: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -178,6 +201,7 @@ class WantedField:
     db_default: object
     has_remote: bool
     db_check: Optional[str]
+    python_default: object = NOT_PROVIDED
 
 
 _CAST = re.compile(r"::\s*[a-z][a-z ]*(\(\s*\d+(\s*,\s*\d+)?\s*\))?(\[\])?")
@@ -213,31 +237,71 @@ def default_problem(wanted_default: object, existing_expr: Optional[str]) -> Opt
     return None
 
 
+def _enum_problems(column: ColumnFacts, wanted: WantedField, wanted_type: Optional[PgType]) -> list[str]:
+    """An enum column may stand in for a varchar/text field only when every value Django can write is a label."""
+    out: list[str] = []
+    if wanted_type is None or wanted_type.array or wanted_type.base not in ("character varying", "text"):
+        return [f"existing column is the enum {column.fmt!r} but the field is not a varchar/text field"]
+    if not column.enum_labels:
+        return [f"existing enum {column.fmt!r} has no labels"]
+    if wanted_type.length is not None:
+        too_long = [label for label in column.enum_labels if len(label) > wanted_type.length]
+        if too_long:
+            out.append(f"enum labels longer than the field's max_length {wanted_type.length}: {too_long}")
+    default = wanted.python_default
+    if default is not NOT_PROVIDED and default is not None and not callable(default):
+        if str(default) not in column.enum_labels:
+            out.append(f"the field default {default!r} is not a label of the enum {column.fmt!r}")
+    elif callable(default):
+        out.append("the field default is a callable; its values cannot be checked against the enum labels")
+    if wanted.db_default is not NOT_PROVIDED and str(wanted.db_default) not in column.enum_labels:
+        out.append(f"db_default {wanted.db_default!r} is not a label of the enum {column.fmt!r}")
+    return out
+
+
 def assess(
     wanted: WantedField,
     column: ColumnFacts,
     unique_indexes: list[UniqueIndexFacts],
     column_name: str,
     null_rows_exist: Callable[[], bool],
-) -> tuple[list[str], list[str]]:
-    """Pure compatibility decision. Returns (problems, warnings); any problem must stop the migration."""
+) -> tuple[list[str], list[str], list[str]]:
+    """Pure compatibility decision. Returns (problems, warnings, actions).
+
+    Any problem must stop the migration. ``actions`` is empty or ``["widen:<type>"]`` (a lossless varchar/text lengthening).
+    """
     problems: list[str] = []
     warnings: list[str] = []
+    actions: list[str] = []
 
     wanted_type = parse_type(wanted.db_type)
-    existing_type = parse_type(column.fmt)
+    existing_type = parse_type(column.fmt) if column.type_kind == "b" else None
     if wanted.has_remote:
         problems.append("foreign-key fields are not verified by this helper (constraint and index not checked)")
     if wanted.db_check:
         problems.append(f"the field carries a database CHECK ({wanted.db_check}) that this helper does not verify")
     if wanted_type is None:
         problems.append(f"unresolved wanted type {wanted.db_type!r}: not in the verified type map")
-    if existing_type is None:
-        problems.append(f"unresolved existing type {column.fmt!r}: not in the verified type map (domains and extension types are rejected)")
+    if column.type_kind == "e":
+        enum_problems = _enum_problems(column, wanted, wanted_type)
+        problems.extend(enum_problems)
+        if not enum_problems:
+            warnings.append(
+                f"existing column is the enum {column.fmt!r} ({len(column.enum_labels)} labels); it is stricter than the "
+                "field, so values outside the labels are rejected by the database"
+            )
+    elif existing_type is None:
+        problems.append(
+            f"unresolved existing type {column.fmt!r} (kind {column.type_kind!r}): not in the verified type map "
+            "(domains, composites and extension types are rejected)"
+        )
     if wanted_type is not None and existing_type is not None:
-        reason = type_problem(existing_type, wanted_type)
-        if reason:
+        verdict, reason = type_decision(existing_type, wanted_type)
+        if verdict == "reject":
             problems.append(f"incompatible type: {reason}")
+        elif verdict == "widen":
+            actions.append(f"widen:{wanted.db_type}")
+            warnings.append(f"existing {column.fmt} will be widened to {wanted.db_type} (lossless): {reason}")
 
     if column.generated:
         problems.append("the existing column is a generated column; Django inserts would fail")
@@ -271,13 +335,15 @@ def assess(
                 "the field is unique but no valid, ready, single-column, non-expression unique index with no predicate "
                 f"(or only '<column> IS NOT NULL') exists: {detail}"
             )
-    return problems, warnings
+    return problems, warnings, actions
 
 
 _COLUMN_SQL = (
     "SELECT format_type(a.atttypid, a.atttypmod), a.attnotnull, pg_get_expr(d.adbin, d.adrelid), "
-    "a.attgenerated <> '', a.attidentity <> '' "
+    "a.attgenerated <> '', a.attidentity <> '', t.typtype, "
+    "COALESCE((SELECT array_agg(e.enumlabel::text ORDER BY e.enumsortorder) FROM pg_enum e WHERE e.enumtypid = t.oid), ARRAY[]::text[]) "
     "FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid JOIN pg_namespace n ON n.oid = c.relnamespace "
+    "JOIN pg_type t ON t.oid = a.atttypid "
     "LEFT JOIN pg_attrdef d ON d.adrelid = a.attrelid AND d.adnum = a.attnum "
     "WHERE n.nspname = current_schema() AND c.relname = %s AND a.attname = %s AND a.attnum > 0 "
     "AND NOT a.attisdropped AND c.relkind IN ('r', 'p')"
@@ -296,7 +362,10 @@ def _column_facts(connection, table: str, column: str) -> Optional[ColumnFacts]:
         row = cursor.fetchone()
     if row is None:
         return None
-    return ColumnFacts(fmt=row[0], not_null=bool(row[1]), default_expr=row[2], generated=bool(row[3]), identity=bool(row[4]))
+    return ColumnFacts(
+        fmt=row[0], not_null=bool(row[1]), default_expr=row[2], generated=bool(row[3]), identity=bool(row[4]),
+        type_kind=row[5], enum_labels=tuple(row[6] or ()),
+    )
 
 
 def _unique_indexes(connection, table: str, column: str) -> list[UniqueIndexFacts]:
@@ -334,8 +403,9 @@ class AddFieldIfNotExists(migrations.AddField):
             db_default=field.db_default,
             has_remote=field.remote_field is not None,
             db_check=field.db_check(connection),
+            python_default=field.default,
         )
-        problems, warnings = assess(
+        problems, warnings, actions = assess(
             wanted,
             facts,
             _unique_indexes(connection, table, column) if wanted.unique else [],
@@ -350,7 +420,11 @@ class AddFieldIfNotExists(migrations.AddField):
             )
         for warning in warnings:
             logger.warning("%s: %s", label, warning)
-        logger.info("%s: equivalent column already present; database step skipped.", label)
+        for action in actions:  # only lossless varchar/text widening is ever planned
+            qn = connection.ops.quote_name
+            schema_editor.execute(f"ALTER TABLE {qn(table)} ALTER COLUMN {qn(column)} TYPE {action.split(':', 1)[1]}")
+            logger.warning("%s: widened %s.%s (%s).", label, table, column, action)
+        logger.info("%s: equivalent column already present; no column was added.", label)
 
     def database_backwards(self, app_label, schema_editor, from_state, to_state):
         # Never drop: the column may belong to another lineage and hold data.

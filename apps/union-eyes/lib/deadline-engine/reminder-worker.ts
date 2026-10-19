@@ -24,6 +24,7 @@ import { logger } from '@/lib/logger';
 import { writeDeadlineAuditEvent } from './audit';
 import { deliverDeadlineReminderEmail } from './email-adapter';
 import { sweepPendingAssignmentConvergence } from './assignment-sync';
+import { isTerminalDeadlineStatus } from './deadline-semantics';
 import type { WorkerRunResult } from './types';
 
 export interface RunReminderWorkerConfig {
@@ -231,7 +232,7 @@ export async function runDeadlineReminderWorker(
       !!revalidation &&
       revalidation.reminder_status === 'claimed' &&
       revalidation.deadline_status !== null &&
-      revalidation.deadline_status !== 'completed' &&
+      !isTerminalDeadlineStatus(revalidation.deadline_status) &&
       !isStaleOfficer;
 
     if (!isEligible) {
@@ -239,8 +240,8 @@ export async function runDeadlineReminderWorker(
         ? 'source_deadline_missing'
         : revalidation.reminder_status !== 'claimed'
           ? 'reminder_no_longer_claimed'
-          : revalidation.deadline_status === 'completed'
-            ? 'deadline_completed'
+          : isTerminalDeadlineStatus(revalidation.deadline_status)
+            ? `deadline_${revalidation.deadline_status}`
             : 'recipient_reassigned';
 
       await db.transaction(async (tx) => {
