@@ -12,6 +12,12 @@
  * An organization that has an active administrator must still have one after
  * the transaction commits. Only an active, non-deleted `admin` counts.
  * Callers serialize that decision with `lockAdministratorRoster`.
+ *
+ * Taking an active administrator off `active` withdraws that person's
+ * administrative authority. That deactivation requires removal authority
+ * (`Permission.DELETE_MEMBER`), the same tenant `admin` role as role
+ * reassignment and member removal. Reactivating an administrator, or
+ * changing a non-administrator's status, does not.
  */
 
 import { and, eq, sql } from 'drizzle-orm'
@@ -130,6 +136,24 @@ export function assertActiveAdministratorsRemain(
 
   const after = [...projected.values()].filter(isEffectiveAdministrator).length
   if (after < 1) throw new MemberBoundaryError('Forbidden')
+}
+
+/**
+ * True when a status change takes an active, non-deleted administrator off
+ * active membership. An administrator who is already inactive or on leave
+ * is not an effective administrator, so a further status edit is not
+ * deactivation.
+ */
+export function deactivatesEffectiveAdministrator(
+  roster: readonly AdministratorRosterRow[],
+  changes: readonly AdministratorProjection[],
+): boolean {
+  const byId = new Map(roster.map((row) => [row.id, row]))
+  return changes.some((change) => {
+    if (change.status === undefined || change.status === 'active') return false
+    const current = byId.get(change.id)
+    return current != null && isEffectiveAdministrator(current)
+  })
 }
 
 /**

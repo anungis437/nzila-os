@@ -281,4 +281,37 @@ describe('organization member query grants', () => {
     await expect(q.updateMember(ORG_A, 'm1', { status: 'on-leave' }, administer)).rejects.toThrow('Forbidden')
     expect(mocks.updates).toEqual([])
   })
+
+  it('requires removal authority before deactivating an active administrator', async () => {
+    const roster = [
+      { id: 'admin-a', userId: 'admin-a-user', role: 'admin', status: 'active', deletedAt: null, organizationId: ORG_A },
+      { id: 'admin-b', userId: 'admin-b-user', role: 'admin', status: 'active', deletedAt: null, organizationId: ORG_A },
+    ]
+    asPrincipal('user-officer-a', ORG_A, 'officer')
+    const officer = await authorizeMemberAccess(ORG_A, 'administer')
+    if (!officer.ok) throw new Error('expected grant')
+
+    mocks.selectQueue.push(roster)
+    mocks.selectQueue.push([{ id: 'admin-a', status: 'active', role: 'admin', organizationId: ORG_A }])
+    await expect(q.updateMember(ORG_A, 'admin-a', { status: 'inactive' }, officer)).rejects.toThrow('Forbidden')
+    mocks.selectQueue.push(roster)
+    mocks.selectQueue.push([{ id: 'admin-b', status: 'active', role: 'admin', organizationId: ORG_A }])
+    await expect(q.updateMember(ORG_A, 'admin-b', { status: 'on-leave' }, officer)).rejects.toThrow('Forbidden')
+    expect(mocks.updates).toEqual([])
+    expect(mocks.audits).toEqual([])
+
+    mocks.selectQueue.push(roster)
+    mocks.selectQueue.push([{ id: 'member-1', status: 'active', role: 'member', organizationId: ORG_A }])
+    const memberUpdate = await q.updateMember(ORG_A, 'member-1', { status: 'inactive' }, officer)
+    expect(memberUpdate?.status).toBe('inactive')
+
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    const admin = await authorizeMemberAccess(ORG_A, 'administer')
+    if (!admin.ok) throw new Error('expected grant')
+    mocks.selectQueue.push(roster)
+    mocks.selectQueue.push([{ id: 'admin-a', status: 'active', role: 'admin', organizationId: ORG_A }])
+    const deactivated = await q.updateMember(ORG_A, 'admin-a', { status: 'inactive' }, admin)
+    expect(deactivated?.status).toBe('inactive')
+    expect(mocks.audits.at(-1)).toMatchObject({ operation: 'status_change', actorUserId: ADMIN })
+  })
 })

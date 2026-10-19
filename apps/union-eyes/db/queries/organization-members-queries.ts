@@ -21,6 +21,7 @@ import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import {
   assertRegisteredMemberGrant,
   assertTenantAssignableRole,
+  authorizeMemberAccess,
   MemberBoundaryError,
   type MemberAccessGrant,
   type MemberCapability,
@@ -30,6 +31,7 @@ import {
   assertActiveAdministratorsRemain,
   assertMemberRemovalPolicy,
   assertMemberStatusTransition,
+  deactivatesEffectiveAdministrator,
   FINANCIAL_EXEMPTION_FIELDS,
   lockAdministratorRoster,
   rejectClientFinancialExemption,
@@ -226,7 +228,12 @@ export async function updateMember(
         .limit(1);
       if (!current[0]) return undefined;
       assertMemberStatusTransition(String(current[0].status), String(updates.status));
-      assertActiveAdministratorsRemain(roster, [{ id: current[0].id, status: String(updates.status) }]);
+      const projection = [{ id: current[0].id, status: String(updates.status) }];
+      if (deactivatesEffectiveAdministrator(roster, projection)) {
+        const removal = await authorizeMemberAccess(organizationId, "remove_member");
+        if (!removal.ok) throw new MemberBoundaryError(removal.message);
+      }
+      assertActiveAdministratorsRemain(roster, projection);
     }
     const result = await db
       .update(organizationMembers)

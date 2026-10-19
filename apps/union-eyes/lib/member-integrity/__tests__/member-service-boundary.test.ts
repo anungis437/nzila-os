@@ -617,6 +617,35 @@ describe('member administration boundary', () => {
     expect(mocks.state.audits).toEqual([])
   })
 
+  it('requires removal authority to deactivate an active administrator', async () => {
+    seed({ id: 'admin-a', userId: 'admin-a-user', role: 'admin', status: 'active' })
+    seed({ id: 'admin-b', userId: 'admin-b-user', role: 'admin', status: 'active' })
+    seed({ id: 'member-1', userId: 'member-1-user', role: 'member', status: 'active' })
+    seed({ id: 'paused-admin', userId: 'paused-admin-user', role: 'admin', status: 'on-leave' })
+
+    for (const role of ['officer', 'union_rep', 'president', 'vice_president', 'secretary_treasurer']) {
+      asPrincipal(OFFICER, ORG_A, role)
+      await expect(updateMember(ORG_A, 'admin-a', { status: 'inactive' })).rejects.toThrow('Forbidden')
+      await expect(updateMember(ORG_A, 'admin-b', { status: 'on-leave' })).rejects.toThrow('Forbidden')
+      await expect(bulkUpdateMemberStatus(ORG_A, ['admin-a'], 'inactive')).rejects.toThrow('Forbidden')
+      await expect(bulkUpdateMemberStatus(ORG_A, ['member-1', 'admin-b'], 'on-leave')).rejects.toThrow('Forbidden')
+    }
+
+    asPrincipal(OFFICER, ORG_A, 'officer')
+    await expect(updateMember(ORG_A, 'member-1', { status: 'inactive' })).resolves.toMatchObject({ status: 'inactive' })
+    await expect(updateMember(ORG_A, 'paused-admin', { status: 'inactive' })).resolves.toMatchObject({ status: 'inactive' })
+    expect(mocks.state.rows.find((row) => row.id === 'admin-a')).toMatchObject({ role: 'admin', status: 'active' })
+    expect(mocks.state.rows.find((row) => row.id === 'admin-b')).toMatchObject({ role: 'admin', status: 'active' })
+    expect(mocks.state.audits.some((audit) => audit.targetId === 'admin-a')).toBe(false)
+
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    await expect(bulkUpdateMemberStatus(ORG_A, ['admin-a'], 'inactive')).resolves.toMatchObject({ success: true, processed: 1 })
+    expect(mocks.state.rows.find((row) => row.id === 'admin-a')?.status).toBe('inactive')
+    expect(mocks.state.rows.find((row) => row.id === 'admin-b')).toMatchObject({ role: 'admin', status: 'active' })
+    await expect(updateMember(ORG_A, 'admin-b', { status: 'on-leave' })).rejects.toThrow('Forbidden')
+    expect(mocks.state.rows.find((row) => row.id === 'admin-b')?.status).toBe('active')
+  })
+
   it('rolls an allowed administrator status change back when the audit write fails', async () => {
     asPrincipal(ADMIN, ORG_A, 'admin')
     seed({ id: 'admin-a', userId: 'admin-a-user', role: 'admin', status: 'active' })

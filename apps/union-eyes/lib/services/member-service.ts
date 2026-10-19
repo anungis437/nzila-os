@@ -5,6 +5,7 @@
  * and runs inside `withRLSContext({ organizationId })` for that organization.
  * Role assignment uses the narrower role-management grant. Soft deletion and
  * duplicate suppression use the removal grant (`Permission.DELETE_MEMBER`).
+ * Deactivating an active administrator uses that same removal grant.
  * Hard deletion is refused. Generic updates cannot move organization
  * ownership, identity, role, or per-capita exemption fields.
  *
@@ -29,8 +30,11 @@ import {
   assertActiveAdministratorsRemain,
   assertMemberRemovalPolicy,
   assertMemberStatusTransition,
+  deactivatesEffectiveAdministrator,
   FINANCIAL_EXEMPTION_FIELDS,
   lockAdministratorRoster,
+  type AdministratorProjection,
+  type AdministratorRosterRow,
   MEMBER_RECORD_STATUSES,
   rejectClientFinancialExemption,
 } from "@/lib/member-integrity/member-write-policy";
@@ -131,6 +135,15 @@ async function requireGrant(organizationId: string, capability: MemberCapability
   const access = await authorizeMemberAccess(assertOrganization(organizationId), capability);
   if (!access.ok) throw new MemberBoundaryError(access.message);
   return access;
+}
+
+async function requireAdministratorDeactivationAuthority(
+  organizationId: string,
+  roster: readonly AdministratorRosterRow[],
+  changes: readonly AdministratorProjection[],
+): Promise<void> {
+  if (!deactivatesEffectiveAdministrator(roster, changes)) return;
+  await requireGrant(organizationId, "remove_member");
 }
 
 function activeInOrganization(organizationId: string, memberId?: string): SQL {
@@ -331,7 +344,9 @@ export async function updateMember(
         });
         if (!current) return null;
         assertMemberStatusTransition(String(current.status), String(data.status));
-        assertActiveAdministratorsRemain(roster, [{ id: current.id, status: String(data.status) }]);
+        const projection = [{ id: current.id, status: String(data.status) }];
+        await requireAdministratorDeactivationAuthority(grant.organizationId, roster, projection);
+        assertActiveAdministratorsRemain(roster, projection);
       }
       const [updated] = await tx
         .update(organizationMembers)
@@ -427,7 +442,9 @@ export async function bulkUpdateMemberStatus(
     return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
       if (new Set(memberIds).size !== memberIds.length) throw new MemberBoundaryError("Forbidden");
       const roster = await lockAdministratorRoster(tx, grant.organizationId);
-      assertActiveAdministratorsRemain(roster, memberIds.map((id) => ({ id, status })));
+      const projection = memberIds.map((id) => ({ id, status }));
+      await requireAdministratorDeactivationAuthority(grant.organizationId, roster, projection);
+      assertActiveAdministratorsRemain(roster, projection);
       const current = await tx
         .select()
         .from(organizationMembers)
