@@ -1,0 +1,522 @@
+{
+  "meta": {
+    "candidateRepoHead": "db554638a6e3b69378550df7f524df097701689b",
+    "deployedSha": "eae195f215208fdaa0529bc70431cbf9479b5124",
+    "migration0015Sha256Lf": "cdd4840d7544f0ec7e81bf9bb269cf3dd82dc2d8bec7849d926430916463bced",
+    "recoveryFile": "none (removed: no executable fail-open restore)",
+    "postgres": "PostgreSQL 16.12 (Debian 16.12-1.pgdg12+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+    "image": "pgvector/pgvector:0.8.1-pg16",
+    "stagingPostgresMajor": "15 (Azure flexible server); rehearsal runs 16",
+    "node": "v24.13.1",
+    "python": "Python 3.13.12",
+    "django": "5.2.17",
+    "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:f0add32da800cc60c32ebde4218584ac810a08531f203e65b6062af9bba6b5e7",
+    "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:3928c22813e78cbdc5138ae946f5bb8e0fd94f8f39209a4270cb7f2ac45e8835",
+    "startedUtc": "2026-10-19T18:17:12.2305627Z",
+    "isolation": "loopback-only container, per-run generated credentials, no staging data, no Azure access",
+    "finishedUtc": "2026-10-19T18:27:54.5498713Z"
+  },
+  "summary": {
+    "checks": 76,
+    "passed": 76,
+    "failed": 0
+  },
+  "results": {
+    "SETUP": [
+      {
+        "id": "S0",
+        "title": "clean-room lineage at the deployed commit builds the staging-shaped schema",
+        "pass": true,
+        "detail": "[schema-lineage-cleanroom] {\"djangoMigrate\":\"PASS\",\"historicalSchemaCreationPass\":19,\"historicalSchemaCreationFail\":0,\"historicalSchemaCreationSkip\":17,\"platformPass\":6,\"platformFail\":0,\"scopedPass\":15,\"scopedFail\":0} "
+      }
+    ],
+    "FIDELITY": [
+      {
+        "id": "F1",
+        "title": "exactly the five PUBLIC-role policies observed on staging",
+        "pass": true,
+        "detail": "deadline_audit_events.deadline_audit_events_tenant_isolation,deadline_reminder_executions.deadline_reminder_executions_read,deadline_reminders.deadline_reminders_tenant_isolation,pilot_checklist_items.pilot_checklist_items_org_isolation,pilot_demo_seeds.pilot_demo_seeds_org_isolation"
+      },
+      {
+        "id": "F2",
+        "title": "deadline tables RLS/FORCE flags as on staging (executions true/false)",
+        "pass": true,
+        "detail": "deadline_audit_events=true/true,deadline_reminder_executions=true/false,deadline_reminders=true/true"
+      },
+      {
+        "id": "F3",
+        "title": "Django migrations applied = 79 (staging: 79)",
+        "pass": true,
+        "detail": "79"
+      },
+      {
+        "id": "F4",
+        "title": "deadline_reassignment_convergence absent (as on staging)",
+        "pass": true,
+        "detail": "absent"
+      },
+      {
+        "id": "F5",
+        "title": "grievance_deadlines has no due_date/status (as on staging)",
+        "pass": true,
+        "detail": "0"
+      },
+      {
+        "id": "F6",
+        "title": "rls-verify preflight (hardened): of the 1699 pre-existing checks exactly the staging one fails (deadline_reminder_executions); the 12 new deadline-engine policy-closure checks additionally flag the legacy PUBLIC policies",
+        "pass": true,
+        "detail": "pass=1703 fail=8 manifest-rls: deadline_reminder_executions is present and fully RLS-enforced (RLS+FORCE+runtime policy owner+system policy); deadline-engine deadline_reminders: policy set is exactly the approved set (ue_org_isolation_select, ue_org_isolation_insert, ue_org_isolation_update, ue_org_isolation_delete, ue_system_full_access); deadline-engine deadline_reminders: no PUBLIC or foreign-role policy; deadline-engine deadline_audit_events: policy set is exactly the approved set (ue_org_isolation_select, ue_org_isolation_insert, ue_org_isolation_update, ue_org_isolation_delete, ue_system_full_access); deadline-engine deadline_audit_events: no PUBLIC or foreign-role policy; deadline-engine deadline_reminder_executions: RLS enabled and forced; deadline-engine deadline_reminder_executions: policy set is exactly the approved set (ue_parent_org_isolation_v2, ue_system_full_access); deadline-engine deadline_reminder_executions: no PUBLIC or foreign-role policy"
+      },
+      {
+        "id": "F7",
+        "title": "ledger table: clean-room does not write one (staging ledger is UNKNOWN; see dossier read-only check)",
+        "pass": true,
+        "detail": "absent"
+      }
+    ],
+    "A_CONTROL": [
+      {
+        "id": "A1",
+        "title": "legacy state reproduces the fail-open defect (7 failures: 6 no-context reads + 1 forged insert)",
+        "pass": true,
+        "detail": "total=15 fail=7 ids=P.1,P.1,P.1,P.1,P.1,P.1,P.3"
+      }
+    ],
+    "B_CHECK": [
+      {
+        "id": "B0",
+        "title": "ledger stamped with the DEPLOYED hashes of 0000-0005 (staging-like: the ICRA gate records 0005)",
+        "pass": true,
+        "detail": "{\"stamped\":6,\"last\":\"0005_add_icra_assessment_capability_token\"}"
+      },
+      {
+        "id": "B1",
+        "title": "governed --check: 6 applied, 10 pending (0006-0015); 0000-0005 unchanged between deployed and candidate",
+        "pass": true,
+        "detail": "[scoped-migrate-existing-env] ledger_exists=true total=16 applied=6 pending=10"
+      },
+      {
+        "id": "B2",
+        "title": "with an EMPTY ledger the executor stops at 0000 (not re-runnable) and records nothing: fails closed",
+        "pass": true,
+        "detail": "[scoped-migrate-existing-env] ordered journal tags: 0000_outstanding_viper, 0001_lean_iron_man, 0002_certain_juggernaut, 0003_dizzy_alex_wilder, 0004_hesitant_chameleon, 0005_add_icra_assessment_capability_token, 0006_external_specialist_runtime_privilege_closure, 0007_auth_bootstrap_runtime_remediation, 0008_runtime_acceptance_closure, 0009_baseline_runtime_role_grants, 0010_tenant_isolation_rls_foundation, 0011_storage_authority_rls_completion, 0012_storage_authority_rls_final_closure, 0013_workbook_credential_payment_authority, 0014_lineage_restoration_rls_closure, 0015_deadline_engine_rls_fail_closed_closure [scoped-migrate-existing-env] FAIL: Scoped migration 0000_outstanding_viper failed: relation \"icra_anonymized_metrics\" already exists"
+      }
+    ],
+    "C_APPLY": [
+      {
+        "id": "C1",
+        "title": "governed --apply runs 10 migrations (0006-0015) and leaves 0 pending",
+        "pass": true,
+        "detail": "[scoped-migrate-existing-env] ordered journal tags: 0000_outstanding_viper, 0001_lean_iron_man, 0002_certain_juggernaut, 0003_dizzy_alex_wilder, 0004_hesitant_chameleon, 0005_add_icra_assessment_capability_token, 0006_external_specialist_runtime_privilege_closure, 0007_auth_bootstrap_runtime_remediation, 0008_runtime_acceptance_closure, 0009_baseline_runtime_role_grants, 0010_tenant_isolation_rls_foundation, 0011_storage_authority_rls_completion, 0012_storage_authority_rls_final_closure, 0013_workbook_credential_payment_authority, 0014_lineage_restoration_rls_closure, 0015_deadline_engine_rls_fail_closed_closure | [scoped-migrate-existing-env] applying scoped migration: 0012_storage_authority_rls_final_closure | [scoped-migrate-existing-env] applied_count=10 | [scoped-migrate-existing-env] applied_tags=[\"0006_external_specialist_runtime_privilege_closure\",\"0007_auth_bootstrap_runtime_remediation\",\"0008_runtime_acceptance_closure\",\"0009_baseline_runtime_role_grants\",\"0010_tenant_isolation_rls_foundation\",\"0011_storage_authority_rls_completion\",\"0012_storage_authority_rls_final_closure\",\"0013_workbook_credential_payment_authority\",\"0014_lineage_restoration_rls_closure\",\"0015_deadline_engine_rls_fail_closed_closure\"] | [scoped-migrate-existing-env] final_applied=16 final_pending=0"
+      },
+      {
+        "id": "C2",
+        "title": "catalog delta on a staging-shaped DB is EXACTLY the three deadline tables (RLS/FORCE/policies/runtime+system grants of every other public table unchanged)",
+        "pass": true,
+        "detail": "tables=deadline_audit_events,deadline_reminder_executions,deadline_reminders"
+      },
+      {
+        "id": "C3",
+        "title": "helper functions redefined: the ten ue_create_* bodies (edited skip-missing-table guards); nothing else",
+        "pass": true,
+        "detail": "count=10"
+      },
+      {
+        "id": "C4",
+        "title": "runtime/system privileges on the three tables identical before and after",
+        "pass": true,
+        "detail": "316e20f979ab44400b35fa4f484cad1c / 316e20f979ab44400b35fa4f484cad1c"
+      },
+      {
+        "id": "C5",
+        "title": "main rls-verify preflight after apply: 1711/1711 (1699 pre-existing + 12 deadline-engine closure checks)",
+        "pass": true,
+        "detail": "pass=1711 fail=0"
+      },
+      {
+        "id": "C6",
+        "title": "isolation probe after apply: 15/15 (no-context read/insert denied, org A/B isolation, system by role, no role assumption)",
+        "pass": true,
+        "detail": "total=15 fail=0"
+      },
+      {
+        "id": "C7",
+        "title": "second --apply is a no-op (idempotent)",
+        "pass": true,
+        "detail": "[scoped-migrate-existing-env] applied_count=0"
+      },
+      {
+        "id": "C8",
+        "title": "ledger holds 16 entries",
+        "pass": true,
+        "detail": "16"
+      }
+    ],
+    "D_ATOMIC": [
+      {
+        "id": "D1",
+        "title": "a PUBLIC policy the migration did not create makes its post-condition fail; --apply exits non-zero",
+        "pass": true,
+        "detail": "[scoped-migrate-existing-env] ordered journal tags: 0000_outstanding_viper, 0001_lean_iron_man, 0002_certain_juggernaut, 0003_dizzy_alex_wilder, 0004_hesitant_chameleon, 0005_add_icra_assessment_capability_token, 0006_external_specialist_runtime_privilege_closure, 0007_auth_bootstrap_runtime_remediation, 0008_runtime_acceptance_closure, 0009_baseline_runtime_role_grants, 0010_tenant_isolation_rls_foundation, 0011_storage_authority_rls_completion, 0012_storage_authority_rls_final_closure, 0013_workbook_credential_payment_authority, 0014_lineage_restoration_rls_closure, 0015_deadline_engine_rls_fail_closed_closure [scoped-migrate-existing-env] applying scoped migration: 0015_deadline_engine_rls_fail_closed_closure [scoped-migrate-existing-env] FAIL: Scoped migration 0015_deadline_engine_rls_fail_closed_closure failed: deadline-engine RLS closure post-condition failed for: deadline_reminders"
+      },
+      {
+        "id": "D2",
+        "title": "0015 is NOT recorded (0006-0014 are: 15 entries)",
+        "pass": true,
+        "detail": "15"
+      },
+      {
+        "id": "D3",
+        "title": "nothing from 0015 persisted: legacy policy intact, executions FORCE unchanged, no ue_* policy added",
+        "pass": true,
+        "detail": "legacyPolicies=1 force=f ueOnExecutions=0"
+      },
+      {
+        "id": "D4",
+        "title": "after removing the cause, --apply resumes and applies only 0015",
+        "pass": true,
+        "detail": "[scoped-migrate-existing-env] applied_count=1"
+      },
+      {
+        "id": "D5",
+        "title": "preflight 1711/1711 after the resumed apply",
+        "pass": true,
+        "detail": "pass=1711 fail=0"
+      }
+    ],
+    "E_RECOVERY": [
+      {
+        "id": "E0",
+        "title": "no rollback/recovery script ships with 0015 and the closure never reads a self-asserted variable",
+        "pass": true,
+        "detail": "0015_deadline_engine_rls_fail_closed_closure.sql"
+      },
+      {
+        "id": "E1b",
+        "title": "a hand-made PUBLIC USING(true) policy on deadline_reminders (RLS+FORCE and every expected policy still present) is real - the isolation probe fails - AND the hardened rls-verify preflight now detects it (exit non-zero, deadline-engine policy-closure checks fail)",
+        "pass": true,
+        "detail": "probeFail=5 preflightExit=1 preflightFail=2 failed=deadline-engine deadline_reminders: policy set is exactly the approved set (ue_org_isolation_select, ue_org_isolation_insert, ue_org_isolation_update, ue_org_isolation_delete, ue_system_full_access); deadline-engine deadline_reminders: no PUBLIC or foreign-role policy"
+      },
+      {
+        "id": "E1",
+        "title": "a hand-made reopening of deadline_reminder_executions as well: the isolation probe fails AND the hardened preflight detects both tables (the independent live isolation probe stays a release gate)",
+        "pass": true,
+        "detail": "probeFail=8 preflightExit=1 preflightFail=4"
+      },
+      {
+        "id": "E2",
+        "title": "TRAP: the governed executor reports 0 pending and does NOT re-close (0015 stays recorded)",
+        "pass": true,
+        "detail": "executor=[scoped-migrate-existing-env] applied_count=0 probeFail=8"
+      },
+      {
+        "id": "E3",
+        "title": "direct replay of 0015 fails its own post-condition while the reopening policy exists (it never papers over it)",
+        "pass": true,
+        "detail": "WARNING: SET LOCAL can only be used in transaction blocks NOTICE: policy \"deadline_reminders_tenant_isolation\" for relation \"public.deadline_reminders\" does not exist, skipping NOTICE: policy \"deadline_audit_events_tenant_isolation\" for relation \"public.deadline_audit_events\" does not exist, skipping NOTICE: policy \"deadline_reminder_executions_read\" for relation \"public.deadline_reminder_executions\" does not exist, skipping ue_create_direct_org_rls_policy --------------------------------- (1 row) ue_create_direct_org_rls_policy --------------------------------- (1 row) ue_create_parent_owned_rls_policy_v2 -------------------------------------- (1 row) ERROR: deadline-engine RLS closure post-condition failed for: deadline_reminders, deadline_reminder_executions CONTEXT: PL/pgSQL function inline_code_block line 14 at RAISE"
+      },
+      {
+        "id": "E4",
+        "title": "after the cause is removed, replaying 0015 re-closes: probe 15/15, preflight 1711/1711, ledger unchanged (16)",
+        "pass": true,
+        "detail": "probeFail=0 preflightPass=1711 ledger=16"
+      }
+    ],
+    "P_PREDICATE": [
+      {
+        "id": "P0",
+        "title": "closed state: preflight 1711/1711 and the isolation probe 15/15 (baseline for the widening cases)",
+        "pass": true,
+        "detail": "pass=1711 fail=0"
+      },
+      {
+        "id": "P1",
+        "title": "identity comparison + nonempty context (a widening that satisfied the old structural checks): the isolation probe LEAKS and the hardened preflight FAILS naming the predicate contract",
+        "pass": true,
+        "detail": "probeFail=1 preflightExit=1 failedDeadlineEngine=1"
+      },
+      {
+        "id": "P2",
+        "title": "inequality (other tenants only) is also rejected by the preflight",
+        "pass": true,
+        "detail": "preflightExit=1"
+      },
+      {
+        "id": "P3",
+        "title": "absent deadline table: default (source-native) reports NOT_PRESENT without failing its deadline-engine checks; with --require-deadline-engine-tables (the deploy preflight) all 4 of its checks FAIL",
+        "pass": true,
+        "detail": "defaultFailing=0 requiredFailing=4 requiredExit=1"
+      }
+    ],
+    "F_DJANGO": [
+      {
+        "id": "F1",
+        "title": "candidate Django migrate succeeds with NO fakes on the staging-shaped DB (7 historical + 2 new migrations), and migrate --check is clean",
+        "pass": true,
+        "detail": "migrate=0 check=0 migrations=88 (79 before)"
+      },
+      {
+        "id": "F2",
+        "title": "lineage-shaped differences are handled explicitly and reported: nullable-but-NOT-NULL columns without NULLs warn; documents.document_type varchar(50) is widened to text; privacy_label/status enums are accepted as stricter (never retyped)",
+        "pass": true,
+        "detail": "nullableWarnings=3 widened=1 enumNotes=2"
+      },
+      {
+        "id": "F3",
+        "title": "an incompatible existing column fails the migration closed: exit non-zero, content.0004 not recorded, none of its columns added",
+        "pass": true,
+        "detail": "exit=1 recorded=0 accessLevelAdded=0"
+      },
+      {
+        "id": "F4",
+        "title": "a claims.idempotency_hash without any unique index also fails closed",
+        "pass": true,
+        "detail": "exit=1"
+      },
+      {
+        "id": "F5",
+        "title": "a fresh Django-first (empty) database also migrates cleanly, with the profiles defaults",
+        "pass": true,
+        "detail": "migrate=0 check=0 profilesDefaults=3"
+      },
+      {
+        "id": "F7",
+        "title": "after migrate: documents.document_type is widened to text; privacy_label and status keep their enum types (never retyped)",
+        "pass": true,
+        "detail": "document_type=text/text privacy_label=USER-DEFINED/document_privacy_label status=USER-DEFINED/document_record_status"
+      },
+      {
+        "id": "F8",
+        "title": "an enum whose labels no longer contain the field default fails closed (not a label), content.0004 not recorded",
+        "pass": true,
+        "detail": "exit=1 recorded=0"
+      },
+      {
+        "id": "F9",
+        "title": "a nullable column that already holds NULLs under a NOT NULL field fails closed, content.0004 not recorded",
+        "pass": true,
+        "detail": "exit=1 recorded=0 insert=SET DO"
+      },
+      {
+        "id": "F6",
+        "title": "unit tests for the guarded operation (pure + 10 PostgreSQL-backed) and the generated R1 field specification pass",
+        "pass": true,
+        "detail": "Ran 28 tests in 4.315s OK"
+      }
+    ],
+    "J_PROFILES": [
+      {
+        "id": "J1",
+        "title": "the exact Drizzle profile insert fails on the staging-shaped DB (NOT NULL on id) ...",
+        "pass": true,
+        "detail": "BEGIN ERROR: null value in column \"id\" of relation \"profiles\" violates not-null constraint q-user-1"
+      },
+      {
+        "id": "J2",
+        "title": "... succeeds after the candidate migrations with the expected defaults, and RLS still rejects a mismatched user",
+        "pass": true,
+        "detail": "after=BEGIN q-user-1 free|whop|0|active INSERT 0 1 ROLLBACK | mismatchedUser=BEGIN someone-else ERROR: new row violates row-level security policy for table \"profiles\""
+      }
+    ],
+    "K_DEADLINE": [
+      {
+        "id": "K1",
+        "title": "due_date is the effective date (override wins over calculated) and a superseded deadline becomes cancelled",
+        "pass": true,
+        "detail": "00000000-0000-0000-0000-0000000000d3:2026-11-05:pending 00000000-0000-0000-0000-0000000000d4:2026-11-02:cancelled MIGRATE exit=0: INFO 2026-10-19 14:21:38,423 migration_ops grievances.claims.idempotency_hash: equivalent column already present; no column was added. | Applying grievances.0005_claims_idempotency_hash... OK | Applying grievances.0006_claim_number_org_scope_and_user_text... OK | Applying grievances.0007_grievance_deadlines_due_date_status... OK"
+      },
+      {
+        "id": "K2",
+        "title": "the overdue cron candidate query (route.ts) now runs on the live schema and excludes the cancelled row",
+        "pass": true,
+        "detail": "rows=1"
+      },
+      {
+        "id": "K3",
+        "title": "the lifecycle guards (override=due_date; superseded=>terminal) are installed on the lineage-shaped table",
+        "pass": true,
+        "detail": "constraints=2"
+      },
+      {
+        "id": "K4",
+        "title": "a writer that diverges due_date from an override, or re-opens a superseded row, is rejected by the database",
+        "pass": true,
+        "detail": "ERROR: new row for relation \"grievance_deadlines\" violates check constraint \"grievance_deadlines_override_is_effective\" DETAIL: Failing row contains (00000000-0000-0000-0000-0000000000d3, 2026-10-19 18:21:28.47342+00, 2026-10-19 18:21:28.47342+00, filing, 00000000-0000-0000-0000-0000000000d2, SYSTEM_CALCULATED, 2026-11-01 00:00:00+00, {}, null, null, 2026-11-05 00:00:00+00, null, null, null, null, null, 2026-11-08 00:00:00+00, pending). | ERROR: new row for relation \"grievance_deadlines\" violates check constraint \"grievance_deadlines_superseded_is_terminal\" DETAIL: Failing row contains (00000000-0000-0000-0000-0000000000d4, 2026-10-19 18:21:28.47342+00, 2026-10-19 18:21:28.47342+00, reply, 00000000-0000-0000-0000-0000000000d2, SYSTEM_CALCULATED, 2026-11-02 00:00:00+00, {}, null, null, null, null, null, null, 2026-10-19 18:21:28.47342+00, null, 2026-11-02 00:00:00+00, extended)."
+      }
+    ],
+    "G_CANDIDATE_WORKER": [
+      {
+        "id": "e_legacy",
+        "title": "candidate worker, real code, 3 concurrent workers, email disabled, on the Django-migrated schema (no due_date/status patch) under legacy policies: 9/9",
+        "pass": true,
+        "detail": "attempts=1 pass=9 of 9: claimed-exactly-once, one execution row per attempt, expired-lease recovery, no lease theft, bounded dead-letter, no duplicate rows, empty-vs-failure"
+      },
+      {
+        "id": "e_closed",
+        "title": "candidate worker, real code, 3 concurrent workers, email disabled, on the Django-migrated schema (no due_date/status patch) under closed policies (0015): 9/9",
+        "pass": true,
+        "detail": "attempts=1 pass=9 of 9: claimed-exactly-once, one execution row per attempt, expired-lease recovery, no lease theft, bounded dead-letter, no duplicate rows, empty-vs-failure"
+      }
+    ],
+    "H_SERVING_IMAGE": [
+      {
+        "id": "H1",
+        "title": "serving-image statements fail first on a missing relation/column, with identical errors before and after 0015 (no policy-dependent statement is reachable)",
+        "pass": true,
+        "detail": "worker sweep (assignment-sync.ts, first statement) => legacy: ERROR:  relation \"deadline_reassignment_convergence\" does not exist | closed: ERROR:  relation \"deadline_reassignment_convergence\" does not exist ;; overdue cron candidate query (app/api/cron/deadline-overdue/route.ts) => legacy: ERROR:  column gd.due_date does not exist | closed: ERROR:  column gd.due_date does not exist ;; assign route first write (requestAssignmentConvergence insert) => legacy: ERROR:  relation \"deadline_reassignment_convergence\" does not exist | closed: ERROR:  relation \"deadline_reassignment_convergence\" does not exist"
+      }
+    ],
+    "I_FRESH": [
+      {
+        "id": "I1",
+        "title": "fresh bootstrap at the candidate (Django-first clean-room) applies all 16 scoped migrations including 0015, no failures",
+        "pass": true,
+        "detail": "[schema-lineage-cleanroom] {\"djangoMigrate\":\"PASS\",\"historicalSchemaCreationPass\":19,\"historicalSchemaCreationFail\":0,\"historicalSchemaCreationSkip\":17,\"platformPass\":7,\"platformFail\":0,\"scopedPass\":16,\"scopedFail\":0} "
+      },
+      {
+        "id": "I2",
+        "title": "fresh DB: no PUBLIC policy on the three tables, RLS and FORCE on all three",
+        "pass": true,
+        "detail": "publicPolicies=0 flags=deadline_audit_events=true/true,deadline_reminder_executions=true/true,deadline_reminders=true/true"
+      },
+      {
+        "id": "I3",
+        "title": "rls-verify preflight on the fresh DB: no failures",
+        "pass": true,
+        "detail": "pass=1711 fail=0"
+      },
+      {
+        "id": "I4",
+        "title": "isolation probe on the fresh DB: 15/15",
+        "pass": true,
+        "detail": "total=15 fail=0"
+      }
+    ],
+    "L_IMAGE": [
+      {
+        "id": "L1",
+        "title": "the candidate backend IMAGE (digest-pinned) runs \"migrate --noinput && migrate --check\" on the staging-shaped DB with no fakes",
+        "pass": true,
+        "detail": "image=nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:f0add32da800cc60c32ebde4218584ac810a08531f203e65b6062af9bba6b5e7 exit=0 migrations=88 profilesDefaults=3 deadlineColumns=2"
+      }
+    ],
+    "M_R1": [
+      {
+        "id": "M0",
+        "title": "R1 returns PROCEED (exit 0) on the rehearsed staging-shaped pre-state with the ledger at 0000-0005",
+        "pass": true,
+        "detail": "decision=PROCEED exit=0 "
+      },
+      {
+        "id": "M_noledger",
+        "title": "R1 STOPs (exit 2) when: no ledger table",
+        "pass": true,
+        "detail": "decision=STOP exit=2 stops=R1.2,R1.3"
+      },
+      {
+        "id": "M_hash",
+        "title": "R1 STOPs (exit 2) when: a ledger hash differs from the current file",
+        "pass": true,
+        "detail": "decision=STOP exit=2 stops=R1.3"
+      },
+      {
+        "id": "M_later",
+        "title": "R1 STOPs (exit 2) when: a later migration (0006) is already recorded",
+        "pass": true,
+        "detail": "decision=STOP exit=2 stops=R1.4"
+      },
+      {
+        "id": "M_policy",
+        "title": "R1 STOPs (exit 2) when: a legacy PUBLIC policy is already gone",
+        "pass": true,
+        "detail": "decision=STOP exit=2 stops=R1.5"
+      },
+      {
+        "id": "M_flags",
+        "title": "R1 STOPs (exit 2) when: executions FORCE already enabled",
+        "pass": true,
+        "detail": "decision=STOP exit=2 stops=R1.6"
+      },
+      {
+        "id": "M_column",
+        "title": "R1 STOPs (exit 2) when: documents.contains_pii exists with an incompatible type",
+        "pass": true,
+        "detail": "decision=STOP exit=2 stops=R1.10"
+      },
+      {
+        "id": "M_xc_column",
+        "title": "agreement: R1 STOP and the real migrate fails closed for the same drift (column)",
+        "pass": true,
+        "detail": "migrateExit=1"
+      },
+      {
+        "id": "M_unique",
+        "title": "R1 STOPs (exit 2) when: claims.idempotency_hash exists without a unique index",
+        "pass": true,
+        "detail": "decision=STOP exit=2 stops=R1.10"
+      },
+      {
+        "id": "M_xc_unique",
+        "title": "agreement: R1 STOP and the real migrate fails closed for the same drift (unique)",
+        "pass": true,
+        "detail": "migrateExit=1"
+      },
+      {
+        "id": "M_enum",
+        "title": "R1 STOPs (exit 2) when: an enum column no longer carries the field default as a label",
+        "pass": true,
+        "detail": "decision=STOP exit=2 stops=R1.10"
+      },
+      {
+        "id": "M_xc_enum",
+        "title": "agreement: R1 STOP and the real migrate fails closed for the same drift (enum)",
+        "pass": true,
+        "detail": "migrateExit=1"
+      },
+      {
+        "id": "M_nulls",
+        "title": "R1 STOPs (exit 2) when: a nullable column under a NOT NULL field already holds NULLs",
+        "pass": true,
+        "detail": "decision=STOP exit=2 stops=R1.10"
+      },
+      {
+        "id": "M_xc_nulls",
+        "title": "agreement: R1 STOP and the real migrate fails closed for the same drift (nulls)",
+        "pass": true,
+        "detail": "migrateExit=1"
+      },
+      {
+        "id": "M_django",
+        "title": "R1 STOPs (exit 2) when: a candidate Django migration is already recorded",
+        "pass": true,
+        "detail": "decision=STOP exit=2 stops=R1.12"
+      },
+      {
+        "id": "M_blind",
+        "title": "R1 STOPs when its identity cannot see every row under RLS: it refuses to report \"no NULLs\" it cannot prove (R1.10)",
+        "pass": true,
+        "detail": "decision=STOP stops=R1.10"
+      },
+      {
+        "id": "M_ro",
+        "title": "R1 cannot write: its session is read-only and a write attempt is refused",
+        "pass": true,
+        "detail": "write refused"
+      }
+    ],
+    "N_SEQUENCE": [
+      {
+        "id": "N1",
+        "title": "one database, in order: R1 PROCEED -> governed closure -> preflight 1711 -> Django migrate (no fakes) -> probe 15/15 -> preflight 1711 -> profile insert OK",
+        "pass": true,
+        "detail": "seconds=R1=4 R3_closure=2 preflight_after_closure=1 R6_django_migrate=20; the database is closed from R3 onward, so the window between closure and candidate readiness is the Django migrate + revision creation time"
+      }
+    ]
+  },
+  "limits": [
+    "Loopback PostgreSQL 16 in Docker, schema-only; staging is Azure PostgreSQL 15 with real data and an unknown ledger.",
+    "Staging-shaped state is reproduced by the clean-room lineage at the deployed commit and validated by the FIDELITY checks, not by reading staging.",
+    "No Azure resource, revision, traffic rule or credential was touched; revision/traffic steps in the dossier are unrehearsed.",
+    "Not the clone rehearsal on the exact candidate digest required before any staging mutation."
+  ]
+}
