@@ -212,7 +212,7 @@ export default function MemberEmploymentManagement({ organizationId }: MemberEmp
       return;
     }
 
-    const result = await deleteMemberEmploymentAction(id);
+    const result = await deleteMemberEmploymentAction(id, organizationId);
     if (result.isSuccess) {
       toast({
         title: "Success",
