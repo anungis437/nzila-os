@@ -50,8 +50,15 @@
 -- staging-like ledger (0000-0005 recorded) it applies 0006-0015; on a staging-shaped database that changes
 -- exactly these three tables plus the ue_create_* helper function bodies.
 --
--- Recovery: there is no routine rollback. See
--- 0015_deadline_engine_rls_fail_closed_closure.rollback.sql (exceptional, security-disposition-gated).
+-- Recovery: there is NO routine rollback and NO executable fail-open restore. Reopening cross-tenant access is never offered
+-- as a script: a session variable or any other free-text token cannot be evidence that a real security decision was made.
+-- In order of preference:
+--   1. forward fix: deploy an application revision compatible with the closed policies;
+--   2. approved point-in-time restore of the database (a change under its own approved record);
+--   3. if the closed state was altered by hand, re-close by replaying this file directly in one transaction as the
+--      migration-admin principal (idempotent; the ledger is unchanged), then re-run the rls-verify preflight.
+-- Any intentional reopening needs a NEW reviewed migration in a PR, under a change record whose approved_by/approval_status
+-- are set by the actual approvers, with the maintainer security disposition attached. Nobody may set those fields on their behalf.
 
 SET LOCAL search_path = public;
 --> statement-breakpoint
