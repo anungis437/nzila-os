@@ -200,7 +200,7 @@ Everything above is the **original evidence record** and is left as executed. No
 | `main` | `b9a54a9b8c3b45b9376f2f8d3fe58b933b9a2047` | executed against `206969ec4` on 2026-10-18/19; both PR branches now contain `b9a54a9b` |
 | PR #947 (member-segment authorization) | **merged** (2026-10-19T02:34Z, `b9a54a9b`) | its source is still **absent from the tested staging image** (`eae195f2`); the audit/evidence gates in section 6 remain blocked until a release containing it is staged |
 | Tested staging artifact | image `sha256:48e6a029…3501`, source `eae195f2`, revision `…--0000259` | unchanged; all runtime evidence is bound to this digest only |
-| PR #948 / #949 | open drafts, ancestry corrected by merging `main` (no history rewrite, no replacement PRs) | evidence artifacts are byte-identical to the first commit. The evidence manifest was **recomputed** because 11 of its 17 original rows were hashed from the Windows working copy and did not match the committed content (see the evidence README); new files were added under `harness-v2/` |
+| PR #948 / #949 | open drafts, ancestry corrected by merging `main` (no history rewrite, no replacement PRs) | result artifacts are byte-identical to the first commit (one as-run script, `harness/b3.js`, lost a no-op `replace` to satisfy CodeQL; disclosed in the evidence README with the original hash). The evidence manifest was **recomputed** because 11 of its 17 original rows were hashed from the Windows working copy and did not match the committed content (see the evidence README); new files were added under `harness-v2/` |
 
 Statements in sections 1 and 6 and the gap table (row 10) that call #947 "unmerged" describe the repository state at execution time and are superseded by this table.
 

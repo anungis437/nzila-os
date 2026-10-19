@@ -21,7 +21,7 @@ and the worker schema patch were applied to a disposable point-in-time restore c
 
 ## SHA-256
 
-SHA-256 of each file's committed (LF-normalized) content, i.e. what a fresh checkout contains. Correction note (2026-10-19): the first revision of this manifest hashed 11 files from the Windows working copy (CRLF) or an earlier copy, so those rows did not match the committed content (6 other rows did). No artifact content changed - the artifacts are byte-identical to the first commit (`35792b991`) - only the manifest was recomputed. The files under `harness-v2/` and `schema-insert-semantics-inventory.json` were added later.
+SHA-256 of each file's committed (LF-normalized) content, i.e. what a fresh checkout contains. Correction note (2026-10-19): the first revision of this manifest hashed 11 files from the Windows working copy (CRLF) or an earlier copy, so those rows did not match the committed content (6 other rows did). No result artifact changed (all are byte-identical to the first commit `35792b991`). One as-run script, `harness/b3.js`, received a semantic-preserving edit to satisfy CodeQL `js/identity-replacement`: a no-op `sql.replace('$1', '$1')` was removed (it returned its input unchanged, so the results are unaffected). Its as-run committed content had sha256 `8a1c7319f2f1dc4b08ed7433a9227622d02d5ea610768a21522cda7e5f84ae81` (git blob at `35792b991`). The manifest was recomputed accordingly. The files under `harness-v2/` and `schema-insert-semantics-inventory.json` were added later.
 
 | File | SHA-256 |
 |---|---|
@@ -31,9 +31,9 @@ SHA-256 of each file's committed (LF-normalized) content, i.e. what a fresh chec
 | `b3-clone-rolledback.json` | `2449f6f043f3b3bd8bf8d6287363ea46dd83c777212de32c34111b60ca310a53` |
 | `harness-v2/insert-semantics-inventory.js` | `2e16dc4e1b789d70693183668f346fc5ece7d1be9d93604cfe28c50a312463d6` |
 | `harness-v2/pg-tls.js` | `0ab5a7b781d2fc81da77445a6bab82fc83229f0bf360142591aa9603aebf3fa8` |
-| `harness-v2/pg-tls.selftest.js` | `2bb859529450a417e379cf57c231bfd7bdb25ec1b7e79863ee1cab9d70bd37a8` |
+| `harness-v2/pg-tls.selftest.js` | `073a5b7eadfa553d7909d2091328779379c70182da0c90d1956ed86a4ca48526` |
 | `harness/authz.js` | `bd8e973984eb05a1db173abb4de44626abc3b2262a7c45144ed2085b9f45e3b5` |
-| `harness/b3.js` | `8a1c7319f2f1dc4b08ed7433a9227622d02d5ea610768a21522cda7e5f84ae81` |
+| `harness/b3.js` | `287be35a58d9b817552f0e0013f1601fbd5fba871d532c78445d9e4de485877a` |
 | `harness/clone-schema-patch.js` | `ae5d77a77fbd87ddfdea1ecc1961d1c1694106a10ed13127e43422fae3f0a555` |
 | `harness/introspect.js` | `482a02d6f7509dfcb3e4734806ef39620054a6bc206162a23d2f200d3a32167e` |
 | `harness/nav-canonical-routes.json` | `31323eb1d6e2c10ee33f01c5160a3ac35c5bd785fbf53be1e1365bbc3c8903c5` |

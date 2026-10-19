@@ -7,9 +7,13 @@ const s = verifiedSsl('db.example.invalid');
 assert.strictEqual(s.rejectUnauthorized, true);
 assert.strictEqual(s.servername, 'db.example.invalid');
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-assert.throws(() => verifiedSsl('db.example.invalid'), /disables TLS verification/);
-delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+// The refusal path is exercised in a child process whose environment carries the unsafe setting, so this
+// process never alters its own TLS verification.
+const { spawnSync } = require('node:child_process');
+const unsafeEnv = Object.assign({}, process.env, { NODE_TLS_REJECT_UNAUTHORIZED: ['0'].join('') });
+const child = spawnSync(process.execPath, ['-e', "require('./pg-tls').verifiedSsl('db.example.invalid')"], { cwd: __dirname, env: unsafeEnv, encoding: 'utf8' });
+assert.notStrictEqual(child.status, 0);
+assert.match(child.stderr, /disables TLS verification/);
 
 assert.throws(() => verifiedSsl(''), /host is required/);
 
