@@ -250,7 +250,9 @@ function parseArgs() {
   if (mode !== 'preflight' && mode !== 'full') {
     throw new Error(`Unknown --mode value: ${mode}. Expected "preflight" or "full".`)
   }
-  return { mode: mode as 'preflight' | 'full' }
+  // A deployed environment (the deploy workflow's preflight) requires the deadline-engine tables; a source-native bootstrap does not.
+  const requireDeadlineEngineTables = args.includes('--require-deadline-engine-tables') || process.env.RLS_VERIFY_REQUIRE_DEADLINE_ENGINE_TABLES === '1'
+  return { mode: mode as 'preflight' | 'full', requireDeadlineEngineTables }
 }
 
 async function checkRuntimeRole(sql: postgres.Sql, results: CheckResult[]) {
@@ -706,8 +708,20 @@ async function checkManifestRlsRequiredCoverage(sql: postgres.Sql, results: Chec
  * The manifest coverage check above proves RLS + FORCE and that runtime/system policies EXIST, which cannot prove
  * closure: PostgreSQL OR-combines permissive policies, so a surviving PUBLIC policy (root 0045) or a hand-made
  * `USING (true)` policy leaves every tenant readable while all of those conditions stay green. For the three
- * deadline-engine tables the approved policy set is therefore pinned EXACTLY, with role, command, permissiveness and
- * an org-scoped predicate. Any change to these tables' policies must update this list in a reviewed PR.
+ * deadline-engine tables the approved policy set is therefore pinned EXACTLY: names, one role, command, PERMISSIVE and
+ * the APPROVED PREDICATE CONTRACT below.
+ *
+ * What the predicate check is, and is not. Structural heuristics (no OR, no IS NULL, no literal true, reads the session
+ * setting) are not semantic verification: `organization_id::text = organization_id::text AND current_setting(...) <> ''`
+ * passes all of them and exposes every tenant. The contract is therefore an exact textual match, after normalization
+ * (lower case, whitespace, parentheses and quotes removed), against the predicate the approved helpers generate
+ * (ue_create_direct_org_rls_policy / ue_create_parent_owned_rls_policy_v2): organization equality against the session
+ * context, or the parent-owned EXISTS with organization equality. The catalog text is identical on PostgreSQL 15, 16 and
+ * 18. This is NOT a general semantic-equivalence checker: a semantically equivalent but textually different rewrite FAILS
+ * (fail-closed) until the contract is updated in a reviewed PR. Executable negative proofs (cross-tenant read, update,
+ * delete and forged insert denied by the approved state; each known widening shape shown to leak and to be rejected) live
+ * in scripts/__tests__/rls-verify-deadline-engine-policies.pglite.test.ts, and the independent live isolation probe
+ * remains a release gate.
  */
 export const DEADLINE_ENGINE_TABLES = ['deadline_reminders', 'deadline_audit_events', 'deadline_reminder_executions'] as const
 
@@ -743,61 +757,81 @@ export interface DeadlineEnginePolicyRow {
 interface ApprovedDeadlinePolicy {
   role: 'union_eyes_runtime' | 'union_eyes_system'
   cmd: string
-  orgScoped: boolean
+  /** Canonical predicate for the USING part, the WITH CHECK part, or null when the catalog must carry none. */
+  using: string | null
+  withCheck: string | null
 }
 
+// Normalization used for the contract: lower case, no whitespace, no parentheses, no double quotes.
+export const canonicalizePredicate = (value: string | null | undefined) =>
+  (value ?? '').toLowerCase().replace(/\s+/g, '').replace(/[()"]/g, '')
+
+// pg_get_expr text of the approved predicates (PostgreSQL 15/16/18 identical). Written in readable form and canonicalized.
+const DIRECT_ORG_PREDICATE = canonicalizePredicate("((organization_id)::text = current_setting('app.current_org_id'::text, true))")
+const PARENT_OWNED_PREDICATE = canonicalizePredicate(
+  "(EXISTS ( SELECT 1 FROM deadline_reminders parent WHERE ((parent.id = deadline_reminder_executions.reminder_id) AND ((parent.organization_id)::text = current_setting('app.current_org_id'::text, true)))))",
+)
+const SYSTEM_PREDICATE = 'true'
+
 const DIRECT_ORG_POLICIES: Record<string, ApprovedDeadlinePolicy> = {
-  ue_org_isolation_select: { role: 'union_eyes_runtime', cmd: 'SELECT', orgScoped: true },
-  ue_org_isolation_insert: { role: 'union_eyes_runtime', cmd: 'INSERT', orgScoped: true },
-  ue_org_isolation_update: { role: 'union_eyes_runtime', cmd: 'UPDATE', orgScoped: true },
-  ue_org_isolation_delete: { role: 'union_eyes_runtime', cmd: 'DELETE', orgScoped: true },
-  ue_system_full_access: { role: 'union_eyes_system', cmd: 'ALL', orgScoped: false },
+  ue_org_isolation_select: { role: 'union_eyes_runtime', cmd: 'SELECT', using: DIRECT_ORG_PREDICATE, withCheck: null },
+  ue_org_isolation_insert: { role: 'union_eyes_runtime', cmd: 'INSERT', using: null, withCheck: DIRECT_ORG_PREDICATE },
+  ue_org_isolation_update: { role: 'union_eyes_runtime', cmd: 'UPDATE', using: DIRECT_ORG_PREDICATE, withCheck: DIRECT_ORG_PREDICATE },
+  ue_org_isolation_delete: { role: 'union_eyes_runtime', cmd: 'DELETE', using: DIRECT_ORG_PREDICATE, withCheck: null },
+  ue_system_full_access: { role: 'union_eyes_system', cmd: 'ALL', using: SYSTEM_PREDICATE, withCheck: SYSTEM_PREDICATE },
 }
 
 const APPROVED_DEADLINE_ENGINE_POLICIES: Record<(typeof DEADLINE_ENGINE_TABLES)[number], Record<string, ApprovedDeadlinePolicy>> = {
   deadline_reminders: DIRECT_ORG_POLICIES,
   deadline_audit_events: DIRECT_ORG_POLICIES,
   deadline_reminder_executions: {
-    ue_parent_org_isolation_v2: { role: 'union_eyes_runtime', cmd: 'ALL', orgScoped: true },
-    ue_system_full_access: { role: 'union_eyes_system', cmd: 'ALL', orgScoped: false },
+    ue_parent_org_isolation_v2: { role: 'union_eyes_runtime', cmd: 'ALL', using: PARENT_OWNED_PREDICATE, withCheck: PARENT_OWNED_PREDICATE },
+    ue_system_full_access: { role: 'union_eyes_system', cmd: 'ALL', using: SYSTEM_PREDICATE, withCheck: SYSTEM_PREDICATE },
   },
 }
 
 const normalizePredicate = (value: string | null) => (value ?? '').replace(/\s+/g, ' ').trim().toLowerCase()
 
-// An org-scoped predicate must read the tenant context and may not contain a branch that can widen it.
-function widensOrgPredicate(value: string | null): string | null {
+// EXPLANATORY ONLY (never an acceptance path): names the widening pattern when a predicate misses the contract. It is a
+// heuristic and is deliberately not used to accept anything.
+function explainWidening(value: string | null): string {
   const p = normalizePredicate(value)
-  if (!p) return null
-  if (!p.includes("current_setting('app.current_org_id'")) return `does not read app.current_org_id: ${value}`
-  if (/\bor\b/.test(p)) return `contains an OR branch: ${value}`
-  if (/\bis (not )?null\b|\bcoalesce\b|\bis (not )?distinct\b/.test(p)) return `contains a null/empty-context fallback: ${value}`
-  // The approved reads pass missing_ok = true to current_setting; drop it before looking for a literal true.
-  const withoutMissingOk = p.replace(/current_setting\('app\.current_org_id'(::text)?, true\)/g, 'ctx')
-  if (/(^|[^a-z_])true([^a-z_]|$)/.test(withoutMissingOk)) return `contains a literal true: ${value}`
-  return null
+  if (!p) return 'empty'
+  const hints: string[] = []
+  if (!p.includes("current_setting('app.current_org_id'")) hints.push('does not read app.current_org_id')
+  if (/\bor\b/.test(p)) hints.push('has an OR branch')
+  if (/\bis (not )?null\b|\bcoalesce\b|\bis (not )?distinct\b/.test(p)) hints.push('has a null/empty-context fallback')
+  if (/(organization_id|parent\.organization_id)(::text)?\s*(=|<>|!=)\s*(organization_id|parent\.organization_id)(::text)?/.test(p)) hints.push('compares the organization column with itself')
+  if (/<>|!=|\blike\b|\bilike\b|\bany\b|\bin \(/.test(p)) hints.push('uses a non-equality operator')
+  if (/<>\s*''/.test(p) || /length\(/.test(p)) hints.push('only tests that a context is non-empty')
+  return hints.length ? hints.join('; ') : 'differs from the approved text'
 }
 
-function requiredPredicateParts(cmd: string): Array<'qual' | 'with_check'> {
-  if (cmd === 'SELECT' || cmd === 'DELETE') return ['qual']
-  if (cmd === 'INSERT') return ['with_check']
-  return ['qual', 'with_check']
+export interface DeadlineEngineEvaluateOptions {
+  /**
+   * True for a deployed environment (staging/production): the three tables MUST exist, so an absent table FAILS.
+   * False (default) is the source-native bootstrap, where an absent table is reported as NOT_PRESENT and does not fail.
+   */
+  requireDeadlineEngineTables?: boolean
 }
 
-export function evaluateDeadlineEngineRlsClosure(input: {
-  tables: DeadlineEngineTableRow[]
-  policies: DeadlineEnginePolicyRow[]
-}): CheckResult[] {
+export function evaluateDeadlineEngineRlsClosure(
+  input: { tables: DeadlineEngineTableRow[]; policies: DeadlineEnginePolicyRow[] },
+  options: DeadlineEngineEvaluateOptions = {},
+): CheckResult[] {
   const results: CheckResult[] = []
   for (const table of DEADLINE_ENGINE_TABLES) {
     const row = input.tables.find((t) => t.relname === table)
     const tablePolicies = input.policies.filter((p) => p.tablename === table)
     if (!row) {
+      const required = options.requireDeadlineEngineTables === true
       for (const label of ['RLS enabled and forced', 'approved policy set', 'roles', 'predicates']) {
         results.push({
           name: `deadline-engine ${table}: ${label}`,
-          pass: true,
-          detail: 'NOT_PRESENT_IN_SOURCE_NATIVE_SCHEMA — table not physically present in this database (enforced by absence).',
+          pass: !required,
+          detail: required
+            ? 'REQUIRED_TABLE_MISSING — this environment requires the deadline-engine tables (deployed staging/production); an absent table is an unprotected-or-unmigrated database, not a source-native schema.'
+            : 'NOT_PRESENT_IN_SOURCE_NATIVE_SCHEMA — table not physically present in this database (enforced by absence).',
         })
       }
       continue
@@ -835,17 +869,18 @@ export function evaluateDeadlineEngineRlsClosure(input: {
       }
       if (policy.cmd !== spec.cmd) predicateProblems.push(`${policy.policyname}: command ${policy.cmd} but approved ${spec.cmd}`)
       if (policy.permissive !== 'PERMISSIVE') predicateProblems.push(`${policy.policyname}: ${policy.permissive}, approved PERMISSIVE`)
-      if (spec.orgScoped) {
-        for (const part of requiredPredicateParts(spec.cmd)) {
-          const text = part === 'qual' ? policy.qual : policy.with_check
-          if (!normalizePredicate(text)) predicateProblems.push(`${policy.policyname}: ${part} is empty`)
-          else {
-            const widened = widensOrgPredicate(text)
-            if (widened) predicateProblems.push(`${policy.policyname}: ${part} ${widened}`)
-          }
+      for (const [part, actual, expected] of [
+        ['USING', policy.qual, spec.using],
+        ['WITH CHECK', policy.with_check, spec.withCheck],
+      ] as const) {
+        const got = canonicalizePredicate(actual)
+        if (expected === null) {
+          if (got !== '') predicateProblems.push(`${policy.policyname}: ${part} must be absent for ${spec.cmd} but is ${JSON.stringify(normalizePredicate(actual))}`)
+        } else if (got !== expected) {
+          predicateProblems.push(
+            `${policy.policyname}: ${part} is not the approved predicate contract (${explainWidening(actual)}): ${JSON.stringify(normalizePredicate(actual))}`,
+          )
         }
-      } else if (normalizePredicate(policy.qual) !== 'true' || normalizePredicate(policy.with_check) !== 'true') {
-        predicateProblems.push(`${policy.policyname}: system policy predicate changed from the approved USING(true)/WITH CHECK(true)`)
       }
     }
     results.push({
@@ -854,7 +889,7 @@ export function evaluateDeadlineEngineRlsClosure(input: {
       detail: roleProblems.length === 0 ? 'ok' : `ROLE VIOLATION — ${roleProblems.join('; ')}`,
     })
     results.push({
-      name: `deadline-engine ${table}: approved policies keep their org-scoped geometry (command, permissive, no widening branch)`,
+      name: `deadline-engine ${table}: approved policies match the approved predicate contract (command, permissive, exact organization-equality predicate)`,
       pass: predicateProblems.length === 0,
       detail: predicateProblems.length === 0 ? 'ok' : `PREDICATE VIOLATION — ${predicateProblems.join('; ')}`,
     })
@@ -862,10 +897,10 @@ export function evaluateDeadlineEngineRlsClosure(input: {
   return results
 }
 
-async function checkDeadlineEngineRlsClosure(sql: postgres.Sql, results: CheckResult[]) {
+async function checkDeadlineEngineRlsClosure(sql: postgres.Sql, results: CheckResult[], options: DeadlineEngineEvaluateOptions) {
   const tables = await sql.unsafe<DeadlineEngineTableRow[]>(DEADLINE_ENGINE_TABLES_QUERY)
   const policies = await sql.unsafe<DeadlineEnginePolicyRow[]>(DEADLINE_ENGINE_POLICIES_QUERY)
-  results.push(...evaluateDeadlineEngineRlsClosure({ tables: [...tables], policies: [...policies] }))
+  results.push(...evaluateDeadlineEngineRlsClosure({ tables: [...tables], policies: [...policies] }, options))
 }
 
 async function checkNoContextFailsClosed(sql: postgres.Sql, results: CheckResult[]) {
@@ -1074,7 +1109,7 @@ async function runFixtureIsolationMatrix(
 }
 
 async function main() {
-  const { mode } = parseArgs()
+  const { mode, requireDeadlineEngineTables } = parseArgs()
   const dbUrl = resolveRuntimeDatabaseUrl()
   if (!dbUrl) {
     console.error('[rls-verify] Missing RLS_VERIFY_DATABASE_URL / DATABASE_URL.')
@@ -1092,7 +1127,7 @@ async function main() {
     await checkBaselineTablesHaveManifestDisposition(results)
     await checkOrphanedTenantTables(sql, results)
     await checkManifestRlsRequiredCoverage(sql, results)
-    await checkDeadlineEngineRlsClosure(sql, results)
+    await checkDeadlineEngineRlsClosure(sql, results, { requireDeadlineEngineTables })
     if (mode === 'full') {
       const bootstrapDbUrl = resolveBootstrapDatabaseUrl()
       if (!bootstrapDbUrl) {
