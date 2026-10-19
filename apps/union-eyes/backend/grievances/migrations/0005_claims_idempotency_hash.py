@@ -2,8 +2,13 @@
 #
 # Not covered by PLATFORM_SQL 0005/0006/0007. 0007 adds claim_updates columns
 # only. claims.idempotency_hash remains a Django-owned additive column.
+#
+# Phase 3A qualification: AddFieldIfNotExists, because a database restored from the historical SQL lineage already has
+# this column (with an equivalent partial unique index); the plain AddField raised DuplicateColumn there.
 
 from django.db import migrations, models
+
+from core.migration_ops import AddFieldIfNotExists
 
 
 class Migration(migrations.Migration):
@@ -13,7 +18,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="claims",
             name="idempotency_hash",
             field=models.CharField(blank=True, max_length=64, null=True, unique=True),

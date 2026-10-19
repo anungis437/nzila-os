@@ -1,0 +1,98 @@
+[
+ {
+  "id": "C.1",
+  "name": "Synthetic member resolves to its bound organization",
+  "pass": true,
+  "detail": "status=200 org=11111111…"
+ },
+ {
+  "id": "C.2",
+  "name": "Secondary-org member resolves to a DIFFERENT organization (membership-bound)",
+  "pass": false,
+  "detail": "status=401 org=…"
+ },
+ {
+  "id": "C.3",
+  "name": "Forged x-organization-id does not switch secondary member into primary org",
+  "pass": true,
+  "detail": "status=401 resolvedOrg=none"
+ },
+ {
+  "id": "C.3",
+  "name": "Forged x-org-id does not switch secondary member into primary org",
+  "pass": true,
+  "detail": "status=401 resolvedOrg=none"
+ },
+ {
+  "id": "C.3",
+  "name": "Forged x-tenant-id does not switch secondary member into primary org",
+  "pass": true,
+  "detail": "status=401 resolvedOrg=none"
+ },
+ {
+  "id": "C.4",
+  "name": "Org switch without a valid target is rejected (no fallback)",
+  "pass": true,
+  "detail": "status=401 {\"error\":\"Unauthorized: Authentication required\"}"
+ },
+ {
+  "id": "C.5",
+  "name": "Member denied platform-admin API",
+  "pass": true,
+  "detail": "status=403"
+ },
+ {
+  "id": "C.6",
+  "name": "Tenant admin (non platform-admin) denied platform-admin API (no fallback to platform administrator)",
+  "pass": true,
+  "detail": "status=403"
+ },
+ {
+  "id": "C.7",
+  "name": "Expired token rejected",
+  "pass": true,
+  "detail": "status=401 {\"error\":\"Unauthorized\"}"
+ },
+ {
+  "id": "C.8",
+  "name": "Token signed with wrong key rejected",
+  "pass": true,
+  "detail": "status=401"
+ },
+ {
+  "id": "C.9",
+  "name": "Wrong audience rejected",
+  "pass": true,
+  "detail": "status=401"
+ },
+ {
+  "id": "C.10",
+  "name": "Identity outside the allowlist rejected",
+  "pass": true,
+  "detail": "status=401"
+ },
+ {
+  "id": "C.11",
+  "name": "Anonymous request rejected",
+  "pass": true,
+  "detail": "status=401"
+ },
+ {
+  "id": "D.cron",
+  "name": "Cron endpoint /api/cron/deadline-reminders rejects no credential (no worker execution)",
+  "pass": true,
+  "detail": "status=401"
+ },
+ {
+  "id": "D.cron",
+  "name": "Cron endpoint /api/cron/deadline-reminders rejects invalid secret (no worker execution)",
+  "pass": true,
+  "detail": "status=401"
+ },
+ {
+  "id": "D.cron",
+  "name": "Cron endpoint /api/cron/deadline-overdue rejects invalid bearer (no worker execution)",
+  "pass": true,
+  "detail": "status=401"
+ }
+]

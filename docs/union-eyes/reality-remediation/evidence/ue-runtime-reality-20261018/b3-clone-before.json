@@ -1,0 +1,215 @@
+{
+ "run": "UE_P3A_b0132f",
+ "results": [
+  {
+   "id": "B3.1",
+   "name": "Org A reads its own grievances",
+   "pass": true,
+   "detail": "own row visible"
+  },
+  {
+   "id": "B3.2",
+   "name": "Org B reads its own grievances",
+   "pass": true,
+   "detail": "own row visible"
+  },
+  {
+   "id": "B3.3",
+   "name": "Org A cannot read Org B rows in grievances",
+   "pass": true,
+   "detail": "0 row(s) (expected 0)"
+  },
+  {
+   "id": "B3.4",
+   "name": "Org B cannot read Org A rows in grievances",
+   "pass": true,
+   "detail": "0 row(s) (expected 0)"
+  },
+  {
+   "id": "B3.3",
+   "name": "Org A cannot read Org B rows in organization_members",
+   "pass": true,
+   "detail": "0 row(s) (expected 0)"
+  },
+  {
+   "id": "B3.4",
+   "name": "Org B cannot read Org A rows in organization_members",
+   "pass": true,
+   "detail": "0 row(s) (expected 0)"
+  },
+  {
+   "id": "B3.3",
+   "name": "Org A cannot read Org B rows in deadline_reminders",
+   "pass": true,
+   "detail": "0 row(s) (expected 0)"
+  },
+  {
+   "id": "B3.4",
+   "name": "Org B cannot read Org A rows in deadline_reminders",
+   "pass": true,
+   "detail": "0 row(s) (expected 0)"
+  },
+  {
+   "id": "B3.3",
+   "name": "Org A cannot read Org B rows in deadline_audit_events",
+   "pass": true,
+   "detail": "0 row(s) (expected 0)"
+  },
+  {
+   "id": "B3.4",
+   "name": "Org B cannot read Org A rows in deadline_audit_events",
+   "pass": true,
+   "detail": "0 row(s) (expected 0)"
+  },
+  {
+   "id": "B3.3",
+   "name": "Org A cannot read Org B rows in deadline_reminder_executions",
+   "pass": true,
+   "detail": "0 row(s) (expected 0)"
+  },
+  {
+   "id": "B3.4",
+   "name": "Org B cannot read Org A rows in deadline_reminder_executions",
+   "pass": true,
+   "detail": "0 row(s) (expected 0)"
+  },
+  {
+   "id": "B3.5",
+   "name": "Org A cannot UPDATE/DELETE Org B rows in grievances",
+   "pass": true,
+   "detail": "update=0 delete=0"
+  },
+  {
+   "id": "B3.5",
+   "name": "Org A cannot UPDATE/DELETE Org B rows in organization_members",
+   "pass": true,
+   "detail": "update=0 delete=0"
+  },
+  {
+   "id": "B3.5",
+   "name": "Org A cannot UPDATE/DELETE Org B rows in deadline_reminders",
+   "pass": true,
+   "detail": "update=0 delete=0"
+  },
+  {
+   "id": "B3.6",
+   "name": "No org context (unset) returns zero rows from grievances",
+   "pass": true,
+   "detail": "0 row(s) visible without org context"
+  },
+  {
+   "id": "B3.6",
+   "name": "No org context (empty) returns zero rows from grievances",
+   "pass": true,
+   "detail": "0 row(s) visible without org context"
+  },
+  {
+   "id": "B3.6",
+   "name": "No org context (unset) returns zero rows from organization_members",
+   "pass": true,
+   "detail": "0 row(s) visible without org context"
+  },
+  {
+   "id": "B3.6",
+   "name": "No org context (empty) returns zero rows from organization_members",
+   "pass": true,
+   "detail": "0 row(s) visible without org context"
+  },
+  {
+   "id": "B3.6",
+   "name": "No org context (unset) returns zero rows from deadline_reminders",
+   "pass": false,
+   "detail": "2 row(s) visible without org context"
+  },
+  {
+   "id": "B3.6",
+   "name": "No org context (empty) returns zero rows from deadline_reminders",
+   "pass": false,
+   "detail": "2 row(s) visible without org context"
+  },
+  {
+   "id": "B3.6",
+   "name": "No org context (unset) returns zero rows from deadline_audit_events",
+   "pass": false,
+   "detail": "4 row(s) visible without org context"
+  },
+  {
+   "id": "B3.6",
+   "name": "No org context (empty) returns zero rows from deadline_audit_events",
+   "pass": false,
+   "detail": "4 row(s) visible without org context"
+  },
+  {
+   "id": "B3.6",
+   "name": "No org context (unset) returns zero rows from deadline_reminder_executions",
+   "pass": true,
+   "detail": "0 row(s) visible without org context"
+  },
+  {
+   "id": "B3.6",
+   "name": "No org context (empty) returns zero rows from deadline_reminder_executions",
+   "pass": true,
+   "detail": "0 row(s) visible without org context"
+  },
+  {
+   "id": "B3.6",
+   "name": "No-context INSERT into deadline_reminders (forging Org B) is rejected",
+   "pass": false,
+   "detail": "INSERT SUCCEEDED (1)"
+  },
+  {
+   "id": "B3.7a",
+   "name": "Context A cannot INSERT a row owned by Org B (WITH CHECK)",
+   "pass": true,
+   "detail": "rejected"
+  },
+  {
+   "id": "B3.8",
+   "name": "Runtime role cannot SET ROLE union_eyes_system / bypass",
+   "pass": true,
+   "detail": "permission denied to set role \"union_eyes_system\""
+  },
+  {
+   "id": "B3.8",
+   "name": "Runtime role NOSUPERUSER/NOBYPASSRLS",
+   "pass": true,
+   "detail": "{\"rolsuper\":false,\"rolbypassrls\":false}"
+  },
+  {
+   "id": "B3.10",
+   "name": "System role (privileged authority) sees cross-org rows by design",
+   "pass": true,
+   "detail": "2 rows"
+  },
+  {
+   "id": "B3.13",
+   "name": "Runtime role cannot write cross_org_access_log (system-only audit authority)",
+   "pass": true,
+   "detail": "rejected"
+  },
+  {
+   "id": "B3.13",
+   "name": "System role can write cross_org_access_log",
+   "pass": true,
+   "detail": "rowCount=1"
+  },
+  {
+   "id": "B3.11",
+   "name": "Transaction-local org context does not leak to next use of pooled connection",
+   "pass": true,
+   "detail": "setting='', visible grievances=0"
+  },
+  {
+   "id": "B3.12",
+   "name": "80 concurrent pooled transactions each see only their own org",
+   "pass": true,
+   "detail": "80/80 isolated"
+  },
+  {
+   "id": "B3.14",
+   "name": "Database error surfaces as error (not empty success)",
+   "pass": true,
+   "detail": "error raised"
+  }
+ ]
+}

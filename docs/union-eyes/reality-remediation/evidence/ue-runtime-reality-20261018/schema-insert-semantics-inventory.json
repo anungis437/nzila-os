@@ -1,0 +1,1090 @@
+{
+ "note": "Upper bound from static analysis; not a live-catalog result.",
+ "sourceCommit": "a2d649e640315d8b2a42962ab79ad2af09ca8288",
+ "counts": {
+  "djangoTables": 524,
+  "drizzleTables": 696,
+  "tablesWithDrizzleInsertSites": 384,
+  "djangoOwnedAndInserted": 267
+ },
+ "tranche1AcceptanceCritical": [
+  "profiles",
+  "grievances",
+  "grievance_deadlines",
+  "claims",
+  "claim_updates",
+  "documents",
+  "in_app_notifications",
+  "steward_assignments"
+ ],
+ "djangoOwnedAndInserted": [
+  {
+   "table": "ab_tests",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "access_justification_requests",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "accessibility_audits",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "accessibility_issues",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "account_balance_reconciliation",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "address_change_history",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "address_validation_cache",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "ai_safety_filters",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "ai_usage_metrics",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "alert_executions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "alert_rules",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "analytics_metrics",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "arbitration_decisions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "arbitrator_profiles",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "arms_length_verification",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "automation_rules",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "autopay_settings",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "award_history",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "award_templates",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "band_council_consent",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "band_councils",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "bank_of_canada_rates",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "bargaining_notes",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "bargaining_units",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "blind_trust_registry",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "board_packet_distributions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "board_packets",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "break_glass_activations",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "break_glass_system",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "budget_reservations",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "calendar_events",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "calendars",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "campaigns",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "cba_clauses",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "certification_alerts",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "certification_audit_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "certification_compliance_reports",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "chat_messages",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "chat_sessions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "claim_updates",
+   "insertSiteFiles": 6
+  },
+  {
+   "table": "claims",
+   "insertSiteFiles": 5
+  },
+  {
+   "table": "clause_comparisons",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "clause_library_tags",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "clc_bargaining_trends",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "clc_oauth_tokens",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "clc_organization_sync_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "clc_per_capita_benchmarks",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "clc_sync_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "clc_union_density",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "clc_webhook_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "collective_agreements",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "committee_memberships",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "committees",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "communication_preferences",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "conflict_audit_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "conflict_disclosures",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "conflict_of_interest_policy",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "consent_records",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "continuing_education",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "contribution_rates",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "cookie_consents",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "cost_of_living_data",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "council_elections",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "course_sessions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "cpi_adjusted_pricing",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "cpi_data",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "cross_border_transactions",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "currency_enforcement_audit",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "currency_enforcement_policy",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "currency_enforcement_violations",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "currency_exchange_rates",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "data_aggregation_consent",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "data_anonymization_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "data_classification_registry",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "data_subject_access_requests",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "defensibility_packs",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "disaster_recovery_drills",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "document_folders",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "document_signers",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "documents",
+   "insertSiteFiles": 6
+  },
+  {
+   "table": "dues_transactions",
+   "insertSiteFiles": 4
+  },
+  {
+   "table": "emergency_declarations",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "employer_access_attempts",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "employer_remittances",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "employers",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "employment_history",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "event_attendees",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "event_reminders",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "exit_interview_documents",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "exit_interview_events",
+   "insertSiteFiles": 8
+  },
+  {
+   "table": "exit_interviews",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_accounts",
+   "insertSiteFiles": 4
+  },
+  {
+   "table": "external_benefit_coverage",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "external_benefit_dependents",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_benefit_enrollments",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "external_benefit_plans",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "external_benefit_utilization",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "external_calendar_connections",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "external_communication_channels",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "external_communication_files",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "external_communication_messages",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "external_communication_users",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "external_customers",
+   "insertSiteFiles": 5
+  },
+  {
+   "table": "external_data_sync_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_departments",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "external_document_files",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_document_libraries",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_document_permissions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_document_sites",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_employees",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "external_insurance_beneficiaries",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "external_insurance_claims",
+   "insertSiteFiles": 4
+  },
+  {
+   "table": "external_insurance_policies",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "external_invoices",
+   "insertSiteFiles": 5
+  },
+  {
+   "table": "external_lms_completions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_lms_courses",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_lms_enrollments",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_lms_learners",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_lms_progress",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "external_payments",
+   "insertSiteFiles": 5
+  },
+  {
+   "table": "external_positions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "feature_flags",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "financial_audit_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "firewall_compliance_audit",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "firewall_violations",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "fmv_audit_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "fmv_benchmarks",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "fmv_policy",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "fmv_violations",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "foreign_workers",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "fx_rate_audit_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "gdpr_data_requests",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "geofence_events",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "geofences",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "gl_transaction_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "gl_trial_balance",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "grievance_approvals",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "grievance_assignments",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "grievance_deadlines",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "grievance_documents",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "grievance_transitions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "grievances",
+   "insertSiteFiles": 9
+  },
+  {
+   "table": "gss_applications",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "in_app_notifications",
+   "insertSiteFiles": 5
+  },
+  {
+   "table": "independent_appraisals",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "indigenous_data_access_log",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "indigenous_data_sharing_agreements",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "indigenous_member_data",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "insight_recommendations",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "integration_configs",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "integration_sync_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "international_addresses",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "job_classifications",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "key_holder_registry",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "knowledge_base",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "kpi_configurations",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "license_renewals",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "lmbp_compliance_alerts",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "lmbp_compliance_reports",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "lmbp_letters",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "location_deletion_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "location_tracking",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "location_tracking_audit",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "location_tracking_config",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "lrb_agreements",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "lrb_sync_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "member_dues_ledger",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "member_employment",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "member_leaves",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "member_location_consent",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "member_segments",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "mentorships",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "message_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "ml_predictions",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "mobile_analytics",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "mobile_devices",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "mobile_notifications",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "mobile_sync_queue",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "model_metadata",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "notification_delivery_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "notification_history",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "notification_log",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "notification_queue",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "notification_tracking",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "payment_plans",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "payment_routing_rules",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "pci_dss_encryption_keys",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "pci_dss_quarterly_scans",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "pci_dss_requirements",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "pci_dss_saq_assessments",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "pending_profiles",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "per_capita_remittances",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "pilot_applications",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "policy_evaluations",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "privacy_breaches",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "procurement_bids",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "procurement_requests",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "profiles",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "provincial_consent",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "provincial_data_handling",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "push_deliveries",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "recognition_award_types",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "recognition_awards",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "recognition_programs",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "recovery_time_objectives",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "recusal_tracking",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "remittance_approvals",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "remittance_exceptions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "remittance_line_items",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "reward_budget_envelopes",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "reward_redemptions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "reward_wallet_ledger",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "rl1_tax_slips",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "role_tenure_history",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "segment_executions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "segment_exports",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "separated_payment_transactions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "shared_clause_library",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "signature_audit_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "signature_audit_trail",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "signature_documents",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "signature_verification",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "signature_workflows",
+   "insertSiteFiles": 3
+  },
+  {
+   "table": "signers",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "sms_conversations",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "sms_messages",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "sms_opt_outs",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "social_accounts",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "social_analytics",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "social_campaigns",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "social_posts",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "sso_providers",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "staff_certifications",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "steward_assignments",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "strike_fund_disbursements",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "strike_fund_payment_audit",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "stripe_connect_accounts",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "support_tickets",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "swiss_cold_storage",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "t106_filing_tracking",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "t4a_tax_slips",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "tax_year_end_processing",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "tentative_agreements",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "ticket_comments",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "ticket_history",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "traditional_knowledge_registry",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "training_courses",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "transaction_currency_conversions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "transfer_pricing_documentation",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "trend_analyses",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "union_only_data_tags",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "user_consents",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "user_notification_preferences",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "user_uuid_mapping",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "voter_eligibility",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "votes",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "voting_audit_log",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "voting_options",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "voting_sessions",
+   "insertSiteFiles": 2
+  },
+  {
+   "table": "wage_benchmarks",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "wage_progressions",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "webhook_events",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "webhook_receipts",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "weekly_threshold_tracking",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "whiplash_prevention_audit",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "whiplash_violations",
+   "insertSiteFiles": 1
+  },
+  {
+   "table": "worksites",
+   "insertSiteFiles": 1
+  }
+ ]
+}

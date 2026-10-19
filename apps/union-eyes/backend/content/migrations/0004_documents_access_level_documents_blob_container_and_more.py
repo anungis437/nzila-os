@@ -9,8 +9,15 @@
 # Reverse of the overlap is a no-op so unapplying this migration cannot drop
 # columns the platform lineage owns.
 
+# Phase 3A qualification: the AddField operations after the platform-0006 overlap are AddFieldIfNotExists so the
+# migration also succeeds on a database restored from the historical SQL lineage, where most of these columns already
+# exist (DuplicateColumn at content.0004 was reproduced). State is identical to AddField; an incompatible existing
+# column fails closed. See core/migration_ops.py.
+
 import django.contrib.postgres.fields
 from django.db import migrations, models
+
+from core.migration_ops import AddFieldIfNotExists
 
 
 PLATFORM_SQL_0006_OVERLAP = [
@@ -80,124 +87,124 @@ class Migration(migrations.Migration):
                 for sql in PLATFORM_SQL_0006_OVERLAP
             ],
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="access_level",
             field=models.CharField(default="standard", max_length=50),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="blob_container",
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="blob_path",
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="category",
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="contains_legal_privilege",
             field=models.BooleanField(default=False),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="contains_medical_sensitive",
             field=models.BooleanField(default=False),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="contains_pii",
             field=models.BooleanField(default=False),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="content_text",
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="content_type",
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="disciplinary_sensitive",
             field=models.BooleanField(default=False),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="document_type",
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="file_type",
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="filename",
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="folder_id",
             field=models.UUIDField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="is_confidential",
             field=models.BooleanField(default=False),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="medical_sensitive",
             field=models.BooleanField(default=False),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="member_pii",
             field=models.BooleanField(default=False),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="privacy_label",
             field=models.CharField(default="team_confidential", max_length=32),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="sha256",
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="size_bytes",
             field=models.BigIntegerField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="status",
             field=models.CharField(default="active", max_length=20),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="tags",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.TextField(), blank=True, null=True, size=None
             ),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="title",
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name="documents",
             name="uploaded_at",
             field=models.DateTimeField(blank=True, null=True),

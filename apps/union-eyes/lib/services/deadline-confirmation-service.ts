@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { grievanceDeadlines } from '@/db/schema/domains/claims/workflows';
 import { auditLog, AuditSeverity } from '@/lib/audit-logger';
@@ -94,6 +94,9 @@ export async function supersedeDeadline(params: {
       confirmationStatus: 'SUPERSEDED',
       supersededAt: now,
       supersededBy: params.actorId,
+      // I2 (deadline-semantics): a superseded deadline is terminal for every reader. A completed deadline keeps its
+      // completion fact; anything else becomes cancelled.
+      status: sql`case when ${grievanceDeadlines.status} = 'completed' then 'completed' else 'cancelled' end`,
       updatedAt: now,
     })
     .where(

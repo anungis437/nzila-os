@@ -1,0 +1,17 @@
+# Trimmed rls-verify --mode=preflight output (passing checks elided; full output sha256=1a7d2182638847277e7460f2b422045690057401e86101ec9a2e76fe841802ca, 1707 lines)
+# passes=1699 fails=0
+[rls-verify] manifest-driven RLS coverage: 328 RLS-required manifest tables (317 present / 11 absent), 317/317 present-and-enforced. RLS_VERIFY_MANIFEST_DRIVEN=YES RLS_VERIFY_EXPECTATIONS_WEAKENED=NO
+✅ runtime-role: connected as union_eyes_runtime — current_user = union_eyes_runtime
+✅ runtime-role: NOSUPERUSER — rolsuper = false
+✅ runtime-role: NOBYPASSRLS — rolbypassrls = false
+✅ table organization_members: RLS enabled — relrowsecurity = true
+✅ table organization_members: RLS forced — relforcerowsecurity = true
+✅ table grievances: RLS enabled — relrowsecurity = true
+✅ table grievances: RLS forced — relforcerowsecurity = true
+  'organizing_contacts',
+  {...})` declarations at db/schema/domains/infrastructure/organizing.ts and db/schema/organizing-tools-schema.ts (both carry their own organization_id-indexed columns). A repo-wide, multi-line-aware search (scripts/rls-storage-reachability-audit.ts) confirms these ARE real union-eyes-native declarations, but zero non-test references to 'organizingContacts' exist anywhere in app/, actions/, lib/, or services/ (excluding financial-service, which separately declares a same-named table in its own database). Correct disposition is therefore LATENT_UNREACHABLE, not SEPARATE_DATABASE_BOUNDARY — the union-eyes table exists and is part of this schema's remit, it is simply unused.
+
+1699/1699 checks passed.
+
+[rls-verify] PASS — RLS tenant-isolation foundation confirmed in force on this database.
+

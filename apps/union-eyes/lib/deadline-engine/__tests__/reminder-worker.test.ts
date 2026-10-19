@@ -333,6 +333,21 @@ describe('reminder-worker', () => {
       expect(auditTypes).not.toContain('reminder.sent');
     });
 
+    it('suppresses delivery when the deadline was cancelled (superseded) between claim and dispatch', async () => {
+      mocks.execute
+        .mockResolvedValueOnce([]) // recovery
+        .mockResolvedValueOnce([makeRow()]) // claim
+        .mockResolvedValueOnce(makeEligibleRevalidation({ deadline_status: 'cancelled' }));
+
+      const result = await runDeadlineReminderWorker({ workerInstance: 'worker-test', now: () => NOW });
+
+      expect(result.sent).toBe(0);
+      expect(result.cancelledSkipped).toBe(1);
+      expect(mocks.deliver).not.toHaveBeenCalled();
+      const params = mocks.txExecute.mock.calls[0]?.[0]?.values ?? [];
+      expect(params).toContain('deadline_cancelled');
+    });
+
     it('suppresses delivery when the assigned-officer recipient no longer matches the current assignment', async () => {
       mocks.execute
         .mockResolvedValueOnce([])

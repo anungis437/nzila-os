@@ -1283,6 +1283,9 @@ export async function processOverdueDeadlines(): Promise<void> {
         and(
           ne(grievanceDeadlines.status, "met"),
           ne(grievanceDeadlines.status, "missed"),
+          // terminal deadlines (completed, cancelled/superseded) must never be re-marked as missed
+          ne(grievanceDeadlines.status, "completed"),
+          ne(grievanceDeadlines.status, "cancelled"),
           lte(grievanceDeadlines.dueDate, new Date())
         )
       );

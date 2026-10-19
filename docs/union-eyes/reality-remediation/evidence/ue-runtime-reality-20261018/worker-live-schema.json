@@ -1,0 +1,26 @@
+[
+  {
+    "id": "D.0",
+    "name": "Worker runs to completion against the live schema",
+    "pass": false,
+    "detail": "Failed query: select \"id\" from \"deadline_reassignment_convergence\" where status = $1 — relation does not exist (to_regclass = null)"
+  },
+  {
+    "id": "D.1",
+    "name": "Concurrent workers claim each due reminder exactly once",
+    "pass": false,
+    "detail": "claimedSum=0/12 — no reminder claimed because every run aborts at sweepPendingAssignmentConvergence"
+  },
+  {
+    "id": "D.2",
+    "name": "One execution row per claimed attempt",
+    "pass": false,
+    "detail": "0 reminders with executions"
+  },
+  {
+    "id": "D.x",
+    "name": "Schema drift: grievance_deadlines.due_date / status",
+    "pass": false,
+    "detail": "Live grievance_deadlines has calculated_due_date/override_due_date/confirmation_status but NO due_date or status column; reminder-worker revalidation (gd.status) and /api/cron/deadline-overdue (gd.due_date, gd.status) reference them"
+  }
+]
