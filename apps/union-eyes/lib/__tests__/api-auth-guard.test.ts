@@ -26,6 +26,7 @@ const mocks = vi.hoisted(() => ({
   mockIsPublicRoute: vi.fn(),
   mockIsCronRoute: vi.fn(),
   mockCookiesGet: vi.fn(),
+  mockCanonicalOrganizationContext: vi.fn(),
 }));
 
 /** Recursive chain for db.select chains */
@@ -112,6 +113,11 @@ vi.mock('@/lib/auth/auth-service', () => ({
 
 vi.mock('../organization-utils', () => ({
   getOrganizationIdForUser: mocks.mockGetOrganizationIdForUser,
+}));
+
+vi.mock('@/lib/auth/canonical-context', () => ({
+  getCanonicalOrganizationContext: mocks.mockCanonicalOrganizationContext,
+  getCanonicalPasswordActor: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock('../auth/roles', async (importOriginal) => {
@@ -581,6 +587,63 @@ describe('ApiAuthGuard', () => {
     it('returns false when unauthenticated', async () => {
       mocks.mockAuth.mockResolvedValue({ userId: null, orgId: null });
       expect(await hasRoleInOrganization('org-1', 'member')).toBe(false);
+    });
+
+    it('evaluates the supplied principal in legacy mode even when the session user differs', async () => {
+      const ACTOR_A = 'actor-a';
+      const ACTOR_B = 'actor-b';
+      mocks.mockAuth.mockResolvedValue({ userId: ACTOR_B, orgId: null });
+      let queriedUserId: string | undefined;
+      mocks.mockOrgMembersFindFirst.mockImplementation(async (args: { where: (om: Record<string, string>, ops: { eq: (column: string, value: string) => unknown; and: (...parts: unknown[]) => unknown }) => unknown }) => {
+        args.where(
+          { userId: 'userId', organizationId: 'organizationId', status: 'status' },
+          {
+            eq: (column, value) => {
+              if (column === 'userId') queriedUserId = value;
+              return { column, value };
+            },
+            and: (...parts) => parts,
+          },
+        );
+        return queriedUserId === ACTOR_A ? { role: 'steward' } : { role: 'member' };
+      });
+
+      await expect(hasRoleInOrganization('org-1', 'steward', ACTOR_A)).resolves.toBe(true);
+      expect(queriedUserId).toBe(ACTOR_A);
+
+      queriedUserId = undefined;
+      await expect(hasRoleInOrganization('org-1', 'steward', ACTOR_B)).resolves.toBe(false);
+      expect(queriedUserId).toBe(ACTOR_B);
+    });
+
+    it('binds the same principal in canonical mode and denies a context for someone else', async () => {
+      const ACTOR_A = 'actor-a';
+      const ACTOR_B = 'actor-b';
+      vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+      mocks.mockAuth.mockResolvedValue({ userId: ACTOR_B, orgId: null });
+      mocks.mockCanonicalOrganizationContext.mockImplementation(async (options: { organizationId?: string; expectedActorUserId?: string }) => {
+        if (options.expectedActorUserId === ACTOR_A) {
+          return { userId: ACTOR_A, organizationId: options.organizationId, role: 'steward' };
+        }
+        return { userId: ACTOR_B, organizationId: options.organizationId, role: 'member' };
+      });
+
+      await expect(hasRoleInOrganization('org-1', 'steward', ACTOR_A)).resolves.toBe(true);
+      expect(mocks.mockCanonicalOrganizationContext).toHaveBeenCalledWith({
+        organizationId: 'org-1',
+        expectedActorUserId: ACTOR_A,
+      });
+
+      mocks.mockCanonicalOrganizationContext.mockResolvedValueOnce({
+        userId: ACTOR_B,
+        organizationId: 'org-1',
+        role: 'admin',
+      });
+      await expect(hasRoleInOrganization('org-1', 'member', ACTOR_A)).resolves.toBe(false);
+
+      mocks.mockCanonicalOrganizationContext.mockRejectedValueOnce(new Error('ACTOR_MISMATCH'));
+      await expect(hasRoleInOrganization('org-1', 'steward', ACTOR_A)).resolves.toBe(false);
+      vi.unstubAllEnvs();
     });
   });
 

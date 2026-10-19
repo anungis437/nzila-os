@@ -25,6 +25,84 @@ import { memberEmployment } from "../schema/domains/member/member-employment";
 import { eq, and, or, desc, asc, sql, gte, lte, inArray, SQL } from "drizzle-orm";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
+import {
+  persistDurableSegmentAudit,
+  type SegmentAuditRequest,
+} from "@/lib/member-segments/durable-segment-audit";
+
+/**
+ * Bind segment SQL to the organization the action already authorized.
+ * An empty id fails closed instead of falling through to a different session org.
+ * Callers must authorize membership before passing organizationId: this helper
+ * attaches that id to the transaction, it does not decide access.
+ */
+function withSegmentOrganization<T>(
+  organizationId: string | null | undefined,
+  operation: (tx: RLSTx) => Promise<T>,
+): Promise<T> {
+  if (typeof organizationId !== "string" || organizationId.trim() === "") {
+    return Promise.reject(new Error("Organization context required"));
+  }
+  return withRLSContext({ organizationId }, operation);
+}
+
+function segmentUpdatePatch(
+  data: Partial<InsertMemberSegment>,
+): Partial<InsertMemberSegment> {
+  const patch: Partial<InsertMemberSegment> = { ...data };
+  delete patch.organizationId;
+  delete patch.createdBy;
+  delete patch.id;
+  return patch;
+}
+
+/**
+ * Who may see or change a segment inside an organization that is already authorized.
+ *
+ * Read and execute: public segments plus segments this actor created, unless
+ * `includeOthersPrivate` was set by an organization-administrator check.
+ * Update and delete: this actor's segments only, unless that same flag is set.
+ * Public visibility does not grant edit or delete. This helper trusts the flag
+ * the same way it trusts `organizationId`.
+ */
+export type SegmentVisibility = {
+  actorUserId: string;
+  includeOthersPrivate: boolean;
+};
+
+function requireSegmentActor(visibility: SegmentVisibility): string {
+  if (typeof visibility?.actorUserId !== "string" || visibility.actorUserId.trim() === "") {
+    throw new Error("Actor required");
+  }
+  return visibility.actorUserId;
+}
+
+function visibleToActor(visibility: SegmentVisibility): SQL | undefined {
+  const actorUserId = requireSegmentActor(visibility);
+  if (visibility.includeOthersPrivate) return undefined;
+  return or(
+    eq(memberSegments.isPublic, true),
+    eq(memberSegments.createdBy, actorUserId),
+  )!;
+}
+
+function mutableByActor(visibility: SegmentVisibility): SQL | undefined {
+  const actorUserId = requireSegmentActor(visibility);
+  if (visibility.includeOthersPrivate) return undefined;
+  return eq(memberSegments.createdBy, actorUserId);
+}
+
+function segmentNotFound(error: unknown): boolean {
+  return error instanceof Error && error.message === "Segment not found";
+}
+
+function auditFact(segment: { id: string; createdBy: string; isPublic: boolean }) {
+  return {
+    segmentId: segment.id,
+    ownerUserId: segment.createdBy,
+    isPublic: segment.isPublic,
+  };
+}
 
 // =============================================================================
 // SEGMENT CRUD
@@ -37,7 +115,7 @@ export async function createSegment(
   data: InsertMemberSegment
 ): Promise<SelectMemberSegment> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(data.organizationId, async (tx: RLSTx) => {
     try {
       const [segment] = await tx
         .insert(memberSegments)
@@ -53,37 +131,40 @@ export async function createSegment(
 }
 
 /**
- * Get all segments for an organization
+ * Get active segments visible to the actor in an organization.
+ * The actor filter is always applied unless `includeOthersPrivate` was authorized.
  */
 export async function getSegments(
   organizationId: string,
-  userId?: string
+  visibility: SegmentVisibility,
 ): Promise<SelectMemberSegment[]> {
-   
-  return withRLSContext(async (tx: RLSTx) => {
+  const boundary = visibleToActor(visibility);
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const conditions: SQL[] = [
         eq(memberSegments.organizationId, organizationId),
         eq(memberSegments.isActive, true),
       ];
+      if (boundary) conditions.push(boundary);
 
-      // If userId provided, filter to user's segments + public segments
-      if (userId) {
-        conditions.push(
-          or(
-            eq(memberSegments.createdBy, userId),
-            eq(memberSegments.isPublic, true)
-          )!
-        );
-      }
-
-      return await tx
+      const segments = await tx
         .select()
         .from(memberSegments)
         .where(and(...conditions))
         .orderBy(desc(memberSegments.lastExecutedAt), desc(memberSegments.createdAt));
+      await persistDurableSegmentAudit(tx, {
+        actorUserId: visibility.actorUserId,
+        organizationId,
+        operation: "list",
+        outcome: "success",
+        segments: segments.map(auditFact),
+      });
+      return segments;
     } catch (error) {
-      logger.error("Failed to get segments", error as Error, { organizationId, userId });
+      logger.error("Failed to get segments", error as Error, {
+        organizationId,
+        actorUserId: visibility.actorUserId,
+      });
       throw new Error("Failed to get segments");
     }
   });
@@ -94,22 +175,32 @@ export async function getSegments(
  */
 export async function getSegmentById(
   id: string,
-  organizationId: string
+  organizationId: string,
+  visibility: SegmentVisibility,
 ): Promise<SelectMemberSegment | null> {
-   
-  return withRLSContext(async (tx: RLSTx) => {
+  const boundary = visibleToActor(visibility);
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
+      const predicates: SQL[] = [
+        eq(memberSegments.id, id),
+        eq(memberSegments.organizationId, organizationId),
+      ];
+      if (boundary) predicates.push(boundary);
       const [segment] = await tx
         .select()
         .from(memberSegments)
-        .where(
-          and(
-            eq(memberSegments.id, id),
-            eq(memberSegments.organizationId, organizationId)
-          )
-        )
+        .where(and(...predicates))
         .limit(1);
-      
+
+      if (segment) {
+        await persistDurableSegmentAudit(tx, {
+          actorUserId: visibility.actorUserId,
+          organizationId,
+          operation: "read",
+          outcome: "success",
+          segments: [auditFact(segment)],
+        });
+      }
       return segment || null;
     } catch (error) {
       logger.error("Failed to get segment", error as Error, { id, organizationId });
@@ -123,26 +214,41 @@ export async function getSegmentById(
  */
 export async function updateSegment(
   id: string,
-  data: Partial<InsertMemberSegment>
+  data: Partial<InsertMemberSegment>,
+  organizationId: string,
+  visibility: SegmentVisibility,
 ): Promise<SelectMemberSegment> {
-   
-  return withRLSContext(async (tx: RLSTx) => {
+  const boundary = mutableByActor(visibility);
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
+      const predicates: SQL[] = [
+        eq(memberSegments.id, id),
+        eq(memberSegments.organizationId, organizationId),
+      ];
+      if (boundary) predicates.push(boundary);
       const [updated] = await tx
         .update(memberSegments)
         .set({
-          ...data,
+          ...segmentUpdatePatch(data),
           updatedAt: new Date(),
         })
-        .where(eq(memberSegments.id, id))
+        .where(and(...predicates))
         .returning();
       
       if (!updated) {
-        throw new Error(`Segment ${id} not found`);
+        throw new Error("Segment not found");
       }
-      
+
+      await persistDurableSegmentAudit(tx, {
+        actorUserId: visibility.actorUserId,
+        organizationId,
+        operation: "update",
+        outcome: "success",
+        segments: [auditFact(updated)],
+      });
       return updated;
     } catch (error) {
+      if (segmentNotFound(error)) throw error;
       logger.error("Failed to update segment", error as Error, { id, data });
       throw new Error("Failed to update segment");
     }
@@ -153,16 +259,41 @@ export async function updateSegment(
  * Delete a segment (soft delete by setting isActive = false)
  */
 export async function deleteSegment(
-  id: string
+  id: string,
+  organizationId: string,
+  visibility: SegmentVisibility,
 ): Promise<void> {
-   
-  return withRLSContext(async (tx: RLSTx) => {
+  const boundary = mutableByActor(visibility);
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
-      await tx
+      const predicates: SQL[] = [
+        eq(memberSegments.id, id),
+        eq(memberSegments.organizationId, organizationId),
+      ];
+      if (boundary) predicates.push(boundary);
+      const updated = await tx
         .update(memberSegments)
         .set({ isActive: false, updatedAt: new Date() })
-        .where(eq(memberSegments.id, id));
+        .where(and(...predicates))
+        .returning({
+          id: memberSegments.id,
+          createdBy: memberSegments.createdBy,
+          isPublic: memberSegments.isPublic,
+        });
+
+      if (updated.length === 0) {
+        throw new Error("Segment not found");
+      }
+
+      await persistDurableSegmentAudit(tx, {
+        actorUserId: visibility.actorUserId,
+        organizationId,
+        operation: "delete",
+        outcome: "success",
+        segments: updated.map(auditFact),
+      });
     } catch (error) {
+      if (segmentNotFound(error)) throw error;
       logger.error("Failed to delete segment", error as Error, { id });
       throw new Error("Failed to delete segment");
     }
@@ -190,7 +321,7 @@ export async function searchMembersAdvanced(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ members: any[]; total: number }> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const page = options?.page || 1;
       const limit = options?.limit || 50;
@@ -344,16 +475,20 @@ export async function executeSegment(
   options?: {
     page?: number;
     limit?: number;
+    includeOthersPrivate?: boolean;
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ members: any[]; total: number }> {
-   
-  return withRLSContext(async (tx: RLSTx) => {
+  const visibility: SegmentVisibility = {
+    actorUserId: executedBy,
+    includeOthersPrivate: options?.includeOthersPrivate === true,
+  };
+  const boundary = visibleToActor(visibility);
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
-      // Get segment
-      const segment = await getSegmentById(segmentId, organizationId);
+      const segment = await getSegmentById(segmentId, organizationId, visibility);
       if (!segment) {
-        throw new Error(`Segment ${segmentId} not found`);
+        throw new Error("Segment not found");
       }
 
       // Start timing
@@ -370,26 +505,37 @@ export async function executeSegment(
       const executionTimeMs = Date.now() - startTime;
 
       // Log execution
+      const otherPrivate = segment.isPublic !== true && segment.createdBy !== executedBy;
       await logSegmentExecution({
         segmentId,
         executedBy,
         resultCount: result.total,
         executionTimeMs,
+        // Another member's private definition stays out of the execution audit.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        filtersSnapshot: segment.filters as any,
+        filtersSnapshot: otherPrivate ? undefined : segment.filters as any,
+      }, organizationId, {
+        actorUserId: executedBy,
+        segments: [auditFact(segment)],
       });
 
-      // Update segment metadata
+      // Update segment metadata inside the authorized organization only.
+      const touched: SQL[] = [
+        eq(memberSegments.id, segmentId),
+        eq(memberSegments.organizationId, organizationId),
+      ];
+      if (boundary) touched.push(boundary);
       await tx
         .update(memberSegments)
         .set({
           lastExecutedAt: new Date(),
           executionCount: sql`${memberSegments.executionCount} + 1`,
         })
-        .where(eq(memberSegments.id, segmentId));
+        .where(and(...touched));
 
       return result;
     } catch (error) {
+      if (segmentNotFound(error)) throw error;
       logger.error("Failed to execute segment", error as Error, { segmentId, organizationId });
       throw new Error("Failed to execute segment");
     }
@@ -404,16 +550,30 @@ export async function executeSegment(
  * Log segment execution for audit trail
  */
 export async function logSegmentExecution(
-  data: InsertSegmentExecution
+  data: InsertSegmentExecution,
+  organizationId: string,
+  audit?: SegmentAuditRequest,
 ): Promise<SelectSegmentExecution> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       const [execution] = await tx
         .insert(segmentExecutions)
         .values(data)
         .returning();
-      
+      if (!execution) {
+        throw new Error("Failed to log segment execution");
+      }
+
+      if (audit) {
+        await persistDurableSegmentAudit(tx, {
+          actorUserId: audit.actorUserId,
+          organizationId,
+          operation: "execute",
+          outcome: "success",
+          segments: audit.segments,
+        });
+      }
       return execution;
     } catch (error) {
       logger.error("Failed to log segment execution", error as Error, { data });
@@ -427,17 +587,34 @@ export async function logSegmentExecution(
  */
 export async function getSegmentExecutions(
   segmentId: string,
-  limit: number = 50
+  organizationId: string,
+  limit: number = 50,
+  audit?: SegmentAuditRequest,
 ): Promise<SelectSegmentExecution[]> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
-      return await tx
+      const executions = await tx
         .select()
         .from(segmentExecutions)
-        .where(eq(segmentExecutions.segmentId, segmentId))
+        .where(
+          and(
+            eq(segmentExecutions.segmentId, segmentId),
+            sql`exists (select 1 from ${memberSegments} where ${memberSegments.id} = ${segmentExecutions.segmentId} and ${memberSegments.organizationId} = ${organizationId})`,
+          ),
+        )
         .orderBy(desc(segmentExecutions.executedAt))
         .limit(limit);
+      if (audit) {
+        await persistDurableSegmentAudit(tx, {
+          actorUserId: audit.actorUserId,
+          organizationId,
+          operation: "history",
+          outcome: "success",
+          segments: audit.segments,
+        });
+      }
+      return executions;
     } catch (error) {
       logger.error("Failed to get segment executions", error as Error, { segmentId });
       throw new Error("Failed to get segment executions");
@@ -453,16 +630,29 @@ export async function getSegmentExecutions(
  * Log member data export
  */
 export async function logSegmentExport(
-  data: InsertSegmentExport
+  data: InsertSegmentExport,
+  audit?: SegmentAuditRequest,
 ): Promise<SelectSegmentExport> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(data.organizationId, async (tx: RLSTx) => {
     try {
       const [exportLog] = await tx
         .insert(segmentExports)
         .values(data)
         .returning();
-      
+      if (!exportLog) {
+        throw new Error("Failed to log segment export");
+      }
+
+      if (audit) {
+        await persistDurableSegmentAudit(tx, {
+          actorUserId: audit.actorUserId,
+          organizationId: data.organizationId,
+          operation: "export",
+          outcome: "success",
+          segments: audit.segments,
+        });
+      }
       return exportLog;
     } catch (error) {
       logger.error("Failed to log segment export", error as Error, { data });
@@ -479,7 +669,7 @@ export async function getExportHistory(
   limit: number = 100
 ): Promise<SelectSegmentExport[]> {
    
-  return withRLSContext(async (tx: RLSTx) => {
+  return withSegmentOrganization(organizationId, async (tx: RLSTx) => {
     try {
       return await tx
         .select()

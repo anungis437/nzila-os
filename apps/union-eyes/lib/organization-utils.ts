@@ -88,32 +88,10 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
         .limit(1);
 
       if (orgById.length > 0) {
-        const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
-          .split(',').map(s => s.trim()).filter(Boolean);
-        if (platformAdminIds.includes(userId)) {
-          return orgById[0].id;
-        }
-
-        const isSuperAdmin = await db
-          .select({ role: organizationMembers.role })
-          .from(organizationMembers)
-          .where(
-            and(
-              eq(organizationMembers.userId, userId),
-              eq(organizationMembers.organizationId, DEFAULT_ORGANIZATION_ID),
-              eq(organizationMembers.status, 'active'),
-              isNull(organizationMembers.deletedAt),
-            )
-          )
-          .limit(1);
-
-        const hasAdminAccess = isSuperAdmin.length > 0 &&
-          ['admin', 'super_admin', 'app_owner'].includes(isSuperAdmin[0].role);
-
-        if (hasAdminAccess) {
-          return orgById[0].id;
-        }
-
+        // The cookie only names a candidate. Membership in that organization is
+        // required. PLATFORM_ADMIN_USER_IDS and an administrator role in the
+        // default organization do not select a different organization from a
+        // client-controlled cookie.
         const userOrg = await db
           .select({ organizationId: organizationMembers.organizationId })
           .from(organizationMembers)
@@ -161,36 +139,8 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
         .limit(1);
       
       if (org.length > 0) {
-        // Platform admin user IDs have unrestricted org access
-        const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
-          .split(',').map(s => s.trim()).filter(Boolean);
-        if (platformAdminIds.includes(userId)) {
-          return org[0].id;
-        }
-
-        // Check if user is a super admin (has admin role in default org)
-        const isSuperAdmin = await db
-          .select({ role: organizationMembers.role })
-          .from(organizationMembers)
-          .where(
-            and(
-              eq(organizationMembers.userId, userId),
-              eq(organizationMembers.organizationId, DEFAULT_ORGANIZATION_ID),
-              eq(organizationMembers.status, 'active'),
-              isNull(organizationMembers.deletedAt),
-            )
-          )
-          .limit(1);
-        
-        const hasAdminAccess = isSuperAdmin.length > 0 && 
-          ['admin', 'super_admin', 'app_owner'].includes(isSuperAdmin[0].role);
-        
-        // If super admin, grant access to all organizations
-        if (hasAdminAccess) {
-          return org[0].id;
-        }
-        
-        // Otherwise, verify user has explicit membership in this organization
+        // Same membership rule as the organization-id cookie. A slug cookie is
+        // not an administrator grant.
         const userOrg = await db
           .select({ organizationId: organizationMembers.organizationId })
           .from(organizationMembers)
