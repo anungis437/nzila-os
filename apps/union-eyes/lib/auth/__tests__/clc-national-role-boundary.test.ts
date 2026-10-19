@@ -60,9 +60,9 @@
  *      TENANT_SELF_SERVICE_ASSIGNABLE_ROLES allow-list is {member, steward,
  *      chief_steward, admin} — excludes every PLATFORM_ELEVATED_ROLES entry.
  *   2. lib/services/member-service.ts's bulkUpdateMemberRole() —
- *      LATENT_UNWIRED. Casts an arbitrary role string onto
- *      organizationMembers with NO allow-list. Zero real (non-test)
- *      importers today (enforced below).
+ *      LATENT_UNWIRED. Role writes are limited to
+ *      TENANT_SELF_SERVICE_ASSIGNABLE_ROLES and require the assign_role
+ *      grant. Zero real (non-test) importers today (enforced below).
  *   3. lib/data-export-import.ts's DataImportService.importRecord()
  *      ('members' case) — LATENT_UNWIRED. Also casts an arbitrary
  *      `data.role` onto organizationMembers (both UPDATE and INSERT) with
@@ -150,9 +150,13 @@ describe('CLC national dashboard authority boundary (PR #752 round 5/6/12)', () 
     }
   });
 
-  it('bulkUpdateMemberRole (LATENT_UNWIRED, unrestricted role-write) has ZERO real importers today — actually enforced via source scan, not a string-presence check', () => {
+  it('bulkUpdateMemberRole (LATENT_UNWIRED, tenant-assignable roles only) has ZERO real importers today — actually enforced via source scan, not a string-presence check', () => {
     const source = readFileSync(resolve(APP_ROOT, 'lib/services/member-service.ts'), 'utf8');
     expect(source).toMatch(/export async function bulkUpdateMemberRole/);
+    expect(source).toMatch(/assertTenantAssignableRole/);
+    expect(source).toMatch(/assign_role/);
+    const policy = readFileSync(resolve(APP_ROOT, 'lib/member-integrity/authorize-member-access.ts'), 'utf8');
+    expect(policy).toMatch(/TENANT_SELF_SERVICE_ASSIGNABLE_ROLES/);
     const importers = realImporterFiles('bulkUpdateMemberRole', 'lib/services/member-service.ts');
     expect(
       importers,

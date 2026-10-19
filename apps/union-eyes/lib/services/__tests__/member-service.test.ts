@@ -57,6 +57,42 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
+vi.mock("@/lib/db/with-rls-context", () => ({
+  withRLSContext: async (ctxOrOp: unknown, maybeOp?: unknown) => {
+    const op = typeof ctxOrOp === "function" ? ctxOrOp : maybeOp;
+    const { db } = await import("@/db/db");
+    return (op as (tx: unknown) => Promise<unknown>)(db);
+  },
+}));
+
+vi.mock("@/lib/member-integrity/authorize-member-access", () => {
+  class MemberBoundaryError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = "MemberBoundaryError";
+    }
+  }
+  return {
+    authorizeMemberAccess: async (organizationId: string, capability: string) => ({
+      ok: true,
+      userId: "user-admin",
+      organizationId,
+      capability,
+    }),
+    authorizeOwnMembership: async () => ({ ok: false, message: "Unauthorized" }),
+    assertTenantAssignableRole: (role: string) => {
+      if (!["member", "steward", "chief_steward", "admin"].includes(role)) {
+        throw new MemberBoundaryError("Forbidden");
+      }
+    },
+    MemberBoundaryError,
+  };
+});
+
+vi.mock("@/lib/member-integrity/durable-member-audit", () => ({
+  persistDurableMemberAudit: async () => undefined,
+}));
+
 /* ── helpers ────────────────────────────────────────────────────────────── */
 
 /** select → from → where (terminal) */
@@ -91,19 +127,6 @@ function uswr(data: any) {
   return { set, where, returning };
 }
 
-/** update → set → where (terminal, no returning) */
-function usw() {
-  const where = vi.fn().mockResolvedValue(undefined);
-  const set = vi.fn().mockReturnValue({ where });
-  return { set };
-}
-
-/** delete → where (terminal) */
-function dw() {
-  const where = vi.fn().mockResolvedValue(undefined);
-  return { where };
-}
-
 /* ── imports ────────────────────────────────────────────────────────────── */
 
 import {
@@ -118,21 +141,28 @@ import {
 /* ── tests ──────────────────────────────────────────────────────────────── */
 
 describe("member-service", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.mockFindFirst.mockReset();
+    mocks.mockSelect.mockReset();
+    mocks.mockInsert.mockReset();
+    mocks.mockUpdate.mockReset();
+    mocks.mockDelete.mockReset();
+  });
 
   // ── findFirst-based lookups ─────────────────────────────────────────
   describe("getMemberById", () => {
     it("returns member when found", async () => {
       mocks.mockFindFirst.mockResolvedValueOnce({ id: "m-1" });
-      expect(await getMemberById("m-1")).toEqual({ id: "m-1" });
+      expect(await getMemberById("org-1", "m-1")).toEqual({ id: "m-1" });
     });
     it("returns null when not found", async () => {
       mocks.mockFindFirst.mockResolvedValueOnce(undefined);
-      expect(await getMemberById("x")).toBeNull();
+      expect(await getMemberById("org-1", "x")).toBeNull();
     });
     it("throws on error", async () => {
       mocks.mockFindFirst.mockRejectedValueOnce(new Error("DB"));
-      await expect(getMemberById("x")).rejects.toThrow("Failed to fetch member");
+      await expect(getMemberById("org-1", "x")).rejects.toThrow("Failed to fetch member");
     });
   });
 
@@ -168,7 +198,7 @@ describe("member-service", () => {
         if (n === 1) return { from: sfw([{ count: 2 }]).from };
         return { from: sfwolo(members).from };
       });
-      const result = await listMembers();
+      const result = await listMembers("org-1");
       expect(result.members).toEqual(members);
       expect(result.total).toBe(2);
     });
@@ -176,7 +206,7 @@ describe("member-service", () => {
       mocks.mockSelect.mockImplementation(() => {
         throw new Error("DB");
       });
-      await expect(listMembers()).rejects.toThrow();
+      await expect(listMembers("org-1")).rejects.toThrow();
     });
 
     it("sorts by createdAt by default when sortBy is unrecognized (Batch 35)", async () => {
@@ -187,7 +217,7 @@ describe("member-service", () => {
         if (n === 1) return { from: sfw([{ count: 1 }]).from };
         return { from: sfwolo(members).from };
       });
-      const result = await listMembers({}, { sortBy: "unknown_field" });
+      const result = await listMembers("org-1", {}, { sortBy: "unknown_field" });
       expect(result.members).toEqual(members);
     });
 
@@ -199,7 +229,7 @@ describe("member-service", () => {
         if (n === 1) return { from: sfw([{ count: 1 }]).from };
         return { from: sfwolo(members).from };
       });
-      const result = await listMembers({}, { sortBy: "hireDate" });
+      const result = await listMembers("org-1", {}, { sortBy: "hireDate" });
       expect(result.members).toEqual(members);
     });
   });
@@ -216,7 +246,7 @@ describe("member-service", () => {
       const chain = ivr([]);
       chain.returning.mockRejectedValueOnce(new Error("dup"));
       mocks.mockInsert.mockReturnValueOnce({ values: chain.values });
-      await expect(createMember({} as never)).rejects.toThrow();
+      await expect(createMember({ organizationId: "org-1" } as never)).rejects.toThrow("Failed to create member");
     });
   });
 
@@ -225,12 +255,12 @@ describe("member-service", () => {
       const updated = { id: "m-1", lastName: "New" };
       const chain = uswr([updated]);
       mocks.mockUpdate.mockReturnValueOnce({ set: chain.set });
-      expect(await updateMember("m-1", { lastName: "New" } as never)).toEqual(updated);
+      expect(await updateMember("org-1", "m-1", { lastName: "New" } as never)).toEqual(updated);
     });
     it("returns null when not found", async () => {
       const chain = uswr([]);
       mocks.mockUpdate.mockReturnValueOnce({ set: chain.set });
-      expect(await updateMember("x", {} as never)).toBeNull();
+      expect(await updateMember("org-1", "x", {} as never)).toBeNull();
     });
   });
 
@@ -238,15 +268,14 @@ describe("member-service", () => {
     it("returns true on success", async () => {
       const chain = uswr([{ id: "m-1" }]);
       mocks.mockUpdate.mockReturnValueOnce({ set: chain.set });
-      expect(await deleteMember("m-1")).toBe(true);
+      expect(await deleteMember("org-1", "m-1")).toBe(true);
     });
   });
 
   describe("permanentlyDeleteMember", () => {
-    it("returns true", async () => {
-      const chain = dw();
-      mocks.mockDelete.mockReturnValueOnce({ where: chain.where });
-      expect(await permanentlyDeleteMember("m-1")).toBe(true);
+    it("refuses hard deletion", async () => {
+      await expect(permanentlyDeleteMember("org-1", "m-1")).rejects.toThrow("retained");
+      expect(mocks.mockDelete).not.toHaveBeenCalled();
     });
   });
 
@@ -279,23 +308,23 @@ describe("member-service", () => {
 
   describe("bulkUpdateMemberStatus", () => {
     it("updates status for member IDs", async () => {
-      const chain = usw();
+      const chain = uswr([{ id: "m-1" }, { id: "m-2" }]);
       mocks.mockUpdate.mockReturnValueOnce({ set: chain.set });
-      const result = await bulkUpdateMemberStatus(["m-1", "m-2"], "active");
+      const result = await bulkUpdateMemberStatus("org-1", ["m-1", "m-2"], "active");
       expect(result.success).toBe(true);
     });
     it("returns failure on error", async () => {
       mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("fail"); });
-      const result = await bulkUpdateMemberStatus(["m-1"], "active");
+      const result = await bulkUpdateMemberStatus("org-1", ["m-1"], "active");
       expect(result.success).toBe(false);
     });
   });
 
   describe("bulkUpdateMemberRole", () => {
     it("updates role for member IDs", async () => {
-      const chain = usw();
+      const chain = uswr([{ id: "m-1" }]);
       mocks.mockUpdate.mockReturnValueOnce({ set: chain.set });
-      const result = await bulkUpdateMemberRole(["m-1"], "steward");
+      const result = await bulkUpdateMemberRole("org-1", ["m-1"], "steward");
       expect(result.success).toBe(true);
     });
   });
@@ -359,8 +388,8 @@ describe("member-service", () => {
   // ── merge and seniority ─────────────────────────────────────────────
   describe("mergeMembers", () => {
     it("merges duplicate into primary", async () => {
-      const primary = { id: "m-1", firstName: "Jane", email: "j@x.com" };
-      const dup = { id: "m-2", firstName: "Jane", email: "j@y.com" };
+      const primary = { id: "m-1", organizationId: "org-1", firstName: "Jane", email: "j@x.com" };
+      const dup = { id: "m-2", organizationId: "org-1", firstName: "Jane", email: "j@y.com" };
       // getMemberById calls (findFirst)
       mocks.mockFindFirst
         .mockResolvedValueOnce(primary)
@@ -372,7 +401,7 @@ describe("member-service", () => {
       const deleteChain = uswr([{ id: "m-2" }]);
       mocks.mockUpdate.mockReturnValueOnce({ set: deleteChain.set });
 
-      const result = await mergeMembers("m-1", "m-2", "duplicate");
+      const result = await mergeMembers("org-1", "m-1", "m-2", "duplicate");
       expect(result.id).toBe("m-1");
     });
   });
@@ -382,12 +411,12 @@ describe("member-service", () => {
       const pastDate = new Date();
       pastDate.setFullYear(pastDate.getFullYear() - 3);
       mocks.mockFindFirst.mockResolvedValueOnce({ id: "m-1", unionJoinDate: pastDate });
-      const result = await calculateSeniority("m-1");
+      const result = await calculateSeniority("org-1", "m-1");
       expect(result).toContain("year");
     });
     it("returns N/A when member not found", async () => {
       mocks.mockFindFirst.mockResolvedValueOnce(undefined);
-      const result = await calculateSeniority("x");
+      const result = await calculateSeniority("org-1", "x");
       expect(result).toBe("N/A");
     });
   });
@@ -425,17 +454,16 @@ describe("member-service", () => {
 
     it("updateMember throws on error", async () => {
       mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("DB"); });
-      await expect(updateMember("m-1", { lastName: "X" } as never)).rejects.toThrow("Failed to update member");
+      await expect(updateMember("org-1", "m-1", { lastName: "X" } as never)).rejects.toThrow("Failed to update member");
     });
 
     it("deleteMember throws on error", async () => {
       mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("DB"); });
-      await expect(deleteMember("m-1")).rejects.toThrow("Failed to delete member");
+      await expect(deleteMember("org-1", "m-1")).rejects.toThrow("Failed to delete member");
     });
 
     it("permanentlyDeleteMember throws on error", async () => {
-      mocks.mockDelete.mockImplementationOnce(() => { throw new Error("DB"); });
-      await expect(permanentlyDeleteMember("m-1")).rejects.toThrow("Failed to permanently delete member");
+      await expect(permanentlyDeleteMember("org-1", "m-1")).rejects.toThrow("retained");
     });
 
     it("getMemberStatistics throws on error", async () => {
@@ -445,7 +473,7 @@ describe("member-service", () => {
 
     it("calculateSeniority returns N/A on error", async () => {
       mocks.mockFindFirst.mockRejectedValueOnce(new Error("DB"));
-      expect(await calculateSeniority("m-1")).toBe("N/A");
+      expect(await calculateSeniority("org-1", "m-1")).toBe("N/A");
     });
 
     it("bulkImportMembers outer catch throws on critical failure", async () => {

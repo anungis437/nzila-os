@@ -196,31 +196,8 @@ return null;
   private static async validateMemberStatus(userId: string, organizationId: string): Promise<boolean> {
     try {
       // Dynamic import to avoid circular dependency
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { getMemberById } = await import('@/lib/services/member-service');
-      
-      const member = await getMemberById(userId);
-      
-      // Member not found = not active
-      if (!member) {
-        return false;
-      }
-      
-      // Verify member belongs to organization and is active
-      const memberStatus = (member as any).status as string | undefined;
-      const memberOrgId = (member as any).organizationId as string | undefined;
-      
-      // Only active members can authenticate
-      if (memberStatus !== 'active') {
-        return false;
-      }
-      
-      // Cross-org access: deny
-      if (memberOrgId !== organizationId) {
-        return false;
-      }
-      
-      return true;
+      const { readOwnMemberStatus } = await import('@/lib/services/member-service');
+      return readOwnMemberStatus(userId, organizationId);
     } catch (_error) {
       // Fail-closed: if we can't verify member status, deny access
       return false;

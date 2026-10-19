@@ -61,6 +61,42 @@ vi.mock('@/lib/logger', () => ({
   logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
 }));
 
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (ctxOrOp: unknown, maybeOp?: unknown) => {
+    const op = typeof ctxOrOp === 'function' ? ctxOrOp : maybeOp;
+    const { db } = await import('@/db/db');
+    return (op as (tx: unknown) => Promise<unknown>)(db);
+  },
+}));
+
+vi.mock('@/lib/member-integrity/authorize-member-access', () => {
+  class MemberBoundaryError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = 'MemberBoundaryError';
+    }
+  }
+  return {
+    authorizeMemberAccess: async (organizationId: string, capability: string) => ({
+      ok: true,
+      userId: 'user-admin',
+      organizationId,
+      capability,
+    }),
+    authorizeOwnMembership: async () => ({ ok: false, message: 'Unauthorized' }),
+    assertTenantAssignableRole: (role: string) => {
+      if (!['member', 'steward', 'chief_steward', 'admin'].includes(role)) {
+        throw new MemberBoundaryError('Forbidden');
+      }
+    },
+    MemberBoundaryError,
+  };
+});
+
+vi.mock('@/lib/member-integrity/durable-member-audit', () => ({
+  persistDurableMemberAudit: async () => undefined,
+}));
+
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
@@ -126,6 +162,11 @@ const MEMBER = {
 describe('member-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.mockFindFirst.mockReset();
+    mocks.mockSelect.mockReset();
+    mocks.mockInsert.mockReset();
+    mocks.mockUpdate.mockReset();
+    mocks.mockDelete.mockReset();
   });
 
   afterEach(() => {
@@ -138,17 +179,17 @@ describe('member-service', () => {
   describe('getMemberById', () => {
     it('returns member when found', async () => {
       mocks.mockFindFirst.mockResolvedValue(MEMBER);
-      expect(await getMemberById('m1')).toEqual(MEMBER);
+      expect(await getMemberById('org-1', 'm1')).toEqual(MEMBER);
     });
 
     it('returns null when not found', async () => {
       mocks.mockFindFirst.mockResolvedValue(undefined);
-      expect(await getMemberById('missing')).toBeNull();
+      expect(await getMemberById('org-1', 'missing')).toBeNull();
     });
 
     it('throws on error', async () => {
       mocks.mockFindFirst.mockRejectedValue(new Error('db'));
-      await expect(getMemberById('m1')).rejects.toThrow('Failed to fetch member');
+      await expect(getMemberById('org-1', 'm1')).rejects.toThrow('Failed to fetch member');
     });
   });
 
@@ -180,7 +221,7 @@ describe('member-service', () => {
         .mockReturnValueOnce(chain([{ count: 1 }]))
         .mockReturnValueOnce(chain([MEMBER]));
 
-      const result = await listMembers();
+      const result = await listMembers('org-1');
       expect(result).toEqual({ members: [MEMBER], total: 1, page: 1, limit: 50 });
     });
 
@@ -190,6 +231,7 @@ describe('member-service', () => {
         .mockReturnValueOnce(chain([]));
 
       const result = await listMembers(
+        'org-1',
         {
           organizationId: 'org-1',
           status: ['active'],
@@ -212,13 +254,13 @@ describe('member-service', () => {
         .mockReturnValueOnce(chain([{ count: 0 }]))
         .mockReturnValueOnce(chain([]));
 
-      const result = await listMembers({}, { sortBy: 'hireDate' });
+      const result = await listMembers('org-1', {}, { sortBy: 'hireDate' });
       expect(result.members).toEqual([]);
     });
 
     it('throws on error', async () => {
       mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
-      await expect(listMembers()).rejects.toThrow('Failed to list members');
+      await expect(listMembers('org-1')).rejects.toThrow('Failed to list members');
     });
   });
 
@@ -242,32 +284,32 @@ describe('member-service', () => {
     it('updates and returns member', async () => {
       const updated = { ...MEMBER, name: 'Jane Updated' };
       mocks.mockUpdate.mockReturnValue(chain([updated]));
-      const result = await updateMember('m1', { name: 'Jane Updated' } as never);
+      const result = await updateMember('org-1', 'm1', { name: 'Jane Updated' } as never);
       expect(result).toEqual(updated);
     });
 
     it('returns null when not found', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      expect(await updateMember('missing', {} as never)).toBeNull();
+      expect(await updateMember('org-1', 'missing', {} as never)).toBeNull();
     });
   });
 
   describe('deleteMember', () => {
     it('soft deletes and returns true', async () => {
       mocks.mockUpdate.mockReturnValue(chain([MEMBER]));
-      expect(await deleteMember('m1')).toBe(true);
+      expect(await deleteMember('org-1', 'm1')).toBe(true);
     });
 
     it('returns false when not found', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      expect(await deleteMember('missing')).toBe(false);
+      expect(await deleteMember('org-1', 'missing')).toBe(false);
     });
   });
 
   describe('permanentlyDeleteMember', () => {
-    it('hard deletes and returns true', async () => {
-      mocks.mockDelete.mockReturnValue(chain());
-      expect(await permanentlyDeleteMember('m1')).toBe(true);
+    it('refuses hard deletion', async () => {
+      await expect(permanentlyDeleteMember('org-1', 'm1')).rejects.toThrow('retained');
+      expect(mocks.mockDelete).not.toHaveBeenCalled();
     });
   });
 
@@ -298,15 +340,15 @@ describe('member-service', () => {
 
   describe('bulkUpdateMemberStatus', () => {
     it('updates status for all member ids', async () => {
-      mocks.mockUpdate.mockReturnValue(chain());
-      const result = await bulkUpdateMemberStatus(['m1', 'm2'], 'inactive');
+      mocks.mockUpdate.mockReturnValue(chain([{ id: 'm1' }, { id: 'm2' }]));
+      const result = await bulkUpdateMemberStatus('org-1', ['m1', 'm2'], 'inactive');
       expect(result.success).toBe(true);
       expect(result.processed).toBe(2);
     });
 
     it('returns failure on error', async () => {
       mocks.mockUpdate.mockImplementation(() => { throw new Error('fail'); });
-      const result = await bulkUpdateMemberStatus(['m1'], 'inactive');
+      const result = await bulkUpdateMemberStatus('org-1', ['m1'], 'inactive');
       expect(result.success).toBe(false);
       expect(result.failed).toBe(1);
     });
@@ -314,15 +356,15 @@ describe('member-service', () => {
 
   describe('bulkUpdateMemberRole', () => {
     it('updates role for all member ids', async () => {
-      mocks.mockUpdate.mockReturnValue(chain());
-      const result = await bulkUpdateMemberRole(['m1', 'm2'], 'steward');
+      mocks.mockUpdate.mockReturnValue(chain([{ id: 'm1' }, { id: 'm2' }]));
+      const result = await bulkUpdateMemberRole('org-1', ['m1', 'm2'], 'steward');
       expect(result.success).toBe(true);
       expect(result.processed).toBe(2);
     });
 
     it('returns failure on error', async () => {
       mocks.mockUpdate.mockImplementation(() => { throw new Error('fail'); });
-      const result = await bulkUpdateMemberRole(['m1'], 'admin');
+      const result = await bulkUpdateMemberRole('org-1', ['m1'], 'admin');
       expect(result.success).toBe(false);
     });
   });
@@ -399,7 +441,7 @@ describe('member-service', () => {
         .mockResolvedValueOnce(DUPLICATE);
       mocks.mockUpdate.mockReturnValue(chain([PRIMARY]));
 
-      const result = await mergeMembers('m1', 'm2', 'primary');
+      const result = await mergeMembers('org-1', 'm1', 'm2', 'primary');
       expect(result).toEqual(PRIMARY);
     });
 
@@ -409,7 +451,7 @@ describe('member-service', () => {
         .mockResolvedValueOnce(DUPLICATE);
       mocks.mockUpdate.mockReturnValue(chain([DUPLICATE]));
 
-      const result = await mergeMembers('m1', 'm2', 'duplicate');
+      const result = await mergeMembers('org-1', 'm1', 'm2', 'duplicate');
       expect(result.name).toBeDefined();
     });
 
@@ -420,7 +462,7 @@ describe('member-service', () => {
         .mockResolvedValueOnce(DUPLICATE);
       mocks.mockUpdate.mockReturnValue(chain([{ ...primaryWithNull, department: 'HR' }]));
 
-      const result = await mergeMembers('m1', 'm2', 'merge');
+      const result = await mergeMembers('org-1', 'm1', 'm2', 'merge');
       expect(result).toBeDefined();
     });
 
@@ -429,7 +471,7 @@ describe('member-service', () => {
         .mockResolvedValueOnce(PRIMARY)
         .mockResolvedValueOnce(undefined);
 
-      await expect(mergeMembers('m1', 'missing', 'primary')).rejects.toThrow('Failed to merge members');
+      await expect(mergeMembers('org-1', 'm1', 'missing', 'primary')).rejects.toThrow('not found');
     });
   });
 
@@ -443,18 +485,18 @@ describe('member-service', () => {
       joinDate.setMonth(joinDate.getMonth() - 2);
       mocks.mockFindFirst.mockResolvedValue({ ...MEMBER, unionJoinDate: joinDate });
 
-      const result = await calculateSeniority('m1');
+      const result = await calculateSeniority('org-1', 'm1');
       expect(result).toMatch(/\d+ years?, \d+ months?/);
     });
 
     it('returns N/A when member not found', async () => {
       mocks.mockFindFirst.mockResolvedValue(undefined);
-      expect(await calculateSeniority('missing')).toBe('N/A');
+      expect(await calculateSeniority('org-1', 'missing')).toBe('N/A');
     });
 
     it('returns N/A when no unionJoinDate', async () => {
       mocks.mockFindFirst.mockResolvedValue({ ...MEMBER, unionJoinDate: null });
-      expect(await calculateSeniority('m1')).toBe('N/A');
+      expect(await calculateSeniority('org-1', 'm1')).toBe('N/A');
     });
   });
 
