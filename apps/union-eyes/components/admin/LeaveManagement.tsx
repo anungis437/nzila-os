@@ -124,7 +124,7 @@ export default function LeaveManagement({ organizationId, memberId }: LeaveManag
   const loadLeaves = async () => {
     setLoading(true);
     try {
-      const result = await getAllMemberLeavesAction(memberId);
+      const result = await getAllMemberLeavesAction(memberId, organizationId);
       if (result.isSuccess && Array.isArray(result.data)) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setLeaves(result.data as any);
@@ -151,7 +151,7 @@ export default function LeaveManagement({ organizationId, memberId }: LeaveManag
   };
 
   const handleApprove = async (leaveId: string) => {
-    const result = await approveMemberLeaveAction(leaveId);
+    const result = await approveMemberLeaveAction(leaveId, organizationId);
     if (result.isSuccess) {
       toast({
         title: "Success",

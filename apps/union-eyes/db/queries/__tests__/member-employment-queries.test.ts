@@ -1,233 +1,253 @@
-/**
- * Member Employment Queries — Unit Tests
- *
- * Same withRLSContext + drizzle-builder queue mock as the other db/queries
- * suites (chain methods all return chain; chain.then resolves queue.shift(),
- * Error => reject). Each exported fn is driven through its happy path; a few
- * representative catch branches are exercised by pushing an Error.
- */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const mocks = vi.hoisted(() => ({ queue: [] as unknown[] }));
+const ORG_A = '11111111-1111-4111-8111-111111111111'
+const ORG_B = '22222222-2222-4222-8222-222222222222'
+const MEMBER = '33333333-3333-4333-8333-333333333333'
+const scope = { organizationId: ORG_A, actorUserId: 'user-admin-a' }
+
+const mocks = vi.hoisted(() => ({
+  queue: [] as unknown[],
+  orgs: [] as Array<string | undefined>,
+  outcomes: [] as string[],
+  sets: [] as unknown[],
+  deletes: 0,
+  loggerError: vi.fn(),
+}))
 
 function makeChain() {
-  const chain: Record<string, unknown> = {};
-  for (const m of [
-    'from',
-    'where',
-    'orderBy',
-    'limit',
-    'offset',
-    'values',
-    'set',
-    'returning',
-    '$dynamic',
-  ]) {
-    chain[m] = () => chain;
+  const chain: Record<string, unknown> = {}
+  for (const method of ['from', 'where', 'orderBy', 'limit', 'offset', 'values', 'returning', '$dynamic']) {
+    chain[method] = () => chain
   }
-  (chain as { then: unknown }).then = (
-    resolve: (v: unknown) => unknown,
-    reject: (e: unknown) => unknown,
-  ) => {
-    const v = mocks.queue.length ? mocks.queue.shift() : [];
-    if (v instanceof Error) return Promise.reject(v).then(resolve, reject);
-    return Promise.resolve(v).then(resolve, reject);
-  };
-  return chain;
+  chain.set = (value: unknown) => {
+    mocks.sets.push(value)
+    return chain
+  }
+  chain.then = (resolve: (value: unknown) => unknown, reject: (error: unknown) => unknown) => {
+    const value = mocks.queue.length ? mocks.queue.shift() : []
+    if (value instanceof Error) return Promise.reject(value).then(resolve, reject)
+    return Promise.resolve(value).then(resolve, reject)
+  }
+  return chain
 }
+
 function makeTx() {
   return {
     select: () => makeChain(),
     insert: () => makeChain(),
     update: () => makeChain(),
-    delete: () => makeChain(),
-  };
+    delete: () => {
+      mocks.deletes += 1
+      return makeChain()
+    },
+  }
 }
 
+vi.mock('server-only', () => ({}))
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (op: (tx: unknown) => Promise<unknown>) => op(makeTx()),
-}));
+  withRLSContext: async (contextOrOp: unknown, maybeOp?: unknown) => {
+    const hasContext = typeof contextOrOp !== 'function'
+    const operation = (hasContext ? maybeOp : contextOrOp) as (tx: unknown) => Promise<unknown>
+    const organizationId = hasContext
+      ? (contextOrOp as { organizationId?: string }).organizationId
+      : undefined
+    mocks.orgs.push(organizationId)
+    try {
+      const result = await operation(makeTx())
+      mocks.outcomes.push('commit')
+      return result
+    } catch (error) {
+      mocks.outcomes.push('rollback')
+      throw error
+    }
+  },
+}))
 vi.mock('@/lib/logger', () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
+  logger: { info: vi.fn(), warn: vi.fn(), error: mocks.loggerError, debug: vi.fn() },
+}))
 
-import * as q from '../member-employment-queries';
+import { EmploymentBoundaryError } from '../member-employment-queries'
+import * as q from '../member-employment-queries'
 
 function push(...rows: unknown[]) {
-  mocks.queue.push(...rows);
+  mocks.queue.push(...rows)
 }
 
 beforeEach(() => {
-  mocks.queue = [];
-  vi.clearAllMocks();
-});
+  vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
+  mocks.queue = []
+  mocks.orgs = []
+  mocks.outcomes = []
+  mocks.sets = []
+  mocks.deletes = 0
+  vi.clearAllMocks()
+})
 
-describe('member-employment-queries — employment records', () => {
-  it('createMemberEmployment returns the created row', async () => {
-    push([{ id: 'e1', memberId: 'm1', jobTitle: 'Welder' }]);
-    expect(await q.createMemberEmployment({ memberId: 'm1' } as never)).toEqual({
-      id: 'e1',
-      memberId: 'm1',
+describe('member employment query boundary', () => {
+  it('creates inside the authorized organization and commits the audit with the row', async () => {
+    push([{ id: MEMBER, userId: 'member-user' }])
+    push([{ id: 'e1', memberId: MEMBER, organizationId: ORG_A }])
+    push([])
+    const row = await q.createMemberEmployment(scope, {
+      organizationId: ORG_A,
+      memberId: MEMBER,
       jobTitle: 'Welder',
-    });
-  });
-  it('createMemberEmployment rethrows on error', async () => {
-    push(new Error('x'));
-    await expect(q.createMemberEmployment({} as never)).rejects.toThrow(
-      'Failed to create member employment',
-    );
-  });
+      hourlyRate: '99.50',
+    } as never)
+    expect(row).toMatchObject({ id: 'e1' })
+    expect(mocks.orgs).toEqual([ORG_A])
+    expect(mocks.outcomes).toEqual(['commit'])
+    expect(JSON.stringify(mocks.loggerError.mock.calls)).not.toContain('99.50')
+  })
 
-  it('getMemberEmploymentById returns row or null', async () => {
-    push([{ id: 'e1' }]);
-    expect(await q.getMemberEmploymentById('e1')).toEqual({ id: 'e1' });
-    push([]);
-    expect(await q.getMemberEmploymentById('missing')).toBeNull();
-  });
-  it('getMemberEmploymentById rethrows on error', async () => {
-    push(new Error('x'));
-    await expect(q.getMemberEmploymentById('e1')).rejects.toThrow('Failed to fetch member employment');
-  });
+  it('rolls back when the legacy audit insert fails', async () => {
+    push([{ id: MEMBER, userId: 'member-user' }])
+    push([{ id: 'e1', memberId: MEMBER }])
+    push(new Error('legacy_audit_down'))
+    await expect(q.createMemberEmployment(scope, {
+      organizationId: ORG_A,
+      memberId: MEMBER,
+    } as never)).rejects.toThrow('Failed to access member employment')
+    expect(mocks.outcomes).toEqual(['rollback'])
+    expect(JSON.stringify(mocks.loggerError.mock.calls)).not.toContain('legacy_audit_down')
+  })
 
-  it('getActiveMemberEmployment returns row or null', async () => {
-    push([{ id: 'e1' }]);
-    expect(await q.getActiveMemberEmployment('m1')).toEqual({ id: 'e1' });
-    push([]);
-    expect(await q.getActiveMemberEmployment('m1')).toBeNull();
-  });
+  it('denies a forged employer and a forged job code', async () => {
+    push([{ id: MEMBER, userId: 'member-user' }])
+    push([])
+    await expect(q.createMemberEmployment(scope, {
+      organizationId: ORG_A,
+      memberId: MEMBER,
+      employerId: '55555555-5555-4555-8555-555555555555',
+    } as never)).rejects.toThrow('Forbidden')
 
-  it('getAllMemberEmployment returns rows', async () => {
-    push([{ id: 'e1' }, { id: 'e2' }]);
-    expect(await q.getAllMemberEmployment('m1')).toHaveLength(2);
-  });
+    push([{ id: MEMBER, userId: 'member-user' }])
+    push([])
+    await expect(q.createMemberEmployment(scope, {
+      organizationId: ORG_A,
+      memberId: MEMBER,
+      jobCode: 'NOT-IN-ORG',
+    } as never)).rejects.toThrow('Forbidden')
+    expect(mocks.outcomes).toEqual(['rollback', 'rollback'])
+  })
 
-  it('getEmploymentByOrganization with and without status', async () => {
-    push([{ id: 'e1' }]);
-    expect(await q.getEmploymentByOrganization('org', 'active')).toHaveLength(1);
-    push([{ id: 'e1' }]);
-    expect(await q.getEmploymentByOrganization('org')).toHaveLength(1);
-  });
+  it('does not open a transaction for a forged organization id', async () => {
+    await expect(q.createMemberEmployment(scope, {
+      organizationId: ORG_B,
+      memberId: MEMBER,
+    } as never)).rejects.toThrow('Forbidden')
+    expect(mocks.orgs).toEqual([])
+  })
 
-  it('updateMemberEmployment returns the updated row', async () => {
-    push([{ id: 'e1' }]);
-    expect(await q.updateMemberEmployment('e1', {} as never)).toEqual({ id: 'e1' });
-  });
+  it('returns null for a missing employment id in the authorized organization', async () => {
+    push([])
+    expect(await q.getMemberEmploymentById(scope, 'missing')).toBeNull()
+    expect(mocks.orgs).toEqual([ORG_A])
+  })
 
-  it('deleteMemberEmployment resolves', async () => {
-    push([]);
-    await expect(q.deleteMemberEmployment('e1')).resolves.toBeUndefined();
-  });
+  it('returns no rows when the member is outside the organization', async () => {
+    push([])
+    expect(await q.getAllMemberEmployment(scope, MEMBER)).toEqual([])
+    expect(mocks.outcomes).toEqual(['commit'])
+  })
 
-  it('getEmploymentForDuesCalculation maps compensation fields', async () => {
-    push([
-      {
-        grossWages: '1000.50',
-        baseSalary: '52000',
-        hourlyRate: '25',
-        regularHoursPerPeriod: '40',
-        employmentStatus: 'active',
-        payFrequency: 'monthly',
-      },
-    ]);
-    const r = await q.getEmploymentForDuesCalculation('m1');
-    expect(r).toEqual({
+  it('fails an update that matches no row', async () => {
+    push([])
+    await expect(q.updateMemberEmployment(scope, 'e1', { jobTitle: 'Lead' })).rejects.toBeInstanceOf(EmploymentBoundaryError)
+    expect(mocks.outcomes).toEqual(['rollback'])
+  })
+
+  it('fails when a concurrent update affects no row', async () => {
+    push([{ id: 'e1', memberId: MEMBER, organizationId: ORG_A }])
+    push([])
+    await expect(q.updateMemberEmployment(scope, 'e1', { jobTitle: 'Lead' })).rejects.toThrow('Employment record not found')
+    expect(mocks.outcomes).toEqual(['rollback'])
+  })
+
+  it('denies member reassignment', async () => {
+    push([{ id: 'e1', memberId: MEMBER, organizationId: ORG_A }])
+    await expect(q.updateMemberEmployment(scope, 'e1', { memberId: '44444444-4444-4444-8444-444444444444' })).rejects.toThrow('Forbidden')
+    expect(mocks.outcomes).toEqual(['rollback'])
+  })
+
+  it('refuses hard deletion and does not issue a delete', async () => {
+    await expect(q.deleteMemberEmployment(scope, 'e1')).rejects.toThrow('Employment records are retained')
+    expect(mocks.deletes).toBe(0)
+    expect(mocks.orgs).toEqual([])
+  })
+
+  it('maps dues compensation and withholds it when the member is outside the organization', async () => {
+    push([{ id: MEMBER, userId: 'member-user' }])
+    push([{
+      id: 'e1',
+      grossWages: '1000.50',
+      baseSalary: '52000.00',
+      hourlyRate: '25.00',
+      regularHoursPerPeriod: '80.00',
+      employmentStatus: 'active',
+      payFrequency: 'bi_weekly',
+    }])
+    push([])
+    await expect(q.getEmploymentForDuesCalculation(scope, MEMBER)).resolves.toEqual({
       grossWages: 1000.5,
       baseSalary: 52000,
       hourlyRate: 25,
-      hoursWorked: 40,
+      hoursWorked: 80,
       employmentStatus: 'active',
-      payFrequency: 'monthly',
-    });
-  });
-  it('getEmploymentForDuesCalculation returns null when no active employment', async () => {
-    push([]);
-    expect(await q.getEmploymentForDuesCalculation('m1')).toBeNull();
-  });
-});
+      payFrequency: 'bi_weekly',
+    })
 
-describe('member-employment-queries — history & leaves', () => {
-  it('createEmploymentHistory returns the created row', async () => {
-    push([{ id: 'h1', memberId: 'm1', changeType: 'promotion' }]);
-    expect(await q.createEmploymentHistory({ memberId: 'm1' } as never)).toEqual({
-      id: 'h1',
-      memberId: 'm1',
-      changeType: 'promotion',
-    });
-  });
-  it('getEmploymentHistoryByMember returns rows', async () => {
-    push([{ id: 'h1' }]);
-    expect(await q.getEmploymentHistoryByMember('m1')).toHaveLength(1);
-  });
+    push([])
+    expect(await q.getEmploymentForDuesCalculation(scope, MEMBER)).toBeNull()
+  })
 
-  it('createMemberLeave returns the created row', async () => {
-    push([{ id: 'l1', memberId: 'm1', leaveType: 'medical' }]);
-    expect(await q.createMemberLeave({ memberId: 'm1' } as never)).toEqual({
-      id: 'l1',
-      memberId: 'm1',
-      leaveType: 'medical',
-    });
-  });
-  it('getActiveMemberLeaves with explicit and default date', async () => {
-    push([{ id: 'l1' }]);
-    expect(await q.getActiveMemberLeaves('m1', new Date('2025-01-01'))).toHaveLength(1);
-    push([{ id: 'l1' }]);
-    expect(await q.getActiveMemberLeaves('m1')).toHaveLength(1);
-  });
-  it('getAllMemberLeaves returns rows', async () => {
-    push([{ id: 'l1' }]);
-    expect(await q.getAllMemberLeaves('m1')).toHaveLength(1);
-  });
-  it('updateMemberLeave returns the updated row', async () => {
-    push([{ id: 'l1' }]);
-    expect(await q.updateMemberLeave('l1', {} as never)).toEqual({ id: 'l1' });
-  });
-});
+  it('rejects leave approval fields and attributes an authorized approval to the actor', async () => {
+    await expect(q.createMemberLeave(scope, {
+      organizationId: ORG_A,
+      memberId: MEMBER,
+      isApproved: true,
+      approvedBy: 'forged',
+    } as never)).rejects.toThrow('Approval fields are assigned by the approval action')
+    expect(mocks.orgs).toEqual([])
 
-describe('member-employment-queries — job classifications & seniority', () => {
-  it('createJobClassification returns the created row', async () => {
-    push([{ id: 'jc1', jobCode: 'W1', jobTitle: 'Welder' }]);
-    expect(await q.createJobClassification({ jobCode: 'W1' } as never)).toEqual({
-      id: 'jc1',
-      jobCode: 'W1',
-      jobTitle: 'Welder',
-    });
-  });
-  it('getJobClassificationByCode returns row or null', async () => {
-    push([{ id: 'jc1' }]);
-    expect(await q.getJobClassificationByCode('org', 'W1')).toEqual({ id: 'jc1' });
-    push([]);
-    expect(await q.getJobClassificationByCode('org', 'missing')).toBeNull();
-  });
-  it('getJobClassificationsByOrganization with activeOnly true and false', async () => {
-    push([{ id: 'jc1' }]);
-    expect(await q.getJobClassificationsByOrganization('org')).toHaveLength(1);
-    push([{ id: 'jc1' }, { id: 'jc2' }]);
-    expect(await q.getJobClassificationsByOrganization('org', false)).toHaveLength(2);
-  });
-  it('updateJobClassification returns the updated row', async () => {
-    push([{ id: 'jc1' }]);
-    expect(await q.updateJobClassification('jc1', {} as never)).toEqual({ id: 'jc1' });
-  });
+    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
+    push([{ id: MEMBER, userId: 'user-admin-a' }])
+    await expect(q.approveMemberLeave(scope, 'l1')).rejects.toThrow('Leave approval requires a different member')
 
-  it('calculateSeniorityYears without memberId (pure date math)', async () => {
-    const seniority = new Date('2020-01-01');
-    const now = new Date('2025-01-01');
-    const years = await q.calculateSeniorityYears(seniority, now);
-    expect(years).toBeCloseTo(5, 0);
-  });
-  it('calculateSeniorityYears subtracts seniority-affecting leave days', async () => {
+    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
+    push([{ id: MEMBER, userId: 'member-user' }])
+    push([{ id: 'l1', isApproved: true, approvedBy: 'user-admin-a' }])
+    push([])
+    const leave = await q.approveMemberLeave(scope, 'l1')
+    expect(leave.approvedBy).toBe('user-admin-a')
+    expect(mocks.sets.at(-1)).toMatchObject({
+      isApproved: true,
+      approvedBy: 'user-admin-a',
+    })
+    expect(JSON.stringify(mocks.sets)).not.toContain('medical')
+  })
+
+  it('denies a classification move to another organization', async () => {
+    await expect(q.updateJobClassification(scope, 'jc1', { organizationId: ORG_B })).rejects.toThrow('Forbidden')
+    expect(mocks.orgs).toEqual([])
+  })
+
+  it('calculates seniority from organization leaves only after the member is in scope', async () => {
+    const seniority = new Date('2020-01-01')
+    const now = new Date('2025-01-01')
+    expect(await q.calculateSeniorityYears(scope, seniority, now)).toBeCloseTo(5, 0)
+    expect(mocks.orgs).toEqual([])
+
+    push([])
+    await expect(q.calculateSeniorityYears(scope, seniority, now, MEMBER)).rejects.toThrow('Forbidden')
+
+    push([{ id: MEMBER, userId: 'member-user' }])
     push([
       { affectsSeniority: true, seniorityAdjustmentDays: 365 },
       { affectsSeniority: false, seniorityAdjustmentDays: 100 },
-    ]);
-    const seniority = new Date('2020-01-01');
-    const now = new Date('2025-01-01');
-    const years = await q.calculateSeniorityYears(seniority, now, 'm1');
-    expect(years).toBeCloseTo(4, 0);
-  });
-  it('calculateSeniorityYears clamps to zero', async () => {
-    const future = new Date('2030-01-01');
-    const now = new Date('2025-01-01');
-    expect(await q.calculateSeniorityYears(future, now)).toBe(0);
-  });
-});
+    ])
+    const years = await q.calculateSeniorityYears(scope, seniority, now, MEMBER)
+    expect(years).toBeCloseTo(4, 0)
+    expect(mocks.orgs).toEqual([ORG_A, ORG_A])
+  })
+})

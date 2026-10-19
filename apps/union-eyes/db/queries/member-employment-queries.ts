@@ -1,26 +1,16 @@
-"use server";
-
 /**
- * Member Employment Query Functions
- * 
- * Phase 1.2: Member Profile v2 - Employment Attributes
- * 
- * Provides data access layer for member employment records:
- * - Member Employment (core employment data)
- * - Employment History (change tracking)
- * - Member Leaves (leave management)
- * - Job Classifications (classification system)
- * 
- * Key Features:
- * - Row-Level Security (RLS) enforcement
- * - Full relationship traversal
- * - Type-safe with TypeScript inference
- * - Transaction support for consistency
- * - Seniority calculation helpers
- * - Dues calculation data extraction
- * 
- * @module db/queries/member-employment-queries
+ * Member employment queries.
+ *
+ * These functions are not Server Actions. Callers pass an organization scope
+ * that the action layer has already authorized. SQL is bound to that
+ * organization through `withRLSContext({ organizationId })`. A missing row is
+ * a failure for mutations. Hard deletion is refused: employment history has
+ * no retention-safe archive in this schema.
+ *
+ * This module does not prove that a deployed database enforces row-level security.
  */
+
+import 'server-only'
 
 import {
   memberEmployment,
@@ -35,661 +25,695 @@ import {
   type NewMemberLeave,
   type JobClassification,
   type NewJobClassification,
-} from "@/db/schema/domains/member/member-employment";
-import { eq, and, or, isNull, desc, asc, gte, lte } from "drizzle-orm";
-import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
-import { logger } from "@/lib/logger";
+} from '@/db/schema/domains/member/member-employment'
+import { organizationMembers } from '@/db/schema-organizations'
+import { employers, worksites, bargainingUnits } from '@/db/schema/union-structure-schema'
+import { and, asc, desc, eq, gte, isNull, lte, or } from 'drizzle-orm'
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context'
+import { logger } from '@/lib/logger'
+import {
+  leaveApprovalAttempted,
+  leaveSelfApprovalDenied,
+} from '@/lib/member-employment/authorize-employment-access'
+import { persistDurableEmploymentAudit } from '@/lib/member-employment/durable-employment-audit'
 
-// =====================================================
-// MEMBER EMPLOYMENT QUERIES
-// =====================================================
-
-/**
- * Create member employment record
- */
-export async function createMemberEmployment(
-  data: NewMemberEmployment,
-   
-  tx?: RLSTx
-): Promise<MemberEmployment> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const [employment] = await dbOrTx.insert(memberEmployment).values(data).returning();
-      logger.info("Member employment created", { 
-        employmentId: employment.id, 
-        memberId: employment.memberId,
-        jobTitle: employment.jobTitle 
-      });
-      return employment;
-    } catch (error) {
-      logger.error("Error creating member employment", error as Error, { data });
-      throw new Error("Failed to create member employment");
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
+export class EmploymentBoundaryError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'EmploymentBoundaryError'
   }
 }
 
-/**
- * Get member employment by ID
- */
-export async function getMemberEmploymentById(
-  id: string,
-   
-  tx?: RLSTx
-): Promise<MemberEmployment | null> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const [employment] = await dbOrTx
-        .select()
-        .from(memberEmployment)
-        .where(eq(memberEmployment.id, id))
-        .limit(1);
+export type EmploymentActorScope = {
+  organizationId: string
+  actorUserId: string
+}
 
-      return employment ?? null;
-    } catch (error) {
-      logger.error("Error fetching member employment by ID", error as Error, { id });
-      throw new Error(`Failed to fetch member employment with ID ${id}`);
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
+function assertScope(scope: EmploymentActorScope): void {
+  if (typeof scope?.organizationId !== 'string' || scope.organizationId.trim() === '') {
+    throw new EmploymentBoundaryError('Organization context required')
+  }
+  if (typeof scope.actorUserId !== 'string' || scope.actorUserId.trim() === '') {
+    throw new EmploymentBoundaryError('Forbidden')
   }
 }
 
-/**
- * Get active employment record for a member
- */
-export async function getActiveMemberEmployment(
-  memberId: string,
-   
-  tx?: RLSTx
-): Promise<MemberEmployment | null> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const [employment] = await dbOrTx
-        .select()
-        .from(memberEmployment)
-        .where(
-          and(
-            eq(memberEmployment.memberId, memberId),
-            eq(memberEmployment.employmentStatus, "active")
-          )
-        )
-        .orderBy(desc(memberEmployment.hireDate))
-        .limit(1);
-
-      return employment ?? null;
-    } catch (error) {
-      logger.error("Error fetching active member employment", error as Error, { memberId });
-      throw new Error(`Failed to fetch active employment for member ${memberId}`);
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
-}
-
-/**
- * Get all employment records for a member (including historical)
- */
-export async function getAllMemberEmployment(
-  memberId: string,
-   
-  tx?: RLSTx
-): Promise<MemberEmployment[]> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      return await dbOrTx
-        .select()
-        .from(memberEmployment)
-        .where(eq(memberEmployment.memberId, memberId))
-        .orderBy(desc(memberEmployment.hireDate));
-    } catch (error) {
-      logger.error("Error fetching all member employment", error as Error, { memberId });
-      throw new Error(`Failed to fetch employment records for member ${memberId}`);
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
-}
-
-/**
- * Get employment records by organization
- */
-export async function getEmploymentByOrganization(
+function withEmploymentOrganization<T>(
   organizationId: string,
-  status?: string,
-   
-  tx?: RLSTx
-): Promise<MemberEmployment[]> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const conditions = [eq(memberEmployment.organizationId, organizationId)];
-      if (status) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        conditions.push(eq(memberEmployment.employmentStatus, status as any));
-      }
+  operation: (tx: RLSTx) => Promise<T>,
+): Promise<T> {
+  return withRLSContext({ organizationId }, operation)
+}
 
-      return await dbOrTx
-        .select()
-        .from(memberEmployment)
-        .where(and(...conditions))
-        .orderBy(asc(memberEmployment.jobTitle));
-    } catch (error) {
-      logger.error("Error fetching employment by organization", error as Error, { organizationId });
-      throw new Error(`Failed to fetch employment records for organization ${organizationId}`);
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
+async function inScope<T>(
+  scope: EmploymentActorScope,
+  tx: RLSTx | undefined,
+  operation: (db: RLSTx) => Promise<T>,
+): Promise<T> {
+  assertScope(scope)
+  try {
+    if (tx) return await operation(tx)
+    return await withEmploymentOrganization(scope.organizationId, operation)
+  } catch (error) {
+    if (error instanceof EmploymentBoundaryError) throw error
+    logger.error('member employment query failed', new Error('member_employment_query'), {
+      organizationId: scope.organizationId,
+    })
+    throw new Error('Failed to access member employment')
   }
 }
 
-/**
- * Update member employment
- */
+async function loadMember(
+  tx: RLSTx,
+  organizationId: string,
+  memberId: string,
+): Promise<{ id: string; userId: string } | null> {
+  const [member] = await tx
+    .select({ id: organizationMembers.id, userId: organizationMembers.userId })
+    .from(organizationMembers)
+    .where(and(
+      eq(organizationMembers.id, memberId),
+      eq(organizationMembers.organizationId, organizationId),
+      eq(organizationMembers.status, 'active'),
+      isNull(organizationMembers.deletedAt),
+    ))
+    .limit(1)
+  return member ?? null
+}
+
+async function requireMember(
+  tx: RLSTx,
+  organizationId: string,
+  memberId: string,
+): Promise<{ id: string; userId: string }> {
+  const member = await loadMember(tx, organizationId, memberId)
+  if (!member) throw new EmploymentBoundaryError('Forbidden')
+  return member
+}
+
+async function assertEmployer(tx: RLSTx, id: string | null | undefined, organizationId: string): Promise<void> {
+  if (!id) return
+  const [row] = await tx
+    .select({ id: employers.id })
+    .from(employers)
+    .where(and(eq(employers.id, id), eq(employers.organizationId, organizationId)))
+    .limit(1)
+  if (!row) throw new EmploymentBoundaryError('Forbidden')
+}
+
+async function assertWorksite(tx: RLSTx, id: string | null | undefined, organizationId: string): Promise<void> {
+  if (!id) return
+  const [row] = await tx
+    .select({ id: worksites.id })
+    .from(worksites)
+    .where(and(eq(worksites.id, id), eq(worksites.organizationId, organizationId)))
+    .limit(1)
+  if (!row) throw new EmploymentBoundaryError('Forbidden')
+}
+
+async function assertBargainingUnit(tx: RLSTx, id: string | null | undefined, organizationId: string): Promise<void> {
+  if (!id) return
+  const [row] = await tx
+    .select({ id: bargainingUnits.id })
+    .from(bargainingUnits)
+    .where(and(eq(bargainingUnits.id, id), eq(bargainingUnits.organizationId, organizationId)))
+    .limit(1)
+  if (!row) throw new EmploymentBoundaryError('Forbidden')
+}
+
+async function assertEmploymentRefs(
+  tx: RLSTx,
+  organizationId: string,
+  data: {
+    employerId?: string | null
+    worksiteId?: string | null
+    bargainingUnitId?: string | null
+    jobCode?: string | null
+    supervisorId?: string | null
+  },
+): Promise<void> {
+  await assertEmployer(tx, data.employerId, organizationId)
+  await assertWorksite(tx, data.worksiteId, organizationId)
+  await assertBargainingUnit(tx, data.bargainingUnitId, organizationId)
+  if (data.supervisorId) await requireMember(tx, organizationId, data.supervisorId)
+  if (data.jobCode) {
+    const [classification] = await tx
+      .select({ id: jobClassifications.id })
+      .from(jobClassifications)
+      .where(and(
+        eq(jobClassifications.organizationId, organizationId),
+        eq(jobClassifications.jobCode, data.jobCode),
+        eq(jobClassifications.isActive, true),
+      ))
+      .limit(1)
+    if (!classification) throw new EmploymentBoundaryError('Forbidden')
+  }
+}
+
+function rejectOrgMove(scope: EmploymentActorScope, organizationId: string | null | undefined): void {
+  if (organizationId && organizationId !== scope.organizationId) {
+    throw new EmploymentBoundaryError('Forbidden')
+  }
+}
+
+async function auditSuccess(
+  tx: RLSTx,
+  scope: EmploymentActorScope,
+  operation: Parameters<typeof persistDurableEmploymentAudit>[1]['operation'],
+  targetId: string | null,
+): Promise<void> {
+  await persistDurableEmploymentAudit(tx, {
+    actorUserId: scope.actorUserId,
+    organizationId: scope.organizationId,
+    operation,
+    outcome: 'success',
+    targetId,
+  })
+}
+
+export async function createMemberEmployment(
+  scope: EmploymentActorScope,
+  data: NewMemberEmployment,
+  tx?: RLSTx,
+): Promise<MemberEmployment> {
+  rejectOrgMove(scope, data.organizationId)
+  return inScope(scope, tx, async (db) => {
+    await requireMember(db, scope.organizationId, data.memberId)
+    await assertEmploymentRefs(db, scope.organizationId, data)
+    const [employment] = await db.insert(memberEmployment).values({
+      ...data,
+      organizationId: scope.organizationId,
+      createdBy: scope.actorUserId,
+      updatedBy: scope.actorUserId,
+    }).returning()
+    if (!employment) throw new EmploymentBoundaryError('Employment record not found')
+    await auditSuccess(db, scope, 'create', employment.id)
+    return employment
+  })
+}
+
+export async function getMemberEmploymentById(
+  scope: EmploymentActorScope,
+  id: string,
+  tx?: RLSTx,
+): Promise<MemberEmployment | null> {
+  return inScope(scope, tx, async (db) => {
+    const [employment] = await db
+      .select()
+      .from(memberEmployment)
+      .where(and(eq(memberEmployment.id, id), eq(memberEmployment.organizationId, scope.organizationId)))
+      .limit(1)
+    return employment ?? null
+  })
+}
+
+export async function getActiveMemberEmployment(
+  scope: EmploymentActorScope,
+  memberId: string,
+  tx?: RLSTx,
+): Promise<MemberEmployment | null> {
+  return inScope(scope, tx, async (db) => {
+    const member = await loadMember(db, scope.organizationId, memberId)
+    if (!member) return null
+    const [employment] = await db
+      .select()
+      .from(memberEmployment)
+      .where(and(
+        eq(memberEmployment.memberId, memberId),
+        eq(memberEmployment.organizationId, scope.organizationId),
+        eq(memberEmployment.employmentStatus, 'active'),
+      ))
+      .orderBy(desc(memberEmployment.hireDate))
+      .limit(1)
+    return employment ?? null
+  })
+}
+
+export async function getAllMemberEmployment(
+  scope: EmploymentActorScope,
+  memberId: string,
+  tx?: RLSTx,
+): Promise<MemberEmployment[]> {
+  return inScope(scope, tx, async (db) => {
+    const member = await loadMember(db, scope.organizationId, memberId)
+    if (!member) return []
+    return db
+      .select()
+      .from(memberEmployment)
+      .where(and(
+        eq(memberEmployment.memberId, memberId),
+        eq(memberEmployment.organizationId, scope.organizationId),
+      ))
+      .orderBy(desc(memberEmployment.hireDate))
+  })
+}
+
+export async function getEmploymentByOrganization(
+  scope: EmploymentActorScope,
+  status?: string,
+  tx?: RLSTx,
+): Promise<MemberEmployment[]> {
+  return inScope(scope, tx, async (db) => {
+    const conditions = [eq(memberEmployment.organizationId, scope.organizationId)]
+    if (status) {
+      conditions.push(eq(memberEmployment.employmentStatus, status as MemberEmployment['employmentStatus']))
+    }
+    return db
+      .select()
+      .from(memberEmployment)
+      .where(and(...conditions))
+      .orderBy(asc(memberEmployment.jobTitle))
+  })
+}
+
 export async function updateMemberEmployment(
+  scope: EmploymentActorScope,
   id: string,
   data: Partial<NewMemberEmployment>,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<MemberEmployment> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const [employment] = await dbOrTx
-        .update(memberEmployment)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(memberEmployment.id, id))
-        .returning();
-
-      logger.info("Member employment updated", { employmentId: id });
-      return employment;
-    } catch (error) {
-      logger.error("Error updating member employment", error as Error, { id, data });
-      throw new Error("Failed to update member employment");
+  rejectOrgMove(scope, data.organizationId)
+  return inScope(scope, tx, async (db) => {
+    const [existing] = await db
+      .select()
+      .from(memberEmployment)
+      .where(and(eq(memberEmployment.id, id), eq(memberEmployment.organizationId, scope.organizationId)))
+      .limit(1)
+    if (!existing) throw new EmploymentBoundaryError('Employment record not found')
+    if (data.memberId && data.memberId !== existing.memberId) {
+      throw new EmploymentBoundaryError('Forbidden')
     }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+    await assertEmploymentRefs(db, scope.organizationId, data)
+    const patch: Partial<NewMemberEmployment> = { ...data, updatedAt: new Date(), updatedBy: scope.actorUserId }
+    delete patch.organizationId
+    delete patch.memberId
+    delete patch.id
+    delete patch.createdBy
+    const [employment] = await db
+      .update(memberEmployment)
+      .set(patch)
+      .where(and(eq(memberEmployment.id, id), eq(memberEmployment.organizationId, scope.organizationId)))
+      .returning()
+    if (!employment) throw new EmploymentBoundaryError('Employment record not found')
+    await auditSuccess(db, scope, 'update', employment.id)
+    return employment
+  })
 }
 
-/**
- * Delete member employment (hard delete - use with caution)
- */
 export async function deleteMemberEmployment(
-  id: string,
-   
-  tx?: RLSTx
+  scope: EmploymentActorScope,
+  _id: string,
 ): Promise<void> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      await dbOrTx
-        .delete(memberEmployment)
-        .where(eq(memberEmployment.id, id));
-
-      logger.info("Member employment deleted", { employmentId: id });
-    } catch (error) {
-      logger.error("Error deleting member employment", error as Error, { id });
-      throw new Error("Failed to delete member employment");
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+  assertScope(scope)
+  throw new EmploymentBoundaryError(
+    'Employment records are retained. Update employment status instead.',
+  )
 }
 
-/**
- * Get employment data for dues calculation
- * Returns member employment with compensation fields needed by dues engine
- */
 export async function getEmploymentForDuesCalculation(
+  scope: EmploymentActorScope,
   memberId: string,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<{
-  grossWages?: number;
-  baseSalary?: number;
-  hourlyRate?: number;
-  hoursWorked?: number;
-  employmentStatus: string;
-  payFrequency: string;
+  grossWages?: number
+  baseSalary?: number
+  hourlyRate?: number
+  hoursWorked?: number
+  employmentStatus: string
+  payFrequency: string
 } | null> {
-  const employment = await getActiveMemberEmployment(memberId, tx);
-  
-  if (!employment) {
-    return null;
-  }
-
-  return {
-    grossWages: employment.grossWages ? parseFloat(employment.grossWages.toString()) : undefined,
-    baseSalary: employment.baseSalary ? parseFloat(employment.baseSalary.toString()) : undefined,
-    hourlyRate: employment.hourlyRate ? parseFloat(employment.hourlyRate.toString()) : undefined,
-    hoursWorked: employment.regularHoursPerPeriod ? parseFloat(employment.regularHoursPerPeriod.toString()) : undefined,
-    employmentStatus: employment.employmentStatus,
-    payFrequency: employment.payFrequency,
-  };
+  return inScope(scope, tx, async (db) => {
+    const member = await loadMember(db, scope.organizationId, memberId)
+    if (!member) return null
+    const [employment] = await db
+      .select()
+      .from(memberEmployment)
+      .where(and(
+        eq(memberEmployment.memberId, memberId),
+        eq(memberEmployment.organizationId, scope.organizationId),
+        eq(memberEmployment.employmentStatus, 'active'),
+      ))
+      .orderBy(desc(memberEmployment.hireDate))
+      .limit(1)
+    if (!employment) return null
+    await auditSuccess(db, scope, 'compensation_read', employment.id)
+    return {
+      grossWages: employment.grossWages ? parseFloat(employment.grossWages.toString()) : undefined,
+      baseSalary: employment.baseSalary ? parseFloat(employment.baseSalary.toString()) : undefined,
+      hourlyRate: employment.hourlyRate ? parseFloat(employment.hourlyRate.toString()) : undefined,
+      hoursWorked: employment.regularHoursPerPeriod
+        ? parseFloat(employment.regularHoursPerPeriod.toString())
+        : undefined,
+      employmentStatus: employment.employmentStatus,
+      payFrequency: employment.payFrequency,
+    }
+  })
 }
 
-// =====================================================
-// EMPLOYMENT HISTORY QUERIES
-// =====================================================
-
-/**
- * Create employment history record
- */
 export async function createEmploymentHistory(
+  scope: EmploymentActorScope,
   data: NewEmploymentHistory,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<EmploymentHistory> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const [history] = await dbOrTx.insert(employmentHistory).values(data).returning();
-      logger.info("Employment history created", { 
-        historyId: history.id, 
-        memberId: history.memberId,
-        changeType: history.changeType 
-      });
-      return history;
-    } catch (error) {
-      logger.error("Error creating employment history", error as Error, { data });
-      throw new Error("Failed to create employment history");
+  rejectOrgMove(scope, data.organizationId)
+  return inScope(scope, tx, async (db) => {
+    await requireMember(db, scope.organizationId, data.memberId)
+    if (data.memberEmploymentId) {
+      const [employment] = await db
+        .select({ id: memberEmployment.id, memberId: memberEmployment.memberId })
+        .from(memberEmployment)
+        .where(and(
+          eq(memberEmployment.id, data.memberEmploymentId),
+          eq(memberEmployment.organizationId, scope.organizationId),
+          eq(memberEmployment.memberId, data.memberId),
+        ))
+        .limit(1)
+      if (!employment) throw new EmploymentBoundaryError('Forbidden')
     }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+    const [history] = await db.insert(employmentHistory).values({
+      ...data,
+      organizationId: scope.organizationId,
+      createdBy: scope.actorUserId,
+    }).returning()
+    if (!history) throw new EmploymentBoundaryError('Employment record not found')
+    await auditSuccess(db, scope, 'history', history.id)
+    return history
+  })
 }
 
-/**
- * Get employment history for a member
- */
 export async function getEmploymentHistoryByMember(
+  scope: EmploymentActorScope,
   memberId: string,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<EmploymentHistory[]> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      return await dbOrTx
-        .select()
-        .from(employmentHistory)
-        .where(eq(employmentHistory.memberId, memberId))
-        .orderBy(desc(employmentHistory.effectiveDate));
-    } catch (error) {
-      logger.error("Error fetching employment history", error as Error, { memberId });
-      throw new Error(`Failed to fetch employment history for member ${memberId}`);
-    }
-  };
+  return inScope(scope, tx, async (db) => {
+    const member = await loadMember(db, scope.organizationId, memberId)
+    if (!member) return []
+    return db
+      .select()
+      .from(employmentHistory)
+      .where(and(
+        eq(employmentHistory.memberId, memberId),
+        eq(employmentHistory.organizationId, scope.organizationId),
+      ))
+      .orderBy(desc(employmentHistory.effectiveDate))
+  })
+}
 
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
+function assertLeaveWrite(data: Partial<NewMemberLeave>): void {
+  if (leaveApprovalAttempted(data)) {
+    throw new EmploymentBoundaryError('Approval fields are assigned by the approval action')
+  }
+  if (data.duesWaiverApproved === true) {
+    throw new EmploymentBoundaryError('Forbidden')
   }
 }
 
-// =====================================================
-// MEMBER LEAVES QUERIES
-// =====================================================
-
-/**
- * Create member leave
- */
 export async function createMemberLeave(
+  scope: EmploymentActorScope,
   data: NewMemberLeave,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<MemberLeave> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const [leave] = await dbOrTx.insert(memberLeaves).values(data).returning();
-      logger.info("Member leave created", { 
-        leaveId: leave.id, 
-        memberId: leave.memberId,
-        leaveType: leave.leaveType 
-      });
-      return leave;
-    } catch (error) {
-      logger.error("Error creating member leave", error as Error, { data });
-      throw new Error("Failed to create member leave");
+  rejectOrgMove(scope, data.organizationId)
+  assertLeaveWrite(data)
+  return inScope(scope, tx, async (db) => {
+    await requireMember(db, scope.organizationId, data.memberId)
+    if (data.memberEmploymentId) {
+      const [employment] = await db
+        .select({ id: memberEmployment.id })
+        .from(memberEmployment)
+        .where(and(
+          eq(memberEmployment.id, data.memberEmploymentId),
+          eq(memberEmployment.organizationId, scope.organizationId),
+          eq(memberEmployment.memberId, data.memberId),
+        ))
+        .limit(1)
+      if (!employment) throw new EmploymentBoundaryError('Forbidden')
     }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+    const [leave] = await db.insert(memberLeaves).values({
+      ...data,
+      organizationId: scope.organizationId,
+      isApproved: false,
+      approvedBy: null,
+      approvedAt: null,
+      duesWaiverApproved: false,
+      createdBy: scope.actorUserId,
+    }).returning()
+    if (!leave) throw new EmploymentBoundaryError('Leave record not found')
+    await auditSuccess(db, scope, 'leave_create', leave.id)
+    return leave
+  })
 }
 
-/**
- * Get active leaves for a member
- */
 export async function getActiveMemberLeaves(
+  scope: EmploymentActorScope,
   memberId: string,
   currentDate?: Date,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<MemberLeave[]> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const now = currentDate || new Date();
-      const nowStr = now.toISOString().split('T')[0];
-
-      return await dbOrTx
-        .select()
-        .from(memberLeaves)
-        .where(
-          and(
-            eq(memberLeaves.memberId, memberId),
-            lte(memberLeaves.startDate, nowStr),
-            or(
-              isNull(memberLeaves.endDate),
-              gte(memberLeaves.endDate, nowStr)
-            )
-          )
-        )
-        .orderBy(desc(memberLeaves.startDate));
-    } catch (error) {
-      logger.error("Error fetching active member leaves", error as Error, { memberId });
-      throw new Error(`Failed to fetch active leaves for member ${memberId}`);
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+  return inScope(scope, tx, async (db) => {
+    const member = await loadMember(db, scope.organizationId, memberId)
+    if (!member) return []
+    const now = currentDate || new Date()
+    const nowStr = now.toISOString().split('T')[0]
+    return db
+      .select()
+      .from(memberLeaves)
+      .where(and(
+        eq(memberLeaves.memberId, memberId),
+        eq(memberLeaves.organizationId, scope.organizationId),
+        lte(memberLeaves.startDate, nowStr),
+        or(isNull(memberLeaves.endDate), gte(memberLeaves.endDate, nowStr)),
+      ))
+      .orderBy(desc(memberLeaves.startDate))
+  })
 }
 
-/**
- * Get all leaves for a member
- */
 export async function getAllMemberLeaves(
+  scope: EmploymentActorScope,
   memberId: string,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<MemberLeave[]> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      return await dbOrTx
-        .select()
-        .from(memberLeaves)
-        .where(eq(memberLeaves.memberId, memberId))
-        .orderBy(desc(memberLeaves.startDate));
-    } catch (error) {
-      logger.error("Error fetching all member leaves", error as Error, { memberId });
-      throw new Error(`Failed to fetch leaves for member ${memberId}`);
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+  return inScope(scope, tx, async (db) => {
+    const member = await loadMember(db, scope.organizationId, memberId)
+    if (!member) return []
+    return db
+      .select()
+      .from(memberLeaves)
+      .where(and(
+        eq(memberLeaves.memberId, memberId),
+        eq(memberLeaves.organizationId, scope.organizationId),
+      ))
+      .orderBy(desc(memberLeaves.startDate))
+  })
 }
 
-/**
- * Update member leave
- */
 export async function updateMemberLeave(
+  scope: EmploymentActorScope,
   id: string,
   data: Partial<NewMemberLeave>,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<MemberLeave> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const [leave] = await dbOrTx
-        .update(memberLeaves)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(memberLeaves.id, id))
-        .returning();
-
-      logger.info("Member leave updated", { leaveId: id });
-      return leave;
-    } catch (error) {
-      logger.error("Error updating member leave", error as Error, { id, data });
-      throw new Error("Failed to update member leave");
+  rejectOrgMove(scope, data.organizationId)
+  assertLeaveWrite(data)
+  return inScope(scope, tx, async (db) => {
+    const [existing] = await db
+      .select()
+      .from(memberLeaves)
+      .where(and(eq(memberLeaves.id, id), eq(memberLeaves.organizationId, scope.organizationId)))
+      .limit(1)
+    if (!existing) throw new EmploymentBoundaryError('Leave record not found')
+    if (data.memberId && data.memberId !== existing.memberId) {
+      throw new EmploymentBoundaryError('Forbidden')
     }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+    if (data.memberEmploymentId) {
+      const [employment] = await db
+        .select({ id: memberEmployment.id })
+        .from(memberEmployment)
+        .where(and(
+          eq(memberEmployment.id, data.memberEmploymentId),
+          eq(memberEmployment.organizationId, scope.organizationId),
+          eq(memberEmployment.memberId, existing.memberId),
+        ))
+        .limit(1)
+      if (!employment) throw new EmploymentBoundaryError('Forbidden')
+    }
+    const patch: Partial<NewMemberLeave> = {
+      ...data,
+      updatedAt: new Date(),
+      isApproved: existing.isApproved,
+      approvedBy: existing.approvedBy,
+      approvedAt: existing.approvedAt,
+      duesWaiverApproved: false,
+    }
+    delete patch.organizationId
+    delete patch.memberId
+    delete patch.id
+    delete patch.createdBy
+    const [leave] = await db
+      .update(memberLeaves)
+      .set(patch)
+      .where(and(eq(memberLeaves.id, id), eq(memberLeaves.organizationId, scope.organizationId)))
+      .returning()
+    if (!leave) throw new EmploymentBoundaryError('Leave record not found')
+    await auditSuccess(db, scope, 'leave_update', leave.id)
+    return leave
+  })
 }
 
-// =====================================================
-// JOB CLASSIFICATIONS QUERIES
-// =====================================================
+export async function approveMemberLeave(
+  scope: EmploymentActorScope,
+  id: string,
+  tx?: RLSTx,
+): Promise<MemberLeave> {
+  return inScope(scope, tx, async (db) => {
+    const [existing] = await db
+      .select()
+      .from(memberLeaves)
+      .where(and(eq(memberLeaves.id, id), eq(memberLeaves.organizationId, scope.organizationId)))
+      .limit(1)
+    if (!existing) throw new EmploymentBoundaryError('Leave record not found')
+    const member = await requireMember(db, scope.organizationId, existing.memberId)
+    if (leaveSelfApprovalDenied(scope.actorUserId, member.userId)) {
+      throw new EmploymentBoundaryError('Leave approval requires a different member')
+    }
+    const [leave] = await db
+      .update(memberLeaves)
+      .set({
+        isApproved: true,
+        approvedBy: scope.actorUserId,
+        approvedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(and(
+        eq(memberLeaves.id, id),
+        eq(memberLeaves.organizationId, scope.organizationId),
+        or(eq(memberLeaves.isApproved, false), isNull(memberLeaves.isApproved)),
+      ))
+      .returning()
+    if (!leave) throw new EmploymentBoundaryError('Leave approval was not applied')
+    await auditSuccess(db, scope, 'leave_approve', leave.id)
+    return leave
+  })
+}
 
-/**
- * Create job classification
- */
 export async function createJobClassification(
+  scope: EmploymentActorScope,
   data: NewJobClassification,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<JobClassification> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const [classification] = await dbOrTx.insert(jobClassifications).values(data).returning();
-      logger.info("Job classification created", { 
-        classificationId: classification.id,
-        jobCode: classification.jobCode,
-        jobTitle: classification.jobTitle 
-      });
-      return classification;
-    } catch (error) {
-      logger.error("Error creating job classification", error as Error, { data });
-      throw new Error("Failed to create job classification");
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+  rejectOrgMove(scope, data.organizationId)
+  return inScope(scope, tx, async (db) => {
+    await assertBargainingUnit(db, data.bargainingUnitId, scope.organizationId)
+    const [classification] = await db.insert(jobClassifications).values({
+      ...data,
+      organizationId: scope.organizationId,
+      createdBy: scope.actorUserId,
+    }).returning()
+    if (!classification) throw new EmploymentBoundaryError('Job classification not found')
+    await auditSuccess(db, scope, 'classification_create', classification.id)
+    return classification
+  })
 }
 
-/**
- * Get job classification by code
- */
 export async function getJobClassificationByCode(
-  organizationId: string,
+  scope: EmploymentActorScope,
   jobCode: string,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<JobClassification | null> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const [classification] = await dbOrTx
-        .select()
-        .from(jobClassifications)
-        .where(
-          and(
-            eq(jobClassifications.organizationId, organizationId),
-            eq(jobClassifications.jobCode, jobCode),
-            eq(jobClassifications.isActive, true)
-          )
-        )
-        .limit(1);
-
-      return classification ?? null;
-    } catch (error) {
-      logger.error("Error fetching job classification by code", error as Error, { jobCode });
-      throw new Error(`Failed to fetch job classification for code ${jobCode}`);
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+  return inScope(scope, tx, async (db) => {
+    const [classification] = await db
+      .select()
+      .from(jobClassifications)
+      .where(and(
+        eq(jobClassifications.organizationId, scope.organizationId),
+        eq(jobClassifications.jobCode, jobCode),
+        eq(jobClassifications.isActive, true),
+      ))
+      .limit(1)
+    return classification ?? null
+  })
 }
 
-/**
- * Get all job classifications for an organization
- */
 export async function getJobClassificationsByOrganization(
-  organizationId: string,
+  scope: EmploymentActorScope,
   activeOnly: boolean = true,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<JobClassification[]> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const conditions = [eq(jobClassifications.organizationId, organizationId)];
-      if (activeOnly) {
-        conditions.push(eq(jobClassifications.isActive, true));
-      }
-
-      return await dbOrTx
-        .select()
-        .from(jobClassifications)
-        .where(and(...conditions))
-        .orderBy(asc(jobClassifications.jobCode));
-    } catch (error) {
-      logger.error("Error fetching job classifications", error as Error, { organizationId });
-      throw new Error(`Failed to fetch job classifications for organization ${organizationId}`);
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+  return inScope(scope, tx, async (db) => {
+    const conditions = [eq(jobClassifications.organizationId, scope.organizationId)]
+    if (activeOnly) conditions.push(eq(jobClassifications.isActive, true))
+    return db
+      .select()
+      .from(jobClassifications)
+      .where(and(...conditions))
+      .orderBy(asc(jobClassifications.jobCode))
+  })
 }
 
-/**
- * Update job classification
- */
 export async function updateJobClassification(
+  scope: EmploymentActorScope,
   id: string,
   data: Partial<NewJobClassification>,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<JobClassification> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      const [classification] = await dbOrTx
-        .update(jobClassifications)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(jobClassifications.id, id))
-        .returning();
-
-      logger.info("Job classification updated", { classificationId: id });
-      return classification;
-    } catch (error) {
-      logger.error("Error updating job classification", error as Error, { id, data });
-      throw new Error("Failed to update job classification");
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
+  rejectOrgMove(scope, data.organizationId)
+  return inScope(scope, tx, async (db) => {
+    const [existing] = await db
+      .select()
+      .from(jobClassifications)
+      .where(and(
+        eq(jobClassifications.id, id),
+        eq(jobClassifications.organizationId, scope.organizationId),
+      ))
+      .limit(1)
+    if (!existing) throw new EmploymentBoundaryError('Job classification not found')
+    await assertBargainingUnit(db, data.bargainingUnitId, scope.organizationId)
+    const patch: Partial<NewJobClassification> = { ...data, updatedAt: new Date() }
+    delete patch.organizationId
+    delete patch.id
+    delete patch.createdBy
+    const [classification] = await db
+      .update(jobClassifications)
+      .set(patch)
+      .where(and(
+        eq(jobClassifications.id, id),
+        eq(jobClassifications.organizationId, scope.organizationId),
+      ))
+      .returning()
+    if (!classification) throw new EmploymentBoundaryError('Job classification not found')
+    await auditSuccess(db, scope, 'classification_update', classification.id)
+    return classification
+  })
 }
 
-// =====================================================
-// UTILITY FUNCTIONS
-// =====================================================
-
-/**
- * Calculate seniority years based on dates and leaves
- */
 export async function calculateSeniorityYears(
+  scope: EmploymentActorScope,
   seniorityDate: Date,
   currentDate?: Date,
   memberId?: string,
-   
-  tx?: RLSTx
+  tx?: RLSTx,
 ): Promise<number> {
-  const now = currentDate || new Date();
-  let totalDays = Math.floor((now.getTime() - seniorityDate.getTime()) / (1000 * 60 * 60 * 24));
-
-  // If memberId provided, subtract leave days that affect seniority
-  if (memberId) {
-    const leaves = await getAllMemberLeaves(memberId, tx);
-    const adjustmentDays = leaves
-      .filter(leave => leave.affectsSeniority && leave.seniorityAdjustmentDays)
-      .reduce((sum, leave) => sum + (leave.seniorityAdjustmentDays || 0), 0);
-    
-    totalDays -= adjustmentDays;
+  const now = currentDate || new Date()
+  let totalDays = Math.floor((now.getTime() - seniorityDate.getTime()) / (1000 * 60 * 60 * 24))
+  if (!memberId) {
+    assertScope(scope)
+    return Math.max(0, totalDays / 365.25)
   }
-
-  return Math.max(0, totalDays / 365.25); // Account for leap years
+  const leaves = await inScope(scope, tx, async (db) => {
+    const member = await loadMember(db, scope.organizationId, memberId)
+    if (!member) throw new EmploymentBoundaryError('Forbidden')
+    return db
+      .select()
+      .from(memberLeaves)
+      .where(and(
+        eq(memberLeaves.memberId, memberId),
+        eq(memberLeaves.organizationId, scope.organizationId),
+      ))
+  })
+  const adjustmentDays = leaves
+    .filter((leave) => leave.affectsSeniority && leave.seniorityAdjustmentDays)
+    .reduce((sum, leave) => sum + (leave.seniorityAdjustmentDays || 0), 0)
+  totalDays -= adjustmentDays
+  return Math.max(0, totalDays / 365.25)
 }
-
