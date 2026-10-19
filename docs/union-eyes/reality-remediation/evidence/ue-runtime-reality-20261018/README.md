@@ -19,6 +19,7 @@ and the worker schema patch were applied to a disposable point-in-time restore c
 | `harness-v2/pg-tls.js`, `pg-tls.selftest.js` | corrected verified-TLS PostgreSQL connection factory and its credential-free self-test (added 2026-10-19; not used to produce the artifacts above) |
 | `harness-v2/insert-semantics-inventory.js` + `schema-insert-semantics-inventory.json` | static, credential-free upper bound of Django-owned tables with Drizzle insert sites (267), replacing the blunt 523-column figure as a work-planning input (added 2026-10-19; pinned to the commit recorded inside the JSON) |
 | `release-sequence-rehearsal/` | **added 2026-10-19, after the original evidence**: reproducible loopback rehearsal of the 0015 release order, atomic failure, recovery and fresh bootstrap (41 checks, 41 passed) with its orchestrator, helpers and `results.json`; touches no Azure resource, staging data or credential (see its README) |
+| `release-sequence-rehearsal-v2/` | **added 2026-10-19 (candidate qualification), additional to and separate from the v1 kit**: 60-check loopback rehearsal at source `4ad53375a` against the exact candidate backend image digest, plus the read-only R1 catalog/ledger check tool (not run against staging: no trusted identity). Not staging acceptance. |
 
 ## SHA-256
 
@@ -49,6 +50,15 @@ SHA-256 of each file's committed (LF-normalized) content, i.e. what a fresh chec
 | `release-sequence-rehearsal/helpers/worker-harness.ts` | `4c35f66a3c88e54955669cdb911631fb876813a3a6d41a882e5e9c9459cc2398` |
 | `release-sequence-rehearsal/results.json` | `34c5290e6302ae12571a8f74af7844be33f2a5caaaa707a60377f403ec44f75f` |
 | `release-sequence-rehearsal/run-rehearsal.ps1` | `3013e0e53024ca460346b588cd693ee26b6a9485a5d9b4ef09b8a35251fb83b5` |
+| `release-sequence-rehearsal-v2/helpers/isolation-probe.js` | `c6f436ce9fb54d949480e0f93b159b9e5fa047055b669f403fb615f007dca12c` |
+| `release-sequence-rehearsal-v2/helpers/loopback-schema-patch.js` | `d900c5ec74e33fd9c22f26fb4e6535e92cbd5f07de8485818f4f85797f627931` |
+| `release-sequence-rehearsal-v2/helpers/migration-columns.js` | `fe235621090d1a9f23166154bff916771c78452ea8d5a0c8ba6172f47b780a62` |
+| `release-sequence-rehearsal-v2/helpers/r1-readonly-check.js` | `3e6d89d37bbfd1a614636ecc35b423e6f8170a2baa82b4237daffe98681d51f2` |
+| `release-sequence-rehearsal-v2/helpers/rehearse.js` | `66aaca2146d72bfbf4d29ffad8429449cf8522702b0c5e4c4ebc402427e2ac17` |
+| `release-sequence-rehearsal-v2/helpers/worker-harness.ts` | `4c35f66a3c88e54955669cdb911631fb876813a3a6d41a882e5e9c9459cc2398` |
+| `release-sequence-rehearsal-v2/README.md` | `b6be7b41f72c3dfceab12e1f6ab747dea2b6e30c5582d113d9ffb7df989827b7` |
+| `release-sequence-rehearsal-v2/results-v2.json` | `b96d003ab7747dcef1c7f058c722f070405c3c3740e6714e0d988eab27ce9900` |
+| `release-sequence-rehearsal-v2/run-rehearsal.ps1` | `a0d29303350864a04e4d0b1c045e27bf4a12ce5eb8bd0e17c950ae7bc4b2827a` |
 | `rls-verify-preflight-clone-after.txt` | `89b16563c99793d7c767ed2919c1cb4c6035a5c92c2291908554178a9a529970` |
 | `rls-verify-preflight-staging.txt` | `56147ba401d80d90df68a918ddec7fe1acda5c682cb3d00b54b60890b968b061` |
 | `routes-result.json` | `217d383482a8e9dfbd0e1617e5070786e01684f21dba6caa426ff20e4fee5eb3` |
