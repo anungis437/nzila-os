@@ -158,45 +158,35 @@ describe('organization-utils', () => {
   // ── getOrganizationIdForUser ─────────────────────────────────────────
 
   describe('getOrganizationIdForUser', () => {
-    it('returns org from cookie when user is platform admin', async () => {
+    it('does not select a cookie organization for a platform admin without membership', async () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('PLATFORM_ADMIN_USER_IDS', 'admin-001');
+      mocks.mockCookiesGet.mockReturnValue({ value: 'foreign-org' });
+      setupLimitSequence([{ id: 'org-abc' }], [], [], [], [], []);
+      const { getOrganizationIdForUser } = await import('../organization-utils');
+      await expect(getOrganizationIdForUser('admin-001')).rejects.toThrow('Default Organization fallback');
+      vi.unstubAllEnvs();
+    });
+
+    it('does not select a cookie organization for a default-organization administrator without membership', async () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('PLATFORM_ADMIN_USER_IDS', '');
+      mocks.mockCookiesGet.mockReturnValue({ value: 'foreign-org' });
+      setupLimitSequence([{ id: 'org-abc' }], [], [], [], [], []);
+      const { getOrganizationIdForUser } = await import('../organization-utils');
+      await expect(getOrganizationIdForUser('user-1')).rejects.toThrow('Default Organization fallback');
+      vi.unstubAllEnvs();
+    });
+
+    it('returns the cookie organization when the same user has explicit membership', async () => {
       process.env.PLATFORM_ADMIN_USER_IDS = 'admin-001';
       mocks.mockCookiesGet.mockReturnValue({ value: 'my-org' });
-      // Query 1: org by slug → found
-      setupLimitSequence([{ id: 'org-abc' }]);
-      const { getOrganizationIdForUser } = await import('../organization-utils');
-      const result = await getOrganizationIdForUser('admin-001');
-      expect(result).toBe('org-abc');
-      delete process.env.PLATFORM_ADMIN_USER_IDS;
-    });
-
-    it('returns org from cookie when user is super admin', async () => {
-      process.env.PLATFORM_ADMIN_USER_IDS = '';
-      mocks.mockCookiesGet.mockReturnValue({ value: 'my-org' });
-      // Query 1: org by slug → found
-      // Query 2: super admin check → admin in default org
       setupLimitSequence(
         [{ id: 'org-abc' }],
-        [{ role: 'admin' }],
-      );
-      const { getOrganizationIdForUser } = await import('../organization-utils');
-      const result = await getOrganizationIdForUser('user-1');
-      expect(result).toBe('org-abc');
-      delete process.env.PLATFORM_ADMIN_USER_IDS;
-    });
-
-    it('returns org from cookie when user has explicit membership', async () => {
-      process.env.PLATFORM_ADMIN_USER_IDS = '';
-      mocks.mockCookiesGet.mockReturnValue({ value: 'my-org' });
-      // Query 1: org by slug → found
-      // Query 2: super admin check → member (not admin access)
-      // Query 3: explicit membership → found
-      setupLimitSequence(
-        [{ id: 'org-abc' }],
-        [{ role: 'member' }],
         [{ organizationId: 'org-abc' }],
       );
       const { getOrganizationIdForUser } = await import('../organization-utils');
-      const result = await getOrganizationIdForUser('user-1');
+      const result = await getOrganizationIdForUser('admin-001');
       expect(result).toBe('org-abc');
       delete process.env.PLATFORM_ADMIN_USER_IDS;
     });
@@ -270,14 +260,14 @@ describe('organization-utils', () => {
     });
 
     it('falls through cookie path when no explicit membership', async () => {
-      process.env.PLATFORM_ADMIN_USER_IDS = '';
+      process.env.PLATFORM_ADMIN_USER_IDS = 'admin-001';
       mocks.mockCookiesGet.mockImplementation((name: string) =>
         name === 'active-organization' ? { value: 'slug-x' } : undefined,
       );
       // Query 1: org by slug → found
-      // Query 2: super admin check → not member of default org
-      // Query 3: explicit membership → not found
-      // Query 4: fall through to first user org
+      // Query 2: membership in that org → absent
+      // Query 3: auth membership in that org → absent
+      // Query 4: primary auth membership → a different organization
       setupLimitSequence(
         [{ id: 'org-x' }],
         [],

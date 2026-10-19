@@ -30,6 +30,8 @@ vi.mock('next/server', () => ({
 vi.mock('@/lib/organization-utils', () => ({
   getOrganizationIdForUser: vi.fn(),
   validateOrganizationExists: vi.fn(),
+  userHasOrganizationAccess: vi.fn(),
+  getUserRoleInOrganization: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({
@@ -64,15 +66,26 @@ vi.mock('@/lib/auth/canonical-context', () => ({
 import {
   getOrganizationId,
   getOrganizationIdFromRequest,
+  validateOrganizationAccess,
   withOrganizationAuth,
 } from '../organization-middleware';
-import { getOrganizationIdForUser, validateOrganizationExists } from '@/lib/organization-utils';
+import {
+  getOrganizationIdForUser,
+  getUserRoleInOrganization,
+  userHasOrganizationAccess,
+  validateOrganizationExists,
+} from '@/lib/organization-utils';
 import { requireUser, requireUserForOrganization } from '@/lib/api-auth-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { NextRequest, NextResponse } from 'next/server';
 
 const mockGetOrgIdForUser = vi.mocked(getOrganizationIdForUser);
 const mockValidateOrgExists = vi.mocked(validateOrganizationExists);
+const mockUserHasAccess = vi.mocked(userHasOrganizationAccess);
+const mockGetUserRole = vi.mocked(getUserRoleInOrganization);
+
+const ORG_A = '11111111-1111-4111-8111-111111111111';
+const ORG_B = '22222222-2222-4222-8222-222222222222';
 const mockRequireUser = vi.mocked(requireUser);
 const mockRequireUserForOrg = vi.mocked(requireUserForOrganization);
 const mockWithRLS = vi.mocked(withRLSContext);
@@ -113,6 +126,7 @@ describe('getOrganizationIdFromRequest', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCookieGet.mockReturnValue(undefined);
+    mockUserHasAccess.mockResolvedValue(true);
   });
 
   function fakeRequest(headers: Record<string, string> = {}) {
@@ -174,6 +188,102 @@ describe('getOrganizationIdFromRequest', () => {
 
     const id = await getOrganizationIdFromRequest(req, 'user_1');
     expect(id).toBe('good-org');
+    expect(mockUserHasAccess).toHaveBeenCalledWith('user_1', 'good-org');
+  });
+
+  it('ignores a forged header naming an existing organization the user does not belong to', async () => {
+    mockValidateOrgExists.mockResolvedValue(true);
+    mockUserHasAccess.mockImplementation(async (_userId: string, orgId: string) => orgId === ORG_A);
+    mockGetOrgIdForUser.mockResolvedValue(ORG_A);
+    const req = fakeRequest({ 'X-Org-ID': ORG_B });
+
+    const id = await getOrganizationIdFromRequest(req, 'user-steward-a');
+    expect(id).toBe(ORG_A);
+    expect(mockGetOrgIdForUser).toHaveBeenCalledWith('user-steward-a');
+  });
+
+  it('ignores a forged organization cookie and keeps an authorized header', async () => {
+    mockValidateOrgExists.mockResolvedValue(true);
+    mockUserHasAccess.mockImplementation(async (_userId: string, orgId: string) => orgId === ORG_A);
+    mockCookieGet.mockImplementation((name: string) =>
+      name === 'selected_org_id' ? { value: ORG_B } : undefined,
+    );
+    const req = fakeRequest({ 'X-Org-ID': ORG_A });
+
+    const id = await getOrganizationIdFromRequest(req, 'user-steward-a');
+    expect(id).toBe(ORG_A);
+    expect(mockGetOrgIdForUser).not.toHaveBeenCalled();
+  });
+
+  it('keeps the higher-precedence membership when header and cookie name different authorized organizations', async () => {
+    mockValidateOrgExists.mockResolvedValue(true);
+    mockUserHasAccess.mockResolvedValue(true);
+    mockCookieGet.mockImplementation((name: string) =>
+      name === 'selected_org_id' ? { value: ORG_B } : undefined,
+    );
+    const req = fakeRequest({ 'X-Org-ID': ORG_A });
+
+    const id = await getOrganizationIdFromRequest(req, 'user-steward-a');
+    expect(id).toBe(ORG_A);
+  });
+
+  it('still accepts a legacy tenant header when the user is a member and no newer signal is authorized', async () => {
+    mockValidateOrgExists.mockImplementation(async (orgId: string) => orgId === ORG_A);
+    mockUserHasAccess.mockImplementation(async (_userId: string, orgId: string) => orgId === ORG_A);
+    const req = fakeRequest({ 'X-Org-ID': ORG_B, 'X-Tenant-ID': ORG_A });
+
+    const id = await getOrganizationIdFromRequest(req, 'user-steward-a');
+    expect(id).toBe(ORG_A);
+  });
+
+  it('does not accept a client organization signal when authentication is missing', async () => {
+    mockValidateOrgExists.mockResolvedValue(true);
+    mockGetOrgIdForUser.mockRejectedValue(new Error('No verified organization membership'));
+    const req = fakeRequest({ 'X-Org-ID': ORG_A });
+
+    await expect(getOrganizationIdFromRequest(req, '')).rejects.toThrow(
+      'No verified organization membership',
+    );
+    expect(mockUserHasAccess).not.toHaveBeenCalled();
+  });
+});
+
+describe('validateOrganizationAccess', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('allows a principal who is a member of the requested organization', async () => {
+    mockValidateOrgExists.mockResolvedValue(true);
+    mockUserHasAccess.mockResolvedValue(true);
+    mockGetUserRole.mockResolvedValue('steward');
+
+    await expect(validateOrganizationAccess('user-steward-a', ORG_A)).resolves.toBe(true);
+    expect(mockGetUserRole).toHaveBeenCalledWith('user-steward-a', ORG_A);
+  });
+
+  it('denies another existing organization when the principal is only an admin elsewhere', async () => {
+    mockValidateOrgExists.mockResolvedValue(true);
+    mockUserHasAccess.mockResolvedValue(false);
+    mockGetUserRole.mockResolvedValue('admin');
+
+    await expect(validateOrganizationAccess('user-admin-a', ORG_B)).resolves.toBe(false);
+    expect(mockGetUserRole).not.toHaveBeenCalled();
+  });
+
+  it('denies a nonexistent organization identifier', async () => {
+    mockValidateOrgExists.mockResolvedValue(false);
+
+    await expect(validateOrganizationAccess('user-steward-a', 'missing-org')).resolves.toBe(false);
+    expect(mockUserHasAccess).not.toHaveBeenCalled();
+  });
+
+  it('denies when membership exists but no role can be resolved', async () => {
+    mockValidateOrgExists.mockResolvedValue(true);
+    mockUserHasAccess.mockResolvedValue(true);
+    mockGetUserRole.mockResolvedValue(null);
+
+    await expect(validateOrganizationAccess('user-steward-a', ORG_A)).resolves.toBe(false);
   });
 });
 
