@@ -348,6 +348,8 @@ Addendum (candidate qualification, section 19): candidate schema corrections and
 
 Addendum (final source hardening, section 20): the preflight now detects the permissive-policy blind spot (#948), the Django helper and R1 decide equivalence from the catalog, and the deadline lifecycle keeps one effective due date; 72-check rehearsal v3 at 7090fde8. Staging remains **NO_GO / BLOCKED**.
 
+Addendum (section 21): the verifier's predicate check is now an exact approved-predicate contract with required-table mode (#948 `e962cde63`), the schema work is PR #967, and receipt v4 (76/76 at `db554638a`) extends v3. Staging remains **NO_GO / BLOCKED**.
+
 ## 18. Release-sequence rehearsal (2026-10-19)
 
 **What it is.** [release-sequence-rehearsal/](./evidence/ue-runtime-reality-20261018/release-sequence-rehearsal/) is a committed, reproducible kit (`run-rehearsal.ps1` + helpers) and its output ([results.json](./evidence/ue-runtime-reality-20261018/release-sequence-rehearsal/results.json)): **41 checks, 41 passed**, from one scripted run against the exact PR #948 head (`81662c2f9`, `0015` sha256 `40006a72…`). It is **additional** to, and kept separate from, the original staging observations above: it touches no Azure resource and no staging data and uses no credential.
@@ -505,3 +507,32 @@ R1 (`release-sequence-rehearsal-v3/helpers/r1-readonly-check.js`) previously use
 6. Dependabot PRs #950–#964 are outside this lane and are not touched.
 
 **Source-merge recommendation:** #948 (RLS closure plus the hardened preflight) and #949 (accurate evidence) are source-mergeable on a green required CI at their final heads once the Principal authorizes; the schema-compat work should be merged only as its own PR. **Staging remains `NO_GO / BLOCKED`.**
+
+## 21. Predicate-contract hardening, schema PR and receipt v4 (2026-10-19, after the recovery verification)
+
+Additional to sections 0-20; nothing already recorded is rewritten. **UE_SAAS_OPERATIONAL_READINESS = NO_GO, UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL (deployed state unchanged), staging NO_GO / BLOCKED.** No staging resource was mutated and no credential or secret was read; the only Azure interactions were read-only registry queries and one `az acr login` (then `docker logout`) for the candidate backend image.
+
+### 21.1 The RLS verifier's predicate check is now an exact contract (PR #948, head `e962cde63`)
+
+* **Concern verified.** The structural predicate rules of section 20.1 (reads `app.current_org_id`; no `OR`, null fallback or literal `true`) are heuristics. `organization_id::text = organization_id::text AND current_setting('app.current_org_id', true) <> ''` satisfies every one of them and exposes every tenant whose context is set. Eleven widening shapes were reproduced on a real catalog with a NOBYPASSRLS role and all passed the old verifier (red run).
+* **Fix.** For the three deadline tables each approved policy's USING and WITH CHECK text must equal the approved predicate exactly after normalization (lower case; whitespace, parentheses and quotes removed): organization equality against the session context, or the parent-owned `EXISTS` with organization equality, with `USING`/`WITH CHECK` required to be **absent** where a command cannot carry them. The catalog text is identical on PostgreSQL 15, 16 and 18 (compared on real 15.19 and 16.12 containers and PGlite 18). The old heuristics remain only to **explain** a mismatch; nothing is accepted through them. Migration `0015` statements and policy geometry are unchanged; the check count stays 1711.
+* **What it is not.** It is an exact textual contract, **not** a general semantic-equivalence checker: a semantically equivalent but textually different rewrite fails closed (test included) until the contract is updated in a reviewed PR. Executable negative tenant proofs complement it: the approved state denies cross-tenant read, update, delete and a forged insert and shows nothing without a context; each widening shape is shown to leak (two are marked latent because an UPDATE policy is bounded by SELECT visibility and the executions subquery by the parent's RLS) and to be rejected. The independent live isolation probe remains a release gate.
+* **Absent versus required tables.** The default stays `NOT_PRESENT_IN_SOURCE_NATIVE_SCHEMA` (non-failing) for a source-native bootstrap. `--require-deadline-engine-tables` (or `RLS_VERIFY_REQUIRE_DEADLINE_ENGINE_TABLES=1`) makes an absent table fail all four of its checks with `REQUIRED_TABLE_MISSING`; the deploy workflow's preflight against the deployed database passes the flag. **Consequence to plan for:** a deployed database whose deadline tables are not yet closed now fails that preflight, which is the intended fail-closed behavior and matches the closure-first sequence.
+
+### 21.2 Schema-compat PR (#967)
+
+Branch `fix/ue-phase3a-schema-compat` (head `db554638a`) is one draft PR, **stacked on #948** (base = #948's branch) so its diff is only its own 24 files; its only overlap with #948 is the four generated inventory files. A stacked base does **not** run the required workflows (only 4 trivial checks), which is not a pass; for qualification the PR was retargeted to `main` so the full required CI runs on the exact head, then restored to the stacked base for review. Local qualification: Django 28/28 (10 PostgreSQL-backed), `manage.py check` clean, fresh Django-first `migrate` clean, `makemigrations --check` pending diff identical to `main` (167 operations, 0 differences), 201 Union Eyes vitest files green (one Docker-backed suite flaked once under parallel load and passes 19/19 in isolation).
+
+### 21.3 Evidence receipt v4 (bound to the SHA on which it ran)
+
+| Item | Value |
+|---|---|
+| Source | `db554638a6e3b69378550df7f524df097701689b` = #948 `e962cde63` + #967's branch |
+| Kit and result | [release-sequence-rehearsal-v4/](./evidence/ue-runtime-reality-20261018/release-sequence-rehearsal-v4/), [results-v4.json](./evidence/ue-runtime-reality-20261018/release-sequence-rehearsal-v4/results-v4.json): **76 checks, 76 passed** (the 72 of v3 plus P0-P3 on the real CLI) on loopback PostgreSQL 16, schema-only |
+| Candidate images (build-only workflow run `39299427277`, tag `proof-39299427277-1`, also tagged with the source SHA; verified equal) | frontend `nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:3928c22813e78cbdc5138ae946f5bb8e0fd94f8f39209a4270cb7f2ac45e8835`; backend `nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:f0add32da800cc60c32ebde4218584ac810a08531f203e65b6062af9bba6b5e7` (L1: the exact backend image migrates the staging-shaped database 79 -> 88 with no fakes). **Qualification build from unmerged source, not a deployable artifact** (rebuild from merged `main`); the web image is recorded, not smoke-tested |
+| Superseded receipts | v1, v2 and v3 are unchanged and keep their meaning. v3's preflight claims are **extended, not contradicted**: the preflight is still 1711 checks and v3's E-group claims hold; v4 adds that a widening which passed the old structural rules is now rejected on the real CLI (P1, P2) |
+| Limits | not the restored-clone rehearsal on a deployable digest; PostgreSQL 16 versus staging 15; unknown staging ledger; every Azure step unrehearsed |
+
+### 21.4 Remaining blockers
+
+Principal authorization to merge #948, #949 and then #967 (after its own required CI and retarget to `main`); R1 on the real staging ledger through a trusted read-only identity; COMMAND's credential-containment disposition and the maintainer security disposition; real approvals on `CHG-2026-0112` (still `PROPOSED`/`PENDING`, no approver recorded); the canonical `deadline_reassignment_convergence` migration with secure RLS and grants; deployable images rebuilt from merged `main` and a restored-clone qualification on them; Azure revision isolation and deployment rehearsal; real staging tenant-isolation negative tests; identity, worker, audit and observability acceptance. Source integration is **not** permission to deploy.

@@ -21,6 +21,7 @@ and the worker schema patch were applied to a disposable point-in-time restore c
 | `release-sequence-rehearsal/` | **added 2026-10-19, after the original evidence**: reproducible loopback rehearsal of the 0015 release order, atomic failure, recovery and fresh bootstrap (41 checks, 41 passed) with its orchestrator, helpers and `results.json`; touches no Azure resource, staging data or credential (see its README) |
 | `release-sequence-rehearsal-v2/` | **added 2026-10-19 (candidate qualification), additional to and separate from the v1 kit**: 60-check loopback rehearsal at source `4ad53375a` against the exact candidate backend image digest, plus the read-only R1 catalog/ledger check tool (not run against staging: no trusted identity). Not staging acceptance. |
 | `release-sequence-rehearsal-v3/` | **added 2026-10-19 (final source hardening), additional to and separate from v1 and v2**: 72-check loopback rehearsal at source `f7090fde8` against the exact candidate backend image digest, plus the hardened read-only R1 tool (not run against staging: no trusted identity). v1 and v2 are unchanged. Not staging acceptance. |
+| `release-sequence-rehearsal-v4/` | **added 2026-10-19 (predicate contract, required-table mode), additional to and separate from v1-v3**: 76-check loopback rehearsal at source `db554638a` against the exact candidate backend image digest. v1, v2 and v3 are unchanged. Not staging acceptance. |
 
 ## SHA-256
 
@@ -69,6 +70,15 @@ SHA-256 of each file's committed (LF-normalized) content, i.e. what a fresh chec
 | `release-sequence-rehearsal-v3/README.md` | `83206fc5761c0a5074ae01e2166f50ec7f5ec20155086c0b41ecfc3edf20322d` |
 | `release-sequence-rehearsal-v3/results-v3.json` | `d472f67aab2d08f58caa7cd50cf5973f2fafac8eb5e5e413adc656b6e772b9ee` |
 | `release-sequence-rehearsal-v3/run-rehearsal.ps1` | `88a40592dc2747daf78cd774e0c37ef9a1f6d0edfa684f74599cc7374819d12a` |
+| `release-sequence-rehearsal-v4/helpers/isolation-probe.js` | `c6f436ce9fb54d949480e0f93b159b9e5fa047055b669f403fb615f007dca12c` |
+| `release-sequence-rehearsal-v4/helpers/loopback-schema-patch.js` | `d900c5ec74e33fd9c22f26fb4e6535e92cbd5f07de8485818f4f85797f627931` |
+| `release-sequence-rehearsal-v4/helpers/migration-columns.js` | `fe235621090d1a9f23166154bff916771c78452ea8d5a0c8ba6172f47b780a62` |
+| `release-sequence-rehearsal-v4/helpers/r1-readonly-check.js` | `2cb171317f16562d46705cfe37f7ddb57bee56fd2b349784fab25a02fb9d20fe` |
+| `release-sequence-rehearsal-v4/helpers/rehearse.js` | `66aaca2146d72bfbf4d29ffad8429449cf8522702b0c5e4c4ebc402427e2ac17` |
+| `release-sequence-rehearsal-v4/helpers/worker-harness.ts` | `4c35f66a3c88e54955669cdb911631fb876813a3a6d41a882e5e9c9459cc2398` |
+| `release-sequence-rehearsal-v4/README.md` | `6eb6e8903786316a9aace5b87fce629d1a9c566ad934defef1bb07810aa6d307` |
+| `release-sequence-rehearsal-v4/results-v4.json` | `b7973592158d758029ec1dad2d3b5acd8f0db39274c3de4d061c04451a00ab69` |
+| `release-sequence-rehearsal-v4/run-rehearsal.ps1` | `65e00adee3eb5e83c5c31d054a45abebc349f44c7ff9322ad71535f16aee2201` |
 | `rls-verify-preflight-clone-after.txt` | `89b16563c99793d7c767ed2919c1cb4c6035a5c92c2291908554178a9a529970` |
 | `rls-verify-preflight-staging.txt` | `56147ba401d80d90df68a918ddec7fe1acda5c682cb3d00b54b60890b968b061` |
 | `routes-result.json` | `217d383482a8e9dfbd0e1617e5070786e01684f21dba6caa426ff20e4fee5eb3` |
