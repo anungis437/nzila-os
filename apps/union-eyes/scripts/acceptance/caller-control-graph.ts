@@ -128,6 +128,14 @@ const PATH_BINDINGS: [RegExp, ControlBinding][] = [
         'independent service with its own database and process; outside the Union Eyes Django/RLS boundary',
     },
   ],
+  [
+    /\/db\/queries\/member-employment-queries\.ts$/,
+    {
+      control: 'TENANT_RLS_TRANSACTION',
+      basis:
+        'server-only query helper, not a Server Action. Callers must pass the grant object registered by authorizeEmploymentAccess. Mutations run inside withRLSContext for that organization. Individual compensation is projected from discloseCompensation on that grant.',
+    },
+  ],
 ]
 
 function bindControl(
