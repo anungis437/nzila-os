@@ -50,6 +50,13 @@
       "when": 1758660000000,
       "tag": "0007_claim_updates_runtime_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1758670000000,
+      "tag": "0008_strike_fund_uuid_membership_provenance",
+      "breakpoints": true
     }
   ]
 }

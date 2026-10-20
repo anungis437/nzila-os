@@ -26,6 +26,11 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0001_billing_subscriptions` | Companion CREATE for billing_subscriptions (DAPL siblings remain frozen) |
 | `0002_employer_execution_and_related_a` | Employer-execution cluster + break_policies + member_breaks + satisfaction_surveys |
 | `0003_integration_partners_and_security_posture` | integration_partners + security_posture_checks |
+| `0004_audit_gap_canonical_tables` | Audit-gap canonical tables |
+| `0005_organization_members_deleted_at` | Additive organization_members columns, including deleted_at |
+| `0006_documents_runtime_columns` | Documents runtime columns |
+| `0007_claim_updates_runtime_columns` | Claim-update runtime columns |
+| `0008_strike_fund_uuid_membership_provenance` | Current-lifecycle strike-fund organization provenance for UUID membership |
 
 ## What does not belong here
 

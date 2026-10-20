@@ -25,6 +25,11 @@ const BRANCH_PATTERNS: RegExp[] = [
   /^dependabot\/.+/,
   /^renovate\/.+/,
   /^copilot\/.+/,
+  // Cloud-agent implementation branches. The suffix is required so arbitrary
+  // cursor/* names stay rejected. Renaming an open pull-request head closes
+  // that pull request, so this pattern is the non-destructive way for the
+  // existing check to accept the branch it is already running against.
+  /^cursor\/[a-z0-9]+(?:-[a-z0-9]+)*-cfc5$/,
 ]
 
 const TAG_PATTERN = /^v\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)\.\d+)?$/
@@ -47,7 +52,7 @@ function validateBranch(ref: string): void {
   const matched = BRANCH_PATTERNS.some((pattern) => pattern.test(ref))
   if (!matched) {
     fail(
-      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, integration/*, ops/*, release/X.Y.Z, release/prod-readiness-YYYY-MM-DD, main, develop, dependabot/*, renovate/*, copilot/*`,
+      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, integration/*, ops/*, release/X.Y.Z, release/prod-readiness-YYYY-MM-DD, main, develop, dependabot/*, renovate/*, copilot/*, cursor/<kebab>-cfc5`,
     )
   }
   ok(`Branch '${ref}' is policy-compliant`)

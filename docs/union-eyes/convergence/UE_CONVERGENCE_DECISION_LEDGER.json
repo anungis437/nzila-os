@@ -9,10 +9,13 @@
       "BINDING_AUTHORITY": "Round 58D is the named architecture decision for one Union Eyes PostgreSQL data plane. PR #923 is a later accepted connection guard and does not record a new decision to create a database. UE_V2_FINANCIAL_SCOPE_AUTHORITY.md remains NOT_PROVEN for caller execution.",
       "ACTUAL_RUNTIME_BEHAVIOR": "No financial-service deployment, Dockerfile, compose service, or infrastructure database exists in this repository. The process refuses to start without FINANCIAL_DATABASE_URL and refuses to select the same host, port, and database name as an operational URL. No second database was created or merged.",
       "RISK": "Treating SEPARATE_DATABASE_BOUNDARY or FINANCIAL_DATABASE_SCOPE_COLLAPSE as an instruction to provision a database would invent a data plane. Pointing financial-service at DATABASE_URL would remove the later role and endpoint guard.",
-      "ENGINEERING_RESOLUTION": "Record the contradiction. Do not create, merge, or split a database. Do not edit financial-service schema declarations or connection-scope behavior in this change. Financial tables stay on their existing deferred authority, including held cross-organization billing writes.",
-      "ACCEPTANCE_EVIDENCE": "Source inspection of Round 58D, connection-scope.ts, connection-scope.test.ts, and the V2 financial-scope report on base SHA 12dd086ae. No live database catalog was available.",
-      "REMAINING_AUTHORIZATION": "A later change that allows the same database name with a distinct non-owner role, or that provisions a separate database, needs its own security review. This mission does not authorize that change.",
-      "CLASSIFICATION": "APPROVED_BUT_NOT_YET_INTEGRATED_DESIGN"
+      "ENGINEERING_RESOLUTION": "Document and contain the contradiction. Do not describe the implementations as reconciled. Do not create, merge, or split a database. Do not edit financial-service schema declarations or connection-scope behavior in this change. Financial tables stay on their existing deferred authority, including held cross-organization billing writes.",
+      "ACCEPTANCE_EVIDENCE": "Source inspection of Round 58D, connection-scope.ts, connection-scope.test.ts, and the V2 financial-scope report. No financial database was created. connection-scope.ts is unchanged.",
+      "REMAINING_AUTHORIZATION": "Proposed resolution, not applied: keep the single Round 58D PostgreSQL database and authorize a distinct non-owner financial role. Changing connection-scope.ts to accept that shape, or provisioning a second database, is a reserved security mutation and is not part of this PR.",
+      "FINANCIAL_ARCHITECTURE_DECISION": "SAME_CANONICAL_DATABASE",
+      "FINANCIAL_RUNTIME_CONFIGURATION_COMPATIBILITY": "INCOMPATIBLE",
+      "FINANCIAL_SERVICE_DEPLOYMENT_STATUS": "UNDEPLOYED",
+      "CLASSIFICATION": "CONTAINED_NOT_RECONCILED"
     },
     {
       "CONFLICT_ID": "BOOTSTRAP_ACCEPTANCE_VS_LEGACY_CLEAN_ROOM",
@@ -33,9 +36,9 @@
       "BINDING_AUTHORITY": "Django is the canonical DDL owner. The accepted V2 plan already materializes the UUID foreign key. Drizzle is a projection and must follow that contract. The financial-service copy is a stale declaration, not a second DDL owner.",
       "ACTUAL_RUNTIME_BEHAVIOR": "Before this change, Drizzle parameterized membership organization_id as text against a UUID column. The switch route issued a second predicate against the slug when the UUID membership row was absent.",
       "RISK": "A blanket type conversion, or rewriting the historical strike-fund migration, could change backfill semantics or drop the foreign key.",
-      "ENGINEERING_RESOLUTION": "Change only the canonical Drizzle projection to uuid with the existing organizations.id foreign key. Remove the slug comparison from the legacy organization switch route so a missing UUID membership returns 403 instead of comparing a slug to a UUID column. Leave 20260909 and the financial-service declaration unchanged.",
-      "ACCEPTANCE_EVIDENCE": "apps/union-eyes/db/__tests__/organization-members-insert-defaults.test.ts asserts getSQLType() === uuid. Broader bootstrap execution is NOT_EXECUTED.",
-      "REMAINING_AUTHORIZATION": "Replaying 20260909 on a UUID membership column remains a known historical incompatibility. Do not rewrite that frozen migration without a separate data-preservation review.",
+      "ENGINEERING_RESOLUTION": "The canonical Drizzle projection is uuid with a foreign key to organizations.id. The legacy switch route checks membership by that UUID. Frozen 20260909 stays byte-for-byte and remains the historical slug-era statement. The current producer is migrations-platform/0008_strike_fund_uuid_membership_provenance.sql, which joins organizations.id and fails closed on text membership, a missing table, or zero or multiple owners at payment_date. The QA baseline no longer creates or coerces the column to text.",
+      "ACCEPTANCE_EVIDENCE": "Historical and current PGlite suites are separate. PostgreSQL 16.15 execution of 0008 is recorded in the checkpoint ledger when that command has been run. Bootstrap V2 and the legacy clean-room remain NOT_EXECUTED in environments without Docker.",
+      "REMAINING_AUTHORIZATION": "Do not rewrite frozen 20260909. Do not treat the historical text fixture as current compatibility.",
       "CLASSIFICATION": "EXISTING_DESIGN_DEFECT"
     }
   ]

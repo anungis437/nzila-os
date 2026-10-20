@@ -259,7 +259,7 @@ export async function exportLedgerToCSV(
         rwl.memo AS description
       FROM ${rewardWalletLedger} rwl
       LEFT JOIN ${organizationMembers} om
-        ON om.user_id = rwl.user_id AND om.organization_id = rwl.org_id::text
+        ON om.user_id = rwl.user_id AND om.organization_id = rwl.org_id
       LEFT JOIN ${users} u ON u.user_id = rwl.user_id
       WHERE ${sql.join(conditions, sql` AND `)}
       ORDER BY rwl.created_at DESC

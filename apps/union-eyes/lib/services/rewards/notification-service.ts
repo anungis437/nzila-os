@@ -221,7 +221,7 @@ export async function getExpiringCreditsUsers(daysBeforeExpiration: number, batc
     .leftJoin(users, eq(users.userId, rewardWalletLedger.userId))
     .leftJoin(organizationMembers, and(
       eq(organizationMembers.userId, rewardWalletLedger.userId),
-      eq(organizationMembers.organizationId, sql`${rewardWalletLedger.orgId}::text`)
+      eq(organizationMembers.organizationId, rewardWalletLedger.orgId)
     ))
     .leftJoin(organizations, eq(organizations.id, rewardWalletLedger.orgId))
     .where(

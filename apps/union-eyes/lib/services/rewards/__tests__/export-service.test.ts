@@ -135,7 +135,8 @@ describe('export-service', () => {
       const template = query[0].join('');
       expect(template).toContain('rwl.amount_credits AS amount');
       expect(template).toContain('rwl.memo AS description');
-      expect(template).toContain('om.organization_id = rwl.org_id::text');
+      expect(template).toContain('om.organization_id = rwl.org_id');
+      expect(template).not.toContain('rwl.org_id::text');
       expect(template).toContain('u.user_id = rwl.user_id');
       expect(template).not.toMatch(/rwl\.amount,|rwl\.description|auth_user/);
       expect(query).toContain('user_management.users');

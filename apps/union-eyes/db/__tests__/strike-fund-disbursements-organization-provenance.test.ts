@@ -176,6 +176,41 @@ describe('strike_fund_disbursements organization_id backfill — historical prov
     if (!result.ok) expect(result.error).toMatch(/zero or ambiguous/i)
   })
 
+  it('rejects the frozen slug join when organization_members.organization_id is uuid', async () => {
+    const db = new PGlite()
+    await db.exec(`
+      create table organizations (
+        id uuid primary key,
+        slug text not null unique
+      );
+      create table organization_members (
+        id uuid primary key,
+        user_id text not null,
+        organization_id uuid not null,
+        joined_at timestamptz not null default now(),
+        deleted_at timestamptz
+      );
+      create table strike_fund_disbursements (
+        id uuid primary key,
+        user_id varchar(255) not null,
+        payment_date timestamp not null
+      );
+    `)
+    await db.query(`insert into organizations (id, slug) values ($1, $2)`, [ORG_A, 'org-a'])
+    await db.query(
+      `insert into organization_members (id, user_id, organization_id, joined_at) values ($1, $2, $3, $4)`,
+      [MEMBER_1, USER, ORG_A, '2025-01-01'],
+    )
+    await db.query(
+      `insert into strike_fund_disbursements (id, user_id, payment_date) values ($1, $2, $3)`,
+      [DISB, USER, '2025-06-01'],
+    )
+
+    const result = await runMigration(db)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error).toMatch(/operator does not exist|uuid|text/i)
+  })
+
   it('a later, still-current membership does not retroactively override an earlier valid one', async () => {
     const db = await createFixtureDb()
     await seedOrg(db, ORG_A, 'org-a')
