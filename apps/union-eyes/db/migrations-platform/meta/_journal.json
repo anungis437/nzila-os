@@ -54,6 +54,13 @@
     {
       "idx": 7,
       "version": "7",
+      "when": 1758665000000,
+      "tag": "0008_strike_fund_disbursements_canonical",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
       "when": 1758670000000,
       "tag": "0008_strike_fund_uuid_membership_provenance",
       "breakpoints": true

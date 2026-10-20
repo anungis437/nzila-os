@@ -16,7 +16,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 - Journal: `meta/_journal.json`
 - Ledger: `drizzle.__drizzle_migrations` (shared hash ledger with scoped; content hashes differ)
 - Executor: `tooling/scripts/lib/union-eyes-platform-migrations.mjs`
-- Wired into `tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs` **after** scoped migrations
+- Wired into `tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs` after scoped migrations through `0013` and before scoped `0014`
 - Oracle lineage: `UNION_EYES_PLATFORM_SQL` historicalOrder **35**
 
 ## Files
@@ -30,6 +30,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0005_organization_members_deleted_at` | Additive organization_members columns, including deleted_at |
 | `0006_documents_runtime_columns` | Documents runtime columns |
 | `0007_claim_updates_runtime_columns` | Claim-update runtime columns |
+| `0008_strike_fund_disbursements_canonical` | Canonical CREATE for `strike_fund_disbursements` when the table is absent |
 | `0008_strike_fund_uuid_membership_provenance` | Current-lifecycle strike-fund organization provenance for UUID membership |
 
 ## What does not belong here

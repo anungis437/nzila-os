@@ -424,8 +424,8 @@ describe('notification-service', () => {
       expect(eq).toHaveBeenCalledWith('ledgerEventType', 'earn');
       expect(eq).toHaveBeenCalledWith('userId', 'ledgerUserId');
       expect(eq).toHaveBeenCalledWith('id', 'ledgerOrgId');
+      expect(eq).toHaveBeenCalledWith('organizationId', 'ledgerOrgId');
       expect(sql).toHaveBeenCalledWith(expect.any(Array), 'amountCredits');
-      expect(sql).toHaveBeenCalledWith(expect.any(Array), 'ledgerOrgId');
     });
 
     it('does not report a schema failure as an empty scan or successful batch', async () => {

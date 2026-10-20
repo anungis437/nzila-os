@@ -207,6 +207,31 @@ describe('strike_fund_disbursements current UUID provenance', () => {
     expect(await getOrgId(db, DISB)).toBe(ORG_A)
   })
 
+  it('accepts a second execution after a successful attribution', async () => {
+    const db = await createCurrentDb()
+    await seedOrg(db, ORG_A, 'org-a')
+    await seedMembership(db, { id: MEMBER_1, userId: USER, organizationId: ORG_A, joinedAt: '2025-01-01' })
+    await seedDisbursement(db, { id: DISB, userId: USER, paymentDate: '2025-06-01' })
+    expect((await runMigration(db)).ok).toBe(true)
+    expect((await runMigration(db)).ok).toBe(true)
+    expect(await getOrgId(db, DISB)).toBe(ORG_A)
+  })
+
+  it('rejects an organization_id that is not an organizations.id', async () => {
+    const db = await createCurrentDb()
+    await seedOrg(db, ORG_A, 'org-a')
+    const result = await runMigration(db)
+    expect(result.ok).toBe(true)
+    const inserted = await db.exec(
+      `insert into strike_fund_disbursements (id, user_id, payment_date, organization_id) values ('${DISB}', '${USER}', '2025-06-01', '${ORG_B}')`,
+    ).then(
+      () => ({ ok: true as const }),
+      (err: unknown) => ({ ok: false as const, error: err instanceof Error ? err.message : String(err) }),
+    )
+    expect(inserted.ok).toBe(false)
+    if (!inserted.ok) expect(inserted.error).toMatch(/foreign key|violates/i)
+  })
+
   it('accepts an empty disbursement table and sets organization_id not null', async () => {
     const db = await createCurrentDb()
     await seedOrg(db, ORG_A, 'org-a')
@@ -218,6 +243,60 @@ describe('strike_fund_disbursements current UUID provenance', () => {
        where table_name = 'strike_fund_disbursements' and column_name = 'organization_id'`,
     )
     expect(column.rows[0]?.is_nullable).toBe('NO')
+  })
+
+  it('constrains organization_id when the table is empty and has no payment_date', async () => {
+    const db = new PGlite()
+    await db.exec(`
+      create table organizations (id uuid primary key, slug text not null unique);
+      create table organization_members (
+        id uuid primary key,
+        user_id text not null,
+        organization_id uuid not null references organizations(id),
+        joined_at timestamptz not null,
+        deleted_at timestamptz
+      );
+      create table strike_fund_disbursements (
+        id uuid primary key,
+        user_id varchar(255) not null
+      );
+    `)
+    await seedOrg(db, ORG_A, 'org-a')
+    const result = await runMigration(db)
+    expect(result.ok).toBe(true)
+    const column = await db.query<{ is_nullable: string }>(
+      `select is_nullable from information_schema.columns
+       where table_name = 'strike_fund_disbursements' and column_name = 'organization_id'`,
+    )
+    expect(column.rows[0]?.is_nullable).toBe('NO')
+  })
+
+  it('fails closed when payment_date is absent and a disbursement row exists', async () => {
+    const db = new PGlite()
+    await db.exec(`
+      create table organizations (id uuid primary key, slug text not null unique);
+      create table organization_members (
+        id uuid primary key,
+        user_id text not null,
+        organization_id uuid not null references organizations(id),
+        joined_at timestamptz not null,
+        deleted_at timestamptz
+      );
+      create table strike_fund_disbursements (
+        id uuid primary key,
+        user_id varchar(255) not null
+      );
+    `)
+    await seedOrg(db, ORG_A, 'org-a')
+    await db.query(`insert into strike_fund_disbursements (id, user_id) values ($1, $2)`, [DISB, USER])
+    const result = await runMigration(db)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error).toMatch(/payment_date/i)
+    const remaining = await db.query<{ id: string; user_id: string }>(
+      `select id, user_id from strike_fund_disbursements where id = $1`,
+      [DISB],
+    )
+    expect(remaining.rows).toEqual([{ id: DISB, user_id: USER }])
   })
 
   it('fails closed when the disbursement table does not exist', async () => {

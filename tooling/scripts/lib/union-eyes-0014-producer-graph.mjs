@@ -7,6 +7,7 @@
  */
 import fs from 'node:fs'
 import path from 'node:path'
+import { platformMigrationPrecedesScopedClosure } from './union-eyes-bootstrap-stages.mjs'
 
 const INACTIVE = new Set(['LATENT_UNREACHABLE', 'SEPARATE_DATABASE_BOUNDARY', 'CONTAINED_NO_AUTHORITY'])
 
@@ -98,11 +99,21 @@ function firstCreate(entries, table) {
   return entries.find((entry) => createsTable(entry.sql, table))?.tag ?? null
 }
 
+export function read0014RelationNames(repoRoot) {
+  const closureSql = read(
+    path.join(repoRoot, 'apps', 'union-eyes', 'db', 'migrations-cache', '0014_lineage_restoration_rls_closure.sql'),
+  )
+  return {
+    targets: extractArray(closureSql, 'target_tables'),
+    parents: extractArray(closureSql, 'parent_tables'),
+    closureSql,
+  }
+}
+
 export function buildProducerGraph(repoRoot) {
   const app = path.join(repoRoot, 'apps', 'union-eyes')
-  const closureSql = read(path.join(app, 'db', 'migrations-cache', '0014_lineage_restoration_rls_closure.sql'))
-  const targets = extractArray(closureSql, 'target_tables')
-  const parents = extractArray(closureSql, 'parent_tables')
+  const { targets, parents, closureSql } = read0014RelationNames(repoRoot)
+  const platformBeforeClosure = platformMigrationPrecedesScopedClosure()
   const names = [...new Set([...targets, ...parents])]
   const classifications = loadClassifications(path.join(app, 'db', 'rls-storage-authority'))
   const django = djangoTables(path.join(app, 'backend'))
@@ -167,7 +178,7 @@ export function buildProducerGraph(repoRoot) {
     else if (drizzleFile) canonicalOwner = 'DRIZZLE_PROJECTION'
     else if (historical) canonicalOwner = 'HISTORICAL_SQL'
     const v2WouldMaterialize = djangoOwned || drizzleReachable
-    const productionBefore0014 = Boolean(scopedBeforeTag)
+    const productionBefore0014 = Boolean(scopedBeforeTag) || (platformBeforeClosure && Boolean(platformTag))
     const cleanroomDeclaredBefore0014 = djangoOwned || Boolean(historical) || Boolean(platformTag) || Boolean(scopedBeforeTag)
     return {
       table,
@@ -190,7 +201,7 @@ export function buildProducerGraph(repoRoot) {
       migrationJournal: {
         scopedBefore0014: scopedBeforeTag,
         platform: platformTag,
-        platformRunsBefore0014OnProductionBootstrap: false,
+        platformRunsBefore0014OnProductionBootstrap: platformBeforeClosure && Boolean(platformTag),
         platformRunsBefore0014OnLegacyCleanroom: Boolean(platformTag),
       },
       dependencies: rls.get(table)?.parent ? [rls.get(table).parent] : [],

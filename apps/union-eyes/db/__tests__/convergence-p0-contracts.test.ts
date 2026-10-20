@@ -15,7 +15,7 @@ function policy(ref: string) {
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === '__tests__') continue
+    if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === '__tests__' || entry.name === '.next' || entry.name === 'dist') continue
     const target = path.join(dir, entry.name)
     if (entry.isDirectory()) walk(target, out)
     else if (/\.(ts|tsx|sql|mjs|py)$/.test(entry.name)) out.push(target)
@@ -71,6 +71,57 @@ describe('convergence P0 contracts', () => {
     expect(graph.coverage.bootstrapV2Source).toBe('SOURCE_DECLARATIONS_REACHABLE')
     expect(graph.coverage.productionDrizzleBootstrap0014).toBe('BLOCKED')
     expect(graph.coverage.runtimeExecution).toBe('NOT_EXECUTED')
+    const rows = (graph as { rows: Array<Record<string, unknown>> }).rows
+    const billing = rows.find((row) => row.table === 'billing_subscriptions') as {
+      declaredOrder: { productionDrizzleBootstrap: string }
+      migrationJournal: { platformRunsBefore0014OnProductionBootstrap: boolean }
+    }
+    expect(billing.declaredOrder.productionDrizzleBootstrap).toBe('BEFORE_0014')
+    expect(billing.migrationJournal.platformRunsBefore0014OnProductionBootstrap).toBe(true)
+    const stillBlocked = rows.filter(
+      (row) =>
+        row.status === 'active' &&
+        row.isTarget === true &&
+        (row.declaredOrder as { productionDrizzleBootstrap: string }).productionDrizzleBootstrap !== 'BEFORE_0014',
+    )
+    expect(stillBlocked.length).toBeGreaterThan(0)
+    expect(
+      stillBlocked.every(
+        (row) => (row.migrationJournal as { platform: string | null }).platform === null,
+      ),
+    ).toBe(true)
+  })
+
+  it('uses the same production stage list the runner executes', async () => {
+    const { pathToFileURL } = await import('node:url')
+    const stages = (await import(
+      pathToFileURL(path.join(REPO_ROOT, 'tooling/scripts/lib/union-eyes-bootstrap-stages.mjs')).href
+    )) as {
+      PRODUCTION_BOOTSTRAP_ORDER: Array<{ id: string }>
+      platformMigrationPrecedesScopedClosure: () => boolean
+    }
+    expect(stages.PRODUCTION_BOOTSTRAP_ORDER.map((stage) => stage.id)).toEqual([
+      'extensions',
+      'snapshot_or_qa_baseline',
+      'scoped_foundation',
+      'platform_sql',
+      'runtime_role_regrant',
+      'scoped_rls_closure',
+    ])
+    expect(stages.platformMigrationPrecedesScopedClosure()).toBe(true)
+    const runner = fs.readFileSync(
+      path.join(REPO_ROOT, 'tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'),
+      'utf8',
+    )
+    expect(runner).toContain('PRODUCTION_BOOTSTRAP_ORDER')
+    expect(runner).toContain('throughTag: SCOPED_FOUNDATION_THROUGH_TAG')
+    expect(runner).toContain('afterTag: SCOPED_FOUNDATION_THROUGH_TAG')
+    const foundation = runner.indexOf('throughTag: SCOPED_FOUNDATION_THROUGH_TAG')
+    const platform = runner.indexOf('Applying post-freeze PLATFORM_SQL')
+    const closure = runner.indexOf('afterTag: SCOPED_FOUNDATION_THROUGH_TAG')
+    expect(foundation).toBeGreaterThan(-1)
+    expect(foundation).toBeLessThan(platform)
+    expect(platform).toBeLessThan(closure)
   })
 
   it('records the financial contradiction as contained rather than reconciled', () => {

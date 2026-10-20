@@ -9,19 +9,20 @@
  * and docs/architecture/orm-governance/fresh-database-bootstrap-reference-implementation.md,
  * this script is the ONLY supported way to prepare a fresh Union Eyes DB.
  *
- * It performs, in order:
+ * It performs, in order (tooling/scripts/lib/union-eyes-bootstrap-stages.mjs):
  *
  *   1. Connectivity check.
  *   2. Refusal-to-replay assertion against the frozen historical Drizzle
  *      lineage at apps/union-eyes/db/migrations/ (sentinel: .lineage-frozen).
  *   3. Required PostgreSQL extension installation.
- *   4. Optional canonical snapshot restore (Django-owned operational
- *      schema). Controlled by UE_DB_RESTORE_SNAPSHOT_URL.
- *   5. Scoped Drizzle migration application from
- *      apps/union-eyes/db/migrations-cache/ (cache/runtime support only).
- *   6. Post-freeze PLATFORM_SQL SCHEMA_CREATION from
- *      apps/union-eyes/db/migrations-platform/ (forward-only business CREATE).
- *   7. Bootstrap attestation written to drizzle.bootstrap_attestations.
+ *   4. Optional canonical snapshot restore, or the QA baseline when the
+ *      canonical tables are absent in QA/CI.
+ *   5. Scoped migrations through 0013 (roles, grants, RLS helpers).
+ *   6. Post-freeze PLATFORM_SQL from db/migrations-platform/.
+ *   7. Re-grant of the 0009 table privileges so tables created in step 6
+ *      receive the same DML grants. 0009 itself is not rewritten.
+ *   8. Scoped migrations after 0013, including the 0014 preflight.
+ *   9. Bootstrap attestation written to drizzle.bootstrap_attestations.
  *
  * It does NOT:
  *   - replay legacy migrations under db/migrations/
@@ -39,10 +40,17 @@ import {
   applyScopedMigrations as applyScopedMigrationsShared,
   baselineScopedMigrations as baselineScopedMigrationsShared,
   ensureExtensions as ensureExtensionsShared,
+  readJournalEntries,
 } from './lib/union-eyes-scoped-migrations.mjs';
 import {
   applyPlatformMigrations as applyPlatformMigrationsShared,
 } from './lib/union-eyes-platform-migrations.mjs';
+import {
+  PRODUCTION_BOOTSTRAP_ORDER,
+  SCOPED_FOUNDATION_THROUGH_TAG,
+  tagsThrough,
+} from './lib/union-eyes-bootstrap-stages.mjs';
+import { read0014RelationNames } from './lib/union-eyes-0014-producer-graph.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -152,12 +160,13 @@ async function maybeRestoreSnapshot() {
   };
 }
 
-async function applyScopedMigrations(client) {
+async function applyScopedMigrations(client, boundary) {
   try {
     return await applyScopedMigrationsShared(client, {
       journalPath: SCOPED_JOURNAL,
       migrationsDir: SCOPED_MIGRATIONS_DIR,
       log: info,
+      ...boundary,
     });
   } catch (err) {
     fail(err.message);
@@ -210,21 +219,71 @@ async function applySqlFile(client, sqlFilePath, label) {
 
 
 async function baselineMigrationsAfterSnapshot(client) {
-  // Scoped migrations often CREATE objects already present in the canonical
-  // snapshot; stamp their hashes so applyScopedMigrations is a no-op.
+  // Foundation scoped migrations often CREATE objects already present in the
+  // canonical snapshot. Stamp only those hashes. 0014 and 0015 are security
+  // closures: their hashes stay unstamped so they execute after platform DDL.
   //
   // Do NOT baseline PLATFORM_SQL here. Platform migrations are additive and
   // idempotent (CREATE IF NOT EXISTS / ADD COLUMN IF NOT EXISTS) and exist
   // specifically to close runtime gaps on reconstituted snapshots (e.g. 0005
   // organization_members.deleted_at / tenant_id). Baselining them skips DDL
   // and leaves getUserRole / seed broken (everyone falls back to member).
-  info('Snapshot restored — baselining scoped migration ledger only (platform DDL will apply next).');
+  const throughTags = tagsThrough(readJournalEntries(SCOPED_JOURNAL), SCOPED_FOUNDATION_THROUGH_TAG);
+  info(
+    `Snapshot restored — baselining scoped foundation hashes through ${SCOPED_FOUNDATION_THROUGH_TAG}. ` +
+      '0014 and later stay unstamped.',
+  );
   const scoped = await baselineScopedMigrationsShared(client, {
     journalPath: SCOPED_JOURNAL,
     migrationsDir: SCOPED_MIGRATIONS_DIR,
+    throughTags,
     log: info,
   });
   return { scoped, platform: { stamped: 0, stampedTags: [] } };
+}
+
+async function regrantRuntimeTablePrivileges(client) {
+  const roles = await client.query(
+    `SELECT rolname FROM pg_roles WHERE rolname IN ('union_eyes_runtime', 'union_eyes_system')`,
+  );
+  const present = new Set(roles.rows.map((row) => row.rolname));
+  if (!present.has('union_eyes_runtime') || !present.has('union_eyes_system')) {
+    info('Runtime roles are absent; skipping the post-platform table re-grant.');
+    return { applied: false };
+  }
+  info('Re-granting 0009 table and sequence privileges after platform DDL. The 0009 file is unchanged.');
+  await client.query('BEGIN');
+  try {
+    await client.query('GRANT USAGE ON SCHEMA public TO union_eyes_runtime, union_eyes_system');
+    await client.query(
+      'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO union_eyes_runtime, union_eyes_system',
+    );
+    await client.query(
+      'GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO union_eyes_runtime, union_eyes_system',
+    );
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    fail(`Post-platform runtime re-grant failed: ${err.message}`);
+  }
+  return { applied: true };
+}
+
+async function report0014PhysicalPresence(client) {
+  const { targets, parents } = read0014RelationNames(repoRoot);
+  const missing = [];
+  for (const table of [...new Set([...targets, ...parents])]) {
+    const result = await client.query(`SELECT to_regclass(format('public.%I', $1::text)) AS regclass`, [table]);
+    if (!result.rows[0]?.regclass) missing.push(table);
+  }
+  if (missing.length === 0) {
+    info(`0014 physical preflight: all ${targets.length} targets and ${parents.length} parents exist.`);
+    return { missing };
+  }
+  info(
+    `0014 physical preflight: ${missing.length} relation(s) absent before the security migration: ${missing.join(',')}`,
+  );
+  return { missing };
 }
 
 async function applyCiBaselineIfNeeded(client, scopedEntriesCount) {
@@ -321,6 +380,9 @@ async function main() {
   await client.connect();
 
   try {
+    const stageIds = PRODUCTION_BOOTSTRAP_ORDER.map((stage) => stage.id);
+    info(`Production bootstrap order: ${stageIds.join(' -> ')}`);
+
     info('Ensuring required extensions...');
     await ensureExtensions(client);
 
@@ -330,22 +392,32 @@ async function main() {
       await baselineMigrationsAfterSnapshot(client);
     }
 
-    const scopedJournal = JSON.parse(fs.readFileSync(SCOPED_JOURNAL, 'utf8'));
-    const scopedEntries = scopedJournal.entries ?? [];
+    const scopedEntries = readJournalEntries(SCOPED_JOURNAL);
     const baselineSummary = await applyCiBaselineIfNeeded(client, scopedEntries.length);
 
-    info('Applying scoped Drizzle migrations from db/migrations-cache/ ...');
-    const migrateSummary = await applyScopedMigrations(client);
+    info(`Applying scoped foundation migrations through ${SCOPED_FOUNDATION_THROUGH_TAG} ...`);
+    const foundationSummary = await applyScopedMigrations(client, { throughTag: SCOPED_FOUNDATION_THROUGH_TAG });
 
     info('Applying post-freeze PLATFORM_SQL migrations from db/migrations-platform/ ...');
     const platformSummary = await applyPlatformMigrations(client);
+
+    const regrantSummary = await regrantRuntimeTablePrivileges(client);
+    const physicalSummary = await report0014PhysicalPresence(client);
+
+    info(`Applying scoped RLS closures after ${SCOPED_FOUNDATION_THROUGH_TAG} ...`);
+    const closureSummary = await applyScopedMigrations(client, { afterTag: SCOPED_FOUNDATION_THROUGH_TAG });
 
     await writeBootstrapAttestation(client, {
       snapshotDigest: restoreSummary.snapshotDigest,
       restored: restoreSummary.restored,
       qaBaselineApplied: baselineSummary.applied,
-      scopedMigrationsApplied: migrateSummary.applied,
+      productionBootstrapOrder: stageIds,
+      scopedFoundationApplied: foundationSummary.applied,
+      scopedClosureApplied: closureSummary.applied,
+      scopedMigrationsApplied: foundationSummary.applied + closureSummary.applied,
       platformMigrationsApplied: platformSummary.applied,
+      runtimeRoleRegrantApplied: regrantSummary.applied,
+      relationsAbsentBefore0014: physicalSummary.missing,
       timestamp: new Date().toISOString(),
     });
 

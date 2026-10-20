@@ -75,8 +75,21 @@ export async function getScopedMigrationStatus(client, { journalPath, migrations
  * unrecorded prior migration). This is what makes a targeted apply (e.g.
  * "just apply 0005 to an existing environment") safe: it cannot replay
  * or silently bypass 0000-0004 depending on the ledger's actual state.
+ *
+ * `throughTag` applies the journal from the start and stops at that tag,
+ * inclusive. Later tags stay unapplied. `afterTag` refuses unless every
+ * tag through that boundary is already recorded, then applies the rest.
+ * Already-recorded hashes are skipped and are not executed again.
+ * `onlyTags` cannot be combined with either boundary.
  */
-export async function applyScopedMigrations(client, { journalPath, migrationsDir, onlyTags, log = () => {} }) {
+export async function applyScopedMigrations(client, { journalPath, migrationsDir, onlyTags, throughTag, afterTag, log = () => {} }) {
+  if (onlyTags && (throughTag || afterTag)) {
+    throw new Error('onlyTags cannot be combined with throughTag or afterTag.');
+  }
+  if (throughTag && afterTag) {
+    throw new Error('throughTag and afterTag are separate passes.');
+  }
+
   const entries = readJournalEntries(journalPath);
   const appliedHashes = await getAppliedHashes(client);
 
@@ -84,12 +97,30 @@ export async function applyScopedMigrations(client, { journalPath, migrationsDir
     log('Scoped Drizzle root has zero entries — nothing to migrate.');
     return { applied: 0, appliedTags: [] };
   }
+  if (throughTag && !entries.some((entry) => entry.tag === throughTag)) {
+    throw new Error(`throughTag ${throughTag} is not in the scoped migration journal.`);
+  }
+  if (afterTag && !entries.some((entry) => entry.tag === afterTag)) {
+    throw new Error(`afterTag ${afterTag} is not in the scoped migration journal.`);
+  }
 
   const appliedTags = [];
   let count = 0;
+  let passedAfterBoundary = !afterTag;
+  let reachedThroughTag = !throughTag;
   for (const entry of entries) {
     const { sql, hash } = computeMigrationHash(migrationsDir, entry.tag);
     const alreadyApplied = appliedHashes.has(hash);
+
+    if (afterTag && !passedAfterBoundary) {
+      if (!alreadyApplied) {
+        throw new Error(
+          `Refusing scoped apply after ${afterTag}: preceding migration ${entry.tag} is not yet recorded as applied.`,
+        );
+      }
+      if (entry.tag === afterTag) passedAfterBoundary = true;
+      continue;
+    }
 
     if (onlyTags && !onlyTags.includes(entry.tag)) {
       if (!alreadyApplied) {
@@ -104,6 +135,10 @@ export async function applyScopedMigrations(client, { journalPath, migrationsDir
 
     if (alreadyApplied) {
       log(`scoped migration already applied: ${entry.tag}`);
+      if (throughTag && entry.tag === throughTag) {
+        reachedThroughTag = true;
+        break;
+      }
       continue;
     }
 
@@ -121,10 +156,22 @@ export async function applyScopedMigrations(client, { journalPath, migrationsDir
       await client.query('COMMIT');
       count += 1;
       appliedTags.push(entry.tag);
+      appliedHashes.add(hash);
     } catch (err) {
       await client.query('ROLLBACK');
       throw new Error(`Scoped migration ${entry.tag} failed: ${err.message}`);
     }
+
+    if (throughTag && entry.tag === throughTag) {
+      reachedThroughTag = true;
+      break;
+    }
+  }
+  if (!reachedThroughTag) {
+    throw new Error(`Scoped apply stopped before throughTag ${throughTag}.`);
+  }
+  if (!passedAfterBoundary) {
+    throw new Error(`Scoped apply did not reach afterTag ${afterTag}.`);
   }
   return { applied: count, appliedTags };
 }

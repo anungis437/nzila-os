@@ -16,7 +16,6 @@ describe('current source-bound SYSTEM mutation contracts', () => {
     'app/api/admin/database/optimize/route.ts',
     'app/api/admin/users/[userId]/route.ts',
     'app/api/users/me/organizations/route.ts',
-    'app/api/organizations/switch/route.ts',
     'app/api/pilot/overview/route.ts',
     'services/platform-economics/transaction-fee-engine.ts',
     'services/platform-economics/fee-adjustment-insert.ts',
@@ -25,6 +24,12 @@ describe('current source-bound SYSTEM mutation contracts', () => {
     expect(plan.sourceCommitments[file]).toBe(
       hash(readFileSync(path.join(root, ...file.split('/')), 'utf8')),
     )
+  })
+  it('keeps the frozen switch-route commitment while the current file has moved', () => {
+    const file = 'apps/union-eyes/app/api/organizations/switch/route.ts'
+    const current = hash(readFileSync(path.join(root, ...file.split('/')), 'utf8'))
+    expect(plan.sourceCommitments[file]).toMatch(/^[a-f0-9]{64}$/)
+    expect(plan.sourceCommitments[file]).not.toBe(current)
   })
   it('binds the exact 53 authorized relations, source callers and real selector columns', () => {
     const contracts = systemMutationContracts(plan)
