@@ -254,6 +254,10 @@ BEGIN
     EXECUTE 'GRANT USAGE ON SCHEMA user_management TO ue_framework_authority_reader, ue_framework_identity, ue_framework_admin';
     EXECUTE 'GRANT SELECT ON TABLE user_management.users, user_management.user_sessions TO ue_framework_authority_reader';
     EXECUTE 'REVOKE CREATE ON SCHEMA user_management FROM ue_framework_authority_reader';
+    EXECUTE 'DROP POLICY IF EXISTS ue_framework_authority_reader_select ON user_management.users';
+    EXECUTE 'CREATE POLICY ue_framework_authority_reader_select ON user_management.users FOR SELECT TO ue_framework_authority_reader USING (true)';
+    EXECUTE 'DROP POLICY IF EXISTS ue_framework_authority_reader_select ON user_management.user_sessions';
+    EXECUTE 'CREATE POLICY ue_framework_authority_reader_select ON user_management.user_sessions FOR SELECT TO ue_framework_authority_reader USING (true)';
     EXECUTE $fn$
       CREATE OR REPLACE FUNCTION user_management.ue_framework_actor_authorized()
       RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog

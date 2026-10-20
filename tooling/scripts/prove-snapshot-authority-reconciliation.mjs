@@ -15,7 +15,9 @@ import { computeMigrationHash } from './lib/union-eyes-scoped-migrations.mjs'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 const cacheDir = path.join(repoRoot, 'apps/union-eyes/db/migrations-cache')
-const database = 'ue_snapshot_authority'
+const database = process.env.UE_PROOF_DATABASE || 'ue_snapshot_authority'
+const proofPort = process.env.UE_PROOF_PORT || ''
+const evidencePath = process.env.UE_PROOF_EVIDENCE || '/opt/cursor/artifacts/snapshot-authority-evidence.json'
 const evidence = []
 
 function record(name, detail) {
@@ -24,14 +26,16 @@ function record(name, detail) {
 }
 
 function admin(sql) {
-  const result = spawnSync('sudo', ['-u', 'postgres', 'psql', '-v', 'ON_ERROR_STOP=1', '-d', 'postgres', '-c', sql], {
-    encoding: 'utf8',
-  })
+  const args = ['-u', 'postgres', 'psql', '-v', 'ON_ERROR_STOP=1', '-d', 'postgres']
+  if (proofPort) args.push('-p', proofPort)
+  args.push('-c', sql)
+  const result = spawnSync('sudo', args, { encoding: 'utf8' })
   if (result.status !== 0) throw new Error(result.stderr || result.stdout || sql)
 }
 
 function clientFor() {
   const url = new URL(process.env.DATABASE_URL)
+  if (proofPort) url.port = proofPort
   url.pathname = `/${database}`
   return new pg.Client({ connectionString: url.toString() })
 }
@@ -230,24 +234,181 @@ async function main() {
     record('django_authority', djangoGrant.rows[0])
     if (djangoGrant.rows[0].runtime || !djangoGrant.rows[0].admin) throw new Error('framework authority collapsed into runtime')
 
-    const membership = await client.query(`
-      SELECT m.rolname AS member, g.rolname AS granted, a.inherit_option, a.set_option
-      FROM pg_auth_members a
-      JOIN pg_roles m ON m.oid = a.member
-      JOIN pg_roles g ON g.oid = a.roleid
-      WHERE m.rolname IN ('ue_framework_gateway', 'ue_framework_worker_gateway')
-      ORDER BY m.rolname, g.rolname
+    const version = await client.query('SHOW server_version')
+    const hasInheritOption = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM pg_attribute
+        WHERE attrelid = 'pg_auth_members'::regclass AND attname = 'inherit_option' AND NOT attisdropped
+      ) AS present
     `)
-    record('gateway_membership', { rows: membership.rows })
-    if (
-      membership.rows.length !== 3 ||
-      membership.rows.some((row) => row.inherit_option !== false || row.set_option !== true)
-    ) {
+    const membershipSql = hasInheritOption.rows[0].present
+      ? `SELECT m.rolname AS member, g.rolname AS granted, a.admin_option, a.inherit_option, a.set_option
+         FROM pg_auth_members a
+         JOIN pg_roles m ON m.oid = a.member
+         JOIN pg_roles g ON g.oid = a.roleid
+         WHERE m.rolname IN ('ue_framework_gateway', 'ue_framework_worker_gateway')
+         ORDER BY m.rolname, g.rolname`
+      : `SELECT m.rolname AS member, g.rolname AS granted, a.admin_option
+         FROM pg_auth_members a
+         JOIN pg_roles m ON m.oid = a.member
+         JOIN pg_roles g ON g.oid = a.roleid
+         WHERE m.rolname IN ('ue_framework_gateway', 'ue_framework_worker_gateway')
+         ORDER BY m.rolname, g.rolname`
+    const membership = await client.query(membershipSql)
+    record('gateway_membership', { serverVersion: version.rows[0].server_version, rows: membership.rows })
+    if (membership.rows.length !== 3 || membership.rows.some((row) => row.admin_option !== false)) {
+      throw new Error('framework gateway has role-administration capability')
+    }
+    if (hasInheritOption.rows[0].present && membership.rows.some((row) => row.inherit_option !== false || row.set_option !== true)) {
       throw new Error('framework gateway membership is inheriting or cannot SET ROLE')
     }
 
-    fs.writeFileSync('/opt/cursor/artifacts/snapshot-authority-evidence.json', JSON.stringify(evidence, null, 2))
-    record('evidence_written', { path: '/opt/cursor/artifacts/snapshot-authority-evidence.json' })
+    const attributes = await client.query(`
+      SELECT rolname, rolcanlogin, rolinherit, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole
+      FROM pg_roles
+      WHERE rolname IN (
+        'ue_framework_gateway','ue_framework_identity','ue_framework_admin',
+        'ue_framework_worker_gateway','ue_framework_worker','ue_framework_authority_reader'
+      )
+      ORDER BY rolname
+    `)
+    record('framework_attributes', { rows: attributes.rows })
+    if (attributes.rows.length !== 6 || attributes.rows.some((row) =>
+      row.rolcanlogin || row.rolinherit || row.rolsuper || row.rolbypassrls || row.rolcreatedb || row.rolcreaterole
+    )) {
+      throw new Error('framework role attributes are not NOLOGIN NOINHERIT')
+    }
+
+    await client.query(`
+      DO $probe$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ue_framework_probe_login') THEN
+          CREATE ROLE ue_framework_probe_login NOLOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
+        END IF;
+      END $probe$;
+      GRANT ue_framework_gateway TO ue_framework_probe_login
+    `)
+    const authUserOid = await client.query(`SELECT 'public.auth_user'::regclass::oid AS oid`)
+    await client.query('SET SESSION AUTHORIZATION ue_framework_probe_login')
+    const inherited = await client.query(
+      `SELECT has_table_privilege(current_user, $1::oid, 'SELECT') AS allowed`,
+      [authUserOid.rows[0].oid],
+    )
+    let selectBeforeSetRole = 'denied'
+    try {
+      await client.query('SELECT count(*) FROM public.auth_user')
+      selectBeforeSetRole = 'allowed'
+    } catch (error) {
+      selectBeforeSetRole = String(error.message).includes('permission denied') ? 'denied' : String(error.message)
+    }
+    await client.query('SET ROLE ue_framework_gateway')
+    await client.query('SET ROLE ue_framework_admin')
+    const hiddenByPolicy = await client.query('SELECT count(*)::int AS n FROM public.auth_user')
+    let grantDenied = false
+    try {
+      await client.query('GRANT ue_framework_admin TO union_eyes_runtime')
+    } catch {
+      grantDenied = true
+    }
+    await client.query('RESET ROLE')
+    await client.query('RESET SESSION AUTHORIZATION')
+    record('set_role_authority', {
+      inheritedSelect: inherited.rows[0].allowed,
+      selectBeforeSetRole,
+      rowsVisibleBeforeAdminSession: hiddenByPolicy.rows[0].n,
+      adminGrantDenied: grantDenied,
+    })
+    if (inherited.rows[0].allowed || selectBeforeSetRole !== 'denied' || hiddenByPolicy.rows[0].n !== 0 || !grantDenied) {
+      throw new Error('framework gateway inherited access or administered a role')
+    }
+
+    await client.query(`INSERT INTO public.auth_user (id, username, is_active, is_staff, is_superuser) VALUES (1, 'visible', true, false, false)`)
+    await client.query(`
+      INSERT INTO user_management.users (user_id, is_active, lifecycle_state, is_system_admin)
+      VALUES ('framework-admin', true, 'active', true)
+    `)
+    await client.query(`
+      INSERT INTO user_management.user_sessions (session_id, user_id, session_token_hash, is_active, expires_at)
+      VALUES (
+        gen_random_uuid(),
+        'framework-admin',
+        encode(sha256(convert_to('framework-token', 'UTF8')), 'hex'),
+        true,
+        statement_timestamp() + interval '1 hour'
+      )
+    `)
+    await client.query('SET SESSION AUTHORIZATION ue_framework_probe_login')
+    await client.query('SET ROLE ue_framework_gateway')
+    await client.query('SET ROLE ue_framework_admin')
+    await client.query("SELECT set_config('app.current_user_id', 'framework-admin', false)")
+    await client.query("SELECT set_config('app.current_session_token', 'wrong-token', false)")
+    const hiddenByWrongToken = await client.query('SELECT count(*)::int AS n FROM public.auth_user')
+    await client.query("SELECT set_config('app.current_session_token', 'framework-token', false)")
+    const visibleToAdmin = await client.query('SELECT count(*)::int AS n FROM public.auth_user')
+    let superuserInsertRejected = false
+    try {
+      await client.query(`INSERT INTO public.auth_user (id, username, is_active, is_staff, is_superuser) VALUES (2, 'root', true, true, true)`)
+    } catch {
+      superuserInsertRejected = true
+    }
+    await client.query('RESET ROLE')
+    await client.query('RESET SESSION AUTHORIZATION')
+    record('framework_policy', {
+      hiddenByWrongToken: hiddenByWrongToken.rows[0].n,
+      visibleToAdmin: visibleToAdmin.rows[0].n,
+      superuserInsertRejected,
+    })
+    if (hiddenByWrongToken.rows[0].n !== 0 || visibleToAdmin.rows[0].n !== 1 || !superuserInsertRejected) {
+      throw new Error('framework admin policy did not enforce')
+    }
+
+    await client.query('SET SESSION AUTHORIZATION union_eyes_runtime')
+    let runtimeSetRoleDenied = false
+    try {
+      await client.query('SET ROLE ue_framework_admin')
+    } catch {
+      runtimeSetRoleDenied = true
+    }
+    let runtimeSelectDenied = false
+    try {
+      await client.query('SELECT count(*) FROM public.auth_user')
+    } catch (error) {
+      runtimeSelectDenied = String(error.message).includes('permission denied')
+    }
+    await client.query('RESET SESSION AUTHORIZATION')
+    record('runtime_framework_denial', { runtimeSetRoleDenied, runtimeSelectDenied })
+    if (!runtimeSetRoleDenied || !runtimeSelectDenied) throw new Error('runtime reached a framework role')
+
+    const foundationTags = [
+      '0006_external_specialist_runtime_privilege_closure',
+      '0007_auth_bootstrap_runtime_remediation',
+      '0008_runtime_acceptance_closure',
+      '0009_baseline_runtime_role_grants',
+    ]
+    const foundationHashes = foundationTags.map((tag) => computeMigrationHash(cacheDir, tag).hash)
+    const recordedFoundation = await client.query(
+      'SELECT hash FROM drizzle.__drizzle_migrations WHERE hash = ANY($1::text[]) ORDER BY hash',
+      [foundationHashes],
+    )
+    const current0017 = computeMigrationHash(cacheDir, '0017_snapshot_authority_reconciliation').hash
+    const before0017 = await client.query('SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations WHERE hash = $1', [current0017])
+    if (before0017.rows[0].n !== 0) throw new Error('0017 hash was stamped before physical verification')
+    await client.query('INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2)', [current0017, 1790140000000])
+    await applyFile(client, '0017_snapshot_authority_reconciliation.sql')
+    const after0017 = await client.query('SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations WHERE hash = $1', [current0017])
+    const recordedAgain = await client.query(
+      'SELECT hash FROM drizzle.__drizzle_migrations WHERE hash = ANY($1::text[]) ORDER BY hash',
+      [foundationHashes],
+    )
+    record('ledger', {
+      foundationUnchanged: JSON.stringify(recordedFoundation.rows) === JSON.stringify(recordedAgain.rows),
+      current0017Count: after0017.rows[0].n,
+    })
+    if (JSON.stringify(recordedFoundation.rows) !== JSON.stringify(recordedAgain.rows) || after0017.rows[0].n !== 1) {
+      throw new Error('migration ledger was rewritten')
+    }
+
+    fs.writeFileSync(evidencePath, JSON.stringify(evidence, null, 2))
+    record('evidence_written', { path: evidencePath })
   } finally {
     await client.end()
   }
