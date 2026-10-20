@@ -56,762 +56,373 @@ $ue$;
 --> statement-breakpoint
 DO $ue$
 DECLARE
+  rel record;
   existing text[];
+  canonical text[];
   row_count bigint;
   match_count integer;
-  created_at_shape text;
-  updated_at_shape text;
-  organization_shape text;
+  live record;
+  expected record;
+  nulls bigint;
+  too_long bigint;
+  repair text;
 BEGIN
-  IF to_regclass('public.employers') IS NULL THEN
-    RETURN;
-  END IF;
-  SELECT COALESCE(array_agg(a.attname::text ORDER BY a.attname), ARRAY[]::text[])
-    INTO existing
-  FROM pg_attribute a
-  WHERE a.attrelid = 'public.employers'::regclass
-    AND a.attnum > 0
-    AND NOT a.attisdropped;
-  IF existing @> ARRAY['archived_at', 'business_number', 'created_at', 'created_by', 'custom_fields', 'dba_name', 'email', 'employer_type', 'established_date', 'federal_corporation_number', 'id', 'industry_code', 'labour_relations_contact_email', 'labour_relations_contact_name', 'labour_relations_contact_phone', 'legal_name', 'main_address', 'name', 'notes', 'organization_id', 'parent_company_id', 'phone', 'primary_contact_email', 'primary_contact_name', 'primary_contact_phone', 'primary_contact_title', 'provincial_corporation_number', 'status', 'total_employees', 'unionized_employees', 'updated_at', 'updated_by', 'website']::text[] THEN
-    SELECT count(*) INTO match_count FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'employers'
-      AND (
-        (column_name = 'id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'organization_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 255)
-        OR (column_name = 'legal_name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'dba_name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'employer_type' AND data_type = 'USER-DEFINED' AND udt_name = 'employer_type' AND is_nullable = 'NO')
-        OR (column_name = 'status' AND data_type = 'USER-DEFINED' AND udt_name = 'employer_status' AND is_nullable = 'NO')
-        OR (column_name = 'business_number' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'federal_corporation_number' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'provincial_corporation_number' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'industry_code' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 20)
-        OR (column_name = 'email' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'phone' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'website' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 500)
-        OR (column_name = 'main_address' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'total_employees' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'unionized_employees' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'established_date' AND data_type = 'date' AND udt_name = 'date' AND is_nullable = 'YES')
-        OR (column_name = 'primary_contact_name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'primary_contact_title' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'primary_contact_email' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'primary_contact_phone' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'labour_relations_contact_name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'labour_relations_contact_email' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'labour_relations_contact_phone' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'parent_company_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'YES')
-        OR (column_name = 'notes' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'custom_fields' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'created_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-        OR (column_name = 'updated_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-        OR (column_name = 'created_by' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'updated_by' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'archived_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-      );
-    IF match_count IS DISTINCT FROM 33 THEN
-      RAISE EXCEPTION 'incompatible existing relation public.employers: canonical names are present but 33 column contracts are not satisfied (found %). Rows were not rewritten.', match_count;
+  CREATE TEMP TABLE IF NOT EXISTS ue_stub_column_contract (
+    relname text,
+    column_name text,
+    data_type text,
+    udt_name text,
+    is_nullable text,
+    character_maximum_length integer,
+    numeric_precision integer,
+    numeric_scale integer,
+    add_sql text,
+    PRIMARY KEY (relname, column_name)
+  ) ON COMMIT DROP;
+  TRUNCATE ue_stub_column_contract;
+
+  -- employers: 33 canonical columns
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'name', 'character varying', 'varchar', 'NO', 255, NULL, NULL, 'varchar(255) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'legal_name', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'dba_name', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'employer_type', 'USER-DEFINED', 'employer_type', 'NO', NULL, NULL, NULL, '"employer_type" NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'status', 'USER-DEFINED', 'employer_status', 'NO', NULL, NULL, NULL, '"employer_status" DEFAULT ''active'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'business_number', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'federal_corporation_number', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'provincial_corporation_number', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'industry_code', 'character varying', 'varchar', 'YES', 20, NULL, NULL, 'varchar(20)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'email', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'phone', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'website', 'character varying', 'varchar', 'YES', 500, NULL, NULL, 'varchar(500)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'main_address', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'total_employees', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'unionized_employees', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'established_date', 'date', 'date', 'YES', NULL, NULL, NULL, 'date');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'primary_contact_name', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'primary_contact_title', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'primary_contact_email', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'primary_contact_phone', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'labour_relations_contact_name', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'labour_relations_contact_email', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'labour_relations_contact_phone', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'parent_company_id', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'notes', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'custom_fields', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'created_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'updated_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'created_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'updated_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('employers', 'archived_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  -- worksites: 22 canonical columns
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'employer_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'name', 'character varying', 'varchar', 'NO', 255, NULL, NULL, 'varchar(255) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'code', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'status', 'USER-DEFINED', 'worksite_status', 'NO', NULL, NULL, NULL, '"worksite_status" DEFAULT ''active'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'address', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'employee_count', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'shift_count', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'operates_weekends', 'boolean', 'bool', 'YES', NULL, NULL, NULL, 'boolean DEFAULT false');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'operates_24_hours', 'boolean', 'bool', 'YES', NULL, NULL, NULL, 'boolean DEFAULT false');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'site_manager_name', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'site_manager_email', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'site_manager_phone', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'description', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'notes', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'custom_fields', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'created_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'updated_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'created_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'updated_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('worksites', 'archived_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  -- bargaining_units: 27 canonical columns
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'employer_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'worksite_id', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'name', 'character varying', 'varchar', 'NO', 255, NULL, NULL, 'varchar(255) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'unit_number', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'unit_type', 'USER-DEFINED', 'unit_type', 'NO', NULL, NULL, NULL, '"unit_type" NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'status', 'USER-DEFINED', 'unit_status', 'NO', NULL, NULL, NULL, '"unit_status" DEFAULT ''active'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'certification_number', 'character varying', 'varchar', 'YES', 100, NULL, NULL, 'varchar(100)');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'certification_date', 'date', 'date', 'YES', NULL, NULL, NULL, 'date');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'certification_body', 'character varying', 'varchar', 'YES', 100, NULL, NULL, 'varchar(100)');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'certification_expiry_date', 'date', 'date', 'YES', NULL, NULL, NULL, 'date');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'current_collective_agreement_id', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'contract_expiry_date', 'date', 'date', 'YES', NULL, NULL, NULL, 'date');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'next_bargaining_date', 'date', 'date', 'YES', NULL, NULL, NULL, 'date');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'member_count', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer DEFAULT 0');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'classifications', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'chief_steward_id', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'bargaining_chair_id', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'description', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'notes', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'custom_fields', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'created_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'updated_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'created_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'updated_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('bargaining_units', 'archived_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  -- committees: 29 canonical columns
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'name', 'character varying', 'varchar', 'NO', 255, NULL, NULL, 'varchar(255) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'committee_type', 'USER-DEFINED', 'committee_type', 'NO', NULL, NULL, NULL, '"committee_type" NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'status', 'character varying', 'varchar', 'NO', 50, NULL, NULL, 'varchar(50) DEFAULT ''active'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'unit_id', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'worksite_id', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'is_organization_wide', 'boolean', 'bool', 'YES', NULL, NULL, NULL, 'boolean DEFAULT false');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'mandate', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'meeting_frequency', 'character varying', 'varchar', 'YES', 100, NULL, NULL, 'varchar(100)');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'meeting_day', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'meeting_time', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'meeting_location', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'max_members', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'current_member_count', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer DEFAULT 0');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'requires_appointment', 'boolean', 'bool', 'YES', NULL, NULL, NULL, 'boolean DEFAULT false');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'requires_election', 'boolean', 'bool', 'YES', NULL, NULL, NULL, 'boolean DEFAULT false');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'term_length', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'chair_id', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'secretary_id', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'contact_email', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'description', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'notes', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'custom_fields', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'created_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'updated_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'created_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'updated_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committees', 'archived_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  -- collective_agreements: 37 canonical columns
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'cba_number', 'character varying', 'varchar', 'NO', 100, NULL, NULL, 'varchar(100) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'title', 'character varying', 'varchar', 'NO', 500, NULL, NULL, 'varchar(500) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'jurisdiction', 'USER-DEFINED', 'cba_jurisdiction', 'NO', NULL, NULL, NULL, '"cba_jurisdiction" NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'language', 'USER-DEFINED', 'cba_language', 'NO', NULL, NULL, NULL, '"cba_language" DEFAULT ''en'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'employer_name', 'character varying', 'varchar', 'NO', 300, NULL, NULL, 'varchar(300) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'employer_id', 'character varying', 'varchar', 'YES', 100, NULL, NULL, 'varchar(100)');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'union_name', 'character varying', 'varchar', 'NO', 300, NULL, NULL, 'varchar(300) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'union_local', 'character varying', 'varchar', 'YES', 100, NULL, NULL, 'varchar(100)');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'union_id', 'character varying', 'varchar', 'YES', 100, NULL, NULL, 'varchar(100)');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'effective_date', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'expiry_date', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'signed_date', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'ratification_date', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'industry_sector', 'character varying', 'varchar', 'NO', 200, NULL, NULL, 'varchar(200) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'sector', 'character varying', 'varchar', 'YES', 200, NULL, NULL, 'varchar(200)');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'employee_coverage', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'bargaining_unit_description', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'document_url', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'document_hash', 'character varying', 'varchar', 'YES', 64, NULL, NULL, 'varchar(64)');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'raw_text', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'structured_data', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'embedding', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'summary_generated', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'key_terms', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'ai_processed', 'boolean', 'bool', 'YES', NULL, NULL, NULL, 'boolean DEFAULT false');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'status', 'USER-DEFINED', 'cba_status', 'NO', NULL, NULL, NULL, '"cba_status" DEFAULT ''active'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'is_public', 'boolean', 'bool', 'YES', NULL, NULL, NULL, 'boolean DEFAULT false');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'view_count', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer DEFAULT 0');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'created_at', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'updated_at', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'created_by', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'last_modified_by', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'version', 'integer', 'int4', 'NO', NULL, NULL, NULL, 'integer DEFAULT 1 NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'superseded_by', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  INSERT INTO ue_stub_column_contract VALUES ('collective_agreements', 'precedes_id', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  -- cba_clauses: 24 canonical columns
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'cba_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'clause_number', 'character varying', 'varchar', 'NO', 50, NULL, NULL, 'varchar(50) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'clause_type', 'USER-DEFINED', 'clause_type', 'NO', NULL, NULL, NULL, '"clause_type" NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'title', 'character varying', 'varchar', 'NO', 500, NULL, NULL, 'varchar(500) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'content', 'text', 'text', 'NO', NULL, NULL, NULL, 'text NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'content_plain_text', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'content_hash', 'character varying', 'varchar', 'YES', 64, NULL, NULL, 'varchar(64)');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'page_number', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'article_number', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'section_hierarchy', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'parent_clause_id', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'order_index', 'integer', 'int4', 'NO', NULL, NULL, NULL, 'integer DEFAULT 0 NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'embedding', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'confidence_score', 'numeric', 'numeric', 'YES', NULL, 5, 4, 'numeric(5, 4)');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'orgs', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'key_terms', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'related_clause_ids', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'interpretation_notes', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'view_count', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer DEFAULT 0');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'citation_count', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer DEFAULT 0');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'created_at', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cba_clauses', 'updated_at', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now() NOT NULL');
+  -- cost_centers: 19 canonical columns
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'code', 'character varying', 'varchar', 'NO', 50, NULL, NULL, 'varchar(50) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'name', 'character varying', 'varchar', 'NO', 255, NULL, NULL, 'varchar(255) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'description', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'type', 'USER-DEFINED', 'cost_center_type', 'NO', NULL, NULL, NULL, '"cost_center_type" NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'parent_cost_center_id', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'manager', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'status', 'character varying', 'varchar', 'NO', 50, NULL, NULL, 'varchar(50) DEFAULT ''active'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'budget_amount', 'numeric', 'numeric', 'YES', NULL, 19, 2, 'numeric(19, 2)');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'budget_period', 'character varying', 'varchar', 'YES', 50, NULL, NULL, 'varchar(50)');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'budget_start_date', 'timestamp without time zone', 'timestamp', 'YES', NULL, NULL, NULL, 'timestamp');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'budget_end_date', 'timestamp without time zone', 'timestamp', 'YES', NULL, NULL, NULL, 'timestamp');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'warning_threshold', 'integer', 'int4', 'YES', NULL, NULL, NULL, 'integer DEFAULT 80');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'external_code', 'character varying', 'varchar', 'YES', 100, NULL, NULL, 'varchar(100)');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'created_at', 'timestamp without time zone', 'timestamp', 'NO', NULL, NULL, NULL, 'timestamp DEFAULT now() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'updated_at', 'timestamp without time zone', 'timestamp', 'NO', NULL, NULL, NULL, 'timestamp DEFAULT now() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'created_by', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+  INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'updated_by', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
+
+  FOR rel IN
+    SELECT relname, count(*)::integer AS expected
+    FROM ue_stub_column_contract
+    GROUP BY relname
+    ORDER BY min(ctid)
+  LOOP
+    IF to_regclass('public.' || rel.relname) IS NULL THEN
+      CONTINUE;
     END IF;
-    RETURN;
-  END IF;
-  IF existing IS DISTINCT FROM ARRAY['created_at', 'id', 'organization_id', 'updated_at']::text[] THEN
-    RAISE EXCEPTION 'incompatible existing relation public.employers: unrecognized historical columns (%). Rows were not rewritten.', existing;
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO organization_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'employers' AND column_name = 'organization_id';
-  IF organization_shape IS DISTINCT FROM 'uuid:YES' AND organization_shape IS DISTINCT FROM 'uuid:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.employers: organization_id is not uuid. Rows were not rewritten.';
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO created_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'employers' AND column_name = 'created_at';
-  SELECT udt_name || ':' || is_nullable INTO updated_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'employers' AND column_name = 'updated_at';
-  IF created_at_shape IS DISTINCT FROM 'timestamptz:NO' OR updated_at_shape IS DISTINCT FROM 'timestamptz:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.employers: timestamps are not timestamptz NOT NULL. Rows were not rewritten.';
-  END IF;
-  SELECT count(*) INTO row_count FROM public.employers;
-  IF row_count > 0 THEN
-    RAISE EXCEPTION 'incompatible existing relation public.employers: % populated row(s) cannot gain canonical NOT NULL columns without a rewrite. Rows were not rewritten.', row_count;
-  END IF;
-  ALTER TABLE public.employers ALTER COLUMN organization_id SET NOT NULL;
-  ALTER TABLE public.employers ALTER COLUMN created_at DROP NOT NULL;
-  ALTER TABLE public.employers ALTER COLUMN updated_at DROP NOT NULL;
-  ALTER TABLE public.employers
-    ADD COLUMN "name" varchar(255) NOT NULL,
-    ADD COLUMN "legal_name" varchar(255),
-    ADD COLUMN "dba_name" varchar(255),
-    ADD COLUMN "employer_type" "employer_type" NOT NULL,
-    ADD COLUMN "status" "employer_status" DEFAULT 'active' NOT NULL,
-    ADD COLUMN "business_number" varchar(50),
-    ADD COLUMN "federal_corporation_number" varchar(50),
-    ADD COLUMN "provincial_corporation_number" varchar(50),
-    ADD COLUMN "industry_code" varchar(20),
-    ADD COLUMN "email" varchar(255),
-    ADD COLUMN "phone" varchar(50),
-    ADD COLUMN "website" varchar(500),
-    ADD COLUMN "main_address" jsonb,
-    ADD COLUMN "total_employees" integer,
-    ADD COLUMN "unionized_employees" integer,
-    ADD COLUMN "established_date" date,
-    ADD COLUMN "primary_contact_name" varchar(255),
-    ADD COLUMN "primary_contact_title" varchar(255),
-    ADD COLUMN "primary_contact_email" varchar(255),
-    ADD COLUMN "primary_contact_phone" varchar(50),
-    ADD COLUMN "labour_relations_contact_name" varchar(255),
-    ADD COLUMN "labour_relations_contact_email" varchar(255),
-    ADD COLUMN "labour_relations_contact_phone" varchar(50),
-    ADD COLUMN "parent_company_id" uuid,
-    ADD COLUMN "notes" text,
-    ADD COLUMN "custom_fields" jsonb,
-    ADD COLUMN "created_by" text,
-    ADD COLUMN "updated_by" text,
-    ADD COLUMN "archived_at" timestamp with time zone;
+
+    SELECT COALESCE(array_agg(a.attname::text ORDER BY a.attname), ARRAY[]::text[])
+      INTO existing
+    FROM pg_attribute a
+    WHERE a.attrelid = to_regclass('public.' || rel.relname)
+      AND a.attnum > 0
+      AND NOT a.attisdropped;
+
+    SELECT COALESCE(array_agg(column_name ORDER BY column_name), ARRAY[]::text[])
+      INTO canonical
+    FROM ue_stub_column_contract
+    WHERE relname = rel.relname;
+
+    IF existing @> canonical THEN
+      EXECUTE format(
+        'SELECT count(*) FROM information_schema.columns WHERE table_schema = %L AND table_name = %L AND (%s)',
+        'public',
+        rel.relname,
+        (SELECT string_agg(
+           format(
+             '(column_name = %L AND data_type = %L AND udt_name = %L AND is_nullable = %L%s%s)',
+             column_name,
+             data_type,
+             udt_name,
+             is_nullable,
+             CASE WHEN character_maximum_length IS NULL THEN ''
+                  ELSE format(' AND character_maximum_length = %s', character_maximum_length) END,
+             CASE WHEN numeric_precision IS NULL THEN ''
+                  ELSE format(' AND numeric_precision = %s AND numeric_scale = %s', numeric_precision, numeric_scale) END
+           ),
+           ' OR '
+         )
+         FROM ue_stub_column_contract
+         WHERE relname = rel.relname)
+      ) INTO match_count;
+      IF match_count IS DISTINCT FROM rel.expected THEN
+        RAISE EXCEPTION 'incompatible existing relation public.%: canonical names are present but % column contracts are not satisfied (found %). Rows were not rewritten.',
+          rel.relname, rel.expected, match_count;
+      END IF;
+      CONTINUE;
+    END IF;
+
+    IF NOT canonical @> existing THEN
+      RAISE EXCEPTION 'incompatible existing relation public.%: unrecognized historical columns (%). Rows were not rewritten.',
+        rel.relname, existing;
+    END IF;
+
+    EXECUTE format('SELECT count(*) FROM public.%I', rel.relname) INTO row_count;
+
+    FOR live IN
+      SELECT column_name, data_type, udt_name, is_nullable, character_maximum_length, numeric_precision, numeric_scale
+      FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = rel.relname
+    LOOP
+      SELECT * INTO expected
+      FROM ue_stub_column_contract
+      WHERE relname = rel.relname AND column_name = live.column_name;
+
+      IF live.udt_name = expected.udt_name
+         AND live.data_type = expected.data_type
+         AND live.is_nullable = expected.is_nullable
+         AND live.character_maximum_length IS NOT DISTINCT FROM expected.character_maximum_length
+         AND live.numeric_precision IS NOT DISTINCT FROM expected.numeric_precision
+         AND live.numeric_scale IS NOT DISTINCT FROM expected.numeric_scale THEN
+        CONTINUE;
+      END IF;
+
+      IF live.udt_name = 'timestamptz' AND expected.udt_name = 'timestamp' THEN
+        IF row_count > 0 THEN
+          RAISE EXCEPTION 'incompatible existing relation public.%: % populated row(s) cannot change %. Rows were not rewritten.',
+            rel.relname, row_count, live.column_name;
+        END IF;
+        EXECUTE format('ALTER TABLE public.%I DROP COLUMN %I', rel.relname, live.column_name);
+        EXECUTE format('ALTER TABLE public.%I ADD COLUMN %I %s', rel.relname, live.column_name, expected.add_sql);
+        CONTINUE;
+      END IF;
+
+      IF live.udt_name IS DISTINCT FROM expected.udt_name OR live.data_type IS DISTINCT FROM expected.data_type
+         OR live.numeric_precision IS DISTINCT FROM expected.numeric_precision
+         OR live.numeric_scale IS DISTINCT FROM expected.numeric_scale THEN
+        RAISE EXCEPTION 'incompatible existing relation public.%: column % has an unrecognized type. Rows were not rewritten.',
+          rel.relname, live.column_name;
+      END IF;
+
+      IF live.udt_name = 'varchar'
+         AND live.character_maximum_length IS DISTINCT FROM expected.character_maximum_length THEN
+        IF live.character_maximum_length > expected.character_maximum_length AND row_count > 0 THEN
+          EXECUTE format(
+            'SELECT count(*) FROM public.%I WHERE length(%I::text) > %s',
+            rel.relname, live.column_name, expected.character_maximum_length
+          ) INTO too_long;
+          IF too_long > 0 THEN
+            RAISE EXCEPTION 'incompatible existing relation public.%: % row(s) exceed the canonical length of %. Rows were not rewritten.',
+              rel.relname, too_long, live.column_name;
+          END IF;
+        END IF;
+        EXECUTE format(
+          'ALTER TABLE public.%I ALTER COLUMN %I TYPE varchar(%s)',
+          rel.relname, live.column_name, expected.character_maximum_length
+        );
+      END IF;
+
+      IF live.is_nullable = 'NO' AND expected.is_nullable = 'YES' THEN
+        EXECUTE format('ALTER TABLE public.%I ALTER COLUMN %I DROP NOT NULL', rel.relname, live.column_name);
+      ELSIF live.is_nullable = 'YES' AND expected.is_nullable = 'NO' THEN
+        IF row_count > 0 THEN
+          EXECUTE format('SELECT count(*) FROM public.%I WHERE %I IS NULL', rel.relname, live.column_name) INTO nulls;
+          IF nulls > 0 THEN
+            RAISE EXCEPTION 'incompatible existing relation public.%: % populated row(s) have null %. Rows were not rewritten.',
+              rel.relname, nulls, live.column_name;
+          END IF;
+        END IF;
+        EXECUTE format('ALTER TABLE public.%I ALTER COLUMN %I SET NOT NULL', rel.relname, live.column_name);
+      END IF;
+    END LOOP;
+
+    FOR expected IN
+      SELECT * FROM ue_stub_column_contract
+      WHERE relname = rel.relname
+        AND column_name NOT IN (
+          SELECT column_name FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = rel.relname
+        )
+    LOOP
+      IF expected.is_nullable = 'NO' AND row_count > 0 THEN
+        RAISE EXCEPTION 'incompatible existing relation public.%: % populated row(s) cannot gain canonical NOT NULL column % without a rewrite. Rows were not rewritten.',
+          rel.relname, row_count, expected.column_name;
+      END IF;
+      EXECUTE format('ALTER TABLE public.%I ADD COLUMN %I %s', rel.relname, expected.column_name, expected.add_sql);
+    END LOOP;
+  END LOOP;
 END
 $ue$;
---> statement-breakpoint
-DO $ue$
-DECLARE
-  existing text[];
-  row_count bigint;
-  match_count integer;
-  created_at_shape text;
-  updated_at_shape text;
-  organization_shape text;
-BEGIN
-  IF to_regclass('public.worksites') IS NULL THEN
-    RETURN;
-  END IF;
-  SELECT COALESCE(array_agg(a.attname::text ORDER BY a.attname), ARRAY[]::text[])
-    INTO existing
-  FROM pg_attribute a
-  WHERE a.attrelid = 'public.worksites'::regclass
-    AND a.attnum > 0
-    AND NOT a.attisdropped;
-  IF existing @> ARRAY['address', 'archived_at', 'code', 'created_at', 'created_by', 'custom_fields', 'description', 'employee_count', 'employer_id', 'id', 'name', 'notes', 'operates_24_hours', 'operates_weekends', 'organization_id', 'shift_count', 'site_manager_email', 'site_manager_name', 'site_manager_phone', 'status', 'updated_at', 'updated_by']::text[] THEN
-    SELECT count(*) INTO match_count FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'worksites'
-      AND (
-        (column_name = 'id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'organization_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'employer_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 255)
-        OR (column_name = 'code' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'status' AND data_type = 'USER-DEFINED' AND udt_name = 'worksite_status' AND is_nullable = 'NO')
-        OR (column_name = 'address' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'employee_count' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'shift_count' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'operates_weekends' AND data_type = 'boolean' AND udt_name = 'bool' AND is_nullable = 'YES')
-        OR (column_name = 'operates_24_hours' AND data_type = 'boolean' AND udt_name = 'bool' AND is_nullable = 'YES')
-        OR (column_name = 'site_manager_name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'site_manager_email' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'site_manager_phone' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'description' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'notes' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'custom_fields' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'created_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-        OR (column_name = 'updated_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-        OR (column_name = 'created_by' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'updated_by' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'archived_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-      );
-    IF match_count IS DISTINCT FROM 22 THEN
-      RAISE EXCEPTION 'incompatible existing relation public.worksites: canonical names are present but 22 column contracts are not satisfied (found %). Rows were not rewritten.', match_count;
-    END IF;
-    RETURN;
-  END IF;
-  IF existing IS DISTINCT FROM ARRAY['created_at', 'id', 'organization_id', 'updated_at']::text[] THEN
-    RAISE EXCEPTION 'incompatible existing relation public.worksites: unrecognized historical columns (%). Rows were not rewritten.', existing;
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO organization_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'worksites' AND column_name = 'organization_id';
-  IF organization_shape IS DISTINCT FROM 'uuid:YES' AND organization_shape IS DISTINCT FROM 'uuid:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.worksites: organization_id is not uuid. Rows were not rewritten.';
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO created_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'worksites' AND column_name = 'created_at';
-  SELECT udt_name || ':' || is_nullable INTO updated_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'worksites' AND column_name = 'updated_at';
-  IF created_at_shape IS DISTINCT FROM 'timestamptz:NO' OR updated_at_shape IS DISTINCT FROM 'timestamptz:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.worksites: timestamps are not timestamptz NOT NULL. Rows were not rewritten.';
-  END IF;
-  SELECT count(*) INTO row_count FROM public.worksites;
-  IF row_count > 0 THEN
-    RAISE EXCEPTION 'incompatible existing relation public.worksites: % populated row(s) cannot gain canonical NOT NULL columns without a rewrite. Rows were not rewritten.', row_count;
-  END IF;
-  ALTER TABLE public.worksites ALTER COLUMN organization_id SET NOT NULL;
-  ALTER TABLE public.worksites ALTER COLUMN created_at DROP NOT NULL;
-  ALTER TABLE public.worksites ALTER COLUMN updated_at DROP NOT NULL;
-  ALTER TABLE public.worksites
-    ADD COLUMN "employer_id" uuid NOT NULL,
-    ADD COLUMN "name" varchar(255) NOT NULL,
-    ADD COLUMN "code" varchar(50),
-    ADD COLUMN "status" "worksite_status" DEFAULT 'active' NOT NULL,
-    ADD COLUMN "address" jsonb,
-    ADD COLUMN "employee_count" integer,
-    ADD COLUMN "shift_count" integer,
-    ADD COLUMN "operates_weekends" boolean DEFAULT false,
-    ADD COLUMN "operates_24_hours" boolean DEFAULT false,
-    ADD COLUMN "site_manager_name" varchar(255),
-    ADD COLUMN "site_manager_email" varchar(255),
-    ADD COLUMN "site_manager_phone" varchar(50),
-    ADD COLUMN "description" text,
-    ADD COLUMN "notes" text,
-    ADD COLUMN "custom_fields" jsonb,
-    ADD COLUMN "created_by" text,
-    ADD COLUMN "updated_by" text,
-    ADD COLUMN "archived_at" timestamp with time zone;
-END
-$ue$;
---> statement-breakpoint
-DO $ue$
-DECLARE
-  existing text[];
-  row_count bigint;
-  match_count integer;
-  created_at_shape text;
-  updated_at_shape text;
-  organization_shape text;
-BEGIN
-  IF to_regclass('public.bargaining_units') IS NULL THEN
-    RETURN;
-  END IF;
-  SELECT COALESCE(array_agg(a.attname::text ORDER BY a.attname), ARRAY[]::text[])
-    INTO existing
-  FROM pg_attribute a
-  WHERE a.attrelid = 'public.bargaining_units'::regclass
-    AND a.attnum > 0
-    AND NOT a.attisdropped;
-  IF existing @> ARRAY['archived_at', 'bargaining_chair_id', 'certification_body', 'certification_date', 'certification_expiry_date', 'certification_number', 'chief_steward_id', 'classifications', 'contract_expiry_date', 'created_at', 'created_by', 'current_collective_agreement_id', 'custom_fields', 'description', 'employer_id', 'id', 'member_count', 'name', 'next_bargaining_date', 'notes', 'organization_id', 'status', 'unit_number', 'unit_type', 'updated_at', 'updated_by', 'worksite_id']::text[] THEN
-    SELECT count(*) INTO match_count FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'bargaining_units'
-      AND (
-        (column_name = 'id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'organization_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'employer_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'worksite_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'YES')
-        OR (column_name = 'name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 255)
-        OR (column_name = 'unit_number' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'unit_type' AND data_type = 'USER-DEFINED' AND udt_name = 'unit_type' AND is_nullable = 'NO')
-        OR (column_name = 'status' AND data_type = 'USER-DEFINED' AND udt_name = 'unit_status' AND is_nullable = 'NO')
-        OR (column_name = 'certification_number' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 100)
-        OR (column_name = 'certification_date' AND data_type = 'date' AND udt_name = 'date' AND is_nullable = 'YES')
-        OR (column_name = 'certification_body' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 100)
-        OR (column_name = 'certification_expiry_date' AND data_type = 'date' AND udt_name = 'date' AND is_nullable = 'YES')
-        OR (column_name = 'current_collective_agreement_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'YES')
-        OR (column_name = 'contract_expiry_date' AND data_type = 'date' AND udt_name = 'date' AND is_nullable = 'YES')
-        OR (column_name = 'next_bargaining_date' AND data_type = 'date' AND udt_name = 'date' AND is_nullable = 'YES')
-        OR (column_name = 'member_count' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'classifications' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'chief_steward_id' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'bargaining_chair_id' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'description' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'notes' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'custom_fields' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'created_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-        OR (column_name = 'updated_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-        OR (column_name = 'created_by' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'updated_by' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'archived_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-      );
-    IF match_count IS DISTINCT FROM 27 THEN
-      RAISE EXCEPTION 'incompatible existing relation public.bargaining_units: canonical names are present but 27 column contracts are not satisfied (found %). Rows were not rewritten.', match_count;
-    END IF;
-    RETURN;
-  END IF;
-  IF existing IS DISTINCT FROM ARRAY['created_at', 'id', 'organization_id', 'updated_at']::text[] THEN
-    RAISE EXCEPTION 'incompatible existing relation public.bargaining_units: unrecognized historical columns (%). Rows were not rewritten.', existing;
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO organization_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'bargaining_units' AND column_name = 'organization_id';
-  IF organization_shape IS DISTINCT FROM 'uuid:YES' AND organization_shape IS DISTINCT FROM 'uuid:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.bargaining_units: organization_id is not uuid. Rows were not rewritten.';
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO created_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'bargaining_units' AND column_name = 'created_at';
-  SELECT udt_name || ':' || is_nullable INTO updated_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'bargaining_units' AND column_name = 'updated_at';
-  IF created_at_shape IS DISTINCT FROM 'timestamptz:NO' OR updated_at_shape IS DISTINCT FROM 'timestamptz:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.bargaining_units: timestamps are not timestamptz NOT NULL. Rows were not rewritten.';
-  END IF;
-  SELECT count(*) INTO row_count FROM public.bargaining_units;
-  IF row_count > 0 THEN
-    RAISE EXCEPTION 'incompatible existing relation public.bargaining_units: % populated row(s) cannot gain canonical NOT NULL columns without a rewrite. Rows were not rewritten.', row_count;
-  END IF;
-  ALTER TABLE public.bargaining_units ALTER COLUMN organization_id SET NOT NULL;
-  ALTER TABLE public.bargaining_units ALTER COLUMN created_at DROP NOT NULL;
-  ALTER TABLE public.bargaining_units ALTER COLUMN updated_at DROP NOT NULL;
-  ALTER TABLE public.bargaining_units
-    ADD COLUMN "employer_id" uuid NOT NULL,
-    ADD COLUMN "worksite_id" uuid,
-    ADD COLUMN "name" varchar(255) NOT NULL,
-    ADD COLUMN "unit_number" varchar(50),
-    ADD COLUMN "unit_type" "unit_type" NOT NULL,
-    ADD COLUMN "status" "unit_status" DEFAULT 'active' NOT NULL,
-    ADD COLUMN "certification_number" varchar(100),
-    ADD COLUMN "certification_date" date,
-    ADD COLUMN "certification_body" varchar(100),
-    ADD COLUMN "certification_expiry_date" date,
-    ADD COLUMN "current_collective_agreement_id" uuid,
-    ADD COLUMN "contract_expiry_date" date,
-    ADD COLUMN "next_bargaining_date" date,
-    ADD COLUMN "member_count" integer DEFAULT 0,
-    ADD COLUMN "classifications" jsonb,
-    ADD COLUMN "chief_steward_id" text,
-    ADD COLUMN "bargaining_chair_id" text,
-    ADD COLUMN "description" text,
-    ADD COLUMN "notes" text,
-    ADD COLUMN "custom_fields" jsonb,
-    ADD COLUMN "created_by" text,
-    ADD COLUMN "updated_by" text,
-    ADD COLUMN "archived_at" timestamp with time zone;
-END
-$ue$;
---> statement-breakpoint
-DO $ue$
-DECLARE
-  existing text[];
-  row_count bigint;
-  match_count integer;
-  created_at_shape text;
-  updated_at_shape text;
-  organization_shape text;
-BEGIN
-  IF to_regclass('public.committees') IS NULL THEN
-    RETURN;
-  END IF;
-  SELECT COALESCE(array_agg(a.attname::text ORDER BY a.attname), ARRAY[]::text[])
-    INTO existing
-  FROM pg_attribute a
-  WHERE a.attrelid = 'public.committees'::regclass
-    AND a.attnum > 0
-    AND NOT a.attisdropped;
-  IF existing @> ARRAY['archived_at', 'chair_id', 'committee_type', 'contact_email', 'created_at', 'created_by', 'current_member_count', 'custom_fields', 'description', 'id', 'is_organization_wide', 'mandate', 'max_members', 'meeting_day', 'meeting_frequency', 'meeting_location', 'meeting_time', 'name', 'notes', 'organization_id', 'requires_appointment', 'requires_election', 'secretary_id', 'status', 'term_length', 'unit_id', 'updated_at', 'updated_by', 'worksite_id']::text[] THEN
-    SELECT count(*) INTO match_count FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'committees'
-      AND (
-        (column_name = 'id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'organization_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 255)
-        OR (column_name = 'committee_type' AND data_type = 'USER-DEFINED' AND udt_name = 'committee_type' AND is_nullable = 'NO')
-        OR (column_name = 'status' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 50)
-        OR (column_name = 'unit_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'YES')
-        OR (column_name = 'worksite_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'YES')
-        OR (column_name = 'is_organization_wide' AND data_type = 'boolean' AND udt_name = 'bool' AND is_nullable = 'YES')
-        OR (column_name = 'mandate' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'meeting_frequency' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 100)
-        OR (column_name = 'meeting_day' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'meeting_time' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'meeting_location' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'max_members' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'current_member_count' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'requires_appointment' AND data_type = 'boolean' AND udt_name = 'bool' AND is_nullable = 'YES')
-        OR (column_name = 'requires_election' AND data_type = 'boolean' AND udt_name = 'bool' AND is_nullable = 'YES')
-        OR (column_name = 'term_length' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'chair_id' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'secretary_id' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'contact_email' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'description' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'notes' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'custom_fields' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'created_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-        OR (column_name = 'updated_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-        OR (column_name = 'created_by' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'updated_by' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'archived_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-      );
-    IF match_count IS DISTINCT FROM 29 THEN
-      RAISE EXCEPTION 'incompatible existing relation public.committees: canonical names are present but 29 column contracts are not satisfied (found %). Rows were not rewritten.', match_count;
-    END IF;
-    RETURN;
-  END IF;
-  IF existing IS DISTINCT FROM ARRAY['created_at', 'id', 'organization_id', 'updated_at']::text[] THEN
-    RAISE EXCEPTION 'incompatible existing relation public.committees: unrecognized historical columns (%). Rows were not rewritten.', existing;
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO organization_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'committees' AND column_name = 'organization_id';
-  IF organization_shape IS DISTINCT FROM 'uuid:YES' AND organization_shape IS DISTINCT FROM 'uuid:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.committees: organization_id is not uuid. Rows were not rewritten.';
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO created_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'committees' AND column_name = 'created_at';
-  SELECT udt_name || ':' || is_nullable INTO updated_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'committees' AND column_name = 'updated_at';
-  IF created_at_shape IS DISTINCT FROM 'timestamptz:NO' OR updated_at_shape IS DISTINCT FROM 'timestamptz:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.committees: timestamps are not timestamptz NOT NULL. Rows were not rewritten.';
-  END IF;
-  SELECT count(*) INTO row_count FROM public.committees;
-  IF row_count > 0 THEN
-    RAISE EXCEPTION 'incompatible existing relation public.committees: % populated row(s) cannot gain canonical NOT NULL columns without a rewrite. Rows were not rewritten.', row_count;
-  END IF;
-  ALTER TABLE public.committees ALTER COLUMN organization_id SET NOT NULL;
-  ALTER TABLE public.committees ALTER COLUMN created_at DROP NOT NULL;
-  ALTER TABLE public.committees ALTER COLUMN updated_at DROP NOT NULL;
-  ALTER TABLE public.committees
-    ADD COLUMN "name" varchar(255) NOT NULL,
-    ADD COLUMN "committee_type" "committee_type" NOT NULL,
-    ADD COLUMN "status" varchar(50) DEFAULT 'active' NOT NULL,
-    ADD COLUMN "unit_id" uuid,
-    ADD COLUMN "worksite_id" uuid,
-    ADD COLUMN "is_organization_wide" boolean DEFAULT false,
-    ADD COLUMN "mandate" text,
-    ADD COLUMN "meeting_frequency" varchar(100),
-    ADD COLUMN "meeting_day" varchar(50),
-    ADD COLUMN "meeting_time" varchar(50),
-    ADD COLUMN "meeting_location" text,
-    ADD COLUMN "max_members" integer,
-    ADD COLUMN "current_member_count" integer DEFAULT 0,
-    ADD COLUMN "requires_appointment" boolean DEFAULT false,
-    ADD COLUMN "requires_election" boolean DEFAULT false,
-    ADD COLUMN "term_length" integer,
-    ADD COLUMN "chair_id" text,
-    ADD COLUMN "secretary_id" text,
-    ADD COLUMN "contact_email" varchar(255),
-    ADD COLUMN "description" text,
-    ADD COLUMN "notes" text,
-    ADD COLUMN "custom_fields" jsonb,
-    ADD COLUMN "created_by" text,
-    ADD COLUMN "updated_by" text,
-    ADD COLUMN "archived_at" timestamp with time zone;
-END
-$ue$;
---> statement-breakpoint
-DO $ue$
-DECLARE
-  existing text[];
-  row_count bigint;
-  match_count integer;
-  created_at_shape text;
-  updated_at_shape text;
-  organization_shape text;
-  extra_shape text;
-BEGIN
-  IF to_regclass('public.collective_agreements') IS NULL THEN
-    RETURN;
-  END IF;
-  SELECT COALESCE(array_agg(a.attname::text ORDER BY a.attname), ARRAY[]::text[])
-    INTO existing
-  FROM pg_attribute a
-  WHERE a.attrelid = 'public.collective_agreements'::regclass
-    AND a.attnum > 0
-    AND NOT a.attisdropped;
-  IF existing @> ARRAY['ai_processed', 'bargaining_unit_description', 'cba_number', 'created_at', 'created_by', 'document_hash', 'document_url', 'effective_date', 'embedding', 'employee_coverage', 'employer_id', 'employer_name', 'expiry_date', 'id', 'industry_sector', 'is_public', 'jurisdiction', 'key_terms', 'language', 'last_modified_by', 'organization_id', 'precedes_id', 'ratification_date', 'raw_text', 'sector', 'signed_date', 'status', 'structured_data', 'summary_generated', 'superseded_by', 'title', 'union_id', 'union_local', 'union_name', 'updated_at', 'version', 'view_count']::text[] THEN
-    SELECT count(*) INTO match_count FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'collective_agreements'
-      AND (
-        (column_name = 'id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'organization_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'cba_number' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 100)
-        OR (column_name = 'title' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 500)
-        OR (column_name = 'jurisdiction' AND data_type = 'USER-DEFINED' AND udt_name = 'cba_jurisdiction' AND is_nullable = 'NO')
-        OR (column_name = 'language' AND data_type = 'USER-DEFINED' AND udt_name = 'cba_language' AND is_nullable = 'NO')
-        OR (column_name = 'employer_name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 300)
-        OR (column_name = 'employer_id' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 100)
-        OR (column_name = 'union_name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 300)
-        OR (column_name = 'union_local' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 100)
-        OR (column_name = 'union_id' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 100)
-        OR (column_name = 'effective_date' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'NO')
-        OR (column_name = 'expiry_date' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'NO')
-        OR (column_name = 'signed_date' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-        OR (column_name = 'ratification_date' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'YES')
-        OR (column_name = 'industry_sector' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 200)
-        OR (column_name = 'sector' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 200)
-        OR (column_name = 'employee_coverage' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'bargaining_unit_description' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'document_url' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'document_hash' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 64)
-        OR (column_name = 'raw_text' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'structured_data' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'embedding' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'summary_generated' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'key_terms' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'ai_processed' AND data_type = 'boolean' AND udt_name = 'bool' AND is_nullable = 'YES')
-        OR (column_name = 'status' AND data_type = 'USER-DEFINED' AND udt_name = 'cba_status' AND is_nullable = 'NO')
-        OR (column_name = 'is_public' AND data_type = 'boolean' AND udt_name = 'bool' AND is_nullable = 'YES')
-        OR (column_name = 'view_count' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'created_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'NO')
-        OR (column_name = 'updated_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'NO')
-        OR (column_name = 'created_by' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'last_modified_by' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'version' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'NO')
-        OR (column_name = 'superseded_by' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'YES')
-        OR (column_name = 'precedes_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'YES')
-      );
-    IF match_count IS DISTINCT FROM 37 THEN
-      RAISE EXCEPTION 'incompatible existing relation public.collective_agreements: canonical names are present but 37 column contracts are not satisfied (found %). Rows were not rewritten.', match_count;
-    END IF;
-    RETURN;
-  END IF;
-  IF existing IS DISTINCT FROM ARRAY['cba_number', 'created_at', 'id', 'organization_id', 'updated_at']::text[] THEN
-    RAISE EXCEPTION 'incompatible existing relation public.collective_agreements: unrecognized historical columns (%). Rows were not rewritten.', existing;
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO organization_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'collective_agreements' AND column_name = 'organization_id';
-  IF organization_shape IS DISTINCT FROM 'uuid:YES' AND organization_shape IS DISTINCT FROM 'uuid:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.collective_agreements: organization_id is not uuid. Rows were not rewritten.';
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO created_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'collective_agreements' AND column_name = 'created_at';
-  SELECT udt_name || ':' || is_nullable INTO updated_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'collective_agreements' AND column_name = 'updated_at';
-  IF created_at_shape IS DISTINCT FROM 'timestamptz:NO' OR updated_at_shape IS DISTINCT FROM 'timestamptz:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.collective_agreements: timestamps are not timestamptz NOT NULL. Rows were not rewritten.';
-  END IF;
-  SELECT udt_name || ':' || is_nullable || ':' || COALESCE(character_maximum_length::text, '') INTO extra_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'collective_agreements' AND column_name = 'cba_number';
-  IF extra_shape IS DISTINCT FROM 'varchar:YES:255' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.collective_agreements: cba_number is not nullable varchar(255). Rows were not rewritten.';
-  END IF;
-  SELECT count(*) INTO row_count FROM public.collective_agreements;
-  IF row_count > 0 THEN
-    RAISE EXCEPTION 'incompatible existing relation public.collective_agreements: % populated row(s) cannot gain canonical NOT NULL columns without a rewrite. Rows were not rewritten.', row_count;
-  END IF;
-  ALTER TABLE public.collective_agreements ALTER COLUMN organization_id SET NOT NULL;
-  ALTER TABLE public.collective_agreements
-    ALTER COLUMN cba_number TYPE varchar(100),
-    ALTER COLUMN cba_number SET NOT NULL;
-  ALTER TABLE public.collective_agreements
-    ADD COLUMN "title" varchar(500) NOT NULL,
-    ADD COLUMN "jurisdiction" "cba_jurisdiction" NOT NULL,
-    ADD COLUMN "language" "cba_language" DEFAULT 'en' NOT NULL,
-    ADD COLUMN "employer_name" varchar(300) NOT NULL,
-    ADD COLUMN "employer_id" varchar(100),
-    ADD COLUMN "union_name" varchar(300) NOT NULL,
-    ADD COLUMN "union_local" varchar(100),
-    ADD COLUMN "union_id" varchar(100),
-    ADD COLUMN "effective_date" timestamp with time zone NOT NULL,
-    ADD COLUMN "expiry_date" timestamp with time zone NOT NULL,
-    ADD COLUMN "signed_date" timestamp with time zone,
-    ADD COLUMN "ratification_date" timestamp with time zone,
-    ADD COLUMN "industry_sector" varchar(200) NOT NULL,
-    ADD COLUMN "sector" varchar(200),
-    ADD COLUMN "employee_coverage" integer,
-    ADD COLUMN "bargaining_unit_description" text,
-    ADD COLUMN "document_url" text,
-    ADD COLUMN "document_hash" varchar(64),
-    ADD COLUMN "raw_text" text,
-    ADD COLUMN "structured_data" jsonb,
-    ADD COLUMN "embedding" text,
-    ADD COLUMN "summary_generated" text,
-    ADD COLUMN "key_terms" jsonb,
-    ADD COLUMN "ai_processed" boolean DEFAULT false,
-    ADD COLUMN "status" "cba_status" DEFAULT 'active' NOT NULL,
-    ADD COLUMN "is_public" boolean DEFAULT false,
-    ADD COLUMN "view_count" integer DEFAULT 0,
-    ADD COLUMN "created_by" varchar(255),
-    ADD COLUMN "last_modified_by" varchar(255),
-    ADD COLUMN "version" integer DEFAULT 1 NOT NULL,
-    ADD COLUMN "superseded_by" uuid,
-    ADD COLUMN "precedes_id" uuid;
-END
-$ue$;
---> statement-breakpoint
-DO $ue$
-DECLARE
-  existing text[];
-  row_count bigint;
-  match_count integer;
-  created_at_shape text;
-  updated_at_shape text;
-  organization_shape text;
-BEGIN
-  IF to_regclass('public.cba_clauses') IS NULL THEN
-    RETURN;
-  END IF;
-  SELECT COALESCE(array_agg(a.attname::text ORDER BY a.attname), ARRAY[]::text[])
-    INTO existing
-  FROM pg_attribute a
-  WHERE a.attrelid = 'public.cba_clauses'::regclass
-    AND a.attnum > 0
-    AND NOT a.attisdropped;
-  IF existing @> ARRAY['article_number', 'cba_id', 'citation_count', 'clause_number', 'clause_type', 'confidence_score', 'content', 'content_hash', 'content_plain_text', 'created_at', 'embedding', 'id', 'interpretation_notes', 'key_terms', 'order_index', 'organization_id', 'orgs', 'page_number', 'parent_clause_id', 'related_clause_ids', 'section_hierarchy', 'title', 'updated_at', 'view_count']::text[] THEN
-    SELECT count(*) INTO match_count FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'cba_clauses'
-      AND (
-        (column_name = 'id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'organization_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'cba_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'clause_number' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 50)
-        OR (column_name = 'clause_type' AND data_type = 'USER-DEFINED' AND udt_name = 'clause_type' AND is_nullable = 'NO')
-        OR (column_name = 'title' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 500)
-        OR (column_name = 'content' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'NO')
-        OR (column_name = 'content_plain_text' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'content_hash' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 64)
-        OR (column_name = 'page_number' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'article_number' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'section_hierarchy' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'parent_clause_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'YES')
-        OR (column_name = 'order_index' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'NO')
-        OR (column_name = 'embedding' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'confidence_score' AND data_type = 'numeric' AND udt_name = 'numeric' AND is_nullable = 'YES' AND numeric_precision = 5 AND numeric_scale = 4)
-        OR (column_name = 'orgs' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'key_terms' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'related_clause_ids' AND data_type = 'jsonb' AND udt_name = 'jsonb' AND is_nullable = 'YES')
-        OR (column_name = 'interpretation_notes' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'view_count' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'citation_count' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'created_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'NO')
-        OR (column_name = 'updated_at' AND data_type = 'timestamp with time zone' AND udt_name = 'timestamptz' AND is_nullable = 'NO')
-      );
-    IF match_count IS DISTINCT FROM 24 THEN
-      RAISE EXCEPTION 'incompatible existing relation public.cba_clauses: canonical names are present but 24 column contracts are not satisfied (found %). Rows were not rewritten.', match_count;
-    END IF;
-    RETURN;
-  END IF;
-  IF existing IS DISTINCT FROM ARRAY['created_at', 'id', 'organization_id', 'updated_at']::text[] THEN
-    RAISE EXCEPTION 'incompatible existing relation public.cba_clauses: unrecognized historical columns (%). Rows were not rewritten.', existing;
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO organization_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'cba_clauses' AND column_name = 'organization_id';
-  IF organization_shape IS DISTINCT FROM 'uuid:YES' AND organization_shape IS DISTINCT FROM 'uuid:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.cba_clauses: organization_id is not uuid. Rows were not rewritten.';
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO created_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'cba_clauses' AND column_name = 'created_at';
-  SELECT udt_name || ':' || is_nullable INTO updated_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'cba_clauses' AND column_name = 'updated_at';
-  IF created_at_shape IS DISTINCT FROM 'timestamptz:NO' OR updated_at_shape IS DISTINCT FROM 'timestamptz:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.cba_clauses: timestamps are not timestamptz NOT NULL. Rows were not rewritten.';
-  END IF;
-  SELECT count(*) INTO row_count FROM public.cba_clauses;
-  IF row_count > 0 THEN
-    RAISE EXCEPTION 'incompatible existing relation public.cba_clauses: % populated row(s) cannot gain canonical NOT NULL columns without a rewrite. Rows were not rewritten.', row_count;
-  END IF;
-  ALTER TABLE public.cba_clauses ALTER COLUMN organization_id SET NOT NULL;
-  ALTER TABLE public.cba_clauses
-    ADD COLUMN "cba_id" uuid NOT NULL,
-    ADD COLUMN "clause_number" varchar(50) NOT NULL,
-    ADD COLUMN "clause_type" "clause_type" NOT NULL,
-    ADD COLUMN "title" varchar(500) NOT NULL,
-    ADD COLUMN "content" text NOT NULL,
-    ADD COLUMN "content_plain_text" text,
-    ADD COLUMN "content_hash" varchar(64),
-    ADD COLUMN "page_number" integer,
-    ADD COLUMN "article_number" varchar(50),
-    ADD COLUMN "section_hierarchy" jsonb,
-    ADD COLUMN "parent_clause_id" uuid,
-    ADD COLUMN "order_index" integer DEFAULT 0 NOT NULL,
-    ADD COLUMN "embedding" text,
-    ADD COLUMN "confidence_score" numeric(5, 4),
-    ADD COLUMN "orgs" jsonb,
-    ADD COLUMN "key_terms" jsonb,
-    ADD COLUMN "related_clause_ids" jsonb,
-    ADD COLUMN "interpretation_notes" text,
-    ADD COLUMN "view_count" integer DEFAULT 0,
-    ADD COLUMN "citation_count" integer DEFAULT 0;
-END
-$ue$;
---> statement-breakpoint
-DO $ue$
-DECLARE
-  existing text[];
-  row_count bigint;
-  match_count integer;
-  created_at_shape text;
-  updated_at_shape text;
-  organization_shape text;
-BEGIN
-  IF to_regclass('public.cost_centers') IS NULL THEN
-    RETURN;
-  END IF;
-  SELECT COALESCE(array_agg(a.attname::text ORDER BY a.attname), ARRAY[]::text[])
-    INTO existing
-  FROM pg_attribute a
-  WHERE a.attrelid = 'public.cost_centers'::regclass
-    AND a.attnum > 0
-    AND NOT a.attisdropped;
-  IF existing @> ARRAY['budget_amount', 'budget_end_date', 'budget_period', 'budget_start_date', 'code', 'created_at', 'created_by', 'description', 'external_code', 'id', 'manager', 'name', 'organization_id', 'parent_cost_center_id', 'status', 'type', 'updated_at', 'updated_by', 'warning_threshold']::text[] THEN
-    SELECT count(*) INTO match_count FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'cost_centers'
-      AND (
-        (column_name = 'id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'organization_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'NO')
-        OR (column_name = 'code' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 50)
-        OR (column_name = 'name' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 255)
-        OR (column_name = 'description' AND data_type = 'text' AND udt_name = 'text' AND is_nullable = 'YES')
-        OR (column_name = 'type' AND data_type = 'USER-DEFINED' AND udt_name = 'cost_center_type' AND is_nullable = 'NO')
-        OR (column_name = 'parent_cost_center_id' AND data_type = 'uuid' AND udt_name = 'uuid' AND is_nullable = 'YES')
-        OR (column_name = 'manager' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'status' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'NO' AND character_maximum_length = 50)
-        OR (column_name = 'budget_amount' AND data_type = 'numeric' AND udt_name = 'numeric' AND is_nullable = 'YES' AND numeric_precision = 19 AND numeric_scale = 2)
-        OR (column_name = 'budget_period' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 50)
-        OR (column_name = 'budget_start_date' AND data_type = 'timestamp without time zone' AND udt_name = 'timestamp' AND is_nullable = 'YES')
-        OR (column_name = 'budget_end_date' AND data_type = 'timestamp without time zone' AND udt_name = 'timestamp' AND is_nullable = 'YES')
-        OR (column_name = 'warning_threshold' AND data_type = 'integer' AND udt_name = 'int4' AND is_nullable = 'YES')
-        OR (column_name = 'external_code' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 100)
-        OR (column_name = 'created_at' AND data_type = 'timestamp without time zone' AND udt_name = 'timestamp' AND is_nullable = 'NO')
-        OR (column_name = 'updated_at' AND data_type = 'timestamp without time zone' AND udt_name = 'timestamp' AND is_nullable = 'NO')
-        OR (column_name = 'created_by' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-        OR (column_name = 'updated_by' AND data_type = 'character varying' AND udt_name = 'varchar' AND is_nullable = 'YES' AND character_maximum_length = 255)
-      );
-    IF match_count IS DISTINCT FROM 19 THEN
-      RAISE EXCEPTION 'incompatible existing relation public.cost_centers: canonical names are present but 19 column contracts are not satisfied (found %). Rows were not rewritten.', match_count;
-    END IF;
-    RETURN;
-  END IF;
-  IF existing IS DISTINCT FROM ARRAY['created_at', 'id', 'organization_id', 'updated_at']::text[] THEN
-    RAISE EXCEPTION 'incompatible existing relation public.cost_centers: unrecognized historical columns (%). Rows were not rewritten.', existing;
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO organization_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'cost_centers' AND column_name = 'organization_id';
-  IF organization_shape IS DISTINCT FROM 'uuid:YES' AND organization_shape IS DISTINCT FROM 'uuid:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.cost_centers: organization_id is not uuid. Rows were not rewritten.';
-  END IF;
-  SELECT udt_name || ':' || is_nullable INTO created_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'cost_centers' AND column_name = 'created_at';
-  SELECT udt_name || ':' || is_nullable INTO updated_at_shape
-  FROM information_schema.columns
-  WHERE table_schema = 'public' AND table_name = 'cost_centers' AND column_name = 'updated_at';
-  IF created_at_shape IS DISTINCT FROM 'timestamptz:NO' OR updated_at_shape IS DISTINCT FROM 'timestamptz:NO' THEN
-    RAISE EXCEPTION 'incompatible existing relation public.cost_centers: timestamps are not timestamptz NOT NULL. Rows were not rewritten.';
-  END IF;
-  SELECT count(*) INTO row_count FROM public.cost_centers;
-  IF row_count > 0 THEN
-    RAISE EXCEPTION 'incompatible existing relation public.cost_centers: % populated row(s) cannot gain canonical NOT NULL columns without a rewrite. Rows were not rewritten.', row_count;
-  END IF;
-  ALTER TABLE public.cost_centers ALTER COLUMN organization_id SET NOT NULL;
-  ALTER TABLE public.cost_centers DROP COLUMN created_at, DROP COLUMN updated_at;
-  ALTER TABLE public.cost_centers
-    ADD COLUMN "code" varchar(50) NOT NULL,
-    ADD COLUMN "name" varchar(255) NOT NULL,
-    ADD COLUMN "description" text,
-    ADD COLUMN "type" "cost_center_type" NOT NULL,
-    ADD COLUMN "parent_cost_center_id" uuid,
-    ADD COLUMN "manager" varchar(255),
-    ADD COLUMN "status" varchar(50) DEFAULT 'active' NOT NULL,
-    ADD COLUMN "budget_amount" numeric(19, 2),
-    ADD COLUMN "budget_period" varchar(50),
-    ADD COLUMN "budget_start_date" timestamp,
-    ADD COLUMN "budget_end_date" timestamp,
-    ADD COLUMN "warning_threshold" integer DEFAULT 80,
-    ADD COLUMN "external_code" varchar(100),
-    ADD COLUMN "created_at" timestamp DEFAULT now() NOT NULL,
-    ADD COLUMN "updated_at" timestamp DEFAULT now() NOT NULL,
-    ADD COLUMN "created_by" varchar(255),
-    ADD COLUMN "updated_by" varchar(255);
-END
-$ue$;
+
 --> statement-breakpoint
 DO $ue$
 DECLARE

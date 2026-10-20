@@ -217,9 +217,9 @@ describe('convergence P0 contracts', () => {
       'cba_clauses',
       'cost_centers',
     ]) {
-      expect(stubSql).toContain(`public.${relation}`)
-      expect(stubSql).toContain(`incompatible existing relation public.${relation}`)
+      expect(stubSql).toContain(`'${relation}'`)
     }
+    expect(stubSql).toContain('incompatible existing relation public.%')
     expect(stubSql).toContain('Rows were not rewritten.')
     expect(stubSql).not.toMatch(/DROP TABLE/i)
     expect(stubSql).not.toMatch(/DROP TYPE/i)

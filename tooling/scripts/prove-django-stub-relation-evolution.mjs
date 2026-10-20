@@ -250,6 +250,45 @@ try {
     }
   })
 
+  await withDatabase('ue_stub_rel_cba_id', async (client) => {
+    await installStubs(client)
+    await client.query('DROP TABLE public.cba_clauses')
+    await client.query(`
+      CREATE TABLE public.cba_clauses (
+        id uuid PRIMARY KEY,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now(),
+        organization_id uuid,
+        cba_id uuid
+      )
+    `)
+    await client.query(`INSERT INTO public.cba_clauses (id) VALUES ('22222222-2222-4222-8222-222222222222')`)
+    let populatedMessage = ''
+    try {
+      await applyEvolution(client)
+    } catch (error) {
+      populatedMessage = error.message
+    }
+    const populatedNames = await columnNames(client, 'cba_clauses')
+    await client.query('DELETE FROM public.cba_clauses')
+    await applyEvolution(client)
+    const matches = await canonicalMatches(client)
+    record('cba_id_subset', {
+      populatedMessage,
+      populatedNames,
+      emptyColumns: matches.cba_clauses,
+    })
+    if (!populatedMessage.includes('Rows were not rewritten')) {
+      throw new Error(`populated cba_clauses did not fail closed: ${populatedMessage}`)
+    }
+    if (JSON.stringify(populatedNames) !== JSON.stringify(['cba_id', 'created_at', 'id', 'organization_id', 'updated_at'])) {
+      throw new Error(`populated cba_clauses changed ${populatedNames}`)
+    }
+    if (matches.cba_clauses < EXPECTED.cba_clauses) {
+      throw new Error(`empty cba_id subset did not satisfy 0009: ${matches.cba_clauses}`)
+    }
+  })
+
   await withDatabase('ue_stub_rel_absent', async (client) => {
     await applyEvolution(client)
     const exists = await client.query(`SELECT to_regclass('public.employers') AS rel`)
