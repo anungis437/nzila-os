@@ -19,12 +19,16 @@
  *      canonical tables are absent in QA/CI.
  *   5. Scoped migrations through 0013 (roles, grants, RLS helpers).
  *   6. Quarantine runtime DML on relations that do not have FORCE RLS,
- *      unless 0014 and 0015 are already recorded. 0009 is not rewritten.
+ *      unless every scoped RLS closure hash is already recorded.
+ *      0009 is not rewritten. Its grants are revoked in the same
+ *      transaction that applies it.
  *   7. Post-freeze PLATFORM_SQL from db/migrations-platform/.
  *   8. Scoped migrations after 0013, including the 0014 preflight.
- *   9. Activate the 0009 grant envelope only after both closure hashes
- *      are recorded. A failed closure leaves the quarantine in place.
+ *   9. Activate exact manifest grants only after the closure hashes are
+ *      recorded and the live catalog matches that manifest. A failed
+ *      closure or a failed preflight leaves runtime DML unactivated.
  *  10. Bootstrap attestation written to drizzle.bootstrap_attestations.
+ *      applicationReady stays false. Migration completion is not readiness.
  *
  * It does NOT:
  *   - replay legacy migrations under db/migrations/
@@ -48,6 +52,7 @@ import {
 import {
   applyPlatformMigrations as applyPlatformMigrationsShared,
 } from './lib/union-eyes-platform-migrations.mjs';
+import { activateCatalogPrivileges } from './lib/union-eyes-catalog-authority.mjs';
 import {
   PRODUCTION_BOOTSTRAP_ORDER,
   SCOPED_FOUNDATION_THROUGH_TAG,
@@ -271,12 +276,12 @@ async function quarantineUnprotectedRuntimePrivileges(client) {
     return { applied: false, reason: 'roles_absent' };
   }
   if (await securityClosureRecorded(client)) {
-    info('0014 and 0015 are already recorded. Existing runtime grants stay unchanged.');
+    info('Scoped RLS closure hashes are already recorded. Quarantine is not repeated.');
     return { applied: false, reason: 'closure_already_recorded' };
   }
   info(
     'Quarantining runtime DML on public relations without FORCE RLS. ' +
-      '0009 is unchanged. Grants return only after 0014 and 0015 commit.',
+      '0009 is unchanged. Exact grants wait for the scoped RLS closures.',
   );
   await client.query('BEGIN');
   try {
@@ -312,30 +317,29 @@ async function quarantineUnprotectedRuntimePrivileges(client) {
   return { applied: true, reason: 'closure_not_recorded' };
 }
 
+async function privilegeEnforcementEnabled(client) {
+  if (process.env.UE_PRIVILEGE_ENFORCEMENT === '1' || process.env.QA_TEST_ENV === 'true') return true;
+  const regclass = await client.query(`SELECT to_regclass('drizzle.bootstrap_attestations') AS regclass`);
+  if (!regclass.rows[0]?.regclass) return true;
+  const prior = await client.query('SELECT 1 FROM drizzle.bootstrap_attestations LIMIT 1');
+  return prior.rowCount === 0;
+}
+
 async function activateRuntimePrivileges(client) {
-  if (!(await runtimeRolesPresent(client))) {
-    info('Runtime roles are absent; skipping grant activation.');
-    return { applied: false, reason: 'roles_absent' };
-  }
   if (!(await securityClosureRecorded(client))) {
-    fail('Refusing runtime grant activation: 0014 and 0015 are not both recorded.');
+    fail('Refusing runtime grant activation: the scoped RLS closure hashes are not all recorded.');
   }
-  info('Activating the existing 0009 table and sequence grant envelope. No default privileges are restored.');
-  await client.query('BEGIN');
+  const enforce = await privilegeEnforcementEnabled(client);
+  info(
+    enforce
+      ? 'Activating exact storage-authority grants after catalog verification.'
+      : 'Serving database: verifying catalog privileges without revoking live grants.',
+  );
   try {
-    await client.query('GRANT USAGE ON SCHEMA public TO union_eyes_runtime, union_eyes_system');
-    await client.query(
-      'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO union_eyes_runtime, union_eyes_system',
-    );
-    await client.query(
-      'GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO union_eyes_runtime, union_eyes_system',
-    );
-    await client.query('COMMIT');
+    return await activateCatalogPrivileges(client, { repoRoot, enforce });
   } catch (err) {
-    await client.query('ROLLBACK');
     fail(`Runtime grant activation failed: ${err.message}`);
   }
-  return { applied: true, reason: 'closure_recorded' };
 }
 
 async function report0014PhysicalPresence(client) {
@@ -491,6 +495,10 @@ async function main() {
       platformMigrationsApplied: platformSummary.applied,
       runtimePrivilegeQuarantineApplied: quarantineSummary.applied,
       runtimeGrantActivationApplied: activationSummary.applied,
+      schemaMigrationComplete: true,
+      securityPolicyVerified: activationSummary.securityPolicyVerified === true,
+      runtimePrivilegesVerified: activationSummary.runtimePrivilegesVerified === true,
+      applicationReady: false,
       relationsAbsentBefore0014: physicalSummary.missing,
       timestamp: new Date().toISOString(),
     });

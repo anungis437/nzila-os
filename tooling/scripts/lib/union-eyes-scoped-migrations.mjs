@@ -149,6 +149,18 @@ export async function applyScopedMigrations(client, { journalPath, migrationsDir
       for (const stmt of statements) {
         await client.query(stmt);
       }
+      if (entry.tag === '0009_baseline_runtime_role_grants') {
+        // The file hash stays the historical bytes. The revoke runs in this
+        // same transaction, so a concurrent session never observes the
+        // broad 0009 envelope. Already-applied databases do not re-enter
+        // this branch and are not revoked here.
+        await client.query(
+          'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM union_eyes_runtime, union_eyes_system, PUBLIC',
+        );
+        await client.query(
+          'REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM union_eyes_runtime, union_eyes_system, PUBLIC',
+        );
+      }
       await client.query(
         'INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2)',
         [hash, entry.when ?? Date.now()],

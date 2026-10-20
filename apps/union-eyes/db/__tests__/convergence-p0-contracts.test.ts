@@ -123,6 +123,15 @@ describe('convergence P0 contracts', () => {
     expect(runner).toContain('throughTag: SCOPED_FOUNDATION_THROUGH_TAG')
     expect(runner).toContain('afterTag: SCOPED_FOUNDATION_THROUGH_TAG')
     expect(runner).not.toContain('regrantRuntimeTablePrivileges')
+    expect(runner).not.toContain('ON ALL TABLES IN SCHEMA public')
+    const scopedExecutor = fs.readFileSync(
+      path.join(REPO_ROOT, 'tooling/scripts/lib/union-eyes-scoped-migrations.mjs'),
+      'utf8',
+    )
+    expect(scopedExecutor).toContain("entry.tag === '0009_baseline_runtime_role_grants'")
+    expect(scopedExecutor).toContain(
+      'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM union_eyes_runtime, union_eyes_system, PUBLIC',
+    )
     const foundation = runner.indexOf('throughTag: SCOPED_FOUNDATION_THROUGH_TAG')
     const quarantine = runner.indexOf('const quarantineSummary = await quarantineUnprotectedRuntimePrivileges')
     const platform = runner.indexOf('Applying post-freeze PLATFORM_SQL')

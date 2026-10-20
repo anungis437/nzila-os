@@ -3,10 +3,11 @@
  *
  * Scoped migrations through 0013 create roles, grants, and RLS helpers.
  * Runtime DML on relations without FORCE RLS is quarantined before later
- * DDL, unless 0014 and 0015 are already recorded.
+ * DDL, unless every scoped RLS closure hash is already recorded.
  * Platform SQL creates objects that 0014's preflight requires.
- * Scoped 0014 and 0015 are the RLS closures.
- * The 0009 grant envelope is activated only after both closure hashes exist.
+ * Scoped 0014, 0015, and 0016 are the RLS closures.
+ * Exact manifest grants are activated only after those closure hashes exist
+ * and the current catalog passes the privilege preflight.
  * The producer graph imports this list. Do not describe a different order
  * in the runner.
  */
@@ -16,6 +17,7 @@ export const SCOPED_RLS_CLOSURE_TAG = '0014_lineage_restoration_rls_closure';
 export const SCOPED_RLS_CLOSURE_TAGS = [
   '0014_lineage_restoration_rls_closure',
   '0015_deadline_engine_rls_fail_closed_closure',
+  '0016_catalog_rls_authority_closure',
 ];
 
 export const PRODUCTION_BOOTSTRAP_ORDER = [

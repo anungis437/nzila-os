@@ -648,12 +648,32 @@ CREATE TABLE IF NOT EXISTS public.subscription_plans (
   CONSTRAINT subscription_plans_code_unique UNIQUE (code)
 );
 
+DO $$ BEGIN
+  CREATE TYPE public.subscription_status AS ENUM ('active', 'trialing', 'past_due', 'cancelled', 'paused');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.platform_invoice_status AS ENUM (
+    'draft', 'issued', 'paid', 'partially_paid', 'overdue', 'void', 'written_off'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.platform_payment_status AS ENUM ('pending', 'processing', 'completed', 'failed', 'refunded');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- Fresh-install producer for the Drizzle billing contract. billing_accounts
+-- does not exist yet at this point; platform 0010 adds that foreign key.
+-- CREATE TABLE IF NOT EXISTS does not repair an older physical shape.
 CREATE TABLE IF NOT EXISTS public.org_subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  billing_account_id uuid,
+  billing_account_id uuid NOT NULL,
   plan_id uuid NOT NULL,
   organization_id uuid NOT NULL,
-  status varchar(20) NOT NULL DEFAULT 'active',
+  status public.subscription_status NOT NULL DEFAULT 'active',
   start_date timestamptz NOT NULL DEFAULT now(),
   end_date timestamptz,
   trial_end_date timestamptz,
@@ -669,7 +689,7 @@ CREATE TABLE IF NOT EXISTS public.org_subscriptions (
 );
 CREATE TABLE IF NOT EXISTS public.platform_invoices (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  billing_account_id uuid,
+  billing_account_id uuid NOT NULL,
   organization_id uuid NOT NULL,
   billing_period_id uuid,
   invoice_number varchar(50) NOT NULL,
@@ -680,7 +700,7 @@ CREATE TABLE IF NOT EXISTS public.platform_invoices (
   total_amount numeric(14, 2) NOT NULL DEFAULT 0,
   amount_paid numeric(14, 2) NOT NULL DEFAULT 0,
   currency varchar(3) NOT NULL DEFAULT 'CAD',
-  status varchar(20) NOT NULL DEFAULT 'draft',
+  status public.platform_invoice_status NOT NULL DEFAULT 'draft',
   notes text,
   metadata jsonb,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -691,11 +711,11 @@ CREATE TABLE IF NOT EXISTS public.platform_invoices (
 
 CREATE TABLE IF NOT EXISTS public.platform_payments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  billing_account_id uuid,
+  billing_account_id uuid NOT NULL,
   organization_id uuid NOT NULL,
   amount numeric(14, 2) NOT NULL DEFAULT 0,
   currency varchar(3) NOT NULL DEFAULT 'CAD',
-  status varchar(20) NOT NULL DEFAULT 'pending',
+  status public.platform_payment_status NOT NULL DEFAULT 'pending',
   method varchar(50) NOT NULL DEFAULT 'unknown',
   external_reference varchar(255),
   paid_at timestamptz,
