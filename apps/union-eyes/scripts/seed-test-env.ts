@@ -386,10 +386,7 @@ async function seed(): Promise<void> {
         // Drizzle defaultRandom() emits SQL DEFAULT which then violates NOT NULL.
         id: randomUUID(),
         userId: u.userId,
-        // organization_members.organization_id is uuid in the canonical Drizzle
-        // schema; pass the org UUID directly. (The slug variant lives in the
-        // legacy schema-organizations.ts mirror; the canonical schema wins for
-        // seed inserts so the seeded rows resolve under getUserRole().)
+        // organization_members.organization_id is the organization UUID.
         organizationId: u.orgId,
         role: u.role,
         status: u.status,

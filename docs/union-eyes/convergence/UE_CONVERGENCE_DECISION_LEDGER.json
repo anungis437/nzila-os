@@ -1,0 +1,42 @@
+{
+  "mission": "UE-CONVERGENCE-P0-FINAL",
+  "baseSha": "12dd086ae906ced483942144ab6c27326fda2738",
+  "conflicts": [
+    {
+      "CONFLICT_ID": "FINANCIAL_TOPOLOGY_ENDPOINT",
+      "SOURCE_A": "apps/union-eyes/reports/union-eyes-canonical-database-topology-round58d.md (50b84ebd, 2026-09-11): SAME_CANONICAL_DATABASE = YES. financial-service is a process boundary. No Dockerfile, compose, Bicep, or deploy workflow. Undeployed. At that investigation the runtime bootstrap read DATABASE_URL.",
+      "SOURCE_B": "apps/union-eyes/services/financial-service/src/db/connection-scope.ts (16a525da, PR #923, 2026-10-17) requires FINANCIAL_DATABASE_URL, rejects a shared host:port:database with DATABASE_URL, SYSTEM_DATABASE_URL, AUTH_DATABASE_URL, and AUTH_SYSTEM_DATABASE_URL (FINANCIAL_DATABASE_SCOPE_COLLAPSE), and rejects role reuse. docs/union-eyes/bootstrap-v2/UE_FINAL_ACCEPTANCE_LEDGER.json records PKI digital_signatures as a separate-database capability held at 501 (G8).",
+      "BINDING_AUTHORITY": "Round 58D is the named architecture decision for one Union Eyes PostgreSQL data plane. PR #923 is a later accepted connection guard and does not record a new decision to create a database. UE_V2_FINANCIAL_SCOPE_AUTHORITY.md remains NOT_PROVEN for caller execution.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "No financial-service deployment, Dockerfile, compose service, or infrastructure database exists in this repository. The process refuses to start without FINANCIAL_DATABASE_URL and refuses to select the same host, port, and database name as an operational URL. No second database was created or merged.",
+      "RISK": "Treating SEPARATE_DATABASE_BOUNDARY or FINANCIAL_DATABASE_SCOPE_COLLAPSE as an instruction to provision a database would invent a data plane. Pointing financial-service at DATABASE_URL would remove the later role and endpoint guard.",
+      "ENGINEERING_RESOLUTION": "Record the contradiction. Do not create, merge, or split a database. Do not edit financial-service schema declarations or connection-scope behavior in this change. Financial tables stay on their existing deferred authority, including held cross-organization billing writes.",
+      "ACCEPTANCE_EVIDENCE": "Source inspection of Round 58D, connection-scope.ts, connection-scope.test.ts, and the V2 financial-scope report on base SHA 12dd086ae. No live database catalog was available.",
+      "REMAINING_AUTHORIZATION": "A later change that allows the same database name with a distinct non-owner role, or that provisions a separate database, needs its own security review. This mission does not authorize that change.",
+      "CLASSIFICATION": "APPROVED_BUT_NOT_YET_INTEGRATED_DESIGN"
+    },
+    {
+      "CONFLICT_ID": "BOOTSTRAP_ACCEPTANCE_VS_LEGACY_CLEAN_ROOM",
+      "SOURCE_A": "docs/union-eyes/bootstrap-v2/README.md terminal acceptance: G1–G7 PASS for frozen plan digest 93fd3cd0 and later staging-closure plan digest 4f9732e2. Legacy clean-room readiness remains HISTORICAL_NON_BINDING_RESULT because it uses the superseded per-table actor model.",
+      "SOURCE_B": "tooling/scripts/run-union-eyes-schema-lineage-cleanroom.mjs and apps/union-eyes/scripts/schema-authority/fresh-build.ts. fresh-build applies Django migrate and scoped migrations-cache, and refuses frozen db/migrations replay. 0014 fail-closes when any preflight target is absent.",
+      "BINDING_AUTHORITY": "Bootstrap V2 is the current lifecycle candidate. Its G1–G7 results stay bound to the recorded candidate and control-based scope. They are not transferred to this branch.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "Not re-executed in this session. Docker is absent, so neither V2 clean-room nor the legacy clean-room was run.",
+      "RISK": "Declaring the historical PASS invalid would discard accepted control evidence. Declaring the legacy path passed would hide the 0014 producer gap.",
+      "ENGINEERING_RESOLUTION": "Keep both records. V2 remains the target runtime. Legacy 0014 is an unresolved producer gap, inventoried in UE_0014_TARGET_INVENTORY.json. No placeholder tables were added and no RLS target was dropped.",
+      "ACCEPTANCE_EVIDENCE": "Historical ledger and README on the base SHA. Fresh execution: NOT_EXECUTED.",
+      "REMAINING_AUTHORIZATION": "None for reading the historical record. A new V2 clean-room result is required before this candidate can cite G1–G7.",
+      "CLASSIFICATION": "EXISTING_DESIGN_DEFECT_FOR_LEGACY_PATH_AND_HISTORICAL_PASS_FOR_V2_CANDIDATE"
+    },
+    {
+      "CONFLICT_ID": "ORGANIZATION_MEMBERS_ORGANIZATION_ID_TYPE",
+      "SOURCE_A": "Django auth_core.OrganizationMembers.organization is a ForeignKey to Organizations. Organizations.id is UUID. The frozen V2 plan emits organization_id uuid NOT NULL with a foreign key to organizations.id. db/migrations/0002_true_selene.sql alters the column to uuid and adds the foreign key. 0108 calls the column UUID.",
+      "SOURCE_B": "apps/union-eyes/db/schema-organizations.ts declared organizationId as text and commented that it stores the organization slug. apps/union-eyes/app/api/organizations/switch/route.ts compared that column to organizations.slug. db/migrations/20260909_strike_fund_disbursements_organization_id.sql joins organizations.slug = organization_members.organization_id. The financial-service introspection schema also declares the column as text.",
+      "BINDING_AUTHORITY": "Django is the canonical DDL owner. The accepted V2 plan already materializes the UUID foreign key. Drizzle is a projection and must follow that contract. The financial-service copy is a stale declaration, not a second DDL owner.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "Before this change, Drizzle parameterized membership organization_id as text against a UUID column. The switch route issued a second predicate against the slug when the UUID membership row was absent.",
+      "RISK": "A blanket type conversion, or rewriting the historical strike-fund migration, could change backfill semantics or drop the foreign key.",
+      "ENGINEERING_RESOLUTION": "Change only the canonical Drizzle projection to uuid with the existing organizations.id foreign key. Remove the slug comparison from the legacy organization switch route so a missing UUID membership returns 403 instead of comparing a slug to a UUID column. Leave 20260909 and the financial-service declaration unchanged.",
+      "ACCEPTANCE_EVIDENCE": "apps/union-eyes/db/__tests__/organization-members-insert-defaults.test.ts asserts getSQLType() === uuid. Broader bootstrap execution is NOT_EXECUTED.",
+      "REMAINING_AUTHORIZATION": "Replaying 20260909 on a UUID membership column remains a known historical incompatibility. Do not rewrite that frozen migration without a separate data-preservation review.",
+      "CLASSIFICATION": "EXISTING_DESIGN_DEFECT"
+    }
+  ]
+}

@@ -36,7 +36,7 @@ async function createFixtureDb(): Promise<PGlite> {
     create table organization_members (
       id uuid primary key,
       user_id text not null,
-      organization_id text not null, -- slug, matches production schema-organizations.ts
+      organization_id text not null, -- historical slug assumption of this migration only
       joined_at timestamptz not null default now(),
       deleted_at timestamptz
     );
