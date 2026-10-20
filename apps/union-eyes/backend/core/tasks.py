@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Optional
 
 from celery import shared_task
+from django.db import DatabaseError, OperationalError
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,28 @@ logger = logging.getLogger(__name__)
 REPORTS_DIR = os.environ.get("REPORTS_DIR", "/tmp/reports")
 TEMP_DIR = os.environ.get("TEMP_DIR", "/tmp/ue_temp")
 
+INSUFFICIENT_PRIVILEGE = "42501"
+
+
+class CleanupError(Exception):
+    """A cleanup failure that retrying cannot fix. The task ends FAILURE without a retry."""
+
+
+class CleanupTargetUnsupported(CleanupError):
+    """The target is unknown or has no source authority to run."""
+
+
+class CleanupPermissionDenied(CleanupError):
+    """The database identity running the task is not allowed to perform the cleanup."""
+
+
+class CleanupIncomplete(Exception):
+    """Part of the cleanup was rejected. Retryable: everything already removed stays removed."""
+
+
+def _sqlstate(exc: BaseException) -> Optional[str]:
+    cause = exc.__cause__ or exc
+    return getattr(cause, "pgcode", None)
 
 # ---------------------------------------------------------------------------
 # Task: cleanup_task
@@ -57,25 +80,44 @@ def cleanup_task(
         target:         One of 'logs', 'sessions', 'temp-files', 'exports'.
         older_than_days: Age threshold for deletion/archival.
     """
-    logger.info("Running cleanup task: target=%s older_than_days=%d", target, older_than_days)
+    task_id = getattr(self.request, "id", None)
+    logger.info(
+        "Running cleanup task: id=%s target=%s older_than_days=%d", task_id, target, older_than_days
+    )
 
+    dispatch = {
+        "logs":       _cleanup_logs,
+        "sessions":   _cleanup_sessions,
+        "temp-files": _cleanup_temp_files,
+        "exports":    _cleanup_exports,
+    }
     try:
-        dispatch = {
-            "logs":       _cleanup_logs,
-            "sessions":   _cleanup_sessions,
-            "temp-files": _cleanup_temp_files,
-            "exports":    _cleanup_exports,
-        }
         handler = dispatch.get(target)
         if not handler:
-            raise ValueError(f"Unknown cleanup target: {target}")
+            raise CleanupTargetUnsupported(f"Unknown cleanup target: {target}")
 
         result = handler(older_than_days=older_than_days)
-        logger.info("Cleanup complete: target=%s result=%s", target, result)
+        logger.info("Cleanup complete: id=%s target=%s result=%s", task_id, target, result)
         return {"success": True, "target": target, **result}
 
-    except Exception as exc:  # noqa: BLE001
-        logger.error("Cleanup task failed: target=%s error=%s", target, exc)
+    except CleanupError as exc:
+        logger.error("Cleanup task failed permanently: id=%s target=%s error=%s", task_id, target, exc)
+        raise
+    except DatabaseError as exc:
+        if _sqlstate(exc) == INSUFFICIENT_PRIVILEGE:
+            logger.error(
+                "Cleanup task denied by the database: id=%s target=%s error=%s", task_id, target, exc
+            )
+            raise CleanupPermissionDenied(
+                f"The database identity running this task may not clean {target}: {exc}"
+            ) from exc
+        if isinstance(exc, OperationalError):
+            logger.warning("Cleanup task hit a transient database error: id=%s target=%s", task_id, target)
+            raise self.retry(exc=exc, countdown=60)
+        logger.error("Cleanup task database error: id=%s target=%s error=%s", task_id, target, exc)
+        raise
+    except (CleanupIncomplete, OSError) as exc:
+        logger.warning("Cleanup task incomplete: id=%s target=%s error=%s", task_id, target, exc)
         raise self.retry(exc=exc, countdown=60)
 
 
@@ -85,36 +127,17 @@ def cleanup_task(
 
 def _cleanup_logs(older_than_days: int, **_) -> dict:
     """
-    Mark audit logs older than N days as archived.
+    Not supported. There is no source authority to run this.
 
-    Mirrors cleanup-worker.ts → cleanupLogs():
-    Uses ARCHIVE not DELETE to preserve immutable audit trail.
+    ``audit_logs`` is a tamper-evident SHA-256 hash chain (see core.models.AuditLogs).
+    Archiving or deleting its rows is a retention decision that no policy in this
+    repository makes, and the ``archived`` column the old code updated does not exist.
+    Report that as a failure instead of a success that did nothing.
     """
-    cutoff = timezone.now() - timedelta(days=older_than_days)
-    archived = 0
-
-    try:
-        # Use the auth_core audit-log model if available
-        from django.db import connection
-
-        with connection.cursor() as cur:
-            cur.execute(
-                """
-                UPDATE audit_logs
-                SET    archived    = TRUE,
-                       updated_at  = NOW()
-                WHERE  created_at  < %s
-                  AND  archived    IS DISTINCT FROM TRUE
-                """,
-                [cutoff],
-            )
-            archived = cur.rowcount
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("audit_logs table not available for archival: %s", exc)
-
-    logger.info("Archived %d audit log rows older than %d days", archived, older_than_days)
-    return {"archived": archived}
-
+    raise CleanupTargetUnsupported(
+        "audit_logs is a tamper-evident hash chain and no retention policy authorizes "
+        "archiving or deleting it, so the 'logs' cleanup target is not supported."
+    )
 
 def _cleanup_sessions(older_than_days: int = 90, **_) -> dict:
     """
@@ -122,23 +145,18 @@ def _cleanup_sessions(older_than_days: int = 90, **_) -> dict:
 
     Mirrors cleanup-worker.ts → cleanupSessions().
     """
-    deleted = 0
+    from django.contrib.sessions.models import Session
+    from django.db.models import Q
 
-    # 1. Django's built-in session table (if using DB sessions)
-    try:
-        from django.contrib.sessions.backends.db import SessionStore
-        from django.contrib.sessions.models import Session
-        from django.db.models import Q
+    now = timezone.now()
+    inactive_cutoff = now - timedelta(days=older_than_days)
 
-        now = timezone.now()
-        inactive_cutoff = now - timedelta(days=older_than_days)
-
-        result = Session.objects.filter(
-            Q(expire_date__lt=now) | Q(expire_date__lt=inactive_cutoff)
-        ).delete()
-        deleted += result[0]
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("Could not clean Django sessions: %s", exc)
+    # A database error here (for example a denied privilege) must reach the task, which
+    # decides between retry and permanent failure. It is not a reason to report success.
+    result = Session.objects.filter(
+        Q(expire_date__lt=now) | Q(expire_date__lt=inactive_cutoff)
+    ).delete()
+    deleted = result[0]
 
     logger.info("Deleted %d sessions", deleted)
     return {"deleted": deleted}
@@ -157,15 +175,21 @@ def _cleanup_temp_files(older_than_days: int, **_) -> dict:
     if not temp_path.exists():
         return {"deleted": 0}
 
+    failed = []
     for filepath in temp_path.iterdir():
         try:
             if filepath.is_file() and filepath.stat().st_mtime < cutoff:
                 filepath.unlink()
                 deleted += 1
-        except Exception as exc:  # noqa: BLE001
+        except OSError as exc:
             logger.warning("Could not delete temp file %s: %s", filepath, exc)
+            failed.append(filepath.name)
 
     logger.info("Deleted %d temp files older than %d days", deleted, older_than_days)
+    if failed:
+        raise CleanupIncomplete(
+            f"{len(failed)} temp file(s) could not be deleted after {deleted} were: {sorted(failed)[:5]}"
+        )
     return {"deleted": deleted}
 
 
@@ -182,13 +206,19 @@ def _cleanup_exports(older_than_days: int, **_) -> dict:
     if not reports_path.exists():
         return {"deleted": 0}
 
+    failed = []
     for filepath in reports_path.iterdir():
         try:
             if filepath.is_file() and filepath.stat().st_mtime < cutoff:
                 filepath.unlink()
                 deleted += 1
-        except Exception as exc:  # noqa: BLE001
+        except OSError as exc:
             logger.warning("Could not delete export file %s: %s", filepath, exc)
+            failed.append(filepath.name)
 
     logger.info("Deleted %d export files older than %d days", deleted, older_than_days)
+    if failed:
+        raise CleanupIncomplete(
+            f"{len(failed)} export file(s) could not be deleted after {deleted} were: {sorted(failed)[:5]}"
+        )
     return {"deleted": deleted}
