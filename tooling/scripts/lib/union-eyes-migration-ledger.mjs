@@ -20,10 +20,21 @@
  * checked on its own. Appending a new migration to a journal is not drift.
  *
  * A prefix cannot distinguish "newest row deleted" from "newest migration not
- * yet applied". The previous bootstrap attestation records a digest of the
- * ledger it saw, so the rows it covered must still be there, unchanged.
- * Someone who can rewrite both the ledger and the attestation table is not
- * detectable from inside the database; that needs an external release record.
+ * yet applied". Every bootstrap attestation that carries a migrationLedger
+ * receipt records the row count and a digest of the ledger it saw, so the rows
+ * it covered must still be there, unchanged.
+ *
+ * Which attestations count: those that carry a migrationLedger key. A row
+ * without the key predates the receipt contract (or was written by tooling that
+ * does not know it) and is not evidence either way, so it can neither supply nor
+ * hide an anchor. A row that carries the key but whose receipt is malformed, or
+ * that contradicts an earlier receipt (fewer rows than before), is a violation.
+ * It is never skipped in favour of an older valid receipt.
+ *
+ * Trust limit: the attestation lives in the same mutable database. Someone who
+ * can rewrite the ledger, delete the receipts, or rewrite both is not detectable
+ * from inside the database. Closing that needs an independently held release
+ * record, which this module does not provide.
  */
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -61,7 +72,7 @@ export function readLedgerExceptions(exceptionsPath) {
 
 /**
  * Pure evaluation. `journals` is [{ name, entries: [{ tag, hash }] }].
- * `attested` is { rowCount, digest } from the previous attestation, or null.
+ * attested is one or more { id?, rowCount, digest } receipts (oldest first), { malformed: true }  for an unreadable receipt, or null.
  */
 export function evaluateLedgerIntegrity({
   rows,
@@ -127,13 +138,24 @@ export function evaluateLedgerIntegrity({
       }
     }
   }
-  if (attested) {
-    if (rows.length < attested.rowCount) {
-      violations.push(`ledger has ${rows.length} rows but the last attestation covered ${attested.rowCount}`);
-    } else if (ledgerDigest(rows.slice(0, attested.rowCount)) !== attested.digest) {
-      violations.push('ledger rows covered by the last attestation no longer match its recorded digest');
+  const anchors = attested == null ? [] : [].concat(attested);
+  let earlierCoverage = 0;
+  anchors.forEach((anchor, position) => {
+    const label = position === anchors.length - 1 ? 'the last attestation' : `attestation ${anchor.id ?? position + 1}`;
+    if (anchor.malformed) {
+      violations.push(`${label} carries a malformed migrationLedger receipt`);
+      return;
     }
-  }
+    if (anchor.rowCount < earlierCoverage) {
+      violations.push(`${label} covers ${anchor.rowCount} ledger rows, fewer than the ${earlierCoverage} an earlier attestation covered`);
+    }
+    earlierCoverage = Math.max(earlierCoverage, anchor.rowCount);
+    if (rows.length < anchor.rowCount) {
+      violations.push(`ledger has ${rows.length} rows but ${label} covered ${anchor.rowCount}`);
+    } else if (ledgerDigest(rows.slice(0, anchor.rowCount)) !== anchor.digest) {
+      violations.push(`ledger rows covered by ${label} no longer match its recorded digest`);
+    }
+  });
 
   return { ok: violations.length === 0, violations: [...new Set(violations)] };
 }
@@ -145,27 +167,43 @@ export async function readLedgerRows(client) {
   return result.rows.map((row) => ({ id: Number(row.id), hash: row.hash }));
 }
 
-export async function readAttestedLedger(client) {
-  const exists = await client.query(`SELECT to_regclass('drizzle.bootstrap_attestations') AS regclass`);
-  if (!exists.rows[0]?.regclass) return null;
-  const result = await client.query(
-    `SELECT payload->'migrationLedger' AS ledger FROM drizzle.bootstrap_attestations ORDER BY id DESC LIMIT 1`,
-  );
-  const ledger = result.rows[0]?.ledger;
-  if (!ledger) return null;
-  if (!Number.isInteger(ledger.rowCount) || !HASH_PATTERN.test(ledger.digest ?? '')) {
-    return { rowCount: Number.POSITIVE_INFINITY, digest: 'malformed-attested-ledger' };
+function parseLedgerReceipt(value) {
+  if (
+    value === null ||
+    typeof value !== 'object' ||
+    Array.isArray(value) ||
+    !Number.isInteger(value.rowCount) ||
+    value.rowCount < 0 ||
+    typeof value.digest !== 'string' ||
+    !HASH_PATTERN.test(value.digest)
+  ) {
+    return { malformed: true };
   }
-  return { rowCount: ledger.rowCount, digest: ledger.digest };
+  return { rowCount: value.rowCount, digest: value.digest };
 }
 
+/**
+ * Every attestation that carries a migrationLedger key, oldest first. Rows
+ * without the key are legacy-format and are not evidence either way.
+ */
+export async function readAttestedLedgers(client) {
+  const exists = await client.query(`SELECT to_regclass('drizzle.bootstrap_attestations') AS regclass`);
+  if (!exists.rows[0]?.regclass) return [];
+  const result = await client.query(
+    `SELECT id, payload->'migrationLedger' AS ledger
+       FROM drizzle.bootstrap_attestations
+      WHERE jsonb_typeof(payload) = 'object' AND payload ? 'migrationLedger'
+      ORDER BY id`,
+  );
+  return result.rows.map((row) => ({ id: Number(row.id), ...parseLedgerReceipt(row.ledger) }));
+}
 /**
  * Throws, and changes nothing, when the ledger is not a faithful prefix of the
  * journals. Never repairs, stamps, or deletes a row.
  */
 export async function assertMigrationLedgerIntegrity(client, { journals, exceptions = [], useAttestation = true }) {
   const rows = await readLedgerRows(client);
-  const attested = useAttestation ? await readAttestedLedger(client) : null;
+  const attested = useAttestation ? await readAttestedLedgers(client) : null;
   const result = evaluateLedgerIntegrity({ rows, journals, exceptions, attested });
   if (!result.ok) {
     throw new Error(

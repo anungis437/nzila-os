@@ -2,12 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
   execute: vi.fn(),
+  withRLSContext: vi.fn(),
   generate: vi.fn(),
   buildDependencyPropagationMap: vi.fn(),
   calculateResilienceIndex: vi.fn(),
 }));
 
-vi.mock('@/db/db', () => ({ db: { execute: h.execute } }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: h.withRLSContext }));
 vi.mock('drizzle-orm', () => ({ sql: Object.assign((..._a: unknown[]) => ({}), { raw: (s: string) => s }) }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ generate: h.generate }),
@@ -30,7 +31,13 @@ vi.mock('../../copilot-explainability/response-builder', () => ({
   }),
 }));
 
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { processCopilotQuery, loadConversationHistory, listConversations } from '../copilot-engine';
+
+const ORG = '11111111-1111-4111-8111-111111111111';
+const C1 = '55555555-5555-4555-8555-555555555555';
+const C2 = '66666666-6666-4666-8666-666666666666';
 
 function ctx() {
   h.buildDependencyPropagationMap.mockResolvedValue({
@@ -52,13 +59,15 @@ function ctx() {
 describe('lib/knowledge-transfer/copilot/copilot-engine', () => {
   beforeEach(() => {
     h.execute.mockReset();
+    h.withRLSContext.mockReset();
+    h.withRLSContext.mockImplementation(async (_c: unknown, op: (tx: unknown) => unknown) => op({ execute: h.execute }));
     h.generate.mockReset();
     h.execute.mockResolvedValue([]);
     ctx();
   });
 
   it('processes a fragility query, creates conversation, returns explainable result', async () => {
-    const result = await processCopilotQuery('org-1', { query: 'What is most fragile and at risk?' });
+    const result = await processCopilotQuery(ORG, { query: 'What is most fragile and at risk?' });
     expect(result.conversationId).toBeTruthy();
     expect(result.answer.length).toBe(250);
     expect(result.summary.endsWith('…')).toBe(true);
@@ -68,46 +77,67 @@ describe('lib/knowledge-transfer/copilot/copilot-engine', () => {
   });
 
   it('returns governance follow-ups and reuses an existing conversation', async () => {
-    h.execute.mockResolvedValue([{ id: 'conv-existing' }]);
-    const result = await processCopilotQuery('org-1', {
+    h.execute.mockResolvedValue([{ id: C1 }]);
+    const result = await processCopilotQuery(ORG, {
       query: 'How do we improve governance compliance?',
-      conversationId: 'conv-existing',
+      conversationId: C1,
       priorMessages: [{ role: 'user', content: 'hi' }],
     });
-    expect(result.conversationId).toBe('conv-existing');
+    expect(result.conversationId).toBe(C1);
     expect(result.followUpSuggestions.some((s) => s.toLowerCase().includes('governance'))).toBe(true);
   });
 
   it('returns mitigation and dependency follow-ups', async () => {
-    const mit = await processCopilotQuery('org-1', { query: 'How do we fix and improve this?' });
+    const mit = await processCopilotQuery(ORG, { query: 'How do we fix and improve this?' });
     expect(mit.followUpSuggestions.some((s) => s.toLowerCase().includes('mitigation'))).toBe(true);
-    const dep = await processCopilotQuery('org-1', { query: 'What is the dependency chain propagation?' });
+    const dep = await processCopilotQuery(ORG, { query: 'What is the dependency chain propagation?' });
     expect(dep.followUpSuggestions.some((s) => s.toLowerCase().includes('dependency'))).toBe(true);
   });
 
   it('returns default follow-ups for generic query', async () => {
-    const result = await processCopilotQuery('org-1', { query: 'Tell me about my organization' });
+    const result = await processCopilotQuery(ORG, { query: 'Tell me about my organization' });
     expect(result.followUpSuggestions.some((s) => s.includes('urgent attention'))).toBe(true);
   });
 
   it('loads conversation history (found and empty)', async () => {
-    h.execute.mockResolvedValueOnce([]).mockResolvedValueOnce([]).mockResolvedValueOnce([{ messages: [{ id: 'm', role: 'user', content: 'x', createdAt: 'now' }] }]);
-    const found = await loadConversationHistory('org-1', 'c1');
+    h.execute.mockResolvedValueOnce([{ messages: [{ id: 'm', role: 'user', content: 'x', createdAt: 'now' }] }]);
+    const found = await loadConversationHistory(ORG, C1);
     expect(found.length).toBe(1);
 
     h.execute.mockResolvedValue([]);
-    const empty = await loadConversationHistory('org-1', 'c2');
+    const empty = await loadConversationHistory(ORG, C2);
     expect(empty).toEqual([]);
   });
 
   it('lists conversations', async () => {
     h.execute
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([{ id: 'c1', title: 'T', updated_at: new Date('2025-01-01'), message_count: 4 }]);
-    const list = await listConversations('org-1', 5);
+    const list = await listConversations(ORG, 5);
     expect(list[0].id).toBe('c1');
     expect(list[0].messageCount).toBe(4);
     expect(typeof list[0].updatedAt).toBe('string');
+  });
+
+  it('scopes message appends by organization and runs in tenant context', async () => {
+    await processCopilotQuery(ORG, { query: 'Tell me about my organization' });
+    expect(h.withRLSContext).toHaveBeenCalled();
+    for (const call of h.withRLSContext.mock.calls) {
+      expect(call[0]).toEqual({ organizationId: ORG });
+    }
+  });
+
+  it('treats a malformed conversation id as empty without querying', async () => {
+    expect(await loadConversationHistory(ORG, 'not-a-uuid')).toEqual([]);
+    expect(h.execute).not.toHaveBeenCalled();
+  });
+
+  it('refuses a non-UUID organization before touching the database', async () => {
+    await expect(listConversations('org-1')).rejects.toThrow('organizationId must be a UUID');
+    expect(h.execute).not.toHaveBeenCalled();
+  });
+
+  it('never issues schema DDL', () => {
+    const source = readFileSync(fileURLToPath(new URL('../copilot-engine.ts', import.meta.url)), 'utf8');
+    expect(source).not.toMatch(/CREATE\s+(TABLE|INDEX)|ALTER\s+TABLE|ensureTable/i);
   });
 });

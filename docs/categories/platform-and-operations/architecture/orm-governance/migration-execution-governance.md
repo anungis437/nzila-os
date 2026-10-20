@@ -140,17 +140,39 @@ faithful append-only prefix of the committed journals
   `apps/union-eyes/db/migration-ledger-exceptions.json` (absent means none);
 - no hash is recorded twice;
 - each journal's recorded entries are its first *k* entries, in order, with no gap;
-- the rows the previous attestation covered still match its sealed digest
+- the rows every earlier attestation covered still match its sealed digest
   (`payload.migrationLedger`). A prefix cannot tell "newest row deleted" from "not
   yet applied"; the digest can.
+
+Which attestations count: those that carry a `migrationLedger` key. A row without the
+key predates the receipt contract and is not evidence either way, so it can neither
+supply nor hide an anchor. A row that carries the key but whose receipt is malformed,
+or that covers fewer rows than an earlier receipt, fails closed. It is never skipped in
+favour of an older valid receipt. Reading only the newest attestation was a defect: a
+newer legacy-format row hid the anchor, and a deleted newest ledger row was then
+silently re-applied and re-stamped.
 
 Appending a migration to a journal is not drift. The one governed gap-fill is the ICRA
 rollout migration listed in `GOVERNED_GAP_FILL_TAGS`; adding to that list is a reviewed
 change. Separately, a recorded `0014` whose protected relations are physically absent is
 a ledger/catalog disagreement and fails closed.
 
-Limit: someone who can rewrite both the ledger and the attestation table is not
-detectable from inside the database. That needs an external release record.
+Limit: the attestations live in the same mutable database. Someone who can rewrite the
+ledger, delete the receipts, or rewrite both is not detectable from inside the database.
+That needs an independently held release record, which this mechanism does not provide.
+## 9b. No application-time DDL
+
+Application code must not create or alter relations. Runtime identities hold no schema
+authority, and a relation that appears at request time is outside the migration ledger,
+the storage-authority manifest and the catalog admission contract, so the packaged
+health check correctly refuses it as unclassified.
+`ue_cognition_memory`, `ue_reasoning_sessions` and `ue_copilot_conversations` were created
+that way. They are now created by platform migration `0012`, protected by scoped `0018`
+(FORCE RLS on `organization_id uuid`), and registered in the storage-authority manifest
+with runtime `SELECT, INSERT, UPDATE` only. A relation the old code already created is
+converted in place when every id and `org_id` is a UUID, and otherwise the migration fails
+closed without changing anything.
+
 ## 10. Prohibitions (Explicit)
 
 The following are explicitly prohibited:

@@ -3,6 +3,7 @@ import {
   GOVERNED_GAP_FILL_TAGS,
   evaluateLedgerIntegrity,
   ledgerDigest,
+  readAttestedLedgers,
   readLedgerExceptions,
 } from '../../../../tooling/scripts/lib/union-eyes-migration-ledger.mjs'
 
@@ -158,3 +159,91 @@ describe('migration ledger integrity', () => {
       expect(evaluateLedgerIntegrity({ rows: dup, journals: governedJournals }).violations.join('\n')).toContain('a second time')
     })
   })})
+
+describe('attestation anchors', () => {
+  const early = { id: 1, ...attest(cleanRows.slice(0, 4)) }
+  const full = { id: 3, ...attest(cleanRows) }
+
+  it('accepts a chain of consistent receipts', () => {
+    expect(evaluate(cleanRows, { attested: [early, full] }).violations).toEqual([])
+  })
+
+  it('keeps an earlier anchor in force when a newer attestation has no receipt', () => {
+    // Legacy-format rows never reach the evaluator: readAttestedLedgers filters them out.
+    const rows = cleanRows.slice(0, -1)
+    const result = evaluate(rows, { attested: [full] })
+    expect(result.violations.join('\n')).toContain('covered')
+  })
+
+  it('detects a changed latest row against an earlier anchor', () => {
+    const rows = cleanRows.map((row, i) => (i === 5 ? { ...row, hash: hash(9999) } : row))
+    expect(evaluate(rows, { attested: [full] }).ok).toBe(false)
+  })
+
+  it('fails closed on a malformed newer receipt instead of using the older valid one', () => {
+    const result = evaluate(cleanRows, { attested: [early, { id: 4, malformed: true }] })
+    expect(result.ok).toBe(false)
+    expect(result.violations.join('\n')).toContain('malformed migrationLedger receipt')
+  })
+
+  it('rejects a newer receipt that covers fewer rows than an earlier one', () => {
+    const shrunk = { id: 4, ...attest(cleanRows.slice(0, 2)) }
+    const result = evaluate(cleanRows, { attested: [full, shrunk] })
+    expect(result.violations.join('\n')).toContain('fewer than the')
+  })
+
+  it('rejects an earlier receipt whose rows were rewritten even if the newest still matches', () => {
+    const rewritten = { id: 1, rowCount: 4, digest: hash(7) }
+    const result = evaluate(cleanRows, { attested: [rewritten, full] })
+    expect(result.violations.join('\n')).toContain('attestation 1 no longer match its recorded digest')
+  })
+
+  it('treats no receipts as a legitimately pre-attestation environment', () => {
+    expect(evaluate(cleanRows, { attested: [] }).violations).toEqual([])
+    expect(evaluate(cleanRows, { attested: null }).violations).toEqual([])
+  })
+
+  describe('readAttestedLedgers', () => {
+    function client(rows: unknown[] | null) {
+      const queries: string[] = []
+      return {
+        queries,
+        query: async (text: string) => {
+          queries.push(text)
+          if (text.includes('to_regclass')) return { rows: [{ regclass: rows === null ? null : 'drizzle.bootstrap_attestations' }] }
+          return { rows: rows ?? [] }
+        },
+      }
+    }
+
+    it('selects only rows that carry the migrationLedger key, oldest first', async () => {
+      const c = client([])
+      await readAttestedLedgers(c)
+      const select = c.queries.find((q) => q.includes('bootstrap_attestations') && !q.includes('to_regclass')) ?? ''
+      expect(select).toMatch(/payload \? 'migrationLedger'/)
+      expect(select).toMatch(/ORDER BY id\s*$/)
+    })
+
+    it('returns nothing when the attestation table is absent', async () => {
+      expect(await readAttestedLedgers(client(null))).toEqual([])
+    })
+
+    it.each([
+      ['null receipt', null],
+      ['array receipt', []],
+      ['string receipt', 'x'],
+      ['missing digest', { rowCount: 3 }],
+      ['short digest', { rowCount: 3, digest: 'abc' }],
+      ['fractional count', { rowCount: 1.5, digest: hash(1) }],
+      ['negative count', { rowCount: -1, digest: hash(1) }],
+    ])('marks a %s as malformed', async (_label, ledger) => {
+      const result = await readAttestedLedgers(client([{ id: 7, ledger }]))
+      expect(result).toEqual([{ id: 7, malformed: true }])
+    })
+
+    it('parses a valid receipt', async () => {
+      const result = await readAttestedLedgers(client([{ id: '7', ledger: { rowCount: 3, digest: hash(1) } }]))
+      expect(result).toEqual([{ id: 7, rowCount: 3, digest: hash(1) }])
+    })
+  })
+})

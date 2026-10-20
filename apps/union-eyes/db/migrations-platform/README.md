@@ -37,6 +37,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0008_django_stub_relation_evolution` | Widens empty Django stubs and casts historical committee text status columns to canonical enums before `0009`. Populated incompatible rows and values outside the enum are refused |
 | `0009_canonical_lineage_relations` | Forward CREATE for current Drizzle relations required by the 0014 preflight and its parent or 0015 dependencies |
 | `0010_billing_relation_shape_authority` | Align empty `org_subscriptions`, `platform_invoices`, and `platform_payments` to the Drizzle enum and `billing_account_id` contract. Populated incompatible rows are refused |
+| `0012_knowledge_transfer_runtime_relations` | `ue_cognition_memory`, `ue_reasoning_sessions` and `ue_copilot_conversations`, previously created by application code in request paths. Legacy runtime-created relations are converted in place only when every id and org_id is a UUID; otherwise the migration fails closed. RLS is scoped `0018` |
 
 ## What does not belong here
 

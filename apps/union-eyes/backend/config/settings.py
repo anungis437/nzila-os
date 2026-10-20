@@ -337,20 +337,15 @@ CELERY_BEAT_SCHEDULE = {
         "args": ("weekly",),
     },
     # ---------- cleanup (was: scheduleCleanupJobs) -------------------------
-    "daily-cleanup-logs": {
-        "task": "core.tasks.cleanup_task",
-        "schedule": crontab(hour=2, minute=0),  # 0 2 * * *
-        "kwargs": {"target": "logs", "older_than_days": 30},
-    },
+    # Only targets with source authority are scheduled. "logs" would archive the audit
+    # hash chain, which no retention policy authorizes. "sessions" needs DELETE on
+    # django_session, which no worker identity holds. Neither is scheduled until an owner
+    # decides a retention contract and identity; core migration 0005 disables rows that
+    # earlier deployments already stored in the DatabaseScheduler.
     "weekly-cleanup-exports": {
         "task": "core.tasks.cleanup_task",
         "schedule": crontab(hour=3, minute=0, day_of_week=0),  # 0 3 * * 0
         "kwargs": {"target": "exports", "older_than_days": 7},
-    },
-    "weekly-cleanup-sessions": {
-        "task": "core.tasks.cleanup_task",
-        "schedule": crontab(hour=3, minute=30, day_of_week=0),
-        "kwargs": {"target": "sessions", "older_than_days": 90},
     },
     # ---------- billing scheduler (was: BillingScheduler) ------------------
     "monthly-billing": {
