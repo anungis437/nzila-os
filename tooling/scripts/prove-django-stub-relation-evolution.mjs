@@ -289,6 +289,64 @@ try {
     }
   })
 
+  await withDatabase('ue_stub_rel_access', async (client) => {
+    await client.query(`CREATE TYPE public.case_access_role AS ENUM ('secondary_lro')`)
+    await client.query(`CREATE TYPE public.case_access_status AS ENUM ('active')`)
+    await client.query(`CREATE TABLE public.grievances (id uuid PRIMARY KEY)`)
+    const grievanceId = '33333333-3333-4333-8333-333333333333'
+    const userId = '11111111-1111-4111-8111-111111111111'
+    await client.query(`INSERT INTO public.grievances (id) VALUES ($1)`, [grievanceId])
+    await client.query(`
+      CREATE TABLE public.grievance_case_access_assignments (
+        id uuid PRIMARY KEY,
+        organization_id uuid NOT NULL,
+        grievance_id uuid NOT NULL REFERENCES public.grievances(id) ON DELETE CASCADE,
+        user_id uuid NOT NULL,
+        access_role public.case_access_role NOT NULL,
+        granted_by uuid NOT NULL,
+        granted_at timestamptz NOT NULL DEFAULT now(),
+        expires_at timestamptz,
+        can_comment boolean NOT NULL DEFAULT true,
+        can_upload_documents boolean NOT NULL DEFAULT false,
+        can_edit_case_notes boolean NOT NULL DEFAULT false,
+        can_draft_actions boolean NOT NULL DEFAULT false,
+        can_view_private_documents boolean NOT NULL DEFAULT false,
+        status public.case_access_status NOT NULL,
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )
+    `)
+    await client.query(
+      `INSERT INTO public.grievance_case_access_assignments (
+         id, organization_id, grievance_id, user_id, access_role, granted_by, status
+       ) VALUES ($1, $1, $2, $3, 'secondary_lro', $3, 'active')`,
+      [grievanceId, grievanceId, userId],
+    )
+    await applyEvolution(client)
+    const row = await client.query(
+      `SELECT user_id, pg_typeof(user_id)::text AS user_type, granted_by, pg_typeof(granted_by)::text AS granted_type
+       FROM public.grievance_case_access_assignments`,
+    )
+    const statements = canonicalSql.split('--> statement-breakpoint').map((statement) => statement.trim()).filter(Boolean)
+    const columnCheck = statements.find((statement) =>
+      statement.includes('incompatible existing relation public.grievance_case_access_assignments: expected 15 matching columns'),
+    )
+    await client.query('BEGIN')
+    await client.query('CREATE TEMP TABLE IF NOT EXISTS ue_bootstrap_created_relations (relname text PRIMARY KEY) ON COMMIT DROP')
+    await client.query(columnCheck)
+    const fkCheck = statements.find((statement) =>
+      statement.includes('constraint grievance_case_access_assignments_grievance_id_grievances_id_fk is absent'),
+    )
+    await client.query(fkCheck)
+    await client.query('COMMIT')
+    record('access_assignment_uuid_text', row.rows[0])
+    if (row.rows[0].user_type !== 'text' || row.rows[0].user_id !== userId) {
+      throw new Error(`user_id was not preserved as text: ${JSON.stringify(row.rows[0])}`)
+    }
+    if (row.rows[0].granted_type !== 'text' || row.rows[0].granted_by !== userId) {
+      throw new Error(`granted_by was not preserved as text: ${JSON.stringify(row.rows[0])}`)
+    }
+  })
+
   await withDatabase('ue_stub_rel_absent', async (client) => {
     await applyEvolution(client)
     const exists = await client.query(`SELECT to_regclass('public.employers') AS rel`)

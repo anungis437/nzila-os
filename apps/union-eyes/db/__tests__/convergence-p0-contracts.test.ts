@@ -216,6 +216,10 @@ describe('convergence P0 contracts', () => {
       'collective_agreements',
       'cba_clauses',
       'cost_centers',
+      'grievance_case_access_assignments',
+      'document_access_grants',
+      'case_documents',
+      'org_configurations',
     ]) {
       expect(stubSql).toContain(`'${relation}'`)
     }

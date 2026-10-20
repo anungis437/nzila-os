@@ -280,6 +280,51 @@ BEGIN
   INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'created_by', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
   INSERT INTO ue_stub_column_contract VALUES ('cost_centers', 'updated_by', 'character varying', 'varchar', 'YES', 255, NULL, NULL, 'varchar(255)');
 
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'grievance_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'user_id', 'text', 'text', 'NO', NULL, NULL, NULL, 'text NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'access_role', 'USER-DEFINED', 'case_access_role', 'NO', NULL, NULL, NULL, '"case_access_role" DEFAULT ''secondary_lro'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'granted_by', 'text', 'text', 'NO', NULL, NULL, NULL, 'text NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'granted_at', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'expires_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'can_comment', 'boolean', 'bool', 'NO', NULL, NULL, NULL, 'boolean DEFAULT true NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'can_upload_documents', 'boolean', 'bool', 'NO', NULL, NULL, NULL, 'boolean DEFAULT false NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'can_edit_case_notes', 'boolean', 'bool', 'NO', NULL, NULL, NULL, 'boolean DEFAULT false NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'can_draft_actions', 'boolean', 'bool', 'NO', NULL, NULL, NULL, 'boolean DEFAULT false NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'can_view_private_documents', 'boolean', 'bool', 'NO', NULL, NULL, NULL, 'boolean DEFAULT false NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'status', 'USER-DEFINED', 'case_access_status', 'NO', NULL, NULL, NULL, '"case_access_status" DEFAULT ''active'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('grievance_case_access_assignments', 'updated_at', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'document_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'user_id', 'text', 'text', 'NO', NULL, NULL, NULL, 'text NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'granted_by', 'text', 'text', 'NO', NULL, NULL, NULL, 'text NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'status', 'USER-DEFINED', 'document_grant_status', 'NO', NULL, NULL, NULL, '"document_grant_status" DEFAULT ''active'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'can_view', 'boolean', 'bool', 'NO', NULL, NULL, NULL, 'boolean DEFAULT true NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'can_download', 'boolean', 'bool', 'NO', NULL, NULL, NULL, 'boolean DEFAULT false NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'can_share', 'boolean', 'bool', 'NO', NULL, NULL, NULL, 'boolean DEFAULT false NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'expires_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'revoked_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  INSERT INTO ue_stub_column_contract VALUES ('document_access_grants', 'created_at', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('case_documents', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('case_documents', 'claim_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('case_documents', 'document_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('case_documents', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('case_documents', 'linked_by', 'text', 'text', 'NO', NULL, NULL, NULL, 'text NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('case_documents', 'linked_at', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('case_documents', 'link_type', 'text', 'text', 'YES', NULL, NULL, NULL, 'text DEFAULT ''attachment''');
+  INSERT INTO ue_stub_column_contract VALUES ('case_documents', 'notes', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('case_documents', 'is_immutable', 'boolean', 'bool', 'YES', NULL, NULL, NULL, 'boolean DEFAULT false');
+  INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'category', 'text', 'text', 'NO', NULL, NULL, NULL, 'text NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'key', 'text', 'text', 'NO', NULL, NULL, NULL, 'text NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'value', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'description', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'created_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'updated_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'updated_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
   FOR rel IN
     SELECT relname, count(*)::integer AS expected
     FROM ue_stub_column_contract
@@ -324,14 +369,12 @@ BEGIN
          FROM ue_stub_column_contract
          WHERE relname = rel.relname)
       ) INTO match_count;
-      IF match_count IS DISTINCT FROM rel.expected THEN
-        RAISE EXCEPTION 'incompatible existing relation public.%: canonical names are present but % column contracts are not satisfied (found %). Rows were not rewritten.',
-          rel.relname, rel.expected, match_count;
+      IF match_count = rel.expected THEN
+        CONTINUE;
       END IF;
-      CONTINUE;
     END IF;
 
-    IF NOT canonical @> existing THEN
+    IF NOT (canonical @> existing OR existing @> canonical) THEN
       RAISE EXCEPTION 'incompatible existing relation public.%: unrecognized historical columns (%). Rows were not rewritten.',
         rel.relname, existing;
     END IF;
@@ -346,6 +389,9 @@ BEGIN
       SELECT * INTO expected
       FROM ue_stub_column_contract
       WHERE relname = rel.relname AND column_name = live.column_name;
+      IF NOT FOUND THEN
+        CONTINUE;
+      END IF;
 
       IF live.udt_name = expected.udt_name
          AND live.data_type = expected.data_type
@@ -354,6 +400,17 @@ BEGIN
          AND live.numeric_precision IS NOT DISTINCT FROM expected.numeric_precision
          AND live.numeric_scale IS NOT DISTINCT FROM expected.numeric_scale THEN
         CONTINUE;
+      END IF;
+
+      IF (live.udt_name = 'uuid' AND expected.udt_name = 'text')
+         OR (live.udt_name = 'varchar' AND expected.udt_name = 'text') THEN
+        EXECUTE format(
+          'ALTER TABLE public.%I ALTER COLUMN %I TYPE text USING %I::text',
+          rel.relname, live.column_name, live.column_name
+        );
+        live.udt_name := 'text';
+        live.data_type := 'text';
+        live.character_maximum_length := NULL;
       END IF;
 
       IF live.udt_name = 'timestamptz' AND expected.udt_name = 'timestamp' THEN
@@ -419,6 +476,32 @@ BEGIN
       END IF;
       EXECUTE format('ALTER TABLE public.%I ADD COLUMN %I %s', rel.relname, expected.column_name, expected.add_sql);
     END LOOP;
+
+    EXECUTE format(
+      'SELECT count(*) FROM information_schema.columns WHERE table_schema = %L AND table_name = %L AND (%s)',
+      'public',
+      rel.relname,
+      (SELECT string_agg(
+         format(
+           '(column_name = %L AND data_type = %L AND udt_name = %L AND is_nullable = %L%s%s)',
+           column_name,
+           data_type,
+           udt_name,
+           is_nullable,
+           CASE WHEN character_maximum_length IS NULL THEN ''
+                ELSE format(' AND character_maximum_length = %s', character_maximum_length) END,
+           CASE WHEN numeric_precision IS NULL THEN ''
+                ELSE format(' AND numeric_precision = %s AND numeric_scale = %s', numeric_precision, numeric_scale) END
+         ),
+         ' OR '
+       )
+       FROM ue_stub_column_contract
+       WHERE relname = rel.relname)
+    ) INTO match_count;
+    IF match_count IS DISTINCT FROM rel.expected THEN
+      RAISE EXCEPTION 'incompatible existing relation public.%: canonical names are present but % column contracts are not satisfied (found %). Rows were not rewritten.',
+        rel.relname, rel.expected, match_count;
+    END IF;
   END LOOP;
 END
 $ue$;
@@ -953,6 +1036,141 @@ BEGIN
     ALTER TABLE public.cba_clauses
       ADD CONSTRAINT cba_clauses_cba_id_collective_agreements_id_fk
       FOREIGN KEY (cba_id) REFERENCES public.collective_agreements(id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.grievance_case_access_assignments');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'grievance_case_access_assignments_grievance_id_grievances_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.grievances');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.grievances for grievance_case_access_assignments_grievance_id_grievances_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans
+    FROM public.grievance_case_access_assignments e
+    LEFT JOIN public.grievances parent_row ON parent_row.id = e.grievance_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.grievance_case_access_assignments: % row(s) violate grievance_case_access_assignments_grievance_id_grievances_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.grievance_case_access_assignments
+      ADD CONSTRAINT grievance_case_access_assignments_grievance_id_grievances_id_fk
+      FOREIGN KEY (grievance_id) REFERENCES public.grievances(id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.case_documents');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'case_documents_claim_id_claims_claim_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.claims');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.claims for case_documents_claim_id_claims_claim_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.case_documents e
+    LEFT JOIN public.claims parent_row ON parent_row.claim_id = e.claim_id
+    WHERE parent_row.claim_id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.case_documents: % row(s) violate case_documents_claim_id_claims_claim_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.case_documents
+      ADD CONSTRAINT case_documents_claim_id_claims_claim_id_fk
+      FOREIGN KEY (claim_id) REFERENCES public.claims(claim_id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.case_documents');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'case_documents_document_id_documents_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.documents');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.documents for case_documents_document_id_documents_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.case_documents e
+    LEFT JOIN public.documents parent_row ON parent_row.id = e.document_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.case_documents: % row(s) violate case_documents_document_id_documents_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.case_documents
+      ADD CONSTRAINT case_documents_document_id_documents_id_fk
+      FOREIGN KEY (document_id) REFERENCES public.documents(id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.case_documents');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'case_documents_organization_id_organizations_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.organizations');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.organizations for case_documents_organization_id_organizations_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.case_documents e
+    LEFT JOIN public.organizations parent_row ON parent_row.id = e.organization_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.case_documents: % row(s) violate case_documents_organization_id_organizations_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.case_documents
+      ADD CONSTRAINT case_documents_organization_id_organizations_id_fk
+      FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
+      ON DELETE no action ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.document_access_grants');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'document_access_grants_organization_id_organizations_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.organizations');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.organizations for document_access_grants_organization_id_organizations_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.document_access_grants e
+    LEFT JOIN public.organizations parent_row ON parent_row.id = e.organization_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.document_access_grants: % row(s) violate document_access_grants_organization_id_organizations_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.document_access_grants
+      ADD CONSTRAINT document_access_grants_organization_id_organizations_id_fk
+      FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.document_access_grants');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'document_access_grants_document_id_documents_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.documents');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.documents for document_access_grants_document_id_documents_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.document_access_grants e
+    LEFT JOIN public.documents parent_row ON parent_row.id = e.document_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.document_access_grants: % row(s) violate document_access_grants_document_id_documents_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.document_access_grants
+      ADD CONSTRAINT document_access_grants_document_id_documents_id_fk
+      FOREIGN KEY (document_id) REFERENCES public.documents(id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.org_configurations');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'org_configurations_organization_id_organizations_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.organizations');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.organizations for org_configurations_organization_id_organizations_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.org_configurations e
+    LEFT JOIN public.organizations parent_row ON parent_row.id = e.organization_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.org_configurations: % row(s) violate org_configurations_organization_id_organizations_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.org_configurations
+      ADD CONSTRAINT org_configurations_organization_id_organizations_id_fk
+      FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
       ON DELETE cascade ON UPDATE no action;
   END IF;
 END
