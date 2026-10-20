@@ -64,6 +64,13 @@
       "when": 1758670000000,
       "tag": "0008_strike_fund_uuid_membership_provenance",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1758680000000,
+      "tag": "0009_canonical_lineage_relations",
+      "breakpoints": true
     }
   ]
 }

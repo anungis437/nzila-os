@@ -18,11 +18,13 @@
  *   4. Optional canonical snapshot restore, or the QA baseline when the
  *      canonical tables are absent in QA/CI.
  *   5. Scoped migrations through 0013 (roles, grants, RLS helpers).
- *   6. Post-freeze PLATFORM_SQL from db/migrations-platform/.
- *   7. Re-grant of the 0009 table privileges so tables created in step 6
- *      receive the same DML grants. 0009 itself is not rewritten.
+ *   6. Quarantine runtime DML on relations that do not have FORCE RLS,
+ *      unless 0014 and 0015 are already recorded. 0009 is not rewritten.
+ *   7. Post-freeze PLATFORM_SQL from db/migrations-platform/.
  *   8. Scoped migrations after 0013, including the 0014 preflight.
- *   9. Bootstrap attestation written to drizzle.bootstrap_attestations.
+ *   9. Activate the 0009 grant envelope only after both closure hashes
+ *      are recorded. A failed closure leaves the quarantine in place.
+ *  10. Bootstrap attestation written to drizzle.bootstrap_attestations.
  *
  * It does NOT:
  *   - replay legacy migrations under db/migrations/
@@ -40,6 +42,7 @@ import {
   applyScopedMigrations as applyScopedMigrationsShared,
   baselineScopedMigrations as baselineScopedMigrationsShared,
   ensureExtensions as ensureExtensionsShared,
+  getScopedMigrationStatus,
   readJournalEntries,
 } from './lib/union-eyes-scoped-migrations.mjs';
 import {
@@ -48,6 +51,9 @@ import {
 import {
   PRODUCTION_BOOTSTRAP_ORDER,
   SCOPED_FOUNDATION_THROUGH_TAG,
+  SCOPED_RLS_CLOSURE_TAGS,
+  platformMigrationPrecedesScopedClosure,
+  runtimeGrantsFollowSecurityClosure,
   tagsThrough,
 } from './lib/union-eyes-bootstrap-stages.mjs';
 import { read0014RelationNames } from './lib/union-eyes-0014-producer-graph.mjs';
@@ -242,16 +248,79 @@ async function baselineMigrationsAfterSnapshot(client) {
   return { scoped, platform: { stamped: 0, stampedTags: [] } };
 }
 
-async function regrantRuntimeTablePrivileges(client) {
+async function runtimeRolesPresent(client) {
   const roles = await client.query(
     `SELECT rolname FROM pg_roles WHERE rolname IN ('union_eyes_runtime', 'union_eyes_system')`,
   );
   const present = new Set(roles.rows.map((row) => row.rolname));
-  if (!present.has('union_eyes_runtime') || !present.has('union_eyes_system')) {
-    info('Runtime roles are absent; skipping the post-platform table re-grant.');
-    return { applied: false };
+  return present.has('union_eyes_runtime') && present.has('union_eyes_system');
+}
+
+async function securityClosureRecorded(client) {
+  const status = await getScopedMigrationStatus(client, {
+    journalPath: SCOPED_JOURNAL,
+    migrationsDir: SCOPED_MIGRATIONS_DIR,
+  });
+  const applied = new Map(status.map((entry) => [entry.tag, entry.applied]));
+  return SCOPED_RLS_CLOSURE_TAGS.every((tag) => applied.get(tag) === true);
+}
+
+async function quarantineUnprotectedRuntimePrivileges(client) {
+  if (!(await runtimeRolesPresent(client))) {
+    info('Runtime roles are absent; skipping privilege quarantine.');
+    return { applied: false, reason: 'roles_absent' };
   }
-  info('Re-granting 0009 table and sequence privileges after platform DDL. The 0009 file is unchanged.');
+  if (await securityClosureRecorded(client)) {
+    info('0014 and 0015 are already recorded. Existing runtime grants stay unchanged.');
+    return { applied: false, reason: 'closure_already_recorded' };
+  }
+  info(
+    'Quarantining runtime DML on public relations without FORCE RLS. ' +
+      '0009 is unchanged. Grants return only after 0014 and 0015 commit.',
+  );
+  await client.query('BEGIN');
+  try {
+    await client.query(`
+      DO $ue$
+      DECLARE
+        rel record;
+      BEGIN
+        FOR rel IN
+          SELECT c.oid::regclass AS relation_name
+          FROM pg_class c
+          JOIN pg_namespace n ON n.oid = c.relnamespace
+          WHERE n.nspname = 'public'
+            AND c.relkind IN ('r', 'p', 'v', 'f')
+            AND NOT c.relforcerowsecurity
+        LOOP
+          EXECUTE format(
+            'REVOKE SELECT, INSERT, UPDATE, DELETE ON TABLE %s FROM union_eyes_runtime, union_eyes_system',
+            rel.relation_name
+          );
+        END LOOP;
+      END
+      $ue$
+    `);
+    await client.query(
+      'REVOKE USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public FROM union_eyes_runtime, union_eyes_system',
+    );
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    fail(`Runtime privilege quarantine failed: ${err.message}`);
+  }
+  return { applied: true, reason: 'closure_not_recorded' };
+}
+
+async function activateRuntimePrivileges(client) {
+  if (!(await runtimeRolesPresent(client))) {
+    info('Runtime roles are absent; skipping grant activation.');
+    return { applied: false, reason: 'roles_absent' };
+  }
+  if (!(await securityClosureRecorded(client))) {
+    fail('Refusing runtime grant activation: 0014 and 0015 are not both recorded.');
+  }
+  info('Activating the existing 0009 table and sequence grant envelope. No default privileges are restored.');
   await client.query('BEGIN');
   try {
     await client.query('GRANT USAGE ON SCHEMA public TO union_eyes_runtime, union_eyes_system');
@@ -264,9 +333,9 @@ async function regrantRuntimeTablePrivileges(client) {
     await client.query('COMMIT');
   } catch (err) {
     await client.query('ROLLBACK');
-    fail(`Post-platform runtime re-grant failed: ${err.message}`);
+    fail(`Runtime grant activation failed: ${err.message}`);
   }
-  return { applied: true };
+  return { applied: true, reason: 'closure_recorded' };
 }
 
 async function report0014PhysicalPresence(client) {
@@ -380,6 +449,9 @@ async function main() {
   await client.connect();
 
   try {
+    if (!platformMigrationPrecedesScopedClosure() || !runtimeGrantsFollowSecurityClosure()) {
+      fail('Production bootstrap stage order is not fail-closed. Refusing to continue.');
+    }
     const stageIds = PRODUCTION_BOOTSTRAP_ORDER.map((stage) => stage.id);
     info(`Production bootstrap order: ${stageIds.join(' -> ')}`);
 
@@ -398,14 +470,15 @@ async function main() {
     info(`Applying scoped foundation migrations through ${SCOPED_FOUNDATION_THROUGH_TAG} ...`);
     const foundationSummary = await applyScopedMigrations(client, { throughTag: SCOPED_FOUNDATION_THROUGH_TAG });
 
+    const quarantineSummary = await quarantineUnprotectedRuntimePrivileges(client);
+
     info('Applying post-freeze PLATFORM_SQL migrations from db/migrations-platform/ ...');
     const platformSummary = await applyPlatformMigrations(client);
-
-    const regrantSummary = await regrantRuntimeTablePrivileges(client);
     const physicalSummary = await report0014PhysicalPresence(client);
 
     info(`Applying scoped RLS closures after ${SCOPED_FOUNDATION_THROUGH_TAG} ...`);
     const closureSummary = await applyScopedMigrations(client, { afterTag: SCOPED_FOUNDATION_THROUGH_TAG });
+    const activationSummary = await activateRuntimePrivileges(client);
 
     await writeBootstrapAttestation(client, {
       snapshotDigest: restoreSummary.snapshotDigest,
@@ -416,7 +489,8 @@ async function main() {
       scopedClosureApplied: closureSummary.applied,
       scopedMigrationsApplied: foundationSummary.applied + closureSummary.applied,
       platformMigrationsApplied: platformSummary.applied,
-      runtimeRoleRegrantApplied: regrantSummary.applied,
+      runtimePrivilegeQuarantineApplied: quarantineSummary.applied,
+      runtimeGrantActivationApplied: activationSummary.applied,
       relationsAbsentBefore0014: physicalSummary.missing,
       timestamp: new Date().toISOString(),
     });

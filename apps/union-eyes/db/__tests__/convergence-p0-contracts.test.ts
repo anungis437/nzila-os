@@ -52,44 +52,47 @@ describe('convergence P0 contracts', () => {
     expect(current).not.toContain('o.slug = om.organization_id')
   })
 
-  it('reports 0014 production order as blocked and does not claim runtime execution', () => {
+  it('declares a 0014 producer for every active target without claiming PostgreSQL execution', () => {
     const result = spawnSync('node', ['tooling/scripts/union-eyes-0014-producer-graph.mjs', '--json'], {
       cwd: REPO_ROOT,
       encoding: 'utf8',
       maxBuffer: 32 * 1024 * 1024,
     })
-    expect(result.status).toBe(1)
+    expect(result.status).toBe(0)
     const graph = JSON.parse(result.stdout) as {
       coverage: { bootstrapV2Source: string; productionDrizzleBootstrap0014: string; runtimeExecution: string }
       v2CompileWouldMiss: string[]
+      productionBootstrapNotBefore0014: string[]
       counts: { targets: number; legacyCleanroomUndeclaredBefore0014: number }
+      rows: Array<Record<string, unknown>>
     }
     expect(graph.counts.targets).toBe(100)
     expect(graph.v2CompileWouldMiss).not.toContain('dues_assignments')
     expect(graph.v2CompileWouldMiss).toEqual([])
     expect(graph.counts.legacyCleanroomUndeclaredBefore0014).toBe(0)
     expect(graph.coverage.bootstrapV2Source).toBe('SOURCE_DECLARATIONS_REACHABLE')
-    expect(graph.coverage.productionDrizzleBootstrap0014).toBe('BLOCKED')
+    expect(graph.coverage.productionDrizzleBootstrap0014).toBe('DECLARED_COMPLETE')
     expect(graph.coverage.runtimeExecution).toBe('NOT_EXECUTED')
-    const rows = (graph as { rows: Array<Record<string, unknown>> }).rows
+    expect(graph.productionBootstrapNotBefore0014).toEqual([])
+    const rows = graph.rows
     const billing = rows.find((row) => row.table === 'billing_subscriptions') as {
       declaredOrder: { productionDrizzleBootstrap: string }
       migrationJournal: { platformRunsBefore0014OnProductionBootstrap: boolean }
     }
     expect(billing.declaredOrder.productionDrizzleBootstrap).toBe('BEFORE_0014')
     expect(billing.migrationJournal.platformRunsBefore0014OnProductionBootstrap).toBe(true)
-    const stillBlocked = rows.filter(
-      (row) =>
-        row.status === 'active' &&
-        row.isTarget === true &&
-        (row.declaredOrder as { productionDrizzleBootstrap: string }).productionDrizzleBootstrap !== 'BEFORE_0014',
+    for (const table of ['org_subscriptions', 'platform_invoices', 'platform_payments']) {
+      const row = rows.find((item) => item.table === table) as { executableProducer: string }
+      expect(row.executableProducer).toBe('tooling/sql/union-eyes-qa-baseline.sql')
+    }
+    const lineage = fs.readFileSync(
+      path.join(REPO_ROOT, 'apps/union-eyes/db/migrations-platform/0009_canonical_lineage_relations.sql'),
+      'utf8',
     )
-    expect(stillBlocked.length).toBeGreaterThan(0)
-    expect(
-      stillBlocked.every(
-        (row) => (row.migrationJournal as { platform: string | null }).platform === null,
-      ),
-    ).toBe(true)
+    expect(lineage).toContain('incompatible existing relation')
+    expect(lineage).not.toContain('CREATE TABLE "org_subscriptions"')
+    expect(lineage).not.toContain('CREATE TABLE "platform_invoices"')
+    expect(lineage).not.toContain('CREATE TABLE "platform_payments"')
   })
 
   it('uses the same production stage list the runner executes', async () => {
@@ -99,16 +102,19 @@ describe('convergence P0 contracts', () => {
     )) as {
       PRODUCTION_BOOTSTRAP_ORDER: Array<{ id: string }>
       platformMigrationPrecedesScopedClosure: () => boolean
+      runtimeGrantsFollowSecurityClosure: () => boolean
     }
     expect(stages.PRODUCTION_BOOTSTRAP_ORDER.map((stage) => stage.id)).toEqual([
       'extensions',
       'snapshot_or_qa_baseline',
       'scoped_foundation',
+      'runtime_privilege_quarantine',
       'platform_sql',
-      'runtime_role_regrant',
       'scoped_rls_closure',
+      'runtime_grant_activation',
     ])
     expect(stages.platformMigrationPrecedesScopedClosure()).toBe(true)
+    expect(stages.runtimeGrantsFollowSecurityClosure()).toBe(true)
     const runner = fs.readFileSync(
       path.join(REPO_ROOT, 'tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'),
       'utf8',
@@ -116,12 +122,17 @@ describe('convergence P0 contracts', () => {
     expect(runner).toContain('PRODUCTION_BOOTSTRAP_ORDER')
     expect(runner).toContain('throughTag: SCOPED_FOUNDATION_THROUGH_TAG')
     expect(runner).toContain('afterTag: SCOPED_FOUNDATION_THROUGH_TAG')
+    expect(runner).not.toContain('regrantRuntimeTablePrivileges')
     const foundation = runner.indexOf('throughTag: SCOPED_FOUNDATION_THROUGH_TAG')
+    const quarantine = runner.indexOf('const quarantineSummary = await quarantineUnprotectedRuntimePrivileges')
     const platform = runner.indexOf('Applying post-freeze PLATFORM_SQL')
     const closure = runner.indexOf('afterTag: SCOPED_FOUNDATION_THROUGH_TAG')
+    const activation = runner.indexOf('const activationSummary = await activateRuntimePrivileges')
     expect(foundation).toBeGreaterThan(-1)
-    expect(foundation).toBeLessThan(platform)
+    expect(foundation).toBeLessThan(quarantine)
+    expect(quarantine).toBeLessThan(platform)
     expect(platform).toBeLessThan(closure)
+    expect(closure).toBeLessThan(activation)
   })
 
   it('records the financial contradiction as contained rather than reconciled', () => {

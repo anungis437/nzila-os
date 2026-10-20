@@ -16,7 +16,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 - Journal: `meta/_journal.json`
 - Ledger: `drizzle.__drizzle_migrations` (shared hash ledger with scoped; content hashes differ)
 - Executor: `tooling/scripts/lib/union-eyes-platform-migrations.mjs`
-- Wired into `tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs` after scoped migrations through `0013` and before scoped `0014`
+- Wired into `tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs` after runtime privilege quarantine and before scoped `0014`
 - Oracle lineage: `UNION_EYES_PLATFORM_SQL` historicalOrder **35**
 
 ## Files
@@ -32,6 +32,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0007_claim_updates_runtime_columns` | Claim-update runtime columns |
 | `0008_strike_fund_disbursements_canonical` | Canonical CREATE for `strike_fund_disbursements` when the table is absent |
 | `0008_strike_fund_uuid_membership_provenance` | Current-lifecycle strike-fund organization provenance for UUID membership |
+| `0009_canonical_lineage_relations` | Forward CREATE for current Drizzle relations required by the 0014 preflight and its parent or 0015 dependencies |
 
 ## What does not belong here
 

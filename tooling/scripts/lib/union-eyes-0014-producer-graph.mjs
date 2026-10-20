@@ -137,6 +137,7 @@ export function buildProducerGraph(repoRoot) {
   const scopedTags = journalTags(path.join(app, 'db', 'migrations-cache', 'meta', '_journal.json'))
   const platformSql = sqlByTag(path.join(app, 'db', 'migrations-platform'), platformTags)
   const scopedSql = sqlByTag(path.join(app, 'db', 'migrations-cache'), scopedTags)
+  const qaBaselineSql = read(path.join(repoRoot, 'tooling', 'sql', 'union-eyes-qa-baseline.sql'))
   const scopedIndex = scopedTags.indexOf('0014_lineage_restoration_rls_closure')
   const scopedBefore = scopedSql.slice(0, scopedIndex === -1 ? 0 : scopedIndex)
   const manifestPath = path.join(repoRoot, 'reports', 'union-eyes', 'runtime-schema-lineage', 'SCHEMA_LINEAGE_MANIFEST.json')
@@ -169,6 +170,7 @@ export function buildProducerGraph(repoRoot) {
       : false
     const platformTag = firstCreate(platformSql, table)
     const scopedBeforeTag = firstCreate(scopedBefore, table)
+    const qaBaselineCreates = createsTable(qaBaselineSql, table)
     const historical = historicalProducers.get(table) ?? null
     const djangoOwned = django.has(table)
     const frozenPlanCreate = frozenPlan.includes(`CREATE TABLE \\"${table}\\"`) || frozenPlan.includes(`CREATE TABLE "${table}"`)
@@ -178,7 +180,8 @@ export function buildProducerGraph(repoRoot) {
     else if (drizzleFile) canonicalOwner = 'DRIZZLE_PROJECTION'
     else if (historical) canonicalOwner = 'HISTORICAL_SQL'
     const v2WouldMaterialize = djangoOwned || drizzleReachable
-    const productionBefore0014 = Boolean(scopedBeforeTag) || (platformBeforeClosure && Boolean(platformTag))
+    const productionBefore0014 =
+      Boolean(scopedBeforeTag) || (platformBeforeClosure && Boolean(platformTag)) || qaBaselineCreates
     const cleanroomDeclaredBefore0014 = djangoOwned || Boolean(historical) || Boolean(platformTag) || Boolean(scopedBeforeTag)
     return {
       table,
@@ -187,17 +190,19 @@ export function buildProducerGraph(repoRoot) {
       status: INACTIVE.has(classification) ? 'inactive' : 'active',
       canonicalOwner,
       legitimateDdlSource: canonicalOwner,
-      executableProducer: productionBefore0014
+      executableProducer: scopedBeforeTag
         ? `migrations-cache/${scopedBeforeTag}.sql`
         : platformTag
           ? `migrations-platform/${platformTag}.sql`
-          : djangoOwned
-            ? 'django migrate'
-            : historical
-              ? historical
-              : drizzleReachable
-                ? drizzleFile
-                : null,
+          : qaBaselineCreates
+            ? 'tooling/sql/union-eyes-qa-baseline.sql'
+            : djangoOwned
+              ? 'django migrate'
+              : historical
+                ? historical
+                : drizzleReachable
+                  ? drizzleFile
+                  : null,
       migrationJournal: {
         scopedBefore0014: scopedBeforeTag,
         platform: platformTag,
