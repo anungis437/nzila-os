@@ -52,6 +52,30 @@
       "ACCEPTANCE_EVIDENCE": "PostgreSQL 16.15 database ue_conv_authority. Organization cf453349-5b89-4bac-a976-3d93a54abd9c. Delete raised organization delete refused. Status became inactive and the disbursement count stayed 1. After the disbursement was removed, the organization delete succeeded. Bootstrap repeat applied 0011 and exited 0.",
       "REMAINING_AUTHORIZATION": "A product owner must decide whether historical disbursements may be erased with the organization. This record does not make that decision.",
       "CLASSIFICATION": "FAIL_CLOSED_PENDING_RETENTION_DECISION"
+    },
+    {
+      "CONFLICT_ID": "CATALOG_ADMISSION_APP_BOUNDARY",
+      "SOURCE_A": "The health route must fail closed when catalog authority drifts, using the same privilege contract as the governance CLI.",
+      "SOURCE_B": "INV-06 forbids raw pg and postgres imports in application code. A Next.js build cannot depend on process.cwd() resolving tooling/scripts.",
+      "BINDING_AUTHORITY": "tooling/contract-tests/db-boundary.test.ts. The storage-authority manifest remains the reviewed source. The packaged JSON is a generated projection with a sha256 digest.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "Application admission executes set-based catalog queries through @nzila/db and assesses the packaged contract. It does not grant, revoke, or spawn tsx. The CLI refuses to diagnose when the packaged payload differs from a fresh export. Public health errors stay generic. Detailed violations are written with console.error.",
+      "RISK": "A stale packaged contract would admit the wrong catalog if the CLI check were skipped. The app therefore rejects a digest that does not match its payload.",
+      "ENGINEERING_RESOLUTION": "Regenerate apps/union-eyes/lib/operations/catalog-authority-contract.json with tooling/scripts/write-union-eyes-catalog-contract.mjs. Do not hand-edit it. Do not add an INV-06 exemption.",
+      "ACCEPTANCE_EVIDENCE": "Contract digest 1625a0a942a1b8dd8737ba933852353791203483f52ddaa57c3a9b461a76b057, 806 entries. INV-06 vitest exit 0. Packaged standalone HTTP 200, then HTTP 503 after a PUBLIC grant, then HTTP 200 after authorized remediation.",
+      "REMAINING_AUTHORIZATION": "None for this boundary. applicationReady remains false.",
+      "CLASSIFICATION": "APPLICATION_READ_ONLY_ADMISSION"
+    },
+    {
+      "CONFLICT_ID": "DAPL_ENUM_HISTORICAL_VS_CANONICAL",
+      "SOURCE_A": "Frozen 20260325_dapl_platform_ledger.sql and migrations-audit/finance-enums.sql define platform_cost_type, ledger_event_type, and ledger_source_type without transaction_fee, settlement, fee_captured, settlement_closed, and settlement_batch.",
+      "SOURCE_B": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts and platform 0009 require those labels in canonical order. The other ten DAPL enums match 0009 or are not rechecked by 0009.",
+      "BINDING_AUTHORITY": "Frozen migrations stay immutable. Platform SQL owns the forward change. 0009 keeps its exact-array check.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "0008_dapl_enum_label_evolution adds only missing labels when the existing order is a subsequence of the canonical order. Unknown or reordered labels raise incompatible existing type and the statement rolls back. Existing enum values on stored rows are not rewritten.",
+      "RISK": "A snapshot may still contain a non-DAPL enum that 0009 rejects. This upgrade does not weaken that check.",
+      "ENGINEERING_RESOLUTION": "Run the additive migration before 0009. Do not drop or recreate the types and do not cast existing financial rows through text.",
+      "ACCEPTANCE_EVIDENCE": "PostgreSQL 16.15 prove-dapl-enum-evolution.mjs exit 0. ue_conv_authority applied the new hash once and kept its canonical labels.",
+      "REMAINING_AUTHORIZATION": "Snapshot-backed E2E on this candidate is still required before calling the historical snapshot repaired.",
+      "CLASSIFICATION": "FORWARD_ONLY_ENUM_EVOLUTION"
     }
   ]
 }

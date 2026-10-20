@@ -1,6 +1,10 @@
-import fs from 'node:fs'
-import path from 'node:path'
-import pg from 'pg'
+import { sql } from 'drizzle-orm'
+import contract from './catalog-authority-contract.json'
+import { admissionQueries, assessCatalogAdmission } from './catalog-admission-core.mjs'
+
+export const CATALOG_ADMISSION_PUBLIC_ERROR = 'catalog authority admission failed'
+
+type QueryRow = Record<string, unknown>
 
 export type CatalogAdmissionReport = {
   ok: boolean
@@ -10,43 +14,28 @@ export type CatalogAdmissionReport = {
   violations: string[]
 }
 
-function repoRootFrom(start: string): string {
-  let dir = start
-  for (let depth = 0; depth < 6; depth += 1) {
-    if (fs.existsSync(path.join(dir, 'tooling/scripts/lib/union-eyes-catalog-authority.mjs'))) return dir
-    const parent = path.dirname(dir)
-    if (parent === dir) break
-    dir = parent
-  }
-  throw new Error('Union Eyes catalog authority module is not available to this process')
+async function executeWithAppDatabase(statement: string): Promise<QueryRow[]> {
+  const { db } = await import('@nzila/db')
+  // Cast needed: the health pool and this module can resolve different drizzle copies.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await db.execute(sql.raw(statement) as any)
+  return Array.from(result as Iterable<QueryRow>)
 }
 
 /**
- * Read-only catalog admission used by the application health route.
- * A failure reports the drift. It does not revoke privileges.
+ * Read-only admission for the packaged application. The contract is bundled.
+ * This does not open a raw driver, spawn a CLI, or change privileges.
  */
 export async function evaluateCatalogAdmission(
-  connectionString = process.env.DATABASE_URL,
+  execute: (statement: string) => Promise<QueryRow[]> = executeWithAppDatabase,
 ): Promise<CatalogAdmissionReport> {
-  if (!connectionString) {
-    return {
-      ok: false,
-      applicationReady: false,
-      environment: process.env.UE_ENVIRONMENT || process.env.NODE_ENV || 'unknown',
-      source: 'apps/union-eyes/db/rls-storage-authority',
-      violations: ['DATABASE_URL is absent'],
-    }
+  const snapshots: Record<string, QueryRow[]> = {}
+  for (const query of admissionQueries) {
+    snapshots[query.name] = await execute(query.sql)
   }
-  const repoRoot = repoRootFrom(process.cwd())
-  const authority = await import(path.join(repoRoot, 'tooling/scripts/lib/union-eyes-catalog-authority.mjs'))
-  const client = new pg.Client({ connectionString })
-  await client.connect()
-  try {
-    return await authority.diagnoseCatalogAuthority(client, {
-      repoRoot,
-      environment: process.env.UE_ENVIRONMENT || process.env.NODE_ENV || 'unknown',
-    })
-  } finally {
-    await client.end()
-  }
+  return assessCatalogAdmission(
+    contract,
+    snapshots,
+    process.env.UE_ENVIRONMENT || process.env.NODE_ENV || 'unknown',
+  )
 }

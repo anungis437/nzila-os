@@ -8,33 +8,49 @@ import {
   type HealthCheckState,
   type RuntimeHealthCheck,
 } from '@nzila/os-core/health'
+import {
+  CATALOG_ADMISSION_PUBLIC_ERROR,
+  evaluateCatalogAdmission,
+} from '@/lib/operations/catalog-admission'
 
 const APP = 'union-eyes'
 
 async function checkCatalogAuthority(): Promise<{ state: HealthCheckState; ms: number; error?: string; note?: string }> {
   const start = Date.now()
   try {
-    const { evaluateCatalogAdmission } = await import('@/lib/operations/catalog-admission')
     const report = await evaluateCatalogAdmission()
     if (!report.ok) {
+      console.error(JSON.stringify({
+        event: 'catalog_authority_admission_failed',
+        applicationReady: false,
+        privilegesUnchanged: true,
+        violationCount: report.violations.length,
+        violations: report.violations.slice(0, 40),
+      }))
       return {
         state: 'fail',
         ms: Date.now() - start,
-        error: report.violations.slice(0, 8).join(' | ') || 'catalog authority drifted',
-        note: `environment=${report.environment}; source=${report.source}; applicationReady=false; privileges_unchanged=true`,
+        error: CATALOG_ADMISSION_PUBLIC_ERROR,
+        note: 'applicationReady=false',
       }
     }
     return {
       state: 'ok',
       ms: Date.now() - start,
-      note: `environment=${report.environment}; source=${report.source}; applicationReady=false`,
+      note: 'applicationReady=false',
     }
   } catch (err) {
+    console.error(JSON.stringify({
+      event: 'catalog_authority_admission_failed',
+      applicationReady: false,
+      privilegesUnchanged: true,
+      error: err instanceof Error ? err.message : 'catalog admission failed',
+    }))
     return {
       state: 'fail',
       ms: Date.now() - start,
-      error: err instanceof Error ? err.message : 'catalog admission failed',
-      note: 'applicationReady=false; privileges_unchanged=true',
+      error: CATALOG_ADMISSION_PUBLIC_ERROR,
+      note: 'applicationReady=false',
     }
   }
 }
@@ -156,7 +172,7 @@ export async function GET() {
   const catalog: { state: HealthCheckState; ms: number; error?: string; note?: string } =
     catalogResult.status === 'fulfilled'
       ? catalogResult.value
-      : { state: 'fail', ms: 0, error: 'catalog admission failed', note: 'applicationReady=false' }
+      : { state: 'fail', ms: 0, error: CATALOG_ADMISSION_PUBLIC_ERROR, note: 'applicationReady=false' }
 
   // Normalize raw states via os-core primitives (cross-app health contract)
   const normalized = normalizeHealthChecks({

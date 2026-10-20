@@ -9,14 +9,14 @@ This ledger records what was verified on this branch. Unexecuted controls stay u
 | BASE_SHA | `12dd086ae906ced483942144ab6c27326fda2738` |
 | CANDIDATE_SHA | The commit on `cursor/ue-convergence-p0-cfc5` that contains this checkpoint. Preserved prior candidate `e08977e6255f23f4aba0f2777b998bd3612792e9` |
 | WORKTREE | `/home/ubuntu/ue-convergence` |
-| FILES_CHANGED | Exact catalog activation, same-transaction 0009 revoke, scoped `0016_catalog_rls_authority_closure`, platform `0010_billing_relation_shape_authority`, `platform_services` authority entry, QA billing CREATE, ledgers |
-| ROOT_CAUSE | Successful activation granted `SELECT, INSERT, UPDATE, DELETE` on every public table after migration 0014, and migration 0009 could commit that envelope before quarantine |
-| FIX_IMPLEMENTED | 0009 grants and their revoke commit together. Activation grants only the reviewed storage-authority manifest, after the live catalog matches it. Scoped 0016 forces RLS on the remaining direct-org and ICRA system tables. Platform 0010 aligns an empty billing shape and refuses a populated incompatible shape |
+| FILES_CHANGED | Exact catalog activation, same-transaction 0009 revoke, scoped `0016_catalog_rls_authority_closure`, platform `0010_billing_relation_shape_authority`, `platform_services` authority entry, QA billing CREATE, packaged catalog admission, platform `0008_dapl_enum_label_evolution`, ledgers |
+| ROOT_CAUSE | Successful activation granted `SELECT, INSERT, UPDATE, DELETE` on every public table after migration 0014, and migration 0009 could commit that envelope before quarantine. Later, the health route imported repository CLI code and `pg`, and historical DAPL enums did not match platform `0009` |
+| FIX_IMPLEMENTED | 0009 grants and their revoke commit together. Activation grants only the reviewed storage-authority manifest, after the live catalog matches it. Scoped 0016 forces RLS on the remaining direct-org and ICRA system tables. Platform 0010 aligns an empty billing shape and refuses a populated incompatible shape. Application admission reads through `@nzila/db` and a digest-bound contract. Platform `0008_dapl_enum_label_evolution` adds the six missing DAPL labels before `0009` |
 | TESTS_EXECUTED | Contract tests. PostgreSQL 16.15 databases `ue_conv_authority`, `ue_conv_partial2`, `ue_conv_window`, `ue_conv_interrupt`, `ue_conv_adv`, `ue_grant_window`, `ue_shape_empty`, `ue_shape_populated`, `ue_shape_compatible`. Prior `e08977e62` databases remain historical |
 | OBSERVED_RESULT | Fresh and repeat activation exit 0 with 147/147 public tables classified and privilege-matched. `applicationReady` is false. Interrupted 0009 left no runtime grant and no attestation. `PG15_LEGACY_CLEAN_ROOM = UNEXECUTED`. `PG16_V2_CLEAN_ROOM = UNEXECUTED` |
 | DEPENDENT_EVIDENCE_INVALIDATED | `e08977e62` on `ue_conv_closure` proved producers and the 100-target closure, not whole-catalog least privilege. Snapshot E2E on `31ab109a1` is not this candidate. Historical G1–G7 are not this candidate |
-| REMAINING_DEFECTS | Strike-fund `ON DELETE CASCADE` remains, and deletion of an organization that still has a disbursement is now refused. Retention is still NOT_PROVEN. Docker clean-rooms and Django were not run. GitHub E2E on `5762b45bb` fails in platform `0009` with `incompatible existing type public.platform_cost_type`. The operations page now reads only `platform_services` |
-| NEXT_EXECUTABLE_ACTION | Run Bootstrap V2 and the PG15 legacy qualification on a Docker host with the pinned images and `UE_V2_WHEELHOUSE`. Run Django, workers, and the four E2E shards against this fresh privilege model |
+| REMAINING_DEFECTS | Strike-fund retention is still NOT_PROVEN. Docker clean-rooms, Django, workers, and both four-shard E2E modes are unexecuted on this candidate. GitHub E2E on `5762b45bb` and the build on `2d32f3549` are not this candidate |
+| NEXT_EXECUTABLE_ACTION | Push this candidate and read the GitHub result for the production build, CUPE pilot contracts, and the four snapshot E2E workers. Fresh-bootstrap E2E, Django, workers, Bootstrap V2, and PG15 remain separate |
 | HUMAN_AUTHORIZATION_BOUNDARY | No merge, deploy, credential change, database provision, or governance-label change |
 
 ## Repository state checked before edits
@@ -115,5 +115,29 @@ Restricted SQL on the restored catalog: `union_eyes_runtime` `SELECT` on `user_m
 `pnpm exec vitest run` for the 0013 journal test, the 0015 journal test, and `tests/api/operational-endpoints.spec.ts`: 3 files, 74 tests, exit 0. `/opt/cursor/artifacts/vitest-admission.log`.
 
 GitHub on `5762b45bbf855077ee3b4b559c3f841233352862`, run `39367866277` job `118448721355`: 2 unit files failed because the journal tail was still asserted as idx 15. Those assertions now register idx 15 as `0015` and the 0013 maximum as 16. Run `39367866284` worker `118448721695`: snapshot bootstrap failed at platform `0009_canonical_lineage_relations` with `incompatible existing type public.platform_cost_type`. That SHA's E2E is not a pass. `PG15_LEGACY_CLEAN_ROOM` and `PG16_BOOTSTRAP_V2` remain UNEXECUTED. Docker is not installed. `import django` fails. No Celery worker was started.
+
+`UE_SAAS_OPERATIONAL_READINESS = NO_GO`. `UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL`. `PRODUCTION_DEPLOYMENT_AUTHORIZED = NO`. `CUSTOMER_DATA_EXECUTION_AUTHORIZED = NO`.
+
+## Build boundary and historical enums
+
+The thirteen enums in frozen `20260325_dapl_platform_ledger.sql` were compared with `migrations-audit/finance-enums.sql`, `migrations/finance-platform-billing-tables.sql`, and the ordered arrays in platform `0009`. Audit enums match the frozen DAPL definitions. The billing file and `0009` already carry the canonical labels. Only three types differ, and each historical label list is a subsequence of the canonical list:
+
+| Enum | Labels absent from the frozen definition |
+| --- | --- |
+| `platform_cost_type` | `transaction_fee`, `settlement` |
+| `ledger_event_type` | `fee_captured`, `settlement_closed` |
+| `ledger_source_type` | `transaction_fee`, `settlement_batch` |
+
+Platform `0008_dapl_enum_label_evolution` is journal idx 9, before `0009`. It does not edit frozen SQL or the `0009` hash. On PostgreSQL 16.15, `node tooling/scripts/prove-dapl-enum-evolution.mjs` exited 0. Fresh database `ue_dapl_enum_fresh` had no labels before the upgrade and the three `0009` enum checks then created the canonical lists. Historical database `ue_dapl_enum_historical` kept `adjustment`, `reversal`, and `system` on the inserted row, amount `12.50`, through rollback and after the upgrade. An extra `rogue_fee` label and a swapped `manual`/`system` order each raised `incompatible existing type` and left the labels unchanged. The platform runner recorded one hash on `ue_dapl_enum_ledger` and applied nothing on the second run. Evidence: `/opt/cursor/artifacts/dapl-enum-evidence.json`.
+
+On the already canonical database `ue_conv_authority`, the same runner applied `0008_dapl_enum_label_evolution` once, left all three label lists unchanged, and a second run applied 0 migrations. Read-only catalog admission then exited 0 with `violationCount=0`.
+
+`pnpm --filter @nzila/union-eyes... build` exited 0. Next.js 16.3.8 Turbopack compiled successfully. Log: `/opt/cursor/artifacts/next-production-build.log`. The standalone trace contains `apps/union-eyes/lib/operations/catalog-authority-contract.json` and does not contain `tooling/scripts/lib/union-eyes-catalog-authority.mjs`.
+
+That standalone tree was copied to `/tmp/ue-packaged` and started with `node server.js` from `/tmp/ue-packaged/apps/union-eyes`. `GET /api/health` returned HTTP 200, `catalogAuthority.status=ok`, note `applicationReady=false`. `GRANT SELECT ON public.platform_services TO PUBLIC` then made the same process return HTTP 503 with public error `catalog authority admission failed`. The response catalog object did not contain privilege or object detail. The server log named `PUBLIC holds`. `UE_PRIVILEGE_ENFORCEMENT=1 node tooling/scripts/union-eyes-catalog-admission.mjs --enforce` restored admission, and the packaged process returned HTTP 200 again. `node tooling/scripts/prove-union-eyes-runtime-admission.mjs` also exited 0 on this code. `/opt/cursor/artifacts/runtime-admission.log`.
+
+`pnpm exec vitest run --project contract-tests tooling/contract-tests/db-boundary.test.ts` passed 16 tests. `assertCatalogContractCurrent` matched digest `1625a0a942a1b8dd8737ba933852353791203483f52ddaa57c3a9b461a76b057` and 806 entries. The union-eyes contract file and convergence contract file passed 10 tests.
+
+Snapshot-backed E2E, fresh-bootstrap E2E, Django, workers, Bootstrap V2, and PG15 were not run on this candidate. A reconstructed historical enum database is not a restored canonical snapshot.
 
 `UE_SAAS_OPERATIONAL_READINESS = NO_GO`. `UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL`. `PRODUCTION_DEPLOYMENT_AUTHORIZED = NO`. `CUSTOMER_DATA_EXECUTION_AUTHORIZED = NO`.

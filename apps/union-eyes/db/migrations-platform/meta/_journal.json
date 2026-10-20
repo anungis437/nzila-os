@@ -68,19 +68,26 @@
     {
       "idx": 9,
       "version": "7",
+      "when": 1758675000000,
+      "tag": "0008_dapl_enum_label_evolution",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
       "when": 1758680000000,
       "tag": "0009_canonical_lineage_relations",
       "breakpoints": true
     },
     {
-      "idx": 10,
+      "idx": 11,
       "version": "7",
       "when": 1758690000000,
       "tag": "0010_billing_relation_shape_authority",
       "breakpoints": true
     },
     {
-      "idx": 11,
+      "idx": 12,
       "version": "7",
       "when": 1758700000000,
       "tag": "0011_strike_fund_deletion_guard",

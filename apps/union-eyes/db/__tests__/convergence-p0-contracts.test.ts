@@ -144,6 +144,47 @@ describe('convergence P0 contracts', () => {
     expect(closure).toBeLessThan(activation)
   })
 
+  it('evolves the historical DAPL enums before platform 0009 validates them', () => {
+    const journal = JSON.parse(
+      fs.readFileSync(
+        path.join(REPO_ROOT, 'apps/union-eyes/db/migrations-platform/meta/_journal.json'),
+        'utf8',
+      ),
+    ) as { entries: Array<{ idx: number; tag: string }> }
+    const tags = journal.entries.map((entry) => entry.tag)
+    const evolution = tags.indexOf('0008_dapl_enum_label_evolution')
+    const canonical = tags.indexOf('0009_canonical_lineage_relations')
+    expect(evolution).toBeGreaterThan(-1)
+    expect(canonical).toBeGreaterThan(evolution)
+    expect(journal.entries.map((entry) => entry.idx)).toEqual(journal.entries.map((_, index) => index))
+    const sql = fs.readFileSync(
+      path.join(REPO_ROOT, 'apps/union-eyes/db/migrations-platform/0008_dapl_enum_label_evolution.sql'),
+      'utf8',
+    )
+    for (const label of [
+      'transaction_fee',
+      'settlement',
+      'fee_captured',
+      'settlement_closed',
+      'settlement_batch',
+    ]) {
+      expect(sql).toContain(`'${label}'`)
+    }
+    expect(sql).toContain('incompatible existing type')
+    expect(sql).not.toMatch(/DROP TYPE/i)
+    expect(sql).not.toMatch(/USING\s+/i)
+    const frozen = fs.readFileSync(
+      path.join(REPO_ROOT, 'apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql'),
+      'utf8',
+    )
+    expect(frozen).toContain(
+      "CREATE TYPE platform_cost_type AS ENUM ('base_subscription','local_fee','seat_fee','module_fee','usage_fee','onboarding_fee','support_fee','adjustment','credit','subsidy','writeoff')",
+    )
+    expect(frozen).not.toContain('transaction_fee')
+    expect(frozen).not.toContain('fee_captured')
+    expect(frozen).not.toContain('settlement_batch')
+  })
+
   it('records the financial contradiction as contained rather than reconciled', () => {
     const ledger = JSON.parse(
       fs.readFileSync(path.join(REPO_ROOT, 'docs/union-eyes/convergence/UE_CONVERGENCE_DECISION_LEDGER.json'), 'utf8'),

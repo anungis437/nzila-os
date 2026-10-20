@@ -2,7 +2,7 @@ import { evaluateCatalogAdmission } from '@/lib/operations/catalog-admission'
 import { GET } from '@/app/api/health/route'
 
 async function main() {
-  const admission = await evaluateCatalogAdmission(process.env.DATABASE_URL)
+  const admission = await evaluateCatalogAdmission()
   const response = await GET()
   const body = await response.json()
   process.stdout.write(JSON.stringify({

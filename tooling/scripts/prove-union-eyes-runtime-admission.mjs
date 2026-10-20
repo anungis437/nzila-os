@@ -131,6 +131,10 @@ try {
   if (driftedBody.ok !== false || driftedBody.httpStatus !== 503 || driftedBody.admissionOk !== false) {
     throw new Error(`drifted health was admitted: ${driftedHealth.stdout}`)
   }
+  const publicCatalog = JSON.stringify(driftedBody.catalog)
+  if (driftedBody.catalog?.error !== 'catalog authority admission failed' || /PUBLIC holds|platform_services|inherits/.test(publicCatalog)) {
+    throw new Error(`public health response exposed catalog detail: ${publicCatalog}`)
+  }
 
   const refused = admit(true, false)
   record('enforce_without_flag', { status: refused.status, stderr: (refused.stderr || '').slice(0, 300) })
