@@ -34,7 +34,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0008_strike_fund_uuid_membership_provenance` | Current-lifecycle strike-fund organization provenance for UUID membership |
 | `0008_dapl_enum_label_evolution` | Additive labels for historical DAPL enums before `0009` checks canonical order |
 | `0008_fee_adjustment_enum_label_evolution` | Adds `partial_reversal` to historical `fee_adjustment_type` before `0009` |
-| `0008_django_stub_relation_evolution` | Widens empty Django stubs for seven Drizzle relation names before `0009`. Populated or unrecognized shapes are refused |
+| `0008_django_stub_relation_evolution` | Widens empty Django stubs and casts historical committee text status columns to canonical enums before `0009`. Populated incompatible rows and values outside the enum are refused |
 | `0009_canonical_lineage_relations` | Forward CREATE for current Drizzle relations required by the 0014 preflight and its parent or 0015 dependencies |
 | `0010_billing_relation_shape_authority` | Align empty `org_subscriptions`, `platform_invoices`, and `platform_payments` to the Drizzle enum and `billing_account_id` contract. Populated incompatible rows are refused |
 

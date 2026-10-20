@@ -12,6 +12,10 @@
 -- and only gains a missing foreign key. An empty recognized stub is widened
 -- to the canonical columns. A populated stub, or any unrecognized shape,
 -- raises and leaves the rows unchanged.
+--
+-- Frozen 0096 stores committee_action_items.status, committee_action_items.priority,
+-- and committee_meetings.status as text. The canonical columns are enums. A text
+-- value is cast only when every stored value is already a canonical label.
 
 --> statement-breakpoint
 DO $ue$
@@ -30,7 +34,10 @@ BEGIN
     ('cba_language', ARRAY['en', 'fr', 'bilingual']::text[]),
     ('cba_status', ARRAY['active', 'expired', 'under_negotiation', 'ratified_pending', 'archived']::text[]),
     ('clause_type', ARRAY['wages_compensation', 'benefits_insurance', 'working_conditions', 'grievance_arbitration', 'seniority_promotion', 'health_safety', 'union_rights', 'management_rights', 'duration_renewal', 'vacation_leave', 'hours_scheduling', 'disciplinary_procedures', 'training_development', 'pension_retirement', 'overtime', 'job_security', 'technological_change', 'workplace_rights', 'other']::text[]),
-    ('cost_center_type', ARRAY['department', 'project', 'location', 'program', 'fund', 'grant', 'other']::text[])
+    ('cost_center_type', ARRAY['department', 'project', 'location', 'program', 'fund', 'grant', 'other']::text[]),
+    ('committee_action_item_priority', ARRAY['low', 'medium', 'high', 'urgent']::text[]),
+    ('committee_action_item_status', ARRAY['pending', 'in_progress', 'completed', 'deferred', 'cancelled']::text[]),
+    ('committee_meeting_status', ARRAY['scheduled', 'in_progress', 'completed', 'cancelled', 'postponed']::text[])
   ) AS t(typname, labels)
   LOOP
     BEGIN
@@ -65,6 +72,7 @@ DECLARE
   expected record;
   nulls bigint;
   too_long bigint;
+  bad bigint;
   repair text;
 BEGIN
   CREATE TEMP TABLE IF NOT EXISTS ue_stub_column_contract (
@@ -325,6 +333,49 @@ BEGIN
   INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'created_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
   INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'updated_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
   INSERT INTO ue_stub_column_contract VALUES ('org_configurations', 'updated_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'committee_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'meeting_id', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'title', 'character varying', 'varchar', 'NO', 500, NULL, NULL, 'varchar(500) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'description', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'status', 'USER-DEFINED', 'committee_action_item_status', 'NO', NULL, NULL, NULL, '"committee_action_item_status" DEFAULT ''pending'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'priority', 'USER-DEFINED', 'committee_action_item_priority', 'NO', NULL, NULL, NULL, '"committee_action_item_priority" DEFAULT ''medium'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'assigned_to', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'due_date', 'date', 'date', 'YES', NULL, NULL, NULL, 'date');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'completed_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'completed_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'resolution', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'carried_from_meeting_id', 'uuid', 'uuid', 'YES', NULL, NULL, NULL, 'uuid');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'carry_count', 'integer', 'int4', 'YES', NULL, 32, 0, 'integer DEFAULT 0');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'created_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'updated_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'created_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_action_items', 'updated_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'committee_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'organization_id', 'uuid', 'uuid', 'NO', NULL, NULL, NULL, 'uuid NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'title', 'character varying', 'varchar', 'NO', 500, NULL, NULL, 'varchar(500) NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'meeting_date', 'timestamp with time zone', 'timestamptz', 'NO', NULL, NULL, NULL, 'timestamp with time zone NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'end_time', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'location', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'virtual_link', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'status', 'USER-DEFINED', 'committee_meeting_status', 'NO', NULL, NULL, NULL, '"committee_meeting_status" DEFAULT ''scheduled'' NOT NULL');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'agenda', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'agenda_items', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'minutes', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'minutes_approved_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'minutes_approved_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'quorum_met', 'boolean', 'bool', 'YES', NULL, NULL, NULL, 'boolean');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'attendee_count', 'integer', 'int4', 'YES', NULL, 32, 0, 'integer DEFAULT 0');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'external_attendees', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'decisions', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'next_meeting_date', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'attachment_ids', 'jsonb', 'jsonb', 'YES', NULL, NULL, NULL, 'jsonb');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'created_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'updated_at', 'timestamp with time zone', 'timestamptz', 'YES', NULL, NULL, NULL, 'timestamp with time zone DEFAULT now()');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'created_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
+  INSERT INTO ue_stub_column_contract VALUES ('committee_meetings', 'updated_by', 'text', 'text', 'YES', NULL, NULL, NULL, 'text');
   FOR rel IN
     SELECT relname, count(*)::integer AS expected
     FROM ue_stub_column_contract
@@ -397,8 +448,8 @@ BEGIN
          AND live.data_type = expected.data_type
          AND live.is_nullable = expected.is_nullable
          AND live.character_maximum_length IS NOT DISTINCT FROM expected.character_maximum_length
-         AND live.numeric_precision IS NOT DISTINCT FROM expected.numeric_precision
-         AND live.numeric_scale IS NOT DISTINCT FROM expected.numeric_scale THEN
+         AND (expected.numeric_precision IS NULL OR live.numeric_precision IS NOT DISTINCT FROM expected.numeric_precision)
+         AND (expected.numeric_scale IS NULL OR live.numeric_scale IS NOT DISTINCT FROM expected.numeric_scale) THEN
         CONTINUE;
       END IF;
 
@@ -413,6 +464,38 @@ BEGIN
         live.character_maximum_length := NULL;
       END IF;
 
+      IF live.udt_name = 'text' AND expected.data_type = 'USER-DEFINED' THEN
+        EXECUTE format(
+          'SELECT count(*) FROM public.%I AS historical_row WHERE historical_row.%I IS NOT NULL AND historical_row.%I::text NOT IN (
+             SELECT e.enumlabel::text
+             FROM pg_enum e
+             JOIN pg_type ty ON ty.oid = e.enumtypid
+             JOIN pg_namespace n ON n.oid = ty.typnamespace
+             WHERE n.nspname = %L AND ty.typname = %L
+           )',
+          rel.relname, live.column_name, live.column_name, 'public', expected.udt_name
+        ) INTO bad;
+        IF bad > 0 THEN
+          RAISE EXCEPTION 'incompatible existing relation public.%: % row(s) store a value outside public.%. Rows were not rewritten.',
+            rel.relname, bad, expected.udt_name;
+        END IF;
+        EXECUTE format('ALTER TABLE public.%I ALTER COLUMN %I DROP DEFAULT', rel.relname, live.column_name);
+        EXECUTE format(
+          'ALTER TABLE public.%I ALTER COLUMN %I TYPE public.%I USING %I::text::public.%I',
+          rel.relname, live.column_name, expected.udt_name, live.column_name, expected.udt_name
+        );
+        repair := substring(expected.add_sql from 'DEFAULT (''[^'']*'')');
+        IF repair IS NOT NULL THEN
+          EXECUTE format(
+            'ALTER TABLE public.%I ALTER COLUMN %I SET DEFAULT %s',
+            rel.relname, live.column_name, repair
+          );
+        END IF;
+        live.udt_name := expected.udt_name;
+        live.data_type := 'USER-DEFINED';
+        live.character_maximum_length := NULL;
+      END IF;
+
       IF live.udt_name = 'timestamptz' AND expected.udt_name = 'timestamp' THEN
         IF row_count > 0 THEN
           RAISE EXCEPTION 'incompatible existing relation public.%: % populated row(s) cannot change %. Rows were not rewritten.',
@@ -424,8 +507,10 @@ BEGIN
       END IF;
 
       IF live.udt_name IS DISTINCT FROM expected.udt_name OR live.data_type IS DISTINCT FROM expected.data_type
-         OR live.numeric_precision IS DISTINCT FROM expected.numeric_precision
-         OR live.numeric_scale IS DISTINCT FROM expected.numeric_scale THEN
+         OR (expected.numeric_precision IS NOT NULL AND (
+           live.numeric_precision IS DISTINCT FROM expected.numeric_precision
+           OR live.numeric_scale IS DISTINCT FROM expected.numeric_scale
+         )) THEN
         RAISE EXCEPTION 'incompatible existing relation public.%: column % has an unrecognized type. Rows were not rewritten.',
           rel.relname, live.column_name;
       END IF;
@@ -1172,6 +1257,253 @@ BEGIN
       ADD CONSTRAINT org_configurations_organization_id_organizations_id_fk
       FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
       ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_action_items');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_action_items_committee_id_committees_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.committees');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.committees for committee_action_items_committee_id_committees_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_action_items e
+    LEFT JOIN public.committees parent_row ON parent_row.id = e.committee_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_action_items: % row(s) violate committee_action_items_committee_id_committees_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_action_items
+      ADD CONSTRAINT committee_action_items_committee_id_committees_id_fk
+      FOREIGN KEY (committee_id) REFERENCES public.committees(id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_action_items');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_action_items_meeting_id_committee_meetings_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.committee_meetings');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.committee_meetings for committee_action_items_meeting_id_committee_meetings_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_action_items e
+    LEFT JOIN public.committee_meetings parent_row ON parent_row.id = e.meeting_id
+    WHERE e.meeting_id IS NOT NULL AND parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_action_items: % row(s) violate committee_action_items_meeting_id_committee_meetings_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_action_items
+      ADD CONSTRAINT committee_action_items_meeting_id_committee_meetings_id_fk
+      FOREIGN KEY (meeting_id) REFERENCES public.committee_meetings(id)
+      ON DELETE set null ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_action_items');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_action_items_organization_id_organizations_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.organizations');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.organizations for committee_action_items_organization_id_organizations_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_action_items e
+    LEFT JOIN public.organizations parent_row ON parent_row.id = e.organization_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_action_items: % row(s) violate committee_action_items_organization_id_organizations_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_action_items
+      ADD CONSTRAINT committee_action_items_organization_id_organizations_id_fk
+      FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_action_items');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_action_items_assigned_to_profiles_user_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.profiles');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.profiles for committee_action_items_assigned_to_profiles_user_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_action_items e
+    LEFT JOIN public.profiles parent_row ON parent_row.user_id = e.assigned_to
+    WHERE e.assigned_to IS NOT NULL AND parent_row.user_id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_action_items: % row(s) violate committee_action_items_assigned_to_profiles_user_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_action_items
+      ADD CONSTRAINT committee_action_items_assigned_to_profiles_user_id_fk
+      FOREIGN KEY (assigned_to) REFERENCES public.profiles(user_id)
+      ON DELETE no action ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_action_items');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_action_items_completed_by_profiles_user_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.profiles');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.profiles for committee_action_items_completed_by_profiles_user_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_action_items e
+    LEFT JOIN public.profiles parent_row ON parent_row.user_id = e.completed_by
+    WHERE e.completed_by IS NOT NULL AND parent_row.user_id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_action_items: % row(s) violate committee_action_items_completed_by_profiles_user_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_action_items
+      ADD CONSTRAINT committee_action_items_completed_by_profiles_user_id_fk
+      FOREIGN KEY (completed_by) REFERENCES public.profiles(user_id)
+      ON DELETE no action ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_action_items');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_action_items_carried_from_meeting_id_committee_meetings_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.committee_meetings');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.committee_meetings for committee_action_items_carried_from_meeting_id_committee_meetings_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_action_items e
+    LEFT JOIN public.committee_meetings parent_row ON parent_row.id = e.carried_from_meeting_id
+    WHERE e.carried_from_meeting_id IS NOT NULL AND parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_action_items: % row(s) violate committee_action_items_carried_from_meeting_id_committee_meetings_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_action_items
+      ADD CONSTRAINT committee_action_items_carried_from_meeting_id_committee_meetings_id_fk
+      FOREIGN KEY (carried_from_meeting_id) REFERENCES public.committee_meetings(id)
+      ON DELETE set null ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_action_items');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_action_items_created_by_profiles_user_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.profiles');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.profiles for committee_action_items_created_by_profiles_user_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_action_items e
+    LEFT JOIN public.profiles parent_row ON parent_row.user_id = e.created_by
+    WHERE e.created_by IS NOT NULL AND parent_row.user_id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_action_items: % row(s) violate committee_action_items_created_by_profiles_user_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_action_items
+      ADD CONSTRAINT committee_action_items_created_by_profiles_user_id_fk
+      FOREIGN KEY (created_by) REFERENCES public.profiles(user_id)
+      ON DELETE no action ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_action_items');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_action_items_updated_by_profiles_user_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.profiles');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.profiles for committee_action_items_updated_by_profiles_user_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_action_items e
+    LEFT JOIN public.profiles parent_row ON parent_row.user_id = e.updated_by
+    WHERE e.updated_by IS NOT NULL AND parent_row.user_id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_action_items: % row(s) violate committee_action_items_updated_by_profiles_user_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_action_items
+      ADD CONSTRAINT committee_action_items_updated_by_profiles_user_id_fk
+      FOREIGN KEY (updated_by) REFERENCES public.profiles(user_id)
+      ON DELETE no action ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_meetings');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_meetings_committee_id_committees_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.committees');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.committees for committee_meetings_committee_id_committees_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_meetings e
+    LEFT JOIN public.committees parent_row ON parent_row.id = e.committee_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_meetings: % row(s) violate committee_meetings_committee_id_committees_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_meetings
+      ADD CONSTRAINT committee_meetings_committee_id_committees_id_fk
+      FOREIGN KEY (committee_id) REFERENCES public.committees(id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_meetings');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_meetings_organization_id_organizations_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.organizations');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.organizations for committee_meetings_organization_id_organizations_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_meetings e
+    LEFT JOIN public.organizations parent_row ON parent_row.id = e.organization_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_meetings: % row(s) violate committee_meetings_organization_id_organizations_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_meetings
+      ADD CONSTRAINT committee_meetings_organization_id_organizations_id_fk
+      FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_meetings');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_meetings_minutes_approved_by_profiles_user_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.profiles');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.profiles for committee_meetings_minutes_approved_by_profiles_user_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_meetings e
+    LEFT JOIN public.profiles parent_row ON parent_row.user_id = e.minutes_approved_by
+    WHERE e.minutes_approved_by IS NOT NULL AND parent_row.user_id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_meetings: % row(s) violate committee_meetings_minutes_approved_by_profiles_user_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_meetings
+      ADD CONSTRAINT committee_meetings_minutes_approved_by_profiles_user_id_fk
+      FOREIGN KEY (minutes_approved_by) REFERENCES public.profiles(user_id)
+      ON DELETE no action ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_meetings');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_meetings_created_by_profiles_user_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.profiles');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.profiles for committee_meetings_created_by_profiles_user_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_meetings e
+    LEFT JOIN public.profiles parent_row ON parent_row.user_id = e.created_by
+    WHERE e.created_by IS NOT NULL AND parent_row.user_id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_meetings: % row(s) violate committee_meetings_created_by_profiles_user_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_meetings
+      ADD CONSTRAINT committee_meetings_created_by_profiles_user_id_fk
+      FOREIGN KEY (created_by) REFERENCES public.profiles(user_id)
+      ON DELETE no action ON UPDATE no action;
+  END IF;
+  child_rel := to_regclass('public.committee_meetings');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'committee_meetings_updated_by_profiles_user_id_fk' AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.profiles');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.profiles for committee_meetings_updated_by_profiles_user_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.committee_meetings e
+    LEFT JOIN public.profiles parent_row ON parent_row.user_id = e.updated_by
+    WHERE e.updated_by IS NOT NULL AND parent_row.user_id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.committee_meetings: % row(s) violate committee_meetings_updated_by_profiles_user_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.committee_meetings
+      ADD CONSTRAINT committee_meetings_updated_by_profiles_user_id_fk
+      FOREIGN KEY (updated_by) REFERENCES public.profiles(user_id)
+      ON DELETE no action ON UPDATE no action;
   END IF;
 END
 $ue$;

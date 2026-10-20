@@ -347,6 +347,186 @@ try {
     }
   })
 
+  async function installCommitteeHistory(client, actionStatus) {
+    await installStubs(client)
+    await client.query('DROP TABLE public.committees')
+    await client.query(`
+      CREATE TYPE public.committee_type AS ENUM (
+        'bargaining', 'grievance', 'health_safety', 'political_action', 'equity', 'education',
+        'organizing', 'steward', 'executive', 'finance', 'communications', 'social',
+        'pension_benefits', 'other'
+      )
+    `)
+    await client.query(`
+      CREATE TABLE public.committees (
+        id uuid PRIMARY KEY,
+        organization_id uuid NOT NULL,
+        name varchar(255) NOT NULL,
+        committee_type public.committee_type NOT NULL,
+        status varchar(50) DEFAULT 'active' NOT NULL,
+        unit_id uuid,
+        worksite_id uuid,
+        is_organization_wide boolean DEFAULT false,
+        mandate text,
+        meeting_frequency varchar(100),
+        meeting_day varchar(50),
+        meeting_time varchar(50),
+        meeting_location text,
+        max_members integer,
+        current_member_count integer DEFAULT 0,
+        requires_appointment boolean DEFAULT false,
+        requires_election boolean DEFAULT false,
+        term_length integer,
+        chair_id text,
+        secretary_id text,
+        contact_email varchar(255),
+        description text,
+        notes text,
+        custom_fields jsonb,
+        created_at timestamp with time zone DEFAULT now(),
+        updated_at timestamp with time zone DEFAULT now(),
+        created_by text,
+        updated_by text,
+        archived_at timestamp with time zone
+      )
+    `)
+    const orgId = '44444444-4444-4444-8444-444444444444'
+    const committeeId = '55555555-5555-4555-8555-555555555555'
+    const meetingId = '66666666-6666-4666-8666-666666666666'
+    const actionId = '77777777-7777-4777-8777-777777777777'
+    await client.query(`INSERT INTO public.organizations (id) VALUES ($1)`, [orgId])
+    await client.query(
+      `INSERT INTO public.committees (id, organization_id, name, committee_type, status)
+       VALUES ($1, $2, 'safety', 'health_safety', 'active')`,
+      [committeeId, orgId],
+    )
+    await client.query(`
+      CREATE TABLE public.committee_meetings (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        committee_id uuid NOT NULL,
+        organization_id uuid NOT NULL,
+        title varchar(500) NOT NULL,
+        meeting_date timestamptz NOT NULL,
+        end_time timestamptz,
+        location text,
+        virtual_link text,
+        status text NOT NULL DEFAULT 'scheduled',
+        agenda text,
+        agenda_items jsonb,
+        minutes text,
+        minutes_approved_by text,
+        minutes_approved_at timestamptz,
+        quorum_met boolean,
+        attendee_count integer DEFAULT 0,
+        external_attendees jsonb,
+        decisions jsonb,
+        next_meeting_date timestamptz,
+        attachment_ids jsonb,
+        created_at timestamptz DEFAULT now(),
+        updated_at timestamptz DEFAULT now(),
+        created_by text,
+        updated_by text
+      )
+    `)
+    await client.query(`
+      CREATE TABLE public.committee_action_items (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        committee_id uuid NOT NULL,
+        meeting_id uuid,
+        organization_id uuid NOT NULL,
+        title varchar(500) NOT NULL,
+        description text,
+        status text NOT NULL DEFAULT 'pending',
+        priority text NOT NULL DEFAULT 'medium',
+        assigned_to text,
+        due_date date,
+        completed_at timestamptz,
+        completed_by text,
+        resolution text,
+        carried_from_meeting_id uuid,
+        carry_count integer DEFAULT 0,
+        created_at timestamptz DEFAULT now(),
+        updated_at timestamptz DEFAULT now(),
+        created_by text,
+        updated_by text
+      )
+    `)
+    await client.query(
+      `INSERT INTO public.committee_meetings (id, committee_id, organization_id, title, meeting_date, status)
+       VALUES ($1, $2, $3, 'monthly', now(), 'scheduled')`,
+      [meetingId, committeeId, orgId],
+    )
+    await client.query(
+      `INSERT INTO public.committee_action_items (
+         id, committee_id, meeting_id, organization_id, title, status, priority
+       ) VALUES ($1, $2, $3, $4, 'follow up', $5, 'medium')`,
+      [actionId, committeeId, meetingId, orgId, actionStatus],
+    )
+    return { orgId, committeeId, meetingId, actionId }
+  }
+
+  await withDatabase('ue_stub_rel_committee', async (client) => {
+    await installCommitteeHistory(client, 'pending')
+    await applyEvolution(client)
+    await applyEvolution(client)
+    const row = await client.query(`
+      SELECT item.status::text AS action_status,
+             pg_typeof(item.status)::text AS action_status_type,
+             item.priority::text AS priority,
+             pg_typeof(item.priority)::text AS priority_type,
+             meeting.status::text AS meeting_status,
+             pg_typeof(meeting.status)::text AS meeting_status_type
+      FROM public.committee_action_items item
+      JOIN public.committee_meetings meeting ON meeting.id = item.meeting_id
+    `)
+    const statements = canonicalSql.split('--> statement-breakpoint').map((statement) => statement.trim()).filter(Boolean)
+    await client.query('BEGIN')
+    await client.query('CREATE TEMP TABLE IF NOT EXISTS ue_bootstrap_created_relations (relname text PRIMARY KEY) ON COMMIT DROP')
+    for (const marker of [
+      'incompatible existing relation public.committee_action_items: expected 19 matching columns',
+      'incompatible existing relation public.committee_meetings: expected 24 matching columns',
+      'constraint committee_action_items_committee_id_committees_id_fk is absent',
+      'constraint committee_meetings_committee_id_committees_id_fk is absent',
+    ]) {
+      const statement = statements.find((candidate) => candidate.includes(marker))
+      if (!statement) throw new Error(`missing 0009 statement ${marker}`)
+      await client.query(statement)
+    }
+    await client.query('COMMIT')
+    record('committee_text_enum', row.rows[0])
+    const observed = row.rows[0]
+    if (observed.action_status !== 'pending' || observed.action_status_type !== 'committee_action_item_status') {
+      throw new Error(`action status was not preserved: ${JSON.stringify(observed)}`)
+    }
+    if (observed.priority !== 'medium' || observed.priority_type !== 'committee_action_item_priority') {
+      throw new Error(`priority was not preserved: ${JSON.stringify(observed)}`)
+    }
+    if (observed.meeting_status !== 'scheduled' || observed.meeting_status_type !== 'committee_meeting_status') {
+      throw new Error(`meeting status was not preserved: ${JSON.stringify(observed)}`)
+    }
+  })
+
+  await withDatabase('ue_stub_rel_committee_bogus', async (client) => {
+    await installCommitteeHistory(client, 'bogus')
+    let message = ''
+    try {
+      await applyEvolution(client)
+    } catch (error) {
+      message = error.message
+    }
+    const types = await client.query(`
+      SELECT item.status AS action_status, pg_typeof(item.status)::text AS action_status_type
+      FROM public.committee_action_items item
+    `)
+    record('committee_bogus_status', { message, ...types.rows[0] })
+    if (!message.includes('Rows were not rewritten')) {
+      throw new Error(`bogus committee status did not fail closed: ${message}`)
+    }
+    if (types.rows[0].action_status !== 'bogus' || types.rows[0].action_status_type !== 'text') {
+      throw new Error(`bogus committee status was rewritten: ${JSON.stringify(types.rows[0])}`)
+    }
+  })
+
   await withDatabase('ue_stub_rel_absent', async (client) => {
     await applyEvolution(client)
     const exists = await client.query(`SELECT to_regclass('public.employers') AS rel`)
