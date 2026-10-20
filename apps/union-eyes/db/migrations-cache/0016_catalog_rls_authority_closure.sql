@@ -95,3 +95,46 @@ BEGIN
     );
   END LOOP;
 END $$;
+--> statement-breakpoint
+-- The 0006 policies keep the tighter SELECT (and document INSERT) predicates.
+-- Manifest write privileges for these three tables had no write policy, so
+-- RLS would deny the representation services. These policies add only the
+-- missing commands and use the direct-org predicate. They do not replace
+-- the existing SELECT policies.
+DROP POLICY IF EXISTS ue_external_authorities_insert ON representation_authorities;
+--> statement-breakpoint
+CREATE POLICY ue_external_authorities_insert
+  ON representation_authorities
+  FOR INSERT TO union_eyes_runtime
+  WITH CHECK ((organization_id)::text = current_setting('app.current_org_id', true));
+--> statement-breakpoint
+DROP POLICY IF EXISTS ue_external_authorities_update ON representation_authorities;
+--> statement-breakpoint
+CREATE POLICY ue_external_authorities_update
+  ON representation_authorities
+  FOR UPDATE TO union_eyes_runtime
+  USING ((organization_id)::text = current_setting('app.current_org_id', true))
+  WITH CHECK ((organization_id)::text = current_setting('app.current_org_id', true));
+--> statement-breakpoint
+DROP POLICY IF EXISTS ue_external_matter_grants_insert ON external_matter_access_grants;
+--> statement-breakpoint
+CREATE POLICY ue_external_matter_grants_insert
+  ON external_matter_access_grants
+  FOR INSERT TO union_eyes_runtime
+  WITH CHECK ((organization_id)::text = current_setting('app.current_org_id', true));
+--> statement-breakpoint
+DROP POLICY IF EXISTS ue_external_matter_grants_update ON external_matter_access_grants;
+--> statement-breakpoint
+CREATE POLICY ue_external_matter_grants_update
+  ON external_matter_access_grants
+  FOR UPDATE TO union_eyes_runtime
+  USING ((organization_id)::text = current_setting('app.current_org_id', true))
+  WITH CHECK ((organization_id)::text = current_setting('app.current_org_id', true));
+--> statement-breakpoint
+DROP POLICY IF EXISTS ue_external_document_grants_update ON external_document_access_grants;
+--> statement-breakpoint
+CREATE POLICY ue_external_document_grants_update
+  ON external_document_access_grants
+  FOR UPDATE TO union_eyes_runtime
+  USING ((organization_id)::text = current_setting('app.current_org_id', true))
+  WITH CHECK ((organization_id)::text = current_setting('app.current_org_id', true));

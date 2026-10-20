@@ -7,16 +7,16 @@ This ledger records what was verified on this branch. Unexecuted controls stay u
 | Field | Value |
 | --- | --- |
 | BASE_SHA | `12dd086ae906ced483942144ab6c27326fda2738` |
-| CANDIDATE_SHA | The commit on `cursor/ue-convergence-p0-cfc5` that contains this checkpoint |
+| CANDIDATE_SHA | The commit on `cursor/ue-convergence-p0-cfc5` that contains this checkpoint. Preserved prior candidate `e08977e6255f23f4aba0f2777b998bd3612792e9` |
 | WORKTREE | `/home/ubuntu/ue-convergence` |
-| FILES_CHANGED | Fail-closed runtime grant lifecycle, platform `0009_canonical_lineage_relations`, 0014 producer graph, convergence contract test, ledgers |
-| ROOT_CAUSE | Fresh bootstrap reached 0014 without the relations its preflight requires, and the runner committed the 0009 table DML grants before that security migration finished |
-| FIX_IMPLEMENTED | Shared stage order is now foundation, runtime privilege quarantine, platform SQL, 0014 and 0015, then activation of the existing 0009 grant envelope. Platform 0009 creates the absent Drizzle relations and rejects an incompatible existing shape. `org_subscriptions`, `platform_invoices`, and `platform_payments` stay owned by the QA baseline |
-| TESTS_EXECUTED | `convergence-p0-contracts.test.ts`. PostgreSQL 16.15 databases `ue_conv_closure`, `ue_conv_resume`, `ue_conv_fail`, `ue_ddl_probe`, and `ue_shape_probe` |
-| OBSERVED_RESULT | Fresh bootstrap exit 0. 100 targets and 14 parents present. 0014 and 0015 hashes recorded. Deliberate 0014 abort left no runtime DML on relations without FORCE RLS and wrote no attestation. Repeat kept 26 distinct ledger hashes. `PG15_LEGACY_CLEAN_ROOM = UNEXECUTED`. `PG16_V2_CLEAN_ROOM = UNEXECUTED` |
-| DEPENDENT_EVIDENCE_INVALIDATED | Historical Bootstrap V2 G1–G7 digests are not evidence for this candidate. The frozen plan file was not regenerated. Snapshot E2E on `31ab109a1` is not fresh-bootstrap evidence |
-| REMAINING_DEFECTS | QA baseline shape for `org_subscriptions`, `platform_invoices`, and `platform_payments` differs from current Drizzle and was not rewritten. `cba_clauses` and `employers` exist and are not FORCE RLS. Successful activation restores 0009 DML on tables 0014 does not protect, including `strike_fund_disbursements`. Financial endpoint guard remains contained. Docker clean-rooms remain unexecuted |
-| NEXT_EXECUTABLE_ACTION | Run the pinned PG16 Bootstrap V2 clean-room and the PG15 legacy qualification only on a runner that has Docker and `UE_V2_WHEELHOUSE`. Keep snapshot E2E distinct from this fresh installation |
+| FILES_CHANGED | Exact catalog activation, same-transaction 0009 revoke, scoped `0016_catalog_rls_authority_closure`, platform `0010_billing_relation_shape_authority`, `platform_services` authority entry, QA billing CREATE, ledgers |
+| ROOT_CAUSE | Successful activation granted `SELECT, INSERT, UPDATE, DELETE` on every public table after migration 0014, and migration 0009 could commit that envelope before quarantine |
+| FIX_IMPLEMENTED | 0009 grants and their revoke commit together. Activation grants only the reviewed storage-authority manifest, after the live catalog matches it. Scoped 0016 forces RLS on the remaining direct-org and ICRA system tables. Platform 0010 aligns an empty billing shape and refuses a populated incompatible shape |
+| TESTS_EXECUTED | Contract tests. PostgreSQL 16.15 databases `ue_conv_authority`, `ue_conv_partial2`, `ue_conv_window`, `ue_conv_interrupt`, `ue_conv_adv`, `ue_grant_window`, `ue_shape_empty`, `ue_shape_populated`, `ue_shape_compatible`. Prior `e08977e62` databases remain historical |
+| OBSERVED_RESULT | Fresh and repeat activation exit 0 with 147/147 public tables classified and privilege-matched. `applicationReady` is false. Interrupted 0009 left no runtime grant and no attestation. `PG15_LEGACY_CLEAN_ROOM = UNEXECUTED`. `PG16_V2_CLEAN_ROOM = UNEXECUTED` |
+| DEPENDENT_EVIDENCE_INVALIDATED | `e08977e62` on `ue_conv_closure` proved producers and the 100-target closure, not whole-catalog least privilege. Snapshot E2E on `31ab109a1` is not this candidate. Historical G1–G7 are not this candidate |
+| REMAINING_DEFECTS | Strike-fund organization delete cascades historical disbursements; retention is still NOT_PROVEN and the foreign key was not changed. Docker clean-rooms and Django/application/four-shard execution were not run. The operations page names columns and tables that this physical `platform_services` relation does not have |
+| NEXT_EXECUTABLE_ACTION | Run Bootstrap V2 and the PG15 legacy qualification on a Docker host with the pinned images and `UE_V2_WHEELHOUSE`. Run Django, workers, and the four E2E shards against this fresh privilege model |
 | HUMAN_AUTHORIZATION_BOUNDARY | No merge, deploy, credential change, database provision, or governance-label change |
 
 ## Repository state checked before edits
@@ -38,12 +38,12 @@ This ledger records what was verified on this branch. Unexecuted controls stay u
 | DJANGO_DRIZZLE_CONVERGENCE | IN_PROGRESS. Membership organization reference now follows the Django UUID contract |
 | FRESH_BOOTSTRAP | PASS on disposable PostgreSQL 16.15 database `ue_conv_closure`. The runner exited 0. This is not a Bootstrap V2 clean-room |
 | SUPPORTED_UPGRADE | PASS for repeat and partial resume. Repeat on `ue_conv_closure` skipped every recorded hash and left 26 distinct hashes. `ue_conv_resume` started after scoped 0004 and completed 0014 and 0015 |
-| SCHEMA_DRIFT | FAIL-CLOSED for an incompatible existing table. `ue_shape_probe` kept `allocation_rules.id` as integer and created no other public table. QA baseline versus Drizzle shape drift on three billing relations was not repaired |
-| RLS_AND_AUTHORIZATION | PASS for the 100 migration-0014 targets on `ue_conv_closure`: RLS enabled, FORCE RLS enabled, runtime and system policies present. `UE_RUNTIME_RLS_TENANT_ISOLATION` stays FAIL because relations outside that target list, including `strike_fund_disbursements`, `cba_clauses`, and `employers`, are not forced |
-| BUSINESS_COMPATIBILITY | NOT_EXECUTED. Django is not installed in this environment. Application startup, seed, and worker suites were not run |
-| FOUR_SHARD_E2E | PASS on GitHub run `39361641631` for snapshot-backed SHA `31ab109a1` (`UE E2E worker` 1/4 through 4/4). That run is not fresh-bootstrap evidence. This candidate has not been through CI |
+| SCHEMA_DRIFT | FAIL-CLOSED for a populated incompatible billing row. Empty legacy billing tables convert. Fresh QA CREATE uses the Drizzle enums and non-null `billing_account_id`. `ue_shape_probe` at `e08977e62` remains the integer `allocation_rules` proof |
+| RLS_AND_AUTHORIZATION | PASS for effective public grants against the 806-entry manifest on `ue_conv_authority`: 147/147 tables classified, 0 privilege mismatches, FORCE RLS on the 15 relations that previously lacked it. `UE_RUNTIME_RLS_TENANT_ISOLATION` stays FAIL as the programme flag |
+| BUSINESS_COMPATIBILITY | NOT_EXECUTED. Django is not installed. Application startup, seed, and worker suites were not run. Runtime SQL for the settings `platform_services` read and an own-org `allocation_rules` insert succeeded |
+| FOUR_SHARD_E2E | PASS only for snapshot-backed SHA `31ab109a1` on GitHub run `39361641631`. Not evidence for this fresh privilege model |
 | CREDENTIAL_FREE_CI | NOT_EXECUTED. No credential-free worktree exists here |
-| ADVERSARIAL_VERIFICATION | NOT_EXECUTED |
+| ADVERSARIAL_VERIFICATION | EXECUTED on `ue_conv_adv`, `ue_grant_window`, and `ue_conv_interrupt`. See the catalog section |
 | SOURCE_INTEGRATION_READINESS | NOT_READY. This is one branch and does not merge #970 or Dependabot |
 | REPOSITORY_RECONCILIATION | UNCHANGED. Seventeen open pull requests remain, including this draft |
 | OPERATIONAL_READINESS | `UE_SAAS_OPERATIONAL_READINESS = NO_GO`, `UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL`, `PRODUCTION_DEPLOYMENT_AUTHORIZED = NO`, `CUSTOMER_DATA_EXECUTION_AUTHORIZED = NO` |
@@ -81,3 +81,21 @@ Repeat on the same database skipped every scoped and platform hash, left 26 dist
 `ue_shape_probe` started with `allocation_rules(id integer)`. Platform 0009 raised `incompatible existing relation public.allocation_rules: expected 8 matching columns, found 0` and left that single public table unchanged.
 
 PostgreSQL 15 was not executed. Docker is not installed. The Bootstrap V2 clean-room and the legacy PG15 clean-room stay UNEXECUTED. Local PostgreSQL 16 does not substitute for either. `FINANCIAL_RUNTIME_CONFIGURATION_COMPATIBILITY` remains `INCOMPATIBLE`. GitHub run `39361641631` on `31ab109a1` has four successful `UE E2E worker` shards. That is snapshot E2E, not this fresh database.
+
+## Full-catalog authority
+
+Preserved checkpoint `e08977e6255f23f4aba0f2777b998bd3612792e9` on `ue_conv_closure`: fresh PostgreSQL 16.15 bootstrap, 100/100 `0014` targets, 14/14 parents, `0014` hash `cd8a2814a0e101dd56b0a94449eda3dce6e99860b368690a5fad3b97791a64a5`, `0015` hash `cdd4840d7544f0ec7e81bf9bb269cf3dd82dc2d8bec7849d926430916463bced`, repeat, partial resume, UUID strike-fund provenance, ambiguous attribution fail-closed, deliberate `0014` failure, and source/journal order. Those hashes are unchanged. That activation still used the broad public DML envelope. It is not whole-catalog least privilege.
+
+Current PostgreSQL 16.15, `QA_TEST_ENV=true`, database `ue_conv_authority`. The runner applies scoped `0016_catalog_rls_authority_closure` and platform `0010_billing_relation_shape_authority`, then exact manifest grants. Attestation fields: `schemaMigrationComplete=true`, `securityPolicyVerified=true`, `runtimePrivilegesVerified=true`, `applicationReady=false`. Public tables: 147. Manifest entries: 806. Classified public tables: 147. Runtime and system privilege mismatches: 0. Whole catalog relations in `public`, `user_management`, `audit_security`, and `drizzle`: 163, including 2 sequences. `employers` has FORCE RLS. Runtime `strike_fund_disbursements` is SELECT without INSERT. Runtime `icra_organizations` is denied. System can insert an ICRA row. `platform_services` runtime SELECT is granted and INSERT is denied.
+
+Repeat on `ue_conv_authority` skipped recorded hashes, did not skip catalog verification, and exited 0. `ue_conv_partial2` started after scoped `0004_hesitant_chameleon` and completed with 28 distinct ledger hashes and `applicationReady=false`.
+
+Same-transaction proof on `ue_grant_window`: a second session received `permission denied for table secret` while the first transaction held an uncommitted GRANT, and again after that transaction committed the REVOKE. Live probes on `ue_conv_window` during bootstrap: 16 probes, 0 leaks, 14 `permission denied`, 2 post-activation reads hidden by RLS. `ue_conv_interrupt` was killed during migration `0009`. Ledger rows: 12. No attestation. Runtime SELECT and INSERT on `organizations`, and system SELECT, were denied.
+
+Billing shape: empty legacy tables on `ue_shape_empty` converted to `subscription_status` and `billing_account_id` NOT NULL. `ue_shape_populated` kept 1 varchar row with a null account and raised `incompatible existing relation public.org_subscriptions`. `ue_shape_compatible` kept its row and added the foreign key.
+
+Strike fund: deleting the organization inside a rolled-back transaction removed the synthetic disbursement (`strike_after_org_delete` count 0). `UE_V2_FINANCIAL_SCOPE_AUTHORITY` still says NOT_PROVEN. The `ON DELETE CASCADE` declaration was not changed.
+
+Adversarial database `ue_conv_adv`: an unclassified table failed activation and had no runtime SELECT. A deleted `allocation_rules` policy failed activation while the closure hashes remained. Membership in `ue_excess` failed activation and left the inherited SELECT in place. A serving PUBLIC grant failed activation and left runtime SELECT true; the following QA enforcement removed it. A runtime SELECT grant on `icra_organizations` failed the serving check and was removed by QA enforcement. `employers` without FORCE RLS failed activation. A `SECURITY DEFINER` function failed activation. Renaming `union_eyes_runtime` failed activation with roles absent. A view `ue_leak` selected `Rule A` as `union_eyes_runtime` while the serving activation exited 1. The view was then dropped.
+
+Django is not installed. Docker is not installed. No application server, worker suite, or four-shard E2E was run on this database.

@@ -265,13 +265,17 @@ async function collectViolations(client, manifest) {
   }
 
   const columnGrants = await client.query(
-    `SELECT table_schema, table_name, column_name, grantee, privilege_type
-     FROM information_schema.column_privileges
-     WHERE table_schema IN ('public', 'user_management', 'audit_security')
-       AND grantee IN ('union_eyes_runtime', 'union_eyes_system', 'PUBLIC')`,
+    `SELECT n.nspname AS schema_name, c.relname AS table_name, a.attname AS column_name
+     FROM pg_attribute a
+     JOIN pg_class c ON c.oid = a.attrelid
+     JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE a.attacl IS NOT NULL
+       AND a.attnum > 0
+       AND NOT a.attisdropped
+       AND n.nspname IN ('public', 'user_management', 'audit_security')`,
   )
   for (const row of columnGrants.rows) {
-    violations.push(`${row.table_schema}.${row.table_name}.${row.column_name} column ${row.privilege_type} for ${row.grantee}`)
+    violations.push(`${row.schema_name}.${row.table_name}.${row.column_name} has a column ACL`)
   }
 
   const defaults = await client.query(
@@ -381,7 +385,7 @@ export async function activateCatalogPrivileges(client, { repoRoot, enforce }) {
     if (enforce) await grantExactPublicPrivileges(client, manifest)
     const violations = await collectViolations(client, manifest)
     if (violations.length > 0) {
-      throw new Error(`Catalog privilege preflight failed:\n${violations.slice(0, 25).join('\n')}`)
+      throw new Error(`Catalog privilege preflight failed:\n${violations.slice(0, 40).join('\n')}`)
     }
     await client.query('COMMIT')
   } catch (error) {
