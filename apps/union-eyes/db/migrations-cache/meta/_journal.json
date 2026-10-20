@@ -120,6 +120,13 @@
       "when": 1790080000000,
       "tag": "0016_catalog_rls_authority_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1790140000000,
+      "tag": "0017_snapshot_authority_reconciliation",
+      "breakpoints": true
     }
   ]
 }

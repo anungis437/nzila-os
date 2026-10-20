@@ -195,6 +195,8 @@ export type StorageAuthorityClassification =
   | 'MIXED_GLOBAL_TENANT_RLS_REQUIRED'
   | 'MULTI_PARTY_RLS_REQUIRED'
   | 'SYSTEM_ONLY'
+  | 'FRAMEWORK_DEDICATED_EXECUTION_CONTEXT'
+  | 'PLATFORM_METADATA_DEDICATED_EXECUTION_CONTEXT'
   | 'GLOBAL_REFERENCE_DATA'
   | 'APP_SCOPED_NON_SENSITIVE'
   | 'SEPARATE_DATABASE_BOUNDARY'
@@ -311,6 +313,12 @@ export interface StorageAuthorityEntry {
   /** Which NEEDS_REVIEW entries to triage first — see file header. */
   reviewPriority: StorageAuthorityReviewPriority
   /**
+   * Dedicated Django framework or platform-metadata role grants.
+   * These are not union_eyes_runtime or union_eyes_system privileges.
+   * Absent means this table has no dedicated-role contract.
+   */
+  frameworkRolePrivileges?: readonly { role: string; privileges: readonly RuntimeOperation[] }[]
+  /**
    * Set ONLY when `table` does not resolve to a canonical DECLARED
    * public-schema table — see ScopeDisposition. Absent/undefined means
    * this entry is a normal in-scope public-schema table.
@@ -330,6 +338,8 @@ export const CLOSED_CLASSIFICATIONS: readonly StorageAuthorityClassification[] =
   'MIXED_GLOBAL_TENANT_RLS_REQUIRED',
   'MULTI_PARTY_RLS_REQUIRED',
   'SYSTEM_ONLY',
+  'FRAMEWORK_DEDICATED_EXECUTION_CONTEXT',
+  'PLATFORM_METADATA_DEDICATED_EXECUTION_CONTEXT',
   'GLOBAL_REFERENCE_DATA',
   'APP_SCOPED_NON_SENSITIVE',
   'SEPARATE_DATABASE_BOUNDARY',

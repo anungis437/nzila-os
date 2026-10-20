@@ -54,6 +54,11 @@ import {
 } from './lib/union-eyes-platform-migrations.mjs';
 import { activateCatalogPrivileges } from './lib/union-eyes-catalog-authority.mjs';
 import {
+  grantRuntimeConnect,
+  recordRestoredAuthority,
+  verifyRestoredAuthority,
+} from './lib/union-eyes-restore-authority.mjs';
+import {
   PRODUCTION_BOOTSTRAP_ORDER,
   SCOPED_FOUNDATION_THROUGH_TAG,
   SCOPED_RLS_CLOSURE_TAGS,
@@ -482,7 +487,20 @@ async function main() {
 
     info(`Applying scoped RLS closures after ${SCOPED_FOUNDATION_THROUGH_TAG} ...`);
     const closureSummary = await applyScopedMigrations(client, { afterTag: SCOPED_FOUNDATION_THROUGH_TAG });
+    const authorityReport = await verifyRestoredAuthority(client, {
+      migrationsDir: SCOPED_MIGRATIONS_DIR,
+      restored: restoreSummary.restored,
+    });
+    await recordRestoredAuthority(client, authorityReport);
+    info(
+      `Authority reconciliation ${authorityReport.mode}: ` +
+        'HISTORICAL_MIGRATION_RECORDED PHYSICAL_SCHEMA_VERIFIED SECURITY_EFFECTS_VERIFIED RESTORE_RECONCILIATION_COMPLETE',
+    );
     const activationSummary = await activateRuntimePrivileges(client);
+    if (restoreSummary.restored) {
+      await grantRuntimeConnect(client);
+      info('Runtime CONNECT restored after catalog admission.');
+    }
 
     await writeBootstrapAttestation(client, {
       snapshotDigest: restoreSummary.snapshotDigest,
@@ -495,6 +513,10 @@ async function main() {
       platformMigrationsApplied: platformSummary.applied,
       runtimePrivilegeQuarantineApplied: quarantineSummary.applied,
       runtimeGrantActivationApplied: activationSummary.applied,
+      historicalMigrationRecorded: authorityReport.HISTORICAL_MIGRATION_RECORDED,
+      physicalSchemaVerified: authorityReport.PHYSICAL_SCHEMA_VERIFIED,
+      securityEffectsVerified: authorityReport.SECURITY_EFFECTS_VERIFIED,
+      restoreReconciliationComplete: authorityReport.RESTORE_RECONCILIATION_COMPLETE,
       schemaMigrationComplete: true,
       securityPolicyVerified: activationSummary.securityPolicyVerified === true,
       runtimePrivilegesVerified: activationSummary.runtimePrivilegesVerified === true,

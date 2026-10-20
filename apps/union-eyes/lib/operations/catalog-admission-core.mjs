@@ -127,6 +127,24 @@ export const admissionQueries = [
             )`,
   },
   {
+    name: 'dedicatedRoles',
+    sql: `SELECT c.relname AS table_name,
+                 r.rolname AS role_name,
+                 ARRAY(
+                   SELECT priv
+                   FROM (VALUES (1, 'SELECT'), (2, 'INSERT'), (3, 'UPDATE'), (4, 'DELETE')) AS v(ord, priv)
+                   WHERE has_table_privilege(r.oid, c.oid, priv)
+                   ORDER BY ord
+                 ) AS privileges
+          FROM pg_class c
+          JOIN pg_namespace n ON n.oid = c.relnamespace
+          JOIN pg_roles r ON r.rolname IN (
+            'ue_framework_admin', 'ue_framework_identity', 'ue_framework_worker'
+          )
+          WHERE n.nspname = 'public'
+            AND c.relkind IN ('r', 'p')`,
+  },
+  {
     name: 'columnGrants',
     sql: `SELECT n.nspname AS schema_name, c.relname AS table_name, a.attname AS column_name
           FROM pg_attribute a
@@ -180,9 +198,16 @@ function policyViolations(table, entry, policies) {
   }
   const runtimePolicies = policies.filter((policy) => appliesTo(policy, 'union_eyes_runtime'))
   const systemPolicies = policies.filter((policy) => appliesTo(policy, 'union_eyes_system'))
-  if (entry.classification === 'SYSTEM_ONLY') {
+  if (
+    entry.classification === 'SYSTEM_ONLY' ||
+    entry.classification === 'FRAMEWORK_DEDICATED_EXECUTION_CONTEXT' ||
+    entry.classification === 'PLATFORM_METADATA_DEDICATED_EXECUTION_CONTEXT'
+  ) {
     if (runtimePolicies.length > 0) violations.push(`public.${table} has a runtime RLS policy`)
-    if (entry.system.length > 0 && systemPolicies.length === 0) {
+    if (entry.classification !== 'SYSTEM_ONLY' && systemPolicies.length > 0) {
+      violations.push(`public.${table} has a system RLS policy`)
+    }
+    if (entry.classification === 'SYSTEM_ONLY' && entry.system.length > 0 && systemPolicies.length === 0) {
       violations.push(`public.${table} has no system RLS policy`)
     }
     return violations
@@ -306,6 +331,23 @@ export function assessCatalogAdmission(contract, snapshots, environment = 'unkno
       } else {
         violations.push(...policyViolations(relation.table_name, entry, policiesByTable.get(relation.table_name) ?? []))
       }
+    }
+  }
+
+  const presentPublic = new Set(
+    rows(snapshots, 'relations')
+      .filter((relation) => relation.schema_name === 'public')
+      .map((relation) => relation.table_name),
+  )
+  const dedicatedActual = new Map()
+  for (const row of rows(snapshots, 'dedicatedRoles')) {
+    dedicatedActual.set(`${row.table_name}|${row.role_name}`, asArray(row.privileges))
+  }
+  for (const expected of payload.dedicatedRolePrivileges ?? []) {
+    if (!presentPublic.has(expected.table)) continue
+    const actual = dedicatedActual.get(`${expected.table}|${expected.role}`) ?? []
+    if (!samePrivileges(actual, expected.privileges)) {
+      violations.push(`public.${expected.table} ${expected.role} privileges are [${actual}]`)
     }
   }
 

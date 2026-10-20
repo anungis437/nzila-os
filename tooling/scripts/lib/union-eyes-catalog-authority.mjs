@@ -24,6 +24,8 @@ export const RLS_REQUIRED_CLASSIFICATIONS = [
   'MIXED_GLOBAL_TENANT_RLS_REQUIRED',
   'MULTI_PARTY_RLS_REQUIRED',
   'SYSTEM_ONLY',
+  'FRAMEWORK_DEDICATED_EXECUTION_CONTEXT',
+  'PLATFORM_METADATA_DEDICATED_EXECUTION_CONTEXT',
 ]
 const RLS_REQUIRED = new Set(RLS_REQUIRED_CLASSIFICATIONS)
 export const RUNTIME_SCHEMA_USAGE = ['public', 'user_management', 'audit_security']
@@ -84,6 +86,10 @@ export function loadAuthorityManifest(repoRoot) {
       classification: row.classification,
       runtime: privilegeSet(row.runtime, row.table, 'runtime'),
       system: privilegeSet(row.system, row.table, 'system'),
+      frameworkRolePrivileges: (row.frameworkRolePrivileges ?? []).map((grant) => ({
+        role: grant.role,
+        privileges: privilegeSet(grant.privileges, `${row.table} ${grant.role}`, 'dedicated'),
+      })),
     })
   }
   return byTable
@@ -144,6 +150,15 @@ function contractFromManifest(manifest) {
     runtimeSchemaUsage: [...RUNTIME_SCHEMA_USAGE],
     systemSchemaUsage: [...SYSTEM_SCHEMA_USAGE],
     rlsRequired: [...RLS_REQUIRED_CLASSIFICATIONS],
+    dedicatedRolePrivileges: [...manifest.values()]
+      .flatMap((entry) =>
+        (entry.frameworkRolePrivileges ?? []).map((grant) => ({
+          table: entry.table,
+          role: grant.role,
+          privileges: privilegesInOrder(grant.privileges),
+        })),
+      )
+      .sort((left, right) => `${left.table}:${left.role}`.localeCompare(`${right.table}:${right.role}`)),
   }
   return { digest: catalogContractDigest(payload), payload }
 }
@@ -243,14 +258,19 @@ export async function remediateCatalogAuthority(client, { repoRoot }) {
     await client.query('ROLLBACK')
     throw error
   }
-  const migration = fs.readFileSync(
-    path.join(repoRoot, 'apps/union-eyes/db/migrations-cache/0016_catalog_rls_authority_closure.sql'),
-    'utf8',
-  )
-  for (const statement of migration.split('--> statement-breakpoint')) {
-    const sql = statement.trim()
-    if (!sql.replace(/--.*$/gm, '').trim()) continue
-    await client.query(sql)
+  for (const fileName of [
+    '0016_catalog_rls_authority_closure.sql',
+    '0017_snapshot_authority_reconciliation.sql',
+  ]) {
+    const migration = fs.readFileSync(
+      path.join(repoRoot, 'apps/union-eyes/db/migrations-cache', fileName),
+      'utf8',
+    )
+    for (const statement of migration.split('--> statement-breakpoint')) {
+      const sql = statement.trim()
+      if (!sql.replace(/--.*$/gm, '').trim()) continue
+      await client.query(sql)
+    }
   }
   return activateCatalogPrivileges(client, { repoRoot, enforce: true })
 }
@@ -287,7 +307,7 @@ export async function activateCatalogPrivileges(client, { repoRoot, enforce }) {
     if (enforce) await grantExactPublicPrivileges(client, manifest)
     const violations = await collectViolations(client, manifest)
     if (violations.length > 0) {
-      throw new Error(`Catalog privilege preflight failed:\n${violations.slice(0, 40).join('\n')}`)
+      throw new Error(`Catalog privilege preflight failed:\n${violations.join('\n')}`)
     }
     await client.query('COMMIT')
   } catch (error) {

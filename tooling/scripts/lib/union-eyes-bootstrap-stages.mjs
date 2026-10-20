@@ -5,7 +5,7 @@
  * Runtime DML on relations without FORCE RLS is quarantined before later
  * DDL, unless every scoped RLS closure hash is already recorded.
  * Platform SQL creates objects that 0014's preflight requires.
- * Scoped 0014, 0015, and 0016 are the RLS closures.
+ * Scoped 0014, 0015, 0016, and 0017 are the RLS closures.
  * Exact manifest grants are activated only after those closure hashes exist
  * and the current catalog passes the privilege preflight.
  * The producer graph imports this list. Do not describe a different order
@@ -18,6 +18,7 @@ export const SCOPED_RLS_CLOSURE_TAGS = [
   '0014_lineage_restoration_rls_closure',
   '0015_deadline_engine_rls_fail_closed_closure',
   '0016_catalog_rls_authority_closure',
+  '0017_snapshot_authority_reconciliation',
 ];
 
 export const PRODUCTION_BOOTSTRAP_ORDER = [

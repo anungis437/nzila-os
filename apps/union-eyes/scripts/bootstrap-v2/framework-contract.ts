@@ -75,3 +75,8 @@ export const FRAMEWORK_ADMIN_PRIVILEGES = ['SELECT', 'INSERT', 'UPDATE', 'DELETE
 export const FRAMEWORK_WORKER_TABLES = Object.keys(FRAMEWORK_MODEL_OWNERS).filter((table) =>
   table.startsWith('django_celery_'),
 )
+
+/** Django's migration recorder is active framework state and is not a model owner. */
+export const FRAMEWORK_LEDGER_OWNERS: Record<string, string> = {
+  django_migrations: 'python:django.db.migrations.recorder.MigrationRecorder',
+}

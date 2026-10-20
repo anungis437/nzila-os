@@ -27,7 +27,7 @@ async function checkCatalogAuthority(): Promise<{ state: HealthCheckState; ms: n
         applicationReady: false,
         privilegesUnchanged: true,
         violationCount: report.violations.length,
-        violations: report.violations.slice(0, 40),
+        violations: report.violations,
       })
       return {
         state: 'fail',
