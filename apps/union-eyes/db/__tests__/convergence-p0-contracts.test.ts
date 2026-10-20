@@ -201,6 +201,33 @@ describe('convergence P0 contracts', () => {
       "CREATE TYPE fee_adjustment_type AS ENUM ('reversal','waiver','correction','dispute_credit')",
     )
     expect(monetization).not.toContain('partial_reversal')
+    const stubEvolution = tags.indexOf('0008_django_stub_relation_evolution')
+    expect(stubEvolution).toBeGreaterThan(feeEvolution)
+    expect(canonical).toBeGreaterThan(stubEvolution)
+    const stubSql = fs.readFileSync(
+      path.join(REPO_ROOT, 'apps/union-eyes/db/migrations-platform/0008_django_stub_relation_evolution.sql'),
+      'utf8',
+    )
+    for (const relation of [
+      'employers',
+      'worksites',
+      'bargaining_units',
+      'committees',
+      'collective_agreements',
+      'cba_clauses',
+      'cost_centers',
+    ]) {
+      expect(stubSql).toContain(`public.${relation}`)
+      expect(stubSql).toContain(`incompatible existing relation public.${relation}`)
+    }
+    expect(stubSql).toContain('Rows were not rewritten.')
+    expect(stubSql).not.toMatch(/DROP TABLE/i)
+    expect(stubSql).not.toMatch(/DROP TYPE/i)
+    const canonicalSql = fs.readFileSync(
+      path.join(REPO_ROOT, 'apps/union-eyes/db/migrations-platform/0009_canonical_lineage_relations.sql'),
+      'utf8',
+    )
+    expect(canonicalSql).toContain('expected 33 matching columns')
   })
 
   it('records the financial contradiction as contained rather than reconciled', () => {
