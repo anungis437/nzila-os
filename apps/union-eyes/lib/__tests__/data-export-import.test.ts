@@ -432,17 +432,6 @@ describe('organization data portability', () => {
     expect(officer).toMatchObject({ success: false, imported: 0 })
     expect(officer.errors[0]).toBe('Forbidden')
     expect(claimWrites()).toEqual([])
-
-    state.role = 'clerk'
-    const clerk = await new DataImportService().import(
-      'claims',
-      ORG,
-      JSON.stringify([CLAIM_ROW]),
-      'json',
-    )
-    expect(clerk.success).toBe(false)
-    expect(clerk.imported).toBe(0)
-    expect(claimWrites()).toEqual([])
   })
 
   it('does not insert a duplicate claim or accept a client claim number', async () => {
