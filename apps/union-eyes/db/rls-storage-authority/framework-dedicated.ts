@@ -8,6 +8,7 @@ import type { RuntimeOperation, StorageAuthorityEntry } from './types'
 import {
   FRAMEWORK_ADMIN_PRIVILEGES,
   FRAMEWORK_IDENTITY_PRIVILEGES,
+  FRAMEWORK_IDENTITY_UPDATE_COLUMNS,
   FRAMEWORK_LEDGER_OWNERS,
   FRAMEWORK_MODEL_OWNERS,
   FRAMEWORK_ROLES,
@@ -16,6 +17,11 @@ import {
 
 const adminPrivileges = [...FRAMEWORK_ADMIN_PRIVILEGES] as RuntimeOperation[]
 
+/** Identity UPDATE is limited to these columns. It is a column grant, never a table grant. */
+const identityUpdateColumns: Record<string, readonly string[]> = {
+  auth_user: FRAMEWORK_IDENTITY_UPDATE_COLUMNS,
+}
+
 function dedicated(
   table: string,
   owner: string,
@@ -23,6 +29,7 @@ function dedicated(
   reason: string,
   roles: StorageAuthorityEntry['frameworkRolePrivileges'],
   invocation: StorageAuthorityEntry['invocationAuthority'],
+  columnGrants?: StorageAuthorityEntry['frameworkColumnGrants'],
 ): StorageAuthorityEntry {
   return {
     table,
@@ -36,6 +43,7 @@ function dedicated(
     reviewPriority: 'NONE',
     scopeDisposition: 'DECLARATION_STALE_OR_NONCANONICAL',
     frameworkRolePrivileges: roles,
+    ...(columnGrants?.length ? { frameworkColumnGrants: columnGrants } : {}),
   }
 }
 
@@ -45,12 +53,18 @@ function frameworkRoles(table: string): NonNullable<StorageAuthorityEntry['frame
   ]
   const identity = FRAMEWORK_IDENTITY_PRIVILEGES[table]
   if (identity?.length) {
-    roles.push({ role: FRAMEWORK_ROLES.identity, privileges: [...identity] as RuntimeOperation[] })
+    const tablePrivileges = identity.filter((privilege) => !(privilege === 'UPDATE' && table in identityUpdateColumns))
+    roles.push({ role: FRAMEWORK_ROLES.identity, privileges: tablePrivileges as RuntimeOperation[] })
   }
   if (table.startsWith('django_celery_')) {
     roles.push({ role: FRAMEWORK_ROLES.worker, privileges: adminPrivileges })
   }
   return roles
+}
+
+function frameworkColumnGrants(table: string): StorageAuthorityEntry['frameworkColumnGrants'] {
+  const columns = identityUpdateColumns[table]
+  return columns ? [{ role: FRAMEWORK_ROLES.identity, privilege: 'UPDATE', columns: [...columns] }] : undefined
 }
 
 const frameworkOwners = { ...FRAMEWORK_MODEL_OWNERS, ...FRAMEWORK_LEDGER_OWNERS }
@@ -68,6 +82,7 @@ export const frameworkDedicatedEntries: StorageAuthorityEntry[] = [
           : 'Active Django framework relation. Identity and administrator roles are the principals. This is not latent and not union_eyes_runtime authority.',
       frameworkRoles(table),
       table.startsWith('django_celery_') ? 'WORKER' : 'PLATFORM_ADMIN',
+      frameworkColumnGrants(table),
     ),
   ),
   dedicated(

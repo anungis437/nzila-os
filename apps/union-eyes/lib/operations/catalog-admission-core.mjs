@@ -146,14 +146,18 @@ export const admissionQueries = [
   },
   {
     name: 'columnGrants',
-    sql: `SELECT n.nspname AS schema_name, c.relname AS table_name, a.attname AS column_name
+    sql: `SELECT n.nspname AS schema_name, c.relname AS table_name, a.attname AS column_name,
+                 COALESCE(g.rolname, 'PUBLIC') AS role_name, x.privilege_type
           FROM pg_attribute a
           JOIN pg_class c ON c.oid = a.attrelid
           JOIN pg_namespace n ON n.oid = c.relnamespace
+          CROSS JOIN LATERAL aclexplode(a.attacl) x
+          LEFT JOIN pg_roles g ON g.oid = x.grantee
           WHERE a.attacl IS NOT NULL
             AND a.attnum > 0
             AND NOT a.attisdropped
-            AND n.nspname IN ('public', 'user_management', 'audit_security')`,
+            AND n.nspname IN ('public', 'user_management', 'audit_security')
+          ORDER BY 1, 2, 4, 5, 3`,
   },
   {
     name: 'defaults',
@@ -358,8 +362,35 @@ export function assessCatalogAdmission(contract, snapshots, environment = 'unkno
   for (const row of rows(snapshots, 'definers')) {
     violations.push(`${row.nspname}.${row.proname} is a SECURITY DEFINER function executable by a runtime principal`)
   }
+  const approvedColumns = new Map(
+    (payload.approvedColumnGrants ?? []).map((grant) => [
+      `${grant.schema}.${grant.table}|${grant.role}|${grant.privilege}`,
+      grant,
+    ]),
+  )
+  const actualColumns = new Map()
   for (const row of rows(snapshots, 'columnGrants')) {
-    violations.push(`${row.schema_name}.${row.table_name}.${row.column_name} has a column ACL`)
+    const key = `${row.schema_name}.${row.table_name}|${row.role_name}|${row.privilege_type}`
+    if (!approvedColumns.has(key)) {
+      violations.push(
+        `${row.schema_name}.${row.table_name}.${row.column_name} has an unapproved column ACL (${row.role_name} ${row.privilege_type})`,
+      )
+      continue
+    }
+    actualColumns.set(key, [...(actualColumns.get(key) ?? []), row.column_name])
+  }
+  const presentRelations = new Set(
+    rows(snapshots, 'relations').map((relation) => `${relation.schema_name}.${relation.table_name}`),
+  )
+  for (const [key, grant] of approvedColumns) {
+    if (!presentRelations.has(`${grant.schema}.${grant.table}`)) continue
+    const actual = [...(actualColumns.get(key) ?? [])].sort()
+    const expected = [...grant.columns].sort()
+    if (actual.length !== expected.length || actual.some((column, index) => column !== expected[index])) {
+      violations.push(
+        `${grant.schema}.${grant.table} ${grant.role} ${grant.privilege} columns are [${actual}], expected [${expected}]`,
+      )
+    }
   }
   for (const row of rows(snapshots, 'defaults')) {
     violations.push(`default privileges for ${row.owner} on ${row.nspname || 'database'} include a runtime role`)

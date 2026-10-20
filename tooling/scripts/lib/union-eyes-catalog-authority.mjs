@@ -47,6 +47,48 @@ export const SCOPED_NONPUBLIC_PRIVILEGES = [
   { schema: 'audit_security', table: 'audit_logs', runtime: ['INSERT'], system: [] },
 ]
 
+/**
+ * The authority-reader role owns the framework SECURITY DEFINER helpers. It may
+ * read only the columns those helpers evaluate. Mirrors FRAMEWORK_READER_COLUMNS
+ * in scripts/bootstrap-v2/framework-contract.ts; a unit test keeps them equal.
+ */
+export const AUTHORITY_READER_COLUMN_GRANTS = [
+  {
+    schema: 'user_management',
+    table: 'users',
+    role: 'ue_framework_authority_reader',
+    privilege: 'SELECT',
+    columns: ['user_id', 'is_active', 'lifecycle_state', 'is_system_admin'],
+  },
+  {
+    schema: 'user_management',
+    table: 'user_sessions',
+    role: 'ue_framework_authority_reader',
+    privilege: 'SELECT',
+    columns: ['user_id', 'organization_id', 'session_token_hash', 'is_active', 'expires_at'],
+  },
+]
+
+function approvedColumnGrants(manifest) {
+  const grants = [
+    ...[...manifest.values()].flatMap((entry) =>
+      (entry.frameworkColumnGrants ?? []).map((grant) => ({
+        schema: 'public',
+        table: entry.table,
+        role: grant.role,
+        privilege: grant.privilege,
+        columns: [...grant.columns].sort(),
+      })),
+    ),
+    ...AUTHORITY_READER_COLUMN_GRANTS.map((grant) => ({ ...grant, columns: [...grant.columns].sort() })),
+  ]
+  return grants.sort((left, right) =>
+    `${left.schema}.${left.table}:${left.role}:${left.privilege}`.localeCompare(
+      `${right.schema}.${right.table}:${right.role}:${right.privilege}`,
+    ),
+  )
+}
+
 function quoteIdent(value) {
   if (!/^[a-z_][a-z0-9_]*$/.test(value)) {
     throw new Error(`Refusing to interpolate identifier ${value}`)
@@ -90,6 +132,11 @@ export function loadAuthorityManifest(repoRoot) {
         role: grant.role,
         privileges: privilegeSet(grant.privileges, `${row.table} ${grant.role}`, 'dedicated'),
       })),
+      frameworkColumnGrants: (row.frameworkColumnGrants ?? []).map((grant) => ({
+        role: grant.role,
+        privilege: grant.privilege,
+        columns: [...grant.columns],
+      })),
     })
   }
   return byTable
@@ -130,7 +177,7 @@ async function loadAdmissionSnapshots(client) {
   return snapshots
 }
 
-function contractFromManifest(manifest) {
+export function contractFromManifest(manifest) {
   const entries = [...manifest.values()]
     .map((entry) => ({
       table: entry.table,
@@ -159,6 +206,7 @@ function contractFromManifest(manifest) {
         })),
       )
       .sort((left, right) => `${left.table}:${left.role}`.localeCompare(`${right.table}:${right.role}`)),
+    approvedColumnGrants: approvedColumnGrants(manifest),
   }
   return { digest: catalogContractDigest(payload), payload }
 }

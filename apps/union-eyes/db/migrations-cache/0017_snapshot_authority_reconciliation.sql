@@ -223,6 +223,8 @@ DECLARE
     'auth_group:SELECT','auth_group_permissions:SELECT',
     'auth_permission:SELECT','django_content_type:SELECT'
   ];
+  -- The only auth_user columns the identity role may update. Mirrors FRAMEWORK_IDENTITY_UPDATE_COLUMNS.
+  identity_update_columns text := 'email, first_name, last_name, last_login, is_staff';
 BEGIN
   FOREACH role_name IN ARRAY ARRAY[
     'ue_framework_gateway','ue_framework_identity','ue_framework_admin',
@@ -252,7 +254,10 @@ BEGIN
   EXECUTE 'GRANT USAGE ON SCHEMA public TO ue_framework_identity, ue_framework_admin, ue_framework_worker';
   IF to_regclass('user_management.users') IS NOT NULL AND to_regclass('user_management.user_sessions') IS NOT NULL THEN
     EXECUTE 'GRANT USAGE ON SCHEMA user_management TO ue_framework_authority_reader, ue_framework_identity, ue_framework_admin';
-    EXECUTE 'GRANT SELECT ON TABLE user_management.users, user_management.user_sessions TO ue_framework_authority_reader';
+    -- Column grants only: the helper functions read these columns and nothing else. REVOKE ALL on the table also clears column privileges.
+    EXECUTE 'REVOKE ALL ON TABLE user_management.users, user_management.user_sessions FROM ue_framework_authority_reader';
+    EXECUTE 'GRANT SELECT (user_id, is_active, lifecycle_state, is_system_admin) ON TABLE user_management.users TO ue_framework_authority_reader';
+    EXECUTE 'GRANT SELECT (user_id, organization_id, session_token_hash, is_active, expires_at) ON TABLE user_management.user_sessions TO ue_framework_authority_reader';
     EXECUTE 'REVOKE CREATE ON SCHEMA user_management FROM ue_framework_authority_reader';
     EXECUTE 'DROP POLICY IF EXISTS ue_framework_authority_reader_select ON user_management.users';
     EXECUTE 'CREATE POLICY ue_framework_authority_reader_select ON user_management.users FOR SELECT TO ue_framework_authority_reader USING (true)';
@@ -320,11 +325,16 @@ BEGIN
       IF split_part(identity_privilege, ':', 1) <> target THEN
         CONTINUE;
       END IF;
-      EXECUTE format(
-        'GRANT %s ON TABLE %s TO ue_framework_identity',
-        split_part(identity_privilege, ':', 2),
-        relation
-      );
+      IF identity_privilege = 'auth_user:UPDATE' THEN
+        -- Column grant only. A table-level UPDATE would also reach password, id and date_joined.
+        EXECUTE format('GRANT UPDATE (%s) ON TABLE %s TO ue_framework_identity', identity_update_columns, relation);
+      ELSE
+        EXECUTE format(
+          'GRANT %s ON TABLE %s TO ue_framework_identity',
+          split_part(identity_privilege, ':', 2),
+          relation
+        );
+      END IF;
       IF target = 'auth_user' THEN
         own_predicate := 'username = (''uev2_''||encode(sha256(convert_to(NULLIF(current_setting(''app.current_user_id'', true), ''''), ''UTF8'')), ''hex'')) AND is_active';
       ELSIF target IN ('auth_user_groups', 'auth_user_user_permissions') THEN

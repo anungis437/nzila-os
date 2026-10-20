@@ -319,6 +319,16 @@ export interface StorageAuthorityEntry {
    */
   frameworkRolePrivileges?: readonly { role: string; privileges: readonly RuntimeOperation[] }[]
   /**
+   * The only column-level grants a dedicated framework role may hold on this
+   * table. A privilege listed here is not also a table-level privilege. The
+   * catalog verifier rejects every column ACL that is not declared here.
+   */
+  frameworkColumnGrants?: readonly {
+    role: string
+    privilege: 'SELECT' | 'UPDATE'
+    columns: readonly string[]
+  }[]
+  /**
    * Set ONLY when `table` does not resolve to a canonical DECLARED
    * public-schema table — see ScopeDisposition. Absent/undefined means
    * this entry is a normal in-scope public-schema table.

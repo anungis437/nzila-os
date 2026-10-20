@@ -12,6 +12,7 @@ const rows = storageAuthorityManifest.map((entry) => ({
   system: entry.requiredSystemPrivileges,
   scopeDisposition: entry.scopeDisposition ?? null,
   frameworkRolePrivileges: entry.frameworkRolePrivileges ?? [],
+  frameworkColumnGrants: entry.frameworkColumnGrants ?? [],
 }))
 
 process.stdout.write(`${JSON.stringify(rows)}\n`)
