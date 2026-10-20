@@ -97,6 +97,11 @@ const REVIEWED: Record<string, { classification: IdentityClass; rationale: strin
     classification: 'DOMAIN_ENTITY_UUID',
     rationale: 'Identifies the superseding collective agreement (an entity), not a user.',
   },
+  'dues_assignments.member_id': {
+    classification: 'DOMAIN_ENTITY_UUID',
+    rationale:
+      'db/schema/domains/finance/dues-assignments.ts declares member_id as uuid NOT NULL with no foreign key. The finance authority treats the table as an organization-scoped dues obligation, not the text application user id stored in dues_transactions.member_id.',
+  },
 }
 
 export function identityCandidates(plan: V2Plan): Candidate[] {

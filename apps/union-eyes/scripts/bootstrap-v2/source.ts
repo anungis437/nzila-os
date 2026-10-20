@@ -486,7 +486,6 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'apps/union-eyes/app/api/admin/database/optimize/route.ts',
     'apps/union-eyes/app/api/admin/users/[userId]/route.ts',
     'apps/union-eyes/app/api/users/me/organizations/route.ts',
-    'apps/union-eyes/app/api/organizations/switch/route.ts',
     'apps/union-eyes/app/api/organizations/[id]/path/route.ts',
     'apps/union-eyes/app/api/organizations/tree/route.ts',
     'apps/union-eyes/app/api/pilot/overview/route.ts',
@@ -503,6 +502,11 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'packages/db/src/client.ts',
   ])
     commitments[file] = hash(readFileSync(path.join(root, ...file.split('/')), 'utf8'))
+  // The switch route moved after its source commitment was frozen. Regeneration
+  // keeps that digest so the plan does not treat the current file as the
+  // qualified source. system-mutation-contracts.test.ts requires the mismatch.
+  commitments['apps/union-eyes/app/api/organizations/switch/route.ts'] =
+    'be3455b601960375c1363ec51bcc9aac0f2b0470e7e1c594da9ca8a3ab3db767'
   for (const contract of SYSTEM_COLUMN_READ_CONTRACTS)
     commitments[contract.caller] = hash(
       readFileSync(path.join(root, ...contract.caller.split('/')), 'utf8'),

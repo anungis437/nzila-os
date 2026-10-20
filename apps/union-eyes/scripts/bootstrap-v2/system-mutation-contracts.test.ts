@@ -27,9 +27,13 @@ describe('current source-bound SYSTEM mutation contracts', () => {
   })
   it('keeps the frozen switch-route commitment while the current file has moved', () => {
     const file = 'apps/union-eyes/app/api/organizations/switch/route.ts'
+    const frozen = 'be3455b601960375c1363ec51bcc9aac0f2b0470e7e1c594da9ca8a3ab3db767'
     const current = hash(readFileSync(path.join(root, ...file.split('/')), 'utf8'))
-    expect(plan.sourceCommitments[file]).toMatch(/^[a-f0-9]{64}$/)
-    expect(plan.sourceCommitments[file]).not.toBe(current)
+    expect(plan.sourceCommitments[file]).toBe(frozen)
+    expect(current).not.toBe(frozen)
+    expect(
+      readFileSync(path.join(root, 'apps/union-eyes/scripts/bootstrap-v2/source.ts'), 'utf8'),
+    ).toContain(frozen)
   })
   it('binds the exact 53 authorized relations, source callers and real selector columns', () => {
     const contracts = systemMutationContracts(plan)

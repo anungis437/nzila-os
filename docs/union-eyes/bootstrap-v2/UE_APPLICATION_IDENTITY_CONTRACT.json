@@ -1,9 +1,9 @@
 {
   "contract": "APPLICATION_USER_ID=TEXT",
-  "candidateColumns": 77,
+  "candidateColumns": 78,
   "classificationCounts": {
     "APPLICATION_USER_ID": 45,
-    "DOMAIN_ENTITY_UUID": 18,
+    "DOMAIN_ENTITY_UUID": 19,
     "DEAD_OR_UNREACHABLE": 14
   },
   "unclassifiedCurrentIdentityColumns": 0,
@@ -174,6 +174,19 @@
         "app/api/search/universal/route.ts :: documentAccessGrants.userId, userId),"
       ],
       "rationale": "Live application code reads or writes the authenticated application user id into this column.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "dues_assignments",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [
+        "db/schema/domains/finance/dues-assignments.ts",
+        "db/rls-storage-authority/finance.ts"
+      ],
+      "rationale": "db/schema/domains/finance/dues-assignments.ts declares member_id as uuid NOT NULL with no foreign key. The finance authority treats the table as an organization-scoped dues obligation, not the text application user id stored in dues_transactions.member_id.",
       "previousType": "uuid"
     },
     {
@@ -912,5 +925,5 @@
       "previousType": "uuid"
     }
   ],
-  "sourcePlanDigest": "5ba116ec82c491577f4eee6ee7e19ef83472d62fd3d2b263b6e3212f9970597e"
+  "sourcePlanDigest": "462d4194fec0d534949c282a91563f728c03add32a9422295d9d7b4db332a73f"
 }

@@ -5,11 +5,11 @@ application user identifier (the `user_management.users.user_id` value carried b
 Genuine entity UUID references stay UUID. Classification uses foreign keys, the current declarations
 and how live application code reads and writes each column; it is never decided by column name alone.
 
-- Source plan: `5ba116ec82c491577f4eee6ee7e19ef83472d62fd3d2b263b6e3212f9970597e`
-- Identity-looking UUID candidates classified: **77**
+- Source plan: `462d4194fec0d534949c282a91563f728c03add32a9422295d9d7b4db332a73f`
+- Identity-looking UUID candidates classified: **78**
 - Unclassified current identity columns: **0**
 - Contract violations: **0**
-- Classification counts: {"APPLICATION_USER_ID":45,"DOMAIN_ENTITY_UUID":18,"DEAD_OR_UNREACHABLE":14}
+- Classification counts: {"APPLICATION_USER_ID":45,"DOMAIN_ENTITY_UUID":19,"DEAD_OR_UNREACHABLE":14}
 
 ## APPLICATION_USER_ID (converted to TEXT)
 
@@ -69,6 +69,7 @@ and how live application code reads and writes each column; it is never decided 
 | `collective_agreements.superseded_by` | uuid -> uuid | Identifies the superseding collective agreement (an entity), not a user. |
 | `cookie_consents.user_id` | uuid -> uuid | Foreign key to profiles.id (uuid entity key). Non-launch GDPR cookie capability. |
 | `dispatch_assignments.member_id` | uuid -> uuid | Live code references the column without the authenticated user id; treated as an entity reference. |
+| `dues_assignments.member_id` | uuid -> uuid | db/schema/domains/finance/dues-assignments.ts declares member_id as uuid NOT NULL with no foreign key. The finance authority treats the table as an organization-scoped dues obligation, not the text application user id stored in dues_transactions.member_id. |
 | `employment_history.member_id` | uuid -> uuid | Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier. |
 | `gss_applications.foreign_worker_id` | uuid -> uuid | Live code references the column without the authenticated user id; treated as an entity reference. |
 | `lmbp_compliance_alerts.foreign_worker_id` | uuid -> uuid | Live code references the column without the authenticated user id; treated as an entity reference. |
