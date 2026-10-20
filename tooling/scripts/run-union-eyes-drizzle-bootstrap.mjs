@@ -48,10 +48,16 @@ import {
   ensureExtensions as ensureExtensionsShared,
   getScopedMigrationStatus,
   readJournalEntries,
+  scopedLedgerJournal,
 } from './lib/union-eyes-scoped-migrations.mjs';
 import {
   applyPlatformMigrations as applyPlatformMigrationsShared,
+  platformLedgerJournal,
 } from './lib/union-eyes-platform-migrations.mjs';
+import {
+  assertMigrationLedgerIntegrity,
+  readLedgerExceptions,
+} from './lib/union-eyes-migration-ledger.mjs';
 import { activateCatalogPrivileges } from './lib/union-eyes-catalog-authority.mjs';
 import {
   grantRuntimeConnect,
@@ -80,6 +86,8 @@ const SCOPED_JOURNAL = path.join(SCOPED_MIGRATIONS_DIR, 'meta', '_journal.json')
 const PLATFORM_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations-platform');
 const PLATFORM_JOURNAL = path.join(PLATFORM_MIGRATIONS_DIR, 'meta', '_journal.json');
 const QA_BASELINE_SQL = path.join(repoRoot, 'tooling', 'sql', 'union-eyes-qa-baseline.sql');
+// Optional, reviewed list of ledger hashes that predate the journals. Absent means none.
+const LEDGER_EXCEPTIONS = path.join(appRoot, 'db', 'migration-ledger-exceptions.json');
 
 loadEnv({ path: path.join(appRoot, '.env.local') });
 if (!process.env.DATABASE_URL) {
@@ -184,6 +192,29 @@ async function applyScopedMigrations(client, boundary) {
       log: info,
       ...boundary,
     });
+  } catch (err) {
+    fail(err.message);
+  }
+}
+
+function ledgerJournals() {
+  const journals = [scopedLedgerJournal({ journalPath: SCOPED_JOURNAL, migrationsDir: SCOPED_MIGRATIONS_DIR })];
+  if (fs.existsSync(PLATFORM_JOURNAL)) {
+    journals.push(platformLedgerJournal({ journalPath: PLATFORM_JOURNAL, migrationsDir: PLATFORM_MIGRATIONS_DIR }));
+  }
+  return journals;
+}
+
+// Fails closed without applying, repairing or stamping anything.
+async function verifyMigrationLedger(client, stage, { useAttestation }) {
+  try {
+    const sealed = await assertMigrationLedgerIntegrity(client, {
+      journals: ledgerJournals(),
+      exceptions: readLedgerExceptions(LEDGER_EXCEPTIONS),
+      useAttestation,
+    });
+    info(`Migration ledger integrity verified (${stage}): ${sealed.rowCount} row(s).`);
+    return sealed;
   } catch (err) {
     fail(err.message);
   }
@@ -364,6 +395,22 @@ async function report0014PhysicalPresence(client) {
   return { missing };
 }
 
+// A recorded migration asserts its effects. When the ledger says 0014 ran but a relation it
+// protects is absent, the ledger and the catalog disagree. Refuse rather than attest it.
+const LINEAGE_RLS_CLOSURE_TAG = '0014_lineage_restoration_rls_closure';
+
+async function refuseRecorded0014WithAbsentRelations(client, missing) {
+  if (missing.length === 0) return;
+  const status = await getScopedMigrationStatus(client, {
+    journalPath: SCOPED_JOURNAL,
+    migrationsDir: SCOPED_MIGRATIONS_DIR,
+  });
+  if (status.find((entry) => entry.tag === LINEAGE_RLS_CLOSURE_TAG)?.applied !== true) return;
+  fail(
+    `Ledger and catalog disagree: ${LINEAGE_RLS_CLOSURE_TAG} is recorded as applied but ${missing.length} relation(s) it protects are absent: ${missing.join(', ')}. Nothing was repaired or attested.`,
+  );
+}
+
 async function applyCiBaselineIfNeeded(client, scopedEntriesCount) {
   if (restoreSnapshotUrl) {
     return { applied: false };
@@ -473,6 +520,8 @@ async function main() {
       await baselineMigrationsAfterSnapshot(client);
     }
 
+    await verifyMigrationLedger(client, 'before apply', { useAttestation: true });
+
     const scopedEntries = readJournalEntries(SCOPED_JOURNAL);
     const baselineSummary = await applyCiBaselineIfNeeded(client, scopedEntries.length);
 
@@ -484,6 +533,7 @@ async function main() {
     info('Applying post-freeze PLATFORM_SQL migrations from db/migrations-platform/ ...');
     const platformSummary = await applyPlatformMigrations(client);
     const physicalSummary = await report0014PhysicalPresence(client);
+    await refuseRecorded0014WithAbsentRelations(client, physicalSummary.missing);
 
     info(`Applying scoped RLS closures after ${SCOPED_FOUNDATION_THROUGH_TAG} ...`);
     const closureSummary = await applyScopedMigrations(client, { afterTag: SCOPED_FOUNDATION_THROUGH_TAG });
@@ -502,7 +552,10 @@ async function main() {
       info('Runtime CONNECT restored after catalog admission.');
     }
 
+    const sealedLedger = await verifyMigrationLedger(client, 'after apply', { useAttestation: false });
+
     await writeBootstrapAttestation(client, {
+      migrationLedger: { rowCount: sealedLedger.rowCount, digest: sealedLedger.digest },
       snapshotDigest: restoreSummary.snapshotDigest,
       restored: restoreSummary.restored,
       qaBaselineApplied: baselineSummary.applied,

@@ -126,6 +126,31 @@ was materialized.
 
 ---
 
+## 9a. Migration Ledger Integrity
+
+`drizzle.__drizzle_migrations` is shared by the scoped and platform executors.
+Applied-ness is decided by file hash, so an altered or deleted row used to make its
+migration look unapplied, re-execute and be re-stamped, which repaired the evidence.
+
+Bootstrap now refuses, before applying or stamping anything, a ledger that is not a
+faithful append-only prefix of the committed journals
+(`tooling/scripts/lib/union-eyes-migration-ledger.mjs`):
+
+- every row is a journal hash or an entry in the reviewed
+  `apps/union-eyes/db/migration-ledger-exceptions.json` (absent means none);
+- no hash is recorded twice;
+- each journal's recorded entries are its first *k* entries, in order, with no gap;
+- the rows the previous attestation covered still match its sealed digest
+  (`payload.migrationLedger`). A prefix cannot tell "newest row deleted" from "not
+  yet applied"; the digest can.
+
+Appending a migration to a journal is not drift. The one governed gap-fill is the ICRA
+rollout migration listed in `GOVERNED_GAP_FILL_TAGS`; adding to that list is a reviewed
+change. Separately, a recorded `0014` whose protected relations are physically absent is
+a ledger/catalog disagreement and fails closed.
+
+Limit: someone who can rewrite both the ledger and the attestation table is not
+detectable from inside the database. That needs an external release record.
 ## 10. Prohibitions (Explicit)
 
 The following are explicitly prohibited:

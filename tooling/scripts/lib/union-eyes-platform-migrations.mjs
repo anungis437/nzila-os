@@ -10,6 +10,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { assertJournalPrefix } from './union-eyes-migration-ledger.mjs';
 
 export function readJournalEntries(journalPath) {
   if (!fs.existsSync(journalPath)) {
@@ -38,6 +39,17 @@ export async function ensureLedgerTable(client) {
       created_at bigint
     )
   `);
+}
+
+/** The platform journal as the trusted history the ledger is checked against. */
+export function platformLedgerJournal({ journalPath, migrationsDir }) {
+  return {
+    name: 'platform',
+    entries: readJournalEntries(journalPath).map((entry) => ({
+      tag: entry.tag,
+      hash: computeMigrationHash(migrationsDir, entry.tag).hash,
+    })),
+  };
 }
 
 export async function getAppliedHashes(client) {
@@ -73,6 +85,7 @@ export async function getPlatformMigrationStatus(client, { journalPath, migratio
 export async function applyPlatformMigrations(client, { journalPath, migrationsDir, onlyTags, log = () => {} }) {
   const entries = readJournalEntries(journalPath);
   const appliedHashes = await getAppliedHashes(client);
+  await assertJournalPrefix(client, platformLedgerJournal({ journalPath, migrationsDir }));
 
   if (entries.length === 0) {
     log('PLATFORM_SQL root has zero entries — nothing to migrate.');
@@ -139,6 +152,7 @@ export async function verifyTagApplied(client, { journalPath, migrationsDir, tag
 export async function baselinePlatformMigrations(client, { journalPath, migrationsDir, throughTags, log = () => {} }) {
   const entries = readJournalEntries(journalPath);
   const appliedHashes = await getAppliedHashes(client);
+  await assertJournalPrefix(client, platformLedgerJournal({ journalPath, migrationsDir }));
   let stamped = 0;
   const stampedTags = [];
   await client.query('BEGIN');

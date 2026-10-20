@@ -16,6 +16,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { assertJournalPrefix } from './union-eyes-migration-ledger.mjs';
 
 export function readJournalEntries(journalPath) {
   if (!fs.existsSync(journalPath)) {
@@ -44,6 +45,17 @@ export async function ensureLedgerTable(client) {
       created_at bigint
     )
   `);
+}
+
+/** The scoped journal as the trusted history the ledger is checked against. */
+export function scopedLedgerJournal({ journalPath, migrationsDir }) {
+  return {
+    name: 'scoped',
+    entries: readJournalEntries(journalPath).map((entry) => ({
+      tag: entry.tag,
+      hash: computeMigrationHash(migrationsDir, entry.tag).hash,
+    })),
+  };
 }
 
 export async function getAppliedHashes(client) {
@@ -92,6 +104,7 @@ export async function applyScopedMigrations(client, { journalPath, migrationsDir
 
   const entries = readJournalEntries(journalPath);
   const appliedHashes = await getAppliedHashes(client);
+  await assertJournalPrefix(client, scopedLedgerJournal({ journalPath, migrationsDir }));
 
   if (entries.length === 0) {
     log('Scoped Drizzle root has zero entries — nothing to migrate.');
@@ -207,6 +220,7 @@ export async function verifyTagApplied(client, { journalPath, migrationsDir, tag
 export async function baselineScopedMigrations(client, { journalPath, migrationsDir, throughTags, log = () => {} }) {
   const entries = readJournalEntries(journalPath);
   const appliedHashes = await getAppliedHashes(client);
+  await assertJournalPrefix(client, scopedLedgerJournal({ journalPath, migrationsDir }));
   let stamped = 0;
   const stampedTags = [];
   await client.query('BEGIN');
