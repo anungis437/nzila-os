@@ -230,6 +230,22 @@ async function main() {
     record('django_authority', djangoGrant.rows[0])
     if (djangoGrant.rows[0].runtime || !djangoGrant.rows[0].admin) throw new Error('framework authority collapsed into runtime')
 
+    const membership = await client.query(`
+      SELECT m.rolname AS member, g.rolname AS granted, a.inherit_option, a.set_option
+      FROM pg_auth_members a
+      JOIN pg_roles m ON m.oid = a.member
+      JOIN pg_roles g ON g.oid = a.roleid
+      WHERE m.rolname IN ('ue_framework_gateway', 'ue_framework_worker_gateway')
+      ORDER BY m.rolname, g.rolname
+    `)
+    record('gateway_membership', { rows: membership.rows })
+    if (
+      membership.rows.length !== 3 ||
+      membership.rows.some((row) => row.inherit_option !== false || row.set_option !== true)
+    ) {
+      throw new Error('framework gateway membership is inheriting or cannot SET ROLE')
+    }
+
     fs.writeFileSync('/opt/cursor/artifacts/snapshot-authority-evidence.json', JSON.stringify(evidence, null, 2))
     record('evidence_written', { path: '/opt/cursor/artifacts/snapshot-authority-evidence.json' })
   } finally {

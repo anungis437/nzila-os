@@ -180,4 +180,6 @@ The current catalog contract digest is `9f4d88f82b9cdc0071e80e11b1525919e6bc9d74
 
 Identity `UPDATE` and the authority-reader `SELECT` are table-level. The Bootstrap V2 column lists are not installed, because a column ACL still fails admission. `applicationReady` stays false.
 
+GitHub on `a0e1bed03a9deb411c67321f4f95b257765f3bac`: CI run `39414826495` succeeded and CUPE run `39414826542` succeeded. E2E run `39414826550` restored the snapshot, applied platform `0009` and scoped `0014`–`0016`, then all four Union Eyes workers failed in `0017_snapshot_authority_reconciliation` with `syntax error at or near "INHERIT"`. The worker database is PostgreSQL 15. `GRANT ... WITH INHERIT FALSE, SET TRUE` is PostgreSQL 16 syntax. The gateway roles are `NOINHERIT`, so the membership is now a plain `GRANT`. On PostgreSQL 16.15 that plain grant records `inherit_option=false` and `set_option=true`. Control-plane, console, and web shards succeeded.
+
 `UE_SAAS_OPERATIONAL_READINESS = NO_GO`. `UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL`. `PRODUCTION_DEPLOYMENT_AUTHORIZED = NO`. `CUSTOMER_DATA_EXECUTION_AUTHORIZED = NO`.

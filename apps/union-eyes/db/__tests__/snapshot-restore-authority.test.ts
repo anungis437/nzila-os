@@ -15,6 +15,13 @@ const reconciliation = readFileSync(
 )
 
 describe('snapshot restore authority', () => {
+  it('uses PostgreSQL 15 membership grants for framework gateways', () => {
+    expect(reconciliation).not.toMatch(/WITH\s+INHERIT/)
+    expect(reconciliation).toContain('GRANT ue_framework_identity, ue_framework_admin TO ue_framework_gateway')
+    expect(reconciliation).toContain('GRANT ue_framework_worker TO ue_framework_worker_gateway')
+    expect(reconciliation).toContain('NOLOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE')
+  })
+
   it('does not grant the public schema to PostgreSQL PUBLIC', () => {
     expect(restoreSource).not.toContain('GRANT ALL ON SCHEMA public TO public')
     expect(restoreSource).toContain('REVOKE ALL ON SCHEMA public FROM PUBLIC')

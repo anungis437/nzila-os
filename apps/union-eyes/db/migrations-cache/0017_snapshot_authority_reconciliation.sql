@@ -242,8 +242,13 @@ BEGIN
       RAISE EXCEPTION 'Unsafe existing framework role: %', role_name;
     END IF;
   END LOOP;
-  EXECUTE 'GRANT ue_framework_identity, ue_framework_admin TO ue_framework_gateway WITH INHERIT FALSE, SET TRUE';
-  EXECUTE 'GRANT ue_framework_worker TO ue_framework_worker_gateway WITH INHERIT FALSE, SET TRUE';
+  -- Plain membership. The gateway roles are created NOINHERIT and rejected if
+  -- that changes. On PostgreSQL 15, which is the snapshot acceptance server,
+  -- that role attribute is what keeps the membership from inheriting table
+  -- privileges while still allowing SET ROLE. The per-grant inherit clause is
+  -- PostgreSQL 16 syntax and fails there.
+  EXECUTE 'GRANT ue_framework_identity, ue_framework_admin TO ue_framework_gateway';
+  EXECUTE 'GRANT ue_framework_worker TO ue_framework_worker_gateway';
   EXECUTE 'GRANT USAGE ON SCHEMA public TO ue_framework_identity, ue_framework_admin, ue_framework_worker';
   IF to_regclass('user_management.users') IS NOT NULL AND to_regclass('user_management.user_sessions') IS NOT NULL THEN
     EXECUTE 'GRANT USAGE ON SCHEMA user_management TO ue_framework_authority_reader, ue_framework_identity, ue_framework_admin';
