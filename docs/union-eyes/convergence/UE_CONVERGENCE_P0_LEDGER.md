@@ -7,7 +7,7 @@ This ledger records what was verified on this branch. Unexecuted controls stay u
 | Field | Value |
 | --- | --- |
 | BASE_SHA | `12dd086ae906ced483942144ab6c27326fda2738` |
-| CANDIDATE_SHA | Set at commit time on `cursor/ue-convergence-p0-cfc5` |
+| CANDIDATE_SHA | `174939f54` on `cursor/ue-convergence-p0-cfc5`. A later commit may only record this SHA |
 | WORKTREE | `/home/ubuntu/ue-convergence` |
 | FILES_CHANGED | Canonical membership projection, legacy organization switch predicate, projection test, convergence ledgers |
 | ROOT_CAUSE | `organization_members.organization_id` is a Django UUID foreign key in the accepted Bootstrap V2 plan, while the canonical Drizzle projection still typed it as text and one legacy route compared it to `organizations.slug` |
