@@ -11116,7 +11116,9 @@
     "resourceUtilizationTitle": "Resource Utilization",
     "warningLabel": "Warning: {value}%",
     "criticalLabel": "Critical: {value}%",
-    "capacityUsageLabel": "{used} {unit} of {total} {unit}"
+    "capacityUsageLabel": "{used} {unit} of {total} {unit}",
+    "noServicesRecorded": "No platform_services rows are recorded.",
+    "notRecordedInCatalog": "This operations view is not recorded in platform_services. No status is inferred."
   },
   "customerSuccessPage": {
     "title": "Customer Success",

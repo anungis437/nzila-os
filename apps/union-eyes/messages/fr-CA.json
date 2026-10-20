@@ -9433,7 +9433,9 @@
     "resourceUtilizationTitle": "Utilisation des ressources",
     "warningLabel": "Avertissement : {value}%",
     "criticalLabel": "Critique : {value}%",
-    "capacityUsageLabel": "{used} {unit} sur {total} {unit}"
+    "capacityUsageLabel": "{used} {unit} sur {total} {unit}",
+    "noServicesRecorded": "Aucune ligne platform_services n'est enregistrée.",
+    "notRecordedInCatalog": "Cette vue d'exploitation n'est pas enregistrée dans platform_services. Aucun état n'est déduit."
   },
   "customerSuccessPage": {
     "title": "Succès Client",

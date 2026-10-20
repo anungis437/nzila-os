@@ -249,8 +249,8 @@ describe('0015 - no executable fail-open restore exists; recovery is forward, re
 describe('0015 - canonical placement and scope', () => {
   const entries = () => (JSON.parse(read(JOURNAL)) as { entries: Array<{ idx: number; tag: string }> }).entries;
 
-  it('is appended to the scoped journal (last entry) and is not under the frozen lineage', () => {
-    expect(entries().at(-1)).toMatchObject({ idx: 15, tag: TAG });
+  it('is registered once at idx 15 and is not under the frozen lineage', () => {
+    expect(entries().find((entry) => entry.idx === 15)).toMatchObject({ idx: 15, tag: TAG });
     const frozen = resolve(APP_ROOT, 'db', 'migrations');
     expect(() => read(resolve(frozen, `${TAG}.sql`))).toThrow();
     expect(entries().filter((e) => e.tag === TAG)).toHaveLength(1);

@@ -78,6 +78,13 @@
       "when": 1758690000000,
       "tag": "0010_billing_relation_shape_authority",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1758700000000,
+      "tag": "0011_strike_fund_deletion_guard",
+      "breakpoints": true
     }
   ]
 }

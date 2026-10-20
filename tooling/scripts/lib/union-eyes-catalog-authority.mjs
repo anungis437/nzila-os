@@ -7,6 +7,7 @@
  * the frozen db/migrations lineage.
  */
 import { spawnSync } from 'node:child_process'
+import fs from 'node:fs'
 import path from 'node:path'
 
 const PRIVILEGE_ORDER = ['SELECT', 'INSERT', 'UPDATE', 'DELETE']
@@ -226,6 +227,21 @@ async function collectViolations(client, manifest) {
     }
   }
 
+  const publicGrants = await client.query(
+    `SELECT n.nspname AS schema_name, c.relname AS table_name, acl.privilege_type
+     FROM pg_class c
+     JOIN pg_namespace n ON n.oid = c.relnamespace
+     CROSS JOIN LATERAL aclexplode(c.relacl) acl
+     WHERE c.relacl IS NOT NULL
+       AND n.nspname = 'public'
+       AND c.relkind IN ('r', 'p', 'v', 'm')
+       AND acl.grantee = 0
+       AND acl.privilege_type IN ('SELECT', 'INSERT', 'UPDATE', 'DELETE')`,
+  )
+  for (const row of publicGrants.rows) {
+    violations.push(`PUBLIC holds ${row.privilege_type} on ${row.schema_name}.${row.table_name}`)
+  }
+
   const sequences = await client.query(
     `SELECT count(*)::int AS count
      FROM pg_class c
@@ -351,6 +367,78 @@ async function grantExactPublicPrivileges(client, manifest) {
       await client.query(`GRANT ${entry.system.join(', ')} ON TABLE ${relation} TO union_eyes_system`)
     }
   }
+}
+
+export async function diagnoseCatalogAuthority(client, { repoRoot, environment } = {}) {
+  const manifest = loadAuthorityManifest(repoRoot)
+  const violations = await collectViolations(client, manifest)
+  return {
+    ok: violations.length === 0,
+    applicationReady: false,
+    environment: environment || process.env.UE_ENVIRONMENT || process.env.NODE_ENV || 'unknown',
+    source: 'apps/union-eyes/db/rls-storage-authority',
+    violations,
+  }
+}
+
+export function formatCatalogDiagnostic(report) {
+  const header = [
+    `environment=${report.environment}`,
+    `source=${report.source}`,
+    'applicationReady=false',
+    `violationCount=${report.violations.length}`,
+  ]
+  return [...header, ...report.violations].join('\n')
+}
+
+/**
+ * Isolated remediation. Refuses unless UE_PRIVILEGE_ENFORCEMENT=1.
+ * Revokes inherited memberships, PUBLIC and runtime grants, and unsafe
+ * SECURITY DEFINER execution, then re-applies the exact manifest. It does
+ * not run on the read-only admission path.
+ */
+export async function remediateCatalogAuthority(client, { repoRoot }) {
+  if (process.env.UE_PRIVILEGE_ENFORCEMENT !== '1') {
+    throw new Error('Remediation refused. Set UE_PRIVILEGE_ENFORCEMENT=1 on an isolated database.')
+  }
+  await client.query('BEGIN')
+  try {
+    const inherited = await client.query(
+      `SELECT member.rolname AS member, parent.rolname AS parent
+       FROM pg_auth_members membership
+       JOIN pg_roles member ON member.oid = membership.member
+       JOIN pg_roles parent ON parent.oid = membership.roleid
+       WHERE member.rolname IN ('union_eyes_runtime', 'union_eyes_system')`,
+    )
+    for (const row of inherited.rows) {
+      await client.query(`REVOKE ${quoteIdent(row.parent)} FROM ${quoteIdent(row.member)}`)
+    }
+    const definers = await client.query(
+      `SELECT p.oid::regprocedure::text AS identity
+       FROM pg_proc p
+       JOIN pg_namespace n ON n.oid = p.pronamespace
+       WHERE p.prosecdef AND n.nspname NOT IN ('pg_catalog', 'information_schema')`,
+    )
+    for (const row of definers.rows) {
+      await client.query(
+        `REVOKE ALL ON FUNCTION ${row.identity} FROM union_eyes_runtime, union_eyes_system, PUBLIC`,
+      )
+    }
+    await client.query('COMMIT')
+  } catch (error) {
+    await client.query('ROLLBACK')
+    throw error
+  }
+  const migration = fs.readFileSync(
+    path.join(repoRoot, 'apps/union-eyes/db/migrations-cache/0016_catalog_rls_authority_closure.sql'),
+    'utf8',
+  )
+  for (const statement of migration.split('--> statement-breakpoint')) {
+    const sql = statement.trim()
+    if (!sql.replace(/--.*$/gm, '').trim()) continue
+    await client.query(sql)
+  }
+  return activateCatalogPrivileges(client, { repoRoot, enforce: true })
 }
 
 /**

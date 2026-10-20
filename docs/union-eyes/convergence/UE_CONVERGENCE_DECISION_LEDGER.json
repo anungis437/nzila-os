@@ -40,6 +40,18 @@
       "ACCEPTANCE_EVIDENCE": "Historical and current PGlite suites are separate. PostgreSQL 16.15 execution of 0008 is recorded in the checkpoint ledger when that command has been run. Bootstrap V2 and the legacy clean-room remain NOT_EXECUTED in environments without Docker.",
       "REMAINING_AUTHORIZATION": "Do not rewrite frozen 20260909. Do not treat the historical text fixture as current compatibility.",
       "CLASSIFICATION": "EXISTING_DESIGN_DEFECT"
+    },
+    {
+      "CONFLICT_ID": "STRIKE_FUND_DELETE_CASCADE_VS_UNPROVEN_RETENTION",
+      "SOURCE_A": "taxes.ts and migrations-platform/0008_strike_fund_disbursements_canonical.sql declare organization_id ON DELETE CASCADE. UE_V2_FINANCIAL_SCOPE_AUTHORITY records strike_fund_disbursements as NOT_PROVEN.",
+      "SOURCE_B": "A synthetic organization delete on PostgreSQL 16.15 removed the disbursement row. No approved retention period authorizes that erasure.",
+      "BINDING_AUTHORITY": "No retention decision is invented here. The historical foreign key stays ON DELETE CASCADE.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "Platform migration 0011_strike_fund_deletion_guard installs BEFORE DELETE trigger ue_strike_fund_retention_guard. When a disbursement exists, DELETE FROM organizations raises restrict_violation and the disbursement remains. UPDATE organizations.status to inactive still succeeds. An organization with no disbursement can still be deleted. EXECUTE on the security-definer function is revoked from PUBLIC, union_eyes_runtime, and union_eyes_system.",
+      "RISK": "A later authorized migration that drops the trigger restores the cascade. Leaving the trigger in place is fail-closed, not a retention period.",
+      "ENGINEERING_RESOLUTION": "Keep the foreign key. Refuse the delete that would erase history until a retention decision says otherwise. Reversal is DROP TRIGGER and DROP FUNCTION.",
+      "ACCEPTANCE_EVIDENCE": "PostgreSQL 16.15 database ue_conv_authority. Organization cf453349-5b89-4bac-a976-3d93a54abd9c. Delete raised organization delete refused. Status became inactive and the disbursement count stayed 1. After the disbursement was removed, the organization delete succeeded. Bootstrap repeat applied 0011 and exited 0.",
+      "REMAINING_AUTHORIZATION": "A product owner must decide whether historical disbursements may be erased with the organization. This record does not make that decision.",
+      "CLASSIFICATION": "FAIL_CLOSED_PENDING_RETENTION_DECISION"
     }
   ]
 }

@@ -9347,7 +9347,9 @@
     "resourceUtilizationTitle": "Utilizzo delle Risorse",
     "warningLabel": "Avviso: {value}%",
     "criticalLabel": "Critico: {value}%",
-    "capacityUsageLabel": "{used} {unit} di {total} {unit}"
+    "capacityUsageLabel": "{used} {unit} di {total} {unit}",
+    "noServicesRecorded": "Nessuna riga di platform_services è registrata.",
+    "notRecordedInCatalog": "Questa vista operativa non è registrata in platform_services. Nessuno stato viene dedotto."
   },
   "customerSuccessPage": {
     "title": "Successo del Cliente",
