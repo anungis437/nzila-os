@@ -597,6 +597,97 @@ try {
     }
   })
 
+  await withDatabase('ue_stub_rel_commercial', async (client) => {
+    await client.query(`CREATE TABLE public.organizations (id uuid PRIMARY KEY)`)
+    await client.query(`CREATE TABLE public.billing_accounts (id uuid PRIMARY KEY)`)
+    await client.query(`CREATE TABLE public.org_subscriptions (id uuid PRIMARY KEY)`)
+    const orgId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+    const billingId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+    const subscriptionId = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'
+    await client.query(`INSERT INTO public.organizations (id) VALUES ($1)`, [orgId])
+    await client.query(`INSERT INTO public.billing_accounts (id) VALUES ($1)`, [billingId])
+    await client.query(`INSERT INTO public.org_subscriptions (id) VALUES ($1)`, [subscriptionId])
+    await client.query(`
+      CREATE TABLE public.commercial_contracts (
+        id uuid PRIMARY KEY,
+        organization_id uuid NOT NULL REFERENCES public.organizations(id) ON DELETE RESTRICT,
+        billing_account_id uuid NOT NULL REFERENCES public.billing_accounts(id) ON DELETE RESTRICT,
+        subscription_id uuid REFERENCES public.org_subscriptions(id) ON DELETE RESTRICT
+      )
+    `)
+    await client.query(
+      `INSERT INTO public.commercial_contracts (id, organization_id, billing_account_id, subscription_id)
+       VALUES ($1, $1, $2, $3)`,
+      [orgId, billingId, subscriptionId],
+    )
+    await applyEvolution(client)
+    const names = await client.query(`
+      SELECT conname FROM pg_constraint
+      WHERE conrelid = 'public.commercial_contracts'::regclass AND contype = 'f'
+      ORDER BY conname
+    `)
+    const statements = canonicalSql.split('--> statement-breakpoint').map((statement) => statement.trim()).filter(Boolean)
+    await client.query('BEGIN')
+    await client.query('CREATE TEMP TABLE IF NOT EXISTS ue_bootstrap_created_relations (relname text PRIMARY KEY) ON COMMIT DROP')
+    for (const marker of [
+      'constraint commercial_contracts_organization_id_organizations_id_fk is absent',
+      'constraint commercial_contracts_billing_account_id_billing_accounts_id_fk is absent',
+      'constraint commercial_contracts_subscription_id_org_subscriptions_id_fk is absent',
+    ]) {
+      const statement = statements.find((candidate) => candidate.includes(marker))
+      if (!statement) throw new Error(`missing 0009 statement ${marker}`)
+      await client.query(statement)
+    }
+    await client.query('COMMIT')
+    record('commercial_fk', { constraints: names.rows.map((row) => row.conname) })
+    for (const marker of [
+      'commercial_contracts_organization_id_organizations_id_fk',
+      'commercial_contracts_billing_account_id_billing_accounts_id_fk',
+      'commercial_contracts_subscription_id_org_subscriptions_id_fk',
+    ]) {
+      if (!names.rows.some((row) => row.conname === marker.slice(0, 63))) {
+        throw new Error(`required commercial foreign key is absent: ${marker}`)
+      }
+    }
+  })
+
+  await withDatabase('ue_stub_rel_commercial_orphan', async (client) => {
+    await client.query(`CREATE TABLE public.organizations (id uuid PRIMARY KEY)`)
+    await client.query(`CREATE TABLE public.billing_accounts (id uuid PRIMARY KEY)`)
+    const billingId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+    const missingOrgId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'
+    await client.query(`INSERT INTO public.billing_accounts (id) VALUES ($1)`, [billingId])
+    await client.query(`
+      CREATE TABLE public.commercial_contracts (
+        id uuid PRIMARY KEY,
+        organization_id uuid NOT NULL,
+        billing_account_id uuid NOT NULL REFERENCES public.billing_accounts(id) ON DELETE RESTRICT
+      )
+    `)
+    await client.query(
+      `INSERT INTO public.commercial_contracts (id, organization_id, billing_account_id) VALUES ($1, $2, $1)`,
+      [billingId, missingOrgId],
+    )
+    let message = ''
+    try {
+      await applyEvolution(client)
+    } catch (error) {
+      message = error.message
+    }
+    const names = await client.query(`
+      SELECT conname FROM pg_constraint
+      WHERE conrelid = 'public.commercial_contracts'::regclass AND contype = 'f'
+      ORDER BY conname
+    `)
+    record('commercial_orphan', { message, constraints: names.rows.map((row) => row.conname) })
+    if (!message.includes('Rows were not rewritten')) {
+      throw new Error(`orphan commercial contract did not fail closed: ${message}`)
+    }
+    if (names.rows.some((row) => row.conname.startsWith('commercial_contracts_organization_id_organizations'))) {
+      throw new Error(`orphan commercial contract gained the canonical organization foreign key`)
+    }
+  })
+
   await withDatabase('ue_stub_rel_absent', async (client) => {
     await applyEvolution(client)
     const exists = await client.query(`SELECT to_regclass('public.employers') AS rel`)

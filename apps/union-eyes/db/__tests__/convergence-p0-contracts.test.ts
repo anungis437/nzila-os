@@ -226,6 +226,9 @@ describe('convergence P0 contracts', () => {
       expect(stubSql).toContain(`'${relation}'`)
     }
     expect(stubSql).toContain('member_jurisdiction_preferences_organization_id_organizations_id_fk')
+    expect(stubSql).toContain('commercial_contracts_organization_id_organizations_id_fk')
+    expect(stubSql).toContain('commercial_contracts_billing_account_id_billing_accounts_id_fk')
+    expect(stubSql).toContain('commercial_contracts_subscription_id_org_subscriptions_id_fk')
     expect(stubSql).toContain('incompatible existing relation public.%')
     expect(stubSql).toContain('Rows were not rewritten.')
     expect(stubSql).not.toMatch(/DROP TABLE/i)

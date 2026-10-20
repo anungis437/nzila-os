@@ -16,6 +16,11 @@
 -- Frozen 0096 stores committee_action_items.status, committee_action_items.priority,
 -- and committee_meetings.status as text. The canonical columns are enums. A text
 -- value is cast only when every stored value is already a canonical label.
+--
+-- A historical inline REFERENCES clause stores PostgreSQL's default constraint
+-- name. 0009 requires the Drizzle name. When both tables already exist and every
+-- referenced value matches, the Drizzle name is added and the historical
+-- constraint stays. A missing parent is left for 0009.
 
 --> statement-breakpoint
 DO $ue$
@@ -1526,5 +1531,201 @@ BEGIN
       FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
       ON DELETE cascade ON UPDATE no action;
   END IF;
+END
+$ue$;
+
+--> statement-breakpoint
+DO $ue$
+DECLARE
+  spec record;
+  child_rel oid;
+  parent_rel oid;
+  nullable text;
+  orphans bigint;
+BEGIN
+  CREATE TEMP TABLE IF NOT EXISTS ue_stub_fk_contract (
+    child_name text,
+    column_name text,
+    parent_name text,
+    parent_column text,
+    constraint_name text,
+    on_delete text
+  ) ON COMMIT DROP;
+  TRUNCATE ue_stub_fk_contract;
+  INSERT INTO ue_stub_fk_contract (child_name, column_name, parent_name, parent_column, constraint_name, on_delete) VALUES
+  ('employers', 'organization_id', 'organizations', 'id', 'employers_organization_id_organizations_id_fk', 'cascade'),
+  ('employers', 'parent_company_id', 'employers', 'id', 'employers_parent_company_id_employers_id_fk', 'no action'),
+  ('employers', 'created_by', 'profiles', 'user_id', 'employers_created_by_profiles_user_id_fk', 'no action'),
+  ('employers', 'updated_by', 'profiles', 'user_id', 'employers_updated_by_profiles_user_id_fk', 'no action'),
+  ('member_jurisdiction_preferences', 'organization_id', 'organizations', 'id', 'member_jurisdiction_preferences_organization_id_organizations_id_fk', 'cascade'),
+  ('grievance_case_access_assignments', 'grievance_id', 'grievances', 'id', 'grievance_case_access_assignments_grievance_id_grievances_id_fk', 'cascade'),
+  ('cba_clauses', 'cba_id', 'collective_agreements', 'id', 'cba_clauses_cba_id_collective_agreements_id_fk', 'cascade'),
+  ('cost_centers', 'organization_id', 'organizations', 'id', 'cost_centers_organization_id_organizations_id_fk', 'cascade'),
+  ('cost_centers', 'parent_cost_center_id', 'cost_centers', 'id', 'cost_centers_parent_cost_center_id_cost_centers_id_fk', 'no action'),
+  ('commercial_contracts', 'organization_id', 'organizations', 'id', 'commercial_contracts_organization_id_organizations_id_fk', 'restrict'),
+  ('commercial_contracts', 'billing_account_id', 'billing_accounts', 'id', 'commercial_contracts_billing_account_id_billing_accounts_id_fk', 'restrict'),
+  ('commercial_contracts', 'subscription_id', 'org_subscriptions', 'id', 'commercial_contracts_subscription_id_org_subscriptions_id_fk', 'restrict'),
+  ('contract_line_items', 'contract_id', 'commercial_contracts', 'id', 'contract_line_items_contract_id_commercial_contracts_id_fk', 'cascade'),
+  ('entitlement_usage_log', 'entitlement_id', 'org_entitlements', 'id', 'entitlement_usage_log_entitlement_id_org_entitlements_id_fk', 'restrict'),
+  ('entitlement_usage_log', 'organization_id', 'organizations', 'id', 'entitlement_usage_log_organization_id_organizations_id_fk', 'restrict'),
+  ('org_entitlements', 'organization_id', 'organizations', 'id', 'org_entitlements_organization_id_organizations_id_fk', 'restrict'),
+  ('org_entitlements', 'contract_line_item_id', 'contract_line_items', 'id', 'org_entitlements_contract_line_item_id_contract_line_items_id_fk', 'set null'),
+  ('subscription_events_log', 'organization_id', 'organizations', 'id', 'subscription_events_log_organization_id_organizations_id_fk', 'restrict'),
+  ('subscription_events_log', 'subscription_id', 'org_subscriptions', 'id', 'subscription_events_log_subscription_id_org_subscriptions_id_fk', 'restrict'),
+  ('billing_accounts', 'organization_id', 'organizations', 'id', 'billing_accounts_organization_id_organizations_id_fk', 'restrict'),
+  ('billing_periods', 'organization_id', 'organizations', 'id', 'billing_periods_organization_id_organizations_id_fk', 'restrict'),
+  ('payment_allocations', 'payment_id', 'platform_payments', 'id', 'payment_allocations_payment_id_platform_payments_id_fk', 'restrict'),
+  ('payment_allocations', 'invoice_id', 'platform_invoices', 'id', 'payment_allocations_invoice_id_platform_invoices_id_fk', 'restrict'),
+  ('platform_invoice_line_items', 'invoice_id', 'platform_invoices', 'id', 'platform_invoice_line_items_invoice_id_platform_invoices_id_fk', 'cascade'),
+  ('platform_cost_ledger_entries', 'organization_id', 'organizations', 'id', 'platform_cost_ledger_entries_organization_id_organizations_id_fk', 'restrict'),
+  ('platform_cost_ledger_entries', 'parent_organization_id', 'organizations', 'id', 'platform_cost_ledger_entries_parent_organization_id_organizations_id_fk', 'restrict'),
+  ('platform_cost_ledger_entries', 'billing_period_id', 'billing_periods', 'id', 'platform_cost_ledger_entries_billing_period_id_billing_periods_id_fk', 'restrict'),
+  ('platform_cost_ledger_entries', 'cost_center_id', 'cost_centers', 'id', 'platform_cost_ledger_entries_cost_center_id_cost_centers_id_fk', 'restrict'),
+  ('allocation_basis_snapshots', 'run_id', 'allocation_runs', 'id', 'allocation_basis_snapshots_run_id_allocation_runs_id_fk', 'cascade'),
+  ('allocation_rule_versions', 'rule_id', 'allocation_rules', 'id', 'allocation_rule_versions_rule_id_allocation_rules_id_fk', 'cascade'),
+  ('allocation_rules', 'organization_id', 'organizations', 'id', 'allocation_rules_organization_id_organizations_id_fk', 'restrict'),
+  ('allocation_run_lines', 'run_id', 'allocation_runs', 'id', 'allocation_run_lines_run_id_allocation_runs_id_fk', 'cascade'),
+  ('allocation_runs', 'organization_id', 'organizations', 'id', 'allocation_runs_organization_id_organizations_id_fk', 'restrict'),
+  ('allocation_runs', 'billing_period_id', 'billing_periods', 'id', 'allocation_runs_billing_period_id_billing_periods_id_fk', 'restrict'),
+  ('allocation_runs', 'rule_version_id', 'allocation_rule_versions', 'id', 'allocation_runs_rule_version_id_allocation_rule_versions_id_fk', 'restrict'),
+  ('chargeback_statements', 'organization_id', 'organizations', 'id', 'chargeback_statements_organization_id_organizations_id_fk', 'restrict'),
+  ('chargeback_statements', 'billing_period_id', 'billing_periods', 'id', 'chargeback_statements_billing_period_id_billing_periods_id_fk', 'restrict'),
+  ('chargeback_statements', 'allocation_run_id', 'allocation_runs', 'id', 'chargeback_statements_allocation_run_id_allocation_runs_id_fk', 'restrict'),
+  ('fee_adjustments', 'fee_event_id', 'transaction_fee_events', 'id', 'fee_adjustments_fee_event_id_transaction_fee_events_id_fk', 'restrict'),
+  ('fee_adjustments', 'organization_id', 'organizations', 'id', 'fee_adjustments_organization_id_organizations_id_fk', 'restrict'),
+  ('transaction_fee_events', 'organization_id', 'organizations', 'id', 'transaction_fee_events_organization_id_organizations_id_fk', 'restrict'),
+  ('transaction_fee_events', 'rule_id', 'transaction_fee_rules', 'id', 'transaction_fee_events_rule_id_transaction_fee_rules_id_fk', 'restrict'),
+  ('transaction_fee_events', 'contract_id', 'commercial_contracts', 'id', 'transaction_fee_events_contract_id_commercial_contracts_id_fk', 'set null'),
+  ('transaction_fee_events', 'settlement_batch_id', 'fee_settlement_batches', 'id', 'transaction_fee_events_settlement_batch_id_fee_settlement_batches_id_fk', 'set null'),
+  ('transaction_fee_rules', 'organization_id', 'organizations', 'id', 'transaction_fee_rules_organization_id_organizations_id_fk', 'restrict'),
+  ('transaction_fee_rules', 'contract_id', 'commercial_contracts', 'id', 'transaction_fee_rules_contract_id_commercial_contracts_id_fk', 'set null'),
+  ('contract_covered_orgs', 'contract_id', 'commercial_contracts', 'id', 'contract_covered_orgs_contract_id_commercial_contracts_id_fk', 'cascade'),
+  ('contract_covered_orgs', 'organization_id', 'organizations', 'id', 'contract_covered_orgs_organization_id_organizations_id_fk', 'restrict'),
+  ('reconciliation_exceptions', 'run_id', 'reconciliation_runs', 'id', 'reconciliation_exceptions_run_id_reconciliation_runs_id_fk', 'cascade'),
+  ('reconciliation_exceptions', 'organization_id', 'organizations', 'id', 'reconciliation_exceptions_organization_id_organizations_id_fk', 'restrict'),
+  ('reconciliation_matches', 'run_id', 'reconciliation_runs', 'id', 'reconciliation_matches_run_id_reconciliation_runs_id_fk', 'cascade'),
+  ('reconciliation_runs', 'organization_id', 'organizations', 'id', 'reconciliation_runs_organization_id_organizations_id_fk', 'restrict'),
+  ('case_documents', 'claim_id', 'claims', 'claim_id', 'case_documents_claim_id_claims_claim_id_fk', 'cascade'),
+  ('case_documents', 'document_id', 'documents', 'id', 'case_documents_document_id_documents_id_fk', 'cascade'),
+  ('case_documents', 'organization_id', 'organizations', 'id', 'case_documents_organization_id_organizations_id_fk', 'no action'),
+  ('document_access_grants', 'organization_id', 'organizations', 'id', 'document_access_grants_organization_id_organizations_id_fk', 'cascade'),
+  ('document_access_grants', 'document_id', 'documents', 'id', 'document_access_grants_document_id_documents_id_fk', 'cascade'),
+  ('document_links', 'organization_id', 'organizations', 'id', 'document_links_organization_id_organizations_id_fk', 'cascade'),
+  ('document_links', 'document_id', 'documents', 'id', 'document_links_document_id_documents_id_fk', 'cascade'),
+  ('document_versions', 'organization_id', 'organizations', 'id', 'document_versions_organization_id_organizations_id_fk', 'cascade'),
+  ('document_versions', 'document_id', 'documents', 'id', 'document_versions_document_id_documents_id_fk', 'cascade'),
+  ('correspondence', 'organization_id', 'organizations', 'id', 'correspondence_organization_id_organizations_id_fk', 'no action'),
+  ('correspondence', 'drafted_by', 'profiles', 'user_id', 'correspondence_drafted_by_profiles_user_id_fk', 'no action'),
+  ('correspondence', 'assigned_signer_id', 'profiles', 'user_id', 'correspondence_assigned_signer_id_profiles_user_id_fk', 'no action'),
+  ('correspondence', 'approved_by', 'profiles', 'user_id', 'correspondence_approved_by_profiles_user_id_fk', 'no action'),
+  ('correspondence', 'signed_by', 'profiles', 'user_id', 'correspondence_signed_by_profiles_user_id_fk', 'no action'),
+  ('correspondence', 'dispatched_by', 'profiles', 'user_id', 'correspondence_dispatched_by_profiles_user_id_fk', 'no action'),
+  ('correspondence_audit_trail', 'correspondence_id', 'correspondence', 'id', 'correspondence_audit_trail_correspondence_id_correspondence_id_fk', 'cascade'),
+  ('correspondence_audit_trail', 'actor_user_id', 'profiles', 'user_id', 'correspondence_audit_trail_actor_user_id_profiles_user_id_fk', 'no action'),
+  ('correspondence_recipients', 'correspondence_id', 'correspondence', 'id', 'correspondence_recipients_correspondence_id_correspondence_id_fk', 'cascade'),
+  ('user_signatures', 'organization_id', 'organizations', 'id', 'user_signatures_organization_id_organizations_id_fk', 'no action'),
+  ('user_signatures', 'user_id', 'profiles', 'user_id', 'user_signatures_user_id_profiles_user_id_fk', 'no action'),
+  ('deadline_reminder_executions', 'reminder_id', 'deadline_reminders', 'id', 'deadline_reminder_executions_reminder_id_deadline_reminders_id_fk', 'restrict'),
+  ('org_configurations', 'organization_id', 'organizations', 'id', 'org_configurations_organization_id_organizations_id_fk', 'cascade'),
+  ('bargaining_units', 'organization_id', 'organizations', 'id', 'bargaining_units_organization_id_organizations_id_fk', 'cascade'),
+  ('bargaining_units', 'employer_id', 'employers', 'id', 'bargaining_units_employer_id_employers_id_fk', 'cascade'),
+  ('bargaining_units', 'worksite_id', 'worksites', 'id', 'bargaining_units_worksite_id_worksites_id_fk', 'set null'),
+  ('bargaining_units', 'chief_steward_id', 'profiles', 'user_id', 'bargaining_units_chief_steward_id_profiles_user_id_fk', 'no action'),
+  ('bargaining_units', 'bargaining_chair_id', 'profiles', 'user_id', 'bargaining_units_bargaining_chair_id_profiles_user_id_fk', 'no action'),
+  ('bargaining_units', 'created_by', 'profiles', 'user_id', 'bargaining_units_created_by_profiles_user_id_fk', 'no action'),
+  ('bargaining_units', 'updated_by', 'profiles', 'user_id', 'bargaining_units_updated_by_profiles_user_id_fk', 'no action'),
+  ('committees', 'organization_id', 'organizations', 'id', 'committees_organization_id_organizations_id_fk', 'cascade'),
+  ('committees', 'unit_id', 'bargaining_units', 'id', 'committees_unit_id_bargaining_units_id_fk', 'set null'),
+  ('committees', 'worksite_id', 'worksites', 'id', 'committees_worksite_id_worksites_id_fk', 'set null'),
+  ('committees', 'chair_id', 'profiles', 'user_id', 'committees_chair_id_profiles_user_id_fk', 'no action'),
+  ('committees', 'secretary_id', 'profiles', 'user_id', 'committees_secretary_id_profiles_user_id_fk', 'no action'),
+  ('committees', 'created_by', 'profiles', 'user_id', 'committees_created_by_profiles_user_id_fk', 'no action'),
+  ('committees', 'updated_by', 'profiles', 'user_id', 'committees_updated_by_profiles_user_id_fk', 'no action'),
+  ('worksites', 'organization_id', 'organizations', 'id', 'worksites_organization_id_organizations_id_fk', 'cascade'),
+  ('worksites', 'employer_id', 'employers', 'id', 'worksites_employer_id_employers_id_fk', 'cascade'),
+  ('worksites', 'created_by', 'profiles', 'user_id', 'worksites_created_by_profiles_user_id_fk', 'no action'),
+  ('worksites', 'updated_by', 'profiles', 'user_id', 'worksites_updated_by_profiles_user_id_fk', 'no action'),
+  ('committee_action_items', 'committee_id', 'committees', 'id', 'committee_action_items_committee_id_committees_id_fk', 'cascade'),
+  ('committee_action_items', 'meeting_id', 'committee_meetings', 'id', 'committee_action_items_meeting_id_committee_meetings_id_fk', 'set null'),
+  ('committee_action_items', 'organization_id', 'organizations', 'id', 'committee_action_items_organization_id_organizations_id_fk', 'cascade'),
+  ('committee_action_items', 'assigned_to', 'profiles', 'user_id', 'committee_action_items_assigned_to_profiles_user_id_fk', 'no action'),
+  ('committee_action_items', 'completed_by', 'profiles', 'user_id', 'committee_action_items_completed_by_profiles_user_id_fk', 'no action'),
+  ('committee_action_items', 'carried_from_meeting_id', 'committee_meetings', 'id', 'committee_action_items_carried_from_meeting_id_committee_meetings_id_fk', 'set null'),
+  ('committee_action_items', 'created_by', 'profiles', 'user_id', 'committee_action_items_created_by_profiles_user_id_fk', 'no action'),
+  ('committee_action_items', 'updated_by', 'profiles', 'user_id', 'committee_action_items_updated_by_profiles_user_id_fk', 'no action'),
+  ('committee_documents', 'committee_id', 'committees', 'id', 'committee_documents_committee_id_committees_id_fk', 'cascade'),
+  ('committee_documents', 'organization_id', 'organizations', 'id', 'committee_documents_organization_id_organizations_id_fk', 'cascade'),
+  ('committee_documents', 'meeting_id', 'committee_meetings', 'id', 'committee_documents_meeting_id_committee_meetings_id_fk', 'set null'),
+  ('committee_documents', 'uploaded_by', 'profiles', 'user_id', 'committee_documents_uploaded_by_profiles_user_id_fk', 'no action'),
+  ('committee_intelligence_snapshots', 'organization_id', 'organizations', 'id', 'committee_intelligence_snapshots_organization_id_organizations_id_fk', 'cascade'),
+  ('committee_intelligence_snapshots', 'committee_id', 'committees', 'id', 'committee_intelligence_snapshots_committee_id_committees_id_fk', 'cascade'),
+  ('committee_intelligence_snapshots', 'generated_by', 'profiles', 'user_id', 'committee_intelligence_snapshots_generated_by_profiles_user_id_fk', 'no action'),
+  ('committee_meeting_attendees', 'meeting_id', 'committee_meetings', 'id', 'committee_meeting_attendees_meeting_id_committee_meetings_id_fk', 'cascade'),
+  ('committee_meeting_attendees', 'member_id', 'profiles', 'user_id', 'committee_meeting_attendees_member_id_profiles_user_id_fk', 'cascade'),
+  ('committee_meetings', 'committee_id', 'committees', 'id', 'committee_meetings_committee_id_committees_id_fk', 'cascade'),
+  ('committee_meetings', 'organization_id', 'organizations', 'id', 'committee_meetings_organization_id_organizations_id_fk', 'cascade'),
+  ('committee_meetings', 'minutes_approved_by', 'profiles', 'user_id', 'committee_meetings_minutes_approved_by_profiles_user_id_fk', 'no action'),
+  ('committee_meetings', 'created_by', 'profiles', 'user_id', 'committee_meetings_created_by_profiles_user_id_fk', 'no action'),
+  ('committee_meetings', 'updated_by', 'profiles', 'user_id', 'committee_meetings_updated_by_profiles_user_id_fk', 'no action'),
+  ('data_quality_warnings', 'organization_id', 'organizations', 'id', 'data_quality_warnings_organization_id_organizations_id_fk', 'no action'),
+  ('data_quality_warnings', 'batch_id', 'ingestion_batches', 'id', 'data_quality_warnings_batch_id_ingestion_batches_id_fk', 'no action'),
+  ('duplicate_group_members', 'group_id', 'duplicate_groups', 'id', 'duplicate_group_members_group_id_duplicate_groups_id_fk', 'cascade'),
+  ('duplicate_groups', 'organization_id', 'organizations', 'id', 'duplicate_groups_organization_id_organizations_id_fk', 'no action'),
+  ('grievance_timeline_events', 'grievance_id', 'grievances', 'id', 'grievance_timeline_events_grievance_id_grievances_id_fk', 'cascade'),
+  ('grievance_timeline_events', 'organization_id', 'organizations', 'id', 'grievance_timeline_events_organization_id_organizations_id_fk', 'no action'),
+  ('ingestion_batches', 'organization_id', 'organizations', 'id', 'ingestion_batches_organization_id_organizations_id_fk', 'no action'),
+  ('ingestion_records', 'batch_id', 'ingestion_batches', 'id', 'ingestion_records_batch_id_ingestion_batches_id_fk', 'cascade');
+
+  FOR spec IN SELECT * FROM ue_stub_fk_contract LOOP
+    child_rel := to_regclass('public.' || spec.child_name);
+    IF child_rel IS NULL THEN
+      CONTINUE;
+    END IF;
+    IF EXISTS (
+      SELECT 1 FROM pg_constraint
+      WHERE conname = left(spec.constraint_name, 63) AND conrelid = child_rel
+    ) THEN
+      CONTINUE;
+    END IF;
+    parent_rel := to_regclass('public.' || spec.parent_name);
+    IF parent_rel IS NULL THEN
+      CONTINUE;
+    END IF;
+    SELECT c.is_nullable INTO nullable
+    FROM information_schema.columns c
+    WHERE c.table_schema = 'public' AND c.table_name = spec.child_name AND c.column_name = spec.column_name;
+    IF NOT FOUND THEN
+      CONTINUE;
+    END IF;
+    IF spec.on_delete NOT IN ('cascade', 'no action', 'restrict', 'set null') THEN
+      RAISE EXCEPTION 'unsupported delete action % for %', spec.on_delete, spec.constraint_name;
+    END IF;
+    BEGIN
+      IF nullable = 'YES' THEN
+        EXECUTE format(
+          'SELECT count(*) FROM public.%I AS child_row LEFT JOIN public.%I AS parent_row ON parent_row.%I = child_row.%I WHERE child_row.%I IS NOT NULL AND parent_row.%I IS NULL',
+          spec.child_name, spec.parent_name, spec.parent_column, spec.column_name, spec.column_name, spec.parent_column
+        ) INTO orphans;
+      ELSE
+        EXECUTE format(
+          'SELECT count(*) FROM public.%I AS child_row LEFT JOIN public.%I AS parent_row ON parent_row.%I = child_row.%I WHERE parent_row.%I IS NULL',
+          spec.child_name, spec.parent_name, spec.parent_column, spec.column_name, spec.parent_column
+        ) INTO orphans;
+      END IF;
+      IF orphans > 0 THEN
+        RAISE EXCEPTION 'incompatible existing relation public.%: % row(s) violate %. Rows were not rewritten.',
+          spec.child_name, orphans, spec.constraint_name;
+      END IF;
+      EXECUTE format(
+        'ALTER TABLE public.%I ADD CONSTRAINT %I FOREIGN KEY (%I) REFERENCES public.%I (%I) ON DELETE %s ON UPDATE no action',
+        spec.child_name, spec.constraint_name, spec.column_name, spec.parent_name, spec.parent_column, spec.on_delete
+      );
+    EXCEPTION WHEN raise_exception THEN
+      RAISE;
+    WHEN others THEN
+      RAISE EXCEPTION 'incompatible existing relation public.%: cannot add %. % Rows were not rewritten.',
+        spec.child_name, spec.constraint_name, SQLERRM;
+    END;
+  END LOOP;
 END
 $ue$;
