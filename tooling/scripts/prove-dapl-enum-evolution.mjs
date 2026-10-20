@@ -13,18 +13,21 @@ import { applyPlatformMigrations, computeMigrationHash } from './lib/union-eyes-
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 const platformDir = path.join(repoRoot, 'apps/union-eyes/db/migrations-platform')
-const migrationPath = path.join(platformDir, '0008_dapl_enum_label_evolution.sql')
-const migrationSql = fs.readFileSync(migrationPath, 'utf8')
-const frozenSql = fs.readFileSync(
-  path.join(repoRoot, 'apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql'),
-  'utf8',
-)
+const migrationSql = [
+  fs.readFileSync(path.join(platformDir, '0008_dapl_enum_label_evolution.sql'), 'utf8'),
+  fs.readFileSync(path.join(platformDir, '0008_fee_adjustment_enum_label_evolution.sql'), 'utf8'),
+].join('\n')
+const frozenSql = [
+  fs.readFileSync(path.join(repoRoot, 'apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql'), 'utf8'),
+  fs.readFileSync(path.join(repoRoot, 'apps/union-eyes/db/migrations/0086_monetization_phase2.sql'), 'utf8'),
+].join('\n')
 const canonicalSql = fs.readFileSync(
   path.join(platformDir, '0009_canonical_lineage_relations.sql'),
   'utf8',
 )
 
-const TYPES = ['platform_cost_type', 'ledger_event_type', 'ledger_source_type']
+const TYPES = ['platform_cost_type', 'ledger_event_type', 'ledger_source_type', 'fee_adjustment_type']
+const EVOLUTION_TAGS = ['0008_dapl_enum_label_evolution', '0008_fee_adjustment_enum_label_evolution']
 const evidence = []
 
 function record(name, detail) {
@@ -115,6 +118,7 @@ const expected = {
   platform_cost_type: ['base_subscription', 'local_fee', 'seat_fee', 'module_fee', 'usage_fee', 'onboarding_fee', 'support_fee', 'transaction_fee', 'settlement', 'adjustment', 'credit', 'subsidy', 'writeoff'],
   ledger_event_type: ['invoice_generated', 'payment_received', 'allocation_run', 'adjustment_posted', 'credit_applied', 'subsidy_applied', 'writeoff_posted', 'period_closed', 'reversal', 'fee_captured', 'settlement_closed'],
   ledger_source_type: ['subscription', 'invoice', 'payment', 'adjustment', 'allocation', 'manual', 'system', 'transaction_fee', 'settlement_batch'],
+  fee_adjustment_type: ['reversal', 'partial_reversal', 'waiver', 'correction', 'dispute_credit'],
 }
 
 try {
@@ -150,6 +154,13 @@ try {
       INSERT INTO public.platform_cost_ledger_entries (id, cost_type, event_type, source_type, amount)
       VALUES ('11111111-1111-4111-8111-111111111111', 'adjustment', 'reversal', 'system', 12.50)
     `)
+    await client.query(`
+      CREATE TABLE public.fee_adjustments_probe (
+        id int PRIMARY KEY,
+        adjustment_type fee_adjustment_type NOT NULL
+      )
+    `)
+    await client.query(`INSERT INTO public.fee_adjustments_probe (id, adjustment_type) VALUES (1, 'waiver')`)
     await client.query('BEGIN')
     await client.query(migrationSql)
     await client.query('ROLLBACK')
@@ -170,7 +181,8 @@ try {
       `SELECT cost_type::text, event_type::text, source_type::text, amount::text
        FROM public.platform_cost_ledger_entries`,
     )
-    record('historical_upgrade', { before, rolledBack, after, repeated, row: row.rows[0], rollbackRow: preservedDuringRollback.rows[0] })
+    const feeRow = await client.query(`SELECT adjustment_type::text FROM public.fee_adjustments_probe`)
+    record('historical_upgrade', { before, rolledBack, after, repeated, row: row.rows[0], fee: feeRow.rows[0], rollbackRow: preservedDuringRollback.rows[0] })
     for (const typeName of TYPES) {
       if (JSON.stringify(rolledBack[typeName]) !== JSON.stringify(before[typeName])) {
         throw new Error(`rollback changed ${typeName}`)
@@ -188,6 +200,9 @@ try {
     const stored = row.rows[0]
     if (stored.cost_type !== 'adjustment' || stored.event_type !== 'reversal' || stored.source_type !== 'system' || stored.amount !== '12.50') {
       throw new Error(`stored financial meaning changed ${JSON.stringify(stored)}`)
+    }
+    if (feeRow.rows[0].adjustment_type !== 'waiver') {
+      throw new Error(`fee adjustment meaning changed ${feeRow.rows[0].adjustment_type}`)
     }
   })
 
@@ -244,23 +259,23 @@ try {
     const journalPath = path.join(platformDir, 'meta/_journal.json')
     const journal = JSON.parse(fs.readFileSync(journalPath, 'utf8'))
     for (const entry of journal.entries) {
-      if (entry.tag === '0008_dapl_enum_label_evolution') continue
+      if (EVOLUTION_TAGS.includes(entry.tag)) continue
       const { hash } = computeMigrationHash(platformDir, entry.tag)
       await client.query('INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2)', [hash, entry.when])
     }
     const first = await applyPlatformMigrations(client, { journalPath, migrationsDir: platformDir })
     const second = await applyPlatformMigrations(client, { journalPath, migrationsDir: platformDir })
     const recorded = await client.query(
-      `SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations WHERE hash = $1`,
-      [computeMigrationHash(platformDir, '0008_dapl_enum_label_evolution').hash],
+      `SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations WHERE hash = ANY($1::text[])`,
+      [EVOLUTION_TAGS.map((tag) => computeMigrationHash(platformDir, tag).hash)],
     )
     const after = {}
     for (const typeName of TYPES) after[typeName] = await labels(client, typeName)
     record('migration_ledger', { first, second, recorded: recorded.rows[0].n, after })
-    if (first.applied !== 1 || !first.appliedTags.includes('0008_dapl_enum_label_evolution')) {
+    if (first.applied !== EVOLUTION_TAGS.length || EVOLUTION_TAGS.some((tag) => !first.appliedTags.includes(tag))) {
       throw new Error(`runner applied ${JSON.stringify(first)}`)
     }
-    if (second.applied !== 0 || recorded.rows[0].n !== 1) {
+    if (second.applied !== 0 || recorded.rows[0].n !== EVOLUTION_TAGS.length) {
       throw new Error('enum migration ledger was not idempotent')
     }
     for (const typeName of TYPES) {

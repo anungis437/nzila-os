@@ -183,6 +183,24 @@ describe('convergence P0 contracts', () => {
     expect(frozen).not.toContain('transaction_fee')
     expect(frozen).not.toContain('fee_captured')
     expect(frozen).not.toContain('settlement_batch')
+    const feeEvolution = tags.indexOf('0008_fee_adjustment_enum_label_evolution')
+    expect(feeEvolution).toBeGreaterThan(evolution)
+    expect(canonical).toBeGreaterThan(feeEvolution)
+    const feeSql = fs.readFileSync(
+      path.join(REPO_ROOT, 'apps/union-eyes/db/migrations-platform/0008_fee_adjustment_enum_label_evolution.sql'),
+      'utf8',
+    )
+    expect(feeSql).toContain("'partial_reversal'")
+    expect(feeSql).toContain('incompatible existing type')
+    expect(feeSql).not.toMatch(/DROP TYPE/i)
+    const monetization = fs.readFileSync(
+      path.join(REPO_ROOT, 'apps/union-eyes/db/migrations/0086_monetization_phase2.sql'),
+      'utf8',
+    )
+    expect(monetization).toContain(
+      "CREATE TYPE fee_adjustment_type AS ENUM ('reversal','waiver','correction','dispute_credit')",
+    )
+    expect(monetization).not.toContain('partial_reversal')
   })
 
   it('records the financial contradiction as contained rather than reconciled', () => {

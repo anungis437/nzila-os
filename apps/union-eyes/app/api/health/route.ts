@@ -8,25 +8,27 @@ import {
   type HealthCheckState,
   type RuntimeHealthCheck,
 } from '@nzila/os-core/health'
+import { createLogger } from '@nzila/os-core/telemetry'
 import {
   CATALOG_ADMISSION_PUBLIC_ERROR,
   evaluateCatalogAdmission,
 } from '@/lib/operations/catalog-admission'
 
 const APP = 'union-eyes'
+const logger = createLogger('union-eyes.health')
 
 async function checkCatalogAuthority(): Promise<{ state: HealthCheckState; ms: number; error?: string; note?: string }> {
   const start = Date.now()
   try {
     const report = await evaluateCatalogAdmission()
     if (!report.ok) {
-      console.error(JSON.stringify({
+      logger.error('catalog authority admission failed', {
         event: 'catalog_authority_admission_failed',
         applicationReady: false,
         privilegesUnchanged: true,
         violationCount: report.violations.length,
         violations: report.violations.slice(0, 40),
-      }))
+      })
       return {
         state: 'fail',
         ms: Date.now() - start,
@@ -40,12 +42,12 @@ async function checkCatalogAuthority(): Promise<{ state: HealthCheckState; ms: n
       note: 'applicationReady=false',
     }
   } catch (err) {
-    console.error(JSON.stringify({
+    logger.error('catalog authority admission failed', {
       event: 'catalog_authority_admission_failed',
       applicationReady: false,
       privilegesUnchanged: true,
       error: err instanceof Error ? err.message : 'catalog admission failed',
-    }))
+    })
     return {
       state: 'fail',
       ms: Date.now() - start,
