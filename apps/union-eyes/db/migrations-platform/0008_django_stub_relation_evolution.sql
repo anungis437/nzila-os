@@ -1505,5 +1505,26 @@ BEGIN
       FOREIGN KEY (updated_by) REFERENCES public.profiles(user_id)
       ON DELETE no action ON UPDATE no action;
   END IF;
+  child_rel := to_regclass('public.member_jurisdiction_preferences');
+  IF child_rel IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = left('member_jurisdiction_preferences_organization_id_organizations_id_fk', 63)
+      AND conrelid = child_rel
+  ) THEN
+    parent_rel := to_regclass('public.organizations');
+    IF parent_rel IS NULL THEN
+      RAISE EXCEPTION 'missing parent public.organizations for member_jurisdiction_preferences_organization_id_organizations_id_fk';
+    END IF;
+    SELECT count(*) INTO orphans FROM public.member_jurisdiction_preferences e
+    LEFT JOIN public.organizations parent_row ON parent_row.id = e.organization_id
+    WHERE parent_row.id IS NULL;
+    IF orphans > 0 THEN
+      RAISE EXCEPTION 'incompatible existing relation public.member_jurisdiction_preferences: % row(s) violate member_jurisdiction_preferences_organization_id_organizations_id_fk. Rows were not rewritten.', orphans;
+    END IF;
+    ALTER TABLE public.member_jurisdiction_preferences
+      ADD CONSTRAINT member_jurisdiction_preferences_organization_id_organizations_id_fk
+      FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
+      ON DELETE cascade ON UPDATE no action;
+  END IF;
 END
 $ue$;

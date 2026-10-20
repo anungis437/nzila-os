@@ -527,6 +527,76 @@ try {
     }
   })
 
+  async function installJurisdiction(client, { orphan }) {
+    await client.query(`CREATE TABLE public.organizations (id uuid PRIMARY KEY)`)
+    const orgId = '88888888-8888-4888-8888-888888888888'
+    const missingOrgId = '99999999-9999-4999-8999-999999999999'
+    await client.query(`INSERT INTO public.organizations (id) VALUES ($1)`, [orgId])
+    const reference = orphan ? '' : ' REFERENCES public.organizations(id) ON DELETE CASCADE'
+    await client.query(`
+      CREATE TABLE public.member_jurisdiction_preferences (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id text NOT NULL,
+        organization_id uuid NOT NULL${reference},
+        preferred_jurisdictions jsonb NOT NULL DEFAULT '[]'::jsonb,
+        preferred_levels jsonb NOT NULL DEFAULT '[]'::jsonb,
+        include_national boolean NOT NULL DEFAULT true,
+        auto_apply boolean NOT NULL DEFAULT true,
+        created_at timestamp NOT NULL DEFAULT now(),
+        updated_at timestamp NOT NULL DEFAULT now(),
+        UNIQUE (user_id, organization_id)
+      )
+    `)
+    await client.query(
+      `INSERT INTO public.member_jurisdiction_preferences (user_id, organization_id) VALUES ('user-1', $1)`,
+      [orphan ? missingOrgId : orgId],
+    )
+  }
+
+  await withDatabase('ue_stub_rel_jurisdiction', async (client) => {
+    await installJurisdiction(client, { orphan: false })
+    await applyEvolution(client)
+    const names = await client.query(`
+      SELECT conname FROM pg_constraint
+      WHERE conrelid = 'public.member_jurisdiction_preferences'::regclass AND contype = 'f'
+      ORDER BY conname
+    `)
+    const statements = canonicalSql.split('--> statement-breakpoint').map((statement) => statement.trim()).filter(Boolean)
+    const fkCheck = statements.find((statement) =>
+      statement.includes('constraint member_jurisdiction_preferences_organization_id_organizations_id_fk is absent'),
+    )
+    await client.query('BEGIN')
+    await client.query('CREATE TEMP TABLE IF NOT EXISTS ue_bootstrap_created_relations (relname text PRIMARY KEY) ON COMMIT DROP')
+    await client.query(fkCheck)
+    await client.query('COMMIT')
+    record('jurisdiction_fk', { constraints: names.rows.map((row) => row.conname) })
+    const required = 'member_jurisdiction_preferences_organization_id_organizations_id_fk'.slice(0, 63)
+    if (!names.rows.some((row) => row.conname === required)) {
+      throw new Error(`required jurisdiction foreign key is absent: ${JSON.stringify(names.rows)}`)
+    }
+  })
+
+  await withDatabase('ue_stub_rel_jurisdiction_orphan', async (client) => {
+    await installJurisdiction(client, { orphan: true })
+    let message = ''
+    try {
+      await applyEvolution(client)
+    } catch (error) {
+      message = error.message
+    }
+    const names = await client.query(`
+      SELECT conname FROM pg_constraint
+      WHERE conrelid = 'public.member_jurisdiction_preferences'::regclass AND contype = 'f'
+    `)
+    record('jurisdiction_orphan', { message, constraints: names.rows.map((row) => row.conname) })
+    if (!message.includes('Rows were not rewritten')) {
+      throw new Error(`orphan jurisdiction did not fail closed: ${message}`)
+    }
+    if (names.rows.length !== 0) {
+      throw new Error(`orphan jurisdiction gained a foreign key: ${JSON.stringify(names.rows)}`)
+    }
+  })
+
   await withDatabase('ue_stub_rel_absent', async (client) => {
     await applyEvolution(client)
     const exists = await client.query(`SELECT to_regclass('public.employers') AS rel`)
