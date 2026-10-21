@@ -532,10 +532,13 @@ jobs:
           SHARD_RECEIPT_FILE: ${{ runner.temp }}/ue-e2e-receipt.json
         run: |
           set -euo pipefail
+          # The workflow engine can mark the matrix complete before the jobs API
+          # reports every shard conclusion. Re-read a few times, then fail closed.
+          for attempt in 1 2 3 4 5 6 7 8; do
           gh api --paginate --slurp \
             "repos/${GITHUB_REPOSITORY}/actions/runs/${EXPECTED_RUN}/attempts/${EXPECTED_ATTEMPT}/jobs?per_page=100" \
             > "$SHARD_JOBS_FILE"
-          node --input-type=module <<'NODE'
+          if node --input-type=module <<'NODE'
           import { readFileSync, writeFileSync } from 'node:fs'
           const head = process.env.EXPECTED_HEAD
           const run = Number(process.env.EXPECTED_RUN)
@@ -550,13 +553,24 @@ jobs:
           if (workers.length !== 4 || new Set(workers.map(job => job.id)).size !== 4 || expected.some(name => workers.filter(job => job.name === name).length !== 1))
             throw new Error('Missing, duplicate or unexpected Union Eyes shard')
           for (const job of workers) {
-            if (!Number.isSafeInteger(job.id) || job.id < 1 || job.head_sha !== head || job.run_id !== run || job.run_attempt !== attempt || job.status !== 'completed' || job.conclusion !== 'success')
+            if (!Number.isSafeInteger(job.id) || job.id < 1 || job.head_sha !== head || job.run_id !== run || job.run_attempt !== attempt || job.status !== 'completed' || job.conclusion !== 'success') {
+              console.error(JSON.stringify({ id: job.id, name: job.name, status: job.status, conclusion: job.conclusion, head_sha: job.head_sha, run_id: job.run_id, run_attempt: job.run_attempt }))
               throw new Error(`Union Eyes shard did not pass on this frozen run: ${job.name}`)
+            }
           }
           const receipt = { head, run, attempt, workers: workers.map(({ id, name, conclusion }) => ({ id, name, conclusion })) }
           writeFileSync(process.env.SHARD_RECEIPT_FILE, `${JSON.stringify(receipt, null, 2)}\n`)
           console.log(JSON.stringify(receipt))
           NODE
+          then
+            exit 0
+          fi
+          echo "Union Eyes shard listing was not successful on attempt ${attempt}. The jobs API can lag a completed matrix."
+          if [ "$attempt" -eq 8 ]; then
+            exit 1
+          fi
+          sleep 15
+          done
 
       - name: Upload Union Eyes shard receipt
         uses: actions/upload-artifact@v4

@@ -1069,6 +1069,7 @@ jobs:
       - hash-chain-drift
       - enterprise-hardening
       - perf-regression
+      - perf-regression-canonical
       - repository-inventory
       - governance-integrity
       - classify
