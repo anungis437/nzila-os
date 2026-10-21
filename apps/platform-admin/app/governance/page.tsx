@@ -87,7 +87,12 @@ export default function CrossDomainGovernancePanel() {
     }
   }, [statusFilter, domainFilter])
 
-  useEffect(() => { fetchData() }, [fetchData])
+  useEffect(() => {
+    const handle = window.setTimeout(() => {
+      void fetchData()
+    }, 0)
+    return () => window.clearTimeout(handle)
+  }, [fetchData])
 
   // Aggregate by domain
   const byDomain = policies.reduce<Record<string, PolicySummary[]>>((acc, p) => {
