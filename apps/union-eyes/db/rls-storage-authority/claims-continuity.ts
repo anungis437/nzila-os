@@ -93,12 +93,12 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
   {
     table: "deadline_reassignment_convergence",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "RECLASSIFIED (final closure sprint, D1): previously LATENT_UNREACHABLE, but the deadline reminder worker (lib/deadline-engine/reminder-worker.ts, run by app/api/cron/deadline-reminders) calls sweepPendingAssignmentConvergence on every run, so the relation is live. Current authoritative declaration: db/schema/deadline-engine-schema.ts (organization_id NOT NULL). Work-state table owned exclusively by the scheduled deadline engine; accessed only through withSystemContext under the cron credential. SYSTEM may read and update its own queue rows; no tenant business table is written through this authority.",
-    supportingCapability: ["lib/deadline-engine/assignment-sync.ts","lib/deadline-engine/reminder-worker.ts","app/api/cron/deadline-reminders/route.ts"],
-    requiredRuntimePrivileges: [],
+    reason: "RECLASSIFIED 2026-10-21 from the system-only D1 note. The assign route (app/api/grievances/[id]/assign/route.ts) inserts the row inside withRLSContext as union_eyes_runtime, in the same transaction as grievances.union_rep_id. The post-commit retry and the reminder cron (app/api/cron/deadline-reminders/route.ts) read and update pending rows as union_eyes_system. Runtime therefore holds SELECT, INSERT, UPDATE under the 0010 direct-org policies from scoped 0019. System holds the same three privileges for the cross-organization sweep. Root migrations/0049 remains a fail-open PUBLIC policy and is not this table's authority. DELETE is not granted. This entry is source authority, not a staging isolation pass.",
+    supportingCapability: ["lib/deadline-engine/assignment-sync.ts","lib/deadline-engine/reminder-worker.ts","app/api/grievances/[id]/assign/route.ts","app/api/cron/deadline-reminders/route.ts","db/migrations-cache/0019_deadline_reassignment_convergence.sql"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
     requiredSystemPrivileges: ["SELECT","INSERT","UPDATE"],
-    invocationAuthority: "SYSTEM_SCHEDULE",
-    dbExecutionPrincipal: "SYSTEM_RUNTIME",
+    invocationAuthority: "MIXED",
+    dbExecutionPrincipal: "MIXED",
     reviewPriority: "NORMAL",
   },
   {

@@ -7,7 +7,7 @@
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { db } from "@/db/db";
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
@@ -91,12 +91,14 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       });
     });
 
-    // Attempt convergence immediately so the common case (no failures)
-    // resolves within the same request. If this fails, the durable task
-    // recorded above stays pending — the reminder worker's periodic sweep
-    // will retry it, so the handoff is never permanently stranded even
-    // though this request reports failure.
-    await processAssignmentConvergence(convergenceTaskId, { type: 'user', id: userId });
+    // The insert above committed under the tenant role. The follow-up read and
+    // update run as union_eyes_system: scoped 0019 denies an empty tenant
+    // context, so this retry cannot see the new row on the ordinary pool.
+    // The reminder cron uses the same system principal for its sweep.
+    // If this fails, the durable task stays pending for that sweep.
+    await withSystemContext(() =>
+      processAssignmentConvergence(convergenceTaskId, { type: 'user', id: userId }),
+    );
 
     // Audit
     await auditDataMutation({

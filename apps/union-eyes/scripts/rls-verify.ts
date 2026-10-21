@@ -706,10 +706,11 @@ async function checkManifestRlsRequiredCoverage(sql: postgres.Sql, results: Chec
  * Deadline-engine policy closure (Phase 3A).
  *
  * The manifest coverage check above proves RLS + FORCE and that runtime/system policies EXIST, which cannot prove
- * closure: PostgreSQL OR-combines permissive policies, so a surviving PUBLIC policy (root 0045) or a hand-made
- * `USING (true)` policy leaves every tenant readable while all of those conditions stay green. For the three
+ * closure: PostgreSQL OR-combines permissive policies, so a surviving PUBLIC policy (root 0045 or root 0049) or a
+ * hand-made `USING (true)` policy leaves every tenant readable while all of those conditions stay green. For the
  * deadline-engine tables the approved policy set is therefore pinned EXACTLY: names, one role, command, PERMISSIVE and
- * the APPROVED PREDICATE CONTRACT below.
+ * the APPROVED PREDICATE CONTRACT below. deadline_reassignment_convergence is included: root 0049's PUBLIC fallback is
+ * not an approved predicate.
  *
  * What the predicate check is, and is not. Structural heuristics (no OR, no IS NULL, no literal true, reads the session
  * setting) are not semantic verification: `organization_id::text = organization_id::text AND current_setting(...) <> ''`
@@ -723,19 +724,24 @@ async function checkManifestRlsRequiredCoverage(sql: postgres.Sql, results: Chec
  * in scripts/__tests__/rls-verify-deadline-engine-policies.pglite.test.ts, and the independent live isolation probe
  * remains a release gate.
  */
-export const DEADLINE_ENGINE_TABLES = ['deadline_reminders', 'deadline_audit_events', 'deadline_reminder_executions'] as const
+export const DEADLINE_ENGINE_TABLES = [
+  'deadline_reminders',
+  'deadline_audit_events',
+  'deadline_reminder_executions',
+  'deadline_reassignment_convergence',
+] as const
 
 export const DEADLINE_ENGINE_TABLES_QUERY = `
   SELECT c.relname AS relname, c.relrowsecurity AS relrowsecurity, c.relforcerowsecurity AS relforcerowsecurity
   FROM pg_class c
   WHERE c.relkind = 'r' AND c.relnamespace = 'public'::regnamespace
-    AND c.relname IN ('deadline_reminders', 'deadline_audit_events', 'deadline_reminder_executions')`
+    AND c.relname IN ('deadline_reminders', 'deadline_audit_events', 'deadline_reminder_executions', 'deadline_reassignment_convergence')`
 
 export const DEADLINE_ENGINE_POLICIES_QUERY = `
   SELECT tablename, policyname, permissive, roles::text[] AS roles, cmd, qual, with_check
   FROM pg_policies
   WHERE schemaname = 'public'
-    AND tablename IN ('deadline_reminders', 'deadline_audit_events', 'deadline_reminder_executions')
+    AND tablename IN ('deadline_reminders', 'deadline_audit_events', 'deadline_reminder_executions', 'deadline_reassignment_convergence')
   ORDER BY tablename, policyname`
 
 export interface DeadlineEngineTableRow {
@@ -784,6 +790,7 @@ const DIRECT_ORG_POLICIES: Record<string, ApprovedDeadlinePolicy> = {
 const APPROVED_DEADLINE_ENGINE_POLICIES: Record<(typeof DEADLINE_ENGINE_TABLES)[number], Record<string, ApprovedDeadlinePolicy>> = {
   deadline_reminders: DIRECT_ORG_POLICIES,
   deadline_audit_events: DIRECT_ORG_POLICIES,
+  deadline_reassignment_convergence: DIRECT_ORG_POLICIES,
   deadline_reminder_executions: {
     ue_parent_org_isolation_v2: { role: 'union_eyes_runtime', cmd: 'ALL', using: PARENT_OWNED_PREDICATE, withCheck: PARENT_OWNED_PREDICATE },
     ue_system_full_access: { role: 'union_eyes_system', cmd: 'ALL', using: SYSTEM_PREDICATE, withCheck: SYSTEM_PREDICATE },
@@ -809,7 +816,7 @@ function explainWidening(value: string | null): string {
 
 export interface DeadlineEngineEvaluateOptions {
   /**
-   * True for a deployed environment (staging/production): the three tables MUST exist, so an absent table FAILS.
+   * True for a deployed environment (staging/production): the deadline-engine tables MUST exist, so an absent table FAILS.
    * False (default) is the source-native bootstrap, where an absent table is reported as NOT_PRESENT and does not fail.
    */
   requireDeadlineEngineTables?: boolean
