@@ -25,7 +25,8 @@ function walk(dir: string, out: string[] = []): string[] {
 
 describe('convergence P0 contracts', () => {
   it('accepts the open cloud-agent branch and rejects an arbitrary cursor branch', () => {
-    expect(policy('cursor/ue-convergence-p0-cfc5').status).toBe(0)
+    expect(policy('cursor/ue-e2e-credential-boundary-cfc5').status).toBe(0)
+    expect(policy('cursor/ue-deps-combined-cfc5').status).toBe(0)
     expect(policy('fix/membership-uuid').status).toBe(0)
     const rejected = policy('cursor/arbitrary')
     expect(rejected.status).toBe(1)
@@ -34,6 +35,7 @@ describe('convergence P0 contracts', () => {
 
   it('admits the legacy cursor branch by exact name only', () => {
     const rejectedNames = [
+      'cursor/ue-convergence-p0-cfc5', // merged #971; exact admission removed
       'cursor/another-branch-cfc5', // same suffix, different name: the old pattern accepted this
       'cursor/ue-convergence-p0-cfc5-2',
       'cursor/ue-convergence-p0-cfc5/extra',

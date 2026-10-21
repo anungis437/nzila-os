@@ -30,11 +30,14 @@ const BRANCH_PATTERNS: RegExp[] = [
 // Branch names admitted by exact match only. This is not a pattern: it does not open
 // the cursor/ family, and a new name needs its own reviewed entry here.
 //
-// cursor/ue-convergence-p0-cfc5 is the head of open pull request #971. Renaming the head
-// branch of an open pull request closes that pull request, so the existing name is
-// grandfathered rather than renamed. Remove this entry once that pull request is merged
-// or closed.
-const GRANDFATHERED_BRANCHES: ReadonlySet<string> = new Set(['cursor/ue-convergence-p0-cfc5'])
+// cursor/ue-convergence-p0-cfc5 was the head of merged pull request #971 and is no longer
+// admitted. The two names below are the open repository-settlement pull requests.
+// Remove each exact name once that pull request is merged or closed. This set does not
+// open the cursor/ family.
+const GRANDFATHERED_BRANCHES: ReadonlySet<string> = new Set([
+  'cursor/ue-e2e-credential-boundary-cfc5',
+  'cursor/ue-deps-combined-cfc5',
+])
 
 const TAG_PATTERN = /^v\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)\.\d+)?$/
 
@@ -56,7 +59,7 @@ function validateBranch(ref: string): void {
   const matched = GRANDFATHERED_BRANCHES.has(ref) || BRANCH_PATTERNS.some((pattern) => pattern.test(ref))
   if (!matched) {
     fail(
-      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, integration/*, ops/*, release/X.Y.Z, release/prod-readiness-YYYY-MM-DD, main, develop, dependabot/*, renovate/*, copilot/*. Grandfathered exact name: cursor/ue-convergence-p0-cfc5`,
+      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, integration/*, ops/*, release/X.Y.Z, release/prod-readiness-YYYY-MM-DD, main, develop, dependabot/*, renovate/*, copilot/*. Grandfathered exact names: cursor/ue-e2e-credential-boundary-cfc5, cursor/ue-deps-combined-cfc5`,
     )
   }
   ok(`Branch '${ref}' is policy-compliant`)

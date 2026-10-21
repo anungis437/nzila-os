@@ -261,7 +261,16 @@ describe('Union Eyes E2E shard authority', () => {
     expect(command).not.toContain('--no-deps')
     expect(command).not.toContain('--grep')
     expect(gate.name).toBe('E2E · union-eyes')
-    expect(gate.needs).toEqual(['e2e'])
+    expect(gate.needs).toEqual(['e2e', 'e2e-canonical'])
+    expect(workflow.permissions).toEqual({ contents: 'read' })
+    expect(worker.environment).toBeUndefined()
+    expect(worker.if).toBe("matrix.app != 'union-eyes' || github.event_name == 'pull_request'")
+    expect(JSON.stringify(worker)).not.toContain('secrets.')
+    const canonical = workflow.jobs['e2e-canonical']
+    expect(canonical.environment).toBe('staging')
+    expect(canonical.if).toBe("github.event_name == 'push' && github.ref == 'refs/heads/main'")
+    expect(canonical.permissions).toEqual({ contents: 'read', 'id-token': 'write' })
+    expect(canonical.steps.some((step: { uses?: string }) => step.uses === 'azure/login@v3')).toBe(true)
     expect(gate.if).toBe('always()')
     expect(gate.permissions).toEqual({ contents: 'read', actions: 'read' })
     expect(gate.steps[0].run).toContain('/attempts/${EXPECTED_ATTEMPT}/jobs')
@@ -277,6 +286,14 @@ describe('Union Eyes E2E shard authority', () => {
     {
       name: 'all UE workers pass despite an unrelated app failure',
       jobs: [...jobs, { name: 'E2E · web', conclusion: 'failure' }],
+      pass: true,
+    },
+    {
+      name: 'skipped companion workers from the other qualification mode',
+      jobs: [
+        ...jobs,
+        ...jobs.map((job) => ({ ...job, id: job.id + 10, conclusion: 'skipped', status: 'completed' })),
+      ],
       pass: true,
     },
     { name: 'missing worker', jobs: jobs.slice(1), pass: false },

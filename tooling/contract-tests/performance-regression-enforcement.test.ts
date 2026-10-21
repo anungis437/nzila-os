@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { parse } from 'yaml'
 
 const ROOT = join(__dirname, '..', '..')
 const CI_WORKFLOW = join(ROOT, '.github', 'workflows', 'ci.yml')
@@ -21,6 +22,19 @@ describe('Performance regression enforcement', () => {
     expect(source).toContain('--summary-export=tests/load/k6-summary.json')
     expect(source).toContain('tests/load/smoke.js')
     expect(source).toContain('AUTH_TOKEN="${{ secrets.PERF_AUTH_TOKEN }}"')
+    const ci = parse(source) as {
+      jobs: Record<string, { if?: string; environment?: string; steps?: Array<{ run?: string }> }>
+    }
+    const pullRequest = ci.jobs['perf-regression']
+    const canonical = ci.jobs['perf-regression-canonical']
+    expect(pullRequest.if).toContain("github.event_name == 'pull_request'")
+    expect(pullRequest.environment).toBeUndefined()
+    expect(JSON.stringify(pullRequest)).not.toContain('secrets.')
+    expect(pullRequest.steps?.some((step) => step.run?.includes('http://127.0.0.1:3999'))).toBe(true)
+    expect(canonical.environment).toBe('staging')
+    expect(canonical.if).toContain("github.event_name == 'push'")
+    expect(canonical.if).toContain("github.ref == 'refs/heads/main'")
+    expect(JSON.stringify(canonical)).toContain('secrets.PERF_AUTH_TOKEN')
   })
 
   it('performance gate publishes artifacts for regression analysis', () => {
