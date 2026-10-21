@@ -684,6 +684,180 @@ export async function calculateSeniority(organizationId: string, memberId: strin
   }
 }
 
+export const MEMBER_IMPORT_KEYS = new Set([
+  "id",
+  "userId",
+  "organizationId",
+  "email",
+  "name",
+  "phone",
+  "department",
+  "location",
+  "position",
+  "status",
+  "role",
+  "exemptFromPerCapita",
+  "exemptionReason",
+  "exemptionApprovedBy",
+]);
+
+export type OrganizationMemberImportRecord = Record<string, unknown>;
+
+/**
+ * Applies a member import inside one organization transaction.
+ * The session grant is the tenant. Record organization ids, roles,
+ * exemptions, and foreign membership ids cannot widen that grant.
+ * Validation covers the whole batch before any write. `validateOnly`
+ * returns after that check. An audit failure rejects the transaction,
+ * so none of the batch remains.
+ */
+export async function importOrganizationMembers(
+  organizationId: string,
+  records: readonly OrganizationMemberImportRecord[],
+  options: { updateExisting: boolean; validateOnly?: boolean },
+): Promise<{ imported: number; errors: string[] }> {
+  const grant = await requireGrant(organizationId, "administer");
+  if (records.length === 0) return { imported: 0, errors: [] };
+  try {
+    return await withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+      const errors: string[] = [];
+      const roster = await lockAdministratorRoster(tx, grant.organizationId);
+      const projections: AdministratorProjection[] = [];
+      let needsRoleGrant = false;
+      let operation: "create" | "update" | "status_change" | "role_change" = "update";
+      const plans: Array<
+        | { kind: "insert"; values: NewMember; role: string }
+        | { kind: "update"; id: string; patch: Partial<NewMember> }
+      > = [];
+
+      for (let index = 0; index < records.length; index += 1) {
+        const record = records[index] ?? {};
+        const rowLabel = `Row ${index + 1}`;
+        try {
+          for (const key of Object.keys(record)) {
+            if (!MEMBER_IMPORT_KEYS.has(key)) throw new MemberBoundaryError("Forbidden");
+          }
+          rejectClientFinancialExemption(record, record.id ? "update" : "create");
+          if (
+            record.organizationId !== undefined &&
+            record.organizationId !== grant.organizationId
+          ) {
+            throw new MemberBoundaryError("Forbidden");
+          }
+          if (typeof record.email !== "string" || record.email.trim() === "") {
+            throw new MemberBoundaryError("Forbidden");
+          }
+          const role = record.role === undefined ? "member" : String(record.role);
+          assertTenantAssignableRole(role);
+
+          if (record.id === undefined) {
+            if (typeof record.userId !== "string" || record.userId.trim() === "") {
+              throw new MemberBoundaryError("Forbidden");
+            }
+            if (record.status !== undefined && record.status !== "active") {
+              throw new MemberBoundaryError("Forbidden");
+            }
+            if (role !== "member") needsRoleGrant = true;
+            const existingUser = await tx.query.organizationMembers.findFirst({
+              where: and(
+                eq(organizationMembers.userId, record.userId),
+                activeInOrganization(grant.organizationId),
+              ),
+            });
+            if (existingUser) throw new MemberBoundaryError("Member already exists");
+            plans.push({
+              kind: "insert",
+              role,
+              values: membershipInsert({
+                userId: record.userId,
+                name: typeof record.name === "string" ? record.name : "",
+                email: record.email,
+                phone: typeof record.phone === "string" ? record.phone : undefined,
+                department: typeof record.department === "string" ? record.department : undefined,
+                location: typeof record.location === "string" ? record.location : undefined,
+                position: typeof record.position === "string" ? record.position : undefined,
+                organizationId: grant.organizationId,
+                role,
+                status: "active",
+              }, grant.organizationId, role),
+            });
+            if (role === "admin") {
+              projections.push({ id: `import-${index}`, role: "admin", status: "active" });
+            }
+            continue;
+          }
+
+          if (!options.updateExisting) throw new MemberBoundaryError("Forbidden");
+          if (typeof record.id !== "string" || record.id.trim() === "") {
+            throw new MemberBoundaryError("Forbidden");
+          }
+          if (record.userId !== undefined) throw new MemberBoundaryError("Forbidden");
+          const current = await tx.query.organizationMembers.findFirst({
+            where: activeInOrganization(grant.organizationId, record.id),
+          });
+          if (!current) throw new MemberBoundaryError("Forbidden");
+          const patch: Partial<NewMember> = {};
+          for (const field of ["name", "email", "phone", "department", "location", "position"] as const) {
+            if (record[field] !== undefined) patch[field] = String(record[field]);
+          }
+          if (record.role !== undefined && role !== current.role) {
+            needsRoleGrant = true;
+            patch.role = role as MemberRoleValue;
+            projections.push({ id: current.id, role });
+            operation = "role_change";
+          }
+          if (record.status !== undefined && String(record.status) !== String(current.status)) {
+            assertMemberStatusTransition(String(current.status), String(record.status));
+            patch.status = String(record.status) as Member["status"];
+            projections.push({ id: current.id, status: String(record.status) });
+            if (operation !== "role_change") operation = "status_change";
+          }
+          plans.push({ kind: "update", id: current.id, patch });
+        } catch (error) {
+          errors.push(`${rowLabel}: ${error instanceof MemberBoundaryError ? error.message : "Forbidden"}`);
+        }
+      }
+
+      if (errors.length > 0) return { imported: 0, errors };
+      try {
+        if (needsRoleGrant) await requireGrant(grant.organizationId, "assign_role");
+        await requireAdministratorDeactivationAuthority(grant.organizationId, roster, projections);
+        assertActiveAdministratorsRemain(roster, projections);
+      } catch (error) {
+        if (error instanceof MemberBoundaryError) return { imported: 0, errors: [error.message] };
+        throw error;
+      }
+      if (options.validateOnly) return { imported: 0, errors: [] };
+      if (plans.every((plan) => plan.kind === "insert") && operation === "update") operation = "create";
+
+      for (const plan of plans) {
+        if (plan.kind === "insert") {
+          const [created] = await tx.insert(organizationMembers).values(plan.values).returning();
+          if (!created) throw new MemberBoundaryError("Failed to create member");
+          continue;
+        }
+        const [updated] = await tx
+          .update(organizationMembers)
+          .set({ ...plan.patch, updatedAt: new Date() })
+          .where(activeInOrganization(grant.organizationId, plan.id))
+          .returning();
+        if (!updated) throw new MemberBoundaryError("Forbidden");
+      }
+
+      await persistDurableMemberAudit(tx, {
+        actorUserId: grant.userId,
+        organizationId: grant.organizationId,
+        operation,
+        targetId: null,
+        count: plans.length,
+      });
+      return { imported: plans.length, errors: [] };
+    });
+  } catch (error) {
+    rethrow(error, "Failed to import members");
+  }
+}
+
 export async function getMembersByDepartment(organizationId: string, department: string): Promise<Member[]> {
   try {
     const grant = await requireGrant(organizationId, "administer");
