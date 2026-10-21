@@ -88,4 +88,17 @@ describe('GET /api/version (operational package)', () => {
     expect(body.requestHost).toBeNull()
     expect(body.demoProfile).toBeNull()
   })
+
+  it('reports the image digests configured on the candidate revision', async () => {
+    process.env.UE_FRONTEND_IMAGE_DIGEST = 'sha256:frontend'
+    process.env.UE_BACKEND_IMAGE_DIGEST = 'sha256:backend'
+    const { GET } = await import('./route')
+    const response = await GET(requestWithHost({ host: 'staging-app.unioneyes.app' }))
+    const body = await response.json()
+
+    expect(body.frontendImageDigest).toBe('sha256:frontend')
+    expect(body.backendImageDigest).toBe('sha256:backend')
+    delete process.env.UE_FRONTEND_IMAGE_DIGEST
+    delete process.env.UE_BACKEND_IMAGE_DIGEST
+  })
 })

@@ -1,68 +1,83 @@
 #!/usr/bin/env node
 /**
  * Prints a deployment-safety decision as JSON and exits non-zero when the
- * requested phase is not allowed. It does not call Azure.
- *
- *   node tooling/scripts/union-eyes-deployment-safety-cli.mjs --phase migrate --inventory inventory.json ...
+ * requested phase is not allowed. It reads evidence files only. Flags that
+ * assert an image label, a schema result, or a role attribute are rejected.
  */
 import fs from 'node:fs'
-import { evaluateDeploymentSafety, phaseAllowed } from './lib/union-eyes-deployment-safety.mjs'
+import { evaluateDeploymentSafety, inspectMigration0019, phaseAllowed } from './lib/union-eyes-deployment-safety.mjs'
+
+const ASSERTED_FLAGS = [
+  '--frontend-label',
+  '--backend-label',
+  '--frontend-tag',
+  '--backend-tag',
+  '--schema-preflight',
+  '--django-preflight',
+  '--bypassrls',
+  '--superuser',
+  '--authority-role',
+  '--probe-header',
+]
 
 function arg(name) {
   const index = process.argv.indexOf(name)
   return index >= 0 ? process.argv[index + 1] : undefined
 }
 
-const phase = arg('--phase')
-const inventoryPath = arg('--inventory')
-if (!phase || !inventoryPath) {
-  process.stderr.write('usage: union-eyes-deployment-safety-cli.mjs --phase <quiesce|migrate|deploy|probe|promote> --inventory <file>\n')
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'))
+}
+
+const asserted = ASSERTED_FLAGS.filter((flag) => process.argv.includes(flag))
+if (asserted.length > 0) {
+  process.stderr.write(`ASSERTED_GATE_REJECTED ${asserted.join(' ')}\n`)
   process.exit(2)
 }
 
-const rehearsalPath = arg('--rehearsal')
+const phase = arg('--phase')
+if (!phase) {
+  process.stderr.write('usage: union-eyes-deployment-safety-cli.mjs --phase <premigrate|icra|scoped-0019|migrate|candidate|label|label-confirm|probe> --manifest <file>\n')
+  process.exit(2)
+}
+
+const manifestPath = arg('--manifest')
+const approvalPath = arg('--approval')
+const trustPath = arg('--approval-trust')
+const sourceRoot = arg('--source-root')
+if (!manifestPath || !approvalPath || !trustPath || !sourceRoot) {
+  process.stderr.write('release manifest, approval, trust anchor, and source root are required\n')
+  process.exit(2)
+}
+
+const inspected = inspectMigration0019(sourceRoot)
 const input = {
   phase,
-  releaseSha: arg('--release-sha') ?? '',
-  images: {
-    frontend: {
-      digest: arg('--frontend-digest') ?? '',
-      tag: arg('--frontend-tag') ?? '',
-      label: arg('--frontend-label') ?? '',
-    },
-    backend: {
-      digest: arg('--backend-digest') ?? '',
-      tag: arg('--backend-tag') ?? '',
-      label: arg('--backend-label') ?? '',
-    },
+  now: arg('--now'),
+  manifest: readJson(manifestPath),
+  acr: {
+    frontend: arg('--acr-frontend') ? readJson(arg('--acr-frontend')) : undefined,
+    backend: arg('--acr-backend') ? readJson(arg('--acr-backend')) : undefined,
   },
-  inventory: JSON.parse(fs.readFileSync(inventoryPath, 'utf8')),
-  databaseAuthority: {
-    role: arg('--authority-role') ?? '',
-    bypassrls: arg('--bypassrls') === 'true',
-    superuser: arg('--superuser') === 'true',
-  },
-  schemaPreflight: { ok: arg('--schema-preflight') === 'pass' },
-  djangoPreflight: { ok: arg('--django-preflight') === 'pass' },
-  rehearsal: rehearsalPath ? JSON.parse(fs.readFileSync(rehearsalPath, 'utf8')) : {},
+  ingress: arg('--ingress') ? readJson(arg('--ingress')) : undefined,
+  revisions: arg('--revisions') ? readJson(arg('--revisions')) : undefined,
+  freshIngress: arg('--fresh-ingress') ? readJson(arg('--fresh-ingress')) : undefined,
+  freshRevisions: arg('--fresh-revisions') ? readJson(arg('--fresh-revisions')) : undefined,
+  proposedIngress: arg('--proposed-ingress') ? readJson(arg('--proposed-ingress')) : undefined,
+  roleCatalog: arg('--role-catalog') ? readJson(arg('--role-catalog')) : undefined,
+  approval: readJson(approvalPath),
+  approvalTrustPem: fs.readFileSync(trustPath, 'utf8'),
+  ledger: arg('--ledger') ? readJson(arg('--ledger')) : undefined,
+  migration0019: inspected,
+  djangoPlan: arg('--django-plan') ? readJson(arg('--django-plan')) : undefined,
+  rlsPreflight: arg('--rls-preflight') ? readJson(arg('--rls-preflight')) : undefined,
   candidateRevision: arg('--candidate-revision'),
+  weightBaseline: arg('--weight-baseline') ? readJson(arg('--weight-baseline')) : undefined,
+  probe: arg('--probe') ? readJson(arg('--probe')) : undefined,
+  requireLedgerRecord: arg('--require-0019-recorded') === 'true',
   migrationCommitted: arg('--migration-committed') === 'true',
   requestedRecovery: arg('--requested-recovery'),
-  tenantIsolation: arg('--tenant-principal')
-    ? {
-        ok: arg('--tenant-ok') === 'true',
-        principal: arg('--tenant-principal'),
-        bypassrls: arg('--tenant-bypassrls') === 'true',
-      }
-    : undefined,
-  healthProbe: arg('--health') ? { ok: arg('--health') === 'pass' } : undefined,
-  probe: arg('--probe-target')
-    ? {
-        target: arg('--probe-target'),
-        header: arg('--probe-header'),
-        revisionName: arg('--probe-revision'),
-      }
-    : undefined,
+  consumerAccounting: arg('--consumer-accounting') ? readJson(arg('--consumer-accounting')) : undefined,
 }
 
 const decision = evaluateDeploymentSafety(input)
