@@ -27,17 +27,9 @@ const BRANCH_PATTERNS: RegExp[] = [
   /^copilot\/.+/,
 ]
 
-// Branch names admitted by exact match only. This is not a pattern: it does not open
-// the cursor/ family, and a new name needs its own reviewed entry here.
-//
-// cursor/ue-convergence-p0-cfc5 was the head of merged pull request #971 and is no longer
-// admitted. The two names below are the open repository-settlement pull requests.
-// Remove each exact name once that pull request is merged or closed. This set does not
-// open the cursor/ family.
-const GRANDFATHERED_BRANCHES: ReadonlySet<string> = new Set([
-  'cursor/ue-e2e-credential-boundary-cfc5',
-  'cursor/ue-deps-combined-cfc5',
-])
+// No branch is admitted by exact name. The cursor/ family is not approved, and a replacement
+// branch for an open pull request uses an approved family such as ci/ or chore/.
+const GRANDFATHERED_BRANCHES: ReadonlySet<string> = new Set()
 
 const TAG_PATTERN = /^v\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)\.\d+)?$/
 
@@ -59,7 +51,7 @@ function validateBranch(ref: string): void {
   const matched = GRANDFATHERED_BRANCHES.has(ref) || BRANCH_PATTERNS.some((pattern) => pattern.test(ref))
   if (!matched) {
     fail(
-      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, integration/*, ops/*, release/X.Y.Z, release/prod-readiness-YYYY-MM-DD, main, develop, dependabot/*, renovate/*, copilot/*. Grandfathered exact names: cursor/ue-e2e-credential-boundary-cfc5, cursor/ue-deps-combined-cfc5`,
+      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, integration/*, ops/*, release/X.Y.Z, release/prod-readiness-YYYY-MM-DD, main, develop, dependabot/*, renovate/*, copilot/*.`,
     )
   }
   ok(`Branch '${ref}' is policy-compliant`)

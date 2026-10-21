@@ -12,6 +12,17 @@ import { scopedBuildPlan, selectBuildScope } from '../ci/run-scoped-build-shard.
 const ROOT = join(__dirname, '..', '..')
 const read = (file: string) => readFileSync(join(ROOT, file), 'utf8')
 
+// The e2e matrix is a fromJSON expression whose two string literals are the pull_request
+// and push cells. A job-level if cannot read the matrix context, so the workflow selects
+// cells here instead.
+function resolveE2eMatrix(job: { strategy: { matrix: { include: string } } }, event: 'pull_request' | 'push') {
+  const literals = [...job.strategy.matrix.include.matchAll(/'(\[[^']*\])'/g)].map((match) =>
+    JSON.parse(match[1]),
+  )
+  expect(literals).toHaveLength(2)
+  return literals[event === 'pull_request' ? 0 : 1]
+}
+
 describe('CI feedback caching', () => {
   const turbo = JSON.parse(read('turbo.json'))
   const setup = parse(read('.github/actions/setup-monorepo/action.yml'))
@@ -179,7 +190,7 @@ describe('owner-declared routine build scope', () => {
     const e2e = parse(read('.github/workflows/e2e.yml'))
     const e2eApps = [
       ...new Set<string>(
-        e2e.jobs.e2e.strategy.matrix.include.map((entry: { app: string }) => entry.app),
+        resolveE2eMatrix(e2e.jobs.e2e, 'pull_request').map((entry: { app: string }) => entry.app),
       ),
     ]
     expect(e2eApps).toEqual(['web', 'console', 'union-eyes', 'control-plane'])
@@ -241,7 +252,7 @@ describe('Union Eyes E2E shard authority', () => {
   }))
 
   it('runs all four shards in separate runner-local databases with one browser worker', () => {
-    const entries = worker.strategy.matrix.include.filter(
+    const entries = resolveE2eMatrix(worker, 'pull_request').filter(
       (entry: { app: string }) => entry.app === 'union-eyes',
     )
     expect(entries.map((entry: { shard: number }) => entry.shard)).toEqual([1, 2, 3, 4])
@@ -264,7 +275,12 @@ describe('Union Eyes E2E shard authority', () => {
     expect(gate.needs).toEqual(['e2e', 'e2e-canonical'])
     expect(workflow.permissions).toEqual({ contents: 'read' })
     expect(worker.environment).toBeUndefined()
-    expect(worker.if).toBe("matrix.app != 'union-eyes' || github.event_name == 'pull_request'")
+    expect(worker.if).toBeUndefined()
+    expect(resolveE2eMatrix(worker, 'push').map((entry: { app: string }) => entry.app)).toEqual([
+      'web',
+      'console',
+      'control-plane',
+    ])
     expect(JSON.stringify(worker)).not.toContain('secrets.')
     const canonical = workflow.jobs['e2e-canonical']
     expect(canonical.environment).toBe('staging')
