@@ -45,7 +45,10 @@ export function CheckInConsole({ eventId }: { eventId: string }) {
   }, [eventId])
 
   useEffect(() => {
-    void loadStats()
+    const handle = window.setTimeout(() => {
+      void loadStats()
+    }, 0)
+    return () => window.clearTimeout(handle)
   }, [loadStats])
 
   async function submitScan(e: React.FormEvent) {
