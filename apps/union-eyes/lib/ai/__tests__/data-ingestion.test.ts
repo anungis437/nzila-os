@@ -151,3 +151,55 @@ describe('FileType', () => {
     },
   );
 });
+
+describe('PDF ingestion (pdfjs-dist legacy build)', () => {
+  // Minimal single-page PDF with one text run, built so the xref offsets are exact.
+  function buildPdf(text: string): Buffer {
+    const stream = `BT /F1 12 Tf 10 50 Td (${text}) Tj ET`;
+    const objects = [
+      '<< /Type /Catalog /Pages 2 0 R >>',
+      '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+      '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 100] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+      `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    ];
+    let pdf = '%PDF-1.4\n';
+    const offsets: number[] = [];
+    objects.forEach((body, index) => {
+      offsets.push(pdf.length);
+      pdf += `${index + 1} 0 obj\n${body}\nendobj\n`;
+    });
+    const xref = pdf.length;
+    pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+    pdf += offsets.map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`).join('');
+    pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+    return Buffer.from(pdf);
+  }
+
+  it('extracts text from a real PDF supplied as a Node Buffer', async () => {
+    const doc = await new DataIngestionService().ingest(
+      buildPdf('Hello CBA clause'),
+      'application/pdf',
+      'agreement.pdf',
+      { source: 'test' },
+    );
+    expect(doc.content).toContain('Hello CBA clause');
+  });
+
+  it('does not detach the caller buffer after parsing', async () => {
+    const pdf = buildPdf('Stable buffer');
+    const length = pdf.byteLength;
+    await new DataIngestionService().ingest(pdf, 'application/pdf', 'a.pdf', { source: 'test' });
+    expect(pdf.byteLength).toBe(length);
+  });
+
+  it('reports a parse failure for non-PDF bytes instead of throwing', async () => {
+    const doc = await new DataIngestionService().ingest(
+      Buffer.from('this is not a pdf'),
+      'application/pdf',
+      'bad.pdf',
+      { source: 'test' },
+    );
+    expect(doc.content).toBe('');
+  });
+});

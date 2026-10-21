@@ -204,7 +204,13 @@ class PDFParser implements FileParser {
     try {
       // Load the PDF document
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const loadingTask = (pdfjs as any).getDocument({ data: buffer });
+      // pdfjs-dist 6 rejects Buffer. Copy into a plain Uint8Array: pdfjs may transfer the
+      // underlying ArrayBuffer, and a Buffer's backing store can be a shared pool.
+      // isEvalSupported:false keeps font programs from being compiled with eval/Function.
+      const loadingTask = (pdfjs as any).getDocument({
+        data: new Uint8Array(buffer),
+        isEvalSupported: false,
+      });
       const pdf = await loadingTask.promise;
 
       const textContent: string[] = [];
