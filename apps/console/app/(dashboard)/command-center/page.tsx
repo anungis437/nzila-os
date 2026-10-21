@@ -77,6 +77,15 @@ type ProductHealth = {
   openBugs: number
 }
 
+function countRenewalsWithinDays(clients: ClientRow[], daysAhead: number): number {
+  const nowMs = Date.now()
+  return clients.filter((client) => {
+    if (!client.renewalDate) return false
+    const days = (new Date(client.renewalDate).getTime() - nowMs) / 86_400_000
+    return days >= 0 && days <= daysAhead
+  }).length
+}
+
 type PriorityRow = {
   id: string
   title: string
@@ -298,12 +307,7 @@ export default async function CommandCenterPage() {
   const liveClients = clientList.filter(c => c.onboardingStage === 'live').length
   const atRiskClients = clientList.filter(c => c.health === 'at_risk' || c.health === 'churned').length
   const totalContractValue = clientList.reduce((sum, c) => sum + parseInt(c.contractValue ?? '0', 10), 0)
-  const nowMs = Date.now()
-  const renewalNext90 = clientList.filter(c => {
-    if (!c.renewalDate) return false
-    const days = (new Date(c.renewalDate).getTime() - nowMs) / 86_400_000
-    return days >= 0 && days <= 90
-  }).length
+  const renewalNext90 = countRenewalsWithinDays(clientList, 90)
   const criticalAlerts = alertList.filter(a => a.severity === 'critical').length
   const totalOpenTickets = clientList.reduce((sum, c) => sum + c.openTickets, 0)
 
