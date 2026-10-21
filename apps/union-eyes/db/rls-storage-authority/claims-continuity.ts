@@ -93,10 +93,10 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
   {
     table: "deadline_reassignment_convergence",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "RECLASSIFIED 2026-10-21 from the system-only D1 note. The assign route (app/api/grievances/[id]/assign/route.ts) inserts the row inside withRLSContext as union_eyes_runtime, in the same transaction as grievances.union_rep_id. The post-commit retry and the reminder cron (app/api/cron/deadline-reminders/route.ts) read and update pending rows as union_eyes_system. Runtime therefore holds SELECT, INSERT, UPDATE under the 0010 direct-org policies from scoped 0019. System holds the same three privileges for the cross-organization sweep. Root migrations/0049 remains a fail-open PUBLIC policy and is not this table's authority. DELETE is not granted. This entry is source authority, not a staging isolation pass.",
+    reason: "RECLASSIFIED 2026-10-21 from the system-only D1 note. requestAssignmentConvergence() inserts with RETURNING id inside the assign route's withRLSContext transaction, so union_eyes_runtime needs SELECT and INSERT only. processAssignmentConvergence() and sweepPendingAssignmentConvergence() select and update pending rows under withSystemContext (assign-route post-commit retry and app/api/cron/deadline-reminders/route.ts), so union_eyes_system needs SELECT and UPDATE only. No production path updates as runtime or inserts as system. The 0010 policies from scoped 0019 still cover the unused commands; the grants do not. Root migrations/0049 remains a fail-open PUBLIC policy and is not this table's authority. DELETE is not granted. This entry is source authority, not a staging isolation pass.",
     supportingCapability: ["lib/deadline-engine/assignment-sync.ts","lib/deadline-engine/reminder-worker.ts","app/api/grievances/[id]/assign/route.ts","app/api/cron/deadline-reminders/route.ts","db/migrations-cache/0019_deadline_reassignment_convergence.sql"],
-    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
-    requiredSystemPrivileges: ["SELECT","INSERT","UPDATE"],
+    requiredRuntimePrivileges: ["SELECT","INSERT"],
+    requiredSystemPrivileges: ["SELECT","UPDATE"],
     invocationAuthority: "MIXED",
     dbExecutionPrincipal: "MIXED",
     reviewPriority: "NORMAL",
