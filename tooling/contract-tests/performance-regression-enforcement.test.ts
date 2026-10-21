@@ -37,6 +37,21 @@ describe('Performance regression enforcement', () => {
     expect(JSON.stringify(canonical)).toContain('secrets.PERF_AUTH_TOKEN')
   })
 
+  it('classifies the pull request stub as a harness check and measures the real app credential-free', () => {
+    const source = readContent(CI_WORKFLOW)
+    expect(source).toContain('name: Performance Harness Check (synthetic stub)')
+    expect(source).not.toMatch(/name: Performance Regression Gate$/m)
+
+    const e2e = readContent(join(ROOT, '.github', 'workflows', 'e2e.yml'))
+    const workflow = parse(e2e) as { jobs: Record<string, { steps: Array<{ name?: string; if?: string; run?: string; env?: Record<string, string> }> }> }
+    const smoke = workflow.jobs.e2e.steps.find((step) => step.name?.startsWith('Application performance smoke'))
+    expect(smoke?.run).toContain('tests/load/smoke.js')
+    expect(smoke?.run).toContain('BASE_URL="http://localhost:${{ matrix.port }}"')
+    expect(smoke?.run).not.toContain('AUTH_TOKEN')
+    expect(smoke?.env).toBeUndefined()
+    expect(JSON.stringify(workflow.jobs.e2e)).not.toContain('secrets.')
+  })
+
   it('performance gate publishes artifacts for regression analysis', () => {
     const source = readContent(CI_WORKFLOW)
 

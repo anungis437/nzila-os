@@ -35,43 +35,16 @@ jobs:
     # Pull-request code is untrusted. This job never selects the staging
     # environment, never requests id-token, and never reads Azure or performance
     # secrets. Union Eyes on a pull request uses the credential-free QA baseline.
-    # Push to main skips these Union Eyes cells; e2e-canonical qualifies the snapshot.
-    if: matrix.app != 'union-eyes' || github.event_name == 'pull_request'
+    # Push to main drops the Union Eyes cells from the matrix; e2e-canonical
+    # qualifies the snapshot. The matrix is expression-built because a job-level
+    # `if` cannot read the matrix context.
     timeout-minutes: 60  # union-eyes: platform DDL + synthetic seed + full Playwright; others ≤5 min
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - app: web
-            port: 3000
-            shard: 1
-            shards: 1
-          - app: console
-            port: 3001
-            shard: 1
-            shards: 1
-          - app: union-eyes
-            port: 3002
-            shard: 1
-            shards: 4
-          - app: control-plane
-            port: 3010
-            shard: 1
-            shards: 1
-          # Each runner restores its own localhost database and uses one browser
-          # worker. Keep file-level ordering and all existing test assertions.
-          - app: union-eyes
-            port: 3002
-            shard: 2
-            shards: 4
-          - app: union-eyes
-            port: 3002
-            shard: 3
-            shards: 4
-          - app: union-eyes
-            port: 3002
-            shard: 4
-            shards: 4
+        # Each Union Eyes runner restores its own localhost database and uses one
+        # browser worker. Keep file-level ordering and all existing test assertions.
+        include: ${{ fromJSON(github.event_name == 'pull_request' && '[{"app":"web","port":3000,"shard":1,"shards":1},{"app":"console","port":3001,"shard":1,"shards":1},{"app":"union-eyes","port":3002,"shard":1,"shards":4},{"app":"control-plane","port":3010,"shard":1,"shards":1},{"app":"union-eyes","port":3002,"shard":2,"shards":4},{"app":"union-eyes","port":3002,"shard":3,"shards":4},{"app":"union-eyes","port":3002,"shard":4,"shards":4}]' || '[{"app":"web","port":3000,"shard":1,"shards":1},{"app":"console","port":3001,"shard":1,"shards":1},{"app":"control-plane","port":3010,"shard":1,"shards":1}]') }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -230,6 +203,41 @@ jobs:
           PARTNERS_URL: http://localhost:${{ matrix.port }}
           CFO_URL: http://localhost:${{ matrix.port }}
           PLAYWRIGHT_BASE_URL: http://localhost:${{ matrix.port }}
+
+      # Application performance on a pull request: the real Union Eyes production
+      # build against the synthetic database, public routes only. No token and no
+      # staging target are involved. It runs after Playwright so it cannot skew the
+      # shard, and only on shard 1 so the load is applied once per pull request.
+      - name: Install k6 (application performance smoke)
+        if: matrix.app == 'union-eyes' && matrix.shard == 1
+        run: |
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://dl.k6.io/key.gpg \
+            | sudo gpg --dearmor -o /etc/apt/keyrings/k6-archive-keyring.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update && sudo apt-get install -y k6
+
+      - name: Application performance smoke (synthetic Union Eyes, credential-free)
+        if: matrix.app == 'union-eyes' && matrix.shard == 1
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/ue-k6"
+          k6 run \
+            --env PROFILE=ci \
+            --env BASE_URL="http://localhost:${{ matrix.port }}" \
+            --summary-export="${RUNNER_TEMP}/ue-k6/k6-summary.json" \
+            tests/load/smoke.js
+
+      - name: Upload application performance summary
+        if: always() && matrix.app == 'union-eyes' && matrix.shard == 1
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-synthetic-k6-summary-${{ matrix.shard }}
+          overwrite: true
+          path: ${{ runner.temp }}/ue-k6/
+          retention-days: 30
+          if-no-files-found: ignore
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
