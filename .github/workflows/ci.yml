@@ -865,12 +865,17 @@ jobs:
             reports/strategy/quarterly-scorecard.json
           retention-days: 90
 
-  # ─── Performance Regression Gate ──────────────────────────────────────────
+  # ─── Performance harness check (pull request) ─────────────────────────────
+  # Validates that the k6 harness, thresholds and artifact path work, using a stub
+  # HTTP server that always returns 200. It measures nothing about the application and
+  # is not regression coverage. Application performance on a pull request is measured
+  # by the credential-free Union Eyes smoke in e2e.yml; the staging-backed gate runs
+  # only on main (perf-regression-canonical).
   perf-regression:
     needs: [classify, build]
     if: needs.classify.outputs.product_code == 'APPLICABLE' && (github.event_name == 'pull_request' && needs.build.result == 'success')
     runs-on: ubuntu-latest
-    name: Performance Regression Gate
+    name: Performance Harness Check (synthetic stub)
     steps:
       - uses: actions/checkout@v5
 
@@ -894,7 +899,7 @@ jobs:
           NODE
           timeout 10 bash -c 'until curl -sf http://127.0.0.1:3999/api/health >/dev/null; do sleep 0.2; done'
 
-      - name: Run k6 fail-closed performance gate
+      - name: Run k6 harness check against stub
         env:
           PERF_AUTH_TOKEN: ''
         run: |
