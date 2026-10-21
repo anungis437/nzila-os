@@ -9398,6 +9398,7 @@
     "logins7dTitle": "Connexions (7j)",
     "releasesScheduled": "{count} version{count, plural, one {} other {s}} prévue{count, plural, one {} other {s}}",
     "serviceHealthTitle": "Santé du service",
+    "serviceHealthUnavailable": "L'état des services n'a pas pu être chargé. Réessayez plus tard; si le problème persiste, contactez le soutien de la plateforme.",
     "noActiveIncidents": "Aucun incident actif",
     "statusInvestigating": "Enquête",
     "statusMonitoring": "Surveillance",

@@ -5,7 +5,8 @@
  * @role platform_lead, coo, cto
  * @dashboard_path /dashboard/operations
  *
- * The physical table is public.platform_services (service_name, status, updated_at).
+ * The physical table is public.platform_services (service_name, status, updated_at),
+ * read on the runtime identity (see lib/operations/platform-services.ts).
  * Incident, SLA, release, login, and capacity tables are not in the catalog.
  * This page does not invent those readings.
  */
@@ -15,53 +16,10 @@ export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { db } from '@/db/db';
-import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { getLocale, getTranslations } from 'next-intl/server';
-
-interface PlatformService {
-  serviceName: string;
-  status: string;
-  updatedAt: string | null;
-}
-
-interface ServiceOverview {
-  services: PlatformService[];
-  totalServices: number;
-  healthyServices: number;
-  degradedServices: number;
-  downServices: number;
-  otherServices: number;
-}
-
-const RECORDED_STATUSES = new Set(['healthy', 'degraded', 'down']);
-
-async function loadPlatformServices(): Promise<ServiceOverview> {
-  const rows = Array.from(
-    await db.execute(sql`
-      SELECT service_name, status, updated_at
-      FROM platform_services
-      ORDER BY
-        CASE status WHEN 'down' THEN 0 WHEN 'degraded' THEN 1 ELSE 2 END,
-        service_name
-    `),
-  ) as Array<Record<string, unknown>>;
-  const services = rows.map((row) => ({
-    serviceName: String(row.service_name),
-    status: String(row.status),
-    updatedAt: row.updated_at == null ? null : String(row.updated_at),
-  }));
-  return {
-    services,
-    totalServices: services.length,
-    healthyServices: services.filter((service) => service.status === 'healthy').length,
-    degradedServices: services.filter((service) => service.status === 'degraded').length,
-    downServices: services.filter((service) => service.status === 'down').length,
-    otherServices: services.filter((service) => !RECORDED_STATUSES.has(service.status)).length,
-  };
-}
+import { logger } from '@/lib/logger';
+import { loadPlatformServices, type ServiceOverview } from '@/lib/operations/platform-services';
 
 function serviceStatusIcon(status: string) {
   if (status === 'healthy') return '🟢';
@@ -93,11 +51,14 @@ export default async function OperationsDashboard(props: {
   };
 
   let overview: ServiceOverview | null = null;
-  let readError: string | null = null;
+  let readFailed = false;
   try {
-    overview = await withSystemContext(() => loadPlatformServices());
+    overview = await loadPlatformServices();
   } catch (error) {
-    readError = error instanceof Error ? error.message : 'platform_services read failed';
+    // Diagnostics stay in the server log. The browser gets a generic message and no data,
+    // so a failed read cannot be mistaken for an empty or healthy service list.
+    readFailed = true;
+    logger.error('operations dashboard: platform_services read failed', { error });
   }
 
   const allRecordedHealthy = Boolean(
@@ -125,13 +86,13 @@ export default async function OperationsDashboard(props: {
         ))}
       </div>
 
-      {readError && (
+      {readFailed && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">{t('serviceHealthTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-red-700">{readError}</p>
+            <p role="alert" className="text-sm text-red-700">{t('serviceHealthUnavailable')}</p>
           </CardContent>
         </Card>
       )}

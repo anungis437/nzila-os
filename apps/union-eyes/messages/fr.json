@@ -9312,6 +9312,7 @@
     "logins7dTitle": "Connexions (7j)",
     "releasesScheduled": "{count} version{count, plural, one {} other {s}} programmée(s)",
     "serviceHealthTitle": "Santé des services",
+    "serviceHealthUnavailable": "L'état des services n'a pas pu être chargé. Réessayez plus tard; si le problème persiste, contactez le soutien de la plateforme.",
     "noActiveIncidents": "Aucun incident actif",
     "statusInvestigating": "En cours d'investigation",
     "statusMonitoring": "Surveillance",

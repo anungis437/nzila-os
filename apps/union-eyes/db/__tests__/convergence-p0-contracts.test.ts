@@ -32,6 +32,38 @@ describe('convergence P0 contracts', () => {
     expect(`${rejected.stdout}${rejected.stderr}`).toMatch(/does not match policy/)
   })
 
+  it('admits the legacy cursor branch by exact name only', () => {
+    const rejectedNames = [
+      'cursor/another-branch-cfc5', // same suffix, different name: the old pattern accepted this
+      'cursor/ue-convergence-p0-cfc5-2',
+      'cursor/ue-convergence-p0-cfc5/extra',
+      'cursor/ue-convergence-p0',
+      'cursor/ue-convergence-p1-cfc5',
+      'cursor/UE-CONVERGENCE-P0-CFC5',
+      'xcursor/ue-convergence-p0-cfc5',
+      'cursor/ue-convergence-p0-cfc5 ',
+      'cursor/',
+      'cursor/x-cfc5',
+    ]
+    for (const ref of rejectedNames) {
+      const result = policy(ref)
+      expect(result.status, ref).toBe(1)
+      expect(`${result.stdout}${result.stderr}`, ref).toMatch(/does not match policy/)
+    }
+  })
+
+  it('keeps the approved branch families accepted', () => {
+    for (const ref of [
+      'main', 'develop', 'feat/x', 'fix/x', 'chore/x', 'docs/x', 'refactor/x', 'perf/x', 'test/x', 'ci/x',
+      'hotfix/x', 'integration/x', 'ops/x', 'release/1.2.3', 'release/prod-readiness-2026-10-20',
+      'dependabot/npm_and_yarn/x', 'renovate/x', 'copilot/x',
+    ]) {
+      expect(policy(ref).status, ref).toBe(0)
+    }
+    expect(policy('release/1.2').status).toBe(1)
+    expect(policy('feature/x').status).toBe(1)
+  })
+
   it('keeps the QA baseline membership column as uuid', () => {
     const baseline = fs.readFileSync(path.join(REPO_ROOT, 'tooling/sql/union-eyes-qa-baseline.sql'), 'utf8')
     expect(baseline).toContain('organization_id uuid NOT NULL')

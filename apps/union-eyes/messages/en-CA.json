@@ -9329,6 +9329,7 @@
     "logins7dTitle": "Logins (7d)",
     "releasesScheduled": "{count} release{count, plural, one {} other {s}} scheduled",
     "serviceHealthTitle": "Service Health",
+    "serviceHealthUnavailable": "Service health could not be loaded. Try again later; if the problem continues, contact platform support.",
     "noActiveIncidents": "No active incidents",
     "statusInvestigating": "Investigating",
     "statusMonitoring": "Monitoring",
