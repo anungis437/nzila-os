@@ -119,10 +119,17 @@ describe("Release Gate E.3 deployment DAG contract (static, no dispatch)", () =>
 
   it("is not a dependency of, and does not depend on, any build/deploy/auto-promotion job — ordinary deploys cannot invoke it", () => {
     const alwaysOnJobs = ["plan", "pre-deploy-gates", "build-push", "apply-django-migrations", "deploy", "apply-icra-capability-migration"];
+    const buildDeployJobs = ["build-push", "apply-django-migrations", "deploy", "apply-icra-capability-migration"];
     const job = doc.jobs["apply-congress-memberships-multi-party-rls-fix"];
     const needs = job.needs ? (Array.isArray(job.needs) ? job.needs : [job.needs]) : [];
-    // Only ever needs the topology-resolution job, never a build/deploy job.
-    expect(needs).toEqual(["plan"]);
+    // A database mutation waits on topology resolution and the read-only
+    // premigration gate. It does not directly need a build, deploy, or
+    // always-on migration job, and no always-on job needs it, so a push
+    // or auto-promote still cannot start it.
+    expect(needs).toEqual(["plan", "release-premutation-gate"]);
+    for (const forbidden of buildDeployJobs) {
+      expect(needs).not.toContain(forbidden);
+    }
 
     for (const [jobName, otherJob] of Object.entries<any>(doc.jobs)) {
       if (jobName === "apply-congress-memberships-multi-party-rls-fix") continue;
