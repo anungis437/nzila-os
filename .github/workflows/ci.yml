@@ -883,6 +883,59 @@ jobs:
             | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update && sudo apt-get install -y k6
 
+      - name: Start credential-free synthetic target
+        run: |
+          node --input-type=module <<'NODE' &
+          import { createServer } from 'node:http'
+          createServer((req, res) => {
+            res.writeHead(200, { 'content-type': 'text/plain' })
+            res.end('synthetic-ok')
+          }).listen(3999, '127.0.0.1')
+          NODE
+          timeout 10 bash -c 'until curl -sf http://127.0.0.1:3999/api/health >/dev/null; do sleep 0.2; done'
+
+      - name: Run k6 fail-closed performance gate
+        env:
+          PERF_AUTH_TOKEN: ''
+        run: |
+          if [ -n "${PERF_AUTH_TOKEN}" ]; then
+            echo "::error::Pull request performance gate received PERF_AUTH_TOKEN"
+            exit 1
+          fi
+          k6 run \
+            --env PROFILE=ci \
+            --env BASE_URL="http://127.0.0.1:3999" \
+            --summary-export=tests/load/k6-summary.json \
+            tests/load/smoke.js
+
+      - name: Upload k6 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-perf-results
+          path: tests/load/
+          retention-days: 30
+
+  perf-regression-canonical:
+    needs: [classify, build]
+    if: needs.classify.outputs.product_code == 'APPLICABLE' && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    environment: staging
+    name: Performance Regression Gate (canonical)
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Install k6
+        run: |
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://dl.k6.io/key.gpg \
+            | sudo gpg --dearmor -o /etc/apt/keyrings/k6-archive-keyring.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update && sudo apt-get install -y k6
+
       - name: Run k6 fail-closed performance gate
         run: |
           k6 run \

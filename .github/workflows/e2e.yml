@@ -20,7 +20,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -33,10 +32,12 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     name: ${{ matrix.app == 'union-eyes' && format('UE E2E worker ({0}/4)', matrix.shard) || format('E2E · {0}', matrix.app) }}
-    # staging env supplies AZURE_CLIENT_ID/TENANT_ID for OIDC snapshot retrieve
-    # (repo-level secrets lack those; staging has no protection reviewers).
-    environment: staging
-    timeout-minutes: 60  # union-eyes: snapshot restore + platform DDL + seed + full Playwright; others ≤5 min
+    # Pull-request code is untrusted. This job never selects the staging
+    # environment, never requests id-token, and never reads Azure or performance
+    # secrets. Union Eyes on a pull request uses the credential-free QA baseline.
+    # Push to main skips these Union Eyes cells; e2e-canonical qualifies the snapshot.
+    if: matrix.app != 'union-eyes' || github.event_name == 'pull_request'
+    timeout-minutes: 60  # union-eyes: platform DDL + synthetic seed + full Playwright; others ≤5 min
     strategy:
       fail-fast: false
       matrix:
@@ -136,26 +137,16 @@ jobs:
           fi
           echo "Staged $(find "$STANDALONE_APP/.next/static" -type f | wc -l) static files into standalone output"
 
-      - name: Azure login (UE snapshot retrieve)
-        if: matrix.app == 'union-eyes'
-        continue-on-error: true
-        uses: azure/login@v3
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Bootstrap Union Eyes E2E database (canonical PG15 snapshot)
+      - name: Bootstrap Union Eyes E2E database (synthetic)
         if: matrix.app == 'union-eyes'
         run: |
           set -euo pipefail
-          SNAPSHOT_ID="${UE_DB_SNAPSHOT_ID}"
-          EXPECTED_SHA256="5b67def829412676a33f49d0155949253a76bc7e33efe5334131853cb64783a4"
-          DUMP_DIR="${RUNNER_TEMP}/ue-canonical-snapshot"
-          DUMP_PATH="${DUMP_DIR}/${SNAPSHOT_ID}.dump"
-          mkdir -p "$DUMP_DIR"
+          if [ -n "${AZURE_CLIENT_ID:-}${AZURE_TENANT_ID:-}${AZURE_SUBSCRIPTION_ID:-}${AZURE_STORAGE_ACCOUNT_KEY:-}${PERF_AUTH_TOKEN:-}" ]; then
+            echo "::error::Synthetic Union Eyes E2E received privileged credentials"
+            exit 1
+          fi
 
-          # Empty PG15 with vector extension support (matches restore-proof target).
+          # Empty PG15 with vector extension support. No snapshot retrieve.
           # Retry image pull — Docker Hub intermittently returns 502.
           for attempt in 1 2 3 4 5; do
             if docker pull pgvector/pgvector:pg15; then
@@ -171,7 +162,7 @@ jobs:
           docker run --name ci-e2e-postgres             -e POSTGRES_USER=ci -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=ci_e2e             -p 5432:5432 -d pgvector/pgvector:pg15
           timeout 90 bash -c 'until docker exec ci-e2e-postgres pg_isready -U ci -d ci_e2e; do sleep 2; done'
 
-          # Roles expected by canonical dump / RLS helpers (idempotent).
+          # Roles expected by RLS helpers (idempotent).
           docker exec -i ci-e2e-postgres psql -U ci -d ci_e2e <<'SQL'
           DO $$ BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime') THEN
@@ -185,37 +176,9 @@ jobs:
           GRANT ALL ON SCHEMA public TO union_eyes_runtime, union_eyes_system;
           SQL
 
-          echo "Retrieving canonical snapshot ${SNAPSHOT_ID} from Azure Blob..."
-          if az account show >/dev/null 2>&1; then
-            az storage blob download \
-              --account-name nzilastagingstore \
-              --container-name nzila-staging-snapshots \
-              --name "${SNAPSHOT_ID}.dump" \
-              --file "$DUMP_PATH" \
-              --auth-mode login
-          elif [ -n "${AZURE_STORAGE_ACCOUNT_KEY:-}" ]; then
-            echo "OIDC session unavailable; falling back to account-key auth for snapshot retrieve"
-            az storage blob download \
-              --account-name nzilastagingstore \
-              --container-name nzila-staging-snapshots \
-              --name "${SNAPSHOT_ID}.dump" \
-              --file "$DUMP_PATH" \
-              --account-key "$AZURE_STORAGE_ACCOUNT_KEY"
-          else
-            echo "::error::No Azure auth for snapshot retrieve (OIDC login failed and AZURE_STORAGE_ACCOUNT_KEY unset)"
-            exit 1
-          fi
-
-          ACTUAL_SHA256="$(sha256sum "$DUMP_PATH" | awk '{print $1}')"
-          echo "Retrieved SHA256=${ACTUAL_SHA256}"
-          if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
-            echo "::error::Snapshot SHA256 mismatch (expected ${EXPECTED_SHA256})"
-            exit 1
-          fi
-          echo "VERIFY_SHA256=PASS"
-
-          # Restore via file:// so bootstrap skips stale QA baseline.
-          export UE_DB_RESTORE_SNAPSHOT_URL="file://${DUMP_PATH}"
+          # QA_TEST_ENV selects the credential-free baseline inside db:migrate.
+          # UE_DB_RESTORE_SNAPSHOT_URL stays unset, so no canonical snapshot is restored.
+          unset UE_DB_RESTORE_SNAPSHOT_URL || true
           export PGSSLMODE=disable
           export POSTGRES_MAJOR=15
           pnpm --filter @nzila/union-eyes db:migrate
@@ -224,10 +187,8 @@ jobs:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
           SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
           QA_TEST_ENV: 'true'
-          UE_DB_SNAPSHOT_ID: staging-canonical-20260923T184938Z-92611387
           POSTGRES_MAJOR: '15'
           PGSSLMODE: disable
-          AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
 
       - name: Start app
         run: |
@@ -311,9 +272,247 @@ jobs:
           path: /tmp/app-server.log
           retention-days: 14
 
+  # Trusted canonical snapshot qualification. This job is not part of
+  # pull_request execution. It checks out the push SHA on main and is the only
+  # job allowed to select the staging environment or request an Azure token.
+  e2e-canonical:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: ${{ format('UE E2E worker ({0}/4)', matrix.shard) }}
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: union-eyes
+            port: 3002
+            shard: 1
+            shards: 4
+          - app: union-eyes
+            port: 3002
+            shard: 2
+            shards: 4
+          - app: union-eyes
+            port: 3002
+            shard: 3
+            shards: 4
+          - app: union-eyes
+            port: 3002
+            shard: 4
+            shards: 4
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Verify Union Eyes source checkout
+        env:
+          UE_EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { execFileSync } from 'node:child_process'
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim()
+          const head = git('rev-parse', 'HEAD')
+          assert.equal(head, process.env.UE_EXPECTED_HEAD, 'Canonical UE E2E must execute the trusted push SHA')
+          console.log(JSON.stringify({ head, tree: git('rev-parse', 'HEAD^{tree}') }))
+          NODE
+
+      - name: Install Playwright browsers
+        run: pnpm -C apps/union-eyes exec playwright install --with-deps chromium
+
+      - name: Build app
+        run: pnpm --filter @nzila/union-eyes build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
+          AUTH_SECRET: ci_e2e_placeholder_secret_32chars_xxxx
+          NEXT_PUBLIC_APP_URL: http://localhost:${{ matrix.port }}
+          QA_TEST_ENV: 'true'
+
+      - name: Stage standalone static assets
+        run: |
+          set -euo pipefail
+          APP_DIR="apps/union-eyes"
+          STANDALONE_APP="$APP_DIR/.next/standalone/apps/union-eyes"
+          if [ ! -f "$STANDALONE_APP/server.js" ]; then
+            echo "::error::Standalone server not found at $STANDALONE_APP/server.js"
+            exit 1
+          fi
+          mkdir -p "$STANDALONE_APP/.next"
+          cp -r "$APP_DIR/.next/static" "$STANDALONE_APP/.next/static"
+          if [ -d "$APP_DIR/public" ]; then
+            cp -r "$APP_DIR/public" "$STANDALONE_APP/public"
+          fi
+          if [ -z "$(ls -A "$STANDALONE_APP/.next/static/chunks" 2>/dev/null)" ]; then
+            echo "::error::No static chunks staged into standalone output"
+            exit 1
+          fi
+
+      - name: Azure login (UE snapshot retrieve)
+        continue-on-error: true
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Bootstrap Union Eyes E2E database (canonical PG15 snapshot)
+        run: |
+          set -euo pipefail
+          SNAPSHOT_ID="${UE_DB_SNAPSHOT_ID}"
+          EXPECTED_SHA256="5b67def829412676a33f49d0155949253a76bc7e33efe5334131853cb64783a4"
+          DUMP_DIR="${RUNNER_TEMP}/ue-canonical-snapshot"
+          DUMP_PATH="${DUMP_DIR}/${SNAPSHOT_ID}.dump"
+          mkdir -p "$DUMP_DIR"
+
+          for attempt in 1 2 3 4 5; do
+            if docker pull pgvector/pgvector:pg15; then
+              break
+            fi
+            echo "docker pull attempt ${attempt} failed; sleeping $((attempt * 5))s"
+            sleep $((attempt * 5))
+            if [ "$attempt" -eq 5 ]; then
+              echo "::error::Failed to pull pgvector/pgvector:pg15 after 5 attempts"
+              exit 1
+            fi
+          done
+          docker run --name ci-e2e-postgres -e POSTGRES_USER=ci -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=ci_e2e -p 5432:5432 -d pgvector/pgvector:pg15
+          timeout 90 bash -c 'until docker exec ci-e2e-postgres pg_isready -U ci -d ci_e2e; do sleep 2; done'
+
+          docker exec -i ci-e2e-postgres psql -U ci -d ci_e2e <<'SQL'
+          DO $$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime') THEN
+              CREATE ROLE union_eyes_runtime LOGIN PASSWORD 'ci';
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_system') THEN
+              CREATE ROLE union_eyes_system LOGIN PASSWORD 'ci';
+            END IF;
+          END $$;
+          GRANT ALL ON DATABASE ci_e2e TO union_eyes_runtime, union_eyes_system;
+          GRANT ALL ON SCHEMA public TO union_eyes_runtime, union_eyes_system;
+          SQL
+
+          echo "Retrieving canonical snapshot ${SNAPSHOT_ID} from Azure Blob..."
+          if az account show >/dev/null 2>&1; then
+            az storage blob download \
+              --account-name nzilastagingstore \
+              --container-name nzila-staging-snapshots \
+              --name "${SNAPSHOT_ID}.dump" \
+              --file "$DUMP_PATH" \
+              --auth-mode login
+          elif [ -n "${AZURE_STORAGE_ACCOUNT_KEY:-}" ]; then
+            echo "OIDC session unavailable; falling back to account-key auth for snapshot retrieve"
+            az storage blob download \
+              --account-name nzilastagingstore \
+              --container-name nzila-staging-snapshots \
+              --name "${SNAPSHOT_ID}.dump" \
+              --file "$DUMP_PATH" \
+              --account-key "$AZURE_STORAGE_ACCOUNT_KEY"
+          else
+            echo "::error::No Azure auth for snapshot retrieve (OIDC login failed and AZURE_STORAGE_ACCOUNT_KEY unset)"
+            exit 1
+          fi
+
+          ACTUAL_SHA256="$(sha256sum "$DUMP_PATH" | awk '{print $1}')"
+          echo "Retrieved SHA256=${ACTUAL_SHA256}"
+          if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
+            echo "::error::Snapshot SHA256 mismatch (expected ${EXPECTED_SHA256})"
+            exit 1
+          fi
+          echo "VERIFY_SHA256=PASS"
+
+          export UE_DB_RESTORE_SNAPSHOT_URL="file://${DUMP_PATH}"
+          export PGSSLMODE=disable
+          export POSTGRES_MAJOR=15
+          pnpm --filter @nzila/union-eyes db:migrate
+          pnpm --filter @nzila/union-eyes seed:test-env
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          QA_TEST_ENV: 'true'
+          UE_DB_SNAPSHOT_ID: staging-canonical-20260923T184938Z-92611387
+          POSTGRES_MAJOR: '15'
+          PGSSLMODE: disable
+          AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+
+      - name: Start app
+        run: |
+          node apps/union-eyes/.next/standalone/apps/union-eyes/server.js >/tmp/app-server.log 2>&1 &
+          timeout 60 bash -c 'until curl -sf http://localhost:${{ matrix.port }}/ > /dev/null 2>&1 || curl -sf http://localhost:${{ matrix.port }}/api/health > /dev/null 2>&1; do sleep 2; done'
+        env:
+          AUTH_SECRET: ci_e2e_placeholder_secret_32chars_xxxx
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          NODE_ENV: production
+          PORT: ${{ matrix.port }}
+          QA_TEST_ENV: 'true'
+          PLAYWRIGHT_TEST_AUTH: 'true'
+          UE_E2E_RISK_BYPASS: 'true'
+          UE_ENVIRONMENT: local
+          UE_CANONICAL_BOOTSTRAP_V2: '0'
+          NEXT_LOG_LEVEL: debug
+          DEBUG: 'next:*'
+          CONTROL_PLANE_API_KEY: ci-e2e-placeholder-key
+          CONTROL_PLANE_URL: http://localhost:3010
+          UNION_EYES_URL: http://localhost:3002
+          ORCHESTRATOR_API_URL: http://localhost:4000
+
+      - name: Run Playwright tests
+        run: pnpm --filter @nzila/union-eyes e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}
+        env:
+          CI: true
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          PLAYWRIGHT_TEST_AUTH: 'true'
+          WEB_URL: http://localhost:${{ matrix.port }}
+          CONSOLE_URL: http://localhost:${{ matrix.port }}
+          FLOW_URL: http://localhost:${{ matrix.port }}
+          PARTNERS_URL: http://localhost:${{ matrix.port }}
+          CFO_URL: http://localhost:${{ matrix.port }}
+          PLAYWRIGHT_BASE_URL: http://localhost:${{ matrix.port }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: failure() || cancelled()
+        with:
+          name: playwright-report-union-eyes-${{ matrix.shard }}
+          overwrite: true
+          path: apps/union-eyes/playwright-report/
+          retention-days: 14
+
+      - name: Upload Playwright test-results (traces)
+        uses: actions/upload-artifact@v4
+        if: failure() || cancelled()
+        with:
+          name: playwright-results-union-eyes-${{ matrix.shard }}
+          overwrite: true
+          path: apps/union-eyes/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Dump app server log on failure
+        if: failure() || cancelled()
+        run: |
+          echo '===== app server log (full) ====='
+          cat /tmp/app-server.log || true
+
+      - name: Upload app server log
+        uses: actions/upload-artifact@v4
+        if: failure() || cancelled()
+        with:
+          name: app-server-log-union-eyes-${{ matrix.shard }}
+          overwrite: true
+          path: /tmp/app-server.log
+          retention-days: 14
+
   union-eyes-result:
     name: E2E · union-eyes
-    needs: [e2e]
+    needs: [e2e, e2e-canonical]
     if: always()
     runs-on: ubuntu-latest
     permissions:
@@ -346,7 +545,7 @@ jobs:
           const pages = JSON.parse(readFileSync(process.env.SHARD_JOBS_FILE, 'utf8'))
           if (!Array.isArray(pages) || !pages.length || pages.some(page => !Array.isArray(page.jobs)))
             throw new Error('Invalid E2E job listing')
-          const workers = pages.flatMap(page => page.jobs).filter(job => job.name?.startsWith('UE E2E worker ('))
+          const workers = pages.flatMap(page => page.jobs).filter(job => job.name?.startsWith('UE E2E worker (') && job.conclusion !== 'skipped' && job.status !== 'skipped')
           const expected = [1, 2, 3, 4].map(index => `UE E2E worker (${index}/4)`)
           if (workers.length !== 4 || new Set(workers.map(job => job.id)).size !== 4 || expected.some(name => workers.filter(job => job.name === name).length !== 1))
             throw new Error('Missing, duplicate or unexpected Union Eyes shard')
