@@ -119,16 +119,20 @@ describe("Release Gate E.3 deployment DAG contract (static, no dispatch)", () =>
 
   it("is not a dependency of, and does not depend on, any build/deploy/auto-promotion job — ordinary deploys cannot invoke it", () => {
     const alwaysOnJobs = ["plan", "pre-deploy-gates", "build-push", "apply-django-migrations", "deploy", "apply-icra-capability-migration"];
-    const buildDeployJobs = ["build-push", "apply-django-migrations", "deploy", "apply-icra-capability-migration"];
+    const buildDeployJobs = ["build-push", "apply-django-migrations", "deploy", "apply-icra-capability-migration", "release-premutation-gate"];
     const job = doc.jobs["apply-congress-memberships-multi-party-rls-fix"];
     const needs = job.needs ? (Array.isArray(job.needs) ? job.needs : [job.needs]) : [];
-    // A database mutation waits on topology resolution and the read-only
-    // premigration gate. It does not directly need a build, deploy, or
-    // always-on migration job, and no always-on job needs it, so a push
-    // or auto-promote still cannot start it.
-    expect(needs).toEqual(["plan", "release-premutation-gate"]);
+    const gate = doc.jobs["database-premutation-gate"];
+    const gateNeeds = gate.needs ? (Array.isArray(gate.needs) ? gate.needs : [gate.needs]) : [];
+    // The corrective waits on topology resolution and the authority-only
+    // database gate. That gate waits only on plan, so the job does not
+    // enter the image build or the ordinary deploy path.
+    expect(needs).toEqual(["plan", "database-premutation-gate"]);
+    expect(gateNeeds).toEqual(["plan"]);
+    expect(job.if).toContain("github.event_name == 'workflow_dispatch'");
     for (const forbidden of buildDeployJobs) {
       expect(needs).not.toContain(forbidden);
+      expect(gateNeeds).not.toContain(forbidden);
     }
 
     for (const [jobName, otherJob] of Object.entries<any>(doc.jobs)) {

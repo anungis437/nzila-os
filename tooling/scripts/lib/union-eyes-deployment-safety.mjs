@@ -7,17 +7,22 @@
  * approval. Traffic promotion and ingress weight rewrites are never allowed.
  */
 import crypto from 'node:crypto'
+import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 
 export const MIGRATION_0019_TAG = '0019_deadline_reassignment_convergence'
 export const MIGRATION_0019_RELATIVE_PATH = 'apps/union-eyes/db/migrations-cache/0019_deadline_reassignment_convergence.sql'
 export const PREMUTATION_GATE_JOB = 'release-premutation-gate'
+export const DATABASE_PREMUTATION_GATE_JOB = 'database-premutation-gate'
 export const SCOPED_EXECUTOR = 'applyScopedMigrations'
+export const TWO_SHA_PROCEDURE = 'two-sha-application-pin'
+export const EXECUTOR_RELATIVE_PATH = 'tooling/scripts/apply-scoped-journal-tag.mjs'
+export const JOURNAL_RELATIVE_PATH = 'apps/union-eyes/db/migrations-cache/meta/_journal.json'
 export const APPROVAL_MAX_AGE_MS = 72 * 60 * 60 * 1000
 export const RESTORED_CLONE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 
-export const DATABASE_MUTATION_JOBS = [
+export const AUTHORITY_MUTATION_JOBS = [
   'apply-authority-schema-prerequisites',
   'apply-automation-rules-ownership-migration',
   'apply-rls-foundation-migration',
@@ -26,10 +31,15 @@ export const DATABASE_MUTATION_JOBS = [
   'apply-round59-geometry-gap-closure',
   'apply-round59-congress-memberships-grant-fix',
   'apply-congress-memberships-multi-party-rls-fix',
+]
+
+export const RELEASE_MUTATION_JOBS = [
   'apply-icra-capability-migration',
   'apply-scoped-0019',
   'apply-django-migrations',
 ]
+
+export const DATABASE_MUTATION_JOBS = [...AUTHORITY_MUTATION_JOBS, ...RELEASE_MUTATION_JOBS]
 
 const PHASE_MUTATIONS = {
   icra: 'scoped-0005',
@@ -80,6 +90,22 @@ export function inspectMigration0019(sourceRoot) {
   if (!fs.existsSync(filePath)) return { present: false, sha256: null, filePath }
   const sha256 = crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex')
   return { present: true, sha256, filePath }
+}
+
+function hashFile(root, relativePath) {
+  const filePath = path.join(root, relativePath)
+  if (!root || !fs.existsSync(filePath)) return null
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex')
+}
+
+export function readSourceIdentity(sourceRoot, workflowRoot = sourceRoot) {
+  const git = spawnSync('git', ['-C', sourceRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' })
+  return {
+    migrationCheckoutSha: git.status === 0 ? git.stdout.trim() : null,
+    applicationExecutorSha256: hashFile(sourceRoot, EXECUTOR_RELATIVE_PATH),
+    workflowExecutorSha256: hashFile(workflowRoot, EXECUTOR_RELATIVE_PATH),
+    journalSha256: hashFile(sourceRoot, JOURNAL_RELATIVE_PATH),
+  }
 }
 
 export function assembleAcrAttestation(show, config) {
@@ -198,6 +224,37 @@ function joinRevisions(ingress, revisionList) {
   return joined
 }
 
+function imageDigest(image) {
+  const match = String(image ?? '').match(/@(sha256:[0-9a-f]{64})$/)
+  return match ? match[1] : null
+}
+
+export function servingDigests(ingressRaw, revisionsRaw) {
+  const ingress = normalizeIngress(ingressRaw)
+  const revisions = normalizeRevisionList(revisionsRaw)
+  if (ingress.error || revisions.error) return null
+  const serving = joinRevisions(ingress, revisions).filter((revision) => revision.weight !== null && revision.weight > 0)
+  if (serving.length !== 1) return null
+  const images = serving[0].containers ?? []
+  const backend = images.find((container) => container.name === 'django-backend' || String(container.image).includes('union-eyes-backend'))
+  const frontend = images.find((container) => container !== backend && (container.name === 'union-eyes' || String(container.image).includes('nzila-os-union-eyes')))
+  const frontendDigest = imageDigest(frontend?.image)
+  const backendDigest = imageDigest(backend?.image)
+  if (!frontendDigest || !backendDigest) return null
+  return { frontendDigest, backendDigest, revisionName: serving[0].name }
+}
+
+function servingImageDefects(manifest, serving) {
+  if (serving.length !== 1) return ['SERVING_IMAGE_DIGEST_MISMATCH']
+  const images = serving[0].containers ?? []
+  const backend = images.find((container) => container.name === 'django-backend' || String(container.image).includes('union-eyes-backend'))
+  const frontend = images.find((container) => container !== backend && (container.name === 'union-eyes' || String(container.image).includes('nzila-os-union-eyes')))
+  if (imageDigest(frontend?.image) !== manifest?.frontendDigest || imageDigest(backend?.image) !== manifest?.backendDigest) {
+    return ['SERVING_IMAGE_DIGEST_MISMATCH']
+  }
+  return []
+}
+
 function imageDefects(manifest, acr) {
   const defects = []
   if (!manifest || !SHA_RE.test(manifest.releaseSha ?? '') || !DIGEST_RE.test(manifest.frontendDigest ?? '') || !DIGEST_RE.test(manifest.backendDigest ?? '')) {
@@ -275,6 +332,86 @@ function approvalDefects(approval, publicKeyPem, manifest, nowMs) {
   }
   if (typeof approval.approver === 'string' && approval.approvalStatus !== 'APPROVED') defects.push('APPROVAL_NOT_APPROVED')
   defects.push(...restoredCloneDefects(approval, manifest, nowMs))
+  return defects
+}
+
+function sourceParityDefects(identity, manifest, approval, migration0019) {
+  if (!identity) return ['SOURCE_IDENTITY_MISSING']
+  const workflowSha = identity.workflowSha
+  const applicationSourceSha = identity.applicationSourceSha
+  if (!SHA_RE.test(workflowSha ?? '') || !SHA_RE.test(applicationSourceSha ?? '') || !SHA_RE.test(identity.migrationCheckoutSha ?? '')) {
+    return ['SOURCE_IDENTITY_MISSING']
+  }
+  if (!identity.workflowExecutorSha256 || !identity.applicationExecutorSha256 || !identity.journalSha256) {
+    return ['SOURCE_IDENTITY_MISSING']
+  }
+  const defects = []
+  if (identity.migrationCheckoutSha !== applicationSourceSha || manifest?.releaseSha !== applicationSourceSha) {
+    defects.push('TWO_SHA_SOURCE_MISMATCH')
+  }
+  if (workflowSha === applicationSourceSha) {
+    if (identity.workflowExecutorSha256 !== identity.applicationExecutorSha256 || approval?.twoSha) defects.push('TWO_SHA_SOURCE_MISMATCH')
+    return defects
+  }
+  const two = approval?.twoSha
+  if (!two || two.procedure !== TWO_SHA_PROCEDURE || two.authorized !== true) {
+    defects.push('TWO_SHA_UNAUTHORIZED')
+    return defects
+  }
+  if (two.workflowSha !== workflowSha || two.applicationSourceSha !== applicationSourceSha) defects.push('TWO_SHA_SOURCE_MISMATCH')
+  if (two.workflowExecutorSha256 !== identity.workflowExecutorSha256 || two.applicationExecutorSha256 !== identity.applicationExecutorSha256) {
+    defects.push('TWO_SHA_SOURCE_MISMATCH')
+  }
+  if (two.journalSha256 !== identity.journalSha256) defects.push('TWO_SHA_SOURCE_MISMATCH')
+  if (migration0019?.present && two.migrationSha256 !== migration0019.sha256) defects.push('TWO_SHA_SOURCE_MISMATCH')
+  return defects
+}
+
+function firewallAuthorizationDefects(approval, request) {
+  if (!request) return []
+  const actions = Array.isArray(approval?.infrastructureActions) ? approval.infrastructureActions : []
+  const match = actions.find((item) => item.action === 'postgres-firewall-rule' && item.serverName === request.serverName && item.resourceGroup === request.resourceGroup)
+  if (!request.serverName || !request.resourceGroup || !match) return ['FIREWALL_MUTATION_UNAUTHORIZED']
+  return []
+}
+
+function stagingRlsDefects(input, manifest, migration0019) {
+  const environment = input.environment ?? manifest?.environment
+  if (environment !== 'staging') return []
+  const proof = input.stagingRls
+  if (!proof || typeof proof !== 'object') return ['STAGING_RLS_PROOF_MISSING']
+  const defects = []
+  const foundation = proof.foundation
+  if (!foundation || foundation.source !== 'github-environment-variable' || foundation.name !== 'UE_RLS_FOUNDATION_ENFORCED_STAGING') {
+    defects.push('STAGING_RLS_FOUNDATION_UNVERIFIED')
+  } else if (foundation.value !== true) {
+    defects.push('STAGING_RLS_FOUNDATION_DISABLED')
+  }
+  const ledger = proof.ledger
+  if (!ledger || ledger.source !== 'drizzle.__drizzle_migrations' || !Array.isArray(ledger.rows) || ledger.rows.length === 0 || ledger.rows.some((row) => !/^[0-9a-f]{64}$/.test(String(row.hash ?? '')))) {
+    defects.push('STAGING_RLS_LEDGER_MISSING')
+  }
+  if (migration0019?.present && !migration0019.recorded) defects.push('MIGRATION_0019_LEDGER_HASH_MISSING')
+  const roles = proof.runtimeRoles
+  if (!roles || roles.source === 'application' || roles.source === 'manifest' || roles.source === 'http') defects.push('STAGING_RLS_APP_RESPONSE_IS_NOT_PROOF')
+  else if (roles.source !== 'pg_roles' || !Array.isArray(roles.rows)) defects.push('STAGING_RLS_ROLE_UNVERIFIED')
+  else {
+    for (const name of ['union_eyes_runtime', 'union_eyes_system']) {
+      const row = roles.rows.find((item) => item.rolname === name)
+      if (!row || !hasOwn(row, 'rolsuper') || !hasOwn(row, 'rolbypassrls') || row.rolsuper !== false || row.rolbypassrls !== false) {
+        defects.push('STAGING_RLS_ROLE_UNVERIFIED')
+      }
+    }
+  }
+  const denial = proof.tenantDenial
+  const denialCommand = String(denial?.command ?? '')
+  if (!denial || denial.source !== 'deployed-database' || denial.transport !== 'postgres' || !denialCommand.includes('set_config') || /^https?:/i.test(denialCommand)) {
+    defects.push('STAGING_RLS_APP_RESPONSE_IS_NOT_PROOF')
+  } else if (denial.candidateRevision !== input.candidateRevision || denial.releaseSha !== manifest?.releaseSha || denial.servingRevisionReached === true) {
+    defects.push('STAGING_RLS_CANDIDATE_EVIDENCE_MISSING')
+  } else if (denial.exitCode !== 0 || denial.leakedRows !== 0) {
+    defects.push('STAGING_RLS_TENANT_DENIAL_FAILED')
+  }
   return defects
 }
 
@@ -369,8 +506,9 @@ export function evaluateDeploymentSafety(input) {
   const defects = []
   const manifest = input.manifest ?? null
   const nowMs = Date.parse(input.now ?? '')
-  defects.push(...imageDefects(manifest, input.acr))
-  defects.push(...roleDefects(input.roleCatalog))
+  const skipAcr = input.phase === 'authority' || (input.phase === 'approval' && !input.acr)
+  if (!skipAcr) defects.push(...imageDefects(manifest, input.acr))
+  if (input.phase !== 'approval') defects.push(...roleDefects(input.roleCatalog))
 
   const ingress = normalizeIngress(input.ingress)
   const revisions = normalizeRevisionList(input.revisions)
@@ -397,6 +535,10 @@ export function evaluateDeploymentSafety(input) {
   const migration0019 = migration0019State(input, approval)
   addMigration0019Defects(defects, migration0019, input.rlsPreflight)
   if (input.requireLedgerRecord === true && !migration0019.recorded) defects.push('MIGRATION_0019_LEDGER_HASH_MISSING')
+  defects.push(...sourceParityDefects(input.sourceIdentity, manifest, approval, migration0019))
+  defects.push(...firewallAuthorizationDefects(approval, input.firewallRequest))
+  defects.push(...stagingRlsDefects(input, manifest, migration0019))
+  if (input.phase === 'authority') defects.push(...servingImageDefects(manifest, serving))
 
   if (input.djangoPlan && (/showmigrations/i.test(String(input.djangoPlan.command ?? '')) || input.djangoPlan.inspectionOnly === true)) {
     if (input.djangoPlan.treatedAsApplyProof === true) defects.push('SHOWMIGRATIONS_PLAN_IS_NOT_APPLY_PROOF')
@@ -459,7 +601,28 @@ export function evaluateDeploymentSafety(input) {
     label: mutationClear && authorized('candidate-label') && !uniqueDefects.includes('INGRESS_WEIGHT_REWRITE_FORBIDDEN'),
     'label-confirm': mutationClear && authorized('candidate-label') && !uniqueDefects.includes('INGRESS_WEIGHT_REWRITE_FORBIDDEN'),
     probe: mutationClear && !uniqueDefects.some((defect) => defect.startsWith('CANDIDATE_') || defect === 'AUTHENTICATED_ACCEPTANCE_FAILED' || defect === 'LABEL_REACHABLE_REVISION'),
-    'rls-preflight': !uniqueDefects.some((defect) => /^(MIGRATION_0019_|RLS_PREFLIGHT_|APPROVAL_|RESTORED_CLONE_)/.test(defect)),
+    approval: !uniqueDefects.some((defect) => /^(APPROVAL_|RESTORED_CLONE_|FIREWALL_|TWO_SHA_|SOURCE_)/.test(defect)),
+    authority: blocking(new Set([
+      'RELEASE_MANIFEST_INVALID',
+      'IMAGE_ATTESTATION_MISSING_FRONTEND',
+      'IMAGE_ATTESTATION_MISSING_BACKEND',
+      'WRONG_IMAGE_FRONTEND_DIGEST',
+      'WRONG_IMAGE_BACKEND_DIGEST',
+      'WRONG_IMAGE_FRONTEND_LABEL',
+      'WRONG_IMAGE_BACKEND_LABEL',
+      'WRONG_IMAGE_FRONTEND_TAG',
+      'WRONG_IMAGE_BACKEND_TAG',
+      'CANDIDATE_PROBE_MISSING',
+      'CANDIDATE_PROBE_HIT_SERVING_REVISION',
+      'CANDIDATE_REVISION_FQDN_REQUIRED',
+      'CANDIDATE_REVISION_UNIDENTIFIED',
+      'CANDIDATE_IMAGE_DIGEST_MISMATCH',
+      'CANDIDATE_RELEASE_SHA_MISMATCH',
+      'CANDIDATE_TRAFFIC_NOT_ZERO',
+      'AUTHENTICATED_ACCEPTANCE_FAILED',
+      'MIGRATION_RECOVERY_IS_NOT_TRAFFIC_ROLLBACK',
+    ])).length === 0,
+    'rls-preflight': !uniqueDefects.some((defect) => /^(MIGRATION_0019_|RLS_PREFLIGHT_|APPROVAL_|RESTORED_CLONE_|STAGING_RLS_|TWO_SHA_|SOURCE_|FIREWALL_)/.test(defect)),
     deactivate: mutationClear && authorized('revision-deactivate') && deactivateTargetsAreUnlabeled && accountingOk && !uniqueDefects.includes('LABEL_REACHABLE_REVISION'),
     promote: false,
     'traffic-rollback': false,
@@ -504,11 +667,16 @@ export function parseWorkflowJobs(workflowText) {
   })
 }
 
+function jobIsDisabled(job) {
+  return /if:\s*\$\{\{\s*false\s*\}\}/.test(job?.body ?? '')
+}
+
 export function assertWorkflowMutationOrder(workflowText) {
   const jobs = parseWorkflowJobs(workflowText)
   const byName = new Map(jobs.map((job) => [job.name, job]))
   const defects = []
   const gate = byName.get(PREMUTATION_GATE_JOB)
+  const authorityGate = byName.get(DATABASE_PREMUTATION_GATE_JOB)
   if (!gate) defects.push('PREMUTATION_GATE_MISSING')
   else {
     const gateNeeds = new Set(gate.needs)
@@ -519,7 +687,28 @@ export function assertWorkflowMutationOrder(workflowText) {
       if (gate.body.includes(forbidden)) defects.push('PREMUTATION_GATE_MUTATES')
     }
   }
-  for (const name of DATABASE_MUTATION_JOBS) {
+  if (!authorityGate) defects.push('DATABASE_PREMUTATION_GATE_MISSING')
+  else if (authorityGate.needs.length !== 1 || authorityGate.needs[0] !== 'plan' || authorityGate.needs.includes('build-push') || authorityGate.needs.includes(PREMUTATION_GATE_JOB)) {
+    defects.push('AUTHORITY_GATE_DEPENDS_ON_IMAGE_BUILD')
+  } else {
+    for (const forbidden of ['icra:capability-rollout:apply', 'manage.py migrate', 'containerapp revision deactivate', 'ingress traffic set', 'build-push']) {
+      if (authorityGate.body.includes(forbidden)) defects.push('AUTHORITY_GATE_DEPENDS_ON_IMAGE_BUILD')
+    }
+  }
+  for (const name of AUTHORITY_MUTATION_JOBS) {
+    const job = byName.get(name)
+    if (!job) defects.push(`MUTATION_JOB_MISSING:${name}`)
+    else {
+      if (!job.needs.includes(DATABASE_PREMUTATION_GATE_JOB)) defects.push(`MUTATION_BEFORE_PREMUTATION_GATE:${name}`)
+      if (job.needs.includes(PREMUTATION_GATE_JOB) || job.needs.includes('build-push') || job.needs.includes('deploy') || job.needs.includes('apply-django-migrations')) {
+        defects.push(`AUTHORITY_JOB_DEPENDS_ON_IMAGE_BUILD:${name}`)
+      }
+      if (!jobIsDisabled(job) && !job.body.includes('database-premutation-gate.outputs.application_source_sha')) {
+        defects.push(`AUTHORITY_JOB_SOURCE_UNPINNED:${name}`)
+      }
+    }
+  }
+  for (const name of RELEASE_MUTATION_JOBS) {
     const job = byName.get(name)
     if (!job) defects.push(`MUTATION_JOB_MISSING:${name}`)
     else if (!job.needs.includes(PREMUTATION_GATE_JOB)) defects.push(`MUTATION_BEFORE_PREMUTATION_GATE:${name}`)
@@ -537,6 +726,19 @@ export function assertWorkflowMutationOrder(workflowText) {
   if (deploy && !['release-premutation-gate', 'apply-icra-capability-migration', 'apply-scoped-0019', 'apply-django-migrations'].every((need) => deploy.needs.includes(need))) {
     defects.push('DEPLOY_BEFORE_MIGRATIONS')
   }
+  for (const job of jobs) {
+    const createCandidates = [job.body.indexOf('firewall-rule create'), job.body.indexOf('union-eyes-postgres-firewall.sh open')].filter((index) => index >= 0)
+    if (createCandidates.length === 0) continue
+    const createAt = Math.min(...createCandidates)
+    const approvalAt = job.body.indexOf('--phase approval')
+    if (approvalAt < 0 || approvalAt > createAt) defects.push(`FIREWALL_BEFORE_APPROVAL:${job.name}`)
+    if (/firewall-rule delete[\s\S]{0,400}\|\| true/.test(job.body)) defects.push(`FIREWALL_CLEANUP_SWALLOWED:${job.name}`)
+  }
+  if (!workflowText.includes("needs.plan.outputs.environment == 'staging' || needs.plan.outputs.rls_foundation_enforced == 'true'")) {
+    defects.push('STAGING_RLS_SKIPPABLE')
+  }
+  if (!workflowText.includes('UE_APPLICATION_SOURCE_SHA')) defects.push('TWO_SHA_ARGUMENTS_MISSING')
+  if (!workflowText.includes('--require-0019-recorded')) defects.push('REQUIRE_0019_RECORDED_MISSING')
   if (/az containerapp ingress traffic set/.test(workflowText) || /--revision-weight[^\n]*=100/.test(workflowText)) {
     defects.push('INGRESS_WEIGHT_REWRITE')
   }

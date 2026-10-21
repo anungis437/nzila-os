@@ -13,6 +13,7 @@ import {
   evaluateDeploymentSafety,
   inspectMigration0019,
   phaseAllowed,
+  readSourceIdentity,
   signApproval,
 } from './union-eyes-deployment-safety.mjs'
 
@@ -97,6 +98,18 @@ function approvalBody(overrides = {}) {
   }
 }
 
+function sourceIdentity(overrides = {}) {
+  return {
+    workflowSha: SHA,
+    applicationSourceSha: SHA,
+    migrationCheckoutSha: SHA,
+    workflowExecutorSha256: 'f'.repeat(64),
+    applicationExecutorSha256: 'f'.repeat(64),
+    journalSha256: '1'.repeat(64),
+    ...overrides,
+  }
+}
+
 function ready(overrides = {}) {
   const { approval, ...rest } = overrides
   const signed = Object.prototype.hasOwnProperty.call(overrides, 'approval')
@@ -106,6 +119,7 @@ function ready(overrides = {}) {
     phase: 'premigrate',
     now: NOW,
     manifest: { releaseSha: SHA, frontendDigest: FRONTEND, backendDigest: BACKEND },
+    sourceIdentity: sourceIdentity(),
     acr: { frontend: acr(FRONTEND), backend: acr(BACKEND) },
     ingress: ingress('read-a', [{ revisionName: 'app--serving', weight: 100 }]),
     revisions: revisions('rev-a', [revision('app--serving', { replicas: 2 })]),
@@ -494,4 +508,209 @@ test('asserted CLI flags are rejected and the workflow keeps mutations behind th
   assert.match(workflow, /\/api\/version/)
   assert.doesNotMatch(workflow, /x-ms-container-app-revision/)
   assert.doesNotMatch(workflow, /ingress traffic set/)
+
+  const authorityOnBuild = workflow.replace(
+    '  database-premutation-gate:\n    runs-on: ubuntu-latest\n    needs: [plan]\n',
+    '  database-premutation-gate:\n    runs-on: ubuntu-latest\n    needs: [plan, build-push]\n',
+  )
+  const coupled = assertWorkflowMutationOrder(authorityOnBuild)
+  assert.ok(coupled.defects.includes('AUTHORITY_GATE_DEPENDS_ON_IMAGE_BUILD'))
+})
+
+test('the workflow CLI requires 0019 to be recorded when the bare flag precedes --now', () => {
+  const cli = path.join(REPO, 'tooling/scripts/union-eyes-deployment-safety-cli.mjs')
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-0019-cli-'))
+  fs.mkdirSync(path.join(root, 'apps/union-eyes/db/migrations-cache/meta'), { recursive: true })
+  fs.mkdirSync(path.join(root, 'tooling/scripts'), { recursive: true })
+  const sql = 'select 1;\n'
+  fs.writeFileSync(path.join(root, 'apps/union-eyes/db/migrations-cache/0019_deadline_reassignment_convergence.sql'), sql)
+  fs.copyFileSync(path.join(REPO, 'tooling/scripts/apply-scoped-journal-tag.mjs'), path.join(root, 'tooling/scripts/apply-scoped-journal-tag.mjs'))
+  fs.copyFileSync(path.join(REPO, 'apps/union-eyes/db/migrations-cache/meta/_journal.json'), path.join(root, 'apps/union-eyes/db/migrations-cache/meta/_journal.json'))
+  const gitEnv = { ...process.env, GIT_AUTHOR_NAME: 'ue-test', GIT_AUTHOR_EMAIL: 'ue-test@example.com', GIT_COMMITTER_NAME: 'ue-test', GIT_COMMITTER_EMAIL: 'ue-test@example.com' }
+  for (const args of [['init'], ['add', '.'], ['commit', '-m', 'candidate']]) {
+    const result = spawnSync('git', args, { cwd: root, env: gitEnv, encoding: 'utf8' })
+    assert.equal(result.status, 0, result.stderr)
+  }
+  const commit = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).stdout.trim()
+  const migrationSha = crypto.createHash('sha256').update(sql).digest('hex')
+  const observed = readSourceIdentity(root, REPO)
+  const approval = signApproval(approvalBody({
+    releaseSha: commit,
+    restoredClone: { ...approvalBody().restoredClone, sourceSha: commit },
+    scheduledMigrations: [{
+      tag: '0019_deadline_reassignment_convergence',
+      sha256: migrationSha,
+      executor: 'applyScopedMigrations',
+      beforeRlsPreflight: true,
+    }],
+  }), privateKeyPem)
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-0019-evidence-'))
+  const manifestPath = path.join(dir, 'manifest.json')
+  const approvalPath = path.join(dir, 'approval.json')
+  const trustPath = path.join(dir, 'trust.pem')
+  const ledgerPath = path.join(dir, 'ledger.json')
+  fs.writeFileSync(manifestPath, JSON.stringify({ releaseSha: commit, frontendDigest: FRONTEND, backendDigest: BACKEND }))
+  fs.writeFileSync(approvalPath, JSON.stringify(approval))
+  fs.writeFileSync(trustPath, publicKeyPem)
+  fs.writeFileSync(ledgerPath, JSON.stringify({ source: 'drizzle.__drizzle_migrations', rows: [] }))
+  const common = [
+    cli,
+    '--phase', 'rls-preflight',
+    '--now', NOW,
+    '--source-root', root,
+    '--workflow-sha', commit,
+    '--application-source-sha', commit,
+    '--manifest', manifestPath,
+    '--approval', approvalPath,
+    '--approval-trust', trustPath,
+    '--ledger', ledgerPath,
+  ]
+  const scheduledOnly = spawnSync(process.execPath, common, { encoding: 'utf8' })
+  const scheduledDecision = JSON.parse(scheduledOnly.stdout)
+  assert.equal(scheduledDecision.migration0019.scheduled, true)
+  assert.equal(scheduledDecision.migration0019.recorded, false)
+  assert.equal(scheduledDecision.defects.includes('MIGRATION_0019_LEDGER_HASH_MISSING'), false)
+  assert.equal(scheduledDecision.allowed, true)
+
+  const recordedFlag = spawnSync(process.execPath, [
+    cli,
+    '--phase', 'rls-preflight',
+    '--require-0019-recorded',
+    '--now', NOW,
+    '--source-root', root,
+    '--workflow-sha', commit,
+    '--application-source-sha', commit,
+    '--manifest', manifestPath,
+    '--approval', approvalPath,
+    '--approval-trust', trustPath,
+    '--ledger', ledgerPath,
+  ], { encoding: 'utf8' })
+  assert.notEqual(recordedFlag.status, 0)
+  const recordedDecision = JSON.parse(recordedFlag.stdout)
+  assert.equal(recordedDecision.migration0019.scheduled, true)
+  assert.equal(recordedDecision.migration0019.recorded, false)
+  assert.ok(recordedDecision.defects.includes('MIGRATION_0019_LEDGER_HASH_MISSING'))
+  assert.equal(recordedDecision.allowed, false)
+  assert.equal(observed.applicationExecutorSha256, observed.workflowExecutorSha256)
+})
+
+test('a two-SHA pin is refused unless the signed approval binds both commits', () => {
+  const pinned = sourceIdentity({
+    workflowSha: SHA,
+    applicationSourceSha: OTHER_SHA,
+    migrationCheckoutSha: OTHER_SHA,
+    applicationExecutorSha256: '9'.repeat(64),
+  })
+  const manifest = { releaseSha: OTHER_SHA, frontendDigest: FRONTEND, backendDigest: BACKEND }
+  const acrFor = (revision) => ({
+    frontend: assembleAcrAttestation({ digest: FRONTEND, tags: [revision, 'latest'] }, { config: { Labels: { 'org.opencontainers.image.revision': revision } } }),
+    backend: assembleAcrAttestation({ digest: BACKEND, tags: [revision, 'latest'] }, { config: { Labels: { 'org.opencontainers.image.revision': revision } } }),
+  })
+  const unbound = signApproval(approvalBody({
+    releaseSha: OTHER_SHA,
+    restoredClone: { ...approvalBody().restoredClone, sourceSha: OTHER_SHA },
+  }), privateKeyPem)
+  const refused = evaluateDeploymentSafety(ready({ approval: unbound, manifest, acr: acrFor(OTHER_SHA), sourceIdentity: pinned }))
+  assert.ok(refused.defects.includes('TWO_SHA_UNAUTHORIZED'))
+  assert.equal(phaseAllowed(refused, 'premigrate'), false)
+
+  const bound = signApproval(approvalBody({
+    releaseSha: OTHER_SHA,
+    restoredClone: { ...approvalBody().restoredClone, sourceSha: OTHER_SHA },
+    twoSha: {
+      procedure: 'two-sha-application-pin',
+      authorized: true,
+      workflowSha: SHA,
+      applicationSourceSha: OTHER_SHA,
+      workflowExecutorSha256: 'f'.repeat(64),
+      applicationExecutorSha256: '9'.repeat(64),
+      journalSha256: '1'.repeat(64),
+      migrationSha256: HASH_0019,
+    },
+  }), privateKeyPem)
+  const accepted = evaluateDeploymentSafety(ready({ approval: bound, manifest, acr: acrFor(OTHER_SHA), sourceIdentity: pinned }))
+  assert.equal(accepted.defects.includes('TWO_SHA_UNAUTHORIZED'), false)
+  assert.equal(accepted.defects.includes('TWO_SHA_SOURCE_MISMATCH'), false)
+  assert.equal(phaseAllowed(accepted, 'premigrate'), true)
+})
+
+test('firewall creation requires the signed approval before the Azure change', () => {
+  const request = { serverName: 'nzila-staging-db', resourceGroup: 'nzila-staging-rg' }
+  const missing = evaluateDeploymentSafety(ready({ phase: 'approval', firewallRequest: request }))
+  assert.ok(missing.defects.includes('FIREWALL_MUTATION_UNAUTHORIZED'))
+  assert.equal(phaseAllowed(missing, 'approval'), false)
+
+  const authorized = signApproval(approvalBody({
+    infrastructureActions: [{ action: 'postgres-firewall-rule', serverName: request.serverName, resourceGroup: request.resourceGroup }],
+  }), privateKeyPem)
+  const allowed = evaluateDeploymentSafety(ready({ phase: 'approval', approval: authorized, firewallRequest: request }))
+  assert.equal(allowed.defects.includes('FIREWALL_MUTATION_UNAUTHORIZED'), false)
+  assert.equal(phaseAllowed(allowed, 'approval'), true)
+})
+
+test('staging RLS proof is mandatory and an application response is not that proof', () => {
+  const stagingManifest = { releaseSha: SHA, frontendDigest: FRONTEND, backendDigest: BACKEND, environment: 'staging' }
+  const absent = evaluateDeploymentSafety(ready({ phase: 'rls-preflight', environment: 'staging', manifest: stagingManifest, candidateRevision: 'app--candidate' }))
+  assert.ok(absent.defects.includes('STAGING_RLS_PROOF_MISSING'))
+  assert.equal(phaseAllowed(absent, 'rls-preflight'), false)
+
+  const httpOnly = {
+    foundation: { source: 'application', name: 'UE_RLS_FOUNDATION_ENFORCED_STAGING', value: true },
+    runtimeRoles: { source: 'http', rows: [] },
+    ledger: { source: 'manifest', rows: [] },
+    tenantDenial: { source: 'application', transport: 'https', command: 'https://union-eyes.example.com/api/health', exitCode: 0, leakedRows: 0 },
+  }
+  const substituted = evaluateDeploymentSafety(ready({
+    phase: 'rls-preflight',
+    environment: 'staging',
+    manifest: stagingManifest,
+    candidateRevision: 'app--candidate',
+    stagingRls: httpOnly,
+  }))
+  assert.ok(substituted.defects.includes('STAGING_RLS_APP_RESPONSE_IS_NOT_PROOF'))
+  assert.equal(phaseAllowed(substituted, 'rls-preflight'), false)
+
+  const disabled = {
+    foundation: { source: 'github-environment-variable', name: 'UE_RLS_FOUNDATION_ENFORCED_STAGING', value: false },
+    runtimeRoles: {
+      source: 'pg_roles',
+      rows: [
+        { rolname: 'union_eyes_runtime', rolsuper: false, rolbypassrls: false },
+        { rolname: 'union_eyes_system', rolsuper: false, rolbypassrls: false },
+      ],
+    },
+    ledger: { source: 'drizzle.__drizzle_migrations', rows: [{ hash: HASH_0019 }] },
+    tenantDenial: {
+      source: 'deployed-database',
+      transport: 'postgres',
+      command: "SELECT set_config('app.current_org_id', '', true)",
+      exitCode: 0,
+      leakedRows: 0,
+      candidateRevision: 'app--candidate',
+      releaseSha: SHA,
+      servingRevisionReached: false,
+    },
+  }
+  const foundationOff = evaluateDeploymentSafety(ready({
+    phase: 'rls-preflight',
+    environment: 'staging',
+    manifest: stagingManifest,
+    candidateRevision: 'app--candidate',
+    stagingRls: disabled,
+  }))
+  assert.ok(foundationOff.defects.includes('STAGING_RLS_FOUNDATION_DISABLED'))
+  assert.equal(phaseAllowed(foundationOff, 'rls-preflight'), false)
+
+  const leaked = structuredClone(disabled)
+  leaked.foundation.value = true
+  leaked.tenantDenial.leakedRows = 2
+  const denialFailed = evaluateDeploymentSafety(ready({
+    phase: 'rls-preflight',
+    environment: 'staging',
+    manifest: stagingManifest,
+    candidateRevision: 'app--candidate',
+    stagingRls: leaked,
+  }))
+  assert.ok(denialFailed.defects.includes('STAGING_RLS_TENANT_DENIAL_FAILED'))
+  assert.equal(phaseAllowed(denialFailed, 'rls-preflight'), false)
 })

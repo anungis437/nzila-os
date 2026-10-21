@@ -13,8 +13,6 @@ import { fileURLToPath } from 'node:url'
 import { MIGRATION_0019_TAG } from './lib/union-eyes-deployment-safety.mjs'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
-const migrationsDir = path.join(repoRoot, 'apps', 'union-eyes', 'db', 'migrations-cache')
-const journalPath = path.join(migrationsDir, 'meta', '_journal.json')
 
 function arg(name) {
   const index = process.argv.indexOf(name)
@@ -23,6 +21,9 @@ function arg(name) {
 
 const decisionPath = arg('--decision')
 const tag = arg('--tag')
+const sourceRoot = arg('--source-root') ?? repoRoot
+const migrationsDir = path.join(sourceRoot, 'apps', 'union-eyes', 'db', 'migrations-cache')
+const journalPath = path.join(migrationsDir, 'meta', '_journal.json')
 if (tag !== MIGRATION_0019_TAG || !decisionPath) {
   process.stderr.write('scoped executor requires --tag 0019_deadline_reassignment_convergence and --decision <allowed-decision.json>\n')
   process.exit(2)

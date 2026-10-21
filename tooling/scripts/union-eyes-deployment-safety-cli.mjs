@@ -5,7 +5,11 @@
  * assert an image label, a schema result, or a role attribute are rejected.
  */
 import fs from 'node:fs'
-import { evaluateDeploymentSafety, inspectMigration0019, phaseAllowed } from './lib/union-eyes-deployment-safety.mjs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { evaluateDeploymentSafety, inspectMigration0019, phaseAllowed, readSourceIdentity } from './lib/union-eyes-deployment-safety.mjs'
+
+const WORKFLOW_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 
 const ASSERTED_FLAGS = [
   '--frontend-label',
@@ -22,7 +26,18 @@ const ASSERTED_FLAGS = [
 
 function arg(name) {
   const index = process.argv.indexOf(name)
-  return index >= 0 ? process.argv[index + 1] : undefined
+  if (index < 0) return undefined
+  const value = process.argv[index + 1]
+  if (value === undefined || value.startsWith('--')) return undefined
+  return value
+}
+
+function booleanFlag(name) {
+  const index = process.argv.indexOf(name)
+  if (index < 0) return false
+  const value = process.argv[index + 1]
+  if (value === undefined || value.startsWith('--')) return true
+  return value === 'true'
 }
 
 function readJson(filePath) {
@@ -37,7 +52,7 @@ if (asserted.length > 0) {
 
 const phase = arg('--phase')
 if (!phase) {
-  process.stderr.write('usage: union-eyes-deployment-safety-cli.mjs --phase <premigrate|icra|scoped-0019|migrate|candidate|label|label-confirm|probe> --manifest <file>\n')
+  process.stderr.write('usage: union-eyes-deployment-safety-cli.mjs --phase <approval|authority|premigrate|icra|scoped-0019|migrate|candidate|label|label-confirm|probe|rls-preflight> --manifest <file>\n')
   process.exit(2)
 }
 
@@ -51,9 +66,13 @@ if (!manifestPath || !approvalPath || !trustPath || !sourceRoot) {
 }
 
 const inspected = inspectMigration0019(sourceRoot)
+const observedIdentity = readSourceIdentity(sourceRoot, WORKFLOW_ROOT)
+const firewallServer = arg('--firewall-server')
+const firewallResourceGroup = arg('--firewall-resource-group')
 const input = {
   phase,
   now: arg('--now'),
+  environment: arg('--environment'),
   manifest: readJson(manifestPath),
   acr: {
     frontend: arg('--acr-frontend') ? readJson(arg('--acr-frontend')) : undefined,
@@ -74,10 +93,17 @@ const input = {
   candidateRevision: arg('--candidate-revision'),
   weightBaseline: arg('--weight-baseline') ? readJson(arg('--weight-baseline')) : undefined,
   probe: arg('--probe') ? readJson(arg('--probe')) : undefined,
-  requireLedgerRecord: arg('--require-0019-recorded') === 'true',
-  migrationCommitted: arg('--migration-committed') === 'true',
+  stagingRls: arg('--staging-rls') ? readJson(arg('--staging-rls')) : undefined,
+  requireLedgerRecord: booleanFlag('--require-0019-recorded'),
+  migrationCommitted: booleanFlag('--migration-committed'),
   requestedRecovery: arg('--requested-recovery'),
   consumerAccounting: arg('--consumer-accounting') ? readJson(arg('--consumer-accounting')) : undefined,
+  firewallRequest: firewallServer || firewallResourceGroup ? { serverName: firewallServer, resourceGroup: firewallResourceGroup } : undefined,
+  sourceIdentity: {
+    ...observedIdentity,
+    workflowSha: arg('--workflow-sha') ?? process.env.GITHUB_SHA,
+    applicationSourceSha: arg('--application-source-sha') ?? process.env.UE_APPLICATION_SOURCE_SHA,
+  },
 }
 
 const decision = evaluateDeploymentSafety(input)
