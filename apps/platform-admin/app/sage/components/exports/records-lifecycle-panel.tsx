@@ -90,8 +90,16 @@ export function RecordsLifecyclePanel({
   )
 
   useEffect(() => {
+    const handles: number[] = []
     for (const pkg of packages) {
-      if ((pkg.availabilityStatus ?? 'available') !== 'destroyed') void loadEligibility(pkg.id)
+      if ((pkg.availabilityStatus ?? 'available') !== 'destroyed') {
+        handles.push(window.setTimeout(() => {
+          void loadEligibility(pkg.id)
+        }, 0))
+      }
+    }
+    return () => {
+      for (const handle of handles) window.clearTimeout(handle)
     }
   }, [packages, loadEligibility])
 

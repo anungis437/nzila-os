@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Real User Monitoring — Web Vitals collection with OpenTelemetry export",
+  "description": "Real User Monitoring \u2014 Web Vitals collection with OpenTelemetry export",
   "exports": {
     ".": "./src/index.ts",
     "./web-vitals": "./src/web-vitals.ts",
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@nzila/platform-observability": "workspace:*",
-    "web-vitals": "^4.2.0",
+    "web-vitals": "^6.2.3",
     "zod": "^3.24.0"
   },
   "devDependencies": {

@@ -6,6 +6,7 @@ vi.mock('@/lib/logger', () => ({
 
 import { DataIngestionService, DataValidator, Deduplicator, dataIngestion } from '../data-ingestion';
 import type { FileType } from '../data-ingestion';
+import { buildPdf } from './pdf-fixture';
 
 describe('DataValidator', () => {
   it('validates required field present', () => {
@@ -150,4 +151,33 @@ describe('FileType', () => {
       expect(typeof type).toBe('string');
     },
   );
+});
+
+describe('PDF ingestion (pdfjs-dist legacy build)', () => {
+  it('extracts text from a real PDF supplied as a Node Buffer', async () => {
+    const doc = await new DataIngestionService().ingest(
+      buildPdf('Hello CBA clause'),
+      'application/pdf',
+      'agreement.pdf',
+      { source: 'test' },
+    );
+    expect(doc.content).toContain('Hello CBA clause');
+  });
+
+  it('does not detach the caller buffer after parsing', async () => {
+    const pdf = buildPdf('Stable buffer');
+    const length = pdf.byteLength;
+    await new DataIngestionService().ingest(pdf, 'application/pdf', 'a.pdf', { source: 'test' });
+    expect(pdf.byteLength).toBe(length);
+  });
+
+  it('reports a parse failure for non-PDF bytes instead of throwing', async () => {
+    const doc = await new DataIngestionService().ingest(
+      Buffer.from('this is not a pdf'),
+      'application/pdf',
+      'bad.pdf',
+      { source: 'test' },
+    );
+    expect(doc.content).toBe('');
+  });
 });

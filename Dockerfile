@@ -1,8 +1,10 @@
 # ============================================
 # Base stage - pnpm setup
-# Node.js 20 LTS — OpenSSL 3.0 WebCrypto stable for OIDC JWT verification
+# Node.js 22 LTS — OpenSSL 3.0 WebCrypto stable for OIDC JWT verification.
+# pdfjs-dist 6 needs Promise.withResolvers (Node >=22.13) and sanitize-html 2.18 needs
+# Node >=22.12; CI already builds and tests on Node 22.
 # ============================================
-FROM node:20-slim AS base
+FROM node:22-slim AS base
 
 # Install wget for healthchecks (not included in slim by default).
 # apt-get upgrade -y patches OS-level CVEs in the base image (e.g. libgnutls30 CVE-2026-33845,
@@ -254,7 +256,7 @@ COPY --from=builder /app/apps/union-eyes/messages ./apps/union-eyes/messages
 COPY --from=builder /app/docs/oci/superseded/whitepapers ./docs/oci/superseded/whitepapers
 COPY --from=builder /app/content ./content
 
-# Runtime hardening: remove build-time package managers baked into node:20-slim.
+# Runtime hardening: remove build-time package managers baked into node:22-slim.
 # The container CMD is `node apps/union-eyes/server.js`; neither npm, corepack,
 # nor pnpm are invoked at runtime. Removing them eliminates their bundled
 # vulnerable transitive deps (tar, sigstore, glob, minimatch, brace-expansion,

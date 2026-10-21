@@ -19,6 +19,15 @@ import { enforceAISafety } from '@nzila/policies';
 import { dataIngestion } from '@/lib/ai/data-ingestion';
 import { entityExtraction, ExtractionResult } from '@/lib/ai/entity-extraction';
 import { ragPipeline } from '@/lib/ai/rag-pipeline';
+import {
+  IngestionCapacityError,
+  IngestionTooLargeError,
+  MAX_INGEST_BODY_BYTES,
+  MAX_INGEST_FILE_BYTES,
+  admissionWeight,
+  readBoundedFormData,
+  uploadBudget,
+} from '@/lib/ai/ingestion-limits';
 
 // Validation schema
 const ingestSchema = z.object({
@@ -28,6 +37,20 @@ const ingestSchema = z.object({
   extractEntities: z.boolean().default(true),
   addToRAG: z.boolean().default(true),
 });
+
+// Fixed, non-sensitive bodies for resource-limit failures.
+function limitResponse(error: unknown): NextResponse | null {
+  if (error instanceof IngestionTooLargeError) {
+    return NextResponse.json({ error: 'Document exceeds the maximum size of 50MB' }, { status: 413 });
+  }
+  if (error instanceof IngestionCapacityError) {
+    return NextResponse.json(
+      { error: 'Document ingestion is busy. Retry shortly.' },
+      { status: 503, headers: { 'Retry-After': '5' } },
+    );
+  }
+  return null;
+}
 
 /**
  * POST /api/ai/ingest
@@ -56,9 +79,16 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     userRole: String(context.userRole ?? 'officer'),
     dataClass: 'internal',
   });
+  // 5. Admission. Reserve upload memory before the body is read; shed load instead of queueing sockets.
+  let releaseUpload: (() => void) | null = null;
   try {
-    // Parse multipart form data
-    const formData = await request.formData();
+    releaseUpload = await uploadBudget.acquire(admissionWeight(request, MAX_INGEST_BODY_BYTES));
+  } catch (error) {
+    return limitResponse(error) ?? NextResponse.json({ error: 'Failed to process document' }, { status: 500 });
+  }
+  try {
+    // Parse multipart form data, aborting once the body exceeds the ceiling
+    const formData = await readBoundedFormData(request, MAX_INGEST_BODY_BYTES);
     const file = formData.get('file') as File | null;
     const bodyStr = formData.get('data') as string | null;
 
@@ -97,6 +127,11 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
         { error: 'Invalid metadata', details: validation.error.errors },
         { status: 400 }
       );
+    }
+
+    // Enforce the advertised ceiling before the file is copied into memory
+    if (file.size > MAX_INGEST_FILE_BYTES) {
+      return limitResponse(new IngestionTooLargeError())!;
     }
 
     // Convert file to buffer
@@ -196,12 +231,16 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     }, { status: 201 });
 
   } catch (error) {
+    const limited = limitResponse(error);
+    if (limited) return limited;
     logger.error('AI ingestion error', { error });
 
     return NextResponse.json(
       { error: 'Failed to process document' },
       { status: 500 }
     );
+  } finally {
+    releaseUpload?.();
   }
 });
 

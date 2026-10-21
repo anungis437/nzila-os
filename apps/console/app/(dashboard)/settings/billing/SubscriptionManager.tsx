@@ -13,6 +13,10 @@ import { Badge } from '@nzila/ui'
 import { CheckCircleIcon, CreditCardIcon } from '@heroicons/react/24/solid'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
+function navigateToTrustedCheckout(url: string): void {
+  window.location.assign(url)
+}
+
 // Plans — priceIds come from Stripe Dashboard (env vars)
 const PLANS = [
   {
@@ -81,7 +85,7 @@ function ActiveSubscriptionCard({ sub, orgId }: { sub: ActiveSub; orgId: string 
       const { url } = await res.json()
       const safeUrl = validateRedirectUrl(url)
       if (!safeUrl) throw new Error('Untrusted redirect URL')
-      window.location.href = safeUrl
+      navigateToTrustedCheckout(safeUrl)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error opening portal')
       setLoading(false)
@@ -162,7 +166,7 @@ function PlanPicker({ orgId }: { orgId: string }) {
       const { url } = await res.json()
       const safeUrl = validateRedirectUrl(url)
       if (!safeUrl) throw new Error('Untrusted redirect URL')
-      window.location.href = safeUrl
+      navigateToTrustedCheckout(safeUrl)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error starting checkout')
       setLoadingPlanId(null)

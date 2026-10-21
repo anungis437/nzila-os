@@ -10,6 +10,7 @@
 
 import { logger } from '@/lib/logger';
 import { createHash } from 'crypto';
+import { IngestionTooLargeError, MAX_INGEST_FILE_BYTES, pdfParseBudget } from './ingestion-limits';
 
 // PDF.js will be loaded dynamically for browser/server compatibility
 let pdfjsLib: any = null;
@@ -17,7 +18,9 @@ let pdfjsLib: any = null;
 async function getPdfJs() {
   if (!pdfjsLib) {
     try {
-      pdfjsLib = await import('pdfjs-dist');
+      // pdfjs-dist 5+ throws DOMMatrix on the browser build under Node.
+      // The legacy build is the supported server entry for ingestion.
+      pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
     } catch {
       // Fallback for environments where pdfjs-dist not available
       return null;
@@ -199,12 +202,25 @@ class PDFParser implements FileParser {
       };
     }
 
-    try {
-      // Load the PDF document
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const loadingTask = (pdfjs as any).getDocument({ data: buffer });
-      const pdf = await loadingTask.promise;
+    if (buffer.byteLength > MAX_INGEST_FILE_BYTES) throw new IngestionTooLargeError();
 
+    // Reserve the memory for the Uint8Array copy and pdfjs' working set before allocating
+    // either. These errors are thrown outside the try below so the caller can answer
+    // 413/503 instead of receiving a parse-failure result.
+    const release = await pdfParseBudget.acquire(buffer.byteLength);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let loadingTask: any = null;
+
+    try {
+      // pdfjs-dist 6 rejects Buffer. Copy into a plain Uint8Array: pdfjs may transfer the
+      // underlying ArrayBuffer, and a Buffer's backing store can be a shared pool.
+      // isEvalSupported:false keeps font programs from being compiled with eval/Function.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      loadingTask = (pdfjs as any).getDocument({
+        data: new Uint8Array(buffer),
+        isEvalSupported: false,
+      });
+      const pdf = await loadingTask.promise;
       const textContent: string[] = [];
       const tables: TableData[] = [];
 
@@ -245,6 +261,13 @@ class PDFParser implements FileParser {
         content: '',
         metadata: { error: 'Failed to parse PDF' }
       };
+    } finally {
+      try {
+        await loadingTask?.destroy();
+      } catch (error) {
+        logger.warn('PDF loading task cleanup failed', { error });
+      }
+      release();
     }
   }
 
