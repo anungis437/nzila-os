@@ -32,10 +32,10 @@
     "@nzila/ui": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^11.3.30",
-    "next": "16.2.12",
+    "next": "16.4.2",
     "next-intl": "^4.9.1",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "zod": "^3.24.0"
   },
   "devDependencies": {
@@ -46,7 +46,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^10",
-    "eslint-config-next": "16.2.2",
+    "eslint-config-next": "16.4.2",
     "tailwindcss": "^4",
     "typescript": "^6",
     "vitest": "^4.1.2"

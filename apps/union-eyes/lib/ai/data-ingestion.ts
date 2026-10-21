@@ -17,7 +17,9 @@ let pdfjsLib: any = null;
 async function getPdfJs() {
   if (!pdfjsLib) {
     try {
-      pdfjsLib = await import('pdfjs-dist');
+      // pdfjs-dist 5+ throws DOMMatrix on the browser build under Node.
+      // The legacy build is the supported server entry for ingestion.
+      pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
     } catch {
       // Fallback for environments where pdfjs-dist not available
       return null;

@@ -17,14 +17,14 @@
   },
   "dependencies": {
     "@nzila/integrations-core": "workspace:*",
-    "twilio": "^5.10.7",
+    "twilio": "^6.2.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
     "typescript": "^6",
     "vitest": "^4.1.2",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.71.2",
+    "@typescript-eslint/parser": "^8.71.2",
     "eslint": "^10"
   }
 }

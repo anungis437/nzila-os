@@ -37,10 +37,10 @@
     "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "framer-motion": "^11.3.30",
-    "next": "16.2.12",
+    "next": "16.4.2",
     "next-intl": "^4.9.1",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "zod": "^3.24.0"
   },
   "devDependencies": {
@@ -51,7 +51,7 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^10",
-    "eslint-config-next": "16.2.2",
+    "eslint-config-next": "16.4.2",
     "tailwindcss": "^4",
     "typescript": "^6",
     "vitest": "^4.1.2"
