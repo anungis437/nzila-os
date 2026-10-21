@@ -134,11 +134,6 @@ jobs:
               return;
             }
 
-            if (sensitiveFiles.length === 0) {
-              core.info('No security-sensitive paths in this pull request diff. The design-review label is not required.');
-              return;
-            }
-
             const { data: labels } = await github.rest.issues.listLabelsOnIssue({
               owner,
               repo,
@@ -157,8 +152,7 @@ jobs:
                 '  - governance/security, governance/ai\n' +
                 '  - ops/policies, middleware.ts, auth/\n' +
                 '  - api/admin/break-glass, users, ai-actions\n\n' +
-                'To proceed: request review from a security team member who will add the label after review.\n\n' +
-                'Files in this diff:\n  - ' + sensitiveFiles.map(file => file.filename).join('\n  - ')
+                'To proceed: request review from a security team member who will add the label after review.'
               );
             } else {
               core.info('✅ Security design review label found.');
