@@ -71,6 +71,28 @@ def main():
     from django.apps import apps
     from django.core.checks import run_checks
     from django.db import connection
+    from django.db.backends.postgresql.operations import DatabaseOperations
+
+    def compose_offline(self, sql, params):
+        # PostgreSQL's schema editor renders constant db_default values through a
+        # live driver cursor. Collection forbids connections, so render the small
+        # set of literal types models declare and refuse anything else.
+        def literal(value):
+            if value is None:
+                return "NULL"
+            if isinstance(value, bool):
+                return "true" if value else "false"
+            if isinstance(value, int):
+                return str(value)
+            if isinstance(value, str) and "\\" not in value and "\x00" not in value:
+                return "'" + value.replace("'", "''") + "'"
+            raise RuntimeError("UE_V2_COLLECTION_UNSUPPORTED_DDL_PARAMETER:" + type(value).__name__)
+
+        if not isinstance(params, (tuple, list)):
+            raise RuntimeError("UE_V2_COLLECTION_UNSUPPORTED_DDL_PARAMETERS:" + type(params).__name__)
+        return sql % tuple(literal(value) for value in params)
+
+    DatabaseOperations.compose_sql = compose_offline
 
     errors = [str(error) for error in run_checks(tags=["models"]) if error.is_serious()]
     if errors:

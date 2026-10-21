@@ -103,7 +103,7 @@ export const getClaimsByMember = async (
 
 /**
  * Get all claims for an organization
- * @param organizationSlug - Organization slug (TEXT) from organization_members.organization_id
+ * @param organizationSlug - Organization slug. Resolved to organizations.id before the claim query.
  */
 export const getClaimsByOrganization = async (
   organizationSlug: string,

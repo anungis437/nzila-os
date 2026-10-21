@@ -277,11 +277,10 @@ END $$;
 CREATE TABLE IF NOT EXISTS public.organization_members (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id text NOT NULL,
-  -- Canonical schema (db/migrations-audit/0000_familiar_silhouette.sql) declares
-  -- organization_id as text. Runtime SQL casts c.organization_id::text to join
-  -- against it (e.g. claims dashboard query). Must be text here too, otherwise
-  -- joins fail with "operator does not exist: uuid = text".
-  organization_id text NOT NULL,
+  -- Canonical contract: UUID foreign key to organizations.id. Django, migration
+  -- 0002, and the Drizzle projection agree. Comparing this column to
+  -- organizations.slug is not a current path.
+  organization_id uuid NOT NULL,
   tenant_id uuid,
   role text NOT NULL,
   status text NOT NULL,
@@ -330,20 +329,45 @@ ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS search_vector t
 ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS tenant_id uuid;
 ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS preferred_contact_method text;
 
--- Converge organization_id to text if a prior baseline created it as uuid.
--- Runtime joins use `m.organization_id = c.organization_id::text`, which fails
--- with `operator does not exist: uuid = text` when the column stayed uuid.
+-- Keep organization_id as uuid. A previous baseline stored text. Convert only
+-- when every existing value is a UUID. Non-UUID values fail closed so a slug
+-- is never coerced into the foreign key.
 DO $$
+DECLARE
+  membership_type text;
+  non_uuid integer;
 BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'organization_members'
-      AND column_name = 'organization_id'
-      AND data_type = 'uuid'
+  SELECT data_type INTO membership_type
+  FROM information_schema.columns
+  WHERE table_schema = 'public'
+    AND table_name = 'organization_members'
+    AND column_name = 'organization_id';
+
+  IF membership_type IN ('text', 'character varying') THEN
+    SELECT COUNT(*) INTO non_uuid
+    FROM public.organization_members
+    WHERE organization_id IS NOT NULL
+      AND organization_id::text !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$';
+    IF non_uuid > 0 THEN
+      RAISE EXCEPTION
+        'QA baseline refuses to coerce organization_members.organization_id to uuid: % value(s) are not UUIDs.',
+        non_uuid;
+    END IF;
+    ALTER TABLE public.organization_members
+      ALTER COLUMN organization_id TYPE uuid USING organization_id::uuid;
+  ELSIF membership_type IS DISTINCT FROM 'uuid' THEN
+    RAISE EXCEPTION
+      'QA baseline expected organization_members.organization_id uuid, found %.',
+      COALESCE(membership_type, 'missing');
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'organization_members_organization_id_fkey'
   ) THEN
-    EXECUTE 'ALTER TABLE public.organization_members ALTER COLUMN organization_id TYPE text USING organization_id::text';
+    ALTER TABLE public.organization_members
+      ADD CONSTRAINT organization_members_organization_id_fkey
+      FOREIGN KEY (organization_id) REFERENCES public.organizations(id) ON DELETE CASCADE;
   END IF;
 END $$;
 
@@ -624,12 +648,32 @@ CREATE TABLE IF NOT EXISTS public.subscription_plans (
   CONSTRAINT subscription_plans_code_unique UNIQUE (code)
 );
 
+DO $$ BEGIN
+  CREATE TYPE public.subscription_status AS ENUM ('active', 'trialing', 'past_due', 'cancelled', 'paused');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.platform_invoice_status AS ENUM (
+    'draft', 'issued', 'paid', 'partially_paid', 'overdue', 'void', 'written_off'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.platform_payment_status AS ENUM ('pending', 'processing', 'completed', 'failed', 'refunded');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- Fresh-install producer for the Drizzle billing contract. billing_accounts
+-- does not exist yet at this point; platform 0010 adds that foreign key.
+-- CREATE TABLE IF NOT EXISTS does not repair an older physical shape.
 CREATE TABLE IF NOT EXISTS public.org_subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  billing_account_id uuid,
+  billing_account_id uuid NOT NULL,
   plan_id uuid NOT NULL,
   organization_id uuid NOT NULL,
-  status varchar(20) NOT NULL DEFAULT 'active',
+  status public.subscription_status NOT NULL DEFAULT 'active',
   start_date timestamptz NOT NULL DEFAULT now(),
   end_date timestamptz,
   trial_end_date timestamptz,
@@ -645,7 +689,7 @@ CREATE TABLE IF NOT EXISTS public.org_subscriptions (
 );
 CREATE TABLE IF NOT EXISTS public.platform_invoices (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  billing_account_id uuid,
+  billing_account_id uuid NOT NULL,
   organization_id uuid NOT NULL,
   billing_period_id uuid,
   invoice_number varchar(50) NOT NULL,
@@ -656,7 +700,7 @@ CREATE TABLE IF NOT EXISTS public.platform_invoices (
   total_amount numeric(14, 2) NOT NULL DEFAULT 0,
   amount_paid numeric(14, 2) NOT NULL DEFAULT 0,
   currency varchar(3) NOT NULL DEFAULT 'CAD',
-  status varchar(20) NOT NULL DEFAULT 'draft',
+  status public.platform_invoice_status NOT NULL DEFAULT 'draft',
   notes text,
   metadata jsonb,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -667,11 +711,11 @@ CREATE TABLE IF NOT EXISTS public.platform_invoices (
 
 CREATE TABLE IF NOT EXISTS public.platform_payments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  billing_account_id uuid,
+  billing_account_id uuid NOT NULL,
   organization_id uuid NOT NULL,
   amount numeric(14, 2) NOT NULL DEFAULT 0,
   currency varchar(3) NOT NULL DEFAULT 'CAD',
-  status varchar(20) NOT NULL DEFAULT 'pending',
+  status public.platform_payment_status NOT NULL DEFAULT 'pending',
   method varchar(50) NOT NULL DEFAULT 'unknown',
   external_reference varchar(255),
   paid_at timestamptz,

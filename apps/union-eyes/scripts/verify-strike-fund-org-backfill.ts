@@ -44,17 +44,45 @@ async function main() {
     // disbursement, deliberately structured differently from the
     // migration's own set-based CTE join, so this script is not just
     // re-checking the migration's own logic against itself.
-    const rows = await sql<{ candidate_count: string }[]>`
-      SELECT (
-        SELECT COUNT(DISTINCT o.id)
-        FROM organization_members om
-        JOIN organizations o ON o.slug = om.organization_id
-        WHERE om.user_id = sfd.user_id
-          AND om.joined_at <= sfd.payment_date
-          AND (om.deleted_at IS NULL OR om.deleted_at > sfd.payment_date)
-      )::text AS candidate_count
-      FROM strike_fund_disbursements sfd
+    const [column] = await sql<{ data_type: string | null }[]>`
+      SELECT data_type
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'organization_members'
+        AND column_name = 'organization_id'
     `
+    const membershipType = column?.data_type ?? null
+    const currentUuid = membershipType === 'uuid'
+    const historicalText = membershipType === 'text' || membershipType === 'character varying'
+    if (!currentUuid && !historicalText) {
+      throw new Error(
+        `organization_members.organization_id is ${membershipType ?? 'missing'}. Expected uuid for the current contract.`,
+      )
+    }
+
+    const rows = currentUuid
+      ? await sql<{ candidate_count: string }[]>`
+          SELECT (
+            SELECT COUNT(DISTINCT o.id)
+            FROM organization_members om
+            JOIN organizations o ON o.id = om.organization_id
+            WHERE om.user_id = sfd.user_id
+              AND om.joined_at <= sfd.payment_date
+              AND (om.deleted_at IS NULL OR om.deleted_at > sfd.payment_date)
+          )::text AS candidate_count
+          FROM strike_fund_disbursements sfd
+        `
+      : await sql<{ candidate_count: string }[]>`
+          SELECT (
+            SELECT COUNT(DISTINCT o.id)
+            FROM organization_members om
+            JOIN organizations o ON o.slug = om.organization_id
+            WHERE om.user_id = sfd.user_id
+              AND om.joined_at <= sfd.payment_date
+              AND (om.deleted_at IS NULL OR om.deleted_at > sfd.payment_date)
+          )::text AS candidate_count
+          FROM strike_fund_disbursements sfd
+        `
 
     let mappedCount = 0
     let ambiguousCount = 0
@@ -68,14 +96,24 @@ async function main() {
 
     const report = {
       table: 'strike_fund_disbursements',
-      mappingSource:
-        'organization_members effective at each disbursement.payment_date (joined_at <= payment_date AND (deleted_at IS NULL OR deleted_at > payment_date)) -> organizations.slug (exactly-one match required per row)',
+      schemaContract: currentUuid ? 'CURRENT_UUID' : 'HISTORICAL_TEXT_NOT_CURRENT',
+      currentLifecycleCompatible: currentUuid,
+      mappingSource: currentUuid
+        ? 'organization_members.organization_id uuid = organizations.id, effective at each disbursement.payment_date'
+        : 'HISTORICAL_TEXT_NOT_CURRENT: organizations.slug = organization_members.organization_id. This does not prove the canonical UUID schema.',
       rowCount: Number(totalRows),
       mappedCount,
       ambiguousCount,
       unmappedCount,
     }
     console.log(JSON.stringify(report, null, 2))
+
+    if (!currentUuid) {
+      console.error(
+        '[verify-strike-fund-org-backfill] Membership organization_id is not uuid. The slug join is historical evidence only. The current producer is migrations-platform/0008_strike_fund_uuid_membership_provenance.sql.',
+      )
+      process.exit(1)
+    }
 
     if (report.ambiguousCount > 0 || report.unmappedCount > 0) {
       console.error(

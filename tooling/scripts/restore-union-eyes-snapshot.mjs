@@ -41,11 +41,48 @@
  * Override binary paths via PG_RESTORE_PATH and PSQL_PATH env vars.
  */
 
-import { URL, fileURLToPath } from 'node:url';
+import { URL, fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createWriteStream, unlinkSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+
+const SERVING_DATABASES = new Set([
+  'postgres',
+  'template0',
+  'template1',
+  'template2',
+  'union_eyes',
+  'union_eyes_lineage',
+  'union_eyes_restore',
+  'nzila',
+  'production',
+  'staging',
+]);
+
+/**
+ * Destructive pre-clean is only legal for a disposable database.
+ * QA_TEST_ENV alone is not enough when the database name is a serving name.
+ */
+export function assertDisposableRestoreTarget(database, env = process.env) {
+  const mode = String(env.UE_ENVIRONMENT || env.NZILA_MODE || '').toLowerCase();
+  if (mode === 'production' || mode === 'prod' || mode === 'staging') {
+    throw new Error(
+      `Refusing snapshot pre-clean for environment ${mode}. This path is not a production restore.`,
+    );
+  }
+  if (!database || SERVING_DATABASES.has(database)) {
+    throw new Error(`Refusing snapshot pre-clean of database ${database || '(none)'}.`);
+  }
+  const disposableName = /^(ci_|ue_|test_|tmp_)/.test(database);
+  const explicit = env.UE_DISPOSABLE_DATABASE === '1';
+  const qa = env.QA_TEST_ENV === 'true';
+  if (!disposableName || (!explicit && !qa)) {
+    throw new Error(
+      `Refusing snapshot pre-clean of ${database}. Set QA_TEST_ENV=true or UE_DISPOSABLE_DATABASE=1 and use a ci_, ue_, test_, or tmp_ database name.`,
+    );
+  }
+}
 
 function fail(msg) {
   process.stderr.write(`[restore] ${msg}\n`);
@@ -56,34 +93,10 @@ function info(msg) {
   process.stdout.write(`[restore] ${msg}\n`);
 }
 
-const databaseUrl = process.env.DATABASE_URL;
-const snapshotUrl = process.env.UE_DB_RESTORE_SNAPSHOT_URL;
-
-if (!databaseUrl) fail('DATABASE_URL is required.');
-if (!snapshotUrl) fail('UE_DB_RESTORE_SNAPSHOT_URL is required.');
-
-const targetEnv = (process.env.UE_ENVIRONMENT || process.env.NZILA_MODE || '').toLowerCase();
-if (targetEnv === 'production' || targetEnv === 'prod') {
-  fail(
-    'Production targets must not be restored via this path. See ' +
-      'docs/architecture/orm-governance/deployment-legitimacy-reconciliation.md',
-  );
-}
-
+let databaseUrl = process.env.DATABASE_URL;
+let snapshotUrl = process.env.UE_DB_RESTORE_SNAPSHOT_URL;
 let parsed;
-try {
-  parsed = new URL(snapshotUrl);
-} catch {
-  fail(`UE_DB_RESTORE_SNAPSHOT_URL is not a valid URL: ${snapshotUrl}`);
-}
-
-const supported = ['https:', 'http:', 'azure:', 'file:'];
-if (!supported.includes(parsed.protocol)) {
-  fail(`Unsupported snapshot URL scheme: ${parsed.protocol}`);
-}
-
-info(`Snapshot source scheme: ${parsed.protocol}`);
-info(`Target environment: ${targetEnv || '(unspecified)'}`);
+let targetEnv = '';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -138,6 +151,11 @@ function findPsql() {
  * "already exists" or "objects depend on it" errors on re-runs.
  */
 function preCleanTarget(connInfo, pgEnv) {
+  try {
+    assertDisposableRestoreTarget(connInfo.database, process.env);
+  } catch (error) {
+    fail(error.message);
+  }
   const psql = findPsql();
   info('Pre-cleaning target DB schemas...');
 
@@ -162,9 +180,23 @@ function preCleanTarget(connInfo, pgEnv) {
 
   info(`Dropping ${schemas.length} schema(s): ${schemas.join(', ')}`);
 
-  // Build a single SQL statement to drop all user schemas + recreate public.
+  // Recreate public without granting it to PostgreSQL PUBLIC.
+  // pg_restore --no-acl intentionally does not restore object privileges.
+  // Scoped security effects are reconciled by migration 0017, not by this GRANT.
   const dropStmts = schemas.map((s) => `DROP SCHEMA IF EXISTS "${s}" CASCADE;`).join(' ');
-  const sql = `${dropStmts} CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO public;`;
+  const sql = [
+    dropStmts,
+    'CREATE SCHEMA public;',
+    'REVOKE ALL ON SCHEMA public FROM PUBLIC;',
+    `DO $restore$ BEGIN
+       IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime') THEN
+         EXECUTE format('REVOKE ALL ON DATABASE %I FROM union_eyes_runtime', current_database());
+       END IF;
+       IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_system') THEN
+         EXECUTE format('REVOKE ALL ON DATABASE %I FROM union_eyes_system', current_database());
+       END IF;
+     END $restore$;`,
+  ].join(' ');
 
   const dropResult = spawnSync(psql, [
     '-h', connInfo.host, '-U', connInfo.user, '-d', connInfo.database, '-p', connInfo.port,
@@ -318,6 +350,23 @@ async function downloadAzureBlob(url) {
 // ---------------------------------------------------------------------------
 
 async function main() {
+  databaseUrl = process.env.DATABASE_URL;
+  snapshotUrl = process.env.UE_DB_RESTORE_SNAPSHOT_URL;
+  if (!databaseUrl) fail('DATABASE_URL is required.');
+  if (!snapshotUrl) fail('UE_DB_RESTORE_SNAPSHOT_URL is required.');
+  targetEnv = (process.env.UE_ENVIRONMENT || process.env.NZILA_MODE || '').toLowerCase();
+  try {
+    parsed = new URL(snapshotUrl);
+  } catch {
+    fail(`UE_DB_RESTORE_SNAPSHOT_URL is not a valid URL: ${snapshotUrl}`);
+  }
+  const supported = ['https:', 'http:', 'azure:', 'file:'];
+  if (!supported.includes(parsed.protocol)) {
+    fail(`Unsupported snapshot URL scheme: ${parsed.protocol}`);
+  }
+  info(`Snapshot source scheme: ${parsed.protocol}`);
+  info(`Target environment: ${targetEnv || '(unspecified)'}`);
+
   const connInfo = parseDatabaseUrl(databaseUrl);
   let tmpFile = null;
 
@@ -342,4 +391,7 @@ async function main() {
   }
 }
 
-main().catch((err) => fail(err.message));
+const invokedDirectly = process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
+if (invokedDirectly) {
+  main().catch((err) => fail(err.message));
+}

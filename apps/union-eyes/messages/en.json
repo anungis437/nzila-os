@@ -11081,6 +11081,7 @@
     "logins7dTitle": "Logins (7d)",
     "releasesScheduled": "{count} release{count, plural, one {} other {s}} scheduled",
     "serviceHealthTitle": "Service Health",
+    "serviceHealthUnavailable": "Service health could not be loaded. Try again later; if the problem continues, contact platform support.",
     "noActiveIncidents": "No active incidents",
     "statusInvestigating": "Investigating",
     "statusMonitoring": "Monitoring",
@@ -11116,7 +11117,9 @@
     "resourceUtilizationTitle": "Resource Utilization",
     "warningLabel": "Warning: {value}%",
     "criticalLabel": "Critical: {value}%",
-    "capacityUsageLabel": "{used} {unit} of {total} {unit}"
+    "capacityUsageLabel": "{used} {unit} of {total} {unit}",
+    "noServicesRecorded": "No platform_services rows are recorded.",
+    "notRecordedInCatalog": "This operations view is not recorded in platform_services. No status is inferred."
   },
   "customerSuccessPage": {
     "title": "Customer Success",

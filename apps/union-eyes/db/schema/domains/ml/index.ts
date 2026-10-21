@@ -22,3 +22,4 @@ export * from './ai-clause-reasoning';
 export * from './employer-risk-scores';
 export * from './ai-copilot-sessions';
 export * from './ai-insight-reports';
+export * from './knowledge-transfer-runtime';

@@ -115,9 +115,12 @@ async function applyExtensionsAndScoped(conn: PgConn, dbName: string): Promise<{
     ensureExtensions: (client: unknown, opts?: { log?: (m: string) => void }) => Promise<void>;
     applyScopedMigrations: (
       client: unknown,
-      opts: { journalPath: string; migrationsDir: string; log?: (m: string) => void },
+      opts: { journalPath: string; migrationsDir: string; throughTag?: string; log?: (m: string) => void },
     ) => Promise<{ applied: number; appliedTags: string[] }>;
   };
+  const stages = (await import(
+    pathToFileURL(path.join(REPO_ROOT, 'tooling', 'scripts', 'lib', 'union-eyes-bootstrap-stages.mjs')).href
+  )) as { SCOPED_FOUNDATION_THROUGH_TAG: string };
   const client = new pg.Client(pgConfig(conn, dbName));
   await client.connect();
   try {
@@ -141,6 +144,7 @@ async function applyExtensionsAndScoped(conn: PgConn, dbName: string): Promise<{
     const scoped = await shared.applyScopedMigrations(client, {
       journalPath: SCOPED_JOURNAL,
       migrationsDir: MIGRATIONS_CACHE,
+      throughTag: stages.SCOPED_FOUNDATION_THROUGH_TAG,
       log,
     });
     return { scopedApplied: scoped.applied, scopedTags: scoped.appliedTags };

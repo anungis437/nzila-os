@@ -8,8 +8,54 @@ import {
   type HealthCheckState,
   type RuntimeHealthCheck,
 } from '@nzila/os-core/health'
+import { createLogger } from '@nzila/os-core/telemetry'
+import {
+  CATALOG_ADMISSION_PUBLIC_ERROR,
+  evaluateCatalogAdmission,
+} from '@/lib/operations/catalog-admission'
 
 const APP = 'union-eyes'
+const logger = createLogger('union-eyes.health')
+
+async function checkCatalogAuthority(): Promise<{ state: HealthCheckState; ms: number; error?: string; note?: string }> {
+  const start = Date.now()
+  try {
+    const report = await evaluateCatalogAdmission()
+    if (!report.ok) {
+      logger.error('catalog authority admission failed', {
+        event: 'catalog_authority_admission_failed',
+        applicationReady: false,
+        privilegesUnchanged: true,
+        violationCount: report.violations.length,
+        violations: report.violations,
+      })
+      return {
+        state: 'fail',
+        ms: Date.now() - start,
+        error: CATALOG_ADMISSION_PUBLIC_ERROR,
+        note: 'applicationReady=false',
+      }
+    }
+    return {
+      state: 'ok',
+      ms: Date.now() - start,
+      note: 'applicationReady=false',
+    }
+  } catch (err) {
+    logger.error('catalog authority admission failed', {
+      event: 'catalog_authority_admission_failed',
+      applicationReady: false,
+      privilegesUnchanged: true,
+      error: err instanceof Error ? err.message : 'catalog admission failed',
+    })
+    return {
+      state: 'fail',
+      ms: Date.now() - start,
+      error: CATALOG_ADMISSION_PUBLIC_ERROR,
+      note: 'applicationReady=false',
+    }
+  }
+}
 
 async function checkDb(): Promise<{ state: HealthCheckState; ms: number; error?: string }> {
   const start = Date.now()
@@ -103,11 +149,12 @@ async function checkBackend(): Promise<{ state: HealthCheckState; ms?: number; n
 }
 
 export async function GET() {
-  const [dbResult, authResult, redisResult, backendResult] = await Promise.allSettled([
+  const [dbResult, authResult, redisResult, backendResult, catalogResult] = await Promise.allSettled([
     checkDb(),
     checkAuth(),
     checkRedis(),
     checkBackend(),
+    checkCatalogAuthority(),
   ])
 
   const db: { state: HealthCheckState; ms: number; error?: string } =
@@ -124,6 +171,10 @@ export async function GET() {
     backendResult.status === 'fulfilled'
       ? backendResult.value
       : { state: 'degraded', note: 'probe failed' }
+  const catalog: { state: HealthCheckState; ms: number; error?: string; note?: string } =
+    catalogResult.status === 'fulfilled'
+      ? catalogResult.value
+      : { state: 'fail', ms: 0, error: CATALOG_ADMISSION_PUBLIC_ERROR, note: 'applicationReady=false' }
 
   // Normalize raw states via os-core primitives (cross-app health contract)
   const normalized = normalizeHealthChecks({
@@ -154,6 +205,13 @@ export async function GET() {
       status: normalized.backend,
       ...(backend.ms !== undefined ? { ms: backend.ms } : {}),
       ...(backend.note ? { note: backend.note } : {}),
+    },
+    catalogAuthority: {
+      status: catalog.state,
+      critical: true,
+      ms: catalog.ms,
+      ...(catalog.error ? { error: catalog.error } : {}),
+      ...(catalog.note ? { note: catalog.note } : {}),
     },
   }
 

@@ -30,6 +30,13 @@ class FakeClient {
     if (trimmed.startsWith('SELECT hash FROM drizzle.__drizzle_migrations')) {
       return { rows: Array.from(this.ledger.keys()).map((hash) => ({ hash })) };
     }
+    // Ledger integrity reads. They are reads, not executed DDL.
+    if (trimmed.startsWith("SELECT to_regclass('drizzle.__drizzle_migrations')")) {
+      return { rows: [{ regclass: 'drizzle.__drizzle_migrations' }] };
+    }
+    if (trimmed.startsWith('SELECT id, hash FROM drizzle.__drizzle_migrations')) {
+      return { rows: Array.from(this.ledger.keys()).map((hash, index) => ({ id: index + 1, hash })) };
+    }
     if (trimmed.startsWith('SELECT column_name FROM information_schema.columns')) {
       const requested = params?.[0] ?? [];
       return { rows: requested.filter((c) => this.addedColumns.has(c)).map((column_name) => ({ column_name })) };

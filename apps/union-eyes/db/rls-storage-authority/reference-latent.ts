@@ -3257,4 +3257,16 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     //     status/report_tier_id/claimed_* remain runtime-mutable (the
     //     claimed-workbook access chain is the next tranche).
   },
+  {
+    table: "platform_services",
+    scopeDisposition: "OTHER_EXPLICITLY_JUSTIFIED",
+    classification: "GLOBAL_REFERENCE_DATA",
+    reason: "The QA baseline creates public.platform_services (service_name, status, updated_at) with no organization column. app/[locale]/dashboard/settings/page.tsx reads service_name and status for the integrations panel, and app/[locale]/dashboard/operations/page.tsx reads service_name, status, and updated_at. union_eyes_runtime holds SELECT and nothing else. No application writer was found. Incident, SLA, release, login, and capacity readings are not stored on this relation, and the operations page does not infer them. Global reference data does not take FORCE RLS.",
+    supportingCapability: ["tooling/sql/union-eyes-qa-baseline.sql","app/[locale]/dashboard/settings/page.tsx"],
+    requiredRuntimePrivileges: ["SELECT"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
+  },
 ]

@@ -207,6 +207,26 @@ describe('rls-storage-authority-manifest privilege/authority invariants', () => 
     expect(offenders).toEqual([]);
   });
 
+  it('PERMANENT INVARIANT: dedicated framework and platform-metadata entries grant nothing to union_eyes_runtime or union_eyes_system', () => {
+    const offenders: string[] = [];
+    for (const entry of storageAuthorityManifest) {
+      if (
+        entry.classification !== 'FRAMEWORK_DEDICATED_EXECUTION_CONTEXT' &&
+        entry.classification !== 'PLATFORM_METADATA_DEDICATED_EXECUTION_CONTEXT'
+      ) continue;
+      if (entry.requiredRuntimePrivileges === 'TBD' || entry.requiredSystemPrivileges === 'TBD') {
+        offenders.push(`${entry.table} (TBD privilege)`);
+        continue;
+      }
+      if (opsOf(entry.requiredRuntimePrivileges).length > 0) offenders.push(`${entry.table} (runtime)`);
+      if (opsOf(entry.requiredSystemPrivileges).length > 0) offenders.push(`${entry.table} (system)`);
+      if (entry.dbExecutionPrincipal !== 'NONE') offenders.push(`${entry.table} (principal)`);
+      if (!entry.frameworkRolePrivileges?.length) offenders.push(`${entry.table} (no dedicated role)`);
+      if (entry.classification === 'LATENT_UNREACHABLE') offenders.push(entry.table);
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it('PERMANENT INVARIANT (round 38): every CONTAINED_NO_AUTHORITY entry\'s reason cites an unconditional deny-all permission and the absence of a legitimate consumer', () => {
     // A CONTAINED_NO_AUTHORITY disposition is only valid when the reason
     // documents the specific mechanical proof (deny-all class name +

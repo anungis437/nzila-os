@@ -15,8 +15,8 @@
  */
 
 import { randomUUID } from 'crypto';
-import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { inOrganization, isUuid } from '../org-scope';
 import {
   buildOrgAiTrace,
   getAiClient,
@@ -36,26 +36,6 @@ import type { CopilotQueryInput, CopilotQueryResult, CopilotMessage } from './co
 // Profile key for continuity copilot — reuses STEWARD_COPILOT as organizational reasoning profile
 const COPILOT_PROFILE = 'ue-steward-copilot';
 
-/** Ensure the copilot conversations table exists. */
-async function ensureTable(): Promise<void> {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS ue_copilot_conversations (
-      id           TEXT PRIMARY KEY,
-      org_id       TEXT NOT NULL,
-      session_id   TEXT,
-      title        TEXT NOT NULL DEFAULT 'Continuity Conversation',
-      messages     JSONB NOT NULL DEFAULT '[]',
-      context_snapshot JSONB,
-      created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-      updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS ue_copilot_conversations_org_idx
-    ON ue_copilot_conversations (org_id, created_at DESC)
-  `);
-}
-
 /** Load or create a conversation. */
 async function upsertConversation(
   orgId: string,
@@ -63,37 +43,46 @@ async function upsertConversation(
   sessionId: string | null,
   contextSnapshot: Record<string, unknown> | null,
 ): Promise<string> {
-  await ensureTable();
-  if (conversationId) {
+  if (conversationId && isUuid(conversationId)) {
     // Verify it belongs to this org
-    const rows = await db.execute(sql`
-      SELECT id FROM ue_copilot_conversations WHERE id = ${conversationId} AND org_id = ${orgId} LIMIT 1
-    `);
+    const rows = await inOrganization(orgId, (tx) =>
+      tx.execute(sql`
+        SELECT id FROM ue_copilot_conversations WHERE id = ${conversationId} AND organization_id = ${orgId} LIMIT 1
+      `),
+    );
     const result = rows as any as Record<string, unknown>[];
     if (result.length > 0) return conversationId;
   }
   // Create new conversation
   const id = randomUUID();
   const now = new Date().toISOString();
-  await db.execute(sql`
-    INSERT INTO ue_copilot_conversations (id, org_id, session_id, context_snapshot, created_at, updated_at)
-    VALUES (
-      ${id}, ${orgId}, ${sessionId ?? null},
-      ${contextSnapshot ? JSON.stringify(contextSnapshot) : null}::jsonb,
-      ${now}::timestamptz, ${now}::timestamptz
-    )
-  `);
+  await inOrganization(orgId, (tx) =>
+    tx.execute(sql`
+      INSERT INTO ue_copilot_conversations (id, organization_id, session_id, context_snapshot, created_at, updated_at)
+      VALUES (
+        ${id}, ${orgId}, ${sessionId ?? null},
+        ${contextSnapshot ? JSON.stringify(contextSnapshot) : null}::jsonb,
+        ${now}::timestamptz, ${now}::timestamptz
+      )
+    `),
+  );
   return id;
 }
 
 /** Append a message to a conversation. */
-async function appendMessage(conversationId: string, message: CopilotMessage): Promise<void> {
-  await db.execute(sql`
-    UPDATE ue_copilot_conversations
-    SET messages = messages || ${JSON.stringify([message])}::jsonb,
-        updated_at = now()
-    WHERE id = ${conversationId}
-  `);
+async function appendMessage(
+  orgId: string,
+  conversationId: string,
+  message: CopilotMessage,
+): Promise<void> {
+  await inOrganization(orgId, (tx) =>
+    tx.execute(sql`
+      UPDATE ue_copilot_conversations
+      SET messages = messages || ${JSON.stringify([message])}::jsonb,
+          updated_at = now()
+      WHERE id = ${conversationId} AND organization_id = ${orgId}
+    `),
+  );
 }
 
 /** Build a continuity-aware system prompt from org context. */
@@ -294,8 +283,8 @@ export async function processCopilotQuery(
   const assistantMsgId = randomUUID();
   const now = new Date().toISOString();
 
-  await appendMessage(convId, { id: userMsgId, role: 'user', content: input.query, createdAt: now });
-  await appendMessage(convId, {
+  await appendMessage(orgId, convId, { id: userMsgId, role: 'user', content: input.query, createdAt: now });
+  await appendMessage(orgId, convId, {
     id: assistantMsgId,
     role: 'assistant',
     content: answer,
@@ -327,12 +316,14 @@ export async function loadConversationHistory(
   orgId: string,
   conversationId: string,
 ): Promise<CopilotMessage[]> {
-  await ensureTable();
-  const rows = await db.execute(sql`
-    SELECT messages FROM ue_copilot_conversations
-    WHERE id = ${conversationId} AND org_id = ${orgId}
-    LIMIT 1
-  `);
+  if (!isUuid(conversationId)) return [];
+  const rows = await inOrganization(orgId, (tx) =>
+    tx.execute(sql`
+      SELECT messages FROM ue_copilot_conversations
+      WHERE id = ${conversationId} AND organization_id = ${orgId}
+      LIMIT 1
+    `),
+  );
   const result = rows as any as Record<string, unknown>[];
   if (result.length === 0) return [];
   return (result[0].messages as CopilotMessage[]) ?? [];
@@ -343,14 +334,15 @@ export async function listConversations(
   orgId: string,
   limit = 10,
 ): Promise<Array<{ id: string; title: string; updatedAt: string; messageCount: number }>> {
-  await ensureTable();
-  const rows = await db.execute(sql`
-    SELECT id, title, updated_at, jsonb_array_length(messages) AS message_count
-    FROM ue_copilot_conversations
-    WHERE org_id = ${orgId}
-    ORDER BY updated_at DESC
-    LIMIT ${limit}
-  `);
+  const rows = await inOrganization(orgId, (tx) =>
+    tx.execute(sql`
+      SELECT id, title, updated_at, jsonb_array_length(messages) AS message_count
+      FROM ue_copilot_conversations
+      WHERE organization_id = ${orgId}
+      ORDER BY updated_at DESC
+      LIMIT ${limit}
+    `),
+  );
   return (rows as any as Record<string, unknown>[]).map((r) => ({
     id: r.id as string,
     title: r.title as string,

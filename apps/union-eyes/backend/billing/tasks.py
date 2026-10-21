@@ -19,6 +19,7 @@ from decimal import Decimal
 from typing import Literal, Optional
 
 from celery import shared_task
+from django.core.cache import cache
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -136,6 +137,7 @@ def send_dues_reminders_task(self):
         "total_processed": 0,
         "reminders_sent": 0,
         "reminders_failed": 0,
+        "reminders_already_sent": 0,
         "breakdown": {
             "seven_day_reminders": 0,
             "one_day_reminders": 0,
@@ -152,9 +154,12 @@ def send_dues_reminders_task(self):
         pending_7day = _get_transactions_due_on(seven_days_out)
         for txn in pending_7day:
             result["total_processed"] += 1
-            if _send_dues_reminder(txn, reminder_type="7day"):
+            outcome = _send_dues_reminder(txn, reminder_type="7day")
+            if outcome == REMINDER_SENT:
                 result["reminders_sent"] += 1
                 result["breakdown"]["seven_day_reminders"] += 1
+            elif outcome == REMINDER_ALREADY_SENT:
+                result["reminders_already_sent"] += 1
             else:
                 result["reminders_failed"] += 1
 
@@ -162,9 +167,12 @@ def send_dues_reminders_task(self):
         pending_1day = _get_transactions_due_on(one_day_out)
         for txn in pending_1day:
             result["total_processed"] += 1
-            if _send_dues_reminder(txn, reminder_type="1day"):
+            outcome = _send_dues_reminder(txn, reminder_type="1day")
+            if outcome == REMINDER_SENT:
                 result["reminders_sent"] += 1
                 result["breakdown"]["one_day_reminders"] += 1
+            elif outcome == REMINDER_ALREADY_SENT:
+                result["reminders_already_sent"] += 1
             else:
                 result["reminders_failed"] += 1
 
@@ -172,9 +180,12 @@ def send_dues_reminders_task(self):
         overdue = _get_overdue_transactions(cutoff=today)
         for txn in overdue:
             result["total_processed"] += 1
-            if _send_dues_reminder(txn, reminder_type="overdue"):
+            outcome = _send_dues_reminder(txn, reminder_type="overdue")
+            if outcome == REMINDER_SENT:
                 result["reminders_sent"] += 1
                 result["breakdown"]["overdue_notices"] += 1
+            elif outcome == REMINDER_ALREADY_SENT:
+                result["reminders_already_sent"] += 1
             else:
                 result["reminders_failed"] += 1
 
@@ -427,8 +438,42 @@ def _get_overdue_transactions(cutoff: date) -> list[dict]:
         return []
 
 
-def _send_dues_reminder(txn: dict, reminder_type: str) -> bool:
-    """Dispatch a dues reminder notification for a transaction."""
+REMINDER_SENT = "sent"
+REMINDER_ALREADY_SENT = "already_sent"
+REMINDER_FAILED = "failed"
+
+# A claim that is never completed (the worker died between claiming and dispatching)
+# expires, so a redelivered run can send. A completed claim outlives any redelivery of
+# the same day's run.
+REMINDER_CLAIM_TTL_SECONDS = 3600
+REMINDER_SENT_TTL_SECONDS = 3 * 24 * 3600
+
+
+def _reminder_key(txn: dict, reminder_type: str) -> str:
+    return f"dues-reminder:{txn.get('id', '')}:{reminder_type}:{date.today().isoformat()}"
+
+
+def _send_dues_reminder(txn: dict, reminder_type: str) -> str:
+    """Dispatch a dues reminder notification for a transaction, at most once per day.
+
+    The reminder is an email and an in-app message, which cannot be taken back. Celery
+    redelivers a task after a worker dies (acks_late) and this task retries after a
+    partial failure, so the same run can reach this point twice. The first run claims
+    (transaction, reminder type, day) atomically; a second attempt finds the claim and
+    does not dispatch again. If the claim store cannot answer, uniqueness cannot be
+    shown, so nothing is sent.
+    """
+    key = _reminder_key(txn, reminder_type)
+    claimed = cache.add(key, "pending", REMINDER_CLAIM_TTL_SECONDS)
+    if claimed is False:
+        logger.info("Dues reminder already dispatched: txn=%s type=%s", txn.get("id"), reminder_type)
+        return REMINDER_ALREADY_SENT
+    if claimed is not True:
+        logger.error(
+            "Dues reminder not sent: claim store unavailable, cannot show it is not a duplicate: txn=%s",
+            txn.get("id"),
+        )
+        return REMINDER_FAILED
     try:
         from notifications.tasks import send_notification_task
 
@@ -455,12 +500,19 @@ def _send_dues_reminder(txn: dict, reminder_type: str) -> bool:
             },
             queue="notifications",
         )
-        return True
+        try:
+            cache.set(key, "sent", REMINDER_SENT_TTL_SECONDS)
+        except Exception:  # noqa: BLE001
+            # The message is already dispatched. The claim keeps its short TTL.
+            logger.warning("Could not record dues reminder as sent: txn=%s", txn.get("id"))
+        return REMINDER_SENT
     except Exception as exc:  # noqa: BLE001
         logger.error(
             "Failed to send dues reminder: txn=%s error=%s", txn.get("id"), exc
         )
-        return False
+        # Nothing was dispatched, so release the claim and let a retry send it.
+        cache.delete(key)
+        return REMINDER_FAILED
 
 
 def _get_transactions_needing_retry() -> list[dict]:
@@ -548,7 +600,11 @@ def _attempt_payment_retry(txn: dict) -> dict:
             )
             return {"success": False, "reason": "missing_payment_method"}
 
+        # The same logical attempt reuses one key, so a redelivered task cannot charge the
+        # member twice: Stripe returns the first result for a repeated key.
+        attempt = int((txn.get("metadata") or {}).get("failure_count", 0)) + 1
         intent = stripe.PaymentIntent.create(
+            idempotency_key=f"dues-retry:{txn.get('id', '')}:{attempt}",
             amount=amount_cents,
             currency=currency,
             customer=customer_id,

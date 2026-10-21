@@ -126,16 +126,18 @@ describe('0015 - existing-environment upgrade through the canonical executor', (
     // Staging ledger caught up through 0014: every earlier journal entry is recorded.
     await db.exec(`CREATE SCHEMA IF NOT EXISTS drizzle; CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at bigint);`);
     for (const e of shared.readJournalEntries(JOURNAL)) {
-      if (e.tag === TAG) continue;
+      // Caught up through 0014: only the entries before 0015 are recorded.
+      if (e.tag === TAG) break;
       await db.query('INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, 0)', [shared.computeMigrationHash(CACHE, e.tag).hash]);
     }
-    const first = await shared.applyScopedMigrations(db, { journalPath: JOURNAL, migrationsDir: CACHE, onlyTags: [TAG] });
+    // The canonical upgrade path: apply from the recorded prefix up to and including 0015.
+    const first = await shared.applyScopedMigrations(db, { journalPath: JOURNAL, migrationsDir: CACHE, throughTag: TAG });
     expect(first.appliedTags).toEqual([TAG]);
   });
 
   it('is recorded in the ledger and is a no-op on re-run (idempotent through the executor)', async () => {
     const shared = await loadShared();
-    const again = await shared.applyScopedMigrations(db, { journalPath: JOURNAL, migrationsDir: CACHE });
+    const again = await shared.applyScopedMigrations(db, { journalPath: JOURNAL, migrationsDir: CACHE, throughTag: TAG });
     expect(again.applied).toBe(0);
     await db.exec('RESET ROLE');
     await db.exec(SQL_0015.split('--> statement-breakpoint').join('\n')); // direct replay must also be safe
@@ -249,8 +251,8 @@ describe('0015 - no executable fail-open restore exists; recovery is forward, re
 describe('0015 - canonical placement and scope', () => {
   const entries = () => (JSON.parse(read(JOURNAL)) as { entries: Array<{ idx: number; tag: string }> }).entries;
 
-  it('is appended to the scoped journal (last entry) and is not under the frozen lineage', () => {
-    expect(entries().at(-1)).toMatchObject({ idx: 15, tag: TAG });
+  it('is registered once at idx 15 and is not under the frozen lineage', () => {
+    expect(entries().find((entry) => entry.idx === 15)).toMatchObject({ idx: 15, tag: TAG });
     const frozen = resolve(APP_ROOT, 'db', 'migrations');
     expect(() => read(resolve(frozen, `${TAG}.sql`))).toThrow();
     expect(entries().filter((e) => e.tag === TAG)).toHaveLength(1);
