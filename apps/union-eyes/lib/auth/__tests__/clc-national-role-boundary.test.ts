@@ -63,13 +63,12 @@
  *      LATENT_UNWIRED. Casts an arbitrary role string onto
  *      organizationMembers with NO allow-list. Zero real (non-test)
  *      importers today (enforced below).
- *   3. lib/data-export-import.ts's DataImportService.importRecord()
- *      ('members' case) — LATENT_UNWIRED. Also casts an arbitrary
- *      `data.role` onto organizationMembers (both UPDATE and INSERT) with
- *      NO allow-list — a SECOND unrestricted writer this round's audit
- *      found, not previously tracked anywhere. Zero real (non-test)
- *      importers of the exported `dataImportService` singleton today
- *      (enforced below).
+ *   3. lib/data-export-import.ts's DataImportService — LATENT_UNWIRED.
+ *      Member rows are no longer written here. Import delegates to
+ *      `importOrganizationMembers`, which uses the tenant role allow-list,
+ *      exemption rejection, and the active-administrator invariant.
+ *      Zero real (non-test) importers of the exported `dataImportService`
+ *      singleton today (enforced below).
  *   Every other `.update(organizationMembers)`/`.insert(organizationMembers)`
  *   call site found (app/api/admin/users/[userId]/route.ts: status/deletedAt
  *   only; app/api/users/me/organizations/route.ts: userId account-linking
@@ -160,14 +159,17 @@ describe('CLC national dashboard authority boundary (PR #752 round 5/6/12)', () 
     ).toEqual([]);
   });
 
-  it('DataImportService.importRecord (LATENT_UNWIRED, unrestricted role-write via bulk member import) has ZERO real importers of the exported dataImportService singleton today', () => {
+  it('DataImportService stays unwired and does not write membership rows itself', () => {
     const source = readFileSync(resolve(APP_ROOT, 'lib/data-export-import.ts'), 'utf8');
     expect(source).toMatch(/export const dataImportService = new DataImportService\(\)/);
-    expect(source).toMatch(/role: data\.role as string \| undefined/);
+    expect(source).toMatch(/importOrganizationMembers/);
+    expect(source).not.toMatch(/\.update\(organizationMembers\)/);
+    expect(source).not.toMatch(/\.insert\(organizationMembers\)/);
+    expect(source).not.toMatch(/role: data\.role/);
     const importers = realImporterFiles('dataImportService', 'lib/data-export-import.ts');
     expect(
       importers,
-      'dataImportService has gained a real caller — its "members" import case writes an arbitrary data.role onto organizationMembers with NO allow-list; that call site MUST validate against PLATFORM_ELEVATED_ROLES before this can pass',
+      'dataImportService has gained a real caller — that call site must keep using importOrganizationMembers rather than writing organizationMembers directly',
     ).toEqual([]);
   });
 

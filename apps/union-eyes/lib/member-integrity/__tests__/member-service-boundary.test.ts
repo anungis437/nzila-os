@@ -225,6 +225,7 @@ import {
   createMember,
   deleteMember,
   getMemberById,
+  importOrganizationMembers,
   listMembers,
   mergeMembers,
   permanentlyDeleteMember,
@@ -682,5 +683,87 @@ describe('member administration boundary', () => {
     expect(await readOwnMemberStatus(MEMBER_USER, ORG_B)).toBe(false)
     mocks.state.rows[0].status = 'inactive'
     expect(await readOwnMemberStatus(MEMBER_USER, ORG_A)).toBe(false)
+  })
+
+  it('rejects an unsafe member import before writing', async () => {
+    asPrincipal(ADMIN, ORG_A, 'admin')
+    seed({ id: 'admin-a', userId: 'admin-a-user', role: 'admin', status: 'active' })
+    seed({ id: 'foreign', userId: 'foreign-user', organizationId: ORG_B, role: 'member', status: 'active' })
+
+    const platform = await importOrganizationMembers(ORG_A, [{
+      email: 'new@example.com',
+      userId: 'new-user',
+      role: 'system_admin',
+    }], { updateExisting: false })
+    expect(platform).toMatchObject({ imported: 0 })
+    expect(platform.errors).toHaveLength(1)
+
+    const foreign = await importOrganizationMembers(ORG_A, [{
+      id: 'foreign',
+      email: 'foreign@example.com',
+      name: 'Foreign',
+    }], { updateExisting: true })
+    expect(foreign.imported).toBe(0)
+
+    const exemption = await importOrganizationMembers(ORG_A, [{
+      email: 'new@example.com',
+      userId: 'new-user',
+      exemptionApprovedBy: 'forged',
+      exemptFromPerCapita: true,
+    }], { updateExisting: false })
+    expect(exemption.imported).toBe(0)
+
+    const lastAdmin = await importOrganizationMembers(ORG_A, [{
+      id: 'admin-a',
+      email: 'admin@example.com',
+      status: 'inactive',
+    }], { updateExisting: true })
+    expect(lastAdmin.imported).toBe(0)
+    expect(mocks.state.rows.find((row) => row.id === 'admin-a')).toMatchObject({ role: 'admin', status: 'active' })
+    expect(mocks.state.rows.find((row) => row.userId === 'new-user')).toBeUndefined()
+    expect(mocks.state.audits).toEqual([])
+  })
+
+  it('validates a member import without writing and rolls back when the audit fails', async () => {
+    seed({ id: 'admin-a', userId: 'admin-a-user', role: 'admin', status: 'active' })
+    seed({ id: 'admin-b', userId: 'admin-b-user', role: 'admin', status: 'active' })
+    asPrincipal(OFFICER, ORG_A, 'officer')
+    const officer = await importOrganizationMembers(ORG_A, [{
+      id: 'admin-a',
+      email: 'admin-a@example.com',
+      status: 'inactive',
+    }], { updateExisting: true })
+    expect(officer.imported).toBe(0)
+    expect(mocks.state.rows.find((row) => row.id === 'admin-a')?.status).toBe('active')
+
+    asPrincipal(ADMIN, ORG_A, 'admin')
+
+    const preview = await importOrganizationMembers(ORG_A, [{
+      id: 'admin-a',
+      email: 'admin-a@example.com',
+      status: 'on-leave',
+    }], { updateExisting: true, validateOnly: true })
+    expect(preview).toEqual({ imported: 0, errors: [] })
+    expect(mocks.state.rows.find((row) => row.id === 'admin-a')?.status).toBe('active')
+    expect(mocks.state.audits).toEqual([])
+
+    mocks.state.auditFails = true
+    await expect(importOrganizationMembers(ORG_A, [{
+      email: 'new@example.com',
+      userId: 'new-user',
+      name: 'New',
+    }], { updateExisting: false })).rejects.toThrow('Failed to import members')
+    expect(mocks.state.rows.find((row) => row.userId === 'new-user')).toBeUndefined()
+    expect(mocks.state.outcomes).toContain('rollback')
+
+    mocks.state.auditFails = false
+    const imported = await importOrganizationMembers(ORG_A, [{
+      id: 'admin-a',
+      email: 'admin-a@example.com',
+      status: 'inactive',
+    }], { updateExisting: true })
+    expect(imported).toEqual({ imported: 1, errors: [] })
+    expect(mocks.state.rows.find((row) => row.id === 'admin-a')?.status).toBe('inactive')
+    expect(mocks.state.rows.find((row) => row.id === 'admin-b')?.status).toBe('active')
   })
 })
