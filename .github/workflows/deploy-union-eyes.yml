@@ -1214,6 +1214,7 @@ jobs:
     outputs:
       frontend_digest: ${{ steps.digests.outputs.frontend_digest }}
       backend_digest: ${{ steps.digests.outputs.backend_digest }}
+      source_sha: ${{ steps.source.outputs.sha }}
     steps:
       - name: Resolve application source SHA (two-SHA pin)
         id: source
@@ -1303,6 +1304,7 @@ jobs:
             --build-arg NEXT_PUBLIC_UE_DEMO_ORG_SLUG=${{ needs.plan.outputs.demo_org_slug }} \
             --build-arg UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }} \
             --build-arg UE_APP_URL=${{ needs.plan.outputs.app_url }} \
+            --label org.opencontainers.image.revision=${{ steps.source.outputs.sha }} \
             -t ${{ env.IMAGE }}:${{ steps.source.outputs.sha }} \
             -t ${{ env.IMAGE }}:${{ needs.plan.outputs.environment }} \
             .
@@ -1326,6 +1328,7 @@ jobs:
           # server-side ACR build; runner-side push needs only AcrPush.
           docker build \
             --file apps/union-eyes/backend/Dockerfile \
+            --label org.opencontainers.image.revision=${{ steps.source.outputs.sha }} \
             -t ${{ env.BACKEND_IMAGE }}:${{ steps.source.outputs.sha }} \
             -t ${{ env.BACKEND_IMAGE }}:latest \
             apps/union-eyes/backend
@@ -1376,7 +1379,10 @@ jobs:
     needs: [plan, build-push]
     name: Apply Django Migrations (ephemeral migration authority)
     environment: ${{ needs.plan.outputs.environment }}
+    outputs:
+      migration_role: ${{ steps.migrate.outputs.migration_role }}
     steps:
+      - uses: actions/checkout@v5
       - name: Assert build identity is configured (fail-closed)
         env:
           BUILD_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -1424,7 +1430,38 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Inventory and quiesce incompatible zero-traffic revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_APP="${{ needs.plan.outputs.app_name }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          az containerapp revision list --name "$TARGET_APP" --resource-group "$TARGET_RG" -o json > "$RUNNER_TEMP/ue-revision-inventory.json"
+          REHEARSAL_ARGS=()
+          if [ -n "${{ vars.UE_REHEARSAL_EVIDENCE_PATH }}" ]; then
+            REHEARSAL_ARGS=(--rehearsal "${{ vars.UE_REHEARSAL_EVIDENCE_PATH }}")
+          fi
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase quiesce \
+            --inventory "$RUNNER_TEMP/ue-revision-inventory.json" \
+            --release-sha "${{ needs.build-push.outputs.source_sha }}" \
+            --frontend-digest "${{ needs.build-push.outputs.frontend_digest }}" \
+            --backend-digest "${{ needs.build-push.outputs.backend_digest }}" \
+            --frontend-tag "${{ needs.build-push.outputs.source_sha }}" \
+            --backend-tag "${{ needs.build-push.outputs.source_sha }}" \
+            --frontend-label "${{ needs.build-push.outputs.source_sha }}" \
+            --backend-label "${{ needs.build-push.outputs.source_sha }}" \
+            "${REHEARSAL_ARGS[@]}" \
+            > "$RUNNER_TEMP/ue-quiesce-decision.json"
+          node --input-type=module -e 'import fs from "node:fs"; const decision = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(decision.quiesceRevisions.join("\n"))' "$RUNNER_TEMP/ue-quiesce-decision.json" | while IFS= read -r revision; do
+            [ -z "$revision" ] && continue
+            echo "Deactivating zero-traffic revision $revision before any database migration."
+            az containerapp revision deactivate --name "$TARGET_APP" --resource-group "$TARGET_RG" --revision "$revision"
+          done
+          az containerapp revision list --name "$TARGET_APP" --resource-group "$TARGET_RG" -o json > "$RUNNER_TEMP/ue-revision-inventory.json"
+
       - name: Run migrations with ephemeral migration-admin authority (fail-closed)
+        id: migrate
         shell: bash
         run: |
           set -euo pipefail
@@ -1467,6 +1504,44 @@ jobs:
             MIGRATE_EXTRA_ARGS="--fake-initial"
           fi
 
+          echo "migration_role=$ADMIN_PGUSER" >> "$GITHUB_OUTPUT"
+
+          set +e
+          docker run --rm \
+            -e PGHOST="$ADMIN_PGHOST" \
+            -e PGPORT="$ADMIN_PGPORT" \
+            -e PGDATABASE="$ADMIN_PGDATABASE" \
+            -e PGUSER="$ADMIN_PGUSER" \
+            -e PGPASSWORD="$ADMIN_PGPASSWORD" \
+            -e PGSSLMODE="require" \
+            ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }} \
+            python manage.py showmigrations --plan
+          PLAN_STATUS=$?
+          set -e
+          if [ "$PLAN_STATUS" -ne 0 ]; then
+            echo "::error::Django migration preflight failed before any migration was applied. Refusing to continue."
+            exit 1
+          fi
+
+          REHEARSAL_ARGS=()
+          if [ -n "${{ vars.UE_REHEARSAL_EVIDENCE_PATH }}" ]; then
+            REHEARSAL_ARGS=(--rehearsal "${{ vars.UE_REHEARSAL_EVIDENCE_PATH }}")
+          fi
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase migrate \
+            --inventory "$RUNNER_TEMP/ue-revision-inventory.json" \
+            --release-sha "${{ needs.build-push.outputs.source_sha }}" \
+            --frontend-digest "${{ needs.build-push.outputs.frontend_digest }}" \
+            --backend-digest "${{ needs.build-push.outputs.backend_digest }}" \
+            --frontend-tag "${{ needs.build-push.outputs.source_sha }}" \
+            --backend-tag "${{ needs.build-push.outputs.source_sha }}" \
+            --frontend-label "${{ needs.build-push.outputs.source_sha }}" \
+            --backend-label "${{ needs.build-push.outputs.source_sha }}" \
+            --authority-role "$ADMIN_PGUSER" \
+            --schema-preflight pass \
+            --django-preflight pass \
+            "${REHEARSAL_ARGS[@]}"
+
           set +e
           docker run --rm \
             -e PGHOST="$ADMIN_PGHOST" \
@@ -1483,7 +1558,7 @@ jobs:
           unset MIGRATION_ADMIN_URL ADMIN_PGUSER ADMIN_PGPASSWORD UE_ADMIN_REST UE_ADMIN_CREDS UE_ADMIN_HOSTPART UE_ADMIN_HOSTPORT UE_ADMIN_DBANDQUERY
 
           if [ "$MIGRATION_STATUS" -ne 0 ]; then
-            echo "::error::Django migration apply/verify failed for ${{ needs.plan.outputs.environment }}. Refusing to deploy the application revision — the database may be partially migrated; do not proceed until this is resolved."
+            echo "::error::Django migration apply/verify failed for ${{ needs.plan.outputs.environment }}. Refusing to deploy the application revision — the database may be partially migrated. A traffic rollback does not undo committed DDL. Recovery is an approved point-in-time restore."
             exit 1
           fi
           echo "::notice::Django migrations applied and verified (no unapplied migrations remain) for ${{ needs.plan.outputs.environment }}. No process retains the migration-admin credential beyond this job."
@@ -1635,6 +1710,31 @@ jobs:
         run: |
           TARGET_APP="${{ needs.plan.outputs.app_name }}"
           TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          (
+            set -euo pipefail
+            az containerapp revision list --name "$TARGET_APP" --resource-group "$TARGET_RG" -o json > "$RUNNER_TEMP/ue-revision-inventory.json"
+            REHEARSAL_ARGS=()
+            if [ -n "${{ vars.UE_REHEARSAL_EVIDENCE_PATH }}" ]; then
+              REHEARSAL_ARGS=(--rehearsal "${{ vars.UE_REHEARSAL_EVIDENCE_PATH }}")
+            fi
+            node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+              --phase deploy \
+              --inventory "$RUNNER_TEMP/ue-revision-inventory.json" \
+              --release-sha "${{ needs.build-push.outputs.source_sha }}" \
+              --frontend-digest "${{ needs.build-push.outputs.frontend_digest }}" \
+              --backend-digest "${{ needs.build-push.outputs.backend_digest }}" \
+              --frontend-tag "${{ needs.build-push.outputs.source_sha }}" \
+              --backend-tag "${{ needs.build-push.outputs.source_sha }}" \
+              --frontend-label "${{ needs.build-push.outputs.source_sha }}" \
+              --backend-label "${{ needs.build-push.outputs.source_sha }}" \
+              --authority-role "${{ needs.apply-django-migrations.outputs.migration_role }}" \
+              --schema-preflight pass \
+              --django-preflight pass \
+              "${REHEARSAL_ARGS[@]}" > "$RUNNER_TEMP/ue-deploy-decision.json"
+            SERVING=$(node --input-type=module -e 'import fs from "node:fs"; const decision = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); if (!decision.allowed) process.exit(1); process.stdout.write(decision.servingRevision ?? "")' "$RUNNER_TEMP/ue-deploy-decision.json")
+            echo "Pin ingress to the serving revision ${SERVING} before creating the candidate. The candidate stays at 0% traffic."
+            az containerapp ingress traffic set --name "$TARGET_APP" --resource-group "$TARGET_RG" --revision-weight "${SERVING}=100"
+          )
 
           SHOW_ERR=$(az containerapp show --name "$TARGET_APP" --resource-group "$TARGET_RG" --output none 2>&1) || {
             echo "::error::Container App $TARGET_APP cannot be updated in $TARGET_RG."
@@ -2017,10 +2117,55 @@ jobs:
           unset RLS_VERIFY_DATABASE_URL RLS_VERIFY_SYSTEM_DATABASE_URL RUNTIME_URL SYSTEM_URL
 
           if [ "$PREFLIGHT_STATUS" -ne 0 ]; then
-            echo "::error::RLS foundation preflight failed for ${{ needs.plan.outputs.environment }} — the deployed revision is not considered healthy."
+            echo "::error::RLS foundation preflight failed for ${{ needs.plan.outputs.environment }} — the deployed revision is not considered healthy. Traffic stays on the serving revision. A traffic rollback does not undo a committed migration."
             exit 1
           fi
           echo "::notice::RLS foundation preflight passed for ${{ needs.plan.outputs.environment }} — union_eyes_runtime is confirmed NOSUPERUSER/NOBYPASSRLS with RLS enforced on every required table. Confirm the deployed app itself is using these credentials via GET /api/admin/database/health."
+
+      - name: Probe the candidate revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_APP="${{ needs.plan.outputs.app_name }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          az containerapp revision list --name "$TARGET_APP" --resource-group "$TARGET_RG" -o json > "$RUNNER_TEMP/ue-revision-inventory.json"
+          SERVING=$(node --input-type=module -e 'import fs from "node:fs"; const raw = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); const rows = Array.isArray(raw) ? raw : raw.value; const serving = rows.filter((row) => row.properties?.active && Number(row.properties?.trafficWeight ?? 0) > 0); if (serving.length !== 1) process.exit(1); process.stdout.write(serving[0].name)' "$RUNNER_TEMP/ue-revision-inventory.json")
+          CANDIDATE=$(node --input-type=module -e 'import fs from "node:fs"; const raw = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); const rows = Array.isArray(raw) ? raw : raw.value; const serving = process.argv[2]; const ranked = rows.filter((row) => row.name !== serving).sort((a, b) => String(a.properties?.createdTime ?? "").localeCompare(String(b.properties?.createdTime ?? ""))); process.stdout.write(ranked.at(-1)?.name ?? "")' "$RUNNER_TEMP/ue-revision-inventory.json" "$SERVING")
+          if [ -z "$CANDIDATE" ] || [ "$CANDIDATE" = "$SERVING" ]; then
+            echo "::error::No candidate revision distinct from the serving revision $SERVING."
+            exit 1
+          fi
+          HOST=$(az containerapp show --name "$TARGET_APP" --resource-group "$TARGET_RG" --query "properties.configuration.ingress.fqdn" -o tsv)
+          STATUS=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 20 -H "x-ms-container-app-revision: $CANDIDATE" "https://$HOST/" || echo "000")
+          HEALTH=fail
+          if [[ "$STATUS" =~ ^(200|301|302|307|308)$ ]]; then
+            HEALTH=pass
+          fi
+          echo "Candidate probe used header x-ms-container-app-revision=$CANDIDATE against https://$HOST/ -> HTTP $STATUS"
+          REHEARSAL_ARGS=()
+          if [ -n "${{ vars.UE_REHEARSAL_EVIDENCE_PATH }}" ]; then
+            REHEARSAL_ARGS=(--rehearsal "${{ vars.UE_REHEARSAL_EVIDENCE_PATH }}")
+          fi
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase probe \
+            --inventory "$RUNNER_TEMP/ue-revision-inventory.json" \
+            --release-sha "${{ needs.build-push.outputs.source_sha }}" \
+            --frontend-digest "${{ needs.build-push.outputs.frontend_digest }}" \
+            --backend-digest "${{ needs.build-push.outputs.backend_digest }}" \
+            --frontend-tag "${{ needs.build-push.outputs.source_sha }}" \
+            --backend-tag "${{ needs.build-push.outputs.source_sha }}" \
+            --frontend-label "${{ needs.build-push.outputs.source_sha }}" \
+            --backend-label "${{ needs.build-push.outputs.source_sha }}" \
+            --authority-role "${{ needs.apply-django-migrations.outputs.migration_role }}" \
+            --schema-preflight pass \
+            --django-preflight pass \
+            --candidate-revision "$CANDIDATE" \
+            --probe-target candidate-revision \
+            --probe-header x-ms-container-app-revision \
+            --probe-revision "$CANDIDATE" \
+            --health "$HEALTH" \
+            "${REHEARSAL_ARGS[@]}"
+          echo "Candidate revision $CANDIDATE was probed directly. Traffic was not promoted."
 
       - name: Custom domain smoke checks
         shell: bash
