@@ -9,7 +9,13 @@
  * Check runs are addressed only to the frozen head captured for that run.
  * An older run cannot retarget them at the pull request's new head.
  */
-import { CANONICAL_CONTEXTS, SECRET_AUTHORITY_CONTEXTS, evaluateCiResults, verdictToCheckRun } from './surface.mjs'
+import {
+  CANONICAL_CONTEXTS,
+  SECRET_AUTHORITY_CONTEXTS,
+  classifyChangedPaths,
+  evaluateCiResults,
+  verdictToCheckRun,
+} from './surface.mjs'
 
 export const EXPENSIVE_WORKFLOW_CONCURRENCY = {
   group: '${{ github.workflow }}-${{ github.ref }}',
@@ -122,13 +128,55 @@ export function capturedPublicationHead({ sourceEvent, workflowRunHeadSha, pullR
   return publicationTarget(workflowRunHeadSha, workflowRunHeadSha)
 }
 
+function executedConclusion(job) {
+  return (
+    Boolean(job) &&
+    job.status === 'completed' &&
+    (job.conclusion === 'success' || job.conclusion === 'failure')
+  )
+}
+
+/**
+ * One conclusion per job name.
+ * A later entry with an empty conclusion must not erase an earlier success or
+ * failure. The jobs API has returned that shape while a run is still settling.
+ */
 function conclusionByJobName(jobs) {
-  const byName = new Map()
+  const grouped = new Map()
   for (const job of Array.isArray(jobs) ? jobs : []) {
     if (!job || typeof job.name !== 'string') continue
-    byName.set(job.name, job.conclusion == null ? '' : String(job.conclusion))
+    const list = grouped.get(job.name) ?? []
+    list.push(job)
+    grouped.set(job.name, list)
+  }
+  const byName = new Map()
+  for (const [name, list] of grouped) {
+    const executed = list.filter((job) => executedConclusion(job))
+    const chosen = executed.length > 0 ? executed[executed.length - 1] : list[list.length - 1]
+    byName.set(name, chosen.conclusion == null ? '' : String(chosen.conclusion))
   }
   return byName
+}
+
+/**
+ * Applicable authority jobs that are absent or still have no conclusion.
+ * Cancelled, skipped, success, and failure are already evidence and do not wait.
+ */
+export function authorityJobsAwaitingList(jobs, diffPaths, workflowName) {
+  const byName = conclusionByJobName(jobs)
+  if (workflowName === 'Secret Scan') {
+    return SECRET_AUTHORITY_CONTEXTS.filter((name) => !byName.has(name) || byName.get(name) === '')
+  }
+  if (workflowName !== 'CI') return []
+  const classification = classifyChangedPaths(Array.isArray(diffPaths) ? diffPaths : [])
+  const waiting = []
+  for (const context of CANONICAL_CONTEXTS) {
+    if (classification.contexts[context.name] === 'NOT_APPLICABLE') continue
+    const job = CI_AUTHORITY_JOBS.find((item) => item.id === context.ciJob)
+    if (!job) continue
+    if (!byName.has(job.name) || byName.get(job.name) === '') waiting.push(context.name)
+  }
+  return waiting
 }
 
 /** Map a CI workflow-run job list onto canonical job ids. Missing jobs stay empty. */
@@ -266,14 +314,11 @@ export function consumeAuthoritativeJobs({ headSha, runs, jobs, jobNames }) {
   if (!runIsTerminal(run)) {
     return { ok: false, reason: `authoritative run for ${headSha} is not terminal` }
   }
-  const byName = new Map()
-  for (const job of Array.isArray(jobs) ? jobs : []) {
-    if (!job || typeof job.name !== 'string') continue
-    byName.set(job.name, job.conclusion == null || job.conclusion === '' ? 'absent' : String(job.conclusion))
-  }
+  const byName = conclusionByJobName(jobs)
   const conclusions = {}
   for (const name of names) {
-    const conclusion = byName.has(name) ? byName.get(name) : 'absent'
+    const raw = byName.has(name) ? byName.get(name) : ''
+    const conclusion = raw === '' ? 'absent' : raw
     conclusions[name] = conclusion
     if (conclusion !== 'success') {
       return { ok: false, reason: `${name} is ${conclusion} for ${headSha}`, conclusions }

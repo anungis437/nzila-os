@@ -11,7 +11,11 @@ import { pathToFileURL } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { parse } from 'yaml'
 import { CANONICAL_CONTEXTS, SECRET_AUTHORITY_CONTEXTS } from '../ci/merge-authority/surface.mjs'
-import { CI_AUTHORITY_JOBS } from '../ci/merge-authority/supersession.mjs'
+import {
+  CI_AUTHORITY_JOBS,
+  authorityJobsAwaitingList,
+  ciResultsFromJobs,
+} from '../ci/merge-authority/supersession.mjs'
 import {
   CONVERGENCE_FLAGS,
   MAX_DURATION_MS_DEFAULT,
@@ -20,9 +24,11 @@ import {
   RequiredContextsTimeoutError,
   AUTHORITATIVE_JOB_LIMIT_MS,
   convergeRequiredChecks,
+  jobPageComplete,
   maxReconciliationAttempts,
   republishFrozenHead,
   requiredContextNames,
+  terminalGraceMs,
 } from '../ci/merge-authority/publish.mjs'
 
 const ROOT = join(__dirname, '..', '..')
@@ -272,6 +278,102 @@ describe('phase 2 required-context convergence', () => {
         ?.ciJob,
     ).toBe('ops-pack-validation')
     expect(github.calls.some((call) => call.op === 'dispatch')).toBe(false)
+  })
+
+  it('keeps reading a short jobs page until total_count is collected', () => {
+    expect(jobPageComplete({ collectedCount: 30, batchLength: 30, totalCount: 36, added: 30 })).toBe(
+      false,
+    )
+    expect(jobPageComplete({ collectedCount: 36, batchLength: 6, totalCount: 36, added: 6 })).toBe(
+      true,
+    )
+    expect(
+      jobPageComplete({ collectedCount: 30, batchLength: 30, totalCount: undefined, added: 30 }),
+    ).toBe(true)
+    expect(jobPageComplete({ collectedCount: 30, batchLength: 30, totalCount: 36, added: 0 })).toBe(
+      true,
+    )
+    expect(terminalGraceMs('0')).toBe(0)
+    const jobs = [
+      ...allCiJobs('completed', 'success'),
+      { name: 'Hash Chain Drift', status: 'in_progress', conclusion: null },
+    ]
+    expect(ciResultsFromJobs(jobs)['hash-chain-drift']).toBe('success')
+    expect(authorityJobsAwaitingList(jobs, ALL_APPLICABLE_DIFF, 'CI')).not.toContain(
+      'Merge Authority / Hash Chain Integrity',
+    )
+    expect(
+      authorityJobsAwaitingList(
+        [
+          { name: 'Gitleaks', status: 'completed', conclusion: 'success' },
+          { name: 'Docker Secret Policy', status: 'completed', conclusion: 'success' },
+        ],
+        [],
+        'Secret Scan',
+      ),
+    ).toEqual(['TruffleHog OSS'])
+    expect(
+      authorityJobsAwaitingList(
+        [
+          { name: 'Gitleaks', status: 'completed', conclusion: 'success' },
+          { name: 'TruffleHog OSS', status: 'completed', conclusion: 'cancelled' },
+          { name: 'Docker Secret Policy', status: 'completed', conclusion: 'failure' },
+        ],
+        [],
+        'Secret Scan',
+      ),
+    ).toEqual([])
+  })
+
+  it('a terminal run that omits a completed job is re-read before MISSING is published', async () => {
+    const clock = fakeClock()
+    let ciReads = 0
+    let secretReads = 0
+    const github = createClient({
+      runs: {
+        'ci.yml': [run(80, CURRENT, 'completed', 'failure')],
+        'secret-scan.yml': [run(81, CURRENT, 'completed', 'success')],
+      },
+      jobs: (id) => {
+        if (id === 81) {
+          secretReads += 1
+          if (secretReads === 1) {
+            return secretJobs('completed', 'success').map((job) =>
+              job.name === 'TruffleHog OSS' ? { ...job, conclusion: null } : job,
+            )
+          }
+          return secretJobs('completed', 'success')
+        }
+        ciReads += 1
+        const jobs = allCiJobs('completed', 'success')
+        return ciReads === 1 ? jobs.filter((job) => job.name !== 'Hash Chain Drift') : jobs
+      },
+    })
+    const result = await convergeRequiredChecks({
+      headSha: CURRENT,
+      diffPaths: ALL_APPLICABLE_DIFF,
+      github,
+      now: clock.now,
+      sleep: clock.sleep,
+      intervalMs: 5_000,
+      maxDurationMs: 20_000,
+      maxAttempts: 4,
+      terminalGraceMs: 5_000,
+    })
+    expect(result.attempts).toBe(2)
+    expect(result.sleeps).toBe(1)
+    expect(
+      result.checks.find((check) => check.name === 'Merge Authority / Hash Chain Integrity'),
+    ).toMatchObject({ conclusion: 'success', output: { title: 'PASS' } })
+    expect(result.checks.find((check) => check.name === 'TruffleHog OSS')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'PASS' },
+    })
+    expect(
+      github.posted.some(
+        (check) => check.output.title === 'MISSING' || check.output.title === 'UNRESOLVED',
+      ),
+    ).toBe(false)
   })
 
   it('convergence case 3: delayed authoritative job retries and converges', async () => {
@@ -832,6 +934,7 @@ globalThis.fetch = async (url, init) => {
           GITHUB_REPOSITORY: 'anungis437/nzila-os',
           GITHUB_TOKEN: 'test-token',
           MA_CHECK_RETRY_BASE_MS: '0',
+          MA_TERMINAL_GRACE_MS: '0',
           ...env,
         },
       },

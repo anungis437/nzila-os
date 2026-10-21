@@ -39,6 +39,7 @@ import {
   secretTerminalPublications,
   consumeAuthoritativeJobs,
   selectRunForHead,
+  authorityJobsAwaitingList,
 } from './supersession.mjs'
 
 const RESULT_ENV = {
@@ -257,10 +258,23 @@ async function githubFetch(url) {
   return response
 }
 
+/**
+ * A page shorter than the requested size is not the end of the list when
+ * total_count says more jobs exist. The CI run that published Hash Chain
+ * Integrity as MISSING had 36 jobs; a 30-job page still omitted Hash Chain Drift.
+ */
+export function jobPageComplete({ collectedCount, batchLength, totalCount, added }) {
+  if (batchLength === 0 || added === 0) return true
+  const total = Number(totalCount)
+  if (Number.isFinite(total) && total >= 0) return collectedCount >= total
+  return batchLength < 100
+}
+
 async function listRunJobs(runId) {
   const { repository } = githubAuth()
   if (!runId) throw new Error('workflow run id is required')
   const jobs = []
+  const seen = new Set()
   for (let page = 1; page <= 20; page += 1) {
     const response = await githubFetch(
       `https://api.github.com/repos/${repository}/actions/runs/${runId}/jobs?per_page=100&page=${page}`,
@@ -271,8 +285,24 @@ async function listRunJobs(runId) {
     }
     const body = await response.json()
     const batch = Array.isArray(body.jobs) ? body.jobs : []
-    jobs.push(...batch)
-    if (batch.length < 100) break
+    let added = 0
+    for (const job of batch) {
+      const key = job && job.id != null ? `id:${job.id}` : `anon:${page}:${added}:${job && job.name ? job.name : ''}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      jobs.push(job)
+      added += 1
+    }
+    if (
+      jobPageComplete({
+        collectedCount: jobs.length,
+        batchLength: batch.length,
+        totalCount: body.total_count,
+        added,
+      })
+    ) {
+      break
+    }
   }
   return jobs
 }
@@ -438,7 +468,11 @@ function runOwnedByHead(runs, headSha) {
 
 function latestJob(jobs, name) {
   const matches = (Array.isArray(jobs) ? jobs : []).filter((job) => job && job.name === name)
-  return matches.length === 0 ? null : matches[matches.length - 1]
+  if (matches.length === 0) return null
+  const executed = matches.filter(
+    (job) => job.status === 'completed' && (job.conclusion === 'success' || job.conclusion === 'failure'),
+  )
+  return executed.length > 0 ? executed[executed.length - 1] : matches[matches.length - 1]
 }
 
 /**
@@ -447,12 +481,27 @@ function latestJob(jobs, name) {
  * copied from a different head, or from a job that has not completed, is not
  * authoritative. null means keep waiting.
  */
-function authoritativeConclusion(job, run) {
+/**
+ * How long to keep reading after a workflow run is terminal while an
+ * applicable job is still absent. The jobs list can omit a completed job
+ * for a short time after the run itself is completed. Zero publishes the
+ * empty result on the first terminal read.
+ */
+export function terminalGraceMs(explicit = process.env.MA_TERMINAL_GRACE_MS) {
+  if (explicit == null || explicit === '') return 180_000
+  const value = Number(explicit)
+  if (!Number.isFinite(value) || value < 0) return 180_000
+  return Math.min(Math.floor(value), 600_000)
+}
+
+function authoritativeConclusion(job, run, acceptMissing = true) {
   if (job && job.status === 'completed' && (job.conclusion === 'success' || job.conclusion === 'failure')) {
     return job.conclusion
   }
   if (runIsTerminal(run)) {
-    if (!job || job.conclusion == null || job.conclusion === '') return ''
+    const missing = !job || job.conclusion == null || job.conclusion === ''
+    if (missing && !acceptMissing) return null
+    if (missing) return ''
     return String(job.conclusion)
   }
   return null
@@ -501,6 +550,7 @@ export async function convergeRequiredChecks({
   intervalMs = retryIntervalMs(),
   maxDurationMs: durationMs = maxDurationMs(),
   maxAttempts = maxReconciliationAttempts(intervalMs, durationMs),
+  terminalGraceMs: graceOverride,
 }) {
   const head = publicationTarget(headSha, headSha)
   if (!Array.isArray(diffPaths)) throw new Error('diff paths must be an array when provided')
@@ -514,6 +564,17 @@ export async function convergeRequiredChecks({
   const started = now()
   const posted = new Map()
   let sleeps = 0
+  const graceMs = graceOverride ?? terminalGraceMs()
+  let ciTerminalSince = null
+  let secretTerminalSince = null
+
+  function acceptMissing(since) {
+    if (graceMs <= 0) return true
+    const elapsed = now() - started
+    if (elapsed >= durationMs) return true
+    if (since == null) return false
+    return now() - since >= graceMs
+  }
 
   function missingNames() {
     return names.filter((name) => !posted.has(name))
@@ -538,6 +599,16 @@ export async function convergeRequiredChecks({
     const ciJobs = observed ? observed.ciJobs : []
     const fastRun = observed ? observed.fastRun : null
     const fastJobs = observed ? observed.fastJobs : []
+    if (runIsTerminal(ciRun)) {
+      if (ciTerminalSince == null) ciTerminalSince = now()
+    } else {
+      ciTerminalSince = null
+    }
+    if (runIsTerminal(secretRun)) {
+      if (secretTerminalSince == null) secretTerminalSince = now()
+    } else {
+      secretTerminalSince = null
+    }
 
     let terminalVerdicts = null
     if (observed && !ciSkipped && runIsTerminal(ciRun)) {
@@ -558,6 +629,9 @@ export async function convergeRequiredChecks({
       if (terminalVerdicts) {
         const verdict = terminalVerdicts.find((item) => item.name === context.name)
         if (!verdict) throw new Error(`missing authority context ${context.name}`)
+        // A just-finished run can still omit a completed job. Hold MISSING
+        // until the grace window ends so a later read can publish PASS.
+        if (verdict.evidence === 'MISSING' && !acceptMissing(ciTerminalSince)) continue
         ready.push(checkBody(verdict, head))
         continue
       }
@@ -574,14 +648,18 @@ export async function convergeRequiredChecks({
       }
       const jobName = CI_AUTHORITY_JOBS.find((job) => job.id === context.ciJob)?.name
       if (!jobName) throw new Error(`missing authority job for ${context.name}`)
-      const conclusion = authoritativeConclusion(latestJob(ciJobs, jobName), ciRun)
+      const conclusion = authoritativeConclusion(latestJob(ciJobs, jobName), ciRun, acceptMissing(ciTerminalSince))
       if (conclusion === null) continue
       ready.push(checkBody(verdictForContext(context, diffPaths, conclusion), head))
     }
 
     if (observed) for (const name of SECRET_AUTHORITY_CONTEXTS) {
       if (posted.has(name)) continue
-      const conclusion = authoritativeConclusion(latestJob(secretJobs, name), secretRun)
+      const conclusion = authoritativeConclusion(
+        latestJob(secretJobs, name),
+        secretRun,
+        acceptMissing(secretTerminalSince),
+      )
       if (conclusion === null) continue
       const publication = secretCheckPublications({ [name]: conclusion === '' ? 'missing' : conclusion }).find(
         (item) => item.name === name,
@@ -848,9 +926,29 @@ async function requireAuthoritativeJobs() {
 }
 
 /**
+ * Re-read this run's jobs while an applicable authority job is still absent.
+ * Cancelled and skipped conclusions are evidence and do not wait. The grace
+ * is wall-clock and is zero when MA_TERMINAL_GRACE_MS=0.
+ */
+async function listJobsUntilAuthoritySettled(runId, diffPaths, workflowName) {
+  const grace = terminalGraceMs()
+  const started = Date.now()
+  let jobs = await withReadRetries(() => listRunJobs(runId))
+  while (authorityJobsAwaitingList(jobs, diffPaths, workflowName).length > 0) {
+    if (Date.now() - started >= grace) break
+    const delay = Math.min(15_000, grace - (Date.now() - started))
+    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay))
+    jobs = await withReadRetries(() => listRunJobs(runId))
+  }
+  return jobs
+}
+
+/**
  * One-shot reconcile for the workflow run that just finished. Publishes only
  * that run's frozen head. Does not poll for a later head and does not
  * re-execute jobs. A different head is refused. Unknown evidence is not success.
+ * An absent job on a just-finished run is re-read through the terminal grace
+ * window before it is published as MISSING or UNRESOLVED.
  */
 async function reconcileThisRun() {
   const eventName = process.env.GITHUB_EVENT_NAME || process.env.SOURCE_EVENT
@@ -870,15 +968,16 @@ async function reconcileThisRun() {
   const runId = process.env.SOURCE_RUN_ID
   if (!runId) throw new Error('workflow run id is required')
   const workflowName = process.env.SOURCE_WORKFLOW_NAME
+  if (workflowName === 'CI' && process.env.MA_CHANGED_PATHS === undefined) {
+    throw new Error('MA_CHANGED_PATHS is required to reconcile a pull request run')
+  }
   const run = await withReadRetries(() => getWorkflowRun(runId))
   if (!run || run.head_sha !== headSha) {
     throw new Error(`refusing to publish checks for ${headSha}; this run owns ${run && run.head_sha ? run.head_sha : 'unknown'}`)
   }
-  const jobs = await withReadRetries(() => listRunJobs(runId))
+  const diffPaths = diffPathsFromEnv() ?? []
+  const jobs = await listJobsUntilAuthoritySettled(runId, diffPaths, workflowName)
   if (workflowName === 'CI') {
-    if (process.env.MA_CHANGED_PATHS === undefined) {
-      throw new Error('MA_CHANGED_PATHS is required to reconcile a pull request run')
-    }
     await publishVerdicts(evaluateCiResults(ciResultsFromJobs(jobs), diffPathsFromEnv()), headSha)
     return
   }

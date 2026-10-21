@@ -1751,6 +1751,7 @@ globalThis.fetch = async (url, init) => {
           GITHUB_TOKEN: 'test-token',
           MA_POLL_INTERVAL_MS: '0',
           MA_POLL_TIMEOUT_MS: '2000',
+          MA_TERMINAL_GRACE_MS: '0',
           ...env,
         },
       },
