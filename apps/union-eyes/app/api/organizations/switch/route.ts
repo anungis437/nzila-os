@@ -55,8 +55,9 @@ export async function POST(req: NextRequest) {
 
   // Platform admins can switch to any org without membership check
   if (!isAdmin) {
-    // Verify user has a membership in this org (by UUID)
-    const memberships = await db
+    // Membership organization_id is the organization UUID, matching the Django
+    // foreign key. A slug comparison cannot succeed against that column.
+    const userMembership = (await db
       .select()
       .from(organizationMembers)
       .where(
@@ -65,20 +66,7 @@ export async function POST(req: NextRequest) {
           eq(organizationMembers.organizationId, organizationId),
         ),
       )
-      .limit(1);
-
-    // Also check by slug
-    const userMembership = memberships[0] ||
-      (await db
-        .select()
-        .from(organizationMembers)
-        .where(
-          and(
-            eq(organizationMembers.userId, userId),
-            eq(organizationMembers.organizationId, org.slug ?? organizationId),
-          ),
-        )
-        .limit(1))[0];
+      .limit(1))[0];
 
     if (!userMembership) {
       return NextResponse.json({ error: 'Access denied: not a member of this organization' }, { status: 403 });

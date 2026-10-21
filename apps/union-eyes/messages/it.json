@@ -9312,6 +9312,7 @@
     "logins7dTitle": "Accessi (7d)",
     "releasesScheduled": "{count} rilascio{count, plural, one {} other {i}} programmato",
     "serviceHealthTitle": "Salute del Servizio",
+    "serviceHealthUnavailable": "Impossibile caricare lo stato dei servizi. Riprova più tardi; se il problema persiste, contatta l'assistenza della piattaforma.",
     "noActiveIncidents": "Nessun incidente attivo",
     "statusInvestigating": "In fase di indagine",
     "statusMonitoring": "Monitoraggio",
@@ -9347,7 +9348,9 @@
     "resourceUtilizationTitle": "Utilizzo delle Risorse",
     "warningLabel": "Avviso: {value}%",
     "criticalLabel": "Critico: {value}%",
-    "capacityUsageLabel": "{used} {unit} di {total} {unit}"
+    "capacityUsageLabel": "{used} {unit} di {total} {unit}",
+    "noServicesRecorded": "Nessuna riga di platform_services è registrata.",
+    "notRecordedInCatalog": "Questa vista operativa non è registrata in platform_services. Nessuno stato viene dedotto."
   },
   "customerSuccessPage": {
     "title": "Successo del Cliente",

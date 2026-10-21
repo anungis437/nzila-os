@@ -1,0 +1,81 @@
+{
+  "mission": "UE-CONVERGENCE-P0-FINAL",
+  "baseSha": "12dd086ae906ced483942144ab6c27326fda2738",
+  "conflicts": [
+    {
+      "CONFLICT_ID": "FINANCIAL_TOPOLOGY_ENDPOINT",
+      "SOURCE_A": "apps/union-eyes/reports/union-eyes-canonical-database-topology-round58d.md (50b84ebd, 2026-09-11): SAME_CANONICAL_DATABASE = YES. financial-service is a process boundary. No Dockerfile, compose, Bicep, or deploy workflow. Undeployed. At that investigation the runtime bootstrap read DATABASE_URL.",
+      "SOURCE_B": "apps/union-eyes/services/financial-service/src/db/connection-scope.ts (16a525da, PR #923, 2026-10-17) requires FINANCIAL_DATABASE_URL, rejects a shared host:port:database with DATABASE_URL, SYSTEM_DATABASE_URL, AUTH_DATABASE_URL, and AUTH_SYSTEM_DATABASE_URL (FINANCIAL_DATABASE_SCOPE_COLLAPSE), and rejects role reuse. docs/union-eyes/bootstrap-v2/UE_FINAL_ACCEPTANCE_LEDGER.json records PKI digital_signatures as a separate-database capability held at 501 (G8).",
+      "BINDING_AUTHORITY": "Round 58D is the named architecture decision for one Union Eyes PostgreSQL data plane. PR #923 is a later accepted connection guard and does not record a new decision to create a database. UE_V2_FINANCIAL_SCOPE_AUTHORITY.md remains NOT_PROVEN for caller execution.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "No financial-service deployment, Dockerfile, compose service, or infrastructure database exists in this repository. The process refuses to start without FINANCIAL_DATABASE_URL and refuses to select the same host, port, and database name as an operational URL. No second database was created or merged.",
+      "RISK": "Treating SEPARATE_DATABASE_BOUNDARY or FINANCIAL_DATABASE_SCOPE_COLLAPSE as an instruction to provision a database would invent a data plane. Pointing financial-service at DATABASE_URL would remove the later role and endpoint guard.",
+      "ENGINEERING_RESOLUTION": "Document and contain the contradiction. Do not describe the implementations as reconciled. Do not create, merge, or split a database. Do not edit financial-service schema declarations or connection-scope behavior in this change. Financial tables stay on their existing deferred authority, including held cross-organization billing writes.",
+      "ACCEPTANCE_EVIDENCE": "Source inspection of Round 58D, connection-scope.ts, connection-scope.test.ts, and the V2 financial-scope report. No financial database was created. connection-scope.ts is unchanged.",
+      "REMAINING_AUTHORIZATION": "Proposed resolution, not applied: keep the single Round 58D PostgreSQL database and authorize a distinct non-owner financial role. Changing connection-scope.ts to accept that shape, or provisioning a second database, is a reserved security mutation and is not part of this PR.",
+      "FINANCIAL_ARCHITECTURE_DECISION": "SAME_CANONICAL_DATABASE",
+      "FINANCIAL_RUNTIME_CONFIGURATION_COMPATIBILITY": "INCOMPATIBLE",
+      "FINANCIAL_SERVICE_DEPLOYMENT_STATUS": "UNDEPLOYED",
+      "CLASSIFICATION": "CONTAINED_NOT_RECONCILED"
+    },
+    {
+      "CONFLICT_ID": "BOOTSTRAP_ACCEPTANCE_VS_LEGACY_CLEAN_ROOM",
+      "SOURCE_A": "docs/union-eyes/bootstrap-v2/README.md terminal acceptance: G1–G7 PASS for frozen plan digest 93fd3cd0 and later staging-closure plan digest 4f9732e2. Legacy clean-room readiness remains HISTORICAL_NON_BINDING_RESULT because it uses the superseded per-table actor model.",
+      "SOURCE_B": "tooling/scripts/run-union-eyes-schema-lineage-cleanroom.mjs and apps/union-eyes/scripts/schema-authority/fresh-build.ts. fresh-build applies Django migrate and scoped migrations-cache, and refuses frozen db/migrations replay. 0014 fail-closes when any preflight target is absent.",
+      "BINDING_AUTHORITY": "Bootstrap V2 is the current lifecycle candidate. Its G1–G7 results stay bound to the recorded candidate and control-based scope. They are not transferred to this branch.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "e08977e62 on ue_conv_closure granted the broad 0009 envelope after 0014 and 0015. The current runner revokes that envelope in the same 0009 transaction, then grants only the storage-authority manifest after 0014, 0015, and 0016 and a live catalog preflight. On PostgreSQL 16.15 database ue_conv_authority the preflight matched 147 public tables with zero privilege mismatches and recorded applicationReady false. ue_conv_closure remains the preserved broad-grant checkpoint and is not this privilege model. Docker is absent, so the V2 clean-room and the legacy PG15 clean-room were not run. The legacy script was not deleted.",
+      "RISK": "Declaring the historical PASS invalid would discard accepted control evidence. Treating the source-graph DECLARED_COMPLETE exit as PostgreSQL execution would hide an unrun clean-room.",
+      "ENGINEERING_RESOLUTION": "Keep the historical G1–G7 record bound to its own candidate. The current producer for the previously absent relations is migrations-platform/0009_canonical_lineage_relations.sql, generated from current Drizzle tables. QA baseline remains the producer for org_subscriptions, platform_invoices, and platform_payments. No placeholder tables were added and no RLS target was dropped.",
+      "ACCEPTANCE_EVIDENCE": "PostgreSQL 16.15 logs pg16-closure-fresh.log, pg16-closure-repeat.log, pg16-closure-partial.log, and pg16-closure-failure.log. The producer graph runtimeExecution value remains NOT_EXECUTED. V2 and PG15 clean-rooms remain UNEXECUTED.",
+      "REMAINING_AUTHORIZATION": "None for reading the historical record. A new V2 clean-room result is required before this candidate can cite G1–G7.",
+      "CLASSIFICATION": "EXISTING_DESIGN_DEFECT_FOR_LEGACY_PATH_AND_HISTORICAL_PASS_FOR_V2_CANDIDATE"
+    },
+    {
+      "CONFLICT_ID": "ORGANIZATION_MEMBERS_ORGANIZATION_ID_TYPE",
+      "SOURCE_A": "Django auth_core.OrganizationMembers.organization is a ForeignKey to Organizations. Organizations.id is UUID. The frozen V2 plan emits organization_id uuid NOT NULL with a foreign key to organizations.id. db/migrations/0002_true_selene.sql alters the column to uuid and adds the foreign key. 0108 calls the column UUID.",
+      "SOURCE_B": "apps/union-eyes/db/schema-organizations.ts declared organizationId as text and commented that it stores the organization slug. apps/union-eyes/app/api/organizations/switch/route.ts compared that column to organizations.slug. db/migrations/20260909_strike_fund_disbursements_organization_id.sql joins organizations.slug = organization_members.organization_id. The financial-service introspection schema also declares the column as text.",
+      "BINDING_AUTHORITY": "Django is the canonical DDL owner. The accepted V2 plan already materializes the UUID foreign key. Drizzle is a projection and must follow that contract. The financial-service copy is a stale declaration, not a second DDL owner.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "Before this change, Drizzle parameterized membership organization_id as text against a UUID column. The switch route issued a second predicate against the slug when the UUID membership row was absent.",
+      "RISK": "A blanket type conversion, or rewriting the historical strike-fund migration, could change backfill semantics or drop the foreign key.",
+      "ENGINEERING_RESOLUTION": "The canonical Drizzle projection is uuid with a foreign key to organizations.id. The legacy switch route checks membership by that UUID. Frozen 20260909 stays byte-for-byte and remains the historical slug-era statement. The current producer is migrations-platform/0008_strike_fund_uuid_membership_provenance.sql, which joins organizations.id and fails closed on text membership, a missing table, or zero or multiple owners at payment_date. The QA baseline no longer creates or coerces the column to text.",
+      "ACCEPTANCE_EVIDENCE": "Historical and current PGlite suites are separate. PostgreSQL 16.15 execution of 0008 is recorded in the checkpoint ledger when that command has been run. Bootstrap V2 and the legacy clean-room remain NOT_EXECUTED in environments without Docker.",
+      "REMAINING_AUTHORIZATION": "Do not rewrite frozen 20260909. Do not treat the historical text fixture as current compatibility.",
+      "CLASSIFICATION": "EXISTING_DESIGN_DEFECT"
+    },
+    {
+      "CONFLICT_ID": "STRIKE_FUND_DELETE_CASCADE_VS_UNPROVEN_RETENTION",
+      "SOURCE_A": "taxes.ts and migrations-platform/0008_strike_fund_disbursements_canonical.sql declare organization_id ON DELETE CASCADE. UE_V2_FINANCIAL_SCOPE_AUTHORITY records strike_fund_disbursements as NOT_PROVEN.",
+      "SOURCE_B": "A synthetic organization delete on PostgreSQL 16.15 removed the disbursement row. No approved retention period authorizes that erasure.",
+      "BINDING_AUTHORITY": "No retention decision is invented here. The historical foreign key stays ON DELETE CASCADE.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "Platform migration 0011_strike_fund_deletion_guard installs BEFORE DELETE trigger ue_strike_fund_retention_guard. When a disbursement exists, DELETE FROM organizations raises restrict_violation and the disbursement remains. UPDATE organizations.status to inactive still succeeds. An organization with no disbursement can still be deleted. EXECUTE on the security-definer function is revoked from PUBLIC, union_eyes_runtime, and union_eyes_system.",
+      "RISK": "A later authorized migration that drops the trigger restores the cascade. Leaving the trigger in place is fail-closed, not a retention period.",
+      "ENGINEERING_RESOLUTION": "Keep the foreign key. Refuse the delete that would erase history until a retention decision says otherwise. Reversal is DROP TRIGGER and DROP FUNCTION.",
+      "ACCEPTANCE_EVIDENCE": "PostgreSQL 16.15 database ue_conv_authority. Organization cf453349-5b89-4bac-a976-3d93a54abd9c. Delete raised organization delete refused. Status became inactive and the disbursement count stayed 1. After the disbursement was removed, the organization delete succeeded. Bootstrap repeat applied 0011 and exited 0.",
+      "REMAINING_AUTHORIZATION": "A product owner must decide whether historical disbursements may be erased with the organization. This record does not make that decision.",
+      "CLASSIFICATION": "FAIL_CLOSED_PENDING_RETENTION_DECISION"
+    },
+    {
+      "CONFLICT_ID": "CATALOG_ADMISSION_APP_BOUNDARY",
+      "SOURCE_A": "The health route must fail closed when catalog authority drifts, using the same privilege contract as the governance CLI.",
+      "SOURCE_B": "INV-06 forbids raw pg and postgres imports in application code. A Next.js build cannot depend on process.cwd() resolving tooling/scripts.",
+      "BINDING_AUTHORITY": "tooling/contract-tests/db-boundary.test.ts. The storage-authority manifest remains the reviewed source. The packaged JSON is a generated projection with a sha256 digest.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "Application admission executes set-based catalog queries through @nzila/db and assesses the packaged contract. It does not grant, revoke, or spawn tsx. The CLI refuses to diagnose when the packaged payload differs from a fresh export. Public health errors stay generic. Detailed violations are written with console.error.",
+      "RISK": "A stale packaged contract would admit the wrong catalog if the CLI check were skipped. The app therefore rejects a digest that does not match its payload.",
+      "ENGINEERING_RESOLUTION": "Regenerate apps/union-eyes/lib/operations/catalog-authority-contract.json with tooling/scripts/write-union-eyes-catalog-contract.mjs. Do not hand-edit it. Do not add an INV-06 exemption.",
+      "ACCEPTANCE_EVIDENCE": "Contract digest 1625a0a942a1b8dd8737ba933852353791203483f52ddaa57c3a9b461a76b057, 806 entries. INV-06 vitest exit 0. Packaged standalone HTTP 200, then HTTP 503 after a PUBLIC grant, then HTTP 200 after authorized remediation.",
+      "REMAINING_AUTHORIZATION": "None for this boundary. applicationReady remains false.",
+      "CLASSIFICATION": "APPLICATION_READ_ONLY_ADMISSION"
+    },
+    {
+      "CONFLICT_ID": "DAPL_ENUM_HISTORICAL_VS_CANONICAL",
+      "SOURCE_A": "Frozen 20260325_dapl_platform_ledger.sql and migrations-audit/finance-enums.sql define platform_cost_type, ledger_event_type, and ledger_source_type without transaction_fee, settlement, fee_captured, settlement_closed, and settlement_batch.",
+      "SOURCE_B": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts and platform 0009 require those labels in canonical order. The other ten DAPL enums match 0009 or are not rechecked by 0009.",
+      "BINDING_AUTHORITY": "Frozen migrations stay immutable. Platform SQL owns the forward change. 0009 keeps its exact-array check.",
+      "ACTUAL_RUNTIME_BEHAVIOR": "0008_dapl_enum_label_evolution adds only missing labels when the existing order is a subsequence of the canonical order. Unknown or reordered labels raise incompatible existing type and the statement rolls back. Existing enum values on stored rows are not rewritten.",
+      "RISK": "A snapshot may still contain a non-DAPL enum that 0009 rejects. This upgrade does not weaken that check.",
+      "ENGINEERING_RESOLUTION": "Run the additive migration before 0009. Do not drop or recreate the types and do not cast existing financial rows through text.",
+      "ACCEPTANCE_EVIDENCE": "PostgreSQL 16.15 prove-dapl-enum-evolution.mjs exit 0. ue_conv_authority applied the new hash once and kept its canonical labels.",
+      "REMAINING_AUTHORIZATION": "Snapshot-backed E2E on this candidate is still required before calling the historical snapshot repaired.",
+      "CLASSIFICATION": "FORWARD_ONLY_ENUM_EVOLUTION"
+    }
+  ]
+}

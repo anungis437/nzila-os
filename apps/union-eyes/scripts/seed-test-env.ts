@@ -48,8 +48,8 @@ function isNonCriticalSeedSchemaDrift(error: any): boolean {
   if (!error || typeof error !== 'object') return false
   const cause = (error as { cause?: { code?: string }; code?: string }).cause
   const code = cause?.code ?? (error as { code?: string }).code
-  // 42703 undefined_column, 23502 not_null_violation, 23503 FK mismatch vs snapshot
-  return code === '42703' || code === '23502' || code === '23503'
+  // 42703 undefined_column is schema drift. A 23502 or 23503 here is a fixture bug, not drift.
+  return code === '42703'
 }
 
 function isMissingRelationError(error: any): boolean {
@@ -100,6 +100,8 @@ async function seed(): Promise<void> {
   const orgIds = orgs.map((o) => o.id)
   const userIds = usersFixture.map((u) => u.userId)
   const claimIds = casesFixture.map((c) => c.claimId)
+  // One row id per fixture claim, shared by the claims insert and the claim_updates foreign key.
+  const claimRowIds = new Map(casesFixture.map((c) => [c.claimId, randomUUID()] as const))
 
   // Main transaction: wipe and reseed core tables
   await db.transaction(async (tx) => {
@@ -124,7 +126,9 @@ async function seed(): Promise<void> {
     // Wipe deterministic test footprint only.
     if (await tableExists('claim_updates')) {
       await safeCleanup('claim_updates', async () => {
-        await tx.delete(claimUpdates).where(inArray(claimUpdates.claimId, claimIds))
+        // claim_updates.claim_id references claims.id, not the fixture's claim_id business key.
+        const seededClaims = tx.select({ id: claims.id }).from(claims).where(inArray(claims.claimId, claimIds))
+        await tx.delete(claimUpdates).where(inArray(claimUpdates.claimId, seededClaims))
       })
     }
     if (await tableExists('claims')) {
@@ -344,7 +348,7 @@ async function seed(): Promise<void> {
       casesFixture.map((c) => ({
         // Snapshot NOT NULL columns often lack server DEFAULTs that drizzle
         // .default() assumes — set client defaults explicitly.
-        id: randomUUID(),
+        id: claimRowIds.get(c.claimId)!,
         claimId: c.claimId,
         claimNumber: c.claimNumber,
         organizationId: c.organizationId,
@@ -386,10 +390,7 @@ async function seed(): Promise<void> {
         // Drizzle defaultRandom() emits SQL DEFAULT which then violates NOT NULL.
         id: randomUUID(),
         userId: u.userId,
-        // organization_members.organization_id is uuid in the canonical Drizzle
-        // schema; pass the org UUID directly. (The slug variant lives in the
-        // legacy schema-organizations.ts mirror; the canonical schema wins for
-        // seed inserts so the seeded rows resolve under getUserRole().)
+        // organization_members.organization_id is the organization UUID.
         organizationId: u.orgId,
         role: u.role,
         status: u.status,
@@ -408,7 +409,8 @@ async function seed(): Promise<void> {
     )
   })
 
-  // Separate transaction for claim_updates (may fail due to schema drift)
+  // Separate transaction for claim_updates. Only an undefined column (real drift against an
+  // older snapshot) is skipped. A foreign key or NOT NULL violation is a bug in this fixture.
   try {
     await db.transaction(async (tx) => {
       await tx.insert(claimUpdates).values(
@@ -416,7 +418,8 @@ async function seed(): Promise<void> {
           // Snapshot claim_updates.id/update_id often NOT NULL without server DEFAULT.
           id: randomUUID(),
           updateId: randomUUID(),
-          claimId: c.claimId,
+          // The FK targets claims.id, which is the row id inserted above.
+          claimId: claimRowIds.get(c.claimId)!,
           updateType: 'seed_baseline',
           message: `Deterministic QA baseline #${index + 1}`,
           createdBy: c.memberId,

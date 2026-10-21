@@ -166,12 +166,11 @@ describe('organizations/switch route', () => {
     expect(json.success).toBe(true);
   });
 
-  it('POST allows member user with slug membership fallback', async () => {
+  it('POST denies a member when the UUID membership is absent', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push(
       [{ id: 'org_1', name: 'Org 1', slug: 'org-1' }],
       [],
-      [{ id: 'membership_2', userId: 'user_1', organizationId: 'org-1' }],
     );
 
     const response = await POST(
@@ -182,8 +181,6 @@ describe('organizations/switch route', () => {
       }),
     );
 
-    expect(response.status).toBe(200);
-    const json = await response.json();
-    expect(json.success).toBe(true);
+    expect(response.status).toBe(403);
   });
 });

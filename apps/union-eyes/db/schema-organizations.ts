@@ -272,10 +272,14 @@ export const organizationMembers = pgTable(
   {
     id: uuid('id').defaultRandom().primaryKey(),
     userId: text('user_id').notNull(),
-    
-    // organization_id stores the slug (TEXT), not UUID
-    // This allows flexible reference without strict foreign key constraint
-    organizationId: text('organization_id').notNull(),
+
+    // Django OrganizationMembers.organization is a UUID foreign key to
+    // organizations.id. Migration 0002_true_selene.sql already casts this
+    // column to uuid and adds that foreign key. The organization slug stays
+    // on organizations.slug and is not stored here.
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
 
     // Required fields in actual database
     name: text('name').notNull(),

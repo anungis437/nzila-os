@@ -21,6 +21,7 @@
 
 // Export all finance-related schemas from consolidated domain location
 export * from './dues';
+export * from './dues-assignments';
 export * from './autopay';
 export * from './payments';
 export * from './accounting';

@@ -1,0 +1,912 @@
+{
+  "mission": "UE-CONVERGENCE-P0-FINAL",
+  "baseSha": "12dd086ae906ced483942144ab6c27326fda2738",
+  "generatingSource": "apps/union-eyes/db/migrations-cache/0014_lineage_restoration_rls_closure.sql preflight arrays, compared with Django db_table, apps/union-eyes/db pgTable declarations, migrations-platform CREATE TABLE, and db/migrations CREATE TABLE",
+  "methodLimit": "A CREATE TABLE or pgTable match is a source declaration, not proof the fresh bootstrap executes that producer before 0014. Regex can count a CREATE that is conditional or outside the active journal.",
+  "declaredTargets": 100,
+  "declaredParents": 14,
+  "dispositionCounts": {
+    "PLATFORM_SQL_NOT_DJANGO": 43,
+    "NOT_IN_DJANGO_OR_PLATFORM_SQL": 57
+  },
+  "rows": [
+    {
+      "table": "ai_clause_reasonings",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "ai_copilot_sessions",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "ai_grievance_triages",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "ai_insight_reports",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "allocation_basis_snapshots",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "allocation_rule_versions",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "allocation_rules",
+      "isParent": true,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "allocation_run_lines",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "allocation_runs",
+      "isParent": true,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "billing_accounts",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "billing_periods",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "billing_subscriptions",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "break_policies",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "case_documents",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "cba_rule_set_items",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "cba_rule_versions",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "chargeback_statements",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "clause_embeddings",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "commercial_contracts",
+      "isParent": true,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "committee_action_items",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "committee_documents",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "committee_intelligence_snapshots",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "committee_meeting_attendees",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "committee_meetings",
+      "isParent": true,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "compliance_alerts",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "contract_covered_orgs",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "contract_line_items",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "correspondence",
+      "isParent": true,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "correspondence_audit_trail",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "correspondence_recipients",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "data_quality_warnings",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "deadline_audit_events",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE"
+      ]
+    },
+    {
+      "table": "deadline_reminders",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE"
+      ]
+    },
+    {
+      "table": "dispatch_assignments",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "dispatch_requests",
+      "isParent": true,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "dispatch_rules",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "document_access_grants",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "document_links",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "document_versions",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "dues_assignments",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "duplicate_group_members",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "duplicate_groups",
+      "isParent": true,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "employer_communications",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_contacts",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_execution_artifacts",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_execution_compliance_events",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_execution_evidence_links",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_execution_profiles",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_execution_replays",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_payroll_run_items",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_payroll_runs",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_remittance_run_items",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_remittance_runs",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_reports",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_risk_scores",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_timesheet_batches",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "employer_timesheet_entries",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "entitlement_usage_log",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "fee_adjustments",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "governance_policies",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "grievance_case_access_assignments",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "grievance_events",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "grievance_timeline_events",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "ingestion_batches",
+      "isParent": true,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "ingestion_records",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "integration_partners",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "member_breaks",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "member_jurisdiction_preferences",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "org_configurations",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "org_entitlements",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "org_subscriptions",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "payment_allocations",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "pension_benefit_claims",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE_AND_FINANCIAL_DECLARATION",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "pension_contributions",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE_AND_FINANCIAL_DECLARATION",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "pension_members",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "pension_plans",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE_AND_FINANCIAL_DECLARATION",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "pension_t4a_records",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "pension_trustee_meetings",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE_AND_FINANCIAL_DECLARATION",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "pension_trustees",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE_AND_FINANCIAL_DECLARATION",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "pilot_checklist_items",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "pilot_demo_seeds",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "pilot_enrollments",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "pilot_events",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "pilot_feedback",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "pilot_milestones",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "platform_cost_ledger_entries",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "platform_invoice_line_items",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "platform_invoices",
+      "isParent": true,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "platform_payments",
+      "isParent": true,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "reconciliation_exceptions",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "reconciliation_matches",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "reconciliation_runs",
+      "isParent": true,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "satisfaction_surveys",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "security_posture_checks",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "stewards",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "strategic_goals",
+      "isParent": false,
+      "disposition": "PLATFORM_SQL_NOT_DJANGO",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "PLATFORM_SQL"
+      ]
+    },
+    {
+      "table": "subscription_events_log",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "transaction_fee_events",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "transaction_fee_rules",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    },
+    {
+      "table": "user_signatures",
+      "isParent": false,
+      "disposition": "NOT_IN_DJANGO_OR_PLATFORM_SQL",
+      "sourceDeclarations": [
+        "CANONICAL_DRIZZLE",
+        "HISTORICAL_SQL"
+      ]
+    }
+  ]
+}

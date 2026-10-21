@@ -208,6 +208,12 @@ describe('UE Ops - /api/health source implementation contract', () => {
   it('probes auth configuration (HEALTH-AUTH-PROBE)', () => {
     expect(healthSrc).toContain('AUTH_SECRET')
   })
+
+  it('fails closed when catalog authority drifts (HEALTH-CATALOG-ADMISSION)', () => {
+    expect(healthSrc).toContain('evaluateCatalogAdmission')
+    expect(healthSrc).toContain('catalogAuthority')
+    expect(healthSrc).toMatch(/catalogAuthority:[\s\S]*critical:\s*true/)
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

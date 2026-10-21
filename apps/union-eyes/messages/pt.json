@@ -9312,6 +9312,7 @@
     "logins7dTitle": "Logins (7d)",
     "releasesScheduled": "{count} lançamento{count, plural, one {} other {s}} agendado",
     "serviceHealthTitle": "Saúde do Serviço",
+    "serviceHealthUnavailable": "Não foi possível carregar o estado dos serviços. Tente novamente mais tarde; se o problema persistir, contacte o suporte da plataforma.",
     "noActiveIncidents": "Nenhum incidente ativo",
     "statusInvestigating": "Investigando",
     "statusMonitoring": "Monitorando",
@@ -9347,7 +9348,9 @@
     "resourceUtilizationTitle": "Utilização de Recursos",
     "warningLabel": "Aviso: {value}%",
     "criticalLabel": "Crítico: {value}%",
-    "capacityUsageLabel": "{used} {unit} de {total} {unit}"
+    "capacityUsageLabel": "{used} {unit} de {total} {unit}",
+    "noServicesRecorded": "Nenhuma linha de platform_services está registrada.",
+    "notRecordedInCatalog": "Esta vista operacional não está registrada em platform_services. Nenhum estado é inferido."
   },
   "customerSuccessPage": {
     "title": "Sucesso do Cliente",

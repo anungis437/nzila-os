@@ -9398,6 +9398,7 @@
     "logins7dTitle": "Connexions (7j)",
     "releasesScheduled": "{count} version{count, plural, one {} other {s}} prévue{count, plural, one {} other {s}}",
     "serviceHealthTitle": "Santé du service",
+    "serviceHealthUnavailable": "L'état des services n'a pas pu être chargé. Réessayez plus tard; si le problème persiste, contactez le soutien de la plateforme.",
     "noActiveIncidents": "Aucun incident actif",
     "statusInvestigating": "Enquête",
     "statusMonitoring": "Surveillance",
@@ -9433,7 +9434,9 @@
     "resourceUtilizationTitle": "Utilisation des ressources",
     "warningLabel": "Avertissement : {value}%",
     "criticalLabel": "Critique : {value}%",
-    "capacityUsageLabel": "{used} {unit} sur {total} {unit}"
+    "capacityUsageLabel": "{used} {unit} sur {total} {unit}",
+    "noServicesRecorded": "Aucune ligne platform_services n'est enregistrée.",
+    "notRecordedInCatalog": "Cette vue d'exploitation n'est pas enregistrée dans platform_services. Aucun état n'est déduit."
   },
   "customerSuccessPage": {
     "title": "Succès Client",

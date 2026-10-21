@@ -41,7 +41,7 @@ const SaveMemorySchema = z.object({
   keyInsights: z.array(z.string()).optional(),
   sessionId: z.string().optional(),
   /** Archive an existing entry by ID */
-  archiveId: z.string().optional(),
+  archiveId: z.string().uuid().optional(),
 });
 
 export const GET = withApi(
