@@ -4,20 +4,23 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { planClone, readBaseline, reconcileClone, recoveryContext, validateTarget } from './lib/ue-staging-historical-lineage.mjs'
+import { qualifiedTargetFromArgs } from './lib/ue-staging-clone-qualification.mjs'
 
 export async function main(args = process.argv.slice(2)) {
   const mode = args[0]
-  if (!['--plan', '--check', '--apply'].includes(mode) || args.length !== 5 || args[1] !== '--snapshot' || args[3] !== '--receipt') {
+  if (!['--plan', '--check', '--apply'].includes(mode) || ![5,11].includes(args.length) || args[1] !== '--snapshot' || args[3] !== '--receipt' ||
+      (args.length === 11 && (args[5] !== '--qualified-clone-receipt' || args[7] !== '--qualified-clone-signature' || args[9] !== '--qualified-clone-sha256'))) {
     throw new Error('Usage: ue-staging-reconcile-lineage.mjs --plan|--check|--apply --snapshot <baseline.json> --receipt <new-output.json>')
   }
   const snapshot = readBaseline(args[2])
   if (fs.existsSync(args[4])) throw new Error('Receipt output already exists; preserve prior evidence')
   const url = process.env.RLS_MIGRATION_ADMIN_DATABASE_URL
   if (!url) throw new Error('RLS_MIGRATION_ADMIN_DATABASE_URL required in process memory')
-  const config = validateTarget(url)
+  const qualifiedTarget = qualifiedTargetFromArgs(args, args[2])
+  const config = validateTarget(url, qualifiedTarget)
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
   const migrationsDir = path.join(root, 'apps/union-eyes/db/migrations-cache')
-  const options = { snapshot, migrationsDir, journalPath: path.join(migrationsDir, 'meta/_journal.json') }
+  const options = { snapshot, migrationsDir, journalPath: path.join(migrationsDir, 'meta/_journal.json'), qualifiedTarget }
   const { default: pg } = await import('pg')
   const client = new pg.Client({ ...config, connectionTimeoutMillis: 15000 })
   try {

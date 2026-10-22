@@ -204,8 +204,11 @@ export async function readAttestedLedgers(client) {
 export async function assertMigrationLedgerIntegrity(client, { journals, exceptions = [], useAttestation = true, stagingLineageContext }) {
   if (stagingLineageContext) {
     const { validateRecoveryContext, historicalJournal } = await import('./ue-staging-historical-lineage.mjs');
-    await validateRecoveryContext(client, stagingLineageContext);
+    const context = await validateRecoveryContext(client, stagingLineageContext);
     journals = journals.map((journal) => journal.name === 'scoped' ? historicalJournal(journal) : journal);
+    for (const known of context.journals) {
+      if (!journals.some((journal) => journal.name === known.name)) journals.push(known);
+    }
   }
   const rows = await readLedgerRows(client);
   const attested = useAttestation ? await readAttestedLedgers(client) : null;

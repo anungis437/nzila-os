@@ -315,9 +315,9 @@ class Documents(BaseModel):
     contains_pii = models.BooleanField(default=False)
     contains_medical_sensitive = models.BooleanField(default=False)
     contains_legal_privilege = models.BooleanField(default=False)
-    member_pii = models.BooleanField(default=False)
-    medical_sensitive = models.BooleanField(default=False)
-    disciplinary_sensitive = models.BooleanField(default=False)
+    member_pii = models.BooleanField(default=False, null=True, blank=True)
+    medical_sensitive = models.BooleanField(default=False, null=True, blank=True)
+    disciplinary_sensitive = models.BooleanField(default=False, null=True, blank=True)
     is_confidential = models.BooleanField(default=False)
 
     # Soft delete

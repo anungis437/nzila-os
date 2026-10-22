@@ -168,17 +168,22 @@ async function main() {
   const contextFlag = process.argv.indexOf('--staging-lineage-snapshot');
   let stagingRecovery;
   let snapshot;
+  let qualifiedTarget;
   let config = { connectionString: adminUrl };
   if (contextFlag >= 0) {
     stagingRecovery = await import('./lib/ue-staging-historical-lineage.mjs');
     snapshot = stagingRecovery.readBaseline(process.argv[contextFlag + 1]);
-    config = stagingRecovery.validateTarget(adminUrl);
+    const { qualifiedTargetFromArgs } = await import('./lib/ue-staging-clone-qualification.mjs');
+    qualifiedTarget = qualifiedTargetFromArgs(process.argv, process.argv[contextFlag + 1]);
+    config = stagingRecovery.validateTarget(adminUrl, qualifiedTarget);
+  } else if (process.argv.some((value) => value.startsWith('--qualified-clone-'))) {
+    throw new Error('Qualification options require --staging-lineage-snapshot');
   }
   const client = new pg.Client(config);
   await client.connect();
   try {
     const stagingLineageContext = stagingRecovery ? await stagingRecovery.recoveryContext(client, {
-      snapshot, journalPath: JOURNAL_PATH, migrationsDir: MIGRATIONS_DIR,
+      snapshot, journalPath: JOURNAL_PATH, migrationsDir: MIGRATIONS_DIR, qualifiedTarget,
     }) : undefined;
     if (mode === 'check') {
       const result = await runCheck(client, { stagingLineageContext });

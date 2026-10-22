@@ -1,7 +1,10 @@
 /** Exact, opt-in clone recovery. Historical ledger rows are never rewritten or stamped. */
 import crypto from 'node:crypto'
 import fs from 'node:fs'
+import path from 'node:path'
 import { computeMigrationHash, scopedLedgerJournal } from './union-eyes-scoped-migrations.mjs'
+import { platformLedgerJournal } from './union-eyes-platform-migrations.mjs'
+import { revalidateQualifiedLiveTarget } from './ue-staging-clone-qualification.mjs'
 import { evaluateLedgerIntegrity, ledgerDigest, readAttestedLedgers } from './union-eyes-migration-ledger.mjs'
 
 export const TARGET_HOST = 'nzila-ue-recovery-20261022.postgres.database.azure.com'
@@ -29,9 +32,15 @@ const canonicalJSON = (value) => JSON.stringify(value, (_key, item) =>
     ? Object.fromEntries(Object.entries(item).sort(([left], [right]) => left.localeCompare(right)))
     : item)
 
-export function validateTarget(connectionString) {
+function targetBinding(qualifiedTarget) {
+  return qualifiedTarget ? revalidateQualifiedLiveTarget(qualifiedTarget)
+    : { host: TARGET_HOST, database: TARGET_DATABASE, qualificationSha256: null }
+}
+
+export function validateTarget(connectionString, qualifiedTarget) {
+  const target = targetBinding(qualifiedTarget)
   const url = new URL(connectionString)
-  if (!['postgres:', 'postgresql:'].includes(url.protocol) || url.hostname !== TARGET_HOST ||
+  if (!['postgres:', 'postgresql:'].includes(url.protocol) || url.hostname !== target.host ||
       decodeURIComponent(url.pathname.slice(1)) !== TARGET_DATABASE || (url.port && url.port !== '5432')) {
     throw new Error('Recovery target must be the exact authorized staging clone/database')
   }
@@ -40,9 +49,9 @@ export function validateTarget(connectionString) {
   // Reject every query option rather than maintaining an incomplete denylist.
   if ([...url.searchParams.keys()].length || url.hash) throw new Error('Recovery connection URL query options and fragments are forbidden')
   return {
-    host: TARGET_HOST, port: 5432, database: TARGET_DATABASE,
+    host: target.host, port: 5432, database: target.database,
     user: decodeURIComponent(url.username), password: decodeURIComponent(url.password),
-    ssl: { rejectUnauthorized: true, servername: TARGET_HOST },
+    ssl: { rejectUnauthorized: true, servername: target.host },
   }
 }
 
@@ -90,13 +99,21 @@ export function historicalJournal(journal) {
   })) }
 }
 
+/** Both reviewed UE journals share the physical ledger; neither is an unknown-hash waiver. */
+export function lineageJournals({ journalPath, migrationsDir }) {
+  const platformDir = path.join(path.dirname(migrationsDir), 'migrations-platform')
+  return [historicalJournal(scopedLedgerJournal({ journalPath, migrationsDir })),
+    platformLedgerJournal({ journalPath: path.join(platformDir, 'meta', '_journal.json'), migrationsDir: platformDir })]
+}
+
 async function readRows(client) {
   return (await client.query('SELECT id, hash, created_at::text FROM drizzle.__drizzle_migrations ORDER BY id')).rows
 }
 const canonicalRows = (rows) => JSON.stringify(rows.map((row) => ({ id: Number(row.id), hash: row.hash, created_at: String(row.created_at) })))
 
-async function assertIdentity(client) {
-  if (client.connectionParameters?.host !== TARGET_HOST || client.connectionParameters?.database !== TARGET_DATABASE) {
+async function assertIdentity(client, qualifiedTarget) {
+  const target = targetBinding(qualifiedTarget)
+  if (client.connectionParameters?.host !== target.host || client.connectionParameters?.database !== target.database) {
     throw new Error('Connected client is not the authorized staging clone')
   }
   const { rows } = await client.query('SELECT current_database() AS database, ssl FROM pg_stat_ssl WHERE pid = pg_backend_pid()')
@@ -128,38 +145,40 @@ async function postconditions(client, executionPlans, snapshot) {
 }
 
 /** Strict read-only preflight. No schema, lock, ledger or receipt write. */
-export async function planClone(client, { snapshot, journalPath, migrationsDir }) {
+export async function planClone(client, { snapshot, journalPath, migrationsDir, qualifiedTarget }) {
+  const target = targetBinding(qualifiedTarget)
   requireVerifiedSnapshot(snapshot)
   const executionPlans = plans(migrationsDir)
-  await assertIdentity(client)
+  await assertIdentity(client, qualifiedTarget)
   const rows = await readRows(client)
   validateBaselineRows(rows)
   if (canonicalRows(rows) !== canonicalRows(snapshot.ledger)) throw new Error('Baseline row metadata changed')
   const anchors = await readAttestedLedgers(client)
-  const integrity = evaluateLedgerIntegrity({ rows, journals: [historicalJournal(scopedLedgerJournal({ journalPath, migrationsDir }))], attested: anchors })
+  const integrity = evaluateLedgerIntegrity({ rows, journals: lineageJournals({ journalPath, migrationsDir }), attested: anchors })
   if (!integrity.ok) throw new Error(`Historical ledger integrity: ${integrity.violations.join('; ')}`)
-  return { targetHost: TARGET_HOST, database: TARGET_DATABASE, sourceSha: SOURCE_SHA,
+  return { targetHost: target.host, database: target.database, sourceSha: SOURCE_SHA,
+      qualificationSha256: target.qualificationSha256,
     snapshotSha256: SNAPSHOT_SHA256, originalLedgerDigest: BASELINE_LEDGER_DIGEST,
     attestationAnchors: anchors, planned: executionPlans.map(({ statements: _statements, ...evidence }) => evidence), mutation: false }
 }
 
 /** Actual DDL and durable receipt commit together; ledger and old anchors stay byte-equivalent. */
-export async function reconcileClone(client, { snapshot, journalPath, migrationsDir }) {
+export async function reconcileClone(client, { snapshot, journalPath, migrationsDir, qualifiedTarget }) {
+  const target = targetBinding(qualifiedTarget)
   requireVerifiedSnapshot(snapshot)
   const executionPlans = plans(migrationsDir)
   await client.query('BEGIN')
   try {
     await client.query("SELECT pg_advisory_xact_lock(hashtext('ue-staging-lineage-recovery-20261022'))")
     await client.query('LOCK TABLE drizzle.__drizzle_migrations IN SHARE ROW EXCLUSIVE MODE')
-    await assertIdentity(client)
+    await assertIdentity(client, qualifiedTarget)
     const before = await readRows(client)
     validateBaselineRows(before)
     if (canonicalRows(before) !== canonicalRows(snapshot.ledger)) throw new Error('Baseline row metadata changed')
     const attestationsTable = await client.query("SELECT to_regclass('drizzle.bootstrap_attestations') AS regclass")
     if (attestationsTable.rows[0]?.regclass) await client.query('LOCK TABLE drizzle.bootstrap_attestations IN SHARE MODE')
     const anchors = await readAttestedLedgers(client)
-    const journal = historicalJournal(scopedLedgerJournal({ journalPath, migrationsDir }))
-    const integrity = evaluateLedgerIntegrity({ rows: before, journals: [journal], attested: anchors })
+    const integrity = evaluateLedgerIntegrity({ rows: before, journals: lineageJournals({ journalPath, migrationsDir }), attested: anchors })
     if (!integrity.ok) throw new Error(`Historical ledger integrity: ${integrity.violations.join('; ')}`)
     await client.query(`CREATE TABLE IF NOT EXISTS drizzle.ue_staging_lineage_recovery
       (recovery_id text PRIMARY KEY, payload jsonb NOT NULL, recorded_at timestamptz NOT NULL DEFAULT now())`)
@@ -172,7 +191,8 @@ export async function reconcileClone(client, { snapshot, journalPath, migrations
       throw new Error('Recovery altered historical ledger rows or attestation anchors')
     }
     const receipt = {
-      version: 1, targetHost: TARGET_HOST, database: TARGET_DATABASE, sourceSha: SOURCE_SHA,
+      version: 1, targetHost: target.host, database: target.database, sourceSha: SOURCE_SHA,
+      qualificationSha256: target.qualificationSha256,
       snapshotSha256: SNAPSHOT_SHA256, originalLedgerDigest: BASELINE_LEDGER_DIGEST,
       originalLedgerRows: before, attestationAnchors: anchors,
       executed: executionPlans.map(({ statements: _statements, ...evidence }) => evidence),
@@ -189,15 +209,16 @@ export async function reconcileClone(client, { snapshot, journalPath, migrations
 }
 
 /** Explicit adapter for future executor/status callers. No production default helper changes. */
-export async function recoveryContext(client, { snapshot, journalPath, migrationsDir }) {
+export async function recoveryContext(client, { snapshot, journalPath, migrationsDir, qualifiedTarget }) {
+  const target = targetBinding(qualifiedTarget)
   requireVerifiedSnapshot(snapshot)
-  await assertIdentity(client)
+  await assertIdentity(client, qualifiedTarget)
   const rows = await readRows(client)
   if (canonicalRows(rows.slice(0, 15)) !== canonicalRows(snapshot.ledger)) throw new Error('Recovery baseline prefix changed')
   const result = await client.query("SELECT payload FROM drizzle.ue_staging_lineage_recovery WHERE recovery_id='20261022-clone-0010-0012'")
   const receipt = result.rows[0]?.payload
   const expected = plans(migrationsDir).map(({ statements: _statements, ...evidence }) => evidence)
-  if (!receipt || receipt.targetHost !== TARGET_HOST || receipt.database !== TARGET_DATABASE || receipt.sourceSha !== SOURCE_SHA ||
+  if (!receipt || receipt.targetHost !== target.host || receipt.database !== target.database || (receipt.qualificationSha256 ?? null) !== target.qualificationSha256 || receipt.sourceSha !== SOURCE_SHA ||
       receipt.version !== 1 || receipt.qualification !== 'HISTORICAL_LINEAGE_DDL_RECONCILED_ONLY' ||
       receipt.snapshotSha256 !== SNAPSHOT_SHA256 || receipt.originalLedgerDigest !== BASELINE_LEDGER_DIGEST ||
       canonicalRows(receipt.originalLedgerRows ?? []) !== canonicalRows(snapshot.ledger) || canonicalJSON(receipt.executed) !== canonicalJSON(expected)) {
@@ -207,16 +228,18 @@ export async function recoveryContext(client, { snapshot, journalPath, migration
   if (canonicalJSON(anchors.slice(0, receipt.attestationAnchors?.length)) !== canonicalJSON(receipt.attestationAnchors)) {
     throw new Error('Recovery attestation anchors changed')
   }
-  const journal = historicalJournal(scopedLedgerJournal({ journalPath, migrationsDir }))
-  const integrity = evaluateLedgerIntegrity({ rows, journals: [journal], attested: anchors })
+  const journals = lineageJournals({ journalPath, migrationsDir })
+  const integrity = evaluateLedgerIntegrity({ rows, journals, attested: anchors })
   if (!integrity.ok) throw new Error(`Recovered ledger integrity: ${integrity.violations.join('; ')}`)
   await postconditions(client, plans(migrationsDir), snapshot)
   const context = {
     receipt,
-    journal,
+    target,
+    journal: journals[0],
+    journals,
     appliedHashes: new Set([...rows.map((row) => row.hash), ...BINDINGS.map((binding) => binding.current)]),
   }
-  verifiedContexts.set(context, { client, options: { snapshot, journalPath, migrationsDir } })
+  verifiedContexts.set(context, { client, options: { snapshot, journalPath, migrationsDir, qualifiedTarget } })
   return context
 }
 

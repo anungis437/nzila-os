@@ -2159,6 +2159,9 @@ jobs:
           path: ue-evidence
 
       - name: Update Container App (frontend + backend sidecar)
+        env:
+          STAGING_ENTRA_CLIENT_ID: ${{ vars.AZURE_AD_CLIENT_ID_STAGING }}
+          STAGING_ENTRA_TENANT_ID: ${{ vars.AZURE_AD_TENANT_ID_STAGING }}
         run: |
           set -euo pipefail
           TARGET_APP="${{ needs.plan.outputs.app_name }}"
@@ -2287,6 +2290,21 @@ jobs:
 
           ensure_kv_backed_secret "union-eyes-runtime-database-url" "DATABASE_URL"
           ensure_kv_backed_secret "union-eyes-system-database-url" "SYSTEM_DATABASE_URL"
+
+          if [ "${{ needs.plan.outputs.environment }}" = "staging" ]; then
+            GUID='^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+            if ! [[ "$STAGING_ENTRA_CLIENT_ID" =~ $GUID && "$STAGING_ENTRA_TENANT_ID" =~ $GUID ]]; then
+              echo "::error::Dedicated staging Entra application and tenant GUIDs are required."
+              exit 1
+            fi
+            ensure_required_kv_backed_secret "union-eyes-staging-entra-client-secret" "AZURE_AD_CLIENT_SECRET"
+            FRONTEND_ENV_VARS+=(
+              "AZURE_AD_CLIENT_ID=$STAGING_ENTRA_CLIENT_ID"
+              "AZURE_AD_TENANT_ID=$STAGING_ENTRA_TENANT_ID"
+              "AZURE_AD_STAGING_SINGLE_TENANT=true"
+              "TARGET_ENVIRONMENT=staging"
+            )
+          fi
 
           if [ "${{ needs.plan.outputs.environment }}" = "production" ]; then
             ensure_required_kv_backed_secret "resend-api-key" "RESEND_API_KEY"
@@ -2737,7 +2755,7 @@ jobs:
             --ledger "$EVIDENCE/ledger.json" \
             --candidate-revision "$CANDIDATE"
           STABLE_HOST="$(jq -r '.fqdn' "$AFTER/ingress.json")"
-          CANDIDATE_HOST="${LABEL}.${STABLE_HOST}"
+          CANDIDATE_HOST="$(node --input-type=module -e 'import { revisionLabelHost } from "./tooling/scripts/lib/union-eyes-deployment-safety.mjs"; console.log(revisionLabelHost(process.argv[1], process.argv[2]))' "$STABLE_HOST" "$LABEL")"
           probe_path() {
             local request_path="$1"
             local output="$2"

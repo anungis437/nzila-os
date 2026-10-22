@@ -13,6 +13,8 @@
 # migration also succeeds on a database restored from the historical SQL lineage, where most of these columns already
 # exist (DuplicateColumn at content.0004 was reproduced). State is identical to AddField; an incompatible existing
 # column fails closed. See core/migration_ops.py.
+# The three legacy sensitivity flags intentionally remain nullable, matching
+# manual 070 and the Drizzle document schema. NULL is not a negative classification.
 
 import django.contrib.postgres.fields
 from django.db import migrations, models
@@ -135,7 +137,7 @@ class Migration(migrations.Migration):
         AddFieldIfNotExists(
             model_name="documents",
             name="disciplinary_sensitive",
-            field=models.BooleanField(default=False),
+            field=models.BooleanField(default=False, null=True, blank=True),
         ),
         AddFieldIfNotExists(
             model_name="documents",
@@ -165,12 +167,12 @@ class Migration(migrations.Migration):
         AddFieldIfNotExists(
             model_name="documents",
             name="medical_sensitive",
-            field=models.BooleanField(default=False),
+            field=models.BooleanField(default=False, null=True, blank=True),
         ),
         AddFieldIfNotExists(
             model_name="documents",
             name="member_pii",
-            field=models.BooleanField(default=False),
+            field=models.BooleanField(default=False, null=True, blank=True),
         ),
         AddFieldIfNotExists(
             model_name="documents",

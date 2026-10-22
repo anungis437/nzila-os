@@ -163,8 +163,13 @@ export async function applyScopedMigrations(client, { journalPath, migrationsDir
     await client.query('BEGIN');
     try {
       const statements = sql.split('--> statement-breakpoint').map((s) => s.trim()).filter(Boolean);
-      for (const stmt of statements) {
-        await client.query(stmt);
+      for (const [index, stmt] of statements.entries()) {
+        if (stagingLineageContext && entry.tag === '0017_snapshot_authority_reconciliation' && index === 5) {
+          const { executeOwnershipHandoff } = await import('./ue-staging-0017-ownership.mjs');
+          await executeOwnershipHandoff(client, { context: stagingLineageContext, tag: entry.tag, sourceHash: hash, statement: stmt, index });
+        } else {
+          await client.query(stmt);
+        }
       }
       if (entry.tag === '0009_baseline_runtime_role_grants') {
         // The file hash stays the historical bytes. The revoke runs in this

@@ -8,8 +8,62 @@ import {
   RLS_VERIFY_ORGANIZATION_FIXTURE_COLUMNS,
   resolveBootstrapDatabaseUrl,
   resolveRuntimeDatabaseUrl,
+  rlsVerifyConnectionOptions,
+  isRlsWriteRejection,
   validateFullModePrincipalModel,
 } from '../rls-verify'
+
+describe('RLS forged-write proof', () => {
+  it('requires the actual RLS SQLSTATE and diagnostic', () => {
+    expect(isRlsWriteRejection({ code: '42501', message: 'new row violates row-level security policy for table "grievances"' })).toBe(true)
+    for (const error of [[], { code: '23502', message: 'null value' }, { code: '42501', message: 'permission denied for table grievances' }, { error: 'unrelated failure' }, null]) {
+      expect(isRlsWriteRejection(error)).toBe(false)
+    }
+  })
+})
+
+describe('RLS verifier verified TLS and routing', () => {
+  const target = () => {
+    const url = new URL('postgresql://staging.example.test/staging')
+    url.username = 'runtime'
+    url.password = 'synthetic-test-value'
+    return url
+  }
+
+  it('verifies remote certificates even when the URL says require', () => {
+    const url = target()
+    url.searchParams.set('sslmode', 'require')
+    expect(rlsVerifyConnectionOptions(url.href)).toMatchObject({ host: 'staging.example.test', database: 'staging', username: 'runtime', ssl: { rejectUnauthorized: true } })
+  })
+
+  it('does not disable TLS when localhost appears in credentials or database', () => {
+    const url = target()
+    url.password = 'localhost'
+    url.pathname = '/localhost'
+    expect(rlsVerifyConnectionOptions(url.href).ssl).toEqual({ rejectUnauthorized: true })
+  })
+
+  it.each(['host', 'port', 'ssl', 'sslrootcert', 'sslcert', 'sslkey', 'user', 'database'])('rejects URL override %s before connecting', (key) => {
+    const url = target()
+    url.searchParams.set(key, 'untrusted')
+    expect(() => rlsVerifyConnectionOptions(url.href)).toThrow('Unsupported')
+  })
+
+  it.each(['localhost', '127.0.0.1', '[::1]'])('allows plaintext only for exact local development host %s', (host) => {
+    const url = target()
+    url.hostname = host
+    expect(rlsVerifyConnectionOptions(url.href).ssl).toBe(false)
+  })
+
+  it('rejects TLS disable and URL fragments', () => {
+    const url = target()
+    url.searchParams.set('sslmode', 'disable')
+    expect(() => rlsVerifyConnectionOptions(url.href)).toThrow('Unsupported')
+    url.search = ''
+    url.hash = 'unexpected'
+    expect(() => rlsVerifyConnectionOptions(url.href)).toThrow('Invalid')
+  })
+})
 
 function organizationColumns(): Record<string, { name: string; notNull: boolean; hasDefault: boolean }> {
   return (organizations as unknown as Record<symbol, unknown>)[Symbol.for('drizzle:Columns')] as Record<

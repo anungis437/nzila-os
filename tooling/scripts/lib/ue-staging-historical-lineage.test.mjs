@@ -6,9 +6,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   BASELINE_LEDGER_DIGEST, BINDINGS, TARGET_HOST, TARGET_DATABASE, historicalJournal,
-  assertPublicPolicyNonRegression, planClone, readBaseline, reconcileClone, recoveryContext, sha256, validateBaselineRows, validateRecoveryContext, validateTarget,
+  assertPublicPolicyNonRegression, lineageJournals, planClone, readBaseline, reconcileClone, recoveryContext, sha256, validateBaselineRows, validateRecoveryContext, validateTarget,
 } from './ue-staging-historical-lineage.mjs'
-import { assertJournalPrefix, ledgerDigest } from './union-eyes-migration-ledger.mjs'
+import { assertJournalPrefix, assertMigrationLedgerIntegrity, ledgerDigest } from './union-eyes-migration-ledger.mjs'
 import { applyScopedMigrations, scopedLedgerJournal } from './union-eyes-scoped-migrations.mjs'
 import { runCheck } from '../apply-union-eyes-scoped-migrations-existing-env.mjs'
 
@@ -163,6 +163,40 @@ test('context rejects wrong connection, changed canonical source and tampered an
     fs.writeFileSync(path.join(directory, BINDINGS[0].tag + '.sql'), 'SELECT 1;')
     await assert.rejects(planClone(client, { ...opts, migrationsDir: directory }), /Canonical source mismatch/)
   } finally { fs.rmSync(directory, { recursive: true }) }
+})
+
+test('shared ledger accepts interleaved canonical platform prefix but rejects unknown/gap/order/tamper', { skip: !snapshotPath }, async () => {
+  const opts = options()
+  const client = fakeClient(opts.snapshot)
+  await reconcileClone(client, opts)
+  const platform = lineageJournals(opts).find((journal) => journal.name === 'platform')
+  assert.ok(platform.entries.length >= 2)
+  const scoped = scopedLedgerJournal(opts)
+  const baseline = structuredClone(client.state.rows)
+  const append = (hash) => client.state.rows.push({ id: client.state.rows.length + 1, hash, created_at: '1790000000000' })
+  append(platform.entries[0].hash)
+  append(scoped.entries[15].hash)
+  append(platform.entries[1].hash)
+  const context = await recoveryContext(client, opts)
+  assert.ok(context.appliedHashes.has(platform.entries[0].hash))
+  assert.ok(context.appliedHashes.has(scoped.entries[15].hash))
+  await assertMigrationLedgerIntegrity(client, { journals: [scoped], stagingLineageContext: context })
+  assert.deepEqual(client.state.rows.slice(0, 15), opts.snapshot.ledger)
+  const invalidSuffixes = [
+    ['0'.repeat(64)],
+    [platform.entries[1].hash],
+    [platform.entries[1].hash, platform.entries[0].hash],
+    [platform.entries[0].hash, '1'.repeat(64)],
+    [platform.entries[0].hash, platform.entries[0].hash],
+  ]
+  for (const suffix of invalidSuffixes) {
+    client.state.rows = structuredClone(baseline)
+    for (const hash of suffix) append(hash)
+    await assert.rejects(recoveryContext(client, opts), /Recovered ledger integrity/)
+  }
+  client.state.rows = structuredClone(baseline)
+  client.state.rows[0].hash = '2'.repeat(64)
+  await assert.rejects(recoveryContext(client, opts), /baseline prefix changed/)
 })
 
 test('failed actual DDL transaction restores disposable PostgreSQL catalog and ledger', {
