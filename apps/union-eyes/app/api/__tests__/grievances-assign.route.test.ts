@@ -7,6 +7,7 @@ const m = vi.hoisted(() => ({
   db: { select: vi.fn(), update: vi.fn(), insert: vi.fn() },
   tx: { update: vi.fn(), insert: vi.fn() },
   withRLSContext: vi.fn(),
+  withSystemContext: vi.fn(),
   assignSteward: vi.fn(),
   auditDataMutation: vi.fn(),
   auditLog: vi.fn(),
@@ -20,7 +21,10 @@ vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOr
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@/db/db', () => ({ db: m.db }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: m.withRLSContext,
+  withSystemContext: m.withSystemContext,
+}));
 vi.mock('@/lib/services/steward-assignment', () => ({ assignSteward: m.assignSteward }));
 vi.mock('@/lib/audit-logger', () => ({
   auditDataMutation: m.auditDataMutation,
@@ -59,6 +63,7 @@ describe('grievances/[id]/assign route', () => {
     // the convergence task through it so the task's existence is atomic
     // with the assignment update.
     m.withRLSContext.mockImplementation(async (fn: any) => fn(m.tx));
+    m.withSystemContext.mockImplementation(async (fn: any) => fn());
     m.requestAssignmentConvergence.mockResolvedValue({ taskId: 'task-1' });
     m.processAssignmentConvergence.mockResolvedValue({
       taskId: 'task-1',
@@ -127,6 +132,7 @@ describe('grievances/[id]/assign route', () => {
       m.processAssignmentConvergence.mock.invocationCallOrder[0],
     );
     expect(m.processAssignmentConvergence).toHaveBeenCalledWith('task-1', { type: 'user', id: 'u1' });
+    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
   });
 
   it('reads the OUTGOING representative from the pre-update grievance row (proves continuity, not a stale snapshot)', async () => {
