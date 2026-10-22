@@ -29,6 +29,8 @@ jobs:
     environment: staging
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - name: Assert exact authorization and staging identity configuration
         env:
           OPERATION: ${{ inputs.operation }}
@@ -42,6 +44,9 @@ jobs:
           test "$OPERATION" = read-only-census
           [[ "$AUTHORIZED_SHA" =~ ^[a-f0-9]{40}$ ]]
           test "$GITHUB_SHA" = "$AUTHORIZED_SHA"
+          test "$GITHUB_REF" = refs/heads/main
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD
           test "$(git rev-parse HEAD)" = "$AUTHORIZED_SHA"
           test -n "$CLIENT_ID"
           test "$TENANT_ID" = "$EXPECTED_TENANT"

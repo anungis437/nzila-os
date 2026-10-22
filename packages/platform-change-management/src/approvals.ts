@@ -37,7 +37,7 @@ export function hasStagingMissionAuthorization(change: ChangeRecord): boolean {
     key_vault: 'nzila-staging-kv', clone_name_prefix: 'nzila-ue-recovery-', region: 'canadacentral',
   }
   if (!auth.resources || Object.keys(auth.resources).length !== Object.keys(expected).length || !Object.entries(expected).every(([key, value]) => auth.resources[key as keyof typeof expected] === value)) return false
-  return change.approval_status === 'APPROVED' && change.approved_by.length === 1 && change.approved_by[0] === auth.owner_github_login && change.approvers_required.length === 1 && change.approvers_required[0] === auth.owner_github_login
+  return change.risk_level === 'MEDIUM' && change.approval_status === 'APPROVED' && change.approved_by.length === 1 && change.approved_by[0] === auth.owner_github_login && change.approvers_required.length === 1 && change.approvers_required[0] === auth.owner_github_login
 }
 
 /**

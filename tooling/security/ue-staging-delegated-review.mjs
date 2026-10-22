@@ -26,6 +26,7 @@ const EXACT_PATHS = new Set([
   'tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs', 'tooling/scripts/lib/ue-staging-historical-lineage.mjs', 'tooling/scripts/lib/ue-staging-historical-lineage.test.mjs', 'tooling/scripts/lib/union-eyes-migration-ledger.mjs', 'tooling/scripts/lib/union-eyes-scoped-migrations.mjs', 'tooling/scripts/ue-staging-discovery.mjs', 'tooling/scripts/ue-staging-reconcile-lineage.mjs',
   'tooling/scripts/lib/ue-staging-0017-ownership.mjs', 'tooling/scripts/lib/ue-staging-0017-ownership.test.mjs',
   'tooling/scripts/lib/union-eyes-deployment-safety.mjs', 'tooling/scripts/lib/union-eyes-deployment-safety.test.mjs',
+  'ops/change-records/CHG-2026-0112.owner-instruction.json',
   'tooling/security/ue-staging-delegated-review.mjs', 'tooling/security/ue-staging-delegated-review.test.mjs',
   'tooling/scripts/lib/ue-staging-0017-ownership.mjs', 'tooling/scripts/lib/ue-staging-0017-ownership.test.mjs',
   'tooling/scripts/lib/ue-staging-clone-qualification.mjs', 'tooling/scripts/lib/ue-staging-clone-qualification.test.mjs',

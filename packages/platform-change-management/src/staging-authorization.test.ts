@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import { evaluateChangeRequirements, hasStagingMissionAuthorization } from './approvals'
 import { changeRecordSchema } from './schemas'
@@ -9,6 +10,12 @@ function mission(): ChangeRecord {
 }
 
 describe('specific Union Eyes sole-owner staging delegation', () => {
+  it('publishes the exact independently hashable owner instruction bytes', () => {
+    const artifact = JSON.parse(readFileSync(new URL('../../../ops/change-records/CHG-2026-0112.owner-instruction.json', import.meta.url), 'utf8'))
+    expect(artifact.encoding).toBe('base64')
+    expect(createHash('sha256').update(Buffer.from(artifact.bytes, 'base64')).digest('hex')).toBe(mission().staging_authorization?.owner_instruction_sha256)
+    expect(artifact.sha256).toBe(mission().staging_authorization?.owner_instruction_sha256)
+  })
   it('retains attribution after schema loading without inventing organizational approvals', () => {
     const change = mission()
     expect(change.approved_by).toEqual(['anungis437'])
@@ -43,6 +50,15 @@ describe('specific Union Eyes sole-owner staging delegation', () => {
     const evaluated = evaluateChangeRequirements(change)
     expect(evaluated.cabRequired).toBe(true)
     expect(evaluated.requiredApprovals).toEqual(['service_owner', 'change_manager', 'security_approver'])
+    expect(evaluated.approvalSatisfied).toBe(false)
+  })
+
+  it.each(['HIGH', 'CRITICAL'] as const)('retains security approval and CAB after staging risk escalates to %s', (risk_level) => {
+    const change = { ...mission(), risk_level }
+    expect(hasStagingMissionAuthorization(change)).toBe(false)
+    const evaluated = evaluateChangeRequirements(change)
+    expect(evaluated.cabRequired).toBe(true)
+    expect(evaluated.requiredApprovals).toContain('security_approver')
     expect(evaluated.approvalSatisfied).toBe(false)
   })
 

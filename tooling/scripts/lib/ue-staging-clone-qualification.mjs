@@ -90,7 +90,7 @@ export function validateQualification(m, proofs, { now = Date.now(), sourceSha, 
     if (!policies?.length || policies.some((policy) => String(policy.roles).includes('public') || /coalesce\s*\(\s*nullif/i.test(policy.qual ?? '') || /coalesce\s*\(\s*nullif/i.test(policy.with_check ?? ''))) fail('Actual policy closure invalid')
   }
   const isolation = proofs.isolation
-  if (isolationDefects(isolation.result, { databaseBaseline: isolation.result?.databaseBaseline, acceptanceFixture: isolation.result?.fixture }, { releaseSha: sourceSha }).length ||
+  if (isolationDefects(isolation.result, { databaseBaseline: BASELINE_LEDGER, acceptanceFixture: isolation.result?.fixture }, { releaseSha: sourceSha }).length ||
       isolation.result?.fixture?.databaseName !== DATABASE) fail('Actual two-tenant SQL isolation evidence invalid')
   const preserved = proofs.preservation.tables
   if (!Array.isArray(preserved) || !preserved.length || new Set(preserved.map((item) => item.schema + '.' + item.table)).size !== preserved.length ||
