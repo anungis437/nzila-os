@@ -14,7 +14,7 @@ export const authStorageAuthorityEntries: AuthStorageAuthorityEntry[] = [
     table: 'user_management.users',
     classification: 'AUTH_RUNTIME_MIXED',
     reason:
-      "Every packages/platform-auth caller (password/auth-service.ts's login/password-reset, entra/server.ts's session-user resolution, magic-link/service.ts, mfa/service.ts) acts on the CALLER'S OWN row via @nzila/db/client (AUTH_RUNTIME). lifecycle/service.ts's suspendUser/reactivateUser/deprovisionUser (cross-user) have ZERO real callers anywhere (grep for the function names and for 'lifecycle/service' imports outside its own file/docs — none) — confirmed LATENT_UNWIRED, not currently reachable. PR #752 round 14 correction (execution principal AUTH_RUNTIME -> MIXED): apps/union-eyes independently re-declares this table TWICE more, both executed via apps/union-eyes/db/db.ts's own DATABASE_URL connection (APP_OWN_DUPLICATE_RUNTIME) — see ./duplicate-declarations.ts for full evidence. Real production importers of these alternates: apps/union-eyes/lib/api-auth-guard.ts (db/schema/domains/member/user-management.ts's `users`, reads users.isSystemAdmin for the CALLER's own userId — a real authorization-relevant read); apps/union-eyes/lib/services/grievance-notifications.ts, apps/union-eyes/lib/services/messaging/campaign-service.ts, and apps/union-eyes/lib/deadline-engine/recipient-resolver.ts (db/schema/user-management-schema.ts's legacy `users` declaration). All three alternate-declaration callers are self-scoped (no cross-user access found) — the concern is the THIRD, uncoordinated connection path, not privilege escalation.",
+      "Shared platform-auth credential/profile operations use the canonical scoped auth clients. Cross-user lifecycle operations remain LATENT_UNWIRED. Union Eyes still has duplicate declarations used by api-auth-guard.ts, grievance-notifications.ts and messaging/campaign-service.ts through its APP_OWN_DUPLICATE_RUNTIME business database client; these retain their separate compatibility risk. The deadline recipient resolver no longer imports the legacy users declaration: it first selects an active business membership in the grievance organization, then uses a canonical email-selector lookup and binds the returned active/unlocked profile to the assigned platform user ID. This lookup can execute for an authenticated request or a trusted deadline worker; it does not impersonate the recipient's identity scope. Source implementation and clone database evidence are separate from deployed acceptance.",
     supportingCapability: [
       'packages/platform-auth/src/password/auth-service.ts',
       'packages/platform-auth/src/entra/server.ts',
@@ -24,9 +24,9 @@ export const authStorageAuthorityEntries: AuthStorageAuthorityEntry[] = [
       'apps/union-eyes/lib/api-auth-guard.ts (APP_OWN_DUPLICATE_RUNTIME)',
       'apps/union-eyes/lib/services/grievance-notifications.ts (APP_OWN_DUPLICATE_RUNTIME, legacy declaration)',
       'apps/union-eyes/lib/services/messaging/campaign-service.ts (APP_OWN_DUPLICATE_RUNTIME, legacy declaration)',
-      'apps/union-eyes/lib/deadline-engine/recipient-resolver.ts (APP_OWN_DUPLICATE_RUNTIME, legacy declaration)',
+      'apps/union-eyes/lib/deadline-engine/recipient-resolver.ts (canonical AUTH_RUNTIME email-selector lookup after organization-scoped membership selection)',
     ],
-    invocationAuthority: 'END_USER',
+    invocationAuthority: 'MIXED',
     dbExecutionPrincipal: 'MIXED',
     requiredAuthRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE'],
     requiredAuthSystemPrivileges: [],
@@ -35,7 +35,7 @@ export const authStorageAuthorityEntries: AuthStorageAuthorityEntry[] = [
     table: 'user_management.organization_users',
     classification: 'AUTH_RUNTIME_MIXED',
     reason:
-      "Self-service paths: entra/server.ts resolves the CALLER'S OWN org membership/role during session resolution (AUTH_RUNTIME); invites/service.ts's acceptInvite upserts the INVITED USER'S OWN row from a token they hold (AUTH_RUNTIME, END_USER). Cross-user platform-admin path: PR #752 round 12/13's apps/union-eyes/lib/services/member-access-revocation-service.ts's revokeMemberAccess()/reactivateMemberAccess() disable/re-enable an ARBITRARY other user's row from a platform-admin-gated route (app/api/admin/users/[userId]/route.ts) — round 13 fixed this to execute via @nzila/db/system-client's systemDb (AUTH_SYSTEM), not the ordinary client. PR #752 round 14 correction: apps/union-eyes ALSO independently re-declares this table as `organizationUsers` (db/schema/domains/member/user-management.ts), executed via apps/union-eyes/db/db.ts's own DATABASE_URL connection (APP_OWN_DUPLICATE_RUNTIME) — real production importers: apps/union-eyes/actions/admin-actions.ts and apps/union-eyes/lib/middleware/api-security.ts, both reading/filtering by the caller's own organizationId (self-scoped, no cross-org access found). A SECOND, legacy alternate declaration (db/schema/user-management-schema.ts's `organizationUsers`) has zero real importers — confirmed unreachable. See ./duplicate-declarations.ts for full evidence.",
+      "Self-service paths resolve the caller's membership or redeem an invite through canonical auth scopes. The platform-admin member-access service now binds the authenticated administrator, target user, organization, operation and reason to the native AUTH_SYSTEM auth-system gateway. Reactivation uses its single physical transaction for the auth membership and the narrowly granted UE business-status projection; raw business-system auth access is not a fallback. Other duplicate organizationUsers declarations in admin-actions.ts and middleware/api-security.ts retain their separately tracked business-client compatibility risk; the legacy declaration has no importers. See duplicate-declarations.ts. This records source wiring, not deployed acceptance.",
     supportingCapability: [
       'packages/platform-auth/src/entra/server.ts',
       'packages/platform-auth/src/invites/service.ts',
@@ -53,7 +53,7 @@ export const authStorageAuthorityEntries: AuthStorageAuthorityEntry[] = [
     table: 'user_management.user_sessions',
     classification: 'AUTH_RUNTIME_MIXED',
     reason:
-      "Self-service paths: packages/platform-auth/src/password/session.ts's createSession/validateSession/revokeSession all act on the CALLER'S OWN session (AUTH_RUNTIME, END_USER — cookie-resolved). Cross-user platform-admin path: round-12's offboarding calls revokeAllUserSessions(authUserId) for an ARBITRARY other user; round 13 added an optional db-executor parameter to revokeAllUserSessions specifically so this cross-user call can pass @nzila/db/system-client's systemDb (AUTH_SYSTEM) instead of defaulting to the ordinary client — every OTHER existing caller (self-service password change, etc.) is unaffected since the parameter defaults to the ordinary client.",
+      "Self-service paths: packages/platform-auth/src/password/session.ts's createSession/validateSession/revokeSession all act on the CALLER'S OWN session (AUTH_RUNTIME, END_USER — cookie-resolved). Cross-user platform-admin offboarding calls revokeAllUserSessions(authUserId) inside the native AUTH_SYSTEM revoke-sessions scope bound to the authenticated administrator, target and reason. The member service no longer supplies a raw systemDb override. Self-service callers continue to use their own canonical auth scopes; no ordinary business-client fallback is authorized.",
     supportingCapability: [
       'packages/platform-auth/src/password/session.ts',
       'apps/union-eyes/lib/services/member-access-revocation-service.ts',

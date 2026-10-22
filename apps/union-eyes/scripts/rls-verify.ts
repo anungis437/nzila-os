@@ -15,6 +15,9 @@
  *     staging/production database as a deploy-gate check. Verifies role
  *     attributes, RLS+FORCE RLS+policy presence on every required table,
  *     and that no policy uses the prohibited empty-context-bypass pattern.
+ *     Canonical V2 (or --require-auth-member-projection) additionally requires
+ *     both exact scoped membership projection policies, including their full
+ *     role, command, schema/table, USING and WITH CHECK contracts.
  *   --mode=full — additionally creates disposable Org A/B + User A/B
  *     fixtures (prefixed `UE_RA_<runId>_`), runs the live cross-tenant
  *     isolation matrix using the ACTUAL runtime role and session-context
@@ -53,6 +56,7 @@ import {
   PROTECTED_NO_TENANT_ACCESS_TABLES,
 } from '../db/rls-0108-protected-tables'
 import { storageAuthorityManifest } from '../db/rls-storage-authority/index'
+import { hasApprovedMemberAccessProjectionPolicies, isApprovedMemberAccessProjectionPolicy, type MemberAccessProjectionPolicy } from '../db/auth/member-access-projection'
 
 // Tables the canonical storageAuthorityManifest (db/rls-storage-authority)
 // dispositions with an EMPTY requiredRuntimePrivileges array — i.e.
@@ -258,7 +262,8 @@ function parseArgs() {
   }
   // A deployed environment (the deploy workflow's preflight) requires the deadline-engine tables; a source-native bootstrap does not.
   const requireDeadlineEngineTables = args.includes('--require-deadline-engine-tables') || process.env.RLS_VERIFY_REQUIRE_DEADLINE_ENGINE_TABLES === '1'
-  return { mode: mode as 'preflight' | 'full', requireDeadlineEngineTables }
+  const requireAuthMemberProjection = args.includes('--require-auth-member-projection') || process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1'
+  return { mode: mode as 'preflight' | 'full', requireDeadlineEngineTables, requireAuthMemberProjection }
 }
 
 async function checkRuntimeRole(sql: postgres.Sql, results: CheckResult[]) {
@@ -315,7 +320,7 @@ async function checkFullModePrincipalModel(
   }
 }
 
-async function checkTableRlsState(sql: postgres.Sql, results: CheckResult[]) {
+async function checkTableRlsState(sql: postgres.Sql, results: CheckResult[], requireAuthMemberProjection: boolean) {
   const rows = await sql<{ relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }[]>`
     SELECT relname, relrowsecurity, relforcerowsecurity
     FROM pg_class
@@ -342,10 +347,16 @@ async function checkTableRlsState(sql: postgres.Sql, results: CheckResult[]) {
     })
   }
 
-  const policies = await sql<{ tablename: string; policyname: string; qual: string | null }[]>`
-    SELECT tablename, policyname, qual::text as qual
+  const policies = await sql<MemberAccessProjectionPolicy[]>`
+    SELECT schemaname, tablename, policyname, permissive, roles::text[], cmd, qual::text as qual, with_check::text as with_check
     FROM pg_policies
     WHERE tablename = ANY(${ALL_PROTECTED_TABLES})`
+
+  if (requireAuthMemberProjection) results.push({
+    name: 'canonical auth membership projection: exactly both governed policies with their complete predicate and role contract',
+    pass: hasApprovedMemberAccessProjectionPolicies(policies),
+    detail: 'Canonical V2 requires both exact scoped policies; absence, replacement and additional projection policies fail closed',
+  })
 
   for (const table of ALL_PROTECTED_TABLES) {
     const tablePolicies = policies.filter((p) => p.tablename === table)
@@ -379,12 +390,13 @@ async function checkTableRlsState(sql: postgres.Sql, results: CheckResult[]) {
         policy.policyname === 'ue_system_full_access' ||
         policy.policyname === 'ue_parent_org_isolation' ||
         policy.policyname.startsWith('ue_org_isolation_')
+      const isExactAuthProjection = isApprovedMemberAccessProjectionPolicy(policy)
       results.push({
-        name: `table ${table}: policy "${policy.policyname}" is an approved 0108 policy (not a surviving historical policy)`,
-        pass: isApprovedPolicyName,
-        detail: isApprovedPolicyName
-          ? 'ok'
-          : `UNEXPECTED POLICY — not one of 0108's own named policies (ue_system_full_access / ue_parent_org_isolation / ue_org_isolation_*). A historical policy from an earlier migration may have survived on this table and can widen access via PostgreSQL's OR-combined permissive-policy semantics. Drop it explicitly (see PART 0 of 0108) or add it to this check's approved list with justification if it is genuinely still required.`,
+        name: `table ${table}: policy "${policy.policyname}" matches the approved foundation or exact auth-membership projection contract`,
+        pass: isApprovedPolicyName || isExactAuthProjection,
+        detail: isExactAuthProjection ? 'exact auth role, command, schema/table, permissive mode, USING and WITH CHECK verified'
+          : isApprovedPolicyName ? 'ok'
+          : `UNEXPECTED OR ALTERED POLICY — requires an approved 0108 policy or the exact governed membership projection contract. A policy name alone cannot admit an auth projection; foreign roles, widened predicates and changed commands fail closed.`,
       })
     }
   }
@@ -1147,7 +1159,7 @@ export function rlsVerifyConnectionOptions(databaseUrl: string) {
 }
 
 async function main() {
-  const { mode, requireDeadlineEngineTables } = parseArgs()
+  const { mode, requireDeadlineEngineTables, requireAuthMemberProjection } = parseArgs()
   const dbUrl = resolveRuntimeDatabaseUrl()
   if (!dbUrl) {
     console.error('[rls-verify] Missing RLS_VERIFY_DATABASE_URL / DATABASE_URL.')
@@ -1160,7 +1172,7 @@ async function main() {
 
   try {
     await checkRuntimeRole(sql, results)
-    await checkTableRlsState(sql, results)
+    await checkTableRlsState(sql, results, requireAuthMemberProjection)
     await checkNoContextFailsClosed(sql, results)
     await checkBaselineTablesHaveManifestDisposition(results)
     await checkOrphanedTenantTables(sql, results)

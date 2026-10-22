@@ -55,7 +55,6 @@ export const authTableDuplicateDeclarations: AuthTableDuplicateDeclarationEntry[
         productionImporters: [
           'apps/union-eyes/lib/services/grievance-notifications.ts',
           'apps/union-eyes/lib/services/messaging/campaign-service.ts',
-          'apps/union-eyes/lib/deadline-engine/recipient-resolver.ts',
         ],
         dbClient: 'apps/union-eyes/db/db.ts (DATABASE_URL)',
         reachable: true,

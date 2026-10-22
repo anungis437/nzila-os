@@ -1,27 +1,22 @@
-import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { readFileSync, readdirSync } from 'node:fs'
+import { join, relative, resolve, sep } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const APP_ROOT = resolve(__dirname, '..', '..', '..')
 
 function productionFiles(fragment: string): string[] {
-  let out = ''
-  try {
-    out = execFileSync('grep', ['-rl', fragment, 'app', 'lib', 'actions', 'services', 'db'], {
-      cwd: APP_ROOT,
-      encoding: 'utf8',
-    })
-  } catch (err: unknown) {
-    const execErr = err as { status?: number; stdout?: string }
-    if (execErr.status === 1) return []
-    out = execErr.stdout ?? ''
+  const matches: string[] = []
+  function scan(dir: string) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const file = join(dir, entry.name)
+      const name = relative(APP_ROOT, file).split(sep).join('/')
+      if (name.includes('__tests__') || name.includes('.test.') || name.includes('.spec.')) continue
+      if (entry.isDirectory()) scan(file)
+      else if (entry.isFile() && readFileSync(file).includes(fragment)) matches.push(name)
+    }
   }
-  return out
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((file) => !file.includes('__tests__') && !file.includes('.test.') && !file.includes('.spec.'))
+  for (const dir of ['app', 'lib', 'actions', 'services', 'db']) scan(resolve(APP_ROOT, dir))
+  return matches.sort()
 }
 
 describe('organization member query importers', () => {

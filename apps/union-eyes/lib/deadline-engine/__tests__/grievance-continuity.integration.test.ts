@@ -24,11 +24,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mocks = vi.hoisted(() => ({
   grievanceSelect: vi.fn(),
   userSelect: vi.fn(),
+  membershipSelect: vi.fn(),
+  withAuthContext: vi.fn(),
   txExecute: vi.fn(),
   audit: vi.fn(),
 }));
 
-const selectCalls: Array<'grievance' | 'user'> = [];
+const selectCalls: Array<'grievance' | 'membership'> = [];
 
 vi.mock('@/db', () => ({
   db: {
@@ -39,7 +41,7 @@ vi.mock('@/db', () => ({
         where: vi.fn().mockReturnThis(),
         limit: vi.fn(() => {
           if (call === 'grievance') return Promise.resolve(mocks.grievanceSelect());
-          if (call === 'user') return Promise.resolve(mocks.userSelect());
+          if (call === 'membership') return Promise.resolve(mocks.membershipSelect());
           return Promise.resolve([]);
         }),
       };
@@ -53,8 +55,15 @@ vi.mock('@/db', () => ({
 vi.mock('@/db/schema/grievance-schema', () => ({
   grievances: { id: {}, organizationId: {}, grievantId: {}, grievantEmail: {}, grievantName: {}, unionRepId: {} },
 }));
-vi.mock('@/db/schema/user-management-schema', () => ({
-  users: { userId: {}, email: {}, isActive: {}, accountLockedUntil: {}, locale: {} },
+vi.mock('@/db/schema-organizations', () => ({
+  organizationMembers: { userId: {}, organizationId: {}, email: {}, status: {}, deletedAt: {} },
+}));
+vi.mock('@nzila/db/schema', () => ({
+  authUsers: { userId: {}, email: {}, isActive: {}, lifecycleState: {}, accountLockedUntil: {}, locale: {} },
+}));
+vi.mock('@nzila/platform-auth/auth-execution', () => ({
+  withAuthContext: mocks.withAuthContext,
+  authDb: { select: () => ({ from: () => ({ where: () => ({ limit: () => Promise.resolve(mocks.userSelect()) }) }) }) },
 }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 vi.mock('../audit', () => ({ writeDeadlineAuditEvent: mocks.audit }));
@@ -82,13 +91,15 @@ beforeEach(() => {
   vi.clearAllMocks();
   selectCalls.length = 0;
   vi.setSystemTime(NOW);
+  mocks.withAuthContext.mockImplementation(async (_context, callback) => callback());
 });
 
 describe('UE_DEADLINE_CONTINUITY — representative transition', () => {
   it('a second schedule call after reassignment cancels the outgoing rep and schedules the successor', async () => {
     // ── Round 1: deadline created while assigned to officer A ──
-    selectCalls.push('grievance', 'user');
+    selectCalls.push('grievance', 'membership');
     mocks.grievanceSelect.mockReturnValueOnce(grievanceRow('officer-A'));
+    mocks.membershipSelect.mockReturnValueOnce([{ email: 'officer-a@example.com' }]);
     mocks.userSelect.mockReturnValueOnce([{ userId: 'officer-A', email: 'officer-a@example.com', locale: 'en' }]);
     mocks.txExecute
       .mockResolvedValueOnce([]) // no prior pending rows to cancel
@@ -104,6 +115,8 @@ describe('UE_DEADLINE_CONTINUITY — representative transition', () => {
     expect(round1.scheduled.map((s) => s.recipientRole).sort()).toEqual(['assigned_officer', 'grievor']);
     const officerARows = round1.scheduled.filter((s) => s.recipientRole === 'assigned_officer');
     expect(officerARows).toHaveLength(1);
+    expect(mocks.withAuthContext).toHaveBeenNthCalledWith(1,
+      { phase: 'lookup', selector: { kind: 'email', email: 'officer-a@example.com' } }, expect.any(Function));
 
     // ── Reassignment happens: grievances.unionRepId is now officer B ──
     // (Simulated by the NEXT recipient resolution reading the updated row —
@@ -111,8 +124,9 @@ describe('UE_DEADLINE_CONTINUITY — representative transition', () => {
     // THEN call scheduleGrievanceDeadlineReminders again.)
 
     // ── Round 2: refresh triggered by PATCH /assign (Gap A fix) ──
-    selectCalls.push('grievance', 'user');
+    selectCalls.push('grievance', 'membership');
     mocks.grievanceSelect.mockReturnValueOnce(grievanceRow('officer-B'));
+    mocks.membershipSelect.mockReturnValueOnce([{ email: 'officer-b@example.com' }]);
     mocks.userSelect.mockReturnValueOnce([{ userId: 'officer-B', email: 'officer-b@example.com', locale: 'en' }]);
     mocks.txExecute
       .mockResolvedValueOnce([{ id: 'r-griev-1' }, { id: 'r-officerA-1' }]) // cancels BOTH prior pending rows
@@ -133,6 +147,8 @@ describe('UE_DEADLINE_CONTINUITY — representative transition', () => {
     expect(officerBRows).toHaveLength(1);
     expect(officerBRows[0].recipientEmailHash).toBe('h-officer-b');
     expect(officerBRows[0].recipientEmailHash).not.toBe(officerARows[0].recipientEmailHash);
+    expect(mocks.withAuthContext).toHaveBeenNthCalledWith(2,
+      { phase: 'lookup', selector: { kind: 'email', email: 'officer-b@example.com' } }, expect.any(Function));
 
     // Grievor's reminder is untouched in substance (re-scheduled with the
     // same recipient identity) — only the officer's snapshot changed.

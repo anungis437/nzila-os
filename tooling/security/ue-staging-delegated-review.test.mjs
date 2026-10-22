@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
-import { allowedPath, BASE, DOMAIN, KEY_PATH, RECEIPT_PATH, SIGNATURE_PATH, RESOURCES, sha256, validateManifest, verifyDetached, verifyEnvelope, verifyPullRequest } from './ue-staging-delegated-review.mjs'
+import { allowedPath, BASE, DOMAIN, KEY_PATH, PR_BINDINGS, RECEIPT_PATH, SIGNATURE_PATH, RESOURCES, sha256, validateManifest, validateSanitizerPackageChange, validateToolDependencyChange, validateOtelPackageChange, verifyDetached, verifyEnvelope, verifyPullRequest } from './ue-staging-delegated-review.mjs'
 
 const NOW=Date.parse('2026-10-22T14:00:00Z'), S='1'.repeat(40), TREE='2'.repeat(40), E='3'.repeat(40), BLOB='4'.repeat(40)
 const report='Actual separate agent review; source risks assessed, no unresolved P0/P1. Production and runtime proof remain separate.'
@@ -24,22 +24,142 @@ test('non-Ed25519 key rejected',()=>{const k=crypto.generateKeyPairSync('rsa',{m
 test('bounded explicit mission manifest passes semantics',()=>assert.equal(validateManifest(manifest(),NOW).sourceSha,S))
 for(const [name,change]of [
  ['production',m=>m.productionAuthorized=true],['proof waiver',m=>m.runtimeProofRequired=false],['release waiver',m=>m.signedReleaseRequired=false],
- ['wrong purpose',m=>m.purpose='runtime-release'],['wrong repo',m=>m.repository='other/repo'],['wrong PR',m=>m.pullRequest=985],['wrong branch',m=>m.branch='main'],['wrong base',m=>m.baseSha=S],['wrong mission',m=>m.mission='other'],['wrong CHG',m=>m.changeRecordId='other'],['wrong owner',m=>m.owner='github-actions[bot]'],['wrong environment',m=>m.environment='PROD'],['wrong instruction',m=>m.instructionSha256='a'.repeat(64)],
+ ['wrong purpose',m=>m.purpose='runtime-release'],['wrong repo',m=>m.repository='other/repo'],['wrong PR',m=>m.pullRequest=986],['wrong branch',m=>m.branch='main'],['wrong base',m=>m.baseSha=S],['wrong mission',m=>m.mission='other'],['wrong CHG',m=>m.changeRecordId='other'],['wrong owner',m=>m.owner='github-actions[bot]'],['wrong environment',m=>m.environment='PROD'],['wrong instruction',m=>m.instructionSha256='a'.repeat(64)],
  ['wrong resource',m=>m.resources.server='prod'],['expired',m=>m.expiresAt='2026-10-22T13:59:59Z'],['future issued',m=>m.issuedAt='2026-10-23T14:00:00Z'],['beyond custody',m=>m.expiresAt='2026-10-28T00:00:00Z'],['unknown key',m=>m.trustKey='mykey'],
  ['unreviewed production source',m=>m.files[0].path='apps/cfo/auth.ts'],['path traversal',m=>m.files[0].path='apps/union-eyes/../cfo/auth.ts'],['path injection',m=>m.files[0].path='apps/union-eyes/x\ny'],['duplicate coverage',m=>m.files.push(m.files[0])],['invalid blob',m=>m.files[0].blobSha='fake'],['unreviewed gate',m=>m.files.pop()],
  ['fake human attribution',m=>m.reviews[0].kind='independent-human'],['missing actual report',m=>m.reviews[0].report=''],['tampered report',m=>m.reviews[0].report+='tamper'],['unresolved P1',m=>m.reviews[0].unresolvedP1=1],['unresolved P0',m=>m.reviews[0].unresolvedP0=1],['future review',m=>m.reviews[0].reviewedAt='2026-10-24T12:00:00Z'],['missing reviews',m=>m.reviews=[]],['failed tests',m=>m.tests[0].result='FAIL'],['no actual test count',m=>m.tests[0].passed=0],['invalid test digest',m=>m.tests[0].logSha256='fake'],
 ])test(`reject ${name}`,()=>{const m=manifest();change(m);assert.throws(()=>validateManifest(m,NOW))})
 
 function apiFixture(m){
- const pr={number:984,state:'open',changed_files:m.files.length+2,user:{login:'anungis437'},base:{ref:'main',sha:BASE,repo:{full_name:m.repository}},head:{sha:E,ref:m.branch,repo:{full_name:m.repository}}}
+ const pr={number:m.pullRequest,state:'open',changed_files:m.files.length+2,user:{login:PR_BINDINGS[m.pullRequest].author},base:{ref:'main',sha:m.baseSha,repo:{full_name:m.repository}},head:{sha:E,ref:m.branch,repo:{full_name:m.repository}}}
  const evidence={parents:[{sha:S}]}, source={tree:{sha:TREE}},base={tree:{sha:'5'.repeat(40)}}
  const allFiles=m.files.map(f=>({filename:f.path,status:f.status,sha:f.blobSha}))
  const evidenceFiles=[RECEIPT_PATH,SIGNATURE_PATH].map(filename=>({filename,status:'added'}))
  const sourceTree={truncated:false,tree:m.files.map(f=>({path:f.path,type:'blob',sha:f.blobSha}))}
- const objects={'pulls/984':pr,[`git/commits/${E}`]:evidence,[`git/commits/${S}`]:source,[`git/commits/${BASE}`]:base,[`git/trees/${TREE}?recursive=1`]:sourceTree,[`git/trees/${base.tree.sha}?recursive=1`]:{truncated:false,tree:[]},[`git/blobs/${BLOB}`]:{encoding:'base64',sha:BLOB,content:bytes.toString('base64')}}
+ const objects={[`pulls/${m.pullRequest}`]:pr,[`git/commits/${E}`]:evidence,[`git/commits/${S}`]:source,[`git/commits/${m.baseSha}`]:base,[`git/trees/${TREE}?recursive=1`]:sourceTree,[`git/trees/${base.tree.sha}?recursive=1`]:{truncated:false,tree:[]},[`git/blobs/${BLOB}`]:{encoding:'base64',sha:BLOB,content:bytes.toString('base64')}}
+ if(m.pullRequest===986){const key={path:KEY_PATH,type:'blob',sha:keyBlob};sourceTree.tree.push(key);objects[`git/trees/${base.tree.sha}?recursive=1`].tree.push({...key})}
  objects[`git/blobs/${keyBlob}`]={encoding:'base64',sha:keyBlob,content:publicPem.toString('base64')}
- return {pr,evidence,sourceTree,allFiles,evidenceFiles,objects,get:async endpoint=>{assert(endpoint in objects,endpoint);return objects[endpoint]},pages:async(endpoint,field)=>{if(endpoint===`commits/${E}`){assert.equal(field,'files');return evidenceFiles}assert.equal(endpoint,'pulls/984/files');return [...allFiles,...evidenceFiles]}}
+ return {pr,evidence,sourceTree,allFiles,evidenceFiles,objects,get:async endpoint=>{assert(endpoint in objects,endpoint);return objects[endpoint]},pages:async(endpoint,field)=>{if(endpoint===`commits/${E}`){assert.equal(field,'files');return evidenceFiles}assert.equal(endpoint,`pulls/${m.pullRequest}/files`);return [...allFiles,...evidenceFiles]}}
 }
+
+function followup(){
+ const m=manifest();m.pullRequest=986;m.branch=PR_BINDINGS[986].branch;m.baseSha=PR_BINDINGS[986].base
+ m.files=m.files.filter(f=>f.path!==KEY_PATH)
+ m.reviews.push({...m.reviews[0],kind:'primary-agent-review',agentTask:'/root'})
+ return m
+}
+
+function dependencyFollowup() {
+ const m=followup()
+ for(const path of ['package.json','pnpm-lock.yaml'])m.files.push({path,status:'modified',previousPath:null,blobSha:BLOB,sha256:sha256(bytes),baseBlobSha:BLOB,baseSha256:sha256(bytes)})
+ return m
+}
+test('sanitizer repair requires exact paired follow-up dependency files',()=>validateManifest(dependencyFollowup(),NOW))
+for(const [name,change]of [
+ ['missing lock',m=>m.files.pop()],['missing package',m=>m.files.splice(-2,1)],
+ ['added package',m=>m.files.at(-2).status='added'],['removed lock',m=>m.files.at(-1).status='removed'],
+ ['adjacent package',m=>m.files.at(-2).path='packages/other/package.json'],
+ ['historical PR',m=>{m.pullRequest=984;m.branch=PR_BINDINGS[984].branch;m.baseSha=BASE}],
+])test(`sanitizer repair rejects ${name}`,()=>{const m=dependencyFollowup();change(m);assert.throws(()=>validateManifest(m,NOW))})
+const packageBytes = floor=>Buffer.from(JSON.stringify({scripts:{test:'unchanged'},pnpm:{overrides:{dompurify:floor,other:'1.0.0',...(floor==='>=3.4.13'?{}:{'@sentry/nextjs':'10.75.2'})}}}))
+test('sanitizer package repair accepts only the reviewed override floor change',()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),packageBytes('>=3.4.17')))
+for(const floor of ['>=3.4.14','>=3.4.16','*','>=3.4.18'])test(`sanitizer package rejects unexpected floor ${floor}`,()=>assert.throws(()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),packageBytes(floor))))
+test('sanitizer package rejects unrelated script edits',()=>{const source=JSON.parse(packageBytes('>=3.4.17'));source.scripts.test='bypass';assert.throws(()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),Buffer.from(JSON.stringify(source))),/Unrelated/)})
+for (const version of [undefined,'10.47.0','*','10.75.3']) test(`Sentry repair rejects unexpected version ${version}`,()=>{
+ const source=JSON.parse(packageBytes('>=3.4.17'));source.pnpm.overrides['@sentry/nextjs']=version
+ assert.throws(()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),Buffer.from(JSON.stringify(source))),/Sentry/)
+})
+const toolManifest=()=>({name:'nzila-kilo-local-tooling',private:true,dependencies:{'@kilocode/plugin':'7.2.52'},overrides:{toml:'5.0.1'},engines:{node:'>=20'}})
+const jsonBytes=value=>Buffer.from(JSON.stringify(value))
+test('local tooling repair accepts only the reproducible manifest without scripts',()=>validateToolDependencyChange('.kilo/package.json',undefined,jsonBytes(toolManifest())))
+for (const [name,change] of [
+ ['install script',p=>p.scripts={postinstall:'execute'}],['broad override',p=>p.overrides.toml='*'],
+ ['plugin change',p=>p.dependencies['@kilocode/plugin']='latest'],['public package',p=>p.private=false],
+]) test(`local tooling manifest rejects ${name}`,()=>{const p=toolManifest();change(p);assert.throws(()=>validateToolDependencyChange('.kilo/package.json',undefined,jsonBytes(p)))})
+const toolLocks=()=>{
+ const old={version:'4.2.0',resolved:'https://registry.npmjs.org/toml/-/toml-4.2.0.tgz',integrity:'old',license:'MIT',engines:{node:'>=20'}}
+ const base={name:'.kilo',lockfileVersion:3,requires:true,packages:{'':{dependencies:toolManifest().dependencies},'node_modules/toml':old,'node_modules/other':{version:'1'}}}
+ const source=structuredClone(base);source.name=toolManifest().name;source.packages['']={name:toolManifest().name,dependencies:toolManifest().dependencies,engines:toolManifest().engines}
+ Object.assign(source.packages['node_modules/toml'],{version:'5.0.1',resolved:'https://registry.npmjs.org/toml/-/toml-5.0.1.tgz',integrity:'sha512-EqYNA/YvUNndrA2B3O2ojzLQoTQrBxeZ9UIjQwk8t10oe6n7dwclBwd9IdZQTOKwe6vWX+AXtl6IntXRbepdxQ=='})
+ return {base,source}
+}
+test('local tooling lock accepts only the exact published TOML artifact and root metadata',()=>{const {base,source}=toolLocks();validateToolDependencyChange('.kilo/package-lock.json',jsonBytes(base),jsonBytes(source))})
+for(const [name,change]of [
+ ['other package',p=>p.packages['node_modules/other'].version='2'],['new package',p=>p.packages['node_modules/extra']={version:'1'}],
+ ['integrity',p=>p.packages['node_modules/toml'].integrity='wrong'],['registry',p=>p.packages['node_modules/toml'].resolved='https://attacker.invalid/toml.tgz'],
+ ['license',p=>p.packages['node_modules/toml'].license='different'],['engine',p=>p.packages[''].engines.node='*'],
+])test(`local tooling lock rejects ${name}`,()=>{const {base,source}=toolLocks();change(source);assert.throws(()=>validateToolDependencyChange('.kilo/package-lock.json',jsonBytes(base),jsonBytes(source)))})
+function toolFollowup(){const m=dependencyFollowup();for(const path of ['.kilo/package.json','.kilo/package-lock.json'])m.files.push({path,status:path.endsWith('/package.json')?'added':'modified',previousPath:null,blobSha:BLOB,sha256:sha256(bytes),baseBlobSha:path.endsWith('/package.json')?null:BLOB,baseSha256:path.endsWith('/package.json')?null:sha256(bytes)});return m}
+test('local tooling coverage requires the exact added manifest and modified lock',()=>validateManifest(toolFollowup(),NOW))
+for(const [name,change]of [
+ ['missing lock',m=>m.files.pop()],['missing manifest',m=>m.files.splice(-2,1)],['manifest modification',m=>m.files.at(-2).status='modified'],
+ ['adjacent file',m=>m.files.at(-2).path='.kilo/other.json'],['historical PR',m=>{m.pullRequest=984;m.branch=PR_BINDINGS[984].branch;m.baseSha=BASE}],
+])test(`local tooling review rejects ${name}`,()=>{const m=toolFollowup();change(m);assert.throws(()=>validateManifest(m,NOW))})
+test('local tooling paths remain outside the general allowlist',()=>{for(const p of ['.kilo/package.json','.kilo/package-lock.json','.kilo/other.json'])assert.equal(allowedPath(p),false)})
+const otelPackage=()=>({name:'@nzila/otel-core',scripts:{typecheck:'tsc --noEmit'},optionalDependencies:{'@opentelemetry/api':'^1.9.0'}})
+const patchedOtelPackage=()=>{const p=otelPackage();p.optionalDependencies['@fastify/otel']='0.18.0';return p}
+test('OTel manifest repair declares the previously hoisted optional dependency',()=>validateOtelPackageChange(jsonBytes(otelPackage()),jsonBytes(patchedOtelPackage())))
+for(const [name,change]of [
+ ['broad range',p=>p.optionalDependencies['@fastify/otel']='*'],['unrelated script',p=>p.scripts.typecheck='true'],
+ ['wrong dependency scope',p=>{delete p.optionalDependencies['@fastify/otel'];p.dependencies={'@fastify/otel':'0.18.0'}}],
+ ['unrelated dependency',p=>p.optionalDependencies['@opentelemetry/api']='*'],
+])test(`OTel manifest rejects ${name}`,()=>{const p=patchedOtelPackage();change(p);assert.throws(()=>validateOtelPackageChange(jsonBytes(otelPackage()),jsonBytes(p)))})
+const otelFile=()=>({path:'packages/otel-core/package.json',status:'modified',previousPath:null,blobSha:BLOB,sha256:sha256(bytes),baseBlobSha:BLOB,baseSha256:sha256(bytes)})
+test('OTel manifest requires paired signed root lock coverage',()=>{const m=dependencyFollowup();m.files.push(otelFile());validateManifest(m,NOW);m.files=m.files.filter(f=>!['package.json','pnpm-lock.yaml'].includes(f.path));assert.throws(()=>validateManifest(m,NOW),/lock coverage/)})
+for(const status of ['added','removed'])test(`OTel manifest rejects ${status} file`,()=>{const m=dependencyFollowup();m.files.push({...otelFile(),status});assert.throws(()=>validateManifest(m,NOW))})
+test('OTel manifest remains excluded from general path allowlist',()=>assert.equal(allowedPath('packages/otel-core/package.json'),false))
+for(const extra of [false,true])test(`actual API OTel package scope (unrelated edit=${extra})`,async()=>{
+ const m=dependencyFollowup(),base=jsonBytes(otelPackage()),source=patchedOtelPackage()
+ if(extra)source.scripts.typecheck='true'
+ const current=jsonBytes(source),newSha='a'.repeat(40),oldSha='b'.repeat(40),rootNew='c'.repeat(40),rootOld='d'.repeat(40)
+ m.files.push({...otelFile(),blobSha:newSha,sha256:sha256(current),baseBlobSha:oldSha,baseSha256:sha256(base)})
+ Object.assign(m.files.find(f=>f.path==='package.json'),{blobSha:rootNew,sha256:sha256(packageBytes('>=3.4.17')),baseBlobSha:rootOld,baseSha256:sha256(packageBytes('>=3.4.13'))})
+ const a=apiFixture(m)
+ for(const f of m.files.filter(f=>['package.json','pnpm-lock.yaml','packages/otel-core/package.json'].includes(f.path)))a.objects[`git/trees/${'5'.repeat(40)}?recursive=1`].tree.push({path:f.path,type:'blob',sha:f.baseBlobSha})
+ for(const [sha,content]of [[newSha,current],[oldSha,base],[rootNew,packageBytes('>=3.4.17')],[rootOld,packageBytes('>=3.4.13')]])a.objects[`git/blobs/${sha}`]={encoding:'base64',sha,content:content.toString('base64')}
+ if(extra)await assert.rejects(verifyPullRequest(m,a),/Unrelated OTel/);else await verifyPullRequest(m,a)
+})
+for(const extra of [false,true])test(`actual API local tooling lock scope (unrelated edit=${extra})`,async()=>{
+ const m=followup(),{base,source}=toolLocks()
+ if(extra)source.packages['node_modules/other'].version='2'
+ const manifestBytes=jsonBytes(toolManifest()),baseBytes=jsonBytes(base),sourceBytes=jsonBytes(source)
+ const manifestSha='a'.repeat(40),baseSha='b'.repeat(40),sourceSha='c'.repeat(40)
+ m.files.push({path:'.kilo/package.json',status:'added',previousPath:null,blobSha:manifestSha,sha256:sha256(manifestBytes),baseBlobSha:null,baseSha256:null},{path:'.kilo/package-lock.json',status:'modified',previousPath:null,blobSha:sourceSha,sha256:sha256(sourceBytes),baseBlobSha:baseSha,baseSha256:sha256(baseBytes)})
+ const a=apiFixture(m)
+ a.objects[`git/trees/${'5'.repeat(40)}?recursive=1`].tree.push({path:'.kilo/package-lock.json',type:'blob',sha:baseSha})
+ for(const [sha,content]of [[manifestSha,manifestBytes],[baseSha,baseBytes],[sourceSha,sourceBytes]])a.objects[`git/blobs/${sha}`]={encoding:'base64',sha,content:content.toString('base64')}
+ if(extra)await assert.rejects(verifyPullRequest(m,a),/Unrelated/);else await verifyPullRequest(m,a)
+})
+for(const extra of [false,true])test(`actual API sanitizer package blob scope (unrelated edit=${extra})`,async()=>{
+ const m=dependencyFollowup(),base=packageBytes('>=3.4.13'),source=JSON.parse(packageBytes('>=3.4.17'))
+ if(extra)source.scripts.test='bypass'
+ const current=Buffer.from(JSON.stringify(source)),newSha='a'.repeat(40),oldSha='b'.repeat(40),file=m.files.find(f=>f.path==='package.json')
+ Object.assign(file,{blobSha:newSha,sha256:sha256(current),baseBlobSha:oldSha,baseSha256:sha256(base)})
+ const a=apiFixture(m)
+ for(const f of m.files.filter(f=>['package.json','pnpm-lock.yaml'].includes(f.path)))a.objects[`git/trees/${'5'.repeat(40)}?recursive=1`].tree.push({path:f.path,type:'blob',sha:f.baseBlobSha})
+ a.objects[`git/blobs/${newSha}`]={encoding:'base64',sha:newSha,content:current.toString('base64')}
+ a.objects[`git/blobs/${oldSha}`]={encoding:'base64',sha:oldSha,content:base.toString('base64')}
+ if(extra)await assert.rejects(verifyPullRequest(m,a),/Unrelated/);else await verifyPullRequest(m,a)
+})
+test('sanitizer root files remain excluded from the general path allowlist',()=>{assert.equal(allowedPath('package.json'),false);assert.equal(allowedPath('pnpm-lock.yaml'),false)})
+test('follow-up binds exact PR, branch, merged base, actual connector author and unchanged trust',async()=>{
+ const m=followup();validateManifest(m,NOW);assert.equal((await verifyPullRequest(m,apiFixture(m))).evidenceSha,E)
+})
+for(const [name,change]of [
+ ['unlisted PR',m=>m.pullRequest=987],['superseded PR',m=>m.pullRequest=985],['historical base',m=>m.baseSha=BASE],['historical branch',m=>m.branch=PR_BINDINGS[984].branch],
+ ['trust-key mutation',m=>m.files.push(manifest().files[0])],['missing attributed primary review',m=>m.reviews=m.reviews.filter(r=>r.kind!=='primary-agent-review')],
+ ['false primary agent identity',m=>m.reviews.find(r=>r.kind==='primary-agent-review').agentTask='/root/another'],
+])test(`follow-up rejects ${name}`,()=>{const m=followup();change(m);assert.throws(()=>validateManifest(m,NOW))})
+for(const [name,change]of [
+ ['owner impersonation',a=>a.pr.user.login='anungis437'],
+ ['changed trust blob',a=>a.sourceTree.tree.find(t=>t.path===KEY_PATH).sha=BLOB],
+ ['missing base trust',a=>a.objects[`git/trees/${'5'.repeat(40)}?recursive=1`].tree=[]],
+ ['modified trust bytes',a=>a.objects[`git/blobs/${keyBlob}`].content=bytes.toString('base64')],
+])test(`follow-up API rejects ${name}`,async()=>{const m=followup(),a=apiFixture(m);change(a);await assert.rejects(verifyPullRequest(m,a))})
+test('follow-up metadata allowlist permits only the two reviewed declarations',()=>{
+ for(const name of ['duplicate-declarations.ts','entries.ts'])assert.equal(allowedPath('packages/db/src/auth-storage-authority/'+name),true)
+ for(const name of ['bootstrap-sql.ts','execution-boundary.ts','other.ts'])assert.equal(allowedPath('packages/db/src/auth-storage-authority/'+name),false)
+})
 test('actual PR API coverage and sole-parent evidence commit pass',async()=>{const m=manifest();assert.equal((await verifyPullRequest(m,apiFixture(m))).evidenceSha,E)})
 for(const [name,change]of [
  ['fork',a=>a.pr.head.repo.full_name='attacker/repo'],['wrong author',a=>a.pr.user.login='other'],['wrong actual base',a=>a.pr.base.sha=S],['wrong E parent',a=>a.evidence.parents[0].sha=BASE],['merge E',a=>a.evidence.parents.push({sha:BASE})],['source edit in E',a=>a.evidenceFiles.push({filename:'tooling/security/ue-staging-delegated-review.mjs',status:'modified'})],['wrong fixed evidence paths',a=>a.evidenceFiles[0].filename='other.json'],['missing API coverage',a=>a.pr.changed_files++],['unlisted PR file',a=>{a.allFiles.push({filename:'apps/union-eyes/extra.ts',status:'added',sha:BLOB});a.pr.changed_files++}],['different blob',a=>a.sourceTree.tree[0].sha='6'.repeat(40)],['truncated tree',a=>a.sourceTree.truncated=true],['tampered actual content',a=>a.objects[`git/blobs/${BLOB}`].content=Buffer.from('changed').toString('base64')],

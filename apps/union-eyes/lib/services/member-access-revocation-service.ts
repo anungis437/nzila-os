@@ -4,6 +4,23 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 import { grievanceCaseAccessAssignments } from '@/db/schema/domains/claims/grievance-lifecycle';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { authDb, withAuthContext } from '@nzila/platform-auth/auth-execution';
+
+/** Callers retain their administrator guard; bind every auth write to the real actor. */
+async function withMemberAuthMutation<T>(
+  input: { authUserId: string; organizationId: string },
+  operation: 'revoke-sessions' | 'membership-state',
+  callback: () => Promise<T>,
+): Promise<T> {
+  const { auth } = await import('@nzila/platform-auth/entra/server');
+  const actor = await auth();
+  if (!actor.userId) throw new Error('Authenticated member administrator required');
+  return withAuthContext({
+    phase: 'system', operation, actorUserId: actor.userId,
+    targetUserId: input.authUserId, organizationId: input.organizationId.toLowerCase(),
+    reason: 'Administrator member access enforcement',
+  }, callback);
+}
 
 export interface RevokeMemberAccessInput {
   /** organizationMembers.id — the membership row's own identity. */
@@ -62,18 +79,10 @@ export interface ReactivateMemberAccessResult {
  * or re-disabling an already-disabled auth membership, is a no-op, not an
  * error.
  *
- * PR #752 round 13: session revocation and the authOrganizationUsers
- * mutation now execute via @nzila/db/system-client's systemDb (a
- * dedicated SYSTEM_DATABASE_URL connection), not @nzila/db/client's
- * ordinary DATABASE_URL-bound db. A platform-admin offboarding an
- * arbitrary user in an arbitrary organization is a cross-user, cross-org
- * mutation against another user's durable auth membership/sessions — the
- * ordinary per-request runtime credential has no legitimate reason to
- * mutate another user's row, so this must run under the system
- * credential. @nzila/platform-auth/password's revokeAllUserSessions now
- * accepts an optional db-executor override for exactly this reason; do
- * not call it with the default ordinary client from a cross-user
- * platform-admin path.
+ * Canonical auth deployments use the dedicated auth-system gateway rather than
+ * either business database client. Each auth mutation binds the authenticated
+ * administrator, target user, organization, operation and reason. The session
+ * helper uses its native auth executor; no raw business-client override is used.
  */
 export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promise<RevokeMemberAccessResult> {
   const errors: string[] = [];
@@ -86,8 +95,7 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
   // SYSTEM auth DB credential (cross-user operation).
   try {
     const { revokeAllUserSessions } = await import('@nzila/platform-auth/password');
-    const { systemDb } = await import('@nzila/db/system-client');
-    await revokeAllUserSessions(input.authUserId, systemDb);
+    await withMemberAuthMutation(input, 'revoke-sessions', () => revokeAllUserSessions(input.authUserId));
     sessionsRevoked = true;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -101,9 +109,8 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
   // re-establish authorized access even after sessions are revoked. Runs
   // via the SYSTEM auth DB credential (cross-user operation).
   try {
-    const { systemDb } = await import('@nzila/db/system-client');
     const { authOrganizationUsers } = await import('@nzila/db/schema');
-    await systemDb
+    await withMemberAuthMutation(input, 'membership-state', () => authDb
       .update(authOrganizationUsers)
       .set({ isActive: false, updatedAt: new Date() })
       .where(
@@ -111,7 +118,7 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
           eq(authOrganizationUsers.userId, input.authUserId),
           eq(authOrganizationUsers.organizationId, input.organizationId),
         ),
-      );
+      ));
     authMembershipDisabled = true;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -222,7 +229,7 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
  * succeeding alone can already authorize the user, regardless of the
  * other. Two independent try/catch blocks (round 13's original shape)
  * could report success:false (502) while one store was already active.
- * Both writes now run inside a SINGLE systemDb transaction (one physical
+ * Both writes run inside a SINGLE scoped auth-system transaction (one physical
  * connection, spanning both the user_management and public schemas on
  * the same database) with RETURNING-based affected-row assertions — a
  * missing row or any error rolls back BOTH writes, so authority is never
@@ -236,11 +243,12 @@ export async function reactivateMemberAccess(
   let localStatusUpdated = false;
 
   try {
-    const { systemDb } = await import('@nzila/db/system-client');
     const { authOrganizationUsers } = await import('@nzila/db/schema');
 
-    await systemDb.transaction(async (tx) => {
-      const [authRow] = await tx
+    // The canonical UE membership projection grants only this actor/target/org's
+    // status columns to the auth executor, preserving one physical transaction.
+    await withMemberAuthMutation(input, 'membership-state', async () => {
+      const [authRow] = await authDb
         .update(authOrganizationUsers)
         .set({ isActive: true, updatedAt: new Date() })
         .where(
@@ -254,10 +262,14 @@ export async function reactivateMemberAccess(
         throw new Error('auth_membership_row_not_found');
       }
 
-      const [localRow] = await tx
+      const [localRow] = await authDb
         .update(organizationMembers)
         .set({ status: 'active', updatedAt: new Date() })
-        .where(eq(organizationMembers.id, input.membershipId))
+        .where(and(
+          eq(organizationMembers.id, input.membershipId),
+          eq(organizationMembers.userId, input.authUserId),
+          eq(organizationMembers.organizationId, input.organizationId),
+        ))
         .returning({ id: organizationMembers.id });
       if (!localRow) {
         throw new Error('local_membership_row_not_found');

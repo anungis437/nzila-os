@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mocks = vi.hoisted(() => ({
   grievanceSelect: vi.fn(),
   userSelect: vi.fn(),
+  membershipSelect: vi.fn(),
+  withAuthContext: vi.fn(),
 }));
 
 // The resolver calls db.select().from(grievances)... and db.select().from(users)...
@@ -18,7 +20,7 @@ vi.mock('@/db', () => ({
         where: vi.fn().mockReturnThis(),
         limit: vi.fn(() => {
           if (call === 'grievance') return Promise.resolve(mocks.grievanceSelect());
-          if (call === 'user') return Promise.resolve(mocks.userSelect());
+          if (call === 'user') return Promise.resolve(mocks.membershipSelect());
           return Promise.resolve([]);
         }),
       };
@@ -30,8 +32,15 @@ vi.mock('@/db', () => ({
 vi.mock('@/db/schema/grievance-schema', () => ({
   grievances: { id: {}, organizationId: {}, grievantId: {}, grievantEmail: {}, grievantName: {}, unionRepId: {} },
 }));
-vi.mock('@/db/schema/user-management-schema', () => ({
-  users: { userId: {}, email: {}, isActive: {}, accountLockedUntil: {}, locale: {} },
+vi.mock('@/db/schema-organizations', () => ({
+  organizationMembers: { userId: {}, organizationId: {}, email: {}, status: {}, deletedAt: {} },
+}));
+vi.mock('@nzila/db/schema', () => ({
+  authUsers: { userId: {}, email: {}, isActive: {}, lifecycleState: {}, accountLockedUntil: {}, locale: {} },
+}));
+vi.mock('@nzila/platform-auth/auth-execution', () => ({
+  withAuthContext: mocks.withAuthContext,
+  authDb: { select: () => ({ from: () => ({ where: () => ({ limit: () => Promise.resolve(mocks.userSelect()) }) }) }) },
 }));
 vi.mock('drizzle-orm', () => ({
   and: vi.fn(),
@@ -53,6 +62,8 @@ describe('recipient-resolver', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     selectCalls.length = 0;
+    mocks.membershipSelect.mockReturnValue([{ email: 'rep@example.com' }]);
+    mocks.withAuthContext.mockImplementation(async (_context, callback) => callback());
   });
 
   it('rejects unknown source table (claim_deadlines is Phase B)', async () => {
@@ -145,6 +156,10 @@ describe('recipient-resolver', () => {
     const officer = result.recipients.find((r) => r.role === 'assigned_officer');
     expect(officer?.email).toBe('rep@example.com');
     expect(officer?.locale).toBe('fr'); // fr-CA reduced to primary tag
+    expect(mocks.withAuthContext).toHaveBeenCalledWith(
+      { phase: 'lookup', selector: { kind: 'email', email: 'rep@example.com' } },
+      expect.any(Function),
+    );
   });
 
   it('skips assigned officer when user is not found / inactive / missing email', async () => {
@@ -172,6 +187,7 @@ describe('recipient-resolver', () => {
   });
 
   it('dedupes recipients when grievor and officer share the same email (first wins)', async () => {
+    mocks.membershipSelect.mockReturnValueOnce([{ email: 'shared@example.com' }]);
     selectCalls.push('grievance', 'user');
     mocks.grievanceSelect.mockReturnValueOnce([
       {
@@ -195,6 +211,23 @@ describe('recipient-resolver', () => {
     // grievor wins (first-in-list)
     expect(result.recipients).toHaveLength(1);
     expect(result.recipients[0].role).toBe('grievor');
+  });
+
+  it('does not open auth authority when the assigned officer has no active membership in the grievance organization', async () => {
+    selectCalls.push('grievance', 'user');
+    mocks.grievanceSelect.mockReturnValueOnce([{ id: GRIEV, organizationId: ORG, grievantEmail: 'griev@example.com', unionRepId: 'foreign-rep' }]);
+    mocks.membershipSelect.mockReturnValueOnce([]);
+    const result = await resolveGrievanceDeadlineRecipients({ sourceTable: 'grievance_deadlines', sourceDeadlineId: DL, grievanceId: GRIEV, correlationId: 'c-foreign' });
+    expect(mocks.withAuthContext).not.toHaveBeenCalled();
+    expect(mocks.userSelect).not.toHaveBeenCalled();
+    expect(result.recipients.map(recipient => recipient.role)).toEqual(['grievor']);
+  });
+
+  it('propagates auth lookup failures instead of inventing an officer or reporting successful resolution', async () => {
+    selectCalls.push('grievance', 'user');
+    mocks.grievanceSelect.mockReturnValueOnce([{ id: GRIEV, organizationId: ORG, grievantEmail: null, unionRepId: 'u-rep' }]);
+    mocks.withAuthContext.mockRejectedValueOnce(new Error('auth gateway unavailable'));
+    await expect(resolveGrievanceDeadlineRecipients({ sourceTable: 'grievance_deadlines', sourceDeadlineId: DL, grievanceId: GRIEV, correlationId: 'c-gateway' })).rejects.toThrow('auth gateway unavailable');
   });
 
   it('marks org_admin as skipped Phase B in every case', async () => {

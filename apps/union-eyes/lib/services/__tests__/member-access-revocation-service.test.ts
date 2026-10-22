@@ -17,10 +17,9 @@
  *   - every failure is captured in `errors` with a stable, greppable
  *     prefix identifying which step failed.
  *
- * PR #752 round 13: session revocation and the authOrganizationUsers
- * mutation now execute via @nzila/db/system-client's systemDb, not the
- * ordinary @nzila/db/client \u2014 covered here by mocking systemDb and
- * asserting it (not the ordinary client) is what receives the mutation.
+ * The canonical implementation uses actor/target/organization-bound native
+ * auth-system scopes. The legacy raw business-system client throws in these
+ * tests, so accidental fallback cannot satisfy a successful test.
  * Also covers reactivateMemberAccess(): symmetric re-enable of the durable
  * auth membership, no automatic session/case-access restoration, and
  * fail-closed behavior for both of its steps.
@@ -37,6 +36,8 @@ const m = vi.hoisted(() => ({
   failNthUpdate: { n: 0 },
   authReturning: vi.fn(),
   localReturning: vi.fn(),
+  auth: vi.fn(),
+  withAuthContext: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/password', () => ({
@@ -44,23 +45,19 @@ vi.mock('@nzila/platform-auth/password', () => ({
 }));
 
 vi.mock('@nzila/db/system-client', () => ({
-  systemDb: {
-    update: () => ({ set: () => ({ where: m.authUpdateWhere }) }),
-    transaction: async (callback: (tx: unknown) => Promise<unknown>) => {
-      const tx = {
-        update: (table: unknown) => {
-          // authOrganizationUsers (mocked below) has `organizationUserId`;
-          // organizationMembers (mocked below) does not — used to dispatch
-          // to the correct returning() mock per table without needing
-          // separate transaction-scoped chain builders.
-          const isAuthTable = (table as { organizationUserId?: unknown })?.organizationUserId !== undefined;
-          const returning = isAuthTable ? m.authReturning : m.localReturning;
-          return { set: () => ({ where: () => ({ returning }) }) };
-        },
-      };
-      return callback(tx);
-    },
-  },
+  get systemDb() { throw new Error('Legacy raw auth system client is forbidden'); },
+}));
+vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
+vi.mock('@nzila/platform-auth/auth-execution', () => ({
+  withAuthContext: m.withAuthContext,
+  authDb: { update: (table: { organizationUserId?: unknown }) => {
+    const isAuthTable = table.organizationUserId !== undefined;
+    return { set: () => ({ where: (...args: unknown[]) => ({
+      then: (resolve: (value: unknown) => unknown, reject: (error: unknown) => unknown) =>
+        Promise.resolve().then(() => isAuthTable ? m.authUpdateWhere(...args) : m.membersUpdateWhere(...args)).then(resolve, reject),
+      returning: isAuthTable ? m.authReturning : m.localReturning,
+    }) }) };
+  } },
 }));
 
 vi.mock('@nzila/db/schema', () => ({
@@ -116,13 +113,15 @@ async function loadService() {
 const baseInput = {
   membershipId: 'membership-1',
   authUserId: 'auth-user-1',
-  organizationId: 'org-a',
+  organizationId: '10000000-0000-4000-8000-000000000001',
   newLocalStatus: 'inactive' as const,
 };
 
 describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.auth.mockResolvedValue({ userId: 'admin-1' });
+    m.withAuthContext.mockImplementation(async (_context, callback) => callback());
     m.updateCallCount.n = 0;
     m.failNthUpdate.n = 0;
     m.revokeAllUserSessions.mockResolvedValue(undefined);
@@ -142,7 +141,14 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
     expect(result.authMembershipDisabled).toBe(true);
     expect(result.localStatusUpdated).toBe(true);
     expect(result.errors).toEqual([]);
-    expect(m.revokeAllUserSessions).toHaveBeenCalledWith('auth-user-1', expect.anything());
+    expect(m.revokeAllUserSessions).toHaveBeenCalledWith('auth-user-1');
+    expect(m.withAuthContext).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      phase: 'system', operation: 'revoke-sessions', actorUserId: 'admin-1', targetUserId: 'auth-user-1',
+    }), expect.any(Function));
+    expect(m.withAuthContext).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      phase: 'system', operation: 'membership-state', actorUserId: 'admin-1',
+      targetUserId: 'auth-user-1', organizationId: baseInput.organizationId,
+    }), expect.any(Function));
   });
 
   it('fails closed when session revocation throws — success: false, other steps still attempted', async () => {
@@ -198,25 +204,23 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
     expect(result.errors.some((e) => e.startsWith('local_status_update_failed:'))).toBe(true);
   });
 
-  it('passes authUserId (not membershipId) to session revocation and case-access filtering, via the SYSTEM auth db client', async () => {
+  it('binds the real auth user, not the membership row id, to scoped session revocation', async () => {
     const distinctInput = {
       membershipId: 'membership-row-uuid-AAAA',
       authUserId: 'real-auth-user-uuid-BBBB',
-      organizationId: 'org-a',
+      organizationId: baseInput.organizationId,
       newLocalStatus: 'deleted' as const,
     };
     const { revokeMemberAccess } = await loadService();
 
     await revokeMemberAccess(distinctInput);
 
-    expect(m.revokeAllUserSessions).toHaveBeenCalledWith('real-auth-user-uuid-BBBB', expect.anything());
-    expect(m.revokeAllUserSessions).not.toHaveBeenCalledWith('membership-row-uuid-AAAA', expect.anything());
-    // the systemDb passed is @nzila/db/system-client's mocked systemDb, not
-    // the ordinary @nzila/db/client — proven by the second call arg being
-    // an object exposing `update` (the mocked systemDb shape) rather than
-    // undefined (which is what an unmocked/missing import would yield).
-    const [, dbArg] = m.revokeAllUserSessions.mock.calls[0];
-    expect(dbArg).toHaveProperty('update');
+    expect(m.revokeAllUserSessions).toHaveBeenCalledWith('real-auth-user-uuid-BBBB');
+    expect(m.revokeAllUserSessions).not.toHaveBeenCalledWith('membership-row-uuid-AAAA');
+    expect(m.withAuthContext).toHaveBeenCalledWith(expect.objectContaining({
+      phase: 'system', operation: 'revoke-sessions', actorUserId: 'admin-1',
+      targetUserId: distinctInput.authUserId, organizationId: distinctInput.organizationId,
+    }), expect.any(Function));
   });
 
   it('revokes every active case-access assignment returned for the user/org and reports the count', async () => {
@@ -236,12 +240,14 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
 const reactivateBaseInput = {
   membershipId: 'membership-1',
   authUserId: 'auth-user-1',
-  organizationId: 'org-a',
+  organizationId: '10000000-0000-4000-8000-000000000001',
 };
 
 describe('reactivateMemberAccess — atomic, fail-closed reactivation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.auth.mockResolvedValue({ userId: 'admin-1' });
+    m.withAuthContext.mockImplementation(async (_context, callback) => callback());
     m.updateCallCount.n = 0;
     m.failNthUpdate.n = 0;
     m.authUpdateWhere.mockResolvedValue(undefined);
@@ -259,6 +265,11 @@ describe('reactivateMemberAccess — atomic, fail-closed reactivation', () => {
     expect(result.authMembershipReenabled).toBe(true);
     expect(result.localStatusUpdated).toBe(true);
     expect(result.errors).toEqual([]);
+    expect(m.withAuthContext).toHaveBeenCalledTimes(1);
+    expect(m.withAuthContext).toHaveBeenCalledWith(expect.objectContaining({
+      phase: 'system', operation: 'membership-state', actorUserId: 'admin-1',
+      targetUserId: reactivateBaseInput.authUserId, organizationId: reactivateBaseInput.organizationId,
+    }), expect.any(Function));
   });
 
   it('does not call revokeAllUserSessions on reactivation', async () => {
@@ -332,5 +343,15 @@ describe('reactivateMemberAccess — atomic, fail-closed reactivation', () => {
     expect(result.authMembershipReenabled).toBe(false);
     expect(result.localStatusUpdated).toBe(false);
     expect(result.errors.some((e) => e.includes('local_membership_row_not_found'))).toBe(true);
+  });
+
+  it('refuses reactivation without an authenticated actor before any authority write', async () => {
+    m.auth.mockResolvedValueOnce({ userId: null });
+    const { reactivateMemberAccess } = await loadService();
+    const result = await reactivateMemberAccess(reactivateBaseInput);
+    expect(result.success).toBe(false);
+    expect(m.withAuthContext).not.toHaveBeenCalled();
+    expect(m.authReturning).not.toHaveBeenCalled();
+    expect(m.localReturning).not.toHaveBeenCalled();
   });
 });

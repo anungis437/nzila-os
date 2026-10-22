@@ -13,7 +13,9 @@
 import { and, eq, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '@/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
-import { users } from '@/db/schema/user-management-schema';
+import { organizationMembers } from '@/db/schema-organizations';
+import { authUsers } from '@nzila/db/schema';
+import { authDb, withAuthContext } from '@nzila/platform-auth/auth-execution';
 import { logger } from '@/lib/logger';
 import type { RecipientSnapshot } from './types';
 
@@ -91,20 +93,40 @@ export async function resolveGrievanceDeadlineRecipients(
     });
   }
 
-  // 2. Assigned union rep / officer — look up email via users table
+  // Resolve the assigned user's active business membership in this grievance's
+  // organization before opening a narrowly selected auth lookup. The business
+  // connection has no raw auth-table privileges in canonical deployments.
   if (grievance.unionRepId) {
-    const [rep] = await db
-      .select({ userId: users.userId, email: users.email, locale: users.locale })
-      .from(users)
+    const [membership] = await db
+      .select({ email: organizationMembers.email })
+      .from(organizationMembers)
       .where(
         and(
-          eq(users.userId, String(grievance.unionRepId)),
-          eq(users.isActive, true),
-          isNull(users.accountLockedUntil),
-          isNotNull(users.email),
+          eq(organizationMembers.userId, String(grievance.unionRepId)),
+          eq(organizationMembers.organizationId, grievance.organizationId),
+          eq(organizationMembers.status, 'active'),
+          isNull(organizationMembers.deletedAt),
+          isNotNull(organizationMembers.email),
         ),
       )
       .limit(1);
+    const email = membership?.email?.trim().toLowerCase();
+    const rep = email
+      ? await withAuthContext({ phase: 'lookup', selector: { kind: 'email', email } }, async () => {
+          const [profile] = await authDb
+            .select({ userId: authUsers.userId, email: authUsers.email, locale: authUsers.locale })
+            .from(authUsers)
+            .where(and(
+              eq(authUsers.userId, String(grievance.unionRepId)),
+              eq(authUsers.isActive, true),
+              eq(authUsers.lifecycleState, 'active'),
+              isNull(authUsers.accountLockedUntil),
+              isNotNull(authUsers.email),
+            ))
+            .limit(1);
+          return profile;
+        })
+      : undefined;
 
     if (rep?.email) {
       recipients.push({
