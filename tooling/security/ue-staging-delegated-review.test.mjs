@@ -24,7 +24,7 @@ test('non-Ed25519 key rejected',()=>{const k=crypto.generateKeyPairSync('rsa',{m
 test('bounded explicit mission manifest passes semantics',()=>assert.equal(validateManifest(manifest(),NOW).sourceSha,S))
 for(const [name,change]of [
  ['production',m=>m.productionAuthorized=true],['proof waiver',m=>m.runtimeProofRequired=false],['release waiver',m=>m.signedReleaseRequired=false],
- ['wrong purpose',m=>m.purpose='runtime-release'],['wrong repo',m=>m.repository='other/repo'],['wrong PR',m=>m.pullRequest=985],['wrong branch',m=>m.branch='main'],['wrong base',m=>m.baseSha=S],['wrong mission',m=>m.mission='other'],['wrong CHG',m=>m.changeRecordId='other'],['wrong owner',m=>m.owner='github-actions[bot]'],['wrong environment',m=>m.environment='PROD'],['wrong instruction',m=>m.instructionSha256='a'.repeat(64)],
+ ['wrong purpose',m=>m.purpose='runtime-release'],['wrong repo',m=>m.repository='other/repo'],['wrong PR',m=>m.pullRequest=986],['wrong branch',m=>m.branch='main'],['wrong base',m=>m.baseSha=S],['wrong mission',m=>m.mission='other'],['wrong CHG',m=>m.changeRecordId='other'],['wrong owner',m=>m.owner='github-actions[bot]'],['wrong environment',m=>m.environment='PROD'],['wrong instruction',m=>m.instructionSha256='a'.repeat(64)],
  ['wrong resource',m=>m.resources.server='prod'],['expired',m=>m.expiresAt='2026-10-22T13:59:59Z'],['future issued',m=>m.issuedAt='2026-10-23T14:00:00Z'],['beyond custody',m=>m.expiresAt='2026-10-28T00:00:00Z'],['unknown key',m=>m.trustKey='mykey'],
  ['unreviewed production source',m=>m.files[0].path='apps/cfo/auth.ts'],['path traversal',m=>m.files[0].path='apps/union-eyes/../cfo/auth.ts'],['path injection',m=>m.files[0].path='apps/union-eyes/x\ny'],['duplicate coverage',m=>m.files.push(m.files[0])],['invalid blob',m=>m.files[0].blobSha='fake'],['unreviewed gate',m=>m.files.pop()],
  ['fake human attribution',m=>m.reviews[0].kind='independent-human'],['missing actual report',m=>m.reviews[0].report=''],['tampered report',m=>m.reviews[0].report+='tamper'],['unresolved P1',m=>m.reviews[0].unresolvedP1=1],['unresolved P0',m=>m.reviews[0].unresolvedP0=1],['future review',m=>m.reviews[0].reviewedAt='2026-10-24T12:00:00Z'],['missing reviews',m=>m.reviews=[]],['failed tests',m=>m.tests[0].result='FAIL'],['no actual test count',m=>m.tests[0].passed=0],['invalid test digest',m=>m.tests[0].logSha256='fake'],
@@ -37,13 +37,13 @@ function apiFixture(m){
  const evidenceFiles=[RECEIPT_PATH,SIGNATURE_PATH].map(filename=>({filename,status:'added'}))
  const sourceTree={truncated:false,tree:m.files.map(f=>({path:f.path,type:'blob',sha:f.blobSha}))}
  const objects={[`pulls/${m.pullRequest}`]:pr,[`git/commits/${E}`]:evidence,[`git/commits/${S}`]:source,[`git/commits/${m.baseSha}`]:base,[`git/trees/${TREE}?recursive=1`]:sourceTree,[`git/trees/${base.tree.sha}?recursive=1`]:{truncated:false,tree:[]},[`git/blobs/${BLOB}`]:{encoding:'base64',sha:BLOB,content:bytes.toString('base64')}}
- if(m.pullRequest===985){const key={path:KEY_PATH,type:'blob',sha:keyBlob};sourceTree.tree.push(key);objects[`git/trees/${base.tree.sha}?recursive=1`].tree.push({...key})}
+ if(m.pullRequest===986){const key={path:KEY_PATH,type:'blob',sha:keyBlob};sourceTree.tree.push(key);objects[`git/trees/${base.tree.sha}?recursive=1`].tree.push({...key})}
  objects[`git/blobs/${keyBlob}`]={encoding:'base64',sha:keyBlob,content:publicPem.toString('base64')}
  return {pr,evidence,sourceTree,allFiles,evidenceFiles,objects,get:async endpoint=>{assert(endpoint in objects,endpoint);return objects[endpoint]},pages:async(endpoint,field)=>{if(endpoint===`commits/${E}`){assert.equal(field,'files');return evidenceFiles}assert.equal(endpoint,`pulls/${m.pullRequest}/files`);return [...allFiles,...evidenceFiles]}}
 }
 
 function followup(){
- const m=manifest();m.pullRequest=985;m.branch=PR_BINDINGS[985].branch;m.baseSha=PR_BINDINGS[985].base
+ const m=manifest();m.pullRequest=986;m.branch=PR_BINDINGS[986].branch;m.baseSha=PR_BINDINGS[986].base
  m.files=m.files.filter(f=>f.path!==KEY_PATH)
  m.reviews.push({...m.reviews[0],kind:'primary-agent-review',agentTask:'/root'})
  return m
@@ -52,7 +52,7 @@ test('follow-up binds exact PR, branch, merged base, actual connector author and
  const m=followup();validateManifest(m,NOW);assert.equal((await verifyPullRequest(m,apiFixture(m))).evidenceSha,E)
 })
 for(const [name,change]of [
- ['unlisted PR',m=>m.pullRequest=986],['historical base',m=>m.baseSha=BASE],['historical branch',m=>m.branch=PR_BINDINGS[984].branch],
+ ['unlisted PR',m=>m.pullRequest=987],['superseded PR',m=>m.pullRequest=985],['historical base',m=>m.baseSha=BASE],['historical branch',m=>m.branch=PR_BINDINGS[984].branch],
  ['trust-key mutation',m=>m.files.push(manifest().files[0])],['missing attributed primary review',m=>m.reviews=m.reviews.filter(r=>r.kind!=='primary-agent-review')],
  ['false primary agent identity',m=>m.reviews.find(r=>r.kind==='primary-agent-review').agentTask='/root/another'],
 ])test(`follow-up rejects ${name}`,()=>{const m=followup();change(m);assert.throws(()=>validateManifest(m,NOW))})

@@ -11,7 +11,7 @@ export const KEY_PATH = 'ops/change-records/CHG-2026-0112.delegated-security.pub
 export const BASE = '65bc9b798a15c3d96c00a60f91cb9cc7de72cf16'
 export const PR_BINDINGS = Object.freeze({
   984: Object.freeze({ base: BASE, branch: 'ops/ue-staging-recovery-20261022', author: 'anungis437' }),
-  985: Object.freeze({ base: '441556737ffe0e36c6ec9bf6bd9c24bab5302559', branch: 'codex/ue-auth-storage-callers-20261022', author: 'anungisa' }),
+  986: Object.freeze({ base: '441556737ffe0e36c6ec9bf6bd9c24bab5302559', branch: 'fix/ue-auth-storage-callers-20261022', author: 'anungisa' }),
 })
 export const RESOURCES = Object.freeze({ subscription: '5d819f33-d16f-429c-a3c0-5b0e94740ba3', tenant: '5082b8be-b04d-4a13-b61c-b6397670177b', app: 'nzila-os-union-eyes-staging', appResourceGroup: 'nzila-canada-staging-rg', server: 'nzila-staging-db', databaseResourceGroup: 'nzila-staging-rg', database: 'nzila_os_staging', clone: 'nzila-ue-recovery-20261022', keyVault: 'nzila-staging-kv', region: 'canadacentral' })
 const HASH = /^[a-f0-9]{64}$/
@@ -88,10 +88,10 @@ export function validateManifest(m, now = Date.now()) {
   for (const review of m.reviews) {
     exactKeys(review,['kind','agentTask','reviewedAt','report','reportSha256','unresolvedP0','unresolvedP1'], 'review')
     const attribution = review.kind === 'separate-agent-review' && typeof review.agentTask === 'string' && /^\/root\/[a-z0-9_]+$/.test(review.agentTask)
-      || m.pullRequest === 985 && review.kind === 'primary-agent-review' && review.agentTask === '/root'
+      || m.pullRequest === 986 && review.kind === 'primary-agent-review' && review.agentTask === '/root'
     if (!attribution || !review.report || sha256(Buffer.from(review.report)) !== review.reportSha256 || !Number.isFinite(Date.parse(review.reviewedAt)) || Date.parse(review.reviewedAt)>issued || review.unresolvedP0 !== 0 || review.unresolvedP1 !== 0) fail('Agent review attribution/report/findings invalid')
   }
-  if (m.pullRequest === 985 && !m.reviews.some(r=>r.kind==='primary-agent-review' && r.agentTask==='/root')) fail('Follow-up primary review with explicit attribution required')
+  if (m.pullRequest === 986 && !m.reviews.some(r=>r.kind==='primary-agent-review' && r.agentTask==='/root')) fail('Follow-up primary review with explicit attribution required')
   for (const test of m.tests) {
     exactKeys(test,['command','result','passed','logSha256'], 'test')
     if (typeof test.command !== 'string' || !test.command || test.result !== 'PASS' || !Number.isInteger(test.passed) || test.passed < 1 || !HASH.test(test.logSha256)) fail('Actual passing test evidence missing')
@@ -121,7 +121,7 @@ export async function verifyPullRequest(m, api) {
   const baseTree = await api.get(`git/trees/${baseCommit.tree.sha}?recursive=1`)
   if (sourceTree.truncated || baseTree.truncated) fail('Truncated source tree')
   const blob = async (sha, expected) => { const b=await api.get(`git/blobs/${sha}`); const bytes=Buffer.from(b.content??'','base64'); if(b.encoding!=='base64' || b.sha!==sha || sha256(bytes)!==expected) fail('Git blob bytes differ from signed review');return bytes }
-  if (m.pullRequest === 985) {
+  if (m.pullRequest === 986) {
     const key = sourceTree.tree.find(t=>t.path===KEY_PATH), baseKey = baseTree.tree.find(t=>t.path===KEY_PATH)
     if (key?.type!=='blob' || baseKey?.type!=='blob' || key.sha!==baseKey.sha) fail('Follow-up trust key must match immutable base')
     await blob(key.sha, TRUST_SHA256)
