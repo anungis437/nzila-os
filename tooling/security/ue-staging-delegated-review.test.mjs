@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
-import { allowedPath, BASE, DOMAIN, KEY_PATH, RECEIPT_PATH, SIGNATURE_PATH, RESOURCES, sha256, validateManifest, verifyDetached, verifyEnvelope, verifyPullRequest } from './ue-staging-delegated-review.mjs'
+import { allowedPath, BASE, DOMAIN, KEY_PATH, PR_BINDINGS, RECEIPT_PATH, SIGNATURE_PATH, RESOURCES, sha256, validateManifest, verifyDetached, verifyEnvelope, verifyPullRequest } from './ue-staging-delegated-review.mjs'
 
 const NOW=Date.parse('2026-10-22T14:00:00Z'), S='1'.repeat(40), TREE='2'.repeat(40), E='3'.repeat(40), BLOB='4'.repeat(40)
 const report='Actual separate agent review; source risks assessed, no unresolved P0/P1. Production and runtime proof remain separate.'
@@ -31,15 +31,41 @@ for(const [name,change]of [
 ])test(`reject ${name}`,()=>{const m=manifest();change(m);assert.throws(()=>validateManifest(m,NOW))})
 
 function apiFixture(m){
- const pr={number:984,state:'open',changed_files:m.files.length+2,user:{login:'anungis437'},base:{ref:'main',sha:BASE,repo:{full_name:m.repository}},head:{sha:E,ref:m.branch,repo:{full_name:m.repository}}}
+ const pr={number:m.pullRequest,state:'open',changed_files:m.files.length+2,user:{login:PR_BINDINGS[m.pullRequest].author},base:{ref:'main',sha:m.baseSha,repo:{full_name:m.repository}},head:{sha:E,ref:m.branch,repo:{full_name:m.repository}}}
  const evidence={parents:[{sha:S}]}, source={tree:{sha:TREE}},base={tree:{sha:'5'.repeat(40)}}
  const allFiles=m.files.map(f=>({filename:f.path,status:f.status,sha:f.blobSha}))
  const evidenceFiles=[RECEIPT_PATH,SIGNATURE_PATH].map(filename=>({filename,status:'added'}))
  const sourceTree={truncated:false,tree:m.files.map(f=>({path:f.path,type:'blob',sha:f.blobSha}))}
- const objects={'pulls/984':pr,[`git/commits/${E}`]:evidence,[`git/commits/${S}`]:source,[`git/commits/${BASE}`]:base,[`git/trees/${TREE}?recursive=1`]:sourceTree,[`git/trees/${base.tree.sha}?recursive=1`]:{truncated:false,tree:[]},[`git/blobs/${BLOB}`]:{encoding:'base64',sha:BLOB,content:bytes.toString('base64')}}
+ const objects={[`pulls/${m.pullRequest}`]:pr,[`git/commits/${E}`]:evidence,[`git/commits/${S}`]:source,[`git/commits/${m.baseSha}`]:base,[`git/trees/${TREE}?recursive=1`]:sourceTree,[`git/trees/${base.tree.sha}?recursive=1`]:{truncated:false,tree:[]},[`git/blobs/${BLOB}`]:{encoding:'base64',sha:BLOB,content:bytes.toString('base64')}}
+ if(m.pullRequest===985){const key={path:KEY_PATH,type:'blob',sha:keyBlob};sourceTree.tree.push(key);objects[`git/trees/${base.tree.sha}?recursive=1`].tree.push({...key})}
  objects[`git/blobs/${keyBlob}`]={encoding:'base64',sha:keyBlob,content:publicPem.toString('base64')}
- return {pr,evidence,sourceTree,allFiles,evidenceFiles,objects,get:async endpoint=>{assert(endpoint in objects,endpoint);return objects[endpoint]},pages:async(endpoint,field)=>{if(endpoint===`commits/${E}`){assert.equal(field,'files');return evidenceFiles}assert.equal(endpoint,'pulls/984/files');return [...allFiles,...evidenceFiles]}}
+ return {pr,evidence,sourceTree,allFiles,evidenceFiles,objects,get:async endpoint=>{assert(endpoint in objects,endpoint);return objects[endpoint]},pages:async(endpoint,field)=>{if(endpoint===`commits/${E}`){assert.equal(field,'files');return evidenceFiles}assert.equal(endpoint,`pulls/${m.pullRequest}/files`);return [...allFiles,...evidenceFiles]}}
 }
+
+function followup(){
+ const m=manifest();m.pullRequest=985;m.branch=PR_BINDINGS[985].branch;m.baseSha=PR_BINDINGS[985].base
+ m.files=m.files.filter(f=>f.path!==KEY_PATH)
+ m.reviews.push({...m.reviews[0],kind:'primary-agent-review',agentTask:'/root'})
+ return m
+}
+test('follow-up binds exact PR, branch, merged base, actual connector author and unchanged trust',async()=>{
+ const m=followup();validateManifest(m,NOW);assert.equal((await verifyPullRequest(m,apiFixture(m))).evidenceSha,E)
+})
+for(const [name,change]of [
+ ['unlisted PR',m=>m.pullRequest=986],['historical base',m=>m.baseSha=BASE],['historical branch',m=>m.branch=PR_BINDINGS[984].branch],
+ ['trust-key mutation',m=>m.files.push(manifest().files[0])],['missing attributed primary review',m=>m.reviews=m.reviews.filter(r=>r.kind!=='primary-agent-review')],
+ ['false primary agent identity',m=>m.reviews.find(r=>r.kind==='primary-agent-review').agentTask='/root/another'],
+])test(`follow-up rejects ${name}`,()=>{const m=followup();change(m);assert.throws(()=>validateManifest(m,NOW))})
+for(const [name,change]of [
+ ['owner impersonation',a=>a.pr.user.login='anungis437'],
+ ['changed trust blob',a=>a.sourceTree.tree.find(t=>t.path===KEY_PATH).sha=BLOB],
+ ['missing base trust',a=>a.objects[`git/trees/${'5'.repeat(40)}?recursive=1`].tree=[]],
+ ['modified trust bytes',a=>a.objects[`git/blobs/${keyBlob}`].content=bytes.toString('base64')],
+])test(`follow-up API rejects ${name}`,async()=>{const m=followup(),a=apiFixture(m);change(a);await assert.rejects(verifyPullRequest(m,a))})
+test('follow-up metadata allowlist permits only the two reviewed declarations',()=>{
+ for(const name of ['duplicate-declarations.ts','entries.ts'])assert.equal(allowedPath('packages/db/src/auth-storage-authority/'+name),true)
+ for(const name of ['bootstrap-sql.ts','execution-boundary.ts','other.ts'])assert.equal(allowedPath('packages/db/src/auth-storage-authority/'+name),false)
+})
 test('actual PR API coverage and sole-parent evidence commit pass',async()=>{const m=manifest();assert.equal((await verifyPullRequest(m,apiFixture(m))).evidenceSha,E)})
 for(const [name,change]of [
  ['fork',a=>a.pr.head.repo.full_name='attacker/repo'],['wrong author',a=>a.pr.user.login='other'],['wrong actual base',a=>a.pr.base.sha=S],['wrong E parent',a=>a.evidence.parents[0].sha=BASE],['merge E',a=>a.evidence.parents.push({sha:BASE})],['source edit in E',a=>a.evidenceFiles.push({filename:'tooling/security/ue-staging-delegated-review.mjs',status:'modified'})],['wrong fixed evidence paths',a=>a.evidenceFiles[0].filename='other.json'],['missing API coverage',a=>a.pr.changed_files++],['unlisted PR file',a=>{a.allFiles.push({filename:'apps/union-eyes/extra.ts',status:'added',sha:BLOB});a.pr.changed_files++}],['different blob',a=>a.sourceTree.tree[0].sha='6'.repeat(40)],['truncated tree',a=>a.sourceTree.truncated=true],['tampered actual content',a=>a.objects[`git/blobs/${BLOB}`].content=Buffer.from('changed').toString('base64')],

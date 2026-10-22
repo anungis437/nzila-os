@@ -142,8 +142,8 @@ jobs:
               issue_number: pull_number,
             });
             const hasLabel = labels.some(l => l.name === 'security-design-reviewed');
-            if (!hasLabel && owner === 'anungis437' && repo === 'nzila-os' && pull_number === 984) {
-              // Explicit owner-authorized, separately agent-reviewed staging
+            if (!hasLabel && owner === 'anungis437' && repo === 'nzila-os' && [984, 985].includes(pull_number)) {
+              // Explicit owner-authorized, correctly attributed agent-reviewed staging
               // amendment. No human/security-team label is synthesized. The
               // verifier pins external delegated trust and exact source blobs.
               const { execFileSync } = require('node:child_process');

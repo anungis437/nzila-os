@@ -9,11 +9,17 @@ export const RECEIPT_PATH = 'ops/change-records/CHG-2026-0112.delegated-security
 export const SIGNATURE_PATH = 'ops/change-records/CHG-2026-0112.delegated-security-review.sig'
 export const KEY_PATH = 'ops/change-records/CHG-2026-0112.delegated-security.pub'
 export const BASE = '65bc9b798a15c3d96c00a60f91cb9cc7de72cf16'
+export const PR_BINDINGS = Object.freeze({
+  984: Object.freeze({ base: BASE, branch: 'ops/ue-staging-recovery-20261022', author: 'anungis437' }),
+  985: Object.freeze({ base: '441556737ffe0e36c6ec9bf6bd9c24bab5302559', branch: 'codex/ue-auth-storage-callers-20261022', author: 'anungisa' }),
+})
 export const RESOURCES = Object.freeze({ subscription: '5d819f33-d16f-429c-a3c0-5b0e94740ba3', tenant: '5082b8be-b04d-4a13-b61c-b6397670177b', app: 'nzila-os-union-eyes-staging', appResourceGroup: 'nzila-canada-staging-rg', server: 'nzila-staging-db', databaseResourceGroup: 'nzila-staging-rg', database: 'nzila_os_staging', clone: 'nzila-ue-recovery-20261022', keyVault: 'nzila-staging-kv', region: 'canadacentral' })
 const HASH = /^[a-f0-9]{64}$/
 const SHA = /^[a-f0-9]{40}$/
 const END = Date.parse('2026-10-27T13:16:59Z')
 const EXACT_PATHS = new Set([
+  'packages/db/src/auth-storage-authority/duplicate-declarations.ts',
+  'packages/db/src/auth-storage-authority/entries.ts',
   '.gitattributes',
   'tooling/repo-inventory/output/inventory.json', 'tooling/repo-inventory/output/inventory.md',
   'tooling/repo-inventory/output/repo-inventory.json', 'tooling/repo-inventory/output/repo-inventory.md',
@@ -60,7 +66,8 @@ export function verifyDetached(bytes, signatureText, pem) {
 }
 export function validateManifest(m, now = Date.now()) {
   exactKeys(m, ['version','purpose','repository','pullRequest','branch','baseSha','sourceSha','sourceTree','mission','changeRecordId','environment','owner','operator','instructionSha256','issuedAt','expiresAt','resources','productionAuthorized','runtimeProofRequired','signedReleaseRequired','files','reviews','tests','limitations'], 'manifest')
-  if (m.version !== 1 || m.purpose !== 'staging-security-review' || m.repository !== 'anungis437/nzila-os' || m.pullRequest !== 984 || m.branch !== 'ops/ue-staging-recovery-20261022' || m.baseSha !== BASE || !SHA.test(m.sourceSha) || !SHA.test(m.sourceTree)) fail('Source/repository/PR binding invalid')
+  const binding = Number.isInteger(m.pullRequest) && PR_BINDINGS[m.pullRequest]
+  if (m.version !== 1 || m.purpose !== 'staging-security-review' || m.repository !== 'anungis437/nzila-os' || !binding || m.branch !== binding.branch || m.baseSha !== binding.base || !SHA.test(m.sourceSha) || !SHA.test(m.sourceTree)) fail('Source/repository/PR binding invalid')
   if (m.mission !== 'UE-STAGING-RECOVERY-TO-GO' || m.changeRecordId !== 'CHG-2026-0112' || m.environment !== 'STAGING' || m.owner !== 'anungis437' || m.operator !== 'Codex' || m.instructionSha256 !== '681844e4f18424c1e592dfd1db205afc66d5c7a3d647c91006dc8f5d2dcbb2e3') fail('Mission or attribution invalid')
   if (m.productionAuthorized !== false || m.runtimeProofRequired !== true || m.signedReleaseRequired !== true) fail('Production/proof boundary invalid')
   exactKeys(m.resources, Object.keys(RESOURCES), 'resources')
@@ -73,12 +80,18 @@ export function validateManifest(m, now = Date.now()) {
     if (!allowedPath(f.path) || (f.previousPath !== null && !allowedPath(f.previousPath)) || !['added','modified','removed','renamed'].includes(f.status)) fail('Unreviewable source path/status')
     if ((f.status === 'removed' ? f.blobSha !== null || f.sha256 !== null : !SHA.test(f.blobSha) || !HASH.test(f.sha256)) || (f.status === 'added' ? f.baseBlobSha !== null || f.baseSha256 !== null : !SHA.test(f.baseBlobSha) || !HASH.test(f.baseSha256)) || (f.status === 'renamed' ? !f.previousPath : f.previousPath !== null)) fail('File hash/status binding invalid')
   }
-  for (const required of [KEY_PATH,'.github/workflows/security-design-review.yml','tooling/security/ue-staging-delegated-review.mjs']) if (!m.files.some(f=>f.path===required && f.status !== 'removed')) fail('Gate amendment itself missing from review')
+  const requiredPaths = ['.github/workflows/security-design-review.yml','tooling/security/ue-staging-delegated-review.mjs']
+  if (m.pullRequest === 984) requiredPaths.push(KEY_PATH)
+  else if (m.files.some(f=>f.path===KEY_PATH || f.previousPath===KEY_PATH)) fail('Follow-up cannot change delegated trust key')
+  for (const required of requiredPaths) if (!m.files.some(f=>f.path===required && f.status !== 'removed')) fail('Gate amendment itself missing from review')
   if (!Array.isArray(m.reviews) || !m.reviews.length || !Array.isArray(m.tests) || !m.tests.length || !Array.isArray(m.limitations)) fail('Review/test evidence missing')
   for (const review of m.reviews) {
     exactKeys(review,['kind','agentTask','reviewedAt','report','reportSha256','unresolvedP0','unresolvedP1'], 'review')
-    if (review.kind !== 'separate-agent-review' || typeof review.agentTask !== 'string' || !/^\/root\/[a-z0-9_]+$/.test(review.agentTask) || !review.report || sha256(Buffer.from(review.report)) !== review.reportSha256 || !Number.isFinite(Date.parse(review.reviewedAt)) || Date.parse(review.reviewedAt)>issued || review.unresolvedP0 !== 0 || review.unresolvedP1 !== 0) fail('Agent review attribution/report/findings invalid')
+    const attribution = review.kind === 'separate-agent-review' && typeof review.agentTask === 'string' && /^\/root\/[a-z0-9_]+$/.test(review.agentTask)
+      || m.pullRequest === 985 && review.kind === 'primary-agent-review' && review.agentTask === '/root'
+    if (!attribution || !review.report || sha256(Buffer.from(review.report)) !== review.reportSha256 || !Number.isFinite(Date.parse(review.reviewedAt)) || Date.parse(review.reviewedAt)>issued || review.unresolvedP0 !== 0 || review.unresolvedP1 !== 0) fail('Agent review attribution/report/findings invalid')
   }
+  if (m.pullRequest === 985 && !m.reviews.some(r=>r.kind==='primary-agent-review' && r.agentTask==='/root')) fail('Follow-up primary review with explicit attribution required')
   for (const test of m.tests) {
     exactKeys(test,['command','result','passed','logSha256'], 'test')
     if (typeof test.command !== 'string' || !test.command || test.result !== 'PASS' || !Number.isInteger(test.passed) || test.passed < 1 || !HASH.test(test.logSha256)) fail('Actual passing test evidence missing')
@@ -88,23 +101,31 @@ export function validateManifest(m, now = Date.now()) {
 
 /** API adapter is read-only; all failures throw, including incomplete pagination. */
 export async function verifyPullRequest(m, api) {
-  const pr = await api.get('pulls/984')
-  if (pr.number !== 984 || pr.state !== 'open' || pr.user?.login !== 'anungis437' || pr.base?.ref !== 'main' || pr.base?.sha !== BASE || pr.base?.repo?.full_name !== m.repository || pr.head?.repo?.full_name !== m.repository || pr.head?.ref !== m.branch || !SHA.test(pr.head.sha)) fail('Actual PR identity invalid')
+  const binding = Number.isInteger(m.pullRequest) && PR_BINDINGS[m.pullRequest]
+  if (!binding || m.baseSha !== binding.base || m.branch !== binding.branch) fail('Source/repository/PR binding invalid')
+  const endpoint = `pulls/${m.pullRequest}`
+  const pr = await api.get(endpoint)
+  if (pr.number !== m.pullRequest || pr.state !== 'open' || pr.user?.login !== binding.author || pr.base?.ref !== 'main' || pr.base?.sha !== binding.base || pr.base?.repo?.full_name !== m.repository || pr.head?.repo?.full_name !== m.repository || pr.head?.ref !== m.branch || !SHA.test(pr.head.sha)) fail('Actual PR identity invalid')
   const evidence = await api.get(`git/commits/${pr.head.sha}`)
   if (evidence.parents?.length !== 1 || evidence.parents[0].sha !== m.sourceSha) fail('Evidence commit must be direct sole-parent child of reviewed source')
   const source = await api.get(`git/commits/${m.sourceSha}`)
   if (source.tree?.sha !== m.sourceTree) fail('Actual reviewed tree differs')
   const changes = await api.pages(`commits/${pr.head.sha}`, 'files')
   if (changes.length !== 2 || ![RECEIPT_PATH,SIGNATURE_PATH].every(name=>changes.some(f=>f.filename===name && ['added','modified'].includes(f.status)))) fail('Evidence commit contains unreviewed edits')
-  const files = await api.pages('pulls/984/files')
+  const files = await api.pages(`${endpoint}/files`)
   if (files.length !== pr.changed_files || files.length > 3000) fail('Incomplete paginated PR coverage')
   const actual = files.filter(f=>![RECEIPT_PATH,SIGNATURE_PATH].includes(f.filename))
   if (actual.length !== m.files.length) fail('Source coverage differs from actual PR')
   const sourceTree = await api.get(`git/trees/${m.sourceTree}?recursive=1`)
-  const baseCommit = await api.get(`git/commits/${BASE}`)
+  const baseCommit = await api.get(`git/commits/${binding.base}`)
   const baseTree = await api.get(`git/trees/${baseCommit.tree.sha}?recursive=1`)
   if (sourceTree.truncated || baseTree.truncated) fail('Truncated source tree')
   const blob = async (sha, expected) => { const b=await api.get(`git/blobs/${sha}`); const bytes=Buffer.from(b.content??'','base64'); if(b.encoding!=='base64' || b.sha!==sha || sha256(bytes)!==expected) fail('Git blob bytes differ from signed review');return bytes }
+  if (m.pullRequest === 985) {
+    const key = sourceTree.tree.find(t=>t.path===KEY_PATH), baseKey = baseTree.tree.find(t=>t.path===KEY_PATH)
+    if (key?.type!=='blob' || baseKey?.type!=='blob' || key.sha!==baseKey.sha) fail('Follow-up trust key must match immutable base')
+    await blob(key.sha, TRUST_SHA256)
+  }
   for (const f of m.files) {
     const a=actual.find(a=>a.filename===f.path)
     if (!a || a.status !== f.status || (a.previous_filename??null)!==f.previousPath) fail('Actual changed-file identity differs')
@@ -116,24 +137,26 @@ export async function verifyPullRequest(m, api) {
     if(f.path==='.gitattributes'&&(f.status!=='modified'||sourceBytes.toString('utf8').trimEnd()!==baseBytes.toString('utf8').trimEnd()+'\n'+KEY_PATH+' -text'))fail('Only exact public-key byte preservation attribute is permitted')
   }
   // Detect a head update during verification; no race-induced stale success.
-  if ((await api.get('pulls/984')).head.sha !== pr.head.sha) fail('PR head changed during verification')
+  if ((await api.get(endpoint)).head.sha !== pr.head.sha) fail('PR head changed during verification')
   return { sourceSha:m.sourceSha,evidenceSha:pr.head.sha,files:m.files.length }
 }
 
 async function main() {
   const event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'))
-  if(process.env.GITHUB_REPOSITORY!=='anungis437/nzila-os'||event.pull_request?.number!==984)fail('Alternative only applies to mission PR984')
+  const number=event.pull_request?.number
+  if(process.env.GITHUB_REPOSITORY!=='anungis437/nzila-os'||!Number.isInteger(number)||!PR_BINDINGS[number])fail('Alternative only applies to explicitly bound mission PRs')
   const token=process.env.GITHUB_TOKEN
   const get=async endpoint=>{const response=await fetch(`https://api.github.com/repos/anungis437/nzila-os/${endpoint}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json'},signal:AbortSignal.timeout(30000)});if(!response.ok)fail(`GitHub read failed ${response.status}`);return response.json()}
   const pages=async(endpoint,field)=>{const all=[];for(let page=1;page<=31;page++){const result=await get(`${endpoint}${endpoint.includes('?')?'&':'?'}per_page=100&page=${page}`);const rows=field?result[field]:result;if(!Array.isArray(rows))fail('Invalid paginated response');all.push(...rows);if(rows.length<100)return all}fail('Pagination exceeds bound')}
-  const pr=await get('pulls/984')
+  const endpoint=`pulls/${number}`,pr=await get(endpoint)
   const content=async name=>{const result=await get(`contents/${name}?ref=${pr.head.sha}`);if(result.encoding!=='base64'||result.type!=='file')fail('Evidence content unavailable');return Buffer.from(result.content,'base64')}
   const bytes=await content(RECEIPT_PATH), signature=await content(SIGNATURE_PATH)
   const pem=fs.readFileSync(new URL('../../'+KEY_PATH,import.meta.url))
   const manifest=verifyEnvelope(bytes,signature.toString('utf8'),pem)
+  if(manifest.pullRequest!==number)fail('Receipt belongs to another PR')
   // Verify that fetched evidence belongs to the same observed head.
-  const api={get:async endpoint=>{const r=await get(endpoint);if(endpoint==='pulls/984'&&r.head.sha!==pr.head.sha)fail('Head changed while fetching evidence');return r},pages}
+  const api={get:async requested=>{const r=await get(requested);if(requested===endpoint&&r.head.sha!==pr.head.sha)fail('Head changed while fetching evidence');return r},pages}
   console.log(JSON.stringify(await verifyPullRequest(manifest,api)))
-  console.log('Delegated staging security review verified (agent review, sole-owner authorization); production authorization unchanged')
+  console.log('Delegated staging security review verified (explicit agent attribution, sole-owner authorization); production authorization unchanged')
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href)main().catch(error=>{console.error(error.message);process.exitCode=1})
