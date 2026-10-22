@@ -51,6 +51,14 @@ export interface SendEmailOptions {
   attachments?: Array<{ filename: string; content?: Buffer | string; path?: string }>;
 }
 
+export interface SendEmailResult {
+  success: boolean;
+  error?: string;
+  messageId?: string;
+  statusCode?: number;
+  code?: string;
+}
+
 export interface ResendSendContext {
   feature?: string;
   correlationId?: string;
@@ -64,6 +72,7 @@ interface ResendParsedError {
   message: string;
   statusCode?: number;
   retryAfterMs?: number;
+  code?: string;
 }
 
 const TRANSIENT_RETRY_STATUS_CODES = new Set([408, 409, 425, 429, 500, 502, 503, 504]);
@@ -92,6 +101,10 @@ function parseResendError(error: unknown): ResendParsedError {
         : 'Failed to send email';
 
   const statusCode = parseInteger((error as { statusCode?: unknown }).statusCode);
+  const rawCode = (error as { code?: unknown }).code;
+  const rawName = (error as { name?: unknown }).name;
+  const code = typeof rawCode === 'string' ? rawCode
+    : typeof rawName === 'string' && rawName !== 'Error' ? rawName : undefined;
   const headers = (error as { headers?: unknown }).headers;
   const retryAfterSeconds =
     headers && typeof headers === 'object'
@@ -101,6 +114,7 @@ function parseResendError(error: unknown): ResendParsedError {
   return {
     message,
     statusCode,
+    code,
     retryAfterMs: retryAfterSeconds !== undefined ? Math.max(retryAfterSeconds, 0) * 1000 : undefined,
   };
 }
@@ -154,7 +168,7 @@ function attachObservability(
 export async function sendResendEmail(
   payload: CreateEmailOptions,
   context: ResendSendContext = {},
-): Promise<{ success: boolean; error?: string; messageId?: string }> {
+): Promise<SendEmailResult> {
   const client = getResendClient();
   if (!client) {
     logger.warn('RESEND_API_KEY not configured - email not sent', { feature: context.feature });
@@ -193,6 +207,8 @@ export async function sendResendEmail(
       return {
         success: false,
         error: parsed.message,
+        statusCode: parsed.statusCode,
+        code: parsed.code,
       };
     }
 
@@ -215,7 +231,7 @@ export async function sendEmail({
   text,
   replyTo = REPLY_TO_EMAIL,
   attachments,
-}: SendEmailOptions): Promise<{ success: boolean; error?: string; messageId?: string }> {
+}: SendEmailOptions): Promise<SendEmailResult> {
   try {
     return await sendResendEmail({
       from: getFromEmail(),
@@ -230,9 +246,12 @@ export async function sendEmail({
     });
   } catch (error) {
     logger.error('Exception sending email', error instanceof Error ? error : new Error(String(error)));
+    const parsed = parseResendError(error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
+      statusCode: parsed.statusCode,
+      code: parsed.code,
     };
   }
 }

@@ -32,6 +32,13 @@ export interface DeliverReminderInput {
 
 const TRANSIENT_STATUS_CODES = new Set([408, 409, 425, 429, 500, 502, 503, 504]);
 
+function failureOutcome(message: string, statusCode?: number, code?: string): DeliveryOutcome {
+  const isTransient = statusCode !== undefined ? TRANSIENT_STATUS_CODES.has(statusCode)
+    : /timeout|ECONNRESET|ETIMEDOUT|EAI_AGAIN/i.test(message)
+      || /^(ECONNRESET|ETIMEDOUT|EAI_AGAIN)$/i.test(code ?? '');
+  return { kind: isTransient ? 'transient_failure' : 'permanent_failure', provider: 'resend', message, code, statusCode };
+}
+
 function renderBody(input: DeliverReminderInput): { html: string; text: string } {
   const when =
     input.daysToDeadline > 0
@@ -110,14 +117,10 @@ export async function deliverDeadlineReminderEmail(
       return { kind: 'sent', provider: 'resend', providerMessageId: result.messageId };
     }
 
-    // Provider explicit failure without throw
+    // The canonical service catches provider/transport errors. Preserve its
+    // structured status so the worker can retry an exhausted transient failure.
     const message = result.error || 'Resend returned success=false with no messageId';
-    return {
-      kind: 'permanent_failure',
-      provider: 'resend',
-      message,
-      code: 'resend_no_message_id',
-    };
+    return failureOutcome(message, result.statusCode, result.code ?? 'resend_no_message_id');
   } catch (error) {
     const rawStatus =
       typeof (error as { statusCode?: unknown })?.statusCode === 'number'
@@ -129,16 +132,6 @@ export async function deliverDeadlineReminderEmail(
         ? (error as { code: string }).code
         : undefined;
 
-    const isTransient =
-      (rawStatus !== undefined && TRANSIENT_STATUS_CODES.has(rawStatus)) ||
-      /timeout|ECONNRESET|ETIMEDOUT|EAI_AGAIN/i.test(message);
-
-    return {
-      kind: isTransient ? 'transient_failure' : 'permanent_failure',
-      provider: 'resend',
-      message,
-      code,
-      statusCode: rawStatus,
-    };
+    return failureOutcome(message, rawStatus, code);
   }
 }
