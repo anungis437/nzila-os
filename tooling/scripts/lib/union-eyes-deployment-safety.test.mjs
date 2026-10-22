@@ -373,9 +373,11 @@ test('committed DDL cannot be recovered by a traffic-only rollback', () => {
   assert.equal(decision.promotionRefusal, 'AUTOMATIC_TRAFFIC_PROMOTION_FORBIDDEN')
 })
 
-test('migration 0019 must be in the candidate and in the ledger before RLS preflight', () => {
+test('migration 0019 must be in the candidate and in the ledger before RLS preflight', (t) => {
+  const missingCandidate = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-missing-0019-'))
+  t.after(() => fs.rmdirSync(missingCandidate))
   const absent = evaluateDeploymentSafety(ready({
-    migration0019: inspectMigration0019(REPO),
+    migration0019: inspectMigration0019(missingCandidate),
     ledger: { source: 'drizzle.__drizzle_migrations', rows: [] },
     approval: signApproval(approvalBody({ scheduledMigrations: [] }), privateKeyPem),
   }))
