@@ -26,7 +26,9 @@ test('shell proof runner against disposable PostgreSQL', { skip: !BIN, timeout: 
   const exe = (name) => path.join(BIN, name + (process.platform === 'win32' ? '.exe' : ''))
   function run(name, args, options = {}) {
     const result = spawnSync(exe(name), args, { encoding: 'utf8', env, timeout: 30000, ...options })
-    assert.equal(result.status, 0, result.stdout + result.stderr)
+    const log = path.join(dir, 'postgres.log')
+    const diagnostic = result.status === 0 ? '' : (fs.existsSync(log) ? fs.readFileSync(log, 'utf8').slice(-4000) : '')
+    assert.equal(result.status, 0, (result.stdout ?? '') + (result.stderr ?? '') + diagnostic)
     return result.stdout
   }
   const adminUrl = `host=127.0.0.1 port=${port} dbname=postgres user=postgres`
@@ -35,7 +37,9 @@ test('shell proof runner against disposable PostgreSQL', { skip: !BIN, timeout: 
   let started = false
   try {
     run('initdb', ['-D', data, '-U', 'postgres', '-A', 'trust', '--no-locale', '--encoding=UTF8', '--no-sync'], { timeout: 120000, stdio: 'ignore' })
-    run('pg_ctl', ['-D', data, '-l', path.join(dir, 'postgres.log'), '-o', `-h 127.0.0.1 -p ${port}`, '-w', 'start'], { stdio: 'ignore' })
+    // Use TCP only. Distribution defaults can point Unix sockets at a shared
+    // directory that the unprivileged CI runner cannot write.
+    run('pg_ctl', ['-D', data, '-l', path.join(dir, 'postgres.log'), '-o', `-h 127.0.0.1 -p ${port} -c unix_socket_directories=`, '-w', 'start'], { stdio: 'ignore' })
     started = true
     const hash = 'd'.repeat(64)
     const manifest = { environment: 'staging', releaseSha: 'a'.repeat(40), frontendDigest: `sha256:${'b'.repeat(64)}`, backendDigest: `sha256:${'c'.repeat(64)}` }
