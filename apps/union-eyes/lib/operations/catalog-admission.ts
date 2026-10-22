@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import contract from './catalog-authority-contract.json'
 import { admissionQueries, assessCatalogAdmission } from './catalog-admission-core.mjs'
+import { canonicalCatalogContract, inspectCanonicalAuthCatalog } from './canonical-catalog-admission'
 
 export const CATALOG_ADMISSION_PUBLIC_ERROR = 'catalog authority admission failed'
 
@@ -33,9 +34,15 @@ export async function evaluateCatalogAdmission(
   for (const query of admissionQueries) {
     snapshots[query.name] = await execute(query.sql)
   }
-  return assessCatalogAdmission(
-    contract,
+  const canonical = process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1'
+  const report = assessCatalogAdmission(
+    canonical ? canonicalCatalogContract() : contract,
     snapshots,
     process.env.UE_ENVIRONMENT || process.env.NODE_ENV || 'unknown',
   )
+  if (canonical) {
+    report.violations.push(...await inspectCanonicalAuthCatalog(execute))
+    report.ok = report.violations.length === 0
+  }
+  return report
 }

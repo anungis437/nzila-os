@@ -4,9 +4,11 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   dbExecute: vi.fn(),
   containerExists: vi.fn(),
+  catalogAdmission: vi.fn(),
 }));
 
 vi.mock('@nzila/db', () => ({ db: { execute: m.dbExecute } }));
+vi.mock('@/lib/operations/catalog-admission', () => ({ evaluateCatalogAdmission: m.catalogAdmission }));
 vi.mock('@nzila/blob', () => ({
   container: vi.fn(() => ({ exists: m.containerExists })),
 }));
@@ -38,6 +40,7 @@ describe('ready route', () => {
     process.env.NODE_ENV = 'test';
     m.dbExecute.mockResolvedValue(undefined);
     m.containerExists.mockResolvedValue(true);
+    m.catalogAdmission.mockResolvedValue({ ok: true });
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true })) as any);
   });
 
@@ -49,6 +52,22 @@ describe('ready route', () => {
     const json = await response.json();
     expect(json.ready).toBe(true);
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('returns 503 when connectivity passes but catalog authority is rejected', async () => {
+    m.catalogAdmission.mockResolvedValue({ ok: false, violations: ['excess grant'] });
+    const { GET } = await loadRoute();
+    const response = await GET();
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ ready: false, checks: { database: true, catalogAuthority: false } });
+  });
+
+  it('fails closed when catalog inspection cannot execute', async () => {
+    m.catalogAdmission.mockRejectedValue(new Error('catalog unavailable'));
+    const { GET } = await loadRoute();
+    const response = await GET();
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ ready: false, checks: { catalogAuthority: false } });
   });
 
   it('keeps optional capabilities out of production readiness by default', async () => {
