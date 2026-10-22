@@ -1,0 +1,238 @@
+{
+  "version": 1,
+  "purpose": "staging-security-review",
+  "repository": "anungis437/nzila-os",
+  "pullRequest": 985,
+  "branch": "codex/ue-auth-storage-callers-20261022",
+  "baseSha": "441556737ffe0e36c6ec9bf6bd9c24bab5302559",
+  "sourceSha": "b8c68cb55a7c9625f53957da6b2e4eef09f9f6aa",
+  "sourceTree": "9cf511e02e957677ab33c3e569a021eb170cce79",
+  "mission": "UE-STAGING-RECOVERY-TO-GO",
+  "changeRecordId": "CHG-2026-0112",
+  "environment": "STAGING",
+  "owner": "anungis437",
+  "operator": "Codex",
+  "instructionSha256": "681844e4f18424c1e592dfd1db205afc66d5c7a3d647c91006dc8f5d2dcbb2e3",
+  "issuedAt": "2026-10-22T19:17:16.884Z",
+  "expiresAt": "2026-10-23T19:17:12.536Z",
+  "resources": {
+    "subscription": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+    "tenant": "5082b8be-b04d-4a13-b61c-b6397670177b",
+    "app": "nzila-os-union-eyes-staging",
+    "appResourceGroup": "nzila-canada-staging-rg",
+    "server": "nzila-staging-db",
+    "databaseResourceGroup": "nzila-staging-rg",
+    "database": "nzila_os_staging",
+    "clone": "nzila-ue-recovery-20261022",
+    "keyVault": "nzila-staging-kv",
+    "region": "canadacentral"
+  },
+  "productionAuthorized": false,
+  "runtimeProofRequired": true,
+  "signedReleaseRequired": true,
+  "files": [
+    {
+      "path": ".github/workflows/security-design-review.yml",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "c5229f1e57943c972a2ea0c1a36b0efdc19c4dd7",
+      "sha256": "61c67fe07fda93a9063a69008aed50aeafc17d577cd02344e6bd3e13c0bff196",
+      "baseBlobSha": "22927beed5f61064f3f8788dbbcf2973d4e07ff6",
+      "baseSha256": "8a3b8c0ffb6170ff5a3ef3e06302a3daf2be0f8b26e71c1ddff726414c8a40d9"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/auth-member-access-projection.pglite.test.ts",
+      "status": "added",
+      "previousPath": null,
+      "blobSha": "9b14406777895dd1c69191dfc1082da036e19377",
+      "sha256": "d754d6ba42d5f2b8901eb06ea088f6268f846554109689afb9f5d71a64b986a6",
+      "baseBlobSha": null,
+      "baseSha256": null
+    },
+    {
+      "path": "apps/union-eyes/db/auth/member-access-projection.ts",
+      "status": "added",
+      "previousPath": null,
+      "blobSha": "a54eb199699f6403c678bbfefbccda3f764b84b0",
+      "sha256": "01d0ffd1e663cb1e852156033b94cc08a9e769f6151fe7b8167c760564eff148",
+      "baseBlobSha": null,
+      "baseSha256": null
+    },
+    {
+      "path": "apps/union-eyes/lib/deadline-engine/__tests__/recipient-resolver.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "4f4cabba79c74f5b5c919fd64bb531f3634bb8ec",
+      "sha256": "91e252c4363c297a21c4308d03a9ef423afcdac2bfd4fbf0837ec34bb18578c0",
+      "baseBlobSha": "bed2a4f4a1ff0ae3496e74ed78c9129c516093ba",
+      "baseSha256": "52a5ad24accec0e0eed575cb471832d6ba62d1053f3e51fd835c2ca7cad78458"
+    },
+    {
+      "path": "apps/union-eyes/lib/deadline-engine/recipient-resolver.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "40506aae1a2332915a6399e188e508923b7b3af0",
+      "sha256": "0d480dc92ff2a24c3f66cddd982cac36c6dc6b7b7f0f7cf9acf84a78bd1a7913",
+      "baseBlobSha": "ce0a48a21206bfe3d44c7c51d2dffd5921d8107a",
+      "baseSha256": "0f5a404c41d96504ff384a74cc97f7ac98e8ddc605541ca609191f7bc4a9ce46"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/__tests__/member-access-revocation-service.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "4934fe80e744cfa91004dffd64e0b8af27e96741",
+      "sha256": "7ab5fd022009800e4a0df12fbb9bf4422fe7646851e76f7655e5ddc7a48e5e66",
+      "baseBlobSha": "0a6ed6e38a236bb69a35828e75357fee27335a14",
+      "baseSha256": "c4b242e1519a2bc8b47c0c39c83c205053b26f4cb7cf1eb74f4febbad10aa053"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/member-access-revocation-service.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "8f492bf78161e7d63f483e9054914056c7e7d8b4",
+      "sha256": "84bad437f6a684c2b88b827c9dd46bf4aae3ab2f9f5aa5bb2b83ddea73ed6c95",
+      "baseBlobSha": "e2d487728f98182aa2726bbb50508984728ed4bc",
+      "baseSha256": "c293e3d3b034b72ce4cb91323a2529c2da7931a34ef5bcefa20a71dc16296580"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/duplicate-declarations.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "48d5a859e8ffb7885edffdd18caa870adf390760",
+      "sha256": "e865bd3d63b7fbf035422b03d9ccec8ab65ab54cb11682ffb906cada2dedd65f",
+      "baseBlobSha": "d594a741e9c7253a62c0bde0fe435cd1fb3fd573",
+      "baseSha256": "a588a320b6a9d0ea8830099864c7dc7397b747664c4f9db3a2907979d9452dd7"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/entries.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "55204ab7562f144dbbe553a4a4d3d566eb93c668",
+      "sha256": "dbfbf8de71414d745885589061834d51126a738d58eef116b7bc0732b7d83971",
+      "baseBlobSha": "c11ae294756dfc0b1a05f0ee735272f53cd8a274",
+      "baseSha256": "3288a6024bc24792c593f351318747f4ed294c06e166c1aece72496870bf86c2"
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.json",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "8a0a727935a3c6bbe028207f71d4512e8f6c89ba",
+      "sha256": "c2b54c307d6dba22778d4ae7b1e1cecdc27926ccabaf691b679fbf8cfa135729",
+      "baseBlobSha": "26045995404e295caf41b155e987b46ba9bf089c",
+      "baseSha256": "487875a4624808b58b19338701aebbf49f1e6b0b4425b450789f60b54a4d3af7"
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.md",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "2b9d5248be4cb20c31fe7bc41aba48be1f0f8c59",
+      "sha256": "2d8ee83e6cb06146aaf4bd7822aee2d39118789efed9bf5c642c28a238b37a5d",
+      "baseBlobSha": "22821da31143f0f1b0a0c976e8e45abccfdb8906",
+      "baseSha256": "04b69a367db7727a06fcd359d896d87b28646c1add20e69bf854f06803b523b3"
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.json",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "8a0a727935a3c6bbe028207f71d4512e8f6c89ba",
+      "sha256": "c2b54c307d6dba22778d4ae7b1e1cecdc27926ccabaf691b679fbf8cfa135729",
+      "baseBlobSha": "26045995404e295caf41b155e987b46ba9bf089c",
+      "baseSha256": "487875a4624808b58b19338701aebbf49f1e6b0b4425b450789f60b54a4d3af7"
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.md",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "2b9d5248be4cb20c31fe7bc41aba48be1f0f8c59",
+      "sha256": "2d8ee83e6cb06146aaf4bd7822aee2d39118789efed9bf5c642c28a238b37a5d",
+      "baseBlobSha": "22821da31143f0f1b0a0c976e8e45abccfdb8906",
+      "baseSha256": "04b69a367db7727a06fcd359d896d87b28646c1add20e69bf854f06803b523b3"
+    },
+    {
+      "path": "tooling/security/ue-staging-delegated-review.mjs",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "98bc1264e1828325bd1fd1929cb384b0df8a590a",
+      "sha256": "acf4d15f72b42f8ee8b1375cac33faeb73e9aae2adb1df30a9365c94053dc07b",
+      "baseBlobSha": "2c361a08a3ae2734db2367ea37f72da07ec558bf",
+      "baseSha256": "f03908391eada29200a4fb28858eece08afc305f553ab65a19368615fe3e436d"
+    },
+    {
+      "path": "tooling/security/ue-staging-delegated-review.test.mjs",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "aaa396d9f2966d79b89f4a530b93103738e67c64",
+      "sha256": "b02077ed88f48a3192f162851778aea6dd240449a7b3bf55dcf633c791a37234",
+      "baseBlobSha": "840f3e0f8ea38538e40e18e3f965ac6cac5b854f",
+      "baseSha256": "deb72ab43daf909c4fd1dbaf0fbf51b5abc2f8613cc77012eaf07ac31afaa904"
+    }
+  ],
+  "reviews": [
+    {
+      "kind": "primary-agent-review",
+      "agentTask": "/root",
+      "reviewedAt": "2026-10-22T19:17:12.536Z",
+      "report": "# UE auth caller boundary — primary agent review\n\nReviewer: Codex /root. This is a primary-agent source review, not a separate-agent or human security-team approval. Account usage limits prevented a new independent agent review. Historical separate-agent reports cover their original PR984 scopes only.\n\nScope: PR985, branch codex/ue-auth-storage-callers-20261022, base 441556737ffe0e36c6ec9bf6bd9c24bab5302559. Initial application source 17043ac13742a8ebadc8e679afe047580d2dea00. The final signed manifest separately binds every reviewed source and base blob, including these governance amendments.\n\nThe isolated clone demonstrated real SQL42501 denials for legacy raw-auth callers after the canonical boundary was installed. Those denials are correct and are preserved. Deadline lookup now requires an active, nondeleted business membership in the grievance organization before opening a canonical email-selected auth lookup. It additionally constrains the assigned user ID and active/unlocked account. Missing membership never opens auth authority; auth gateway failure propagates rather than producing a successful contact resolution.\n\nMember administrator routes retain their existing platform-administrator guards. Auth mutations also bind the real authenticated actor, target user, organization, operation and reason. Session revocation uses the native scoped auth client; raw systemDb overrides are removed. Independent revocation steps still maximize denial coverage and report partial failure. Reactivation uses one physical auth-system transaction spanning auth and business schemas, with both RETURNING row counts required. A missing second row cannot leave the first authority write committed.\n\nThe companion SQL grants the nonlogin auth system executor SELECT on id/user/organization/status and UPDATE on status/updated_at only. It requires forced RLS, separate ownership, a safe canonical role, no inherited business-role auth authority, and no unexplained prior projection grants or policies. New policies constrain the exact target and organization, system membership-state operation, actor and reason. Updates require active status. Private contacts, ownership retargeting, deletion and arbitrary status changes remain denied. The broad canonical platform authorization migration is not applied or stamped.\n\nEvidence: 15 PGlite policy tests and 32 focused caller/scheduler tests pass. Fourteen actual Azure PostgreSQL15 rollback checks pass using verified TLS and the dedicated non-BYPASS migration principal. The canonical auth bootstrap SHA256 remains 6d306bec3905bf50ddf141410c0b2ae263979877dc094f79519f1b69954f3834. The clone-only projection was then installed and tested through the actual dedicated NOINHERIT auth-system LOGIN and native executeAuthContext. Both writes used the same backend connection; deliberate transaction aborts after successful writes and after a missing second row restored exact full-row fingerprints in both existing membership tables. These are source/gateway clone proofs, not deployed image or browser acceptance.\n\nThe delegated gate amendment is limited to exact PR985/base/branch/actual connector author anungisa, alongside the historical PR984 binding. The owner remains anungis437 and the operator Codex; no owner impersonation or security label is synthesized. The pinned public key must remain identical to the immutable merged base. The two metadata allowlist additions are exact file paths; canonical auth SQL and execution-boundary files are not newly allowed. All source changes and the gate itself must be included in a genuine owner-controlled delegated Ed25519 signature. The unchanged expiry, resources, instruction hash, production=false, runtime-proof and signed-release requirements remain mandatory. Seventy verifier tests pass, including unlisted PRs, mismatched bindings, false primary attribution, changed key blobs/bytes and adjacent path denials.\n\nNo unresolved P0/P1 findings were identified within this reviewed change. Other legacy auth callers remain explicitly recorded in the authority declarations and have not been claimed repaired. Root validation and exact final-head protected Linux CI remain mandatory; failed Windows aggregate results must be recorded as failed. The clone projection is not applied to live staging by this review. Final integrated images, signed clone/release qualification, governed live migration, real Entra and worker acceptance, and controlled staging cutover remain outstanding. Staging remains NO_GO; production authorization remains NO.\n",
+      "reportSha256": "fe22b6a368248f9609910cf8bd566d19775817c842e79a0a89cea2420dd622fd",
+      "unresolvedP0": 0,
+      "unresolvedP1": 0
+    }
+  ],
+  "tests": [
+    {
+      "command": "Focused recipient resolver, member access failure injection and reminder scheduler tests",
+      "result": "PASS",
+      "passed": 32,
+      "logSha256": "6b60284c165a1143c7192f44f1aeb18b4df85b6fd66c1b6769300f59e4bf8b38"
+    },
+    {
+      "command": "Actual PGlite SQL membership projection policy tests",
+      "result": "PASS",
+      "passed": 15,
+      "logSha256": "104f79efeca958dfad8eda1a77939c3097099aa5d82808c715d569859ccd9c15"
+    },
+    {
+      "command": "Canonical authority registry invariants and duplicate declaration ratchet",
+      "result": "PASS",
+      "passed": 14,
+      "logSha256": "a224aeb022fbf593e602c4980b288444566ea3334a3619a9041ab43d71566f92"
+    },
+    {
+      "command": "node --test tooling/security/ue-staging-delegated-review.test.mjs",
+      "result": "PASS",
+      "passed": 70,
+      "logSha256": "462397bc6ed3d6d11bab165c812f7229328ad22f9dddcf046ae1100850342161"
+    },
+    {
+      "command": "Actual Azure PostgreSQL15 verified-TLS dedicated migration-principal rollback rehearsal, canonical bootstrap byte comparison and negative permissions",
+      "result": "PASS",
+      "passed": 14,
+      "logSha256": "081cde2766690a36374693b5a6811148af64c292ee4a725faad8416babbdff88"
+    },
+    {
+      "command": "Actual native dedicated auth gateway cross-schema same-connection writes and missing-second-row rollback, with both original membership full-row fingerprints preserved",
+      "result": "PASS",
+      "passed": 2,
+      "logSha256": "f2443b78a301ec060c7010d9f19b4f7e93d38f7c604977ba8e38951ea2c14da8"
+    },
+    {
+      "command": "Intermediate merged441 immutable backend image: actual canonical-mode four dedicated TLS aliases, raw-auth denial and unmapped native lookup/provider denial on isolated clone; no final follow-up image or deployed acceptance claimed",
+      "result": "PASS",
+      "passed": 7,
+      "logSha256": "bb99d90add2a73ac1cc5c319259e0e01e67799113e12bec88abe7bc1e90c0807"
+    }
+  ],
+  "limitations": [
+    "This is a primary-agent review by Codex /root, not a new independent/separate agent or human security-team approval. Account usage limits prevented additional parallel agent review. Historical PR984 reviews remain historical and are not presented as reviews of PR985.",
+    "PR985 was created by the connected GitHub identity anungisa; the standing authorizing owner remains anungis437 and the actual delegated operator/signatory is Codex. Exact PR/base/branch/author bindings prevent owner impersonation. No human security label is synthesized.",
+    "Canonical auth bootstrap SQL remains byte-identical to the installed clone source. The narrow UE companion projection is separately source-bound, rehearsed and installed only on the isolated clone, with native gateway transaction proofs. No full platform authorization migration0041 is applied or stamped.",
+    "The 20 scoped/16 platform/93 Django and1736 runtime RLS proofs are retained distinct prior clone observations. Fresh exact final-source/image qualification is required before live operations. Pre-restore697 original fingerprints and post-migration696 unchanged plus exact10-row canonical category backfill are distinct evidence statements.",
+    "Other legacy auth callers remain explicitly recorded and are not claimed repaired by this change. Actual deployed acceptance must disposition any reachable remaining compatibility failures.",
+    "No final image execution, live DDL, real Entra browser acceptance, worker delivery, functional/nav/FR-EN/audit acceptance, candidate deployment or staging GO is established by this source review. Signed image-bound clone qualification and runtime/recovery gates remain mandatory. Production authorization remains NO.",
+    "Actual pnpm lint --concurrency=2 exitCode 0; receipt SHA256 5e024f852d46622c827797d5ca979e6b8f9b756997b9a8806e48b14165fdfc6b",
+    "Actual pnpm typecheck --concurrency=2 exitCode 0; receipt SHA256 dbcb2b5f3b91870db8cfe537cc18618b3c0c2c274297abc44783b2fa9e332d5f",
+    "Actual pnpm test:fast --maxWorkers=2 is IN_PROGRESS; no completed aggregate result is asserted; receipt SHA256 1ac4a83098ace34a0a709d2775e0a6b3cb835e630b2ce268a96caf727f5c658d",
+    "Actual pnpm validate:docs exitCode 0; receipt SHA256 5125066df071245726ff91db313cbc341abd8e17fd807c4ff1fe58216ecb64df",
+    "Actual pnpm governance:audit exitCode 0; receipt SHA256 f7628effd7249c065bd2af7df544ade27a8ffc28b444ba3b73868ded9e3bf22f"
+  ]
+}
