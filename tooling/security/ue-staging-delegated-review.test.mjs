@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
-import { allowedPath, BASE, DOMAIN, KEY_PATH, PR_BINDINGS, RECEIPT_PATH, SIGNATURE_PATH, RESOURCES, sha256, validateManifest, validateSanitizerPackageChange, verifyDetached, verifyEnvelope, verifyPullRequest } from './ue-staging-delegated-review.mjs'
+import { allowedPath, BASE, DOMAIN, KEY_PATH, PR_BINDINGS, RECEIPT_PATH, SIGNATURE_PATH, RESOURCES, sha256, validateManifest, validateSanitizerPackageChange, validateToolDependencyChange, verifyDetached, verifyEnvelope, verifyPullRequest } from './ue-staging-delegated-review.mjs'
 
 const NOW=Date.parse('2026-10-22T14:00:00Z'), S='1'.repeat(40), TREE='2'.repeat(40), E='3'.repeat(40), BLOB='4'.repeat(40)
 const report='Actual separate agent review; source risks assessed, no unresolved P0/P1. Production and runtime proof remain separate.'
@@ -61,10 +61,52 @@ for(const [name,change]of [
  ['adjacent package',m=>m.files.at(-2).path='packages/other/package.json'],
  ['historical PR',m=>{m.pullRequest=984;m.branch=PR_BINDINGS[984].branch;m.baseSha=BASE}],
 ])test(`sanitizer repair rejects ${name}`,()=>{const m=dependencyFollowup();change(m);assert.throws(()=>validateManifest(m,NOW))})
-const packageBytes = floor=>Buffer.from(JSON.stringify({scripts:{test:'unchanged'},pnpm:{overrides:{dompurify:floor,other:'1.0.0'}}}))
+const packageBytes = floor=>Buffer.from(JSON.stringify({scripts:{test:'unchanged'},pnpm:{overrides:{dompurify:floor,other:'1.0.0',...(floor==='>=3.4.13'?{}:{'@sentry/nextjs':'10.75.2'})}}}))
 test('sanitizer package repair accepts only the reviewed override floor change',()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),packageBytes('>=3.4.17')))
 for(const floor of ['>=3.4.14','>=3.4.16','*','>=3.4.18'])test(`sanitizer package rejects unexpected floor ${floor}`,()=>assert.throws(()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),packageBytes(floor))))
 test('sanitizer package rejects unrelated script edits',()=>{const source=JSON.parse(packageBytes('>=3.4.17'));source.scripts.test='bypass';assert.throws(()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),Buffer.from(JSON.stringify(source))),/Unrelated/)})
+for (const version of [undefined,'10.47.0','*','10.75.3']) test(`Sentry repair rejects unexpected version ${version}`,()=>{
+ const source=JSON.parse(packageBytes('>=3.4.17'));source.pnpm.overrides['@sentry/nextjs']=version
+ assert.throws(()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),Buffer.from(JSON.stringify(source))),/Sentry/)
+})
+const toolManifest=()=>({name:'nzila-kilo-local-tooling',private:true,dependencies:{'@kilocode/plugin':'7.2.52'},overrides:{toml:'5.0.1'},engines:{node:'>=20'}})
+const jsonBytes=value=>Buffer.from(JSON.stringify(value))
+test('local tooling repair accepts only the reproducible manifest without scripts',()=>validateToolDependencyChange('.kilo/package.json',undefined,jsonBytes(toolManifest())))
+for (const [name,change] of [
+ ['install script',p=>p.scripts={postinstall:'execute'}],['broad override',p=>p.overrides.toml='*'],
+ ['plugin change',p=>p.dependencies['@kilocode/plugin']='latest'],['public package',p=>p.private=false],
+]) test(`local tooling manifest rejects ${name}`,()=>{const p=toolManifest();change(p);assert.throws(()=>validateToolDependencyChange('.kilo/package.json',undefined,jsonBytes(p)))})
+const toolLocks=()=>{
+ const old={version:'4.2.0',resolved:'https://registry.npmjs.org/toml/-/toml-4.2.0.tgz',integrity:'old',license:'MIT',engines:{node:'>=20'}}
+ const base={name:'.kilo',lockfileVersion:3,requires:true,packages:{'':{dependencies:toolManifest().dependencies},'node_modules/toml':old,'node_modules/other':{version:'1'}}}
+ const source=structuredClone(base);source.name=toolManifest().name;source.packages['']={name:toolManifest().name,dependencies:toolManifest().dependencies,engines:toolManifest().engines}
+ Object.assign(source.packages['node_modules/toml'],{version:'5.0.1',resolved:'https://registry.npmjs.org/toml/-/toml-5.0.1.tgz',integrity:'sha512-EqYNA/YvUNndrA2B3O2ojzLQoTQrBxeZ9UIjQwk8t10oe6n7dwclBwd9IdZQTOKwe6vWX+AXtl6IntXRbepdxQ=='})
+ return {base,source}
+}
+test('local tooling lock accepts only the exact published TOML artifact and root metadata',()=>{const {base,source}=toolLocks();validateToolDependencyChange('.kilo/package-lock.json',jsonBytes(base),jsonBytes(source))})
+for(const [name,change]of [
+ ['other package',p=>p.packages['node_modules/other'].version='2'],['new package',p=>p.packages['node_modules/extra']={version:'1'}],
+ ['integrity',p=>p.packages['node_modules/toml'].integrity='wrong'],['registry',p=>p.packages['node_modules/toml'].resolved='https://attacker.invalid/toml.tgz'],
+ ['license',p=>p.packages['node_modules/toml'].license='different'],['engine',p=>p.packages[''].engines.node='*'],
+])test(`local tooling lock rejects ${name}`,()=>{const {base,source}=toolLocks();change(source);assert.throws(()=>validateToolDependencyChange('.kilo/package-lock.json',jsonBytes(base),jsonBytes(source)))})
+function toolFollowup(){const m=dependencyFollowup();for(const path of ['.kilo/package.json','.kilo/package-lock.json'])m.files.push({path,status:path.endsWith('/package.json')?'added':'modified',previousPath:null,blobSha:BLOB,sha256:sha256(bytes),baseBlobSha:path.endsWith('/package.json')?null:BLOB,baseSha256:path.endsWith('/package.json')?null:sha256(bytes)});return m}
+test('local tooling coverage requires the exact added manifest and modified lock',()=>validateManifest(toolFollowup(),NOW))
+for(const [name,change]of [
+ ['missing lock',m=>m.files.pop()],['missing manifest',m=>m.files.splice(-2,1)],['manifest modification',m=>m.files.at(-2).status='modified'],
+ ['adjacent file',m=>m.files.at(-2).path='.kilo/other.json'],['historical PR',m=>{m.pullRequest=984;m.branch=PR_BINDINGS[984].branch;m.baseSha=BASE}],
+])test(`local tooling review rejects ${name}`,()=>{const m=toolFollowup();change(m);assert.throws(()=>validateManifest(m,NOW))})
+test('local tooling paths remain outside the general allowlist',()=>{for(const p of ['.kilo/package.json','.kilo/package-lock.json','.kilo/other.json'])assert.equal(allowedPath(p),false)})
+for(const extra of [false,true])test(`actual API local tooling lock scope (unrelated edit=${extra})`,async()=>{
+ const m=followup(),{base,source}=toolLocks()
+ if(extra)source.packages['node_modules/other'].version='2'
+ const manifestBytes=jsonBytes(toolManifest()),baseBytes=jsonBytes(base),sourceBytes=jsonBytes(source)
+ const manifestSha='a'.repeat(40),baseSha='b'.repeat(40),sourceSha='c'.repeat(40)
+ m.files.push({path:'.kilo/package.json',status:'added',previousPath:null,blobSha:manifestSha,sha256:sha256(manifestBytes),baseBlobSha:null,baseSha256:null},{path:'.kilo/package-lock.json',status:'modified',previousPath:null,blobSha:sourceSha,sha256:sha256(sourceBytes),baseBlobSha:baseSha,baseSha256:sha256(baseBytes)})
+ const a=apiFixture(m)
+ a.objects[`git/trees/${'5'.repeat(40)}?recursive=1`].tree.push({path:'.kilo/package-lock.json',type:'blob',sha:baseSha})
+ for(const [sha,content]of [[manifestSha,manifestBytes],[baseSha,baseBytes],[sourceSha,sourceBytes]])a.objects[`git/blobs/${sha}`]={encoding:'base64',sha,content:content.toString('base64')}
+ if(extra)await assert.rejects(verifyPullRequest(m,a),/Unrelated/);else await verifyPullRequest(m,a)
+})
 for(const extra of [false,true])test(`actual API sanitizer package blob scope (unrelated edit=${extra})`,async()=>{
  const m=dependencyFollowup(),base=packageBytes('>=3.4.13'),source=JSON.parse(packageBytes('>=3.4.17'))
  if(extra)source.scripts.test='bypass'

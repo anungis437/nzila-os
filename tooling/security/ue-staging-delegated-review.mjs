@@ -50,14 +50,35 @@ export function allowedPath(name) {
   return typeof name === 'string' && !name.includes('\\') && !name.split('/').some(part => ['.', '..', ''].includes(part)) && !/[\x00-\x1f]/.test(name) && (EXACT_PATHS.has(name) || name.startsWith('apps/union-eyes/'))
 }
 
-// Only PR986 may include the paired, signed sanitizer dependency repair.
+// Only PR986 may include these exact, signed dependency repairs.
 const DEPENDENCY_PATHS = ['package.json', 'pnpm-lock.yaml']
+const TOOL_DEPENDENCY_PATHS = ['.kilo/package.json', '.kilo/package-lock.json']
 export function validateSanitizerPackageChange(baseBytes, sourceBytes) {
   const base = JSON.parse(baseBytes.toString('utf8'))
   const source = JSON.parse(sourceBytes.toString('utf8'))
   if (base.pnpm?.overrides?.dompurify !== '>=3.4.13' || source.pnpm?.overrides?.dompurify !== '>=3.4.17') fail('Unexpected sanitizer override repair')
   base.pnpm.overrides.dompurify = '>=3.4.17'
+  if (Object.hasOwn(base.pnpm.overrides, '@sentry/nextjs') || source.pnpm.overrides['@sentry/nextjs'] !== '10.75.2') fail('Unexpected Sentry security repair')
+  base.pnpm.overrides['@sentry/nextjs'] = '10.75.2'
   if (JSON.stringify(base) !== JSON.stringify(source)) fail('Unrelated root package change')
+}
+
+const stableJson = value => JSON.stringify(value, (_, v) => v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))) : v)
+const TOOL_MANIFEST = {name:'nzila-kilo-local-tooling',private:true,dependencies:{'@kilocode/plugin':'7.2.52'},overrides:{toml:'5.0.1'},engines:{node:'>=20'}}
+export function validateToolDependencyChange(name, baseBytes, sourceBytes) {
+  const source = JSON.parse(sourceBytes.toString('utf8'))
+  if (name === '.kilo/package.json') {
+    if (baseBytes || stableJson(source) !== stableJson(TOOL_MANIFEST)) fail('Unexpected local tooling manifest')
+    return
+  }
+  if (name !== '.kilo/package-lock.json' || !baseBytes) fail('Unexpected local tooling lock path')
+  const base = JSON.parse(baseBytes.toString('utf8'))
+  const old = base.packages?.['node_modules/toml'], patched = source.packages?.['node_modules/toml']
+  if (base.lockfileVersion !== 3 || old?.version !== '4.2.0' || patched?.version !== '5.0.1' || patched.resolved !== 'https://registry.npmjs.org/toml/-/toml-5.0.1.tgz' || patched.integrity !== 'sha512-EqYNA/YvUNndrA2B3O2ojzLQoTQrBxeZ9UIjQwk8t10oe6n7dwclBwd9IdZQTOKwe6vWX+AXtl6IntXRbepdxQ==') fail('Unexpected TOML security repair')
+  base.name = TOOL_MANIFEST.name
+  base.packages[''] = {name:TOOL_MANIFEST.name,dependencies:TOOL_MANIFEST.dependencies,engines:TOOL_MANIFEST.engines}
+  base.packages['node_modules/toml'] = {...old,version:patched.version,resolved:patched.resolved,integrity:patched.integrity}
+  if (stableJson(base) !== stableJson(source)) fail('Unrelated local tooling lock change')
 }
 
 /** Signature verifies immutable UTF-8 bytes, never JSON reserialization. */
@@ -88,10 +109,12 @@ export function validateManifest(m, now = Date.now()) {
   for (const f of m.files) {
     exactKeys(f, ['path','status','previousPath','blobSha','sha256','baseBlobSha','baseSha256'], 'file')
     const dependencyRepair = m.pullRequest === 986 && DEPENDENCY_PATHS.includes(f.path) && f.status === 'modified' && f.previousPath === null
-    if ((!allowedPath(f.path) && !dependencyRepair) || (f.previousPath !== null && !allowedPath(f.previousPath)) || !['added','modified','removed','renamed'].includes(f.status)) fail('Unreviewable source path/status')
+    const toolRepair = m.pullRequest === 986 && TOOL_DEPENDENCY_PATHS.includes(f.path) && f.status === (f.path === '.kilo/package.json' ? 'added' : 'modified') && f.previousPath === null
+    if ((!allowedPath(f.path) && !dependencyRepair && !toolRepair) || (f.previousPath !== null && !allowedPath(f.previousPath)) || !['added','modified','removed','renamed'].includes(f.status)) fail('Unreviewable source path/status')
     if ((f.status === 'removed' ? f.blobSha !== null || f.sha256 !== null : !SHA.test(f.blobSha) || !HASH.test(f.sha256)) || (f.status === 'added' ? f.baseBlobSha !== null || f.baseSha256 !== null : !SHA.test(f.baseBlobSha) || !HASH.test(f.baseSha256)) || (f.status === 'renamed' ? !f.previousPath : f.previousPath !== null)) fail('File hash/status binding invalid')
   }
   if (m.files.some(f=>DEPENDENCY_PATHS.includes(f.path)) && !DEPENDENCY_PATHS.every(name=>m.files.some(f=>f.path===name && f.status==='modified'))) fail('Sanitizer repair requires package and lockfile coverage')
+  if (m.files.some(f=>TOOL_DEPENDENCY_PATHS.includes(f.path)) && !TOOL_DEPENDENCY_PATHS.every(name=>m.files.some(f=>f.path===name && f.status===(name === '.kilo/package.json' ? 'added' : 'modified')))) fail('Local tooling repair requires exact manifest and lockfile coverage')
   const requiredPaths = ['.github/workflows/security-design-review.yml','tooling/security/ue-staging-delegated-review.mjs']
   if (m.pullRequest === 984) requiredPaths.push(KEY_PATH)
   else if (m.files.some(f=>f.path===KEY_PATH || f.previousPath===KEY_PATH)) fail('Follow-up cannot change delegated trust key')
@@ -147,6 +170,7 @@ export async function verifyPullRequest(m, api) {
     if(f.status!=='added'){const b=baseTree.tree.find(t=>t.path===(f.previousPath??f.path));if(b?.type!=='blob'||b.sha!==f.baseBlobSha)fail('Base blob identity differs');baseBytes=await blob(f.baseBlobSha,f.baseSha256)}
     if(f.path===KEY_PATH&&sha256(sourceBytes)!==TRUST_SHA256)fail('Reviewed key differs from owner trust')
     if(f.path==='package.json')validateSanitizerPackageChange(baseBytes,sourceBytes)
+    if(TOOL_DEPENDENCY_PATHS.includes(f.path))validateToolDependencyChange(f.path,baseBytes,sourceBytes)
     if(f.path==='.gitattributes'&&(f.status!=='modified'||sourceBytes.toString('utf8').trimEnd()!==baseBytes.toString('utf8').trimEnd()+'\n'+KEY_PATH+' -text'))fail('Only exact public-key byte preservation attribute is permitted')
   }
   // Detect a head update during verification; no race-induced stale success.

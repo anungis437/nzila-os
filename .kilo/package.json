@@ -1,0 +1,13 @@
+{
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@kilocode/plugin": "7.2.52"
+  },
+  "overrides": {
+    "toml": "5.0.1"
+  },
+  "name": "nzila-kilo-local-tooling",
+  "private": true
+}
