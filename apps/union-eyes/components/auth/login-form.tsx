@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { signInWithEntra } from '@nzila/platform-auth/entra/client';
 
 type Mode = 'password' | 'magic-link' | 'sso';
 
@@ -156,9 +157,16 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
     }
   }
 
-  function continueWithSso() {
-    const cb = encodeURIComponent(postLoginPath);
-    window.location.href = `/api/auth/signin/azure-ad?callbackUrl=${cb}`;
+  async function continueWithSso() {
+    setError(null);
+    setLoading(true);
+    try {
+      await signInWithEntra(postLoginPath);
+    } catch {
+      setError('Unable to start Microsoft sign-in. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -236,6 +244,7 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           <button
             type="button"
             onClick={continueWithSso}
+            disabled={loading}
             className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg transition-all"
           >
             Continue with Microsoft
@@ -374,6 +383,7 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           <button
             type="button"
             onClick={continueWithSso}
+            disabled={loading}
             className="w-full border border-gray-200 hover:bg-gray-50 text-gray-900 font-medium py-2.5 px-4 rounded-xl transition-colors"
           >
             Continue with Microsoft
