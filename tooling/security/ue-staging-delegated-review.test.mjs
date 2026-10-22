@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
-import { allowedPath, BASE, DOMAIN, KEY_PATH, PR_BINDINGS, RECEIPT_PATH, SIGNATURE_PATH, RESOURCES, sha256, validateManifest, verifyDetached, verifyEnvelope, verifyPullRequest } from './ue-staging-delegated-review.mjs'
+import { allowedPath, BASE, DOMAIN, KEY_PATH, PR_BINDINGS, RECEIPT_PATH, SIGNATURE_PATH, RESOURCES, sha256, validateManifest, validateSanitizerPackageChange, verifyDetached, verifyEnvelope, verifyPullRequest } from './ue-staging-delegated-review.mjs'
 
 const NOW=Date.parse('2026-10-22T14:00:00Z'), S='1'.repeat(40), TREE='2'.repeat(40), E='3'.repeat(40), BLOB='4'.repeat(40)
 const report='Actual separate agent review; source risks assessed, no unresolved P0/P1. Production and runtime proof remain separate.'
@@ -48,6 +48,35 @@ function followup(){
  m.reviews.push({...m.reviews[0],kind:'primary-agent-review',agentTask:'/root'})
  return m
 }
+
+function dependencyFollowup() {
+ const m=followup()
+ for(const path of ['package.json','pnpm-lock.yaml'])m.files.push({path,status:'modified',previousPath:null,blobSha:BLOB,sha256:sha256(bytes),baseBlobSha:BLOB,baseSha256:sha256(bytes)})
+ return m
+}
+test('sanitizer repair requires exact paired follow-up dependency files',()=>validateManifest(dependencyFollowup(),NOW))
+for(const [name,change]of [
+ ['missing lock',m=>m.files.pop()],['missing package',m=>m.files.splice(-2,1)],
+ ['added package',m=>m.files.at(-2).status='added'],['removed lock',m=>m.files.at(-1).status='removed'],
+ ['adjacent package',m=>m.files.at(-2).path='packages/other/package.json'],
+ ['historical PR',m=>{m.pullRequest=984;m.branch=PR_BINDINGS[984].branch;m.baseSha=BASE}],
+])test(`sanitizer repair rejects ${name}`,()=>{const m=dependencyFollowup();change(m);assert.throws(()=>validateManifest(m,NOW))})
+const packageBytes = floor=>Buffer.from(JSON.stringify({scripts:{test:'unchanged'},pnpm:{overrides:{dompurify:floor,other:'1.0.0'}}}))
+test('sanitizer package repair accepts only the reviewed override floor change',()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),packageBytes('>=3.4.17')))
+for(const floor of ['>=3.4.14','>=3.4.16','*','>=3.4.18'])test(`sanitizer package rejects unexpected floor ${floor}`,()=>assert.throws(()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),packageBytes(floor))))
+test('sanitizer package rejects unrelated script edits',()=>{const source=JSON.parse(packageBytes('>=3.4.17'));source.scripts.test='bypass';assert.throws(()=>validateSanitizerPackageChange(packageBytes('>=3.4.13'),Buffer.from(JSON.stringify(source))),/Unrelated/)})
+for(const extra of [false,true])test(`actual API sanitizer package blob scope (unrelated edit=${extra})`,async()=>{
+ const m=dependencyFollowup(),base=packageBytes('>=3.4.13'),source=JSON.parse(packageBytes('>=3.4.17'))
+ if(extra)source.scripts.test='bypass'
+ const current=Buffer.from(JSON.stringify(source)),newSha='a'.repeat(40),oldSha='b'.repeat(40),file=m.files.find(f=>f.path==='package.json')
+ Object.assign(file,{blobSha:newSha,sha256:sha256(current),baseBlobSha:oldSha,baseSha256:sha256(base)})
+ const a=apiFixture(m)
+ for(const f of m.files.filter(f=>['package.json','pnpm-lock.yaml'].includes(f.path)))a.objects[`git/trees/${'5'.repeat(40)}?recursive=1`].tree.push({path:f.path,type:'blob',sha:f.baseBlobSha})
+ a.objects[`git/blobs/${newSha}`]={encoding:'base64',sha:newSha,content:current.toString('base64')}
+ a.objects[`git/blobs/${oldSha}`]={encoding:'base64',sha:oldSha,content:base.toString('base64')}
+ if(extra)await assert.rejects(verifyPullRequest(m,a),/Unrelated/);else await verifyPullRequest(m,a)
+})
+test('sanitizer root files remain excluded from the general path allowlist',()=>{assert.equal(allowedPath('package.json'),false);assert.equal(allowedPath('pnpm-lock.yaml'),false)})
 test('follow-up binds exact PR, branch, merged base, actual connector author and unchanged trust',async()=>{
  const m=followup();validateManifest(m,NOW);assert.equal((await verifyPullRequest(m,apiFixture(m))).evidenceSha,E)
 })

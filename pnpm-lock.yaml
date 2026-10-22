@@ -52,7 +52,7 @@ overrides:
   drizzle-orm: '>=0.45.2'
   follow-redirects: '>=1.16.1'
   cookie: '>=0.7.0'
-  dompurify: '>=3.4.13'
+  dompurify: '>=3.4.17'
   sanitize-html: '>=2.18.0'
   '@grpc/proto-loader>protobufjs': 8.6.6
   google-gax>protobufjs: 8.6.6
@@ -700,8 +700,8 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0
       dompurify:
-        specifier: '>=3.4.13'
-        version: 3.4.14
+        specifier: '>=3.4.17'
+        version: 3.4.17
       drizzle-orm:
         specifier: '>=0.45.2'
         version: 0.45.2(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)(@upstash/redis@1.37.0)(better-sqlite3@12.9.0)(gel@2.2.0)(pg@8.20.0)(postgres@3.4.8)
@@ -2645,8 +2645,8 @@ importers:
         specifier: ^10.6.0
         version: 10.6.0
       dompurify:
-        specifier: '>=3.4.13'
-        version: 3.4.14
+        specifier: '>=3.4.17'
+        version: 3.4.17
       dotenv:
         specifier: ^17.3.1
         version: 17.4.0
@@ -3278,8 +3278,8 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0
       dompurify:
-        specifier: '>=3.4.13'
-        version: 3.4.14
+        specifier: '>=3.4.17'
+        version: 3.4.17
       next:
         specifier: 16.4.2
         version: 16.4.2(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(@types/node@25.5.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -15750,8 +15750,8 @@ packages:
     resolution: {integrity: sha512-gYzvtM72ZtxQO0T048kd6HWSbbGCNOUwcnfQ01cqIJ4X2IYKFFHZ5mKvrQETcFXxsRObZulDaKmy//R7TPtsBg==}
     engines: {node: '>=20.19.0'}
 
-  dompurify@3.4.14:
-    resolution: {integrity: sha512-dVoH9z+MY+C9IilgGCk3YfFqjLi3fChm2OiKJMzh6axrJ5qwxqWaZamgmHrpv22CN/KdbZJuGEGgfQoL00LTdg==}
+  dompurify@3.4.17:
+    resolution: {integrity: sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==}
 
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
@@ -27416,7 +27416,7 @@ snapshots:
 
   '@types/dompurify@3.2.0':
     dependencies:
-      dompurify: 3.4.14
+      dompurify: 3.4.17
 
   '@types/eslint-scope@3.7.7':
     dependencies:
@@ -29429,7 +29429,7 @@ snapshots:
     dependencies:
       domelementtype: 3.0.0
 
-  dompurify@3.4.14:
+  dompurify@3.4.17:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
@@ -31976,7 +31976,7 @@ snapshots:
     optionalDependencies:
       canvg: 3.0.11
       core-js: 3.48.0
-      dompurify: 3.4.14
+      dompurify: 3.4.17
       html2canvas: 1.4.1
 
   jsx-ast-utils@3.3.5:

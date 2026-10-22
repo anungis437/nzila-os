@@ -50,6 +50,16 @@ export function allowedPath(name) {
   return typeof name === 'string' && !name.includes('\\') && !name.split('/').some(part => ['.', '..', ''].includes(part)) && !/[\x00-\x1f]/.test(name) && (EXACT_PATHS.has(name) || name.startsWith('apps/union-eyes/'))
 }
 
+// Only PR986 may include the paired, signed sanitizer dependency repair.
+const DEPENDENCY_PATHS = ['package.json', 'pnpm-lock.yaml']
+export function validateSanitizerPackageChange(baseBytes, sourceBytes) {
+  const base = JSON.parse(baseBytes.toString('utf8'))
+  const source = JSON.parse(sourceBytes.toString('utf8'))
+  if (base.pnpm?.overrides?.dompurify !== '>=3.4.13' || source.pnpm?.overrides?.dompurify !== '>=3.4.17') fail('Unexpected sanitizer override repair')
+  base.pnpm.overrides.dompurify = '>=3.4.17'
+  if (JSON.stringify(base) !== JSON.stringify(source)) fail('Unrelated root package change')
+}
+
 /** Signature verifies immutable UTF-8 bytes, never JSON reserialization. */
 export function verifyEnvelope(bytes, signatureText, pem, now = Date.now()) {
   if (sha256(pem) !== TRUST_SHA256) fail('Untrusted public key bytes')
@@ -77,9 +87,11 @@ export function validateManifest(m, now = Date.now()) {
   if (!Array.isArray(m.files) || !m.files.length || new Set(m.files.map(f=>f.path)).size !== m.files.length) fail('Missing or duplicate source coverage')
   for (const f of m.files) {
     exactKeys(f, ['path','status','previousPath','blobSha','sha256','baseBlobSha','baseSha256'], 'file')
-    if (!allowedPath(f.path) || (f.previousPath !== null && !allowedPath(f.previousPath)) || !['added','modified','removed','renamed'].includes(f.status)) fail('Unreviewable source path/status')
+    const dependencyRepair = m.pullRequest === 986 && DEPENDENCY_PATHS.includes(f.path) && f.status === 'modified' && f.previousPath === null
+    if ((!allowedPath(f.path) && !dependencyRepair) || (f.previousPath !== null && !allowedPath(f.previousPath)) || !['added','modified','removed','renamed'].includes(f.status)) fail('Unreviewable source path/status')
     if ((f.status === 'removed' ? f.blobSha !== null || f.sha256 !== null : !SHA.test(f.blobSha) || !HASH.test(f.sha256)) || (f.status === 'added' ? f.baseBlobSha !== null || f.baseSha256 !== null : !SHA.test(f.baseBlobSha) || !HASH.test(f.baseSha256)) || (f.status === 'renamed' ? !f.previousPath : f.previousPath !== null)) fail('File hash/status binding invalid')
   }
+  if (m.files.some(f=>DEPENDENCY_PATHS.includes(f.path)) && !DEPENDENCY_PATHS.every(name=>m.files.some(f=>f.path===name && f.status==='modified'))) fail('Sanitizer repair requires package and lockfile coverage')
   const requiredPaths = ['.github/workflows/security-design-review.yml','tooling/security/ue-staging-delegated-review.mjs']
   if (m.pullRequest === 984) requiredPaths.push(KEY_PATH)
   else if (m.files.some(f=>f.path===KEY_PATH || f.previousPath===KEY_PATH)) fail('Follow-up cannot change delegated trust key')
@@ -134,6 +146,7 @@ export async function verifyPullRequest(m, api) {
     if(f.status==='removed'){if(s)fail('Removed source still exists')}else{if(s?.type!=='blob'||s.sha!==f.blobSha||a.sha!==f.blobSha)fail('Source blob identity differs');sourceBytes=await blob(f.blobSha,f.sha256)}
     if(f.status!=='added'){const b=baseTree.tree.find(t=>t.path===(f.previousPath??f.path));if(b?.type!=='blob'||b.sha!==f.baseBlobSha)fail('Base blob identity differs');baseBytes=await blob(f.baseBlobSha,f.baseSha256)}
     if(f.path===KEY_PATH&&sha256(sourceBytes)!==TRUST_SHA256)fail('Reviewed key differs from owner trust')
+    if(f.path==='package.json')validateSanitizerPackageChange(baseBytes,sourceBytes)
     if(f.path==='.gitattributes'&&(f.status!=='modified'||sourceBytes.toString('utf8').trimEnd()!==baseBytes.toString('utf8').trimEnd()+'\n'+KEY_PATH+' -text'))fail('Only exact public-key byte preservation attribute is permitted')
   }
   // Detect a head update during verification; no race-induced stale success.

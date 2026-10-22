@@ -1,16 +1,20 @@
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const REPO_ROOT = path.resolve(__dirname, '../../../..')
+const TSX_CLI = createRequire(import.meta.url).resolve('tsx/cli')
 
 function policy(ref: string) {
-  return spawnSync(
-    'pnpm',
-    ['exec', 'tsx', 'scripts/release/validate-branch-tag-policy.ts', '--mode', 'branch', '--ref', ref],
+  const result = spawnSync(
+    process.execPath,
+    [TSX_CLI, 'scripts/release/validate-branch-tag-policy.ts', '--mode', 'branch', '--ref', ref],
     { cwd: REPO_ROOT, encoding: 'utf8' },
   )
+  if (result.error) throw result.error
+  return result
 }
 
 function walk(dir: string, out: string[] = []): string[] {
