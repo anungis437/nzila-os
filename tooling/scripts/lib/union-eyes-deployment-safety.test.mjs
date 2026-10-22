@@ -6,6 +6,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { databaseProofId, sha256 } from './union-eyes-staging-proof.mjs'
 import {
   assembleAcrAttestation,
   assembleRoleCatalog,
@@ -25,6 +26,13 @@ const FRONTEND = `sha256:${'b'.repeat(64)}`
 const BACKEND = `sha256:${'c'.repeat(64)}`
 const HASH_0019 = 'd'.repeat(64)
 const NOW = '2026-10-21T22:00:00.000Z'
+const FIXTURE = {
+  fixtureId: 'synthetic-acceptance-v1', environment: 'staging', synthetic: true,
+  allowRolledBackWriteProbe: true, databaseName: 'ue_acceptance',
+  databaseBaseline: 'pitr-2026-10-21T12:00:00Z',
+  tenantA: { organizationId: '11111111-1111-4111-8111-111111111111', userId: '22222222-2222-4222-8222-222222222222', recordId: '33333333-3333-4333-8333-333333333333' },
+  tenantB: { organizationId: '44444444-4444-4444-8444-444444444444', userId: '55555555-5555-4555-8555-555555555555', recordId: '66666666-6666-4666-8666-666666666666' },
+}
 const keys = crypto.generateKeyPairSync('ed25519')
 const privateKeyPem = keys.privateKey.export({ type: 'pkcs8', format: 'pem' })
 const publicKeyPem = keys.publicKey.export({ type: 'spki', format: 'pem' })
@@ -71,6 +79,7 @@ function approvalBody(overrides = {}) {
     frontendDigest: FRONTEND,
     backendDigest: BACKEND,
     databaseBaseline: 'pitr-2026-10-21T12:00:00Z',
+    acceptanceFixture: FIXTURE,
     recoveryMethod: 'point-in-time-restore',
     authorizedMutations: ['scoped-0005', 'scoped-0019', 'django-migrate', 'candidate-revision', 'candidate-label'],
     scheduledMigrations: [{
@@ -680,16 +689,7 @@ test('staging RLS proof is mandatory and an application response is not that pro
       ],
     },
     ledger: { source: 'drizzle.__drizzle_migrations', rows: [{ hash: HASH_0019 }] },
-    tenantDenial: {
-      source: 'deployed-database',
-      transport: 'postgres',
-      command: "SELECT set_config('app.current_org_id', '', true)",
-      exitCode: 0,
-      leakedRows: 0,
-      candidateRevision: 'app--candidate',
-      releaseSha: SHA,
-      servingRevisionReached: false,
-    },
+    databaseIsolation: databaseProof(),
   }
   const foundationOff = evaluateDeploymentSafety(ready({
     phase: 'rls-preflight',
@@ -703,7 +703,7 @@ test('staging RLS proof is mandatory and an application response is not that pro
 
   const leaked = structuredClone(disabled)
   leaked.foundation.value = true
-  leaked.tenantDenial.leakedRows = 2
+  leaked.databaseIsolation.counts.emptyContext = 2
   const denialFailed = evaluateDeploymentSafety(ready({
     phase: 'rls-preflight',
     environment: 'staging',
@@ -713,4 +713,117 @@ test('staging RLS proof is mandatory and an application response is not that pro
   }))
   assert.ok(denialFailed.defects.includes('STAGING_RLS_TENANT_DENIAL_FAILED'))
   assert.equal(phaseAllowed(denialFailed, 'rls-preflight'), false)
+})
+
+function databaseProof() {
+  const proof = {
+    kind: 'database-isolation', source: 'deployed-database', transport: 'postgres',
+    releaseSha: SHA, databaseBaseline: FIXTURE.databaseBaseline, fixture: structuredClone(FIXTURE),
+    observedAt: NOW, test: 'grievances-two-tenant-v1', executedSql: 'synthetic-test-query',
+    executedSqlSha256: sha256('synthetic-test-query'),
+    ledgerSha256: sha256(JSON.stringify([{ hash: HASH_0019 }])),
+    identity: { currentUser: 'union_eyes_runtime', sessionUser: 'union_eyes_runtime', databaseName: FIXTURE.databaseName, rolsuper: false, rolbypassrls: false },
+    counts: { fixtureA: 1, fixtureB: 1, ownA: 1, ownB: 1, aReadsB: 0, bReadsA: 0, emptyContext: 0 },
+    forgedWrites: { aToB: '42501', bToA: '42501' },
+  }
+  proof.evidenceId = databaseProofId(proof)
+  return proof
+}
+
+function stagingInput(phase = 'rls-preflight') {
+  const input = ready({ phase, environment: 'staging' })
+  input.manifest.environment = 'staging'
+  input.stagingRls = {
+    foundation: { source: 'github-environment-variable', name: 'UE_RLS_FOUNDATION_ENFORCED_STAGING', value: true },
+    runtimeRoles: { source: 'pg_roles', rows: ['union_eyes_runtime', 'union_eyes_system'].map((rolname) => ({ rolname, rolsuper: false, rolbypassrls: false })) },
+    ledger: input.ledger,
+    databaseIsolation: databaseProof(),
+  }
+  return input
+}
+
+test('database isolation requires nonempty signed fixtures, actual identity and both denial directions', () => {
+  assert.equal(phaseAllowed(evaluateDeploymentSafety(stagingInput()), 'rls-preflight'), true)
+  const mutations = [
+    (p) => { p.counts.fixtureA = 0 }, (p) => { p.counts.fixtureB = 0 },
+    (p) => { p.counts.ownA = 0 }, (p) => { p.counts.ownB = 0 },
+    (p) => { p.counts.aReadsB = 1 }, (p) => { p.counts.bReadsA = 1 },
+    (p) => { p.counts.emptyContext = 1 }, (p) => { p.counts.emptyContext = '0' },
+    (p) => { delete p.counts.emptyContext }, (p) => { p.forgedWrites.aToB = 'success' },
+    (p) => { delete p.forgedWrites.bToA }, (p) => { p.identity.currentUser = 'postgres' },
+    (p) => { p.identity.sessionUser = 'postgres' }, (p) => { p.identity.rolsuper = true },
+    (p) => { p.identity.rolbypassrls = true }, (p) => { delete p.identity.rolsuper },
+    (p) => { p.identity.databaseName = 'different' }, (p) => { p.releaseSha = OTHER_SHA },
+    (p) => { p.databaseBaseline = 'different' }, (p) => { p.fixture.tenantB.organizationId = p.fixture.tenantA.organizationId },
+    (p) => { p.fixture.synthetic = false }, (p) => { p.fixture.allowRolledBackWriteProbe = false },
+    (p) => { p.candidateRevision = 'claimed-candidate' }, (p) => { p.executedSql = 'changed' },
+    (p) => { p.observedAt = '2026-10-20T22:00:00.000Z' },
+    (p) => { p.ledgerSha256 = '0'.repeat(64) },
+  ]
+  for (const mutate of mutations) {
+    const input = stagingInput()
+    mutate(input.stagingRls.databaseIsolation)
+    input.stagingRls.databaseIsolation.evidenceId = databaseProofId(input.stagingRls.databaseIsolation)
+    assert.equal(phaseAllowed(evaluateDeploymentSafety(input), 'rls-preflight'), false)
+  }
+  const unsigned = stagingInput()
+  unsigned.approval.acceptanceFixture.fixtureId = 'unsigned-change'
+  assert.equal(phaseAllowed(evaluateDeploymentSafety(unsigned), 'rls-preflight'), false)
+})
+
+test('candidate endpoint proof is separate and correlated to the database evidence', () => {
+  const input = stagingInput('probe')
+  input.candidateRevision = 'app--candidate'
+  input.ingress.traffic.push({ revisionName: 'app--candidate', weight: 0, label: 'ue-candidate' })
+  const containers = [
+    { name: 'union-eyes', image: `registry.azurecr.io/app@${FRONTEND}` },
+    { name: 'django-backend', image: `registry.azurecr.io/backend@${BACKEND}` },
+  ]
+  input.revisions.revisions.push(revision('app--candidate', { containers }))
+  const proof = input.stagingRls.databaseIsolation
+  input.probe = {
+    label: 'ue-candidate', host: 'ue-candidate.union-eyes.example.com', stableHost: 'union-eyes.example.com',
+    revisionName: 'app--candidate', deploymentRevision: 'app--candidate',
+    deployment: { latestRevisionName: 'app--candidate', containers },
+    databaseProof: { evidenceId: proof.evidenceId, databaseBaseline: proof.databaseBaseline, releaseSha: SHA, runtimePrincipal: 'union_eyes_runtime' },
+    responses: [
+      { path: '/api/health', status: 200, body: { ok: true } },
+      { path: '/api/ready', status: 200, body: { ok: true } },
+      { path: '/api/version', status: 200, body: { gitSha: SHA, frontendImageDigest: FRONTEND, backendImageDigest: BACKEND } },
+      { path: '/api/admin/database/health', status: 200, body: {
+        tenantPrincipal: { ...proof.identity },
+        systemPrincipal: { currentUser: 'union_eyes_system', databaseName: FIXTURE.databaseName, rolsuper: false, rolbypassrls: false },
+      } },
+    ],
+  }
+  const checked = withFresh(input)
+  assert.equal(phaseAllowed(evaluateDeploymentSafety(checked), 'probe'), true)
+  const envelope = structuredClone(checked)
+  const admin = envelope.probe.responses[3]
+  admin.body = { success: true, data: admin.body, timestamp: NOW }
+  assert.equal(phaseAllowed(evaluateDeploymentSafety(envelope), 'probe'), true)
+  for (const mutate of [
+    (i) => { delete i.probe },
+    (i) => { delete i.probe.databaseProof },
+    (i) => { i.probe.databaseProof.evidenceId = 'different' },
+    (i) => { i.probe.databaseProof.databaseBaseline = 'different' },
+    (i) => { i.probe.responses[2].body.frontendImageDigest = BACKEND },
+    (i) => { i.probe.responses[3].body.tenantPrincipal.currentUser = 'postgres' },
+    (i) => { i.probe.responses[3].body.systemPrincipal.rolbypassrls = true },
+    (i) => { i.probe.responses[3].body.tenantPrincipal.databaseName = 'different' },
+    (i) => { i.probe.host = i.probe.stableHost },
+    (i) => { i.probe.host = 'ue-candidate.unrelated.example.com' },
+    (i) => { i.revisions.revisions.pop() },
+    (i) => { delete i.stagingRls },
+  ]) {
+    const changed = structuredClone(checked)
+    mutate(changed)
+    assert.equal(phaseAllowed(evaluateDeploymentSafety(changed), 'probe'), false)
+  }
+})
+
+test('psql count parsing survives command tags and refuses malformed shell output', () => {
+  const bash = process.platform === 'win32' ? 'C:/Program Files/Git/bin/bash.exe' : 'bash'
+  const result = spawnSync(bash, ['tooling/scripts/test-union-eyes-psql-parser.sh'], { cwd: REPO, encoding: 'utf8' })
+  assert.equal(result.status, 0, result.stdout + result.stderr)
 })

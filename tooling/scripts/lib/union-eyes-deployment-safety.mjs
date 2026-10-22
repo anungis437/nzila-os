@@ -10,6 +10,7 @@ import crypto from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+import { candidateCorrelationDefects, isolationDefects, sha256 } from './union-eyes-staging-proof.mjs'
 
 export const MIGRATION_0019_TAG = '0019_deadline_reassignment_convergence'
 export const MIGRATION_0019_RELATIVE_PATH = 'apps/union-eyes/db/migrations-cache/0019_deadline_reassignment_convergence.sql'
@@ -311,7 +312,7 @@ function restoredCloneDefects(approval, manifest, nowMs) {
   return defects
 }
 
-function approvalDefects(approval, publicKeyPem, manifest, nowMs) {
+export function approvalDefects(approval, publicKeyPem, manifest, nowMs) {
   if (!approval || typeof approval !== 'object') return ['APPROVAL_MISSING']
   const defects = []
   if (!approvalSignatureValid(approval, publicKeyPem)) defects.push('APPROVAL_UNSIGNED')
@@ -378,6 +379,9 @@ function firewallAuthorizationDefects(approval, request) {
 function stagingRlsDefects(input, manifest, migration0019) {
   const environment = input.environment ?? manifest?.environment
   if (environment !== 'staging') return []
+  // Database evidence is collected after migrations and before the label probe.
+  // Earlier approval/mutation phases must not require evidence from the future.
+  if (!['rls-preflight', 'probe'].includes(input.phase) && !input.stagingRls) return []
   const proof = input.stagingRls
   if (!proof || typeof proof !== 'object') return ['STAGING_RLS_PROOF_MISSING']
   const defects = []
@@ -392,6 +396,10 @@ function stagingRlsDefects(input, manifest, migration0019) {
     defects.push('STAGING_RLS_LEDGER_MISSING')
   }
   if (migration0019?.present && !migration0019.recorded) defects.push('MIGRATION_0019_LEDGER_HASH_MISSING')
+  if (proof.databaseIsolation?.ledgerSha256 !== sha256(JSON.stringify(ledger?.rows ?? []))
+    || !ledger?.rows?.some((row) => row.hash === migration0019?.sha256)) defects.push('STAGING_RLS_LEDGER_BINDING_INVALID')
+  const ageMs = Date.parse(input.now ?? '') - Date.parse(proof.databaseIsolation?.observedAt ?? '')
+  if (!Number.isFinite(ageMs) || ageMs < -300000 || ageMs > 3600000) defects.push('STAGING_RLS_PROOF_STALE')
   const roles = proof.runtimeRoles
   if (!roles || roles.source === 'application' || roles.source === 'manifest' || roles.source === 'http') defects.push('STAGING_RLS_APP_RESPONSE_IS_NOT_PROOF')
   else if (roles.source !== 'pg_roles' || !Array.isArray(roles.rows)) defects.push('STAGING_RLS_ROLE_UNVERIFIED')
@@ -403,15 +411,8 @@ function stagingRlsDefects(input, manifest, migration0019) {
       }
     }
   }
-  const denial = proof.tenantDenial
-  const denialCommand = String(denial?.command ?? '')
-  if (!denial || denial.source !== 'deployed-database' || denial.transport !== 'postgres' || !denialCommand.includes('set_config') || /^https?:/i.test(denialCommand)) {
-    defects.push('STAGING_RLS_APP_RESPONSE_IS_NOT_PROOF')
-  } else if (denial.candidateRevision !== input.candidateRevision || denial.releaseSha !== manifest?.releaseSha || denial.servingRevisionReached === true) {
-    defects.push('STAGING_RLS_CANDIDATE_EVIDENCE_MISSING')
-  } else if (denial.exitCode !== 0 || denial.leakedRows !== 0) {
-    defects.push('STAGING_RLS_TENANT_DENIAL_FAILED')
-  }
+  defects.push(...isolationDefects(proof.databaseIsolation, input.approval, manifest))
+  defects.push(...candidateCorrelationDefects(input, proof.databaseIsolation))
   return defects
 }
 
@@ -453,13 +454,14 @@ function deploymentImagesMatch(deployment, manifest) {
   return frontend && backend
 }
 
-function probeDefects(probe, manifest, servingNames, candidate) {
+function probeDefects(probe, manifest, servingNames, candidate, stableHost) {
   const defects = []
   if (!probe) return ['CANDIDATE_PROBE_MISSING']
   if (probe.header === 'x-ms-container-app-revision' || (probe.stableHost && probe.host === probe.stableHost)) {
     defects.push('CANDIDATE_PROBE_HIT_SERVING_REVISION')
   }
   if (!probe.label || !probe.host || !probe.host.startsWith(`${probe.label}.`)) defects.push('CANDIDATE_REVISION_FQDN_REQUIRED')
+  if (!stableHost || probe.stableHost !== stableHost || probe.host !== `${probe.label}.${stableHost}`) defects.push('CANDIDATE_REVISION_FQDN_REQUIRED')
   const revisionName = probe.deploymentRevision ?? probe.revisionName ?? ''
   if (!revisionName || servingNames.includes(revisionName)) defects.push('CANDIDATE_PROBE_HIT_SERVING_REVISION')
   if (!probe.deployment || !probe.deployment.latestRevisionName) defects.push('CANDIDATE_REVISION_UNIDENTIFIED')
@@ -467,6 +469,8 @@ function probeDefects(probe, manifest, servingNames, candidate) {
     defects.push('CANDIDATE_IMAGE_DIGEST_MISMATCH')
   }
   if (candidate && candidate.weight !== 0 && candidate.weight !== null) defects.push('CANDIDATE_TRAFFIC_NOT_ZERO')
+  if (!candidate || candidate.name !== revisionName) defects.push('CANDIDATE_REVISION_UNIDENTIFIED')
+  if (candidate && !deploymentImagesMatch(candidate, manifest)) defects.push('CANDIDATE_IMAGE_DIGEST_MISMATCH')
   if (candidate && candidate.label !== probe.label) defects.push('CANDIDATE_REVISION_FQDN_REQUIRED')
   for (const requiredPath of PROBE_PATHS) {
     const response = (probe.responses ?? []).find((item) => item.path === requiredPath)
@@ -477,7 +481,8 @@ function probeDefects(probe, manifest, servingNames, candidate) {
   if (version.frontendImageDigest !== manifest?.frontendDigest || version.backendImageDigest !== manifest?.backendDigest) {
     defects.push('CANDIDATE_IMAGE_DIGEST_MISMATCH')
   }
-  const admin = (probe.responses ?? []).find((item) => item.path === '/api/admin/database/health')?.body ?? {}
+  const adminBody = (probe.responses ?? []).find((item) => item.path === '/api/admin/database/health')?.body ?? {}
+  const admin = adminBody.data ?? adminBody
   const tenant = admin.tenantPrincipal ?? {}
   const system = admin.systemPrincipal ?? {}
   if (tenant.currentUser !== 'union_eyes_runtime' || tenant.rolsuper !== false || tenant.rolbypassrls !== false || system.currentUser !== 'union_eyes_system') {
@@ -568,7 +573,7 @@ export function evaluateDeploymentSafety(input) {
 
   const candidate = joined.find((revision) => revision.name === candidateName) ?? null
   if (input.phase === 'probe' || input.probe) {
-    defects.push(...probeDefects(input.probe, manifest ?? {}, serving.map((revision) => revision.name), candidate))
+    defects.push(...probeDefects(input.probe, manifest ?? {}, serving.map((revision) => revision.name), candidate, ingress.fqdn))
   }
 
   const uniqueDefects = [...new Set(defects)]

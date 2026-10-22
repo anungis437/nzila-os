@@ -23,14 +23,15 @@ export const dynamic = 'force-dynamic';
 
 interface PrincipalInfo {
   currentUser: string;
-  rolsuper: boolean;
-  rolbypassrls: boolean;
+  rolsuper: boolean | null;
+  rolbypassrls: boolean | null;
   applicationName: string | null;
+  databaseName: string;
 }
 
 async function readPrincipal(): Promise<PrincipalInfo> {
   const identityResult = await db.execute(
-    sql`SELECT current_user as u, current_setting('application_name', true) as app_name`
+    sql`SELECT current_user as u, current_database() as database_name, current_setting('application_name', true) as app_name`
   );
   const identityRow = Array.from(identityResult)[0] as Record<string, unknown> | undefined;
   const currentUser = String(identityRow?.u ?? 'unknown');
@@ -42,9 +43,10 @@ async function readPrincipal(): Promise<PrincipalInfo> {
 
   return {
     currentUser,
-    rolsuper: Boolean(attrsRow?.rolsuper),
-    rolbypassrls: Boolean(attrsRow?.rolbypassrls),
+    rolsuper: typeof attrsRow?.rolsuper === 'boolean' ? attrsRow.rolsuper : null,
+    rolbypassrls: typeof attrsRow?.rolbypassrls === 'boolean' ? attrsRow.rolbypassrls : null,
     applicationName: (identityRow?.app_name as string | null) ?? null,
+    databaseName: String(identityRow?.database_name ?? 'unknown'),
   };
 }
 

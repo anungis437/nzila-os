@@ -1605,9 +1605,10 @@ jobs:
           jq -n \
             --arg releaseSha "$APP_SHA" \
             --arg workflowSha "$WORKFLOW_SHA" \
+            --arg environment "${{ needs.plan.outputs.environment }}" \
             --arg frontendDigest "${{ needs.build-push.outputs.frontend_digest }}" \
             --arg backendDigest "${{ needs.build-push.outputs.backend_digest }}" \
-            '{releaseSha:$releaseSha, workflowSha:$workflowSha, frontendDigest:$frontendDigest, backendDigest:$backendDigest}' \
+            '{releaseSha:$releaseSha, workflowSha:$workflowSha, environment:$environment, frontendDigest:$frontendDigest, backendDigest:$backendDigest}' \
             > "$EVIDENCE/release-manifest.json"
           bash tooling/scripts/union-eyes-read-acr-attestation.sh \
             "${{ needs.plan.outputs.acr_name }}" nzila-os-union-eyes \
@@ -2599,14 +2600,17 @@ jobs:
           set -x
           STAGING_ARGS=()
           if [ "$ENVIRONMENT" = "staging" ]; then
+            set +x
             export RLS_MIGRATION_ADMIN_DATABASE_URL
             RLS_MIGRATION_ADMIN_DATABASE_URL="$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name union-eyes-migration-admin-database-url --query value -o tsv)"
             bash tooling/scripts/union-eyes-read-staging-rls.sh \
               "$RUNNER_TEMP/staging-rls.json" \
-              "$CANDIDATE" \
-              "$(jq -r .releaseSha "$EVIDENCE/release-manifest.json")" \
+              "$EVIDENCE/release-manifest.json" \
+              "$EVIDENCE/approval.json" \
+              "$EVIDENCE/approval-trust.pem" \
               "$FOUNDATION"
             unset RLS_MIGRATION_ADMIN_DATABASE_URL
+            cp "$RUNNER_TEMP/staging-rls.json" "$EVIDENCE/staging-rls.json"
             STAGING_ARGS=(--staging-rls "$RUNNER_TEMP/staging-rls.json")
           fi
           node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
@@ -2753,7 +2757,14 @@ jobs:
           READY_STATUS="$(probe_path /api/ready "$RUNNER_TEMP/ue-probe/ready.json")"
           VERSION_STATUS="$(probe_path /api/version "$RUNNER_TEMP/ue-probe/version.json")"
           ADMIN_STATUS="$(probe_path /api/admin/database/health "$RUNNER_TEMP/ue-probe/admin-health.json")"
+          STAGING_ARGS=()
+          DATABASE_PROOF='null'
+          if [ "${{ needs.plan.outputs.environment }}" = "staging" ]; then
+            STAGING_ARGS=(--staging-rls "$EVIDENCE/staging-rls.json")
+            DATABASE_PROOF="$(jq -ce '.databaseIsolation | {evidenceId, databaseBaseline, releaseSha, runtimePrincipal: .identity.currentUser}' "$EVIDENCE/staging-rls.json")"
+          fi
           jq -n \
+            --argjson databaseProof "$DATABASE_PROOF" \
             --arg label "$LABEL" \
             --arg host "$CANDIDATE_HOST" \
             --arg stableHost "$STABLE_HOST" \
@@ -2768,12 +2779,13 @@ jobs:
             --argjson version "$(json_file "$RUNNER_TEMP/ue-probe/version.json")" \
             --argjson admin "$(json_file "$RUNNER_TEMP/ue-probe/admin-health.json")" \
             '{
+              databaseProof: $databaseProof,
               label: $label,
               host: $host,
               stableHost: $stableHost,
               revisionName: $revision,
               deploymentRevision: $revision,
-              deployment: { latestRevisionName: ($deployment.properties.latestRevisionName // $revision), containers: ($deployment.properties.template.containers // []) },
+              deployment: { latestRevisionName: $deployment.properties.latestRevisionName, containers: ($deployment.properties.template.containers // []) },
               responses: [
                 { path: "/api/health", status: ($healthStatus | tonumber), body: $health },
                 { path: "/api/ready", status: ($readyStatus | tonumber), body: $ready },
@@ -2785,8 +2797,11 @@ jobs:
           PROBE_FRESH="$RUNNER_TEMP/ue-probe-fresh"
           bash tooling/scripts/union-eyes-read-release-inventory.sh "$TARGET_APP" "$TARGET_RG" "$PROBE_READ" "probe"
           bash tooling/scripts/union-eyes-read-release-inventory.sh "$TARGET_APP" "$TARGET_RG" "$PROBE_FRESH" "probe-fresh"
+          cp "$RUNNER_TEMP/ue-probe.json" "$EVIDENCE/candidate-probe.json"
           node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
             --phase probe \
+            --environment "${{ needs.plan.outputs.environment }}" \
+            "${STAGING_ARGS[@]}" \
             --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             --source-root "$SOURCE_ROOT" \
             --workflow-sha "$WORKFLOW_SHA" \
@@ -2805,6 +2820,16 @@ jobs:
             --probe "$RUNNER_TEMP/ue-probe.json" \
             --candidate-revision "$CANDIDATE"
           echo "Candidate ${CANDIDATE} was probed at https://${CANDIDATE_HOST}. Ordinary ingress weights were not changed."
+
+      - name: Preserve staging database and candidate observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-staging-proof-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: ignore
+          path: |
+            ue-evidence/staging-rls.json
+            ue-evidence/candidate-probe.json
 
       - name: Custom domain smoke checks
         shell: bash
