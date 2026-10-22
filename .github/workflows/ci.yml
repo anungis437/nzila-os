@@ -183,6 +183,15 @@ jobs:
           UE_0108_MIGRATION_TEST_URL: postgresql://postgres:postgres@localhost:5432/test_db
           AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
 
+      - name: Union Eyes staging evidence and release-control regressions
+        if: matrix.lane == 'shared'
+        run: |
+          set -euo pipefail
+          node --test tooling/scripts/lib/union-eyes-deployment-safety.test.mjs
+          POSTGRES_BIN="$(pg_config --bindir)"
+          test -x "$POSTGRES_BIN/initdb"
+          UE_TEST_POSTGRES_BIN="$POSTGRES_BIN" node --test tooling/scripts/lib/union-eyes-staging-runner.test.mjs
+
       # E5-E: transfer TEST_FAST_ONLY orphan merge-correctness projects into Unit Tests job.
       # Preserves vitest project configs/aliases/timeouts/assertions; does not alter RG.
       - name: Run transferred orphan merge-correctness tests
