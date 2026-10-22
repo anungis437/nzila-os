@@ -6,6 +6,49 @@
  * system executor therefore receives only the business columns it needs, with
  * the same actor/target/organization/reason context as its auth membership write.
  */
+export interface MemberAccessProjectionPolicy {
+  schemaname: string;
+  tablename: string;
+  policyname: string;
+  permissive: string;
+  roles: string[];
+  cmd: string;
+  qual: string | null;
+  with_check: string | null;
+}
+
+/** Exact PostgreSQL-deparsed contract, observed on PG15 and exercised in PGlite.
+ * A policy name alone must never admit an OR-broadened or foreign-role policy.
+ * Only whitespace is normalized; operators, parentheses, casts and literals bind.
+ */
+export function isApprovedMemberAccessProjectionPolicy(policy: MemberAccessProjectionPolicy): boolean {
+  const atoms = [
+    "(user_id = NULLIF(current_setting('nzila.auth_user_id'::text, true), ''::text))",
+    "((organization_id)::text = NULLIF(current_setting('nzila.auth_org_id'::text, true), ''::text))",
+    "(NULLIF(current_setting('nzila.auth_phase'::text, true), ''::text) = 'system'::text)",
+    "(NULLIF(current_setting('nzila.auth_operation'::text, true), ''::text) = 'membership-state'::text)",
+    "(NULLIF(current_setting('nzila.auth_actor_id'::text, true), ''::text) IS NOT NULL)",
+    "(NULLIF(current_setting('nzila.auth_reason'::text, true), ''::text) IS NOT NULL)",
+  ];
+  const normalize = (value: string | null) => value?.replace(/\s+/g, ' ').trim();
+  const scope = '(' + atoms.join(' AND ') + ')';
+  if (policy.schemaname !== 'public' || policy.tablename !== 'organization_members'
+    || policy.permissive !== 'PERMISSIVE' || policy.roles.length !== 1
+    || policy.roles[0] !== 'nzila_auth_system_mutation' || normalize(policy.qual) !== scope) return false;
+  if (policy.policyname === 'ue_auth_member_projection_select') {
+    return policy.cmd === 'SELECT' && policy.with_check === null;
+  }
+  return policy.policyname === 'ue_auth_member_projection_reactivate' && policy.cmd === 'UPDATE'
+    && normalize(policy.with_check) === '(' + [...atoms, "(status = 'active'::text)"].join(' AND ') + ')';
+}
+
+export function hasApprovedMemberAccessProjectionPolicies(policies: MemberAccessProjectionPolicy[]): boolean {
+  const projection = policies.filter(policy => policy.schemaname === 'public'
+    && policy.tablename === 'organization_members' && policy.policyname.startsWith('ue_auth_member_projection_'));
+  return projection.length === 2 && new Set(projection.map(policy => policy.policyname)).size === 2
+    && projection.every(isApprovedMemberAccessProjectionPolicy);
+}
+
 export function compileMemberAccessProjectionSql(): string {
   const scope = `user_id = NULLIF(current_setting('nzila.auth_user_id',true),'')
     AND organization_id::text = NULLIF(current_setting('nzila.auth_org_id',true),'')
