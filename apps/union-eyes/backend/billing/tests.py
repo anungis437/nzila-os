@@ -657,13 +657,23 @@ class TestWhiplashPreventionAuditStr(TestCase):
 # ===== 27. CostCenters =====
 class TestCostCentersCreate(TestCase):
     def test_create(self):
-        obj = CostCenters.objects.create()
+        org = Organizations.objects.create(
+            name="Synthetic cost-center tenant",
+            slug=f"cost-center-{uuid.uuid4().hex}",
+            organization_type="union",
+        )
+        obj = CostCenters.objects.create(organization_id=org.id)
         self.assertIsNotNone(obj.id)
 
 
 class TestCostCentersStr(TestCase):
     def test_str(self):
-        obj = CostCenters.objects.create()
+        org = Organizations.objects.create(
+            name="Synthetic cost-center tenant",
+            slug=f"cost-center-{uuid.uuid4().hex}",
+            organization_type="union",
+        )
+        obj = CostCenters.objects.create(organization_id=org.id)
         self.assertIsInstance(str(obj), str)
 
 

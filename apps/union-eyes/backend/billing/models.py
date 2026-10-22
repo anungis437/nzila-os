@@ -407,7 +407,7 @@ class WhiplashPreventionAudit(BaseModel):
 
 class CostCenters(BaseModel):
     """Migrated from drizzle: accounting.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
 
     class Meta:
         db_table = 'cost_centers'
