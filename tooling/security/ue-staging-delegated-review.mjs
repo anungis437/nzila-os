@@ -53,6 +53,7 @@ export function allowedPath(name) {
 // Only PR986 may include these exact, signed dependency repairs.
 const DEPENDENCY_PATHS = ['package.json', 'pnpm-lock.yaml']
 const TOOL_DEPENDENCY_PATHS = ['.kilo/package.json', '.kilo/package-lock.json']
+const OTEL_DEPENDENCY_PATH = 'packages/otel-core/package.json'
 export function validateSanitizerPackageChange(baseBytes, sourceBytes) {
   const base = JSON.parse(baseBytes.toString('utf8'))
   const source = JSON.parse(sourceBytes.toString('utf8'))
@@ -64,6 +65,12 @@ export function validateSanitizerPackageChange(baseBytes, sourceBytes) {
 }
 
 const stableJson = value => JSON.stringify(value, (_, v) => v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))) : v)
+export function validateOtelPackageChange(baseBytes, sourceBytes) {
+  const base = JSON.parse(baseBytes.toString('utf8')), source = JSON.parse(sourceBytes.toString('utf8'))
+  if (!base.optionalDependencies || Object.hasOwn(base.optionalDependencies, '@fastify/otel') || source.optionalDependencies?.['@fastify/otel'] !== '0.18.0') fail('Unexpected Fastify instrumentation dependency repair')
+  base.optionalDependencies['@fastify/otel'] = '0.18.0'
+  if (stableJson(base) !== stableJson(source)) fail('Unrelated OTel package change')
+}
 const TOOL_MANIFEST = {name:'nzila-kilo-local-tooling',private:true,dependencies:{'@kilocode/plugin':'7.2.52'},overrides:{toml:'5.0.1'},engines:{node:'>=20'}}
 export function validateToolDependencyChange(name, baseBytes, sourceBytes) {
   const source = JSON.parse(sourceBytes.toString('utf8'))
@@ -108,12 +115,13 @@ export function validateManifest(m, now = Date.now()) {
   if (!Array.isArray(m.files) || !m.files.length || new Set(m.files.map(f=>f.path)).size !== m.files.length) fail('Missing or duplicate source coverage')
   for (const f of m.files) {
     exactKeys(f, ['path','status','previousPath','blobSha','sha256','baseBlobSha','baseSha256'], 'file')
-    const dependencyRepair = m.pullRequest === 986 && DEPENDENCY_PATHS.includes(f.path) && f.status === 'modified' && f.previousPath === null
+    const dependencyRepair = m.pullRequest === 986 && [...DEPENDENCY_PATHS, OTEL_DEPENDENCY_PATH].includes(f.path) && f.status === 'modified' && f.previousPath === null
     const toolRepair = m.pullRequest === 986 && TOOL_DEPENDENCY_PATHS.includes(f.path) && f.status === (f.path === '.kilo/package.json' ? 'added' : 'modified') && f.previousPath === null
     if ((!allowedPath(f.path) && !dependencyRepair && !toolRepair) || (f.previousPath !== null && !allowedPath(f.previousPath)) || !['added','modified','removed','renamed'].includes(f.status)) fail('Unreviewable source path/status')
     if ((f.status === 'removed' ? f.blobSha !== null || f.sha256 !== null : !SHA.test(f.blobSha) || !HASH.test(f.sha256)) || (f.status === 'added' ? f.baseBlobSha !== null || f.baseSha256 !== null : !SHA.test(f.baseBlobSha) || !HASH.test(f.baseSha256)) || (f.status === 'renamed' ? !f.previousPath : f.previousPath !== null)) fail('File hash/status binding invalid')
   }
   if (m.files.some(f=>DEPENDENCY_PATHS.includes(f.path)) && !DEPENDENCY_PATHS.every(name=>m.files.some(f=>f.path===name && f.status==='modified'))) fail('Sanitizer repair requires package and lockfile coverage')
+  if (m.files.some(f=>f.path===OTEL_DEPENDENCY_PATH) && !m.files.some(f=>f.path==='pnpm-lock.yaml' && f.status==='modified')) fail('OTel dependency declaration requires reviewed lock coverage')
   if (m.files.some(f=>TOOL_DEPENDENCY_PATHS.includes(f.path)) && !TOOL_DEPENDENCY_PATHS.every(name=>m.files.some(f=>f.path===name && f.status===(name === '.kilo/package.json' ? 'added' : 'modified')))) fail('Local tooling repair requires exact manifest and lockfile coverage')
   const requiredPaths = ['.github/workflows/security-design-review.yml','tooling/security/ue-staging-delegated-review.mjs']
   if (m.pullRequest === 984) requiredPaths.push(KEY_PATH)
@@ -170,6 +178,7 @@ export async function verifyPullRequest(m, api) {
     if(f.status!=='added'){const b=baseTree.tree.find(t=>t.path===(f.previousPath??f.path));if(b?.type!=='blob'||b.sha!==f.baseBlobSha)fail('Base blob identity differs');baseBytes=await blob(f.baseBlobSha,f.baseSha256)}
     if(f.path===KEY_PATH&&sha256(sourceBytes)!==TRUST_SHA256)fail('Reviewed key differs from owner trust')
     if(f.path==='package.json')validateSanitizerPackageChange(baseBytes,sourceBytes)
+    if(f.path===OTEL_DEPENDENCY_PATH)validateOtelPackageChange(baseBytes,sourceBytes)
     if(TOOL_DEPENDENCY_PATHS.includes(f.path))validateToolDependencyChange(f.path,baseBytes,sourceBytes)
     if(f.path==='.gitattributes'&&(f.status!=='modified'||sourceBytes.toString('utf8').trimEnd()!==baseBytes.toString('utf8').trimEnd()+'\n'+KEY_PATH+' -text'))fail('Only exact public-key byte preservation attribute is permitted')
   }

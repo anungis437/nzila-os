@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
-import { allowedPath, BASE, DOMAIN, KEY_PATH, PR_BINDINGS, RECEIPT_PATH, SIGNATURE_PATH, RESOURCES, sha256, validateManifest, validateSanitizerPackageChange, validateToolDependencyChange, verifyDetached, verifyEnvelope, verifyPullRequest } from './ue-staging-delegated-review.mjs'
+import { allowedPath, BASE, DOMAIN, KEY_PATH, PR_BINDINGS, RECEIPT_PATH, SIGNATURE_PATH, RESOURCES, sha256, validateManifest, validateSanitizerPackageChange, validateToolDependencyChange, validateOtelPackageChange, verifyDetached, verifyEnvelope, verifyPullRequest } from './ue-staging-delegated-review.mjs'
 
 const NOW=Date.parse('2026-10-22T14:00:00Z'), S='1'.repeat(40), TREE='2'.repeat(40), E='3'.repeat(40), BLOB='4'.repeat(40)
 const report='Actual separate agent review; source risks assessed, no unresolved P0/P1. Production and runtime proof remain separate.'
@@ -96,6 +96,29 @@ for(const [name,change]of [
  ['adjacent file',m=>m.files.at(-2).path='.kilo/other.json'],['historical PR',m=>{m.pullRequest=984;m.branch=PR_BINDINGS[984].branch;m.baseSha=BASE}],
 ])test(`local tooling review rejects ${name}`,()=>{const m=toolFollowup();change(m);assert.throws(()=>validateManifest(m,NOW))})
 test('local tooling paths remain outside the general allowlist',()=>{for(const p of ['.kilo/package.json','.kilo/package-lock.json','.kilo/other.json'])assert.equal(allowedPath(p),false)})
+const otelPackage=()=>({name:'@nzila/otel-core',scripts:{typecheck:'tsc --noEmit'},optionalDependencies:{'@opentelemetry/api':'^1.9.0'}})
+const patchedOtelPackage=()=>{const p=otelPackage();p.optionalDependencies['@fastify/otel']='0.18.0';return p}
+test('OTel manifest repair declares the previously hoisted optional dependency',()=>validateOtelPackageChange(jsonBytes(otelPackage()),jsonBytes(patchedOtelPackage())))
+for(const [name,change]of [
+ ['broad range',p=>p.optionalDependencies['@fastify/otel']='*'],['unrelated script',p=>p.scripts.typecheck='true'],
+ ['wrong dependency scope',p=>{delete p.optionalDependencies['@fastify/otel'];p.dependencies={'@fastify/otel':'0.18.0'}}],
+ ['unrelated dependency',p=>p.optionalDependencies['@opentelemetry/api']='*'],
+])test(`OTel manifest rejects ${name}`,()=>{const p=patchedOtelPackage();change(p);assert.throws(()=>validateOtelPackageChange(jsonBytes(otelPackage()),jsonBytes(p)))})
+const otelFile=()=>({path:'packages/otel-core/package.json',status:'modified',previousPath:null,blobSha:BLOB,sha256:sha256(bytes),baseBlobSha:BLOB,baseSha256:sha256(bytes)})
+test('OTel manifest requires paired signed root lock coverage',()=>{const m=dependencyFollowup();m.files.push(otelFile());validateManifest(m,NOW);m.files=m.files.filter(f=>!['package.json','pnpm-lock.yaml'].includes(f.path));assert.throws(()=>validateManifest(m,NOW),/lock coverage/)})
+for(const status of ['added','removed'])test(`OTel manifest rejects ${status} file`,()=>{const m=dependencyFollowup();m.files.push({...otelFile(),status});assert.throws(()=>validateManifest(m,NOW))})
+test('OTel manifest remains excluded from general path allowlist',()=>assert.equal(allowedPath('packages/otel-core/package.json'),false))
+for(const extra of [false,true])test(`actual API OTel package scope (unrelated edit=${extra})`,async()=>{
+ const m=dependencyFollowup(),base=jsonBytes(otelPackage()),source=patchedOtelPackage()
+ if(extra)source.scripts.typecheck='true'
+ const current=jsonBytes(source),newSha='a'.repeat(40),oldSha='b'.repeat(40),rootNew='c'.repeat(40),rootOld='d'.repeat(40)
+ m.files.push({...otelFile(),blobSha:newSha,sha256:sha256(current),baseBlobSha:oldSha,baseSha256:sha256(base)})
+ Object.assign(m.files.find(f=>f.path==='package.json'),{blobSha:rootNew,sha256:sha256(packageBytes('>=3.4.17')),baseBlobSha:rootOld,baseSha256:sha256(packageBytes('>=3.4.13'))})
+ const a=apiFixture(m)
+ for(const f of m.files.filter(f=>['package.json','pnpm-lock.yaml','packages/otel-core/package.json'].includes(f.path)))a.objects[`git/trees/${'5'.repeat(40)}?recursive=1`].tree.push({path:f.path,type:'blob',sha:f.baseBlobSha})
+ for(const [sha,content]of [[newSha,current],[oldSha,base],[rootNew,packageBytes('>=3.4.17')],[rootOld,packageBytes('>=3.4.13')]])a.objects[`git/blobs/${sha}`]={encoding:'base64',sha,content:content.toString('base64')}
+ if(extra)await assert.rejects(verifyPullRequest(m,a),/Unrelated OTel/);else await verifyPullRequest(m,a)
+})
 for(const extra of [false,true])test(`actual API local tooling lock scope (unrelated edit=${extra})`,async()=>{
  const m=followup(),{base,source}=toolLocks()
  if(extra)source.packages['node_modules/other'].version='2'
