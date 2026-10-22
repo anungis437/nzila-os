@@ -58,7 +58,11 @@ export function scopedLedgerJournal({ journalPath, migrationsDir }) {
   };
 }
 
-export async function getAppliedHashes(client) {
+export async function getAppliedHashes(client, stagingLineageContext) {
+  if (stagingLineageContext) {
+    const { validateRecoveryContext } = await import('./ue-staging-historical-lineage.mjs');
+    return (await validateRecoveryContext(client, stagingLineageContext)).appliedHashes;
+  }
   await ensureLedgerTable(client);
   const applied = await client.query('SELECT hash FROM drizzle.__drizzle_migrations ORDER BY id');
   return new Set(applied.rows.map((r) => r.hash));
@@ -68,9 +72,9 @@ export async function getAppliedHashes(client) {
  * Read-only status report: for every journal entry, whether its hash is
  * already recorded as applied. Never mutates the database.
  */
-export async function getScopedMigrationStatus(client, { journalPath, migrationsDir }) {
+export async function getScopedMigrationStatus(client, { journalPath, migrationsDir, stagingLineageContext }) {
   const entries = readJournalEntries(journalPath);
-  const appliedHashes = await getAppliedHashes(client);
+  const appliedHashes = await getAppliedHashes(client, stagingLineageContext);
   return entries.map((entry) => {
     const { hash } = computeMigrationHash(migrationsDir, entry.tag);
     return { tag: entry.tag, hash, applied: appliedHashes.has(hash) };
@@ -94,7 +98,7 @@ export async function getScopedMigrationStatus(client, { journalPath, migrations
  * Already-recorded hashes are skipped and are not executed again.
  * `onlyTags` cannot be combined with either boundary.
  */
-export async function applyScopedMigrations(client, { journalPath, migrationsDir, onlyTags, throughTag, afterTag, log = () => {} }) {
+export async function applyScopedMigrations(client, { journalPath, migrationsDir, onlyTags, throughTag, afterTag, stagingLineageContext, log = () => {} }) {
   if (onlyTags && (throughTag || afterTag)) {
     throw new Error('onlyTags cannot be combined with throughTag or afterTag.');
   }
@@ -103,8 +107,8 @@ export async function applyScopedMigrations(client, { journalPath, migrationsDir
   }
 
   const entries = readJournalEntries(journalPath);
-  const appliedHashes = await getAppliedHashes(client);
-  await assertJournalPrefix(client, scopedLedgerJournal({ journalPath, migrationsDir }));
+  const appliedHashes = await getAppliedHashes(client, stagingLineageContext);
+  await assertJournalPrefix(client, scopedLedgerJournal({ journalPath, migrationsDir }), { stagingLineageContext });
 
   if (entries.length === 0) {
     log('Scoped Drizzle root has zero entries — nothing to migrate.');

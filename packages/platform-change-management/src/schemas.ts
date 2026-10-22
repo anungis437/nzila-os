@@ -35,6 +35,7 @@ export const approvalRoleSchema = z.enum([
   'change_manager',
   'security_approver',
   'platform_owner',
+  'staging_mission_owner',
 ])
 
 export const pirOutcomeSchema = z.enum([
@@ -75,6 +76,22 @@ export const changeRecordSchema = z.object({
   approvers_required: z.array(z.string()),
   approved_by: z.array(z.string()),
   approval_status: approvalStatusSchema,
+  staging_authorization: z.object({
+    mission: z.string(),
+    owner_github_login: z.string(),
+    owner_instruction_sha256: z.string().regex(/^[a-f0-9]{64}$/),
+    owner_instruction_ref: z.string(),
+    delegate: z.object({ name: z.string(), authenticated_github_login: z.string(), azure_identity: z.string() }).strict(),
+    resources: z.object({
+      subscription_id: z.string(), tenant_id: z.string(), container_app: z.string(),
+      container_app_resource_group: z.string(), postgres_server: z.string(),
+      postgres_resource_group: z.string(), database: z.string(), key_vault: z.string(),
+      clone_name_prefix: z.string(), region: z.string(),
+    }).strict(),
+    production_authorized: z.literal(false),
+    security_proof_required: z.literal(true),
+    signed_release_required: z.literal(true),
+  }).strict().optional(),
   implementation_window_start: isoTimestampSchema,
   implementation_window_end: isoTimestampSchema,
   rollback_plan: z.string().min(1),

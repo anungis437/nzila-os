@@ -20,11 +20,19 @@
  *   AZURE_AD_CLIENT_SECRET
  *   AZURE_AD_TENANT_ID
  *   AUTH_SECRET  (NextAuth secret — generate with `openssl rand -base64 32`)
+ *
+ * Optional dedicated single-tenant staging registration:
+ *   AZURE_AD_STAGING_SINGLE_TENANT=true
+ *   TARGET_ENVIRONMENT=staging
+ *   AZURE_AD_TENANT_ID=<directory GUID; never common/organizations>
+ * This opt-in fails closed outside staging or without a valid tenant GUID.
+ * Omit it (or set false) to preserve the existing /common issuer everywhere.
  */
 import NextAuth from 'next-auth'
 import MicrosoftEntraID from 'next-auth/providers/microsoft-entra-id'
 import type { NextAuthConfig } from 'next-auth'
 import type { EntraTokenClaims, EntraSession } from './types'
+import { resolveEntraIssuer } from './issuer'
 
 // ── Auto-Provisioning Hook ──────────────────────────────────────────────────
 
@@ -58,7 +66,7 @@ export function setOnSignInHook(hook: (params: OnSignInHookParams) => Promise<vo
 const AZURE_AD_TENANT_ID = process.env.AZURE_AD_TENANT_ID
 
 /**
- * Issuer URL — uses `/common/` for multi-tenant + personal accounts,
+ * Default issuer uses `/common/` for multi-tenant + personal accounts,
  * which allows:
  *   • Organizational accounts from any Azure AD tenant
  *   • Personal Microsoft accounts (Outlook.com, Hotmail, etc.)
@@ -66,16 +74,18 @@ const AZURE_AD_TENANT_ID = process.env.AZURE_AD_TENANT_ID
  *
  * Token validation uses audience (client ID) check; the `tid` claim
  * is captured in the JWT callback for tenant-specific logic.
+ * A dedicated staging registration can explicitly select its directory
+ * issuer through the validated, staging-only opt-in documented above.
  */
-function getIssuerUrl(): string {
-  return 'https://login.microsoftonline.com/common/v2.0'
-}
-
 function createEntraProvider() {
   return MicrosoftEntraID({
     clientId: process.env.AZURE_AD_CLIENT_ID!,
     clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
-    issuer: getIssuerUrl(),
+    issuer: resolveEntraIssuer({
+      AZURE_AD_STAGING_SINGLE_TENANT: process.env.AZURE_AD_STAGING_SINGLE_TENANT,
+      AZURE_AD_TENANT_ID: process.env.AZURE_AD_TENANT_ID,
+      TARGET_ENVIRONMENT: process.env.TARGET_ENVIRONMENT,
+    }),
     authorization: {
       params: {
         scope: 'openid profile email User.Read',

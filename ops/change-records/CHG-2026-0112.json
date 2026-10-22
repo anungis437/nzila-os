@@ -1,22 +1,23 @@
 {
   "change_id": "CHG-2026-0112",
-  "title": "Union Eyes staging: remove fail-open legacy RLS policies from the deadline-engine tables",
-  "description": "Mission UE-RUNTIME-REALITY-20261018 (Phase 3A). Business justification: the staging rls-verify preflight fails 1 of 1699 checks (manifest-rls deadline_reminder_executions UNENFORCED) and a runtime probe shows union_eyes_runtime with NO organization context can read, and insert into, deadline_reminders, deadline_audit_events and deadline_reminder_executions for every tenant. Cause: the PERMISSIVE PUBLIC policies installed by root migrations/0045 (deadline_reminders_tenant_isolation, deadline_audit_events_tenant_isolation, deadline_reminder_executions_read) fall back to the row's own organization when app.current_org_id is empty and are OR-ed with the 0010-style policies; the same objects exist in existing staging and in the clean-room/fresh path. Affected tables (exact scope): deadline_reminders, deadline_audit_events, deadline_reminder_executions. Desired state: RLS + FORCE + runtime and system policies and no PUBLIC policy on all three. Migration: canonical scoped migration apps/union-eyes/db/migrations-cache/0015_deadline_engine_rls_fail_closed_closure.sql (journal idx 15), executed only through the governed executor tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs (--check, then --apply). Atomic per migration with in-transaction post-condition assertions; idempotent; resumable; no grants, roles, functions or other tables. RELEASE ORDER (rehearsed; dossier 29_UE_PHASE3A_RUNTIME_REALITY_DOSSIER.md sections 14 and 18): CLOSURE FIRST, CANDIDATE SECOND. Apply 0015 BEFORE the candidate revision is dispatched and before it receives traffic; it does not depend on a newer revision serving. The serving revision (eae195f2, 0000259) cannot reach a policy-dependent statement on these tables on the live schema, and the candidate worker works under both policy sets. PREREQUISITES (all required before any staging apply; STOP on any miss): (1) approval by service_owner and change_manager, recorded on this record by the real approvers; (2) R1 read-only catalog and migration-ledger evidence obtained with an authorized trusted identity (never credentials from the agent host) with the read-only tool docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/release-sequence-rehearsal-v3/helpers/r1-readonly-check.js (PR #949; BEGIN READ ONLY, verified TLS, exit 2 = STOP; the identity needs SELECT on documents.disciplinary_sensitive, medical_sensitive and member_pii and must see every row - superuser, BYPASSRLS, or owner of a table without FORCE RLS - otherwise R1 cannot prove the NULL check and STOPs): ledger holds 0000-0005 under current LF-normalized hashes with 0006-0015 pending; the five legacy PUBLIC policies present; deadline_reminder_executions FORCE false; 79 Django migrations with none of the seven candidate migrations recorded; every guarded Django column that already exists provably equivalent to the migration state (the same catalog rules as the migration; any unresolved type, enum default outside its labels, NULLs under a NOT NULL field or missing unique-index equivalent is a STOP); any divergence from the rehearsed pre-state is a STOP; (3) ALL non-serving active revisions isolated: the 29 active revisions other than the serving 0000259 (14 running at 1 replica 0000246-0000258 and 16 scale-to-zero 0000230, 0000232-0000245 and wave1acc2, 130 revisions in total at inspection) deactivated and the ff989637 and wave1 labels removed, under a separate approved change, because 0% traffic weight does not isolate (every revision has a public revision FQDN and no ipSecurityRestrictions, and scale-to-zero revisions wake on request); only 0000259 (rollback target) and the candidate may be active; (4) a qualified immutable candidate: image digests built from MERGED main by the governed build workflow, candidate Django migrations rehearsed against a restored clone of staging on that exact digest, schema prerequisites delivered (content.0004 and grievances.0005 collision-tolerant AddFieldIfNotExists, auth_core.0007 profiles database defaults, grievances.0007 due_date and status with the lifecycle CHECK guards, plus the deadline writer and reader corrections; the deadline_reassignment_convergence table still needs its own security-scope migration); (5) maintainer security disposition covering the fail-open window until closure, the recovery policy (no executable fail-open restore) and the preflight hardening in this PR (rls-verify now pins the exact approved policy set AND the exact approved organization-equality predicate on the three deadline tables and rejects any PUBLIC, foreign-role or non-contract policy, which the earlier verifier did not; the deploy preflight also passes --require-deadline-engine-tables so an absent table fails in a deployed environment; the predicate check is an exact textual contract, not general semantic verification); the independent live isolation probe remains a mandatory release gate; (6) CREDENTIAL HYGIENE IS NOT A PREREQUISITE OF THIS CHANGE: by Principal decision (2026-10-19) the COMMAND-managed rotation of the staging runtime/system/administrator database credentials and the acceptance-auth signing secret, and COMMAND's containment disposition, are DEFERRED until after functional-readiness work; the 2026-10-18 findings (77 listSecrets operations, TLS verification disabled in the as-run harnesses, a restore clone holding a copy of staging records) and their severity stand unchanged and the remediation is recorded as a Principal-owned deferred item in dossier 29 section 22. Exception that stays in force: an independently verified ACTIVE compromise that affects this operation must be controlled before the operation proceeds. No agent retrieves, rotates, reproduces or reveals a secret under this record; the R1 identity is a separately authorized, least-privileged, time-bounded, read-only identity. SEQUENCE: R1 -> isolate revisions -> closure 0015 via the governed executor -> preflight (1711 checks incl. the deadline-engine predicate contract, run with --require-deadline-engine-tables) and live isolation probe -> candidate Django migrations -> candidate revision at 0% -> smokes -> traffic. Django migrations commit individually and are not reversible by a traffic flip. NOT part of this change and independently blocking: the schema and image candidate above (delivered by a separate change and PR) and the convergence table. Not applied to staging at the time of writing.",
+  "title": "Union Eyes sole-owner staging recovery and runtime requalification",
+  "description": "Mission UE-STAGING-RECOVERY-TO-GO. Sole owner anungis437 expressly delegates staging recovery execution to Codex in the instruction preserved in the linked authorization record. Scope: refreshed Azure and database census; exact pending canonical scoped migrations through0019 and applicable Django migrations derived from actual ledgers; isolated Canadian recovery clone and demonstrated recovery; immutable qualified frontend/backend images; validated drain and deactivation of obsolete revisions and labels; least-privilege runtime/system grants and fail-closed policies; staging authentication/configuration/connectivity repair; synthetic acceptance fixtures; candidate zero-traffic deployment; authenticated runtime, tenant isolation, worker, audit and EN/FR acceptance; controlled staging cutover only after evidence passes. Serialize database and Container App mutations. Required sequence: verified identity and read-only census -> isolated recoverable clone -> exact-image rehearsal and preservation checks -> safely isolate obsolete revisions -> required live DDL -> catalog/hash/RLS verification -> candidate -> acceptance -> controlled staging cutover. Live DDL stops on destructive migration or unrecoverable clone condition. No customer-data disclosure, uncontrolled deletion, fabricated independent review/signature, security weakening, or production operation. This record establishes operational authorization only: authentic delegated signing, release binding, actual clone proof, migration preconditions, isolation and final runtime proof remain required. Historical risks and credential-hygiene deferral are preserved in linked historical record; an active compromise must be controlled before proceeding. Original narrow0015 record is retained verbatim in linked authorization document.",
   "service": "union-eyes",
   "environment": "STAGING",
   "change_type": "NORMAL",
   "risk_level": "MEDIUM",
-  "impact_summary": "Three deadline-engine tables, one governed migration, auto-rolled back on any failed statement or assertion. Behaviour change: sessions without tenant context stop seeing or writing these tables; the system role keeps full access via TO union_eyes_system policies. The serving revision is unaffected (rehearsed). With a staging-like ledger the governed --apply runs 0006-0015; on a staging-shaped database that changes exactly the three tables plus the ue_create_* helper function bodies.",
-  "requested_by": "UE-RUNTIME-REALITY-20261018",
+  "impact_summary": "Staging-only mission may create an isolated temporary restore server, migrate staging database through actual pending scoped/Django chain, correct configuration, deactivate verified obsolete revisions/labels, deploy candidate and cut over after measured qualification. No production authorization. No claim of staging GO before all required runtime proof.",
+  "requested_by": "anungis437 (sole-owner instruction; delegated execution by Codex)",
   "approvers_required": [
-    "service_owner",
-    "change_manager"
+    "anungis437"
   ],
-  "approved_by": [],
-  "approval_status": "PENDING",
+  "approved_by": [
+    "anungis437"
+  ],
+  "approval_status": "APPROVED",
   "implementation_window_start": "2026-10-20T00:00:00Z",
   "implementation_window_end": "2026-10-27T23:59:59Z",
-  "rollback_plan": "Recovery is forward and secure; the fail-closed state is never intentionally reverted, and there is no executable fail-open restore: a session variable or free-text token cannot evidence a real security decision, so none is accepted anywhere. Order of preference: (1) forward fix - deploy an application revision compatible with the closed policies; (2) approved point-in-time restore of nzila-staging-db (a change under its own approved record; restore rehearsed 2026-10-19, about 15 minutes); (3) if the closed state was altered by hand, replay 0015 directly in one transaction as the migration-admin principal (idempotent, ledger unchanged; the governed executor will not re-close because 0015 stays recorded) and re-run the rls-verify preflight. Traffic rollback is a weight change back to revision 0000259, which is compatible with the closed policies; once Django migrations have run, a weight flip alone may not be sufficient and recovery is (2). Any intentional reopening of cross-tenant access requires a NEW reviewed migration in a PR under a change record whose approved_by and approval_status are set by the actual approvers (service_owner, change_manager) with the maintainer security disposition attached; no agent or script may set them.",
+  "rollback_plan": "Prefer forward-secure repair; preserve serving0000259 until candidate qualification and viable recovery. Azure PITR creates a separately named isolated Canadian server, never rewinds live server in place. Rehearse exact immutable images and actual migration chain on clone before live DDL; verify preservation invariants and demonstrable recovery. Never restore fail-open policies or use traffic flip as proof committed DDL was reversed. Preserve durable queued work during drain; control external side effects; restrict clone network/credentials and record retention cleanup. Final signed release and runtime isolation/security proof remain mandatory before controlled staging cutover.",
   "test_evidence_refs": [
     "apps/union-eyes/db/__tests__/deadline-engine-rls-fail-closed-closure-0015.pglite.test.ts",
     "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/b3-clone-before.json",
@@ -25,11 +26,38 @@
     "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/rls-verify-preflight-clone-after.txt",
     "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/release-sequence-rehearsal/results.json",
     "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/release-sequence-rehearsal-v2/results-v2.json",
-    "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/release-sequence-rehearsal-v3/results-v3.json"
+    "docs/union-eyes/reality-remediation/evidence/ue-runtime-reality-20261018/release-sequence-rehearsal-v3/results-v3.json",
+    "ops/change-records/CHG-2026-0112.staging-authorization.md"
   ],
   "linked_prs": [],
   "linked_commits": [],
-  "status": "PROPOSED",
+  "status": "APPROVED",
   "created_at": "2026-10-19T02:30:00Z",
-  "updated_at": "2026-10-19T20:30:00Z"
+  "updated_at": "2026-10-22T13:05:32.763541Z",
+  "staging_authorization": {
+    "mission": "UE-STAGING-RECOVERY-TO-GO",
+    "owner_github_login": "anungis437",
+    "owner_instruction_sha256": "681844e4f18424c1e592dfd1db205afc66d5c7a3d647c91006dc8f5d2dcbb2e3",
+    "owner_instruction_ref": "ops/change-records/CHG-2026-0112.staging-authorization.md",
+    "delegate": {
+      "name": "Codex",
+      "authenticated_github_login": "anungis437",
+      "azure_identity": "user:fcb34d85-3e87-4213-9fc4-435656b17f44"
+    },
+    "resources": {
+      "subscription_id": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+      "tenant_id": "5082b8be-b04d-4a13-b61c-b6397670177b",
+      "container_app": "nzila-os-union-eyes-staging",
+      "container_app_resource_group": "nzila-canada-staging-rg",
+      "postgres_server": "nzila-staging-db",
+      "postgres_resource_group": "nzila-staging-rg",
+      "database": "nzila_os_staging",
+      "key_vault": "nzila-staging-kv",
+      "clone_name_prefix": "nzila-ue-recovery-",
+      "region": "canadacentral"
+    },
+    "production_authorized": false,
+    "security_proof_required": true,
+    "signed_release_required": true
+  }
 }

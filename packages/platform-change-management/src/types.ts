@@ -33,6 +33,31 @@ export type ApprovalRole =
   | 'change_manager'
   | 'security_approver'
   | 'platform_owner'
+  | 'staging_mission_owner'
+
+/** Operational authorization only; never substitutes for signed release or security proof. */
+export interface StagingAuthorization {
+  readonly mission: string
+  readonly owner_github_login: string
+  readonly owner_instruction_sha256: string
+  readonly owner_instruction_ref: string
+  readonly delegate: { readonly name: string; readonly authenticated_github_login: string; readonly azure_identity: string }
+  readonly resources: {
+    readonly subscription_id: string
+    readonly tenant_id: string
+    readonly container_app: string
+    readonly container_app_resource_group: string
+    readonly postgres_server: string
+    readonly postgres_resource_group: string
+    readonly database: string
+    readonly key_vault: string
+    readonly clone_name_prefix: string
+    readonly region: string
+  }
+  readonly production_authorized: false
+  readonly security_proof_required: true
+  readonly signed_release_required: true
+}
 
 export type PIROutcome = 'SUCCESS' | 'PARTIAL_SUCCESS' | 'FAILED' | 'ROLLED_BACK'
 
@@ -60,6 +85,7 @@ export interface ChangeRecord {
   readonly approvers_required: readonly string[]
   readonly approved_by: readonly string[]
   readonly approval_status: ApprovalStatus
+  readonly staging_authorization?: StagingAuthorization
   readonly implementation_window_start: string
   readonly implementation_window_end: string
   readonly rollback_plan: string

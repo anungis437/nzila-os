@@ -47,9 +47,15 @@ jobs:
       - name: Resolve application source SHA
         id: source
         shell: bash
+        env:
+          REQUESTED_SOURCE_SHA: ${{ github.event.inputs.application_source_sha }}
         run: |
           set -euo pipefail
-          PIN="${{ github.event.inputs.application_source_sha }}"
+          PIN="$REQUESTED_SOURCE_SHA"
+          if [ -n "$PIN" ] && ! [[ "$PIN" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "::error::application_source_sha must be a full commit SHA."
+            exit 1
+          fi
           if [ -n "$PIN" ]; then
             echo "sha=$PIN" >> "$GITHUB_OUTPUT"
           else
@@ -73,6 +79,40 @@ jobs:
         with:
           ref: ${{ steps.source.outputs.sha }}
           clean: true
+
+      - name: Verify checked-out source and record image identity
+        id: identity
+        shell: bash
+        env:
+          EXPECTED_SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA=$(git rev-parse HEAD)
+          if [ "${ACTUAL_SHA,,}" != "${EXPECTED_SOURCE_SHA,,}" ]; then
+            echo "::error::Checked-out source does not match requested commit."
+            exit 1
+          fi
+          echo "sha=$ACTUAL_SHA" >> "$GITHUB_OUTPUT"
+          echo "build_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          echo "release_id=UE-PROOF-${ACTUAL_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve staging public authentication identifiers
+        id: staging-auth
+        if: ${{ inputs.environment == 'staging' }}
+        shell: bash
+        env:
+          CLIENT_ID: ${{ vars.AZURE_AD_CLIENT_ID_STAGING || vars.AZURE_AD_CLIENT_ID || secrets.AZURE_AD_CLIENT_ID }}
+          TENANT_ID: ${{ vars.AZURE_AD_TENANT_ID_STAGING || vars.AZURE_AD_TENANT_ID || secrets.AZURE_AD_TENANT_ID }}
+        run: |
+          set -euo pipefail
+          for VALUE in "$CLIENT_ID" "$TENANT_ID"; do
+            if ! [[ "$VALUE" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]]; then
+              echo "::error::Staging build requires valid public Entra client and tenant identifiers."
+              exit 1
+            fi
+          done
+          echo "client_id=$CLIENT_ID" >> "$GITHUB_OUTPUT"
+          echo "tenant_id=$TENANT_ID" >> "$GITHUB_OUTPUT"
 
       - name: Assert build identity is configured (fail-closed)
         env:
@@ -143,13 +183,17 @@ jobs:
         run: |
           set -euo pipefail
           PROOF="${{ steps.source.outputs.proof_tag }}"
-          SHA="${{ steps.source.outputs.sha }}"
+          SHA="${{ steps.identity.outputs.sha }}"
           docker build \
             --target union-eyes \
             --build-arg TURBO_FILTER="--filter=@nzila/union-eyes" \
             --build-arg BUILD_AUTH_PLACEHOLDER=ci_build_placeholder_secret_32_chars_x \
-            --build-arg AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} \
-            --build-arg AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} \
+            --build-arg AZURE_AD_CLIENT_ID=${{ steps.staging-auth.outputs.client_id || secrets.AZURE_AD_CLIENT_ID }} \
+            --build-arg AZURE_AD_TENANT_ID=${{ steps.staging-auth.outputs.tenant_id || secrets.AZURE_AD_TENANT_ID }} \
+            --build-arg GITHUB_SHA="$SHA" \
+            --build-arg ARTIFACT_ID="$SHA" \
+            --build-arg BUILD_TIME="${{ steps.identity.outputs.build_time }}" \
+            --build-arg RELEASE_ID="${{ steps.identity.outputs.release_id }}" \
             --build-arg NEXT_PUBLIC_SITE_URL=${{ steps.topo.outputs.marketing_url }} \
             --build-arg NEXT_PUBLIC_APP_URL=${{ steps.topo.outputs.app_url }} \
             --build-arg NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app \
@@ -165,6 +209,8 @@ jobs:
             --build-arg NEXT_PUBLIC_UE_DEMO_ORG_SLUG=${{ steps.topo.outputs.demo_org_slug }} \
             --build-arg UE_MARKETING_URL=${{ steps.topo.outputs.marketing_url }} \
             --build-arg UE_APP_URL=${{ steps.topo.outputs.app_url }} \
+            --label org.opencontainers.image.revision="$SHA" \
+            --label org.opencontainers.image.source="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
             -t ${{ env.IMAGE }}:${PROOF} \
             -t ${{ env.IMAGE }}:${SHA} \
             .
@@ -183,9 +229,11 @@ jobs:
         run: |
           set -euo pipefail
           PROOF="${{ steps.source.outputs.proof_tag }}"
-          SHA="${{ steps.source.outputs.sha }}"
+          SHA="${{ steps.identity.outputs.sha }}"
           docker build \
             --file apps/union-eyes/backend/Dockerfile \
+            --label org.opencontainers.image.revision="$SHA" \
+            --label org.opencontainers.image.source="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
             -t ${{ env.BACKEND_IMAGE }}:${PROOF} \
             -t ${{ env.BACKEND_IMAGE }}:${SHA} \
             apps/union-eyes/backend
@@ -212,7 +260,7 @@ jobs:
           echo "backend_digest=$BACKEND_DIGEST" >> "$GITHUB_OUTPUT"
           {
             echo "### UE Build & Push Proof (no deploy)"
-            echo "- source_sha: ${{ steps.source.outputs.sha }}"
+            echo "- source_sha: ${{ steps.identity.outputs.sha }}"
             echo "- proof_tag: ${PROOF}"
             echo "- frontend: ${FRONTEND_DIGEST}"
             echo "- backend: ${BACKEND_DIGEST}"
