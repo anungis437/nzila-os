@@ -1,6 +1,7 @@
 /**
  * Regression: the deployment-time rls-verify preflight must reject unexpected permissive / PUBLIC policies on the
- * three deadline-engine tables, including when RLS + FORCE are enabled and the expected role policies exist.
+ * deadline-engine tables, including deadline_reassignment_convergence, even when RLS + FORCE are enabled and the
+ * expected role policies exist.
  *
  * Background (Phase 3A): on staging the preflight went 1698/1699 because deadline_reminder_executions lacked
  * enforcement, but the permissive PUBLIC policies on the other two tables (installed by root 0045) were NOT flagged:
@@ -25,6 +26,7 @@ const REPO_ROOT = resolve(APP_ROOT, '..', '..');
 const CACHE = resolve(APP_ROOT, 'db', 'migrations-cache');
 const read = (p: string) => readFileSync(p, 'utf8');
 const SQL_0015 = read(resolve(CACHE, '0015_deadline_engine_rls_fail_closed_closure.sql'));
+const SQL_0019 = read(resolve(CACHE, '0019_deadline_reassignment_convergence.sql'));
 const ROOT_0045 = read(resolve(REPO_ROOT, 'migrations', '0045_union_eyes_deadline_engine.sql'));
 
 const fn = (file: string, name: string): string => {
@@ -53,6 +55,7 @@ async function legacyDb(): Promise<PGlite> {
 async function closedDb(): Promise<PGlite> {
   const db = await legacyDb();
   await db.exec(SQL_0015);
+  await db.exec(SQL_0019);
   return db;
 }
 
@@ -64,8 +67,15 @@ async function verdicts(db: PGlite) {
 }
 
 describe('rls-verify preflight: deadline-engine policy closure', () => {
-  it('covers exactly the three protected deadline-engine tables', () => {
-    expect([...DEADLINE_ENGINE_TABLES].sort()).toEqual(['deadline_audit_events', 'deadline_reminder_executions', 'deadline_reminders']);
+  it('covers exactly the protected deadline-engine tables', () => {
+    expect([...DEADLINE_ENGINE_TABLES].sort()).toEqual([
+      'deadline_audit_events',
+      'deadline_reassignment_convergence',
+      'deadline_reminder_executions',
+      'deadline_reminders',
+    ]);
+    expect(DEADLINE_ENGINE_TABLES_QUERY).toContain('deadline_reassignment_convergence');
+    expect(DEADLINE_ENGINE_POLICIES_QUERY).toContain('deadline_reassignment_convergence');
   });
 
   it('passes on the approved closed state produced by migration 0015', async () => {
@@ -97,7 +107,7 @@ describe('rls-verify preflight: deadline-engine policy closure', () => {
                EXISTS (SELECT 1 FROM pg_policy p WHERE p.polrelid = c.oid AND 'union_eyes_runtime'::regrole = ANY (p.polroles)) AS has_runtime,
                EXISTS (SELECT 1 FROM pg_policy p WHERE p.polrelid = c.oid AND 'union_eyes_system'::regrole = ANY (p.polroles)) AS has_system
         FROM pg_class c WHERE c.relnamespace = 'public'::regnamespace AND c.relname = ANY($1)`, [[...DEADLINE_ENGINE_TABLES]])).rows as Array<Record<string, boolean | string>>;
-      expect(rows).toHaveLength(3);
+      expect(rows).toHaveLength(DEADLINE_ENGINE_TABLES.length);
       // These are the conditions the pre-existing manifest coverage check evaluates: all true => it reports "enforced".
       for (const r of rows) expect([r.rls, r.forced, r.has_runtime, r.has_system], String(r.relname)).toEqual([true, true, true, true]);
     };

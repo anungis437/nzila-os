@@ -302,7 +302,7 @@ jobs:
     # rollout is exclusively owned by union-eyes-authority-rollout.yml.
     if: ${{ false }}
     runs-on: ubuntu-latest
-    needs: plan
+    needs: [plan, database-premutation-gate]
     name: Apply Authority Schema Prerequisites (P3.2, one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -409,7 +409,7 @@ jobs:
   apply-automation-rules-ownership-migration:
     if: ${{ false }}
     runs-on: ubuntu-latest
-    needs: [plan, apply-authority-schema-prerequisites]
+    needs: [plan, database-premutation-gate, apply-authority-schema-prerequisites]
     name: Apply Automation-Rules Ownership Migration (P3.2, one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -492,7 +492,7 @@ jobs:
   apply-rls-foundation-migration:
     if: ${{ false }}
     runs-on: ubuntu-latest
-    needs: [plan, apply-automation-rules-ownership-migration]
+    needs: [plan, database-premutation-gate, apply-automation-rules-ownership-migration]
     name: Apply RLS Foundation Migration (0108, one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -571,7 +571,7 @@ jobs:
   apply-authority-enforcement-migration:
     if: ${{ false }}
     runs-on: ubuntu-latest
-    needs: [plan, apply-rls-foundation-migration]
+    needs: [plan, database-premutation-gate, apply-rls-foundation-migration]
     name: Apply Authority Enforcement Migration (round 58, one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -652,7 +652,7 @@ jobs:
   apply-round58-grant-fix-migration:
     if: ${{ false }}
     runs-on: ubuntu-latest
-    needs: [plan, apply-authority-enforcement-migration]
+    needs: [plan, database-premutation-gate, apply-authority-enforcement-migration]
     name: Apply Round 58 Grant-Order Fix (round 59, one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -721,7 +721,7 @@ jobs:
   apply-round59-geometry-gap-closure:
     if: ${{ false }}
     runs-on: ubuntu-latest
-    needs: [plan, apply-round58-grant-fix-migration]
+    needs: [plan, database-premutation-gate, apply-round58-grant-fix-migration]
     name: Apply Round 59B RLS Geometry Gap Closure (one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -767,7 +767,7 @@ jobs:
   apply-round59-congress-memberships-grant-fix:
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_round59_congress_memberships_grant_fix == 'true' }}
     runs-on: ubuntu-latest
-    needs: plan
+    needs: [plan, database-premutation-gate]
     name: Apply Round 59D Congress-Memberships Grant Fix (one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -820,6 +820,12 @@ jobs:
           set +x  # never trace this — the export line contains a secret
           export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
 
+          REF="${{ needs.database-premutation-gate.outputs.application_source_sha }}"
+          if [ "$REF" != "$GITHUB_SHA" ]; then
+            git fetch --depth 1 origin "$REF"
+            git checkout "$REF" -- apps/union-eyes/scripts/apply-round59-congress-memberships-grant-fix.ts
+          fi
+
           set +e
           pnpm --filter @nzila/union-eyes run rls:apply-round59-congress-memberships-grant-fix
           FIX_STATUS=$?
@@ -850,7 +856,7 @@ jobs:
   apply-congress-memberships-multi-party-rls-fix:
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_congress_memberships_multi_party_rls_fix == 'true' }}
     runs-on: ubuntu-latest
-    needs: plan
+    needs: [plan, database-premutation-gate]
     name: Apply Congress-Memberships Multi-Party RLS Fix (Gate E.1/E.2, one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -903,6 +909,12 @@ jobs:
           set +x  # never trace this — the export line contains a secret
           export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
 
+          REF="${{ needs.database-premutation-gate.outputs.application_source_sha }}"
+          if [ "$REF" != "$GITHUB_SHA" ]; then
+            git fetch --depth 1 origin "$REF"
+            git checkout "$REF" -- apps/union-eyes/scripts/apply-congress-memberships-multi-party-rls-fix.ts
+          fi
+
           set +e
           pnpm --filter @nzila/union-eyes run rls:apply-congress-memberships-multi-party-rls-fix
           FIX_STATUS=$?
@@ -929,7 +941,7 @@ jobs:
   # post-apply verification does not reach GO.
   apply-icra-capability-migration:
     runs-on: ubuntu-latest
-    needs: plan
+    needs: [plan, release-premutation-gate]
     name: Apply ICRA Capability Migration (0005, mandatory pre-deploy gate)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -954,6 +966,42 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ue-release-evidence
+          path: ue-evidence
+
+      - name: Refuse ICRA apply until the fresh premutation decision allows it
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVIDENCE="$GITHUB_WORKSPACE/ue-evidence"
+          FRESH="$RUNNER_TEMP/ue-fresh-icra"
+          export UE_APPLICATION_SOURCE_SHA="${{ needs.release-premutation-gate.outputs.application_source_sha }}"
+          bash tooling/scripts/union-eyes-resolve-source-root.sh "$GITHUB_SHA" "$UE_APPLICATION_SOURCE_SHA" "$RUNNER_TEMP/ue-source-icra.env"
+          # shellcheck disable=SC1091
+          source "$RUNNER_TEMP/ue-source-icra.env"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh \
+            "${{ needs.plan.outputs.app_name }}" "${{ needs.plan.outputs.resource_group }}" \
+            "$FRESH" "icra"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase icra \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$EVIDENCE/gate-ingress.json" \
+            --revisions "$EVIDENCE/gate-revisions.json" \
+            --fresh-ingress "$FRESH/ingress.json" \
+            --fresh-revisions "$FRESH/revisions.json" \
+            --role-catalog "$EVIDENCE/role-catalog.json" \
+            --ledger "$EVIDENCE/ledger.json"
 
       - name: Check + apply the ICRA capability scoped migration (fail-closed)
         shell: bash
@@ -997,21 +1045,37 @@ jobs:
             exit 1
           fi
 
+          EVIDENCE="$GITHUB_WORKSPACE/ue-evidence"
+          export UE_APPLICATION_SOURCE_SHA="${{ needs.release-premutation-gate.outputs.application_source_sha }}"
+          bash tooling/scripts/union-eyes-resolve-source-root.sh "$GITHUB_SHA" "$UE_APPLICATION_SOURCE_SHA" "$RUNNER_TEMP/ue-source.env"
+          # shellcheck disable=SC1091
+          source "$RUNNER_TEMP/ue-source.env"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase approval \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$EVIDENCE/gate-ingress.json" \
+            --revisions "$EVIDENCE/gate-revisions.json" \
+            --firewall-server "$POSTGRES_SERVER_NAME" \
+            --firewall-resource-group "$POSTGRES_RG"
           cleanup() {
-            az postgres flexible-server firewall-rule delete \
-              --server-name "$POSTGRES_SERVER_NAME" \
-              --resource-group "$POSTGRES_RG" \
-              --name "$RULE_NAME" \
-              --yes >/dev/null 2>&1 || true
+            local status=$?
+            bash tooling/scripts/union-eyes-postgres-firewall.sh close \
+              "$POSTGRES_SERVER_NAME" "$POSTGRES_RG" "$RULE_NAME" "" \
+              "$RUNNER_TEMP/icra-firewall-cleanup.json" || status=1
+            exit "$status"
           }
+          bash tooling/scripts/union-eyes-postgres-firewall.sh open \
+            "$POSTGRES_SERVER_NAME" "$POSTGRES_RG" "$RULE_NAME" "$RUNNER_IP" \
+            "$RUNNER_TEMP/icra-firewall-open.json"
           trap cleanup EXIT
-
-          az postgres flexible-server firewall-rule create \
-            --server-name "$POSTGRES_SERVER_NAME" \
-            --resource-group "$POSTGRES_RG" \
-            --name "$RULE_NAME" \
-            --start-ip-address "$RUNNER_IP" \
-            --end-ip-address "$RUNNER_IP" >/dev/null
 
           set +x  # never trace this — the export line contains a secret
           export RLS_MIGRATION_ADMIN_DATABASE_URL="$ADMIN_URL"
@@ -1214,6 +1278,7 @@ jobs:
     outputs:
       frontend_digest: ${{ steps.digests.outputs.frontend_digest }}
       backend_digest: ${{ steps.digests.outputs.backend_digest }}
+      source_sha: ${{ steps.source.outputs.sha }}
     steps:
       - name: Resolve application source SHA (two-SHA pin)
         id: source
@@ -1303,6 +1368,7 @@ jobs:
             --build-arg NEXT_PUBLIC_UE_DEMO_ORG_SLUG=${{ needs.plan.outputs.demo_org_slug }} \
             --build-arg UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }} \
             --build-arg UE_APP_URL=${{ needs.plan.outputs.app_url }} \
+            --label org.opencontainers.image.revision=${{ steps.source.outputs.sha }} \
             -t ${{ env.IMAGE }}:${{ steps.source.outputs.sha }} \
             -t ${{ env.IMAGE }}:${{ needs.plan.outputs.environment }} \
             .
@@ -1326,6 +1392,7 @@ jobs:
           # server-side ACR build; runner-side push needs only AcrPush.
           docker build \
             --file apps/union-eyes/backend/Dockerfile \
+            --label org.opencontainers.image.revision=${{ steps.source.outputs.sha }} \
             -t ${{ env.BACKEND_IMAGE }}:${{ steps.source.outputs.sha }} \
             -t ${{ env.BACKEND_IMAGE }}:latest \
             apps/union-eyes/backend
@@ -1356,6 +1423,377 @@ jobs:
           echo "Resolved frontend digest: $FRONTEND_DIGEST"
           echo "Resolved backend digest: $BACKEND_DIGEST"
 
+  # Authority-only corrections wait on this gate. It does not build an image
+  # and it does not apply SQL. Image attestation stays on the release gate.
+  database-premutation-gate:
+    runs-on: ubuntu-latest
+    needs: [plan]
+    name: Database pre-mutation gate (authority-only)
+    environment: ${{ needs.plan.outputs.environment }}
+    outputs:
+      application_source_sha: ${{ steps.evidence.outputs.application_source_sha }}
+      workflow_sha: ${{ steps.evidence.outputs.workflow_sha }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}'. Refusing to open the database pre-mutation gate."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Approve, then read the catalog
+        id: evidence
+        shell: bash
+        env:
+          UE_APPROVAL_EVIDENCE_B64: ${{ secrets.UE_APPROVAL_EVIDENCE_B64 }}
+          UE_APPROVAL_TRUST_PEM: ${{ secrets.UE_APPROVAL_TRUST_PEM }}
+        run: |
+          set -euo pipefail
+          if [ -z "${UE_APPROVAL_EVIDENCE_B64}" ] || [ -z "${UE_APPROVAL_TRUST_PEM}" ]; then
+            echo "::error::Authenticated approval evidence is not configured. Refusing before any firewall change."
+            exit 1
+          fi
+          EVIDENCE="$RUNNER_TEMP/ue-authority-evidence"
+          mkdir -p "$EVIDENCE"
+          printf '%s' "$UE_APPROVAL_EVIDENCE_B64" | base64 -d > "$EVIDENCE/approval.json"
+          printf '%s\n' "$UE_APPROVAL_TRUST_PEM" > "$EVIDENCE/approval-trust.pem"
+          WORKFLOW_SHA="$GITHUB_SHA"
+          PIN="${{ github.event.inputs.application_source_sha }}"
+          if [ -n "$PIN" ]; then APP_SHA="$PIN"; else APP_SHA="$WORKFLOW_SHA"; fi
+          echo "application_source_sha=$APP_SHA" >> "$GITHUB_OUTPUT"
+          echo "workflow_sha=$WORKFLOW_SHA" >> "$GITHUB_OUTPUT"
+          export UE_APPLICATION_SOURCE_SHA="$APP_SHA"
+          bash tooling/scripts/union-eyes-resolve-source-root.sh "$WORKFLOW_SHA" "$APP_SHA" "$RUNNER_TEMP/ue-source.env"
+          # shellcheck disable=SC1091
+          source "$RUNNER_TEMP/ue-source.env"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh \
+            "${{ needs.plan.outputs.app_name }}" "${{ needs.plan.outputs.resource_group }}" \
+            "$EVIDENCE/inventory" "authority-gate"
+          node tooling/scripts/union-eyes-write-authority-manifest.mjs \
+            --release-sha "$APP_SHA" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --environment "${{ needs.plan.outputs.environment }}" \
+            --ingress "$EVIDENCE/inventory/ingress.json" \
+            --revisions "$EVIDENCE/inventory/revisions.json" \
+            --out "$EVIDENCE/release-manifest.json"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase approval \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APP_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --ingress "$EVIDENCE/inventory/ingress.json" \
+            --revisions "$EVIDENCE/inventory/revisions.json" \
+            --firewall-server "${{ vars.AZURE_POSTGRES_SERVER_NAME }}" \
+            --firewall-resource-group "${{ vars.AZURE_POSTGRES_RESOURCE_GROUP }}"
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+          RUNNER_IP="$(curl -fsS --max-time 10 https://api.ipify.org)"
+          RULE_NAME="gha-ue-authority-${{ github.run_id }}"
+          POSTGRES_SERVER_NAME="${{ vars.AZURE_POSTGRES_SERVER_NAME }}"
+          POSTGRES_RG="${{ vars.AZURE_POSTGRES_RESOURCE_GROUP }}"
+          cleanup() {
+            local status=$?
+            bash tooling/scripts/union-eyes-postgres-firewall.sh close \
+              "$POSTGRES_SERVER_NAME" "$POSTGRES_RG" "$RULE_NAME" "" \
+              "$EVIDENCE/firewall-cleanup.json" || status=1
+            exit "$status"
+          }
+          bash tooling/scripts/union-eyes-postgres-firewall.sh open \
+            "$POSTGRES_SERVER_NAME" "$POSTGRES_RG" "$RULE_NAME" "$RUNNER_IP" \
+            "$EVIDENCE/firewall-open.json"
+          trap cleanup EXIT
+          set +x
+          export RLS_MIGRATION_ADMIN_DATABASE_URL
+          RLS_MIGRATION_ADMIN_DATABASE_URL="$(az keyvault secret show --vault-name "${{ needs.plan.outputs.key_vault_name }}" --name union-eyes-migration-admin-database-url --query value -o tsv)"
+          bash tooling/scripts/union-eyes-read-migration-catalog.sh "$EVIDENCE"
+          unset RLS_MIGRATION_ADMIN_DATABASE_URL
+          set -x
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase authority \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APP_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --ingress "$EVIDENCE/inventory/ingress.json" \
+            --revisions "$EVIDENCE/inventory/revisions.json" \
+            --role-catalog "$EVIDENCE/role-catalog.json" \
+            --ledger "$EVIDENCE/ledger.json"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ue-authority-evidence
+          path: ${{ runner.temp }}/ue-authority-evidence
+          retention-days: 7
+
+  # Release image attestation. Database mutations on the deploy path need this
+  # gate. It does not apply SQL, deactivate revisions, or rewrite ingress weights.
+  release-premutation-gate:
+    runs-on: ubuntu-latest
+    needs: [plan, build-push]
+    name: Release pre-mutation gate (read-only)
+    environment: ${{ needs.plan.outputs.environment }}
+    outputs:
+      application_source_sha: ${{ steps.evidence.outputs.application_source_sha }}
+      workflow_sha: ${{ steps.evidence.outputs.workflow_sha }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}'. Refusing to open the pre-mutation gate."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Collect release evidence after approval
+        id: evidence
+        shell: bash
+        env:
+          UE_APPROVAL_EVIDENCE_B64: ${{ secrets.UE_APPROVAL_EVIDENCE_B64 }}
+          UE_APPROVAL_TRUST_PEM: ${{ secrets.UE_APPROVAL_TRUST_PEM }}
+        run: |
+          set -euo pipefail
+          if [ -z "${UE_APPROVAL_EVIDENCE_B64}" ] || [ -z "${UE_APPROVAL_TRUST_PEM}" ]; then
+            echo "::error::Authenticated approval evidence is not configured. A change-record name is not an approval. Refusing before any database mutation."
+            exit 1
+          fi
+          EVIDENCE="$RUNNER_TEMP/ue-evidence"
+          mkdir -p "$EVIDENCE"
+          printf '%s' "$UE_APPROVAL_EVIDENCE_B64" | base64 -d > "$EVIDENCE/approval.json"
+          printf '%s\n' "$UE_APPROVAL_TRUST_PEM" > "$EVIDENCE/approval-trust.pem"
+          WORKFLOW_SHA="$GITHUB_SHA"
+          APP_SHA="${{ needs.build-push.outputs.source_sha }}"
+          echo "application_source_sha=$APP_SHA" >> "$GITHUB_OUTPUT"
+          echo "workflow_sha=$WORKFLOW_SHA" >> "$GITHUB_OUTPUT"
+          export UE_APPLICATION_SOURCE_SHA="$APP_SHA"
+          bash tooling/scripts/union-eyes-resolve-source-root.sh "$WORKFLOW_SHA" "$APP_SHA" "$RUNNER_TEMP/ue-source.env"
+          # shellcheck disable=SC1091
+          source "$RUNNER_TEMP/ue-source.env"
+          jq -n \
+            --arg releaseSha "$APP_SHA" \
+            --arg workflowSha "$WORKFLOW_SHA" \
+            --arg environment "${{ needs.plan.outputs.environment }}" \
+            --arg frontendDigest "${{ needs.build-push.outputs.frontend_digest }}" \
+            --arg backendDigest "${{ needs.build-push.outputs.backend_digest }}" \
+            '{releaseSha:$releaseSha, workflowSha:$workflowSha, environment:$environment, frontendDigest:$frontendDigest, backendDigest:$backendDigest}' \
+            > "$EVIDENCE/release-manifest.json"
+          bash tooling/scripts/union-eyes-read-acr-attestation.sh \
+            "${{ needs.plan.outputs.acr_name }}" nzila-os-union-eyes \
+            "${{ needs.build-push.outputs.frontend_digest }}" "$EVIDENCE/acr-frontend.json"
+          bash tooling/scripts/union-eyes-read-acr-attestation.sh \
+            "${{ needs.plan.outputs.acr_name }}" nzila-os-union-eyes-backend \
+            "${{ needs.build-push.outputs.backend_digest }}" "$EVIDENCE/acr-backend.json"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh \
+            "${{ needs.plan.outputs.app_name }}" "${{ needs.plan.outputs.resource_group }}" \
+            "$EVIDENCE/inventory" "gate"
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+          RUNNER_IP="$(curl -fsS --max-time 10 https://api.ipify.org)"
+          RULE_NAME="gha-ue-premigrate-${{ github.run_id }}"
+          POSTGRES_SERVER_NAME="${{ vars.AZURE_POSTGRES_SERVER_NAME }}"
+          POSTGRES_RG="${{ vars.AZURE_POSTGRES_RESOURCE_GROUP }}"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase approval \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APP_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$EVIDENCE/inventory/ingress.json" \
+            --revisions "$EVIDENCE/inventory/revisions.json" \
+            --firewall-server "$POSTGRES_SERVER_NAME" \
+            --firewall-resource-group "$POSTGRES_RG"
+          cleanup() {
+            local status=$?
+            bash tooling/scripts/union-eyes-postgres-firewall.sh close \
+              "$POSTGRES_SERVER_NAME" "$POSTGRES_RG" "$RULE_NAME" "" \
+              "$EVIDENCE/firewall-cleanup.json" || status=1
+            exit "$status"
+          }
+          bash tooling/scripts/union-eyes-postgres-firewall.sh open \
+            "$POSTGRES_SERVER_NAME" "$POSTGRES_RG" "$RULE_NAME" "$RUNNER_IP" \
+            "$EVIDENCE/firewall-open.json"
+          trap cleanup EXIT
+          set +x
+          export RLS_MIGRATION_ADMIN_DATABASE_URL
+          RLS_MIGRATION_ADMIN_DATABASE_URL="$(az keyvault secret show --vault-name "${{ needs.plan.outputs.key_vault_name }}" --name union-eyes-migration-admin-database-url --query value -o tsv)"
+          bash tooling/scripts/union-eyes-read-migration-catalog.sh "$EVIDENCE"
+          unset RLS_MIGRATION_ADMIN_DATABASE_URL
+          set -x
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase premigrate \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APP_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$EVIDENCE/inventory/ingress.json" \
+            --revisions "$EVIDENCE/inventory/revisions.json" \
+            --role-catalog "$EVIDENCE/role-catalog.json" \
+            --ledger "$EVIDENCE/ledger.json" \
+            > "$EVIDENCE/premigrate-decision.json"
+          cp "$EVIDENCE/inventory/ingress.json" "$EVIDENCE/gate-ingress.json"
+          cp "$EVIDENCE/inventory/revisions.json" "$EVIDENCE/gate-revisions.json"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ue-release-evidence
+          path: ${{ runner.temp }}/ue-evidence
+          retention-days: 7
+
+  apply-scoped-0019:
+    runs-on: ubuntu-latest
+    needs: [plan, release-premutation-gate, apply-icra-capability-migration]
+    name: Apply scoped migration 0019 before RLS preflight
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: ue-release-evidence
+          path: ue-evidence
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity. Refusing to apply scoped migration 0019."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Apply 0019 only after a fresh inventory and an allowed decision
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVIDENCE="$GITHUB_WORKSPACE/ue-evidence"
+          FRESH="$RUNNER_TEMP/ue-fresh-0019"
+          export UE_APPLICATION_SOURCE_SHA="${{ needs.release-premutation-gate.outputs.application_source_sha }}"
+          bash tooling/scripts/union-eyes-resolve-source-root.sh "$GITHUB_SHA" "$UE_APPLICATION_SOURCE_SHA" "$RUNNER_TEMP/ue-source.env"
+          # shellcheck disable=SC1091
+          source "$RUNNER_TEMP/ue-source.env"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh \
+            "${{ needs.plan.outputs.app_name }}" "${{ needs.plan.outputs.resource_group }}" \
+            "$FRESH" "scoped-0019"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase scoped-0019 \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$EVIDENCE/gate-ingress.json" \
+            --revisions "$EVIDENCE/gate-revisions.json" \
+            --fresh-ingress "$FRESH/ingress.json" \
+            --fresh-revisions "$FRESH/revisions.json" \
+            --role-catalog "$EVIDENCE/role-catalog.json" \
+            --ledger "$EVIDENCE/ledger.json" \
+            > "$RUNNER_TEMP/ue-scoped-0019-decision.json"
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+          RUNNER_IP="$(curl -fsS --max-time 10 https://api.ipify.org)"
+          RULE_NAME="gha-ue-scoped-0019-${{ github.run_id }}"
+          POSTGRES_SERVER_NAME="${{ vars.AZURE_POSTGRES_SERVER_NAME }}"
+          POSTGRES_RG="${{ vars.AZURE_POSTGRES_RESOURCE_GROUP }}"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase approval \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$EVIDENCE/gate-ingress.json" \
+            --revisions "$EVIDENCE/gate-revisions.json" \
+            --firewall-server "$POSTGRES_SERVER_NAME" \
+            --firewall-resource-group "$POSTGRES_RG"
+          cleanup() {
+            local status=$?
+            bash tooling/scripts/union-eyes-postgres-firewall.sh close \
+              "$POSTGRES_SERVER_NAME" "$POSTGRES_RG" "$RULE_NAME" "" \
+              "$RUNNER_TEMP/scoped-0019-firewall-cleanup.json" || status=1
+            exit "$status"
+          }
+          bash tooling/scripts/union-eyes-postgres-firewall.sh open \
+            "$POSTGRES_SERVER_NAME" "$POSTGRES_RG" "$RULE_NAME" "$RUNNER_IP" \
+            "$RUNNER_TEMP/scoped-0019-firewall-open.json"
+          trap cleanup EXIT
+          set +x
+          export RLS_MIGRATION_ADMIN_DATABASE_URL
+          RLS_MIGRATION_ADMIN_DATABASE_URL="$(az keyvault secret show --vault-name "${{ needs.plan.outputs.key_vault_name }}" --name union-eyes-migration-admin-database-url --query value -o tsv)"
+          node tooling/scripts/apply-scoped-journal-tag.mjs \
+            --tag 0019_deadline_reassignment_convergence \
+            --decision "$RUNNER_TEMP/ue-scoped-0019-decision.json" \
+            --source-root "$SOURCE_ROOT"
+          bash tooling/scripts/union-eyes-read-migration-catalog.sh "$EVIDENCE"
+          unset RLS_MIGRATION_ADMIN_DATABASE_URL
+          set -x
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ue-release-evidence
+          path: ue-evidence
+          retention-days: 7
+          overwrite: true
+
   # Round 59C — mandatory pre-deploy gate, ephemeral migration authority.
   # Django migrations require DDL/table-owner privileges the runtime role
   # (union_eyes_runtime) must not have. Previously the persistent
@@ -1373,10 +1811,13 @@ jobs:
   # (see the "Update Container App" step below).
   apply-django-migrations:
     runs-on: ubuntu-latest
-    needs: [plan, build-push]
+    needs: [plan, build-push, release-premutation-gate, apply-icra-capability-migration, apply-scoped-0019]
     name: Apply Django Migrations (ephemeral migration authority)
     environment: ${{ needs.plan.outputs.environment }}
+    outputs:
+      migration_role: ${{ steps.migrate.outputs.migration_role }}
     steps:
+      - uses: actions/checkout@v5
       - name: Assert build identity is configured (fail-closed)
         env:
           BUILD_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -1424,7 +1865,13 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: ue-release-evidence
+          path: ue-evidence
+
       - name: Run migrations with ephemeral migration-admin authority (fail-closed)
+        id: migrate
         shell: bash
         run: |
           set -euo pipefail
@@ -1467,6 +1914,82 @@ jobs:
             MIGRATE_EXTRA_ARGS="--fake-initial"
           fi
 
+          echo "migration_role=$ADMIN_PGUSER" >> "$GITHUB_OUTPUT"
+
+          # showmigrations --plan is recorded as inspection evidence. It is not
+          # proof that migrate will succeed; the signed restored-clone receipt is.
+          set +e
+          docker run --rm \
+            -e PGHOST="$ADMIN_PGHOST" \
+            -e PGPORT="$ADMIN_PGPORT" \
+            -e PGDATABASE="$ADMIN_PGDATABASE" \
+            -e PGUSER="$ADMIN_PGUSER" \
+            -e PGPASSWORD="$ADMIN_PGPASSWORD" \
+            -e PGSSLMODE="require" \
+            ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }} \
+            python manage.py showmigrations --plan > "$RUNNER_TEMP/showmigrations-plan.txt"
+          PLAN_STATUS=$?
+          set -e
+          jq -n \
+            --arg command "python manage.py showmigrations --plan" \
+            --argjson exitCode "$PLAN_STATUS" \
+            --rawfile stdout "$RUNNER_TEMP/showmigrations-plan.txt" \
+            '{command:$command, exitCode:$exitCode, inspectionOnly:true, stdout:$stdout}' \
+            > "$RUNNER_TEMP/django-plan.json"
+          if [ "$PLAN_STATUS" -ne 0 ]; then
+            echo "::error::Django migration inspection failed before any migration was applied. This inspection is not apply proof. Refusing to continue."
+            exit 1
+          fi
+
+          ROLE_ROW="$(docker run --rm \
+            -e PGHOST="$ADMIN_PGHOST" \
+            -e PGPORT="$ADMIN_PGPORT" \
+            -e PGDATABASE="$ADMIN_PGDATABASE" \
+            -e PGUSER="$ADMIN_PGUSER" \
+            -e PGPASSWORD="$ADMIN_PGPASSWORD" \
+            -e PGSSLMODE="require" \
+            ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }} \
+            python -c 'import json,os,psycopg2; conn=psycopg2.connect(host=os.environ["PGHOST"], port=os.environ["PGPORT"], dbname=os.environ["PGDATABASE"], user=os.environ["PGUSER"], password=os.environ["PGPASSWORD"], sslmode=os.environ["PGSSLMODE"]); cur=conn.cursor(); cur.execute("SELECT rolname, rolsuper, rolbypassrls, rolcanlogin FROM pg_roles WHERE rolname = current_user"); row=cur.fetchone(); print(json.dumps({"rolname": row[0], "rolsuper": row[1], "rolbypassrls": row[2], "rolcanlogin": row[3]}))')"
+          jq -n --argjson row "$ROLE_ROW" '{source:"pg_roles", query:"SELECT rolname, rolsuper, rolbypassrls, rolcanlogin FROM pg_roles WHERE rolname = current_user", currentUser:$row.rolname, rows:[$row]}' > "$RUNNER_TEMP/role-catalog.json"
+          LEDGER_ROWS="$(docker run --rm \
+            -e PGHOST="$ADMIN_PGHOST" \
+            -e PGPORT="$ADMIN_PGPORT" \
+            -e PGDATABASE="$ADMIN_PGDATABASE" \
+            -e PGUSER="$ADMIN_PGUSER" \
+            -e PGPASSWORD="$ADMIN_PGPASSWORD" \
+            -e PGSSLMODE="require" \
+            ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }} \
+            python -c 'import json,os,psycopg2; conn=psycopg2.connect(host=os.environ["PGHOST"], port=os.environ["PGPORT"], dbname=os.environ["PGDATABASE"], user=os.environ["PGUSER"], password=os.environ["PGPASSWORD"], sslmode=os.environ["PGSSLMODE"]); cur=conn.cursor(); cur.execute("SELECT hash FROM drizzle.__drizzle_migrations"); print(json.dumps([{"hash": row[0]} for row in cur.fetchall()]))')"
+          jq -n --argjson rows "$LEDGER_ROWS" '{source:"drizzle.__drizzle_migrations", rows:$rows}' > "$RUNNER_TEMP/ledger.json"
+
+          EVIDENCE="$GITHUB_WORKSPACE/ue-evidence"
+          FRESH="$RUNNER_TEMP/ue-fresh-migrate"
+          export UE_APPLICATION_SOURCE_SHA="${{ needs.release-premutation-gate.outputs.application_source_sha }}"
+          bash tooling/scripts/union-eyes-resolve-source-root.sh "$GITHUB_SHA" "$UE_APPLICATION_SOURCE_SHA" "$RUNNER_TEMP/ue-source-django.env"
+          # shellcheck disable=SC1091
+          source "$RUNNER_TEMP/ue-source-django.env"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh \
+            "${{ needs.plan.outputs.app_name }}" "${{ needs.plan.outputs.resource_group }}" \
+            "$FRESH" "django-migrate"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase migrate \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$EVIDENCE/gate-ingress.json" \
+            --revisions "$EVIDENCE/gate-revisions.json" \
+            --fresh-ingress "$FRESH/ingress.json" \
+            --fresh-revisions "$FRESH/revisions.json" \
+            --role-catalog "$RUNNER_TEMP/role-catalog.json" \
+            --ledger "$RUNNER_TEMP/ledger.json" \
+            --django-plan "$RUNNER_TEMP/django-plan.json"
+
           set +e
           docker run --rm \
             -e PGHOST="$ADMIN_PGHOST" \
@@ -1483,15 +2006,14 @@ jobs:
           unset MIGRATION_ADMIN_URL ADMIN_PGUSER ADMIN_PGPASSWORD UE_ADMIN_REST UE_ADMIN_CREDS UE_ADMIN_HOSTPART UE_ADMIN_HOSTPORT UE_ADMIN_DBANDQUERY
 
           if [ "$MIGRATION_STATUS" -ne 0 ]; then
-            echo "::error::Django migration apply/verify failed for ${{ needs.plan.outputs.environment }}. Refusing to deploy the application revision — the database may be partially migrated; do not proceed until this is resolved."
+            echo "::error::Django migration apply/verify failed for ${{ needs.plan.outputs.environment }}. Refusing to deploy the application revision — the database may be partially migrated. A traffic rollback does not undo committed DDL. Recovery is an approved point-in-time restore."
             exit 1
           fi
           echo "::notice::Django migrations applied and verified (no unapplied migrations remain) for ${{ needs.plan.outputs.environment }}. No process retains the migration-admin credential beyond this job."
 
   deploy:
     runs-on: ubuntu-latest
-    needs:
-      [plan, pre-deploy-gates, build-push, apply-icra-capability-migration, apply-django-migrations]
+    needs: [plan, pre-deploy-gates, build-push, release-premutation-gate, apply-icra-capability-migration, apply-scoped-0019, apply-django-migrations]
     name: Deploy UnionEyes (env-scoped, digest-pinned)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -1631,10 +2153,41 @@ jobs:
             --max-replicas 3 \
             --registry-server ${{ needs.plan.outputs.acr_name }}.azurecr.io
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: ue-release-evidence
+          path: ue-evidence
+
       - name: Update Container App (frontend + backend sidecar)
         run: |
+          set -euo pipefail
           TARGET_APP="${{ needs.plan.outputs.app_name }}"
           TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          EVIDENCE="$GITHUB_WORKSPACE/ue-evidence"
+          FRESH="$RUNNER_TEMP/ue-fresh-candidate"
+          export UE_APPLICATION_SOURCE_SHA="${{ needs.release-premutation-gate.outputs.application_source_sha }}"
+          bash tooling/scripts/union-eyes-resolve-source-root.sh "$GITHUB_SHA" "$UE_APPLICATION_SOURCE_SHA" "$RUNNER_TEMP/ue-source-deploy.env"
+          # shellcheck disable=SC1091
+          source "$RUNNER_TEMP/ue-source-deploy.env"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh "$TARGET_APP" "$TARGET_RG" "$FRESH" "candidate"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase candidate \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$EVIDENCE/gate-ingress.json" \
+            --revisions "$EVIDENCE/gate-revisions.json" \
+            --fresh-ingress "$FRESH/ingress.json" \
+            --fresh-revisions "$FRESH/revisions.json" \
+            --role-catalog "$EVIDENCE/role-catalog.json" \
+            --ledger "$EVIDENCE/ledger.json"
+          echo "Ingress weights are left unchanged. The candidate revision stays off the serving allocation."
 
           SHOW_ERR=$(az containerapp show --name "$TARGET_APP" --resource-group "$TARGET_RG" --output none 2>&1) || {
             echo "::error::Container App $TARGET_APP cannot be updated in $TARGET_RG."
@@ -1652,11 +2205,13 @@ jobs:
             "UE_FEATURE_PROFILE=${{ needs.plan.outputs.feature_profile }}"
             "NEXT_PUBLIC_UE_FEATURE_PROFILE=${{ needs.plan.outputs.feature_profile }}"
             "NZILA_MODE=${{ needs.plan.outputs.nzila_mode }}"
-            "GITHUB_SHA=${{ github.sha }}"
+            "GITHUB_SHA=${{ needs.build-push.outputs.source_sha }}"
+            "UE_FRONTEND_IMAGE_DIGEST=${{ needs.build-push.outputs.frontend_digest }}"
+            "UE_BACKEND_IMAGE_DIGEST=${{ needs.build-push.outputs.backend_digest }}"
             "RELEASE_ID=${{ needs.plan.outputs.release_id }}"
             "BUILD_TIME=${{ needs.plan.outputs.build_time }}"
             "BUILD_TIMESTAMP=${{ needs.plan.outputs.build_time }}"
-            "ARTIFACT_ID=${{ github.sha }}"
+            "ARTIFACT_ID=${{ needs.build-push.outputs.source_sha }}"
             "UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }}"
             "UE_APP_URL=${{ needs.plan.outputs.app_url }}"
             "NEXT_PUBLIC_SITE_URL=${{ needs.plan.outputs.marketing_url }}"
@@ -1941,7 +2496,8 @@ jobs:
               "PGSSLMODE=$PGSSLMODE_VAL" \
               "PGPASSWORD=secretref:$PGPASSWORD_SECRET" \
             --remove-env-vars PGADMIN_USER PGADMIN_PASSWORD DJANGO_SKIP_MIGRATIONS DJANGO_MIGRATE_EXTRA_ARGS \
-            --image ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }}
+            --image ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }} \
+            -o json > "$RUNNER_TEMP/aca-candidate-update.json"
 
           # Remove the now-unused migration-admin secret from the Container
           # App's own secret surface (Round 59C — it must only ever exist in
@@ -1963,17 +2519,30 @@ jobs:
         # Container Apps secrets are revision-scoped, and this step queries
         # Postgres directly from the runner using the same credentials the
         # container secret references now point at, not through the running
-        # container. For that operator-facing confirmation, call
-        # GET /api/admin/database/health (platform_lead+) after this deploy
-        # completes and confirm tenantPrincipal.currentUser is
-        # "union_eyes_runtime" (not "nzilaadmin") and
-        # systemPrincipal.currentUser is "union_eyes_system".
-        if: ${{ needs.plan.outputs.rls_foundation_enforced == 'true' }}
+        # container. Staging qualification does not accept that HTTP response
+        # in place of the deployed-database role, ledger, and tenant-denial proof.
+        if: ${{ needs.plan.outputs.environment == 'staging' || needs.plan.outputs.rls_foundation_enforced == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
 
+          ENVIRONMENT="${{ needs.plan.outputs.environment }}"
+          FOUNDATION="${{ needs.plan.outputs.rls_foundation_enforced }}"
+          if [ "$ENVIRONMENT" = "staging" ] && [ "$FOUNDATION" != "true" ]; then
+            echo "::error::Staging qualification requires UE_RLS_FOUNDATION_ENFORCED_STAGING=true and a deployed-database tenant-denial probe. Refusing to skip it."
+            exit 1
+          fi
           KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          EVIDENCE="$GITHUB_WORKSPACE/ue-evidence"
+          CANDIDATE="$(jq -r '.properties.latestRevisionName // empty' "$RUNNER_TEMP/aca-candidate-update.json")"
+          if [ -z "$CANDIDATE" ]; then
+            echo "::error::RLS proof requires the candidate revision name from the container app update response."
+            exit 1
+          fi
+          export UE_APPLICATION_SOURCE_SHA="${{ needs.release-premutation-gate.outputs.application_source_sha }}"
+          bash tooling/scripts/union-eyes-resolve-source-root.sh "$GITHUB_SHA" "$UE_APPLICATION_SOURCE_SHA" "$RUNNER_TEMP/ue-source-rls.env"
+          # shellcheck disable=SC1091
+          source "$RUNNER_TEMP/ue-source-rls.env"
           RUNNER_IP=$(curl -sS --max-time 10 https://api.ipify.org)
           if [ -z "$RUNNER_IP" ]; then
             echo "::error::Could not determine this runner's public IP; refusing to proceed without a scoped firewall rule."
@@ -1987,21 +2556,30 @@ jobs:
             exit 1
           fi
 
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase approval \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --firewall-server "$POSTGRES_SERVER_NAME" \
+            --firewall-resource-group "$POSTGRES_RG"
           cleanup() {
-            az postgres flexible-server firewall-rule delete \
-              --server-name "$POSTGRES_SERVER_NAME" \
-              --resource-group "$POSTGRES_RG" \
-              --name "$RULE_NAME" \
-              --yes >/dev/null 2>&1 || true
+            local status=$?
+            bash tooling/scripts/union-eyes-postgres-firewall.sh close \
+              "$POSTGRES_SERVER_NAME" "$POSTGRES_RG" "$RULE_NAME" "" \
+              "$RUNNER_TEMP/rls-firewall-cleanup.json" || status=1
+            exit "$status"
           }
+          bash tooling/scripts/union-eyes-postgres-firewall.sh open \
+            "$POSTGRES_SERVER_NAME" "$POSTGRES_RG" "$RULE_NAME" "$RUNNER_IP" \
+            "$RUNNER_TEMP/rls-firewall-open.json"
           trap cleanup EXIT
-
-          az postgres flexible-server firewall-rule create \
-            --server-name "$POSTGRES_SERVER_NAME" \
-            --resource-group "$POSTGRES_RG" \
-            --name "$RULE_NAME" \
-            --start-ip-address "$RUNNER_IP" \
-            --end-ip-address "$RUNNER_IP" >/dev/null
 
           RUNTIME_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name union-eyes-runtime-database-url --query value -o tsv)
           SYSTEM_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name union-eyes-system-database-url --query value -o tsv)
@@ -2011,16 +2589,247 @@ jobs:
           export RLS_VERIFY_SYSTEM_DATABASE_URL="$SYSTEM_URL"
 
           # A deployed environment must carry the deadline-engine tables: an absent one is a failure here, not a source-native schema.
+          # Migration 0019 must already be in the ledger. This command does not run while that hash is only scheduled.
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+          set +x
+          export RLS_MIGRATION_ADMIN_DATABASE_URL
+          RLS_MIGRATION_ADMIN_DATABASE_URL="$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name union-eyes-migration-admin-database-url --query value -o tsv)"
+          bash tooling/scripts/union-eyes-read-migration-catalog.sh "$RUNNER_TEMP/ue-rls-catalog"
+          unset RLS_MIGRATION_ADMIN_DATABASE_URL
+          set -x
+          STAGING_ARGS=()
+          if [ "$ENVIRONMENT" = "staging" ]; then
+            set +x
+            export RLS_MIGRATION_ADMIN_DATABASE_URL
+            RLS_MIGRATION_ADMIN_DATABASE_URL="$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name union-eyes-migration-admin-database-url --query value -o tsv)"
+            bash tooling/scripts/union-eyes-read-staging-rls.sh \
+              "$RUNNER_TEMP/staging-rls.json" \
+              "$EVIDENCE/release-manifest.json" \
+              "$EVIDENCE/approval.json" \
+              "$EVIDENCE/approval-trust.pem" \
+              "$FOUNDATION"
+            unset RLS_MIGRATION_ADMIN_DATABASE_URL
+            cp "$RUNNER_TEMP/staging-rls.json" "$EVIDENCE/staging-rls.json"
+            STAGING_ARGS=(--staging-rls "$RUNNER_TEMP/staging-rls.json")
+          fi
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase rls-preflight \
+            --require-0019-recorded \
+            --environment "$ENVIRONMENT" \
+            --candidate-revision "$CANDIDATE" \
+            "${STAGING_ARGS[@]}" \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --role-catalog "$RUNNER_TEMP/ue-rls-catalog/role-catalog.json" \
+            --ledger "$RUNNER_TEMP/ue-rls-catalog/ledger.json"
+          set +e
           pnpm --filter @nzila/union-eyes exec tsx scripts/rls-verify.ts --mode=preflight --require-deadline-engine-tables
           PREFLIGHT_STATUS=$?
+          set -e
+          jq -n \
+            --arg command "tsx scripts/rls-verify.ts --mode=preflight --require-deadline-engine-tables" \
+            --argjson exitCode "$PREFLIGHT_STATUS" \
+            '{command:$command, exitCode:$exitCode}' > "$RUNNER_TEMP/rls-preflight.json"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase rls-preflight \
+            --require-0019-recorded \
+            --environment "$ENVIRONMENT" \
+            --candidate-revision "$CANDIDATE" \
+            "${STAGING_ARGS[@]}" \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --role-catalog "$RUNNER_TEMP/ue-rls-catalog/role-catalog.json" \
+            --ledger "$RUNNER_TEMP/ue-rls-catalog/ledger.json" \
+            --rls-preflight "$RUNNER_TEMP/rls-preflight.json"
 
           unset RLS_VERIFY_DATABASE_URL RLS_VERIFY_SYSTEM_DATABASE_URL RUNTIME_URL SYSTEM_URL
 
           if [ "$PREFLIGHT_STATUS" -ne 0 ]; then
-            echo "::error::RLS foundation preflight failed for ${{ needs.plan.outputs.environment }} — the deployed revision is not considered healthy."
+            echo "::error::RLS foundation preflight failed for ${{ needs.plan.outputs.environment }} — the deployed revision is not considered healthy. Traffic stays on the serving revision. A traffic rollback does not undo a committed migration."
             exit 1
           fi
-          echo "::notice::RLS foundation preflight passed for ${{ needs.plan.outputs.environment }} — union_eyes_runtime is confirmed NOSUPERUSER/NOBYPASSRLS with RLS enforced on every required table. Confirm the deployed app itself is using these credentials via GET /api/admin/database/health."
+          echo "::notice::RLS foundation preflight passed for ${{ needs.plan.outputs.environment }}. Staging acceptance uses the deployed-database role, ledger, and tenant-denial evidence. GET /api/admin/database/health does not replace that proof."
+
+      - name: Probe the candidate revision
+        shell: bash
+        env:
+          UE_CANDIDATE_PROBE_TOKEN: ${{ secrets.UE_CANDIDATE_PROBE_TOKEN }}
+        run: |
+          set -euo pipefail
+          TARGET_APP="${{ needs.plan.outputs.app_name }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          EVIDENCE="$GITHUB_WORKSPACE/ue-evidence"
+          CANDIDATE="$(jq -r '.properties.latestRevisionName // empty' "$RUNNER_TEMP/aca-candidate-update.json")"
+          if [ -z "$CANDIDATE" ]; then
+            echo "::error::The container app update response did not name a candidate revision."
+            exit 1
+          fi
+          export UE_APPLICATION_SOURCE_SHA="${{ needs.release-premutation-gate.outputs.application_source_sha }}"
+          bash tooling/scripts/union-eyes-resolve-source-root.sh "$GITHUB_SHA" "$UE_APPLICATION_SOURCE_SHA" "$RUNNER_TEMP/ue-source-probe.env"
+          # shellcheck disable=SC1091
+          source "$RUNNER_TEMP/ue-source-probe.env"
+          LABEL="ue-${GITHUB_RUN_ID}"
+          BEFORE="$RUNNER_TEMP/ue-before-label"
+          BEFORE_FRESH="$RUNNER_TEMP/ue-before-label-fresh"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh "$TARGET_APP" "$TARGET_RG" "$BEFORE" "before-label"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh "$TARGET_APP" "$TARGET_RG" "$BEFORE_FRESH" "before-label-fresh"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase label \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$BEFORE/ingress.json" \
+            --revisions "$BEFORE/revisions.json" \
+            --fresh-ingress "$BEFORE_FRESH/ingress.json" \
+            --fresh-revisions "$BEFORE_FRESH/revisions.json" \
+            --weight-baseline "$EVIDENCE/gate-ingress.json" \
+            --role-catalog "$EVIDENCE/role-catalog.json" \
+            --ledger "$EVIDENCE/ledger.json" \
+            --candidate-revision "$CANDIDATE"
+          az containerapp revision label add \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --label "$LABEL" \
+            --revision "$CANDIDATE"
+          AFTER="$RUNNER_TEMP/ue-after-label"
+          AFTER_FRESH="$RUNNER_TEMP/ue-after-label-fresh"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh "$TARGET_APP" "$TARGET_RG" "$AFTER" "after-label"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh "$TARGET_APP" "$TARGET_RG" "$AFTER_FRESH" "after-label-fresh"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase label-confirm \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$AFTER/ingress.json" \
+            --revisions "$AFTER/revisions.json" \
+            --fresh-ingress "$AFTER_FRESH/ingress.json" \
+            --fresh-revisions "$AFTER_FRESH/revisions.json" \
+            --proposed-ingress "$AFTER/ingress.json" \
+            --weight-baseline "$EVIDENCE/gate-ingress.json" \
+            --role-catalog "$EVIDENCE/role-catalog.json" \
+            --ledger "$EVIDENCE/ledger.json" \
+            --candidate-revision "$CANDIDATE"
+          STABLE_HOST="$(jq -r '.fqdn' "$AFTER/ingress.json")"
+          CANDIDATE_HOST="${LABEL}.${STABLE_HOST}"
+          probe_path() {
+            local request_path="$1"
+            local output="$2"
+            local status
+            status="$(curl -sS -o "$output" -w "%{http_code}" --max-time 20 "${AUTH_HEADER[@]}" "https://${CANDIDATE_HOST}${request_path}" || echo "000")"
+            printf '%s' "$status"
+          }
+          AUTH_HEADER=()
+          if [ -n "${UE_CANDIDATE_PROBE_TOKEN:-}" ]; then
+            AUTH_HEADER=(-H "Authorization: Bearer ${UE_CANDIDATE_PROBE_TOKEN}")
+          fi
+          mkdir -p "$RUNNER_TEMP/ue-probe"
+          json_file() {
+            if jq -e . "$1" >/dev/null 2>&1; then cat "$1"; else echo '{}'; fi
+          }
+          HEALTH_STATUS="$(probe_path /api/health "$RUNNER_TEMP/ue-probe/health.json")"
+          READY_STATUS="$(probe_path /api/ready "$RUNNER_TEMP/ue-probe/ready.json")"
+          VERSION_STATUS="$(probe_path /api/version "$RUNNER_TEMP/ue-probe/version.json")"
+          ADMIN_STATUS="$(probe_path /api/admin/database/health "$RUNNER_TEMP/ue-probe/admin-health.json")"
+          STAGING_ARGS=()
+          DATABASE_PROOF='null'
+          if [ "${{ needs.plan.outputs.environment }}" = "staging" ]; then
+            STAGING_ARGS=(--staging-rls "$EVIDENCE/staging-rls.json")
+            DATABASE_PROOF="$(jq -ce '.databaseIsolation | {evidenceId, databaseBaseline, releaseSha, runtimePrincipal: .identity.currentUser}' "$EVIDENCE/staging-rls.json")"
+          fi
+          jq -n \
+            --argjson databaseProof "$DATABASE_PROOF" \
+            --arg label "$LABEL" \
+            --arg host "$CANDIDATE_HOST" \
+            --arg stableHost "$STABLE_HOST" \
+            --arg revision "$CANDIDATE" \
+            --arg healthStatus "$HEALTH_STATUS" \
+            --arg readyStatus "$READY_STATUS" \
+            --arg versionStatus "$VERSION_STATUS" \
+            --arg adminStatus "$ADMIN_STATUS" \
+            --argjson deployment "$(cat "$RUNNER_TEMP/aca-candidate-update.json")" \
+            --argjson health "$(json_file "$RUNNER_TEMP/ue-probe/health.json")" \
+            --argjson ready "$(json_file "$RUNNER_TEMP/ue-probe/ready.json")" \
+            --argjson version "$(json_file "$RUNNER_TEMP/ue-probe/version.json")" \
+            --argjson admin "$(json_file "$RUNNER_TEMP/ue-probe/admin-health.json")" \
+            '{
+              databaseProof: $databaseProof,
+              label: $label,
+              host: $host,
+              stableHost: $stableHost,
+              revisionName: $revision,
+              deploymentRevision: $revision,
+              deployment: { latestRevisionName: $deployment.properties.latestRevisionName, containers: ($deployment.properties.template.containers // []) },
+              responses: [
+                { path: "/api/health", status: ($healthStatus | tonumber), body: $health },
+                { path: "/api/ready", status: ($readyStatus | tonumber), body: $ready },
+                { path: "/api/version", status: ($versionStatus | tonumber), body: $version },
+                { path: "/api/admin/database/health", status: ($adminStatus | tonumber), body: $admin }
+              ]
+            }' > "$RUNNER_TEMP/ue-probe.json"
+          PROBE_READ="$RUNNER_TEMP/ue-probe-read"
+          PROBE_FRESH="$RUNNER_TEMP/ue-probe-fresh"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh "$TARGET_APP" "$TARGET_RG" "$PROBE_READ" "probe"
+          bash tooling/scripts/union-eyes-read-release-inventory.sh "$TARGET_APP" "$TARGET_RG" "$PROBE_FRESH" "probe-fresh"
+          cp "$RUNNER_TEMP/ue-probe.json" "$EVIDENCE/candidate-probe.json"
+          node tooling/scripts/union-eyes-deployment-safety-cli.mjs \
+            --phase probe \
+            --environment "${{ needs.plan.outputs.environment }}" \
+            "${STAGING_ARGS[@]}" \
+            --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --source-root "$SOURCE_ROOT" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --application-source-sha "$APPLICATION_SOURCE_SHA" \
+            --manifest "$EVIDENCE/release-manifest.json" \
+            --approval "$EVIDENCE/approval.json" \
+            --approval-trust "$EVIDENCE/approval-trust.pem" \
+            --acr-frontend "$EVIDENCE/acr-frontend.json" \
+            --acr-backend "$EVIDENCE/acr-backend.json" \
+            --ingress "$PROBE_READ/ingress.json" \
+            --revisions "$PROBE_READ/revisions.json" \
+            --fresh-ingress "$PROBE_FRESH/ingress.json" \
+            --fresh-revisions "$PROBE_FRESH/revisions.json" \
+            --role-catalog "$EVIDENCE/role-catalog.json" \
+            --ledger "$EVIDENCE/ledger.json" \
+            --probe "$RUNNER_TEMP/ue-probe.json" \
+            --candidate-revision "$CANDIDATE"
+          echo "Candidate ${CANDIDATE} was probed at https://${CANDIDATE_HOST}. Ordinary ingress weights were not changed."
+
+      - name: Preserve staging database and candidate observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-staging-proof-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: ignore
+          path: |
+            ue-evidence/staging-rls.json
+            ue-evidence/candidate-probe.json
 
       - name: Custom domain smoke checks
         shell: bash

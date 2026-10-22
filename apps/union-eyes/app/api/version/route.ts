@@ -43,5 +43,7 @@ export async function GET(request: Request) {
     // env var is rejected at boot by lib/config/env-validation.ts.
     demoProfile: null,
     requestHost: hostHeader || null,
+    frontendImageDigest: process.env.UE_FRONTEND_IMAGE_DIGEST ?? null,
+    backendImageDigest: process.env.UE_BACKEND_IMAGE_DIGEST ?? null,
   })
 }

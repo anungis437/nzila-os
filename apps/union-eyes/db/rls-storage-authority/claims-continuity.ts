@@ -93,12 +93,12 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
   {
     table: "deadline_reassignment_convergence",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "RECLASSIFIED (final closure sprint, D1): previously LATENT_UNREACHABLE, but the deadline reminder worker (lib/deadline-engine/reminder-worker.ts, run by app/api/cron/deadline-reminders) calls sweepPendingAssignmentConvergence on every run, so the relation is live. Current authoritative declaration: db/schema/deadline-engine-schema.ts (organization_id NOT NULL). Work-state table owned exclusively by the scheduled deadline engine; accessed only through withSystemContext under the cron credential. SYSTEM may read and update its own queue rows; no tenant business table is written through this authority.",
-    supportingCapability: ["lib/deadline-engine/assignment-sync.ts","lib/deadline-engine/reminder-worker.ts","app/api/cron/deadline-reminders/route.ts"],
-    requiredRuntimePrivileges: [],
-    requiredSystemPrivileges: ["SELECT","INSERT","UPDATE"],
-    invocationAuthority: "SYSTEM_SCHEDULE",
-    dbExecutionPrincipal: "SYSTEM_RUNTIME",
+    reason: "RECLASSIFIED 2026-10-21 from the system-only D1 note. requestAssignmentConvergence() inserts with RETURNING id inside the assign route's withRLSContext transaction, so union_eyes_runtime needs SELECT and INSERT only. processAssignmentConvergence() and sweepPendingAssignmentConvergence() select and update pending rows under withSystemContext (assign-route post-commit retry and app/api/cron/deadline-reminders/route.ts), so union_eyes_system needs SELECT and UPDATE only. No production path updates as runtime or inserts as system. The 0010 policies from scoped 0019 still cover the unused commands; the grants do not. Root migrations/0049 remains a fail-open PUBLIC policy and is not this table's authority. DELETE is not granted. This entry is source authority, not a staging isolation pass.",
+    supportingCapability: ["lib/deadline-engine/assignment-sync.ts","lib/deadline-engine/reminder-worker.ts","app/api/grievances/[id]/assign/route.ts","app/api/cron/deadline-reminders/route.ts","db/migrations-cache/0019_deadline_reassignment_convergence.sql"],
+    requiredRuntimePrivileges: ["SELECT","INSERT"],
+    requiredSystemPrivileges: ["SELECT","UPDATE"],
+    invocationAuthority: "MIXED",
+    dbExecutionPrincipal: "MIXED",
     reviewPriority: "NORMAL",
   },
   {

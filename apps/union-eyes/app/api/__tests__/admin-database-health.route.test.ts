@@ -26,10 +26,10 @@ describe('admin/database/health route', () => {
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.db.execute
       // tenantPrincipal (outside withSystemContext): identity, then attrs
-      .mockResolvedValueOnce([{ u: 'union_eyes_runtime', app_name: 'union-claims-app' }])
+      .mockResolvedValueOnce([{ u: 'union_eyes_runtime', database_name: 'ue_acceptance', app_name: 'union-claims-app' }])
       .mockResolvedValueOnce([{ rolsuper: false, rolbypassrls: false }])
       // systemPrincipal (inside withSystemContext): identity, then attrs
-      .mockResolvedValueOnce([{ u: 'union_eyes_system', app_name: 'union-eyes-system' }])
+      .mockResolvedValueOnce([{ u: 'union_eyes_system', database_name: 'ue_acceptance', app_name: 'union-eyes-system' }])
       .mockResolvedValueOnce([{ rolsuper: false, rolbypassrls: false }])
       // health metrics
       .mockResolvedValueOnce([{ db_size: '1048576' }])
@@ -48,11 +48,13 @@ describe('admin/database/health route', () => {
       tableCount: 12,
       status: 'healthy',
       tenantPrincipal: {
+        databaseName: 'ue_acceptance',
         currentUser: 'union_eyes_runtime',
         rolsuper: false,
         rolbypassrls: false,
       },
       systemPrincipal: {
+        databaseName: 'ue_acceptance',
         currentUser: 'union_eyes_system',
         rolsuper: false,
         rolbypassrls: false,
@@ -76,5 +78,22 @@ describe('admin/database/health route', () => {
 
     expect(result.tenantPrincipal.currentUser).toBe('nzilaadmin');
     expect(result.tenantPrincipal.rolbypassrls).toBe(true);
+  });
+
+  it('does not turn missing role attributes into a non-bypass identity', async () => {
+    m.db.execute.mockReset();
+    m.db.execute
+      .mockResolvedValueOnce([{ u: 'union_eyes_runtime', database_name: 'ue_acceptance' }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ u: 'union_eyes_system', database_name: 'ue_acceptance' }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ db_size: '0' }])
+      .mockResolvedValueOnce([{ active_connections: '0' }])
+      .mockResolvedValueOnce([{ table_count: '0' }]);
+    const { GET } = await loadRoute();
+    expect(await GET()).toMatchObject({
+      tenantPrincipal: { rolsuper: null, rolbypassrls: null },
+      systemPrincipal: { rolsuper: null, rolbypassrls: null },
+    });
   });
 });
