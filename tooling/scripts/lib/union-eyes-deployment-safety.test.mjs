@@ -15,6 +15,7 @@ import {
   inspectMigration0019,
   phaseAllowed,
   readSourceIdentity,
+  revisionLabelHost,
   signApproval,
 } from './union-eyes-deployment-safety.mjs'
 
@@ -49,7 +50,7 @@ function ingress(readId, traffic, extra = {}) {
     readId,
     observedAt: extra.observedAt ?? '2026-10-21T21:50:00.000Z',
     activeRevisionsMode: 'multiple',
-    fqdn: 'union-eyes.example.com',
+    fqdn: 'union-eyes.env-123.canadacentral.azurecontainerapps.io',
     traffic,
   }
 }
@@ -291,8 +292,8 @@ test('showmigrations --plan does not prove that migrate will succeed', () => {
 
 test('a revision header on the serving hostname is not candidate verification', () => {
   const servingProbe = {
-    host: 'union-eyes.example.com',
-    stableHost: 'union-eyes.example.com',
+    host: 'union-eyes.env-123.canadacentral.azurecontainerapps.io',
+    stableHost: 'union-eyes.env-123.canadacentral.azurecontainerapps.io',
     header: 'x-ms-container-app-revision',
     label: '',
     revisionName: 'app--serving',
@@ -421,8 +422,8 @@ test('the candidate is accepted only on its revision-label FQDN at zero traffic'
   ])
   const probe = {
     label: 'ue-candidate',
-    host: 'ue-candidate.union-eyes.example.com',
-    stableHost: 'union-eyes.example.com',
+    host: 'union-eyes---ue-candidate.env-123.canadacentral.azurecontainerapps.io',
+    stableHost: 'union-eyes.env-123.canadacentral.azurecontainerapps.io',
     revisionName: 'app--candidate',
     deploymentRevision: 'app--candidate',
     deployment: {
@@ -669,7 +670,7 @@ test('staging RLS proof is mandatory and an application response is not that pro
     foundation: { source: 'application', name: 'UE_RLS_FOUNDATION_ENFORCED_STAGING', value: true },
     runtimeRoles: { source: 'http', rows: [] },
     ledger: { source: 'manifest', rows: [] },
-    tenantDenial: { source: 'application', transport: 'https', command: 'https://union-eyes.example.com/api/health', exitCode: 0, leakedRows: 0 },
+    tenantDenial: { source: 'application', transport: 'https', command: 'https://union-eyes.env-123.canadacentral.azurecontainerapps.io/api/health', exitCode: 0, leakedRows: 0 },
   }
   const substituted = evaluateDeploymentSafety(ready({
     phase: 'rls-preflight',
@@ -784,7 +785,7 @@ test('candidate endpoint proof is separate and correlated to the database eviden
   input.revisions.revisions.push(revision('app--candidate', { containers }))
   const proof = input.stagingRls.databaseIsolation
   input.probe = {
-    label: 'ue-candidate', host: 'ue-candidate.union-eyes.example.com', stableHost: 'union-eyes.example.com',
+    label: 'ue-candidate', host: 'union-eyes---ue-candidate.env-123.canadacentral.azurecontainerapps.io', stableHost: 'union-eyes.env-123.canadacentral.azurecontainerapps.io',
     revisionName: 'app--candidate', deploymentRevision: 'app--candidate',
     deployment: { latestRevisionName: 'app--candidate', containers },
     databaseProof: { evidenceId: proof.evidenceId, databaseBaseline: proof.databaseBaseline, releaseSha: SHA, runtimePrincipal: 'union_eyes_runtime' },
@@ -815,6 +816,7 @@ test('candidate endpoint proof is separate and correlated to the database eviden
     (i) => { i.probe.responses[3].body.tenantPrincipal.databaseName = 'different' },
     (i) => { i.probe.host = i.probe.stableHost },
     (i) => { i.probe.host = 'ue-candidate.unrelated.example.com' },
+    (i) => { i.probe.host = `${i.probe.label}.${i.probe.stableHost}` },
     (i) => { i.revisions.revisions.pop() },
     (i) => { delete i.stagingRls },
   ]) {
@@ -828,4 +830,19 @@ test('psql count parsing survives command tags and refuses malformed shell outpu
   const bash = process.platform === 'win32' ? 'C:/Program Files/Git/bin/bash.exe' : 'bash'
   const result = spawnSync(bash, ['tooling/scripts/test-union-eyes-psql-parser.sh'], { cwd: REPO, encoding: 'utf8' })
   assert.equal(result.status, 0, result.stdout + result.stderr)
+})
+
+
+test('ACA label host follows documented triple-dash routing for external and internal ingress', () => {
+  assert.equal(revisionLabelHost('app.env-123.canadacentral.azurecontainerapps.io', 'ue-candidate'),
+    'app---ue-candidate.env-123.canadacentral.azurecontainerapps.io')
+  assert.equal(revisionLabelHost('app.internal.env-123.canadacentral.azurecontainerapps.io', 'ue-candidate'),
+    'app---ue-candidate.internal.env-123.canadacentral.azurecontainerapps.io')
+  for (const host of ['app.example.com', 'https://app.env-123.canadacentral.azurecontainerapps.io',
+    'app---old.env-123.canadacentral.azurecontainerapps.io', 'app.env-123.canadacentral.azurecontainerapps.io.evil.example']) {
+    assert.throws(() => revisionLabelHost(host, 'ue-candidate'), /FQDN/)
+  }
+  for (const label of ['', '9bad', 'bad--label', 'bad.label', 'Bad', 'bad-', 'a'.repeat(65)]) {
+    assert.throws(() => revisionLabelHost('app.env-123.canadacentral.azurecontainerapps.io', label), /label/)
+  }
 })

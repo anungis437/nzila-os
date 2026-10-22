@@ -115,6 +115,9 @@ export const RLS_VERIFY_ORGANIZATION_FIXTURE_COLUMNS = [
   'hierarchy_level',
   'status',
   'settings',
+  // Historical Django tables retain NOT NULL fields without server defaults.
+  'sectors', 'features_enabled', 'clc_affiliated', 'member_count', 'active_member_count',
+  'created_at', 'updated_at', 'remittance_day',
 ] as const
 
 export const RLS_VERIFY_GRIEVANCE_FIXTURE_COLUMNS = [
@@ -124,6 +127,8 @@ export const RLS_VERIFY_GRIEVANCE_FIXTURE_COLUMNS = [
   'title',
   'description',
   'organization_id',
+  'priority', 'status', 'created_at', 'updated_at', 'has_legal_implications',
+  'is_arbitration_eligible', 'is_confidential', 'is_group_grievance',
 ] as const
 
 export function buildRlsVerifyOrganizationFixture(input: {
@@ -160,8 +165,9 @@ export function buildRlsVerifyGrievanceFixture(input: {
   }
 }
 
-function isCaughtErrorResult(value: unknown): value is { error: string } {
-  return typeof value === 'object' && value !== null && 'error' in value
+export function isRlsWriteRejection(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || !('code' in value) || !('message' in value)) return false
+  return value.code === '42501' && typeof value.message === 'string' && /^new row violates row-level security policy/.test(value.message)
 }
 
 async function setTenantContext(sql: TenantContextSql, input: { orgId: string; userId: string }) {
@@ -978,7 +984,7 @@ async function runFixtureIsolationMatrix(
       await setTenantContext(tx, { orgId: orgA.id, userId: orgA.userId })
       await tx.unsafe(
         `INSERT INTO organizations (${RLS_VERIFY_ORGANIZATION_FIXTURE_COLUMNS.join(', ')})
-         VALUES ($1, $2, $3, $4::organization_type, $5::text[], $6, $7, $8::jsonb)`,
+         VALUES ($1, $2, $3, $4, $5::text[], $6, $7, $8::jsonb, ARRAY[]::text[], ARRAY[]::text[], false, 0, 0, now(), now(), 15)`,
         [
           orgAFixture.id,
           orgAFixture.name,
@@ -992,7 +998,7 @@ async function runFixtureIsolationMatrix(
       )
       await tx.unsafe(
         `INSERT INTO grievances (${RLS_VERIFY_GRIEVANCE_FIXTURE_COLUMNS.join(', ')})
-         VALUES ($1, $2, $3::grievance_type, $4, $5, $6)`,
+         VALUES ($1, $2, $3, $4, $5, $6, 'medium', 'draft', now(), now(), false, false, false, false)`,
         Object.values(buildRlsVerifyGrievanceFixture({
           id: crypto.randomUUID(),
           organizationId: orgA.id,
@@ -1004,7 +1010,7 @@ async function runFixtureIsolationMatrix(
       await setTenantContext(tx, { orgId: orgB.id, userId: orgB.userId })
       await tx.unsafe(
         `INSERT INTO organizations (${RLS_VERIFY_ORGANIZATION_FIXTURE_COLUMNS.join(', ')})
-         VALUES ($1, $2, $3, $4::organization_type, $5::text[], $6, $7, $8::jsonb)`,
+         VALUES ($1, $2, $3, $4, $5::text[], $6, $7, $8::jsonb, ARRAY[]::text[], ARRAY[]::text[], false, 0, 0, now(), now(), 15)`,
         [
           orgBFixture.id,
           orgBFixture.name,
@@ -1018,7 +1024,7 @@ async function runFixtureIsolationMatrix(
       )
       await tx.unsafe(
         `INSERT INTO grievances (${RLS_VERIFY_GRIEVANCE_FIXTURE_COLUMNS.join(', ')})
-         VALUES ($1, $2, $3::grievance_type, $4, $5, $6)`,
+         VALUES ($1, $2, $3, $4, $5, $6, 'medium', 'draft', now(), now(), false, false, false, false)`,
         Object.values(buildRlsVerifyGrievanceFixture({
           id: crypto.randomUUID(),
           organizationId: orgB.id,
@@ -1056,18 +1062,18 @@ async function runFixtureIsolationMatrix(
         await tx.savepoint(async (sp) => {
           forged = await sp.unsafe(
             `INSERT INTO grievances (${RLS_VERIFY_GRIEVANCE_FIXTURE_COLUMNS.join(', ')})
-             VALUES ($1, $2, $3::grievance_type, $4, $5, $6) RETURNING id`,
+             VALUES ($1, $2, $3, $4, $5, $6, 'medium', 'draft', now(), now(), false, false, false, false) RETURNING id`,
             Object.values(forgedFixture),
           )
         })
       } catch (e) {
-        forged = { error: e instanceof Error ? e.message : String(e) }
+        forged = e
       }
-      const forgedRejected = isCaughtErrorResult(forged) || (Array.isArray(forged) && forged.length === 0)
+      const forgedRejected = isRlsWriteRejection(forged)
       results.push({
         name: 'fixture matrix: Org A insert forging Org B organization_id is rejected',
         pass: forgedRejected,
-        detail: forgedRejected ? 'rejected as expected' : 'INSERT SUCCEEDED — policy WITH CHECK failed to block a forged org_id',
+        detail: forgedRejected ? '42501 row-level security rejection' : 'Expected an actual 42501 row-level security rejection; other errors or empty inserts do not qualify',
       })
     })
 
@@ -1115,6 +1121,31 @@ async function runFixtureIsolationMatrix(
   }
 }
 
+/** Explicit options prevent URL query parameters or environment routing from overriding the inspected target. */
+export function rlsVerifyConnectionOptions(databaseUrl: string) {
+  const url = new URL(databaseUrl)
+  if (!['postgres:', 'postgresql:'].includes(url.protocol) || url.hash || !url.hostname || !url.username || url.pathname.length < 2) {
+    throw new Error('Invalid RLS verifier database target')
+  }
+  for (const [key, value] of url.searchParams) {
+    if (key !== 'sslmode' || !['require', 'verify-ca', 'verify-full'].includes(value)) {
+      throw new Error('Unsupported RLS verifier connection parameter')
+    }
+  }
+  const host = url.hostname.replace(/^\[|\]$/g, '')
+  const local = ['localhost', '127.0.0.1', '::1'].includes(host)
+  return {
+    host,
+    port: Number(url.port || 5432),
+    database: decodeURIComponent(url.pathname.slice(1)),
+    username: decodeURIComponent(url.username),
+    password: decodeURIComponent(url.password),
+    ssl: local ? false as const : { rejectUnauthorized: true },
+    max: 1,
+    prepare: false,
+  }
+}
+
 async function main() {
   const { mode, requireDeadlineEngineTables } = parseArgs()
   const dbUrl = resolveRuntimeDatabaseUrl()
@@ -1123,7 +1154,7 @@ async function main() {
     process.exit(1)
   }
 
-  const sql = postgres(dbUrl, { ssl: dbUrl.includes('localhost') ? false : 'require', max: 1, prepare: false })
+  const sql = postgres(rlsVerifyConnectionOptions(dbUrl))
   let bootstrapSql: postgres.Sql | undefined
   const results: CheckResult[] = []
 
@@ -1144,7 +1175,7 @@ async function main() {
             'fixture bootstrap/cleanup must use a privileged bootstrap principal, never the runtime role under test.',
         )
       }
-      bootstrapSql = postgres(bootstrapDbUrl, { ssl: bootstrapDbUrl.includes('localhost') ? false : 'require', max: 1, prepare: false })
+      bootstrapSql = postgres(rlsVerifyConnectionOptions(bootstrapDbUrl))
       await checkFullModePrincipalModel(sql, bootstrapSql, results)
       await runFixtureIsolationMatrix(sql, bootstrapSql, results)
     }

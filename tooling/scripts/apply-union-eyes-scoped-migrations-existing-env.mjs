@@ -44,6 +44,11 @@
  * prints the connection string or any credential value. Does not
  * retrieve Key Vault credentials itself — credential acquisition is the
  * responsibility of the separately authorized execution environment.
+ *
+ * Opt-in clone recovery only: --staging-lineage-snapshot <exact-baseline.json>
+ * validates the persisted, transactionally executed historical-DDL receipt and
+ * target/TLS/source bindings before resolving historical hashes. Without this
+ * flag the original strict hash/prefix behavior is unchanged. Never production.
  */
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -72,7 +77,7 @@ async function ledgerTableExists(client) {
  * ensureLedgerTable() (which would CREATE SCHEMA/TABLE IF NOT EXISTS) —
  * a missing ledger is reported as "all entries pending" instead.
  */
-export async function runCheck(client, { journalPath = JOURNAL_PATH, migrationsDir = MIGRATIONS_DIR } = {}) {
+export async function runCheck(client, { journalPath = JOURNAL_PATH, migrationsDir = MIGRATIONS_DIR, stagingLineageContext } = {}) {
   const entries = readJournalEntries(journalPath);
   const ledgerExists = await ledgerTableExists(client);
 
@@ -80,6 +85,10 @@ export async function runCheck(client, { journalPath = JOURNAL_PATH, migrationsD
   if (ledgerExists) {
     const result = await client.query('SELECT hash FROM drizzle.__drizzle_migrations ORDER BY id');
     appliedHashes = new Set(result.rows.map((r) => r.hash));
+  }
+  if (stagingLineageContext) {
+    const { validateRecoveryContext } = await import('./lib/ue-staging-historical-lineage.mjs');
+    appliedHashes = (await validateRecoveryContext(client, stagingLineageContext)).appliedHashes;
   }
 
   const statuses = entries.map((entry) => {
@@ -98,16 +107,16 @@ export async function runCheck(client, { journalPath = JOURNAL_PATH, migrationsD
  * Re-verifies via runCheck() afterward; throws if anything is still
  * pending post-apply.
  */
-export async function runApply(client, { journalPath = JOURNAL_PATH, migrationsDir = MIGRATIONS_DIR, log = () => {} } = {}) {
-  const preflight = await runCheck(client, { journalPath, migrationsDir });
+export async function runApply(client, { journalPath = JOURNAL_PATH, migrationsDir = MIGRATIONS_DIR, stagingLineageContext, log = () => {} } = {}) {
+  const preflight = await runCheck(client, { journalPath, migrationsDir, stagingLineageContext });
   log(
     `preflight: total=${preflight.total} applied=${preflight.applied} pending=${preflight.pending}`,
   );
   log(`ordered journal tags: ${preflight.statuses.map((s) => s.tag).join(', ')}`);
 
-  const result = await applyScopedMigrations(client, { journalPath, migrationsDir, log });
+  const result = await applyScopedMigrations(client, { journalPath, migrationsDir, stagingLineageContext, log });
 
-  const postcheck = await runCheck(client, { journalPath, migrationsDir });
+  const postcheck = await runCheck(client, { journalPath, migrationsDir, stagingLineageContext });
   if (postcheck.pending > 0) {
     throw new Error(
       `Post-apply verification failed: ${postcheck.pending} journal migration(s) still pending after apply.`,
@@ -156,11 +165,28 @@ async function main() {
     return;
   }
 
-  const client = new pg.Client({ connectionString: adminUrl });
+  const contextFlag = process.argv.indexOf('--staging-lineage-snapshot');
+  let stagingRecovery;
+  let snapshot;
+  let qualifiedTarget;
+  let config = { connectionString: adminUrl };
+  if (contextFlag >= 0) {
+    stagingRecovery = await import('./lib/ue-staging-historical-lineage.mjs');
+    snapshot = stagingRecovery.readBaseline(process.argv[contextFlag + 1]);
+    const { qualifiedTargetFromArgs } = await import('./lib/ue-staging-clone-qualification.mjs');
+    qualifiedTarget = qualifiedTargetFromArgs(process.argv, process.argv[contextFlag + 1]);
+    config = stagingRecovery.validateTarget(adminUrl, qualifiedTarget);
+  } else if (process.argv.some((value) => value.startsWith('--qualified-clone-'))) {
+    throw new Error('Qualification options require --staging-lineage-snapshot');
+  }
+  const client = new pg.Client(config);
   await client.connect();
   try {
+    const stagingLineageContext = stagingRecovery ? await stagingRecovery.recoveryContext(client, {
+      snapshot, journalPath: JOURNAL_PATH, migrationsDir: MIGRATIONS_DIR, qualifiedTarget,
+    }) : undefined;
     if (mode === 'check') {
-      const result = await runCheck(client);
+      const result = await runCheck(client, { stagingLineageContext });
       for (const s of result.statuses) {
         console.log(`[scoped-migrate-existing-env] tag=${s.tag} hash=${s.hash} applied=${s.applied}`);
       }
@@ -169,7 +195,7 @@ async function main() {
       );
       process.exit(0);
     } else {
-      const result = await runApply(client, { log: (m) => console.log(`[scoped-migrate-existing-env] ${m}`) });
+      const result = await runApply(client, { stagingLineageContext, log: (m) => console.log(`[scoped-migrate-existing-env] ${m}`) });
       console.log(`[scoped-migrate-existing-env] applied_count=${result.appliedCount}`);
       console.log(`[scoped-migrate-existing-env] applied_tags=${JSON.stringify(result.appliedTags)}`);
       console.log(

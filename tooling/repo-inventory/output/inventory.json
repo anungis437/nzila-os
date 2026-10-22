@@ -3,10 +3,10 @@
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
-  "workflowCount": 59,
+  "workflowCount": 60,
   "contractTestCount": 300,
-  "tsTestFileCount": 2834,
-  "pythonTestFileCount": 41,
+  "tsTestFileCount": 2838,
+  "pythonTestFileCount": 43,
   "apps": [
     {
       "name": "abr",
@@ -690,7 +690,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 5456
+      "codeFileCount": 5463
     },
     {
       "name": "union-eyes-demo",
@@ -910,6 +910,7 @@
     "security-design-review.yml",
     "trivy.yml",
     "ue-build-push-proof.yml",
+    "ue-staging-discovery.yml",
     "union-eyes-authority-rollout.yml",
     "zonga-check.yml"
   ]

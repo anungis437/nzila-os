@@ -454,14 +454,29 @@ function deploymentImagesMatch(deployment, manifest) {
   return frontend && backend
 }
 
+/** ACA revision labels use APP---LABEL.environment.region, never LABEL.APP. */
+export function revisionLabelHost(stableHost, label) {
+  if (typeof stableHost !== 'string' || !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.(?:internal\.)?[a-z0-9-]+\.[a-z0-9-]+\.azurecontainerapps\.io$/.test(stableHost)) {
+    throw new Error('ACA label routing requires the observed default ingress FQDN')
+  }
+  if (typeof label !== 'string' || !/^[a-z](?:[a-z0-9-]*[a-z0-9])?$/.test(label) || label.includes('--') || label.length > 64) {
+    throw new Error('Invalid ACA revision label')
+  }
+  const dot = stableHost.indexOf('.')
+  const app = stableHost.slice(0, dot)
+  if (app.includes('---')) throw new Error('Default ingress FQDN must not already contain a revision label')
+  return `${app}---${label}${stableHost.slice(dot)}`
+}
+
 function probeDefects(probe, manifest, servingNames, candidate, stableHost) {
   const defects = []
   if (!probe) return ['CANDIDATE_PROBE_MISSING']
   if (probe.header === 'x-ms-container-app-revision' || (probe.stableHost && probe.host === probe.stableHost)) {
     defects.push('CANDIDATE_PROBE_HIT_SERVING_REVISION')
   }
-  if (!probe.label || !probe.host || !probe.host.startsWith(`${probe.label}.`)) defects.push('CANDIDATE_REVISION_FQDN_REQUIRED')
-  if (!stableHost || probe.stableHost !== stableHost || probe.host !== `${probe.label}.${stableHost}`) defects.push('CANDIDATE_REVISION_FQDN_REQUIRED')
+  let expectedHost
+  try { expectedHost = revisionLabelHost(stableHost, probe.label) } catch { /* Fail closed below. */ }
+  if (!expectedHost || probe.stableHost !== stableHost || probe.host !== expectedHost) defects.push('CANDIDATE_REVISION_FQDN_REQUIRED')
   const revisionName = probe.deploymentRevision ?? probe.revisionName ?? ''
   if (!revisionName || servingNames.includes(revisionName)) defects.push('CANDIDATE_PROBE_HIT_SERVING_REVISION')
   if (!probe.deployment || !probe.deployment.latestRevisionName) defects.push('CANDIDATE_REVISION_UNIDENTIFIED')

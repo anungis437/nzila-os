@@ -8,6 +8,7 @@ import { partitionTypecheckPlan } from '../ci/run-typecheck-shard.mjs'
 import { listWorkspacePackageDirs } from '../ci/affected-build-plan.mjs'
 import { buildWorkspaceTypecheckGraph } from '../ci/affected-typecheck-plan.mjs'
 import { scopedBuildPlan, selectBuildScope } from '../ci/run-scoped-build-shard.mjs'
+import { createWorkerReceipt, validateShardReceipts, requireMatrixSuccess } from '../ci/ue-e2e-shard-receipts.mjs'
 
 const ROOT = join(__dirname, '..', '..')
 const read = (file: string) => readFileSync(join(ROOT, file), 'utf8')
@@ -190,10 +191,11 @@ describe('owner-declared routine build scope', () => {
     const e2e = parse(read('.github/workflows/e2e.yml'))
     const e2eApps = [
       ...new Set<string>(
-        resolveE2eMatrix(e2e.jobs.e2e, 'pull_request').map((entry: { app: string }) => entry.app),
+        [...resolveE2eMatrix(e2e.jobs.e2e, 'pull_request'), ...e2e.jobs['e2e-ue-pr'].strategy.matrix.include]
+          .map((entry: { app: string }) => entry.app),
       ),
     ]
-    expect(e2eApps).toEqual(['web', 'console', 'union-eyes', 'control-plane'])
+    expect(e2eApps.sort()).toEqual(['web', 'console', 'union-eyes', 'control-plane'].sort())
     expect(e2eApps.every((app: string) => plan.ACTIVE_APPS.includes(app))).toBe(true)
   })
 
@@ -237,24 +239,14 @@ describe('owner-declared routine build scope', () => {
 
 describe('Union Eyes E2E shard authority', () => {
   const workflow = parse(read('.github/workflows/e2e.yml'))
-  const worker = workflow.jobs.e2e
+  const worker = workflow.jobs['e2e-ue-pr']
   const gate = workflow.jobs['union-eyes-result']
-  const code = gate.steps[0].run.match(/node --input-type=module <<'NODE'\n([\s\S]*?)\nNODE/)[1]
   const head = 'a'.repeat(40)
-  const jobs = [1, 2, 3, 4].map((index) => ({
-    id: index,
-    name: `UE E2E worker (${index}/4)`,
-    run_id: 123,
-    run_attempt: 2,
-    head_sha: head,
-    status: 'completed',
-    conclusion: 'success',
-  }))
+  const frozen = { repository: 'anungis437/nzila-os', headSha: head, headTree: 'b'.repeat(40), runId: 123, runAttempt: 2, mode: 'synthetic-pr' }
+  const receipts = () => [1, 2, 3, 4].map((shard) => createWorkerReceipt({ ...frozen, shard, outcomes: { job: 'success', build: 'success', playwright: 'success', performance: shard === 1 ? 'success' : 'not-required' } }))
 
   it('runs all four shards in separate runner-local databases with one browser worker', () => {
-    const entries = resolveE2eMatrix(worker, 'pull_request').filter(
-      (entry: { app: string }) => entry.app === 'union-eyes',
-    )
+    const entries = worker.strategy.matrix.include
     expect(entries.map((entry: { shard: number }) => entry.shard)).toEqual([1, 2, 3, 4])
     expect(entries.every((entry: { shards: number }) => entry.shards === 4)).toBe(true)
     expect(worker.strategy['fail-fast']).toBe(false)
@@ -272,104 +264,95 @@ describe('Union Eyes E2E shard authority', () => {
     expect(command).not.toContain('--no-deps')
     expect(command).not.toContain('--grep')
     expect(gate.name).toBe('E2E · union-eyes')
-    expect(gate.needs).toEqual(['e2e', 'e2e-canonical'])
+    expect(gate.needs).toEqual(['e2e-ue-pr', 'e2e-canonical'])
     expect(workflow.permissions).toEqual({ contents: 'read' })
     expect(worker.environment).toBeUndefined()
-    expect(worker.if).toBeUndefined()
-    expect(resolveE2eMatrix(worker, 'push').map((entry: { app: string }) => entry.app)).toEqual([
+    expect(worker.if).toBe("github.event_name == 'pull_request'")
+    expect(resolveE2eMatrix(workflow.jobs.e2e, 'push').map((entry: { app: string }) => entry.app)).toEqual([
       'web',
       'console',
       'control-plane',
     ])
     expect(JSON.stringify(worker)).not.toContain('secrets.')
     const canonical = workflow.jobs['e2e-canonical']
+    expect(worker.name).toBe("${{ format('UE PR E2E worker ({0}/4)', matrix.shard) }}")
+    expect(canonical.name).toBe("${{ format('UE E2E worker ({0}/4)', matrix.shard) }}")
     expect(canonical.environment).toBe('staging')
     expect(canonical.if).toBe("github.event_name == 'push' && github.ref == 'refs/heads/main'")
     expect(canonical.permissions).toEqual({ contents: 'read', 'id-token': 'write' })
     expect(canonical.steps.some((step: { uses?: string }) => step.uses === 'azure/login@v3')).toBe(true)
     expect(gate.if).toBe('always()')
     expect(gate.permissions).toEqual({ contents: 'read', actions: 'read' })
-    expect(gate.steps[0].run).toContain('/attempts/${EXPECTED_ATTEMPT}/jobs')
+    expect(worker.steps).toEqual(workflow.jobs.e2e.steps)
+    expect(gate.steps.find((step: { name?: string }) => step.name === 'Validate shard receipt contract').run)
+      .toBe('node --test tooling/ci/ue-e2e-shard-receipts.test.mjs')
+    const download = gate.steps.find((step: { uses?: string }) => step.uses === 'actions/download-artifact@v5')
+    expect(download.with.pattern).toBe('ue-e2e-worker-${{ github.run_id }}-${{ github.run_attempt }}-*')
+    expect(download.with['run-id']).toBe('${{ github.run_id }}')
+    expect(download.with['merge-multiple']).toBe(false)
+    const verify = gate.steps.find((step: { name?: string }) => step.name === 'Require every Union Eyes shard')
+    expect(verify.run).toContain('tooling/ci/ue-e2e-shard-receipts.mjs verify')
+    expect(verify.env.UE_MATRIX_RESULT).toContain('needs.e2e-ue-pr.result')
+    expect(verify.env.UE_MATRIX_RESULT).not.toContain('needs.e2e.result')
+    const outcome = worker.steps.find((step: { name?: string }) => step.name === 'Record Union Eyes shard outcome')
+    expect(outcome.if).toBe("always() && matrix.app == 'union-eyes'")
+    expect(outcome.env.UE_JOB_STATUS).toBe('${{ job.status }}')
+    expect(outcome.env.UE_BUILD_OUTCOME).toBe('${{ steps.app-build.outcome }}')
+    expect(outcome.env.UE_PLAYWRIGHT_OUTCOME).toBe('${{ steps.playwright.outcome }}')
+    for (const job of [worker, canonical]) {
+      const install = job.steps.find((step: { name?: string }) => step.name === 'Install Playwright browsers')
+      const dependencies = job.steps.find((step: { name?: string }) => step.name === 'Install Playwright operating system dependencies')
+      expect(dependencies.run).toContain('sudo env "PATH=$PATH" timeout --kill-after=20s 15m')
+      expect(dependencies.run).toContain('playwright install-deps chromium')
+      expect(install.run).toContain('timeout --kill-after=20s 4m')
+      expect(install.run).not.toContain('--with-deps')
+      expect(install.run).toContain('exit 1')
+    }
     for (const step of worker.steps.filter(
       (step: { uses?: string }) => step.uses === 'actions/upload-artifact@v4',
     )) {
       expect(step.with.name).toContain('matrix.shard')
-      expect(step.with.overwrite).toBe(true)
+      if (step.name === 'Upload Union Eyes worker receipt') {
+        expect(step.with['if-no-files-found']).toBe('error')
+        expect(step.with.overwrite).toBeUndefined()
+      } else expect(step.with.overwrite).toBe(true)
     }
   })
 
-  const cases = [
-    {
-      name: 'all UE workers pass despite an unrelated app failure',
-      jobs: [...jobs, { name: 'E2E · web', conclusion: 'failure' }],
-      pass: true,
-    },
-    {
-      name: 'skipped companion workers from the other qualification mode',
-      jobs: [
-        ...jobs,
-        ...jobs.map((job) => ({ ...job, id: job.id + 10, conclusion: 'skipped', status: 'completed' })),
-      ],
-      pass: true,
-    },
-    { name: 'missing worker', jobs: jobs.slice(1), pass: false },
-    { name: 'duplicate worker identity', jobs: [jobs[0], jobs[0], ...jobs.slice(2)], pass: false },
-    {
-      name: 'unexpected fifth worker',
-      jobs: [...jobs, { ...jobs[0], id: 5, name: 'UE E2E worker (5/4)' }],
-      pass: false,
-    },
-    ...['failure', 'cancelled', 'skipped', 'timed_out', 'neutral', null].map((conclusion) => ({
-      name: `worker conclusion ${conclusion}`,
-      jobs: [{ ...jobs[0], conclusion }, ...jobs.slice(1)],
-      pass: false,
-    })),
-    {
-      name: 'foreign head',
-      jobs: [{ ...jobs[0], head_sha: 'b'.repeat(40) }, ...jobs.slice(1)],
-      pass: false,
-    },
-    {
-      name: 'earlier attempt',
-      jobs: [{ ...jobs[0], run_attempt: 1 }, ...jobs.slice(1)],
-      pass: false,
-    },
-    { name: 'foreign run', jobs: [{ ...jobs[0], run_id: 122 }, ...jobs.slice(1)], pass: false },
-    {
-      name: 'unfinished worker',
-      jobs: [{ ...jobs[0], status: 'in_progress' }, ...jobs.slice(1)],
-      pass: false,
-    },
-  ]
+  it('accepts four UE successes independently of an unrelated application failure', () => {
+    expect(gate.needs).not.toContain('e2e')
+    requireMatrixSuccess('success')
+    expect(validateShardReceipts(receipts(), frozen).workers).toHaveLength(4)
+  })
 
-  it.each(cases)('executes the real aggregate validator: $name', ({ jobs: scenario, pass }) => {
-    const directory = mkdtempSync(join(tmpdir(), 'nzila-ue-e2e-gate-'))
-    try {
-      const file = join(directory, 'jobs.json')
-      const receipt = join(directory, 'receipt.json')
-      writeFileSync(
-        file,
-        JSON.stringify([{ jobs: scenario.slice(0, 2) }, { jobs: scenario.slice(2) }]),
-      )
-      const result = spawnSync(process.execPath, ['--input-type=module', '-e', code], {
-        encoding: 'utf8',
-        env: {
-          ...process.env,
-          EXPECTED_HEAD: head,
-          EXPECTED_RUN: '123',
-          EXPECTED_ATTEMPT: '2',
-          SHARD_JOBS_FILE: file,
-          SHARD_RECEIPT_FILE: receipt,
-        },
-      })
-      expect(result.error).toBeUndefined()
-      expect(result.status, result.stderr).toBe(pass ? 0 : 1)
-      if (pass) expect(JSON.parse(readFileSync(receipt, 'utf8')).workers).toHaveLength(4)
-    } finally {
-      for (const name of ['jobs.json', 'receipt.json'])
-        rmSync(join(directory, name), { force: true })
-      rmdirSync(directory)
-    }
+  it('rejects a failed selected matrix even when pre-cleanup receipts passed', () => {
+    expect(() => requireMatrixSuccess('failure')).toThrow()
+    expect(() => requireMatrixSuccess('cancelled')).toThrow()
+  })
+
+  const cases: Array<{ name: string; change: (rows: ReturnType<typeof createWorkerReceipt>[]) => void }> = [
+    { name: 'missing worker', change: rows => { rows.pop() } },
+    { name: 'duplicate worker', change: rows => { rows[3] = rows[0] } },
+    { name: 'unexpected fifth worker', change: rows => { rows.push(rows[0]) } },
+    { name: 'failed receipt', change: rows => { rows[0].status = 'failure' } },
+    { name: 'failed test execution', change: rows => { rows[0].outcomes.playwright = 'failure' } },
+    { name: 'skipped test execution', change: rows => { rows[0].outcomes.playwright = 'skipped' } },
+    { name: 'failed build', change: rows => { rows[0].outcomes.build = 'failure' } },
+    { name: 'failed required performance smoke', change: rows => { rows[0].outcomes.performance = 'failure' } },
+    { name: 'foreign source', change: rows => { rows[0].headSha = 'c'.repeat(40) } },
+    { name: 'foreign source tree', change: rows => { rows[0].headTree = 'c'.repeat(40) } },
+    { name: 'earlier attempt', change: rows => { rows[0].runAttempt = 1 } },
+    { name: 'foreign run', change: rows => { rows[0].runId = 122 } },
+    { name: 'foreign qualification mode', change: rows => { rows[0].mode = 'canonical-main' } },
+    ...['failure', 'cancelled', 'skipped', 'timed_out', 'neutral', 'in_progress', ''].map(result => ({
+      name: 'worker result ' + result,
+      change: (rows: ReturnType<typeof createWorkerReceipt>[]) => { rows[0].outcomes.job = result },
+    })),
+  ]
+  it.each(cases)('executes the receipt validator: $name', ({ change }) => {
+    const rows = receipts()
+    change(rows)
+    expect(() => validateShardReceipts(rows, frozen)).toThrow()
   })
 })
 

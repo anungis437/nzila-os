@@ -1080,7 +1080,7 @@ class ProgramEnrollments(BaseModel):
 class Employers(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
 
     class Meta:
         db_table = "employers"
@@ -1090,7 +1090,7 @@ class Employers(BaseModel):
 class Worksites(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
 
     class Meta:
         db_table = "worksites"
@@ -1100,7 +1100,7 @@ class Worksites(BaseModel):
 class BargainingUnits(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
 
     class Meta:
         db_table = "bargaining_units"
@@ -1110,7 +1110,7 @@ class BargainingUnits(BaseModel):
 class Committees(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
 
     class Meta:
         db_table = "committees"

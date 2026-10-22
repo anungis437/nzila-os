@@ -1,0 +1,136 @@
+name: Union Eyes staging read-only discovery
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Type read-only-census
+        required: true
+        type: string
+      authorized_sha:
+        description: Exact reviewed workflow commit SHA
+        required: true
+        type: string
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: union-eyes-staging-recovery-controller
+  cancel-in-progress: false
+env:
+  EXPECTED_SUBSCRIPTION: 5d819f33-d16f-429c-a3c0-5b0e94740ba3
+  EXPECTED_TENANT: 5082b8be-b04d-4a13-b61c-b6397670177b
+  PG_SERVER: nzila-staging-db
+  PG_RG: nzila-staging-rg
+  KEY_VAULT: nzila-staging-kv
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Assert exact authorization and staging identity configuration
+        env:
+          OPERATION: ${{ inputs.operation }}
+          AUTHORIZED_SHA: ${{ inputs.authorized_sha }}
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$OPERATION" = read-only-census
+          [[ "$AUTHORIZED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$GITHUB_SHA" = "$AUTHORIZED_SHA"
+          test "$GITHUB_REF" = refs/heads/main
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$AUTHORIZED_SHA"
+          test -n "$CLIENT_ID"
+          test "$TENANT_ID" = "$EXPECTED_TENANT"
+          test "$SUBSCRIPTION_ID" = "$EXPECTED_SUBSCRIPTION"
+          mkdir -p "$RUNNER_TEMP/ue-discovery-evidence"
+          jq -n --arg actor "$GITHUB_ACTOR" --arg sha "$GITHUB_SHA" --arg run "$GITHUB_RUN_ID" '{mission:"UE-STAGING-RECOVERY-TO-GO",authorization:"sole-owner standing staging authorization 2026-10-22",actor:$actor,sha:$sha,runId:$run,operation:"read-only-census"}' > "$RUNNER_TEMP/ue-discovery-evidence/authorization.json"
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Assert live resource identities and record metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/ue-discovery-evidence"
+          az account show --query '{id:id,tenantId:tenantId,userType:user.type}' -o json > "$EVIDENCE/azure-identity.json"
+          test "$(jq -r .id "$EVIDENCE/azure-identity.json")" = "$EXPECTED_SUBSCRIPTION"
+          test "$(jq -r .tenantId "$EVIDENCE/azure-identity.json")" = "$EXPECTED_TENANT"
+          az postgres flexible-server show -g "$PG_RG" -n "$PG_SERVER" --query '{id:id,name:name,fqdn:fullyQualifiedDomainName,version:version,state:state,network:network,backup:backup}' -o json > "$EVIDENCE/postgres-resource.json"
+          test "$(jq -r .fqdn "$EVIDENCE/postgres-resource.json")" = nzila-staging-db.postgres.database.azure.com
+          test "$(jq -r .id "$EVIDENCE/postgres-resource.json" | tr '[:upper:]' '[:lower:]')" = "/subscriptions/$EXPECTED_SUBSCRIPTION/resourcegroups/$PG_RG/providers/microsoft.dbforpostgresql/flexibleservers/$PG_SERVER"
+          test "$(jq -r .version "$EVIDENCE/postgres-resource.json")" = 15
+          az keyvault show -n "$KEY_VAULT" --query '{id:id,name:name,tenantId:properties.tenantId}' -o json > "$EVIDENCE/keyvault-resource.json"
+          test "$(jq -r .tenantId "$EVIDENCE/keyvault-resource.json")" = "$EXPECTED_TENANT"
+          test "$(jq -r .name "$EVIDENCE/keyvault-resource.json")" = "$KEY_VAULT"
+          az keyvault secret list --vault-name "$KEY_VAULT" --query '[].{name:name,enabled:attributes.enabled}' -o json > "$EVIDENCE/keyvault-secret-metadata.json"
+          az postgres flexible-server firewall-rule list -g "$PG_RG" -n "$PG_SERVER" -o json > "$EVIDENCE/firewall-before.json"
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Install isolated PostgreSQL client
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ue-discovery-pg"
+          npm install --prefix "$RUNNER_TEMP/ue-discovery-pg" --ignore-scripts --no-audit --no-fund pg@8.16.3
+      - name: Open temporary single-IP rule
+        shell: bash
+        run: |
+          set -euo pipefail
+          RULE="ue-discovery-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          IP="$(curl --fail --silent --show-error --max-time 15 https://api.ipify.org)"
+          python -c 'import ipaddress,sys; a=ipaddress.ip_address(sys.argv[1]); assert a.version == 4 and a.is_global' "$IP"
+          az postgres flexible-server firewall-rule create -g "$PG_RG" -n "$PG_SERVER" --rule-name "$RULE" --start-ip-address "$IP" --end-ip-address "$IP" --output none
+          jq -n --arg rule "$RULE" --arg ip "$IP" '{rule:$rule,startIp:$ip,endIp:$ip}' > "$RUNNER_TEMP/ue-discovery-evidence/firewall-open.json"
+      - name: Execute TLS verified read-only database census
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +x
+          trap 'unset UE_DISCOVERY_DATABASE_URL' EXIT
+          UE_DISCOVERY_DATABASE_URL="$(az keyvault secret show --vault-name "$KEY_VAULT" --name union-eyes-migration-admin-database-url --query value -o tsv)"
+          test -n "$UE_DISCOVERY_DATABASE_URL"
+          echo "::add-mask::$UE_DISCOVERY_DATABASE_URL"
+          export UE_DISCOVERY_DATABASE_URL
+          export UE_DISCOVERY_OUTPUT_DIR="$RUNNER_TEMP/ue-discovery-evidence"
+          export UE_DISCOVERY_PG_DIR="$RUNNER_TEMP/ue-discovery-pg"
+          node tooling/scripts/ue-staging-discovery.mjs
+      - name: Always remove and verify temporary firewall rule
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ue-discovery-evidence"
+          RULE="ue-discovery-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          az postgres flexible-server firewall-rule list -g "$PG_RG" -n "$PG_SERVER" -o json > "$RUNNER_TEMP/ue-discovery-evidence/firewall-precleanup.json"
+          if jq -e --arg rule "$RULE" 'any(.[]; .name == $rule)' "$RUNNER_TEMP/ue-discovery-evidence/firewall-precleanup.json" >/dev/null; then
+            az postgres flexible-server firewall-rule delete -g "$PG_RG" -n "$PG_SERVER" --rule-name "$RULE" --yes --output none
+          fi
+          az postgres flexible-server firewall-rule list -g "$PG_RG" -n "$PG_SERVER" -o json > "$RUNNER_TEMP/ue-discovery-evidence/firewall-after.json"
+          jq -e --arg rule "$RULE" 'all(.[]; .name != $rule)' "$RUNNER_TEMP/ue-discovery-evidence/firewall-after.json"
+          printf '{"cleanupVerified":true}\n' > "$RUNNER_TEMP/ue-discovery-evidence/firewall-cleanup.json"
+      - name: Hash evidence and include source migration journal
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ue-discovery-evidence"
+          cp apps/union-eyes/db/migrations-cache/meta/_journal.json "$RUNNER_TEMP/ue-discovery-evidence/source-migration-journal.json"
+          (cd "$RUNNER_TEMP/ue-discovery-evidence"; find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: ue-staging-discovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/ue-discovery-evidence
+          retention-days: 14

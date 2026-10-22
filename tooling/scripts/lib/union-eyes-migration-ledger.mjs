@@ -201,7 +201,15 @@ export async function readAttestedLedgers(client) {
  * Throws, and changes nothing, when the ledger is not a faithful prefix of the
  * journals. Never repairs, stamps, or deletes a row.
  */
-export async function assertMigrationLedgerIntegrity(client, { journals, exceptions = [], useAttestation = true }) {
+export async function assertMigrationLedgerIntegrity(client, { journals, exceptions = [], useAttestation = true, stagingLineageContext }) {
+  if (stagingLineageContext) {
+    const { validateRecoveryContext, historicalJournal } = await import('./ue-staging-historical-lineage.mjs');
+    const context = await validateRecoveryContext(client, stagingLineageContext);
+    journals = journals.map((journal) => journal.name === 'scoped' ? historicalJournal(journal) : journal);
+    for (const known of context.journals) {
+      if (!journals.some((journal) => journal.name === known.name)) journals.push(known);
+    }
+  }
   const rows = await readLedgerRows(client);
   const attested = useAttestation ? await readAttestedLedgers(client) : null;
   const result = evaluateLedgerIntegrity({ rows, journals, exceptions, attested });
@@ -214,7 +222,13 @@ export async function assertMigrationLedgerIntegrity(client, { journals, excepti
 }
 
 /** Executor-level guard: only this journal's own rows must be an unbroken, ordered prefix. */
-export async function assertJournalPrefix(client, journal) {
+export async function assertJournalPrefix(client, journal, { stagingLineageContext } = {}) {
+  if (stagingLineageContext) {
+    const { validateRecoveryContext, historicalJournal } = await import('./ue-staging-historical-lineage.mjs');
+    await validateRecoveryContext(client, stagingLineageContext);
+    if (journal.name !== 'scoped') throw new Error('Staging historical lineage applies only to the scoped journal');
+    journal = historicalJournal(journal);
+  }
   const rows = await readLedgerRows(client);
   const result = evaluateLedgerIntegrity({ rows, journals: [journal], ignoreUnknown: true });
   if (!result.ok) {

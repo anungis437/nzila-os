@@ -1165,46 +1165,46 @@ class TestProgramEnrollmentsStr(TestCase):
 # ===== 69–73. Union structure models =====
 class TestEmployersCreate(TestCase):
     def test_create(self):
-        obj = Employers.objects.create()
+        obj = Employers.objects.create(organization_id=_org().id)
         self.assertIsNotNone(obj.id)
 
 
 class TestEmployersStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(Employers.objects.create()), str)
+        self.assertIsInstance(str(Employers.objects.create(organization_id=_org().id)), str)
 
 
 class TestWorksitesCreate(TestCase):
     def test_create(self):
-        obj = Worksites.objects.create()
+        obj = Worksites.objects.create(organization_id=_org().id)
         self.assertIsNotNone(obj.id)
 
 
 class TestWorksitesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(Worksites.objects.create()), str)
+        self.assertIsInstance(str(Worksites.objects.create(organization_id=_org().id)), str)
 
 
 class TestBargainingUnitsCreate(TestCase):
     def test_create(self):
-        obj = BargainingUnits.objects.create()
+        obj = BargainingUnits.objects.create(organization_id=_org().id)
         self.assertIsNotNone(obj.id)
 
 
 class TestBargainingUnitsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(BargainingUnits.objects.create()), str)
+        self.assertIsInstance(str(BargainingUnits.objects.create(organization_id=_org().id)), str)
 
 
 class TestCommitteesCreate(TestCase):
     def test_create(self):
-        obj = Committees.objects.create()
+        obj = Committees.objects.create(organization_id=_org().id)
         self.assertIsNotNone(obj.id)
 
 
 class TestCommitteesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(Committees.objects.create()), str)
+        self.assertIsInstance(str(Committees.objects.create(organization_id=_org().id)), str)
 
 
 class TestCommitteeMembershipsCreate(TestCase):
