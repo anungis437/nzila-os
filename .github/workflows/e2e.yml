@@ -64,11 +64,16 @@ jobs:
           console.log(JSON.stringify({ head, tree: git('rev-parse', 'HEAD^{tree}') }))
           NODE
 
+      # Run the dependency timeout as root so it owns the privileged apt process
+      # group. Timing out an unprivileged pnpm parent can leave sudo/apt alive.
+      - name: Install Playwright operating system dependencies
+        run: sudo env "PATH=$PATH" timeout --kill-after=20s 15m pnpm -C apps/${{ matrix.app }} exec playwright install-deps chromium
+
       - name: Install Playwright browsers
         run: |
           set -euo pipefail
           for attempt in 1 2; do
-            if timeout --kill-after=20s 8m pnpm -C apps/${{ matrix.app }} exec playwright install --with-deps chromium; then
+            if timeout --kill-after=20s 4m pnpm -C apps/${{ matrix.app }} exec playwright install chromium; then
               exit 0
             fi
             echo "Browser installation attempt ${attempt} failed or timed out."
@@ -316,7 +321,7 @@ jobs:
   e2e-ue-pr:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    name: ${{ format('UE E2E worker ({0}/4)', matrix.shard) }}
+    name: ${{ format('UE PR E2E worker ({0}/4)', matrix.shard) }}
     permissions:
       contents: read
     timeout-minutes: 60
@@ -381,11 +386,14 @@ jobs:
           console.log(JSON.stringify({ head, tree: git('rev-parse', 'HEAD^{tree}') }))
           NODE
 
+      - name: Install Playwright operating system dependencies
+        run: sudo env "PATH=$PATH" timeout --kill-after=20s 15m pnpm -C apps/union-eyes exec playwright install-deps chromium
+
       - name: Install Playwright browsers
         run: |
           set -euo pipefail
           for attempt in 1 2; do
-            if timeout --kill-after=20s 8m pnpm -C apps/union-eyes exec playwright install --with-deps chromium; then
+            if timeout --kill-after=20s 4m pnpm -C apps/union-eyes exec playwright install chromium; then
               exit 0
             fi
             echo "Browser installation attempt ${attempt} failed or timed out."

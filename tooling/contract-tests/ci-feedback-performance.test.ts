@@ -275,6 +275,8 @@ describe('Union Eyes E2E shard authority', () => {
     ])
     expect(JSON.stringify(worker)).not.toContain('secrets.')
     const canonical = workflow.jobs['e2e-canonical']
+    expect(worker.name).toBe("${{ format('UE PR E2E worker ({0}/4)', matrix.shard) }}")
+    expect(canonical.name).toBe("${{ format('UE E2E worker ({0}/4)', matrix.shard) }}")
     expect(canonical.environment).toBe('staging')
     expect(canonical.if).toBe("github.event_name == 'push' && github.ref == 'refs/heads/main'")
     expect(canonical.permissions).toEqual({ contents: 'read', 'id-token': 'write' })
@@ -299,7 +301,11 @@ describe('Union Eyes E2E shard authority', () => {
     expect(outcome.env.UE_PLAYWRIGHT_OUTCOME).toBe('${{ steps.playwright.outcome }}')
     for (const job of [worker, canonical]) {
       const install = job.steps.find((step: { name?: string }) => step.name === 'Install Playwright browsers')
-      expect(install.run).toContain('timeout --kill-after=20s 8m')
+      const dependencies = job.steps.find((step: { name?: string }) => step.name === 'Install Playwright operating system dependencies')
+      expect(dependencies.run).toContain('sudo env "PATH=$PATH" timeout --kill-after=20s 15m')
+      expect(dependencies.run).toContain('playwright install-deps chromium')
+      expect(install.run).toContain('timeout --kill-after=20s 4m')
+      expect(install.run).not.toContain('--with-deps')
       expect(install.run).toContain('exit 1')
     }
     for (const step of worker.steps.filter(
