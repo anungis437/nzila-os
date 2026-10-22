@@ -149,7 +149,7 @@ function applyFoundation(extraArgs: string[] = []) {
   return runApplyScript(extraArgs)
 }
 
-describe.sequential('apply-rls-foundation-migration least-privilege idempotent reapply (disposable PostgreSQL 16)', () => {
+describe('apply-rls-foundation-migration least-privilege idempotent reapply (disposable PostgreSQL 16)', { concurrent: false }, () => {
   beforeAll(async () => {
     const started = docker(
       'run', '--rm', '-d',

@@ -87,7 +87,7 @@ async function establishFinalAuthorityState(includeCoreLedger = true) {
   }
 }
 
-describe.sequential('P4 authority state census on disposable PostgreSQL', () => {
+describe('P4 authority state census on disposable PostgreSQL', { concurrent: false }, () => {
   beforeAll(async () => {
     const started = docker(
       'run', '--rm', '-d',
