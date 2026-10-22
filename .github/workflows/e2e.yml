@@ -32,20 +32,19 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     name: ${{ matrix.app == 'union-eyes' && format('UE E2E worker ({0}/4)', matrix.shard) || format('E2E · {0}', matrix.app) }}
-    # Pull-request code is untrusted. This job never selects the staging
+    # Pull-request code is untrusted. These shared steps never select the staging
     # environment, never requests id-token, and never reads Azure or performance
     # secrets. Union Eyes on a pull request uses the credential-free QA baseline.
-    # Push to main drops the Union Eyes cells from the matrix; e2e-canonical
-    # qualifies the snapshot. The matrix is expression-built because a job-level
-    # `if` cannot read the matrix context.
+    # e2e-ue-pr runs the four isolated PR shards with these same steps;
+    # e2e-canonical qualifies the trusted snapshot after a push to main.
     timeout-minutes: 60  # union-eyes: platform DDL + synthetic seed + full Playwright; others ≤5 min
     strategy:
       fail-fast: false
       matrix:
         # Each Union Eyes runner restores its own localhost database and uses one
         # browser worker. Keep file-level ordering and all existing test assertions.
-        include: ${{ fromJSON(github.event_name == 'pull_request' && '[{"app":"web","port":3000,"shard":1,"shards":1},{"app":"console","port":3001,"shard":1,"shards":1},{"app":"union-eyes","port":3002,"shard":1,"shards":4},{"app":"control-plane","port":3010,"shard":1,"shards":1},{"app":"union-eyes","port":3002,"shard":2,"shards":4},{"app":"union-eyes","port":3002,"shard":3,"shards":4},{"app":"union-eyes","port":3002,"shard":4,"shards":4}]' || '[{"app":"web","port":3000,"shard":1,"shards":1},{"app":"console","port":3001,"shard":1,"shards":1},{"app":"control-plane","port":3010,"shard":1,"shards":1}]') }}
-    steps:
+        include: ${{ fromJSON(github.event_name == 'pull_request' && '[{"app":"web","port":3000,"shard":1,"shards":1},{"app":"console","port":3001,"shard":1,"shards":1},{"app":"control-plane","port":3010,"shard":1,"shards":1}]' || '[{"app":"web","port":3000,"shard":1,"shards":1},{"app":"console","port":3001,"shard":1,"shards":1},{"app":"control-plane","port":3010,"shard":1,"shards":1}]') }}
+    steps: &e2e-shared-steps
       - uses: actions/checkout@v5
         with:
           ref: ${{ matrix.app == 'union-eyes' && (github.event.pull_request.head.sha || github.sha) || '' }}
@@ -66,9 +65,18 @@ jobs:
           NODE
 
       - name: Install Playwright browsers
-        run: pnpm -C apps/${{ matrix.app }} exec playwright install --with-deps chromium
+        run: |
+          set -euo pipefail
+          for attempt in 1 2; do
+            if timeout --kill-after=20s 8m pnpm -C apps/${{ matrix.app }} exec playwright install --with-deps chromium; then
+              exit 0
+            fi
+            echo "Browser installation attempt ${attempt} failed or timed out."
+          done
+          exit 1
 
       - name: Build app
+        id: app-build
         run: pnpm --filter @nzila/${{ matrix.app }} build
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
@@ -190,6 +198,7 @@ jobs:
           ORCHESTRATOR_API_URL: http://localhost:4000
 
       - name: Run Playwright tests
+        id: playwright
         run: pnpm --filter @nzila/${{ matrix.app }} e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}
         env:
           CI: true
@@ -219,6 +228,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y k6
 
       - name: Application performance smoke (synthetic Union Eyes, credential-free)
+        id: ue-perf-smoke
         if: matrix.app == 'union-eyes' && matrix.shard == 1
         run: |
           set -euo pipefail
@@ -280,6 +290,46 @@ jobs:
           path: /tmp/app-server.log
           retention-days: 14
 
+      - name: Record Union Eyes shard outcome
+        if: always() && matrix.app == 'union-eyes'
+        env:
+          UE_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          UE_E2E_MODE: synthetic-pr
+          UE_SHARD: ${{ matrix.shard }}
+          UE_JOB_STATUS: ${{ job.status }}
+          UE_BUILD_OUTCOME: ${{ steps.app-build.outcome }}
+          UE_PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          UE_PERFORMANCE_OUTCOME: ${{ matrix.shard == 1 && steps.ue-perf-smoke.outcome || 'not-required' }}
+        run: node tooling/ci/ue-e2e-shard-receipts.mjs write "${RUNNER_TEMP}/ue-shard/receipt.json"
+
+      - name: Upload Union Eyes worker receipt
+        if: always() && matrix.app == 'union-eyes'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-e2e-worker-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
+          path: ${{ runner.temp }}/ue-shard/receipt.json
+          if-no-files-found: error
+          retention-days: 14
+
+  # A separate matrix gives the workflow engine a UE-only final result, including
+  # post-job cleanup, without coupling UE evidence to another application's job.
+  e2e-ue-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    name: ${{ format('UE E2E worker ({0}/4)', matrix.shard) }}
+    permissions:
+      contents: read
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { app: union-eyes, port: 3002, shard: 1, shards: 4 }
+          - { app: union-eyes, port: 3002, shard: 2, shards: 4 }
+          - { app: union-eyes, port: 3002, shard: 3, shards: 4 }
+          - { app: union-eyes, port: 3002, shard: 4, shards: 4 }
+    steps: *e2e-shared-steps
+
   # Trusted canonical snapshot qualification. This job is not part of
   # pull_request execution. It checks out the push SHA on main and is the only
   # job allowed to select the staging environment or request an Azure token.
@@ -332,9 +382,18 @@ jobs:
           NODE
 
       - name: Install Playwright browsers
-        run: pnpm -C apps/union-eyes exec playwright install --with-deps chromium
+        run: |
+          set -euo pipefail
+          for attempt in 1 2; do
+            if timeout --kill-after=20s 8m pnpm -C apps/union-eyes exec playwright install --with-deps chromium; then
+              exit 0
+            fi
+            echo "Browser installation attempt ${attempt} failed or timed out."
+          done
+          exit 1
 
       - name: Build app
+        id: app-build
         run: pnpm --filter @nzila/union-eyes build
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
@@ -471,6 +530,7 @@ jobs:
           ORCHESTRATOR_API_URL: http://localhost:4000
 
       - name: Run Playwright tests
+        id: playwright
         run: pnpm --filter @nzila/union-eyes e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}
         env:
           CI: true
@@ -518,67 +578,63 @@ jobs:
           path: /tmp/app-server.log
           retention-days: 14
 
+      - name: Record canonical Union Eyes shard outcome
+        if: always()
+        env:
+          UE_EXPECTED_HEAD: ${{ github.sha }}
+          UE_E2E_MODE: canonical-main
+          UE_SHARD: ${{ matrix.shard }}
+          UE_JOB_STATUS: ${{ job.status }}
+          UE_BUILD_OUTCOME: ${{ steps.app-build.outcome }}
+          UE_PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          UE_PERFORMANCE_OUTCOME: not-required
+        run: node tooling/ci/ue-e2e-shard-receipts.mjs write "${RUNNER_TEMP}/ue-shard/receipt.json"
+
+      - name: Upload canonical Union Eyes worker receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-e2e-worker-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
+          path: ${{ runner.temp }}/ue-shard/receipt.json
+          if-no-files-found: error
+          retention-days: 14
+
   union-eyes-result:
     name: E2E · union-eyes
-    needs: [e2e, e2e-canonical]
+    needs: [e2e-ue-pr, e2e-canonical]
     if: always()
     runs-on: ubuntu-latest
     permissions:
       contents: read
       actions: read
     steps:
-      # A matrix job exposes only its combined result. Read this attempt's UE
-      # workers so another app's failure cannot be mistaken for a UE failure,
-      # and missing/cancelled/foreign-head workers can never pass this gate.
+      # Jobs API conclusions can lag the completed matrix. Consume only this
+      # run/attempt's four worker artifacts, retaining exact source and outcomes.
+      # Also require the workflow engine's final matrix result so a failure in
+      # post-job cleanup cannot be hidden by an earlier successful receipt.
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Validate shard receipt contract
+        run: node --test tooling/ci/ue-e2e-shard-receipts.test.mjs
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: ue-e2e-worker-${{ github.run_id }}-${{ github.run_attempt }}-*
+          path: ${{ runner.temp }}/ue-e2e-workers
+          merge-multiple: false
+          run-id: ${{ github.run_id }}
+          github-token: ${{ github.token }}
+
       - name: Require every Union Eyes shard
         env:
-          GH_TOKEN: ${{ github.token }}
-          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
-          EXPECTED_RUN: ${{ github.run_id }}
-          EXPECTED_ATTEMPT: ${{ github.run_attempt }}
-          SHARD_JOBS_FILE: ${{ runner.temp }}/ue-e2e-jobs.json
-          SHARD_RECEIPT_FILE: ${{ runner.temp }}/ue-e2e-receipt.json
+          UE_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          UE_E2E_MODE: ${{ github.event_name == 'pull_request' && 'synthetic-pr' || 'canonical-main' }}
+          UE_MATRIX_RESULT: ${{ github.event_name == 'pull_request' && needs.e2e-ue-pr.result || needs.e2e-canonical.result }}
         run: |
-          set -euo pipefail
-          # The workflow engine can mark the matrix complete before the jobs API
-          # reports every shard conclusion. Re-read a few times, then fail closed.
-          for attempt in 1 2 3 4 5 6 7 8; do
-          gh api --paginate --slurp \
-            "repos/${GITHUB_REPOSITORY}/actions/runs/${EXPECTED_RUN}/attempts/${EXPECTED_ATTEMPT}/jobs?per_page=100" \
-            > "$SHARD_JOBS_FILE"
-          if node --input-type=module <<'NODE'
-          import { readFileSync, writeFileSync } from 'node:fs'
-          const head = process.env.EXPECTED_HEAD
-          const run = Number(process.env.EXPECTED_RUN)
-          const attempt = Number(process.env.EXPECTED_ATTEMPT)
-          if (!/^[a-f0-9]{40}$/.test(head ?? '') || !Number.isSafeInteger(run) || run < 1 || !Number.isSafeInteger(attempt) || attempt < 1)
-            throw new Error('Invalid frozen E2E run identity')
-          const pages = JSON.parse(readFileSync(process.env.SHARD_JOBS_FILE, 'utf8'))
-          if (!Array.isArray(pages) || !pages.length || pages.some(page => !Array.isArray(page.jobs)))
-            throw new Error('Invalid E2E job listing')
-          const workers = pages.flatMap(page => page.jobs).filter(job => job.name?.startsWith('UE E2E worker (') && job.conclusion !== 'skipped' && job.status !== 'skipped')
-          const expected = [1, 2, 3, 4].map(index => `UE E2E worker (${index}/4)`)
-          if (workers.length !== 4 || new Set(workers.map(job => job.id)).size !== 4 || expected.some(name => workers.filter(job => job.name === name).length !== 1))
-            throw new Error('Missing, duplicate or unexpected Union Eyes shard')
-          for (const job of workers) {
-            if (!Number.isSafeInteger(job.id) || job.id < 1 || job.head_sha !== head || job.run_id !== run || job.run_attempt !== attempt || job.status !== 'completed' || job.conclusion !== 'success') {
-              console.error(JSON.stringify({ id: job.id, name: job.name, status: job.status, conclusion: job.conclusion, head_sha: job.head_sha, run_id: job.run_id, run_attempt: job.run_attempt }))
-              throw new Error(`Union Eyes shard did not pass on this frozen run: ${job.name}`)
-            }
-          }
-          const receipt = { head, run, attempt, workers: workers.map(({ id, name, conclusion }) => ({ id, name, conclusion })) }
-          writeFileSync(process.env.SHARD_RECEIPT_FILE, `${JSON.stringify(receipt, null, 2)}\n`)
-          console.log(JSON.stringify(receipt))
-          NODE
-          then
-            exit 0
-          fi
-          echo "Union Eyes shard listing was not successful on attempt ${attempt}. The jobs API can lag a completed matrix."
-          if [ "$attempt" -eq 8 ]; then
-            exit 1
-          fi
-          sleep 15
-          done
+          node tooling/ci/ue-e2e-shard-receipts.mjs verify \
+            "${RUNNER_TEMP}/ue-e2e-workers" "${RUNNER_TEMP}/ue-e2e-receipt.json"
 
       - name: Upload Union Eyes shard receipt
         uses: actions/upload-artifact@v4
