@@ -38,6 +38,27 @@ beforeEach(async () => { mode.canonical=true; await pg.exec('TRUNCATE claims, cl
 afterAll(async () => { await pg?.close() })
 
 describe('claim writes against canonical Django column defaults', () => {
+  it('encodes claim-number date boundaries before passing them to the PostgreSQL driver', async () => {
+    const queries: { query: string; params: unknown[] }[] = []
+    const driverBoundaryDb=drizzle(pg, { logger: { logQuery(query,params) {
+      queries.push({query,params})
+      // postgres-js uses transparent timestamp serializers under Drizzle and
+      // rejects raw Date parameters. PGlite alone would accept those values.
+      if (params.some(value=>value instanceof Date)) throw new Error('UNENCODED_DRIVER_DATE')
+    } } })
+    const created=await driverBoundaryDb.transaction(tx=>createClaim({organizationId:org,memberId:member},tx as unknown as RLSTx))
+    const countQuery=queries.find(({query})=>query.startsWith('select count(*) from "claims"'))
+    expect(countQuery).toBeDefined()
+    expect(countQuery!.params).toHaveLength(2)
+    expect(countQuery!.params.every(value=>typeof value==='string')).toBe(true)
+    const [start,end]=countQuery!.params.map(value=>new Date(value as string))
+    expect(start.getTime()).toBeLessThanOrEqual(created.createdAt.getTime())
+    expect(end.getTime()).toBeGreaterThan(created.createdAt.getTime())
+    expect(start.getHours()).toBe(0)
+    expect(end.getHours()).toBe(0)
+    expect(end.getDate()).toBe(new Date(start.getFullYear(),start.getMonth(),start.getDate()+1).getDate())
+  })
+
   it('creates a claim when required UUID, timestamp, boolean and state columns have no SQL defaults', async () => {
     const required=(await pg.query<{ column_name: string; column_default: string | null }>(
       "SELECT column_name,column_default FROM information_schema.columns WHERE table_name='claims' AND column_name IN ('id','claim_id','created_at','updated_at','is_anonymous','previously_reported','progress','status','priority','witnesses_present')")).rows
