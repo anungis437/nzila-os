@@ -63,3 +63,5 @@ CREATE TABLE "claim_updates" (
   PRIMARY KEY (id),
   UNIQUE (update_id)
 );
+-- Deployed Django relationship: history points at the internal PK, not public claim_id.
+ALTER TABLE claim_updates ADD FOREIGN KEY (claim_id) REFERENCES claims(id) DEFERRABLE INITIALLY DEFERRED;

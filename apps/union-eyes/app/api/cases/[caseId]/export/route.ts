@@ -20,6 +20,7 @@ import { requireEntitlement } from '@/services/platform-economics/entitlement-gu
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial'
 import { recordUnionEyesEvidenceExport } from '@/lib/pilot-metrics'
 import { getOrganizationIdForUser } from '@/lib/organization-utils'
+import { claimHistoryReference, publicClaimHistory } from '@/lib/cases/claim-history-reference'
 
 export async function GET(request: Request, { params }: { params: Promise<{ caseId: string }> }) {
   const { userId } = await auth()
@@ -43,7 +44,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
         db
           .select()
           .from(claimUpdates)
-          .where(eq(claimUpdates.claimId, caseId))
+          .where(eq(claimUpdates.claimId, claimHistoryReference(caseId)))
           .orderBy(desc(claimUpdates.createdAt)),
         db
           .select()
@@ -62,7 +63,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
       caseId,
       organizationId: orgId,
       caseRecord: caseRows[0] as any as Record<string, unknown>,
-      notes: noteRows as any as Record<string, unknown>[],
+      notes: noteRows.map(note => publicClaimHistory(note, caseId)) as any as Record<string, unknown>[],
       auditTrail: auditRows as any as Record<string, unknown>[],
     }
 

@@ -26,6 +26,7 @@ import { getOrganizationIdForUser, getUserRoleInOrganization } from '@/lib/organ
 import { wrapSchemaQuery } from '@/lib/schema-error';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
+import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
 
 export const dynamic = 'force-dynamic';
 
@@ -159,7 +160,7 @@ export async function PATCH(
 
       // 6. Add transition note
       await tx.insert(claimUpdates).values({
-        claimId: caseId,
+        claimId: claimHistoryReference(caseId),
         updateType: 'status_change',
         message: reason
           ? `Status changed: ${fromStatus} → ${toDbStatus}. Reason: ${reason}`

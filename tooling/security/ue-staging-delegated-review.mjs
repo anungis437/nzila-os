@@ -64,6 +64,13 @@ const NATIVE_INTAKE_PATHS = new Set([
   'tooling/repo-inventory/output/repo-inventory.json', 'tooling/repo-inventory/output/repo-inventory.md',
 ])
 const NATIVE_WRITE_DEFAULT_PATHS = new Set([
+  'apps/union-eyes/lib/cases/claim-history-reference.ts',
+  'apps/union-eyes/db/queries/claims-queries.ts',
+  'apps/union-eyes/app/api/cases/[caseId]/transition/route.ts',
+  'apps/union-eyes/app/api/cases/[caseId]/assign/route.ts',
+  'apps/union-eyes/app/api/cases/[caseId]/notes/route.ts',
+  'apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts',
+  'apps/union-eyes/app/api/cases/[caseId]/export/route.ts',
   'apps/union-eyes/lib/audit/canonical-audit-chain.ts',
   'apps/union-eyes/lib/audit/__tests__/canonical-nar-proof.pglite.test.ts',
   'apps/union-eyes/db/schema/claims-schema.ts',

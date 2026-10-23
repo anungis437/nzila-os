@@ -16,6 +16,7 @@ import { claimUpdates } from '@/db/schema';
 import { grievanceTimeline } from '@/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,7 @@ export const GET = withApi(
       tx
         .select()
         .from(claimUpdates)
-        .where(eq(claimUpdates.claimId, resolvedClaimId))
+        .where(eq(claimUpdates.claimId, claimHistoryReference(resolvedClaimId)))
         .orderBy(desc(claimUpdates.createdAt)),
     );
 

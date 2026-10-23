@@ -80,6 +80,10 @@ for(const name of ['apps/union-eyes/backend/grievances/models.py','apps/union-ey
  const m=nativeWriteDefaultsFollowup();m.files.push({...m.files[0],path:name});assert.throws(()=>validateManifest(m,NOW))
 })
 for(const name of ['apps/union-eyes/lib/audit/canonical-audit-chain.ts',
+ 'apps/union-eyes/lib/cases/claim-history-reference.ts','apps/union-eyes/db/queries/claims-queries.ts',
+ 'apps/union-eyes/app/api/cases/[caseId]/transition/route.ts','apps/union-eyes/app/api/cases/[caseId]/assign/route.ts',
+ 'apps/union-eyes/app/api/cases/[caseId]/notes/route.ts','apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts',
+ 'apps/union-eyes/app/api/cases/[caseId]/export/route.ts',
  'apps/union-eyes/lib/audit/__tests__/canonical-nar-proof.pglite.test.ts','apps/union-eyes/db/schema/claims-schema.ts',
  'apps/union-eyes/db/queries/__tests__/canonical-claim-writes.pglite.test.ts',
  'apps/union-eyes/db/queries/__tests__/fixtures/canonical-claim-write.sql'])test(`native write-default signed coverage accepts exact repair ${name}`,()=>{

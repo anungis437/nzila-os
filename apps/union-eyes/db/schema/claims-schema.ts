@@ -136,7 +136,8 @@ export const claims = pgTable("claims", {
 export const claimUpdates = pgTable("claim_updates", {
   id: uuid("id").primaryKey().defaultRandom(),
   updateId: uuid("update_id").unique().defaultRandom(),
-  claimId: uuid("claim_id").notNull().references(() => claims.claimId, { onDelete: "cascade" }),
+  // Django's physical FK points to the internal PK; ORM deletion handles cascades.
+  claimId: uuid("claim_id").notNull().references(() => claims.id),
   updateType: varchar("update_type", { length: 50 }),
   message: text("message"),
   createdBy: varchar("created_by", { length: 255 }),
