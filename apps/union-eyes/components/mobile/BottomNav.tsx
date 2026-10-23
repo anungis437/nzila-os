@@ -105,10 +105,10 @@ export function BottomNav({ className, userRole }: BottomNavProps) {
   const experience = useMemo(() => getDashboardExperience(userRole), [userRole]);
 
   const items = useMemo<NavigationItem[]>(() => {
-    const nav = getVisibleNavigationForExperience(experience, isPilotMode);
+    const nav = getVisibleNavigationForExperience(experience, isPilotMode, userRole);
     const primary = nav.slice(0, 4);
     return [...primary, { label: 'More', href: '/dashboard/settings' }];
-  }, [experience, isPilotMode]);
+  }, [experience, isPilotMode, userRole]);
 
   const withLocale = (href: string) => `/${locale}${href}`;
 

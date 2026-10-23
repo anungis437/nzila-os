@@ -213,6 +213,7 @@ describe('EC-G03 guards', () => {
         '/dashboard',
         '/dashboard/workspace',
         '/dashboard/workbench',
+        '/dashboard/priorities',
         '/dashboard/operations',
         '/dashboard/inbox',
         '/dashboard/intelligence',

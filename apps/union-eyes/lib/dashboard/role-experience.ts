@@ -1,3 +1,5 @@
+import { getRoleLevel, UserRole } from '../auth/roles';
+
 export type DashboardExperience = 'member' | 'staff' | 'executive' | 'governance' | 'admin';
 
 export type NavigationItem = {
@@ -13,6 +15,7 @@ export type NavigationGroup = {
 };
 
 const ADMIN_ROLES = new Set([
+  'app_owner',
   'system_admin',
   'admin',
   'platform_lead',
@@ -143,7 +146,6 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Messages', href: '/dashboard/inbox?type=message' },
       { label: 'Documents', href: '/dashboard/documents' },
       { label: 'Profile & Settings', href: '/dashboard/settings' },
-      { label: 'Help & Support', href: '/dashboard/support' },
     ];
   }
 
@@ -152,7 +154,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
       { label: 'Operations (Casework Console)', href: '/dashboard/workbench', group: 'Operations' },
       { label: 'Operations Queue (Representation Cases)', href: '/dashboard/inbox?type=intake', group: 'Operations' },
-      { label: 'Operations Priorities (Commitments & Deadlines)', href: '/dashboard/operations', group: 'Operations' },
+      { label: 'Operations Priorities (Commitments & Deadlines)', href: '/dashboard/priorities', group: 'Operations' },
       { label: 'Members', href: '/dashboard/members', group: 'Operations' },
       { label: 'Documents', href: '/dashboard/documents', group: 'Operations' },
       { label: 'Operations Communications', href: '/dashboard/correspondence', group: 'Operations' },
@@ -221,6 +223,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard',
     '/dashboard/workspace',
     '/dashboard/workbench',
+    '/dashboard/priorities',
     '/dashboard/operations',
     '/dashboard/inbox',
     '/dashboard/intelligence',
@@ -315,6 +318,18 @@ export function canAccessDashboardPath(pathname: string, experience: DashboardEx
   return !isExcluded;
 }
 
+// These destinations have stricter server guards than their enclosing experience.
+// Presentation never grants access: their page/layout guards remain authoritative.
+const PLATFORM_LEAD_ROLES = ['app_owner', 'coo', 'cto', 'platform_lead'];
+const SUPPORT_MANAGER_ROLES = [...PLATFORM_LEAD_ROLES, 'customer_success_director', 'support_manager'];
+const INTEGRATION_MANAGER_ROLES = [...SUPPORT_MANAGER_ROLES, 'data_analytics_manager', 'billing_manager', 'integration_manager'];
+const PLATFORM_NAVIGATION_ROLES: Record<string, readonly string[]> = {
+  '/dashboard/operations': PLATFORM_LEAD_ROLES,
+  '/dashboard/admin/members': SUPPORT_MANAGER_ROLES,
+  '/dashboard/integrations': INTEGRATION_MANAGER_ROLES,
+  '/dashboard/security': [...INTEGRATION_MANAGER_ROLES, 'compliance_manager', 'security_manager'],
+};
+
 /**
  * Single source of truth for which navigation entries are actually visible.
  * Navigation availability and route authorization must be derived from the
@@ -326,9 +341,14 @@ export function canAccessDashboardPath(pathname: string, experience: DashboardEx
 export function getVisibleNavigationForExperience(
   experience: DashboardExperience,
   isPilotMode: boolean,
+  userRole?: string,
 ): NavigationItem[] {
+  const role = userRole ?? ({ member: 'member', staff: 'steward', executive: 'president', governance: 'officer', admin: 'admin' } as const)[experience];
   return getNavigationForExperience(experience).filter((item) => {
     const pathname = item.href.split('?')[0];
+    const platformRoles = PLATFORM_NAVIGATION_ROLES[pathname];
+    if (platformRoles && !platformRoles.includes(role)) return false;
+    if (pathname === '/dashboard/audits' && getRoleLevel(role as UserRole) < getRoleLevel(UserRole.ADMIN)) return false;
     return canAccessDashboardPath(pathname, experience, isPilotMode);
   });
 }

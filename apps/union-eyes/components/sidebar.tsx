@@ -135,8 +135,8 @@ export default function Sidebar({
   const hubCue = useMemo(() => roleHomeHubCue(homes), [homes]);
 
   const items = useMemo<NavigationItem[]>(
-    () => getVisibleNavigationForExperience(homes.experience, isPilotMode),
-    [homes.experience, isPilotMode],
+    () => getVisibleNavigationForExperience(homes.experience, isPilotMode, userRole),
+    [homes.experience, isPilotMode, userRole],
   );
 
   // Build ordered groups from the nav. Use demo-defined order when available;
