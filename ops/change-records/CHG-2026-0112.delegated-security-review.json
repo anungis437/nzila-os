@@ -2,19 +2,19 @@
   "version": 1,
   "purpose": "staging-security-review",
   "repository": "anungis437/nzila-os",
-  "pullRequest": 990,
-  "branch": "fix/ue-native-intake-audit-20261022",
-  "baseSha": "9bb8a3fd224ca581838d433688b04860f2e9efc8",
-  "sourceSha": "c0b9f5ebff0d744532f4e2c8ebd2099f56061eaf",
-  "sourceTree": "f4becca110e51442b0f6840573266626241fa94c",
+  "pullRequest": 991,
+  "branch": "fix/ue-native-write-defaults-20261022",
+  "baseSha": "8c41b6a8f54c6e1ff1e4e5f8ca0ba24256955ee7",
+  "sourceSha": "762a4c0496d75ed1f5ab9f1a61cecb5823c59f6b",
+  "sourceTree": "7db57549ee2362a0ac152d99624241aad219f622",
   "mission": "UE-STAGING-RECOVERY-TO-GO",
   "changeRecordId": "CHG-2026-0112",
   "environment": "STAGING",
   "owner": "anungis437",
   "operator": "Codex",
   "instructionSha256": "681844e4f18424c1e592dfd1db205afc66d5c7a3d647c91006dc8f5d2dcbb2e3",
-  "issuedAt": "2026-10-23T01:30:58.246Z",
-  "expiresAt": "2026-10-24T01:30:58.246Z",
+  "issuedAt": "2026-10-23T02:40:34.053Z",
+  "expiresAt": "2026-10-24T02:40:34.118Z",
   "resources": {
     "subscription": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
     "tenant": "5082b8be-b04d-4a13-b61c-b6397670177b",
@@ -35,154 +35,118 @@
       "path": ".github/workflows/security-design-review.yml",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "3d5ccb5da69fc57e0723814e1f727c28ef33a3bd",
-      "sha256": "31151717d2486025d310d2194a65b5ec8273e23c602c3d620b3de7ab75956a25",
-      "baseBlobSha": "12f86ae7237c54838d04a77139df12cd7c946ed5",
-      "baseSha256": "d91723806cab8d9dda82a5eb1789d2f08c964de40d9a7956d4d7c1d16e3ab532"
+      "blobSha": "39dd82bcd16de748ae1e169793885891fafae84d",
+      "sha256": "e49c14d7ac900a13301927c98790d1cdb124e1d71f25818827cedd043bcaaa58",
+      "baseBlobSha": "3d5ccb5da69fc57e0723814e1f727c28ef33a3bd",
+      "baseSha256": "31151717d2486025d310d2194a65b5ec8273e23c602c3d620b3de7ab75956a25"
     },
     {
-      "path": "apps/union-eyes/app/[locale]/dashboard/__tests__/canonical-dashboard-layout.test.tsx",
+      "path": "apps/union-eyes/db/queries/__tests__/canonical-claim-writes.pglite.test.ts",
       "status": "added",
       "previousPath": null,
-      "blobSha": "82c8641158909c15358c2e45d1d5a73d6b1a2043",
-      "sha256": "c045e93c192073ad1cd1dd0f422003706f2c8920bcbae228ac8f5548b0379a12",
+      "blobSha": "f2a9138cddb10f451b4adf83103d5dbc18c93736",
+      "sha256": "16f02b2aa719c97a6758ff0f5242d5a4d38da3036623eb71cd348a3b7b49116d",
       "baseBlobSha": null,
       "baseSha256": null
     },
     {
-      "path": "apps/union-eyes/app/[locale]/dashboard/layout.tsx",
-      "status": "modified",
+      "path": "apps/union-eyes/db/queries/__tests__/fixtures/canonical-claim-write.sql",
+      "status": "added",
       "previousPath": null,
-      "blobSha": "ee24d127366287375c204969082986a2ab579b00",
-      "sha256": "2b7506fe9b3951559792faa134fd0a7956ee8da59062d3b1cfc8471f24e55e44",
-      "baseBlobSha": "f6055579a7893979e85c7af1a502c67dab5a099f",
-      "baseSha256": "e78429dd2e2cc15c31e2adec514e264e0adcab0ac29a9069c53520548bbc4c3f"
+      "blobSha": "2d48ff8ed5979ad517aeca9a65f58304a3257e42",
+      "sha256": "ad8ebb3564dec99b3cadd4e870549e03449efbac051c78ddddbc6457a7c445bb",
+      "baseBlobSha": null,
+      "baseSha256": null
     },
     {
-      "path": "apps/union-eyes/app/api/__tests__/cases-intake.route.test.ts",
+      "path": "apps/union-eyes/db/schema/claims-schema.ts",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "cf19edef992083018701f33b60fea22864328cd9",
-      "sha256": "4c4aa15d5a5ce686d24278a1e52659c0ccd43074a7f01dac94f1bbb8ddb19dce",
-      "baseBlobSha": "ae2357ee4351dbb966d39285fc128ee53f04b0f7",
-      "baseSha256": "445c580adc5fe7c9cb7212fc3ccf07ec80ff9527b1d5908da2946928bfbff362"
-    },
-    {
-      "path": "apps/union-eyes/app/api/cases/intake/route.ts",
-      "status": "modified",
-      "previousPath": null,
-      "blobSha": "1195d39cd21b562ac39def05bab64de653b37587",
-      "sha256": "1745e7b9f5ea745b20dcae6ed57a9bdf7bc0996f57af4eebdac0881c14e6d32e",
-      "baseBlobSha": "d940c591945685ea327050cad67cdf6e354567c7",
-      "baseSha256": "e69c81e1d1244bcf51d648d418841a8173d75e56a084a90fc688a982a17e5569"
+      "blobSha": "ed6ebc9d69073ce98de53f118457656a10585831",
+      "sha256": "85aa36916af5f9a4eea5f772f54b1b6bcc24dc6ceb0e4516fb29f09f013eb1fd",
+      "baseBlobSha": "08e8c38b65dccbf16732bfb3aa223d947c606438",
+      "baseSha256": "540c54be7ee54f7f498ea10bb4a667719bf357fd50788ffd4cdbdcc847e101f5"
     },
     {
       "path": "apps/union-eyes/lib/audit/__tests__/canonical-nar-proof.pglite.test.ts",
-      "status": "added",
-      "previousPath": null,
-      "blobSha": "54b8dd3017821ed2e6c7f4c7241714640b776244",
-      "sha256": "77853c1619c96b1c63eab456755ea34f7b56c4ec4ac2bc7a38df5ffacc8cd2fc",
-      "baseBlobSha": null,
-      "baseSha256": null
-    },
-    {
-      "path": "apps/union-eyes/lib/audit/canonical-nar-proof.ts",
-      "status": "added",
-      "previousPath": null,
-      "blobSha": "76bdf73cc652c64dafbe6a6a5f9e9fa4c1180359",
-      "sha256": "927c99ada9ba84ec337d6552d14bd1820cd7f1d1044aaf35eec4b70b1c00919f",
-      "baseBlobSha": null,
-      "baseSha256": null
-    },
-    {
-      "path": "packages/platform-auth/src/entra/config.ts",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "72fea066e1fafe811106dcb41f67069a335c2a31",
-      "sha256": "62a462f1d97444ea2249ac29353fd8bafdb9c7aa722b7976959adc0b2ce21173",
-      "baseBlobSha": "744e6943d0337416243ced07faae9782c97e9e25",
-      "baseSha256": "7240b3dbf6be05aa13586907f32314296923c8c6d345d56bf6ba6c7ab7063d9d"
+      "blobSha": "a77f4fea2f258a76d34f87cf264adde20a2a9c73",
+      "sha256": "72a3f30ec90388607a783939a7b11432076009d4dcf5a7bf17786b638017b06e",
+      "baseBlobSha": "54b8dd3017821ed2e6c7f4c7241714640b776244",
+      "baseSha256": "77853c1619c96b1c63eab456755ea34f7b56c4ec4ac2bc7a38df5ffacc8cd2fc"
     },
     {
-      "path": "packages/platform-auth/src/entra/session-policy.test.ts",
-      "status": "added",
+      "path": "apps/union-eyes/lib/audit/canonical-audit-chain.ts",
+      "status": "modified",
       "previousPath": null,
-      "blobSha": "1f4c0d53acd116c0a4b9e150490d4a77cf204631",
-      "sha256": "f671abe528bc1dfbeb81be1f5b1b30770f7b836dd0a2491a8131d4eea8f14f4a",
-      "baseBlobSha": null,
-      "baseSha256": null
-    },
-    {
-      "path": "packages/platform-auth/src/entra/session-policy.ts",
-      "status": "added",
-      "previousPath": null,
-      "blobSha": "491a1bb0ff114dedf8e9c763c35a091c26641fe1",
-      "sha256": "3c0362e8a0a0a408e585031b3ff893a40ebd2b826fbce5fd245cd6fc6773a30f",
-      "baseBlobSha": null,
-      "baseSha256": null
+      "blobSha": "bacee4f0bc4debcff2574afb9b007581a9d29006",
+      "sha256": "482ca44b64327b5d11a4a71ec689b87a7215aaba5a0ef0802251c1ede2661294",
+      "baseBlobSha": "f1917cbbabbdf78514775099ef2d799528c2995b",
+      "baseSha256": "195b7a690b95f0b62a38b038a7aade73010d27dc40a7d86279542a32906c6123"
     },
     {
       "path": "tooling/repo-inventory/output/inventory.json",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "fe15abb43a2d10c77408eb7552e04d19291aec0e",
-      "sha256": "c88f965890c0fd79347fe59df13a36b91ffcd6ca8921932d54c3a6b421aa2886",
-      "baseBlobSha": "af5750ecbd46bdf8f04a9098adf52a3af8f926ce",
-      "baseSha256": "da7accbb0ced46a5221fd743be12e105d7376695ad446c08d958d30a43b13c7e"
+      "blobSha": "e86d16c9b759f85b4fc1c7983e0d63bc916128e3",
+      "sha256": "fcb575a38cd8bd2fb7d1f838cdbf9b43a4758f417a284f2c7ac394c1a0cfa7bc",
+      "baseBlobSha": "fe15abb43a2d10c77408eb7552e04d19291aec0e",
+      "baseSha256": "c88f965890c0fd79347fe59df13a36b91ffcd6ca8921932d54c3a6b421aa2886"
     },
     {
       "path": "tooling/repo-inventory/output/inventory.md",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "5ed59a84b131cc9abdb7a195c0735810317ae1e6",
-      "sha256": "e34339cd5279eb84e8809680d6302470ed735c5386bf222049e7ad376bbe86cf",
-      "baseBlobSha": "6cac33e690d93bd55a63bc1eb06ba0730ef2343e",
-      "baseSha256": "41e7bef87ab666cdfe04461e7fb6c39737e39bf2a6df6e44116a18794bb7c7c3"
+      "blobSha": "bb9fe7cf1f6a45f32b3cb0b4da28cfb9066e1705",
+      "sha256": "4866147a82b743a8ebda25c837736d25e0e6774dcd76fcec0898bd6159db8666",
+      "baseBlobSha": "5ed59a84b131cc9abdb7a195c0735810317ae1e6",
+      "baseSha256": "e34339cd5279eb84e8809680d6302470ed735c5386bf222049e7ad376bbe86cf"
     },
     {
       "path": "tooling/repo-inventory/output/repo-inventory.json",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "fe15abb43a2d10c77408eb7552e04d19291aec0e",
-      "sha256": "c88f965890c0fd79347fe59df13a36b91ffcd6ca8921932d54c3a6b421aa2886",
-      "baseBlobSha": "af5750ecbd46bdf8f04a9098adf52a3af8f926ce",
-      "baseSha256": "da7accbb0ced46a5221fd743be12e105d7376695ad446c08d958d30a43b13c7e"
+      "blobSha": "e86d16c9b759f85b4fc1c7983e0d63bc916128e3",
+      "sha256": "fcb575a38cd8bd2fb7d1f838cdbf9b43a4758f417a284f2c7ac394c1a0cfa7bc",
+      "baseBlobSha": "fe15abb43a2d10c77408eb7552e04d19291aec0e",
+      "baseSha256": "c88f965890c0fd79347fe59df13a36b91ffcd6ca8921932d54c3a6b421aa2886"
     },
     {
       "path": "tooling/repo-inventory/output/repo-inventory.md",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "5ed59a84b131cc9abdb7a195c0735810317ae1e6",
-      "sha256": "e34339cd5279eb84e8809680d6302470ed735c5386bf222049e7ad376bbe86cf",
-      "baseBlobSha": "6cac33e690d93bd55a63bc1eb06ba0730ef2343e",
-      "baseSha256": "41e7bef87ab666cdfe04461e7fb6c39737e39bf2a6df6e44116a18794bb7c7c3"
+      "blobSha": "bb9fe7cf1f6a45f32b3cb0b4da28cfb9066e1705",
+      "sha256": "4866147a82b743a8ebda25c837736d25e0e6774dcd76fcec0898bd6159db8666",
+      "baseBlobSha": "5ed59a84b131cc9abdb7a195c0735810317ae1e6",
+      "baseSha256": "e34339cd5279eb84e8809680d6302470ed735c5386bf222049e7ad376bbe86cf"
     },
     {
       "path": "tooling/security/ue-staging-delegated-review.mjs",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "6e86facf087a94d7d9cc6bee218abf25d02bba42",
-      "sha256": "00035fd92e7b0938428c6bf0d298d723d529fb95bcc61edffb0adf1864588737",
-      "baseBlobSha": "ff5f06768bf707fa0a622c4bdb0075d0ae4f63c0",
-      "baseSha256": "1e904f4429de0bad7d6322426ec2feda220ee5f45429bf68cb9b8129455bc78f"
+      "blobSha": "1fd216851da283f73775db0cfcf4a743f902b822",
+      "sha256": "255db8cc0f48adeb7ca6c14f4cfe2e8cbd80a241637ea87777e69ec266ee2d07",
+      "baseBlobSha": "6e86facf087a94d7d9cc6bee218abf25d02bba42",
+      "baseSha256": "00035fd92e7b0938428c6bf0d298d723d529fb95bcc61edffb0adf1864588737"
     },
     {
       "path": "tooling/security/ue-staging-delegated-review.test.mjs",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "a03410502e51561551476301a776445bf7f60519",
-      "sha256": "b727d945f72791596bd3ed0b2a3091f6601f0894f1ffa7e27f3e34939274af66",
-      "baseBlobSha": "846688e166932078589c613c1a25ec02ecd8f1fa",
-      "baseSha256": "8d08c3683e30c8a634122399d946573f80573565c85e5665e5f4aee65deb5740"
+      "blobSha": "ada86a7c63f276cc9a1cc8c59f4cec62f0206396",
+      "sha256": "1959a5dc19f80b9c47a85b26311ef97417eeb44baefcab6858657c52175a7dc3",
+      "baseBlobSha": "a03410502e51561551476301a776445bf7f60519",
+      "baseSha256": "b727d945f72791596bd3ed0b2a3091f6601f0894f1ffa7e27f3e34939274af66"
     }
   ],
   "reviews": [
     {
       "kind": "primary-agent-review",
       "agentTask": "/root",
-      "reviewedAt": "2026-10-23T01:30:58.185Z",
-      "report": "Primary Codex /root review of frozen source c0b9f5ebff0d744532f4e2c8ebd2099f56061eaf for PR990. This is explicitly an agent review under the existing sole-owner staging authorization, not a separate person's approval. The exact nine application/test changes use canonical private membership for dashboard admission, reject foreign intake member ids, map only the verified Entra self alias, persist real HMAC-signed NAR records in the tenant append-only audit chain with serialized chain heads and cryptographic readback, and commit the final claim/proof atomically. Native idle-session override is bounded and available only to the validated dedicated staging registration; the 24-hour default is preserved.\n\nThe three governance changes bind only PR990, branch fix/ue-native-intake-audit-20261022, actual author anungisa and merged base 9bb8a3fd224ca581838d433688b04860f2e9efc8. PR990's exact path list forbids unrelated UE paths, database migrations, dependencies, trust-key changes and production policy. The unchanged external owner trust key must verify an actual domain-separated signature. Complete GitHub file pagination, exact base/source blobs and hashes, unchanged trust bytes, a sole-parent evidence-only commit, source tree binding, validity windows, attribution and head-race checks remain enforced. No security-team label is synthesized. Existing PR984/986 scopes and production controls retain their prior behavior.\n\nAll 144 delegated-verifier regressions pass, including native follow-up trust, author, scope and evidence-commit negatives. The unchanged application repair bytes pass 23 targeted regressions including real PGlite signature/tamper/transaction tests, and 51 session-policy/issuer regressions pass. No unresolved P0/P1 was identified within this bounded source review. Full repository checks and exact-head protected CI remain pending and must pass before review readiness or normal merge. No deployed repair, staging GO, independent human review or production authorization is claimed. Final merged images, fresh signed clone qualification and complete native staging acceptance remain required.",
-      "reportSha256": "ca70df123b42da41b203131e4b2d5c8e9d4428e71ca8487d6a9bf33fb44bdb3a",
+      "reviewedAt": "2026-10-23T02:40:34.053Z",
+      "report": "Primary Codex /root review of frozen source 762a4c0496d75ed1f5ab9f1a61cecb5823c59f6b for PR991 under the existing explicit sole-owner staging authorization. This is an attributed primary agent review, not another person's approval. Deployed source 8c41b6a8f54c6e1ff1e4e5f8ca0ba24256955ee7 admits the native dashboard and rejects foreign intake members without writes, but its own intake fails before persistence because canonical Django audit identifiers have no database defaults. Read-only deployed metadata also confirms required claim identifiers, timestamps, booleans and state values whose Django defaults execute in Python.\n\nThe canonical audit writer now supplies independent UUIDs for id and audit_id while retaining its advisory lock, Python-compatible content hash, tenant context and transaction. The NAR SQL regression fixture now requires both identifiers and timestamps without SQL defaults. Real signatures, tamper rejection, tenant restrictions and atomic rollback still pass. Drizzle claim fields provide runtime UUID/timestamp/boolean/state defaults while their existing SQL declarations are retained; history timestamps receive the same runtime fallback. A real PGlite fixture uses the deployed column types/nullability/defaults without business data. Explicit caller values are preserved. No migration, grant, auth permission, dependency, backend source or production configuration changes.\n\nThe three governance files authorize only PR991, exact branch fix/ue-native-write-defaults-20261022, actual author anungisa, merged base 8c41b6a8f54c6e1ff1e4e5f8ca0ba24256955ee7, and twelve exact source/test/inventory paths. The unchanged pinned Ed25519 trust key must verify a genuine domain-separated signature. Complete paginated API coverage, exact base/source blobs and hashes, unchanged trust bytes, sole-parent two-file evidence-only commit, source tree binding, expiry, primary attribution and head-race protections remain enforced. Existing PR984/986/990 rules remain intact. No human security-team label is synthesized.\n\nAll 169 verifier regressions and 27 targeted SQL/application regressions pass. No unresolved P0/P1 was identified within this bounded source review. Full required repository checks and exact final-head protected CI remain pending and mandatory before review readiness or normal merge. This does not claim the application fix deployed, staging GO, independent human approval or production authorization. Fresh merged-source images, signed clone qualification and actual native staging acceptance remain required.",
+      "reportSha256": "5bed8a1628defb76ac6b82336a9f1e35ced000abbb4482de48417eebc4713732",
       "unresolvedP0": 0,
       "unresolvedP1": 0
     }
@@ -191,26 +155,20 @@
     {
       "command": "node --test tooling/security/ue-staging-delegated-review.test.mjs",
       "result": "PASS",
-      "passed": 144,
-      "logSha256": "f6bd40cbc4ef3aee310f41fb621fc1d0ac0af78c6a7829bc8ed5906887b50f5e"
+      "passed": 169,
+      "logSha256": "b5295d5c874fe3af79443f3717927af933872803de70282e8d50391ffc9f2947"
     },
     {
-      "command": "Targeted actual canonical dashboard, intake, NAR PGlite and Python-compatible audit regressions",
+      "command": "Actual canonical audit/NAR PGlite, claim/history PGlite and claim-query regressions",
       "result": "PASS",
-      "passed": 23,
-      "logSha256": "3be89a11c352bffeeba2331c598c00ae918f34eeb18bd6f453a3eb969c6ff323"
-    },
-    {
-      "command": "Targeted actual dedicated staging native session policy and Entra issuer regressions",
-      "result": "PASS",
-      "passed": 51,
-      "logSha256": "dc6937ada8810c6f214e0bdf62dabf0312100c5ed9d8d8fc8f2a27c1ec83340c"
+      "passed": 27,
+      "logSha256": "67e3b5ce4e1c2e74af1a5653b812b26ef87a80f6b1e1e11af8f9b9cf4a5e7b9c"
     }
   ],
   "limitations": [
-    "Primary agent review only; no independent human or security-team approval.",
-    "Full required repository checks and exact final-head CI remain mandatory before review readiness and normal merge.",
-    "Real native sessions, logout and the intake failure witness belong to the preceding deployed source; no application acceptance is carried forward.",
-    "This signature authorizes only the exact bounded staging review; signed release/clone qualification and runtime acceptance are separate."
+    "Primary agent source review only; no independent human/security-team approval.",
+    "Required final-head repository checks and protected CI remain mandatory.",
+    "Runtime observations belong to preceding deployed source; no deployed repair or staging acceptance is claimed.",
+    "Fresh signed release/clone qualification and complete native acceptance remain separate requirements."
   ]
 }
