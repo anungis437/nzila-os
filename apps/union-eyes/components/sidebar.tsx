@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useLocale } from "next-intl";
-import { usePathname } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { usePathname, useSearchParams } from "next/navigation";
 import { UserButton } from "@nzila/platform-auth/entra/client";
 import {
   BarChart3,
@@ -20,12 +20,10 @@ import {
   Gavel,
   Inbox,
   LayoutDashboard,
-  Menu,
   MessageSquare,
   Scale,
   Target,
   Users,
-  X,
   type LucideIcon,
 } from "lucide-react";
 import type { SelectProfile } from "@/db/schema/domains/member";
@@ -44,6 +42,12 @@ import {
   type NavigationGroup,
   type NavigationItem,
 } from "@/lib/dashboard/role-experience";
+
+import { useDashboardNavigation } from '@/components/dashboard/navigation-context';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { navigationDestination, selectedNavigationDestination } from '@/lib/dashboard/navigation-selection';
+
+import { navigationCopyKey } from '@/lib/dashboard/navigation-copy';
 
 interface SidebarProps {
   profile: SelectProfile | null;
@@ -92,13 +96,20 @@ export default function Sidebar({
   platformOrgId,
 }: SidebarProps) {
   const locale = useLocale();
+  const translations = useTranslations('experienceNavigation');
+  const copy = useCallback((text: string) => translations(navigationCopyKey(text)), [translations]);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
+  const navigation = useDashboardNavigation();
   const { organization } = useOrganization();
   const { isPilotMode } = usePilotMode();
   const [isMounted, setIsMounted] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [fallbackOpen, setFallbackOpen] = useState(false);
+  const mobileOpen = navigation?.open ?? fallbackOpen;
+  const setMobileOpen = navigation?.setOpen ?? setFallbackOpen;
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -123,7 +134,7 @@ export default function Sidebar({
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [pathname]);
+  }, [pathname, search, setMobileOpen]);
 
   const isViewingTenantOrg = !!(
     platformOrgId &&
@@ -132,7 +143,7 @@ export default function Sidebar({
   );
 
   const homes = useMemo(() => getDualNavHomes(userRole), [userRole]);
-  const hubCue = useMemo(() => roleHomeHubCue(homes), [homes]);
+  const hubCue = useMemo(() => roleHomeHubCue(homes, copy), [homes, copy]);
 
   const items = useMemo<NavigationItem[]>(
     () => getVisibleNavigationForExperience(homes.experience, isPilotMode, userRole),
@@ -177,13 +188,8 @@ export default function Sidebar({
 
   const withLocale = (href: string) => `/${locale}${href}`;
 
-  const isActive = (href: string) => {
-    const hrefPath = href.split("?")[0];
-    const localizedHref = withLocale(href);
-    const localizedPath = withLocale(hrefPath);
-    if (pathname === localizedHref || pathname === localizedPath) return true;
-    return hrefPath !== "/dashboard" && pathname.startsWith(`${localizedPath}/`);
-  };
+  const selectedDestination = selectedNavigationDestination(items, pathname, search);
+  const isActive = (href: string) => navigationDestination(href) === selectedDestination;
 
   const persistCollapsed = (next: boolean) => {
     setCollapsed(next);
@@ -254,14 +260,14 @@ export default function Sidebar({
       <div>
         {renderHubCue(showLabels)}
         <nav
-          aria-label={ROLE_EXECUTION_DESTINATIONS_LABEL}
+          aria-label={copy(ROLE_EXECUTION_DESTINATIONS_LABEL)}
           data-nav-role="legacy-side"
-          className="px-2 space-y-3 overflow-y-auto max-h-[calc(100vh-180px)]"
+          className="px-2 space-y-3"
         >
         {groups.map(({ group, items: groupItems }) => {
           const isFlat = group.key === "__flat";
           const isGroupCollapsed = !isFlat && collapsedGroups.has(group.key);
-          const groupId = `nav-group-${group.key}`;
+          const groupId = `nav-group-${variant}-${group.key}`;
 
           return (
             <div key={group.key} className="space-y-1">
@@ -273,7 +279,7 @@ export default function Sidebar({
                   aria-controls={groupId}
                   className="group flex w-full items-center justify-between px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-900"
                 >
-                  <span>{group.label}</span>
+                  <span>{copy(group.label)}</span>
                   <ChevronDown
                     size={12}
                     className={`shrink-0 transition-transform ${
@@ -298,14 +304,15 @@ export default function Sidebar({
                   const href = withLocale(item.href);
                   const active = isActive(item.href);
                   const showLabel = showLabels;
-                  const honesty = honestyForNavigationItem(item, homes.roleHomeHref);
+                  const honesty = honestyForNavigationItem(item, homes.roleHomeHref, copy);
                   return (
                     <li key={`${item.href}-${item.label}`}>
                       <Link
                         href={href}
+                        onClick={() => setMobileOpen(false)}
                         title={!showLabel ? honesty.collapsedTitle : undefined}
                         aria-label={
-                          honesty.visibleQualifier ? honesty.accessibleName : undefined
+                          honesty.accessibleName || item.label
                         }
                         aria-current={active ? "page" : undefined}
                         data-nav-role={honesty.navRole}
@@ -313,8 +320,8 @@ export default function Sidebar({
                           showLabel ? "items-start" : "items-center justify-center"
                         } ${
                           active
-                            ? "bg-blue-600 text-white shadow-sm"
-                            : "text-gray-700 hover:bg-gray-100"
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "text-foreground hover:bg-muted"
                         }`}
                       >
                         {active && (
@@ -326,7 +333,7 @@ export default function Sidebar({
                         <IconForItem item={item} />
                         {showLabel && (
                           <span className="min-w-0">
-                            <span className="block truncate">{item.label}</span>
+                            <span className="block whitespace-normal break-words leading-5">{copy(item.label)}</span>
                             {honesty.visibleQualifier ? (
                               <Badge
                                 variant="outline"
@@ -412,26 +419,14 @@ export default function Sidebar({
     </Link>
   );
 
-  const desktopWidth = collapsed ? "md:w-16" : "md:w-64";
+  const desktopWidth = collapsed ? "md:w-16" : "md:w-72";
 
   return (
     <>
-      {/* Mobile hamburger trigger */}
-      <button
-        type="button"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Open navigation"
-        aria-expanded={mobileOpen}
-        aria-controls="ue-mobile-drawer"
-        className="fixed left-3 top-3 z-40 inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-700 shadow-sm md:hidden"
-      >
-        <Menu size={18} aria-hidden="true" />
-      </button>
-
       {/* Desktop sidebar (hidden on small screens) */}
       <aside
-        className={`hidden h-screen shrink-0 flex-col justify-between border-r border-gray-200 bg-white py-4 transition-[width] duration-200 ease-out md:flex ${desktopWidth}`}
-        aria-label={ROLE_EXECUTION_CHROME_LABEL}
+        className={`ue-sidebar hidden shrink-0 flex-col justify-between border-r border-gray-200 bg-white py-4 transition-[width] duration-200 ease-out md:flex ${desktopWidth}`}
+        aria-label={copy(ROLE_EXECUTION_CHROME_LABEL)}
         data-nav-role="legacy-side"
         data-nav-surface="desktop"
       >
@@ -446,8 +441,8 @@ export default function Sidebar({
               <button
                 type="button"
                 onClick={() => persistCollapsed(true)}
-                aria-label="Collapse sidebar"
-                title="Collapse sidebar"
+                aria-label={copy("Collapse sidebar")}
+                title={copy("Collapse sidebar")}
                 className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
               >
                 <ChevronsLeft size={16} aria-hidden="true" />
@@ -459,8 +454,8 @@ export default function Sidebar({
               <button
                 type="button"
                 onClick={() => persistCollapsed(false)}
-                aria-label="Expand sidebar"
-                title="Expand sidebar"
+                aria-label={copy("Expand sidebar")}
+                title={copy("Expand sidebar")}
                 className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
               >
                 <ChevronsRight size={16} aria-hidden="true" />
@@ -483,59 +478,17 @@ export default function Sidebar({
         </div>
       </aside>
 
-      {/* Mobile drawer */}
-      <div
-        className={`fixed inset-0 z-50 md:hidden ${
-          mobileOpen ? "" : "pointer-events-none"
-        }`}
-        aria-hidden={!mobileOpen}
-      >
-        <div
-          onClick={() => setMobileOpen(false)}
-          className={`absolute inset-0 bg-slate-900/40 transition-opacity duration-200 ${
-            mobileOpen ? "opacity-100" : "opacity-0"
-          }`}
-          aria-hidden="true"
-        />
-        <aside
-          id="ue-mobile-drawer"
-          role="dialog"
-          aria-modal="true"
-          aria-label={ROLE_EXECUTION_CHROME_LABEL}
-          data-nav-role="legacy-side"
-          data-nav-surface="drawer"
-          className={`relative ml-0 flex h-full w-72 max-w-[85vw] flex-col justify-between border-r border-gray-200 bg-white py-4 shadow-xl transition-transform duration-200 ease-out ${
-            mobileOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
-          <div>
-            <div className="mb-5 flex items-center justify-between px-3">
-              {renderBrand(true)}
-              <button
-                type="button"
-                onClick={() => setMobileOpen(false)}
-                aria-label="Close navigation"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-              >
-                <X size={18} aria-hidden="true" />
-              </button>
-            </div>
-
-            {isViewingTenantOrg && organization && (
-              <div className="mx-3 mb-3 flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-700">
-                <Building2 size={12} aria-hidden="true" />
-                <span className="truncate">Viewing: {organization.name}</span>
-              </div>
-            )}
-
-            {renderNav("drawer")}
-          </div>
-
-          <div className="mx-2 border-t border-gray-200 pt-3">
-            {renderProfile(true)}
-          </div>
-        </aside>
-      </div>
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent side="left" id="ue-mobile-drawer" data-nav-role="legacy-side"
+          aria-describedby={undefined}
+          onCloseAutoFocus={event => { event.preventDefault(); document.getElementById("ue-navigation-trigger")?.focus(); }}
+          data-nav-surface="drawer" className="ue-navigation-drawer w-[min(22rem,90vw)] overflow-y-auto">
+          <SheetTitle className="sr-only">{copy(ROLE_EXECUTION_CHROME_LABEL)}</SheetTitle>
+          <div className="mb-6 pr-12">{renderBrand(true)}</div>
+          {renderNav("drawer")}
+          <div className="mt-6 border-t border-border pt-4">{renderProfile(true)}</div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

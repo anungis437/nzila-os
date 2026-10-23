@@ -1,10 +1,9 @@
 "use client";
 
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
-import { motion } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +27,7 @@ export default function LanguageSwitcher() {
   const pathname = usePathname();
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
 
   // Read active locale from URL params (most reliable vs. parsing the raw path)
   const localeParam = (params?.locale as string) ?? "en-CA";
@@ -40,23 +40,23 @@ export default function LanguageSwitcher() {
     // next-intl's router.replace(path, { locale }) swaps the [locale] segment
     // and properly invalidates NextIntlClientProvider, triggering a server
     // component re-render with the new messages bundle.
-    router.replace(pathname, { locale: newLocale });
+    const query = searchParams.toString();
+    router.replace(pathname + (query ? '?' + query : '') + window.location.hash, { locale: newLocale });
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Button
             variant="ghost"
-            size="sm"
-            className="rounded-xl flex items-center space-x-1.5 px-3 py-2 shadow-sm border bg-white/70 border-white/60 text-gray-700 hover:bg-white/90 hover:text-gray-900 relative overflow-hidden"
+            size="default"
+            aria-label={locale === "fr-CA" ? "Changer de langue" : "Change language"}
+            className="flex shrink-0 items-center gap-1.5 border border-border bg-card px-3"
           >
             <Globe size={16} className="relative z-10" />
             <span className="relative z-10 text-lg">{currentLocale.flag}</span>
             <span className="relative z-10 hidden sm:inline">{currentLocale.label}</span>
           </Button>
-        </motion.div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40 bg-white/95 backdrop-blur-md border-white/60 shadow-lg">
         {locales.map((loc) => (

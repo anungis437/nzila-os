@@ -27,7 +27,7 @@
   --card-foreground: 222 47% 9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 9%;
-  --primary: 221 83% 53%;
+  --primary: 205 62% 32%;
   --primary-foreground: 0 0% 100%;
   --secondary: 210 24% 93%;
   --secondary-foreground: 222 47% 9%;
@@ -39,7 +39,7 @@
   --destructive-foreground: 0 0% 98%;
   --border: 210 21% 86%;
   --input: 210 21% 86%;
-  --ring: 221 83% 53%;
+  --ring: 205 62% 32%;
   --radius: 0.75rem;
   --chart-1: 221 83% 53%;
   --chart-2: 160 60% 45%;
@@ -458,7 +458,7 @@ html {
 }
 
 .dashboard-content > * {
-  animation: dashboard-fade-in 0.35s ease-out both;
+  /* Routine page content is immediately visible; no entrance staging. */
 }
 
 /* Stagger children for a polished cascade effect */
@@ -532,4 +532,51 @@ html {
   --color-accent: #1e3a8a;
   --color-accent-soft: #dbeafe;
   --color-accent-fg: #ffffff;
+}
+
+/* Operational application composition; shared across all authenticated pages. */
+:root {
+  --ue-content-width: 90rem;
+  --ue-page-gap: clamp(1rem, 3vw, 2rem);
+  --ue-header-layer: 20;
+  --ue-navigation-layer: 40;
+  --ue-dialog-layer: 50;
+}
+.ue-environment-banner { position: relative; z-index: 1; padding-top: max(.5rem, env(safe-area-inset-top)); }
+.ue-app-shell { display: flex; align-items: stretch; min-height: 100dvh; background: hsl(var(--background)); color: hsl(var(--foreground)); }
+.ue-app-main { flex: 1; min-width: 0; }
+.ue-sidebar { position: sticky; top: 0; height: 100dvh; overflow-y: auto; background: hsl(var(--card)); border-color: hsl(var(--border)); }
+.ue-global-header { position: sticky; top: 0; z-index: var(--ue-header-layer); display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; padding: .75rem max(1rem, env(safe-area-inset-right)) .75rem max(1rem, env(safe-area-inset-left)); background: hsl(var(--card)); border-bottom: 1px solid hsl(var(--border)); }
+.ue-header-context { flex: 1 1 12rem; min-width: 0; overflow-wrap: anywhere; }
+.ue-header-context nav, .ue-header-context nav > div { min-width: 0; flex-wrap: wrap; }
+.ue-header-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-width: 0; }
+.ue-organization-selector { width: min(17.5rem, 100%); min-width: 0; flex: 1 1 10rem; }
+.dashboard-content { width: 100%; max-width: var(--ue-content-width); margin-inline: auto; padding: var(--ue-page-gap); padding-bottom: max(2rem, env(safe-area-inset-bottom)); overflow-wrap: anywhere; }
+.dashboard-content > * { min-width: 0; }
+.dashboard-content h1 { font-size: clamp(1.5rem, 2vw, 1.875rem); font-weight: 600; line-height: 1.25; letter-spacing: -.025em; color: hsl(var(--foreground)); }
+.dashboard-content h2 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; letter-spacing: -.015em; }
+.ue-page-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: var(--ue-page-gap); }
+.ue-page-heading > :first-child { flex: 1 1 20rem; }
+.ue-page-description { max-width: 65ch; margin-top: .5rem; font-size: .9375rem; line-height: 1.6; color: hsl(var(--muted-foreground)); }
+.ue-page-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.ue-eyebrow { margin-bottom: .5rem; font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+.ue-contextual-guidance { position: relative; max-width: 40rem; margin: 1rem var(--ue-page-gap) 2rem auto; }
+.ue-navigation-drawer { padding-top: max(1.5rem, env(safe-area-inset-top)); padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+.ue-app-shell :where(a, button, input, select, textarea):focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
+@media (max-width: 767px) {
+  .ue-header-context { flex-basis: calc(100% - 4rem); font-size: .8125rem; }
+  .ue-header-controls { width: 100%; }
+  .ue-organization-selector { flex-basis: 8rem; width: auto; }
+  .ue-contextual-guidance { margin-inline: var(--ue-page-gap); }
+}
+
+.dashboard-content > .container { padding: 0; }
+.ue-app-shell {
+  --color-blue-50: hsl(var(--secondary));
+  --color-blue-100: hsl(var(--accent));
+  --color-blue-200: hsl(var(--border));
+  --color-blue-600: hsl(var(--primary));
+  --color-blue-700: var(--navy-light);
+  --color-blue-800: var(--navy);
+  --color-blue-900: var(--navy);
 }

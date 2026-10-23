@@ -10,7 +10,8 @@
  */
 
 import { useUser } from "@nzila/platform-auth/entra/client";
-import { useEffect, useState } from "react";
+import { useConsentDecision } from '@/lib/privacy/consent-decision';
+import { useOrganization } from '@/contexts/organization-context';
 import { useOnboarding } from "@/lib/hooks/use-onboarding";
 import {
   OnboardingOverlay,
@@ -31,14 +32,9 @@ export function OnboardingProvider({ userRole }: OnboardingProviderProps) {
     completeOnboarding,
   } = useOnboarding(user?.id);
 
-  // Small delay to let the page content render before showing overlay
-  const [delayPassed, setDelayPassed] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setDelayPassed(true), 600);
-    return () => clearTimeout(t);
-  }, []);
-
-  if (!showOverlay || !delayPassed) return null;
+  const privacyDecided = useConsentDecision();
+  const { organization, isLoading } = useOrganization();
+  if (!showOverlay || !privacyDecided || !user || isLoading || !organization) return null;
 
   const onboardingRole = toOnboardingRole(userRole);
 

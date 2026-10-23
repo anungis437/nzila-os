@@ -1,3 +1,4 @@
+import messages from '../../messages/en-CA.json';
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
@@ -10,14 +11,17 @@ import {
   ROLE_HOME_HUB_CUE_MESSAGE,
 } from '@/lib/dashboard/dual-nav-honesty';
 import Sidebar from '../sidebar';
+import { DashboardNavigationProvider, DashboardMenuTrigger } from '@/components/dashboard/navigation-context';
 
 const mockUsePilotMode = vi.fn();
 
 vi.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams(),
   usePathname: () => '/en-CA/dashboard/workspace',
 }));
 vi.mock('next-intl', () => ({
   useLocale: () => 'en-CA',
+  useTranslations: () => (key: string) => messages.experienceNavigation[key as keyof typeof messages.experienceNavigation],
 }));
 vi.mock('next/image', () => ({ default: () => null }));
 vi.mock('next/link', () => ({
@@ -54,12 +58,12 @@ beforeEach(() => {
 
 function renderSidebar(userRole: string) {
   return render(
-    <Sidebar
+    <DashboardNavigationProvider><DashboardMenuTrigger /><Sidebar
       profile={null}
       whopMonthlyPlanId="m"
       whopYearlyPlanId="y"
       userRole={userRole}
-    />,
+    /></DashboardNavigationProvider>,
   );
 }
 
@@ -179,7 +183,7 @@ describe('Sidebar dual-nav honesty', () => {
     );
     expect(
       screen.getAllByRole('navigation', { name: ROLE_EXECUTION_DESTINATIONS_LABEL }),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
     expect(screen.getAllByText('Orientation hub').length).toBeGreaterThanOrEqual(1);
     expectNoUndifferentiatedPrimary();
   });

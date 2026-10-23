@@ -11,7 +11,7 @@ import { CookieConsentProvider } from "@/components/gdpr/cookie-consent-provider
 import { DemoModeOverlay } from "@/components/pilot/demo-mode-overlay";
 import { getUnionEyesSiteTopology } from '@/lib/site-topology';
 import localFont from 'next/font/local';
-import { getLocale } from 'next-intl/server';
+import { getLocale, getMessages } from 'next-intl/server';
 import './globals.css';
 
 export const dynamic = 'force-dynamic'
@@ -82,6 +82,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Note: Profile creation/claiming is now handled in protected routes
   // to avoid calling auth() in the root layout which causes middleware detection issues
   const locale = await getLocale();
+  const messages = await getMessages();
   const site = getUnionEyesSiteTopology();
   const organizationSchema = {
     '@context': 'https://schema.org',
@@ -177,8 +178,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
         />
         {site.isStaging ? (
-          <div className="sticky top-0 z-100 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-950">
-            Staging environment. Pre-production data and behavior may change without notice.
+          <div className="ue-environment-banner border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-950">
+            {locale === 'fr-CA' ? 'Environnement de préproduction. Les données et le comportement peuvent changer sans préavis.' : 'Staging environment. Pre-production data and behavior may change without notice.'}
           </div>
         ) : null}
         <AuthProvider>
@@ -190,7 +191,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <DemoModeOverlay />
                 {children}
               </LayoutWrapper>
-              <CookieConsentProvider />
+              <CookieConsentProvider messages={messages.experiencePrivacy as Record<string, string>} />
               <Toaster />
             </OrganizationProvider>
             </Providers>

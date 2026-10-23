@@ -1,3 +1,4 @@
+import { DashboardNavigationProvider, DashboardMenuTrigger } from '@/components/dashboard/navigation-context';
 /**
  * Dashboard layout for Template App
  * This layout removes the global header from all dashboard pages
@@ -289,7 +290,8 @@ function renderDashboard({ children, profile, userEmail, userRole, organizationP
 }) {
   return (
     <PilotModeProvider>
-    <div className="flex h-screen bg-gray-50 relative overflow-hidden">
+    <DashboardNavigationProvider>
+    <div className="ue-app-shell">
       {/* Credits system disabled — no credit checks needed */}
       {/* Welcome popup disabled — users cannot manage plans or credits */}
         
@@ -312,13 +314,14 @@ function renderDashboard({ children, profile, userEmail, userRole, organizationP
         />
         
         {/* Main content area with organization selector */}
-        <div className="flex-1 min-w-0 overflow-auto relative bg-linear-to-br from-slate-50 via-white to-blue-50">
+        <div className="ue-app-main">
           {/* QC bilingual banner (Bill 96 / Law 25) */}
           <QcBilingualBanner province={organizationProvince} />
           {/* Organization selector and breadcrumb in header - sticky at top */}
-          <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200/60 pl-16 md:pl-6 pr-3 md:pr-6 py-2.5 md:py-4 flex justify-between items-center gap-2 min-h-12 md:min-h-15">
-            <OrganizationBreadcrumb />
-            <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+          <div className="ue-global-header">
+            <DashboardMenuTrigger />
+            <div className="ue-header-context"><OrganizationBreadcrumb /></div>
+            <div className="ue-header-controls">
               <LanguageSwitcher />
               <OrganizationSelector />
               <HeaderActions />
@@ -326,7 +329,7 @@ function renderDashboard({ children, profile, userEmail, userRole, organizationP
           </div>
           
           {/* Page content */}
-          <main className="dashboard-content p-3 md:p-6 mt-1 md:mt-2">
+          <main id="main-content" className="dashboard-content">
             <FeatureFlagProvider>
               <RoleExperienceGuard userRole={userRole} />
               {children}
@@ -337,6 +340,7 @@ function renderDashboard({ children, profile, userEmail, userRole, organizationP
           <OnboardingProvider userRole={userRole} />
         </div>
       </div>
+    </DashboardNavigationProvider>
     </PilotModeProvider>
   );
 } 

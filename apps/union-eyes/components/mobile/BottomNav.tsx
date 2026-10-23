@@ -2,8 +2,8 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   Home,
   Briefcase,
@@ -29,6 +29,10 @@ import {
   getVisibleNavigationForExperience,
   type NavigationItem,
 } from '@/lib/dashboard/role-experience';
+
+import { navigationDestination, selectedNavigationDestination } from '@/lib/dashboard/navigation-selection';
+
+import { navigationCopyKey } from '@/lib/dashboard/navigation-copy';
 
 interface BottomNavProps {
   className?: string;
@@ -99,7 +103,9 @@ function iconFor(label: string): LucideIcon {
  */
 export function BottomNav({ className, userRole }: BottomNavProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const locale = useLocale();
+  const copy = useTranslations('experienceNavigation');
   const { isPilotMode } = usePilotMode();
 
   const experience = useMemo(() => getDashboardExperience(userRole), [userRole]);
@@ -112,12 +118,8 @@ export function BottomNav({ className, userRole }: BottomNavProps) {
 
   const withLocale = (href: string) => `/${locale}${href}`;
 
-  const isActive = (href: string) => {
-    const hrefPath = href.split('?')[0];
-    const localizedPath = withLocale(hrefPath);
-    if (pathname === localizedPath) return true;
-    return hrefPath !== '/dashboard' && pathname.startsWith(`${localizedPath}/`);
-  };
+  const selected = selectedNavigationDestination(items, pathname, searchParams.toString());
+  const isActive = (href: string) => navigationDestination(href) === selected;
 
   return (
     <nav
@@ -139,15 +141,15 @@ export function BottomNav({ className, userRole }: BottomNavProps) {
             className={cn(
               'flex flex-col items-center justify-center py-1 px-3 rounded-lg',
               'transition-colors duration-200',
-              active ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700',
+              active ? 'text-primary' : 'text-gray-500 hover:text-gray-700',
             )}
             aria-current={active ? 'page' : undefined}
           >
             <span className="block w-6 h-6">
               <Icon className="w-6 h-6" aria-hidden />
             </span>
-            <span className="text-xs mt-1 font-medium truncate max-w-16">
-              {item.label}
+            <span className="text-xs mt-1 font-medium whitespace-normal text-center max-w-24">
+              {copy(navigationCopyKey(item.label))}
             </span>
           </Link>
         );

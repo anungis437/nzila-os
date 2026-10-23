@@ -138,7 +138,6 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
     'Governance Continuity Overview',
     'Governance Trust & Explainability',
     'Governance Continuity Review',
-    'Governance Policy Continuity',
     'OCRA Continuity Signals',
     'Institutional Intelligence Reports',
     'Profile & Settings',

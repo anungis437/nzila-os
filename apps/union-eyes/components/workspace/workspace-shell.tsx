@@ -14,6 +14,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeading } from '@/components/dashboard/page-heading';
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WorkspaceTabPanel } from "@/components/workspace/workspace-tab-panel";
@@ -132,19 +133,9 @@ export function WorkspaceShell({ role }: WorkspaceShellProps) {
     translate(t, `availability.${availability}`, availability);
 
   return (
-    <div className="container mx-auto py-6 space-y-6" data-testid="union-eyes-workspace">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {translate(t, "title", "Workspace")}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {translate(
-            t,
-            "intro",
-            "One operating surface for the union. Each section answers a single operational question. Labels show whether that section is in role, a stub for orientation, or unavailable.",
-          )}
-        </p>
-      </header>
+    <div className="space-y-6" data-testid="union-eyes-workspace">
+      <PageHeading title={translate(t, "title", "Workspace")}
+        description={translate(t, "intro", "One operating surface for the union. Each section answers a single operational question. Labels show whether that section is in role, a stub for orientation, or unavailable.")} />
 
       {persona === null ? (
         <p

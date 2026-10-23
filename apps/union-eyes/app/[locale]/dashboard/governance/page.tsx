@@ -1,3 +1,5 @@
+import { PageHeading } from '@/components/dashboard/page-heading';
+import { getLocale } from 'next-intl/server';
 import type { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
@@ -21,20 +23,11 @@ export default async function GovernanceOverviewPage() {
     redirect("/dashboard");
   }
 
-  return (
-    <div className="space-y-6">
-      <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
-          Governance Continuity
-        </p>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900">
-          Governance Continuity Overview
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-          This workspace brings together oversight, policy continuity, evidence trails,
-          and review posture in one place for governance-facing roles.
-        </p>
-      </section>
-    </div>
-  );
+  const french = (await getLocale()) === 'fr-CA';
+  return <PageHeading
+    eyebrow={french ? 'Gouvernance' : 'Governance'}
+    title={french ? 'Aperçu de la continuité de la gouvernance' : 'Governance Continuity Overview'}
+    description={french
+      ? 'Aperçu des domaines de surveillance, de continuité des politiques et de revue. Cette page est une introduction; elle ne présente pas de résultats opérationnels.'
+      : 'An overview of oversight, policy continuity and review areas. This page is an introduction; it does not present operational results.'} />;
 }

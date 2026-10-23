@@ -8,7 +8,7 @@
 "use client";
 import Link from 'next/link';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,6 +23,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Cookie, Shield, Settings } from "lucide-react";
 
+import { CONSENT_DECISION_EVENT, hasStoredConsentDecision } from '@/lib/privacy/consent-decision';
+
 interface CookiePreferences {
   essential: boolean;
   functional: boolean;
@@ -33,9 +35,12 @@ interface CookiePreferences {
 interface CookieConsentBannerProps {
   organizationId: string;
   userId?: string;
+  messages?: Record<string, string>;
 }
 
-export function CookieConsentBanner({ organizationId, userId }: CookieConsentBannerProps) {
+export function CookieConsentBanner({ organizationId, userId, messages }: CookieConsentBannerProps) {
+  const fieldId = useId();
+  const text = (key: string, fallback: string) => messages?.[key] ?? fallback;
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>({
@@ -44,26 +49,6 @@ export function CookieConsentBanner({ organizationId, userId }: CookieConsentBan
     analytics: false,
     marketing: false,
   });
-
-  useEffect(() => {
-    // Check if user has already consented
-    const consentId = localStorage.getItem("cookie_consent_id");
-    const consentData = localStorage.getItem("cookie_consent");
-
-    if (!consentId || !consentData) {
-      // Show banner after a short delay
-      setTimeout(() => setShowBanner(true), 1000);
-    } else {
-      // Load existing preferences
-      try {
-        const saved = JSON.parse(consentData);
-        setPreferences(saved.preferences);
-        applyConsent(saved.preferences);
-      } catch (_e) {
-}
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const applyConsent = (prefs: CookiePreferences) => {
     // Apply cookie preferences
@@ -119,6 +104,26 @@ export function CookieConsentBanner({ organizationId, userId }: CookieConsentBan
     }
   };
 
+  useEffect(() => {
+    // Check if user has already consented
+    const consentId = localStorage.getItem("cookie_consent_id");
+    const consentData = localStorage.getItem("cookie_consent");
+
+    if (!consentId || !consentData || !hasStoredConsentDecision()) {
+      // Privacy precedes onboarding; no competing presentation timers.
+      setShowBanner(true);
+    } else {
+      // Load existing preferences
+      try {
+        const saved = JSON.parse(consentData);
+        setPreferences(saved.preferences);
+        applyConsent(saved.preferences);
+      } catch (_e) {
+}
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const saveConsent = async (prefs: CookiePreferences) => {
     const consentId = localStorage.getItem("cookie_consent_id") || crypto.randomUUID();
     const consentData = {
@@ -155,6 +160,7 @@ export function CookieConsentBanner({ organizationId, userId }: CookieConsentBan
 }
 
     applyConsent(prefs);
+    window.dispatchEvent(new Event(CONSENT_DECISION_EVENT));
   };
 
   const handleAcceptAll = async () => {
@@ -195,45 +201,33 @@ export function CookieConsentBanner({ organizationId, userId }: CookieConsentBan
     <>
       {/* Simple Banner */}
       {!showSettings && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
-          <div className="container max-w-7xl mx-auto p-4 md:p-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+        <Dialog open onOpenChange={() => {}}><DialogContent showCloseButton={false} aria-describedby="ue-privacy-description" className="max-w-3xl" onEscapeKeyDown={event => event.preventDefault()} onPointerDownOutside={event => event.preventDefault()}>
+          <div className="min-w-0">
+            <div className="flex flex-col items-stretch gap-6">
               <div className="flex items-start gap-3 flex-1">
                 <Cookie className="w-6 h-6 text-primary mt-1 shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-lg mb-1">
-                    We value your privacy
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    We use cookies to enhance your experience, analyze site
-                    traffic, and personalize content. You can customize your
-                    preferences or accept all cookies.
-                  </p>
+                  <DialogTitle className="font-semibold text-lg mb-1">{text("text0", "We value your privacy")}</DialogTitle>
+                  <DialogDescription id="ue-privacy-description" className="text-sm text-muted-foreground">{text("text1", "We use cookies to enhance your experience, analyze site traffic, and personalize content. You can customize your preferences or accept all cookies.")}</DialogDescription>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <Button
                   variant="outline"
                   onClick={() => setShowSettings(true)}
                   className="w-full sm:w-auto"
                 >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Customize
-                </Button>
+                  <Settings className="w-4 h-4 mr-2" />{text("text2", "Customize")}</Button>
                 <Button
                   variant="outline"
                   onClick={handleRejectAll}
                   className="w-full sm:w-auto"
-                >
-                  Reject All
-                </Button>
-                <Button onClick={handleAcceptAll} className="w-full sm:w-auto">
-                  Accept All
-                </Button>
+                >{text("text3", "Reject All")}</Button>
+                <Button onClick={handleAcceptAll} className="w-full sm:w-auto">{text("text4", "Accept All")}</Button>
               </div>
             </div>
           </div>
-        </div>
+        </DialogContent></Dialog>
       )}
 
       {/* Detailed Settings Dialog */}
@@ -241,44 +235,34 @@ export function CookieConsentBanner({ organizationId, userId }: CookieConsentBan
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              Cookie Preferences
-            </DialogTitle>
-            <DialogDescription>
-              Manage your cookie preferences. Essential cookies cannot be
-              disabled as they are required for the website to function.
-            </DialogDescription>
+              <Shield className="w-5 h-5" />{text("text5", "Cookie Preferences")}</DialogTitle>
+            <DialogDescription>{text("text6", "Manage your cookie preferences. Essential cookies cannot be disabled as they are required for the website to function.")}</DialogDescription>
           </DialogHeader>
 
           <Tabs defaultValue="overview" className="mt-4">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="overview">{text("text7", "Overview")}</TabsTrigger>
+              <TabsTrigger value="details">{text("text8", "Details")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4 mt-4">
               {/* Essential Cookies */}
               <div className="flex items-start justify-between space-x-4 p-4 border rounded-lg bg-muted/30">
                 <div className="flex-1">
-                  <Label className="font-semibold">Essential Cookies</Label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Required for the website to function properly. These cannot
-                    be disabled.
-                  </p>
+                  <Label htmlFor={`${fieldId}-essential`} className="font-semibold">{text("text9", "Essential Cookies")}</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{text("text13", "Required for the website to function properly. These cannot be disabled.")}</p>
                 </div>
-                <Switch checked={true} disabled className="mt-1" />
+                <Switch id={`${fieldId}-essential`} checked={true} disabled className="mt-1" />
               </div>
 
               {/* Functional Cookies */}
               <div className="flex items-start justify-between space-x-4 p-4 border rounded-lg">
                 <div className="flex-1">
-                  <Label className="font-semibold">Functional Cookies</Label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Enable enhanced features like language preferences and
-                    personalization.
-                  </p>
+                  <Label htmlFor={`${fieldId}-functional`} className="font-semibold">{text("text10", "Functional Cookies")}</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{text("text14", "Enable enhanced features like language preferences and personalization.")}</p>
                 </div>
                 <Switch
+                  id={`${fieldId}-functional`}
                   checked={preferences.functional}
                   onCheckedChange={(checked) =>
                     setPreferences({ ...preferences, functional: checked })
@@ -290,13 +274,11 @@ export function CookieConsentBanner({ organizationId, userId }: CookieConsentBan
               {/* Analytics Cookies */}
               <div className="flex items-start justify-between space-x-4 p-4 border rounded-lg">
                 <div className="flex-1">
-                  <Label className="font-semibold">Analytics Cookies</Label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Help us understand how visitors interact with our website
-                    through anonymized data.
-                  </p>
+                  <Label htmlFor={`${fieldId}-analytics`} className="font-semibold">{text("text11", "Analytics Cookies")}</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{text("text15", "Help us understand how visitors interact with our website through anonymized data.")}</p>
                 </div>
                 <Switch
+                  id={`${fieldId}-analytics`}
                   checked={preferences.analytics}
                   onCheckedChange={(checked) =>
                     setPreferences({ ...preferences, analytics: checked })
@@ -308,13 +290,11 @@ export function CookieConsentBanner({ organizationId, userId }: CookieConsentBan
               {/* Marketing Cookies */}
               <div className="flex items-start justify-between space-x-4 p-4 border rounded-lg">
                 <div className="flex-1">
-                  <Label className="font-semibold">Marketing Cookies</Label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Used to deliver personalized advertisements and measure
-                    campaign effectiveness.
-                  </p>
+                  <Label htmlFor={`${fieldId}-marketing`} className="font-semibold">{text("text12", "Marketing Cookies")}</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{text("text16", "Used to deliver personalized advertisements and measure campaign effectiveness.")}</p>
                 </div>
                 <Switch
+                  id={`${fieldId}-marketing`}
                   checked={preferences.marketing}
                   onCheckedChange={(checked) =>
                     setPreferences({ ...preferences, marketing: checked })
@@ -327,55 +307,50 @@ export function CookieConsentBanner({ organizationId, userId }: CookieConsentBan
             <TabsContent value="details" className="mt-4">
               <div className="space-y-4 text-sm">
                 <div>
-                  <h4 className="font-semibold mb-2">Essential Cookies</h4>
+                  <h4 className="font-semibold mb-2">{text("text9", "Essential Cookies")}</h4>
                   <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                    <li>session_id - Maintains your login session</li>
-                    <li>csrf_token - Protects against security attacks</li>
-                    <li>auth_token - Authenticates your requests</li>
+                    <li>{text("text22", "session_id - Maintains your login session")}</li>
+                    <li>{text("text23", "csrf_token - Protects against security attacks")}</li>
+                    <li>{text("text24", "auth_token - Authenticates your requests")}</li>
                   </ul>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-2">Functional Cookies</h4>
+                  <h4 className="font-semibold mb-2">{text("text10", "Functional Cookies")}</h4>
                   <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                    <li>language_preference - Remembers your language choice</li>
-                    <li>theme_preference - Stores your theme selection</li>
+                    <li>{text("text25", "language_preference - Remembers your language choice")}</li>
+                    <li>{text("text26", "theme_preference - Stores your theme selection")}</li>
                   </ul>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-2">Analytics Cookies</h4>
+                  <h4 className="font-semibold mb-2">{text("text11", "Analytics Cookies")}</h4>
                   <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                    <li>_ga - Google Analytics identifier</li>
-                    <li>_gid - Google Analytics session identifier</li>
-                    <li>analytics_session - Internal analytics tracking</li>
+                    <li>{text("text27", "_ga - Google Analytics identifier")}</li>
+                    <li>{text("text28", "_gid - Google Analytics session identifier")}</li>
+                    <li>{text("text29", "analytics_session - Internal analytics tracking")}</li>
                   </ul>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-2">Marketing Cookies</h4>
+                  <h4 className="font-semibold mb-2">{text("text12", "Marketing Cookies")}</h4>
                   <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                    <li>marketing_id - Tracks marketing campaigns</li>
-                    <li>ad_personalization - Enables personalized ads</li>
+                    <li>{text("text30", "marketing_id - Tracks marketing campaigns")}</li>
+                    <li>{text("text31", "ad_personalization - Enables personalized ads")}</li>
                   </ul>
                 </div>
 
                 <div className="pt-4 border-t">
-                  <p className="text-xs text-muted-foreground">
-                    For more information, please read our{" "}
+                  <p className="text-xs text-muted-foreground">{text("text17", "For more information, please read our")}{" "}
                     <Link href="/privacy-policy"
                       className="text-primary underline"
                       target="_blank"
-                    >
-                      Privacy Policy
-                    </Link>{" "}
+                    >{text("text18", "Privacy Policy")}</Link>{" "}
                     and{" "}
                     <Link href="/cookie-policy"
                       className="text-primary underline"
                       target="_blank"
-                    >
-                      Cookie Policy
-                    </Link>
+                    >{text("text20", "Cookie Policy")}</Link>
                     .
                   </p>
                 </div>
@@ -384,12 +359,8 @@ export function CookieConsentBanner({ organizationId, userId }: CookieConsentBan
           </Tabs>
 
           <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button variant="outline" onClick={handleRejectAll}>
-              Reject All
-            </Button>
-            <Button onClick={handleSavePreferences}>
-              Save Preferences
-            </Button>
+            <Button variant="outline" onClick={handleRejectAll}>{text("text3", "Reject All")}</Button>
+            <Button onClick={handleSavePreferences}>{text("text21", "Save Preferences")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
