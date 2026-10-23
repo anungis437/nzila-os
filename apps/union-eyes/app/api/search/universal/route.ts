@@ -7,6 +7,7 @@ import {
 } from '@/lib/api/standardized-responses';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { hasSupervisoryCaseRead } from '@/lib/cases/supervisory-case-read';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
@@ -58,7 +59,8 @@ export const GET = withOrganizationAuth(async (request, context) => {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Search query must be at least 2 characters');
   }
 
-  const isStewardPlus = await hasMinRole('steward');
+  // Supervisory case-read authority (case_read_any), not merely a steward role.
+  const isStewardPlus = await hasSupervisoryCaseRead(organizationId, userId);
 
   const caseRows = await db
     .select({

@@ -4,6 +4,7 @@ const m = vi.hoisted(() => ({
   withOrganizationAuth: vi.fn(),
   requireEntitlement: vi.fn(),
   hasMinRole: vi.fn(),
+  hasSupervisoryCaseRead: vi.fn(),
   isDocumentVisibleByPolicy: vi.fn(),
   normalizeDocumentTitle: vi.fn(),
   toGovernanceLabel: vi.fn(),
@@ -41,6 +42,7 @@ const mockDb: any = {
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/cases/supervisory-case-read', () => ({ hasSupervisoryCaseRead: m.hasSupervisoryCaseRead }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (a: any, b?: any) => {
     const fn = typeof a === 'function' ? a : b;
@@ -89,6 +91,7 @@ describe('documents/repository/[id] route', () => {
     m.withOrganizationAuth.mockImplementation((handler: any) => (_req: Request, context: any = { organizationId: 'org_1', userId: 'u1' }, params: any = { id: 'd1' }) => handler(_req, context, params));
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
+    m.hasSupervisoryCaseRead.mockResolvedValue(true);
     m.isDocumentVisibleByPolicy.mockReturnValue(true);
     m.normalizeDocumentTitle.mockReturnValue('Doc');
     m.toGovernanceLabel.mockReturnValue('public_internal');

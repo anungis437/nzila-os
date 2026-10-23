@@ -26,6 +26,7 @@ const m = vi.hoisted(() => {
     state,
     requireEntitlement: vi.fn(),
     hasMinRole: vi.fn(),
+    hasSupervisoryCaseRead: vi.fn(),
     getEffectiveCaseAccess: vi.fn(),
     isDocumentVisibleByPolicy: vi.fn(),
     normalizeDocumentTitle: vi.fn(),
@@ -50,6 +51,7 @@ vi.mock('@/services/platform-economics/entitlement-guard', () => ({
   requireEntitlement: m.requireEntitlement,
 }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/cases/supervisory-case-read', () => ({ hasSupervisoryCaseRead: m.hasSupervisoryCaseRead }));
 vi.mock('@/lib/organization-middleware', () => ({
   withOrganizationAuth: vi.fn(
     (handler: (req: NextRequest, ctx: { organizationId: string; userId: string }) => Promise<Response>) =>
@@ -85,6 +87,7 @@ describe('documents/repository route', () => {
     m.resetQueues();
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
+    m.hasSupervisoryCaseRead.mockResolvedValue(true);
     m.getEffectiveCaseAccess.mockResolvedValue({
       isPrimaryOwner: true,
       canViewCase: true,
@@ -131,7 +134,8 @@ describe('documents/repository route', () => {
 
   it('returns only visible documents after policy checks', async () => {
     const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    m.hasMinRole.mockResolvedValueOnce(true);
+    m.hasSupervisoryCaseRead.mockResolvedValueOnce(false);
     m.queueSelect([
       {
         id: 'doc-1',

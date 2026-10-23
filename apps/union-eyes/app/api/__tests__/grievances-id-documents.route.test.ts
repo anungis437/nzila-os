@@ -4,6 +4,7 @@ const m = vi.hoisted(() => ({
   withOrganizationAuth: vi.fn(),
   requireEntitlement: vi.fn(),
   hasMinRole: vi.fn(),
+  hasSupervisoryCaseRead: vi.fn(),
   withRLSContext: vi.fn(),
   auditDataMutation: vi.fn(),
   trackPilotEvent: vi.fn(),
@@ -37,6 +38,7 @@ const mockDb: any = {
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/cases/supervisory-case-read', () => ({ hasSupervisoryCaseRead: m.hasSupervisoryCaseRead }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
@@ -63,6 +65,7 @@ describe('grievances/[id]/documents route', () => {
     );
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
+    m.hasSupervisoryCaseRead.mockResolvedValue(true);
     m.withRLSContext.mockImplementation(async (fn: any) => fn(mockDb));
     m.buildUnionEvidencePack.mockResolvedValue({});
     m.getEffectiveCaseAccess.mockResolvedValue({ hasAccess: true, canModify: true });

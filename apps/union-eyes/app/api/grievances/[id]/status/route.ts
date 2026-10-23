@@ -11,6 +11,9 @@ import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
+import { hasSupervisoryCaseRead } from "@/lib/cases/supervisory-case-read";
+import { canTransitionGrievance } from "@/lib/cases/grievance-transition-authority";
+import { getEffectiveCaseAccess } from "@/lib/services/case-access-service";
 import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
@@ -74,6 +77,29 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
+    // Role level is necessary but not sufficient: the actor needs authority over this matter.
+    const caseAccess = await getEffectiveCaseAccess({ organizationId, grievanceId: params.id, userId });
+    const mayTransition = canTransitionGrievance({
+      supervisory: await hasSupervisoryCaseRead(organizationId, userId),
+      isPrimaryOwner: caseAccess.isPrimaryOwner,
+      accessRole: caseAccess.isSecondaryCollaborator ? caseAccess.accessRole : null,
+      grievanceStatus: grievance.status as string,
+      primaryRepresentativeId: grievance.unionRepId,
+    });
+    if (!mayTransition) {
+      await auditLog({
+        eventType: AuditEventType.AUTHORITY_VIOLATION,
+        severity: AuditSeverity.HIGH,
+        userId,
+        organizationId,
+        resource: "grievances",
+        action: "status_transition",
+        resourceId: params.id,
+        details: { reason: "Representative has no authority over this matter", requestedStatus: newStatus },
+        outcome: "failure",
+      });
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have authority to change the status of this matter");
+    }
     // Map existing status to unified FSM status via state bridge
     const currentStatus = grievance.status as string;
     const isAdmin = await hasMinRole("admin");

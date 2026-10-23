@@ -11,6 +11,10 @@ const m = vi.hoisted(() => ({
 
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/cases/supervisory-case-read', () => ({
+  hasSupervisoryCaseRead: vi.fn().mockResolvedValue(true),
+  creatorAccessApplies: vi.fn().mockResolvedValue(false),
+}));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: m.getEffectiveCaseAccess }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));

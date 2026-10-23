@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   requireEntitlement: vi.fn(),
   hasMinRole: vi.fn(),
+  hasSupervisoryCaseRead: vi.fn(),
   withRLSContext: vi.fn(),
   dbInsertReturning: vi.fn(),
   dbInsertValues: vi.fn(),
@@ -42,6 +43,7 @@ vi.mock('@/lib/organization-middleware', () => ({
   withOrganizationAuth: vi.fn((handler: (req: NextRequest, ctx: any) => Promise<Response>) => (req: NextRequest, ctx: any) => handler(req, ctx)),
 }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/cases/supervisory-case-read', () => ({ hasSupervisoryCaseRead: m.hasSupervisoryCaseRead }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/audit-logger', () => ({
   AuditEventType: {
@@ -71,6 +73,7 @@ describe('grievances route', () => {
     vi.clearAllMocks();
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
+    m.hasSupervisoryCaseRead.mockResolvedValue(false);
     m.withRLSContext.mockImplementation(async (a: unknown, b?: unknown) => {
       const fn = (typeof a === 'function' ? a : b) as (tx?: unknown) => Promise<unknown>;
       return fn({});
@@ -199,5 +202,40 @@ describe('grievances route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.success).toBe(true);
+  });
+
+  it('GET gives an ordinary steward case rows plus minimum triage rows, and no more', async () => {
+    m.dbSelectWhere
+      .mockResolvedValueOnce([{ id: 'owned', status: 'filed', description: 'private' }])
+      .mockResolvedValueOnce([{ id: 'intake', status: 'draft' }, { id: 'owned', status: 'filed' }]);
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/grievances'), { organizationId: 'org_1', userId: 'user_1' });
+    const { data } = await response.json();
+
+    expect(m.hasSupervisoryCaseRead).toHaveBeenCalledWith('org_1', 'user_1');
+    expect(data).toEqual([
+      { id: 'owned', status: 'filed', description: 'private', access: 'case' },
+      { id: 'intake', status: 'draft', access: 'triage' },
+    ]);
+  });
+
+  it('GET omits triage rows when the caller filters to a non-intake status', async () => {
+    m.dbSelectWhere.mockResolvedValueOnce([{ id: 'owned', status: 'filed' }]);
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/grievances?status=active'), { organizationId: 'org_1', userId: 'user_1' });
+    const { data } = await response.json();
+    expect(data).toEqual([{ id: 'owned', status: 'filed', access: 'case' }]);
+    expect(m.dbSelectWhere).toHaveBeenCalledTimes(1);
+  });
+
+  it('GET lets supervisory authority read the organization queue in one query', async () => {
+    m.hasSupervisoryCaseRead.mockResolvedValue(true);
+    m.dbSelectWhere.mockResolvedValueOnce([{ id: 'a', status: 'filed' }, { id: 'b', status: 'filed' }]);
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/grievances'), { organizationId: 'org_1', userId: 'chief_1' });
+    const { data } = await response.json();
+    expect(data.map((row: { id: string }) => row.id)).toEqual(['a', 'b']);
+    expect(data.every((row: { access: string }) => row.access === 'case')).toBe(true);
+    expect(m.dbSelectWhere).toHaveBeenCalledTimes(1);
   });
 });

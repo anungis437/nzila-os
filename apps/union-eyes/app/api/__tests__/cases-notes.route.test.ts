@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
   claimQueue: [] as unknown[][],
   notesQueue: [] as unknown[][],
   insertQueue: [] as unknown[][],
+  insertValues: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
@@ -59,9 +60,10 @@ describe('cases/[caseId]/notes route', () => {
           })),
         })),
         insert: vi.fn(() => ({
-          values: vi.fn(() => ({
-            returning: vi.fn(async () => (m.insertQueue.shift() ?? []) as unknown[]),
-          })),
+          values: vi.fn((value: unknown) => {
+            m.insertValues(value);
+            return { returning: vi.fn(async () => (m.insertQueue.shift() ?? []) as unknown[]) };
+          }),
         })),
       };
       return fn(tx);
@@ -129,6 +131,35 @@ describe('cases/[caseId]/notes route', () => {
     expect(json.success).toBe(true);
     expect(m.auditDataMutation).toHaveBeenCalled();
   });
+  it('keeps a representative note internal unless member visibility is chosen explicitly', async () => {
+    const { POST } = await loadRoute();
+    const post = (body: unknown) => POST(new Request('http://localhost/api/cases/c1/notes', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
+
+    m.claimQueue.push([{ claimId: 'c1' }]);
+    m.insertQueue.push([{ updateId: 'n1' }]);
+    expect((await post({ text: 'working note' })).status).toBe(201);
+    expect(m.insertValues).toHaveBeenLastCalledWith(expect.objectContaining({ isInternal: true, visibilityScope: 'staff' }));
+
+    m.claimQueue.push([{ claimId: 'c1' }]);
+    m.insertQueue.push([{ updateId: 'n2' }]);
+    expect((await post({ text: 'update for the member', isInternal: false })).status).toBe(201);
+    expect(m.insertValues).toHaveBeenLastCalledWith(expect.objectContaining({ isInternal: false, visibilityScope: 'member' }));
+  });
+
+  it('records a member-authored note as member-visible', async () => {
+    const { POST } = await loadRoute();
+    m.getUserRoleInOrganization.mockResolvedValueOnce('member');
+    m.claimQueue.push([{ claimId: 'c1' }]);
+    m.insertQueue.push([{ updateId: 'n3' }]);
+    const response = await POST(new Request('http://localhost/api/cases/c1/notes', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: 'my message' }),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
+    expect(response.status).toBe(201);
+    expect(m.insertValues).toHaveBeenLastCalledWith(expect.objectContaining({ isInternal: false, visibilityScope: 'member' }));
+  });
+
   it('denies member internal-note creation before any business write', async () => {
     const { POST } = await loadRoute();
     m.getUserRoleInOrganization.mockResolvedValueOnce('member');

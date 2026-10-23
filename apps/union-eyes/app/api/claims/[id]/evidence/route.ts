@@ -8,13 +8,20 @@
  * - Defensibility pack (if previously generated)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { requireApiAuth } from '@/lib/api-auth-guard'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { claims, claimUpdates } from '@/db/schema'
 import { defensibilityPacks } from '@/db/schema/defensibility-packs-schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { clientErrorResponse } from '@/lib/api/authorization-denial'
+import { claimHistoryReference } from '@/lib/cases/claim-history-reference'
+import {
+  caseAuthorizationResponse,
+  caseHistoryVisibility,
+  findReadableCase,
+  getCaseActor,
+  requireCaseAction,
+} from '@/lib/cases/case-authorization'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,48 +30,43 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { userId: _userId, organizationId } = await requireApiAuth({
-      orgScoped: true,
-      roles: ['steward', 'admin'],
-    })
-
+    // Organization, role and case authority are derived server-side; evidence is staff-level only
+    // and limited to cases the actor may read (assigned, own, or supervisory case_read_any).
+    const actor = await getCaseActor()
     const { id: claimId } = await params
+    await requireCaseAction(actor, 'note_add_internal', claimId)
 
-    // Fetch claim — always org_id scoped to prevent cross-org evidence access
-    const claimFilter = organizationId
-      ? and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId))
-      : eq(claims.claimId, claimId)
+    const evidence = await withRLSContext(async (tx) => {
+      const readable = await findReadableCase(tx, actor, claimId)
+      if (!readable) return null
 
-    const [claim] = await withRLSContext(async (tx) =>
-      tx
+      const [claim] = await tx
         .select()
         .from(claims)
-        .where(claimFilter)
+        .where(and(eq(claims.claimId, readable.claimId), eq(claims.organizationId, actor.organizationId)))
         .limit(1)
-    )
+      if (!claim) return null
 
-    if (!claim) {
-      return NextResponse.json({ error: 'Claim not found' }, { status: 404 })
-    }
-
-    // Fetch all updates (audit log)
-    const updates = await withRLSContext(async (tx) =>
-      tx
+      const updates = await tx
         .select()
         .from(claimUpdates)
-        .where(eq(claimUpdates.claimId, claimId))
+        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(actor)))
         .orderBy(claimUpdates.createdAt)
-    )
 
-    // Fetch latest defensibility pack if available
-    const [pack] = await withRLSContext(async (tx) =>
-      tx
+      const [pack] = await tx
         .select()
         .from(defensibilityPacks)
-        .where(eq(defensibilityPacks.caseId, claimId))
+        .where(eq(defensibilityPacks.caseId, claim.claimId))
         .orderBy(desc(defensibilityPacks.generatedAt))
         .limit(1)
-    )
+
+      return { claim, updates, pack }
+    })
+
+    if (!evidence) {
+      return NextResponse.json({ error: 'Claim not found' }, { status: 404 })
+    }
+    const { claim, updates, pack } = evidence
 
     return NextResponse.json({
       claim: {
@@ -115,7 +117,7 @@ export async function GET(
       generated_at: new Date().toISOString(),
     })
   } catch (err) {
-    const denied = clientErrorResponse(err)
+    const denied = caseAuthorizationResponse(err) ?? clientErrorResponse(err)
     if (denied) return denied
     logger.error('Evidence pack export failed', { error: String(err) })
     return NextResponse.json(

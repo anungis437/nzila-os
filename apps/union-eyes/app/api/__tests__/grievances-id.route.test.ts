@@ -4,6 +4,8 @@ const m = vi.hoisted(() => ({
   withOrganizationAuth: vi.fn(),
   requireEntitlement: vi.fn(),
   hasMinRole: vi.fn(),
+  hasSupervisoryCaseRead: vi.fn(),
+  creatorAccessApplies: vi.fn(),
   db: { select: vi.fn() },
   selectQueue: [] as unknown[][],
   getEffectiveCaseAccess: vi.fn(),
@@ -16,6 +18,10 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/cases/supervisory-case-read', () => ({
+  hasSupervisoryCaseRead: m.hasSupervisoryCaseRead,
+  creatorAccessApplies: m.creatorAccessApplies,
+}));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (a: any, b?: any) => {
     const fn = typeof a === 'function' ? a : b;
@@ -46,6 +52,8 @@ describe('grievances/[id] route', () => {
     m.withOrganizationAuth.mockImplementation((handler: any) => (request: Request, context: any = { organizationId: 'org_1', userId: 'u1' }, params: any = { id: 'g1' }) => handler(request, context, params));
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
+    m.hasSupervisoryCaseRead.mockResolvedValue(true);
+    m.creatorAccessApplies.mockResolvedValue(false);
     m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canManageAssignments: true, isPrimaryOwner: true, canViewPrivateDocuments: true });
     m.expireElapsedCaseAccessAssignments.mockResolvedValue(undefined);
     m.isDocumentVisibleByPolicy.mockReturnValue(true);
@@ -111,12 +119,10 @@ describe('grievances/[id] route', () => {
     expect(m.trackPilotEvent).not.toHaveBeenCalled();
   });
 
-  it('returns forbidden when non-steward user has no ownership or delegated access', async () => {
+  it('returns forbidden when a steward has no ownership, creation or delegated access', async () => {
     const { GET } = await loadRoute();
 
-    m.hasMinRole
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false);
+    m.hasSupervisoryCaseRead.mockResolvedValueOnce(false);
     m.getEffectiveCaseAccess.mockResolvedValueOnce({
       canViewCase: false,
       canManageAssignments: false,
@@ -132,9 +138,7 @@ describe('grievances/[id] route', () => {
 
   it('returns governed documents and tracks pilot access event', async () => {
     const { GET } = await loadRoute();
-    m.hasMinRole
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false);
+    m.hasSupervisoryCaseRead.mockResolvedValueOnce(false);
     m.getEffectiveCaseAccess.mockResolvedValueOnce({
       canViewCase: true,
       canManageAssignments: false,

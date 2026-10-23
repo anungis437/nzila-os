@@ -3,6 +3,9 @@ import { and, desc, eq } from 'drizzle-orm';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { hasSupervisoryCaseRead } from '@/lib/cases/supervisory-case-read';
+import { organizationMembers } from '@/db/schema-organizations';
+import { isNull } from 'drizzle-orm';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -35,9 +38,9 @@ const updateStatusSchema = z.object({
   status: z.enum(['active', 'revoked', 'expired']),
 });
 
+/** Granting access is a delegation: only supervisory authority or the primary owner may delegate. */
 async function canManageAccess(organizationId: string, grievanceId: string, userId: string) {
-  const isStewardPlus = await hasMinRole('steward');
-  if (isStewardPlus) {
+  if (await hasSupervisoryCaseRead(organizationId, userId)) {
     return true;
   }
 
@@ -48,6 +51,22 @@ async function canManageAccess(organizationId: string, grievanceId: string, user
   });
 
   return access.isPrimaryOwner;
+}
+
+async function isActiveOrganizationMember(organizationId: string, userId: string) {
+  const [member] = await db
+    .select({ id: organizationMembers.id })
+    .from(organizationMembers)
+    .where(
+      and(
+        eq(organizationMembers.organizationId, organizationId),
+        eq(organizationMembers.userId, userId),
+        eq(organizationMembers.status, 'active'),
+        isNull(organizationMembers.deletedAt),
+      ),
+    )
+    .limit(1);
+  return Boolean(member);
 }
 
 export const GET = withOrganizationAuth(async (_request, context, params?: { id: string }) => {
@@ -71,7 +90,7 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     userId,
   });
 
-  const isStewardPlus = await hasMinRole('steward');
+  const isStewardPlus = await hasSupervisoryCaseRead(organizationId, userId);
   const effectiveAccessForResponse = {
     ...effective,
     canManageAssignments: isStewardPlus || effective.canManageAssignments,
@@ -93,7 +112,11 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     .orderBy(desc(grievanceCaseAccessAssignments.grantedAt));
 
   return standardSuccessResponse({
-    primaryLroId: (await db.select({ unionRepId: grievances.unionRepId }).from(grievances).where(eq(grievances.id, params.id)).limit(1))[0]?.unionRepId ?? null,
+    primaryLroId: (await db
+      .select({ unionRepId: grievances.unionRepId })
+      .from(grievances)
+      .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)))
+      .limit(1))[0]?.unionRepId ?? null,
     assignments,
     effectiveAccess: effectiveAccessForResponse,
   });
@@ -109,13 +132,26 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
   const canManage = await canManageAccess(organizationId, params.id, userId);
   if (!canManage) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only primary LRO or steward+ can grant collaborator access');
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only the primary LRO or supervisory authority can grant collaborator access');
   }
 
   const body = await request.json();
   const parsed = accessInputSchema.safeParse(body);
   if (!parsed.success) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid access payload', parsed.error.flatten());
+  }
+
+  if (!(await isActiveOrganizationMember(organizationId, parsed.data.userId))) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Grantee must be an active member of this organization');
+  }
+
+  const [targetGrievance] = await db
+    .select({ id: grievances.id })
+    .from(grievances)
+    .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)))
+    .limit(1);
+  if (!targetGrievance) {
+    return standardErrorResponse(ErrorCode.NOT_FOUND, 'Grievance not found');
   }
 
   const access = await grantCaseAccess({

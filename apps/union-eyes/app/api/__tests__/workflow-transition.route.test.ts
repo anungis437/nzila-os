@@ -3,6 +3,8 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
   requireApiAuth: vi.fn(),
+  getCaseActor: vi.fn(),
+  caseReadScope: vi.fn(() => 'CASE_READ_SCOPE'),
   updateClaimStatus: vi.fn(),
   getAllowedTransitions: vi.fn(),
   toLifecycleState: vi.fn(),
@@ -28,6 +30,16 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ requireApiAuth: m.requireApiAuth }));
+vi.mock('@/lib/audit-logger', () => ({
+  auditLog: vi.fn().mockResolvedValue(undefined),
+  AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' },
+  AuditSeverity: { HIGH: 'HIGH' },
+}));
+vi.mock('@/lib/cases/case-authorization', async (original) => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  getCaseActor: m.getCaseActor,
+  caseReadScope: m.caseReadScope,
+}));
 vi.mock('@/lib/workflow-engine', () => ({ updateClaimStatus: m.updateClaimStatus }));
 vi.mock('@/lib/workflow/case-lifecycle', () => ({ getAllowedTransitions: m.getAllowedTransitions }));
 vi.mock('@/lib/workflow/state-bridge', () => ({
@@ -87,6 +99,7 @@ describe('workflow/transition route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.requireApiAuth.mockResolvedValue({ userId: 'user_1', organizationId: 'org_1' });
+    m.getCaseActor.mockResolvedValue({ userId: 'user_1', organizationId: 'org_1', role: 'steward' });
     m.transitionSchemaSafeParse.mockReturnValue({
       success: true,
       data: { claimNumber: 'CLM-1', targetStatus: 'resolved', notes: 'done' },
@@ -189,6 +202,35 @@ describe('workflow/transition route', () => {
     expect(payload.success).toBe(true);
     expect(m.eventEmit).toHaveBeenCalled();
     expect(m.recordUnionEyesWorkflowTransition).toHaveBeenCalled();
+  });
+
+  it('returns 403 for a caller without transition authority and never opens a transaction', async () => {
+    const { POST } = await loadRoute();
+    m.getCaseActor.mockResolvedValueOnce({ userId: 'member_1', organizationId: 'org_1', role: 'member' });
+
+    const response = await POST(new NextRequest('http://localhost/api/workflow/transition', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ claimNumber: 'CLM-1', targetStatus: 'resolved' }),
+    }));
+
+    expect(response.status).toBe(403);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.updateClaimStatus).not.toHaveBeenCalled();
+  });
+
+  it('locks and moves only a case inside the actor read scope, never via an unscoped lookup', async () => {
+    const { POST } = await loadRoute();
+    // Even when the auth guard reports no organization, the actor organization governs the scope.
+    m.requireApiAuth.mockResolvedValueOnce({ userId: 'user_1', organizationId: undefined });
+
+    await POST(new NextRequest('http://localhost/api/workflow/transition', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ claimNumber: 'CLM-1', targetStatus: 'resolved' }),
+    }));
+
+    expect(m.caseReadScope).toHaveBeenCalledWith(expect.objectContaining({ userId: 'user_1', organizationId: 'org_1' }));
   });
 
   it('returns 500 when unexpected errors occur', async () => {

@@ -2,6 +2,7 @@ import { and, eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { hasSupervisoryCaseRead, creatorAccessApplies } from '@/lib/cases/supervisory-case-read';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -35,6 +36,7 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     .select({
       id: grievances.id,
       createdBy: grievances.createdBy,
+      unionRepId: grievances.unionRepId,
     })
     .from(grievances)
     .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)))
@@ -44,14 +46,14 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Grievance not found');
   }
 
-  const isStewardPlus = await hasMinRole('steward');
+  const isStewardPlus = await hasSupervisoryCaseRead(organizationId, userId);
   const effectiveAccess = await getEffectiveCaseAccess({
     organizationId,
     grievanceId: params.id,
     userId,
   });
 
-  if (!isStewardPlus && grievance.createdBy !== userId && !effectiveAccess.canViewCase) {
+  if (!isStewardPlus && !(await creatorAccessApplies(organizationId, userId, grievance)) && !effectiveAccess.canViewCase) {
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this grievance');
   }
 

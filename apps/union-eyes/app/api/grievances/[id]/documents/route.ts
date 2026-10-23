@@ -16,6 +16,7 @@ import {
 } from "@/db/schema/documents-schema";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
+import { hasSupervisoryCaseRead, creatorAccessApplies } from "@/lib/cases/supervisory-case-read";
 import { auditDataMutation } from "@/lib/audit-logger";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
@@ -91,7 +92,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
-    const isStewardPlus = await hasMinRole('steward');
+    const isStewardPlus = await hasSupervisoryCaseRead(organizationId, userId);
     const effectiveAccess = await getEffectiveCaseAccess({
       organizationId,
       grievanceId: params.id,
@@ -100,7 +101,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
     const canUpload =
       isStewardPlus ||
-      grievance.createdBy === userId ||
+      (await creatorAccessApplies(organizationId, userId, grievance)) ||
       effectiveAccess.isPrimaryOwner ||
       effectiveAccess.canUploadDocuments;
 

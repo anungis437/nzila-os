@@ -8,6 +8,7 @@ import {
   ErrorCode,
 } from '@/lib/api/standardized-responses';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { hasSupervisoryCaseRead } from '@/lib/cases/supervisory-case-read';
 import { db } from '@/db/db';
 import {
   documents,
@@ -107,7 +108,8 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
   }
 
-  const isStewardPlus = await hasMinRole('steward');
+  // Supervisory case-read authority (case_read_any), not merely a steward role.
+  const isStewardPlus = await hasSupervisoryCaseRead(organizationId, userId);
   let caseAccess = {
     isPrimaryOwner: false,
     canViewCase: false,

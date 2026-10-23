@@ -12,6 +12,7 @@ import { grievanceCaseAccessAssignments } from "@/db/schema/domains/claims/griev
 import { documents, documentAccessGrants, documentLinks } from "@/db/schema/documents-schema";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
+import { hasSupervisoryCaseRead, creatorAccessApplies } from "@/lib/cases/supervisory-case-read";
 import { getEffectiveCaseAccess, expireElapsedCaseAccessAssignments } from "@/lib/services/case-access-service";
 import { isDocumentVisibleByPolicy, toGovernanceLabel } from "@/lib/services/document-governance-service";
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
@@ -54,11 +55,10 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
 
     await expireElapsedCaseAccessAssignments();
 
-    // Row-level access check:
-    // steward+ can view any grievance in org,
-    // creator can view own grievance,
-    // primary LRO or delegated collaborator can view by explicit assignment.
-    const isStewardPlus = await hasMinRole("steward");
+    // Supervisory case-read authority (case_read_any); a steward reaches a case through
+    // creation, ownership or an explicit collaborator assignment.
+    const isStewardPlus = await hasSupervisoryCaseRead(organizationId, userId);
+    const isCreatorWithAccess = await creatorAccessApplies(organizationId, userId, grievance);
     const effectiveAccess = await getEffectiveCaseAccess({
       organizationId,
       grievanceId: params.id,
@@ -69,7 +69,7 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
       canManageAssignments: isStewardPlus || effectiveAccess.canManageAssignments,
     };
 
-    if (!isStewardPlus && grievance.createdBy !== userId && !effectiveAccess.canViewCase) {
+    if (!isStewardPlus && !isCreatorWithAccess && !effectiveAccess.canViewCase) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, "You can only view your own submissions.");
     }
 
@@ -128,7 +128,7 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
         isOrgMember: true,
         isStewardPlus,
         isPrimaryOwner: effectiveAccessForResponse.isPrimaryOwner,
-        hasCaseAccess: isStewardPlus || grievance.createdBy === userId || effectiveAccessForResponse.canViewCase,
+        hasCaseAccess: isStewardPlus || isCreatorWithAccess || effectiveAccessForResponse.canViewCase,
         canViewPrivateDocuments: effectiveAccessForResponse.canViewPrivateDocuments,
         hasExplicitDocumentGrant: explicitGrantIds.has(doc.id),
       }),

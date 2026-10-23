@@ -46,6 +46,10 @@ vi.mock('@/lib/api-auth-guard', () => ({
   hasMinRole: mocks.hasMinRole,
 }));
 
+vi.mock('@/lib/cases/supervisory-case-read', () => ({
+  hasSupervisoryCaseRead: vi.fn(async () => false),
+}));
+
 vi.mock('@/db/db', () => ({
   db: mocks.db,
 }));

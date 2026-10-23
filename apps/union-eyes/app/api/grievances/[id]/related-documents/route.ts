@@ -2,6 +2,7 @@ import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { hasSupervisoryCaseRead, creatorAccessApplies } from '@/lib/cases/supervisory-case-read';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -40,6 +41,7 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     .select({
       id: grievances.id,
       createdBy: grievances.createdBy,
+      unionRepId: grievances.unionRepId,
     })
     .from(grievances)
     .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)))
@@ -49,14 +51,14 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Grievance not found');
   }
 
-  const isStewardPlus = await hasMinRole('steward');
+  const isStewardPlus = await hasSupervisoryCaseRead(organizationId, userId);
   const access = await getEffectiveCaseAccess({
     organizationId,
     grievanceId: params.id,
     userId,
   });
 
-  if (!isStewardPlus && grievance.createdBy !== userId && !access.canViewCase) {
+  if (!isStewardPlus && !(await creatorAccessApplies(organizationId, userId, grievance)) && !access.canViewCase) {
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this grievance');
   }
 

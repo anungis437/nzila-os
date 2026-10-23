@@ -14,6 +14,7 @@ import {
   documentVersions,
 } from '@/db/schema/documents-schema';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { hasSupervisoryCaseRead } from '@/lib/cases/supervisory-case-read';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import {
@@ -123,7 +124,8 @@ export const GET = withOrganizationAuth(async (request, context) => {
     .where(and(...conditions))
     .orderBy(desc(documents.updatedAt));
 
-  const isStewardPlus = await hasMinRole('steward');
+  // Supervisory case-read authority (case_read_any), not merely a steward role.
+  const isStewardPlus = await hasSupervisoryCaseRead(organizationId, userId);
 
   const visible = await Promise.all(
     rows.map(async (row) => {

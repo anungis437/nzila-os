@@ -13,6 +13,12 @@ import { grievances, GrievanceStatus } from "@/db/schema/domains/claims/grievanc
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
+import { hasSupervisoryCaseRead } from "@/lib/cases/supervisory-case-read";
+import {
+  GRIEVANCE_TRIAGE_COLUMNS,
+  grievanceCaseAuthorityScope,
+  grievanceTriageScope,
+} from "@/lib/cases/grievance-list-scope";
 import { auditDataMutation, auditLog, AuditEventType } from "@/lib/audit-logger";
 import { emitCapeAuditEvent, CAPE_AUDIT_EVENTS } from "@/lib/audit/cape-audit-events";
 import {
@@ -285,7 +291,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
 // ── GET ─────────────────────────────────────────────────────────────────────
 
 export const GET = withOrganizationAuth(async (request, context) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
   await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
@@ -313,16 +319,44 @@ export const GET = withOrganizationAuth(async (request, context) => {
       scopedFilter = eq(grievances.organizationId, organizationId);
     }
 
-    const filtered = await withRLSContext({ organizationId }, async () =>
-      db
+    // Supervisory authority reads the queue; an ordinary steward holds case-resource authority only
+    // for matters created, owned or actively delegated, plus minimum triage metadata for unassigned intakes.
+    if (await hasSupervisoryCaseRead(organizationId, userId)) {
+      const filtered = await withRLSContext({ organizationId }, async () =>
+        db
+          .select()
+          .from(grievances)
+          .where(scopedFilter)
+          .orderBy(desc(grievances.createdAt))
+          .limit(500),
+      );
+      return standardSuccessResponse(filtered.map((row) => ({ ...row, access: 'case' as const })));
+    }
+
+    const includeTriage = !status || status === 'intakes' || status === 'draft';
+    const { caseRows, triageRows } = await withRLSContext({ organizationId }, async () => {
+      const caseRows = await db
         .select()
         .from(grievances)
-        .where(scopedFilter)
+        .where(and(scopedFilter, grievanceCaseAuthorityScope(organizationId, userId)))
         .orderBy(desc(grievances.createdAt))
-        .limit(500),
-    );
+        .limit(500);
+      const authorizedIds = new Set(caseRows.map((row) => row.id));
+      const triageRows = includeTriage
+        ? (await db
+            .select(GRIEVANCE_TRIAGE_COLUMNS)
+            .from(grievances)
+            .where(grievanceTriageScope(organizationId))
+            .orderBy(desc(grievances.createdAt))
+            .limit(500)).filter((row) => !authorizedIds.has(row.id))
+        : [];
+      return { caseRows, triageRows };
+    });
 
-    return standardSuccessResponse(filtered);
+    return standardSuccessResponse([
+      ...caseRows.map((row) => ({ ...row, access: 'case' as const })),
+      ...triageRows.map((row) => ({ ...row, access: 'triage' as const })),
+    ]);
   } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to list grievances");
   }

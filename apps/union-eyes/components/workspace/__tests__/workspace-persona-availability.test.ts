@@ -362,6 +362,7 @@ describe("workspace deep-work path coherence", () => {
       "/dashboard/members",
       "/dashboard/documents",
       "/dashboard/correspondence",
+      "/dashboard/clause-library",
       "/dashboard/notifications",
       "/dashboard/settings",
       "/dashboard/profile",

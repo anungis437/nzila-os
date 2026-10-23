@@ -7,6 +7,7 @@ import {
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { hasSupervisoryCaseRead } from '@/lib/cases/supervisory-case-read';
 import { db } from '@/db/db';
 import {
   documentAccessGrants,
@@ -87,7 +88,8 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
       .limit(1)
   )[0];
 
-  const isStewardPlus = await hasMinRole('steward');
+  // Supervisory case-read authority (case_read_any), not merely a steward role.
+  const isStewardPlus = await hasSupervisoryCaseRead(organizationId, userId);
   let caseAccess = {
     isPrimaryOwner: false,
     canViewCase: false,
