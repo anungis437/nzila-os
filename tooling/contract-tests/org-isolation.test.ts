@@ -40,6 +40,7 @@ const PROTECTED_APPS = ['console', 'partners', 'union-eyes', 'flow', 'cfo', 'zon
 const AUTH_CALL_PATTERNS = [
   /authorize\s*\(/,
   /requireOrgAccess\s*\(/,
+  /await\s+getCaseActor\s*\(/, // Authenticated live organization membership and role
   /requirePartnerEntityAccess\s*\(/,  // partner portal custom auth
   /resolvePartnerEntityIdForView\s*\(/, // partner portal entity resolution
   /authenticateUser\s*\(/,

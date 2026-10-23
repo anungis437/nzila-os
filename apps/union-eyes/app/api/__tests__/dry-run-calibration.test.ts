@@ -11,6 +11,7 @@ import {
 } from './shared-route-mocks';
 
 const m = vi.hoisted(() => ({
+  getCaseActor: vi.fn(),
   getCurrentUser: vi.fn(),
   checkRateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 99 }),
   createRateLimitHeaders: vi.fn(() => ({})),
@@ -24,6 +25,11 @@ const m = vi.hoisted(() => ({
   executePostHandlerPolicies: vi.fn().mockResolvedValue(undefined),
   createCorrelationContext: vi.fn().mockReturnValue({ traceId: 'test-trace' }),
   correlationToHeaders: vi.fn().mockReturnValue({}),
+}));
+
+vi.mock('@/lib/cases/case-authorization', async (original) => ({
+  ...await original<typeof import('@/lib/cases/case-authorization')>(),
+  getCaseActor: m.getCaseActor,
 }));
 
 vi.mock('@/lib/api-auth-guard', async (orig) => {
@@ -159,6 +165,7 @@ describe('Tier 2 — withApi: GET /api/cases', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.getCurrentUser.mockResolvedValue(STEWARD_USER);
+    m.getCaseActor.mockResolvedValue({ userId: 'user_test_001', organizationId: '00000000-0000-0000-0000-000000000001', role: 'steward' });
     m.withRLSContext.mockImplementation(
       (fn: (tx: unknown) => Promise<unknown>) =>
         fn({ execute: vi.fn().mockResolvedValue([]) })

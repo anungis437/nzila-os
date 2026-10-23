@@ -1,82 +1,36 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-const m = vi.hoisted(() => ({
-  withApi: vi.fn(),
-  withRLSContext: vi.fn(),
-}));
-
-vi.mock('@/lib/api/with-api', () => ({ withApi: m.withApi }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
-vi.mock('@/db/schema', () => ({ claimUpdates: {}, grievanceTimeline: {} }));
-vi.mock('drizzle-orm', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return {
-    ...actual,
-    eq: vi.fn(() => 'eq'),
-    desc: vi.fn(() => 'desc'),
-    sql: vi.fn(() => 'sql'),
-  };
-});
-
-async function loadRoute() {
-  return import('../cases/[caseId]/timeline/route');
-}
-
-describe('cases/[caseId]/timeline route', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-
-    m.withApi.mockImplementation((_cfg: unknown, handler: any) => {
-      return (ctx: any = {}) => handler(ctx);
-    });
-
-    let call = 0;
-    m.withRLSContext.mockImplementation(async (fn: any) => {
-      call += 1;
-      if (call === 1) {
-        return [{ claim_id: 'claim_1' }];
-      }
-      if (call === 2) {
-        const tx = {
-          select: vi.fn(() => ({
-            from: vi.fn(() => ({
-              where: vi.fn(() => ({
-                orderBy: vi.fn(async () => [
-                  { updateId: 'u1', createdAt: new Date(), updateType: 'status_change', message: 'Updated', createdBy: 'u1' },
-                ]),
-              })),
-            })),
-          })),
-        };
-        return fn(tx);
-      }
-      if (call === 3) {
-        return [{ grievance_id: 'g1' }];
-      }
-      const tx = {
-        select: vi.fn(() => ({
-          from: vi.fn(() => ({
-            where: vi.fn(() => ({
-              orderBy: vi.fn(async () => []),
-            })),
-          })),
-        })),
-      };
-      return fn(tx);
-    });
-  });
-
-  it('returns empty data when caseId is missing', async () => {
-    const { GET } = await loadRoute();
-    const result = await GET({ params: {} });
-    expect(result.data).toEqual([]);
-  });
-
-  it('returns timeline data for resolved case id', async () => {
-    const { GET } = await loadRoute();
-    const result = await GET({ params: { caseId: 'case_1' } });
-
-    expect(Array.isArray(result.data)).toBe(true);
-    expect(result.data.length).toBeGreaterThanOrEqual(1);
-  });
-});
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+const m = vi.hoisted(() => ({ actor: vi.fn(), find: vi.fn(), rls: vi.fn() }))
+vi.mock('@/lib/api/with-api', () => ({ withApi: (_config: unknown, handler: unknown) => handler }))
+vi.mock('@/lib/cases/case-authorization', async original => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  getCaseActor: m.actor, findReadableCase: m.find,
+}))
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.rls }))
+vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: vi.fn() }))
+import { GET } from '../cases/[caseId]/timeline/route'
+const call = (caseId?: string) => (GET as unknown as (context: unknown) => Promise<{data: unknown[]}> )({params:{caseId}})
+beforeEach(() => {
+  vi.clearAllMocks()
+  m.actor.mockResolvedValue({ userId: 'actor', organizationId: 'org', role: 'member' })
+  m.find.mockResolvedValue({ claimId: '11111111-1111-4111-8111-111111111111' })
+  const query = { from: () => query, where: () => query, orderBy: async () => [
+    {updateId:'history',createdAt:new Date('2026-10-23T05:00:00Z'),updateType:'note',message:'Visible',createdBy:'actor'},
+  ] }
+  m.rls.mockImplementation(async fn => fn({select:()=>query}))
+})
+describe('case timeline', () => {
+  it('rejects a missing case reference', async () => {
+    await expect(call()).rejects.toMatchObject({code:'NOT_FOUND'})
+  })
+  it('returns 404 for a foreign, unreadable or nonexistent case', async () => {
+    m.find.mockResolvedValueOnce(null)
+    await expect(call('foreign')).rejects.toMatchObject({code:'NOT_FOUND'})
+  })
+  it('loads the authorized case and history in the same tenant transaction', async () => {
+    expect((await call('CASE-20261023-0001')).data).toEqual([
+      {id:'history',timestamp:'2026-10-23T05:00:00.000Z',type:'note',description:'Visible',actor:'actor'},
+    ])
+    expect(m.rls).toHaveBeenCalledTimes(1)
+    expect(m.find).toHaveBeenCalledWith(expect.anything(),expect.objectContaining({userId:'actor'}),'CASE-20261023-0001')
+  })
+})

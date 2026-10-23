@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import { isIP } from 'node:net'
 import { sql } from 'drizzle-orm'
 import type { RLSTx } from '@/lib/db/with-rls-context'
@@ -118,11 +118,12 @@ export async function appendCanonicalAuditLog(tx: RLSTx, entry: CanonicalAuditEn
     details,
     previousHash,
   })
+  // Django generates both identifiers in Python; the deployed columns have no SQL defaults.
   await tx.execute(
     sql`INSERT INTO public.audit_logs
-        (created_at, updated_at, organization_id, action, resource_type, resource_id, user_id,
+        (id, audit_id, created_at, updated_at, organization_id, action, resource_type, resource_id, user_id,
          ip_address, user_agent, details, changes, content_hash, previous_hash)
-        VALUES (clock_timestamp(), clock_timestamp(), ${entry.organizationId}::uuid, ${action},
+        VALUES (${randomUUID()}::uuid, ${randomUUID()}::uuid, clock_timestamp(), clock_timestamp(), ${entry.organizationId}::uuid, ${action},
           ${resourceType}, ${resourceId}, ${userId}, ${ipAddress}::inet, ${entry.userAgent ?? null},
           ${JSON.stringify(details)}::jsonb, '{}'::jsonb, ${contentHash}, ${previousHash})`,
   )

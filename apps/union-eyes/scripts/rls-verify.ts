@@ -57,6 +57,7 @@ import {
 } from '../db/rls-0108-protected-tables'
 import { storageAuthorityManifest } from '../db/rls-storage-authority/index'
 import { hasApprovedMemberAccessProjectionPolicies, isApprovedMemberAccessProjectionPolicy, type MemberAccessProjectionPolicy } from '../db/auth/member-access-projection'
+import { CASE_ASSIGNEE_CATALOG_QUERY, caseAssigneePredicateViolations } from '../db/auth/case-assignee-predicate'
 
 // Tables the canonical storageAuthorityManifest (db/rls-storage-authority)
 // dispositions with an EMPTY requiredRuntimePrivileges array — i.e.
@@ -263,7 +264,8 @@ function parseArgs() {
   // A deployed environment (the deploy workflow's preflight) requires the deadline-engine tables; a source-native bootstrap does not.
   const requireDeadlineEngineTables = args.includes('--require-deadline-engine-tables') || process.env.RLS_VERIFY_REQUIRE_DEADLINE_ENGINE_TABLES === '1'
   const requireAuthMemberProjection = args.includes('--require-auth-member-projection') || process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1'
-  return { mode: mode as 'preflight' | 'full', requireDeadlineEngineTables, requireAuthMemberProjection }
+  const requireCaseAssigneePredicate = args.includes('--require-case-assignee-predicate') || process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1'
+  return { mode: mode as 'preflight' | 'full', requireDeadlineEngineTables, requireAuthMemberProjection, requireCaseAssigneePredicate }
 }
 
 async function checkRuntimeRole(sql: postgres.Sql, results: CheckResult[]) {
@@ -479,15 +481,25 @@ async function checkBaselineTablesHaveManifestDisposition(results: CheckResult[]
  * evidence-backed, non-NEEDS_REVIEW disposition — not merely "the 24-table
  * 0108 subset checks out".
  */
+// Catalog metadata stays visible after runtime table grants are removed. An
+// information_schema scan would silently drop zero-grant tables from coverage.
+export const ORPHANED_TENANT_TABLES_QUERY = `
+  SELECT DISTINCT c.relname::text AS table_name, a.attname::text AS column_name
+  FROM pg_catalog.pg_class c
+  JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+  JOIN pg_catalog.pg_attribute a ON a.attrelid = c.oid
+  WHERE n.nspname = 'public'
+    AND c.relkind IN ('r', 'p')
+    AND a.attnum > 0 AND NOT a.attisdropped
+    AND a.attname IN ('organization_id', 'org_id', 'tenant_id')
+    AND c.relname::text != ALL($1::text[])
+  ORDER BY table_name, column_name
+`
+
 async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult[]) {
-  const rows = await sql<{ table_name: string; column_name: string }[]>`
-    SELECT DISTINCT c.table_name, c.column_name
-    FROM information_schema.columns c
-    JOIN information_schema.tables t
-      ON t.table_schema = c.table_schema AND t.table_name = c.table_name AND t.table_type = 'BASE TABLE'
-    WHERE c.table_schema = 'public'
-      AND c.column_name IN ('organization_id', 'org_id', 'tenant_id')
-      AND c.table_name != ALL(${ALL_PROTECTED_TABLES})`
+  const rows = await sql.unsafe<{ table_name: string; column_name: string }[]>(
+    ORPHANED_TENANT_TABLES_QUERY, [[...ALL_PROTECTED_TABLES]],
+  )
 
   const { storageAuthorityManifest, CLOSED_CLASSIFICATIONS } = await import('../db/rls-storage-authority-manifest')
   const manifestByTable = new Map(storageAuthorityManifest.map((e) => [e.table, e]))
@@ -1159,7 +1171,7 @@ export function rlsVerifyConnectionOptions(databaseUrl: string) {
 }
 
 async function main() {
-  const { mode, requireDeadlineEngineTables, requireAuthMemberProjection } = parseArgs()
+  const { mode, requireDeadlineEngineTables, requireAuthMemberProjection, requireCaseAssigneePredicate } = parseArgs()
   const dbUrl = resolveRuntimeDatabaseUrl()
   if (!dbUrl) {
     console.error('[rls-verify] Missing RLS_VERIFY_DATABASE_URL / DATABASE_URL.')
@@ -1173,6 +1185,11 @@ async function main() {
   try {
     await checkRuntimeRole(sql, results)
     await checkTableRlsState(sql, results, requireAuthMemberProjection)
+    if (requireCaseAssigneePredicate) {
+      const violations = caseAssigneePredicateViolations(await sql.unsafe(CASE_ASSIGNEE_CATALOG_QUERY))
+      results.push({ name: 'canonical case assignee: exact bounded predicate body, owner and execution ACL',
+        pass: violations.length === 0, detail: violations.length ? violations.join('; ') : 'Source-pinned function; runtime EXECUTE only; no raw private-table grant' })
+    }
     await checkNoContextFailsClosed(sql, results)
     await checkBaselineTablesHaveManifestDisposition(results)
     await checkOrphanedTenantTables(sql, results)

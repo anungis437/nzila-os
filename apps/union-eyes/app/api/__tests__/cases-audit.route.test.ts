@@ -7,15 +7,21 @@ const m = vi.hoisted(() => ({
   auditDataAccess: vi.fn(),
   requireEntitlement: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
+  getUserRoleInOrganization: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db', () => ({ db: m.db }));
 vi.mock('@/db/schema', () => ({ auditLogs: {} }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataAccess: m.auditDataAccess }));
+vi.mock('@/lib/audit-logger', () => ({auditDataAccess:m.auditDataAccess,auditLog:vi.fn().mockResolvedValue(undefined),AuditEventType:{AUTH_FAILED:'AUTH_FAILED'},AuditSeverity:{HIGH:'HIGH'}}));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
-vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser, getUserRoleInOrganization:m.getUserRoleInOrganization }));
+
+vi.mock('@/lib/cases/case-authorization', async original => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  findReadableCase:vi.fn().mockResolvedValue({claimId:'c1'}),
+}));
 
 async function loadRoute() {
   return import('../cases/[caseId]/audit/route');
@@ -26,8 +32,9 @@ describe('cases/[caseId]/audit route', () => {
     vi.clearAllMocks();
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
+    m.getUserRoleInOrganization.mockResolvedValue('officer');
     m.requireEntitlement.mockResolvedValue(undefined);
-    m.withRLSContext.mockImplementation(async (fn: any) => fn());
+    m.withRLSContext.mockImplementation(async (_context: unknown, fn: any) => fn({execute:vi.fn().mockResolvedValue([{auditId:'a1'}])}));
     m.db.select = vi.fn(() => ({
       from: vi.fn(() => ({
         where: vi.fn(() => ({
@@ -60,7 +67,7 @@ describe('cases/[caseId]/audit route', () => {
       params: Promise.resolve({ caseId: 'c1' }),
     });
 
-    expect([200, 500]).toContain(response.status);
+    expect(response.status).toBe(200);
   });
 
   it('returns 500 when query fails', async () => {
@@ -73,4 +80,13 @@ describe('cases/[caseId]/audit route', () => {
 
     expect(response.status).toBe(500);
   });
+  it('does not disclose internal audit metadata to a member', async () => {
+    const { GET } = await loadRoute();
+    m.getUserRoleInOrganization.mockResolvedValueOnce('member');
+    const response=await GET(new Request('http://localhost/api/cases/c1/audit'),{params:Promise.resolve({caseId:'c1'})});
+    expect(response.status).toBe(403);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.auditDataAccess).not.toHaveBeenCalled();
+  });
+
 });

@@ -93,6 +93,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /getAuth\(/,
       /currentUser\(\)/,
       /requireOrgAccess\(/,
+  /await\s+getCaseActor\s*\(/, // Authenticated live organization membership and role
       /requireVerifiedOrgAccess\(/,  // ABR CourtLens — session/DB membership verification (Phase 2C.6)
       /requireVerifiedPermission\(/, // ABR CourtLens — server-derived RBAC (Phase 2C.6)
       /verifyWebhookSignature\(/,

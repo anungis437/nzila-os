@@ -12,6 +12,8 @@ const m = vi.hoisted(() => ({
   getOrganizationIdForUser: vi.fn(),
   enforceDecision: vi.fn(),
   createNarProofAdapter: vi.fn(),
+  canonical: vi.fn(),
+  canonicalProof: { createProof: vi.fn() },
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
@@ -23,6 +25,11 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: m.canonical }));
+vi.mock('@/lib/audit/canonical-nar-proof', () => ({
+  canonicalNarProofAdapter: m.canonicalProof,
+  createCanonicalNarProofAdapter: () => m.canonicalProof,
+}));
 vi.mock('@nzila/cupe-vocabulary', () => ({
   validateIntakeRequest: m.validateIntakeRequest,
   getCaseTypeById: m.getCaseTypeById,
@@ -70,6 +77,8 @@ async function loadRoute() {
 describe('cases/intake route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.canonical.mockReturnValue(false);
+    m.selectClaimRows.length = 0;
     m.auth.mockResolvedValue({ userId: 'user_1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
     m.requireEntitlement.mockResolvedValue(undefined);
@@ -193,5 +202,45 @@ describe('cases/intake route', () => {
     expect(response.status).toBe(201);
     expect(payload).toMatchObject({ success: true, status: 'submitted', claimId: 'claim_1' });
     expect(m.auditDataMutation).toHaveBeenCalled();
+  });
+
+  it('normalizes only the verified native Entra actor to its platform id before every write and proof', async () => {
+    m.canonical.mockReturnValue(true);
+    m.auth.mockResolvedValue({ userId: 'platform-uuid', identityProvider: 'entra', providerSubject: 'tenant:member_1' });
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
+    expect(response.status).toBe(201);
+    expect(m.createClaim).toHaveBeenCalledWith(expect.objectContaining({ memberId: 'platform-uuid' }), expect.anything());
+    for (const [decision] of m.enforceDecision.mock.calls) {
+      expect(decision.input.memberId).toBe('platform-uuid');
+      expect(decision.actor.id).toBe('platform-uuid');
+      expect(decision.proofAdapter).toBe(m.canonicalProof);
+    }
+    expect(m.getClaimsByMember).toHaveBeenCalledWith('platform-uuid', 'org_1');
+  });
+
+  it.each([
+    { userId: 'foreign-platform-id', identityProvider: 'entra', providerSubject: 'tenant:different-oid' },
+    { userId: 'foreign-platform-id', identityProvider: 'nzila-password', providerSubject: 'tenant:member_1' },
+  ])('rejects another member before duplicate lookup, proof or mutation: $identityProvider', async (actor) => {
+    m.canonical.mockReturnValue(true);
+    m.auth.mockResolvedValue(actor);
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
+    expect(response.status).toBe(403);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.enforceDecision).not.toHaveBeenCalled();
+    expect(m.createClaim).not.toHaveBeenCalled();
+    expect(m.auditDataMutation).not.toHaveBeenCalled();
+  });
+
+  it('accepts the platform self id and fails closed when canonical proof persistence fails', async () => {
+    m.canonical.mockReturnValue(true);
+    m.auth.mockResolvedValue({ userId: 'member_1' });
+    m.enforceDecision.mockRejectedValueOnce(new Error('audit unavailable'));
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
+    expect(response.status).toBe(500);
+    expect(m.createClaim).not.toHaveBeenCalled();
   });
 });

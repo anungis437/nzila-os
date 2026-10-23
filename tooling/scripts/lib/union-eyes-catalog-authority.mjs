@@ -168,6 +168,36 @@ function samePrivileges(actual, expected) {
   return actual.length === expected.length && actual.every((privilege, index) => privilege === expected[index])
 }
 
+/** Pure, reviewable plan for an isolated, transaction-controlled reconciliation.
+ * Does not execute, commit, touch auth roles, or infer authority from DB grants.
+ * The caller must verify the target and admit the resulting catalog before commit.
+ */
+export function planExactPublicPrivileges(contract, presentTables) {
+  if (catalogContractDigest(contract?.payload) !== contract?.digest
+    || !Array.isArray(contract?.payload?.entries) || contract.payload.entries.length < 100
+    || !Array.isArray(presentTables) || presentTables.some(table => typeof table !== 'string')) {
+    throw new Error('Exact source contract and table census required')
+  }
+  const present = new Set(presentTables)
+  const seen = new Set()
+  const statements = [
+    'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM union_eyes_runtime,union_eyes_system,PUBLIC',
+    'REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM union_eyes_runtime,union_eyes_system,PUBLIC',
+  ]
+  for (const entry of contract.payload.entries) {
+    const table = quoteIdent(entry.table)
+    if (seen.has(entry.table)) throw new Error('Duplicate source authority table')
+    seen.add(entry.table)
+    for (const [side, role] of [['runtime', 'union_eyes_runtime'], ['system', 'union_eyes_system']]) {
+      const atoms = entry[side]
+      if (!Array.isArray(atoms) || atoms.some(atom => !PRIVILEGE_ORDER.includes(atom))
+        || new Set(atoms).size !== atoms.length) throw new Error('Unresolved source privilege authority')
+      if (present.has(entry.table) && atoms.length) statements.push(`GRANT ${atoms.join(',')} ON TABLE public.${table} TO ${role}`)
+    }
+  }
+  return statements
+}
+
 async function loadAdmissionSnapshots(client) {
   const snapshots = {}
   for (const query of admissionQueries) {

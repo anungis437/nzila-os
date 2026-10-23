@@ -57,6 +57,7 @@ function allApiRoutes(): string[] {
 // Auth guard patterns recognised as org-boundary enforcement
 const ORG_GUARD_PATTERNS = [
   /requireOrgAccess\s*\(/,
+  /await\s+getCaseActor\s*\(/, // Authenticated live organization membership and role
   /requireVerifiedOrgAccess\s*\(/,   // ABR CourtLens — session/DB membership verification (Phase 2C.6)
   /requireVerifiedPermission\s*\(/,  // ABR CourtLens — server-derived RBAC (Phase 2C.6)
   /authorizeOrgAccess\s*\(/,

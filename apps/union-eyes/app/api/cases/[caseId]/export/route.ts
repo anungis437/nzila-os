@@ -8,8 +8,6 @@
  */
 
 import { NextResponse } from 'next/server'
-import { auth } from '@nzila/platform-auth/entra/server'
-import { db } from '@/db'
 import { claims, claimUpdates } from '@/db/schema'
 import { auditLogs } from '@/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
@@ -19,50 +17,56 @@ import { auditCaseExport } from '@/lib/audited-case-mutations'
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial'
 import { recordUnionEyesEvidenceExport } from '@/lib/pilot-metrics'
-import { getOrganizationIdForUser } from '@/lib/organization-utils'
+import { getCaseActor, findReadableCase, caseHistoryVisibility, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
+import { readCanonicalCaseAudit } from '@/lib/cases/case-evidence-query'
+import { claimHistoryReference, publicClaimHistory } from '@/lib/cases/claim-history-reference'
 
 export async function GET(request: Request, { params }: { params: Promise<{ caseId: string }> }) {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  const orgId = await getOrganizationIdForUser(userId)
-
-  const { caseId } = await params
+  const { caseId: reference } = await params
   const url = new URL(request.url)
   const format = (url.searchParams.get('format') ?? 'json').toLowerCase()
   const envelope = url.searchParams.get('envelope') === 'true'
   const verify = url.searchParams.get('verify') === 'true'
 
   try {
+    const actor = await getCaseActor()
+    const { userId, organizationId: orgId } = actor
+    await requireCaseAction(actor, 'case_export', reference)
     await requireEntitlement(orgId, 'grievance_case_suite')
-    // Fetch case, notes, and audit trail in parallel
-    const [caseRows, noteRows, auditRows] = await withRLSContext(async () => {
-      return Promise.all([
-        db.select().from(claims).where(eq(claims.claimId, caseId)).limit(1),
-        db
+    const records = await withRLSContext(async (tx) => {
+      const readable = await findReadableCase(tx, actor, reference)
+      if (!readable) return null
+      const caseId = readable.claimId
+      const [caseRows, noteRows] = await Promise.all([
+        tx.select().from(claims).where(and(eq(claims.claimId, caseId), eq(claims.organizationId, orgId))).limit(1),
+        tx
           .select()
           .from(claimUpdates)
-          .where(eq(claimUpdates.claimId, caseId))
+          .where(and(eq(claimUpdates.claimId, claimHistoryReference(caseId)), caseHistoryVisibility(actor)))
           .orderBy(desc(claimUpdates.createdAt)),
-        db
-          .select()
-          .from(auditLogs)
-          .where(and(eq(auditLogs.resourceType, 'claims'), eq(auditLogs.resourceId, caseId)))
-          .orderBy(desc(auditLogs.createdAt)),
       ])
+      // V2 writes hash-chained public records; the legacy audit_security table
+      // is deliberately inaccessible to the canonical runtime database role.
+      const auditRows = currentStateContextEnabled()
+        ? await readCanonicalCaseAudit(tx, orgId, caseId)
+        : await tx.select().from(auditLogs)
+          .where(and(eq(auditLogs.organizationId, orgId), eq(auditLogs.resourceType, 'claims'), eq(auditLogs.resourceId, caseId)))
+          .orderBy(desc(auditLogs.createdAt))
+      return { caseId, caseRows, noteRows, auditRows }
     })
 
-    if (caseRows.length === 0) {
+    if (!records || records.caseRows.length === 0) {
       return NextResponse.json({ error: 'Case not found' }, { status: 404 })
     }
+    const { caseId, caseRows, noteRows, auditRows } = records
 
     const evidenceInput = {
       exportedBy: userId,
       caseId,
       organizationId: orgId,
       caseRecord: caseRows[0] as any as Record<string, unknown>,
-      notes: noteRows as any as Record<string, unknown>[],
+      notes: noteRows.map(note => publicClaimHistory(note, caseId)) as any as Record<string, unknown>[],
       auditTrail: auditRows as any as Record<string, unknown>[],
     }
 
@@ -130,7 +134,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
       },
     })
   } catch (error) {
-    const denied = authorizationDenialResponse(error)
+    const denied = caseAuthorizationResponse(error) ?? authorizationDenialResponse(error)
     if (denied) return denied
     return NextResponse.json({ error: 'Failed to export evidence' }, { status: 500 })
   }

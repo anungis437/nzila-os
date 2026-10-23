@@ -1,106 +1,41 @@
-/**
- * Case timeline route
- *
- * Returns timeline events for a specific case (claim), combining:
- *  - claimUpdates (status changes, notes, communications)
- *  - grievanceTimeline entries linked via the claim's grievanceId (if any)
- *
- * Fixes:
- *  - Previous implementation used a generic CRUD collection that returned
- *    ALL grievanceTimeline rows in the org (no per-case filter).
- *  - Response fields now match the TimelineEvent interface expected by the UI
- *    (id, timestamp, type, description, actor).
- */
-import { withApi } from '@/lib/api/with-api';
-import { claimUpdates } from '@/db/schema';
-import { grievanceTimeline } from '@/db/schema';
-import { eq, desc, sql } from 'drizzle-orm';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+/** Case history uses the same record scope and visibility as case notes. */
+import { withApi } from '@/lib/api/with-api'
+import { ApiError } from '@/lib/api/errors'
+import { claimUpdates } from '@/db/schema/claims-schema'
+import { and, eq, desc } from 'drizzle-orm'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { claimHistoryReference } from '@/lib/cases/claim-history-reference'
+import { getCaseActor, findReadableCase, caseHistoryVisibility } from '@/lib/cases/case-authorization'
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Claims'],
-      summary: 'Get case timeline',
-      description: 'Returns timeline events for a specific case.',
+      tags: ['Claims'], summary: 'Get case timeline',
+      description: 'Returns visible timeline events for a specific case.',
     },
   },
   async ({ params }) => {
-    const caseId = params?.caseId;
-    if (!caseId) {
-      return { data: [] };
-    }
-
-    // Resolve caseId (could be claim_number like "L123-2026-007" or a UUID)
-    const claimRows = await withRLSContext(async (tx) =>
-      tx.execute(
-        sql`SELECT claim_id FROM claims WHERE claim_number = ${caseId} OR claim_id::text = ${caseId} LIMIT 1`,
-      ),
-    );
-    const resolvedClaimId = (claimRows[0] as { claim_id?: string } | undefined)?.claim_id;
-    if (!resolvedClaimId) {
-      return { data: [] };
-    }
-
-    // 1. Fetch claimUpdates scoped to this case
-    const updates = await withRLSContext(async (tx) =>
-      tx
-        .select()
-        .from(claimUpdates)
-        .where(eq(claimUpdates.claimId, resolvedClaimId))
-        .orderBy(desc(claimUpdates.createdAt)),
-    );
-
-    const mapped = updates.map((u) => ({
-      id: u.updateId,
-      timestamp: u.createdAt?.toISOString() ?? new Date().toISOString(),
-      type: u.updateType,
-      description: u.message,
-      actor: u.createdBy,
-    }));
-
-    // 2. Check if there's a linked grievance via claim metadata or
-    //    a future grievance_id column. Currently claims table has no FK
-    //    to grievances, so attempt a raw lookup and gracefully skip if
-    //    the column doesn't exist.
-    try {
-      const linkResult = await withRLSContext(async (tx) =>
-        tx.execute(
-          sql`SELECT grievance_id FROM claims WHERE claim_id = ${resolvedClaimId} AND grievance_id IS NOT NULL LIMIT 1`,
-        ),
-      );
-      const rows = Array.from(linkResult);
-      const grievanceId = (rows[0] as Record<string, unknown> | undefined)?.grievance_id as string | undefined;
-
-      if (grievanceId) {
-        const gEvents = await withRLSContext(async (tx) =>
-          tx
-            .select()
-            .from(grievanceTimeline)
-            .where(eq(grievanceTimeline.grievanceId, grievanceId))
-            .orderBy(desc(grievanceTimeline.eventDate)),
-        );
-
-        for (const ev of gEvents) {
-          mapped.push({
-            id: ev.id,
-            timestamp: ev.eventDate?.toISOString() ?? ev.createdAt?.toISOString() ?? new Date().toISOString(),
-            type: ev.eventType,
-            description: ev.description,
-            actor: ev.actor ?? 'System',
-          });
-        }
-      }
-    } catch {
-      // Column doesn't exist yet — no linked grievance timeline to include
-    }
-
-    // Sort combined list newest-first
-    mapped.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-    return { data: mapped };
+    const caseId = params?.caseId
+    if (!caseId) throw ApiError.notFound('Case')
+    const actor = await getCaseActor()
+    await requireEntitlement(actor.organizationId, 'grievance_case_suite')
+    return withRLSContext(async (tx) => {
+      const claim = await findReadableCase(tx, actor, caseId)
+      if (!claim) throw ApiError.notFound('Case')
+      const updates = await tx.select().from(claimUpdates)
+        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(actor)))
+        .orderBy(desc(claimUpdates.createdAt))
+      return { data: updates.map(update => ({
+        id: update.updateId,
+        timestamp: update.createdAt?.toISOString() ?? null,
+        type: update.updateType,
+        description: update.message,
+        actor: update.createdBy,
+      })) }
+    })
   },
-);
+)

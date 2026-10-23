@@ -395,6 +395,13 @@ export async function getUserRoleInOrganization(
   organizationId: string
 ): Promise<AppRole | null> {
   try {
+    if (currentStateContextEnabled()) {
+      const context = await getCanonicalOrganizationContext({
+        expectedActorUserId: userId,
+        organizationId,
+      });
+      return context.role as AppRole;
+    }
     const result = await db
       .select({ role: organizationMembers.role })
       .from(organizationMembers)

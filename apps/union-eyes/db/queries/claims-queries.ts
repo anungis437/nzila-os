@@ -1,10 +1,11 @@
 "use server";
 
-import { eq, and, desc, sql, count } from "drizzle-orm";
+import { eq, and, desc, sql, count, gte, lt } from "drizzle-orm";
 import { claims, claimUpdates } from "../schema/claims-schema";
 import { organizations } from "../schema-organizations";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
+import { claimHistoryReference, publicClaimHistory } from '@/lib/cases/claim-history-reference';
 
 // Type for inserting a new claim
 export type InsertClaim = typeof claims.$inferInsert;
@@ -35,8 +36,8 @@ export const createClaim = async (
         .from(claims)
         .where(
           and(
-            sql`${claims.createdAt} >= ${todayStart}`,
-            sql`${claims.createdAt} < ${todayEnd}`
+            gte(claims.createdAt, todayStart),
+            lt(claims.createdAt, todayEnd)
           )
         );
       
@@ -218,7 +219,7 @@ export const updateClaimStatus = async (
       
       // Create an update record
       await dbOrTx.insert(claimUpdates).values({
-        claimId,
+        claimId: claimHistoryReference(claimId),
         updateType: 'status_change',
         message: notes || `Status changed to ${newStatus}`,
         createdBy: updatedBy,
@@ -265,7 +266,7 @@ export const assignClaim = async (
       
       // Create an update record
       await dbOrTx.insert(claimUpdates).values({
-        claimId,
+        claimId: claimHistoryReference(claimId),
         updateType: 'assignment',
         message: `Claim assigned to user ${assignedTo}`,
         createdBy: assignedBy,
@@ -444,11 +445,11 @@ export const getRecentClaimUpdates = async (
       const updates = await dbOrTx
         .select()
         .from(claimUpdates)
-        .where(eq(claimUpdates.claimId, claimId))
+        .where(eq(claimUpdates.claimId, claimHistoryReference(claimId)))
         .orderBy(desc(claimUpdates.createdAt))
         .limit(20);
       
-      return updates;
+      return updates.map(update => publicClaimHistory(update, claimId));
     } catch (error) {
       logger.error("Error fetching claim updates", { error, claimId });
       throw new Error("Failed to fetch updates");
@@ -480,7 +481,7 @@ export const addClaimUpdate = async (
       const [newUpdate] = await dbOrTx
         .insert(claimUpdates)
         .values({
-          claimId,
+          claimId: claimHistoryReference(claimId),
           updateType,
           message,
           createdBy,
@@ -495,7 +496,7 @@ export const addClaimUpdate = async (
         })
         .where(eq(claims.claimId, claimId));
       
-      return newUpdate;
+      return publicClaimHistory(newUpdate, claimId);
     } catch (error) {
       logger.error("Error adding claim update", { error, claimId, updateType });
       throw new Error("Failed to add update");

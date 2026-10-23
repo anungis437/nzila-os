@@ -7,22 +7,23 @@
  */
 
 import { NextResponse } from 'next/server';
-import { auth } from '@nzila/platform-auth/entra/server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims, claimUpdates } from '@/db/schema/claims-schema';
+import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { recordUnionEyesCaseAssigned } from '@/lib/pilot-metrics';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { getCaseActor, requireCaseAction, findReadableCase, caseAssigneeEligible, denyCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
+import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
 
 export const dynamic = 'force-dynamic';
 
 const AssignCaseSchema = z.object({
-  assigneeId: z.string().min(1, 'Assignee ID is required'),
+  assigneeId: z.string().min(1, 'Assignee ID is required').max(255),
   reason: z.string().max(1000).optional(),
 });
 
@@ -36,14 +37,9 @@ export async function POST(
   try {
     const { caseId } = await params;
 
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
-        { status: 401 },
-      );
-    }
-    const orgId = await getOrganizationIdForUser(userId);
+    const actor = await getCaseActor();
+    const {userId,organizationId:orgId} = actor;
+    await requireCaseAction(actor,'case_assign',caseId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     let body: any;
@@ -74,18 +70,11 @@ export async function POST(
     const { assigneeId, reason } = parsed.data;
 
     const result = await withRLSContext(async (tx) => {
-      // Verify case exists (RLS enforces org isolation)
-      const [claim] = await tx
-        .select({
-          claimId: claims.claimId,
-          assignedTo: claims.assignedTo,
-          status: claims.status,
-        })
-        .from(claims)
-        .where(eq(claims.claimId, caseId))
-        .limit(1);
+      const claim = await findReadableCase(tx,actor,caseId,true);
 
       if (!claim) return null;
+      if (!(await caseAssigneeEligible(tx,actor,assigneeId)))
+        return {denied:true as const,claimId:claim.claimId};
 
       const previousAssignee = claim.assignedTo;
 
@@ -97,13 +86,13 @@ export async function POST(
           assignedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(claims.claimId, caseId));
+        .where(eq(claims.claimId, claim.claimId));
 
       // Add assignment note
       const [update] = await tx
         .insert(claimUpdates)
         .values({
-          claimId: caseId,
+          claimId: claimHistoryReference(claim.claimId),
           updateType: 'assignment',
           message: reason
             ? `Case assigned. Reason: ${reason}`
@@ -114,7 +103,7 @@ export async function POST(
         })
         .returning();
 
-      return { previousAssignee, updateId: update.updateId };
+      return { denied:false as const,claimId:claim.claimId,previousAssignee, updateId: update.updateId };
     });
 
     if (!result) {
@@ -123,16 +112,17 @@ export async function POST(
         { status: 404 },
       );
     }
+    if(result.denied) return await denyCaseAction(actor,'case_assign',result.claimId,'Assignee is not an active canonical representative in this organization');
 
     await auditDataMutation({
       userId,
       organizationId: orgId,
       resource: 'claims',
-      resourceId: caseId,
+      resourceId: result.claimId,
       action: 'update',
       details: {
         event: 'CASE_ASSIGNED',
-        caseId,
+        caseId: result.claimId,
         fromAssignee: result.previousAssignee,
         toAssignee: assigneeId,
         reason: reason ?? null,
@@ -141,7 +131,7 @@ export async function POST(
     });
 
     logger.info('Case assigned', {
-      caseId,
+      caseId: result.claimId,
       fromAssignee: result.previousAssignee,
       toAssignee: assigneeId,
     });
@@ -153,23 +143,25 @@ export async function POST(
       actionType: 'CASE_ASSIGNED',
       orgId: orgId,
       actorId: userId,
-      artifacts: [{ type: 'case_assignment', data: { caseId, fromAssignee: result.previousAssignee, toAssignee: assigneeId } }],
+      artifacts: [{ type: 'case_assignment', data: { caseId: result.claimId, fromAssignee: result.previousAssignee, toAssignee: assigneeId } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_ASSIGNED' }))
 
-    recordUnionEyesCaseAssigned(orgId, caseId, assigneeId, userId, traceId).catch((err) =>
+    recordUnionEyesCaseAssigned(orgId, result.claimId, assigneeId, userId, traceId).catch((err) =>
       logger.warn('Pilot metric emit failed', { error: String(err), metric: 'assignment_efficiency' }),
     )
 
     return NextResponse.json(
       {
         success: true,
-        caseId,
+        caseId: result.claimId,
         assignedTo: assigneeId,
         previousAssignee: result.previousAssignee,
       },
       { status: 200 },
     );
   } catch (error) {
+    const denied=caseAuthorizationResponse(error)??authorizationDenialResponse(error);
+    if(denied) return denied;
     logger.error('Failed to assign case', error as Error);
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' },

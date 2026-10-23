@@ -27,6 +27,9 @@ import { organizationMembers } from "@/db/schema-organizations";
 import { organizations } from "@/db/schema-organizations";
 import { eq, sql } from "drizzle-orm";
 import { QcBilingualBanner } from "@/components/compliance/qc-bilingual-banner";
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 // Credits system disabled — platform does not require credits
 // import { ExpiredCreditsChecker } from "@/components/billing/expired-credits-checker";
 
@@ -40,6 +43,22 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       hasSessionCookie: undefined,
     });
     return redirect("/login");
+  }
+
+  if (currentStateContextEnabled()) {
+    // Canonical membership is live authority. The legacy billing profile is not an
+    // identity prerequisite, and email must never relink a profile or membership.
+    const context = await getCanonicalOrganizationContext({ expectedActorUserId: userId });
+    const organizationProvince = await withRLSContext(
+      { organizationId: context.organizationId },
+      async (tx) => {
+        const [organization] = await tx.select({ provinceTerritory: organizations.provinceTerritory })
+          .from(organizations).where(eq(organizations.id, context.organizationId)).limit(1);
+        return organization?.provinceTerritory ?? null;
+      },
+    );
+    return renderDashboard({ children, profile: null, userEmail: context.email,
+      userRole: context.role, organizationProvince });
   }
 
   let profile: (typeof profiles.$inferSelect) | null = null;
@@ -258,6 +277,16 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     userRole: userRole
   });
 
+  return renderDashboard({ children, profile, userEmail, userRole, organizationProvince });
+}
+
+function renderDashboard({ children, profile, userEmail, userRole, organizationProvince }: {
+  children: ReactNode;
+  profile: (typeof profiles.$inferSelect) | null;
+  userEmail: string;
+  userRole: UserRole;
+  organizationProvince: string | null;
+}) {
   return (
     <PilotModeProvider>
     <div className="flex h-screen bg-gray-50 relative overflow-hidden">
@@ -265,10 +294,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       {/* Welcome popup disabled — users cannot manage plans or credits */}
         
         {/* Show payment success popup - component handles visibility logic */}
-        <PaymentSuccessPopup profile={profile} />
+        {profile && <PaymentSuccessPopup profile={profile} />}
         
         {/* Show cancellation popup directly if status is canceled */}
-        {profile.status === "canceled" && (
+        {profile?.status === "canceled" && (
           <CancellationPopup profile={profile} />
         )}
         
