@@ -9,8 +9,7 @@ import React from 'react';
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from '@nzila/platform-auth/entra/client';
-import { useTranslations } from 'next-intl';
-import Link from "next/link";
+import { useLocale, useTranslations } from 'next-intl';
 import { useOrganization } from "@/lib/hooks/use-organization";
 import {
   Clipboard,
@@ -30,7 +29,6 @@ import {
   Phone,
   Mail,
   ChevronDown,
-  Eye,
   UserCheck,
   TrendingUp,
   AlertTriangle,
@@ -38,6 +36,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeading } from '@/components/dashboard/page-heading';
 
 type CaseStatus = "pending" | "in-review" | "approved" | "rejected" | "resolved";
 type CasePriority = "low" | "medium" | "high" | "urgent";
@@ -97,19 +96,12 @@ interface Case {
 
 // Map database claim types to UI-friendly labels
 const claimTypeLabels: Record<string, string> = {
-  "grievance_discipline": "Discipline",
-  "grievance_pay": "Wage & Hour",
-  "grievance_schedule": "Scheduling",
-  "grievance_benefits": "Benefits",
-  "grievance_leave": "Leave",
-  "discrimination_race": "Discrimination",
-  "discrimination_gender": "Discrimination",
-  "discrimination_age": "Discrimination",
-  "discrimination_disability": "Discrimination",
-  "harassment_sexual": "Harassment",
-  "harassment_workplace": "Harassment",
-  "workplace_safety": "Safety",
-  "contract_violation": "Contract Violation",
+  grievance_discipline: 'discipline', grievance_pay: 'wageHour',
+  grievance_schedule: 'scheduling', grievance_benefits: 'benefits', grievance_leave: 'leave',
+  discrimination_race: 'discrimination', discrimination_gender: 'discrimination',
+  discrimination_age: 'discrimination', discrimination_disability: 'discrimination',
+  harassment_sexual: 'harassment', harassment_workplace: 'harassment',
+  workplace_safety: 'safety', contract_violation: 'contractViolation',
 };
 
 // Map database status to UI status
@@ -148,18 +140,18 @@ const calculateDaysOpen = (createdAt: Date): number => {
 };
 
 // Convert database claim to UI case (now with member details from API)
-const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: string; memberPhone?: string }): Case => ({
+const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: string; memberPhone?: string }, t: (key: string) => string): Case => ({
   id: claim.claimNumber,
   claimId: claim.claimId,
-  title: claimTypeLabels[claim.claimType] || claim.claimType || "Untitled Case",
+  title: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.untitledCase'),
   description: claim.description,
   status: mapDbStatusToUi(claim.status),
   priority: mapDbPriorityToUi(claim.priority),
-  category: claimTypeLabels[claim.claimType] || claim.claimType || "General",
-  submittedDate: new Date(claim.createdAt).toISOString().split('T')[0],
-  lastUpdate: new Date(claim.updatedAt).toISOString().split('T')[0],
+  category: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.generalCase'),
+  submittedDate: new Date(claim.createdAt).toISOString(),
+  lastUpdate: new Date(claim.updatedAt).toISOString(),
   memberId: claim.memberId,
-  memberName: claim.memberName || (claim.isAnonymous ? "Anonymous Member" : "Unknown Member"),
+  memberName: claim.memberName || t(claim.isAnonymous ? 'workbench.anonymousMember' : 'workbench.unknownMember'),
   memberEmail: claim.memberEmail || (claim.isAnonymous ? "" : ""),
   memberPhone: claim.memberPhone || (claim.isAnonymous ? "" : ""),
   assignedTo: claim.assignedTo || null,
@@ -198,6 +190,8 @@ const statusConfig: Record<CaseStatus, { icon: React.ReactElement; color: string
 
 export default function WorkbenchConsole() {
   const t = useTranslations();
+  const locale = useLocale();
+  const loadingErrorMessage = t('workbench.errorLoadingCases');
   const { user } = useUser();
   const { organizationId, organization } = useOrganization();
   const isPlatformOrg = organization?.type === 'platform';
@@ -240,8 +234,9 @@ export default function WorkbenchConsole() {
         }
 
         const data = await response.json();
-        const claims = data.data?.claims ?? data.claims ?? [];
-        const mappedCases = claims.map(mapDbClaimToCase);
+        const claims = data.data?.claims ?? data.claims;
+        if (!Array.isArray(claims)) throw new Error(loadingErrorMessage);
+        const mappedCases = claims.map(claim => mapDbClaimToCase(claim, t));
         setCases(mappedCases);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load assigned claims');
@@ -251,7 +246,7 @@ export default function WorkbenchConsole() {
     };
 
     fetchAssignedClaims();
-  }, [organizationId, isPlatformOrg]);
+  }, [organizationId, isPlatformOrg, loadingErrorMessage, t]);
 
   // Filter and sort cases
   const filteredAndSortedCases = cases
@@ -303,8 +298,12 @@ export default function WorkbenchConsole() {
     const response = await fetch(url);
     if (response.ok) {
       const data = await response.json();
-      const claims = data.data?.claims ?? data.claims ?? [];
-      setCases(claims.map(mapDbClaimToCase));
+      const claims = data.data?.claims ?? data.claims;
+      if (!Array.isArray(claims)) {
+        setError(t('workbench.errorLoadingCases'));
+        return;
+      }
+      setCases(claims.map(claim => mapDbClaimToCase(claim, t)));
     }
   };
 
@@ -389,24 +388,14 @@ export default function WorkbenchConsole() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
+    <div className="min-w-0">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto"
+        className="min-w-0 space-y-6"
       >
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Clipboard className="w-10 h-10 text-orange-600" />
-            <h1 className="text-4xl font-bold text-gray-900">
-              {t('workbench.title')}
-            </h1>
-          </div>
-          <p className="text-lg text-gray-600">
-            {t('workbench.subtitle')}
-          </p>
-        </div>
+        <PageHeading title={t('workbench.title')} description={t('workbench.subtitle')} />
 
         {/* Loading State */}
         {isLoading && (
@@ -416,7 +405,7 @@ export default function WorkbenchConsole() {
             className="flex justify-center items-center py-20"
           >
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-gray-600">{t('workbench.loadingCases')}</p>
             </div>
           </motion.div>
@@ -425,6 +414,7 @@ export default function WorkbenchConsole() {
         {/* Error State */}
         {error && (
           <motion.div
+            role="alert"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6"
@@ -463,7 +453,7 @@ export default function WorkbenchConsole() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="bg-card border-border shadow-sm hover:shadow-xl transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -483,7 +473,7 @@ export default function WorkbenchConsole() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="bg-card border-border shadow-sm hover:shadow-xl transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -503,7 +493,7 @@ export default function WorkbenchConsole() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="bg-card border-border shadow-sm hover:shadow-xl transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -523,15 +513,15 @@ export default function WorkbenchConsole() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="bg-card border-border shadow-sm hover:shadow-xl transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">{t('workbench.avgDaysOpen')}</p>
-                    <p className="text-3xl font-bold text-orange-600">{avgDaysOpen}</p>
+                    <p className="text-3xl font-bold text-foreground">{avgDaysOpen}</p>
                   </div>
-                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-orange-600" />
+                  <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-primary" />
                   </div>
                 </div>
               </CardContent>
@@ -545,7 +535,7 @@ export default function WorkbenchConsole() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg mb-8">
+          <Card className="bg-card border-border shadow-sm mb-8">
             <CardContent className="p-6">
               {/* Search Bar */}
               <div className="relative mb-6">
@@ -553,9 +543,10 @@ export default function WorkbenchConsole() {
                 <input
                   type="text"
                   placeholder={t('workbench.searchPlaceholder')}
+                  aria-label={t('workbench.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
                 />
               </div>
 
@@ -570,19 +561,21 @@ export default function WorkbenchConsole() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSelectedStatus("all")}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      aria-pressed={selectedStatus === 'all'}
+                      className={`min-h-11 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         selectedStatus === "all"
-                          ? "bg-orange-600 text-white shadow-md"
+                          ? "bg-primary text-primary-foreground shadow-md"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      All ({cases.length})
+                      {t('workbench.all')} ({cases.length})
                     </button>
                     <button
                       onClick={() => setSelectedStatus("pending")}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      aria-pressed={selectedStatus === 'pending'}
+                      className={`min-h-11 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         selectedStatus === "pending"
-                          ? "bg-orange-600 text-white shadow-md"
+                          ? "bg-primary text-primary-foreground shadow-md"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
@@ -590,9 +583,10 @@ export default function WorkbenchConsole() {
                     </button>
                     <button
                       onClick={() => setSelectedStatus("in-review")}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      aria-pressed={selectedStatus === 'in-review'}
+                      className={`min-h-11 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         selectedStatus === "in-review"
-                          ? "bg-orange-600 text-white shadow-md"
+                          ? "bg-primary text-primary-foreground shadow-md"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
@@ -610,9 +604,10 @@ export default function WorkbenchConsole() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSelectedPriority("all")}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      aria-pressed={selectedPriority === 'all'}
+                      className={`min-h-11 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         selectedPriority === "all"
-                          ? "bg-orange-600 text-white shadow-md"
+                          ? "bg-primary text-primary-foreground shadow-md"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
@@ -624,9 +619,10 @@ export default function WorkbenchConsole() {
                         <button
                           key={priority}
                           onClick={() => setSelectedPriority(priority)}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          aria-pressed={selectedPriority === priority}
+                          className={`min-h-11 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                             selectedPriority === priority
-                              ? "bg-orange-600 text-white shadow-md"
+                              ? "bg-primary text-primary-foreground shadow-md"
                               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                           }`}
                         >
@@ -654,9 +650,10 @@ export default function WorkbenchConsole() {
                     <button
                       key={field}
                       onClick={() => handleSort(field)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                      aria-pressed={sortField === field}
+                      className={`min-h-11 px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
                         sortField === field
-                          ? "bg-orange-600 text-white shadow-md"
+                          ? "bg-primary text-primary-foreground shadow-md"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
@@ -683,7 +680,7 @@ export default function WorkbenchConsole() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg">
+                <Card className="bg-card border-border shadow-sm">
                   <CardContent className="p-12 text-center">
                     <Clipboard className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -701,7 +698,7 @@ export default function WorkbenchConsole() {
                           setSelectedStatus("all");
                           setSelectedPriority("all");
                         }}
-                        className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                        className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                       >
                         {t('workbench.clearFilters')}
                       </button>
@@ -723,16 +720,13 @@ export default function WorkbenchConsole() {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg hover:shadow-xl transition-all">
+                    <Card>
                       <CardContent className="p-6">
                         {/* Case Header */}
-                        <div 
-                          className="cursor-pointer"
-                          onClick={() => setExpandedCase(isExpanded ? null : caseItem.id)}
-                        >
+                        <div>
                           <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-3">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-3 mb-3">
                                 <span className="text-sm font-mono text-gray-500">
                                   {caseItem.id}
                                 </span>
@@ -767,7 +761,7 @@ export default function WorkbenchConsole() {
                                 </div>
                                 <div className="flex items-center gap-1 text-gray-500">
                                   <Calendar className="w-4 h-4" />
-                                  {t('workbench.submittedOn', { date: new Date(caseItem.submittedDate).toLocaleDateString() })}
+                                  {t('workbench.submittedOn', { date: new Date(caseItem.submittedDate).toLocaleDateString(locale) })}
                                 </div>
                                 {caseItem.assignedTo && (
                                   <div className="flex items-center gap-1 text-blue-600">
@@ -778,8 +772,12 @@ export default function WorkbenchConsole() {
                               </div>
                             </div>
                             <button
-                              className="ml-4 text-orange-600 hover:text-orange-700"
-                              aria-label={isExpanded ? t('workbench.collapse') : t('workbench.expand')}
+                              type="button"
+                              className="ml-3 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input text-primary hover:bg-accent"
+                              aria-label={`${isExpanded ? t('workbench.collapse') : t('workbench.expand')} ${caseItem.id}`}
+                              aria-expanded={isExpanded}
+                              aria-controls={isExpanded ? `case-details-${encodeURIComponent(caseItem.claimId)}` : undefined}
+                              onClick={() => setExpandedCase(isExpanded ? null : caseItem.id)}
                             >
                               <motion.div
                                 animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -795,6 +793,7 @@ export default function WorkbenchConsole() {
                         <AnimatePresence>
                           {isExpanded && (
                             <motion.div
+                              id={`case-details-${encodeURIComponent(caseItem.claimId)}`}
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: "auto" }}
                               exit={{ opacity: 0, height: 0 }}
@@ -812,18 +811,18 @@ export default function WorkbenchConsole() {
                                     <User className="w-4 h-4" />
                                     <span>{caseItem.memberName}</span>
                                   </div>
-                                  <div className="flex items-center gap-2 text-gray-700">
+                                  {caseItem.memberEmail && <div className="min-w-0 flex items-center gap-2 text-gray-700">
                                     <Mail className="w-4 h-4" />
-                                    <a href={`mailto:${caseItem.memberEmail}`} className="text-blue-600 hover:underline">
+                                    <a href={`mailto:${caseItem.memberEmail}`} className="inline-flex min-h-11 min-w-0 items-center break-all text-primary hover:underline">
                                       {caseItem.memberEmail}
                                     </a>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-gray-700">
+                                  </div>}
+                                  {caseItem.memberPhone && <div className="min-w-0 flex items-center gap-2 text-gray-700">
                                     <Phone className="w-4 h-4" />
-                                    <a href={`tel:${caseItem.memberPhone}`} className="text-blue-600 hover:underline">
+                                    <a href={`tel:${caseItem.memberPhone}`} className="inline-flex min-h-11 min-w-0 items-center break-all text-primary hover:underline">
                                       {caseItem.memberPhone}
                                     </a>
-                                  </div>
+                                  </div>}
                                 </div>
                               </div>
 
@@ -853,10 +852,11 @@ export default function WorkbenchConsole() {
                                   <MessageSquare className="w-4 h-4" />
                                   {t('workbench.addCaseNote')}
                                 </h4>
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap gap-2">
                                   <input
                                     type="text"
                                     placeholder={t('workbench.addNotePlaceholder')}
+                                    aria-label={t('workbench.addNotePlaceholder')}
                                     value={newNote[caseItem.id] || ""}
                                     onChange={(e) => setNewNote({ ...newNote, [caseItem.id]: e.target.value })}
                                     onKeyDown={(e) => {
@@ -864,12 +864,12 @@ export default function WorkbenchConsole() {
                                         handleAddNote(caseItem);
                                       }
                                     }}
-                                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    className="min-h-11 min-w-0 basis-48 flex-1 px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
                                   />
                                   <button
                                     onClick={() => handleAddNote(caseItem)}
                                     disabled={!newNote[caseItem.id]?.trim() || actionLoading === caseItem.id}
-                                    className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    className="min-h-11 px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                   >
                                     {actionLoading === caseItem.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                                     {t('workbench.addNote')}
@@ -883,18 +883,15 @@ export default function WorkbenchConsole() {
                                   <button
                                     onClick={() => handleAssignToMe(caseItem)}
                                     disabled={actionLoading === caseItem.id}
-                                    className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
+                                    className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
                                   >
                                     {actionLoading === caseItem.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <UserCheck className="w-5 h-5" />}
                                     {t('workbench.assignToMe')}
                                   </button>
                                 )}
-                                <Link href={`/dashboard/cases/${caseItem.claimId}`} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                  <Eye className="w-5 h-5" />
-                                  {t('workbench.viewFullDetails')}
-                                </Link>
                                 {caseItem.status !== "resolved" && caseItem.status !== "rejected" && (
                                   <select
+                                    aria-label={t('workbench.updateStatusLabel')}
                                     onChange={(e) => {
                                       if (e.target.value) handleUpdateStatus(caseItem, e.target.value);
                                     }}
@@ -943,10 +940,10 @@ export default function WorkbenchConsole() {
           transition={{ delay: 0.6 }}
           className="mt-8"
         >
-          <Card className="bg-linear-to-r from-orange-50 to-yellow-50 border-orange-200">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center shrink-0">
                   <Clipboard className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
@@ -960,9 +957,6 @@ export default function WorkbenchConsole() {
                     <li>&bull; {t('workbench.lroTips.contact')}</li>
                     <li>&bull; {t('workbench.lroTips.coordinate')}</li>
                   </ul>
-                  <button className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-                    {t('workbench.viewLroGuidelines')}
-                  </button>
                 </div>
               </div>
             </CardContent>

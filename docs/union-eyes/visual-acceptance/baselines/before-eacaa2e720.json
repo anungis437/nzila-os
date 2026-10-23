@@ -1,0 +1,850 @@
+{
+  "schemaVersion": 1,
+  "kind": "BEFORE_BASELINE",
+  "evidenceArchive": "ue-staging-recovery-20261022/case-authorization-release-20261023/global-experience-before-r2",
+  "distinctPages": 3,
+  "captures": 42,
+  "scope": "Officer only; not full application acceptance",
+  "images": [
+    {
+      "route": "/en-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 360,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:18:45.762Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "2d5474114b4f3b98394492a3685304f40ff8cf1b735062590e8b037ee34636b9",
+      "artifact": "e913f2fc65c9bfdb5785.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 360,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:18:49.085Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "39710507c3b02be634768e485c29cbae64da8f3bbddf92c9ddab0d57bd7a11a1",
+      "artifact": "4bd05d3e2575e4862e4d.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 360,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:18:52.794Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "0e62e3ff30f1853392167f5d0a3ba7cfeb44a09077af33eb5cb6a26f5cb10732",
+      "artifact": "b46999200824459a054c.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:18:56.024Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "e48f437150757ea0a943e35005bbb27838be6fd4768f35941bae453921c978be",
+      "artifact": "2f7acb6f429937acc0d3.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:19:00.079Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "889fb44c0975ce2b632cd62c4ed3c17a52d80fc0c27fb15b3dee8df6ac2bfe48",
+      "artifact": "a10b2daff63a930ea5e7.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:19:03.971Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "f4bc5438800c10e8677087d116dde7e97c2b77446bac656fbb949c98adc83e9b",
+      "artifact": "e4a6dfa10399f56ee45f.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:19:07.561Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "b08fc9bfa0e7724fd2a118e022a286272fe381d846cb35cc5d538bed20f9f2b2",
+      "artifact": "1a26f540adf040fff123.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:19:10.926Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "3b0843fc64efda8b637f82158530113d4fc23c4533f8e3ef5e57795f76033c44",
+      "artifact": "7e360f554f247c1befba.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:19:14.511Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "b897d75b1eb15ba52f8393161030830de12fc977d29e91e02bc7e268fe665518",
+      "artifact": "430cd61de6efb625ea88.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 430,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:19:17.903Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "774a4b2230f0b369e6c54495942066f449ba1303162fd87067018bd85cc07cdb",
+      "artifact": "2a320e37980728e5a792.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 430,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:19:21.943Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "a759bc20c0b3630efb0ed55568fb734aa9dc7ed6a11f4bfb00fd323ddcd083ef",
+      "artifact": "952f79fb88b0e49ae8e6.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 430,
+        "height": 900
+      },
+      "landed": "/en-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:19:25.685Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "b6c2cdb2114ad7e749a382bdc710f87d7156b3cc5b987ef7bd8f65c9870abc04",
+      "artifact": "1185769b43018fde9a03.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 768,
+        "height": 1000
+      },
+      "landed": "/en-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:19:28.982Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "09dff1c5e340478c361bc00a6048b8265ea6155a5294a5a34b2e595a7976891c",
+      "artifact": "7dfddf8490770e5cb298.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 768,
+        "height": 1000
+      },
+      "landed": "/en-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:19:32.132Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "5c99a7113a379b56c1bc7bcd2df7d4eff95f9b38bfba943236fbc172ce4ea0c0",
+      "artifact": "0630f3f1932558aae8ee.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 768,
+        "height": 1000
+      },
+      "landed": "/en-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:19:35.602Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "d757a0f55a35588622037f2e0daca9e6cb3497a65bd345c3ecf6410acab2c1be",
+      "artifact": "bca881235802fb7206fc.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1024,
+        "height": 1000
+      },
+      "landed": "/en-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:19:38.966Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "9770943a7009117c048322df76a6d41a57d8085788d9a62028304dc09f139722",
+      "artifact": "35a2d1080c4f705205e3.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1024,
+        "height": 1000
+      },
+      "landed": "/en-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:19:42.307Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "7655646c505dcf9ca158d171d670acc530dc300cff43e26b39128ff298ad1fbc",
+      "artifact": "bcbb023a81c9d501553c.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1024,
+        "height": 1000
+      },
+      "landed": "/en-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:19:45.774Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "753ff3d65a33f32df895639f8f3ffe0787577f90acbe63f74088c970f118a2c9",
+      "artifact": "619141e27e195981d7f0.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "landed": "/en-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:19:49.349Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "30df18ac3950de1c6d9eca4ea1d00dced0b4a064fc06620c7c9d1fad9f0f17dc",
+      "artifact": "7fd7429e0478eba1ba7e.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "landed": "/en-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:19:53.723Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "1fcc7983cec3c50784d6f229e9642f4f750215400757f2138a317bd1041bf70d",
+      "artifact": "db0f95a76e52e1bb1678.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/en-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "en-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "landed": "/en-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:19:57.834Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "921c7afe406b8de4fa09b6d7fbe88c4d6b4a921f2fc7f5eb4cdd71a62f3da5d4",
+      "artifact": "87090d1b283a5dd20bbf.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 360,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:20:01.495Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "f29465a2c1c826a81c4aa3c1eeba7051f6708b140913f0641e3ab50cfd2fc47f",
+      "artifact": "41dcda81c1ffa4c1b4d5.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 360,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:20:05.139Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "39710507c3b02be634768e485c29cbae64da8f3bbddf92c9ddab0d57bd7a11a1",
+      "artifact": "c25de32fedbc6094898a.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 360,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:20:08.789Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "3e9cb97b34208ce309bc515fff657fd199a80204382d253416098da1e3279388",
+      "artifact": "16c3b9bc24c1059fb043.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:20:12.215Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "0c51f604636fd730256fa11fbe879ee51a2e00a9bc674dddad3a3bf61a9d6c78",
+      "artifact": "2933f3c2dd1f4bf055bb.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:20:15.772Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "889fb44c0975ce2b632cd62c4ed3c17a52d80fc0c27fb15b3dee8df6ac2bfe48",
+      "artifact": "65d72b3968ba621022b3.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:20:19.626Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "1b1968fa7296aa7525460939d3eeef688ba477c4c61017203022a2a2392818c0",
+      "artifact": "b68eda520bbbdcce27e9.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:20:22.989Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "b7a8f4019e4862201c9323647ccb642dbe9e10e5c98b89ab458010ccc91f35b9",
+      "artifact": "bca86f24c426ffe559d2.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:20:27.265Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "3b0843fc64efda8b637f82158530113d4fc23c4533f8e3ef5e57795f76033c44",
+      "artifact": "3fd6bd54269cca4b964d.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:20:30.771Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "dbb270129a8c6508cd950f38ff228dd3dac0648c3aa7fc5d94dec3f89dbce09d",
+      "artifact": "093b8e03af44c38bbd27.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 430,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:20:34.230Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "75d0386d7c7dabe433165e0b9f7194c5f7bbfbac3815736f39deb5d47f302a00",
+      "artifact": "fd30bfe198348f44d01a.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 430,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:20:37.414Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "a759bc20c0b3630efb0ed55568fb734aa9dc7ed6a11f4bfb00fd323ddcd083ef",
+      "artifact": "7b093afba9535556a6da.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 430,
+        "height": 900
+      },
+      "landed": "/fr-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:20:41.022Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "1be58735dba8e633f1fb43a00b74da7c9b2143a919c1ff2d022a6a77b7307bc9",
+      "artifact": "e3dc16b0ca29133681bc.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 768,
+        "height": 1000
+      },
+      "landed": "/fr-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:20:44.253Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "27313be2c543b9a776b91fa90248b98f90915198075ca17f85c6b5d43da373f7",
+      "artifact": "0b62909c6ad29bf295df.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 768,
+        "height": 1000
+      },
+      "landed": "/fr-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:20:47.814Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "f9b9542d4d431bdf7eda7657a9fd4ded4fdae38acb90647d6c5ee92cf00914c3",
+      "artifact": "2a241f8a72f088e1a69d.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 768,
+        "height": 1000
+      },
+      "landed": "/fr-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:20:51.637Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "d864af9522aff9a5afd0bd792ff5937b9780693e0567e03babeb3a2c44e4217b",
+      "artifact": "080a02723d6317acdee6.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1024,
+        "height": 1000
+      },
+      "landed": "/fr-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:20:55.045Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "053395668c274f1be99e8e6a809222b48925f853745023ee7b9d2cc12943caaf",
+      "artifact": "4569aa5f14eae7600d85.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1024,
+        "height": 1000
+      },
+      "landed": "/fr-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:20:58.367Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "973660b85eea3b4d287fc4ba61916f4be856e6aa3d4b95d671e85821f299f04d",
+      "artifact": "013c8ca3f012f9b0f80d.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1024,
+        "height": 1000
+      },
+      "landed": "/fr-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:21:02.341Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "c9bd168a2d9a15ad5319398bbf99e967b9117226ab23d2143ba406dcd9bcf508",
+      "artifact": "a6adba7176e095a18fde.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/workspace",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "landed": "/fr-CA/dashboard/workspace",
+      "capturedAt": "2026-10-23T09:21:05.839Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "4cafb495a8984ba44818e47f1e6e7e68b4f02bf8193ac2303083cc091c0fa084",
+      "artifact": "1ffeac18751ecff51981.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/governance",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "landed": "/fr-CA/dashboard/governance",
+      "capturedAt": "2026-10-23T09:21:09.290Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "ba06deac570c9968c5fb6553016cece40d40777fa94adc71114e29a7c09b75a1",
+      "artifact": "d44ef253b4965eb5453c.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    },
+    {
+      "route": "/fr-CA/dashboard/settings",
+      "role": "officer",
+      "locale": "fr-CA",
+      "state": "first-visit",
+      "sourceSha": "eacaa2e7202c1deed5f89aaea5132ec9e5e32871",
+      "candidateRevision": "nzila-os-union-eyes-staging--ue-rec-eacaa2e720",
+      "frontendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:b4085b5cc7eb7636700785ad68c6d900087b881adc5160caf7078fe6e79101ed",
+      "backendImage": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend@sha256:9f9c5ac750c11ab6d58e1262c5d9d1d868703a63c7b24243ba89ad0b610ea191",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "landed": "/fr-CA/dashboard/settings",
+      "capturedAt": "2026-10-23T09:21:12.950Z",
+      "classification": "RENDERED_REQUIRES_VISUAL_REVIEW",
+      "screenshotSha256": "3f579bf69f212dfa3e8d901da24c174a40505531e5cd7c4c747b06bfaf4b5a4c",
+      "artifact": "d97ee712eb19812d20e8.png",
+      "comparison": "BEFORE_ONLY_NOT_YET_QUALIFIED"
+    }
+  ]
+}

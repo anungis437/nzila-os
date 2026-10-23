@@ -1,3 +1,4 @@
+import { OperationalShell } from '@/components/dashboard/operational-shell';
 /**
  * Dashboard layout for Template App
  * This layout removes the global header from all dashboard pages
@@ -6,17 +7,6 @@
 import React, { ReactNode } from "react";
 import { auth, currentUser } from '@nzila/platform-auth/entra/server';
 import { redirect } from "next/navigation";
-import Sidebar from "@/components/sidebar";
-import CancellationPopup from "@/components/cancellation-popup";
-import PaymentSuccessPopup from "@/components/payment-success-popup";
-import { OrganizationSelector } from "@/components/organization/organization-selector";
-import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
-import LanguageSwitcher from "@/components/language-switcher";
-import { HeaderActions } from "@/components/header-actions";
-import RoleExperienceGuard from "@/components/dashboard/role-experience-guard";
-import { PilotModeProvider } from "@/contexts/pilot-mode-context";
-import { FeatureFlagProvider } from "@/lib/hooks/use-feature-flags";
-import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
 import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import { getUserRole } from "@/lib/auth/rbac-server";
@@ -26,7 +16,6 @@ import { profiles } from "@/db/schema";
 import { organizationMembers } from "@/db/schema-organizations";
 import { organizations } from "@/db/schema-organizations";
 import { eq, sql } from "drizzle-orm";
-import { QcBilingualBanner } from "@/components/compliance/qc-bilingual-banner";
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -57,8 +46,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         return organization?.provinceTerritory ?? null;
       },
     );
-    return renderDashboard({ children, profile: null, userEmail: context.email,
-      userRole: context.role, organizationProvince });
+    return <OperationalShell profile={null} userEmail={context.email}
+      userRole={context.role} organizationProvince={organizationProvince}>{children}</OperationalShell>;
   }
 
   let profile: (typeof profiles.$inferSelect) | null = null;
@@ -277,66 +266,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     userRole: userRole
   });
 
-  return renderDashboard({ children, profile, userEmail, userRole, organizationProvince });
+  return <OperationalShell profile={profile} userEmail={userEmail}
+    userRole={userRole} organizationProvince={organizationProvince}>{children}</OperationalShell>;
 }
-
-function renderDashboard({ children, profile, userEmail, userRole, organizationProvince }: {
-  children: ReactNode;
-  profile: (typeof profiles.$inferSelect) | null;
-  userEmail: string;
-  userRole: UserRole;
-  organizationProvince: string | null;
-}) {
-  return (
-    <PilotModeProvider>
-    <div className="flex h-screen bg-gray-50 relative overflow-hidden">
-      {/* Credits system disabled — no credit checks needed */}
-      {/* Welcome popup disabled — users cannot manage plans or credits */}
-        
-        {/* Show payment success popup - component handles visibility logic */}
-        {profile && <PaymentSuccessPopup profile={profile} />}
-        
-        {/* Show cancellation popup directly if status is canceled */}
-        {profile?.status === "canceled" && (
-          <CancellationPopup profile={profile} />
-        )}
-        
-        {/* Sidebar component with profile data and user email */}
-        <Sidebar 
-          profile={profile} 
-          userEmail={userEmail} 
-          whopMonthlyPlanId={process.env.WHOP_PLAN_ID_MONTHLY || ''}
-          whopYearlyPlanId={process.env.WHOP_PLAN_ID_YEARLY || ''}
-          userRole={userRole}
-          platformOrgId={DEFAULT_ORGANIZATION_ID}
-        />
-        
-        {/* Main content area with organization selector */}
-        <div className="flex-1 min-w-0 overflow-auto relative bg-linear-to-br from-slate-50 via-white to-blue-50">
-          {/* QC bilingual banner (Bill 96 / Law 25) */}
-          <QcBilingualBanner province={organizationProvince} />
-          {/* Organization selector and breadcrumb in header - sticky at top */}
-          <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200/60 pl-16 md:pl-6 pr-3 md:pr-6 py-2.5 md:py-4 flex justify-between items-center gap-2 min-h-12 md:min-h-15">
-            <OrganizationBreadcrumb />
-            <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-              <LanguageSwitcher />
-              <OrganizationSelector />
-              <HeaderActions />
-            </div>
-          </div>
-          
-          {/* Page content */}
-          <main className="dashboard-content p-3 md:p-6 mt-1 md:mt-2">
-            <FeatureFlagProvider>
-              <RoleExperienceGuard userRole={userRole} />
-              {children}
-            </FeatureFlagProvider>
-          </main>
-
-          {/* First-visit onboarding overlay */}
-          <OnboardingProvider userRole={userRole} />
-        </div>
-      </div>
-    </PilotModeProvider>
-  );
-} 

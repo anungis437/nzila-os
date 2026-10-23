@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from 'next-intl';
+import { PageHeading } from '@/components/dashboard/page-heading';
 import { Card } from "@/components/ui/card";
-import { Building2, Settings as SettingsIcon, Palette, Users, Link2, Bell, Shield, CreditCard, Upload, Save, AlertCircle, Mail, MessageSquare, Database, Calendar, Check, Download, Info, Loader2 } from "lucide-react";
+import { Settings as SettingsIcon, Palette, Users, Link2, Bell, Shield, CreditCard, Upload, Save, AlertCircle, Mail, MessageSquare, Database, Calendar, Check, Download, Info, Loader2 } from "lucide-react";
 
 type OrgSettingsSection = "general" | "branding" | "members" | "integrations" | "notifications" | "security" | "billing";
 
@@ -63,13 +64,18 @@ export default function OrgSettingsContent() {
   const [hasChanges, setHasChanges] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   
   const [orgSettings, setOrgSettings] = useState(DEFAULT_SETTINGS);
 
   const loadSettings = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
     try {
       const res = await fetch('/api/settings/organization');
+      if (!res.ok) throw new Error('SETTINGS_UNAVAILABLE');
       const json = await res.json();
+      if (!json.success || !json.data?.organization) throw new Error('SETTINGS_UNAVAILABLE');
       if (json.success && json.data?.organization) {
         const org = json.data.organization;
         const s = org.settings ?? {};
@@ -124,7 +130,7 @@ export default function OrgSettingsContent() {
         }));
       }
     } catch {
-      // keep defaults on error
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -137,43 +143,43 @@ export default function OrgSettingsContent() {
       id: "general" as OrgSettingsSection,
       label: t('settings.sections.general'),
       icon: <SettingsIcon size={20} />,
-      color: "bg-blue-100 text-blue-700",
+      color: "bg-secondary text-primary",
     },
     {
       id: "branding" as OrgSettingsSection,
       label: t('settings.sections.branding'),
       icon: <Palette size={20} />,
-      color: "bg-purple-100 text-purple-700",
+      color: "bg-secondary text-primary",
     },
     {
       id: "members" as OrgSettingsSection,
       label: t('settings.sections.members'),
       icon: <Users size={20} />,
-      color: "bg-green-100 text-green-700",
+      color: "bg-secondary text-primary",
     },
     {
       id: "integrations" as OrgSettingsSection,
       label: t('settings.sections.integrations'),
       icon: <Link2 size={20} />,
-      color: "bg-orange-100 text-orange-700",
+      color: "bg-secondary text-primary",
     },
     {
       id: "notifications" as OrgSettingsSection,
       label: t('settings.sections.notifications'),
       icon: <Bell size={20} />,
-      color: "bg-yellow-100 text-yellow-700",
+      color: "bg-secondary text-primary",
     },
     {
       id: "security" as OrgSettingsSection,
       label: t('settings.sections.security'),
       icon: <Shield size={20} />,
-      color: "bg-red-100 text-red-700",
+      color: "bg-secondary text-primary",
     },
     {
       id: "billing" as OrgSettingsSection,
       label: t('settings.sections.billing'),
       icon: <CreditCard size={20} />,
-      color: "bg-indigo-100 text-indigo-700",
+      color: "bg-secondary text-primary",
     },
   ];
 
@@ -247,10 +253,16 @@ export default function OrgSettingsContent() {
   };
 
   return (
-    <div className="p-8">
+    <div className="space-y-6">
       {loading ? (
         <div className="flex items-center justify-center py-24">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+        </div>
+      ) : loadError ? (
+        <div role="alert" className="rounded-lg border border-destructive p-6">
+          <h1>{t('settings.title')}</h1>
+          <p className="mt-2">{t('settings.loadUnavailable')}</p>
+          <button type="button" className="mt-4 min-h-11 rounded-md border border-input px-4" onClick={loadSettings}>{t('settings.retryLoad')}</button>
         </div>
       ) : (
       <>
@@ -260,18 +272,8 @@ export default function OrgSettingsContent() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
-            <Building2 size={24} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {t('settings.title')}
-            </h1>
-            <p className="text-gray-600">{t('settings.subtitle')}</p>
-          </div>
-        </div>
-        
+        <PageHeading title={t('settings.title')} description={t('settings.subtitle')} />
+
         <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
@@ -281,22 +283,23 @@ export default function OrgSettingsContent() {
         </div>
       </motion.div>
 
-      <div className="flex gap-8">
+      <div className="flex flex-col gap-6 xl:flex-row">
         {/* Sidebar Navigation */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-64 shrink-0"
+          className="w-full shrink-0 xl:w-60"
         >
-          <Card className="p-4 sticky top-24">
-            <div className="space-y-1">
+          <Card className="p-3">
+            <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-1">
               {settingsSections.map((section) => (
                 <button
                   key={section.id}
+                  aria-pressed={activeSection === section.id}
                   onClick={() => setActiveSection(section.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
                     activeSection === section.id
-                      ? "bg-blue-50 text-blue-700 shadow-sm"
+                      ? "bg-secondary text-primary shadow-sm"
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
@@ -315,9 +318,9 @@ export default function OrgSettingsContent() {
           key={activeSection}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex-1"
+          className="min-w-0 flex-1"
         >
-          <Card className="p-8">
+          <Card className="p-4 sm:p-6">
             {activeSection === "general" && (
               <div className="space-y-6">
                 <div>

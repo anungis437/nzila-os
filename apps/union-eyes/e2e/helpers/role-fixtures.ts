@@ -100,7 +100,6 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
     'Messages',
     'Documents',
     'Profile & Settings',
-    'Help & Support',
   ],
   steward: [
     'Operations (Casework Console)',
@@ -139,22 +138,16 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
     'Governance Continuity Overview',
     'Governance Trust & Explainability',
     'Governance Continuity Review',
-    'Governance Policy Continuity',
     'OCRA Continuity Signals',
-    'Governance Audit & Evidence',
     'Institutional Intelligence Reports',
     'Profile & Settings',
   ],
   admin: [
     'Organization',
-    'Users & Roles',
     'Pilot Configuration',
     'Policies',
     'Audit',
-    'Security',
     'Exports',
-    'Integrations',
-    'System Status',
   ],
 };
 
@@ -228,7 +221,7 @@ export function getExpectedSidebar(role: StakeholderRole): string[] {
   // which makes GET /api/feature-flags?flag=pilot-mode deterministically resolve
   // isPilotMode=true for every E2E run -- so the expected sidebar must be filtered
   // through the same policy the app itself applies in pilot mode.
-  return getVisibleNavigationForExperience(experience, true).map((item) => item.label);
+  return getVisibleNavigationForExperience(experience, true, fixture.userRole).map((item) => item.label);
 }
 
 /**

@@ -1,3 +1,4 @@
+import messages from '../../../messages/en-CA.json';
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
@@ -7,10 +8,12 @@ import { BottomNav } from '../BottomNav';
 const mockUsePilotMode = vi.fn();
 
 vi.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams(),
   usePathname: () => '/en-CA/dashboard/workspace',
 }));
 vi.mock('next-intl', () => ({
   useLocale: () => 'en-CA',
+  useTranslations: () => (key: string) => messages.experienceNavigation[key as keyof typeof messages.experienceNavigation],
 }));
 vi.mock('@/contexts/pilot-mode-context', () => ({
   usePilotMode: () => mockUsePilotMode(),

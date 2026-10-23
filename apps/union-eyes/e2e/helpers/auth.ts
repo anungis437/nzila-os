@@ -9,6 +9,12 @@ export async function bootstrapE2EAuth(request: APIRequestContext): Promise<void
 }
 
 export async function loginAsRole(page: Page, role: StakeholderRole): Promise<void> {
+  // Ordinary role journeys make an explicit optional-cookie rejection in the UI.
+  // Dedicated first-visit tests exercise all consent choices independently.
+  await page.addLocatorHandler(
+    page.getByRole('dialog').filter({ has: page.getByRole('button', { name: /^(Reject All|Tout refuser)$/i }) }).first(),
+    async (dialog) => { await dialog.getByRole('button', { name: /^(Reject All|Tout refuser)$/i }).click(); },
+  );
   const fixture = getFixture(role);
   const baseUrl = new URL(getBaseUrl());
   const cookieUrl = baseUrl.toString();

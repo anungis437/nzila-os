@@ -162,13 +162,13 @@ describe("WorkspaceShell persona labels", () => {
     expect(claims).toHaveAccessibleDescription(/Outside your role/i);
 
     const priorities = screen.getByRole("link", { name: /^Priorities/i });
-    expect(priorities).toHaveAttribute("aria-disabled", "true");
-    expect(priorities).not.toHaveAttribute("href");
+    expect(priorities).not.toHaveAttribute("aria-disabled");
+    expect(priorities).toHaveAttribute("href", "/en/dashboard/priorities");
 
     const hrefs = screen.getAllByRole("link").map((link) => link.getAttribute("href") ?? "");
     expect(hrefs.some((href) => href.includes("/dashboard/operations"))).toBe(false);
     expect(hrefs.some((href) => href.includes("/dashboard/cases"))).toBe(false);
-    expect(hrefs.some((href) => href.includes("/dashboard/priorities"))).toBe(false);
+    expect(hrefs.some((href) => href.includes("/dashboard/priorities"))).toBe(true);
     expect(hrefs.filter((href) => href.endsWith("/dashboard/workbench")).length).toBeGreaterThan(0);
     expect(screen.getByTestId("workspace-deep-work").className).toContain("flex-wrap");
   });

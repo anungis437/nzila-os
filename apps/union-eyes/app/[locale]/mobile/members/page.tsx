@@ -93,7 +93,7 @@ export default function MobileMembersPage() {
   const unsyncedCount = members.filter(m => !m.synced).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-w-0 space-y-6 bg-background">
       <MobileHeader
         title={t("title")}
         rightContent={
@@ -109,7 +109,7 @@ export default function MobileMembersPage() {
       />
 
       {/* Search bar */}
-      <div className="sticky top-14 z-30 bg-white border-b border-gray-200 p-4">
+      <div className="rounded-lg border border-border bg-card p-4">
         <div className="relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -126,20 +126,23 @@ export default function MobileMembersPage() {
           <input
             type="search"
             placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="min-h-11 w-full pl-10 pr-4 py-2 bg-muted rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 
         {/* Status filter */}
-        <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+        <div className="flex flex-wrap gap-2 mt-3">
           {['all', 'active', 'inactive', 'pending'].map((status) => (
             <button
               key={status}
+              type="button"
+              aria-pressed={statusFilter === status}
               onClick={() => setStatusFilter(status)}
               className={cn(
-                'px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-colors',
+                'min-h-11 px-3 py-2 text-sm font-medium rounded-full whitespace-normal transition-colors',
                 statusFilter === status
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-600'

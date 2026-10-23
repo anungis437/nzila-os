@@ -76,7 +76,9 @@ function withLabel(label: string, qualifier: string): Pick<
 export function honestyForNavigationItem(
   item: { label: string; href: string },
   roleHomeHref: string,
+  translate: (text: string) => string = text => text,
 ): NavigationItemHonesty {
+  item = { ...item, label: translate(item.label) };
   const path = item.href.split('?')[0];
   const isHub = path === WORKSPACE_ORIENTATION_HUB_PATH;
   const isExactRoleHome = item.href === roleHomeHref;
@@ -85,40 +87,40 @@ export function honestyForNavigationItem(
   if (isHub && roleHomeHref === WORKSPACE_ORIENTATION_HUB_PATH) {
     return {
       navRole: 'hub',
-      visibleQualifier: WORKSPACE_HUB_AND_ROLE_HOME_QUALIFIER,
-      ...withLabel(item.label, WORKSPACE_HUB_AND_ROLE_HOME_QUALIFIER),
+      visibleQualifier: translate(WORKSPACE_HUB_AND_ROLE_HOME_QUALIFIER),
+      ...withLabel(item.label, translate(WORKSPACE_HUB_AND_ROLE_HOME_QUALIFIER)),
     };
   }
 
   if (isHub) {
     return {
       navRole: 'hub',
-      visibleQualifier: WORKSPACE_HUB_QUALIFIER,
-      ...withLabel(item.label, WORKSPACE_HUB_QUALIFIER),
+      visibleQualifier: translate(WORKSPACE_HUB_QUALIFIER),
+      ...withLabel(item.label, translate(WORKSPACE_HUB_QUALIFIER)),
     };
   }
 
   if (isExactRoleHome && isIntelligenceSurface) {
     return {
       navRole: 'role-home',
-      visibleQualifier: ROLE_EXECUTION_HOME_NOT_TAB_QUALIFIER,
-      ...withLabel(item.label, ROLE_EXECUTION_HOME_NOT_TAB_QUALIFIER),
+      visibleQualifier: translate(ROLE_EXECUTION_HOME_NOT_TAB_QUALIFIER),
+      ...withLabel(item.label, translate(ROLE_EXECUTION_HOME_NOT_TAB_QUALIFIER)),
     };
   }
 
   if (isExactRoleHome) {
     return {
       navRole: 'role-home',
-      visibleQualifier: ROLE_EXECUTION_HOME_QUALIFIER,
-      ...withLabel(item.label, ROLE_EXECUTION_HOME_QUALIFIER),
+      visibleQualifier: translate(ROLE_EXECUTION_HOME_QUALIFIER),
+      ...withLabel(item.label, translate(ROLE_EXECUTION_HOME_QUALIFIER)),
     };
   }
 
   if (isIntelligenceSurface) {
     return {
       navRole: 'legacy-side',
-      visibleQualifier: NOT_WORKSPACE_TAB_QUALIFIER,
-      ...withLabel(item.label, NOT_WORKSPACE_TAB_QUALIFIER),
+      visibleQualifier: translate(NOT_WORKSPACE_TAB_QUALIFIER),
+      ...withLabel(item.label, translate(NOT_WORKSPACE_TAB_QUALIFIER)),
     };
   }
 
@@ -141,16 +143,16 @@ export type RoleHomeHubCue = {
 };
 
 /** Explicit link copy. Callers must render an anchor, not a redirect. */
-export function roleHomeHubCue(homes: DualNavHomes): RoleHomeHubCue {
+export function roleHomeHubCue(homes: DualNavHomes, translate: (text: string) => string = text => text): RoleHomeHubCue {
   const show = !homes.roleHomeIsOrientationHub;
   return {
     show,
-    message: ROLE_HOME_HUB_CUE_MESSAGE,
-    linkLabel: ROLE_HOME_HUB_CUE_LINK_LABEL,
+    message: translate(ROLE_HOME_HUB_CUE_MESSAGE),
+    linkLabel: translate(ROLE_HOME_HUB_CUE_LINK_LABEL),
     hubHref: WORKSPACE_ORIENTATION_HUB_PATH,
     intelligenceNote:
       homes.roleHomeHref === INTELLIGENCE_EXECUTION_PATH
-        ? INTELLIGENCE_NOT_WORKSPACE_TAB_NOTE
+        ? translate(INTELLIGENCE_NOT_WORKSPACE_TAB_NOTE)
         : null,
   };
 }

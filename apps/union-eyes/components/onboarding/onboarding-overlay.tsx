@@ -156,7 +156,7 @@ export function OnboardingOverlay({
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 max-w-sm animate-in slide-in-from-bottom-4 fade-in duration-300">
+    <div className="ue-contextual-guidance">
       <div className="rounded-xl border border-blue-200 bg-white shadow-lg overflow-hidden">
         {/* Progress dots */}
         <div className="flex items-center justify-between px-4 pt-3 pb-1">

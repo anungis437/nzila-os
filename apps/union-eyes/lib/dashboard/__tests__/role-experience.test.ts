@@ -89,16 +89,16 @@ describe('lib/dashboard/role-experience', () => {
       expect(nav.some((i) => i.href === '/dashboard/intelligence?scope=executive')).toBe(true);
     });
 
-    it('leaves member, staff, governance, and admin navigation unchanged outside pilot mode', () => {
-      for (const experience of ['member', 'staff', 'governance', 'admin'] as const) {
+    it('leaves member and staff navigation unchanged outside pilot mode', () => {
+      for (const experience of ['member', 'staff'] as const) {
         expect(getVisibleNavigationForExperience(experience, false)).toEqual(
           getNavigationForExperience(experience),
         );
       }
     });
 
-    it('leaves member, staff, and governance navigation unchanged in pilot mode (none of their entries are pilot-excluded)', () => {
-      for (const experience of ['member', 'staff', 'governance'] as const) {
+    it('leaves member and staff navigation unchanged in pilot mode', () => {
+      for (const experience of ['member', 'staff'] as const) {
         expect(getVisibleNavigationForExperience(experience, true)).toEqual(
           getNavigationForExperience(experience),
         );
@@ -106,11 +106,32 @@ describe('lib/dashboard/role-experience', () => {
     });
 
     it('hides the admin Exports entry in pilot mode (it targets a pilot-excluded /dashboard/movement-insights prefix)', () => {
-      const fullNav = getNavigationForExperience('admin');
+      const fullNav = getVisibleNavigationForExperience('admin', false, 'admin');
       const pilotNav = getVisibleNavigationForExperience('admin', true);
       expect(fullNav.some((i) => i.href === '/dashboard/movement-insights/export')).toBe(true);
       expect(pilotNav.some((i) => i.href === '/dashboard/movement-insights/export')).toBe(false);
       expect(pilotNav.length).toBe(fullNav.length - 1);
+    });
+
+    it('does not advertise platform operations to an ordinary organization admin', () => {
+      const nav = getVisibleNavigationForExperience('admin', false, 'admin');
+      for (const path of ['/dashboard/admin/members', '/dashboard/security', '/dashboard/integrations', '/dashboard/operations']) {
+        expect(nav.some(item => item.href === path)).toBe(false);
+      }
+      expect(nav.some(item => item.href === '/dashboard/audits')).toBe(true);
+      expect(getVisibleNavigationForExperience('admin', false, 'platform_lead')).toEqual(getNavigationForExperience('admin'));
+    });
+
+    it('keeps the administrator-only audit destination out of the officer menu', () => {
+      expect(getVisibleNavigationForExperience('governance', false, 'officer').some(item => item.href === '/dashboard/audits')).toBe(false);
+      expect(getVisibleNavigationForExperience('governance', false, 'national_officer').some(item => item.href === '/dashboard/audits')).toBe(true);
+    });
+
+    it('routes staff priorities to the priorities console and omits member support operations', () => {
+      const priorities = getVisibleNavigationForExperience('staff', false, 'steward').find(item => item.label === 'Operations Priorities (Commitments & Deadlines)');
+      expect(priorities?.href).toBe('/dashboard/priorities');
+      expect(canAccessDashboardPath(priorities!.href, 'staff', false)).toBe(true);
+      expect(getVisibleNavigationForExperience('member', false, 'member').some(item => item.href === '/dashboard/support')).toBe(false);
     });
   });
 });
