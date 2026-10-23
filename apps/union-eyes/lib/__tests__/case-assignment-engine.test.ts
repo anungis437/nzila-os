@@ -394,6 +394,41 @@ describe('case-assignment-engine', () => {
       expect(r.error).toContain('not found');
     });
 
+    it('refuses an assignment that belongs to a different case', async () => {
+      mocks.mockAssignmentsFindFirst.mockResolvedValueOnce({ ...baseAssignment, claimId: 'other-claim' });
+      const r = await reassignGrievance('claim-1', 'org-1', 'asgn-1', 'off-2', 'admin', 'reason');
+      expect(r.success).toBe(false);
+      expect(r.error).toContain('does not belong');
+      expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
+    });
+
+    it('refuses to reassign an assignment that is no longer active', async () => {
+      mocks.mockAssignmentsFindFirst.mockResolvedValueOnce({ ...baseAssignment, status: 'reassigned' });
+      const r = await reassignGrievance('claim-1', 'org-1', 'asgn-1', 'off-2', 'admin', 'reason');
+      expect(r.success).toBe(false);
+      expect(r.error).toContain('not active');
+      expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
+    });
+
+    it('does not retire the existing assignment when the successor cannot be created', async () => {
+      mocks.mockAssignmentsFindFirst
+        .mockResolvedValueOnce({ ...baseAssignment, role: 'primary_officer' })
+        .mockResolvedValueOnce({ ...baseAssignment, assignedTo: 'off-2' }); // successor already assigned
+      const r = await reassignGrievance('claim-1', 'org-1', 'asgn-1', 'off-2', 'admin', 'reason');
+      expect(r.success).toBe(false);
+      expect(mocks.mockUpdateWhere).not.toHaveBeenCalled();
+    });
+
+    it('is blocked, with no writes, when the representation protocol is not approved', async () => {
+      mocks.protocolStatus.value = 'legacy_unapproved';
+      mocks.mockAssignmentsFindFirst.mockResolvedValueOnce({ ...baseAssignment, role: 'primary_officer' });
+      const r = await reassignGrievance('claim-1', 'org-1', 'asgn-1', 'off-2', 'admin', 'reason');
+      expect(r.success).toBe(false);
+      expect(r.error).toContain('not approved');
+      expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
+      expect(mocks.mockUpdateWhere).not.toHaveBeenCalled();
+    });
+
     it('returns unknown error when non-Error is thrown', async () => {
       mocks.mockWithRLS.mockRejectedValue('boom');
       const r = await reassignGrievance('claim-1', 'org-1', 'asgn-1', 'off-2', 'admin', 'reason');

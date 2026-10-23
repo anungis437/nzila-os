@@ -105,6 +105,25 @@ export function RepresentationProtocolEditor() {
     }
   };
 
+  const handleSubmitLegacy = async () => {
+    setApproveError(null);
+    try {
+      const res = await fetch("/api/admin/representation-protocol", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "submit_legacy" }),
+      });
+      if (res.ok) {
+        setExecution({ status: "pending_approval", executable: false });
+      } else {
+        const body = await res.json().catch(() => null);
+        setApproveError(body?.message ?? "Submission was not recorded.");
+      }
+    } catch {
+      setApproveError("Submission was not recorded.");
+    }
+  };
+
   const handleApprove = async () => {
     setApproveError(null);
     try {
@@ -188,6 +207,11 @@ export function RepresentationProtocolEditor() {
           <div className="space-y-2">
             <p>This protocol is awaiting approval by an administrator other than its author. It does not yet govern assignment.</p>
             <Button size="sm" variant="outline" onClick={handleApprove}>Approve protocol</Button>
+          </div>
+        ) : execution?.status === "legacy_unapproved" ? (
+          <div className="space-y-2">
+            <p>These settings were saved before approval tracking existed. They are kept unchanged but do not govern assignment until submitted and approved by a different administrator.</p>
+            <Button size="sm" variant="outline" onClick={handleSubmitLegacy}>Submit existing settings for approval</Button>
           </div>
         ) : (
           <p>No approved protocol is configured. The steward-led layout shown is a display default only; authority-bearing assignment is disabled until a protocol is saved and approved.</p>

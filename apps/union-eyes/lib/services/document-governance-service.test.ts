@@ -47,11 +47,23 @@ const actors: Record<string, LiunaActor> = {
       hasExplicitDocumentGrant: false,
     },
   },
+  stewardPlusWithoutCaseRelationship: {
+    name: 'steward-level or senior role with no case relationship',
+    context: {
+      isOrgMember: true,
+      // Ignored by policy; asserted here to prove seniority grants nothing.
+      isStewardPlus: true,
+      isPrimaryOwner: false,
+      hasCaseAccess: false,
+      canViewPrivateDocuments: false,
+      hasExplicitDocumentGrant: true,
+    },
+  },
   centralReviewerWithoutRawGrant: {
     name: 'central reviewer without raw-document grant',
     context: {
       isOrgMember: true,
-      isStewardPlus: true,
+      isStewardPlus: false,
       isPrimaryOwner: false,
       hasCaseAccess: true,
       canViewPrivateDocuments: false,
@@ -109,12 +121,18 @@ describe('document governance service', () => {
     expect(isDocumentVisibleByPolicy('highly_sensitive', actors.successorReviewer.context)).toBe(false);
   });
 
-  it('does not let central steward-level review imply raw privileged document access', () => {
+  it('does not let steward-level review imply raw private document access', () => {
     expect(isDocumentVisibleByPolicy('team_confidential', actors.centralReviewerWithoutRawGrant.context)).toBe(true);
     expect(isDocumentVisibleByPolicy('case_restricted', actors.centralReviewerWithoutRawGrant.context)).toBe(true);
-    expect(isDocumentVisibleByPolicy('lro_confidential', actors.centralReviewerWithoutRawGrant.context)).toBe(true);
+    expect(isDocumentVisibleByPolicy('lro_confidential', actors.centralReviewerWithoutRawGrant.context)).toBe(false);
     expect(isDocumentVisibleByPolicy('privileged', actors.centralReviewerWithoutRawGrant.context)).toBe(false);
     expect(isDocumentVisibleByPolicy('highly_sensitive', actors.centralReviewerWithoutRawGrant.context)).toBe(false);
+  });
+
+  it('denies a steward+ with no case relationship every label, even with a stray document grant', () => {
+    for (const label of ['public_internal', 'team_confidential', 'case_restricted', ...restrictedLabels] as GovernancePrivacyLabel[]) {
+      expect(isDocumentVisibleByPolicy(label, actors.stewardPlusWithoutCaseRelationship.context)).toBe(false);
+    }
   });
 
   it('requires explicit grant or primary ownership for privileged labels', () => {

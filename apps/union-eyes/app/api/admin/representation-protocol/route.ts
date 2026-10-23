@@ -14,6 +14,7 @@ import {
   resolveRepresentationProtocol,
   saveRepresentationProtocol,
   approveRepresentationProtocol,
+  submitLegacyRepresentationProtocolForApproval,
 } from "@/lib/representation/protocol-service";
 import {
   ErrorCode,
@@ -130,11 +131,29 @@ export const PUT = withAdminAuth(async (request, context: BaseAuthContext) => {
 
 // ─── POST — Independently approve the pending protocol ────────
 
-export const POST = withAdminAuth(async (_request, context: BaseAuthContext) => {
+export const POST = withAdminAuth(async (request, context: BaseAuthContext) => {
   const { userId, organizationId } = context;
 
   if (!organizationId || !userId) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Organization and user context required");
+  }
+
+  const body = await request.json().catch(() => ({}));
+  if (body?.action === "submit_legacy") {
+    const submitted = await submitLegacyRepresentationProtocolForApproval(organizationId, userId);
+    logApiAuditEvent({
+      timestamp: new Date().toISOString(),
+      userId,
+      endpoint: "/api/admin/representation-protocol",
+      method: "POST",
+      eventType: submitted.ok ? "success" : "validation_failed",
+      severity: "medium",
+      details: { action: "submit_legacy", outcome: submitted.ok ? "pending_approval" : submitted.code },
+    });
+    if (!submitted.ok) {
+      return NextResponse.json({ error: submitted.code, message: submitted.message }, { status: 409 });
+    }
+    return NextResponse.json({ ok: true, execution: { status: "pending_approval", executable: false } });
   }
 
   const result = await approveRepresentationProtocol(organizationId, userId);

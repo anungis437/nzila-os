@@ -107,7 +107,6 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
   }
 
-  const isStewardPlus = await hasMinRole('steward');
   let caseAccess = {
     isPrimaryOwner: false,
     canViewCase: false,
@@ -131,9 +130,8 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
     {
       isOrgMember: true,
-      isStewardPlus,
       isPrimaryOwner: caseAccess.isPrimaryOwner,
-      hasCaseAccess: isStewardPlus || caseAccess.canViewCase || !row.linkedEntityId,
+      hasCaseAccess: caseAccess.canViewCase || !row.linkedEntityId,
       canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
       hasExplicitDocumentGrant: Boolean(explicitGrant),
     },
@@ -205,6 +203,18 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
 
   if (!before) {
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
+  }
+
+  // Changing a label alters who can read a case document, so it is a case-management power.
+  if (before.linkedEntityType === 'grievance' && before.linkedEntityId) {
+    const relationship = await getEffectiveCaseAccess({
+      organizationId,
+      grievanceId: before.linkedEntityId,
+      userId,
+    });
+    if (!relationship.isPrimaryOwner) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only the primary owner of the linked case can change this document label');
+    }
   }
 
   const blockedReason = getDocumentMutabilityBlockReason({ metadata: before.metadata });

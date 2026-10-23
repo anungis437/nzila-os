@@ -13,7 +13,16 @@ const m = vi.hoisted(() => ({
   claimQueue: [] as unknown[][],
   assigneeEligible: vi.fn(),
   insertQueue: [] as unknown[][],
+  canonical: { enabled: false },
+  appendCanonicalAuditLog: vi.fn(),
+  updateReturning: vi.fn(),
 }));
+
+vi.mock('@/lib/auth/canonical-bootstrap', async (original) => ({
+  ...(await original<typeof import('@/lib/auth/canonical-bootstrap')>()),
+  currentStateContextEnabled: () => m.canonical.enabled,
+}));
+vi.mock('@/lib/audit/canonical-audit-chain', () => ({ appendCanonicalAuditLog: m.appendCanonicalAuditLog }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser, getUserRoleInOrganization: m.getUserRoleInOrganization }));
@@ -45,6 +54,9 @@ describe('cases/[caseId]/assign route', () => {
     m.claimQueue = [];
     m.assigneeEligible.mockResolvedValue(true);
     m.insertQueue = [];
+    m.canonical.enabled = false;
+    m.appendCanonicalAuditLog.mockResolvedValue(undefined);
+    m.updateReturning.mockResolvedValue([{ claimId: 'c1' }]);
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
     m.getUserRoleInOrganization.mockResolvedValue('chief_steward');
@@ -55,7 +67,7 @@ describe('cases/[caseId]/assign route', () => {
     m.withRLSContext.mockImplementation(async (fn: any) => {
       const tx = {
         select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => (m.claimQueue.shift() ?? []) as unknown[]) })) })) })),
-        update: vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(async () => undefined) })) })),
+        update: vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(async () => m.updateReturning()) })) })) })),
         insert: vi.fn(() => ({ values: vi.fn(() => ({ returning: vi.fn(async () => (m.insertQueue.shift() ?? []) as unknown[]) })) })),
       };
       return fn(tx);
@@ -138,17 +150,69 @@ describe('cases/[caseId]/assign route', () => {
     expect(m.insertQueue).toEqual([]);
   });
 
-  it('does not report a transfer when the assignee is unchanged', async () => {
+  it('treats a repeated identical request as an idempotent no-op: 200, no write, no audit', async () => {
     const { POST } = await loadRoute();
     m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u2', status: 'filed' }]);
     const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2' }),
     }), { params: Promise.resolve({ caseId: 'c1' }) });
+    const json = await response.json();
+    expect(response.status).toBe(200);
+    expect(json).toMatchObject({ success: true, transferred: false, assignedTo: 'u2' });
+    expect(m.updateReturning).not.toHaveBeenCalled();
+    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.appendCanonicalAuditLog).not.toHaveBeenCalled();
+    expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
+  });
+
+  it('reports a concurrent reassignment as a 409 conflict and performs no history, audit or evidence write', async () => {
+    const { POST } = await loadRoute();
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u0', status: 'filed' }]);
+    m.updateReturning.mockResolvedValueOnce([]);
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2' }),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
     expect(response.status).toBe(409);
+    expect((await response.json()).error).toBe('ASSIGNMENT_CONFLICT');
+    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
+    expect(m.recordUnionEyesCaseAssigned).not.toHaveBeenCalled();
+  });
+
+  it('writes the canonical audit inside the assignment transaction and skips the post-commit audit', async () => {
+    const { POST } = await loadRoute();
+    m.canonical.enabled = true;
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u0', status: 'filed' }]);
+    m.insertQueue.push([{ updateId: 'up1' }]);
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2', reason: 'coverage' }),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
+    expect(response.status).toBe(200);
+    expect(m.appendCanonicalAuditLog).toHaveBeenCalledTimes(1);
+    expect(m.appendCanonicalAuditLog.mock.calls[0][1]).toMatchObject({
+      organizationId: 'org_1', resourceType: 'claims', resourceId: 'c1',
+      details: { event: 'CASE_ASSIGNED', fromAssignee: 'u0', toAssignee: 'u2' },
+    });
     expect(m.auditDataMutation).not.toHaveBeenCalled();
   });
 
-  it('reports a committed assignment whose audit failed as an explicit failure, not success', async () => {
+  it('fails the whole request, with no success body or downstream effects, when the in-transaction audit cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.canonical.enabled = true;
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u0', status: 'filed' }]);
+    m.insertQueue.push([{ updateId: 'up1' }]);
+    m.appendCanonicalAuditLog.mockRejectedValueOnce(new Error('audit chain unavailable'));
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2' }),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
+    const json = await response.json();
+    expect(response.status).toBe(500);
+    expect(json.success).toBeUndefined();
+    expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
+    expect(m.recordUnionEyesCaseAssigned).not.toHaveBeenCalled();
+  });
+
+  it('exposes committed state when only the non-canonical post-commit audit fails, and a retry is a safe no-op', async () => {
     const { POST } = await loadRoute();
     m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u0', status: 'filed' }]);
     m.insertQueue.push([{ updateId: 'up1' }]);
@@ -158,8 +222,15 @@ describe('cases/[caseId]/assign route', () => {
     }), { params: Promise.resolve({ caseId: 'c1' }) });
     const json = await response.json();
     expect(response.status).toBe(500);
-    expect(json.error).toBe('ASSIGNMENT_COMMITTED_AUDIT_FAILED');
+    expect(json).toMatchObject({ error: 'ASSIGNMENT_COMMITTED_AUDIT_FAILED', assignedTo: 'u2', previousAssignee: 'u0', historyRecordId: 'up1' });
     expect(json.success).toBeUndefined();
+
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u2', status: 'filed' }]);
+    const retry = await POST(new Request('http://localhost/api/cases/c1/assign', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2' }),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
+    expect(retry.status).toBe(200);
+    expect((await retry.json()).transferred).toBe(false);
   });
 
   it('denies member assignment before opening a case transaction', async () => {

@@ -54,11 +54,8 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
 
     await expireElapsedCaseAccessAssignments();
 
-    // Row-level access check:
-    // steward+ can view any grievance in org,
-    // creator can view own grievance,
-    // primary LRO or delegated collaborator can view by explicit assignment.
-    const isStewardPlus = await hasMinRole("steward");
+    // Row-level access check: seniority grants nothing. Only the creator, the primary owner, or an
+    // active unexpired case-access assignment may read this grievance.
     const effectiveAccess = await getEffectiveCaseAccess({
       organizationId,
       grievanceId: params.id,
@@ -67,8 +64,8 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     // Collaborator administration is a case-management power held by the primary owner, not by role seniority.
     const effectiveAccessForResponse = effectiveAccess;
 
-    if (!isStewardPlus && grievance.createdBy !== userId && !effectiveAccess.canViewCase) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "You can only view your own submissions.");
+    if (grievance.createdBy !== userId && !effectiveAccess.canViewCase) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have access to this grievance.");
     }
 
     // Fetch related events
@@ -124,9 +121,8 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     const governedDocuments = linkedDocuments.filter((doc) =>
       isDocumentVisibleByPolicy(toGovernanceLabel({ privacyLabel: doc.privacyLabel ?? undefined }), {
         isOrgMember: true,
-        isStewardPlus,
         isPrimaryOwner: effectiveAccessForResponse.isPrimaryOwner,
-        hasCaseAccess: isStewardPlus || grievance.createdBy === userId || effectiveAccessForResponse.canViewCase,
+        hasCaseAccess: grievance.createdBy === userId || effectiveAccessForResponse.canViewCase,
         canViewPrivateDocuments: effectiveAccessForResponse.canViewPrivateDocuments,
         hasExplicitDocumentGrant: explicitGrantIds.has(doc.id),
       }),

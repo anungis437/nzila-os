@@ -10,7 +10,8 @@ export type GovernancePrivacyLabel =
 
 export interface DocumentVisibilityContext {
   isOrgMember: boolean;
-  isStewardPlus: boolean;
+  /** @deprecated Ignored. Role seniority never confers access to case content. */
+  isStewardPlus?: boolean;
   isPrimaryOwner: boolean;
   hasCaseAccess: boolean;
   canViewPrivateDocuments: boolean;
@@ -35,10 +36,9 @@ export function isDocumentVisibleByPolicy(
     return false;
   }
 
-  if (context.isStewardPlus || context.isPrimaryOwner) {
-    if (privacyLabel === 'privileged' || privacyLabel === 'highly_sensitive') {
-      return context.hasExplicitDocumentGrant || context.canViewPrivateDocuments || context.isPrimaryOwner;
-    }
+  // Only the case's primary owner reads case documents without a case relationship; organization
+  // role seniority (steward, chief steward, officer) is deliberately not an input here.
+  if (context.isPrimaryOwner) {
     return true;
   }
 

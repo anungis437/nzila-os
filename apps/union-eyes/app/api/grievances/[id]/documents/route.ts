@@ -91,7 +91,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
-    const isStewardPlus = await hasMinRole('steward');
     const effectiveAccess = await getEffectiveCaseAccess({
       organizationId,
       grievanceId: params.id,
@@ -99,7 +98,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     });
 
     const canUpload =
-      isStewardPlus ||
       grievance.createdBy === userId ||
       effectiveAccess.isPrimaryOwner ||
       effectiveAccess.canUploadDocuments;

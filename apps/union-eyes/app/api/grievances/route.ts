@@ -20,7 +20,8 @@ import {
   standardErrorResponse,
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
-import { eq, desc, inArray, and } from "drizzle-orm";
+import { eq, desc, inArray, and, type SQL } from "drizzle-orm";
+import { grievanceRelationshipScope, unassignedIntakeTriageScope } from '@/lib/services/grievance-read-scope';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
@@ -285,7 +286,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
 // ── GET ─────────────────────────────────────────────────────────────────────
 
 export const GET = withOrganizationAuth(async (request, context) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
   await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
@@ -302,27 +303,57 @@ export const GET = withOrganizationAuth(async (request, context) => {
 
     // Push status filter to DB layer to avoid loading unbounded result sets into memory.
     // Safety limit of 500: steward workbenches don't need more; paginate at API level if needed.
-    let scopedFilter;
+    let statusFilter: SQL | undefined;
     if (status === 'active') {
-      scopedFilter = and(eq(grievances.organizationId, organizationId), inArray(grievances.status, ACTIVE_STATUSES));
+      statusFilter = inArray(grievances.status, ACTIVE_STATUSES);
     } else if (status === 'intakes') {
-      scopedFilter = and(eq(grievances.organizationId, organizationId), inArray(grievances.status, INTAKE_STATUSES));
+      statusFilter = inArray(grievances.status, INTAKE_STATUSES);
     } else if (status) {
-      scopedFilter = and(eq(grievances.organizationId, organizationId), eq(grievances.status, status as GrievanceStatus));
-    } else {
-      scopedFilter = eq(grievances.organizationId, organizationId);
+      statusFilter = eq(grievances.status, status as GrievanceStatus);
     }
+    const scoped = (...extra: (SQL | undefined)[]) =>
+      and(eq(grievances.organizationId, organizationId), statusFilter, ...extra);
 
-    const filtered = await withRLSContext({ organizationId }, async () =>
-      db
+    // Seniority does not open case files. Full records are limited to matters this user created, owns,
+    // or holds an active unexpired case-access grant for.
+    const relationship = grievanceRelationshipScope(userId);
+
+    const { owned, triage } = await withRLSContext({ organizationId }, async () => {
+      const ownedRows = await db
         .select()
         .from(grievances)
-        .where(scopedFilter)
+        .where(scoped(relationship))
         .orderBy(desc(grievances.createdAt))
-        .limit(500),
-    );
+        .limit(500);
 
-    return standardSuccessResponse(filtered);
+      // Unassigned, non-confidential intakes are visible as triage metadata only (no narrative,
+      // member identity or employer detail) so the intake queue can be worked without opening files.
+      const triageRows = await db
+        .select({
+          id: grievances.id,
+          grievanceNumber: grievances.grievanceNumber,
+          type: grievances.type,
+          status: grievances.status,
+          priority: grievances.priority,
+          createdAt: grievances.createdAt,
+        })
+        .from(grievances)
+        .where(scoped(unassignedIntakeTriageScope()))
+        .orderBy(desc(grievances.createdAt))
+        .limit(200);
+
+      return { owned: ownedRows, triage: triageRows };
+    });
+
+    const ownedIds = new Set(owned.map((row) => row.id));
+    const visible = [
+      ...owned.map((row) => ({ ...row, accessScope: 'case' as const })),
+      ...triage
+        .filter((row) => !ownedIds.has(row.id))
+        .map((row) => ({ ...row, accessScope: 'intake_triage' as const })),
+    ];
+
+    return standardSuccessResponse(visible);
   } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to list grievances");
   }

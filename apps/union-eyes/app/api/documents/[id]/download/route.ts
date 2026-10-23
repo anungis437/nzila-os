@@ -87,7 +87,6 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
       .limit(1)
   )[0];
 
-  const isStewardPlus = await hasMinRole('steward');
   let caseAccess = {
     isPrimaryOwner: false,
     canViewCase: false,
@@ -111,9 +110,8 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
     {
       isOrgMember: true,
-      isStewardPlus,
       isPrimaryOwner: caseAccess.isPrimaryOwner,
-      hasCaseAccess: isStewardPlus || caseAccess.canViewCase || !row.linkedEntityId,
+      hasCaseAccess: caseAccess.canViewCase || !row.linkedEntityId,
       canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
       hasExplicitDocumentGrant: Boolean(explicitGrant),
     },

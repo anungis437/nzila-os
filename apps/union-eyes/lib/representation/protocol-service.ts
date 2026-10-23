@@ -125,6 +125,36 @@ export type ProtocolApprovalResult =
   | { ok: false; code: "NOT_FOUND" | "NOT_PENDING" | "SELF_APPROVAL_FORBIDDEN"; message: string };
 
 /**
+ * Controlled adoption of a historical (pre-provenance) configuration: the settings are preserved
+ * exactly, the submitting administrator becomes the recorded author, and approval is still
+ * required from a different administrator. Nothing is approved automatically.
+ */
+export async function submitLegacyRepresentationProtocolForApproval(
+  organizationId: string,
+  submitterId: string,
+): Promise<{ ok: true } | { ok: false; code: "NOT_LEGACY"; message: string }> {
+  const current = resolveStoredProtocol(await readProtocolValue(organizationId));
+  if (current.status !== "legacy_unapproved") {
+    return { ok: false, code: "NOT_LEGACY", message: "Only a historical configuration without provenance can be submitted this way." };
+  }
+  const submitted: RepresentationProtocol = {
+    ...current.protocol,
+    approval: { configuredBy: submitterId, configuredAt: new Date().toISOString() },
+  };
+  await db
+    .update(orgConfigurations)
+    .set({ value: submitted, updatedAt: new Date() })
+    .where(
+      and(
+        eq(orgConfigurations.organizationId, organizationId),
+        eq(orgConfigurations.category, CONFIG_CATEGORY),
+        eq(orgConfigurations.key, CONFIG_KEY),
+      ),
+    );
+  return { ok: true };
+}
+
+/**
  * Independent approval of the currently stored protocol. The approver must differ
  * from whoever configured it.
  */
@@ -135,6 +165,9 @@ export async function approveRepresentationProtocol(
   const current = resolveStoredProtocol(await readProtocolValue(organizationId));
   if (current.status === "missing" || current.status === "invalid") {
     return { ok: false, code: "NOT_FOUND", message: "No valid protocol configuration is awaiting approval." };
+  }
+  if (current.status === "legacy_unapproved") {
+    return { ok: false, code: "NOT_FOUND", message: "A historical configuration must first be submitted for approval by an administrator." };
   }
   if (current.status === "approved") {
     return { ok: false, code: "NOT_PENDING", message: "The current protocol is already approved." };

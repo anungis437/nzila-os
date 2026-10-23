@@ -26,6 +26,7 @@ import {
 } from '../protocol-types';
 import {
   approveRepresentationProtocol,
+  submitLegacyRepresentationProtocolForApproval,
   requireExecutableRepresentationProtocol,
   resolveRepresentationProtocol,
   getRepresentationProtocol,
@@ -49,8 +50,39 @@ describe('representation protocol execution status (P0-C)', () => {
     expect(r.protocol).toBe(PROTOCOL_STEWARD_LED);
   });
 
-  it('a preset without provenance is not executable', () => {
-    expect(resolveStoredProtocol(PROTOCOL_LRO_LED)).toMatchObject({ status: 'invalid', executable: false, reason: 'missing_provenance' });
+  it('historical settings without provenance are preserved but classified legacy and not executable', () => {
+    const r = resolveStoredProtocol(PROTOCOL_LRO_LED);
+    expect(r).toMatchObject({ status: 'legacy_unapproved', executable: false });
+    expect(r.protocol.primaryRepresentative).toBe('lro');
+  });
+
+  it('a null or non-object approval block is malformed provenance, not legacy', () => {
+    expect(resolveStoredProtocol({ ...PROTOCOL_LRO_LED, approval: null })).toMatchObject({ status: 'invalid', reason: 'malformed_provenance' });
+    expect(resolveStoredProtocol({ ...PROTOCOL_LRO_LED, approval: { configuredBy: '' } })).toMatchObject({ status: 'invalid' });
+  });
+
+  it('adoption stamps the submitter as author, keeps settings, and still needs a different approver', async () => {
+    m.stored.value = PROTOCOL_LRO_LED;
+    expect(await approveRepresentationProtocol('org', 'admin-b')).toMatchObject({ ok: false, code: 'NOT_FOUND' });
+
+    expect(await submitLegacyRepresentationProtocolForApproval('org', 'admin-a')).toEqual({ ok: true });
+    const written = m.update.mock.calls[0][0] as { value: typeof PROTOCOL_LRO_LED & { approval: Record<string, string> } };
+    expect(written.value.primaryRepresentative).toBe('lro');
+    expect(written.value.approval).toMatchObject({ configuredBy: 'admin-a' });
+    expect(written.value.approval.approvedBy).toBeUndefined();
+
+    m.stored.value = written.value;
+    expect(resolveStoredProtocol(m.stored.value)).toMatchObject({ status: 'pending_approval', executable: false });
+    expect(await approveRepresentationProtocol('org', 'admin-a')).toMatchObject({ ok: false, code: 'SELF_APPROVAL_FORBIDDEN' });
+  });
+
+  it('adoption is refused for missing, already-provenanced and malformed records', async () => {
+    expect(await submitLegacyRepresentationProtocolForApproval('org', 'admin-a')).toMatchObject({ ok: false, code: 'NOT_LEGACY' });
+    m.stored.value = approved();
+    expect(await submitLegacyRepresentationProtocolForApproval('org', 'admin-a')).toMatchObject({ ok: false, code: 'NOT_LEGACY' });
+    m.stored.value = { version: 9 };
+    expect(await submitLegacyRepresentationProtocolForApproval('org', 'admin-a')).toMatchObject({ ok: false, code: 'NOT_LEGACY' });
+    expect(m.update).not.toHaveBeenCalled();
   });
 
   it.each([

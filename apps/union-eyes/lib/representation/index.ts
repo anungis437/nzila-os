@@ -31,6 +31,7 @@ export {
   requireExecutableRepresentationProtocol,
   RepresentationProtocolNotExecutableError,
   approveRepresentationProtocol,
+  submitLegacyRepresentationProtocolForApproval,
   saveRepresentationProtocol,
   resetRepresentationProtocol,
 } from "./protocol-service";

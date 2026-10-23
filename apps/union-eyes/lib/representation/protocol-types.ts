@@ -84,7 +84,7 @@ export interface ProtocolApproval {
   approvedAt?: string;
 }
 
-export type ProtocolExecutionStatus = "approved" | "pending_approval" | "missing" | "invalid";
+export type ProtocolExecutionStatus = "approved" | "pending_approval" | "legacy_unapproved" | "missing" | "invalid";
 
 /**
  * Display protocols may be defaults; only an `approved` resolution is executable
@@ -134,8 +134,12 @@ export function resolveStoredProtocol(value: unknown | null | undefined): Protoc
   }
   const { protocol } = parsed;
   const approval = protocol.approval;
+  if (approval === undefined) {
+    // Well-formed settings saved before provenance existed. Preserved as-is but never executable.
+    return { status: "legacy_unapproved", executable: false, protocol, reason: "historical_configuration_without_provenance" };
+  }
   if (!approval || !nonEmptyString(approval.configuredBy) || !nonEmptyString(approval.configuredAt)) {
-    return { status: "invalid", executable: false, protocol, reason: "missing_provenance" };
+    return { status: "invalid", executable: false, protocol, reason: "malformed_provenance" };
   }
   if (!nonEmptyString(approval.approvedBy) || !nonEmptyString(approval.approvedAt)) {
     return { status: "pending_approval", executable: false, protocol, reason: "approval_pending" };
