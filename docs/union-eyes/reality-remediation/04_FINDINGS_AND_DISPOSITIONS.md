@@ -349,6 +349,8 @@ add a durable authoritative FX-rate cache + staleness alerts._
 
 ## Traceability
 
+- Active 2026-10-23 platform-security intake: [UE_SECURITY_CONVERGENCE_DISPOSITION](UE_SECURITY_CONVERGENCE_DISPOSITION.md). Addendum findings A–E are registered there with Codex ownership, source/runtime distinctions and affected release gates. Historical F-01–F-25 dispositions above are preserved; the intake is not a closure claim.
+
 - Wave-0 tooling that catches or contains findings above: `tooling/reality/anti-theatre-scan.ts`, `tooling/reality/demo-deployment-guard.ts`, `tooling/reality/capability-inventory.ts`.
 - Programme state matrix and open list: `docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md`.
 - Baseline anti-theatre numbers: `docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md`.
