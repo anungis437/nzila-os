@@ -27,12 +27,16 @@
  *   AZURE_AD_TENANT_ID=<directory GUID; never common/organizations>
  * This opt-in fails closed outside staging or without a valid tenant GUID.
  * Omit it (or set false) to preserve the existing /common issuer everywhere.
+ * AZURE_AD_STAGING_SESSION_MAX_AGE_SECONDS may shorten the real idle session
+ * lifetime to 60..86400 seconds for that dedicated staging registration.
+ * Omit it to retain the 24-hour default. Other environments reject the override.
  */
 import NextAuth from 'next-auth'
 import MicrosoftEntraID from 'next-auth/providers/microsoft-entra-id'
 import type { NextAuthConfig } from 'next-auth'
 import type { EntraTokenClaims, EntraSession } from './types'
 import { resolveEntraIssuer } from './issuer'
+import { resolveEntraSessionMaxAge } from './session-policy'
 
 // ── Auto-Provisioning Hook ──────────────────────────────────────────────────
 
@@ -120,7 +124,12 @@ export const authConfig: NextAuthConfig = {
 
   session: {
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 hours
+    maxAge: resolveEntraSessionMaxAge({
+      AZURE_AD_STAGING_SESSION_MAX_AGE_SECONDS: process.env.AZURE_AD_STAGING_SESSION_MAX_AGE_SECONDS,
+      AZURE_AD_STAGING_SINGLE_TENANT: process.env.AZURE_AD_STAGING_SINGLE_TENANT,
+      AZURE_AD_TENANT_ID: process.env.AZURE_AD_TENANT_ID,
+      TARGET_ENVIRONMENT: process.env.TARGET_ENVIRONMENT,
+    }),
   },
 
   callbacks: {

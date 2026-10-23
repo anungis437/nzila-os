@@ -12,6 +12,7 @@ export const BASE = '65bc9b798a15c3d96c00a60f91cb9cc7de72cf16'
 export const PR_BINDINGS = Object.freeze({
   984: Object.freeze({ base: BASE, branch: 'ops/ue-staging-recovery-20261022', author: 'anungis437' }),
   986: Object.freeze({ base: '441556737ffe0e36c6ec9bf6bd9c24bab5302559', branch: 'fix/ue-auth-storage-callers-20261022', author: 'anungisa' }),
+  990: Object.freeze({ base: '9bb8a3fd224ca581838d433688b04860f2e9efc8', branch: 'fix/ue-native-intake-audit-20261022', author: 'anungisa' }),
 })
 export const RESOURCES = Object.freeze({ subscription: '5d819f33-d16f-429c-a3c0-5b0e94740ba3', tenant: '5082b8be-b04d-4a13-b61c-b6397670177b', app: 'nzila-os-union-eyes-staging', appResourceGroup: 'nzila-canada-staging-rg', server: 'nzila-staging-db', databaseResourceGroup: 'nzila-staging-rg', database: 'nzila_os_staging', clone: 'nzila-ue-recovery-20261022', keyVault: 'nzila-staging-kv', region: 'canadacentral' })
 const HASH = /^[a-f0-9]{64}$/
@@ -31,6 +32,7 @@ const EXACT_PATHS = new Set([
   '.github/workflows/deploy-union-eyes.yml',
   KEY_PATH, 'ops/change-records/CHG-2026-0112.json', 'ops/change-records/CHG-2026-0112.staging-authorization.md',
   'packages/platform-auth/src/entra/config.ts', 'packages/platform-auth/src/entra/issuer.ts', 'packages/platform-auth/src/entra/issuer.test.ts',
+  'packages/platform-auth/src/entra/session-policy.ts', 'packages/platform-auth/src/entra/session-policy.test.ts',
   'packages/platform-change-management/src/approvals.ts', 'packages/platform-change-management/src/types.ts', 'packages/platform-change-management/src/schemas.ts', 'packages/platform-change-management/src/staging-authorization.test.ts',
   'tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs', 'tooling/scripts/lib/ue-staging-historical-lineage.mjs', 'tooling/scripts/lib/ue-staging-historical-lineage.test.mjs', 'tooling/scripts/lib/union-eyes-migration-ledger.mjs', 'tooling/scripts/lib/union-eyes-scoped-migrations.mjs', 'tooling/scripts/ue-staging-discovery.mjs', 'tooling/scripts/ue-staging-reconcile-lineage.mjs',
   'tooling/scripts/lib/ue-staging-0017-ownership.mjs', 'tooling/scripts/lib/ue-staging-0017-ownership.test.mjs',
@@ -42,6 +44,24 @@ const EXACT_PATHS = new Set([
   'tooling/scripts/lib/union-eyes-deployment-safety.mjs', 'tooling/scripts/lib/union-eyes-deployment-safety.test.mjs',
 ])
 export const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex')
+// This follow-up authorizes only its reviewed application repair and gate amendment.
+// It cannot carry dependency, migration, role/grant, trust-key or production-policy changes.
+const NATIVE_INTAKE_PATHS = new Set([
+  'apps/union-eyes/app/[locale]/dashboard/layout.tsx',
+  'apps/union-eyes/app/[locale]/dashboard/__tests__/canonical-dashboard-layout.test.tsx',
+  'apps/union-eyes/app/api/cases/intake/route.ts',
+  'apps/union-eyes/app/api/__tests__/cases-intake.route.test.ts',
+  'apps/union-eyes/lib/audit/canonical-nar-proof.ts',
+  'apps/union-eyes/lib/audit/__tests__/canonical-nar-proof.pglite.test.ts',
+  'packages/platform-auth/src/entra/config.ts',
+  'packages/platform-auth/src/entra/session-policy.ts',
+  'packages/platform-auth/src/entra/session-policy.test.ts',
+  '.github/workflows/security-design-review.yml',
+  'tooling/security/ue-staging-delegated-review.mjs',
+  'tooling/security/ue-staging-delegated-review.test.mjs',
+  'tooling/repo-inventory/output/inventory.json', 'tooling/repo-inventory/output/inventory.md',
+  'tooling/repo-inventory/output/repo-inventory.json', 'tooling/repo-inventory/output/repo-inventory.md',
+])
 const fail = message => { throw new Error(message) }
 function exactKeys(value, keys, name) {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).sort().join('|') !== [...keys].sort().join('|')) fail(`Invalid fields: ${name}`)
@@ -115,6 +135,8 @@ export function validateManifest(m, now = Date.now()) {
   if (!Array.isArray(m.files) || !m.files.length || new Set(m.files.map(f=>f.path)).size !== m.files.length) fail('Missing or duplicate source coverage')
   for (const f of m.files) {
     exactKeys(f, ['path','status','previousPath','blobSha','sha256','baseBlobSha','baseSha256'], 'file')
+    if (m.pullRequest === 990 && (!NATIVE_INTAKE_PATHS.has(f.path) ||
+      (f.previousPath !== null && !NATIVE_INTAKE_PATHS.has(f.previousPath)))) fail('Native intake follow-up exceeds exact reviewed path scope')
     const dependencyRepair = m.pullRequest === 986 && [...DEPENDENCY_PATHS, OTEL_DEPENDENCY_PATH].includes(f.path) && f.status === 'modified' && f.previousPath === null
     const toolRepair = m.pullRequest === 986 && TOOL_DEPENDENCY_PATHS.includes(f.path) && f.status === (f.path === '.kilo/package.json' ? 'added' : 'modified') && f.previousPath === null
     if ((!allowedPath(f.path) && !dependencyRepair && !toolRepair) || (f.previousPath !== null && !allowedPath(f.previousPath)) || !['added','modified','removed','renamed'].includes(f.status)) fail('Unreviewable source path/status')
@@ -131,10 +153,10 @@ export function validateManifest(m, now = Date.now()) {
   for (const review of m.reviews) {
     exactKeys(review,['kind','agentTask','reviewedAt','report','reportSha256','unresolvedP0','unresolvedP1'], 'review')
     const attribution = review.kind === 'separate-agent-review' && typeof review.agentTask === 'string' && /^\/root\/[a-z0-9_]+$/.test(review.agentTask)
-      || m.pullRequest === 986 && review.kind === 'primary-agent-review' && review.agentTask === '/root'
+      || [986, 990].includes(m.pullRequest) && review.kind === 'primary-agent-review' && review.agentTask === '/root'
     if (!attribution || !review.report || sha256(Buffer.from(review.report)) !== review.reportSha256 || !Number.isFinite(Date.parse(review.reviewedAt)) || Date.parse(review.reviewedAt)>issued || review.unresolvedP0 !== 0 || review.unresolvedP1 !== 0) fail('Agent review attribution/report/findings invalid')
   }
-  if (m.pullRequest === 986 && !m.reviews.some(r=>r.kind==='primary-agent-review' && r.agentTask==='/root')) fail('Follow-up primary review with explicit attribution required')
+  if ([986, 990].includes(m.pullRequest) && !m.reviews.some(r=>r.kind==='primary-agent-review' && r.agentTask==='/root')) fail('Follow-up primary review with explicit attribution required')
   for (const test of m.tests) {
     exactKeys(test,['command','result','passed','logSha256'], 'test')
     if (typeof test.command !== 'string' || !test.command || test.result !== 'PASS' || !Number.isInteger(test.passed) || test.passed < 1 || !HASH.test(test.logSha256)) fail('Actual passing test evidence missing')
@@ -164,7 +186,7 @@ export async function verifyPullRequest(m, api) {
   const baseTree = await api.get(`git/trees/${baseCommit.tree.sha}?recursive=1`)
   if (sourceTree.truncated || baseTree.truncated) fail('Truncated source tree')
   const blob = async (sha, expected) => { const b=await api.get(`git/blobs/${sha}`); const bytes=Buffer.from(b.content??'','base64'); if(b.encoding!=='base64' || b.sha!==sha || sha256(bytes)!==expected) fail('Git blob bytes differ from signed review');return bytes }
-  if (m.pullRequest === 986) {
+  if ([986, 990].includes(m.pullRequest)) {
     const key = sourceTree.tree.find(t=>t.path===KEY_PATH), baseKey = baseTree.tree.find(t=>t.path===KEY_PATH)
     if (key?.type!=='blob' || baseKey?.type!=='blob' || key.sha!==baseKey.sha) fail('Follow-up trust key must match immutable base')
     await blob(key.sha, TRUST_SHA256)
