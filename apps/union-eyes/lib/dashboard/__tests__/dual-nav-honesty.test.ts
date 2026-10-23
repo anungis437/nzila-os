@@ -28,8 +28,8 @@ describe('EC-G03 landing × experience', () => {
       {
         role: 'member',
         experience: 'member',
-        roleHomeHref: '/dashboard/workspace',
-        roleHomeIsOrientationHub: true,
+        roleHomeHref: '/dashboard/claims',
+        roleHomeIsOrientationHub: false,
       },
       {
         role: 'steward',
@@ -74,19 +74,23 @@ describe('EC-G03 landing × experience', () => {
       expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE[row.experience]).toBe(row.roleHomeHref);
     }
 
-    expect(getRoleLandingPath(undefined)).toBe('/dashboard/workspace');
-    expect(getRoleLandingPath('unknown')).toBe('/dashboard/workspace');
+    expect(getRoleLandingPath(undefined)).toBe('/dashboard/claims');
+    expect(getRoleLandingPath('unknown')).toBe('/dashboard/claims');
   });
 
-  it('keeps Workspace first in the sidebar while staff, executive, governance, and admin land elsewhere', () => {
-    for (const experience of ['member', 'staff', 'executive', 'governance', 'admin'] as const) {
+  it('keeps Workspace first in the sidebar for non-member roles; members start at My Cases with no hub', () => {
+    for (const experience of ['staff', 'executive', 'governance', 'admin'] as const) {
       expect(getNavigationForExperience(experience)[0]).toMatchObject({
         label: 'Workspace',
         href: WORKSPACE_ORIENTATION_HUB_PATH,
       });
     }
 
-    expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.member).toBe(WORKSPACE_ORIENTATION_HUB_PATH);
+    const memberNav = getNavigationForExperience('member');
+    expect(memberNav[0]).toMatchObject({ label: 'My Cases', href: '/dashboard/claims' });
+    expect(memberNav.map((item) => item.label)).not.toContain('Workspace');
+    expect(memberNav.map((item) => item.label)).not.toContain('Home');
+    expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.member).toBe('/dashboard/claims');
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.staff).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.executive).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.governance).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
@@ -200,7 +204,6 @@ describe('EC-G03 guards', () => {
     expect(getAllowedPrefixesByExperience()).toEqual({
       member: [
         '/dashboard',
-        '/dashboard/workspace',
         '/dashboard/inbox',
         '/dashboard/claims',
         '/dashboard/claims/new',

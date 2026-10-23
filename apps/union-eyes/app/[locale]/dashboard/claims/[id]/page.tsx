@@ -10,7 +10,7 @@ import { ArrowLeft, Calendar, MapPin, FileText, Clock, AlertCircle } from 'lucid
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from '@/components/file-upload';
 import { Button } from '@/components/ui/button';
-import { ClaimJurisdictionInfo } from '@/components/claims/claim-jurisdiction-info';
+import { ClaimDeadlineUnavailable } from '@/components/claims/claim-deadline-unavailable';
 import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
 import Link from 'next/link';
 
@@ -98,6 +98,7 @@ export default function ClaimDetailPage() {
   const [claim, setClaim] = useState<Claim | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [unavailable, setUnavailable] = useState(false);
   const [workflowHistory, setWorkflowHistory] = useState<WorkflowUpdate[]>([]);
 
   useEffect(() => {
@@ -105,6 +106,12 @@ export default function ClaimDetailPage() {
       try {
         setLoading(true);
         const response = await fetch(`/api/claims/${claimId}`);
+
+        // A missing case and one the user may not read are intentionally indistinguishable.
+        if (response.status === 404 || response.status === 403) {
+          setUnavailable(true);
+          return;
+        }
         
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
@@ -175,9 +182,13 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('errors.loadingError')}</h2>
-            <p className="text-gray-600 mb-4">{error || t('claims.notFound')}</p>
-            <Link href={`/${locale}/dashboard/inbox?type=intake`}>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              {unavailable ? t('claimsPage.notAvailableTitle') : t('errors.loadingError')}
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {unavailable ? t('claimsPage.notAvailableBody') : (error || t('claims.notFound'))}
+            </p>
+            <Link href={`/${locale}/dashboard/claims`}>
               <Button>{t('claims.backToClaims')}</Button>
             </Link>
           </CardContent>
@@ -198,7 +209,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <Link href={`/${locale}/dashboard/inbox?type=intake`}>
+          <Link href={`/${locale}/dashboard/claims`}>
             <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
               <ArrowLeft size={20} />
               {t('claims.backToClaims')}
@@ -289,13 +300,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
             >
-              <ClaimJurisdictionInfo
-                claimId={claim.claimId}
-                organizationId={claim.organizationId}
-                claimType={claim.claimType}
-                status={claim.status}
-                filedDate={claim.filedDate}
-              />
+              <ClaimDeadlineUnavailable />
             </motion.div>
 
             {/* Workflow History */}

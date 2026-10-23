@@ -23,25 +23,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Info, CheckCircle2, XCircle, History } from 'lucide-react';
-import { requireUser } from '@/lib/api-auth-guard';
+import { requireUser, getUserRole } from '@/lib/api-auth-guard';
+import { canManageOrganizationSettings } from '@/lib/auth/org-settings-access';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import ConsentForm from '@/components/marketing/consent-form';
  
 import RevokeConsentButton from '@/components/marketing/revoke-consent-button';
 
 interface DataSharingPageProps {
-  params: {
+  params: Promise<{
     locale: string;
-  };
+  }>;
 }
 
 export default async function DataSharingPage({ params }: DataSharingPageProps) {
   const t = await getTranslations('dataSharingPage');
-  const { locale: _locale } = params;
+  const { locale } = await params;
 
   // Get user's organization
   const user = await requireUser();
   const organizationId = user.organizationId ?? '';
+
+  // Organization data-sharing consent is an administrator decision.
+  const role = await getUserRole(user.userId, organizationId);
+  if (!canManageOrganizationSettings(role)) {
+    redirect(`/${locale}/dashboard/profile`);
+  }
 
   const [_organization] = await db
     .select()

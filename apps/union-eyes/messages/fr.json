@@ -1,4 +1,35 @@
 {
+  "memberProfile": {
+    "readOnlyNotice": "Vos renseignements personnels sont affichés ci-dessous. Pour modifier votre nom, votre courriel ou votre numéro de téléphone, ou pour demander une copie de vos données ou des changements à votre compte, communiquez avec l'administrateur de votre syndicat."
+  },
+  "claimsPage": {
+    "metaTitle": "Dossiers | UnionEyes",
+    "metaDescription": "Suivez les dossiers de représentation et leur progression.",
+    "memberTitle": "Mes dossiers",
+    "memberSubtitle": "Suivez les dossiers que vous avez ouverts et leur progression",
+    "memberNewAction": "Ouvrir un dossier de représentation",
+    "memberEmptyTitle": "Aucun dossier pour le moment",
+    "memberEmptyBody": "Les dossiers que vous ouvrez apparaissent ici.",
+    "memberEmptyAction": "Ouvrir votre premier dossier",
+    "staffTitle": "Réclamations",
+    "staffSubtitle": "Suivez et gérez les réclamations soumises",
+    "staffNewAction": "Nouvelle réclamation",
+    "staffEmptyTitle": "Aucune réclamation pour le moment",
+    "staffEmptyBody": "Les réclamations apparaissent ici lorsque des membres ou des délégués les soumettent.",
+    "staffEmptyAction": "Soumettre la première réclamation",
+    "retry": "Réessayer",
+    "loadError": "Échec du chargement des dossiers",
+    "columnCaseNumber": "N° de dossier",
+    "columnType": "Type",
+    "columnStatus": "Statut",
+    "columnPriority": "Priorité",
+    "columnSubmitted": "Soumis le",
+    "viewCase": "Voir le dossier",
+    "notAvailableTitle": "Dossier non disponible",
+    "notAvailableBody": "Ce dossier n'existe pas ou vous n'y avez pas accès.",
+    "deadlineUnavailableTitle": "Délais de dépôt",
+    "deadlineUnavailableBody": "Le calcul des délais n'est pas encore disponible. Votre représentant confirmera les délais de dépôt qui s'appliquent à ce dossier."
+  },
   "workspaceNav": {
     "metaTitle": "Espace de travail | UnionEyes",
     "metaDescription": "Une surface de travail pour le syndicat.",

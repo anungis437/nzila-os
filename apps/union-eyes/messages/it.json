@@ -1,4 +1,35 @@
 {
+  "memberProfile": {
+    "readOnlyNotice": "Le tue informazioni personali sono mostrate qui sotto. Per modificare nome, email o telefono, o per richiedere una copia dei tuoi dati o modifiche al tuo account, contatta l'amministratore del tuo sindacato."
+  },
+  "claimsPage": {
+    "metaTitle": "Casi | UnionEyes",
+    "metaDescription": "Segui i casi di rappresentanza e il loro stato.",
+    "memberTitle": "I miei casi",
+    "memberSubtitle": "Segui i casi che hai aperto e il loro stato",
+    "memberNewAction": "Apri un caso di rappresentanza",
+    "memberEmptyTitle": "Nessun caso al momento",
+    "memberEmptyBody": "I casi che apri compaiono qui.",
+    "memberEmptyAction": "Apri il tuo primo caso",
+    "staffTitle": "Reclami",
+    "staffSubtitle": "Monitora e gestisci i reclami presentati",
+    "staffNewAction": "Nuovo reclamo",
+    "staffEmptyTitle": "Nessun reclamo al momento",
+    "staffEmptyBody": "I reclami compaiono qui dopo l'invio da parte di membri o delegati.",
+    "staffEmptyAction": "Presenta il primo reclamo",
+    "retry": "Riprova",
+    "loadError": "Impossibile caricare i casi",
+    "columnCaseNumber": "N. caso",
+    "columnType": "Tipo",
+    "columnStatus": "Stato",
+    "columnPriority": "Priorità",
+    "columnSubmitted": "Inviato il",
+    "viewCase": "Apri caso",
+    "notAvailableTitle": "Caso non disponibile",
+    "notAvailableBody": "Questo caso non esiste oppure non hai accesso.",
+    "deadlineUnavailableTitle": "Scadenze di deposito",
+    "deadlineUnavailableBody": "Il calcolo delle scadenze non è ancora disponibile. Il tuo rappresentante confermerà le scadenze di deposito applicabili a questo caso."
+  },
   "workspaceNav": {
     "metaTitle": "Area di lavoro | UnionEyes",
     "metaDescription": "Una superficie di lavoro per il sindacato.",

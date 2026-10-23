@@ -154,23 +154,22 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
   //
   // The member role is used because its nav items are stable and available to
   // any authenticated user, keeping the test focused on the nav mechanic.
+  // Members start at My Cases; Workspace and Home are not part of their nav.
   test('member: sidebar link click navigates and updates active state', async ({ page }) => {
     const fixture = getFixture('member');
     await gotoDashboardAsRole(page, 'member');
 
-    // Select the Home control by exact accessible name.
-    // hasText: 'Home' is a case-insensitive substring, so it also matches the
-    // Workspace badge "Orientation hub and role home". .first() then clicks
-    // the hub link and the URL stays on /dashboard/workspace. Home still
-    // points at /dashboard/inbox.
     const destinations = page
       .getByRole('complementary', { name: 'Role execution navigation', exact: true })
       .getByRole('navigation', { name: 'Role execution destinations', exact: true });
-    const homeLink = destinations.getByRole('link', { name: 'Home', exact: true });
+    await expect(destinations.getByRole('link', { name: 'Workspace' })).toHaveCount(0);
+    await expect(destinations.getByRole('link', { name: 'Home', exact: true })).toHaveCount(0);
+
+    const homeLink = destinations.getByRole('link', { name: 'Messages', exact: true });
     await expect(homeLink).toBeVisible({ timeout: 10_000 });
 
     const hrefBefore = await homeLink.getAttribute('href');
-    expect(hrefBefore).toBe(`/${fixture.locale}/dashboard/inbox`);
+    expect(hrefBefore).toBe(`/${fixture.locale}/dashboard/inbox?type=message`);
 
     // Click the sidebar link and wait for the URL to change.
     // Use a 30s timeout: clicking a Next.js sidebar link triggers an RSC

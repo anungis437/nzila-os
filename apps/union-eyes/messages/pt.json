@@ -1,4 +1,35 @@
 {
+  "memberProfile": {
+    "readOnlyNotice": "As suas informações pessoais são mostradas abaixo. Para alterar o nome, o email ou o telefone, ou para pedir uma cópia dos seus dados ou alterações à sua conta, contacte o administrador do seu sindicato."
+  },
+  "claimsPage": {
+    "metaTitle": "Casos | UnionEyes",
+    "metaDescription": "Acompanhe os casos de representação e o seu andamento.",
+    "memberTitle": "Meus casos",
+    "memberSubtitle": "Acompanhe os casos que você abriu e o andamento deles",
+    "memberNewAction": "Abrir caso de representação",
+    "memberEmptyTitle": "Nenhum caso ainda",
+    "memberEmptyBody": "Os casos que você abrir aparecerão aqui.",
+    "memberEmptyAction": "Abra seu primeiro caso",
+    "staffTitle": "Reclamações",
+    "staffSubtitle": "Acompanhe e gerencie as reclamações enviadas",
+    "staffNewAction": "Nova reclamação",
+    "staffEmptyTitle": "Nenhuma reclamação ainda",
+    "staffEmptyBody": "As reclamações aparecem aqui depois que membros ou delegados as enviam.",
+    "staffEmptyAction": "Enviar a primeira reclamação",
+    "retry": "Tentar novamente",
+    "loadError": "Falha ao carregar os casos",
+    "columnCaseNumber": "N.º do caso",
+    "columnType": "Tipo",
+    "columnStatus": "Estado",
+    "columnPriority": "Prioridade",
+    "columnSubmitted": "Enviado em",
+    "viewCase": "Ver caso",
+    "notAvailableTitle": "Caso não disponível",
+    "notAvailableBody": "Este caso não existe ou você não tem acesso a ele.",
+    "deadlineUnavailableTitle": "Prazos de apresentação",
+    "deadlineUnavailableBody": "O cálculo de prazos ainda não está disponível. O seu representante confirmará os prazos de apresentação aplicáveis a este caso."
+  },
   "workspaceNav": {
     "metaTitle": "Área de trabalho | UnionEyes",
     "metaDescription": "Uma superfície de trabalho para o sindicato.",

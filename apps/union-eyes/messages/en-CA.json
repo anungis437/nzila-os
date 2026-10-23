@@ -1,4 +1,35 @@
 {
+  "memberProfile": {
+    "readOnlyNotice": "Your personal information is shown below. To change your name, email or phone number, or to request a copy of your data or changes to your account, contact your union administrator."
+  },
+  "claimsPage": {
+    "metaTitle": "Cases | UnionEyes",
+    "metaDescription": "Track representation cases and their progress.",
+    "memberTitle": "My Cases",
+    "memberSubtitle": "Track the cases you have opened and their progress",
+    "memberNewAction": "Open Representation Case",
+    "memberEmptyTitle": "No cases yet",
+    "memberEmptyBody": "Cases you open appear here.",
+    "memberEmptyAction": "Open your first case",
+    "staffTitle": "Claims",
+    "staffSubtitle": "Track and manage submitted claims",
+    "staffNewAction": "New Claim",
+    "staffEmptyTitle": "No claims yet",
+    "staffEmptyBody": "Claims appear here after members or stewards submit them.",
+    "staffEmptyAction": "Submit first claim",
+    "retry": "Retry",
+    "loadError": "Failed to load cases",
+    "columnCaseNumber": "Case #",
+    "columnType": "Type",
+    "columnStatus": "Status",
+    "columnPriority": "Priority",
+    "columnSubmitted": "Submitted",
+    "viewCase": "View case",
+    "notAvailableTitle": "Case not available",
+    "notAvailableBody": "This case does not exist or you do not have access to it.",
+    "deadlineUnavailableTitle": "Filing deadlines",
+    "deadlineUnavailableBody": "Deadline calculation is not available yet. Your representative will confirm any filing deadlines that apply to this case."
+  },
   "workspaceNav": {
     "metaTitle": "Workspace | UnionEyes",
     "metaDescription": "One operating surface for the union.",
