@@ -479,15 +479,25 @@ async function checkBaselineTablesHaveManifestDisposition(results: CheckResult[]
  * evidence-backed, non-NEEDS_REVIEW disposition — not merely "the 24-table
  * 0108 subset checks out".
  */
+// Catalog metadata stays visible after runtime table grants are removed. An
+// information_schema scan would silently drop zero-grant tables from coverage.
+export const ORPHANED_TENANT_TABLES_QUERY = `
+  SELECT DISTINCT c.relname::text AS table_name, a.attname::text AS column_name
+  FROM pg_catalog.pg_class c
+  JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+  JOIN pg_catalog.pg_attribute a ON a.attrelid = c.oid
+  WHERE n.nspname = 'public'
+    AND c.relkind IN ('r', 'p')
+    AND a.attnum > 0 AND NOT a.attisdropped
+    AND a.attname IN ('organization_id', 'org_id', 'tenant_id')
+    AND c.relname::text != ALL($1::text[])
+  ORDER BY table_name, column_name
+`
+
 async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult[]) {
-  const rows = await sql<{ table_name: string; column_name: string }[]>`
-    SELECT DISTINCT c.table_name, c.column_name
-    FROM information_schema.columns c
-    JOIN information_schema.tables t
-      ON t.table_schema = c.table_schema AND t.table_name = c.table_name AND t.table_type = 'BASE TABLE'
-    WHERE c.table_schema = 'public'
-      AND c.column_name IN ('organization_id', 'org_id', 'tenant_id')
-      AND c.table_name != ALL(${ALL_PROTECTED_TABLES})`
+  const rows = await sql.unsafe<{ table_name: string; column_name: string }[]>(
+    ORPHANED_TENANT_TABLES_QUERY, [[...ALL_PROTECTED_TABLES]],
+  )
 
   const { storageAuthorityManifest, CLOSED_CLASSIFICATIONS } = await import('../db/rls-storage-authority-manifest')
   const manifestByTable = new Map(storageAuthorityManifest.map((e) => [e.table, e]))
