@@ -23,12 +23,10 @@ interface ClaimAttachment {
   uploadedBy: string;
 }
 
-interface WorkflowUpdate {
-  id?: string;
-  newStatus: string;
-  previousStatus?: string | null;
-  changedAt: string;
-  notes?: string | null;
+interface CaseActivity {
+  id: string;
+  timestamp: string | null;
+  description: string | null;
 }
 
 interface Claim {
@@ -99,7 +97,7 @@ export default function ClaimDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [unavailable, setUnavailable] = useState(false);
-  const [workflowHistory, setWorkflowHistory] = useState<WorkflowUpdate[]>([]);
+  const [activity, setActivity] = useState<CaseActivity[]>([]);
 
   useEffect(() => {
     const fetchClaim = async () => {
@@ -124,14 +122,15 @@ export default function ClaimDetailPage() {
         setClaim(claimData);
         trackCaseViewed(claimData?.claimId ?? claimId);
         
-        // Fetch workflow history
+        // Member-visible case activity from the canonical timeline (visibility-scoped server side)
         try {
-          const historyResponse = await fetch(`/api/claims/${claimData?.claimId ?? claimId}/workflow/history`);
-          if (historyResponse.ok) {
-            const historyData = await historyResponse.json();
-            setWorkflowHistory(historyData.history || []);
+          const timelineResponse = await fetch(`/api/cases/${claimData?.claimId ?? claimId}/timeline`);
+          if (timelineResponse.ok) {
+            const timelineBody = await timelineResponse.json();
+            const items = timelineBody?.data?.data ?? timelineBody?.data ?? [];
+            setActivity(Array.isArray(items) ? items : []);
           }
-        } catch (_histErr) {
+        } catch (_timelineErr) {
 }
       } catch (err) {
 setError(err instanceof Error ? err.message : 'Failed to load claim');
@@ -303,8 +302,8 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
               <ClaimDeadlineUnavailable />
             </motion.div>
 
-            {/* Workflow History */}
-            {workflowHistory.length > 0 && (
+            {/* Case activity */}
+            {activity.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -315,24 +314,16 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <CardTitle className="text-lg">{t('claims.statusHistory')}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {workflowHistory.map((update, index: number) => (
-                        <div key={update.id || index} className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium text-gray-900">
-                              {statusLabels[update.newStatus]?.label || update.newStatus}
-                            </span>
+                    <div className="space-y-4" data-testid="case-activity">
+                      {activity.map((item, index: number) => (
+                        <div key={item.id || index} className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0">
+                          {item.timestamp && (
                             <span className="text-xs text-gray-500">
-                              {new Date(update.changedAt).toLocaleDateString()}
+                              {new Date(item.timestamp).toLocaleDateString(locale)}
                             </span>
-                          </div>
-                          {update.previousStatus && (
-                            <p className="text-xs text-gray-500 mb-1">
-                              {t('claims.from')}: {statusLabels[update.previousStatus]?.label || update.previousStatus}
-                            </p>
                           )}
-                          {update.notes && (
-                            <p className="text-sm text-gray-600 mt-1">{update.notes}</p>
+                          {item.description && (
+                            <p className="text-sm text-gray-700 mt-1">{item.description}</p>
                           )}
                         </div>
                       ))}

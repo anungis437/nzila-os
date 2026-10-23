@@ -106,9 +106,8 @@ test.describe('UnionEyes stakeholder demo journeys', () => {
     await gotoDashboardAsRole(page, 'member');
 
     const path: Array<{ label: string; href: string }> = [
-      { label: 'My Cases', href: '/dashboard/inbox?type=intake' },
+      { label: 'My Cases', href: '/dashboard/claims' },
       { label: 'Open Representation Case', href: '/dashboard/claims/new' },
-      { label: 'Messages', href: '/dashboard/inbox?type=message' },
       { label: 'Documents', href: '/dashboard/documents' },
     ];
 

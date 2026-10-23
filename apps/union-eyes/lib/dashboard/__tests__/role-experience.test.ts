@@ -47,7 +47,8 @@ describe('lib/dashboard/role-experience', () => {
     });
     it('allows in-scope paths and blocks out-of-scope ones', () => {
       expect(canAccessDashboardPath('/dashboard', 'member', false)).toBe(true);
-      expect(canAccessDashboardPath('/dashboard/inbox', 'member', false)).toBe(true);
+      expect(canAccessDashboardPath('/dashboard/inbox', 'member', false)).toBe(false);
+      expect(canAccessDashboardPath('/dashboard/claims', 'member', false)).toBe(true);
       expect(canAccessDashboardPath('/dashboard/workspace', 'member', false)).toBe(false);
       expect(canAccessDashboardPath('/dashboard/security', 'member', false)).toBe(false);
     });

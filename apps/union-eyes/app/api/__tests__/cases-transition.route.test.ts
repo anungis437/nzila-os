@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => {
   const state = {
     claimRows: [] as unknown[],
+    inserted: [] as Array<Record<string, unknown>>,
   };
 
   return {
@@ -26,6 +27,7 @@ const m = vi.hoisted(() => {
     },
     resetState: () => {
       state.claimRows = [];
+      state.inserted = [];
     },
   };
 });
@@ -71,7 +73,9 @@ function makeTx(claimRows: unknown[]) {
       })),
     })),
     insert: vi.fn(() => ({
-      values: vi.fn(async () => undefined),
+      values: vi.fn(async (values: Record<string, unknown>) => {
+        m.state.inserted.push(values);
+      }),
     })),
   };
 }
@@ -180,6 +184,43 @@ describe('cases/[caseId]/transition route', () => {
     expect(payload).toMatchObject({ success: true, claimId: 'case_1', toStatus: 'settled' });
     expect(m.auditDataMutation).toHaveBeenCalled();
     expect(m.validateTransition).toHaveBeenCalledWith(expect.objectContaining({ assignedTo: 'agent_1', actorRole: 'steward' }));
+  });
+
+  it('notifies the owning member in-app when their case moves', async () => {
+    const { PATCH } = await loadRoute();
+    m.state.claimRows = [{
+      claimId: 'case_1',
+      memberId: 'member_9',
+      status: 'submitted',
+      priority: 'medium',
+      organizationId: 'org_1',
+      assignedTo: 'agent_1',
+    }];
+
+    const response = await PATCH(makeRequest({ targetStatus: 'settled' }), { params: Promise.resolve({ caseId: 'case_1' }) });
+
+    expect(response.status).toBe(200);
+    expect(m.state.inserted).toContainEqual(expect.objectContaining({
+      userId: 'member_9',
+      organizationId: 'org_1',
+      actionUrl: '/dashboard/claims/case_1',
+    }));
+  });
+
+  it('does not notify a member about a transition they performed themselves', async () => {
+    const { PATCH } = await loadRoute();
+    m.state.claimRows = [{
+      claimId: 'case_1',
+      memberId: 'user_1',
+      status: 'submitted',
+      priority: 'medium',
+      organizationId: 'org_1',
+      assignedTo: 'user_1',
+    }];
+
+    await PATCH(makeRequest({ targetStatus: 'settled' }), { params: Promise.resolve({ caseId: 'case_1' }) });
+
+    expect(m.state.inserted.filter((row) => 'actionUrl' in row)).toHaveLength(0);
   });
 
   it('returns 500 when transition pipeline throws unexpectedly', async () => {

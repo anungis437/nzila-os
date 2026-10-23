@@ -96,7 +96,6 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
   member: [
     'My Cases',
     'Open Representation Case',
-    'Messages',
     'Documents',
     'Profile & Settings',
   ],

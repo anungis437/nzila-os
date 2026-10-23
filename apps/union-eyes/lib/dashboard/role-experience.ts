@@ -141,7 +141,6 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
     return [
       { label: 'My Cases', href: '/dashboard/claims' },
       { label: 'Open Representation Case', href: '/dashboard/claims/new' },
-      { label: 'Messages', href: '/dashboard/inbox?type=message' },
       { label: 'Documents', href: '/dashboard/documents' },
       { label: 'Profile & Settings', href: '/dashboard/settings' },
     ];
@@ -207,7 +206,6 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
   member: [
     '/dashboard',
-    '/dashboard/inbox',
     '/dashboard/claims',
     '/dashboard/claims/new',
     '/dashboard/documents',

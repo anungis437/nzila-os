@@ -165,11 +165,11 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
     await expect(destinations.getByRole('link', { name: 'Workspace' })).toHaveCount(0);
     await expect(destinations.getByRole('link', { name: 'Home', exact: true })).toHaveCount(0);
 
-    const homeLink = destinations.getByRole('link', { name: 'Messages', exact: true });
+    const homeLink = destinations.getByRole('link', { name: 'Documents', exact: true });
     await expect(homeLink).toBeVisible({ timeout: 10_000 });
 
     const hrefBefore = await homeLink.getAttribute('href');
-    expect(hrefBefore).toBe(`/${fixture.locale}/dashboard/inbox?type=message`);
+    expect(hrefBefore).toBe(`/${fixture.locale}/dashboard/documents`);
 
     // Click the sidebar link and wait for the URL to change.
     // Use a 30s timeout: clicking a Next.js sidebar link triggers an RSC
@@ -181,7 +181,7 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
     // The URL must have changed and remain on a dashboard path.
     const urlAfter = page.url();
     expect(urlAfter).not.toBe(urlBefore);
-    expect(urlAfter).toContain('/dashboard/inbox');
+    expect(urlAfter).toContain('/dashboard/documents');
 
     // Locale must be preserved.
     expect(urlAfter).toContain(`/${fixture.locale}/`);

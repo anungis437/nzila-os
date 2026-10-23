@@ -204,7 +204,6 @@ describe('EC-G03 guards', () => {
     expect(getAllowedPrefixesByExperience()).toEqual({
       member: [
         '/dashboard',
-        '/dashboard/inbox',
         '/dashboard/claims',
         '/dashboard/claims/new',
         '/dashboard/documents',
