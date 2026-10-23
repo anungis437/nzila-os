@@ -29,7 +29,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withMinRole('officer', async (request, context: BaseAuthContext) => {
+export const GET = withMinRole('secretary_treasurer', async (request, context: BaseAuthContext) => {
   const { organizationId, userId } = context;
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');

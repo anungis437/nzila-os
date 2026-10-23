@@ -46,11 +46,17 @@ describe('EC-G03 landing × experience', () => {
       {
         role: 'president',
         experience: 'executive',
-        roleHomeHref: '/dashboard/intelligence',
+        roleHomeHref: '/dashboard/executive',
         roleHomeIsOrientationHub: false,
       },
       {
         role: 'officer',
+        experience: 'executive',
+        roleHomeHref: '/dashboard/executive',
+        roleHomeIsOrientationHub: false,
+      },
+      {
+        role: 'clc_executive',
         experience: 'governance',
         roleHomeHref: '/dashboard/governance',
         roleHomeIsOrientationHub: false,
@@ -78,13 +84,14 @@ describe('EC-G03 landing × experience', () => {
     expect(getRoleLandingPath('unknown')).toBe('/dashboard/workspace');
   });
 
-  it('keeps Workspace first in the sidebar while staff, executive, governance, and admin land elsewhere', () => {
-    for (const experience of ['member', 'staff', 'executive', 'governance', 'admin'] as const) {
+  it('keeps Workspace first in the sidebar while staff, governance, and admin land elsewhere; executives have no competing hub entry', () => {
+    for (const experience of ['member', 'staff', 'governance', 'admin'] as const) {
       expect(getNavigationForExperience(experience)[0]).toMatchObject({
         label: 'Workspace',
         href: WORKSPACE_ORIENTATION_HUB_PATH,
       });
     }
+    expect(getNavigationForExperience('executive').some((i) => i.href === WORKSPACE_ORIENTATION_HUB_PATH)).toBe(false);
 
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.member).toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.staff).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
@@ -109,12 +116,12 @@ describe('EC-G03 landing × experience', () => {
       accessibleName: 'Workspace, orientation hub',
     });
 
-    const executiveHome = honestyForNavigationItem(
+    const intelligenceHome = honestyForNavigationItem(
       { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence' },
       '/dashboard/intelligence',
     );
-    expect(executiveHome.navRole).toBe('role-home');
-    expect(executiveHome.visibleQualifier).toContain('Not a Workspace tab');
+    expect(intelligenceHome.navRole).toBe('role-home');
+    expect(intelligenceHome.visibleQualifier).toContain('Not a Workspace tab');
 
     const executiveOverview = honestyForNavigationItem(
       {
@@ -126,11 +133,12 @@ describe('EC-G03 landing × experience', () => {
     expect(executiveOverview.navRole).toBe('legacy-side');
     expect(executiveOverview.visibleQualifier).toBe('Not a Workspace tab');
 
-    const cue = roleHomeHubCue(getDualNavHomes('president'));
-    expect(cue.show).toBe(true);
-    expect(cue.hubHref).toBe(WORKSPACE_ORIENTATION_HUB_PATH);
-    expect(cue.hubHref).not.toBe(getRoleLandingPath('president'));
-    expect(cue.intelligenceNote).toMatch(/not a Workspace tab/i);
+    // Staff still reach the hub; executives no longer advertise it because their allow-list rejects it.
+    const staffCue = roleHomeHubCue(getDualNavHomes('steward'));
+    expect(staffCue.show).toBe(true);
+    expect(staffCue.hubHref).toBe(WORKSPACE_ORIENTATION_HUB_PATH);
+    expect(roleHomeHubCue(getDualNavHomes('president')).show).toBe(false);
+    expect(roleHomeHubCue(getDualNavHomes('president')).intelligenceNote).toBeNull();
     expect(roleHomeHubCue(getDualNavHomes('member')).show).toBe(false);
   });
 });
@@ -226,14 +234,19 @@ describe('EC-G03 guards', () => {
       ],
       executive: [
         '/dashboard',
-        '/dashboard/workspace',
-        '/dashboard/intelligence',
+        '/dashboard/executive',
+        '/dashboard/leadership',
+        '/dashboard/governance',
+        '/dashboard/bargaining',
+        '/dashboard/finance',
+        '/dashboard/correspondence',
         '/dashboard/continuity-intelligence',
+        '/dashboard/priorities',
+        '/dashboard/committees',
+        '/dashboard/intelligence',
         '/dashboard/executive-operating-intelligence',
-        '/dashboard/operations',
         '/dashboard/governance-center',
         '/dashboard/outcomes',
-        '/dashboard/leadership',
         '/dashboard/trust',
         '/dashboard/settings',
         '/dashboard/profile',

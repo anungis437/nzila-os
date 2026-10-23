@@ -24,7 +24,7 @@ const paymentSchema = z.object({
   externalReference: z.string().max(255).optional(),
 });
 
-export const GET = withMinRole('officer', async (
+export const GET = withMinRole('secretary_treasurer', async (
   _request,
   context: BaseAuthContext & { params: Promise<{ id: string }> },
 ) => {

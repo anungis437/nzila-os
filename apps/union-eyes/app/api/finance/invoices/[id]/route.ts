@@ -13,7 +13,7 @@ import { getInvoiceWithLineItems } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withMinRole('officer', async (
+export const GET = withMinRole('secretary_treasurer', async (
   _request,
   context: BaseAuthContext & { params: Promise<{ id: string }> },
 ) => {

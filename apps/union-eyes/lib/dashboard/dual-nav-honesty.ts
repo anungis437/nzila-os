@@ -11,7 +11,7 @@
  */
 
 import {
-  ROLE_EXECUTION_HOME_BY_EXPERIENCE,
+  canAccessDashboardPath,
   WORKSPACE_ORIENTATION_HUB_PATH,
   type DualNavHomes,
 } from './role-experience';
@@ -57,7 +57,9 @@ export type NavigationItemHonesty = {
   collapsedTitle: string;
 };
 
-const INTELLIGENCE_EXECUTION_PATH = ROLE_EXECUTION_HOME_BY_EXPERIENCE.executive;
+// The Intelligence reports surface. It was the executive role home before the
+// executive experience adopted Today; it is still not a Workspace tab.
+const INTELLIGENCE_EXECUTION_PATH = '/dashboard/intelligence';
 
 function withLabel(label: string, qualifier: string): Pick<
   NavigationItemHonesty,
@@ -144,7 +146,9 @@ export type RoleHomeHubCue = {
 
 /** Explicit link copy. Callers must render an anchor, not a redirect. */
 export function roleHomeHubCue(homes: DualNavHomes, translate: (text: string) => string = text => text): RoleHomeHubCue {
-  const show = !homes.roleHomeIsOrientationHub;
+  // Never advertise a hub link the experience's own allow-list would bounce.
+  const show = !homes.roleHomeIsOrientationHub
+    && canAccessDashboardPath(WORKSPACE_ORIENTATION_HUB_PATH, homes.experience, false);
   return {
     show,
     message: translate(ROLE_HOME_HUB_CUE_MESSAGE),

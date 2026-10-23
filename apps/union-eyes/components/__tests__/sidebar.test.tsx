@@ -101,43 +101,34 @@ describe('Sidebar', () => {
       expect(Array.from(document.querySelectorAll('[id]')).filter(element => element.id === id)).toHaveLength(1);
     }
   });
-  it('shows Operations Continuity for an executive outside pilot mode', () => {
+  it('renders exactly the seven frozen executive destinations for a president', () => {
     mockUsePilotMode.mockReturnValue({ isPilotMode: false });
-    render(
-      <Sidebar
-        profile={null}
-        whopMonthlyPlanId="m"
-        whopYearlyPlanId="y"
-        userRole="president"
-      />,
-    );
-    expect(screen.getAllByText('Operations Continuity').length).toBeGreaterThan(0);
-  });
-
-  it('hides Operations Continuity for an executive in pilot mode', () => {
-    mockUsePilotMode.mockReturnValue({ isPilotMode: true });
-    render(
-      <Sidebar
-        profile={null}
-        whopMonthlyPlanId="m"
-        whopYearlyPlanId="y"
-        userRole="president"
-      />,
-    );
+    renderSidebar('president');
+    for (const label of [
+      'Today',
+      'Members & Service',
+      'Governance & Organization',
+      'Bargaining & Collective Action',
+      'Finance & Resources',
+      'Communications & Relations',
+      'Continuity & Intelligence',
+    ]) {
+      expect(screen.getAllByText(label).length, label).toBeGreaterThan(0);
+    }
     expect(screen.queryAllByText('Operations Continuity')).toHaveLength(0);
   });
 
-  it('still shows other executive nav entries in pilot mode', () => {
+  it('does not offer Finance & Resources to a general officer', () => {
+    renderSidebar('officer');
+    expect(screen.getAllByText('Members & Service').length).toBeGreaterThan(0);
+    expect(screen.queryAllByText('Finance & Resources')).toHaveLength(0);
+  });
+
+  it('shows the same executive destinations in pilot mode', () => {
     mockUsePilotMode.mockReturnValue({ isPilotMode: true });
-    render(
-      <Sidebar
-        profile={null}
-        whopMonthlyPlanId="m"
-        whopYearlyPlanId="y"
-        userRole="president"
-      />,
-    );
-    expect(screen.getAllByText('Governance Continuity').length).toBeGreaterThan(0);
+    renderSidebar('president');
+    expect(screen.getAllByText('Governance & Organization').length).toBeGreaterThan(0);
+    expect(screen.queryAllByText('Operations Continuity')).toHaveLength(0);
   });
 });
 
@@ -202,35 +193,22 @@ describe('Sidebar dual-nav honesty', () => {
     expectNoUndifferentiatedPrimary();
   });
 
-  it('labels executive Intelligence as the role execution home and not a Workspace tab', () => {
+  it('labels the executive Today destination as the role execution home with no competing Workspace hub', () => {
     renderSidebar('president');
 
     expectNoUndifferentiatedPrimary();
     const desktop = screen.getByRole('complementary', { name: ROLE_EXECUTION_CHROME_LABEL });
-    expect(within(desktop).getByText(INTELLIGENCE_NOT_WORKSPACE_TAB_NOTE)).toBeInTheDocument();
+    expect(within(desktop).queryByText(INTELLIGENCE_NOT_WORKSPACE_TAB_NOTE)).not.toBeInTheDocument();
+    expect(within(desktop).queryByText(ROLE_HOME_HUB_CUE_MESSAGE)).not.toBeInTheDocument();
+    expect(screen.queryAllByRole('link', { name: (n) => n.startsWith('Workspace') })).toHaveLength(0);
 
-    const hub = linksNamed('Workspace, orientation hub');
-    expect(hub[0]).toHaveAttribute('data-nav-role', 'hub');
-    expect(hub[0]).toHaveAttribute('href', '/en-CA/dashboard/workspace');
-
-    const roleHome = linksNamed(
-      'Institutional Intelligence Reports, role execution home. Not a Workspace tab.',
-    );
+    const roleHome = linksNamed('Today, role execution home');
     expect(roleHome[0]).toHaveAttribute('data-nav-role', 'role-home');
-    expect(roleHome[0]).toHaveAttribute('href', '/en-CA/dashboard/intelligence');
-
-    const overview = linksNamed('OCRA Intelligence (Executive Overview), not a Workspace tab');
-    expect(overview[0]).toHaveAttribute('data-nav-role', 'legacy-side');
-    expect(overview[0]).toHaveAttribute('href', '/en-CA/dashboard/intelligence?scope=executive');
-
-    expect(linksNamed(ROLE_HOME_HUB_CUE_LINK_LABEL)[0]).toHaveAttribute(
-      'href',
-      '/en-CA/dashboard/workspace',
-    );
+    expect(roleHome[0]).toHaveAttribute('href', '/en-CA/dashboard/executive');
   });
 
   it('labels governance and admin role homes without sending them to the hub', () => {
-    renderSidebar('officer');
+    renderSidebar('clc_executive');
     const governanceHome = linksNamed('Governance Continuity Overview, role execution home');
     expect(governanceHome[0]).toHaveAttribute('data-nav-role', 'role-home');
     expect(governanceHome[0]).toHaveAttribute('href', '/en-CA/dashboard/governance');

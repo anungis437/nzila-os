@@ -2,189 +2,124 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, TrendingUp, AlertCircle, CheckCircle, Calendar, DollarSign, Loader2 } from "lucide-react";
- 
-import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import StrategicPlanningBoard, { type StrategicGoalRecord } from "./StrategicPlanningBoard";
 
 interface ExecutiveDashboardProps {
   organizationId: string;
   userRole: string;
 }
 
-interface ExecutiveMetrics {
+interface ExecutiveIndicators {
   totalMembers: number;
   activeGrievances: number;
-  pendingApprovals: number;
-  upcomingMeetings: number;
-  monthlyBudget: {
-    allocated: number;
-    spent: number;
-    currency: string;
-  };
-  membershipTrend: number; // percentage change
-  grievanceResolutionRate: number; // percentage
+  grievanceResolutionRate: number;
+  atRiskStrategicGoals: number;
+  grievanceMeetingsNext30Days: number;
+  duesRemittances: { expectedAmount: number; receivedAmount: number; currency: string };
+  provenance?: { generatedAt?: string };
 }
 
-const defaultMetrics: ExecutiveMetrics = {
-  totalMembers: 0,
-  activeGrievances: 0,
-  pendingApprovals: 0,
-  upcomingMeetings: 0,
-  monthlyBudget: { allocated: 0, spent: 0, currency: "CAD" },
-  membershipTrend: 0,
-  grievanceResolutionRate: 0,
-};
+type LoadState =
+  | { status: "loading" }
+  | { status: "unavailable"; httpStatus?: number }
+  | { status: "ready"; metrics: ExecutiveIndicators; goals: StrategicGoalRecord[] };
 
-export default function ExecutiveDashboard({ organizationId, userRole }: ExecutiveDashboardProps) {
-  const _t = useTranslations();
-  const [metrics, setMetrics] = useState<ExecutiveMetrics>(defaultMetrics);
-  const [loading, setLoading] = useState(true);
+const money = (n: number, currency: string) =>
+  new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
 
-  const fetchMetrics = useCallback(async () => {
+/**
+ * Aggregate executive indicators. Values come from /api/executive/dashboard
+ * (organization-scoped, aggregate only). When the source cannot be read, the
+ * indicators are reported as not available — never as zero. Labels name what
+ * each figure actually measures; none of them is an approval queue, a governance
+ * meeting count or a budget.
+ */
+export default function ExecutiveDashboard({ userRole }: ExecutiveDashboardProps) {
+  const [state, setState] = useState<LoadState>({ status: "loading" });
+
+  const load = useCallback(async () => {
     try {
-      setLoading(true);
-      const res = await fetch(`/api/v2/executive/metrics?organizationId=${encodeURIComponent(organizationId)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setMetrics({
-          totalMembers: data.totalMembers ?? data.total_members ?? 0,
-          activeGrievances: data.activeGrievances ?? data.active_grievances ?? 0,
-          pendingApprovals: data.pendingApprovals ?? data.pending_approvals ?? 0,
-          upcomingMeetings: data.upcomingMeetings ?? data.upcoming_meetings ?? 0,
-          monthlyBudget: data.monthlyBudget ?? data.monthly_budget ?? defaultMetrics.monthlyBudget,
-          membershipTrend: data.membershipTrend ?? data.membership_trend ?? 0,
-          grievanceResolutionRate: data.grievanceResolutionRate ?? data.grievance_resolution_rate ?? 0,
-        });
+      const res = await fetch("/api/executive/dashboard");
+      if (!res.ok) {
+        setState({ status: "unavailable", httpStatus: res.status });
+        return;
       }
+      const body = await res.json();
+      const data = body?.data;
+      if (!data?.metrics) {
+        setState({ status: "unavailable" });
+        return;
+      }
+      setState({ status: "ready", metrics: data.metrics, goals: Array.isArray(data.strategicGoals) ? data.strategicGoals : [] });
     } catch {
-      // API not available — defaults shown
-    } finally {
-      setLoading(false);
+      setState({ status: "unavailable" });
     }
-  }, [organizationId]);
+  }, []);
 
-  useEffect(() => { fetchMetrics(); }, [fetchMetrics]);
+  useEffect(() => { load(); }, [load]);
 
-  if (loading) {
-    return <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+  if (state.status === "loading") {
+    return <div className="flex items-center justify-center py-12" role="status" aria-label="Loading executive indicators"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   }
 
-  const metricCards = [
+  if (state.status === "unavailable") {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Executive indicators</CardTitle>
+          <CardDescription>
+            Not available{state.httpStatus === 403 ? " for your office" : ""}. Figures are not shown rather than shown as zero.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  const { metrics, goals } = state;
+  const cards: Array<{ title: string; value: string; description: string }> = [
+    { title: "Active members", value: metrics.totalMembers.toLocaleString(), description: "Members not marked inactive, archived, deleted or disabled" },
+    { title: "Open grievances", value: metrics.activeGrievances.toLocaleString(), description: "Aggregate count; case details are not shown here" },
+    { title: "Grievance resolution rate", value: `${metrics.grievanceResolutionRate}%`, description: "Resolved share of grievances filed in the current window" },
+    { title: "At-risk strategic goals", value: metrics.atRiskStrategicGoals.toLocaleString(), description: "Goals marked at-risk or delayed. This is not an approval queue" },
+    { title: "Grievance meetings, next 30 days", value: metrics.grievanceMeetingsNext30Days.toLocaleString(), description: "Case meetings only; governance meetings are not counted" },
     {
-      title: "Total Members",
-      value: metrics.totalMembers.toLocaleString(),
-      icon: Users,
-      trend: `+${metrics.membershipTrend}%`,
-      trendPositive: true,
-      description: "Active members"
+      title: "Dues remittances this month",
+      value: `${money(metrics.duesRemittances.receivedAmount, metrics.duesRemittances.currency)} of ${money(metrics.duesRemittances.expectedAmount, metrics.duesRemittances.currency)} expected`,
+      description: "Employer remittances received. This is not a budget or expenditure",
     },
-    {
-      title: "Active Grievances",
-      value: metrics.activeGrievances,
-      icon: AlertCircle,
-      trend: metrics.grievanceResolutionRate + "% resolved",
-      trendPositive: true,
-      description: "Resolution rate"
-    },
-    {
-      title: "Pending Approvals",
-      value: metrics.pendingApprovals,
-      icon: CheckCircle,
-      trend: "Requires action",
-      trendPositive: false,
-      description: "Awaiting review"
-    },
-    {
-      title: "Upcoming Meetings",
-      value: metrics.upcomingMeetings,
-      icon: Calendar,
-      trend: "This week",
-      trendPositive: null,
-      description: "Board & committee"
-    },
-    {
-      title: "Monthly Budget",
-      value: `$${(metrics.monthlyBudget.spent / 1000).toFixed(0)}K / $${(metrics.monthlyBudget.allocated / 1000).toFixed(0)}K`,
-      icon: DollarSign,
-      trend: `${((metrics.monthlyBudget.spent / metrics.monthlyBudget.allocated) * 100).toFixed(0)}% utilized`,
-      trendPositive: (metrics.monthlyBudget.spent / metrics.monthlyBudget.allocated) < 0.9,
-      description: "Current spend"
-    }
   ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Executive Dashboard</h1>
+          <h2 className="text-2xl font-bold tracking-tight">Executive indicators</h2>
           <p className="text-muted-foreground mt-1">
-            Strategic overview and key performance indicators
+            Organization-scoped aggregates{metrics.provenance?.generatedAt ? `, generated ${metrics.provenance.generatedAt}` : ""}
           </p>
         </div>
-        <Badge variant="outline" className="text-sm">
-          {userRole.replace(/_/g, ' ').toUpperCase()}
-        </Badge>
+        <Badge variant="outline" className="text-sm">{userRole.replace(/_/g, " ").toUpperCase()}</Badge>
       </div>
 
-      {/* Key Metrics Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {metricCards.map((metric, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {metric.title}
-              </CardTitle>
-              <metric.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metric.value}</div>
-              <div className="flex items-center space-x-2 mt-1">
-                {metric.trendPositive !== null && (
-                  <TrendingUp 
-                    className={`h-3 w-3 ${metric.trendPositive ? 'text-green-500' : 'text-amber-500'}`} 
-                  />
-                )}
-                <p className={`text-xs ${metric.trendPositive ? 'text-green-500' : metric.trendPositive === false ? 'text-amber-500' : 'text-muted-foreground'}`}>
-                  {metric.trend}
-                </p>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {metric.description}
-              </p>
-            </CardContent>
-          </Card>
+      <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {cards.map((card) => (
+          <li key={card.title}>
+            <Card className="h-full">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{card.value}</div>
+                <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
+              </CardContent>
+            </Card>
+          </li>
         ))}
-      </div>
+      </ul>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common executive tasks</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
-            <button className="p-4 border rounded-lg hover:bg-accent text-left transition-colors">
-              <div className="font-medium">Review Approvals</div>
-              <div className="text-sm text-muted-foreground">{metrics.pendingApprovals} pending</div>
-            </button>
-            <button className="p-4 border rounded-lg hover:bg-accent text-left transition-colors">
-              <div className="font-medium">View Calendar</div>
-              <div className="text-sm text-muted-foreground">{metrics.upcomingMeetings} meetings</div>
-            </button>
-            <button className="p-4 border rounded-lg hover:bg-accent text-left transition-colors">
-              <div className="font-medium">Financial Reports</div>
-              <div className="text-sm text-muted-foreground">Monthly summary</div>
-            </button>
-            <button className="p-4 border rounded-lg hover:bg-accent text-left transition-colors">
-              <div className="font-medium">Member Directory</div>
-              <div className="text-sm text-muted-foreground">{metrics.totalMembers} members</div>
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+      <StrategicPlanningBoard goals={goals} />
     </div>
   );
 }
