@@ -101,6 +101,8 @@ function exactKeys(value, keys, name) {
 // predicate: existing auth reader, session-bound boolean result, runtime EXECUTE
 // only. It does not authorize other DDL, raw auth-table grants or core auth changes.
 const CASE_AUTHORIZATION_PATHS = new Set([
+  "apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts",
+  "apps/union-eyes/app/api/__tests__/cases-escalate.route.test.ts",
   "apps/union-eyes/app/api/__tests__/cases-assign.route.test.ts",
   "apps/union-eyes/app/api/__tests__/cases-audit.route.test.ts",
   "apps/union-eyes/app/api/__tests__/cases-caseId-export.route.test.ts",

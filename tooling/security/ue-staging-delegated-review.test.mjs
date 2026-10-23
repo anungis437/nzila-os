@@ -425,3 +425,7 @@ for(const [name,change]of [
 ])test(`case authorization actual API rejects ${name}`,async()=>{
  const m=caseAuthorizationFollowup(),a=apiFixture(m);change(a);await assert.rejects(verifyPullRequest(m,a))
 })
+
+for(const name of ['apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts','apps/union-eyes/app/api/__tests__/cases-escalate.route.test.ts'])test(`case authorization review accepts scoped escalation ${name}`,()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:name});validateManifest(m,NOW)
+})
