@@ -37,7 +37,7 @@ function apiFixture(m){
  const evidenceFiles=[RECEIPT_PATH,SIGNATURE_PATH].map(filename=>({filename,status:'added'}))
  const sourceTree={truncated:false,tree:m.files.map(f=>({path:f.path,type:'blob',sha:f.blobSha}))}
  const objects={[`pulls/${m.pullRequest}`]:pr,[`git/commits/${E}`]:evidence,[`git/commits/${S}`]:source,[`git/commits/${m.baseSha}`]:base,[`git/trees/${TREE}?recursive=1`]:sourceTree,[`git/trees/${base.tree.sha}?recursive=1`]:{truncated:false,tree:[]},[`git/blobs/${BLOB}`]:{encoding:'base64',sha:BLOB,content:bytes.toString('base64')}}
- if([986,990,991].includes(m.pullRequest)){const key={path:KEY_PATH,type:'blob',sha:keyBlob};sourceTree.tree.push(key);objects[`git/trees/${base.tree.sha}?recursive=1`].tree.push({...key})}
+ if([986,990,991,992].includes(m.pullRequest)){const key={path:KEY_PATH,type:'blob',sha:keyBlob};sourceTree.tree.push(key);objects[`git/trees/${base.tree.sha}?recursive=1`].tree.push({...key})}
  objects[`git/blobs/${keyBlob}`]={encoding:'base64',sha:keyBlob,content:publicPem.toString('base64')}
  return {pr,evidence,sourceTree,allFiles,evidenceFiles,objects,get:async endpoint=>{assert(endpoint in objects,endpoint);return objects[endpoint]},pages:async(endpoint,field)=>{if(endpoint===`commits/${E}`){assert.equal(field,'files');return evidenceFiles}assert.equal(endpoint,`pulls/${m.pullRequest}/files`);return [...allFiles,...evidenceFiles]}}
 }
@@ -63,6 +63,37 @@ function nativeWriteDefaultsFollowup() {
  const m=followup();m.pullRequest=991;m.branch=PR_BINDINGS[991].branch;m.baseSha=PR_BINDINGS[991].base
  return m
 }
+function timestampQueryFollowup() {
+ const m=followup();m.pullRequest=992;m.branch=PR_BINDINGS[992].branch;m.baseSha=PR_BINDINGS[992].base
+ return m
+}
+test('timestamp query review binds exact PR, branch, merged base, author and unchanged trust',async()=>{
+ const m=timestampQueryFollowup();validateManifest(m,NOW)
+ assert.equal((await verifyPullRequest(m,apiFixture(m))).evidenceSha,E)
+})
+for(const [name,change]of [
+ ['another PR',m=>m.pullRequest=993],['another branch',m=>m.branch=PR_BINDINGS[991].branch],
+ ['another base',m=>m.baseSha=PR_BINDINGS[991].base],['production authorization',m=>m.productionAuthorized=true],
+ ['missing primary attribution',m=>m.reviews=m.reviews.filter(r=>r.kind!=='primary-agent-review')],
+ ['invented human attribution',m=>m.reviews[0].kind='independent-human'],
+ ['changed trust',m=>m.files.push(manifest().files[0])],
+])test(`timestamp query review rejects ${name}`,()=>{const m=timestampQueryFollowup();change(m);assert.throws(()=>validateManifest(m,NOW))})
+for(const name of ['apps/union-eyes/backend/grievances/models.py','apps/union-eyes/db/migrations-platform/0009_extra.sql',
+ 'apps/union-eyes/lib/auth/unreviewed.ts','packages/platform-auth/src/auth-db.ts','package.json','pnpm-lock.yaml',
+ '.github/workflows/deploy-union-eyes.yml','ops/policies/production.json','apps/union-eyes/db/schema/claims-schema.ts'])test(`timestamp query review cannot expand to ${name}`,()=>{
+ const m=timestampQueryFollowup();m.files.push({...m.files[0],path:name});assert.throws(()=>validateManifest(m,NOW))
+})
+for(const name of ['apps/union-eyes/db/queries/claims-queries.ts',
+ 'apps/union-eyes/db/queries/__tests__/canonical-claim-writes.pglite.test.ts'])test(`timestamp query signed coverage accepts exact repair ${name}`,()=>{
+ const m=timestampQueryFollowup();m.files.push({...m.files[0],path:name});validateManifest(m,NOW)
+})
+for(const [name,change]of [
+ ['owner impersonation',a=>a.pr.user.login='anungis437'],
+ ['changed trust blob',a=>a.sourceTree.tree.find(t=>t.path===KEY_PATH).sha=BLOB],
+ ['unreviewed evidence edit',a=>a.evidenceFiles.push({filename:'apps/union-eyes/db/schema/claims-schema.ts',status:'modified'})],
+])test(`timestamp query actual API rejects ${name}`,async()=>{
+ const m=timestampQueryFollowup(),a=apiFixture(m);change(a);await assert.rejects(verifyPullRequest(m,a))
+})
 test('native write-default review binds exact PR, branch, merged base, author and unchanged trust',async()=>{
  const m=nativeWriteDefaultsFollowup();validateManifest(m,NOW)
  assert.equal((await verifyPullRequest(m,apiFixture(m))).evidenceSha,E)

@@ -14,6 +14,7 @@ export const PR_BINDINGS = Object.freeze({
   986: Object.freeze({ base: '441556737ffe0e36c6ec9bf6bd9c24bab5302559', branch: 'fix/ue-auth-storage-callers-20261022', author: 'anungisa' }),
   990: Object.freeze({ base: '9bb8a3fd224ca581838d433688b04860f2e9efc8', branch: 'fix/ue-native-intake-audit-20261022', author: 'anungisa' }),
   991: Object.freeze({ base: '8c41b6a8f54c6e1ff1e4e5f8ca0ba24256955ee7', branch: 'fix/ue-native-write-defaults-20261022', author: 'anungisa' }),
+  992: Object.freeze({ base: 'a36cf4b8928abaf61faf24d48e73c5001ae25af4', branch: 'fix/ue-canonical-timestamp-query-20261023', author: 'anungisa' }),
 })
 export const RESOURCES = Object.freeze({ subscription: '5d819f33-d16f-429c-a3c0-5b0e94740ba3', tenant: '5082b8be-b04d-4a13-b61c-b6397670177b', app: 'nzila-os-union-eyes-staging', appResourceGroup: 'nzila-canada-staging-rg', server: 'nzila-staging-db', databaseResourceGroup: 'nzila-staging-rg', database: 'nzila_os_staging', clone: 'nzila-ue-recovery-20261022', keyVault: 'nzila-staging-kv', region: 'canadacentral' })
 const HASH = /^[a-f0-9]{64}$/
@@ -76,6 +77,15 @@ const NATIVE_WRITE_DEFAULT_PATHS = new Set([
   'apps/union-eyes/db/schema/claims-schema.ts',
   'apps/union-eyes/db/queries/__tests__/canonical-claim-writes.pglite.test.ts',
   'apps/union-eyes/db/queries/__tests__/fixtures/canonical-claim-write.sql',
+  '.github/workflows/security-design-review.yml',
+  'tooling/security/ue-staging-delegated-review.mjs',
+  'tooling/security/ue-staging-delegated-review.test.mjs',
+  'tooling/repo-inventory/output/inventory.json', 'tooling/repo-inventory/output/inventory.md',
+  'tooling/repo-inventory/output/repo-inventory.json', 'tooling/repo-inventory/output/repo-inventory.md',
+])
+const TIMESTAMP_QUERY_PATHS = new Set([
+  'apps/union-eyes/db/queries/claims-queries.ts',
+  'apps/union-eyes/db/queries/__tests__/canonical-claim-writes.pglite.test.ts',
   '.github/workflows/security-design-review.yml',
   'tooling/security/ue-staging-delegated-review.mjs',
   'tooling/security/ue-staging-delegated-review.test.mjs',
@@ -159,6 +169,8 @@ export function validateManifest(m, now = Date.now()) {
       (f.previousPath !== null && !NATIVE_INTAKE_PATHS.has(f.previousPath)))) fail('Native intake follow-up exceeds exact reviewed path scope')
     if (m.pullRequest === 991 && (!NATIVE_WRITE_DEFAULT_PATHS.has(f.path) ||
       (f.previousPath !== null && !NATIVE_WRITE_DEFAULT_PATHS.has(f.previousPath)))) fail('Native write-default follow-up exceeds exact reviewed path scope')
+    if (m.pullRequest === 992 && (!TIMESTAMP_QUERY_PATHS.has(f.path) ||
+      (f.previousPath !== null && !TIMESTAMP_QUERY_PATHS.has(f.previousPath)))) fail('Timestamp query follow-up exceeds exact reviewed path scope')
     const dependencyRepair = m.pullRequest === 986 && [...DEPENDENCY_PATHS, OTEL_DEPENDENCY_PATH].includes(f.path) && f.status === 'modified' && f.previousPath === null
     const toolRepair = m.pullRequest === 986 && TOOL_DEPENDENCY_PATHS.includes(f.path) && f.status === (f.path === '.kilo/package.json' ? 'added' : 'modified') && f.previousPath === null
     if ((!allowedPath(f.path) && !dependencyRepair && !toolRepair) || (f.previousPath !== null && !allowedPath(f.previousPath)) || !['added','modified','removed','renamed'].includes(f.status)) fail('Unreviewable source path/status')
@@ -175,10 +187,10 @@ export function validateManifest(m, now = Date.now()) {
   for (const review of m.reviews) {
     exactKeys(review,['kind','agentTask','reviewedAt','report','reportSha256','unresolvedP0','unresolvedP1'], 'review')
     const attribution = review.kind === 'separate-agent-review' && typeof review.agentTask === 'string' && /^\/root\/[a-z0-9_]+$/.test(review.agentTask)
-      || [986, 990, 991].includes(m.pullRequest) && review.kind === 'primary-agent-review' && review.agentTask === '/root'
+      || [986, 990, 991, 992].includes(m.pullRequest) && review.kind === 'primary-agent-review' && review.agentTask === '/root'
     if (!attribution || !review.report || sha256(Buffer.from(review.report)) !== review.reportSha256 || !Number.isFinite(Date.parse(review.reviewedAt)) || Date.parse(review.reviewedAt)>issued || review.unresolvedP0 !== 0 || review.unresolvedP1 !== 0) fail('Agent review attribution/report/findings invalid')
   }
-  if ([986, 990, 991].includes(m.pullRequest) && !m.reviews.some(r=>r.kind==='primary-agent-review' && r.agentTask==='/root')) fail('Follow-up primary review with explicit attribution required')
+  if ([986, 990, 991, 992].includes(m.pullRequest) && !m.reviews.some(r=>r.kind==='primary-agent-review' && r.agentTask==='/root')) fail('Follow-up primary review with explicit attribution required')
   for (const test of m.tests) {
     exactKeys(test,['command','result','passed','logSha256'], 'test')
     if (typeof test.command !== 'string' || !test.command || test.result !== 'PASS' || !Number.isInteger(test.passed) || test.passed < 1 || !HASH.test(test.logSha256)) fail('Actual passing test evidence missing')
@@ -208,7 +220,7 @@ export async function verifyPullRequest(m, api) {
   const baseTree = await api.get(`git/trees/${baseCommit.tree.sha}?recursive=1`)
   if (sourceTree.truncated || baseTree.truncated) fail('Truncated source tree')
   const blob = async (sha, expected) => { const b=await api.get(`git/blobs/${sha}`); const bytes=Buffer.from(b.content??'','base64'); if(b.encoding!=='base64' || b.sha!==sha || sha256(bytes)!==expected) fail('Git blob bytes differ from signed review');return bytes }
-  if ([986, 990, 991].includes(m.pullRequest)) {
+  if ([986, 990, 991, 992].includes(m.pullRequest)) {
     const key = sourceTree.tree.find(t=>t.path===KEY_PATH), baseKey = baseTree.tree.find(t=>t.path===KEY_PATH)
     if (key?.type!=='blob' || baseKey?.type!=='blob' || key.sha!==baseKey.sha) fail('Follow-up trust key must match immutable base')
     await blob(key.sha, TRUST_SHA256)

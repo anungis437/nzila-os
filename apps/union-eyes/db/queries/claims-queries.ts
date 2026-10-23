@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, and, desc, sql, count } from "drizzle-orm";
+import { eq, and, desc, sql, count, gte, lt } from "drizzle-orm";
 import { claims, claimUpdates } from "../schema/claims-schema";
 import { organizations } from "../schema-organizations";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
@@ -36,8 +36,8 @@ export const createClaim = async (
         .from(claims)
         .where(
           and(
-            sql`${claims.createdAt} >= ${todayStart}`,
-            sql`${claims.createdAt} < ${todayEnd}`
+            gte(claims.createdAt, todayStart),
+            lt(claims.createdAt, todayEnd)
           )
         );
       
