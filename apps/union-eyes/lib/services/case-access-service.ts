@@ -1,5 +1,7 @@
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { caseAssigneeEligible } from '@/lib/cases/case-authorization';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import {
   grievanceCaseAccessAssignments,
@@ -107,6 +109,120 @@ export async function updateCaseAccessStatus(id: string, status: CaseAccessStatu
     .returning();
 
   return updated ?? null;
+}
+
+export const MAX_CASE_ACCESS_GRANT_DAYS = 365;
+
+export type CaseAccessMutationFailure = {
+  ok: false;
+  status: 400 | 403 | 404;
+  code:
+    | 'CASE_NOT_FOUND'
+    | 'CASE_MANAGEMENT_AUTHORITY_REQUIRED'
+    | 'GRANTEE_INELIGIBLE'
+    | 'SELF_GRANT_FORBIDDEN'
+    | 'PRIMARY_OWNER_GRANT_FORBIDDEN'
+    | 'INVALID_EXPIRY'
+    | 'EXPIRY_REQUIRED'
+    | 'SCOPE_EXCEEDS_ROLE'
+    | 'ASSIGNMENT_NOT_FOUND';
+  message: string;
+};
+
+/**
+ * Validates grant terms independent of who is asking. Pure so the policy can be
+ * exercised without a database.
+ */
+export function validateCaseAccessGrantTerms(
+  input: Pick<GrantCaseAccessInput, 'accessRole' | 'expiresAt' | 'canViewPrivateDocuments' | 'canUploadDocuments' | 'canEditCaseNotes' | 'canDraftActions'>,
+  now: Date = new Date(),
+): CaseAccessMutationFailure | null {
+  if (input.accessRole !== 'secondary_lro' && (input.canEditCaseNotes || input.canDraftActions || input.canUploadDocuments)) {
+    return { ok: false, status: 400, code: 'SCOPE_EXCEEDS_ROLE', message: 'Only a secondary LRO grant may carry editing, drafting or upload rights.' };
+  }
+  const requiresExpiry = input.accessRole !== 'secondary_lro' || input.canViewPrivateDocuments === true;
+  if (!input.expiresAt) {
+    return requiresExpiry
+      ? { ok: false, status: 400, code: 'EXPIRY_REQUIRED', message: 'Reviewer, read-only and private-document grants must expire.' }
+      : null;
+  }
+  const ms = input.expiresAt.getTime();
+  if (Number.isNaN(ms) || ms <= now.getTime() || ms > now.getTime() + MAX_CASE_ACCESS_GRANT_DAYS * 86_400_000) {
+    return { ok: false, status: 400, code: 'INVALID_EXPIRY', message: `Expiry must be in the future and within ${MAX_CASE_ACCESS_GRANT_DAYS} days.` };
+  }
+  return null;
+}
+
+async function loadCaseOwner(organizationId: string, grievanceId: string) {
+  const [grievance] = await db
+    .select({ unionRepId: grievances.unionRepId })
+    .from(grievances)
+    .where(and(eq(grievances.organizationId, organizationId), eq(grievances.id, grievanceId)))
+    .limit(1);
+  return grievance ?? null;
+}
+
+/**
+ * Case-access grants are a case-management power. Org-wide role seniority does not
+ * confer it: only the primary owner of this specific case may change collaborators.
+ */
+export async function grantCaseAccessGuarded(
+  input: GrantCaseAccessInput,
+): Promise<{ ok: true; access: Awaited<ReturnType<typeof grantCaseAccess>> } | CaseAccessMutationFailure> {
+  const grievance = await loadCaseOwner(input.organizationId, input.grievanceId);
+  if (!grievance) return { ok: false, status: 404, code: 'CASE_NOT_FOUND', message: 'Grievance not found.' };
+  if (grievance.unionRepId !== input.grantedBy) {
+    return { ok: false, status: 403, code: 'CASE_MANAGEMENT_AUTHORITY_REQUIRED', message: 'Only the primary owner of this case may grant collaborator access.' };
+  }
+  if (input.userId === input.grantedBy) {
+    return { ok: false, status: 403, code: 'SELF_GRANT_FORBIDDEN', message: 'A case access grant cannot target the grantor.' };
+  }
+  if (grievance.unionRepId === input.userId) {
+    return { ok: false, status: 400, code: 'PRIMARY_OWNER_GRANT_FORBIDDEN', message: 'The primary owner already holds full access.' };
+  }
+  const terms = validateCaseAccessGrantTerms(input);
+  if (terms) return terms;
+
+  const eligible = await withRLSContext({ organizationId: input.organizationId }, (tx) =>
+    caseAssigneeEligible(tx, { userId: input.grantedBy, organizationId: input.organizationId, role: 'steward' }, input.userId),
+  );
+  if (!eligible) {
+    return { ok: false, status: 400, code: 'GRANTEE_INELIGIBLE', message: 'Grantee is not an active representative in this organization.' };
+  }
+
+  return { ok: true, access: await grantCaseAccess(input) };
+}
+
+export async function revokeCaseAccessGuarded(params: {
+  organizationId: string;
+  grievanceId: string;
+  assignmentId: string;
+  actorId: string;
+}): Promise<
+  | { ok: true; before: typeof grievanceCaseAccessAssignments.$inferSelect; updated: typeof grievanceCaseAccessAssignments.$inferSelect }
+  | CaseAccessMutationFailure
+> {
+  const grievance = await loadCaseOwner(params.organizationId, params.grievanceId);
+  if (!grievance) return { ok: false, status: 404, code: 'CASE_NOT_FOUND', message: 'Grievance not found.' };
+  if (grievance.unionRepId !== params.actorId) {
+    return { ok: false, status: 403, code: 'CASE_MANAGEMENT_AUTHORITY_REQUIRED', message: 'Only the primary owner of this case may revoke collaborator access.' };
+  }
+  const [before] = await db
+    .select()
+    .from(grievanceCaseAccessAssignments)
+    .where(
+      and(
+        eq(grievanceCaseAccessAssignments.id, params.assignmentId),
+        eq(grievanceCaseAccessAssignments.organizationId, params.organizationId),
+        eq(grievanceCaseAccessAssignments.grievanceId, params.grievanceId),
+      ),
+    )
+    .limit(1);
+  if (!before) return { ok: false, status: 404, code: 'ASSIGNMENT_NOT_FOUND', message: 'Access assignment not found.' };
+
+  const updated = await updateCaseAccessStatus(before.id, 'revoked');
+  if (!updated) return { ok: false, status: 404, code: 'ASSIGNMENT_NOT_FOUND', message: 'Access assignment not found.' };
+  return { ok: true, before, updated };
 }
 
 export async function expireElapsedCaseAccessAssignments() {

@@ -78,6 +78,12 @@ export async function POST(
 
       const previousAssignee = claim.assignedTo;
 
+      // A person cannot route their own matter, or give a member their own matter.
+      if (claim.memberId === userId || claim.memberId === assigneeId)
+        return {denied:true as const,conflict:true as const,claimId:claim.claimId};
+      if (previousAssignee === assigneeId)
+        return {unchanged:true as const,claimId:claim.claimId};
+
       // Update assignment
       await tx
         .update(claims)
@@ -112,23 +118,45 @@ export async function POST(
         { status: 404 },
       );
     }
-    if(result.denied) return await denyCaseAction(actor,'case_assign',result.claimId,'Assignee is not an active canonical representative in this organization');
+    if ('unchanged' in result) {
+      return NextResponse.json(
+        { error: 'ASSIGNMENT_UNCHANGED', message: 'The case is already assigned to this representative; no transfer occurred.', caseId: result.claimId },
+        { status: 409 },
+      );
+    }
+    if(result.denied) return await denyCaseAction(actor,'case_assign',result.claimId,
+      'conflict' in result ? 'Case parties cannot assign or receive their own case' : 'Assignee is not an active canonical representative in this organization');
 
-    await auditDataMutation({
-      userId,
-      organizationId: orgId,
-      resource: 'claims',
-      resourceId: result.claimId,
-      action: 'update',
-      details: {
-        event: 'CASE_ASSIGNED',
-        caseId: result.claimId,
-        fromAssignee: result.previousAssignee,
-        toAssignee: assigneeId,
-        reason: reason ?? null,
-        updatedBy: userId,
-      },
-    });
+    try {
+      await auditDataMutation({
+        userId,
+        organizationId: orgId,
+        resource: 'claims',
+        resourceId: result.claimId,
+        action: 'update',
+        details: {
+          event: 'CASE_ASSIGNED',
+          caseId: result.claimId,
+          fromAssignee: result.previousAssignee,
+          toAssignee: assigneeId,
+          reason: reason ?? null,
+          updatedBy: userId,
+        },
+      });
+    } catch (auditError) {
+      // The assignment is already committed; report that explicitly instead of a clean success or a bare 500.
+      logger.error('Case assignment committed but audit failed', auditError as Error);
+      return NextResponse.json(
+        {
+          error: 'ASSIGNMENT_COMMITTED_AUDIT_FAILED',
+          message: 'The assignment was recorded but its audit record could not be written. Review the case before relying on this transfer.',
+          caseId: result.claimId,
+          assignedTo: assigneeId,
+          previousAssignee: result.previousAssignee,
+        },
+        { status: 500 },
+      );
+    }
 
     logger.info('Case assigned', {
       caseId: result.claimId,

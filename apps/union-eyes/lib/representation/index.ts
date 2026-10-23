@@ -7,6 +7,11 @@ export {
   type RepresentativeType,
   type StewardPermissions,
   type RepresentationProtocol,
+  type ProtocolApproval,
+  type ProtocolResolution,
+  type ProtocolExecutionStatus,
+  resolveStoredProtocol,
+  parseStoredProtocol,
   PROTOCOL_STEWARD_LED,
   PROTOCOL_LRO_LED,
   PROTOCOL_NATIONAL_REP_LED,
@@ -22,6 +27,10 @@ export {
 // Service (server-only)
 export {
   getRepresentationProtocol,
+  resolveRepresentationProtocol,
+  requireExecutableRepresentationProtocol,
+  RepresentationProtocolNotExecutableError,
+  approveRepresentationProtocol,
   saveRepresentationProtocol,
   resetRepresentationProtocol,
 } from "./protocol-service";

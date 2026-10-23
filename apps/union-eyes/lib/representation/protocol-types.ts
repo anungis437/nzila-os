@@ -69,6 +69,86 @@ export interface RepresentationProtocol {
 
   /** Optional notes about the union's protocol (internal documentation) */
   notes?: string;
+
+  /**
+   * Provenance of the configuration. Authority-bearing actions run only when the
+   * stored protocol carries a complete, independent approval.
+   */
+  approval?: ProtocolApproval;
+}
+
+export interface ProtocolApproval {
+  configuredBy: string;
+  configuredAt: string;
+  approvedBy?: string;
+  approvedAt?: string;
+}
+
+export type ProtocolExecutionStatus = "approved" | "pending_approval" | "missing" | "invalid";
+
+/**
+ * Display protocols may be defaults; only an `approved` resolution is executable
+ * institutional authority.
+ */
+export type ProtocolResolution =
+  | { status: "approved"; executable: true; protocol: RepresentationProtocol; approval: Required<ProtocolApproval> }
+  | { status: Exclude<ProtocolExecutionStatus, "approved">; executable: false; protocol: RepresentationProtocol; reason: string };
+
+const REPRESENTATIVE_TYPES: readonly RepresentativeType[] = ["steward", "lro", "national_rep", "officer"];
+const STEWARD_PERMISSION_KEYS: readonly (keyof StewardPermissions)[] = [
+  "canFileGrievance", "canRepresent", "canBeAssigned", "canContactEmployer", "canEscalate",
+];
+
+function nonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+/** Structural validation of a stored protocol value. Never trusts shape from storage. */
+export function parseStoredProtocol(value: unknown): { ok: true; protocol: RepresentationProtocol } | { ok: false; reason: string } {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return { ok: false, reason: "not_an_object" };
+  const v = value as Record<string, unknown>;
+  if (v.version !== 1) return { ok: false, reason: "unsupported_version" };
+  if (!REPRESENTATIVE_TYPES.includes(v.primaryRepresentative as RepresentativeType)) return { ok: false, reason: "invalid_primary_representative" };
+  const perms = v.stewardPermissions as Record<string, unknown> | undefined;
+  if (!perms || typeof perms !== "object" || STEWARD_PERMISSION_KEYS.some((k) => typeof perms[k] !== "boolean")) {
+    return { ok: false, reason: "invalid_steward_permissions" };
+  }
+  if (!nonEmptyString(v.representativeLabel) || !nonEmptyString(v.stewardLabel)
+    || !nonEmptyString(v.minimumFilingRole) || !nonEmptyString(v.minimumRepresentationRole)) {
+    return { ok: false, reason: "invalid_labels_or_roles" };
+  }
+  return { ok: true, protocol: v as unknown as RepresentationProtocol };
+}
+
+/**
+ * Resolve a stored value into display-safe protocol plus an explicit execution status.
+ * Missing, malformed, unapproved or self-approved configuration is never executable.
+ */
+export function resolveStoredProtocol(value: unknown | null | undefined): ProtocolResolution {
+  if (value === null || value === undefined) {
+    return { status: "missing", executable: false, protocol: PROTOCOL_STEWARD_LED, reason: "no_configuration" };
+  }
+  const parsed = parseStoredProtocol(value);
+  if (!parsed.ok) {
+    return { status: "invalid", executable: false, protocol: PROTOCOL_STEWARD_LED, reason: parsed.reason };
+  }
+  const { protocol } = parsed;
+  const approval = protocol.approval;
+  if (!approval || !nonEmptyString(approval.configuredBy) || !nonEmptyString(approval.configuredAt)) {
+    return { status: "invalid", executable: false, protocol, reason: "missing_provenance" };
+  }
+  if (!nonEmptyString(approval.approvedBy) || !nonEmptyString(approval.approvedAt)) {
+    return { status: "pending_approval", executable: false, protocol, reason: "approval_pending" };
+  }
+  if (approval.approvedBy === approval.configuredBy || Number.isNaN(Date.parse(approval.approvedAt))) {
+    return { status: "invalid", executable: false, protocol, reason: "approval_not_independent" };
+  }
+  return {
+    status: "approved",
+    executable: true,
+    protocol,
+    approval: { configuredBy: approval.configuredBy, configuredAt: approval.configuredAt, approvedBy: approval.approvedBy, approvedAt: approval.approvedAt },
+  };
 }
 
 // ============================================================================

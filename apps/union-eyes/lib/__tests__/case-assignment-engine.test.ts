@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   mockMembersFindMany: vi.fn(),
   mockWithRLS: vi.fn(),
   mockGetProtocol: vi.fn(),
+  protocolStatus: { value: 'approved' as string },
   mockGetPrimaryRole: vi.fn(),
 }));
 
@@ -114,7 +115,12 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 
 vi.mock('@/lib/representation', () => ({
-  getRepresentationProtocol: mocks.mockGetProtocol,
+  resolveRepresentationProtocol: async (...args: unknown[]) => {
+    if (mocks.protocolStatus.value !== 'approved') {
+      return { status: mocks.protocolStatus.value, executable: false, protocol: { stewardPermissions: { canBeAssigned: true } }, reason: 'test' };
+    }
+    return { status: 'approved', executable: true, protocol: await mocks.mockGetProtocol(...args) };
+  },
   getPrimaryAssignmentRole: mocks.mockGetPrimaryRole,
 }));
 
@@ -172,7 +178,7 @@ const baseAssignment = {
 describe('case-assignment-engine', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default implementations
+    mocks.protocolStatus.value = 'approved';
     mocks.mockGetProtocol.mockResolvedValue({
       stewardPermissions: { canBeAssigned: false },
     });
@@ -192,6 +198,19 @@ describe('case-assignment-engine', () => {
 
   // ── autoAssignGrievance ───────────────────────────────────────────
   describe('autoAssignGrievance', () => {
+    it.each(['missing', 'invalid', 'pending_approval'])(
+      'fails closed and writes nothing when the representation protocol is %s',
+      async (status) => {
+        mocks.protocolStatus.value = status;
+        mocks.mockMembersFindMany.mockResolvedValue([baseOfficer]);
+        const r = await autoAssignGrievance('claim-1', 'org-1', {}, 'admin');
+        expect(r.success).toBe(false);
+        expect(r.error).toContain('not approved');
+        expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
+        expect(mocks.mockUpdateWhere).not.toHaveBeenCalled();
+      },
+    );
+
     it('returns error when claim not found', async () => {
       mocks.mockClaimsFindFirst.mockResolvedValue(null);
       const r = await autoAssignGrievance('claim-1', 'org-1', {}, 'admin');

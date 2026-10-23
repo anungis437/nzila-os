@@ -122,6 +122,46 @@ describe('cases/[caseId]/assign route', () => {
     expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
     expect(m.insertQueue).toEqual([]);
   });
+  it('denies assigning a case to the member who filed it or by that member (conflict) before mutation', async () => {
+    const { POST } = await loadRoute();
+    const post = (assigneeId: string) => POST(new Request('http://localhost/api/cases/c1/assign', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId }),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
+
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'u1', assignedTo: 'u0', status: 'filed' }]);
+    expect((await post('u2')).status).toBe(403);
+
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'u2', assignedTo: 'u0', status: 'filed' }]);
+    expect((await post('u2')).status).toBe(403);
+
+    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.insertQueue).toEqual([]);
+  });
+
+  it('does not report a transfer when the assignee is unchanged', async () => {
+    const { POST } = await loadRoute();
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u2', status: 'filed' }]);
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2' }),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
+    expect(response.status).toBe(409);
+    expect(m.auditDataMutation).not.toHaveBeenCalled();
+  });
+
+  it('reports a committed assignment whose audit failed as an explicit failure, not success', async () => {
+    const { POST } = await loadRoute();
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u0', status: 'filed' }]);
+    m.insertQueue.push([{ updateId: 'up1' }]);
+    m.auditDataMutation.mockRejectedValueOnce(new Error('audit down'));
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2' }),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
+    const json = await response.json();
+    expect(response.status).toBe(500);
+    expect(json.error).toBe('ASSIGNMENT_COMMITTED_AUDIT_FAILED');
+    expect(json.success).toBeUndefined();
+  });
+
   it('denies member assignment before opening a case transaction', async () => {
     const { POST } = await loadRoute();
     m.getUserRoleInOrganization.mockResolvedValueOnce('member');

@@ -31,7 +31,7 @@ import { withRLSContext } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 import {
   type RepresentationProtocol,
-  getRepresentationProtocol,
+  resolveRepresentationProtocol,
   getPrimaryAssignmentRole,
 } from "@/lib/representation";
 
@@ -116,8 +116,15 @@ export async function autoAssignGrievance(
   } = {}
 ): Promise<AssignmentResult> {
   try {
-    // Resolve protocol for this org
-    const protocol = await getRepresentationProtocol(organizationId);
+    // Authority-bearing: a default or unapproved protocol must not decide who may represent members
+    const resolution = await resolveRepresentationProtocol(organizationId);
+    if (!resolution.executable) {
+      return {
+        success: false,
+        error: `Representation protocol is not approved for this organization (${resolution.status}). Assignment requires a configured, independently approved protocol.`,
+      };
+    }
+    const protocol = resolution.protocol;
 
     // Get claim details (wrapped with RLS for org isolation)
     const claim = await withRLSContext({ organizationId }, async (db) =>

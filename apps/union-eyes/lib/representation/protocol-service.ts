@@ -12,23 +12,22 @@ import { eq, and } from "drizzle-orm";
 import { orgConfigurations } from "@/db/schema";
 import {
   type RepresentationProtocol,
-  PROTOCOL_STEWARD_LED,
+  type ProtocolResolution,
+  resolveStoredProtocol,
 } from "./protocol-types";
 
 const CONFIG_CATEGORY = "grievance";
 const CONFIG_KEY = "representation_protocol";
 
-// ============================================================================
-// READ
-// ============================================================================
+export class RepresentationProtocolNotExecutableError extends Error {
+  readonly code = "REPRESENTATION_PROTOCOL_NOT_EXECUTABLE";
+  constructor(readonly status: string, readonly reason: string) {
+    super(`Representation protocol is not executable (${status}: ${reason}).`);
+    this.name = "RepresentationProtocolNotExecutableError";
+  }
+}
 
-/**
- * Retrieve the representation protocol for an organization.
- * Falls back to the default steward-led protocol if none is configured.
- */
-export async function getRepresentationProtocol(
-  organizationId: string,
-): Promise<RepresentationProtocol> {
+async function readProtocolValue(organizationId: string): Promise<unknown | null> {
   const row = await db.query.orgConfigurations.findFirst({
     where: and(
       eq(orgConfigurations.organizationId, organizationId),
@@ -36,12 +35,45 @@ export async function getRepresentationProtocol(
       eq(orgConfigurations.key, CONFIG_KEY),
     ),
   });
+  return row?.value ?? null;
+}
 
-  if (!row?.value) {
-    return PROTOCOL_STEWARD_LED;
+// ============================================================================
+// READ
+// ============================================================================
+
+/**
+ * Resolve the protocol together with whether it may be used as institutional authority.
+ */
+export async function resolveRepresentationProtocol(
+  organizationId: string,
+): Promise<ProtocolResolution> {
+  return resolveStoredProtocol(await readProtocolValue(organizationId));
+}
+
+/**
+ * Authority-bearing callers (assignment, filing, escalation) must use this.
+ * Fails closed when the protocol is missing, malformed, unapproved or self-approved.
+ */
+export async function requireExecutableRepresentationProtocol(
+  organizationId: string,
+): Promise<RepresentationProtocol> {
+  const resolution = await resolveRepresentationProtocol(organizationId);
+  if (!resolution.executable) {
+    throw new RepresentationProtocolNotExecutableError(resolution.status, resolution.reason);
   }
+  return resolution.protocol;
+}
 
-  return row.value as RepresentationProtocol;
+/**
+ * DISPLAY ONLY. Falls back to the steward-led default when nothing valid is configured,
+ * so the result must never be used to authorize an action. Use
+ * `requireExecutableRepresentationProtocol` for authority.
+ */
+export async function getRepresentationProtocol(
+  organizationId: string,
+): Promise<RepresentationProtocol> {
+  return (await resolveRepresentationProtocol(organizationId)).protocol;
 }
 
 // ============================================================================
@@ -51,20 +83,25 @@ export async function getRepresentationProtocol(
 /**
  * Save (upsert) the representation protocol for an organization.
  *
- * Uses Postgres ON CONFLICT to upsert on (organization_id, category, key).
+ * Any save replaces the stored value and therefore clears prior approval: the new
+ * configuration is `pending_approval` until a different administrator approves it.
  */
 export async function saveRepresentationProtocol(
   organizationId: string,
   protocol: RepresentationProtocol,
   updatedBy: string,
 ): Promise<void> {
+  const configured: RepresentationProtocol = {
+    ...protocol,
+    approval: { configuredBy: updatedBy, configuredAt: new Date().toISOString() },
+  };
   await db
     .insert(orgConfigurations)
     .values({
       organizationId,
       category: CONFIG_CATEGORY,
       key: CONFIG_KEY,
-      value: protocol,
+      value: configured,
       description: "Per-union representation protocol — defines who files and manages grievances.",
       updatedBy,
       updatedAt: new Date(),
@@ -76,11 +113,52 @@ export async function saveRepresentationProtocol(
         orgConfigurations.key,
       ],
       set: {
-        value: protocol,
+        value: configured,
         updatedBy,
         updatedAt: new Date(),
       },
     });
+}
+
+export type ProtocolApprovalResult =
+  | { ok: true; approvedAt: string }
+  | { ok: false; code: "NOT_FOUND" | "NOT_PENDING" | "SELF_APPROVAL_FORBIDDEN"; message: string };
+
+/**
+ * Independent approval of the currently stored protocol. The approver must differ
+ * from whoever configured it.
+ */
+export async function approveRepresentationProtocol(
+  organizationId: string,
+  approverId: string,
+): Promise<ProtocolApprovalResult> {
+  const current = resolveStoredProtocol(await readProtocolValue(organizationId));
+  if (current.status === "missing" || current.status === "invalid") {
+    return { ok: false, code: "NOT_FOUND", message: "No valid protocol configuration is awaiting approval." };
+  }
+  if (current.status === "approved") {
+    return { ok: false, code: "NOT_PENDING", message: "The current protocol is already approved." };
+  }
+  const configuredBy = current.protocol.approval?.configuredBy;
+  if (!configuredBy || configuredBy === approverId) {
+    return { ok: false, code: "SELF_APPROVAL_FORBIDDEN", message: "A protocol must be approved by someone other than its author." };
+  }
+  const approvedAt = new Date().toISOString();
+  const approved: RepresentationProtocol = {
+    ...current.protocol,
+    approval: { ...current.protocol.approval!, approvedBy: approverId, approvedAt },
+  };
+  await db
+    .update(orgConfigurations)
+    .set({ value: approved, updatedAt: new Date() })
+    .where(
+      and(
+        eq(orgConfigurations.organizationId, organizationId),
+        eq(orgConfigurations.category, CONFIG_CATEGORY),
+        eq(orgConfigurations.key, CONFIG_KEY),
+      ),
+    );
+  return { ok: true, approvedAt };
 }
 
 // ============================================================================

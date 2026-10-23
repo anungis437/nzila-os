@@ -64,10 +64,8 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
       grievanceId: params.id,
       userId,
     });
-    const effectiveAccessForResponse = {
-      ...effectiveAccess,
-      canManageAssignments: isStewardPlus || effectiveAccess.canManageAssignments,
-    };
+    // Collaborator administration is a case-management power held by the primary owner, not by role seniority.
+    const effectiveAccessForResponse = effectiveAccess;
 
     if (!isStewardPlus && grievance.createdBy !== userId && !effectiveAccess.canViewCase) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, "You can only view your own submissions.");
