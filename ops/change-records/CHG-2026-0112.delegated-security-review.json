@@ -2,19 +2,19 @@
   "version": 1,
   "purpose": "staging-security-review",
   "repository": "anungis437/nzila-os",
-  "pullRequest": 992,
-  "branch": "fix/ue-canonical-timestamp-query-20261023",
-  "baseSha": "a36cf4b8928abaf61faf24d48e73c5001ae25af4",
-  "sourceSha": "e16c7dd27a8ee28433569a3a718ba86a87fa5bfa",
-  "sourceTree": "f8baa422b0ebd512ab1eb5803dd99c1ff7092fdc",
+  "pullRequest": 993,
+  "branch": "fix/ue-canonical-case-authorization-20261023",
+  "baseSha": "8fafc507a52c448446578f08fc72a233039d8098",
+  "sourceSha": "f8c27e82ab679810bdb1f253b3a9eebb2d34b39a",
+  "sourceTree": "0a477a22df47e827e662c82beab63017f2b57b53",
   "mission": "UE-STAGING-RECOVERY-TO-GO",
   "changeRecordId": "CHG-2026-0112",
   "environment": "STAGING",
   "owner": "anungis437",
   "operator": "Codex",
   "instructionSha256": "681844e4f18424c1e592dfd1db205afc66d5c7a3d647c91006dc8f5d2dcbb2e3",
-  "issuedAt": "2026-10-23T04:16:14.770Z",
-  "expiresAt": "2026-10-24T04:16:14.822Z",
+  "issuedAt": "2026-10-23T07:05:39.809Z",
+  "expiresAt": "2026-10-24T07:05:39.810Z",
   "resources": {
     "subscription": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
     "tenant": "5082b8be-b04d-4a13-b61c-b6397670177b",
@@ -35,55 +35,370 @@
       "path": ".github/workflows/security-design-review.yml",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "0c16dba91d1bb3447eecdf10d4e6680b11aec521",
-      "sha256": "7eb5d482e47f245f46b622b42ca6894eb5261f285f11a3d6ee06f1d7fc312e15",
-      "baseBlobSha": "39dd82bcd16de748ae1e169793885891fafae84d",
-      "baseSha256": "e49c14d7ac900a13301927c98790d1cdb124e1d71f25818827cedd043bcaaa58"
+      "blobSha": "164cb874c8c2b5a33f1949c7d3852b75f0ba5734",
+      "sha256": "c2ce7bc16075f7b7c8a9a9759fa0b91b88a552da1f2bda9648bd4d1c2ccbf29d",
+      "baseBlobSha": "0c16dba91d1bb3447eecdf10d4e6680b11aec521",
+      "baseSha256": "7eb5d482e47f245f46b622b42ca6894eb5261f285f11a3d6ee06f1d7fc312e15"
     },
     {
-      "path": "apps/union-eyes/db/queries/__tests__/canonical-claim-writes.pglite.test.ts",
+      "path": "apps/union-eyes/app/api/__tests__/cases-assign.route.test.ts",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "c078afffeebe1e2eccf964ebcf4cfa5d4bc5e914",
-      "sha256": "7d7f2298b148f38bd13a702522e233b41c206db9614e751746e69b310443a34e",
-      "baseBlobSha": "3404ee3f80b9c2e598498662a00a961c3bd94639",
-      "baseSha256": "782fdef66f01ca6c3f5747e5be6f42bbeeac50ca2d883b4ec6eb4ecd471a1baf"
+      "blobSha": "7152e0473286e32bb44b32e335a5c837b7599e45",
+      "sha256": "93f6dea5ffe146c1981a5150e50ef09a34785173bf499966a66395001432adb6",
+      "baseBlobSha": "bfb90c5864ea633057e4f5328dd8a0968a30583b",
+      "baseSha256": "bc308783ee268e6596bd18deb6b3d9796b298bcfd02c3907b9fe46d01c77aaf7"
     },
     {
-      "path": "apps/union-eyes/db/queries/claims-queries.ts",
+      "path": "apps/union-eyes/app/api/__tests__/cases-audit.route.test.ts",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "66e027b237ff130a0a1fd9ec73bfb26ad425b97d",
-      "sha256": "cd86a5d359c4c229245960c525ae63a669e39502058f3f85003b36704ec52fc0",
-      "baseBlobSha": "e320955dd449ac3f92b1e6da31fa1bacf27aba96",
-      "baseSha256": "4ad2bedf7ebd8cd91253f3ec8fb0be47a5978504c381f7be311ff794183b4a69"
+      "blobSha": "eb484f749e12589079e70dcfa87fb0eb048e73f7",
+      "sha256": "22233ee39048c352f845e25ef564150fa1548f916c0490ca1a071e2be110abe5",
+      "baseBlobSha": "35126f069412d4e3ae9959a08a272c995465d23b",
+      "baseSha256": "6fc4ef1d62823adf6a8296a93d4d5329fec16ba0d0257e36eb7234e07f62b384"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cases-caseId-export.route.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "7b455071b6b18366d3c73acebd9e271264cbb1ca",
+      "sha256": "3410d2e9099843315fb8e9ce9c2e77be12ceb9cc2aa9204b869dd6baafa3485c",
+      "baseBlobSha": "dab7c11ba7f9661ca5350b05f6607c83b2ff6e59",
+      "baseSha256": "26c3617ef7d15a91e6d2fc8baa43cc19a6573711d00d70b74fa8767d2373a3ff"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cases-escalate.route.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "97a8b4e6d540028ef1b39ad209772c0eb1f0e85a",
+      "sha256": "c143e09cd042e263b2b9636deafbc7474e444f51b55f5a61c4c88921b083e7ad",
+      "baseBlobSha": "9e12506301b3b7f6279697aa1ad31cc0eeb9b6da",
+      "baseSha256": "19e5ae11eec61793e96aff02b83dcb77b155ab0ec0fac76525af4d4ad574aa22"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cases-evidence.route.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "2f08b6b2651d6cfd86f2121737da76746eeaa5fd",
+      "sha256": "66c16d47d40df0698f2eaf070656a8cb6fa66db108141e367cd7b92155ee73b5",
+      "baseBlobSha": "86455079a12552fab759cb82ecb8f662cd86f951",
+      "baseSha256": "8d0c391769fa4f23e550ade9bf42d7d9d5ca7a26a7b2ca933383ba710912f176"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cases-next-actions.route.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "55e25af370203d8034d61aa98f15ce964ff255c3",
+      "sha256": "1f9dbd483cb378fa1dd79ad35a0581fe5a0e4b5f584153b70163d343c208ef45",
+      "baseBlobSha": "66dcbd5330f635709d74187a855e763ba5274d7b",
+      "baseSha256": "53a6d44e91830f33d74c9ac040a84287bf790d877e67c06654c43517c667d8cf"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cases-notes.route.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "1d168d44deab26eecbf8ede002b8d4f3b3a99cec",
+      "sha256": "607c17e469ed5ee777f3a77410b3f10c2dc2aa088e35c1cf75ebbc5e18283aae",
+      "baseBlobSha": "ef3f46067881391df89a09ea58ad63018073d865",
+      "baseSha256": "11858d7668caac50510c25a72515ed9bb8526b7eb80d1ed7604c17013ec8b085"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cases-route.route.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "23ad983b079cbc53ab2f8b8d2e5d41e4aecfd4f4",
+      "sha256": "31fec2dd0062c135a9843b5bc85539599bad93904c9b36cf0b29e66cd4f3a178",
+      "baseBlobSha": "a0099e8fe9c1e73b4866467f7aa92d51a24d05b8",
+      "baseSha256": "529e4bb3928807045ef9d89779f7d9ec5b82053f472b727511dad096aaafcd4d"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cases-timeline.route.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "9ba4600f7e9d3af3e42a33d7caf14e58ea68ea0d",
+      "sha256": "e3b4d3f57d7a813dc958b2bf940b09a0e9d43d53f1d1b48e47cc8dba42e70a0c",
+      "baseBlobSha": "9228b249fb135126a27510c2ffd8fea80deeb592",
+      "baseSha256": "e86c4b560784caa56fd67e785c0d9b08f3ea0b90ac98c83f19a3e654884c5387"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cases-transition.route.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "639c3dbe7db154a299d109dc8b0423b28e66b8c0",
+      "sha256": "e6a2f612907fc93d089a51f5399d90a59da905adfb670b1f2ed09e030e08ac4a",
+      "baseBlobSha": "9505710059747844e4efffd113ab680d052dc4d4",
+      "baseSha256": "2375eddc986ba482dcbefd2de9f8657d345f56a18a4938e12c83ff54f30447d4"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/assign/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "16cf8f5e1595e17802c32af88f171ef316db8a1b",
+      "sha256": "93b55ebc5e0cab88f37666ae26716d2df54ca2963976f89f2ae58329028ae767",
+      "baseBlobSha": "477546fb89d189d8b188d3b9d57447c85e0eac9c",
+      "baseSha256": "2cfc758558a786722c2c4a3fdf1551545c1a90c9b4ab6814752bba252a540f4f"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/audit/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "47c978009abb56209e62160084338ee2608392bd",
+      "sha256": "514cbed5d67d6664fe9302fca0792570572acf31210b536009647f3af7b3df35",
+      "baseBlobSha": "89b21f0557aa1c952416723c42c5ef0d3c488ad6",
+      "baseSha256": "8cffb2f39760299370b24682a1111d22a4baf8c47badddcd7f5674944279c6b6"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "990c741d60ccce2d026e6925f09992071a92a705",
+      "sha256": "79ea5011139205b627a97383b7a5011ea727661268b95e2814df83261de42ea5",
+      "baseBlobSha": "43d457dc36f46af6a63e9a64c5f3415325bfd6ae",
+      "baseSha256": "1789bf62b3346454e46308571726ce8de077fd34e6128d2581c87ef0dc50303a"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/evidence/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "3850a25b04b6a01cefe2522747a6fc5ddf710826",
+      "sha256": "5a2314cc456001b2c07ddf69dbc6ad70acdc298c99a28946e53853c1b2515d35",
+      "baseBlobSha": "eccd6426c9941a4f7d0fc994634ed9e396845e2c",
+      "baseSha256": "3292da4fc9a0bebb01067e3f16b250fc02db91d35d0d068b3869c193de6c4652"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/export/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "1712d2615ab13baf9191160fe8c77956cee94c72",
+      "sha256": "b68978cc9b22cd85ad761e2b2893aa16988e4a8746a3dabf07496b9ff2bdead2",
+      "baseBlobSha": "2a8eb0839f86f01689f6925c6d2b57664fa39dbc",
+      "baseSha256": "4b207d1c6b27a01ea637612a4e2db8a0188fa5a092391e12536229bc433cbaba"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/next-actions/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "c474d057ee8c1aa390b5984007703d8fa327e5a3",
+      "sha256": "2a218176c7091e078b9e594e2df87227e368b76b84004f1bb4450f02e0b7af71",
+      "baseBlobSha": "65efec63d22cd643166eb11fbc8f190486e493c0",
+      "baseSha256": "88e6fb97ee21d422a4a1b5009d34c52c4bd792cf15d02fa321fe63bbaa45bfc2"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "a4f2e5a30293c72403d1fb6f9c554926a0d21245",
+      "sha256": "1db44fcaa20bf6c8e797b43a24bc5b82618a05f2965196e5914b72f5c2ae1544",
+      "baseBlobSha": "62afcf62d9722b3dff40fde491684e47480c7505",
+      "baseSha256": "a9cecdf6283b1538935691a3a1c0042d2fe842e4565c0faaf5c897a271e5de90"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "30524825aa869cccc51d6b6bdd132fdc2cbb125b",
+      "sha256": "22a4101b79033c38a29f3d8e6fb202a91130d6cc9a253a1bb248212c829894a6",
+      "baseBlobSha": "cba9bfa509c6ccbfc5c84412835f689385abb5cb",
+      "baseSha256": "26315fd62f457d44e55cf3fdc278694efe44a7e5ca1314b3e6f2893ab5a35b69"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "51639fe53f1907bce6476603b760c7b8a3138331",
+      "sha256": "f3fd6279331427fbd352847438a3d7cbc35a7b604c9c8e38d2dd1bec230f3b3b",
+      "baseBlobSha": "f74a5b0c8253d8b016637f9050b9592a3b23c74d",
+      "baseSha256": "72026e4e0729ca7d0e4d0bb01f623556b783b41afe6298f14220dfad75fe759e"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/transition/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "37ba4047cc466c721dc488d23863bbbfbb7fdab1",
+      "sha256": "fdcb3ba49613c741e637a92edde91df21f441ce7b4460b5c03298a5eab5d6a9c",
+      "baseBlobSha": "a74c688717c915e42e568d0688f1e396bb04aa6a",
+      "baseSha256": "8ca8a1426ea856f36d87845656965f9461a30775ce283387e76c8816b78baddd"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "9f2db091b0f865f9bbe9b8ae4fd20c8fa53e5402",
+      "sha256": "f5d7bd9056d43253b8fdf2ffac63999b941e1392744a27e25163b77bcb51803d",
+      "baseBlobSha": "025cd08625e0fe207ca1023f96a005a852c53998",
+      "baseSha256": "a7b513c8f838d57ee76a8c8d00058862e70b6af6bd9874a46632136d493dab00"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/case-assignee-predicate.pglite.test.ts",
+      "status": "added",
+      "previousPath": null,
+      "blobSha": "5a5340438ecb24bb57b19d44c8fa3dcff3c258e3",
+      "sha256": "68f7e25ced12cf45b72511d34b6ef65d323068f8e3f5ef02595a5ac1c33e7ed4",
+      "baseBlobSha": null,
+      "baseSha256": null
+    },
+    {
+      "path": "apps/union-eyes/db/auth/case-assignee-predicate.ts",
+      "status": "added",
+      "previousPath": null,
+      "blobSha": "3d2bb5233625ae7828da9db2e360c8890817abf1",
+      "sha256": "9c7642a6a6618949dcca99a45c8b5ad4cc00ba2dc77e3bd6fdf91ea38e7320a4",
+      "baseBlobSha": null,
+      "baseSha256": null
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/organization-utils.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "cac9eb74d18108b16ac5e86b8bad51d6d0ce1c8e",
+      "sha256": "f6f89108cc3d013bc90693c05f5df84c5a9c7a503592b5d004f2800ae419a141",
+      "baseBlobSha": "ffaa1ba46395c42d50f8eecbd84782e1c1f26741",
+      "baseSha256": "4f1bfe59240223fec6630497602c728ef7c4f1f025b3be12d533e8b3ce7b8ae9"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-authorization.pglite.test.ts",
+      "status": "added",
+      "previousPath": null,
+      "blobSha": "e48c80af04490ec6497ae68cb9f26f8467f09b56",
+      "sha256": "396f84731023d06374896330b4e72c97d1276a082eceac66051a2fc9ddb6ff09",
+      "baseBlobSha": null,
+      "baseSha256": null
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-authorization.ts",
+      "status": "added",
+      "previousPath": null,
+      "blobSha": "52f70da6867bfccdd4e6afa9047e61a8f3510fad",
+      "sha256": "f2eff39ed4dec6bd67377bf04cdfb914b92d08d17aba6b5980394953ad591dfe",
+      "baseBlobSha": null,
+      "baseSha256": null
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-evidence-query.pglite.test.ts",
+      "status": "added",
+      "previousPath": null,
+      "blobSha": "74ad59974c5370226cab95143da88081279493f9",
+      "sha256": "b2c814916b857dee405a56473c826906944ad335350a0c5aed82547c74571ec3",
+      "baseBlobSha": null,
+      "baseSha256": null
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-evidence-query.ts",
+      "status": "added",
+      "previousPath": null,
+      "blobSha": "91411951a9990b58f5a4187a54a147ed144cd92e",
+      "sha256": "cab1552898660994995fb2b38f6ba1f6c2bf8c3ba6b77d034506cccb5692de17",
+      "baseBlobSha": null,
+      "baseSha256": null
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-permissions.ts",
+      "status": "added",
+      "previousPath": null,
+      "blobSha": "08d564fcfadd69239e89c801ff8fa0fc9b7c1d90",
+      "sha256": "e15caaf94da1501441b6428c2acffcb004be3415358b0d14f83b6e0523be3c17",
+      "baseBlobSha": null,
+      "baseSha256": null
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/canonical-catalog-admission.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "05a9eff732ed65304d53b467f13cd1e373a560ab",
+      "sha256": "dadaf2eedc028d9fec814ee24b6714d01ae0fb70af54d968f30365c4a0bb7f4a",
+      "baseBlobSha": "0e8c58eed876f76fbedb2d532e225dd0c88334cd",
+      "baseSha256": "0af8e5af4fe968922572e9d9d41fcef5898da01854a243a6928b63a8c5925c0f"
+    },
+    {
+      "path": "apps/union-eyes/lib/organization-utils.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "b96ae30f8a3b89673a7ffbbbbcaf5ab12f519647",
+      "sha256": "bb12377086a595e820b20b881218162b977bbbf78e4054342e309ea357190729",
+      "baseBlobSha": "25513d30ec6ab9559915a6163dafb1f915db99d0",
+      "baseSha256": "a4ff6d866e344c43aba346a5e9e2a56be7bbd69780b8d6af96f4568753192866"
+    },
+    {
+      "path": "apps/union-eyes/scripts/rls-verify.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "e0cbe73ea557bbddd9f96b0ba14caa5d71f83d13",
+      "sha256": "fae675e437f74b3aa2558fd01e297bdc5b439835da8b19b2b93024cfca3913ef",
+      "baseBlobSha": "095e4df34730be01a867d95ab5fca17e36d715bb",
+      "baseSha256": "6ed5d0c44502a2672d887138d77f75a502463f8fe39dd045544213e48be081f1"
+    },
+    {
+      "path": "tooling/contract-tests/vertical-governance.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "99e30ac2d6799757a295291f61a9925ba06e164c",
+      "sha256": "ca0135e45c4cab90e4a1f6cfeb872b787a2d0e98625ce65a842b5e66b81e580c",
+      "baseBlobSha": "489b56fe2b491c57d7811061491b3dd56f3485fa",
+      "baseSha256": "6a7de206f4c269fa8d4d9d448b8e9929137da1ceca4e07fba8505e25336480c4"
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.json",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "0a149e1ecea10497dfe68494518a366c07619675",
+      "sha256": "8976f59d1fb425ffae9d52d06ac19d1101be5481b78319beb848080b416d5939",
+      "baseBlobSha": "83dc4d7543b553bcee1d89e9416ced7d22769051",
+      "baseSha256": "6f3694c6d0035599d892f30b55c6a5b76fbdd4fd510fb435035c776b86e70cec"
+    },
+    {
+      "path": "tooling/repo-inventory/output/inventory.md",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "b4163ba9ddb9ff1af7c6206013ae749d036cb89e",
+      "sha256": "b73b1c58ec9b438ce3d6eb19246e645b6bf89d7ddd7c44b2e0c1b0a24530afc8",
+      "baseBlobSha": "405a82b68c21193fa10eac31a91fa03bef95412b",
+      "baseSha256": "17f298a2b3e1576f08b1095b334766bdac9a5b43d924986486ec4f4ae6b46624"
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.json",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "0a149e1ecea10497dfe68494518a366c07619675",
+      "sha256": "8976f59d1fb425ffae9d52d06ac19d1101be5481b78319beb848080b416d5939",
+      "baseBlobSha": "83dc4d7543b553bcee1d89e9416ced7d22769051",
+      "baseSha256": "6f3694c6d0035599d892f30b55c6a5b76fbdd4fd510fb435035c776b86e70cec"
+    },
+    {
+      "path": "tooling/repo-inventory/output/repo-inventory.md",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "b4163ba9ddb9ff1af7c6206013ae749d036cb89e",
+      "sha256": "b73b1c58ec9b438ce3d6eb19246e645b6bf89d7ddd7c44b2e0c1b0a24530afc8",
+      "baseBlobSha": "405a82b68c21193fa10eac31a91fa03bef95412b",
+      "baseSha256": "17f298a2b3e1576f08b1095b334766bdac9a5b43d924986486ec4f4ae6b46624"
     },
     {
       "path": "tooling/security/ue-staging-delegated-review.mjs",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "0e1614a653a9661a23c83d25d4ed51d3a0ac07c7",
-      "sha256": "ce6cf6a9d178861ac9b8e5a951b999082e9b0f61da7d3ff126bab9c49136be5d",
-      "baseBlobSha": "06c22170caa7b6389b0d84df493ba57917eb202a",
-      "baseSha256": "ced6d9d1d97be662405a670a161fb36114643b71a10102a1a958407df65d5b4f"
+      "blobSha": "711de419f7d9a045ed01e936ac3e099f9949da6f",
+      "sha256": "687706c31902f2483ea3630fdf94812dfd20cedd721f4ad628431345f8ddeb2b",
+      "baseBlobSha": "0e1614a653a9661a23c83d25d4ed51d3a0ac07c7",
+      "baseSha256": "ce6cf6a9d178861ac9b8e5a951b999082e9b0f61da7d3ff126bab9c49136be5d"
     },
     {
       "path": "tooling/security/ue-staging-delegated-review.test.mjs",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "4030ab3eb7653540af4a9f36189206d40b338f7e",
-      "sha256": "1e947d44a45ff7214695e2e4f2364abbd9effab2a988f686698d7367df90425e",
-      "baseBlobSha": "9694102077c789e7799d025bf3f67b9956a6cbb5",
-      "baseSha256": "5db1dd177b3881116d20507e1f8612b31e985c78ab12056e98d52dc945d38cd4"
+      "blobSha": "c7be3d586f37597c33278e30fcfcc9234d07820e",
+      "sha256": "06bab78c731bcb15ca6da8ed88f436b04de3610106b4710116ffa43b77fa21a6",
+      "baseBlobSha": "4030ab3eb7653540af4a9f36189206d40b338f7e",
+      "baseSha256": "1e947d44a45ff7214695e2e4f2364abbd9effab2a988f686698d7367df90425e"
     }
   ],
   "reviews": [
     {
       "kind": "primary-agent-review",
       "agentTask": "/root",
-      "reviewedAt": "2026-10-23T04:16:14.770Z",
-      "report": "Primary Codex /root review of frozen source e16c7dd27a8ee28433569a3a718ba86a87fa5bfa for PR992 under the existing explicit sole-owner staging authorization. This is an attributed primary agent review, not another person's approval. Deployed source a36cf4b8928abaf61faf24d48e73c5001ae25af4 admits native dashboard sessions and persists a genuine preflight NAR, but self-intake fails in the daily claim-count query before INSERT. The actual deployed error is ERR_INVALID_ARG_TYPE. A verified-TLS read-only transaction on the recovery clone with union_eyes_runtime and the installed postgres-js/Drizzle stack reproduced the raw Date failure and showed that column-encoded gte/lt predicates succeed with string parameters. Reproduction SHA256: 09f76e4d30d812297d56827d620e0f21859978bce3d0d65e2b7dc2abe9505df3.\n\nThe two application/test files replace only the raw count-query comparisons with Drizzle gte and lt, preserving the existing local-midnight inclusive lower bound, next-midnight exclusive upper bound and the current claim-number algorithm. Drizzle's timestamp column encoder serializes the Date values before postgres-js, whose timestamp serializer is transparent under Drizzle. No claim identity/defaults, history mapping, policy, route authority, transaction boundaries or SQL schema is changed. The regression executes real createClaim against the native-shaped PGlite fixture with a driver-boundary logger that refuses unencoded Date values; it verifies both string parameters and the day window. The previous PGlite tests accepted Date values that the deployed driver rejects. All seven claim SQL tests pass.\n\nThe three governance files bind PR992 alone to actual branch fix/ue-canonical-timestamp-query-20261023, author anungisa, merged base a36cf4b8928abaf61faf24d48e73c5001ae25af4, and the exact application/test/governance path allowlist. No inventory outputs changed because file counts are unchanged. All 198 verifier regressions pass, including primary attribution, unchanged key, actual author, sole-parent two-file evidence commit, forbidden adjacent paths and protected boundaries. An initial new regression caught an omitted PR992 trust-key check and was corrected before this frozen source; the failed log is retained separately. The pinned Ed25519 key, exact file/blob/hash coverage, paginated API verification, signature validity, evidence commit and head-race checks remain mandatory. This is a transparent staging-only sole-owner amendment; no human security-team approval is synthesized and no production control is changed.\n\nNo unresolved P0/P1 was identified in the changed query encoding or narrow gate binding. Existing broader acceptance concerns, including role authorization, claim numbering under concurrency and native end-to-end persistence, remain subject to the programme and are not certified by this review. Full required repository checks and protected final-head CI remain pending and mandatory. This review does not claim deployment, staging GO, independent human approval or production authorization. Fresh merged-source images, signed clone qualification, preservation of the actual owned preflight audit row and complete native acceptance remain required.",
-      "reportSha256": "07cbfbeddfa9d360ae84ad2222c49967953afbd5f56ec32c11b15f9ab09474bb",
+      "reviewedAt": "2026-10-23T07:05:39.809Z",
+      "report": "Primary-agent source security review of PR993 by Codex /root. Reviewed canonical actor resolution, role mapping, tenant and member/assignee record scope, history visibility, assignment eligibility, scoped canonical audit export, route mutations and denial handling. Canonical actors derive from authenticated live organization context; unknown roles fail closed. Generic PATCH rejects assignment and status bypasses. Assignment and transition lock the scoped record before mutation. Escalation applies record scope before decision proof or write. The companion predicate uses the existing non-login, non-bypass reader, fixed pg_catalog search path, session-bound organization authority and boolean output; PUBLIC execution is revoked and runtime execution explicitly bounded. Catalog admission verifies exact body, owner and ACL. No raw private-table grant or production permission is introduced. The contract recognizer now recognizes invocation of the existing authenticated actor guard; import-only and request-supplied actor negative controls remain rejected. The delegated review covers the exact additional contract-test path and rejects unrelated contract edits; immutable key, PR identity, exact file hashes and evidence-only child checks remain enforced. No unresolved P0/P1 identified in this source review. This is primary-agent review, not independent human approval. Database installation and actual staging acceptance remain unproven by this receipt.",
+      "reportSha256": "647502a7fe970296d69ed142f7d68908e0b5aa5a096a9ff1248c73cb1eef5a08",
       "unresolvedP0": 0,
       "unresolvedP1": 0
     }
@@ -92,20 +407,26 @@
     {
       "command": "node --test tooling/security/ue-staging-delegated-review.test.mjs",
       "result": "PASS",
-      "passed": 198,
-      "logSha256": "9722430f0aead8ec9ecbf43a67193248cb4c242f30ad26d48f0bff6a5cd230b5"
+      "passed": 259,
+      "logSha256": "71a789a3013ef7093a6493036d4ab42612a22a70fffa3aed32aae8d29aeedb3a"
     },
     {
-      "command": "pnpm --filter @nzila/union-eyes exec vitest run db/queries/__tests__/canonical-claim-writes.pglite.test.ts",
+      "command": "pnpm exec vitest run --project contract-tests tooling/contract-tests/vertical-governance.test.ts",
       "result": "PASS",
-      "passed": 7,
-      "logSha256": "f549c608eaa23e962e9f61f28b28f405ffe1b818c8035e2cf6346cc14c3f7a9a"
+      "passed": 1200,
+      "logSha256": "12bc325cbf41adc384e44146e204f8765f31b68ef10defd1ff82f395192772cd"
+    },
+    {
+      "command": "pnpm exec vitest run --project union-eyes (six case authorization, predicate, evidence and mutation regression files) --maxWorkers=2",
+      "result": "PASS",
+      "passed": 48,
+      "logSha256": "ff79da543badd235c1df8e1037a669b231a89389f3705fe29f990ca00cea714a"
     }
   ],
   "limitations": [
-    "Primary agent source review only; no independent human/security-team approval.",
-    "Required final-head repository checks and protected CI remain mandatory.",
-    "No deployed repair, native authorization or end-to-end staging acceptance is claimed.",
-    "Fresh signed release/clone qualification and complete native acceptance remain separate requirements."
+    "Primary agent review only; no independent human or security-team approval.",
+    "Full final-source repository validation and protected CI remain required; focused passing tests do not certify the full suite.",
+    "No live database change, deployed authorization proof, staging GO or production authorization is claimed.",
+    "Signed clone qualification, image-bound release and authenticated staging acceptance remain separate requirements."
   ]
 }
