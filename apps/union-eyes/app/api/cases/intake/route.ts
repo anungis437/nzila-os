@@ -23,11 +23,13 @@ import { createHash } from 'crypto';
 import { claims } from '@/db/schema/claims-schema';
 import { eq, and } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
-import { enforceDecision } from '@nzila/decision-core';
+import { enforceDecision, type DecisionProofAdapter } from '@nzila/decision-core';
 import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
 import { platformDb } from '@nzila/db/platform';
 import { auditRecords } from '@nzila/db/schema';
 import { desc } from 'drizzle-orm';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { canonicalNarProofAdapter, createCanonicalNarProofAdapter } from '@/lib/audit/canonical-nar-proof';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +78,7 @@ const narProofAdapter = createNarProofAdapter({
 export async function POST(request: Request) {
   try {
     // 1. Auth check
-    const { userId } = await auth();
+    const { userId, identityProvider, providerSubject } = await auth();
     if (!userId) {
       return NextResponse.json(
         { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
@@ -111,6 +113,28 @@ export async function POST(request: Request) {
     }
 
     const data = validation.data!;
+    const canonical = currentStateContextEnabled();
+    if (canonical) {
+      // The client may still send its verified Entra object id. Resolve only that
+      // actor's alias; a caller-supplied member id cannot select another principal.
+      const ownEntraObjectId = identityProvider === 'entra'
+        ? providerSubject?.split(':')[1] : undefined;
+      if (data.memberId !== userId && (!ownEntraObjectId || data.memberId !== ownEntraObjectId)) {
+        return NextResponse.json({ error: 'MEMBER_IDENTITY_MISMATCH',
+          message: 'Self-service intake must use the authenticated member.' }, { status: 403 });
+      }
+      data.memberId = userId;
+    }
+    const proofAdapter = canonical ? canonicalNarProofAdapter : narProofAdapter;
+    const decideIntake = (resourceId: string, adapter: DecisionProofAdapter = proofAdapter) => enforceDecision({
+      decisionType: 'union.grievance.intake.submitted', organizationId: orgId, resourceId,
+      actor: { id: userId, type: 'user', authorityScope: ['grievance:create'] },
+      authorityScope: ['grievance:create'],
+      input: { memberId: data.memberId, caseType: data.caseType, incidentDate: data.incidentDate,
+        title: data.title, priority: data.priority },
+      policy: { id: 'labour.grievance.intake', version: '1.0.0', domain: 'labour' },
+      actionType: 'claim:intake', proofAdapter: adapter, emitAuditPayload: true,
+    });
 
     // 4. Auto-set severity from case type defaults if not provided
     let severity = data.severity;
@@ -142,32 +166,7 @@ export async function POST(request: Request) {
     });
 
     if (existingCheck) {
-      const duplicateDecision = await enforceDecision({
-        decisionType: 'union.grievance.intake.submitted',
-        organizationId: orgId,
-        resourceId: existingCheck.claimId,
-        actor: {
-          id: userId,
-          type: 'user',
-          authorityScope: ['grievance:create'],
-        },
-        authorityScope: ['grievance:create'],
-        input: {
-          memberId: data.memberId,
-          caseType: data.caseType,
-          incidentDate: data.incidentDate,
-          title: data.title,
-          priority: data.priority,
-        },
-        policy: {
-          id: 'labour.grievance.intake',
-          version: '1.0.0',
-          domain: 'labour',
-        },
-        actionType: 'claim:intake',
-        proofAdapter: narProofAdapter,
-        emitAuditPayload: true,
-      });
+      const duplicateDecision = await decideIntake(existingCheck.claimId);
 
       return NextResponse.json(
         {
@@ -182,32 +181,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const preflightDecision = await enforceDecision({
-      decisionType: 'union.grievance.intake.submitted',
-      organizationId: orgId,
-      resourceId: 'pending',
-      actor: {
-        id: userId,
-        type: 'user',
-        authorityScope: ['grievance:create'],
-      },
-      authorityScope: ['grievance:create'],
-      input: {
-        memberId: data.memberId,
-        caseType: data.caseType,
-        incidentDate: data.incidentDate,
-        title: data.title,
-        priority: data.priority,
-      },
-      policy: {
-        id: 'labour.grievance.intake',
-        version: '1.0.0',
-        domain: 'labour',
-      },
-      actionType: 'claim:intake',
-      proofAdapter: narProofAdapter,
-      emitAuditPayload: true,
-    });
+    const preflightDecision = await decideIntake('pending');
 
     if (!preflightDecision.allowed) {
       return NextResponse.json(
@@ -221,7 +195,7 @@ export async function POST(request: Request) {
     }
 
     // 5. Create claim with RLS context (audit inside transaction for atomicity)
-    const claim = await withRLSContext(async (tx) => {
+    const { claim, canonicalDecision } = await withRLSContext(async (tx) => {
       const newClaim = await createClaim(
         {
           organizationId: orgId,
@@ -246,10 +220,13 @@ export async function POST(request: Request) {
         },
         tx,
       );
-      return newClaim;
+      const canonicalDecision = canonical
+        ? await decideIntake(newClaim.claimId, createCanonicalNarProofAdapter(tx)) : null;
+      if (canonicalDecision && !canonicalDecision.allowed) throw new Error('UE_INTAKE_DECISION_REJECTED');
+      return { claim: newClaim, canonicalDecision };
     });
 
-    // 6. Audit trail (outside transaction — non-critical path, never throws)
+    // 6. Operational audit trail. The canonical signed claim proof already committed atomically.
     await auditDataMutation({
       userId,
       organizationId: orgId,
@@ -291,32 +268,7 @@ export async function POST(request: Request) {
       isFirst: memberClaims.length <= 1,
     }, { organizationId: orgId, userId });
 
-    const recordedDecision = await enforceDecision({
-      decisionType: 'union.grievance.intake.submitted',
-      organizationId: orgId,
-      resourceId: claim.claimId,
-      actor: {
-        id: userId,
-        type: 'user',
-        authorityScope: ['grievance:create'],
-      },
-      authorityScope: ['grievance:create'],
-      input: {
-        memberId: data.memberId,
-        caseType: data.caseType,
-        incidentDate: data.incidentDate,
-        title: data.title,
-        priority: data.priority,
-      },
-      policy: {
-        id: 'labour.grievance.intake',
-        version: '1.0.0',
-        domain: 'labour',
-      },
-      actionType: 'claim:intake',
-      proofAdapter: narProofAdapter,
-      emitAuditPayload: true,
-    });
+    const recordedDecision = canonicalDecision ?? await decideIntake(claim.claimId);
 
     return NextResponse.json(
       {
