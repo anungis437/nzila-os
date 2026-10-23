@@ -5,6 +5,7 @@
  * DELETE /api/voting/sessions/[id] — delete session
  */
 import { withApi, z } from '@/lib/api/framework';
+import { ApiError } from '@/lib/api/errors';
 import {
   getVotingSessionById,
   updateVotingSession,
@@ -15,6 +16,16 @@ import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
+// A session outside the caller's organization is indistinguishable from a
+// missing one, so cross-union callers cannot probe for session ids.
+async function getOwnedSession(id: string, organizationId: string | null, includeOptions = false) {
+  const session = await getVotingSessionById(id, includeOptions);
+  if (!session || !organizationId || session.organizationId !== organizationId) {
+    throw ApiError.notFound('Voting session');
+  }
+  return session;
+}
+
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
@@ -24,12 +35,8 @@ export const GET = withApi(
       description: 'Returns a single voting session with its options.',
     },
   },
-  async ({ params }) => {
-    const session = await getVotingSessionById(params.id, true);
-    if (!session) {
-      const { ApiError } = await import('@/lib/api/errors');
-      throw ApiError.notFound('Voting session');
-    }
+  async ({ params, organizationId }) => {
+    const session = await getOwnedSession(params.id, organizationId, true);
     return { ...session };
   }
 );
@@ -51,13 +58,13 @@ export const PATCH = withApi(
     },
   },
   async ({ params, body, organizationId, userId }) => {
+    await getOwnedSession(params.id, organizationId);
     const updated = await updateVotingSession(params.id, {
       ...body,
       startTime: body.startTime ? new Date(body.startTime) : undefined,
       endTime: body.endTime ? new Date(body.endTime) : undefined,
     });
     if (!updated) {
-      const { ApiError } = await import('@/lib/api/errors');
       throw ApiError.notFound('Voting session');
     }
 
@@ -82,6 +89,7 @@ export const DELETE = withApi(
     },
   },
   async ({ params, organizationId, userId }) => {
+    await getOwnedSession(params.id, organizationId);
     await deleteVotingSession(params.id);
 
     buildUnionEvidencePack({

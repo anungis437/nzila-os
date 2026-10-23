@@ -6,7 +6,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { votingSessions } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 const updateSessionSchema = z.object({
@@ -14,7 +14,7 @@ const updateSessionSchema = z.object({
   description: z.string().max(5000).optional(),
   type: z.string().min(1).max(50).optional(),
   meetingType: z.string().min(1).max(50).optional(),
-  status: z.enum(['draft', 'open', 'closed', 'cancelled']).optional(),
+  status: z.enum(['draft', 'active', 'paused', 'closed', 'cancelled']).optional(),
   startTime: z.coerce.date().optional(),
   endTime: z.coerce.date().optional(),
   scheduledEndTime: z.coerce.date().optional(),
@@ -32,10 +32,14 @@ export const GET = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Get voting session by ID' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const id = request.url.split('/sessions/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
-    const [session] = await db.select().from(votingSessions).where(eq(votingSessions.id, id));
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const [session] = await db
+      .select()
+      .from(votingSessions)
+      .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)));
     if (!session) throw ApiError.notFound('Voting session not found');
     return session;
   },
@@ -47,12 +51,17 @@ export const PATCH = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Update voting session' },
   },
-  async ({ request, body }) => {
+  async ({ request, body, organizationId }) => {
     const id = request.url.split('/sessions/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
     const parsed = updateSessionSchema.parse(body);
     const [session] = await withRLSContext(async () =>
-      db.update(votingSessions).set({ ...parsed, updatedAt: new Date() }).where(eq(votingSessions.id, id)).returning()
+      db
+        .update(votingSessions)
+        .set({ ...parsed, updatedAt: new Date() })
+        .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)))
+        .returning()
     );
     if (!session) throw ApiError.notFound('Voting session not found');
     return session;
@@ -65,11 +74,16 @@ export const DELETE = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Cancel voting session' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const id = request.url.split('/sessions/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
     const [session] = await withRLSContext(async () =>
-      db.update(votingSessions).set({ status: 'cancelled', updatedAt: new Date() }).where(eq(votingSessions.id, id)).returning()
+      db
+        .update(votingSessions)
+        .set({ status: 'cancelled', updatedAt: new Date() })
+        .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)))
+        .returning()
     );
     if (!session) throw ApiError.notFound('Voting session not found');
     return session;

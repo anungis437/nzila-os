@@ -29,14 +29,20 @@ async function loadRoute() {
 }
 
 describe('voting/sessions/[id]/results route', () => {
+  let sessionFixture: Record<string, unknown>;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionFixture = { id: 'sess_1', organizationId: 'org_1', title: 'General Vote', status: 'closed', type: 'general' };
 
     m.withApi.mockImplementation(
       (_config: unknown, handler: (ctx: any) => Promise<unknown>) =>
         async (_req: NextRequest, context: any = { params: { id: 'sess_1' } }) => {
           try {
-            const result = await handler({ params: context.params });
+            const result = await handler({
+              params: context.params,
+              organizationId: context.organizationId === undefined ? 'org_1' : context.organizationId,
+            });
             return new Response(JSON.stringify(result), {
               status: 200,
               headers: { 'content-type': 'application/json' },
@@ -49,12 +55,7 @@ describe('voting/sessions/[id]/results route', () => {
         },
     );
 
-    m.getVotingSessionById.mockResolvedValue({
-      id: 'sess_1',
-      title: 'General Vote',
-      status: 'closed',
-      type: 'general',
-    });
+    m.getVotingSessionById.mockImplementation(async () => ({ ...sessionFixture }));
     m.calculateResults.mockResolvedValue({ winner: 'option_1', totalVotes: 100 });
     m.getSessionStatistics.mockResolvedValue({ turnout: 0.68, eligibleVoters: 150 });
     m.calculateRankedChoiceResults.mockResolvedValue({ rounds: [{ round: 1, eliminated: 'option_3' }] });
@@ -73,12 +74,6 @@ describe('voting/sessions/[id]/results route', () => {
 
   it('returns results payload for non-convention sessions', async () => {
     const { GET } = await loadRoute();
-    m.getVotingSessionById.mockResolvedValueOnce({
-      id: 'sess_1',
-      title: 'General Vote',
-      status: 'closed',
-      type: 'general',
-    });
 
     const response = await GET(new NextRequest('http://localhost/api/voting/sessions/sess_1/results'), {
       params: { id: 'sess_1' },
@@ -88,16 +83,39 @@ describe('voting/sessions/[id]/results route', () => {
     expect(response.status).toBe(200);
     expect(payload.rankedChoiceResults).toBeNull();
     expect(payload.results).toMatchObject({ winner: 'option_1' });
+    expect(payload.certification).toBe('NOT_CERTIFIED');
+  });
+
+  it('withholds results while the session is not closed', async () => {
+    const { GET } = await loadRoute();
+    sessionFixture.status = 'active';
+
+    const response = await GET(new NextRequest('http://localhost/api/voting/sessions/sess_1/results'), {
+      params: { id: 'sess_1' },
+    });
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.resultsWithheld).toBe(true);
+    expect(payload.results).toBeNull();
+    expect(m.calculateResults).not.toHaveBeenCalled();
+  });
+
+  it('treats a session in another organization as not found', async () => {
+    const { GET } = await loadRoute();
+    sessionFixture.organizationId = 'org_other';
+
+    const response = await GET(new NextRequest('http://localhost/api/voting/sessions/sess_1/results'), {
+      params: { id: 'sess_1' },
+    });
+
+    expect(response.status).toBe(404);
+    expect(m.calculateResults).not.toHaveBeenCalled();
   });
 
   it('includes ranked-choice results for convention sessions', async () => {
     const { GET } = await loadRoute();
-    m.getVotingSessionById.mockResolvedValueOnce({
-      id: 'sess_1',
-      title: 'Convention Vote',
-      status: 'closed',
-      type: 'convention',
-    });
+    sessionFixture.type = 'convention';
 
     const response = await GET(new NextRequest('http://localhost/api/voting/sessions/sess_1/results'), {
       params: { id: 'sess_1' },
@@ -110,12 +128,7 @@ describe('voting/sessions/[id]/results route', () => {
 
   it('swallows ranked-choice calculation errors when data is insufficient', async () => {
     const { GET } = await loadRoute();
-    m.getVotingSessionById.mockResolvedValueOnce({
-      id: 'sess_1',
-      title: 'Convention Vote',
-      status: 'closed',
-      type: 'convention',
-    });
+    sessionFixture.type = 'convention';
     m.calculateRankedChoiceResults.mockRejectedValueOnce(new Error('not enough ballots'));
 
     const response = await GET(new NextRequest('http://localhost/api/voting/sessions/sess_1/results'), {
