@@ -56,18 +56,19 @@ export const visibilityScopeEnum = pgEnum("visibility_scope", [
 // NOTE: Django BaseModel is the canonical source. Drizzle mirrors it.
 // PK = id (Django BaseModel auto-PK), claim_id is UNIQUE.
 export const claims = pgTable("claims", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  claimId: uuid("claim_id").notNull().unique().defaultRandom(),
+  // Canonical Django defaults execute in Python. Drizzle must supply its own values too.
+  id: uuid("id").primaryKey().defaultRandom().$defaultFn(() => globalThis.crypto.randomUUID()),
+  claimId: uuid("claim_id").notNull().unique().defaultRandom().$defaultFn(() => globalThis.crypto.randomUUID()),
   // Organization-scoped numbering: uniqueness is the canonical (organization_id, claim_number) constraint.
   claimNumber: varchar("claim_number", { length: 50 }),
   organizationId: uuid("organization_id").notNull().references(() => organizations.id),
   memberId: varchar("member_id", { length: 255 }),
-  isAnonymous: boolean("is_anonymous").default(true),
+  isAnonymous: boolean("is_anonymous").default(true).$defaultFn(() => true),
   
   // Claim details
   claimType: claimTypeEnum("claim_type"),
-  status: claimStatusEnum("status").notNull().default("submitted"),
-  priority: claimPriorityEnum("priority").notNull().default("medium"),
+  status: claimStatusEnum("status").notNull().default("submitted").$defaultFn(() => 'submitted'),
+  priority: claimPriorityEnum("priority").notNull().default("medium").$defaultFn(() => 'medium'),
   
   // Incident information
   incidentDate: timestamp("incident_date", { withTimezone: true }),
@@ -76,9 +77,9 @@ export const claims = pgTable("claims", {
   desiredOutcome: text("desired_outcome"),
   
   // Witness and reporting information
-  witnessesPresent: boolean("witnesses_present").default(false),
+  witnessesPresent: boolean("witnesses_present").default(false).$defaultFn(() => false),
   witnessDetails: text("witness_details"),
-  previouslyReported: boolean("previously_reported").default(false),
+  previouslyReported: boolean("previously_reported").default(false).$defaultFn(() => false),
   previousReportDetails: text("previous_report_details"),
   
   // Assignment and tracking
@@ -93,7 +94,7 @@ export const claims = pgTable("claims", {
   complexityScore: integer("complexity_score"),
   
   // Progress tracking
-  progress: integer("progress").default(0),
+  progress: integer("progress").default(0).$defaultFn(() => 0),
   
   // Financial information (decimal for monetary precision)
   claimAmount: decimal("claim_amount", { precision: 14, scale: 2 }).notNull().default('0'),
@@ -119,8 +120,8 @@ export const claims = pgTable("claims", {
   idempotencyHash: varchar("idempotency_hash", { length: 64 }).unique(),
   
   // Timestamps
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
   closedAt: timestamp("closed_at", { withTimezone: true }),
 }, (table) => [
   index("idx_claims_org").on(table.organizationId),
@@ -142,8 +143,8 @@ export const claimUpdates = pgTable("claim_updates", {
   isInternal: boolean("is_internal").default(false),
   visibilityScope: visibilityScopeEnum("visibility_scope").default("member").notNull(),
   metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
 });
 
 // Type exports
