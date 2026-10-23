@@ -5,6 +5,7 @@
  * PATCH /api/dues/remittances/:id — Update remittance status/notes/reconciliation
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
 import { eq, and } from 'drizzle-orm';
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Get an employer remittance by ID' },
   },
@@ -51,7 +52,7 @@ const patchSchema = z.object({
 
 export const PATCH = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     openapi: { tags: ['Dues'], summary: 'Update an employer remittance' },
   },
   async ({ organizationId, userId, params, request }) => {

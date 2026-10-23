@@ -49,6 +49,8 @@ export const GET = withMinRole('officer', async (request, context: BaseAuthConte
     );
 
     return standardSuccessResponse({
+      domain: 'NZILA_PLATFORM_BILLING',
+      notUnionFinancialRecords: true,
       billingAccount,
       ledgerSummary,
       recentInvoices,

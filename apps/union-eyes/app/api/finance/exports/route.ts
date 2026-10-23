@@ -1,5 +1,10 @@
 /**
- * GET /api/finance/exports — Generate finance exports
+ * GET /api/finance/exports — Generate Nzila platform-billing exports
+ *
+ * Domain: NZILA_PLATFORM_BILLING. These are the SaaS subscription billing
+ * records for the calling organization (invoices, chargebacks, platform GL
+ * journal). They are NOT the union's general ledger, bank, dues or remittance
+ * records and must not be presented as such.
  *
  * Query params:
  *   type: master_invoice | allocation_statement | chargeback_report | gl_journal | evidence_pack

@@ -731,6 +731,95 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'app/api/reports/scheduled/route.ts (the non-v2 path the OTHER, live page calls) is itself backed by ' +
       'real cron delivery depends on UE-CRON-SCHEDULED-REPORTS above, which remains NOT_IMPLEMENTED.',
   },
+
+  // ------------------------------------------------------------------------
+  // Financial Officer 2.1 containment (UE-FINANCIAL-OFFICER-2.1-CONVERGENCE).
+  // Source-level evidence only: state is NOT_IMPLEMENTED, never operational.
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-FIN-UNION-BUDGETS-EXPENSES-VENDORS',
+    title: 'Union budgets, expenses and vendors',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'app/api/financial/budgets/route.ts',
+      'app/api/financial/expenses/route.ts',
+      'app/api/financial/vendors/route.ts',
+      'lib/finance/retired-financial-route.ts',
+    ],
+    evidence: [
+      'app/api/financial/{budgets,expenses,vendors}/** — all methods answer HTTP 501 via lib/finance/retired-financial-route.ts; previously a 200 deprecation payload.',
+      'The budgets, expenses and vendors tables were never created (see lib/api/deprecation.ts registry).',
+      'app/api/__tests__/financial-officer-containment.test.ts — asserts 501 and absence of any pointer to Nzila billing reports.',
+    ],
+    targetWave: 8,
+    notes:
+      'Nzila billing reports are not a union budget or expense record. A qualified union-finance record store, ' +
+      'policy and migration are required before any replacement; do not create a generic schema to satisfy the UI.',
+  },
+  {
+    id: 'UE-FIN-STRIKE-FUNDS',
+    title: 'Strike funds, stipends, disbursements, eligibility, picket lines',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'app/api/strike/funds/route.ts',
+      'app/api/strike/disbursements/route.ts',
+      'app/api/strike/stipends/route.ts',
+      'app/api/strike/eligibility/route.ts',
+      'app/api/strike/picket-lines/route.ts',
+    ],
+    evidence: [
+      'These routes were bound to votingSessions via crudRoutes, serving voting records as fund data; they now answer HTTP 501 and import no database table.',
+      'app/api/__tests__/financial-officer-containment.test.ts — asserts no votingSessions/crudRoutes import and a 501 result.',
+    ],
+    targetWave: 8,
+    notes:
+      'Only strike_fund_payment_audit exists in the schema; there is no qualified strike-fund balance, stipend or ' +
+      'eligibility model. The strike-fund dashboard pages render an explicit not-available state.',
+  },
+  {
+    id: 'UE-FIN-AFFILIATE-REMITTANCES',
+    title: 'CLC / National / federation affiliate remittances',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/admin/clc/remittances/route.ts'],
+    evidence: [
+      'app/api/admin/clc/remittances/** — previously bound to organizationMembers (membership rows served/mutated as remittances; export/submit stubs answered "accepted"); all now answer HTTP 501.',
+      'app/api/__tests__/financial-officer-containment.test.ts — asserts no organizationMembers/crudRoutes import and no "accepted" stub.',
+    ],
+    targetWave: 8,
+    notes:
+      'Affiliate (per-capita) remittances are distinct from employer payroll-deduction remittances. A qualified model ' +
+      'with institutional recipients, payable/receivable recognition and acknowledgment is required.',
+  },
+  {
+    id: 'UE-FIN-PENSION-TRUSTEE-ADMIN',
+    title: 'Pension trustee appointment and administration',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/pension/trustees/route.ts', 'app/api/pension/trustees/[id]/route.ts'],
+    evidence: [
+      'POST/PATCH/DELETE previously required only minRole steward; they now fail closed with HTTP 501 for every role.',
+      'app/api/__tests__/financial-officer-containment.test.ts — asserts 501 for trustee create/update/delete.',
+    ],
+    targetWave: 8,
+    notes:
+      'Trustee administration requires an independently verified trustee-administration authority and approval ' +
+      'workflow. Secretary-Treasurer status does not imply it. GET (read) is unchanged.',
+  },
+  {
+    id: 'UE-FIN-EMPLOYER-REMITTANCE-INGESTION',
+    title: 'Employer remittance upload (source preservation only)',
+    state: 'LIMITED',
+    ownedBy: ['app/api/dues/remittances/upload/route.ts'],
+    evidence: [
+      'app/api/dues/remittances/upload/route.ts — SHA-256 hashes and preserves the original bytes in blob storage before creating a record; a failed store creates no record; duplicate hashes are rejected.',
+      'app/api/__tests__/dues-remittances-upload.route.test.ts — mocked storage/db only; no live storage was exercised.',
+    ],
+    targetWave: 8,
+    notes:
+      'Records are SOURCE_PRESERVED_UNPARSED: no parsing, member matching, employer-ownership validation or ' +
+      'reconciliation occurs; zero totals are placeholders. PATCH /api/dues/remittances/[id] can still set ' +
+      'reconciliation fields directly and must be replaced by an engine-driven transition before any ' +
+      'reconciled claim is made.',
+  },
 ] as const;
 
 /**

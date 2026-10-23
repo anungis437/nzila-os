@@ -5,6 +5,7 @@
  * POST /api/dues/arrears/calculate — Calculate/summarize arrears status for org members
  */
 import { withApi, ApiError } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { memberArrears } from '@/db/schema/dues-finance-schema';
 import { eq, sql } from 'drizzle-orm';
@@ -14,7 +15,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'List current arrears for the organization' },
   },
@@ -32,7 +33,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     openapi: { tags: ['Dues'], summary: 'Calculate arrears summary for organization' },
   },
   async ({ organizationId, userId: _userId }) => {

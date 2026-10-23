@@ -1,17 +1,15 @@
 /**
- * CRUD collection route for votingSessions
+ * Strike picket lines — NOT_IMPLEMENTED. This route was bound to
+ * votingSessions. No qualified picket-line model exists. Answers HTTP 501.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { votingSessions } from '@/db/schema';
+import { retiredFinancialRoute } from '@/lib/finance/retired-financial-route';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: votingSessions,
-  pk: 'id',
-  tags: ["Governance"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
-});
-export { GET, POST };
+const handler = retiredFinancialRoute(
+  '/api/strike/picket-lines',
+  'strike-picket-lines',
+  'No qualified picket-line record store exists. This route no longer reads or writes voting records.',
+);
+export const GET = handler;
+export const POST = handler;

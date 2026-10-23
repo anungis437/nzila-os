@@ -5,6 +5,7 @@
  * POST /api/dues/remittances — Create a new employer remittance record
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
 import { eq, desc } from 'drizzle-orm';
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'List employer remittances' },
   },
@@ -50,7 +51,7 @@ const createSchema = z.object({
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     openapi: { tags: ['Dues'], summary: 'Create an employer remittance' },
   },
   async ({ organizationId, userId, request }) => {

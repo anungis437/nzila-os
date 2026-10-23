@@ -3,13 +3,14 @@
  */
 
 import { withApi, ApiError } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { getLedgerEntries } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'officer' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: {
       tags: ['Dues'],

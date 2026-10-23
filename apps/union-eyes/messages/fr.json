@@ -5254,8 +5254,17 @@
     "complianceRisk": "Risque de conformité",
     "medium": "Moyen"
   },
+  "financialCapabilityUnavailable": {
+    "state": "Non disponible",
+    "explanation": "Cette fonction n'est pas encore appuyée par un registre financier syndical autoritaire et qualifié. Aucune information n'est donc affichée et aucune action n'est possible ici. Rien de ce que vous faites sur cette page n'est enregistré.",
+    "budgets": "Budgets",
+    "expenses": "Dépenses et approbations",
+    "vendors": "Fournisseurs",
+    "strikeFunds": "Fonds de grève"
+  },
   "financeDashboardPage": {
-    "title": "Tableau de bord financier",
+    "title": "Facturation de la plateforme (abonnement Nzila)",
+    "platformBillingNotice": "Cette page présente uniquement la facturation de votre abonnement Nzila Union Eyes. Elle ne représente pas le grand livre général, le solde bancaire, les cotisations ni les remises de votre syndicat.",
     "retry": "Réessayer",
     "noDataAvailable": "Aucune donnée disponible",
     "exports": "Exportations",

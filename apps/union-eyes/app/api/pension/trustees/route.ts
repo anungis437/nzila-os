@@ -2,16 +2,7 @@ import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionTrustees } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { z } from 'zod';
-
-const createTrusteeSchema = z.object({
-  userId: z.string().uuid().optional(),
-  name: z.string().max(255),
-  role: z.string().max(100).optional(),
-  appointedDate: z.coerce.date().optional(),
-  termEndDate: z.coerce.date().optional(),
-  status: z.enum(['active', 'inactive', 'removed']).optional(),
-});
+import { capabilityNotImplementedResponse } from '@/lib/finance/financial-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,16 +31,13 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
-    openapi: { tags: ['Pension'], summary: 'Add trustee', description: 'Add a new pension trustee' },
+    auth: { required: true, minRole: 'member' },
+    openapi: { tags: ['Pension'], summary: 'Add trustee', description: 'Not implemented: trustee appointment requires an independently verified trustee-administration authority' },
   },
-  async ({ body, organizationId }) => {
-    const parsed = createTrusteeSchema.parse(body);
-    const [trustee] = await db
-      .insert(pensionTrustees)
-      .values({ ...parsed, organizationId: organizationId! })
-      .returning();
-    return trustee;
-  },
+  async () =>
+    capabilityNotImplementedResponse(
+      'pension-trustee-appointment',
+      'Trustee appointment requires an independently verified trustee-administration authority, which is not implemented. Steward and Secretary-Treasurer roles do not confer it.',
+    ),
 );
 

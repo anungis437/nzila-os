@@ -7,19 +7,34 @@
  *   - file: the employer remittance file (CSV/XLSX/PDF)
  *   - metadata: JSON string with { employerId, periodStart, periodEnd, fiscalYear, fiscalMonth }
  *
- * Creates an employerRemittances record in 'pending' status and returns it.
+ * The original bytes are hashed (SHA-256) and preserved in authorized blob
+ * storage BEFORE any record is created. If preservation fails, no remittance
+ * record is created and the request fails. A duplicate file (same hash within the
+ * organization) is rejected.
+ *
+ * The resulting record is SOURCE_PRESERVED_UNPARSED: the file has not been
+ * parsed, members have not been matched, and the zero totals are placeholders,
+ * not reconciled amounts. No parser/matcher is invoked here.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
+import { and, eq } from 'drizzle-orm';
+import { createHash } from 'node:crypto';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
 import { logger } from '@/lib/logger';
 import { buildUnionEvidencePack } from '@/lib/evidence';
+import { putBlob, deleteBlob } from '@/lib/blob-client';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_REMITTANCE_FILE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_REMITTANCE_EXTENSIONS = new Set(['csv', 'xlsx', 'pdf']);
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Upload employer remittance file' },
   },
@@ -49,31 +64,81 @@ export const POST = withApi(
     }
 
     if (!meta.employerId) throw ApiError.badRequest('employerId is required in metadata');
+    if (!UUID_PATTERN.test(meta.employerId)) throw ApiError.badRequest('employerId must be a valid UUID');
     if (!meta.periodStart || !meta.periodEnd) {
       throw ApiError.badRequest('periodStart and periodEnd are required in metadata');
     }
 
-    const [remittance] = await db
-      .insert(employerRemittances)
-      .values({
-        employerId: meta.employerId,
-        organizationId,
-        periodStart: new Date(meta.periodStart),
-        periodEnd: new Date(meta.periodEnd),
-        fiscalYear: meta.fiscalYear ?? new Date().getFullYear(),
-        fiscalMonth: meta.fiscalMonth ?? new Date().getMonth() + 1,
-        remittanceDate: new Date(),
-        fileName: file.name,
-        processingStatus: 'pending',
-        memberCount: 0,
-        totalAmount: '0',
-        createdBy: userId ?? undefined,
-      })
-      .returning();
+    const periodStart = new Date(meta.periodStart);
+    const periodEnd = new Date(meta.periodEnd);
+    if (Number.isNaN(periodStart.getTime()) || Number.isNaN(periodEnd.getTime()) || periodEnd < periodStart) {
+      throw ApiError.badRequest('periodStart/periodEnd must be valid dates with periodEnd on or after periodStart');
+    }
 
-    logger.info('Remittance file uploaded', {
+    const extension = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : '';
+    if (!ALLOWED_REMITTANCE_EXTENSIONS.has(extension)) {
+      throw ApiError.badRequest('Remittance file must be a CSV, XLSX or PDF file');
+    }
+    if (file.size === 0) throw ApiError.badRequest('Remittance file is empty');
+    if (file.size > MAX_REMITTANCE_FILE_BYTES) throw ApiError.badRequest('Remittance file exceeds the 10 MB limit');
+
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const fileHash = createHash('sha256').update(bytes).digest('hex');
+
+    const [duplicate] = await db
+      .select({ id: employerRemittances.id })
+      .from(employerRemittances)
+      .where(and(eq(employerRemittances.organizationId, organizationId), eq(employerRemittances.fileHash, fileHash)))
+      .limit(1);
+    if (duplicate) {
+      throw ApiError.conflict('This remittance file has already been uploaded', { remittanceId: duplicate.id });
+    }
+
+    const safeName = file.name.replace(/[^A-Za-z0-9._-]/g, '_');
+    let storedPath: string;
+    try {
+      const stored = await putBlob(`remittances/${organizationId}/${fileHash}-${safeName}`, bytes, {
+        contentType: file.type || 'application/octet-stream',
+      });
+      storedPath = stored.pathname;
+    } catch (error) {
+      logger.error('Remittance source preservation failed', {
+        organizationId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw ApiError.externalService('document-storage', 'Remittance file could not be preserved; nothing was recorded');
+    }
+
+    let remittance;
+    try {
+      [remittance] = await db
+        .insert(employerRemittances)
+        .values({
+          employerId: meta.employerId,
+          organizationId,
+          periodStart,
+          periodEnd,
+          fiscalYear: meta.fiscalYear ?? periodStart.getFullYear(),
+          fiscalMonth: meta.fiscalMonth ?? periodStart.getMonth() + 1,
+          remittanceDate: new Date(),
+          fileName: file.name,
+          fileUrl: storedPath,
+          fileHash,
+          processingStatus: 'pending',
+          memberCount: 0,
+          totalAmount: '0',
+          createdBy: userId ?? undefined,
+        })
+        .returning();
+    } catch (error) {
+      await deleteBlob(storedPath).catch(() => undefined);
+      throw error;
+    }
+
+    logger.info('Remittance file preserved', {
       remittanceId: remittance.id,
       fileName: file.name,
+      fileHash,
       organizationId,
     });
 
@@ -81,9 +146,18 @@ export const POST = withApi(
       actionType: 'REMITTANCE_FILE_UPLOADED',
       orgId: organizationId!,
       actorId: userId!,
-      artifacts: [{ type: 'remittance', data: { remittanceId: remittance.id, fileName: file.name } }],
+      artifacts: [{ type: 'remittance', data: { remittanceId: remittance.id, fileName: file.name, fileHash } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'REMITTANCE_FILE_UPLOADED' }));
 
-    return { remittance };
+    return {
+      remittance,
+      ingestion: {
+        state: 'SOURCE_PRESERVED_UNPARSED',
+        parsed: false,
+        matched: false,
+        reconciled: false,
+        totalsArePlaceholders: true,
+      },
+    };
   },
 );
