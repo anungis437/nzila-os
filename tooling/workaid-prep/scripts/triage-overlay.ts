@@ -139,6 +139,10 @@ export const OVERLAY: Record<string, Overlay> = {
   'WA-INT-001': o('Blob key embeds document name; name logged', 'C', 'Platform unchanged; canary reproduction handed to Codex.', { group: 'STORAGE', overlaps: ['WA-R3-012'], tests: ['INT-001', 'T097'] }),
   'WA-INT-002': o('Azure branch claims SAS but returns an unsigned URL', 'C', 'Container ACL and real access behaviour unproven.', { group: 'STORAGE', overlaps: ['WA-R3-006'], tests: ['INT-002'] }),
   'WA-INT-003': o('Put-then-sign leaves an orphan when signing fails', 'C', 'Platform unchanged.', { group: 'STORAGE', overlaps: ['WA-R3-006'], tests: ['INT-003'] }),
+  /* ---------------- Slice C (self-identified; ids are new, nothing renumbered) ---------------- */
+  'WA-C-001': o('Receipt confirmation treated as a filed submission', 'WP', 'Requirement sources are an empty registry; who may determine valid filing and whether receipt is a prerequisite (F-01) are Angelo decisions (D-19). Receipt is still not persisted or surfaced in any UI.', { group: 'RECEIPT-SEMANTICS', overlaps: ['WA-R1-04', 'WA-R4-04', 'WA-R5-08'], tests: ['T102', 'T103', 'T104', 'T105', 'T106', 'T107', 'T108'] }),
+  'WA-C-002': o('Preparation tooling could write into another checkout', 'W', 'The guard governs this harness only. The typecheck still reads TypeScript from another checkout read-only; a future clean install in this worktree would remove that.', { tests: ['T109', 'T110'] }),
+  'WA-C-003': o('Status wording can misrepresent procedural progress', 'WPU', 'The lint is a backstop over fixed patterns, not a proof of meaning; the approved plain-language and French wording is a content decision (D-20) and no translation or accessibility testing has run.', { group: 'CLAIMS-HONESTY', overlaps: ['WA-R2-09'], tests: ['T111', 'T112', 'T113'] }),
 };
 
 export interface AdversarialCase {

@@ -19,7 +19,7 @@ import {
 import type { Principal, Role } from '../src/principal.ts';
 import type { Matter, MatterAccessGrant, DocumentArtifact, DocumentDisclosureGrant, RepresentationAuthorization } from '../src/authorization.ts';
 import type { ReferralPacket, PolicyDecisionsPending } from '../src/referral.ts';
-import type { Submission, SubmissionContext } from '../src/submission.ts';
+import type { Submission, SubmissionContext, SubmissionState } from '../src/submission.ts';
 import { createSubmission, applySubmissionEvent } from '../src/submission.ts';
 import type { WsibClaim, WsibDecision } from '../src/claims.ts';
 
@@ -40,6 +40,8 @@ export const principal = (userId: string, org = ORG_WA, roles: Role[] = ['WORKAI
 });
 
 export const REP_A = principal('FAKE-UNION-REP-A', ORG_A, ['UNION_REFERRAL_REP']);
+export const ADMIN_A = principal('FAKE-UNION-ADMIN-A', ORG_A, ['UNION_ADMIN']);
+export const ADMIN_B = principal('FAKE-UNION-ADMIN-B', ORG_B, ['UNION_ADMIN']);
 export const REP_B = principal('FAKE-UNION-REP-B', ORG_B, ['UNION_REFERRAL_REP']);
 export const VIEWER_A = principal('FAKE-UNION-VIEWER-A', ORG_A, ['UNION_VIEWER']);
 export const SPEC_1 = principal('FAKE-WORKAID-STAFF-1');
@@ -180,7 +182,7 @@ export const policyForSubmissions: SubmissionContext['policy'] = {
 export const allowDecision = { allow: true as const, basis: 'test' };
 
 /** Drive a submission through states with full authority, for tests that start mid-lifecycle. */
-export function submissionAt(state: 'DRAFT' | 'REVIEWED' | 'APPROVED' | 'DISPATCHED' | 'DELIVERY_ACK' | 'RECEIPT_CONFIRMED', kind: Submission['kind'] = 'DOA', version = 1): Submission {
+export function submissionAt(state: SubmissionState, kind: Submission['kind'] = 'DOA', version = 1): Submission {
   const created = createSubmission({
     id: asSubmissionId(`FAKE-SUB-${kind}-${version}`),
     matterId: MATTER_ID,
@@ -201,13 +203,20 @@ export function submissionAt(state: 'DRAFT' | 'REVIEWED' | 'APPROVED' | 'DISPATC
     if (!r.ok) throw new Error(`${event.type}: ${r.code}`);
     s = r.value;
   };
-  const order = ['DRAFT', 'REVIEWED', 'APPROVED', 'DISPATCHED', 'DELIVERY_ACK', 'RECEIPT_CONFIRMED'];
-  const target = order.indexOf(state);
+  const order = ['DRAFT', 'REVIEWED', 'APPROVED', 'DISPATCH_ATTEMPTED', 'DISPATCHED', 'DELIVERY_ACK', 'RECEIPT_CONFIRMED'];
+  // Terminal and failure states are reached through the real events; SUPERSEDED is reached after a documented receipt, the case where a stale receipt could be mistaken for a live one.
+  const through: Record<string, string> = { DISPATCH_FAILED: 'DISPATCH_ATTEMPTED', REJECTED: 'DISPATCHED', WITHDRAWN: 'REVIEWED', SUPERSEDED: 'RECEIPT_CONFIRMED' };
+  const target = order.indexOf(through[state] ?? state);
   if (target >= 1) step({ type: 'REVIEW' });
   if (target >= 2) step({ type: 'APPROVE', claimedApprover: SPEC_1.userId });
-  if (target >= 3) step({ type: 'DISPATCH', requestId: 'REQ-1', method: 'FAX_RECORDED_MANUALLY' });
-  if (target === 4) step({ type: 'ACK_DELIVERY', channel: 'test-provider', providerRef: 'PR-1' }, { kind: 'SYSTEM', component: 'DISPATCH_PROVIDER' });
-  if (target === 5) step({ type: 'CONFIRM_RECEIPT', method: 'PHONE_CALL', contactRef: 'FAKE WSIB CLERK', receivedAt: '2026-10-24T14:00:00Z' });
+  if (target >= 3) step({ type: 'ATTEMPT_DISPATCH', requestId: 'REQ-1', method: 'FAX_RECORDED_MANUALLY' });
+  if (target >= 4 && state !== 'DISPATCH_FAILED') step({ type: 'CONFIRM_DISPATCH', requestId: 'REQ-1', transmissionRef: 'FAKE-TX-0001' });
+  if (state === 'DELIVERY_ACK') step({ type: 'ACK_DELIVERY', channel: 'test-provider', providerRef: 'PR-1' }, { kind: 'SYSTEM', component: 'DISPATCH_PROVIDER' });
+  if (target >= 6) step({ type: 'CONFIRM_RECEIPT', method: 'PHONE_CALL', contactRef: 'FAKE WSIB CLERK', receivedAt: '2026-10-24T14:00:00Z' });
+  if (state === 'DISPATCH_FAILED') step({ type: 'FAIL_DISPATCH', requestId: 'REQ-1', reason: 'synthetic transmission failure' });
+  if (state === 'REJECTED') step({ type: 'REJECT', reason: 'synthetic rejection by the authority' });
+  if (state === 'WITHDRAWN') step({ type: 'WITHDRAW', reason: 'synthetic withdrawal by the preparer' });
+  if (state === 'SUPERSEDED') step({ type: 'SUPERSEDE', reason: 'synthetic replacement version' });
   return s;
 }
 

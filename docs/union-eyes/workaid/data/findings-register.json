@@ -1,11 +1,11 @@
 {
   "schema": "workaid-findings-register/1",
   "generatedFromTestRun": {
-    "baseCommit": "38a824918cf2e7d7cfb7fcb0e796cbde45433be8",
-    "command": "node --test --test-reporter=junit test\\authorization.test.ts test\\claims.test.ts test\\deadlines.test.ts test\\followup.test.ts test\\integration-contracts.test.ts test\\isolation.test.ts test\\pack-integrity.test.ts test\\platform-repro.test.ts test\\publication-revocation.test.ts test\\referral.test.ts test\\submission.test.ts"
+    "baseCommit": "023712d6ab3b40b43ef7f487183315e846de21fc",
+    "command": "node --test --test-reporter=junit test\\authorization.test.ts test\\claims.test.ts test\\cross-persona.test.ts test\\deadlines.test.ts test\\filing.test.ts test\\followup.test.ts test\\integration-contracts.test.ts test\\isolation.test.ts test\\journey-a-domenic.test.ts test\\journey-b-angelo.test.ts test\\journey-c-union.test.ts test\\journey-d-member.test.ts test\\pack-integrity.test.ts test\\platform-repro.test.ts test\\publication-revocation.test.ts test\\referral.test.ts test\\slice-c-contracts.test.ts test\\submission.test.ts test\\write-isolation.test.ts"
   },
   "totals": {
-    "entries": 91,
+    "entries": 94,
     "byRound": {
       "R1": 22,
       "R2": 9,
@@ -13,16 +13,17 @@
       "R4": 12,
       "R5": 10,
       "R6": 9,
-      "INT": 3
+      "INT": 3,
+      "C": 3
     },
     "bySeverity": {
       "P0": 22,
-      "P1": 52,
+      "P1": 55,
       "P2": 16,
       "P3": 1
     },
     "byDisposition": {
-      "PARTIALLY_MITIGATED": 56,
+      "PARTIALLY_MITIGATED": 59,
       "OPEN": 33,
       "BLOCKED_EXTERNAL_EVIDENCE": 1,
       "OUT_OF_SCOPE_WITH_BOUNDARY": 1
@@ -76,6 +77,12 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-33",
+        "B-15",
+        "B-16",
+        "B-20"
+      ],
       "gap": "Rule-source registry is empty by design; reviewer and rule content are Angelo/Domenic decisions (D-11)."
     },
     {
@@ -118,6 +125,29 @@
           "tag": "WA-T099",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-50",
+        "X-51",
+        "X-52",
+        "D-04",
+        "X-53",
+        "X-54",
+        "X-55",
+        "X-56",
+        "X-57",
+        "X-58",
+        "D-21",
+        "A-32",
+        "D-22",
+        "A-33a",
+        "A-33",
+        "D-25",
+        "C-06",
+        "C-19",
+        "C-20",
+        "C-21",
+        "B-14"
       ],
       "gap": "Runtime RLS and tenant isolation on staging are unproven; this contract denies by construction but is not runtime evidence."
     },
@@ -170,6 +200,28 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-41",
+        "X-42",
+        "X-43",
+        "X-44",
+        "X-46",
+        "D-07",
+        "D-20",
+        "D-23",
+        "D-24",
+        "D-26",
+        "D-27",
+        "C-11",
+        "B-05",
+        "C-12",
+        "B-06",
+        "B-08",
+        "B-09",
+        "B-10",
+        "C-16",
+        "B-12"
+      ],
       "gap": "Publication rights and the lawful records-access channel need legal and privacy review (D-03, D-10); platform search, export and preview surfaces unproven."
     },
     {
@@ -209,6 +261,14 @@
           "tag": "WA-ADV-09",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-01",
+        "X-04",
+        "X-28",
+        "X-29",
+        "A-15",
+        "D-12"
       ],
       "gap": "No persistence or UI. Accepted receipt methods need Domenic confirmation."
     },
@@ -255,6 +315,14 @@
           "tag": "WA-T092",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-25",
+        "A-04",
+        "A-05",
+        "B-03",
+        "B-04",
+        "C-14"
       ],
       "gap": "Who formally accepts representation is an open WorkAid decision; the production schema has no acceptance record."
     },
@@ -309,6 +377,9 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "A-06"
+      ],
       "gap": "No schema or migration; ITO grouping within one claim is a professional choice (D-05)."
     },
     {
@@ -351,6 +422,9 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "A-30"
+      ],
       "gap": "Durable outbox, real delivery sink and worker restart (T059) are not executed; platform worker is NO_GO."
     },
     {
@@ -371,6 +445,9 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [
+        "X-59"
+      ],
       "gap": "Needs database and object-store failure injection (T057); not possible in the isolated harness."
     },
     {
@@ -411,6 +488,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Per-purpose, recipient and data-class grant model is not in the production schema; legal review required."
     },
     {
@@ -453,6 +531,13 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-30",
+        "X-31",
+        "X-32",
+        "A-14",
+        "A-31"
+      ],
       "gap": "Task-of-record is deliberately UNRESOLVED pending Domenic (D-02). No connector exists."
     },
     {
@@ -485,6 +570,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Business day versus calendar day (D-01) and the holiday calendar are unresolved; the rule is left unconfigured by design."
     },
     {
@@ -526,6 +612,11 @@
           "tag": "WA-ADV-19",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "D-05",
+        "C-13",
+        "C-18"
       ],
       "gap": "No platform malware scan, AI/OCR deny or log-redaction canary run (T066 runtime, T093)."
     },
@@ -581,6 +672,13 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-13",
+        "X-14",
+        "X-15",
+        "X-35",
+        "X-36"
+      ],
       "gap": "Platform revokeRepresentationAuthority has no grant or session cascade (source confirmed at 38a824918); sessions and links unproven at runtime."
     },
     {
@@ -612,6 +710,19 @@
           "tag": "WA-ADV-14",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-01",
+        "X-02",
+        "X-03",
+        "X-29",
+        "X-49",
+        "D-09",
+        "D-10",
+        "A-25",
+        "D-12",
+        "A-26",
+        "D-16"
       ],
       "gap": "Stage vocabulary and plain-language text need Angelo approval (D-06)."
     },
@@ -645,6 +756,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Cohort threshold is a policy decision; platform export paths unproven."
     },
     {
@@ -686,6 +798,13 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-20",
+        "X-21",
+        "X-22",
+        "X-23",
+        "X-24"
+      ],
       "gap": "Which deficiencies may be waived (D-04) is unresolved; the test policy is synthetic and not a proposed default."
     },
     {
@@ -711,6 +830,10 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "B-25",
+        "B-29"
+      ],
       "gap": "Actor, source document, rule version and reasoning are enforced in the contract; the UI forcing function is unproven."
     },
     {
@@ -735,6 +858,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "Measurement design only; no pilot cohort exists."
     },
     {
@@ -758,6 +882,9 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [
+        "D-28"
+      ],
       "gap": "No UI exists; accessibility evidence requires built flows."
     },
     {
@@ -784,6 +911,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "No connector exists by design; only an event-admissibility contract is proven."
     },
     {
@@ -811,6 +939,14 @@
           "tag": "WA-T015",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06"
       ],
       "gap": "Identity binding and duplicate review workflow are unspecified; only claim-number conflict detection exists."
     },
@@ -854,6 +990,9 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-45"
+      ],
       "gap": "Platform notification templates are free-form; a purpose-limited schema needs platform work."
     },
     {
@@ -886,6 +1025,13 @@
           "tag": "WA-T072",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-06",
+        "X-07",
+        "X-08",
+        "X-10",
+        "A-09"
       ],
       "gap": "Which prior-claim numbers may appear on which form (D-12) is unresolved."
     },
@@ -920,6 +1066,9 @@
           "tag": "WA-T073",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "A-10"
       ],
       "gap": "Grouping within one claim is a WorkAid professional choice (D-05)."
     },
@@ -962,6 +1111,11 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-33",
+        "B-15",
+        "B-17"
+      ],
       "gap": "Rule registry unpopulated; D-11."
     },
     {
@@ -994,6 +1148,9 @@
           "tag": "WA-T076",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-20"
       ],
       "gap": "D-04."
     },
@@ -1030,6 +1187,9 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-19"
+      ],
       "gap": "Production schema has no typed instrument classes (WA-R3-009)."
     },
     {
@@ -1058,6 +1218,9 @@
           "tag": "WA-T078",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "A-23"
       ],
       "gap": "ARF readiness checklist content (WA-R5-04) needs Domenic; only an attested gate exists."
     },
@@ -1089,6 +1252,11 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-48",
+        "B-21",
+        "B-23"
+      ],
       "gap": "No Tribunal appeal entity is implemented; NOA readiness is an attested boolean gate only (Angelo)."
     },
     {
@@ -1111,6 +1279,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "Angelo to confirm the current Hearing Ready Form / COA workflow. T080 not implemented."
     },
     {
@@ -1144,6 +1313,10 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "A-21",
+        "A-22"
+      ],
       "gap": "No empirical baseline has been collected."
     },
     {
@@ -1169,6 +1342,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Platform detector unchanged; reference detector and negative fixture handed to Codex."
     },
     {
@@ -1191,6 +1365,7 @@
       "disposition": "PARTIALLY_MITIGATED",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "Mocked unit tests only; runtime isolation unproven."
     },
     {
@@ -1224,6 +1399,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Platform read paths unproven; contract proves keys are internal ids and org scope."
     },
     {
@@ -1247,6 +1423,16 @@
       "disposition": "PARTIALLY_MITIGATED",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [
+        "X-50",
+        "X-51",
+        "X-52",
+        "X-53",
+        "X-54",
+        "X-55",
+        "X-56",
+        "A-32"
+      ],
       "gap": "T089 not executed; active-membership selection is a platform concern."
     },
     {
@@ -1274,6 +1460,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Platform route unchanged; reference ordering handed to Codex."
     },
     {
@@ -1303,6 +1490,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Platform unchanged; one-year exposure itself unproven (unsafe intent confirmed)."
     },
     {
@@ -1334,6 +1522,10 @@
           "tag": "WA-T083",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-25",
+        "A-05"
       ],
       "gap": "Production schema has no acceptance record."
     },
@@ -1369,6 +1561,12 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-12",
+        "X-13",
+        "X-14",
+        "X-16"
+      ],
       "gap": "Platform function unchanged (source confirmed); reference cascade proven synthetically."
     },
     {
@@ -1401,6 +1599,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Production schema allows an untyped evidence document."
     },
     {
@@ -1432,6 +1631,9 @@
           "tag": "WA-T091",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-45"
       ],
       "gap": "Platform templates unchanged."
     },
@@ -1473,6 +1675,11 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "D-01",
+        "C-15",
+        "C-16"
+      ],
       "gap": "Contract proven synthetically; no persistence, no UI."
     },
     {
@@ -1500,6 +1707,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Platform unchanged."
     },
     {
@@ -1527,6 +1735,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Platform unchanged."
     },
     {
@@ -1554,6 +1763,9 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-59"
+      ],
       "gap": "Platform log scrub unproven."
     },
     {
@@ -1580,6 +1792,9 @@
           "tag": "WA-T084",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-13"
       ],
       "gap": "Identity runtime blocked; scoped invalidation requests specified only."
     },
@@ -1613,6 +1828,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Exports, thumbnails, caches, mobile unproven on the platform."
     },
     {
@@ -1635,6 +1851,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "Codex owns staging qualification."
     },
     {
@@ -1657,6 +1874,7 @@
       "disposition": "BLOCKED_EXTERNAL_EVIDENCE",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "External authority required."
     },
     {
@@ -1684,6 +1902,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Platform ledger unchanged."
     },
     {
@@ -1706,6 +1925,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "T093 not executed; platform AI path unchanged."
     },
     {
@@ -1738,6 +1958,9 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "C-18"
+      ],
       "gap": "No platform malware scan run; contract assessment proven synthetically."
     },
     {
@@ -1766,6 +1989,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Platform unchanged."
     },
     {
@@ -1795,6 +2019,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Resolver correctly fails loud today; separation proven by contract and a source tripwire."
     },
     {
@@ -1827,6 +2052,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Must remain true for any pilot candidate; boundary enforced by copy check."
     },
     {
@@ -1849,6 +2075,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "Codex owns staging qualification."
     },
     {
@@ -1881,6 +2108,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Threshold is a policy decision; platform exports unproven."
     },
     {
@@ -1928,6 +2156,11 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-06",
+        "X-07",
+        "D-23"
+      ],
       "gap": "No schema; D-05 and D-12."
     },
     {
@@ -1969,6 +2202,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "D-05."
     },
     {
@@ -2011,6 +2245,9 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-20"
+      ],
       "gap": "D-04."
     },
     {
@@ -2051,6 +2288,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "No persistence or UI."
     },
     {
@@ -2081,6 +2319,9 @@
           "tag": "WA-ADV-07",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "A-08"
       ],
       "gap": "Referral double-submit concurrency (T009) needs persistence."
     },
@@ -2123,6 +2364,12 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-35",
+        "X-38",
+        "X-39",
+        "B-14b"
+      ],
       "gap": "Real delivery sink unproven."
     },
     {
@@ -2155,6 +2402,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "D-01 unresolved."
     },
     {
@@ -2185,6 +2433,14 @@
           "tag": "WA-ADV-14",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-47",
+        "X-49",
+        "A-27",
+        "A-28",
+        "D-16",
+        "D-18"
       ],
       "gap": "ARO event attestation source needs Angelo."
     },
@@ -2220,6 +2476,12 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-13",
+        "X-18",
+        "X-19",
+        "X-37"
+      ],
       "gap": "Platform has no cascade (WA-R3-008)."
     },
     {
@@ -2252,6 +2514,9 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-30"
+      ],
       "gap": "D-02."
     },
     {
@@ -2279,6 +2544,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Separation enforced by contract and tripwire."
     },
     {
@@ -2315,6 +2581,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Durable outbox unproven."
     },
     {
@@ -2348,6 +2615,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "D-05."
     },
     {
@@ -2379,6 +2647,11 @@
           "tag": "WA-T072",
           "status": "PASS"
         }
+      ],
+      "journeySteps": [
+        "X-08",
+        "X-10",
+        "A-09"
       ],
       "gap": "D-12."
     },
@@ -2421,6 +2694,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Typed submission kinds proven; stage content needs professional review."
     },
     {
@@ -2448,6 +2722,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Checklist content is a professional decision; only an attested gate exists."
     },
     {
@@ -2475,6 +2750,11 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "D-19",
+        "B-21",
+        "B-23"
+      ],
       "gap": "No Tribunal assessment entity."
     },
     {
@@ -2497,6 +2777,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "Angelo must confirm current forms."
     },
     {
@@ -2524,6 +2805,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Checklist items attested by humans; no entity yet."
     },
     {
@@ -2551,6 +2833,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Glossary in the product not yet written."
     },
     {
@@ -2583,6 +2866,9 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-33"
+      ],
       "gap": "Rule registry unpopulated."
     },
     {
@@ -2611,6 +2897,10 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [
+        "X-47",
+        "A-22"
+      ],
       "gap": "Dependency aging proven; SLA values are operational and unmeasured."
     },
     {
@@ -2635,6 +2925,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "Time-motion study not designed in detail."
     },
     {
@@ -2655,6 +2946,9 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [
+        "B-24"
+      ],
       "gap": "Angelo approvals undefined."
     },
     {
@@ -2677,6 +2971,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "No measured denominator."
     },
     {
@@ -2699,6 +2994,9 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [
+        "D-28"
+      ],
       "gap": "No UI."
     },
     {
@@ -2722,6 +3020,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "No baseline."
     },
     {
@@ -2742,6 +3041,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "Module boundary exists but an explicit kernel/specialization split is not yet enforced in code."
     },
     {
@@ -2764,6 +3064,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "No UI."
     },
     {
@@ -2784,6 +3085,7 @@
       "disposition": "OPEN",
       "proofLevel": "NONE",
       "tests": [],
+      "journeySteps": [],
       "gap": "No UI; priority tiers unspecified."
     },
     {
@@ -2811,6 +3113,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Copy check proven; commercial material not reviewed."
     },
     {
@@ -2842,6 +3145,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Platform unchanged; canary reproduction handed to Codex."
     },
     {
@@ -2869,6 +3173,7 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Container ACL and real access behaviour unproven."
     },
     {
@@ -2896,7 +3201,145 @@
           "status": "PASS"
         }
       ],
+      "journeySteps": [],
       "gap": "Platform unchanged."
+    },
+    {
+      "id": "WA-C-001",
+      "round": "C",
+      "severity": "P1",
+      "sourceSeverity": "P1 (engineering review)",
+      "title": "Receipt confirmation treated as a filed submission",
+      "sourceFile": "Slice C mission §2 (engineering review of v0.2)",
+      "sourceDisposition": "SELF_IDENTIFIED_V0_2",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "RECEIPT-SEMANTICS",
+      "overlaps": [
+        "WA-R1-04",
+        "WA-R4-04",
+        "WA-R5-08"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T102",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T103",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T104",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T105",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T106",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T107",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T108",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-04",
+        "X-34a",
+        "X-34",
+        "A-17",
+        "A-18",
+        "A-19",
+        "D-13",
+        "D-14",
+        "D-15"
+      ],
+      "gap": "Requirement sources are an empty registry; who may determine valid filing and whether receipt is a prerequisite (F-01) are Angelo decisions (D-19). Receipt is still not persisted or surfaced in any UI."
+    },
+    {
+      "id": "WA-C-002",
+      "round": "C",
+      "severity": "P1",
+      "sourceSeverity": "P1 (engineering review)",
+      "title": "Preparation tooling could write into another checkout",
+      "sourceFile": "Slice C mission §2 (engineering review of v0.2)",
+      "sourceDisposition": "SELF_IDENTIFIED_V0_2",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T109",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T110",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "The guard governs this harness only. The typecheck still reads TypeScript from another checkout read-only; a future clean install in this worktree would remove that."
+    },
+    {
+      "id": "WA-C-003",
+      "round": "C",
+      "severity": "P1",
+      "sourceSeverity": "P1 (self-identified)",
+      "title": "Status wording can misrepresent procedural progress",
+      "sourceFile": "Slice C mission §3 Journey D and §4 (member status updates that would misrepresent progress)",
+      "sourceDisposition": "SELF_IDENTIFIED_SLICE_C",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION",
+        "UX_ACCESSIBILITY"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CLAIMS-HONESTY",
+      "overlaps": [
+        "WA-R2-09"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T111",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T112",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T113",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "D-09",
+        "D-13",
+        "D-17"
+      ],
+      "gap": "The lint is a backstop over fixed patterns, not a proof of meaning; the approved plain-language and French wording is a content decision (D-20) and no translation or accessibility testing has run."
     }
   ]
 }

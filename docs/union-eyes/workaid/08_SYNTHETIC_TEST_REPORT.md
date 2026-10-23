@@ -4,39 +4,47 @@
 
 ## Run
 
-- Command: `node --test --test-reporter=junit test\authorization.test.ts test\claims.test.ts test\deadlines.test.ts test\followup.test.ts test\integration-contracts.test.ts test\isolation.test.ts test\pack-integrity.test.ts test\platform-repro.test.ts test\publication-revocation.test.ts test\referral.test.ts test\submission.test.ts` (from `tooling/workaid-prep`, via `node scripts/run-tests.ts`)
+- Command: `node --test --test-reporter=junit test\authorization.test.ts test\claims.test.ts test\cross-persona.test.ts test\deadlines.test.ts test\filing.test.ts test\followup.test.ts test\integration-contracts.test.ts test\isolation.test.ts test\journey-a-domenic.test.ts test\journey-b-angelo.test.ts test\journey-c-union.test.ts test\journey-d-member.test.ts test\pack-integrity.test.ts test\platform-repro.test.ts test\publication-revocation.test.ts test\referral.test.ts test\slice-c-contracts.test.ts test\submission.test.ts test\write-isolation.test.ts` (from `tooling/workaid-prep`, via `node scripts/run-tests.ts`)
 - Node v24.13.1; no dependency installed, no workspace file changed.
-- Base commit: `38a824918cf2e7d7cfb7fcb0e796cbde45433be8`; working tree dirty at run time: true (the files under test are uncommitted until the slice is committed).
-- Result: **177 passed, 0 failed, 0 skipped** of 177 test cases.
+- Base commit: `023712d6ab3b40b43ef7f487183315e846de21fc`; working tree dirty at run time: true (the files under test are uncommitted until the slice is committed).
+- Result: **264 passed, 0 failed, 0 skipped** of 264 test cases.
 
 | Test file | Cases |
 |---|---:|
 | test/authorization.test.ts | 24 |
 | test/claims.test.ts | 14 |
+| test/cross-persona.test.ts | 10 |
 | test/deadlines.test.ts | 11 |
+| test/filing.test.ts | 20 |
 | test/followup.test.ts | 26 |
 | test/integration-contracts.test.ts | 11 |
 | test/isolation.test.ts | 4 |
+| test/journey-a-domenic.test.ts | 8 |
+| test/journey-b-angelo.test.ts | 6 |
+| test/journey-c-union.test.ts | 4 |
+| test/journey-d-member.test.ts | 6 |
 | test/pack-integrity.test.ts | 14 |
 | test/platform-repro.test.ts | 19 |
 | test/publication-revocation.test.ts | 11 |
 | test/referral.test.ts | 22 |
-| test/submission.test.ts | 21 |
+| test/slice-c-contracts.test.ts | 14 |
+| test/submission.test.ts | 29 |
+| test/write-isolation.test.ts | 11 |
 
 No failing tests.
 
-## Acceptance matrix v0.2 (100 cases: WA-T001–T080 from the pack, WA-T081–T100 from the Grok delta)
+## Acceptance matrix v0.3 (115 cases: WA-T001–T080 from the pack, WA-T081–T100 from the Grok delta, WA-T101–T115 added in Slice C)
 
 | State | Count | Meaning |
 |---|---:|---|
-| EXECUTED_SYNTHETIC_PASS | 71 | At least one tagged test, all passing. Scope is the tagged test titles in the CSV; see caveat below. |
+| EXECUTED_SYNTHETIC_PASS | 86 | At least one tagged test, all passing. Scope is the tagged test titles in the CSV; see caveat below. |
 | EXECUTED_SYNTHETIC_FAIL | 0 | A tagged test failed. |
 | BLOCKED_RUNTIME_OR_EXTERNAL | 17 | Cannot be executed in isolation (needs deployed runtime, UI, identity provider, legal decision or pilot data). |
 | DESIGNED_NOT_EXECUTED | 12 | Could be executed in the isolated harness but has not been. |
 
-**Caveat.** A matrix row is marked `EXECUTED_SYNTHETIC_PASS` when a test carrying its id passes. Several rows describe a platform surface (search, export, aggregates, runtime sessions) of which the harness exercises only the domain contract; the `Evidence` column in `data/WORKAID_ACCEPTANCE_MATRIX_v0.2.csv` names exactly what ran, and `Runtime_gate` is `NOT_CLOSED` on every row. Rows whose only tests are `platform-repro.test.ts` are labelled `SYNTHETIC_REPRO_OF_PLATFORM_DEFECT`: they show the defect is reproducible and the proposed assertion is satisfiable, not that the platform is fixed.
+**Caveat.** A matrix row is marked `EXECUTED_SYNTHETIC_PASS` when a test carrying its id passes. Several rows describe a platform surface (search, export, aggregates, runtime sessions) of which the harness exercises only the domain contract; the `Evidence` column in `data/WORKAID_ACCEPTANCE_MATRIX_v0.3.csv` names exactly what ran, and `Runtime_gate` is `NOT_CLOSED` on every row. Rows whose only tests are `platform-repro.test.ts` are labelled `SYNTHETIC_REPRO_OF_PLATFORM_DEFECT`: they show the defect is reproducible and the proposed assertion is satisfiable, not that the platform is fixed.
 
-- **EXECUTED_SYNTHETIC_PASS (71):** T001, T002, T003, T004, T005, T006, T007, T008, T010, T011, T012, T013, T015, T016, T017, T018, T019, T023, T025, T026, T027, T028, T029, T030, T031, T032, T037, T038, T039, T040, T041, T042, T043, T044, T045, T046, T047, T048, T049, T051, T052, T053, T054, T055, T056, T066, T071, T072, T073, T074, T075, T076, T077, T078, T079, T081, T082, T083, T084, T085, T086, T090, T091, T092, T094, T095, T096, T097, T098, T099, T100
+- **EXECUTED_SYNTHETIC_PASS (86):** T001, T002, T003, T004, T005, T006, T007, T008, T010, T011, T012, T013, T015, T016, T017, T018, T019, T023, T025, T026, T027, T028, T029, T030, T031, T032, T037, T038, T039, T040, T041, T042, T043, T044, T045, T046, T047, T048, T049, T051, T052, T053, T054, T055, T056, T066, T071, T072, T073, T074, T075, T076, T077, T078, T079, T081, T082, T083, T084, T085, T086, T090, T091, T092, T094, T095, T096, T097, T098, T099, T100, T101, T102, T103, T104, T105, T106, T107, T108, T109, T110, T111, T112, T113, T114, T115
 - **BLOCKED_RUNTIME_OR_EXTERNAL (17):** T022, T057, T059, T060, T061, T062, T063, T064, T065, T067, T068, T069, T070, T087, T088, T089, T093
 - **DESIGNED_NOT_EXECUTED (12):** T009, T014, T020, T021, T024, T033, T034, T035, T036, T050, T058, T080
 

@@ -4,31 +4,35 @@ Module: [`src/submission.ts`](../../../tooling/workaid-prep/src/submission.ts), 
 
 ## Outbound submission states
 
-"Sending is not receipt. Receipt is not acceptance."
+"Sending is not receipt. Receipt is not acceptance. Receipt is not valid filing."
 
 ```
-DRAFT ⇄ REVIEWED → APPROVED → DISPATCHED → DELIVERY_ACK → RECEIPT_CONFIRMED → SUPERSEDED
-   │        │          │  ↑          │            │
-   │        │          └──┘ (invalidate approval) └→ REJECTED → SUPERSEDED
-   └────────┴──────────→ WITHDRAWN        (DISPATCHED/DELIVERY_ACK may also be WITHDRAWN or SUPERSEDED)
+DRAFT ⇄ REVIEWED → APPROVED → DISPATCH_ATTEMPTED → DISPATCHED → DELIVERY_ACK → RECEIPT_CONFIRMED → SUPERSEDED
+   │        │          │  ↑          │  ↑                │            │
+   │        │          └──┘          │  └ DISPATCH_FAILED (retry with a new request id; or WITHDRAWN/SUPERSEDED)
+   │        │       (invalidate)     │                    └→ REJECTED → SUPERSEDED
+   └────────┴──────────→ WITHDRAWN   (reachable from every state before RECEIPT_CONFIRMED except REJECTED; sent states may be SUPERSEDED)
 ```
 
-The authoritative table is `ALLOWED_SUBMISSION_TRANSITIONS`; the test `[WA-T039][WA-T040] exhaustive matrix` runs all 81 (from, to) pairs against it. Mapping to the mission's six lifecycle stages:
+The authoritative table is `ALLOWED_SUBMISSION_TRANSITIONS` (11 states). The test `[WA-T039][WA-T040] exhaustive matrix` runs all 121 (from, to) pairs against it; anything not listed is forbidden. Mapping to the lifecycle stages (the full evidence and authority table is [17](17_RECEIPT_VS_FILING_AUTHORITY.md)):
 
-| Mission stage | State | Who or what causes it |
+| Stage | State | Who or what causes it |
 |---|---|---|
 | Document created | `DRAFT` | Preparer |
 | Document authorized for submission | `REVIEWED` then `APPROVED` | WorkAid professional; identity must equal the authenticated principal; live professional authorization; configurable separate-approver rule |
-| Document dispatched | `DISPATCHED` | WorkAid professional records the manual send (request id gives idempotency) |
-| Dispatch acknowledged by the sending service | `DELIVERY_ACK` | Dispatch provider (system actor) only |
-| Receipt confirmation obtained from WSIB | `RECEIPT_CONFIRMED` | WorkAid professional: recognized method (`PHONE_CALL`, `WSIB_PORTAL_CONFIRMATION`, `WSIB_WRITTEN_CONFIRMATION`, `WSIB_EMAIL_REPLY`), WSIB contact or evidence reference, and the received-at time stated by the human |
+| Dispatch attempted | `DISPATCH_ATTEMPTED` | WorkAid professional (human only); request id gives idempotency; needs live authority to act as WSIB representative except for a DOA |
+| Dispatch confirmed | `DISPATCHED` | Professional or the dispatch provider, with a transmission reference matching the attempt. A failed attempt is `DISPATCH_FAILED`, visible and recoverable, and never starts a follow-up |
+| Dispatch acknowledged by the sending service | `DELIVERY_ACK` | Dispatch provider (system actor) only; never receipt |
+| Receipt acknowledgement obtained from WSIB | `RECEIPT_CONFIRMED` | WorkAid professional: recognized method (`PHONE_CALL`, `WSIB_PORTAL_CONFIRMATION`, `WSIB_WRITTEN_CONFIRMATION`, `WSIB_EMAIL_REPLY`), WSIB contact or evidence reference, and the received-at time stated by the human |
+| Valid filing determined | **not a submission state** | A separate append-only `FilingRecord`; `UNDETERMINED` until a professional determines it against a reviewed requirement source |
+| Authority accepted or rejected | **not a submission state** | `FilingRecord.authorityResponses`, from the authority's own document |
 | Follow-up completed | Task `RECEIPT_CONFIRMED` | Derived from the submission; there is no "done without receipt" |
 
-`isReceiptUnconfirmed` (derived) is true for `DISPATCHED`/`DELIVERY_ACK` without a receipt record; `submissionCountsAsFiled` requires `RECEIPT_CONFIRMED` with a receipt. A dispatch that is never confirmed stays unconfirmed indefinitely (`[WA-ADV-09]`).
+`isReceiptUnconfirmed` (derived) is true for `DISPATCHED`/`DELIVERY_ACK` without a receipt record. `receiptDocumented` and `dispatchConfirmed` are the only derived facts; **`submissionCountsAsFiled` was removed in Slice C (WA-C-001)** because a receipt record is not a legal conclusion that the filing was valid. A dispatch that is never confirmed stays unconfirmed indefinitely (`[WA-ADV-09]`).
 
 ### Forbidden transitions (all tested)
 
-`DRAFT/REVIEWED/APPROVED → DISPATCHED-adjacent receipt states`; `DRAFT/REVIEWED → DISPATCHED`; `DISPATCHED → APPROVED`; `REJECTED → DISPATCHED` (a rejected document is superseded by a new version, never revived); `WITHDRAWN` and `SUPERSEDED` are terminal; a second dispatch under a different request id is refused.
+Any pair not in `ALLOWED_SUBMISSION_TRANSITIONS`, including: `DRAFT/REVIEWED → DISPATCHED`; `APPROVED → DISPATCHED` (an attempt must come first); `DISPATCH_ATTEMPTED → RECEIPT_CONFIRMED`; `DISPATCHED → APPROVED`; `REJECTED → DISPATCHED` (a rejected document is superseded by a new version, never revived); `WITHDRAWN` and `SUPERSEDED` are terminal; a second dispatch under a different request id is refused.
 
 ## Typed instruments
 

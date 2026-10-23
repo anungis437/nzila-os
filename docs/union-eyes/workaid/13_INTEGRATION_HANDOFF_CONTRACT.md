@@ -17,7 +17,7 @@
 
 If `origin/main` or the staging branch advances, re-run `node scripts/platform-tripwire.ts --root <checkout>` (informational; it reports `PRESENT/ABSENT/FILE_MISSING` per cited pattern and never fails).
 
-**Isolation proof.** `test/isolation.test.ts` asserts every changed or added path relative to the base is under `docs/union-eyes/workaid/` or `tooling/workaid-prep/`; no manifest, lockfile, workspace file, migration, workflow, app or package is touched. Other worktrees were not modified: Codex-pattern worktrees under `C:/Users/AubertNungisa/.codex/worktrees/` (`multer-987-qualification` `9d49b7982`, `ue-catalog-admission` `1d52b79d5`, `ue-navigation-acceptance` `38a824918`); `C:/APPS/nzila-os-navigation` was observed advancing between my reads (`6319d92c8` → `9f1ad0668`) and was not touched.
+**Isolation proof.** `test/isolation.test.ts` asserts every changed or added path relative to the base is under `docs/union-eyes/workaid/` or `tooling/workaid-prep/`; no manifest, lockfile, workspace file, migration, workflow, app or package is touched. Since Slice C, `scripts/guard.ts` additionally refuses any write outside those prefixes or OS temp and any write into another registered worktree (`test/write-isolation.test.ts`), and the repository's document validator runs only in a temp sandbox. Other worktrees were not modified: Codex-pattern worktrees under `C:/Users/AubertNungisa/.codex/worktrees/` (`multer-987-qualification` `9d49b7982`, `ue-catalog-admission` `1d52b79d5`, `ue-navigation-acceptance` `38a824918`); `C:/APPS/nzila-os-navigation` was observed advancing between my reads (`6319d92c8` → `9f1ad0668`) and was not touched.
 
 ## 2. Platform defects routed to Codex (not patched here)
 
@@ -33,6 +33,7 @@ Each row: pinned reference → synthetic reproduction in this branch → propose
 | 6 Session handling | WA-R3-015, WA-R3-018 | `lib/auth/session.ts:9-10` re-exports `revokeSession`, `revokeAllUserSessions`; `lib/services/member-access-revocation-service.ts:97-98` already revokes **all** sessions of the real auth user id (the nearest existing pattern) | Reference output `sessionInvalidations` = `[{userId, matterId}]` (scoped) | Decide the scope: `revokeAllUserSessions` is user-wide (all organizations); a specialist serving several unions would lose unrelated sessions. Prefer re-checking the grant on every request plus an epoch/denylist scoped to (user, matter); add a test that revoking Union A access leaves the same user's Union B session valid. Identity-provider behaviour is `BLOCKED_EXTERNAL_EVIDENCE` |
 | 7 Evaluator observations | (not in Grok findings) | `representation-authority-service.ts:51` `representativeOrganizationId?` optional → check skipped when omitted; `scope` column not read by `evaluateRepresentationAuthority` or the external evaluators; `app/api/external/**` hard-reject `matterType !== 'grievance'` (e.g. `documents/[id]/route.ts:22`) | none (observations) | Confirm across all call sites whether the specialist-organization check can be skipped by a caller; if WSIB matter access is ever enabled, extend routes deliberately (it is `NOT_IMPLEMENTED` today) |
 | 8 Release gate | WA-R3-017, WA-R3-025; WA-T087 | `docs/union-eyes/reality-remediation/25_…`, `30_…` | none | Single gate record `PLATFORM-GATE`. Nothing in this branch overrides or reinterprets it |
+| 9 Member-portal surfaces (Slice C, read-only inspection) | WA-C-003; see [16](16_MEMBER_PORTAL_REUSE_ASSESSMENT.md) | `app/api/members/merge` returns 200 for an unimplemented capability (stub POST `{status:'accepted'}`); `members/[id]/documents` is a generic CRUD route over `documents` whose `[id]` is the document id and which sets no owner column; `app/[locale]/dashboard/member/timeline/[caseId]/page.tsx` fetches `/api/cases/${caseId}/timeline` without credentials and expects `data.timeline` while the route returns `{data: [...]}` behind a `grievance_case_suite` entitlement and exposes `actor`; `portal/dues/balance` takes the organization id from the client | None run (running the application is out of scope). Static reading only | Confirm the merge stub returns 501; confirm whether the timeline page renders for a member and whether any link to it is advertised; decide the subject-member binding for member-visible documents before any WorkAid reuse |
 
 ## 3. Reusable Union Eyes capabilities confirmed (source-level only)
 
@@ -48,7 +49,7 @@ All of `tooling/workaid-prep/src/*` domain contracts and their tests; fixtures; 
 
 | Component (path at `38a824918`) | Change | Why it must wait |
 |---|---|---|
-| `apps/union-eyes/db/schema/*`, `migrations/`, migration journal | New tables: referral, claim, decision, issue, objection, submission, task, reminder, publication, deadline obligation, dependency, acceptance; RLS policies; typed authorization instrument; grant `sourceAuthorizationId` | The migration journal and canonical bootstrap are under Codex's qualification (`UE_V2_CANONICAL_FRESH_BOOTSTRAP` is `UNQUALIFIED` per the demo doc). No migration may be proposed against an unqualified journal |
+| `apps/union-eyes/db/schema/*`, `migrations/`, migration journal | New tables: referral, claim, decision, issue, objection, submission (11 states, recipient, attempt, receipt), **filing record (determinations and authority responses, append-only), requirement-source registry, tribunal assessment**, task, reminder, publication (with French text and union-visibility), deadline obligation, dependency, acceptance; RLS policies; typed authorization instrument; grant `sourceAuthorizationId` | The migration journal and canonical bootstrap are under Codex's qualification (`UE_V2_CANONICAL_FRESH_BOOTSTRAP` is `UNQUALIFIED` per the demo doc). No migration may be proposed against an unqualified journal |
 | `representation-authority-schema.ts` | Matter type for WSIB (the existing `wcb_claim` label is generic), acceptance record | Schema/enum migration |
 | `representation-authority-service.ts`, `external-resource-authorization-service.ts`, `app/api/external/**` | Cascade revocation (row 5); remove the hard-coded `'grievance'` matter-type rejection for the new matter type; new routes for referrals and publication | Security-sensitive; routes are release-critical |
 | `lib/services/document-storage-service.ts`, `app/api/search/universal/route.ts`, notification schemas | Rows 2–4 | Shared services; already defects independent of WorkAid |
@@ -59,7 +60,7 @@ All of `tooling/workaid-prep/src/*` domain contracts and their tests; fixtures; 
 
 ### 4.3 Needs an external decision before any code
 
-D-01…D-18 in [11](11_WORKAID_VALIDATION_DECISIONS.md); privacy/legal review for D-03, D-10, D-18.
+D-01…D-24 in [11](11_WORKAID_VALIDATION_DECISIONS.md); privacy/legal review for D-03, D-10, D-18, D-20, D-21.
 
 ## 5. Portability of the tests
 

@@ -13,7 +13,7 @@
 | Base | `origin/main` = `38a824918cf2e7d7cfb7fcb0e796cbde45433be8` (fetched at start of both slices; unchanged) |
 | Clean at start | Yes (`git status` empty before the first write) |
 | Codex worktree | Not modified. Codex-pattern worktrees (`.codex/worktrees/*`) were only listed, never opened for writing; no checkout, merge, rebase or cherry-pick touched them |
-| Shared files | None changed — enforced by `test/isolation.test.ts` |
+| Shared files | None changed: enforced by `test/isolation.test.ts` and, since Slice C, by `scripts/guard.ts` (`test/write-isolation.test.ts`) |
 | Remote operations | None: no push, PR, merge, deploy, no network write |
 | Real data / credentials | None. All identifiers are fabricated (`FAKE-…`, `SYNTH-CANARY`) |
 
@@ -38,18 +38,24 @@
 | 06 | [TASK_REMINDER_AND_RECEIPT_CONTRACTS](06_TASK_REMINDER_AND_RECEIPT_CONTRACTS.md) | hand-written |
 | 07 | [CLIO_COEXISTENCE_ARCHITECTURE](07_CLIO_COEXISTENCE_ARCHITECTURE.md) | hand-written |
 | 08 | [SYNTHETIC_TEST_REPORT](08_SYNTHETIC_TEST_REPORT.md) | generated from the recorded run |
-| 09 | [ADVERSARIAL_FINDINGS_REGISTER](09_ADVERSARIAL_FINDINGS_REGISTER.md) | generated (91 entries) |
+| 09 | [ADVERSARIAL_FINDINGS_REGISTER](09_ADVERSARIAL_FINDINGS_REGISTER.md) | generated (94 entries: 91 source entries + WA-C-001…003) |
 | 10 | [GROK_FINDINGS_RECONCILIATION](10_GROK_FINDINGS_RECONCILIATION.md) | hand-written |
 | 11 | [WORKAID_VALIDATION_DECISIONS](11_WORKAID_VALIDATION_DECISIONS.md) | hand-written |
 | 12 | [IMPLEMENTATION_SLICES_AND_DEPENDENCIES](12_IMPLEMENTATION_SLICES_AND_DEPENDENCIES.md) | hand-written |
 | 13 | [INTEGRATION_HANDOFF_CONTRACT](13_INTEGRATION_HANDOFF_CONTRACT.md) | hand-written |
-| — | [WORKAID_PRODUCT_SPEC_v0.2](WORKAID_PRODUCT_SPEC_v0.2.md), [DECISION_LOG](DECISION_LOG.md), [CHANGED_SOURCE_INVENTORY](CHANGED_SOURCE_INVENTORY.md) | spec / log / inventory |
-| data | `data/WORKAID_ACCEPTANCE_MATRIX_v0.2.csv`, `data/findings-register.json` | generated |
-| evidence | `evidence/test-results.json`, `evidence/harness-manifest.json`, `evidence/COMMIT_BINDING.md` | generated |
+| 14 | [PERSONA_JOURNEY_CONTRACTS](14_PERSONA_JOURNEY_CONTRACTS.md) | hand-written (Slice C) |
+| 15 | [CROSS_PERSONA_CONSISTENCY](15_CROSS_PERSONA_CONSISTENCY.md) | hand-written (Slice C) |
+| 16 | [MEMBER_PORTAL_REUSE_ASSESSMENT](16_MEMBER_PORTAL_REUSE_ASSESSMENT.md) | hand-written, read-only inspection (Slice C) |
+| 17 | [RECEIPT_VS_FILING_AUTHORITY](17_RECEIPT_VS_FILING_AUTHORITY.md) | hand-written (Slice C) |
+| 18 | [SLICE_C_TEST_REPORT](18_SLICE_C_TEST_REPORT.md) | generated (Slice C) |
+| 19 | [R7_ADVERSARIAL_HANDOFF](19_R7_ADVERSARIAL_HANDOFF.md) | hand-written (Slice C) |
+| — | [WORKAID_PRODUCT_SPEC_v0.3](WORKAID_PRODUCT_SPEC_v0.3.md) (candidate; supersedes [v0.2](WORKAID_PRODUCT_SPEC_v0.2.md) where stated), [DECISION_LOG](DECISION_LOG.md), [CHANGED_SOURCE_INVENTORY](CHANGED_SOURCE_INVENTORY.md) | spec / log / inventory |
+| data | `data/WORKAID_ACCEPTANCE_MATRIX_v0.3.csv` (v0.2 csv retained as history), `data/findings-register.json` | generated |
+| evidence | `evidence/test-results.json`, `evidence/journey-trace.json`, `evidence/harness-manifest.json`, `evidence/COMMIT_BINDING.md`, `evidence/R7_MANIFEST.json` | generated |
 
 ## How to regenerate
 
-From `tooling/workaid-prep`: `node scripts/run-tests.ts && node scripts/build-baseline.ts && node scripts/manifest.ts` (then the inventory: `node scripts/inventory.ts`). Generated files say so in their header; edit `scripts/triage-overlay.ts` or `scripts/requirements.ts`, not the output.
+From `tooling/workaid-prep` (only from this isolated worktree; every script calls `preflight()` and writes through `scripts/guard.ts`): `node scripts/run-tests.ts && node scripts/build-baseline.ts && node scripts/inventory.ts && node scripts/manifest.ts`. Validate documentation with `node scripts/validate-docs-sandboxed.ts` (never the repository's `validate:docs` directly). Generated files say so in their header; edit `scripts/triage-overlay.ts`, `scripts/requirements.ts` or `scripts/slice-c-cases.ts`, not the output.
 
 ## Verdicts (separate; see 12)
 
@@ -62,4 +68,5 @@ None. No operation was attempted that would have changed Codex's directory or br
 ## Increments
 
 1. **Slice A + B (first part):** isolation, baseline, domain model, authority, referral completeness and multiple-claim harness, first findings register (initial increment).
-2. **Grok R3–R6 intake (this increment):** reconciliation, WA-INT hypotheses, spec v0.2, acceptance delta merged, expanded contracts (authorization separation, submission lifecycle, follow-up/reminders, deadline obligations, publication, revocation, uploads, Clio contract), platform reproductions, handoff.
+2. **Grok R3–R6 intake:** reconciliation, WA-INT hypotheses, spec v0.2, acceptance delta merged, expanded contracts (authorization separation, submission lifecycle, follow-up/reminders, deadline obligations, publication, revocation, uploads, Clio contract), platform reproductions, handoff.
+3. **Slice C (UE-WORKAID-PREP-20261023-C, this increment):** receipt separated from filing validity (WA-C-001), write isolation made structural (WA-C-002, with a corrected account of the v0.2 `validate:docs` run), four persona journeys and cross-persona challenges over one composed world, member-portal reuse assessment (read-only), spec v0.3 candidate, matrix v0.3 with per-step trace, Grok R7 challenge package. No operational file changed.

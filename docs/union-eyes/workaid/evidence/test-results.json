@@ -1,16 +1,17 @@
 {
-  "schema": "workaid-test-results/1",
-  "command": "node --test --test-reporter=junit test\\authorization.test.ts test\\claims.test.ts test\\deadlines.test.ts test\\followup.test.ts test\\integration-contracts.test.ts test\\isolation.test.ts test\\pack-integrity.test.ts test\\platform-repro.test.ts test\\publication-revocation.test.ts test\\referral.test.ts test\\submission.test.ts",
+  "schema": "workaid-test-results/2",
+  "command": "node --test --test-reporter=junit test\\authorization.test.ts test\\claims.test.ts test\\cross-persona.test.ts test\\deadlines.test.ts test\\filing.test.ts test\\followup.test.ts test\\integration-contracts.test.ts test\\isolation.test.ts test\\journey-a-domenic.test.ts test\\journey-b-angelo.test.ts test\\journey-c-union.test.ts test\\journey-d-member.test.ts test\\pack-integrity.test.ts test\\platform-repro.test.ts test\\publication-revocation.test.ts test\\referral.test.ts test\\slice-c-contracts.test.ts test\\submission.test.ts test\\write-isolation.test.ts",
   "cwd": "tooling/workaid-prep",
   "node": "v24.13.1",
-  "baseCommit": "38a824918cf2e7d7cfb7fcb0e796cbde45433be8",
+  "baseCommit": "023712d6ab3b40b43ef7f487183315e846de21fc",
   "workingTreeDirty": true,
   "exitCode": 0,
   "totals": {
-    "total": 177,
-    "pass": 177,
+    "total": 264,
+    "pass": 264,
     "fail": 0,
-    "skipped": 0
+    "skipped": 0,
+    "journeySteps": 184
   },
   "cases": [
     {
@@ -204,6 +205,56 @@
       "status": "PASS"
     },
     {
+      "file": "test/cross-persona.test.ts",
+      "name": "[WA-J-X] dispatch, publication, receipt and information requests reach only the personas entitled to them",
+      "status": "PASS"
+    },
+    {
+      "file": "test/cross-persona.test.ts",
+      "name": "[WA-J-X] multiple claims for one worker: only professionals see claim numbers; historical other-employer claims stay private",
+      "status": "PASS"
+    },
+    {
+      "file": "test/cross-persona.test.ts",
+      "name": "[WA-J-X] revoked specialist authority: access, reminders and approvals stop; other personas see no leak and no change they are not entitled to",
+      "status": "PASS"
+    },
+    {
+      "file": "test/cross-persona.test.ts",
+      "name": "[WA-J-X] incomplete urgent referral and missing professional acceptance: exceptions never become completeness or acceptance",
+      "status": "PASS"
+    },
+    {
+      "file": "test/cross-persona.test.ts",
+      "name": "[WA-J-X] unconfirmed receipt, conflicting Clio and Union Eyes tasks, and an unknown filing deadline: nothing is inferred and nothing is written back",
+      "status": "PASS"
+    },
+    {
+      "file": "test/cross-persona.test.ts",
+      "name": "[WA-J-X] reassigned responsibility: the old owner loses the task and access, reminders move with the task, and nothing is delivered to the wrong person",
+      "status": "PASS"
+    },
+    {
+      "file": "test/cross-persona.test.ts",
+      "name": "[WA-J-X] withheld medical evidence stays withheld across every persona, notification and release path",
+      "status": "PASS"
+    },
+    {
+      "file": "test/cross-persona.test.ts",
+      "name": "[WA-J-X] a delayed ARO decision: waiting is visible, no date is invented, nothing reaches the member until a professional publishes",
+      "status": "PASS"
+    },
+    {
+      "file": "test/cross-persona.test.ts",
+      "name": "[WA-J-X] cross-tenant attempts on every surface fail without disclosure and are logged only on the attacker's own organization",
+      "status": "PASS"
+    },
+    {
+      "file": "test/cross-persona.test.ts",
+      "name": "[WA-J-X] source of truth: every matter event is audited on the OWNING union's trail with the actor, never with content",
+      "status": "PASS"
+    },
+    {
       "file": "test/deadlines.test.ts",
       "name": "[WA-T028][WA-T074] unconfirmed means unconfirmed: no universal timer, no computed date, never a &quot;met&quot; status",
       "status": "PASS"
@@ -256,6 +307,106 @@
     {
       "file": "test/deadlines.test.ts",
       "name": "[WA-T032] receiving a file in batches does not mark it complete; completeness is a professional judgement",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T103] no submission state, with or without a receipt record, yields a valid-filing status without a professional determination",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T103] the unresolved reason distinguishes &quot;not sent&quot;, &quot;sent, no receipt&quot; and &quot;receipt, no determination&quot;",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T103] an authority response cannot be fabricated from receipt: it needs the authority document and a professional",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T103] receipt itself carries no filing field: the receipt record has no validity or acceptance property",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T103] with every other input perfect, only a documented receipt in a live state can be assessed valid; no status named VALIDLY_FILED exists",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T104] union user, member, inactive session, forged assessor, missing authorization",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T104] a closed or superseded submission, or a stale version, cannot be assessed",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T105] sent without documented receipt, or never sent, cannot be a valid filing",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T105] with no reviewed, applicable requirement source the status stays explicitly undetermined",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T105] every element of the source must be attested with a non-empty evidence reference",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T106] wrong claim, wrong decision, different issues, wrong matter",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T106] wrong form kind and a tampered recipient (a record corrupted after creation)",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T106] a missing required link makes it malformed even when receipt was acknowledged",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T106] a refused determination changes nothing: the status stays UNDETERMINED",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T107] with every gate satisfied a named professional can record a valid determination; timeliness is still not asserted",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T107] the authority response is separate: acceptance and rejection need its own document and neither asserts timeliness",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T107] an authority acceptance recorded without any professional determination does not create one",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T107] a determination is void once the submission is superseded; a new version needs its own",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T108] a professional can record a defect on a sent submission without receipt; it needs concrete defects and reasoning",
+      "status": "PASS"
+    },
+    {
+      "file": "test/filing.test.ts",
+      "name": "[WA-T108] determinations are append-only: a later defect finding supersedes a valid one without erasing it",
       "status": "PASS"
     },
     {
@@ -464,6 +615,126 @@
       "status": "PASS"
     },
     {
+      "file": "test/journey-a-domenic.test.ts",
+      "name": "[WA-J-A] referral intake: missing items, return, clarification, and no acceptance without the policy role",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-a-domenic.test.ts",
+      "name": "[WA-J-A] a technical grant and recorded instruments are not acceptance: no professional action before the principal accepts",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-a-domenic.test.ts",
+      "name": "[WA-J-A] multiple claims: objections attach to the right claim; historical other-employer numbers stay out of outbound references",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-a-domenic.test.ts",
+      "name": "[WA-J-A] dispatch to receipt: contextual task without retyping; no reminder through an invented default",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-a-domenic.test.ts",
+      "name": "[WA-J-A] receipt is confirmed by a human with evidence; it does not become a valid filing",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-a-domenic.test.ts",
+      "name": "[WA-J-A] evidence gathering, ARF, and waiting for the ARO without invented dates or milestones",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-a-domenic.test.ts",
+      "name": "[WA-J-A] a configured task-of-record produces a reminder only when due, to the synthetic sink, with generic text; Clio as record produces none",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-a-domenic.test.ts",
+      "name": "[WA-J-A] the specialist cannot reach what is not theirs",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-b-angelo.test.ts",
+      "name": "[WA-J-B] supervision of acceptance: only the policy role accepts; the referral queue is visible to the principal alone",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-b-angelo.test.ts",
+      "name": "[WA-J-B] holds and release: lifting a hold is the principal's; supervision does not bypass document access",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-b-angelo.test.ts",
+      "name": "[WA-J-B] escalations and reassignment: only the principal reassigns; the old owner's reminders are superseded",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-b-angelo.test.ts",
+      "name": "[WA-J-B] uncertain statutory deadlines stay visible to the supervisor until a professional confirms them with a reviewed rule source",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-b-angelo.test.ts",
+      "name": "[WA-J-B] an adverse ARO decision opens a prompt for assessment, never a filing; no tribunal procedure is determined by the system",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-b-angelo.test.ts",
+      "name": "[WA-J-B] approval boundaries: forged approvals and non-professional overrides are refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-c-union.test.ts",
+      "name": "[WA-T115][WA-J-C] duplicate worker identities within a union need an administrator; another union's records are never consulted",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-c-union.test.ts",
+      "name": "[WA-J-C] create and correct a referral; the union sees only what it owes, codes not documents",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-c-union.test.ts",
+      "name": "[WA-J-C] the union receives only approved milestones and nothing professional, medical or from another union",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-c-union.test.ts",
+      "name": "[WA-J-C] uploads are untrusted; another union is told nothing; refusals are logged on the refuser's own trail",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-d-member.test.ts",
+      "name": "[WA-J-D] before anything is published the member sees &quot;no update&quot; and the records-access channel, never the internal state",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-d-member.test.ts",
+      "name": "[WA-J-D] requested information: the member supplies a document, which stays quarantined and unreadable until a professional releases something",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-d-member.test.ts",
+      "name": "[WA-J-D] a submitted document, a pending WSIB action and an actual decision are three different things the member can tell apart",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-d-member.test.ts",
+      "name": "[WA-J-D] restricted medical material, another member's records and historical claims are never reachable",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-d-member.test.ts",
+      "name": "[WA-J-D] released correspondence is the only document a member can open; the title appears only for what is released",
+      "status": "PASS"
+    },
+    {
+      "file": "test/journey-d-member.test.ts",
+      "name": "[WA-J-D] English and French content contract: French is required only if policy says so, is shown only if it exists, and carries no quality claim",
+      "status": "PASS"
+    },
+    {
       "file": "test/pack-integrity.test.ts",
       "name": "every manifest file is present and matches its recorded size and SHA-256 (CSV compared as CRLF as shipped)",
       "status": "PASS"
@@ -525,7 +796,7 @@
     },
     {
       "file": "test/pack-integrity.test.ts",
-      "name": "all source findings: 91 entries, ids unique across rounds (R1 22, R2 9, R3 26, R4-R6 31, INT 3)",
+      "name": "all source findings: 91 original entries unchanged (R1 22, R2 9, R3 26, R4-R6 31, INT 3) plus 3 Slice C entries; ids unique, nothing renumbered",
       "status": "PASS"
     },
     {
@@ -794,6 +1065,76 @@
       "status": "PASS"
     },
     {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T111] honest wording about a sent document passes; wording that claims receipt, filing or acceptance is refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T111] receipt-confirmed wording may say received, but still never &quot;filed&quot;, &quot;valid&quot; or &quot;accepted&quot;",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T111] a decision stage tells the member a decision arrived and who will explain it; it never states the outcome",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T111] waiting stages cannot claim receipt; the three states a member must tell apart stay distinct",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T111] the lint is a backstop, not a gate on evidence: wording passing the lint still needs stage evidence",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T112] French wording is linted with the same rules",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T112] when policy requires French, an English-only publication is refused; otherwise nothing is assumed",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T112] a French text is recorded UNREVIEWED: the system claims no translation quality",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T112] the member sees French only if it exists; otherwise English is shown and labelled as English",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T113] publications are union-invisible by default; only an explicitly union-visible, non-withdrawn milestone appears, with no extra fields",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T114] a non-favourable or unknown outcome opens a prompt for professional assessment, never a filing; a favourable one opens nothing",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T114] only a permitted role can assess, the assessor must be the authenticated principal, and reasoning plus the final decision document are required",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T114] tribunal submission preparation needs a recorded &quot;proceeding&quot; assessment; not-proceeding, more-information and unassessed do not qualify",
+      "status": "PASS"
+    },
+    {
+      "file": "test/slice-c-contracts.test.ts",
+      "name": "[WA-T114] an assessment is recorded once; revisiting needs a new prompt, and the record states no time limit",
+      "status": "PASS"
+    },
+    {
       "file": "test/submission.test.ts",
       "name": "[WA-T026] DOA and WRF are distinct typed submissions",
       "status": "PASS"
@@ -815,12 +1156,17 @@
     },
     {
       "file": "test/submission.test.ts",
+      "name": "[WA-T101] a submission is addressed to the authority its kind belongs to; an ITO cannot be created for the Tribunal",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
       "name": "[WA-T039][WA-T040] exhaustive matrix: every (from, to) pair behaves exactly as the allow-list says",
       "status": "PASS"
     },
     {
       "file": "test/submission.test.ts",
-      "name": "[WA-ADV-09] DRAFT/REVIEWED/APPROVED can never jump to DISPATCHED-adjacent receipt states",
+      "name": "[WA-ADV-09] drafts, reviews and approvals can never jump to sent or receipt states",
       "status": "PASS"
     },
     {
@@ -831,6 +1177,36 @@
     {
       "file": "test/submission.test.ts",
       "name": "a rejected submission can only be superseded by a new version, never revived",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T102] an attempt is not a dispatch: no transmission reference, no confirmed dispatch, no follow-up eligibility",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T102] confirming dispatch needs the matching attempt and a transmission reference",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T102] a failed attempt is visible and recoverable with a new request id; it never starts a receipt follow-up",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T102] the provider may report transmission outcomes but never receipt, approval or an attempt",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T102] a human confirming dispatch still needs live professional authorization; a union user cannot",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T102] the old helper that counted a receipt as &quot;filed&quot; no longer exists",
       "status": "PASS"
     },
     {
@@ -855,17 +1231,17 @@
     },
     {
       "file": "test/submission.test.ts",
-      "name": "a union user cannot confirm receipt or dispatch",
+      "name": "a union user cannot confirm receipt or attempt dispatch",
       "status": "PASS"
     },
     {
       "file": "test/submission.test.ts",
-      "name": "[WA-T039] draft or approved documents have no dispatch record and start nothing",
+      "name": "[WA-T039] draft or approved documents have no dispatch or attempt record and start nothing",
       "status": "PASS"
     },
     {
       "file": "test/submission.test.ts",
-      "name": "a replayed dispatch with the same request id is idempotent; a second send under a new id is refused",
+      "name": "a replayed attempt or confirmation with the same request id is idempotent; a second send under a new id is refused",
       "status": "PASS"
     },
     {
@@ -885,7 +1261,7 @@
     },
     {
       "file": "test/submission.test.ts",
-      "name": "a system actor cannot approve, review or dispatch",
+      "name": "a system actor cannot approve, review or attempt dispatch",
       "status": "PASS"
     },
     {
@@ -895,7 +1271,67 @@
     },
     {
       "file": "test/submission.test.ts",
-      "name": "losing authority invalidates an approval back to REVIEWED (cascade actor only)",
+      "name": "losing authority invalidates an approval back to REVIEWED (cascade actor, or a professional)",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "a union user cannot invalidate or otherwise touch an approval",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T109] preflight confirms the isolated linked worktree on an agents/workaid-prep branch",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T109] writes are permitted only under the two preparation prefixes or the OS temp directory",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T109] path traversal out of the allowed prefixes is refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T109] every other registered worktree, including the main checkout, is refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T109] temp helpers only operate below the OS temp directory",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T109] only scripts/guard.ts may import write-capable filesystem functions; nothing imports fs wholesale",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T109] no source runs a mutating git command or names another checkout by path",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T109] every spawned process runs with this harness, the repository root or a temp sandbox as its working directory",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T109] the type-check script can only run with --noEmit and verifies the worktree is unchanged afterwards",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T110] the repository validator derives its output directory from the working directory, which is why it is only ever run in a sandbox",
+      "status": "PASS"
+    },
+    {
+      "file": "test/write-isolation.test.ts",
+      "name": "[WA-T110] sandboxed documentation validation reports no errors and leaves the worktree reports untouched",
       "status": "PASS"
     }
   ]

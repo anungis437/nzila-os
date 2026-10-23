@@ -8,7 +8,7 @@ export const baselineDir = join(workaidDocs, 'baseline-pack-v0.1');
 export const grokDir = join(workaidDocs, 'grok-redteam-01');
 
 export type Severity = 'P0' | 'P1' | 'P2' | 'P3';
-export type SourceRound = 'R1' | 'R2' | 'R3' | 'R4' | 'R5' | 'R6' | 'INT';
+export type SourceRound = 'R1' | 'R2' | 'R3' | 'R4' | 'R5' | 'R6' | 'INT' | 'C';
 
 export interface SourceFinding {
   readonly id: string;
@@ -131,8 +131,39 @@ export const INTAKE_HYPOTHESES: SourceFinding[] = [
   },
 ];
 
+/** Findings raised by this programme's own review of v0.2 (mission UE-WORKAID-PREP-20261023-C). Ids WA-C-nnn; no prior id is renumbered. */
+export const SLICE_C_FINDINGS: SourceFinding[] = [
+  {
+    id: 'WA-C-001',
+    round: 'C',
+    sourceSeverity: 'P1 (engineering review)',
+    severity: 'P1',
+    title: 'Receipt confirmation was treated as a filed submission (submissionCountsAsFiled)',
+    sourceDisposition: 'SELF_IDENTIFIED_V0_2',
+    sourceFile: 'Slice C mission §2 (engineering review of v0.2)',
+  },
+  {
+    id: 'WA-C-002',
+    round: 'C',
+    sourceSeverity: 'P1 (engineering review)',
+    severity: 'P1',
+    title: 'Preparation tooling could write into another checkout (validate:docs ran through the main checkout)',
+    sourceDisposition: 'SELF_IDENTIFIED_V0_2',
+    sourceFile: 'Slice C mission §2 (engineering review of v0.2)',
+  },
+  {
+    id: 'WA-C-003',
+    round: 'C',
+    sourceSeverity: 'P1 (self-identified)',
+    severity: 'P1',
+    title: 'Member- or union-facing status wording can misrepresent procedural progress',
+    sourceDisposition: 'SELF_IDENTIFIED_SLICE_C',
+    sourceFile: 'Slice C mission §3 Journey D and §4 (member status updates that would misrepresent progress)',
+  },
+];
+
 export function allSourceFindings(): SourceFinding[] {
-  return [...parseR1(), ...parseR2(), ...parseR3(), ...parseExtension(), ...INTAKE_HYPOTHESES];
+  return [...parseR1(), ...parseR2(), ...parseR3(), ...parseExtension(), ...INTAKE_HYPOTHESES, ...SLICE_C_FINDINGS];
 }
 
 /* ---------------- acceptance matrix ---------------- */
@@ -148,7 +179,7 @@ export interface MatrixRow {
   readonly owner: string;
   readonly priorState: string;
   readonly relatedFindings: string;
-  readonly origin: 'PACK_V0_1' | 'GROK_DELTA';
+  readonly origin: 'PACK_V0_1' | 'GROK_DELTA' | 'SLICE_C';
 }
 
 export function parseCsv(text: string): string[][] {

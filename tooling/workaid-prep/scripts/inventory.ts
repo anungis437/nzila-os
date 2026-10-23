@@ -5,12 +5,14 @@
  *   node scripts/inventory.ts
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { preflight, safeWrite } from './guard.ts';
 
+preflight();
 const BASE = '38a824918cf2e7d7cfb7fcb0e796cbde45433be8';
 const repoRoot = resolve(import.meta.dirname, '..', '..', '..');
-const git = (...a: string[]) => execFileSync('git', a, { cwd: repoRoot, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean);
+const git = (...a: string[]) => execFileSync('git', ['--no-optional-locks', ...a], { cwd: repoRoot, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean);
 
 const tracked = git('diff', '--name-status', BASE).map((l) => {
   const [status, ...rest] = l.split('\t');
@@ -67,6 +69,6 @@ md.push('## Not touched');
 md.push('');
 md.push('`package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, `vitest.config.ts`, `.github/**`, `apps/**`, `packages/**`, `migrations/**`, `infrastructure/**`, `governance/**`, `tooling/` other than `workaid-prep`, the staging database, migration journal and release manifests. Asserted by `test/isolation.test.ts`.');
 md.push('');
-writeFileSync(join(repoRoot, 'docs', 'union-eyes', 'workaid', 'CHANGED_SOURCE_INVENTORY.md'), md.join('\n'));
+safeWrite(join(repoRoot, 'docs', 'union-eyes', 'workaid', 'CHANGED_SOURCE_INVENTORY.md'), md.join('\n'));
 console.log(JSON.stringify({ paths: all.length, outside: outside.length }));
 if (outside.length > 0) process.exitCode = 1;

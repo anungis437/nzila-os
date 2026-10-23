@@ -1,9 +1,10 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { ALLOWED_SUBMISSION_TRANSITIONS, SUBMISSION_STATES, applySubmissionEvent, createSubmission, isReceiptUnconfirmed, submissionCountsAsFiled } from '../src/submission.ts';
+import * as submissionModule from '../src/submission.ts';
+import { ALLOWED_SUBMISSION_TRANSITIONS, SUBMISSION_STATES, applySubmissionEvent, createSubmission, dispatchConfirmed, isReceiptUnconfirmed, receiptDocumented } from '../src/submission.ts';
 import type { Submission, SubmissionContext, SubmissionEvent, SubmissionState } from '../src/submission.ts';
-import { asDecisionId, asIssueId, asMatterId, asObjectionId, asSubmissionId } from '../src/ids.ts';
-import { CLAIM_X, MATTER_ID, PRINCIPAL_1, REP_A, SPEC_1, SPEC_2, allowDecision, policyForSubmissions, principal, submissionAt, ORG_WA } from './helpers.ts';
+import { asDecisionId, asIssueId, asObjectionId, asSubmissionId } from '../src/ids.ts';
+import { CLAIM_X, MATTER_ID, PRINCIPAL_1, REP_A, SPEC_1, allowDecision, policyForSubmissions, principal, submissionAt, ORG_WA } from './helpers.ts';
 
 const ctx = (over: Partial<SubmissionContext> = {}): SubmissionContext => ({
   actor: { kind: 'USER', principal: SPEC_1 },
@@ -15,6 +16,7 @@ const ctx = (over: Partial<SubmissionContext> = {}): SubmissionContext => ({
   ...over,
 });
 const code = (r: { ok: boolean }) => (r as { code?: string }).code;
+const PROVIDER = { kind: 'SYSTEM', component: 'DISPATCH_PROVIDER' } as const;
 
 describe('submission creation links', () => {
   it('[WA-T026] DOA and WRF are distinct typed submissions', () => {
@@ -44,6 +46,13 @@ describe('submission creation links', () => {
     assert.equal(code(applySubmissionEvent(noa, { type: 'APPROVE', claimedApprover: SPEC_1.userId }, ctx({ gates: { noaReady: false } }))), 'GATE_NOT_SATISFIED');
     assert.equal(code(applySubmissionEvent(noa, { type: 'APPROVE', claimedApprover: SPEC_1.userId }, ctx({ gates: {} }))), 'GATE_NOT_SATISFIED');
   });
+
+  it('[WA-T101] a submission is addressed to the authority its kind belongs to; an ITO cannot be created for the Tribunal', () => {
+    const base = { id: asSubmissionId('S'), matterId: MATTER_ID, kind: 'ITO' as const, version: 1, preparedBy: SPEC_1.userId, claimId: CLAIM_X, decisionId: asDecisionId('D'), objectionId: asObjectionId('O'), issueIds: [asIssueId('I')] };
+    assert.equal(code(createSubmission({ ...base, recipient: 'WSIAT' })), 'RECIPIENT_MISMATCH');
+    assert.equal(createSubmission({ ...base, recipient: 'WSIB' }).ok, true);
+    assert.equal(code(createSubmission({ ...base, kind: 'WSIAT_NOA', recipient: 'WSIB' })), 'RECIPIENT_MISMATCH');
+  });
 });
 
 describe('forbidden transitions', () => {
@@ -51,51 +60,65 @@ describe('forbidden transitions', () => {
     DRAFT: { type: 'REQUEST_REWORK' },
     REVIEWED: { type: 'REVIEW' },
     APPROVED: { type: 'APPROVE', claimedApprover: SPEC_1.userId },
-    DISPATCHED: { type: 'DISPATCH', requestId: 'REQ-X', method: 'm' },
+    DISPATCH_ATTEMPTED: { type: 'ATTEMPT_DISPATCH', requestId: 'REQ-1', method: 'FAX_RECORDED_MANUALLY' },
+    DISPATCH_FAILED: { type: 'FAIL_DISPATCH', requestId: 'REQ-1', reason: 'line busy' },
+    DISPATCHED: { type: 'CONFIRM_DISPATCH', requestId: 'REQ-1', transmissionRef: 'FAKE-TX-0001' },
     DELIVERY_ACK: { type: 'ACK_DELIVERY', channel: 'c', providerRef: 'p' },
     RECEIPT_CONFIRMED: { type: 'CONFIRM_RECEIPT', method: 'PHONE_CALL', contactRef: 'FAKE CLERK', receivedAt: '2026-10-24T00:00:00Z' },
     REJECTED: { type: 'REJECT', reason: 'rejected by WSIB' },
     WITHDRAWN: { type: 'WITHDRAW', reason: 'no longer needed' },
     SUPERSEDED: { type: 'SUPERSEDE', reason: 'new version issued' },
   };
+  const via = (from: Parameters<typeof submissionAt>[0], e: SubmissionEvent, c = ctx()) => {
+    const r = applySubmissionEvent(submissionAt(from), e, c);
+    return r.ok ? r.value : null;
+  };
   const reach = (s: SubmissionState): Submission | null => {
-    if (s === 'DRAFT' || s === 'REVIEWED' || s === 'APPROVED' || s === 'DISPATCHED' || s === 'DELIVERY_ACK' || s === 'RECEIPT_CONFIRMED') return submissionAt(s);
-    const via = (from: Parameters<typeof submissionAt>[0], e: SubmissionEvent) => {
-      const r = applySubmissionEvent(submissionAt(from), e, ctx());
-      return r.ok ? r.value : null;
-    };
+    if (s === 'DRAFT' || s === 'REVIEWED' || s === 'APPROVED' || s === 'DISPATCH_ATTEMPTED' || s === 'DISPATCHED' || s === 'DELIVERY_ACK' || s === 'RECEIPT_CONFIRMED') return submissionAt(s);
+    if (s === 'DISPATCH_FAILED') return via('DISPATCH_ATTEMPTED', eventsFor.DISPATCH_FAILED);
     if (s === 'REJECTED') return via('DISPATCHED', eventsFor.REJECTED);
     if (s === 'WITHDRAWN') return via('DRAFT', eventsFor.WITHDRAWN);
     return via('DISPATCHED', eventsFor.SUPERSEDED);
   };
+  const actorFor = (to: SubmissionState): SubmissionContext['actor'] => (to === 'DELIVERY_ACK' ? PROVIDER : { kind: 'USER', principal: SPEC_1 });
 
   it('[WA-T039][WA-T040] exhaustive matrix: every (from, to) pair behaves exactly as the allow-list says', () => {
+    assert.equal(SUBMISSION_STATES.length, 11);
+    let pairs = 0;
     for (const from of SUBMISSION_STATES) {
       for (const to of SUBMISSION_STATES) {
         const sub = reach(from);
         assert.ok(sub, `could not reach ${from}`);
-        const actor: SubmissionContext['actor'] = to === 'DELIVERY_ACK' ? { kind: 'SYSTEM', component: 'DISPATCH_PROVIDER' } : { kind: 'USER', principal: SPEC_1 };
-        const r = applySubmissionEvent(sub, eventsFor[to], ctx({ actor }));
-        const allowed = ALLOWED_SUBMISSION_TRANSITIONS[from].includes(to) || (from === 'DELIVERY_ACK' && to === 'DELIVERY_ACK');
+        // a fresh attempt after a failure needs a new request id; every other event uses fixture ids
+        const event: SubmissionEvent = from === 'DISPATCH_FAILED' && to === 'DISPATCH_ATTEMPTED' ? { type: 'ATTEMPT_DISPATCH', requestId: 'REQ-2', method: 'FAX_RECORDED_MANUALLY' } : eventsFor[to];
+        const r = applySubmissionEvent(sub, event, ctx({ actor: actorFor(to) }));
+        const attemptedOrSent = ['DISPATCH_ATTEMPTED', 'DISPATCHED', 'DELIVERY_ACK', 'RECEIPT_CONFIRMED'].includes(from);
+        const sentOnly = ['DISPATCHED', 'DELIVERY_ACK', 'RECEIPT_CONFIRMED'].includes(from);
+        // Replays of an event that already took effect under the same request id are idempotent no-ops, not transitions.
+        const idempotentReplay = (to === 'DISPATCH_ATTEMPTED' && attemptedOrSent) || (to === 'DISPATCHED' && sentOnly) || (from === 'DELIVERY_ACK' && to === 'DELIVERY_ACK');
+        const allowed = ALLOWED_SUBMISSION_TRANSITIONS[from].includes(to) || idempotentReplay;
         assert.equal(r.ok, allowed, `${from} -> ${to} expected ${allowed ? 'allowed' : 'forbidden'}: ${JSON.stringify(r)}`);
+        pairs++;
       }
     }
+    assert.equal(pairs, 121);
   });
 
-  it('[WA-ADV-09] DRAFT/REVIEWED/APPROVED can never jump to DISPATCHED-adjacent receipt states', () => {
+  it('[WA-ADV-09] drafts, reviews and approvals can never jump to sent or receipt states', () => {
     for (const s of ['DRAFT', 'REVIEWED', 'APPROVED'] as const) {
       assert.equal(code(applySubmissionEvent(submissionAt(s), eventsFor.RECEIPT_CONFIRMED, ctx())), 'ILLEGAL_TRANSITION');
-      assert.equal(code(applySubmissionEvent(submissionAt(s), eventsFor.DELIVERY_ACK, ctx({ actor: { kind: 'SYSTEM', component: 'DISPATCH_PROVIDER' } }))), 'ILLEGAL_TRANSITION');
+      assert.equal(code(applySubmissionEvent(submissionAt(s), eventsFor.DELIVERY_ACK, ctx({ actor: PROVIDER }))), 'ILLEGAL_TRANSITION');
+      assert.equal(code(applySubmissionEvent(submissionAt(s), eventsFor.DISPATCHED, ctx())), 'DISPATCH_REQUEST_MISMATCH');
     }
-    assert.equal(code(applySubmissionEvent(submissionAt('DRAFT'), eventsFor.DISPATCHED, ctx())), 'ILLEGAL_TRANSITION');
-    assert.equal(code(applySubmissionEvent(submissionAt('REVIEWED'), eventsFor.DISPATCHED, ctx())), 'ILLEGAL_TRANSITION');
+    assert.equal(code(applySubmissionEvent(submissionAt('DRAFT'), eventsFor.DISPATCH_ATTEMPTED, ctx())), 'ILLEGAL_TRANSITION');
+    assert.equal(code(applySubmissionEvent(submissionAt('REVIEWED'), eventsFor.DISPATCH_ATTEMPTED, ctx())), 'ILLEGAL_TRANSITION');
   });
 
   it('terminal states stay terminal', () => {
     for (const s of ['WITHDRAWN', 'SUPERSEDED'] as const) {
       const sub = reach(s)!;
       for (const e of Object.values(eventsFor)) {
-        const actor: SubmissionContext['actor'] = e.type === 'ACK_DELIVERY' ? { kind: 'SYSTEM', component: 'DISPATCH_PROVIDER' } : { kind: 'USER', principal: SPEC_1 };
+        const actor = e.type === 'ACK_DELIVERY' ? PROVIDER : ({ kind: 'USER', principal: SPEC_1 } as const);
         assert.equal(applySubmissionEvent(sub, e, ctx({ actor })).ok, false, `${s} must be terminal for ${e.type}`);
       }
     }
@@ -103,8 +126,57 @@ describe('forbidden transitions', () => {
 
   it('a rejected submission can only be superseded by a new version, never revived', () => {
     const rejected = reach('REJECTED')!;
-    assert.equal(code(applySubmissionEvent(rejected, eventsFor.DISPATCHED, ctx())), 'ILLEGAL_TRANSITION');
+    assert.equal(code(applySubmissionEvent(rejected, eventsFor.DISPATCH_ATTEMPTED, ctx())), 'ILLEGAL_TRANSITION');
     assert.equal(applySubmissionEvent(rejected, eventsFor.SUPERSEDED, ctx()).ok, true);
+  });
+});
+
+describe('dispatch attempt, confirmed dispatch and receipt are separate facts (WA-C-001)', () => {
+  it('[WA-T102] an attempt is not a dispatch: no transmission reference, no confirmed dispatch, no follow-up eligibility', () => {
+    const attempted = submissionAt('DISPATCH_ATTEMPTED', 'WRF');
+    assert.equal(attempted.attempt?.requestId, 'REQ-1');
+    assert.equal(attempted.dispatch, null);
+    assert.equal(dispatchConfirmed(attempted), false);
+    assert.equal(isReceiptUnconfirmed(attempted), false, 'not yet sent, so there is nothing to confirm receipt of');
+  });
+
+  it('[WA-T102] confirming dispatch needs the matching attempt and a transmission reference', () => {
+    const attempted = submissionAt('DISPATCH_ATTEMPTED', 'WRF');
+    assert.equal(code(applySubmissionEvent(attempted, { type: 'CONFIRM_DISPATCH', requestId: 'OTHER', transmissionRef: 'X' }, ctx())), 'DISPATCH_REQUEST_MISMATCH');
+    assert.equal(code(applySubmissionEvent(attempted, { type: 'CONFIRM_DISPATCH', requestId: 'REQ-1', transmissionRef: '  ' }, ctx())), 'TRANSMISSION_REF_REQUIRED');
+    const done = applySubmissionEvent(attempted, { type: 'CONFIRM_DISPATCH', requestId: 'REQ-1', transmissionRef: 'FAKE-TX-77' }, ctx());
+    assert.equal(done.ok, true);
+    assert.equal((done as { value: Submission }).value.dispatch?.transmissionRef, 'FAKE-TX-77');
+    assert.equal(dispatchConfirmed((done as { value: Submission }).value), true);
+  });
+
+  it('[WA-T102] a failed attempt is visible and recoverable with a new request id; it never starts a receipt follow-up', () => {
+    const failed = (applySubmissionEvent(submissionAt('DISPATCH_ATTEMPTED', 'WRF'), { type: 'FAIL_DISPATCH', requestId: 'REQ-1', reason: 'fax line busy' }, ctx()) as { value: Submission }).value;
+    assert.equal(failed.state, 'DISPATCH_FAILED');
+    assert.equal(failed.dispatch, null);
+    const again = applySubmissionEvent(failed, { type: 'ATTEMPT_DISPATCH', requestId: 'REQ-2', method: 'FAX_RECORDED_MANUALLY' }, ctx());
+    assert.equal(again.ok, true);
+    assert.equal(code(applySubmissionEvent(failed, { type: 'FAIL_DISPATCH', requestId: 'REQ-9', reason: 'x' }, ctx())), 'DISPATCH_REQUEST_MISMATCH');
+  });
+
+  it('[WA-T102] the provider may report transmission outcomes but never receipt, approval or an attempt', () => {
+    const attempted = submissionAt('DISPATCH_ATTEMPTED', 'WRF');
+    assert.equal(applySubmissionEvent(attempted, { type: 'CONFIRM_DISPATCH', requestId: 'REQ-1', transmissionRef: 'PROVIDER-REF' }, ctx({ actor: PROVIDER, professionalAuth: undefined })).ok, true);
+    const sent = submissionAt('DISPATCHED', 'WRF');
+    assert.equal(code(applySubmissionEvent(sent, { type: 'CONFIRM_RECEIPT', method: 'PHONE_CALL', contactRef: 'x', receivedAt: 'z' }, ctx({ actor: PROVIDER }))), 'HUMAN_ACTOR_REQUIRED');
+    assert.equal(code(applySubmissionEvent(submissionAt('APPROVED', 'WRF'), { type: 'ATTEMPT_DISPATCH', requestId: 'r', method: 'm' }, ctx({ actor: PROVIDER }))), 'HUMAN_ACTOR_REQUIRED');
+    assert.equal(code(applySubmissionEvent(attempted, { type: 'CONFIRM_DISPATCH', requestId: 'REQ-1', transmissionRef: 'x' }, ctx({ actor: { kind: 'SYSTEM', component: 'AUTHORITY_CASCADE' } }))), 'SYSTEM_ACTOR_NOT_ALLOWED');
+  });
+
+  it('[WA-T102] a human confirming dispatch still needs live professional authorization; a union user cannot', () => {
+    const attempted = submissionAt('DISPATCH_ATTEMPTED', 'WRF');
+    assert.equal(code(applySubmissionEvent(attempted, { type: 'CONFIRM_DISPATCH', requestId: 'REQ-1', transmissionRef: 'x' }, ctx({ professionalAuth: undefined }))), 'AUTHORITY_DENIED');
+    assert.equal(code(applySubmissionEvent(attempted, { type: 'CONFIRM_DISPATCH', requestId: 'REQ-1', transmissionRef: 'x' }, ctx({ actor: { kind: 'USER', principal: REP_A } }))), 'NOT_PROFESSIONAL');
+  });
+
+  it('[WA-T102] the old helper that counted a receipt as "filed" no longer exists', () => {
+    assert.equal('submissionCountsAsFiled' in submissionModule, false);
+    assert.equal(typeof submissionModule.receiptDocumented, 'function');
   });
 });
 
@@ -114,13 +186,13 @@ describe('sending is not receipt; receipt is not acceptance', () => {
     assert.equal(acked.state, 'DELIVERY_ACK');
     assert.equal(acked.receipt, null);
     assert.equal(isReceiptUnconfirmed(acked), true);
-    assert.equal(submissionCountsAsFiled(acked), false);
+    assert.equal(receiptDocumented(acked), false);
   });
 
   it('[WA-ADV-09] a dispatch whose receipt is never confirmed stays visibly unconfirmed forever', () => {
     const sent = submissionAt('DISPATCHED');
     assert.equal(isReceiptUnconfirmed(sent), true);
-    assert.equal(submissionCountsAsFiled(sent), false);
+    assert.equal(receiptDocumented(sent), false);
   });
 
   it('only the dispatch provider may acknowledge delivery; humans and other systems cannot', () => {
@@ -133,7 +205,7 @@ describe('sending is not receipt; receipt is not acceptance', () => {
   it('[WA-T041] receipt confirmation requires a human, a recognized method, and a contact or evidence reference', () => {
     const sent = submissionAt('DISPATCHED');
     const at = '2026-10-24T14:00:00Z';
-    assert.equal(code(applySubmissionEvent(sent, { type: 'CONFIRM_RECEIPT', method: 'PHONE_CALL', contactRef: 'FAKE CLERK', receivedAt: at }, ctx({ actor: { kind: 'SYSTEM', component: 'DISPATCH_PROVIDER' } }))), 'HUMAN_ACTOR_REQUIRED');
+    assert.equal(code(applySubmissionEvent(sent, { type: 'CONFIRM_RECEIPT', method: 'PHONE_CALL', contactRef: 'FAKE CLERK', receivedAt: at }, ctx({ actor: PROVIDER }))), 'HUMAN_ACTOR_REQUIRED');
     assert.equal(code(applySubmissionEvent(sent, { type: 'CONFIRM_RECEIPT', method: 'EMAIL_PROVIDER_200', contactRef: 'x', receivedAt: at }, ctx())), 'INVALID_RECEIPT_METHOD');
     assert.equal(code(applySubmissionEvent(sent, { type: 'CONFIRM_RECEIPT', method: 'PHONE_CALL', receivedAt: at }, ctx())), 'RECEIPT_EVIDENCE_REQUIRED');
     assert.equal(code(applySubmissionEvent(sent, { type: 'CONFIRM_RECEIPT', method: 'PHONE_CALL', contactRef: '  ', evidenceRef: '', receivedAt: at }, ctx())), 'RECEIPT_EVIDENCE_REQUIRED');
@@ -142,32 +214,37 @@ describe('sending is not receipt; receipt is not acceptance', () => {
     const v = (done as { value: Submission }).value;
     assert.equal(v.receipt?.confirmedBy, SPEC_1.userId);
     assert.equal(v.receipt?.recordedAt, '2026-10-23T15:00:00Z');
-    assert.equal(submissionCountsAsFiled(v), true);
+    assert.equal(receiptDocumented(v), true);
   });
 
-  it('a union user cannot confirm receipt or dispatch', () => {
+  it('a union user cannot confirm receipt or attempt dispatch', () => {
     const sent = submissionAt('DISPATCHED');
     assert.equal(code(applySubmissionEvent(sent, { type: 'CONFIRM_RECEIPT', method: 'PHONE_CALL', contactRef: 'x', receivedAt: 'z' }, ctx({ actor: { kind: 'USER', principal: REP_A } }))), 'NOT_PROFESSIONAL');
-    assert.equal(code(applySubmissionEvent(submissionAt('APPROVED'), { type: 'DISPATCH', requestId: 'r', method: 'm' }, ctx({ actor: { kind: 'USER', principal: REP_A } }))), 'NOT_PROFESSIONAL');
+    assert.equal(code(applySubmissionEvent(submissionAt('APPROVED'), { type: 'ATTEMPT_DISPATCH', requestId: 'r', method: 'm' }, ctx({ actor: { kind: 'USER', principal: REP_A } }))), 'NOT_PROFESSIONAL');
   });
 
-  it('[WA-T039] draft or approved documents have no dispatch record and start nothing', () => {
-    for (const s of ['DRAFT', 'REVIEWED', 'APPROVED'] as const) assert.equal(submissionAt(s).dispatch, null);
+  it('[WA-T039] draft or approved documents have no dispatch or attempt record and start nothing', () => {
+    for (const s of ['DRAFT', 'REVIEWED', 'APPROVED'] as const) {
+      assert.equal(submissionAt(s).dispatch, null);
+      assert.equal(submissionAt(s).attempt, null);
+    }
   });
 
-  it('a replayed dispatch with the same request id is idempotent; a second send under a new id is refused', () => {
+  it('a replayed attempt or confirmation with the same request id is idempotent; a second send under a new id is refused', () => {
     const sent = submissionAt('DISPATCHED');
-    const replay = applySubmissionEvent(sent, { type: 'DISPATCH', requestId: 'REQ-1', method: 'FAX_RECORDED_MANUALLY' }, ctx());
+    const replay = applySubmissionEvent(sent, { type: 'ATTEMPT_DISPATCH', requestId: 'REQ-1', method: 'FAX_RECORDED_MANUALLY' }, ctx());
     assert.equal(replay.ok && replay.created, false);
-    assert.equal(code(applySubmissionEvent(sent, { type: 'DISPATCH', requestId: 'REQ-2', method: 'FAX_RECORDED_MANUALLY' }, ctx())), 'DUPLICATE_DISPATCH_DIFFERENT_REQUEST');
+    const replayConfirm = applySubmissionEvent(sent, { type: 'CONFIRM_DISPATCH', requestId: 'REQ-1', transmissionRef: 'FAKE-TX-0001' }, ctx());
+    assert.equal(replayConfirm.ok && replayConfirm.created, false);
+    assert.equal(code(applySubmissionEvent(sent, { type: 'ATTEMPT_DISPATCH', requestId: 'REQ-2', method: 'FAX_RECORDED_MANUALLY' }, ctx())), 'DUPLICATE_DISPATCH_DIFFERENT_REQUEST');
   });
 
   it('dispatching a representative document without live WSIB authority is refused, but DOA itself is dispatchable', () => {
     const ito = submissionAt('APPROVED', 'ITO');
     const denied = { allow: false as const, publicOutcome: 'FORBIDDEN' as const, reason: 'no DOA' };
-    assert.equal(code(applySubmissionEvent(ito, { type: 'DISPATCH', requestId: 'r', method: 'm' }, ctx({ representativeAuth: denied }))), 'AUTHORITY_DENIED');
+    assert.equal(code(applySubmissionEvent(ito, { type: 'ATTEMPT_DISPATCH', requestId: 'r', method: 'm' }, ctx({ representativeAuth: denied }))), 'AUTHORITY_DENIED');
     const doa = submissionAt('APPROVED', 'DOA');
-    assert.equal(applySubmissionEvent(doa, { type: 'DISPATCH', requestId: 'r', method: 'm' }, ctx({ representativeAuth: denied })).ok, true);
+    assert.equal(applySubmissionEvent(doa, { type: 'ATTEMPT_DISPATCH', requestId: 'r', method: 'm' }, ctx({ representativeAuth: denied })).ok, true);
   });
 });
 
@@ -187,9 +264,9 @@ describe('approval cannot be forged', () => {
     assert.equal(code(applySubmissionEvent(rev, { type: 'APPROVE', claimedApprover: SPEC_1.userId }, ctx({ professionalAuth: undefined }))), 'AUTHORITY_DENIED');
   });
 
-  it('a system actor cannot approve, review or dispatch', () => {
-    for (const e of [{ type: 'APPROVE', claimedApprover: 'system' }, { type: 'REVIEW' }, { type: 'DISPATCH', requestId: 'r', method: 'm' }] as SubmissionEvent[]) {
-      assert.equal(code(applySubmissionEvent(submissionAt('REVIEWED'), e, ctx({ actor: { kind: 'SYSTEM', component: 'DISPATCH_PROVIDER' } }))), 'HUMAN_ACTOR_REQUIRED');
+  it('a system actor cannot approve, review or attempt dispatch', () => {
+    for (const e of [{ type: 'APPROVE', claimedApprover: 'system' }, { type: 'REVIEW' }, { type: 'ATTEMPT_DISPATCH', requestId: 'r', method: 'm' }] as SubmissionEvent[]) {
+      assert.equal(code(applySubmissionEvent(submissionAt('REVIEWED'), e, ctx({ actor: PROVIDER }))), 'HUMAN_ACTOR_REQUIRED');
     }
   });
 
@@ -201,14 +278,15 @@ describe('approval cannot be forged', () => {
     assert.equal(applySubmissionEvent(rev, { type: 'APPROVE', claimedApprover: other.userId }, { ...strict, actor: { kind: 'USER', principal: other } }).ok, true);
   });
 
-  it('losing authority invalidates an approval back to REVIEWED (cascade actor only)', () => {
+  it('losing authority invalidates an approval back to REVIEWED (cascade actor, or a professional)', () => {
     const approved = submissionAt('APPROVED');
     const r = applySubmissionEvent(approved, { type: 'INVALIDATE_APPROVAL', reason: 'DOA revoked' }, ctx({ actor: { kind: 'SYSTEM', component: 'AUTHORITY_CASCADE' } }));
     assert.equal(r.ok, true);
     assert.equal((r as { value: Submission }).value.state, 'REVIEWED');
     assert.equal((r as { value: Submission }).value.approval, null);
   });
-});
 
-void SPEC_2;
-void asMatterId;
+  it('a union user cannot invalidate or otherwise touch an approval', () => {
+    assert.equal(code(applySubmissionEvent(submissionAt('APPROVED'), { type: 'INVALIDATE_APPROVAL', reason: 'union attempt' }, ctx({ actor: { kind: 'USER', principal: REP_A } }))), 'NOT_PROFESSIONAL');
+  });
+});

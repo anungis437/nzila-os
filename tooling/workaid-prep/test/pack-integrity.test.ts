@@ -107,11 +107,14 @@ describe('Grok deliverables (R3-R6) integrity', () => {
     for (const r of parseGrokDelta()) for (const f of r.relatedFindings.split(/\s+/).filter(Boolean)) assert.ok(r3.has(f), `${r.id} cites ${f}`);
   });
 
-  it('all source findings: 91 entries, ids unique across rounds (R1 22, R2 9, R3 26, R4-R6 31, INT 3)', () => {
+  it('all source findings: 91 original entries unchanged (R1 22, R2 9, R3 26, R4-R6 31, INT 3) plus 3 Slice C entries; ids unique, nothing renumbered', () => {
     const all = allSourceFindings();
-    assert.equal(all.length, 22 + 9 + 26 + 31 + INTAKE_HYPOTHESES.length);
-    assert.equal(all.length, 91);
-    assert.equal(new Set(all.map((f) => f.id)).size, 91);
+    const original = all.filter((f) => f.round !== 'C');
+    assert.equal(original.length, 22 + 9 + 26 + 31 + INTAKE_HYPOTHESES.length);
+    assert.equal(original.length, 91);
+    assert.deepEqual(all.filter((f) => f.round === 'C').map((f) => f.id), ['WA-C-001', 'WA-C-002', 'WA-C-003']);
+    assert.equal(all.length, 94);
+    assert.equal(new Set(all.map((f) => f.id)).size, 94);
   });
 
   it('the CSV parser handles quoted commas and CRLF', () => {

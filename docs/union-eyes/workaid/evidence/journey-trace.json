@@ -1,0 +1,4122 @@
+{
+  "schema": "workaid-journey-trace/1",
+  "sourceRevision": "023712d6ab3b40b43ef7f487183315e846de21fc",
+  "workingTreeDirty": true,
+  "steps": 184,
+  "entries": [
+    {
+      "stepId": "X-01",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "confirmed dispatch propagates",
+      "expected": "specialist and supervisor see the unconfirmed receipt; union and member see nothing new",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-040",
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-04",
+        "WA-R1-14"
+      ],
+      "matrixCases": [
+        "WA-T037",
+        "WA-T085"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-02",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "a member-only publication propagates",
+      "expected": "only the member view changes",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-14"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-03",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "a union-visible publication propagates",
+      "expected": "member and union views change; professional views do not",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-14"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-04",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "documented receipt propagates",
+      "expected": "professional views change; member and union are told nothing until a professional publishes",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-032",
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-04",
+        "WA-C-001"
+      ],
+      "matrixCases": [
+        "WA-T040",
+        "WA-T103"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-05",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "an information request addressed to the union propagates",
+      "expected": "specialist and union change; supervisor and member do not",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-053"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-06",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union view with two claims on file",
+      "expected": "no claim number, employer or decision anywhere",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-024",
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R4-01",
+        "WA-R2-01"
+      ],
+      "matrixCases": [
+        "WA-T007",
+        "WA-T071"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-07",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member view with two claims on file",
+      "expected": "no claim number, employer or decision anywhere",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-024",
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R4-01",
+        "WA-R2-01"
+      ],
+      "matrixCases": [
+        "WA-T007",
+        "WA-T071"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-08",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist outbound references for claim X with historical claim Y on file",
+      "expected": "target claim only",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-024"
+      ],
+      "findings": [
+        "WA-R2-01",
+        "WA-R5-02"
+      ],
+      "matrixCases": [
+        "WA-T071"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-09",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "validate work context for the historical other-employer claim",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "WORK_CONTEXT_VALIDATED",
+      "requirements": [
+        "WA-REQ-024"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-10",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "references after a work-context validation for a different-employer claim",
+      "expected": "still excluded: validation never overrides an employer mismatch",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-024"
+      ],
+      "findings": [
+        "WA-R2-01",
+        "WA-R5-02"
+      ],
+      "matrixCases": [
+        "WA-T071",
+        "WA-T072"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-11",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist reads a document before revocation",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-012"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-12",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "a union referral representative revokes the release authorization",
+      "expected": "NOT_AUTHORIZED",
+      "actual": "NOT_AUTHORIZED",
+      "authorizationDecision": "DENY:NOT_AUTHORIZED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-015"
+      ],
+      "findings": [
+        "WA-R3-008"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-13",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-ADMIN-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "the union administrator revokes the release authorization",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "AUTHORIZATION_REVOKED",
+      "requirements": [
+        "WA-REQ-015"
+      ],
+      "findings": [
+        "WA-R1-13",
+        "WA-R3-008",
+        "WA-R3-015",
+        "WA-R4-09"
+      ],
+      "matrixCases": [
+        "WA-T084",
+        "WA-T018"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-14",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist reads the document after revocation",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-015"
+      ],
+      "findings": [
+        "WA-R1-13",
+        "WA-R3-008"
+      ],
+      "matrixCases": [
+        "WA-T018",
+        "WA-T084"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-15",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist queue after revocation",
+      "expected": "empty: the matter is no longer reachable",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-015"
+      ],
+      "findings": [
+        "WA-R1-13"
+      ],
+      "matrixCases": [
+        "WA-T084",
+        "WA-T100"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-16",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist dispatches a previously approved document after revocation",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-015"
+      ],
+      "findings": [
+        "WA-R3-008"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-17",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member view after the specialist lost access",
+      "expected": "unchanged: revocation of a specialist is not a member event",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-18",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "the principal revokes the WSIB DOA",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "AUTHORIZATION_REVOKED",
+      "requirements": [
+        "WA-REQ-015"
+      ],
+      "findings": [
+        "WA-R4-09"
+      ],
+      "matrixCases": [
+        "WA-T084",
+        "WA-T017"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-19",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "dispatch as WSIB representative without a live DOA",
+      "expected": "AUTHORITY_DENIED",
+      "actual": "AUTHORITY_DENIED",
+      "authorizationDecision": "DENY:AUTHORITY_DENIED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-010",
+        "WA-REQ-011"
+      ],
+      "findings": [
+        "WA-R4-09",
+        "WA-R2-05"
+      ],
+      "matrixCases": [
+        "WA-T017"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-20",
+      "fixture": "FX-URGENT-INCOMPLETE",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "offer under a granted urgent exception",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "REFERRAL_OFFER",
+      "requirements": [
+        "WA-REQ-006"
+      ],
+      "findings": [
+        "WA-R1-16",
+        "WA-R2-04",
+        "WA-R4-03"
+      ],
+      "matrixCases": [
+        "WA-T011",
+        "WA-T076"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-21",
+      "fixture": "FX-URGENT-INCOMPLETE",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist sees the urgent referral",
+      "expected": "missing photo ID still reported; urgent review pending",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-006"
+      ],
+      "findings": [
+        "WA-R1-16"
+      ],
+      "matrixCases": [
+        "WA-T016"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-22",
+      "fixture": "FX-URGENT-INCOMPLETE",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union sees the same referral",
+      "expected": "urgent review pending; the packet is NOT shown as complete",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-006"
+      ],
+      "findings": [
+        "WA-R1-16"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-23",
+      "fixture": "FX-URGENT-INCOMPLETE",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union withdraws while the urgent review is pending",
+      "expected": "URGENT_REVIEW_PENDING",
+      "actual": "URGENT_REVIEW_PENDING",
+      "authorizationDecision": "DENY:URGENT_REVIEW_PENDING",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-007"
+      ],
+      "findings": [
+        "WA-R1-16"
+      ],
+      "matrixCases": [
+        "WA-ADV-16"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-24",
+      "fixture": "FX-URGENT-INCOMPLETE",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist declines without disposing of the urgent review",
+      "expected": "URGENT_REVIEW_PENDING",
+      "actual": "URGENT_REVIEW_PENDING",
+      "authorizationDecision": "DENY:URGENT_REVIEW_PENDING",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-007"
+      ],
+      "findings": [
+        "WA-R1-16"
+      ],
+      "matrixCases": [
+        "WA-ADV-16"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-25",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "publish \"representation accepted\" with a grant and a DOA but no acceptance",
+      "expected": "FORBIDDEN",
+      "actual": "FORBIDDEN",
+      "authorizationDecision": "DENY:FORBIDDEN",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-010",
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-05",
+        "WA-R3-007"
+      ],
+      "matrixCases": [
+        "WA-T083"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-26",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union view before acceptance",
+      "expected": "OFFERED, not ACCEPTED",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-008"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-27",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member view before acceptance",
+      "expected": "no update",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-01",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union offers an incomplete packet with no exception",
+      "expected": "PACKET_INCOMPLETE",
+      "actual": "PACKET_INCOMPLETE",
+      "authorizationDecision": "DENY:PACKET_INCOMPLETE",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-002",
+        "WA-REQ-006"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T003"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-02",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist reads the referral queue",
+      "expected": "missing item reported individually; nothing marked complete",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-002"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T003"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-03",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist requests clarification about claim history",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "REFERRAL_REQUEST_CLARIFICATION",
+      "requirements": [
+        "WA-REQ-007"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T012"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-04",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist tries to accept representation (policy reserves it to the principal)",
+      "expected": "FORBIDDEN_ACTOR",
+      "actual": "FORBIDDEN_ACTOR",
+      "authorizationDecision": "DENY:FORBIDDEN_ACTOR",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-008"
+      ],
+      "findings": [
+        "WA-R1-05"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-05",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "create a WRF with a view grant but no professional acceptance",
+      "expected": "FORBIDDEN",
+      "actual": "FORBIDDEN",
+      "authorizationDecision": "DENY:FORBIDDEN",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-010"
+      ],
+      "findings": [
+        "WA-R1-05",
+        "WA-R3-007"
+      ],
+      "matrixCases": [
+        "WA-T016",
+        "WA-T083"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-28",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "supervisor lists dispatched-but-unconfirmed submissions",
+      "expected": "the ITO is listed; filing is undetermined",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-032"
+      ],
+      "findings": [
+        "WA-R1-04"
+      ],
+      "matrixCases": [
+        "WA-T040",
+        "WA-ADV-09"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-06",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "prepare an objection on the wrong claim",
+      "expected": "WRONG_CLAIM",
+      "actual": "WRONG_CLAIM",
+      "authorizationDecision": "DENY:WRONG_CLAIM",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-020"
+      ],
+      "findings": [
+        "WA-R1-06"
+      ],
+      "matrixCases": [
+        "WA-T008"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-29",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "publish \"receipt confirmed\" while receipt is unconfirmed",
+      "expected": "EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "actual": "EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "authorizationDecision": "DENY:EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-04",
+        "WA-R1-14"
+      ],
+      "matrixCases": [
+        "WA-ADV-09"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-07",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "prepare an objection on claim X decision A-D2 issue 1",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "OBJECTION_PREPARED",
+      "requirements": [
+        "WA-REQ-020",
+        "WA-REQ-022"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-08",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "the same objection request replayed",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-022"
+      ],
+      "findings": [
+        "WA-R4-05"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-09",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "claim references allowed on an outbound ITO for claim X",
+      "expected": "target claim only; employer-Y claim excluded",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-024"
+      ],
+      "findings": [
+        "WA-R2-01",
+        "WA-R5-02"
+      ],
+      "matrixCases": [
+        "WA-T071"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-30",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "Clio reports a snoozed task while the Union Eyes task is open",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-071"
+      ],
+      "findings": [
+        "WA-R1-10",
+        "WA-R4-10"
+      ],
+      "matrixCases": [
+        "WA-T056",
+        "WA-ADV-15"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-10",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "ITO grouping within a claim",
+      "expected": "undecided: no default strategy is invented",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-023"
+      ],
+      "findings": [
+        "WA-R2-02"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-31",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "Clio reports \"receipt confirmed\"; Union Eyes has no receipt record",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-071"
+      ],
+      "findings": [
+        "WA-R1-10"
+      ],
+      "matrixCases": [
+        "WA-ADV-15"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-11",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "attempt dispatch",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "SUBMISSION_ATTEMPT_DISPATCH",
+      "requirements": [
+        "WA-REQ-031"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-32",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "who is told about the conflict",
+      "expected": "supervisor and specialist see exceptions; union and member views unchanged",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-071"
+      ],
+      "findings": [
+        "WA-R1-10"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-12",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "confirm dispatch with a transmission reference",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "RECEIPT_TASK_GENERATED",
+      "requirements": [
+        "WA-REQ-031",
+        "WA-REQ-040"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T037",
+        "WA-T102"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-33",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "every persona's view with a disputed filing deadline open",
+      "expected": "supervisor lists it as uncertain; no persona shows any date or timer",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-050"
+      ],
+      "findings": [
+        "WA-R1-01",
+        "WA-R2-03",
+        "WA-R5-09"
+      ],
+      "matrixCases": [
+        "WA-T028",
+        "WA-T030"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-13",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "task context",
+      "expected": "member label, claim number, form kind and version already on the task",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-040"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T037"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-14",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "reminders after years of waiting under UNRESOLVED task-of-record",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-041"
+      ],
+      "findings": [
+        "WA-R1-10"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-34a",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "determine a valid filing when receipt has not been documented",
+      "expected": "RECEIPT_NOT_DOCUMENTED",
+      "actual": "RECEIPT_NOT_DOCUMENTED",
+      "authorizationDecision": "DENY:RECEIPT_NOT_DOCUMENTED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-100"
+      ],
+      "findings": [
+        "WA-C-001"
+      ],
+      "matrixCases": [
+        "WA-T105",
+        "WA-T103"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-34",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "determine a valid filing with no reviewed requirement source for the form",
+      "expected": "REQUIREMENT_SOURCE_UNKNOWN",
+      "actual": "REQUIREMENT_SOURCE_UNKNOWN",
+      "authorizationDecision": "DENY:REQUIREMENT_SOURCE_UNKNOWN",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-100"
+      ],
+      "findings": [
+        "WA-C-001"
+      ],
+      "matrixCases": [
+        "WA-T105"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-15",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "confirm receipt with a provider-style method",
+      "expected": "INVALID_RECEIPT_METHOD",
+      "actual": "INVALID_RECEIPT_METHOD",
+      "authorizationDecision": "DENY:INVALID_RECEIPT_METHOD",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-032"
+      ],
+      "findings": [
+        "WA-R1-04"
+      ],
+      "matrixCases": [
+        "WA-T040"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-16",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "confirm receipt by phone with a named contact",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "RECEIPT_TASK_COMPLETED",
+      "requirements": [
+        "WA-REQ-032",
+        "WA-REQ-043"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T041"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-17",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "filing status after receipt",
+      "expected": "UNDETERMINED, receipt documented, timeliness not asserted",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-100"
+      ],
+      "findings": [
+        "WA-C-001"
+      ],
+      "matrixCases": [
+        "WA-T103"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-18",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "determine the filing valid with one element unattested",
+      "expected": "INCOMPLETE_ATTESTATIONS",
+      "actual": "INCOMPLETE_ATTESTATIONS",
+      "authorizationDecision": "DENY:INCOMPLETE_ATTESTATIONS",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-100"
+      ],
+      "findings": [
+        "WA-C-001"
+      ],
+      "matrixCases": [
+        "WA-T105"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-35",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal reassigns responsibility from Domenic to a second specialist",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "REMINDER_SCHEDULED",
+      "requirements": [
+        "WA-REQ-045"
+      ],
+      "findings": [
+        "WA-R4-06",
+        "WA-R1-13"
+      ],
+      "matrixCases": [
+        "WA-T048",
+        "WA-ADV-11"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-19",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "determine the filing valid with every element attested and evidenced",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "FILING_DETERMINED_VALID",
+      "requirements": [
+        "WA-REQ-100"
+      ],
+      "findings": [
+        "WA-C-001"
+      ],
+      "matrixCases": [
+        "WA-T107"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-36",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "former specialist reads their queue",
+      "expected": "empty: task and access moved",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-045"
+      ],
+      "findings": [
+        "WA-R1-13"
+      ],
+      "matrixCases": [
+        "WA-T100"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-37",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-2",
+      "tenant": "ORG-WORKAID",
+      "operation": "successor reads their queue before the union has granted matter access",
+      "expected": "empty: assignment alone shows nothing without a live grant",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-045"
+      ],
+      "findings": [
+        "WA-R4-09"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-20",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "request a medical report from the member",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "INFO_REQUESTED",
+      "requirements": [
+        "WA-REQ-053"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-21",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "start waiting for the claim file with the partner-reported 4-6 week expectation",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DEPENDENCY_OPENED",
+      "requirements": [
+        "WA-REQ-053"
+      ],
+      "findings": [
+        "WA-R2-09"
+      ],
+      "matrixCases": [
+        "WA-T031"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-38",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "reminder worker runs at the due time with the successor not yet granted access",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-044"
+      ],
+      "findings": [
+        "WA-R4-06"
+      ],
+      "matrixCases": [
+        "WA-ADV-11"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-39",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "reminder worker runs after the union grants the successor access",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-044"
+      ],
+      "findings": [
+        "WA-R4-06"
+      ],
+      "matrixCases": [
+        "WA-T048",
+        "WA-ADV-10"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-40",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member and union views through the reassignment",
+      "expected": "unchanged",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-41",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional notes the document must remain restricted",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DOCUMENT_HOLD_PLACED",
+      "requirements": [
+        "WA-REQ-062"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-ADV-13"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-42",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "UNION_REP opens the held medical document",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-T019"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-43",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "MEMBER opens the held medical document",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-T019"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-44",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "release the held medical document to the member",
+      "expected": "FORBIDDEN",
+      "actual": "FORBIDDEN",
+      "authorizationDecision": "DENY:FORBIDDEN",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-062"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-ADV-13"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-45",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "the update notification for the held document",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-064"
+      ],
+      "findings": [
+        "WA-R1-22",
+        "WA-R3-010"
+      ],
+      "matrixCases": [
+        "WA-T053",
+        "WA-T091"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-46",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "every non-professional view while the evidence is withheld",
+      "expected": "no title, class or hold anywhere",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-47",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist queue seven months into the ARO wait",
+      "expected": "waiting, no expectation configured, not a legal deadline",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-053"
+      ],
+      "findings": [
+        "WA-R4-08",
+        "WA-R5-10"
+      ],
+      "matrixCases": [
+        "WA-T031"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-01",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member reads their view with nothing published",
+      "expected": "no update, no documents, no requests, records-access channel available",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R3-011"
+      ],
+      "matrixCases": [
+        "WA-T085",
+        "WA-T051"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-48",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "supervisor view during the wait",
+      "expected": "no tribunal prompt and no obligation until a decision is recorded",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-090"
+      ],
+      "findings": [
+        "WA-R2-07"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-02",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member view carries no claims, decisions, submissions or tasks",
+      "expected": "exactly four fields",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T085"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-49",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member view during the wait",
+      "expected": "no update published; no invented decision date",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R4-08",
+        "WA-R1-14"
+      ],
+      "matrixCases": [
+        "WA-T085"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-50",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "union B attempt X-50",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02",
+        "WA-R3-004"
+      ],
+      "matrixCases": [
+        "WA-T020",
+        "WA-ADV-01"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-03",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member sees the request",
+      "expected": "one open request by code only",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-053"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-51",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "union B attempt X-51",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02",
+        "WA-R3-004"
+      ],
+      "matrixCases": [
+        "WA-T020",
+        "WA-ADV-01"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-52",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-ADMIN-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "union B attempt X-52",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02",
+        "WA-R3-004"
+      ],
+      "matrixCases": [
+        "WA-T020",
+        "WA-ADV-01"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-04",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-MEMBER-USER-002",
+      "tenant": "ORG-UNION-A",
+      "operation": "another member supplies the same request",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [
+        "WA-ADV-04"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-53",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-ADMIN-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "union B attempt X-53",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02",
+        "WA-R3-004"
+      ],
+      "matrixCases": [
+        "WA-T020",
+        "WA-ADV-01"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-05",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member uploads a document",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DOCUMENT_UPLOADED_QUARANTINED",
+      "requirements": [
+        "WA-REQ-060"
+      ],
+      "findings": [
+        "WA-R1-12"
+      ],
+      "matrixCases": [
+        "WA-T010"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-54",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "union B attempt X-54",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02",
+        "WA-R3-004"
+      ],
+      "matrixCases": [
+        "WA-T020",
+        "WA-ADV-01"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-06",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member marks the request supplied",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "INFO_SUPPLIED_PENDING_REVIEW",
+      "requirements": [
+        "WA-REQ-053"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-22",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "queue after the expected window passes",
+      "expected": "past expected window and never a legal deadline",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-053"
+      ],
+      "findings": [
+        "WA-R2-09",
+        "WA-R5-10"
+      ],
+      "matrixCases": [
+        "WA-T031"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-55",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "union B attempt X-55",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02",
+        "WA-R3-004"
+      ],
+      "matrixCases": [
+        "WA-T020",
+        "WA-ADV-01"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-07",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member opens their own upload before any release",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-060",
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-T019"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-23",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "approve an ARF before readiness is attested",
+      "expected": "GATE_NOT_SATISFIED",
+      "actual": "GATE_NOT_SATISFIED",
+      "authorizationDecision": "DENY:GATE_NOT_SATISFIED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-033"
+      ],
+      "findings": [
+        "WA-R2-06"
+      ],
+      "matrixCases": [
+        "WA-T078"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-08",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member view after supplying",
+      "expected": "request no longer open; the quarantined upload is not listed",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-053"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-56",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "union B attempt X-56",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02",
+        "WA-R3-004"
+      ],
+      "matrixCases": [
+        "WA-T020",
+        "WA-ADV-01"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-57",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "union B reads a document of union A",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [
+        "WA-T019"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-24",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "approve the ARF after attested readiness",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "SUBMISSION_APPROVE",
+      "requirements": [
+        "WA-REQ-033"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T078"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-09",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional publishes wording that claims WSIB received the documents (only sent)",
+      "expected": "MISREPRESENTS_PROGRESS",
+      "actual": "MISREPRESENTS_PROGRESS",
+      "authorizationDecision": "DENY:MISREPRESENTS_PROGRESS",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-111"
+      ],
+      "findings": [
+        "WA-C-003",
+        "WA-R1-14"
+      ],
+      "matrixCases": [
+        "WA-T111"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-58",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "union B and a union B member request views of union A",
+      "expected": "no views at all",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [
+        "WA-T020"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-10",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional publishes \"sent\" with honest wording",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "STATUS_PUBLISHED",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-14"
+      ],
+      "matrixCases": [
+        "WA-T085"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-25",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "publish \"appeal sent\" from an ARF only attempted, not confirmed sent",
+      "expected": "EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "actual": "EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "authorizationDecision": "DENY:EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-14"
+      ],
+      "matrixCases": [
+        "WA-T085"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-11",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member reads the \"sent\" status",
+      "expected": "stage DOCUMENTS_SENT_TO_WSIB",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-12",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional publishes \"receipt confirmed\" before a human recorded receipt",
+      "expected": "EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "actual": "EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "authorizationDecision": "DENY:EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-032",
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-04",
+        "WA-R1-14"
+      ],
+      "matrixCases": [
+        "WA-T040",
+        "WA-ADV-09"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "X-59",
+      "fixture": "FX-MATTER-001",
+      "persona": "SYSTEM",
+      "actor": "system",
+      "tenant": "system",
+      "operation": "audit trail of one matter worked by union, specialist, principal and system",
+      "expected": "all events on union A's trail; actor recorded; details are short codes",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-065"
+      ],
+      "findings": [
+        "WA-R1-08",
+        "WA-R3-014"
+      ],
+      "matrixCases": [
+        "WA-T066"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-26",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "publish \"appeal sent\" once dispatch is confirmed",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "STATUS_PUBLISHED",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-14"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-13",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional publishes receipt wording that says the objection was filed",
+      "expected": "MISREPRESENTS_PROGRESS",
+      "actual": "MISREPRESENTS_PROGRESS",
+      "authorizationDecision": "DENY:MISREPRESENTS_PROGRESS",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-111"
+      ],
+      "findings": [
+        "WA-C-001",
+        "WA-C-003"
+      ],
+      "matrixCases": [
+        "WA-T111"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-14",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional publishes \"receipt confirmed\" with honest wording",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "STATUS_PUBLISHED",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-C-001"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-27",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "wait for the ARO decision",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DEPENDENCY_OPENED",
+      "requirements": [
+        "WA-REQ-053"
+      ],
+      "findings": [
+        "WA-R4-08"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-15",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member reads the \"pending WSIB action\" status",
+      "expected": "stage WSIB_RECEIPT_CONFIRMED; wording says no decision yet",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-C-001"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-28",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "queue while waiting for the ARO",
+      "expected": "no expectation configured, no date invented, no obligation created",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-053"
+      ],
+      "findings": [
+        "WA-R4-08"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-16",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional publishes a decision stage that states the outcome",
+      "expected": "EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "actual": "EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "authorizationDecision": "DENY:EVIDENCE_DOES_NOT_SUPPORT_STAGE",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-14",
+        "WA-R4-08"
+      ],
+      "matrixCases": [
+        "WA-T085"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-17",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional states the outcome in a status line after the decision arrived",
+      "expected": "MISREPRESENTS_PROGRESS",
+      "actual": "MISREPRESENTS_PROGRESS",
+      "authorizationDecision": "DENY:MISREPRESENTS_PROGRESS",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-111"
+      ],
+      "findings": [
+        "WA-C-003"
+      ],
+      "matrixCases": [
+        "WA-T111"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-29",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "worker runs before the due time",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-044"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T038"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-18",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional publishes that a decision arrived and who will explain it",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "STATUS_PUBLISHED",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R4-08"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-30",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "worker runs at 09:00 local on the due date, then a second worker runs",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-044"
+      ],
+      "findings": [
+        "WA-R1-07"
+      ],
+      "matrixCases": [
+        "WA-T038",
+        "WA-ADV-10"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-19",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member reads the decision stage",
+      "expected": "stage ARO_DECISION_RECEIVED; no outcome, no tribunal prompt or assessment detail",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063",
+        "WA-REQ-090"
+      ],
+      "findings": [
+        "WA-R5-05"
+      ],
+      "matrixCases": [
+        "WA-T085"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-31",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "Clio is the task-of-record",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-041"
+      ],
+      "findings": [
+        "WA-R1-10"
+      ],
+      "matrixCases": [
+        "WA-T056"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-20",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member guesses the id of a restricted medical document",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-T019",
+        "WA-ADV-04"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-21",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-MEMBER-USER-002",
+      "tenant": "ORG-UNION-A",
+      "operation": "another member opens the same document",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [
+        "WA-T020"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-32",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-2",
+      "tenant": "ORG-WORKAID",
+      "operation": "unassigned specialist reads the queue",
+      "expected": "nothing: not assigned and no grant",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02",
+        "WA-R3-004"
+      ],
+      "matrixCases": [
+        "WA-T089"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-22",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-MEMBER-USER-002",
+      "tenant": "ORG-UNION-A",
+      "operation": "another member reads a member view",
+      "expected": "no view",
+      "actual": "NULL_VIEW",
+      "authorizationDecision": "DENY:NO_VIEW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-23",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member view with a restricted document, two claims and a historical claim on file",
+      "expected": "no title, class, claim number or employer anywhere",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-061",
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-03",
+        "WA-R4-01"
+      ],
+      "matrixCases": [
+        "WA-T023",
+        "WA-T071"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-33a",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "control: the assigned specialist with a live document grant opens the same document",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-24",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member requests access to the full record outside the portal",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "RECORDS_ACCESS_REQUESTED",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-T051"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-33",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-2",
+      "tenant": "ORG-WORKAID",
+      "operation": "unassigned specialist opens a document",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-25",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-MEMBER-USER-002",
+      "tenant": "ORG-UNION-A",
+      "operation": "another member opens a records-access request on this matter",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "A-34",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-2",
+      "tenant": "ORG-WORKAID",
+      "operation": "unassigned specialist classifies a document",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-26",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional releases the correspondence to the member",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DOCUMENT_RELEASED",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-27",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member lists documents",
+      "expected": "only the released correspondence",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-T023"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-28",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "publish English-only when policy requires French",
+      "expected": "FR_TEXT_REQUIRED",
+      "actual": "FR_TEXT_REQUIRED",
+      "authorizationDecision": "DENY:FR_TEXT_REQUIRED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-112"
+      ],
+      "findings": [
+        "WA-R1-19",
+        "WA-R6-04"
+      ],
+      "matrixCases": [
+        "WA-T112"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-29",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "publish with a French text that overstates progress",
+      "expected": "MISREPRESENTS_PROGRESS",
+      "actual": "MISREPRESENTS_PROGRESS",
+      "authorizationDecision": "DENY:MISREPRESENTS_PROGRESS",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-112"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T112"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-30",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "publish both languages",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "STATUS_PUBLISHED",
+      "requirements": [
+        "WA-REQ-112"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T112"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-31",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member reads in French",
+      "expected": "French text, locale fr",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-112"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T112"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "D-32",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member reads in English",
+      "expected": "English text, locale en",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-112"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T112"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-01",
+      "fixture": "FX-IDENTITY-DUPLICATES",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "register the same name and birth year again in the same union",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "MEMBER_REGISTERED_DUPLICATE_REVIEW",
+      "requirements": [
+        "WA-REQ-110"
+      ],
+      "findings": [
+        "WA-R1-21"
+      ],
+      "matrixCases": [
+        "WA-T014"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-02",
+      "fixture": "FX-IDENTITY-DUPLICATES",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "refer the unresolved possible duplicate",
+      "expected": "DUPLICATE_REVIEW_REQUIRED",
+      "actual": "DUPLICATE_REVIEW_REQUIRED",
+      "authorizationDecision": "DENY:DUPLICATE_REVIEW_REQUIRED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-110"
+      ],
+      "findings": [
+        "WA-R1-21"
+      ],
+      "matrixCases": [
+        "WA-T014"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-03",
+      "fixture": "FX-IDENTITY-DUPLICATES",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "a referral representative resolves the duplicate",
+      "expected": "FORBIDDEN",
+      "actual": "FORBIDDEN",
+      "authorizationDecision": "DENY:FORBIDDEN",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-110"
+      ],
+      "findings": [
+        "WA-R1-21"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-04",
+      "fixture": "FX-IDENTITY-DUPLICATES",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-ADMIN-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "the administrator confirms it is the same person",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DUPLICATE_RESOLVED",
+      "requirements": [
+        "WA-REQ-110"
+      ],
+      "findings": [
+        "WA-R1-21"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-05",
+      "fixture": "FX-IDENTITY-DUPLICATES",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "refer the superseded record",
+      "expected": "IDENTITY_SUPERSEDED",
+      "actual": "IDENTITY_SUPERSEDED",
+      "authorizationDecision": "DENY:IDENTITY_SUPERSEDED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-110"
+      ],
+      "findings": [
+        "WA-R1-21"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-06",
+      "fixture": "FX-IDENTITY-DUPLICATES",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "a different union registers the same name and birth year",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "MEMBER_REGISTERED",
+      "requirements": [
+        "WA-REQ-110"
+      ],
+      "findings": [
+        "WA-R1-21",
+        "WA-R1-02"
+      ],
+      "matrixCases": [
+        "WA-T014"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-07",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "submit a packet missing the photo ID and retainer",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "REFERRAL_UPDATE_PACKET",
+      "requirements": [
+        "WA-REQ-002"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T002"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-01",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal reads the supervision view",
+      "expected": "offered referral awaits acceptance",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-008"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-08",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union reads its outstanding obligations",
+      "expected": "both missing items by code and reason, with who supplies each",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-002",
+        "WA-REQ-004"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T004",
+        "WA-T006"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-02",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "a specialist asks for the supervision view",
+      "expected": "no view",
+      "actual": "NULL_VIEW",
+      "authorizationDecision": "DENY:NO_VIEW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-008"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-03",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist accepts representation",
+      "expected": "FORBIDDEN_ACTOR",
+      "actual": "FORBIDDEN_ACTOR",
+      "authorizationDecision": "DENY:FORBIDDEN_ACTOR",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-008"
+      ],
+      "findings": [
+        "WA-R1-05"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-09",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "offer the incomplete packet with no urgent exception",
+      "expected": "PACKET_INCOMPLETE",
+      "actual": "PACKET_INCOMPLETE",
+      "authorizationDecision": "DENY:PACKET_INCOMPLETE",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-006"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T011"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-04",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal accepts representation",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "REFERRAL_ACCEPT",
+      "requirements": [
+        "WA-REQ-008",
+        "WA-REQ-010"
+      ],
+      "findings": [
+        "WA-R1-05"
+      ],
+      "matrixCases": [
+        "WA-T013"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-10",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union reads a returned referral",
+      "expected": "state and reason only",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-007"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T012"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-11",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union rep opens a medical document",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-T019",
+        "WA-T024"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-05",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist places a restriction hold",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DOCUMENT_HOLD_PLACED",
+      "requirements": [
+        "WA-REQ-062"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-12",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union rep releases a medical document to the union",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-06",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist tries to lift the hold",
+      "expected": "NOT_AUTHORIZED",
+      "actual": "NOT_AUTHORIZED",
+      "authorizationDecision": "DENY:NOT_AUTHORIZED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-062"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-13",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union rep classifies a document",
+      "expected": "FORBIDDEN",
+      "actual": "FORBIDDEN",
+      "authorizationDecision": "DENY:FORBIDDEN",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-060"
+      ],
+      "findings": [
+        "WA-R1-12"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-07",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal sees the held document in the supervision view",
+      "expected": "listed by id only",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-062"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-14",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union rep publishes a status (a professional act on a matter it is a party to)",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R1-05"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-08",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal lifts the hold with a reason",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DOCUMENT_HOLD_LIFTED",
+      "requirements": [
+        "WA-REQ-062"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-ADV-13"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-09",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal releases without being assigned or granted access",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-15",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union reads milestones before anything is marked union-visible",
+      "expected": "none",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R3-011"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-10",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal releases the correspondence to the member once granted access",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DOCUMENT_RELEASED",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-16",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union reads the approved milestone and nothing else",
+      "expected": "one milestone; no claim numbers, titles, canary or member-only text",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [
+        "WA-R3-011",
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-T049",
+        "WA-T085"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-11",
+      "fixture": "FX-MATTER-001",
+      "persona": "MEMBER",
+      "actor": "FAKE-MEMBER-USER-001",
+      "tenant": "ORG-UNION-A",
+      "operation": "member opens the released correspondence",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-17",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union reads after the milestone is withdrawn",
+      "expected": "none",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-063"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-12",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "release a medical document to the union",
+      "expected": "FORBIDDEN",
+      "actual": "FORBIDDEN",
+      "authorizationDecision": "DENY:FORBIDDEN",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-061"
+      ],
+      "findings": [
+        "WA-R1-03"
+      ],
+      "matrixCases": [
+        "WA-T052"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-18",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "upload with instruction-like name and a spoofed class",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DOCUMENT_UPLOADED_QUARANTINED",
+      "requirements": [
+        "WA-REQ-060"
+      ],
+      "findings": [
+        "WA-R1-12",
+        "WA-R3-021"
+      ],
+      "matrixCases": [
+        "WA-ADV-19"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-19",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "another union updates this union's referral",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [
+        "WA-T020",
+        "WA-ADV-01"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-20",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "another union reads this union's referral view",
+      "expected": "no view",
+      "actual": "NULL_VIEW",
+      "authorizationDecision": "DENY:NO_VIEW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [
+        "WA-T020"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-21",
+      "fixture": "FX-MATTER-001",
+      "persona": "ADVERSARY",
+      "actor": "FAKE-UNION-REP-B",
+      "tenant": "ORG-UNION-B",
+      "operation": "another union uploads to this union's matter",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-13",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist reassigns a receipt task",
+      "expected": "NOT_AUTHORIZED",
+      "actual": "NOT_AUTHORIZED",
+      "authorizationDecision": "DENY:NOT_AUTHORIZED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-045"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T048"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "C-22",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-VIEWER-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union viewer (read-only role) withdraws a referral",
+      "expected": "FORBIDDEN_ACTOR",
+      "actual": "FORBIDDEN_ACTOR",
+      "authorizationDecision": "DENY:FORBIDDEN_ACTOR",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-013"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-14",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal reassigns a task to a specialist who has no matter access",
+      "expected": "NEW_OWNER_NOT_AUTHORIZED",
+      "actual": "NEW_OWNER_NOT_AUTHORIZED",
+      "authorizationDecision": "DENY:NEW_OWNER_NOT_AUTHORIZED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-045"
+      ],
+      "findings": [
+        "WA-R1-02"
+      ],
+      "matrixCases": [
+        "WA-T048"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-14b",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal reassigns the receipt task to an assigned, granted specialist",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "TASK_REASSIGNED",
+      "requirements": [
+        "WA-REQ-045"
+      ],
+      "findings": [
+        "WA-R4-06"
+      ],
+      "matrixCases": [
+        "WA-T048",
+        "WA-ADV-11"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-15",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "supervisor lists uncertain deadlines",
+      "expected": "mixed-issue obligation listed as unconfirmed; no date shown anywhere",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-050"
+      ],
+      "findings": [
+        "WA-R1-01",
+        "WA-R2-03"
+      ],
+      "matrixCases": [
+        "WA-T028",
+        "WA-T074"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-16",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist confirms a mixed-issue deadline without manual affirmation",
+      "expected": "MANUAL_AFFIRMATION_REQUIRED",
+      "actual": "MANUAL_AFFIRMATION_REQUIRED",
+      "authorizationDecision": "DENY:MANUAL_AFFIRMATION_REQUIRED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-050"
+      ],
+      "findings": [
+        "WA-R1-01"
+      ],
+      "matrixCases": [
+        "WA-T074"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-17",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist cites a rule source that is not in the registry",
+      "expected": "RULE_SOURCE_UNKNOWN",
+      "actual": "RULE_SOURCE_UNKNOWN",
+      "authorizationDecision": "DENY:RULE_SOURCE_UNKNOWN",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-050"
+      ],
+      "findings": [
+        "WA-R2-03"
+      ],
+      "matrixCases": [
+        "WA-T028"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-18",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist confirms with source document, reviewed rule source, reasoning and affirmation",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "DEADLINE_CONFIRMED",
+      "requirements": [
+        "WA-REQ-050"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T028"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-19",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "supervisor lists uncertain deadlines after confirmation",
+      "expected": "no longer uncertain while the confirmed date is in the future",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-050"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-20",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "supervisor lists deadlines after the confirmed date passes",
+      "expected": "returned for disposition; never reported as met",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-050",
+        "WA-REQ-052"
+      ],
+      "findings": [
+        "WA-R1-01"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-21",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist records an adverse ARO decision",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "TRIBUNAL_ASSESSMENT_PROMPT_OPENED",
+      "requirements": [
+        "WA-REQ-090",
+        "WA-REQ-091"
+      ],
+      "findings": [
+        "WA-R2-07",
+        "WA-R5-05"
+      ],
+      "matrixCases": [
+        "WA-T035"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-22",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "supervisor sees the prompt",
+      "expected": "one prompt awaiting professional assessment",
+      "actual": "VIEW",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "NONE",
+      "requirements": [
+        "WA-REQ-090",
+        "WA-REQ-091"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T035"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-23",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "a tribunal notice is prepared before any assessment",
+      "expected": "NOT_PROCEEDING",
+      "actual": "NOT_PROCEEDING",
+      "authorizationDecision": "DENY:NOT_PROCEEDING",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-090",
+        "WA-REQ-091"
+      ],
+      "findings": [
+        "WA-R2-07",
+        "WA-R5-05"
+      ],
+      "matrixCases": [
+        "WA-T035",
+        "WA-T079"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-24",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist makes the tribunal assessment",
+      "expected": "NOT_AUTHORIZED",
+      "actual": "NOT_AUTHORIZED",
+      "authorizationDecision": "DENY:NOT_AUTHORIZED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-090",
+        "WA-REQ-091"
+      ],
+      "findings": [
+        "WA-R6-02"
+      ],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-25",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal assessment with a forged assessor identity",
+      "expected": "ASSESSOR_MISMATCH",
+      "actual": "ASSESSOR_MISMATCH",
+      "authorizationDecision": "DENY:ASSESSOR_MISMATCH",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-090",
+        "WA-REQ-091"
+      ],
+      "findings": [
+        "WA-R1-17"
+      ],
+      "matrixCases": [
+        "WA-ADV-20"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-26",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal records \"proceeding\" with reasoning",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "TRIBUNAL_ASSESSMENT_RECORDED",
+      "requirements": [
+        "WA-REQ-090",
+        "WA-REQ-091"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T114"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-27",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist prepares the tribunal notice after an assessment of \"proceeding\"",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "SUBMISSION_CREATED",
+      "requirements": [
+        "WA-REQ-090",
+        "WA-REQ-091"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T079"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-28",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "approve the tribunal notice before readiness is attested",
+      "expected": "GATE_NOT_SATISFIED",
+      "actual": "GATE_NOT_SATISFIED",
+      "authorizationDecision": "DENY:GATE_NOT_SATISFIED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-090"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-T079"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-29",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "approval request asserting a different approver",
+      "expected": "APPROVER_MISMATCH",
+      "actual": "APPROVER_MISMATCH",
+      "authorizationDecision": "DENY:APPROVER_MISMATCH",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-033"
+      ],
+      "findings": [
+        "WA-R1-17"
+      ],
+      "matrixCases": [
+        "WA-ADV-20"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-30",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union representative tries to approve",
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND",
+      "authorizationDecision": "DENY:NOT_FOUND",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-033"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-ADV-20"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-31",
+      "fixture": "FX-MATTER-001",
+      "persona": "UNION_REP",
+      "actor": "FAKE-UNION-REP-A",
+      "tenant": "ORG-UNION-A",
+      "operation": "union representative tries to reassign responsibility",
+      "expected": "FORBIDDEN",
+      "actual": "FORBIDDEN",
+      "authorizationDecision": "DENY:FORBIDDEN",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-045"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-32",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "specialist tries to close the matter",
+      "expected": "FORBIDDEN",
+      "actual": "FORBIDDEN",
+      "authorizationDecision": "DENY:FORBIDDEN",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-045"
+      ],
+      "findings": [],
+      "matrixCases": [],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-33",
+      "fixture": "FX-MATTER-001",
+      "persona": "ANGELO",
+      "actor": "FAKE-WORKAID-PRINCIPAL",
+      "tenant": "ORG-WORKAID",
+      "operation": "principal closes the matter",
+      "expected": "OK",
+      "actual": "OK",
+      "authorizationDecision": "ALLOW",
+      "auditExpectation": "MATTER_CLOSED",
+      "requirements": [
+        "WA-REQ-045"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-ADV-18"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    },
+    {
+      "stepId": "B-34",
+      "fixture": "FX-MATTER-001",
+      "persona": "DOMENIC",
+      "actor": "FAKE-WORKAID-STAFF-1",
+      "tenant": "ORG-WORKAID",
+      "operation": "professional action on a closed matter",
+      "expected": "AUTHORITY_DENIED",
+      "actual": "AUTHORITY_DENIED",
+      "authorizationDecision": "DENY:AUTHORITY_DENIED",
+      "auditExpectation": "NO_STATE_CHANGE_REFUSAL_LOGGED_ON_ACTOR_ORGANIZATION",
+      "requirements": [
+        "WA-REQ-012"
+      ],
+      "findings": [],
+      "matrixCases": [
+        "WA-ADV-18"
+      ],
+      "executed": true,
+      "runtimeProof": "NONE"
+    }
+  ]
+}

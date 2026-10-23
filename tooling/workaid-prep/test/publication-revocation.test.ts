@@ -36,7 +36,7 @@ describe('deny-by-default member publication', () => {
   it('[WA-T049] a published, approved, versioned text is the only thing a member receives', () => {
     const p = val<MemberPublication>(publish());
     const v = memberStatusView(MEMBER_P, openMatter(), [p]);
-    assert.deepEqual(Object.keys(v!).sort(), ['publishedAt', 'recordsAccessRequestChannel', 'stage', 'state', 'text', 'version']);
+    assert.deepEqual(Object.keys(v!).sort(), ['locale', 'publishedAt', 'recordsAccessRequestChannel', 'stage', 'state', 'text', 'version']);
     const polluted = { ...p, internalNote: 'SYNTH-CANARY Clio note', documentTitle: 'SYNTH-CANARY psychiatric assessment' } as MemberPublication;
     assert.equal(JSON.stringify(memberStatusView(MEMBER_P, openMatter(), [polluted])).includes('SYNTH-CANARY'), false);
   });

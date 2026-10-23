@@ -12,8 +12,11 @@ issue / objection graph, cross-employer disclosure, acceptance vs access vs WSIB
 document disclosure and holds, outbound submission states and forbidden transitions, receipt
 follow-up tasks, reminder idempotency, human-confirmed deadline obligations, deny-by-default
 member publication, authority revocation cascade, uploads, audit, and the Clio coexistence
-contract. `src/platform-repro/` holds reference reproductions of platform defects that are
-**routed to the platform owner**; nothing here patches the platform.
+contract. Slice C adds a composed synthetic `World` (`src/journey.ts`, `src/journey-views.ts`) driving
+four persona journeys and cross-persona challenges, a separate filing-validity contract
+(`src/filing.ts`) and a tribunal-assessment boundary (`src/tribunal.ts`). `src/platform-repro/` holds
+reference reproductions of platform defects that are **routed to the platform owner**; nothing here
+patches the platform.
 
 ## What it is not
 
@@ -23,21 +26,28 @@ contract. `src/platform-repro/` holds reference reproductions of platform defect
 
 ## Run
 
-No installation is needed (Node 24 strips types natively). From this directory:
+No installation is needed (Node 24 strips types natively). Run only from the isolated worktree on an
+`agents/workaid-prep*` branch: every script calls `preflight()` and writes only through
+`scripts/guard.ts`, which refuses any path outside `docs/union-eyes/workaid/`, `tooling/workaid-prep/`
+and the OS temp directory, and any other worktree. From this directory:
 
 ```powershell
-node --test test/*.test.ts                  # run the suite
-node scripts/run-tests.ts                   # run and record docs/union-eyes/workaid/evidence/test-results.json
-node scripts/build-baseline.ts              # regenerate 02, 08, 09, the v0.2 matrix and the findings register
+node --test test/*.test.ts                  # run the suite (writes nothing)
+node scripts/run-tests.ts                   # run and record evidence/test-results.json and evidence/journey-trace.json
+node scripts/build-baseline.ts              # regenerate 02, 08, 09, 18, the v0.3 matrix and the findings register
+node scripts/validate-docs-sandboxed.ts     # run the repository document validator in a temp sandbox
 ```
 
-Static check (uses a TypeScript already present in the main checkout; adds nothing):
+Static check. The worktree has no installation, so TypeScript comes from another checkout's
+`node_modules`, read-only. The script refuses to run without the variable, uses `--noEmit
+--incremental false` and verifies the worktree is unchanged afterwards:
 
 ```powershell
-<path-to>\node_modules\.bin\tsc.cmd -p tsconfig.json --typeRoots <path-to>\node_modules\@types
+$env:WORKAID_NODE_MODULES = '<path-to>\node_modules'; node scripts/typecheck.ts
 ```
 
-`tsconfig.json` is local to this folder and extends nothing.
+`tsconfig.json` is local to this folder and extends nothing. Never run the repository's `validate:docs`
+directly: it derives its output directory from the working directory.
 
 ## Layout
 
@@ -46,7 +56,7 @@ Static check (uses a TypeScript already present in the main checkout; adds nothi
 | `src/` | Domain contracts (see `docs/union-eyes/workaid/03_DOMAIN_MODEL_AND_STATES.md`) |
 | `src/platform-repro/` | Reproductions for Codex; reference detector, search order, storage policy |
 | `test/` | Executable synthetic tests; test titles carry `[WA-T###]`, `[WA-ADV-##]`, `[WA-INT-###]` tags |
-| `scripts/` | Test runner, source parsers, triage overlay, requirements, baseline builder |
+| `scripts/` | Guard, test runner, source parsers, triage overlay, requirements, baseline builder, sandboxed validator, guarded type-check |
 
 Test titles are the evidence link: a tag in a title is the only way a test is credited to a matrix
 case, adversarial case or finding.
