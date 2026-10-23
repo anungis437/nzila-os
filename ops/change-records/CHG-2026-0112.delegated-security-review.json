@@ -5,16 +5,16 @@
   "pullRequest": 991,
   "branch": "fix/ue-native-write-defaults-20261022",
   "baseSha": "8c41b6a8f54c6e1ff1e4e5f8ca0ba24256955ee7",
-  "sourceSha": "762a4c0496d75ed1f5ab9f1a61cecb5823c59f6b",
-  "sourceTree": "7db57549ee2362a0ac152d99624241aad219f622",
+  "sourceSha": "4e936230fdee8bc8753b0a38097f0768b1881be6",
+  "sourceTree": "8e9a183aea144def22b50875b9f384bcc6709fed",
   "mission": "UE-STAGING-RECOVERY-TO-GO",
   "changeRecordId": "CHG-2026-0112",
   "environment": "STAGING",
   "owner": "anungis437",
   "operator": "Codex",
   "instructionSha256": "681844e4f18424c1e592dfd1db205afc66d5c7a3d647c91006dc8f5d2dcbb2e3",
-  "issuedAt": "2026-10-23T02:40:34.053Z",
-  "expiresAt": "2026-10-24T02:40:34.118Z",
+  "issuedAt": "2026-10-23T03:00:45.628Z",
+  "expiresAt": "2026-10-24T03:00:45.686Z",
   "resources": {
     "subscription": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
     "tenant": "5082b8be-b04d-4a13-b61c-b6397670177b",
@@ -41,11 +41,56 @@
       "baseSha256": "31151717d2486025d310d2194a65b5ec8273e23c602c3d620b3de7ab75956a25"
     },
     {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/assign/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "477546fb89d189d8b188d3b9d57447c85e0eac9c",
+      "sha256": "2cfc758558a786722c2c4a3fdf1551545c1a90c9b4ab6814752bba252a540f4f",
+      "baseBlobSha": "585df548d6d529cfafd9476263da9aaeeb8d8078",
+      "baseSha256": "964ee96dcdb3d8f7a82dcdaa5ab3ea588763ebdaeef9d1a05d41e2f98ff8b244"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/export/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "2a8eb0839f86f01689f6925c6d2b57664fa39dbc",
+      "sha256": "4b207d1c6b27a01ea637612a4e2db8a0188fa5a092391e12536229bc433cbaba",
+      "baseBlobSha": "0ff6533544cb729cf00659aa852e9be4f0d18d9e",
+      "baseSha256": "729c35342064b09f6454daeff4cbbb2501cdb04aee8636eb0b37d0d7cc4f5c88"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "62afcf62d9722b3dff40fde491684e47480c7505",
+      "sha256": "a9cecdf6283b1538935691a3a1c0042d2fe842e4565c0faaf5c897a271e5de90",
+      "baseBlobSha": "d77d7727f7d4623ad86d1b12986dc47b3d4d23f7",
+      "baseSha256": "6f9a61e0c5103057cefc9aece19d09d02741f333e869c22cf1cc31ca442d462f"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "f74a5b0c8253d8b016637f9050b9592a3b23c74d",
+      "sha256": "72026e4e0729ca7d0e4d0bb01f623556b783b41afe6298f14220dfad75fe759e",
+      "baseBlobSha": "db239d351092b482d3dcd3e66b41781533d6a0d4",
+      "baseSha256": "7b795c2ad8dd885cfcb020ee122fde064ebbd9a3eab336937eb3829d7e06bed2"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/transition/route.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "a74c688717c915e42e568d0688f1e396bb04aa6a",
+      "sha256": "8ca8a1426ea856f36d87845656965f9461a30775ce283387e76c8816b78baddd",
+      "baseBlobSha": "868d0600ff664c2b95b682bd4464c0df51c198cf",
+      "baseSha256": "7cdb441181debf35416ce848484d22ddd0cbd60dc21ad76443b1daf60f63f4ec"
+    },
+    {
       "path": "apps/union-eyes/db/queries/__tests__/canonical-claim-writes.pglite.test.ts",
       "status": "added",
       "previousPath": null,
-      "blobSha": "f2a9138cddb10f451b4adf83103d5dbc18c93736",
-      "sha256": "16f02b2aa719c97a6758ff0f5242d5a4d38da3036623eb71cd348a3b7b49116d",
+      "blobSha": "3404ee3f80b9c2e598498662a00a961c3bd94639",
+      "sha256": "782fdef66f01ca6c3f5747e5be6f42bbeeac50ca2d883b4ec6eb4ecd471a1baf",
       "baseBlobSha": null,
       "baseSha256": null
     },
@@ -53,17 +98,26 @@
       "path": "apps/union-eyes/db/queries/__tests__/fixtures/canonical-claim-write.sql",
       "status": "added",
       "previousPath": null,
-      "blobSha": "2d48ff8ed5979ad517aeca9a65f58304a3257e42",
-      "sha256": "ad8ebb3564dec99b3cadd4e870549e03449efbac051c78ddddbc6457a7c445bb",
+      "blobSha": "658836d73d9b1990853498ef02301eb91c7ad2f3",
+      "sha256": "5f241e82b30eadda38332ae0e804983375b103b17f8ac34ea8960d9c3c86e646",
       "baseBlobSha": null,
       "baseSha256": null
+    },
+    {
+      "path": "apps/union-eyes/db/queries/claims-queries.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "e320955dd449ac3f92b1e6da31fa1bacf27aba96",
+      "sha256": "4ad2bedf7ebd8cd91253f3ec8fb0be47a5978504c381f7be311ff794183b4a69",
+      "baseBlobSha": "2f81d2320784416074e20d9ea7f0bab236fdcf29",
+      "baseSha256": "d1b0ad7ecb6a8e98b5b77da12f9df23fc9fc40d86d18eebecdefd293180d2e03"
     },
     {
       "path": "apps/union-eyes/db/schema/claims-schema.ts",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "ed6ebc9d69073ce98de53f118457656a10585831",
-      "sha256": "85aa36916af5f9a4eea5f772f54b1b6bcc24dc6ceb0e4516fb29f09f013eb1fd",
+      "blobSha": "7d505e8db57079218d901b72d129999df35c4c48",
+      "sha256": "dd04e5e5f17bf369e8124f63fabcd570d957c42092214cdee8f1966dd789ef33",
       "baseBlobSha": "08e8c38b65dccbf16732bfb3aa223d947c606438",
       "baseSha256": "540c54be7ee54f7f498ea10bb4a667719bf357fd50788ffd4cdbdcc847e101f5"
     },
@@ -86,11 +140,20 @@
       "baseSha256": "195b7a690b95f0b62a38b038a7aade73010d27dc40a7d86279542a32906c6123"
     },
     {
+      "path": "apps/union-eyes/lib/cases/claim-history-reference.ts",
+      "status": "added",
+      "previousPath": null,
+      "blobSha": "133f2e86b08b1f9a329c01272cbc4f221cf951a3",
+      "sha256": "a8d7889226d5523e996f57ce9650af4c5ebf032c691bb276857bd6627e786d69",
+      "baseBlobSha": null,
+      "baseSha256": null
+    },
+    {
       "path": "tooling/repo-inventory/output/inventory.json",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "e86d16c9b759f85b4fc1c7983e0d63bc916128e3",
-      "sha256": "fcb575a38cd8bd2fb7d1f838cdbf9b43a4758f417a284f2c7ac394c1a0cfa7bc",
+      "blobSha": "83dc4d7543b553bcee1d89e9416ced7d22769051",
+      "sha256": "6f3694c6d0035599d892f30b55c6a5b76fbdd4fd510fb435035c776b86e70cec",
       "baseBlobSha": "fe15abb43a2d10c77408eb7552e04d19291aec0e",
       "baseSha256": "c88f965890c0fd79347fe59df13a36b91ffcd6ca8921932d54c3a6b421aa2886"
     },
@@ -98,8 +161,8 @@
       "path": "tooling/repo-inventory/output/inventory.md",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "bb9fe7cf1f6a45f32b3cb0b4da28cfb9066e1705",
-      "sha256": "4866147a82b743a8ebda25c837736d25e0e6774dcd76fcec0898bd6159db8666",
+      "blobSha": "405a82b68c21193fa10eac31a91fa03bef95412b",
+      "sha256": "17f298a2b3e1576f08b1095b334766bdac9a5b43d924986486ec4f4ae6b46624",
       "baseBlobSha": "5ed59a84b131cc9abdb7a195c0735810317ae1e6",
       "baseSha256": "e34339cd5279eb84e8809680d6302470ed735c5386bf222049e7ad376bbe86cf"
     },
@@ -107,8 +170,8 @@
       "path": "tooling/repo-inventory/output/repo-inventory.json",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "e86d16c9b759f85b4fc1c7983e0d63bc916128e3",
-      "sha256": "fcb575a38cd8bd2fb7d1f838cdbf9b43a4758f417a284f2c7ac394c1a0cfa7bc",
+      "blobSha": "83dc4d7543b553bcee1d89e9416ced7d22769051",
+      "sha256": "6f3694c6d0035599d892f30b55c6a5b76fbdd4fd510fb435035c776b86e70cec",
       "baseBlobSha": "fe15abb43a2d10c77408eb7552e04d19291aec0e",
       "baseSha256": "c88f965890c0fd79347fe59df13a36b91ffcd6ca8921932d54c3a6b421aa2886"
     },
@@ -116,8 +179,8 @@
       "path": "tooling/repo-inventory/output/repo-inventory.md",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "bb9fe7cf1f6a45f32b3cb0b4da28cfb9066e1705",
-      "sha256": "4866147a82b743a8ebda25c837736d25e0e6774dcd76fcec0898bd6159db8666",
+      "blobSha": "405a82b68c21193fa10eac31a91fa03bef95412b",
+      "sha256": "17f298a2b3e1576f08b1095b334766bdac9a5b43d924986486ec4f4ae6b46624",
       "baseBlobSha": "5ed59a84b131cc9abdb7a195c0735810317ae1e6",
       "baseSha256": "e34339cd5279eb84e8809680d6302470ed735c5386bf222049e7ad376bbe86cf"
     },
@@ -125,8 +188,8 @@
       "path": "tooling/security/ue-staging-delegated-review.mjs",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "1fd216851da283f73775db0cfcf4a743f902b822",
-      "sha256": "255db8cc0f48adeb7ca6c14f4cfe2e8cbd80a241637ea87777e69ec266ee2d07",
+      "blobSha": "06c22170caa7b6389b0d84df493ba57917eb202a",
+      "sha256": "ced6d9d1d97be662405a670a161fb36114643b71a10102a1a958407df65d5b4f",
       "baseBlobSha": "6e86facf087a94d7d9cc6bee218abf25d02bba42",
       "baseSha256": "00035fd92e7b0938428c6bf0d298d723d529fb95bcc61edffb0adf1864588737"
     },
@@ -134,8 +197,8 @@
       "path": "tooling/security/ue-staging-delegated-review.test.mjs",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "ada86a7c63f276cc9a1cc8c59f4cec62f0206396",
-      "sha256": "1959a5dc19f80b9c47a85b26311ef97417eeb44baefcab6858657c52175a7dc3",
+      "blobSha": "9694102077c789e7799d025bf3f67b9956a6cbb5",
+      "sha256": "5db1dd177b3881116d20507e1f8612b31e985c78ab12056e98d52dc945d38cd4",
       "baseBlobSha": "a03410502e51561551476301a776445bf7f60519",
       "baseSha256": "b727d945f72791596bd3ed0b2a3091f6601f0894f1ffa7e27f3e34939274af66"
     }
@@ -144,9 +207,9 @@
     {
       "kind": "primary-agent-review",
       "agentTask": "/root",
-      "reviewedAt": "2026-10-23T02:40:34.053Z",
-      "report": "Primary Codex /root review of frozen source 762a4c0496d75ed1f5ab9f1a61cecb5823c59f6b for PR991 under the existing explicit sole-owner staging authorization. This is an attributed primary agent review, not another person's approval. Deployed source 8c41b6a8f54c6e1ff1e4e5f8ca0ba24256955ee7 admits the native dashboard and rejects foreign intake members without writes, but its own intake fails before persistence because canonical Django audit identifiers have no database defaults. Read-only deployed metadata also confirms required claim identifiers, timestamps, booleans and state values whose Django defaults execute in Python.\n\nThe canonical audit writer now supplies independent UUIDs for id and audit_id while retaining its advisory lock, Python-compatible content hash, tenant context and transaction. The NAR SQL regression fixture now requires both identifiers and timestamps without SQL defaults. Real signatures, tamper rejection, tenant restrictions and atomic rollback still pass. Drizzle claim fields provide runtime UUID/timestamp/boolean/state defaults while their existing SQL declarations are retained; history timestamps receive the same runtime fallback. A real PGlite fixture uses the deployed column types/nullability/defaults without business data. Explicit caller values are preserved. No migration, grant, auth permission, dependency, backend source or production configuration changes.\n\nThe three governance files authorize only PR991, exact branch fix/ue-native-write-defaults-20261022, actual author anungisa, merged base 8c41b6a8f54c6e1ff1e4e5f8ca0ba24256955ee7, and twelve exact source/test/inventory paths. The unchanged pinned Ed25519 trust key must verify a genuine domain-separated signature. Complete paginated API coverage, exact base/source blobs and hashes, unchanged trust bytes, sole-parent two-file evidence-only commit, source tree binding, expiry, primary attribution and head-race protections remain enforced. Existing PR984/986/990 rules remain intact. No human security-team label is synthesized.\n\nAll 169 verifier regressions and 27 targeted SQL/application regressions pass. No unresolved P0/P1 was identified within this bounded source review. Full required repository checks and exact final-head protected CI remain pending and mandatory before review readiness or normal merge. This does not claim the application fix deployed, staging GO, independent human approval or production authorization. Fresh merged-source images, signed clone qualification and actual native staging acceptance remain required.",
-      "reportSha256": "5bed8a1628defb76ac6b82336a9f1e35ced000abbb4482de48417eebc4713732",
+      "reviewedAt": "2026-10-23T03:00:45.628Z",
+      "report": "Primary Codex /root review of frozen source 4e936230fdee8bc8753b0a38097f0768b1881be6 for PR991 under the existing explicit sole-owner staging authorization. This is an attributed primary agent review, not another person's approval. The preceding deployed source 8c41b6a8f54c6e1ff1e4e5f8ca0ba24256955ee7 admits native dashboard sessions but self-intake fails before persistence because canonical Django audit identifiers lack SQL defaults. Read-only metadata also establishes required claim values and the actual deferred history FK to claims.id, distinct from public claims.claim_id.\n\nThe canonical audit writer supplies id and audit_id UUIDs while retaining tenant locking, Python-compatible hashing and atomic signed-proof persistence. Drizzle supplies runtime UUID/timestamp/boolean/state defaults without changing its SQL default declarations. The history schema mirror identifies the actual internal parent key without applying database DDL. In canonical mode, history INSERT/SELECT references resolve the public ID through a parameterized parent subquery inside the caller's existing RLS transaction. A hidden parent cannot produce a valid history insert. API results preserve public IDs. Notes, status transitions, assignment history, timeline and export use that reference. With canonical mode disabled, legacy history behavior is unchanged. Existing route authorization is unchanged; full native role, record and recipient acceptance is still mandatory and is not certified here.\n\nThe twelve application/test/SQL-fixture files contain no migration, backend, dependency, role/grant or trust-key change. The real PGlite fixture uses deployed column types/nullability/defaults and the actual internal-ID FK, with distinct IDs and local tenant policies. It proves UUID/timestamp defaults, notes/transitions/assignment history, hidden-parent refusal without mutation and legacy-mode compatibility. Existing affected API regressions pass. These are local SQL/source checks, not native staging acceptance.\n\nThe three governance files bind PR991 alone to its exact branch fix/ue-native-write-defaults-20261022, actual author anungisa, merged base 8c41b6a8f54c6e1ff1e4e5f8ca0ba24256955ee7, and nineteen exact source/test/inventory paths. Four inventory files are generated counts. The unchanged pinned Ed25519 trust key verifies a genuine domain-separated signature. Complete paginated actual file coverage, exact base/source blobs and hashes, unchanged trust bytes, sole-parent two-file evidence-only commit, validity windows, primary attribution and head-race protections remain mandatory. Only the two signed evidence metadata paths are excluded from executable source coverage, as required by that evidence-commit protocol. Existing PR984/986/990 scopes are unchanged; no human security-team label is synthesized.\n\nAll 176 verifier regressions and 54 targeted application/SQL regressions pass on this frozen source. No unresolved P0/P1 was identified in the changed defaults/reference logic. Full required repository checks and protected final-head CI remain pending and mandatory. This review does not claim the repair deployed, complete route authorization, staging GO, independent human approval or production authorization. Fresh merged-source images, signed clone qualification and complete native acceptance remain required.",
+      "reportSha256": "8ca7c54226da16eae3fd0fd4544b94ecb813cb2b0892f6670c65c85f3dc52e64",
       "unresolvedP0": 0,
       "unresolvedP1": 0
     }
@@ -155,14 +218,14 @@
     {
       "command": "node --test tooling/security/ue-staging-delegated-review.test.mjs",
       "result": "PASS",
-      "passed": 169,
-      "logSha256": "b5295d5c874fe3af79443f3717927af933872803de70282e8d50391ffc9f2947"
+      "passed": 176,
+      "logSha256": "d49b9b40ee40b0769f8b628832291f1e939c9f42b6f222d051d494527c42a944"
     },
     {
       "command": "Actual canonical audit/NAR PGlite, claim/history PGlite and claim-query regressions",
       "result": "PASS",
-      "passed": 27,
-      "logSha256": "67e3b5ce4e1c2e74af1a5653b812b26ef87a80f6b1e1e11af8f9b9cf4a5e7b9c"
+      "passed": 54,
+      "logSha256": "becc17ab67d6e84a7973dbe50a4f1571ea8443049cdf244ea4fe914a731a4dd2"
     }
   ],
   "limitations": [
