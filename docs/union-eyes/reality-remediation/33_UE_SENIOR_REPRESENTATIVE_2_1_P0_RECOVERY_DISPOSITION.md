@@ -9,7 +9,8 @@ Evidence labels: `SOURCE_INSPECTED`, `TEST_PROVEN` (automated test, including PG
 ## 1. Verified baseline and commit contents
 
 - Worktree `C:/APPS/nzila-os.worktrees/frozen-senior-representative-architecture`, branch `agents/frozen-senior-representative-architecture`.
-- Baseline `0c994b968` (PR #995 merge). Checkpoint `c38dc348f` (first commit, previously reported as `c38dc348f`) exists and contains the P0-B/P0-C/P0-D patches and tests. `git for-each-ref --contains` shows only this local branch holds it: **unpublished**. No Representative 2.2 or Member 2.1 branch/worktree exists in this repository, so no concurrent edit to any file below was possible to collide with; other worktrees were not touched.
+- Baseline `0c994b968` (PR #995 merge). Checkpoint `c38dc348f` exists and contains the P0-B/P0-C/P0-D patches and tests. `git for-each-ref --contains` shows only this local branch holds it: **unpublished**. Other worktrees were not touched.
+- **Correction (2026-10-23, after review):** an earlier version of this paragraph said no Representative 2.2 or Member 2.1 work existed in this repository. That was wrong: the check filtered branch names, and those branches are not named after their persona. See section 13 for the full ref inventory and overlap analysis.
 - This continuation adds a second local commit on top (no history rewrite).
 
 ## 2. Disposition of the four generated inventory files — SOURCE_INSPECTED
@@ -138,7 +139,7 @@ No progress on Journeys 1–8. Team Oversight, intake allocation by a supervisor
 | `app/api/grievances/**`, `documents/**`, `search/universal`, `case-pattern-detection-service` | Seniority bypass removed | Same. |
 | `lib/cases/case-authorization.ts` (claims) | **Unchanged** | Owner decision, section 3 item 1. |
 | `app/api/cases/[caseId]/assign/route.ts`, `lib/audited-case-mutations.ts` | Transactional audit, idempotency | Rebase risk with Representation 2.2. |
-| Member 2.1 | No shared file edited | Member-facing projections of the new `accessScope` field: none. |
+| Member 2.1 | **Four files overlap** (corrected; originally recorded as none): `documents/repository/route.ts`, `documents/repository/[id]/route.ts`, `documents/[id]/download/route.ts`, `search/universal/route.ts`. Real merge conflicts, and a semantic regression risk if resolved toward Member (section 13). | Integration-owner resolution. |
 
 ## 11. Remaining blockers
 
@@ -152,3 +153,29 @@ No progress on Journeys 1–8. Team Oversight, intake allocation by a supervisor
 | Local | **NO_GO** — P0 above open; fixes are TEST_PROVEN only. |
 | Staging | **NO_GO** — no native acceptance; known runtime-isolation and operational-readiness blockers (file 25) remain open. |
 | Production | **NO_GO**. |
+
+## 13. Cross-persona ref inventory and overlap (read-only; added after review) — SOURCE_INSPECTED
+
+Method: `git for-each-ref`, `git worktree list`, `git diff --name-only <merge-base> <tip>`, and in-memory `git merge-tree --write-tree` (no ref, index or worktree was modified; no other worktree was entered). All four persona branches are **local only**: `origin` has none of them (remote has no `agents/*` refs). No stashes.
+
+| Persona | Branch (worktree) | Tip | Base | Files changed | Overlap with this branch | In-memory merge with this branch |
+| --- | --- | --- | --- | --- | --- | --- |
+| Senior Representative 2.1 | `agents/frozen-senior-representative-architecture` | `7df6ca85d` | `0c994b968` | 42 | — | — |
+| Representative 2.2 | `agents/pasted-text-processing-7ac45129` | `571784d58` | `0c994b968` | 38 | 0 | Conflicts only in the four generated `tooling/repo-inventory/output` files (regenerate) |
+| Member 2.1 | `agents/local-ue-navigation-validation` | `a9578d5e3` | `0c994b968` | 69 (3 commits) | **4** | **Content conflicts** in the document download/repository routes and `search/universal`, plus inventory files |
+| Officer / Executive 2.1 | `agents/union-eyes-officer-executive-2-1-freeze` | `638817da2` | `0c994b968` | 51 | 0 | Clean |
+| Financial Officer, Governance Officer | `agents/union-eyes-financial-officer-freeze`, `agents/frozen-governance-officer-21-architecture` | `0c994b968` | — | 0 | — | No work committed yet |
+| WorkAid prep | `agents/workaid-prep-20261023` | `541effda5` | — | not analysed | — | Out of scope |
+
+Uncommitted state in the other worktrees was **not** inspected, so "0 overlap" applies to committed work only.
+
+### Findings that matter for integration
+
+1. **A clean textual merge is not a safe merge.** Representative 2.2 and Officer/Executive merge cleanly with this branch, but both were cut from `0c994b968` and still carry the seniority-based case access that this branch removed (`isStewardPlus` is used in **12 non-test files** on each of them, against **2 here**, both being the deprecated, ignored optional field; the remaining 9 files here are tests that assert it is ignored). Any code they added that calls those paths inherits the bypass. Re-run the cross-case read tests (`grievance-read-scope.pglite.test.ts`, the `grievances-*` and `documents-*` route tests) on the merged result.
+2. **Member 2.1 reintroduces the bypass through a new helper.** On the four overlapping files it replaces `hasCaseAccess: isStewardPlus || caseAccess.canViewCase || !row.linkedEntityId` with `hasDocumentContextAccess({ isStewardPlus, … })`, whose first line is `if (input.isStewardPlus || input.canViewCase) return true`. That returns `true` for **case-linked** documents for any steward+, restoring the disclosure this branch closed for the default-visible labels. Resolving the conflict "toward Member" would silently undo the fix. The Member change is otherwise valuable (non-staff scoping of unlinked documents and uploader-identity redaction) and should be kept. Suggested resolution, for the integration owner to decide: keep the helper and the redaction, but drop the `isStewardPlus` short-circuit for documents with a `linkedEntityId`; staff scope for *unlinked* organization documents remains a separate policy decision.
+3. **Representative 2.2 builds on the open claims-path policy.** Its `workbench/assigned` and `workbench/assign` routes use `caseReadScope` / `findReadableCase`, and `workbench-projection.ts` and `members/directory-access.ts` are designed around `case_read_any`. So the unresolved P0-A (tenant-wide claim reads for chief steward and above) is not isolated to code this branch left alone — the 2.2 workbench actively depends on it. Changing it requires the integration owner to decide between a relationship-scoped read plus a metadata-only supervisory projection, and the existing 2.2 contract.
+4. **The earlier statement that no concurrent persona work existed was incorrect** (cause: filtering `git branch` by persona-like names; the Representative 2.2 branch is `pasted-text-processing-7ac45129`). It is corrected above and in file 32. Conclusion unchanged: nothing was merged, rebased, or pushed, and no other agent's worktree was modified.
+
+### Not done (needs the integration owner)
+
+Merging, rebasing or cherry-picking any of these branches; deciding the consolidated case-read policy; the shared authority kernel / mandate store; and the unified verification campaign. This branch stays a candidate source, not an integration target.

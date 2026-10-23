@@ -115,7 +115,7 @@ Not qualified. The new UI strings are English only, consistent with the surround
 ## 11. Shared-file dependencies
 
 - **Representation 2.2:** `lib/action-enforcer.ts`, `lib/cases/case-permissions.ts`, `lib/cases/case-authorization.ts` (unchanged), and the steward+ read path in `app/api/grievances/[id]/route.ts` and `lib/services/document-governance-service.ts`. `app/api/cases/[caseId]/assign/route.ts` and `lib/audited-case-mutations.ts` were edited with additive changes. Rebase or merge conflicts are possible and must be resolved by the integration owner.
-- **Member 2.1:** no shared file was edited.
+- **Member 2.1:** corrected — four document/search files overlap with `agents/local-ue-navigation-validation`; see file 33 section 13.
 - **Schema/RLS:** a mandate/delegation table needs a migration and an RLS storage-authority census entry (`db/rls-storage-authority`). Not started.
 
 ## 12. Validation executed
