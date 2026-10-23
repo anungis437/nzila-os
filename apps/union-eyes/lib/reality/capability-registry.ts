@@ -816,9 +816,9 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     targetWave: 8,
     notes:
       'Records are SOURCE_PRESERVED_UNPARSED: no parsing, member matching, employer-ownership validation or ' +
-      'reconciliation occurs; zero totals are placeholders. PATCH /api/dues/remittances/[id] can still set ' +
-      'reconciliation fields directly and must be replaced by an engine-driven transition before any ' +
-      'reconciled claim is made.',
+      'reconciliation occurs; zero totals are placeholders. PATCH /api/dues/remittances/[id] can no longer set ' +
+      'reconciliation, completion or result fields (strict schema), so no remittance can become reconciled until ' +
+      'an engine-driven transition exists.',
   },
 ] as const;
 

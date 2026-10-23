@@ -2,7 +2,12 @@
 
 import { useTranslations } from 'next-intl';
 
-export type UnavailableFinancialCapability = 'budgets' | 'expenses' | 'vendors' | 'strikeFunds';
+export type UnavailableFinancialCapability =
+  | 'budgets'
+  | 'expenses'
+  | 'vendors'
+  | 'strikeFunds'
+  | 'affiliateRemittances';
 
 /**
  * Honest placeholder for union-finance capabilities that have no qualified

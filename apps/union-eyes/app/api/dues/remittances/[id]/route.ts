@@ -35,20 +35,15 @@ export const GET = withApi(
   },
 );
 
-const patchSchema = z.object({
-  processingStatus: z.enum(['pending', 'processing', 'completed', 'failed', 'requires_review']).optional(),
-  notes: z.string().optional(),
-  isReconciled: z.boolean().optional(),
-  reconciledAt: z.coerce.date().optional(),
-  reconciledBy: z.string().optional(),
-  expectedAmount: z.string().optional(),
-  variance: z.string().optional(),
-  recordsTotal: z.number().int().optional(),
-  recordsProcessed: z.number().int().optional(),
-  recordsMatched: z.number().int().optional(),
-  recordsException: z.number().int().optional(),
-  metadata: z.record(z.unknown()).optional(),
-});
+// Reconciliation, totals and result counters are outputs of a processing engine, never caller input.
+// Unknown keys (isReconciled, reconciledAt/By, variance, expectedAmount, records*) are rejected.
+const patchSchema = z
+  .object({
+    processingStatus: z.enum(['requires_review', 'failed']).optional(),
+    notes: z.string().optional(),
+    metadata: z.record(z.unknown()).optional(),
+  })
+  .strict();
 
 export const PATCH = withApi(
   {

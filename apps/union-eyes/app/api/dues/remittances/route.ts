@@ -43,8 +43,6 @@ const createSchema = z.object({
   totalAmount: z.string(),
   memberCount: z.number().int().min(0),
   remittanceNumber: z.string().optional(),
-  fileName: z.string().optional(),
-  fileUrl: z.string().optional(),
   notes: z.string().optional(),
   metadata: z.record(z.unknown()).optional(),
 });
@@ -64,6 +62,8 @@ export const POST = withApi(
       .values({
         ...body,
         organizationId,
+        processingStatus: 'pending',
+        isReconciled: false,
         createdBy: userId ?? undefined,
       })
       .returning();

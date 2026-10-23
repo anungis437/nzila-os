@@ -283,14 +283,6 @@ export default async function CLCDashboardPage() {
             </Button>
 
             <Button variant="outline" className="h-auto p-4 flex-col items-start" asChild>
-              <Link href="/api/admin/clc/remittances">
-                <DollarSign className="h-5 w-5 mb-2" />
-                <div className="font-semibold">{t('actions.reviewRemittances', { defaultValue: 'Review Remittances' })}</div>
-                <div className="text-xs text-muted-foreground">{t('actions.remittancesDesc', { defaultValue: 'Approve pending payments' })}</div>
-              </Link>
-            </Button>
-
-            <Button variant="outline" className="h-auto p-4 flex-col items-start" asChild>
               <Link href="/dashboard/clc/affiliates">
                 <Users className="h-5 w-5 mb-2" />
                 <div className="font-semibold">{t('actions.manageAffiliates', { defaultValue: 'Manage Affiliates' })}</div>

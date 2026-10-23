@@ -5275,7 +5275,8 @@
     "budgets": "Budgets",
     "expenses": "Dépenses et approbations",
     "vendors": "Fournisseurs",
-    "strikeFunds": "Fonds de grève"
+    "strikeFunds": "Fonds de grève",
+    "affiliateRemittances": "Remises aux affiliations (CTC / syndicat national / fédération)"
   },
   "financeDashboardPage": {
     "title": "Facturation de la plateforme (abonnement Nzila)",

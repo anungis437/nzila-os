@@ -5323,7 +5323,8 @@
     "budgets": "Budgets",
     "expenses": "Expenses and approvals",
     "vendors": "Vendors",
-    "strikeFunds": "Strike funds"
+    "strikeFunds": "Strike funds",
+    "affiliateRemittances": "Affiliate (CLC / National / federation) remittances"
   },
   "financeDashboardPage": {
     "title": "Platform Billing (Nzila subscription)",

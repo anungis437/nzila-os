@@ -81,17 +81,22 @@ product owner must decide whether a delegated-mandate store or an interim allow-
 
 ## 6. Known residual risks (named, not fixed)
 
-1. `PATCH /api/dues/remittances/[id]` (allow-listed) can still set `isReconciled`, `processingStatus: completed` and
-   reconciliation fields directly; reconciliation must become an engine-driven transition.
-2. `POST /api/dues/remittances` accepts caller-supplied totals and `fileUrl`.
-3. Upload does not validate that `employerId` belongs to the organization (no employer table located) and does not
+Closed in a follow-up commit (TEST_PROVEN, mocked db): `PATCH /api/dues/remittances/[id]` now uses a strict schema that
+rejects reconciliation, completion, variance and result-counter fields (only `notes`, `metadata` and a
+`requires_review`/`failed` flag remain); `POST /api/dues/remittances` no longer accepts caller `fileUrl`/`fileName` and
+always records `pending` / unreconciled; the CLC remittance dashboard and approval components now render the
+not-available state, and the "Review Remittances" link to a raw API path was removed from the CLC dashboard.
+
+1. Reconciliation has no engine-driven transition at all yet, so no remittance can become reconciled; the manual
+   `POST` still accepts caller-asserted totals and member counts (recorded as pending, unverified).
+2. Upload does not validate that `employerId` belongs to the organization (no employer table located) and does not
    parse or match; the evidence-pack call remains fire-and-forget.
-4. `/api/finance/summary` (platform billing) feeds `components/financial/FinancialOverview.tsx` beside dues data.
-5. `components/admin/clc-remittances-dashboard.tsx` and `clc-approval-workflow.tsx` still call the now-501 routes and
-   will show their error state; they were not converted.
-6. `db/rls-storage-authority/*` reachability prose still names the former route bindings (historical evidence).
-7. `lib/api/deprecation.ts` now lists `REMOVED` for the six retired routes; registry consumers were not re-audited.
-8. Role resolution for `auth.roles` falls back to a DB role lookup in `withApi`; behaviour with real Entra sessions is
+3. `/api/finance/summary` (platform billing) feeds `components/financial/FinancialOverview.tsx` beside dues data.
+4. `/dashboard/clc/staff` still passes server-action props (via `as any`) and `/api/v2/clc/remittances/*` calls to the
+   approval component; the component now ignores them and offers no action, but the dead props should be removed.
+5. `db/rls-storage-authority/*` reachability prose still names the former route bindings (historical evidence).
+6. `lib/api/deprecation.ts` now lists `REMOVED` for the six retired routes; registry consumers were not re-audited.
+7. Role resolution for `auth.roles` falls back to a DB role lookup in `withApi`; behaviour with real Entra sessions is
    `NOT_PROVEN`.
 
 ## 7. Cross-agent dependencies and responsible authority
