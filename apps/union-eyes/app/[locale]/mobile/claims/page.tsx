@@ -104,7 +104,7 @@ export default function MobileClaimsPage() {
   const unsyncedCount = claims.filter(c => !c.synced).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-w-0 space-y-6 bg-background">
       <MobileHeader
         title={t("title")}
         rightContent={
@@ -120,14 +120,16 @@ export default function MobileClaimsPage() {
       />
 
       {/* Filter tabs */}
-      <div className="sticky top-14 z-30 bg-white border-b border-gray-200 overflow-x-auto">
-        <div className="flex px-4 py-2 gap-2 min-w-max">
+      <div className="rounded-lg border border-border bg-card">
+        <div className="flex flex-wrap p-3 gap-2">
           {['all', 'draft', 'submitted', 'under_review', 'approved', 'rejected'].map((status) => (
             <button
               key={status}
+              type="button"
+              aria-pressed={filter === status}
               onClick={() => setFilter(status)}
               className={cn(
-                'px-3 py-1.5 text-sm font-medium rounded-full whitespace-nowrap transition-colors',
+                'min-h-11 px-3 py-2 text-sm font-medium rounded-full whitespace-normal transition-colors',
                 filter === status
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'

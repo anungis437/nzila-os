@@ -1,9 +1,9 @@
 import React from 'react';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
-import { BottomNav } from '@/components/mobile/BottomNav';
+import { OperationalShell } from '@/components/dashboard/operational-shell';
+import { UserRole } from '@/lib/auth/roles';
 import { OfflineBanner } from '@/components/mobile/OfflineBanner';
-import { PilotModeProvider } from '@/contexts/pilot-mode-context';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { getUserRole } from '@/lib/auth/rbac-server';
 import { logger } from '@/lib/logger';
@@ -33,24 +33,19 @@ export default async function MobileLayout({
     return redirect('/login');
   }
 
-  let userRole: string | undefined;
+  let userRole: UserRole = UserRole.MEMBER;
   try {
     const organizationId = await getOrganizationIdForUser(userId);
     const role = await getUserRole(userId, organizationId);
-    userRole = role ?? undefined;
+    userRole = role ?? UserRole.MEMBER;
   } catch (error) {
     logger.warn('[mobile:layout] role resolution failed; defaulting to member experience', error);
   }
 
   return (
-    <PilotModeProvider>
-      <div className="min-h-screen bg-gray-50 pb-20">
-        <OfflineBanner />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <BottomNav userRole={userRole} />
-      </div>
-    </PilotModeProvider>
+    <OperationalShell profile={null} userEmail="" userRole={userRole} organizationProvince={null}>
+      <OfflineBanner className="static z-auto mb-4" />
+      {children}
+    </OperationalShell>
   );
 }
