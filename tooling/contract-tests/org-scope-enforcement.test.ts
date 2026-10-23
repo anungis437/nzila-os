@@ -111,6 +111,7 @@ describe('Org-scope enforcement patterns', () => {
         const hasOrgGuard =
           content.includes('withOrgScope') ||
           content.includes('requireOrgAccess') ||
+          /await\s+getCaseActor\s*\(/.test(content) ||
           content.includes('requireVerifiedOrgAccess') ||   // ABR CourtLens — Phase 2C.6
           content.includes('requireVerifiedPermission') ||  // ABR CourtLens — Phase 2C.6
           content.includes('resolveOrgContext') ||

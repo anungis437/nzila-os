@@ -435,3 +435,5 @@ test('case authorization review rejects other contract changes',()=>{
 for(const name of ['apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts','apps/union-eyes/app/api/__tests__/cases-escalate.route.test.ts'])test(`case authorization review accepts scoped escalation ${name}`,()=>{
  const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:name});validateManifest(m,NOW)
 })
+
+for(const path of ["tooling/contract-tests/api-authz-coverage.test.ts","tooling/contract-tests/cross-org-breach-http.test.ts","tooling/contract-tests/org-isolation.test.ts","tooling/contract-tests/org-isolation-runtime.test.ts","tooling/contract-tests/org-scope-enforcement.test.ts","tooling/contract-tests/union-eyes-fsm-enforcement.test.ts","apps/union-eyes/app/api/__tests__/dry-run-calibration.test.ts"])test('case authorization accepts exact follow-up test '+path,()=>{const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path});validateManifest(m,NOW)})

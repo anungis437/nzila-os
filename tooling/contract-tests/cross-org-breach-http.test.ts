@@ -72,6 +72,7 @@ const SYSTEM_SKIP = (path: string) => {
 
 const ORG_SCOPED_AUTH_PATTERNS = [
   /requireOrgAccess\s*\(/,
+  /await\s+getCaseActor\s*\(/, // Authenticated live organization membership and role
   /requirePartnerEntityAccess\s*\(/,
   /resolvePartnerEntityIdForView\s*\(/,
   /authenticateUser\s*\(/,
