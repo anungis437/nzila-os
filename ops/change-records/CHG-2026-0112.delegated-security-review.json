@@ -5,16 +5,16 @@
   "pullRequest": 993,
   "branch": "fix/ue-canonical-case-authorization-20261023",
   "baseSha": "8fafc507a52c448446578f08fc72a233039d8098",
-  "sourceSha": "f8c27e82ab679810bdb1f253b3a9eebb2d34b39a",
-  "sourceTree": "0a477a22df47e827e662c82beab63017f2b57b53",
+  "sourceSha": "6436c5f83a74991bec60e8039f5691f2d7b61611",
+  "sourceTree": "bff4eaf11b0eb58619b122efe30d8dfd61bddc5c",
   "mission": "UE-STAGING-RECOVERY-TO-GO",
   "changeRecordId": "CHG-2026-0112",
   "environment": "STAGING",
   "owner": "anungis437",
   "operator": "Codex",
   "instructionSha256": "681844e4f18424c1e592dfd1db205afc66d5c7a3d647c91006dc8f5d2dcbb2e3",
-  "issuedAt": "2026-10-23T07:05:39.809Z",
-  "expiresAt": "2026-10-24T07:05:39.810Z",
+  "issuedAt": "2026-10-23T07:17:28.326Z",
+  "expiresAt": "2026-10-24T07:17:28.327Z",
   "resources": {
     "subscription": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
     "tenant": "5082b8be-b04d-4a13-b61c-b6397670177b",
@@ -129,6 +129,15 @@
       "sha256": "e6a2f612907fc93d089a51f5399d90a59da905adfb670b1f2ed09e030e08ac4a",
       "baseBlobSha": "9505710059747844e4efffd113ab680d052dc4d4",
       "baseSha256": "2375eddc986ba482dcbefd2de9f8657d345f56a18a4938e12c83ff54f30447d4"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/dry-run-calibration.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "9637cbf14249554d03845129e95155188b67aac1",
+      "sha256": "89d7ef73c5396d9dc653d6f10f26ff37b144091dfe4c75dc412febf058507e4d",
+      "baseBlobSha": "f6e7964aae8533bc3b412e44816d90ead9b0c2cd",
+      "baseSha256": "b5b0a44bb900ee0aae43c95c6e26efb2ea2a99c3759e3a55a9f6997b3f1c144d"
     },
     {
       "path": "apps/union-eyes/app/api/cases/[caseId]/assign/route.ts",
@@ -329,6 +338,60 @@
       "baseSha256": "6ed5d0c44502a2672d887138d77f75a502463f8fe39dd045544213e48be081f1"
     },
     {
+      "path": "tooling/contract-tests/api-authz-coverage.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "458559069c236aea6c0b5d2afd2afd1f991be735",
+      "sha256": "8ac023a8ef5b908c0d50adca3d9ed1479eace2acad08c4fef3ed1e120ea6219d",
+      "baseBlobSha": "3881604581b4a6a47907c0184efdf8a2408cc9ad",
+      "baseSha256": "9c63b0a986c7a9a91e90f5cd392a4becda5c36b5d4f487f70e864c7e0ab78c8e"
+    },
+    {
+      "path": "tooling/contract-tests/cross-org-breach-http.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "868412a81c58163ca2591b3d78cff294d79c7c0f",
+      "sha256": "258eb943d74c1be80b1cabeaaade0efe9a2acf46967995b003bb77b9cb28e169",
+      "baseBlobSha": "8bc103c2eec14fdc01308232e01005a77a77662b",
+      "baseSha256": "36e19d8438e2e81da54da4738b16bf8265565ed376a2998888483df4d0432779"
+    },
+    {
+      "path": "tooling/contract-tests/org-isolation-runtime.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "aac0b4c8f2272a9b9cf4ffdd1f9888f1705ddd5c",
+      "sha256": "0c556d3031315425a4a344a474437acf1e7e63f0ee81cfe6984b1b7904b4feb1",
+      "baseBlobSha": "c333f9ad60a5bc169af6b84c92c12f9b1d694dd9",
+      "baseSha256": "3a020bc472ee4ab820874a561e0f4a560ca7f4cdda25a628301c3e23e86bfa42"
+    },
+    {
+      "path": "tooling/contract-tests/org-isolation.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "034798a4beb2377339003df6664cf68a208bb89e",
+      "sha256": "86361daa9ced2bcbdf908bb5b650dc129d2db431a004d03a914bbd251c06eb07",
+      "baseBlobSha": "e8146aa483f158b3ea2850a458f8830bc4b98c7b",
+      "baseSha256": "aa4bf17451b9b5190527edd89f96a2dbc81d5aa2b6abae9b1399656305d93a98"
+    },
+    {
+      "path": "tooling/contract-tests/org-scope-enforcement.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "29866aaa3c42f0e01d032ffd00c9b1e3aab2d039",
+      "sha256": "61617e225d6f1c71ff694bd1cb01b69dd147f05f8ac3ba0a9b51666e70780430",
+      "baseBlobSha": "d8959a5975157bc7391d0495cf7cfd0082d8f76c",
+      "baseSha256": "82e6ce8f50d6b2496be14f75fe6e224bb6aa58b0f0754e78db6b4710cc5f4567"
+    },
+    {
+      "path": "tooling/contract-tests/union-eyes-fsm-enforcement.test.ts",
+      "status": "modified",
+      "previousPath": null,
+      "blobSha": "0fe4e4a475cb60f594169ba4667181ee1c371e2f",
+      "sha256": "b1ff8a3f6bcd1c00102ec2851d7c2e580114f4e6e8058b4d5f5b8b670890e786",
+      "baseBlobSha": "db77753a3bdcdd873fe9d119154ea4e8cb414a3d",
+      "baseSha256": "3eb344435e1a6c79216296d6ae501bcf86b9de07bb366b11660ff3bd60fc37c4"
+    },
+    {
       "path": "tooling/contract-tests/vertical-governance.test.ts",
       "status": "modified",
       "previousPath": null,
@@ -377,8 +440,8 @@
       "path": "tooling/security/ue-staging-delegated-review.mjs",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "711de419f7d9a045ed01e936ac3e099f9949da6f",
-      "sha256": "687706c31902f2483ea3630fdf94812dfd20cedd721f4ad628431345f8ddeb2b",
+      "blobSha": "29be89de4b3b5aed1e17a822446a64a2ba5d3e11",
+      "sha256": "56efdcf49ad3167f9ff50d038cd8ac729c4c23dfc29b4587cf93f7bcb41134dc",
       "baseBlobSha": "0e1614a653a9661a23c83d25d4ed51d3a0ac07c7",
       "baseSha256": "ce6cf6a9d178861ac9b8e5a951b999082e9b0f61da7d3ff126bab9c49136be5d"
     },
@@ -386,8 +449,8 @@
       "path": "tooling/security/ue-staging-delegated-review.test.mjs",
       "status": "modified",
       "previousPath": null,
-      "blobSha": "c7be3d586f37597c33278e30fcfcc9234d07820e",
-      "sha256": "06bab78c731bcb15ca6da8ed88f436b04de3610106b4710116ffa43b77fa21a6",
+      "blobSha": "460e86ac7ae43710a61e5d80151cb6f2563360bb",
+      "sha256": "ff61f3232230e9911405cc83e2ec042f1aeea4531aaa5baa17c77144986ef548",
       "baseBlobSha": "4030ab3eb7653540af4a9f36189206d40b338f7e",
       "baseSha256": "1e947d44a45ff7214695e2e4f2364abbd9effab2a988f686698d7367df90425e"
     }
@@ -396,9 +459,9 @@
     {
       "kind": "primary-agent-review",
       "agentTask": "/root",
-      "reviewedAt": "2026-10-23T07:05:39.809Z",
-      "report": "Primary-agent source security review of PR993 by Codex /root. Reviewed canonical actor resolution, role mapping, tenant and member/assignee record scope, history visibility, assignment eligibility, scoped canonical audit export, route mutations and denial handling. Canonical actors derive from authenticated live organization context; unknown roles fail closed. Generic PATCH rejects assignment and status bypasses. Assignment and transition lock the scoped record before mutation. Escalation applies record scope before decision proof or write. The companion predicate uses the existing non-login, non-bypass reader, fixed pg_catalog search path, session-bound organization authority and boolean output; PUBLIC execution is revoked and runtime execution explicitly bounded. Catalog admission verifies exact body, owner and ACL. No raw private-table grant or production permission is introduced. The contract recognizer now recognizes invocation of the existing authenticated actor guard; import-only and request-supplied actor negative controls remain rejected. The delegated review covers the exact additional contract-test path and rejects unrelated contract edits; immutable key, PR identity, exact file hashes and evidence-only child checks remain enforced. No unresolved P0/P1 identified in this source review. This is primary-agent review, not independent human approval. Database installation and actual staging acceptance remain unproven by this receipt.",
-      "reportSha256": "647502a7fe970296d69ed142f7d68908e0b5aa5a096a9ff1248c73cb1eef5a08",
+      "reviewedAt": "2026-10-23T07:17:28.326Z",
+      "report": "Primary-agent source security review of PR993 by Codex /root. Reviewed canonical actor resolution, role mapping, tenant and member/assignee record scope, history visibility, assignment eligibility, scoped canonical audit export, route mutations and denial handling. Canonical actors derive from authenticated live organization context; unknown roles fail closed. Generic PATCH rejects assignment and status bypasses. Assignment and transition lock the scoped record before mutation. Escalation applies record scope before decision proof or write. The companion predicate uses the existing non-login, non-bypass reader, fixed pg_catalog search path, session-bound organization authority and boolean output; PUBLIC execution is revoked and runtime execution explicitly bounded. Catalog admission verifies exact body, owner and ACL. No raw private-table grant or production permission is introduced. The contract recognizer now recognizes invocation of the existing authenticated actor guard; import-only and request-supplied actor negative controls remain rejected. The delegated review covers the exact additional contract-test path and rejects unrelated contract edits; immutable key, PR identity, exact file hashes and evidence-only child checks remain enforced. No unresolved P0/P1 identified in this source review. This is primary-agent review, not independent human approval. Database installation and actual staging acceptance remain unproven by this receipt. Follow-up review: six contract files recognize the canonical awaited actor guard or verify rejection of generic status changes plus FSM enforcement by the dedicated route. The calibration test supplies an authenticated canonical actor while retaining real scope SQL and unauthenticated wrapper rejection. Changes are test-only plus exact signed-path coverage; production route behavior is unchanged.",
+      "reportSha256": "d60ec031c9855d2f7b774cc7a326111c4ec13f4591e270ca05547731146e8d7c",
       "unresolvedP0": 0,
       "unresolvedP1": 0
     }
@@ -407,8 +470,8 @@
     {
       "command": "node --test tooling/security/ue-staging-delegated-review.test.mjs",
       "result": "PASS",
-      "passed": 259,
-      "logSha256": "71a789a3013ef7093a6493036d4ab42612a22a70fffa3aed32aae8d29aeedb3a"
+      "passed": 266,
+      "logSha256": "ea940bd4d8fe9d50dee87e208dffa225fe696e62e18b5d39b2373fc9aeee92b1"
     },
     {
       "command": "pnpm exec vitest run --project contract-tests tooling/contract-tests/vertical-governance.test.ts",
@@ -421,6 +484,18 @@
       "result": "PASS",
       "passed": 48,
       "logSha256": "ff79da543badd235c1df8e1037a669b231a89389f3705fe29f990ca00cea714a"
+    },
+    {
+      "command": "pnpm exec vitest run --project contract-tests (authorization, organization isolation and FSM contracts)",
+      "result": "PASS",
+      "passed": 94,
+      "logSha256": "f0f54e5cdc8c42291ff433cd8e56b6b04118d44df2c4dd6e80cb7f5e0fc5870b"
+    },
+    {
+      "command": "pnpm exec vitest run --project union-eyes apps/union-eyes/app/api/__tests__/dry-run-calibration.test.ts",
+      "result": "PASS",
+      "passed": 6,
+      "logSha256": "54c348a711edb91499f18efc29a5a7352a32561ac64fa276bc77147777b637b6"
     }
   ],
   "limitations": [
