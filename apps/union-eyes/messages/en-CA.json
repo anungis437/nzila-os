@@ -11514,6 +11514,7 @@
     }
   },
   "experienceNavigation": {
+    "close_navigation": "Close navigation",
   "workspace": "Workspace",
   "home": "Home",
   "my_cases": "My Cases",
@@ -11569,6 +11570,7 @@
   "viewing": "Viewing"
 },
   "experiencePrivacy": {
+    "close": "Close",
   "text0": "We value your privacy",
   "text1": "We use cookies to enhance your experience, analyze site traffic, and personalize content. You can customize your preferences or accept all cookies.",
   "text2": "Customize",

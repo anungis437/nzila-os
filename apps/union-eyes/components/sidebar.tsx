@@ -246,7 +246,7 @@ export default function Sidebar({
         <Link
           href={href}
           data-nav-role="hub"
-          className="mt-1 inline-flex font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900"
+          className="mt-1 inline-flex min-h-11 items-center font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900"
         >
           {hubCue.linkLabel}
         </Link>
@@ -267,7 +267,7 @@ export default function Sidebar({
         {groups.map(({ group, items: groupItems }) => {
           const isFlat = group.key === "__flat";
           const isGroupCollapsed = !isFlat && collapsedGroups.has(group.key);
-          const groupId = `nav-group-${variant}-${group.key}`;
+          const groupId = `nav-group-${variant}-${encodeURIComponent(group.key)}`;
 
           return (
             <div key={group.key} className="space-y-1">
@@ -277,7 +277,7 @@ export default function Sidebar({
                   onClick={() => toggleGroup(group.key)}
                   aria-expanded={!isGroupCollapsed}
                   aria-controls={groupId}
-                  className="group flex w-full items-center justify-between px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-900"
+                  className="group flex min-h-11 w-full items-center justify-between px-2 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-900"
                 >
                   <span>{copy(group.label)}</span>
                   <ChevronDown
@@ -316,7 +316,7 @@ export default function Sidebar({
                         }
                         aria-current={active ? "page" : undefined}
                         data-nav-role={honesty.navRole}
-                        className={`relative flex gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
+                        className={`relative flex min-h-11 gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
                           showLabel ? "items-start" : "items-center justify-center"
                         } ${
                           active
@@ -364,7 +364,7 @@ export default function Sidebar({
   const renderBrand = (showLabel: boolean) => (
     <Link
       href={withLocale("/dashboard")}
-      className="flex items-center gap-2"
+      className="flex min-h-11 min-w-11 items-center gap-2"
       aria-label="UnionEyes home"
     >
       <Image
@@ -465,7 +465,7 @@ export default function Sidebar({
           {isViewingTenantOrg && organization && !collapsed && (
             <div className="mx-3 mb-3 flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-700">
               <Building2 size={12} aria-hidden="true" />
-              <span className="truncate">Viewing: {organization.name}</span>
+              <span className="break-words">{copy('Viewing')}: {organization.name}</span>
             </div>
           )}
 
@@ -478,7 +478,7 @@ export default function Sidebar({
       </aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" id="ue-mobile-drawer" data-nav-role="legacy-side"
+        <SheetContent side="left" id="ue-mobile-drawer" data-nav-role="legacy-side" closeLabel={copy('Close navigation')}
           aria-describedby={undefined}
           onCloseAutoFocus={event => { event.preventDefault(); document.getElementById("ue-navigation-trigger")?.focus(); }}
           data-nav-surface="drawer" className="ue-navigation-drawer w-[min(22rem,90vw)] overflow-y-auto">

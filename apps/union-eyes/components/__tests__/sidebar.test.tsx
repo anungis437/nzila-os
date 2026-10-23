@@ -87,6 +87,20 @@ function expectNoUndifferentiatedPrimary() {
 }
 
 describe('Sidebar', () => {
+  it('connects each group control to exactly one group in desktop and drawer navigation', () => {
+    mockUsePilotMode.mockReturnValue({ isPilotMode: false });
+    renderSidebar('officer');
+    fireEvent.click(screen.getByRole('button', { name: 'Open navigation' }));
+    const controls = Array.from(document.querySelectorAll<HTMLButtonElement>('button[aria-controls^="nav-group-"]'));
+    expect(controls.length).toBeGreaterThan(0);
+    for (const control of controls) {
+      const id = control.getAttribute('aria-controls')!;
+      expect(id).not.toMatch(/\s/);
+      const group = document.getElementById(id);
+      expect(group).not.toBeNull();
+      expect(Array.from(document.querySelectorAll('[id]')).filter(element => element.id === id)).toHaveLength(1);
+    }
+  });
   it('shows Operations Continuity for an executive outside pilot mode', () => {
     mockUsePilotMode.mockReturnValue({ isPilotMode: false });
     render(

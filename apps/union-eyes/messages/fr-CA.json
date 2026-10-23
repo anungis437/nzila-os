@@ -11514,6 +11514,7 @@
     "metaDescription": "Gérer les dossiers de représentation et d'arbitrage"
   },
   "experienceNavigation": {
+    "close_navigation": "Fermer la navigation",
   "workspace": "Espace de travail",
   "home": "Accueil",
   "my_cases": "Mes dossiers",
@@ -11569,6 +11570,7 @@
   "viewing": "Organisation affichée"
 },
   "experiencePrivacy": {
+    "close": "Fermer",
   "text0": "Votre vie privée compte",
   "text1": "Nous utilisons des témoins pour améliorer votre expérience, analyser la fréquentation et personnaliser le contenu. Vous pouvez définir vos préférences ou accepter tous les témoins.",
   "text2": "Personnaliser",

@@ -232,9 +232,9 @@ export function CookieConsentBanner({ organizationId, userId, messages }: Cookie
 
       {/* Detailed Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent closeLabel={text('close', 'Close')} className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 pr-8">
               <Shield className="w-5 h-5" />{text("text5", "Cookie Preferences")}</DialogTitle>
             <DialogDescription>{text("text6", "Manage your cookie preferences. Essential cookies cannot be disabled as they are required for the website to function.")}</DialogDescription>
           </DialogHeader>
