@@ -1,0 +1,902 @@
+{
+  "schema": "workaid-test-results/1",
+  "command": "node --test --test-reporter=junit test\\authorization.test.ts test\\claims.test.ts test\\deadlines.test.ts test\\followup.test.ts test\\integration-contracts.test.ts test\\isolation.test.ts test\\pack-integrity.test.ts test\\platform-repro.test.ts test\\publication-revocation.test.ts test\\referral.test.ts test\\submission.test.ts",
+  "cwd": "tooling/workaid-prep",
+  "node": "v24.13.1",
+  "baseCommit": "38a824918cf2e7d7cfb7fcb0e796cbde45433be8",
+  "workingTreeDirty": true,
+  "exitCode": 0,
+  "totals": {
+    "total": 177,
+    "pass": 177,
+    "fail": 0,
+    "skipped": 0
+  },
+  "cases": [
+    {
+      "file": "test/authorization.test.ts",
+      "name": "assigned specialist with a live grant is allowed",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-ADV-02] a specialist in the right organization but not assigned to the matter gets a non-disclosing NOT_FOUND",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-ADV-02] a specialist from another organization never reaches the matter",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "expired, revoked, mismatched-user and inactive-session grants are refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "all three dimensions present: allowed",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-T083][WA-T016] a technical view grant without professional acceptance is not representation",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-T017] DOA missing, revoked or expired denies WSIB representative action even with grant and acceptance",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-T077][WA-T092] the four WorkAid intake instruments never substitute for a WSIB DOA",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "a DOA for another member or another matter does not count",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-ADV-17] an authorization that expires mid-matter stops authorizing from the moment it expires",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "a closed matter permits no professional action",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-ADV-04][WA-T019] a member guessing a restricted document id gets NOT_FOUND with no title",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-T023] a member sees a released document only through an active member grant and never while a professional hold applies",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "a union user sees nothing from another union and never sees restricted classes, grant or not",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-T099] identical external claim numbers in two organizations do not widen access: authorization keys are internal ids",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-ADV-03][WA-T018] a revoked grant stops serving an old document link",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-T025] expired links, links for another user and links for another document are refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-ADV-05] a cached allow stops being usable on expiry, on a newer revocation epoch, or when stale",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-ADV-13] a professional hold blocks release to member and union until a principal lifts it with a reason",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "release eligibility refuses quarantined, medical-to-union, wrong member, wrong union and unauthorized releasers",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-ADV-14][WA-T053][WA-T091] an unapproved notification carries no title, and sensitive documents never carry a preview",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "a preview that leaks a document title is discarded",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-T049][WA-T085] member status projection copies allow-listed fields only",
+      "status": "PASS"
+    },
+    {
+      "file": "test/authorization.test.ts",
+      "name": "[WA-T052][WA-T095] small cohorts are suppressed and a lone suppression is complemented",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "[WA-T007][WA-T008] one member, many claims; every decision belongs to exactly one claim and keeps its letter provenance",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "[WA-ADV-06] an objection attached to the wrong claim is refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "an objection must name real issues of that decision",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "[WA-ADV-07] the same denial letter submitted twice resolves to one decision",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "the same letter bytes under a different claim are held for review as a likely wrong-claim upload",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "a claim number linked to a different member is never auto-joined",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "[WA-T015] a claim number is data, not an identity: claims outside the organization scope are refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "[WA-ADV-07] idempotent create: the same request id returns the same objection; a changed payload under the same id is rejected",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "[WA-ADV-08] a legitimate new objection is not deduplicated against an older terminal one, nor against a different issue",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "[WA-T027][WA-T073] groups never span claims; counts differ by approved strategy and never equal the letter count by formula",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "regrouping excludes issues already covered by an active objection",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "[WA-T071] a historical claim from another employer stays private and is excluded from the outbound ITO by default",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "[WA-T072] a same-employer related claim needs explicit professional work-context validation; intake listing is not permission",
+      "status": "PASS"
+    },
+    {
+      "file": "test/claims.test.ts",
+      "name": "a union user cannot validate work context; unknown-employer claims fail closed even with a validation",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "[WA-T028][WA-T074] unconfirmed means unconfirmed: no universal timer, no computed date, never a &quot;met&quot; status",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "[WA-T028] confirmation needs a professional, a source document, reasoning and a reviewed, effective rule source",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "[WA-T029] letter date and received date are both retained and neither is defaulted from upload time",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "[WA-T030][WA-T074][WA-T075] mixed issue kinds and exception windows require explicit manual rule affirmation",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "[WA-T075][WA-T030] a rule source is only valid within its dated window; there is no blanket extension",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "re-confirmation is append-only: earlier confirmations are never erased",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "[WA-ADV-12] the confirmed date ends at local midnight in the matter zone, whatever zone the viewer is in",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "a disposition needs a receipt-confirmed submission and a professional; sent or drafted is not enough",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "[WA-T031] 4-6 weeks is an operational expectation, never a legal deadline",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "an owner is required so a wait cannot go unowned",
+      "status": "PASS"
+    },
+    {
+      "file": "test/deadlines.test.ts",
+      "name": "[WA-T032] receiving a file in batches does not mark it complete; completeness is a professional judgement",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T037] a dispatched submission yields exactly one task carrying submission, matter, claim and owner context",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T038][WA-ADV-10] replays and racing workers resolve to the same single task",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T039] draft, reviewed and approved documents never start a receipt follow-up",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "a new submission version gets its own follow-up; an earlier version does not block it",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "an already receipt-confirmed submission needs no follow-up",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "a named owner is required",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "UNRESOLVED: a task record exists but is non-authoritative and schedules no reminders",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "CLIO as task-of-record: Union Eyes generates no competing task (no dual OPEN receipt tasks)",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "UNION_EYES as task-of-record: the task is authoritative and may schedule reminders",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T042] with no configured rule the task is created without a fabricated date",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T042] Friday 23:59 local: calendar rule lands on Saturday and says so; business rule gives Monday",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T042] holidays are skipped only when configured",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T043] daylight-saving changes use local dates, not 24-hour arithmetic",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-ADV-12] the matter calendar zone, not any viewer zone, decides the local date",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "the owner can confirm or edit the date; the candidate stays visible in provenance",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T044] snoozing needs a reason, keeps the original due date, and cannot hide overdue",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T041] a task completes only from a confirmed receipt of its own submission version; an owner cannot erase a failure",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T048] reassignment is reserved to the principal, preserves provenance and bumps the owner epoch",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T038] scheduling is idempotent on (task, owner epoch, offset)",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-ADV-10] a reminder delivered once cannot fire a second time, and two workers cannot hold it together",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T045][WA-T046] failures stay visible, retry, then dead-letter; they never count as notified",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "a reminder is not sent before it is due",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-ADV-11][WA-T048] reassigning while a reminder is queued cancels the old recipient and never notifies the former assignee",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-ADV-18] closing a matter cancels its tasks and outstanding reminders, and delivery refuses a closed matter",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "[WA-T047][WA-T100] a reminder deep link rechecks current authorization at delivery",
+      "status": "PASS"
+    },
+    {
+      "file": "test/followup.test.ts",
+      "name": "a task whose recipient is a different user than the snapshot is refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "[WA-T054] there is no connector, no writeback, and the mode is manual coordination",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "[WA-T096] copy claiming a Clio integration is rejected; honest manual-coordination copy passes",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "[WA-ADV-15][WA-T056] conflicting task states raise a reconciliation exception, never a silent winner or a writeback",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "[WA-ADV-15] an external &quot;done&quot; is not WSIB receipt evidence",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "agreement is in sync; tasks about different submissions never merge",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "[WA-T055] a future event is admitted once, for its own tenant, within its type/field allow-list and age limit",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "every upload is quarantined and unverified; a clean PDF is merely scan-pending",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "[WA-ADV-19] misleading metadata is data only: declared class is ignored, instruction-like names are flagged and neutralized",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "[WA-ADV-19] MIME lies, unknown signatures, empty and oversize files are caught",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "[WA-T010][WA-T098] password-protected and polyglot PDFs are sent back for correction, not treated as verified",
+      "status": "PASS"
+    },
+    {
+      "file": "test/integration-contracts.test.ts",
+      "name": "[WA-T066] allow-listed scalar detail codes pass; free text, unknown keys, objects and canary content are refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/isolation.test.ts",
+      "name": "the base commit exists locally",
+      "status": "PASS"
+    },
+    {
+      "file": "test/isolation.test.ts",
+      "name": "every changed or added path is inside docs/union-eyes/workaid/ or tooling/workaid-prep/",
+      "status": "PASS"
+    },
+    {
+      "file": "test/isolation.test.ts",
+      "name": "no shared, operational or release-critical path is touched",
+      "status": "PASS"
+    },
+    {
+      "file": "test/isolation.test.ts",
+      "name": "the preparation harness adds no package manifest or lockfile entry",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "every manifest file is present and matches its recorded size and SHA-256 (CSV compared as CRLF as shipped)",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "README, MANIFEST and the six working documents are all present (no missing attachment)",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "the pack claims 80 acceptance cases, 12 scenarios and 31 findings; the files actually contain exactly that",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "the pack marks every acceptance case DESIGNED_NOT_EXECUTED and declares NO_GO",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "scenario target tests all reference real matrix cases, and every fixture is synthetic with deliberately invalid external ids",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "R1 and R2 finding ids are unique and severities are only CRITICAL/HIGH/MEDIUM and P0/P1",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "the nine delivered artifacts are present",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "R3 contains 26 findings: 8 P0, 15 P1, 3 P2 - counted from the severity headings, not the summary",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "the executive verdict contradicts itself: header table says 8/15/3, its footer says 8/14/4; the detailed file governs",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "R4-R6 contain 31 findings (CRITICAL 7, HIGH 15, MEDIUM 8, LOW 1) split 12/10/9",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "the acceptance delta adds exactly WA-T081..WA-T100 with no id collision with the 80 existing cases",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "every finding id cited by the delta resolves to a real R3 finding",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "all source findings: 91 entries, ids unique across rounds (R1 22, R2 9, R3 26, R4-R6 31, INT 3)",
+      "status": "PASS"
+    },
+    {
+      "file": "test/pack-integrity.test.ts",
+      "name": "the CSV parser handles quoted commas and CRLF",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T081] source at the pinned SHA only recognizes the single-quoted directive",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T081] a double-quoted action without resolveOrgContext is invisible to the legacy detector and caught by the reference detector",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T081] reference detector handles BOM, comments, stacked directives, inline directives and ignores look-alikes",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T081] measured at the pinned SHA: the legacy detector sees fewer UE action files than the reference detector",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T094] exception entries are failed once their expiry passes",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T090] reference search never evaluates restricted titles for an unauthorized caller",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T090] legacy ordering (match, then filter) touches restricted titles before authorization",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T090] source at the pinned SHA queries by title before applying the visibility policy",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T082] source at the pinned SHA signs S3/R2 URLs for one year",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T082] a one-year TTL is beyond both policy and the S3 SigV4 maximum; reference policy is <= 60 minutes",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T082] a download URL is minted only after a fresh allow; a revoked grant yields no URL",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-INT-001] source builds the object key from the human document name and logs it",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-INT-001][WA-T097] a clinical-name canary appears in the legacy key, metadata and log context but not in the opaque design",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-INT-002] source says &quot;SAS URL valid for 1 year&quot; but returns a bare container URL with no signature",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-INT-003] source puts the object before it signs, inside one try that rethrows",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-INT-003] reproduction: a signing failure after put leaves an orphan; the compensating sequence cleans up or records it",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T084] revokeRepresentationAuthority at the pinned SHA updates the authority and audits, with no grant or session handling",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T086] the resolver at the pinned SHA throws for claim_deadlines and resolves grievance recipients only",
+      "status": "PASS"
+    },
+    {
+      "file": "test/platform-repro.test.ts",
+      "name": "[WA-T086] no WorkAid preparation source imports the deadline engine, its resolver, scheduler or tables",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "[WA-T085][WA-T023] with nothing published a member sees only &quot;no update&quot;, never the internal state machine",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "[WA-T049] a published, approved, versioned text is the only thing a member receives",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "[WA-T051] the lawful records-access channel is always present, including when nothing is published or a publication is withdrawn",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "other members, union users and inactive sessions get nothing",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "[WA-ADV-14] a draft is never a milestone: sent/received/ARO stages need matching evidence",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "[WA-ADV-14] &quot;ARO decided&quot; cannot be published from a waiting dependency or a drafted ARF",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "publication needs a professional authorization, text, and a sane length; versions increment",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "[WA-T084][WA-ADV-03] revoking the instrument revokes dependent matter and document grants, bumps the epoch, and cancels reminders for the affected user",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "[WA-T084] revoking a WSIB DOA does not revoke technical grants (distinct records) but returns undispatched approvals for re-review",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "only a party to the matter with a revoking role may revoke; other organizations learn nothing",
+      "status": "PASS"
+    },
+    {
+      "file": "test/publication-revocation.test.ts",
+      "name": "revocation always emits audit events; none of them removes prior audit",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T001] four forms + photo ID + all documents is document-complete for review only",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T002] omitted intake form is reported with a next-action owner and cannot be overridden by a frontend flag",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T003] missing MEDICAL_AUTHORIZATION is flagged individually",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T004] missing RETAINER_AGREEMENT is flagged individually",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T005] missing SHARE_INFORMATION_RELEASE is flagged individually",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T006] missing GOVERNMENT_PHOTO_ID is flagged individually",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T010] unreadable, unsigned, wrong-claim and duplicate uploads do not count as provided",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "undeclared claim history and missing counts are flagged",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "every denial needs its letter, identified per decision",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T011][WA-T016] a granted exception routes to expedited review but never flips the checklist to complete",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T004] items outside the policy waiver list cannot be waived; union reps cannot grant exceptions",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T076] urgent objection preparation is not forced to wait for missing evidence",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "incomplete packet cannot be offered without a covering exception",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T012] return for correction keeps history and does not collapse into declined",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "clarification round-trips without leaving the specialist relationship",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-T013] acceptance is a professional act, separate from the checklist",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "decline is professional, requires a reason, and is terminal",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-ADV-16] returning a referral does not cancel a pending urgent review, and withdraw/decline are blocked until it is dispositioned",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "re-applying the same packet update is deterministic",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "illegal transitions are refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "[WA-ADV-01] another union cannot act on or even see a referral",
+      "status": "PASS"
+    },
+    {
+      "file": "test/referral.test.ts",
+      "name": "union-side actions by a specialist and specialist-side actions by a union are refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T026] DOA and WRF are distinct typed submissions",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T027] an ITO must name claim, decision, objection and issues; there is no matter-wide ITO checkbox",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T078] ARF approval is gated on attested readiness; a template existing is not a completed ARF",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T079] a WSIAT NOA cannot be approved ready-to-file without attested readiness",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T039][WA-T040] exhaustive matrix: every (from, to) pair behaves exactly as the allow-list says",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-ADV-09] DRAFT/REVIEWED/APPROVED can never jump to DISPATCHED-adjacent receipt states",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "terminal states stay terminal",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "a rejected submission can only be superseded by a new version, never revived",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T040] a provider acknowledgement never confirms WSIB receipt",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-ADV-09] a dispatch whose receipt is never confirmed stays visibly unconfirmed forever",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "only the dispatch provider may acknowledge delivery; humans and other systems cannot",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T041] receipt confirmation requires a human, a recognized method, and a contact or evidence reference",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "a union user cannot confirm receipt or dispatch",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-T039] draft or approved documents have no dispatch record and start nothing",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "a replayed dispatch with the same request id is idempotent; a second send under a new id is refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "dispatching a representative document without live WSIB authority is refused, but DOA itself is dispatchable",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-ADV-20] an asserted approver that differs from the authenticated principal is refused",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "[WA-ADV-20] a union principal, an inactive session or a missing professional authorization cannot approve",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "a system actor cannot approve, review or dispatch",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "the open decision about separate approvers is configurable, not assumed",
+      "status": "PASS"
+    },
+    {
+      "file": "test/submission.test.ts",
+      "name": "losing authority invalidates an approval back to REVIEWED (cascade actor only)",
+      "status": "PASS"
+    }
+  ]
+}
