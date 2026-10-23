@@ -14,6 +14,7 @@ export const PR_BINDINGS = Object.freeze({
   986: Object.freeze({ base: '441556737ffe0e36c6ec9bf6bd9c24bab5302559', branch: 'fix/ue-auth-storage-callers-20261022', author: 'anungisa' }),
   990: Object.freeze({ base: '9bb8a3fd224ca581838d433688b04860f2e9efc8', branch: 'fix/ue-native-intake-audit-20261022', author: 'anungisa' }),
   991: Object.freeze({ base: '8c41b6a8f54c6e1ff1e4e5f8ca0ba24256955ee7', branch: 'fix/ue-native-write-defaults-20261022', author: 'anungisa' }),
+  993: Object.freeze({ base: '8fafc507a52c448446578f08fc72a233039d8098', branch: 'fix/ue-canonical-case-authorization-20261023', author: 'anungisa' }),
   992: Object.freeze({ base: 'a36cf4b8928abaf61faf24d48e73c5001ae25af4', branch: 'fix/ue-canonical-timestamp-query-20261023', author: 'anungisa' }),
 })
 export const RESOURCES = Object.freeze({ subscription: '5d819f33-d16f-429c-a3c0-5b0e94740ba3', tenant: '5082b8be-b04d-4a13-b61c-b6397670177b', app: 'nzila-os-union-eyes-staging', appResourceGroup: 'nzila-canada-staging-rg', server: 'nzila-staging-db', databaseResourceGroup: 'nzila-staging-rg', database: 'nzila_os_staging', clone: 'nzila-ue-recovery-20261022', keyVault: 'nzila-staging-kv', region: 'canadacentral' })
@@ -31,6 +32,13 @@ const EXACT_PATHS = new Set([
   '.github/workflows/e2e.yml',
   'tooling/ci/ue-e2e-shard-receipts.mjs', 'tooling/ci/ue-e2e-shard-receipts.test.mjs',
   'tooling/contract-tests/ci-feedback-performance.test.ts',
+  'tooling/contract-tests/vertical-governance.test.ts',
+  'tooling/contract-tests/api-authz-coverage.test.ts',
+  'tooling/contract-tests/cross-org-breach-http.test.ts',
+  'tooling/contract-tests/org-isolation.test.ts',
+  'tooling/contract-tests/org-isolation-runtime.test.ts',
+  'tooling/contract-tests/org-scope-enforcement.test.ts',
+  'tooling/contract-tests/union-eyes-fsm-enforcement.test.ts',
   '.github/workflows/deploy-union-eyes.yml',
   KEY_PATH, 'ops/change-records/CHG-2026-0112.json', 'ops/change-records/CHG-2026-0112.staging-authorization.md',
   'packages/platform-auth/src/entra/config.ts', 'packages/platform-auth/src/entra/issuer.ts', 'packages/platform-auth/src/entra/issuer.test.ts',
@@ -96,6 +104,59 @@ const fail = message => { throw new Error(message) }
 function exactKeys(value, keys, name) {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).sort().join('|') !== [...keys].sort().join('|')) fail(`Invalid fields: ${name}`)
 }
+// This case authorization repair additionally contains one reviewed UE companion
+// predicate: existing auth reader, session-bound boolean result, runtime EXECUTE
+// only. It does not authorize other DDL, raw auth-table grants or core auth changes.
+const CASE_AUTHORIZATION_PATHS = new Set([
+  'apps/union-eyes/app/api/__tests__/dry-run-calibration.test.ts',
+  'tooling/contract-tests/vertical-governance.test.ts',
+  'tooling/contract-tests/api-authz-coverage.test.ts',
+  'tooling/contract-tests/cross-org-breach-http.test.ts',
+  'tooling/contract-tests/org-isolation.test.ts',
+  'tooling/contract-tests/org-isolation-runtime.test.ts',
+  'tooling/contract-tests/org-scope-enforcement.test.ts',
+  'tooling/contract-tests/union-eyes-fsm-enforcement.test.ts',
+  "apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts",
+  "apps/union-eyes/app/api/__tests__/cases-escalate.route.test.ts",
+  "apps/union-eyes/app/api/__tests__/cases-assign.route.test.ts",
+  "apps/union-eyes/app/api/__tests__/cases-audit.route.test.ts",
+  "apps/union-eyes/app/api/__tests__/cases-caseId-export.route.test.ts",
+  "apps/union-eyes/app/api/__tests__/cases-evidence.route.test.ts",
+  "apps/union-eyes/app/api/__tests__/cases-next-actions.route.test.ts",
+  "apps/union-eyes/app/api/__tests__/cases-notes.route.test.ts",
+  "apps/union-eyes/app/api/__tests__/cases-route.route.test.ts",
+  "apps/union-eyes/app/api/__tests__/cases-timeline.route.test.ts",
+  "apps/union-eyes/app/api/__tests__/cases-transition.route.test.ts",
+  "apps/union-eyes/app/api/cases/[caseId]/assign/route.ts",
+  "apps/union-eyes/app/api/cases/[caseId]/audit/route.ts",
+  "apps/union-eyes/app/api/cases/[caseId]/evidence/route.ts",
+  "apps/union-eyes/app/api/cases/[caseId]/export/route.ts",
+  "apps/union-eyes/app/api/cases/[caseId]/next-actions/route.ts",
+  "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts",
+  "apps/union-eyes/app/api/cases/[caseId]/route.ts",
+  "apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts",
+  "apps/union-eyes/app/api/cases/[caseId]/transition/route.ts",
+  "apps/union-eyes/app/api/cases/route.ts",
+  "apps/union-eyes/db/auth/case-assignee-predicate.pglite.test.ts",
+  "apps/union-eyes/db/auth/case-assignee-predicate.ts",
+  "apps/union-eyes/lib/__tests__/organization-utils.test.ts",
+  "apps/union-eyes/lib/cases/case-authorization.pglite.test.ts",
+  "apps/union-eyes/lib/cases/case-authorization.ts",
+  "apps/union-eyes/lib/cases/case-evidence-query.pglite.test.ts",
+  "apps/union-eyes/lib/cases/case-evidence-query.ts",
+  "apps/union-eyes/lib/cases/case-permissions.ts",
+  "apps/union-eyes/lib/operations/canonical-catalog-admission.ts",
+  "apps/union-eyes/lib/organization-utils.ts",
+  "apps/union-eyes/scripts/rls-verify.ts",
+  "tooling/repo-inventory/output/inventory.json",
+  "tooling/repo-inventory/output/inventory.md",
+  "tooling/repo-inventory/output/repo-inventory.json",
+  "tooling/repo-inventory/output/repo-inventory.md",
+  ".github/workflows/security-design-review.yml",
+  "tooling/security/ue-staging-delegated-review.mjs",
+  "tooling/security/ue-staging-delegated-review.test.mjs",
+])
+
 export function allowedPath(name) {
   return typeof name === 'string' && !name.includes('\\') && !name.split('/').some(part => ['.', '..', ''].includes(part)) && !/[\x00-\x1f]/.test(name) && (EXACT_PATHS.has(name) || name.startsWith('apps/union-eyes/'))
 }
@@ -171,6 +232,8 @@ export function validateManifest(m, now = Date.now()) {
       (f.previousPath !== null && !NATIVE_WRITE_DEFAULT_PATHS.has(f.previousPath)))) fail('Native write-default follow-up exceeds exact reviewed path scope')
     if (m.pullRequest === 992 && (!TIMESTAMP_QUERY_PATHS.has(f.path) ||
       (f.previousPath !== null && !TIMESTAMP_QUERY_PATHS.has(f.previousPath)))) fail('Timestamp query follow-up exceeds exact reviewed path scope')
+    if (m.pullRequest === 993 && (!CASE_AUTHORIZATION_PATHS.has(f.path) ||
+      (f.previousPath !== null && !CASE_AUTHORIZATION_PATHS.has(f.previousPath)))) fail('Case authorization follow-up exceeds exact reviewed path scope')
     const dependencyRepair = m.pullRequest === 986 && [...DEPENDENCY_PATHS, OTEL_DEPENDENCY_PATH].includes(f.path) && f.status === 'modified' && f.previousPath === null
     const toolRepair = m.pullRequest === 986 && TOOL_DEPENDENCY_PATHS.includes(f.path) && f.status === (f.path === '.kilo/package.json' ? 'added' : 'modified') && f.previousPath === null
     if ((!allowedPath(f.path) && !dependencyRepair && !toolRepair) || (f.previousPath !== null && !allowedPath(f.previousPath)) || !['added','modified','removed','renamed'].includes(f.status)) fail('Unreviewable source path/status')
@@ -187,10 +250,10 @@ export function validateManifest(m, now = Date.now()) {
   for (const review of m.reviews) {
     exactKeys(review,['kind','agentTask','reviewedAt','report','reportSha256','unresolvedP0','unresolvedP1'], 'review')
     const attribution = review.kind === 'separate-agent-review' && typeof review.agentTask === 'string' && /^\/root\/[a-z0-9_]+$/.test(review.agentTask)
-      || [986, 990, 991, 992].includes(m.pullRequest) && review.kind === 'primary-agent-review' && review.agentTask === '/root'
+      || [986, 990, 991, 992, 993].includes(m.pullRequest) && review.kind === 'primary-agent-review' && review.agentTask === '/root'
     if (!attribution || !review.report || sha256(Buffer.from(review.report)) !== review.reportSha256 || !Number.isFinite(Date.parse(review.reviewedAt)) || Date.parse(review.reviewedAt)>issued || review.unresolvedP0 !== 0 || review.unresolvedP1 !== 0) fail('Agent review attribution/report/findings invalid')
   }
-  if ([986, 990, 991, 992].includes(m.pullRequest) && !m.reviews.some(r=>r.kind==='primary-agent-review' && r.agentTask==='/root')) fail('Follow-up primary review with explicit attribution required')
+  if ([986, 990, 991, 992, 993].includes(m.pullRequest) && !m.reviews.some(r=>r.kind==='primary-agent-review' && r.agentTask==='/root')) fail('Follow-up primary review with explicit attribution required')
   for (const test of m.tests) {
     exactKeys(test,['command','result','passed','logSha256'], 'test')
     if (typeof test.command !== 'string' || !test.command || test.result !== 'PASS' || !Number.isInteger(test.passed) || test.passed < 1 || !HASH.test(test.logSha256)) fail('Actual passing test evidence missing')
@@ -220,7 +283,7 @@ export async function verifyPullRequest(m, api) {
   const baseTree = await api.get(`git/trees/${baseCommit.tree.sha}?recursive=1`)
   if (sourceTree.truncated || baseTree.truncated) fail('Truncated source tree')
   const blob = async (sha, expected) => { const b=await api.get(`git/blobs/${sha}`); const bytes=Buffer.from(b.content??'','base64'); if(b.encoding!=='base64' || b.sha!==sha || sha256(bytes)!==expected) fail('Git blob bytes differ from signed review');return bytes }
-  if ([986, 990, 991, 992].includes(m.pullRequest)) {
+  if ([986, 990, 991, 992, 993].includes(m.pullRequest)) {
     const key = sourceTree.tree.find(t=>t.path===KEY_PATH), baseKey = baseTree.tree.find(t=>t.path===KEY_PATH)
     if (key?.type!=='blob' || baseKey?.type!=='blob' || key.sha!==baseKey.sha) fail('Follow-up trust key must match immutable base')
     await blob(key.sha, TRUST_SHA256)

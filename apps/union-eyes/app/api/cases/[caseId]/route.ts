@@ -6,9 +6,9 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { sql } from 'drizzle-orm';
 import { claims } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { updateClaimStatusById, type ClaimStatus } from '@/lib/workflow-engine';
+import { getCaseActor, caseReadScope, findReadableCase, requireCaseAction } from '@/lib/cases/case-authorization';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,24 +21,11 @@ export const GET = withApi(
       description: 'Returns a single case (claim) with member contact info.',
     },
   },
-  async ({ params, organizationId, userId }) => {
+  async ({ params }) => {
     const id = params.caseId;
 
-    // Resolve organizationId: if null, fall back to the user's membership org
-    let orgId = organizationId;
-    if (!orgId && userId) {
-      const memberRows = await withRLSContext(async (tx) => tx.execute(
-        sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
-      ));
-      orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
-    }
-
-    // Build WHERE clause: org-scoped when possible, owner-fallback when not
-    const orgFilter = orgId
-      ? sql`AND c.organization_id = ${orgId}::uuid`
-      : userId
-        ? sql`AND c.member_id = ${userId}`
-        : sql`AND FALSE`;
+    const actor = await getCaseActor();
+    const orgFilter = sql`AND ${caseReadScope(actor, 'c')}`;
 
     const rows = await withRLSContext(async (tx) => tx.execute(sql`
       SELECT c.claim_id        AS "claimId",
@@ -90,27 +77,11 @@ export const GET = withApi(
   },
 );
 
-const CLAIM_STATUS_VALUES = [
-  'submitted',
-  'under_review',
-  'assigned',
-  'investigation',
-  'pending_documentation',
-  'resolved',
-  'rejected',
-  'closed',
-] as const;
-
-function isClaimStatus(value: any): value is ClaimStatus {
-  return typeof value === 'string' && CLAIM_STATUS_VALUES.includes(value as (typeof CLAIM_STATUS_VALUES)[number]);
-}
-
 // Allowed fields for PATCH — status transitions are enforced separately via FSM.
 const ALLOWED_PATCH_FIELDS: Record<string, keyof typeof claims.$inferInsert> = {
   priority: 'priority',
   description: 'description',
   desiredOutcome: 'desiredOutcome',
-  assignedTo: 'assignedTo',
   location: 'location',
 };
 
@@ -123,56 +94,16 @@ export const PATCH = withApi(
       description: 'Partially update a case (claim). Steward-only.',
     },
   },
-  async ({ body: parsedBody, params, organizationId, userId }) => {
+  async ({ body: parsedBody, params }) => {
     const id = params.caseId;
     const body = (parsedBody ?? {}) as Record<string, unknown>;
 
-    // Resolve organizationId fallback
-    let orgId = organizationId;
-    if (!orgId && userId) {
-      const memberRows = await withRLSContext(async (tx) => tx.execute(
-        sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
-      ));
-      orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
-    }
-
-    // Find the claim first
-    const orgFilter = orgId
-      ? sql`AND organization_id = ${orgId}::uuid`
-      : sql`AND FALSE`;
-
-    const existing = await withRLSContext(async (tx) => tx.execute(sql`
-      SELECT claim_id, claim_number FROM claims
-      WHERE (claim_number = ${id} OR claim_id::text = ${id})
-        ${orgFilter}
-      LIMIT 1
-    `));
-    if (!existing[0]) throw ApiError.notFound('Case not found');
-    const claimId = (existing[0] as { claim_id: string }).claim_id;
-
-    if (body.status !== undefined) {
-      if (!isClaimStatus(body.status)) {
-        throw ApiError.badRequest('Invalid claim status transition target');
-      }
-      if (!userId) {
-        throw ApiError.unauthorized('Authentication required for status transitions');
-      }
-
-      const nextStatus: ClaimStatus = body.status;
-
-      const transitionResult = await withRLSContext(async (tx) =>
-        updateClaimStatusById(
-          claimId,
-          nextStatus,
-          userId,
-          typeof body.notes === 'string' ? body.notes : undefined,
-          tx,
-        ),
-      );
-
-      if (!transitionResult.success) {
-        throw ApiError.badRequest(transitionResult.error ?? 'Status transition denied by workflow policy');
-      }
+    const actor = await getCaseActor();
+    await requireCaseAction(actor, 'case_transition', id);
+    // Assignment and status updates must use the audited, validated endpoints.
+    // The workbench already uses those endpoints; generic PATCH cannot bypass them.
+    if ('assignedTo' in body || 'status' in body) {
+      throw ApiError.badRequest('Use the case assignment or transition endpoint for this change');
     }
 
     // Build update object from allowed fields only
@@ -183,25 +114,18 @@ export const PATCH = withApi(
       }
     }
     if (Object.keys(updates).length === 0) {
-      if (body.status !== undefined) {
-        return { updated: true, claimId, statusTransitioned: true };
-      }
       throw ApiError.badRequest('No valid fields to update');
     }
     // Always bump updatedAt
     updates.updatedAt = new Date();
 
-    // If assigning, also set assignedAt
-    if ('assignedTo' in updates) {
-      updates.assignedAt = new Date();
-    }
+    const claimId = await withRLSContext(async (tx) => {
+      const claim = await findReadableCase(tx, actor, id, true);
+      if (!claim) throw ApiError.notFound('Case');
+      await tx.update(claims).set(updates).where(eq(claims.claimId, claim.claimId));
+      return claim.claimId;
+    });
 
-    await withRLSContext(async (tx) =>
-      tx.update(claims)
-        .set(updates)
-        .where(and(eq(claims.claimId, claimId)))
-    );
-
-    return { updated: true, claimId, statusTransitioned: body.status !== undefined };
+    return { updated: true, claimId, statusTransitioned: false };
   },
 );

@@ -26,6 +26,7 @@ vi.mock('@/lib/workflow/state-bridge', () => ({
   toLegacyClaimStatus: m.toLegacyClaimStatus,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/audit-logger', () => ({ auditLog: vi.fn(), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
 
 async function loadRoute() {
   return import('../cases/[caseId]/next-actions/route');

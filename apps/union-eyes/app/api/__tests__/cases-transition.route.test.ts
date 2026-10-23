@@ -43,7 +43,7 @@ vi.mock('@/lib/workflow/case-lifecycle', () => ({
 }));
 vi.mock('@/lib/workflow/state-bridge', () => ({ toLifecycleState: m.toLifecycleState }));
 vi.mock('@/lib/schema-error', () => ({ wrapSchemaQuery: m.wrapSchemaQuery }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
+vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation, auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
@@ -75,6 +75,12 @@ function makeTx(claimRows: unknown[]) {
     })),
   };
 }
+
+
+vi.mock('@/lib/cases/case-authorization', async (original) => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  findReadableCase: vi.fn(async () => m.state.claimRows[0] ?? null),
+}));
 
 async function loadRoute() {
   return import('../cases/[caseId]/transition/route');
@@ -173,6 +179,7 @@ describe('cases/[caseId]/transition route', () => {
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ success: true, claimId: 'case_1', toStatus: 'settled' });
     expect(m.auditDataMutation).toHaveBeenCalled();
+    expect(m.validateTransition).toHaveBeenCalledWith(expect.objectContaining({ assignedTo: 'agent_1', actorRole: 'steward' }));
   });
 
   it('returns 500 when transition pipeline throws unexpectedly', async () => {

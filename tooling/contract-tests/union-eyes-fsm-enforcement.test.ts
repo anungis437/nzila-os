@@ -2,7 +2,7 @@
  * Contract Test — Union Eyes FSM Route Enforcement
  *
  * UE-FSM-001:
- *   1. Case PATCH route must delegate status transitions to workflow-engine FSM helper.
+ *   1. Case PATCH rejects status changes; the dedicated transition route enforces the FSM.
  *   2. Case escalate route must not directly set claim status; it must use FSM helper.
  *   3. Grievance status route must validate transitions through unified lifecycle FSM.
  */
@@ -17,10 +17,13 @@ function read(relativePath: string): string {
 }
 
 describe('UE-FSM-001: Union Eyes route-level FSM enforcement', () => {
-  it('cases PATCH route delegates status transitions to updateClaimStatusById', () => {
+  it('cases PATCH rejects status bypass and dedicated transition route validates FSM', () => {
     const src = read('apps/union-eyes/app/api/cases/[caseId]/route.ts')
-    expect(src).toContain('updateClaimStatusById')
-    expect(src).toContain('if (body.status !== undefined)')
+    expect(src).toContain("'assignedTo' in body || 'status' in body")
+    expect(src).toContain("throw ApiError.badRequest('Use the case assignment or transition endpoint for this change')")
+    const transition = read('apps/union-eyes/app/api/cases/[caseId]/transition/route.ts')
+    expect(transition).toContain('validateTransition(')
+    expect(transition).toContain('if (!validation.allowed)')
     expect(src).not.toContain("status: 'status'")
   })
 

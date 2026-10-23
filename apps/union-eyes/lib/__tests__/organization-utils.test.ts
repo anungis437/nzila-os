@@ -4,12 +4,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
+  canonical: false,
+  canonicalContext: vi.fn(),
   mockSelect: vi.fn(),
   mockFrom: vi.fn(),
   mockWhere: vi.fn(),
   mockLimit: vi.fn(),
   mockCookiesGet: vi.fn(),
 }));
+
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => mocks.canonical }));
+vi.mock('@/lib/auth/canonical-context', () => ({ getCanonicalOrganizationContext: mocks.canonicalContext }));
 
 vi.mock('@/db/db', () => ({
   db: {
@@ -72,6 +77,7 @@ function setupLimitSequence(...values: any[][]) {
 describe('organization-utils', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.canonical = false;
     mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
     mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
     mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
@@ -319,5 +325,25 @@ describe('organization-utils', () => {
       const { getUserRoleInOrganization } = await import('../organization-utils');
       expect(await getUserRoleInOrganization('u1', 'o1')).toBe('cto');
     });
+  });
+});
+
+
+describe('canonical case membership role authority', () => {
+  beforeEach(() => { vi.clearAllMocks(); mocks.canonical = true });
+  it('uses private live membership even when public metadata says member', async () => {
+    const { getUserRoleInOrganization } = await import('../organization-utils');
+    mocks.canonicalContext.mockResolvedValueOnce({ role: 'officer' });
+    mocks.mockLimit.mockResolvedValueOnce([{ role: 'member' }]);
+    expect(await getUserRoleInOrganization('actor', 'organization')).toBe('officer');
+    expect(mocks.canonicalContext).toHaveBeenCalledWith({ expectedActorUserId: 'actor', organizationId: 'organization' });
+    expect(mocks.mockSelect).not.toHaveBeenCalled();
+  });
+  it('does not fall back to public privileges when canonical membership fails', async () => {
+    const { getUserRoleInOrganization } = await import('../organization-utils');
+    mocks.canonicalContext.mockRejectedValueOnce(new Error('Membership revoked'));
+    mocks.mockLimit.mockResolvedValueOnce([{ role: 'admin' }]);
+    expect(await getUserRoleInOrganization('actor', 'organization')).toBeNull();
+    expect(mocks.mockSelect).not.toHaveBeenCalled();
   });
 });

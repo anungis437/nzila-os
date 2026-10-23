@@ -7,18 +7,17 @@
  */
 
 import { NextResponse } from 'next/server'
-import { auth } from '@nzila/platform-auth/entra/server'
 import { z } from 'zod'
-import { eq, desc } from 'drizzle-orm'
+import { and, eq, desc } from 'drizzle-orm'
 import { withRLSContext } from '@/lib/db/with-rls-context'
-import { claimUpdates, claims } from '@/db/schema/claims-schema'
+import { claimUpdates } from '@/db/schema/claims-schema'
 import { claimHistoryReference, publicClaimHistory } from '@/lib/cases/claim-history-reference'
 import { auditDataMutation } from '@/lib/audit-logger'
 import { logger } from '@/lib/logger'
 import { buildUnionEvidencePack } from '@/lib/evidence'
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial'
-import { getOrganizationIdForUser } from '@/lib/organization-utils'
+import { getCaseActor, findReadableCase, caseHistoryVisibility, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,31 +36,21 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
   try {
     const { caseId } = await params
 
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
-        { status: 401 },
-      )
-    }
-    const orgId = await getOrganizationIdForUser(userId)
+    const actor = await getCaseActor()
+    const orgId = actor.organizationId
     await requireEntitlement(orgId, 'grievance_case_suite')
 
     const notes = await withRLSContext(async (tx) => {
-      // Verify the case exists (RLS enforces org isolation)
-      const [claim] = await tx
-        .select({ claimId: claims.claimId })
-        .from(claims)
-        .where(eq(claims.claimId, caseId))
-        .limit(1)
+      const claim = await findReadableCase(tx, actor, caseId)
 
       if (!claim) return null
 
-      return tx
+      const rows = await tx
         .select()
         .from(claimUpdates)
-        .where(eq(claimUpdates.claimId, claimHistoryReference(caseId)))
+        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(actor)))
         .orderBy(desc(claimUpdates.createdAt))
+      return { claimId: claim.claimId, rows }
     })
 
     if (notes === null) {
@@ -71,9 +60,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
       )
     }
 
-    return NextResponse.json({ caseId, notes: notes.map(note => publicClaimHistory(note, caseId)) })
+    return NextResponse.json({ caseId: notes.claimId, notes: notes.rows.map(note => publicClaimHistory(note, notes.claimId)) })
   } catch (error) {
-    const denied = authorizationDenialResponse(error)
+    const denied = caseAuthorizationResponse(error) ?? authorizationDenialResponse(error)
     if (denied) return denied
     logger.error('Failed to get case notes', error as Error)
     return NextResponse.json(
@@ -90,14 +79,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
   try {
     const { caseId } = await params
 
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
-        { status: 401 },
-      )
-    }
-    const orgId = await getOrganizationIdForUser(userId)
+    const actor = await getCaseActor()
+    const { userId, organizationId: orgId } = actor
     await requireEntitlement(orgId, 'grievance_case_suite')
 
     // Parse body
@@ -127,21 +110,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
     }
 
     const { text, isInternal } = parsed.data
+    await requireCaseAction(actor, isInternal ? 'note_add_internal' : 'note_add', caseId)
 
     const note = await withRLSContext(async (tx) => {
-      // Verify case exists (RLS enforces org isolation)
-      const [claim] = await tx
-        .select({ claimId: claims.claimId })
-        .from(claims)
-        .where(eq(claims.claimId, caseId))
-        .limit(1)
+      const claim = await findReadableCase(tx, actor, caseId, true)
 
       if (!claim) return null
 
       const [newNote] = await tx
         .insert(claimUpdates)
         .values({
-          claimId: claimHistoryReference(caseId),
+          claimId: claimHistoryReference(claim.claimId),
           updateType: 'note',
           message: text,
           createdBy: userId,
@@ -150,7 +129,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
         })
         .returning()
 
-      return publicClaimHistory(newNote, caseId)
+      return publicClaimHistory(newNote, claim.claimId)
     })
 
     if (!note) {
@@ -192,7 +171,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
 
     return NextResponse.json({ success: true, noteId: note.updateId }, { status: 201 })
   } catch (error) {
-    const denied = authorizationDenialResponse(error)
+    const denied = caseAuthorizationResponse(error) ?? authorizationDenialResponse(error)
     if (denied) return denied
     logger.error('Failed to add case note', error as Error)
     return NextResponse.json(

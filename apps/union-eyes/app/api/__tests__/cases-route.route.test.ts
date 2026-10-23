@@ -24,6 +24,11 @@ vi.mock('@/lib/audit-logger', () => ({
 vi.mock('@/lib/pilot-metrics', () => ({ recordUnionEyesCaseCreated: m.recordUnionEyesCaseCreated }));
 vi.mock('drizzle-orm', () => ({ sql: m.sql }));
 
+vi.mock('@/lib/cases/case-authorization', () => ({
+  getCaseActor: vi.fn().mockResolvedValue({ userId: 'u1', organizationId: 'org_1', role: 'member' }),
+  caseReadScope: vi.fn(() => 'owned-case-scope'),
+}));
+
 async function loadRoute() {
   return import('../cases/route');
 }
@@ -59,18 +64,15 @@ describe('cases route', () => {
     expect(m.sql).toHaveBeenCalled();
   });
 
-  it('GET falls back to org membership when organizationId is missing', async () => {
+  it('GET uses authenticated canonical scope without a public membership fallback', async () => {
     const { GET } = await loadRoute();
-    m.withRLSContext.mockImplementationOnce(async (fn: any) => fn({ execute: vi.fn(async () => [{ organization_id: 'org_2' }]) }));
-    m.withRLSContext.mockImplementationOnce(async (fn: any) => fn({ execute: vi.fn(async () => [{ claimId: 'c1' }]) }));
-
     const result = await GET({
       request: new NextRequest('http://localhost/api/cases'),
       userId: 'u1',
     });
 
     expect(Array.isArray(result.data)).toBe(true);
-    expect(m.withRLSContext).toHaveBeenCalledTimes(2);
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
   });
 
   it('POST returns 400 for invalid payload', async () => {

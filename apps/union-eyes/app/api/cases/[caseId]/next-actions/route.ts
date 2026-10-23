@@ -8,14 +8,11 @@
  */
 
 import { NextResponse } from 'next/server'
-import { auth } from '@nzila/platform-auth/entra/server'
-import { eq } from 'drizzle-orm'
 import { getAllowedTransitions, type ActorRole } from '@/lib/workflow/case-lifecycle'
 import { toLifecycleState, toLegacyClaimStatus } from '@/lib/workflow/state-bridge'
 import { withRLSContext } from '@/lib/db/with-rls-context'
-import { claims } from '@/db/schema/claims-schema'
 import { logger } from '@/lib/logger'
-import { getOrganizationIdForUser, getUserRoleInOrganization } from '@/lib/organization-utils'
+import { getCaseActor, findReadableCase, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial'
 
@@ -25,24 +22,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
   try {
     const { caseId } = await params
 
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
-        { status: 401 },
-      )
-    }
-    const orgId = await getOrganizationIdForUser(userId)
-    await requireEntitlement(orgId, 'grievance_case_suite')
-
-    const claim = await withRLSContext(async (tx) => {
-      const [row] = await tx
-        .select({ status: claims.status })
-        .from(claims)
-        .where(eq(claims.claimId, caseId))
-        .limit(1)
-      return row ?? null
-    })
+    const actor = await getCaseActor()
+    await requireEntitlement(actor.organizationId, 'grievance_case_suite')
+    const claim = await withRLSContext(tx => findReadableCase(tx, actor, caseId))
 
     if (!claim) {
       return NextResponse.json(
@@ -55,8 +37,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
     const lifecycleState = toLifecycleState('claim', claim.status) ?? 'submitted'
 
     // Resolve actor role from org membership
-    const resolvedRole = await getUserRoleInOrganization(userId, orgId)
-    const actorRole = normalizeActorRole(resolvedRole)
+    const actorRole = normalizeActorRole(actor.role)
 
     const allowedLifecycle = getAllowedTransitions(lifecycleState, actorRole)
     // Convert back to legacy ClaimStatus values for backward-compat consumers
@@ -74,7 +55,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
       },
     )
   } catch (error) {
-    const denied = authorizationDenialResponse(error)
+    const denied = caseAuthorizationResponse(error) ?? authorizationDenialResponse(error)
     if (denied) return denied
     logger.error('Failed to get next actions', error as Error)
     return NextResponse.json(
