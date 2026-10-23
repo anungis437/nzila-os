@@ -4985,6 +4985,21 @@
     }
   },
   "workbench": {
+    "caseTypes": {
+      "discipline": "Discipline",
+      "wageHour": "Wage & Hour",
+      "scheduling": "Scheduling",
+      "benefits": "Benefits",
+      "leave": "Leave",
+      "discrimination": "Discrimination",
+      "harassment": "Harassment",
+      "safety": "Safety",
+      "contractViolation": "Contract Violation"
+    },
+    "untitledCase": "Untitled Case",
+    "generalCase": "General",
+    "anonymousMember": "Anonymous Member",
+    "unknownMember": "Unknown Member",
     "title": "Casework Console",
     "subtitle": "Coordinate active member representation, evidence, and procedural follow-through.",
     "underReview": "Under Review",

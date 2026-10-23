@@ -9,7 +9,7 @@ import React from 'react';
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from '@nzila/platform-auth/entra/client';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useOrganization } from "@/lib/hooks/use-organization";
 import {
   Clipboard,
@@ -96,19 +96,12 @@ interface Case {
 
 // Map database claim types to UI-friendly labels
 const claimTypeLabels: Record<string, string> = {
-  "grievance_discipline": "Discipline",
-  "grievance_pay": "Wage & Hour",
-  "grievance_schedule": "Scheduling",
-  "grievance_benefits": "Benefits",
-  "grievance_leave": "Leave",
-  "discrimination_race": "Discrimination",
-  "discrimination_gender": "Discrimination",
-  "discrimination_age": "Discrimination",
-  "discrimination_disability": "Discrimination",
-  "harassment_sexual": "Harassment",
-  "harassment_workplace": "Harassment",
-  "workplace_safety": "Safety",
-  "contract_violation": "Contract Violation",
+  grievance_discipline: 'discipline', grievance_pay: 'wageHour',
+  grievance_schedule: 'scheduling', grievance_benefits: 'benefits', grievance_leave: 'leave',
+  discrimination_race: 'discrimination', discrimination_gender: 'discrimination',
+  discrimination_age: 'discrimination', discrimination_disability: 'discrimination',
+  harassment_sexual: 'harassment', harassment_workplace: 'harassment',
+  workplace_safety: 'safety', contract_violation: 'contractViolation',
 };
 
 // Map database status to UI status
@@ -147,18 +140,18 @@ const calculateDaysOpen = (createdAt: Date): number => {
 };
 
 // Convert database claim to UI case (now with member details from API)
-const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: string; memberPhone?: string }): Case => ({
+const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: string; memberPhone?: string }, t: (key: string) => string): Case => ({
   id: claim.claimNumber,
   claimId: claim.claimId,
-  title: claimTypeLabels[claim.claimType] || claim.claimType || "Untitled Case",
+  title: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.untitledCase'),
   description: claim.description,
   status: mapDbStatusToUi(claim.status),
   priority: mapDbPriorityToUi(claim.priority),
-  category: claimTypeLabels[claim.claimType] || claim.claimType || "General",
-  submittedDate: new Date(claim.createdAt).toISOString().split('T')[0],
-  lastUpdate: new Date(claim.updatedAt).toISOString().split('T')[0],
+  category: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.generalCase'),
+  submittedDate: new Date(claim.createdAt).toISOString(),
+  lastUpdate: new Date(claim.updatedAt).toISOString(),
   memberId: claim.memberId,
-  memberName: claim.memberName || (claim.isAnonymous ? "Anonymous Member" : "Unknown Member"),
+  memberName: claim.memberName || t(claim.isAnonymous ? 'workbench.anonymousMember' : 'workbench.unknownMember'),
   memberEmail: claim.memberEmail || (claim.isAnonymous ? "" : ""),
   memberPhone: claim.memberPhone || (claim.isAnonymous ? "" : ""),
   assignedTo: claim.assignedTo || null,
@@ -197,6 +190,7 @@ const statusConfig: Record<CaseStatus, { icon: React.ReactElement; color: string
 
 export default function WorkbenchConsole() {
   const t = useTranslations();
+  const locale = useLocale();
   const loadingErrorMessage = t('workbench.errorLoadingCases');
   const { user } = useUser();
   const { organizationId, organization } = useOrganization();
@@ -242,7 +236,7 @@ export default function WorkbenchConsole() {
         const data = await response.json();
         const claims = data.data?.claims ?? data.claims;
         if (!Array.isArray(claims)) throw new Error(loadingErrorMessage);
-        const mappedCases = claims.map(mapDbClaimToCase);
+        const mappedCases = claims.map(claim => mapDbClaimToCase(claim, t));
         setCases(mappedCases);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load assigned claims');
@@ -252,7 +246,7 @@ export default function WorkbenchConsole() {
     };
 
     fetchAssignedClaims();
-  }, [organizationId, isPlatformOrg, loadingErrorMessage]);
+  }, [organizationId, isPlatformOrg, loadingErrorMessage, t]);
 
   // Filter and sort cases
   const filteredAndSortedCases = cases
@@ -309,7 +303,7 @@ export default function WorkbenchConsole() {
         setError(t('workbench.errorLoadingCases'));
         return;
       }
-      setCases(claims.map(mapDbClaimToCase));
+      setCases(claims.map(claim => mapDbClaimToCase(claim, t)));
     }
   };
 
@@ -767,7 +761,7 @@ export default function WorkbenchConsole() {
                                 </div>
                                 <div className="flex items-center gap-1 text-gray-500">
                                   <Calendar className="w-4 h-4" />
-                                  {t('workbench.submittedOn', { date: new Date(caseItem.submittedDate).toLocaleDateString() })}
+                                  {t('workbench.submittedOn', { date: new Date(caseItem.submittedDate).toLocaleDateString(locale) })}
                                 </div>
                                 {caseItem.assignedTo && (
                                   <div className="flex items-center gap-1 text-blue-600">

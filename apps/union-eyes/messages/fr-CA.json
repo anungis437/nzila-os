@@ -4985,6 +4985,21 @@
     }
   },
   "workbench": {
+    "caseTypes": {
+      "discipline": "Discipline",
+      "wageHour": "Salaire et heures",
+      "scheduling": "Horaires",
+      "benefits": "Avantages sociaux",
+      "leave": "Congés",
+      "discrimination": "Discrimination",
+      "harassment": "Harcèlement",
+      "safety": "Sécurité",
+      "contractViolation": "Violation de la convention"
+    },
+    "untitledCase": "Dossier sans titre",
+    "generalCase": "Général",
+    "anonymousMember": "Membre anonyme",
+    "unknownMember": "Membre inconnu",
     "title": "Poste de travail des dossiers",
     "subtitle": "Gérer vos files d'attente, attributions et escalades de dossiers",
     "underReview": "En cours d'examen",
