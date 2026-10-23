@@ -32,6 +32,7 @@ const EXACT_PATHS = new Set([
   '.github/workflows/e2e.yml',
   'tooling/ci/ue-e2e-shard-receipts.mjs', 'tooling/ci/ue-e2e-shard-receipts.test.mjs',
   'tooling/contract-tests/ci-feedback-performance.test.ts',
+  'tooling/contract-tests/vertical-governance.test.ts',
   '.github/workflows/deploy-union-eyes.yml',
   KEY_PATH, 'ops/change-records/CHG-2026-0112.json', 'ops/change-records/CHG-2026-0112.staging-authorization.md',
   'packages/platform-auth/src/entra/config.ts', 'packages/platform-auth/src/entra/issuer.ts', 'packages/platform-auth/src/entra/issuer.test.ts',
@@ -101,6 +102,7 @@ function exactKeys(value, keys, name) {
 // predicate: existing auth reader, session-bound boolean result, runtime EXECUTE
 // only. It does not authorize other DDL, raw auth-table grants or core auth changes.
 const CASE_AUTHORIZATION_PATHS = new Set([
+  'tooling/contract-tests/vertical-governance.test.ts',
   "apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts",
   "apps/union-eyes/app/api/__tests__/cases-escalate.route.test.ts",
   "apps/union-eyes/app/api/__tests__/cases-assign.route.test.ts",

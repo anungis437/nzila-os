@@ -108,6 +108,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'authorize(',
     'withAuth(',
     'requireOrgAccess(',
+    'await getCaseActor(',       // Union Eyes — authenticates and resolves live organization membership and role
     'requireVerifiedOrgAccess(',  // ABR CourtLens — verifies session/DB membership (Phase 2C.6)
     'requireVerifiedPermission(', // ABR CourtLens — server-derived RBAC check (Phase 2C.6)
     'requirePlatformRole(',
@@ -224,6 +225,12 @@ describe('INV-11 — Every API route has authorization', () => {
   describe('recognizer fails closed', () => {
     const hasAuth = (content: string) => AUTH_PATTERNS.some((pattern) => content.includes(pattern))
     const isPublic = (p: string) => PUBLIC_ROUTE_PATTERNS.some((x) => p.replace(/\\/g, '/').includes(x))
+
+    it('recognizes the canonical case actor guard only when invoked', () => {
+      expect(hasAuth('const actor = await getCaseActor()')).toBe(true)
+      expect(hasAuth("import { getCaseActor } from '@/lib/cases/case-authorization'")).toBe(false)
+      expect(hasAuth('const actor = request.body.actor')).toBe(false)
+    })
 
     it('recognizes a Stripe webhook that verifies its signature (verifyStripeSignature)', () => {
       const content =

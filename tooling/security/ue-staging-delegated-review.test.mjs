@@ -426,6 +426,12 @@ for(const [name,change]of [
  const m=caseAuthorizationFollowup(),a=apiFixture(m);change(a);await assert.rejects(verifyPullRequest(m,a))
 })
 
+test('case authorization review accepts the exact authorization recognizer repair',()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:'tooling/contract-tests/vertical-governance.test.ts'});validateManifest(m,NOW)
+})
+test('case authorization review rejects other contract changes',()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:'tooling/contract-tests/ci-feedback-performance.test.ts'});assert.throws(()=>validateManifest(m,NOW))
+})
 for(const name of ['apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts','apps/union-eyes/app/api/__tests__/cases-escalate.route.test.ts'])test(`case authorization review accepts scoped escalation ${name}`,()=>{
  const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:name});validateManifest(m,NOW)
 })
