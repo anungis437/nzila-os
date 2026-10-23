@@ -37,7 +37,7 @@ function apiFixture(m){
  const evidenceFiles=[RECEIPT_PATH,SIGNATURE_PATH].map(filename=>({filename,status:'added'}))
  const sourceTree={truncated:false,tree:m.files.map(f=>({path:f.path,type:'blob',sha:f.blobSha}))}
  const objects={[`pulls/${m.pullRequest}`]:pr,[`git/commits/${E}`]:evidence,[`git/commits/${S}`]:source,[`git/commits/${m.baseSha}`]:base,[`git/trees/${TREE}?recursive=1`]:sourceTree,[`git/trees/${base.tree.sha}?recursive=1`]:{truncated:false,tree:[]},[`git/blobs/${BLOB}`]:{encoding:'base64',sha:BLOB,content:bytes.toString('base64')}}
- if(m.pullRequest===986){const key={path:KEY_PATH,type:'blob',sha:keyBlob};sourceTree.tree.push(key);objects[`git/trees/${base.tree.sha}?recursive=1`].tree.push({...key})}
+ if([986,990].includes(m.pullRequest)){const key={path:KEY_PATH,type:'blob',sha:keyBlob};sourceTree.tree.push(key);objects[`git/trees/${base.tree.sha}?recursive=1`].tree.push({...key})}
  objects[`git/blobs/${keyBlob}`]={encoding:'base64',sha:keyBlob,content:publicPem.toString('base64')}
  return {pr,evidence,sourceTree,allFiles,evidenceFiles,objects,get:async endpoint=>{assert(endpoint in objects,endpoint);return objects[endpoint]},pages:async(endpoint,field)=>{if(endpoint===`commits/${E}`){assert.equal(field,'files');return evidenceFiles}assert.equal(endpoint,`pulls/${m.pullRequest}/files`);return [...allFiles,...evidenceFiles]}}
 }
@@ -54,6 +54,38 @@ function dependencyFollowup() {
  for(const path of ['package.json','pnpm-lock.yaml'])m.files.push({path,status:'modified',previousPath:null,blobSha:BLOB,sha256:sha256(bytes),baseBlobSha:BLOB,baseSha256:sha256(bytes)})
  return m
 }
+
+function nativeIntakeFollowup() {
+ const m=followup();m.pullRequest=990;m.branch=PR_BINDINGS[990].branch;m.baseSha=PR_BINDINGS[990].base
+ return m
+}
+test('native intake follow-up binds its exact PR, branch, merged base, author and unchanged trust',async()=>{
+ const m=nativeIntakeFollowup();validateManifest(m,NOW)
+ assert.equal((await verifyPullRequest(m,apiFixture(m))).evidenceSha,E)
+})
+for(const [name,change]of [
+ ['another PR',m=>m.pullRequest=991],['another branch',m=>m.branch=PR_BINDINGS[986].branch],
+ ['another base',m=>m.baseSha=PR_BINDINGS[986].base],['production authorization',m=>m.productionAuthorized=true],
+ ['missing primary attribution',m=>m.reviews=m.reviews.filter(r=>r.kind!=='primary-agent-review')],
+ ['invented human attribution',m=>m.reviews[0].kind='independent-human'],
+ ['changed trust',m=>m.files.push(manifest().files[0])],
+])test(`native intake review rejects ${name}`,()=>{const m=nativeIntakeFollowup();change(m);assert.throws(()=>validateManifest(m,NOW))})
+for(const name of ['apps/union-eyes/backend/auth_core/models.py','apps/union-eyes/db/migrations-platform/0009_extra.sql',
+ 'apps/union-eyes/lib/auth/unreviewed.ts','packages/platform-auth/src/auth-db.ts','package.json',
+ '.github/workflows/deploy-union-eyes.yml','ops/policies/production.json'])test(`native intake cannot expand to ${name}`,()=>{
+ const m=nativeIntakeFollowup();m.files.push({...m.files[0],path:name});assert.throws(()=>validateManifest(m,NOW))
+})
+for(const name of ['packages/platform-auth/src/entra/session-policy.ts','packages/platform-auth/src/entra/session-policy.test.ts',
+ 'apps/union-eyes/lib/audit/canonical-nar-proof.ts'])test(`native intake signed coverage accepts exact repair ${name}`,()=>{
+ const m=nativeIntakeFollowup();m.files.push({...m.files[0],path:name});validateManifest(m,NOW)
+})
+for(const [name,change]of [
+ ['owner impersonation',a=>a.pr.user.login='anungis437'],
+ ['changed trust blob',a=>a.sourceTree.tree.find(t=>t.path===KEY_PATH).sha=BLOB],
+ ['unreviewed evidence edit',a=>a.evidenceFiles.push({filename:'apps/union-eyes/lib/audit/canonical-nar-proof.ts',status:'modified'})],
+])test(`native intake actual API rejects ${name}`,async()=>{
+ const m=nativeIntakeFollowup(),a=apiFixture(m);change(a);await assert.rejects(verifyPullRequest(m,a))
+})
 test('sanitizer repair requires exact paired follow-up dependency files',()=>validateManifest(dependencyFollowup(),NOW))
 for(const [name,change]of [
  ['missing lock',m=>m.files.pop()],['missing package',m=>m.files.splice(-2,1)],
