@@ -80,11 +80,13 @@ export function CorrespondenceDashboard({
 }: CorrespondenceDashboardProps) {
   const [items, setItems] = useState<CorrespondenceItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [showNewDialog, setShowNewDialog] = useState(false);
 
   const fetchItems = useCallback(async (status?: string) => {
     setLoading(true);
+    setLoadFailed(false);
     try {
       const params = new URLSearchParams();
       if (status && status !== "all") params.set("status", status);
@@ -93,7 +95,9 @@ export function CorrespondenceDashboard({
       const json = await res.json();
       setItems(json.data?.data ?? json.data ?? []);
     } catch {
+      // A failed request is reported; it is never shown as an empty correspondence queue.
       setItems([]);
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -122,6 +126,16 @@ export function CorrespondenceDashboard({
 
   return (
     <div className="space-y-6">
+      {loadFailed && (
+        <Card role="alert" className="border-red-200 bg-red-50">
+          <CardContent className="pt-4 text-red-700">
+            Correspondence could not be loaded. The counts and list below are not available. Please retry.
+            <Button size="sm" variant="outline" className="ml-3" onClick={() => fetchItems(activeTab === "all" ? undefined : activeTab)}>
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      )}
       {/* ── Summary Cards ─────────────────────────────────────────────── */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>

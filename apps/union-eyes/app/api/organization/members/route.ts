@@ -1,12 +1,15 @@
 /**
- * GET /api/organization/members?organization=<orgId>
- * Direct DB query — replaces Django proxy
+ * GET /api/organization/members
+ * Direct DB query — replaces Django proxy. Organization comes from the session; the rows a
+ * caller may see come from the member-directory policy (case-context for stewards).
  */
+import { NextResponse } from 'next/server';
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema-organizations';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, or, sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { memberDirectoryAccess, projectDirectoryMember } from '@/lib/members/directory-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,10 +19,10 @@ export const GET = withApi(
     openapi: {
       tags: ['Organization', 'Members'],
       summary: 'List organization members',
-      description: 'Returns members for the specified organization',
+      description: 'Returns the members the caller is authorized to see in the active organization',
     },
   },
-  async ({ organizationId }) => {
+  async ({ organizationId, userId, user }) => {
     // Org scope comes from the authenticated session (resolved + enforced by
     // withApi), never from a client-suppliable value — a prior version of
     // this route trusted an `?organization=` query parameter directly,
@@ -28,40 +31,44 @@ export const GET = withApi(
       return { members: [], stats: { total: 0, active: 0 } };
     }
 
+    const access = memberDirectoryAccess(user?.role);
+    if (access.scope === 'none' || !userId) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'Member directory access is not part of your current mandate.' },
+        { status: 403 },
+      );
+    }
+
     return withRLSContext(async () => {
+      const conditions = [
+        eq(organizationMembers.organizationId, organizationId),
+        isNull(organizationMembers.deletedAt),
+      ];
+      if (access.scope === 'case-context') {
+        conditions.push(
+          or(
+            eq(organizationMembers.userId, userId),
+            sql`EXISTS (
+              SELECT 1 FROM claims c
+              WHERE c.member_id = ${organizationMembers.userId}
+                AND c.organization_id::text = ${organizationMembers.organizationId}::text
+                AND c.assigned_to = ${userId}
+            )`,
+          )!,
+        );
+      }
+
       const rows = await db
         .select()
         .from(organizationMembers)
-        .where(
-          and(
-            eq(organizationMembers.organizationId, organizationId),
-            isNull(organizationMembers.deletedAt),
-          ),
-        );
+        .where(and(...conditions));
 
       const activeCount = rows.filter(r => r.status === 'active').length;
 
-      const members = rows.map(m => {
-        const metadata = (m.metadata && typeof m.metadata === 'object') ? m.metadata as Record<string, unknown> : {};
-        return {
-          id: m.id,
-          userId: m.userId,
-          name: m.name,
-          email: m.email,
-          phone: m.phone || '',
-          role: m.role,
-          status: m.status,
-          department: m.department || 'Administration',
-          location: m.location || '',
-          position: m.position || 'Union Member',
-          hireDate: m.hireDate?.toISOString() ?? null,
-          seniority: m.seniority ?? 0,
-          membershipNumber: m.membershipNumber || '',
-          unionJoinDate: m.unionJoinDate?.toISOString() ?? null,
-          createdAt: m.createdAt?.toISOString() ?? null,
-          metadata,
-        };
-      });
+      const members = rows.map(m => ({
+        ...projectDirectoryMember(m, access),
+        location: m.location || '',
+      }));
 
       return {
         members,
@@ -70,4 +77,3 @@ export const GET = withApi(
     });
   },
 );
-

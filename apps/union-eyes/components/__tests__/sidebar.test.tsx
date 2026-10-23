@@ -142,37 +142,38 @@ describe('Sidebar', () => {
 });
 
 describe('Sidebar dual-nav honesty', () => {
-  it('qualifies staff landmarks and labels Workspace as the orientation hub', () => {
+  it('presents the seven Representative 2.2 destinations and keeps Workspace reachable only through the hub cue', () => {
     renderSidebar('steward');
 
     expect(
       screen.getByRole('complementary', { name: ROLE_EXECUTION_CHROME_LABEL }),
     ).toHaveAttribute('data-nav-surface', 'desktop');
-    expect(
-      screen.getByRole('navigation', { name: ROLE_EXECUTION_DESTINATIONS_LABEL }),
-    ).toHaveAttribute('data-nav-role', 'legacy-side');
+    const destinations = screen.getByRole('navigation', { name: ROLE_EXECUTION_DESTINATIONS_LABEL });
+    expect(destinations).toHaveAttribute('data-nav-role', 'legacy-side');
     expectNoUndifferentiatedPrimary();
 
-    const hub = linksNamed('Workspace, orientation hub');
-    expect(hub).toHaveLength(1);
-    expect(hub[0]).toHaveAttribute('data-nav-role', 'hub');
-    expect(hub[0]).toHaveAttribute('href', '/en-CA/dashboard/workspace');
-    const desktop = screen.getByRole('complementary', { name: ROLE_EXECUTION_CHROME_LABEL });
-    expect(within(desktop).getByText('Orientation hub')).toBeInTheDocument();
+    const labels = ['Today', 'Representation, role execution home', 'Members & Workplaces', 'Communications',
+      'Documents & Evidence', 'Tasks & Deadlines', 'Knowledge & Guidance'];
+    for (const label of labels) expect(linksNamed(label)).toHaveLength(1);
+    const primary = within(destinations).getAllByRole('link').filter((link) => !link.getAttribute('href')?.endsWith('/settings'));
+    expect(primary.map((link) => link.getAttribute('href'))).toEqual([
+      '/en-CA/dashboard/inbox', '/en-CA/dashboard/workbench', '/en-CA/dashboard/members',
+      '/en-CA/dashboard/correspondence', '/en-CA/dashboard/documents', '/en-CA/dashboard/priorities',
+      '/en-CA/dashboard/clause-library',
+    ]);
+    expect(screen.queryAllByRole('link', { name: (name) => name.startsWith('Institutional Intelligence') })).toHaveLength(0);
+    expect(screen.queryAllByRole('link', { name: (name) => name.startsWith('Workspace') })).toHaveLength(0);
 
-    const roleHome = linksNamed('Operations (Casework Console), role execution home');
-    expect(roleHome).toHaveLength(1);
+    const roleHome = linksNamed('Representation, role execution home');
     expect(roleHome[0]).toHaveAttribute('data-nav-role', 'role-home');
     expect(roleHome[0]).toHaveAttribute('href', '/en-CA/dashboard/workbench');
 
+    const desktop = screen.getByRole('complementary', { name: ROLE_EXECUTION_CHROME_LABEL });
     expect(within(desktop).getByText(ROLE_HOME_HUB_CUE_MESSAGE)).toBeInTheDocument();
     const cue = linksNamed(ROLE_HOME_HUB_CUE_LINK_LABEL);
     expect(cue).toHaveLength(1);
     expect(cue[0].tagName).toBe('A');
     expect(cue[0]).toHaveAttribute('href', '/en-CA/dashboard/workspace');
-
-    const intelligence = linksNamed('Institutional Intelligence Reports, not a Workspace tab');
-    expect(intelligence[0]).toHaveAttribute('data-nav-role', 'legacy-side');
     expect(screen.queryByText(INTELLIGENCE_NOT_WORKSPACE_TAB_NOTE)).not.toBeInTheDocument();
   });
 
@@ -180,11 +181,6 @@ describe('Sidebar dual-nav honesty', () => {
     renderSidebar('chief_steward');
 
     fireEvent.click(screen.getByRole('button', { name: 'Collapse sidebar' }));
-    const collapsedHub = linksNamed('Workspace, orientation hub').find((link) =>
-      link.getAttribute('title'),
-    );
-    expect(collapsedHub).toHaveAttribute('aria-label', 'Workspace, orientation hub');
-    expect(collapsedHub).toHaveAttribute('title', 'Workspace — Orientation hub');
     const collapsedCue = linksNamed(ROLE_HOME_HUB_CUE_LINK_LABEL).find((link) =>
       link.getAttribute('title'),
     );
@@ -198,7 +194,6 @@ describe('Sidebar dual-nav honesty', () => {
     expect(
       screen.getAllByRole('navigation', { name: ROLE_EXECUTION_DESTINATIONS_LABEL }),
     ).toHaveLength(1);
-    expect(screen.getAllByText('Orientation hub').length).toBeGreaterThanOrEqual(1);
     expectNoUndifferentiatedPrimary();
   });
 

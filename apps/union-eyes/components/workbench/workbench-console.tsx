@@ -92,6 +92,7 @@ interface Case {
   notes: string[];
   daysOpen: number;
   claimType: string;
+  triage: boolean;
 }
 
 // Map database claim types to UI-friendly labels
@@ -140,18 +141,21 @@ const calculateDaysOpen = (createdAt: Date): number => {
 };
 
 // Convert database claim to UI case (now with member details from API)
-const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: string; memberPhone?: string }, t: (key: string) => string): Case => ({
+const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: string; memberPhone?: string; access?: 'case' | 'triage' }, t: (key: string) => string): Case => ({
   id: claim.claimNumber,
   claimId: claim.claimId,
+  triage: claim.access === 'triage',
   title: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.untitledCase'),
-  description: claim.description,
+  description: claim.description ?? '',
   status: mapDbStatusToUi(claim.status),
   priority: mapDbPriorityToUi(claim.priority),
   category: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.generalCase'),
   submittedDate: new Date(claim.createdAt).toISOString(),
   lastUpdate: new Date(claim.updatedAt).toISOString(),
-  memberId: claim.memberId,
-  memberName: claim.memberName || t(claim.isAnonymous ? 'workbench.anonymousMember' : 'workbench.unknownMember'),
+  memberId: claim.memberId ?? '',
+  memberName: claim.access === 'triage'
+    ? t('workbench.restrictedMember')
+    : claim.memberName || t(claim.isAnonymous ? 'workbench.anonymousMember' : 'workbench.unknownMember'),
   memberEmail: claim.memberEmail || (claim.isAnonymous ? "" : ""),
   memberPhone: claim.memberPhone || (claim.isAnonymous ? "" : ""),
   assignedTo: claim.assignedTo || null,
@@ -207,6 +211,8 @@ export default function WorkbenchConsole() {
   const [newNote, setNewNote] = useState<Record<string, string>>({});
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [escalatingId, setEscalatingId] = useState<string | null>(null);
+  const [canAssign, setCanAssign] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const priorityConfig: Record<CasePriority, { label: string; color: string; icon: React.ReactElement }> = {
     low: { label: t('workbench.priorities.low'), color: "text-gray-600 bg-gray-100", icon: <Flag className="w-3 h-3" /> },
@@ -236,6 +242,7 @@ export default function WorkbenchConsole() {
         const data = await response.json();
         const claims = data.data?.claims ?? data.claims;
         if (!Array.isArray(claims)) throw new Error(loadingErrorMessage);
+        setCanAssign((data.data?.capabilities ?? data.capabilities)?.canAssign === true);
         const mappedCases = claims.map(claim => mapDbClaimToCase(claim, t));
         setCases(mappedCases);
       } catch (err) {
@@ -316,7 +323,10 @@ export default function WorkbenchConsole() {
         body: JSON.stringify({ assigneeId: user?.id ?? '', reason: 'Self-assigned from case queue' }),
       });
       if (res.ok) {
+        setActionError(null);
         await refetchCases();
+      } else {
+        setActionError(t('workbench.assignDenied'));
       }
     } finally {
       setActionLoading(null);
@@ -427,6 +437,10 @@ export default function WorkbenchConsole() {
               </div>
             </div>
           </motion.div>
+        )}
+
+        {actionError && (
+          <p role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{actionError}</p>
         )}
 
         {/* Empty State */}
@@ -800,6 +814,23 @@ export default function WorkbenchConsole() {
                               transition={{ duration: 0.3 }}
                               className="border-t border-gray-200 pt-6 mt-4"
                             >
+                              {caseItem.triage ? (
+                                <div className="space-y-3">
+                                  <p role="note" className="rounded-lg bg-gray-50 p-4 text-sm text-gray-700">
+                                    {t('workbench.restrictedMatterNotice')}
+                                  </p>
+                                  {canAssign && !caseItem.assignedTo && (
+                                    <button
+                                      onClick={() => handleAssignToMe(caseItem)}
+                                      disabled={actionLoading === caseItem.id}
+                                      className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                    >
+                                      {actionLoading === caseItem.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <UserCheck className="w-5 h-5" />}
+                                      {t('workbench.assignToMe')}
+                                    </button>
+                                  )}
+                                </div>
+                              ) : (<>
                               {/* Member Contact Info */}
                               <div className="bg-blue-50 p-4 rounded-lg mb-6">
                                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -879,7 +910,7 @@ export default function WorkbenchConsole() {
 
                               {/* Action Buttons */}
                               <div className="flex flex-wrap gap-3">
-                                {!caseItem.assignedTo && caseItem.memberId !== user?.id && (
+                                {canAssign && !caseItem.assignedTo && caseItem.memberId !== user?.id && (
                                   <button
                                     onClick={() => handleAssignToMe(caseItem)}
                                     disabled={actionLoading === caseItem.id}
@@ -921,6 +952,7 @@ export default function WorkbenchConsole() {
                                   </button>
                                 )}
                               </div>
+                              </>)}
                             </motion.div>
                           )}
                         </AnimatePresence>

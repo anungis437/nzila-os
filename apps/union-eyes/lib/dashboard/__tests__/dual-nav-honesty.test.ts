@@ -79,13 +79,15 @@ describe('EC-G03 landing × experience', () => {
   });
 
   it('keeps Workspace first in the sidebar while staff, executive, governance, and admin land elsewhere', () => {
-    for (const experience of ['member', 'staff', 'executive', 'governance', 'admin'] as const) {
+    for (const experience of ['member', 'executive', 'governance', 'admin'] as const) {
       expect(getNavigationForExperience(experience)[0]).toMatchObject({
         label: 'Workspace',
         href: WORKSPACE_ORIENTATION_HUB_PATH,
       });
     }
-
+    // Representative 2.2 freezes seven destinations; Workspace stays reachable via the hub cue.
+    expect(getNavigationForExperience('staff').some(item => item.href === WORKSPACE_ORIENTATION_HUB_PATH)).toBe(false);
+    expect(roleHomeHubCue(getDualNavHomes('steward')).show).toBe(true);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.member).toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.staff).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.executive).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
@@ -220,6 +222,7 @@ describe('EC-G03 guards', () => {
         '/dashboard/members',
         '/dashboard/documents',
         '/dashboard/correspondence',
+        '/dashboard/clause-library',
         '/dashboard/notifications',
         '/dashboard/settings',
         '/dashboard/profile',

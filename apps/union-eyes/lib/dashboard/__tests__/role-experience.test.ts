@@ -128,10 +128,26 @@ describe('lib/dashboard/role-experience', () => {
     });
 
     it('routes staff priorities to the priorities console and omits member support operations', () => {
-      const priorities = getVisibleNavigationForExperience('staff', false, 'steward').find(item => item.label === 'Operations Priorities (Commitments & Deadlines)');
+      const priorities = getVisibleNavigationForExperience('staff', false, 'steward').find(item => item.label === 'Tasks & Deadlines');
       expect(priorities?.href).toBe('/dashboard/priorities');
       expect(canAccessDashboardPath(priorities!.href, 'staff', false)).toBe(true);
       expect(getVisibleNavigationForExperience('member', false, 'member').some(item => item.href === '/dashboard/support')).toBe(false);
+    });
+
+    it('offers exactly the seven Representative 2.2 destinations plus account settings to a steward', () => {
+      const nav = getVisibleNavigationForExperience('staff', false, 'steward');
+      expect(nav.filter(item => item.group !== 'Settings').map(item => item.label)).toEqual([
+        'Today', 'Representation', 'Members & Workplaces', 'Communications',
+        'Documents & Evidence', 'Tasks & Deadlines', 'Knowledge & Guidance',
+      ]);
+      expect(nav.filter(item => item.group === 'Settings').map(item => item.label)).toEqual(['Profile & Settings']);
+      for (const item of nav) expect(canAccessDashboardPath(item.href.split('?')[0], 'staff', false)).toBe(true);
+    });
+
+    it('does not advertise the knowledge destination to staff roles below steward', () => {
+      for (const role of ['bargaining_committee', 'health_safety_rep']) {
+        expect(getVisibleNavigationForExperience('staff', false, role).some(item => item.href === '/dashboard/clause-library')).toBe(false);
+      }
     });
   });
 });

@@ -132,11 +132,12 @@ describe('ROLE_PERMISSIONS mapping', () => {
     expect(stPerms).toContain(Permission.APPROVE_FINANCIAL);
   });
 
-  it('steward has claim assignment permission', () => {
+  it('steward holds no organization-wide claim read/edit/assignment grant (case authority is per case)', () => {
     const stewardPerms = ROLE_PERMISSIONS[UserRole.STEWARD];
-    expect(stewardPerms).toContain(Permission.ASSIGN_CLAIMS);
-    expect(stewardPerms).toContain(Permission.VIEW_ALL_CLAIMS);
-    expect(stewardPerms).toContain(Permission.EDIT_ALL_CLAIMS);
+    expect(stewardPerms).not.toContain(Permission.ASSIGN_CLAIMS);
+    expect(stewardPerms).not.toContain(Permission.VIEW_ALL_CLAIMS);
+    expect(stewardPerms).not.toContain(Permission.EDIT_ALL_CLAIMS);
+    expect(ROLE_PERMISSIONS[UserRole.CHIEF_STEWARD]).toContain(Permission.ASSIGN_CLAIMS);
   });
 
   it('CLC executive has cross-org and congress permissions', () => {
