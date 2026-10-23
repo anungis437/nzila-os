@@ -1,4 +1,16 @@
 {
+  "memberDocuments": {
+    "title": "Documenti",
+    "description": "I documenti che hai caricato e quelli che il tuo sindacato condivide con i membri.",
+    "emptyTitle": "Nessun documento al momento",
+    "emptyBody": "I documenti che carichi nei tuoi casi e quelli condivisi dal sindacato con tutti i membri compaiono qui.",
+    "loadError": "Impossibile caricare i tuoi documenti. Riprova.",
+    "retry": "Riprova",
+    "download": "Scarica",
+    "downloadUnavailable": "Questo file non è disponibile per il download al momento.",
+    "sourceOwn": "Il tuo documento",
+    "sourceShared": "Condiviso dal tuo sindacato"
+  },
   "memberProfile": {
     "readOnlyNotice": "Le tue informazioni personali sono mostrate qui sotto. Per modificare nome, email o telefono, o per richiedere una copia dei tuoi dati o modifiche al tuo account, contatta l'amministratore del tuo sindacato."
   },

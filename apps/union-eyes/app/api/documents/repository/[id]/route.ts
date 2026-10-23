@@ -22,6 +22,7 @@ import {
 } from '@/lib/services/document-governance-service';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 
@@ -133,7 +134,14 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
       isOrgMember: true,
       isStewardPlus,
       isPrimaryOwner: caseAccess.isPrimaryOwner,
-      hasCaseAccess: isStewardPlus || caseAccess.canViewCase || !row.linkedEntityId,
+      hasCaseAccess: hasDocumentContextAccess({
+        isStewardPlus,
+        canViewCase: caseAccess.canViewCase,
+        linkedEntityId: row.linkedEntityId,
+        privacyLabel: row.privacyLabel,
+        uploadedBy: row.uploadedBy,
+        userId,
+      }),
       canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
       hasExplicitDocumentGrant: Boolean(explicitGrant),
     },

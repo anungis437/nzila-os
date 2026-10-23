@@ -1,4 +1,16 @@
 {
+  "memberDocuments": {
+    "title": "Documentos",
+    "description": "Os documentos que carregou e os que o seu sindicato partilha com os membros.",
+    "emptyTitle": "Ainda sem documentos",
+    "emptyBody": "Os documentos que carregar nos seus casos e os que o sindicato partilha com todos os membros aparecem aqui.",
+    "loadError": "Não foi possível carregar os seus documentos. Tente novamente.",
+    "retry": "Tentar novamente",
+    "download": "Transferir",
+    "downloadUnavailable": "Este ficheiro não está disponível para transferência neste momento.",
+    "sourceOwn": "O seu documento",
+    "sourceShared": "Partilhado pelo seu sindicato"
+  },
   "memberProfile": {
     "readOnlyNotice": "As suas informações pessoais são mostradas abaixo. Para alterar o nome, o email ou o telefone, ou para pedir uma cópia dos seus dados ou alterações à sua conta, contacte o administrador do seu sindicato."
   },

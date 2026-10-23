@@ -68,9 +68,12 @@ export function MemberCaseList({ data }: { data: ClaimRow[] }) {
               <td className="py-3 pr-4">{priorityLabel(claim.priority)}</td>
               <td className="py-3 pr-4 whitespace-nowrap">{submitted(claim)}</td>
               <td className="py-3 text-right">
-                <Link className="font-medium text-primary underline-offset-4 hover:underline" href={href(claim)}>
+                <Link
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                  href={href(claim)}
+                  aria-label={`${page('viewCase')} ${claim.claimNumber}`}
+                >
                   {page('viewCase')}
-                  <span className="sr-only"> {claim.claimNumber}</span>
                 </Link>
               </td>
             </tr>

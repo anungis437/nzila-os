@@ -1,4 +1,16 @@
 {
+  "memberDocuments": {
+    "title": "Documents",
+    "description": "Documents you have uploaded and documents your union shares with members.",
+    "emptyTitle": "No documents yet",
+    "emptyBody": "Documents you upload to your cases, and documents your union shares with all members, appear here.",
+    "loadError": "We couldn't load your documents. Please try again.",
+    "retry": "Try again",
+    "download": "Download",
+    "downloadUnavailable": "This file isn't available for download right now.",
+    "sourceOwn": "Your document",
+    "sourceShared": "Shared by your union"
+  },
   "memberProfile": {
     "readOnlyNotice": "Your personal information is shown below. To change your name, email or phone number, or to request a copy of your data or changes to your account, contact your union administrator."
   },

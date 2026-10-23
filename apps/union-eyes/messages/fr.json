@@ -1,4 +1,16 @@
 {
+  "memberDocuments": {
+    "title": "Documents",
+    "description": "Les documents que vous avez téléversés et ceux que votre syndicat partage avec les membres.",
+    "emptyTitle": "Aucun document pour le moment",
+    "emptyBody": "Les documents que vous téléversez dans vos dossiers, et ceux que votre syndicat partage avec tous les membres, apparaissent ici.",
+    "loadError": "Impossible de charger vos documents. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "download": "Télécharger",
+    "downloadUnavailable": "Ce fichier n'est pas disponible au téléchargement pour le moment.",
+    "sourceOwn": "Votre document",
+    "sourceShared": "Partagé par votre syndicat"
+  },
   "memberProfile": {
     "readOnlyNotice": "Vos renseignements personnels sont affichés ci-dessous. Pour modifier votre nom, votre courriel ou votre numéro de téléphone, ou pour demander une copie de vos données ou des changements à votre compte, communiquez avec l'administrateur de votre syndicat."
   },
