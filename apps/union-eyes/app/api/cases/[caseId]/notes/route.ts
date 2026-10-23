@@ -12,6 +12,7 @@ import { z } from 'zod'
 import { eq, desc } from 'drizzle-orm'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { claimUpdates, claims } from '@/db/schema/claims-schema'
+import { claimHistoryReference, publicClaimHistory } from '@/lib/cases/claim-history-reference'
 import { auditDataMutation } from '@/lib/audit-logger'
 import { logger } from '@/lib/logger'
 import { buildUnionEvidencePack } from '@/lib/evidence'
@@ -59,7 +60,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
       return tx
         .select()
         .from(claimUpdates)
-        .where(eq(claimUpdates.claimId, caseId))
+        .where(eq(claimUpdates.claimId, claimHistoryReference(caseId)))
         .orderBy(desc(claimUpdates.createdAt))
     })
 
@@ -70,7 +71,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
       )
     }
 
-    return NextResponse.json({ caseId, notes })
+    return NextResponse.json({ caseId, notes: notes.map(note => publicClaimHistory(note, caseId)) })
   } catch (error) {
     const denied = authorizationDenialResponse(error)
     if (denied) return denied
@@ -140,7 +141,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
       const [newNote] = await tx
         .insert(claimUpdates)
         .values({
-          claimId: caseId,
+          claimId: claimHistoryReference(caseId),
           updateType: 'note',
           message: text,
           createdBy: userId,
@@ -149,7 +150,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
         })
         .returning()
 
-      return newNote
+      return publicClaimHistory(newNote, caseId)
     })
 
     if (!note) {

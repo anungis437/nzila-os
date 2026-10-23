@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims, claimUpdates } from '@/db/schema/claims-schema';
+import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
@@ -103,7 +104,7 @@ export async function POST(
       const [update] = await tx
         .insert(claimUpdates)
         .values({
-          claimId: caseId,
+          claimId: claimHistoryReference(caseId),
           updateType: 'assignment',
           message: reason
             ? `Case assigned. Reason: ${reason}`

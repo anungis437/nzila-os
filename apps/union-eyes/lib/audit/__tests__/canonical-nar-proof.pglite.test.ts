@@ -37,8 +37,8 @@ beforeAll(async () => {
   // Isolated PostgreSQL fixture: tenant filtering and append-only runtime grants.
   // Live signed-binding policies are separately exercised by the staging verifier.
   await pg.exec(`CREATE ROLE nar_runtime;
-    CREATE TABLE audit_logs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      created_at timestamptz, updated_at timestamptz, organization_id uuid NOT NULL,
+    CREATE TABLE audit_logs (id uuid PRIMARY KEY, audit_id uuid NOT NULL UNIQUE,
+      created_at timestamptz NOT NULL, updated_at timestamptz NOT NULL, organization_id uuid NOT NULL,
       action text, resource_type text, resource_id text, user_id text, ip_address inet,
       user_agent text, details jsonb, changes jsonb, content_hash text, previous_hash text);
     ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
