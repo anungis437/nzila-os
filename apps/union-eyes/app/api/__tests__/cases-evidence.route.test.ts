@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
+  actor: vi.fn(),
   withRLSContext: vi.fn(),
   putBlob: vi.fn(),
   deleteBlob: vi.fn(),
@@ -20,6 +21,7 @@ vi.mock('@/lib/api/errors', () => {
       badRequest: (message: string, details?: unknown) => makeError(400, message, details),
       notFound: (_entity: string, id?: string) => makeError(404, id ? `Not found: ${id}` : 'Not found'),
       unauthorized: () => makeError(401, 'Unauthorized'),
+      forbidden: () => makeError(403, 'Forbidden'),
       externalService: (_svc: string, message: string) => makeError(503, message),
     },
   };
@@ -35,6 +37,12 @@ vi.mock('@/lib/audited-case-mutations', () => ({
 }));
 vi.mock('@/lib/security/clamav', () => ({ isMalwareScanError: m.isMalwareScanError }));
 
+vi.mock('@/lib/cases/case-authorization', async original => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  getCaseActor: m.actor, caseReadScope: vi.fn(() => undefined),
+}));
+vi.mock('@/lib/audit-logger', () => ({auditLog:vi.fn().mockResolvedValue(undefined),AuditEventType:{AUTH_FAILED:'AUTH_FAILED'},AuditSeverity:{HIGH:'HIGH'}}));
+
 async function loadRoute() {
   return import('../cases/[caseId]/evidence/route');
 }
@@ -42,6 +50,7 @@ async function loadRoute() {
 describe('cases/[caseId]/evidence route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.actor.mockResolvedValue({userId:'user_1',organizationId:'org_1',role:'admin'});
     m.executeQueue = [];
     m.putBlob.mockResolvedValue({
       url: 'https://blob/evidence.pdf',
@@ -180,4 +189,12 @@ describe('cases/[caseId]/evidence route', () => {
     expect(m.deleteBlob).not.toHaveBeenCalled();
     expect(m.auditCaseMutation).not.toHaveBeenCalled();
   });
+  it('denies a member evidence deletion before touching storage or case data', async () => {
+    const { DELETE } = await loadRoute();
+    m.actor.mockResolvedValueOnce({userId:'user_1',organizationId:'org_1',role:'member'});
+    await expect(DELETE({params:{caseId:'claim_1'},organizationId:'org_1',userId:'user_1',request:new NextRequest('http://localhost/api/cases/claim_1/evidence?fileUrl=https://x')} as any)).rejects.toMatchObject({status:403});
+    expect(m.deleteBlob).not.toHaveBeenCalled();
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+
 });

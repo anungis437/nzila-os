@@ -8,7 +8,6 @@
  */
 
 import { NextResponse } from 'next/server';
-import { auth } from '@nzila/platform-auth/entra/server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import {
@@ -20,10 +19,11 @@ import {
 import { toLifecycleState } from '@/lib/workflow/state-bridge';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims, claimUpdates, claimStatusEnum } from '@/db/schema/claims-schema';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { canPerformAction } from '@/lib/action-enforcer';
 import { logger } from '@/lib/logger';
-import { getOrganizationIdForUser, getUserRoleInOrganization } from '@/lib/organization-utils';
-import { wrapSchemaQuery } from '@/lib/schema-error';
+import { getCaseActor, findReadableCase, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
+import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
@@ -43,14 +43,9 @@ export async function PATCH(
     const { caseId } = await params;
 
     // 1. Auth
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
-        { status: 401 },
-      );
-    }
-    const orgId = await getOrganizationIdForUser(userId);
+    const actor = await getCaseActor();
+    const { userId, organizationId: orgId } = actor;
+    await requireCaseAction(actor, 'case_transition', caseId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     // 2. Parse + validate body
@@ -83,29 +78,11 @@ export async function PATCH(
 
     // 3. Load claim in RLS context (with row lock to prevent TOCTOU race)
     const result = await withRLSContext(async (tx) => {
-      const [claim] = await wrapSchemaQuery(
-        async () => await tx
-          .select({
-            claimId: claims.claimId,
-            status: claims.status,
-            priority: claims.priority,
-            organizationId: claims.organizationId,
-            assignedTo: claims.assignedTo,
-          })
-          .from(claims)
-          .where(eq(claims.claimId, caseId))
-          .limit(1)
-          .for('update'),
-        { table: 'claims', route: '/api/cases/[caseId]/transition', query: 'SELECT FOR UPDATE' }
-      );
+      const claim = await findReadableCase(tx, actor, caseId, true);
 
       if (!claim) {
         return { found: false as const };
       }
-
-      // 4. Resolve actor role from org membership
-      const resolvedRole = await getUserRoleInOrganization(userId, claim.organizationId);
-      const actorRole = resolvedRole ?? 'member';
 
       // 5. Validate FSM transition via canonical case-lifecycle.ts
       const cupeCurrentStatus = mapDbStatusToCupe(claim.status);
@@ -121,12 +98,20 @@ export async function PATCH(
         };
       }
 
-      const normalizedRole = normalizeActorRole(actorRole);
+      const normalizedRole = normalizeActorRole(actor.role);
+      const action = targetLifecycleState === 'closed' ? 'case_close'
+        : currentLifecycleState === 'closed' ? 'case_reopen' : 'case_transition';
+      const permission = canPerformAction(action, actor.role, { caseStatus: claim.status });
+      if (!permission.allowed) return {
+        found: true as const, allowed: false as const,
+        reason: permission.reason, nextAllowedStatuses: [] as string[],
+      };
       const validation = validateTransition({
         caseId,
         currentState: currentLifecycleState,
         targetState: targetLifecycleState,
         actorRole: normalizedRole,
+        assignedTo: claim.assignedTo,
         priority: (claim.priority as CasePriority) ?? 'medium',
         notes: reason,
       });
@@ -156,11 +141,11 @@ export async function PATCH(
             ? { resolvedAt: now }
             : {}),
         })
-        .where(eq(claims.claimId, caseId));
+        .where(eq(claims.claimId, claim.claimId));
 
       // 6. Add transition note
       await tx.insert(claimUpdates).values({
-        claimId: claimHistoryReference(caseId),
+        claimId: claimHistoryReference(claim.claimId),
         updateType: 'status_change',
         message: reason
           ? `Status changed: ${fromStatus} → ${toDbStatus}. Reason: ${reason}`
@@ -184,7 +169,7 @@ export async function PATCH(
         toStatus: toDbStatus,
         cupeFromStatus: cupeCurrentStatus,
         cupeToStatus: targetStatus,
-        claimId: caseId,
+        claimId: claim.claimId,
       };
     });
 
@@ -198,6 +183,11 @@ export async function PATCH(
 
     // Handle disallowed
     if (!result.allowed) {
+      await auditLog({
+        eventType: AuditEventType.AUTH_FAILED, severity: AuditSeverity.HIGH,
+        userId, organizationId: orgId, resource: 'claims', resourceId: caseId,
+        action: 'case_transition', outcome: 'failure', details: { reason: result.reason, targetStatus },
+      });
       return NextResponse.json(
         {
           error: 'TRANSITION_DENIED',
@@ -213,7 +203,7 @@ export async function PATCH(
       userId,
       organizationId: orgId,
       resource: 'claims',
-      resourceId: caseId,
+      resourceId: result.claimId,
       action: 'update',
       details: {
         event: 'CASE_TRANSITIONED',
@@ -226,7 +216,7 @@ export async function PATCH(
     });
 
     logger.info('Case transitioned', {
-      claimId: caseId,
+      claimId: result.claimId,
       from: result.fromStatus,
       to: result.toStatus,
     });
@@ -236,16 +226,18 @@ export async function PATCH(
       actionType: 'CASE_TRANSITIONED',
       orgId: orgId,
       actorId: userId,
-      artifacts: [{ type: 'case_transition', data: { caseId, from: result.cupeFromStatus, to: result.cupeToStatus, reason } }],
+      artifacts: [{ type: 'case_transition', data: { caseId: result.claimId, from: result.cupeFromStatus, to: result.cupeToStatus, reason } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_TRANSITIONED' }))
 
     return NextResponse.json({
       success: true,
-      claimId: caseId,
+      claimId: result.claimId,
       fromStatus: result.cupeFromStatus,
       toStatus: result.cupeToStatus,
     });
   } catch (error) {
+    const denied = caseAuthorizationResponse(error) ?? authorizationDenialResponse(error);
+    if (denied) return denied;
     logger.error('Case transition failed', error as Error);
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' },

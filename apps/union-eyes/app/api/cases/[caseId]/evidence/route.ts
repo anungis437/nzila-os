@@ -4,6 +4,7 @@
 import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { sql } from 'drizzle-orm';
+import { getCaseActor, caseReadScope, requireCaseAction } from '@/lib/cases/case-authorization';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { putBlob, deleteBlob } from '@/lib/blob-client';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
@@ -65,11 +66,9 @@ function sanitizeFilename(fileName: string): string {
 }
 
 async function resolveCaseRecord(caseId: string, organizationId: string | null, userId: string | null): Promise<CaseRecord> {
-  const orgFilter = organizationId
-    ? sql`AND c.organization_id = ${organizationId}::uuid`
-    : userId
-      ? sql`AND c.member_id = ${userId}`
-      : sql`AND FALSE`;
+  const actor = await getCaseActor();
+  if (actor.userId !== userId || actor.organizationId !== organizationId) throw ApiError.forbidden();
+  const orgFilter = sql`AND ${caseReadScope(actor, 'c')}`;
 
   const rows = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT c.claim_id AS "claimId", c.claim_number AS "claimNumber", c.attachments, c.metadata
@@ -129,6 +128,7 @@ export const POST = withApi(
       throw ApiError.unauthorized();
     }
 
+    await requireCaseAction(await getCaseActor(), 'attachment_upload', params.caseId);
     const fileForm = await request.formData();
     const file = fileForm.get('file');
 
@@ -217,6 +217,7 @@ export const DELETE = withApi(
       throw ApiError.unauthorized();
     }
 
+    await requireCaseAction(await getCaseActor(), 'attachment_delete', params.caseId);
     const fileUrl = request.nextUrl.searchParams.get('fileUrl');
     if (!fileUrl) {
       throw ApiError.badRequest('fileUrl query parameter is required');

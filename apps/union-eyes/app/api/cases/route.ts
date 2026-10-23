@@ -15,6 +15,7 @@ import { logger } from '@/lib/logger';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { recordUnionEyesCaseCreated } from '@/lib/pilot-metrics';
 import { z } from 'zod';
+import { getCaseActor, caseReadScope } from '@/lib/cases/case-authorization';
 
 const caseCreateSchema = z.object({
   claimType: z.enum([
@@ -48,28 +49,14 @@ export const GET = withApi(
       description: 'Returns cases (claims) for the authenticated org with optional filters.',
     },
   },
-  async ({ request, organizationId, userId }) => {
+  async ({ request }) => {
+    const actor = await getCaseActor();
     const url = new URL(request.url);
     const status = url.searchParams.get('status');
     const type = url.searchParams.get('type');
     const priority = url.searchParams.get('priority');
 
-    // Resolve organizationId: fall back to user's org membership
-    let orgId = organizationId;
-    if (!orgId && userId) {
-      const memberRows = await withRLSContext(async (tx) =>
-        tx.execute(
-          sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
-        ),
-      );
-      orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
-    }
-
-    const orgFilter = orgId
-      ? sql`AND c.organization_id = ${orgId}::uuid`
-      : userId
-        ? sql`AND c.member_id = ${userId}`
-        : sql`AND FALSE`;
+    const orgFilter = sql`AND ${caseReadScope(actor, 'c')}`;
 
     const statusFilter = status ? sql`AND c.status = ${status}` : sql``;
     const typeFilter   = type   ? sql`AND c.claim_type = ${type}` : sql``;

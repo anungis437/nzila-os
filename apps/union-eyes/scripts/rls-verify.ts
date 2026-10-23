@@ -57,6 +57,7 @@ import {
 } from '../db/rls-0108-protected-tables'
 import { storageAuthorityManifest } from '../db/rls-storage-authority/index'
 import { hasApprovedMemberAccessProjectionPolicies, isApprovedMemberAccessProjectionPolicy, type MemberAccessProjectionPolicy } from '../db/auth/member-access-projection'
+import { CASE_ASSIGNEE_CATALOG_QUERY, caseAssigneePredicateViolations } from '../db/auth/case-assignee-predicate'
 
 // Tables the canonical storageAuthorityManifest (db/rls-storage-authority)
 // dispositions with an EMPTY requiredRuntimePrivileges array — i.e.
@@ -263,7 +264,8 @@ function parseArgs() {
   // A deployed environment (the deploy workflow's preflight) requires the deadline-engine tables; a source-native bootstrap does not.
   const requireDeadlineEngineTables = args.includes('--require-deadline-engine-tables') || process.env.RLS_VERIFY_REQUIRE_DEADLINE_ENGINE_TABLES === '1'
   const requireAuthMemberProjection = args.includes('--require-auth-member-projection') || process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1'
-  return { mode: mode as 'preflight' | 'full', requireDeadlineEngineTables, requireAuthMemberProjection }
+  const requireCaseAssigneePredicate = args.includes('--require-case-assignee-predicate') || process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1'
+  return { mode: mode as 'preflight' | 'full', requireDeadlineEngineTables, requireAuthMemberProjection, requireCaseAssigneePredicate }
 }
 
 async function checkRuntimeRole(sql: postgres.Sql, results: CheckResult[]) {
@@ -1169,7 +1171,7 @@ export function rlsVerifyConnectionOptions(databaseUrl: string) {
 }
 
 async function main() {
-  const { mode, requireDeadlineEngineTables, requireAuthMemberProjection } = parseArgs()
+  const { mode, requireDeadlineEngineTables, requireAuthMemberProjection, requireCaseAssigneePredicate } = parseArgs()
   const dbUrl = resolveRuntimeDatabaseUrl()
   if (!dbUrl) {
     console.error('[rls-verify] Missing RLS_VERIFY_DATABASE_URL / DATABASE_URL.')
@@ -1183,6 +1185,11 @@ async function main() {
   try {
     await checkRuntimeRole(sql, results)
     await checkTableRlsState(sql, results, requireAuthMemberProjection)
+    if (requireCaseAssigneePredicate) {
+      const violations = caseAssigneePredicateViolations(await sql.unsafe(CASE_ASSIGNEE_CATALOG_QUERY))
+      results.push({ name: 'canonical case assignee: exact bounded predicate body, owner and execution ACL',
+        pass: violations.length === 0, detail: violations.length ? violations.join('; ') : 'Source-pinned function; runtime EXECUTE only; no raw private-table grant' })
+    }
     await checkNoContextFailsClosed(sql, results)
     await checkBaselineTablesHaveManifestDisposition(results)
     await checkOrphanedTenantTables(sql, results)

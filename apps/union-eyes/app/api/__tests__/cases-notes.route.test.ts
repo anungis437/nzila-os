@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
+  getUserRoleInOrganization: vi.fn(),
   requireEntitlement: vi.fn(),
   withRLSContext: vi.fn(),
   auditDataMutation: vi.fn(),
@@ -14,9 +15,9 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
-vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser, getUserRoleInOrganization: m.getUserRoleInOrganization }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
+vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation, auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
@@ -24,6 +25,12 @@ vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: vi.fn(() => 'eq'), desc: vi.fn(() => 'desc') };
 });
+
+
+vi.mock('@/lib/cases/case-authorization', async (original) => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  findReadableCase: vi.fn(async () => (m.claimQueue.shift() ?? [])[0] ?? null),
+}));
 
 async function loadRoute() {
   return import('../cases/[caseId]/notes/route');
@@ -37,6 +44,7 @@ describe('cases/[caseId]/notes route', () => {
     m.insertQueue = [];
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
+    m.getUserRoleInOrganization.mockResolvedValue('steward');
     m.requireEntitlement.mockResolvedValue(undefined);
     m.auditDataMutation.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
@@ -121,4 +129,15 @@ describe('cases/[caseId]/notes route', () => {
     expect(json.success).toBe(true);
     expect(m.auditDataMutation).toHaveBeenCalled();
   });
+  it('denies member internal-note creation before any business write', async () => {
+    const { POST } = await loadRoute();
+    m.getUserRoleInOrganization.mockResolvedValueOnce('member');
+    const response = await POST(new Request('http://localhost/api/cases/c1/notes', {
+      method:'POST',body:JSON.stringify({text:'private staff material',isInternal:true}),
+    }), {params:Promise.resolve({caseId:'c1'})});
+    expect(response.status).toBe(403);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.auditDataMutation).not.toHaveBeenCalled();
+  });
+
 });

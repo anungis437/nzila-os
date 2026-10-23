@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
+  getUserRoleInOrganization: vi.fn(),
   requireEntitlement: vi.fn(),
   withRLSContext: vi.fn(),
   auditDataMutation: vi.fn(),
@@ -10,14 +11,15 @@ const m = vi.hoisted(() => ({
   recordUnionEyesCaseAssigned: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   claimQueue: [] as unknown[][],
+  assigneeEligible: vi.fn(),
   insertQueue: [] as unknown[][],
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
-vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser, getUserRoleInOrganization: m.getUserRoleInOrganization }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
+vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation, auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/pilot-metrics', () => ({ recordUnionEyesCaseAssigned: m.recordUnionEyesCaseAssigned }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
@@ -25,6 +27,13 @@ vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: vi.fn(() => 'eq') };
 });
+
+
+vi.mock('@/lib/cases/case-authorization', async (original) => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  findReadableCase: vi.fn(async () => (m.claimQueue.shift() ?? [])[0] ?? null),
+  caseAssigneeEligible: m.assigneeEligible,
+}));
 
 async function loadRoute() {
   return import('../cases/[caseId]/assign/route');
@@ -34,9 +43,11 @@ describe('cases/[caseId]/assign route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.claimQueue = [];
+    m.assigneeEligible.mockResolvedValue(true);
     m.insertQueue = [];
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
+    m.getUserRoleInOrganization.mockResolvedValue('chief_steward');
     m.requireEntitlement.mockResolvedValue(undefined);
     m.auditDataMutation.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
@@ -99,4 +110,26 @@ describe('cases/[caseId]/assign route', () => {
     expect(json.assignedTo).toBe('u2');
     expect(m.auditDataMutation).toHaveBeenCalled();
   });
+  it('denies an ineligible foreign or inactive assignee before any mutation', async () => {
+    const { POST } = await loadRoute();
+    m.claimQueue.push([{ claimId: 'c1', assignedTo: 'u0', status: 'under_review' }]);
+    m.assigneeEligible.mockResolvedValueOnce(false);
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({assigneeId:'foreign'}),
+    }), {params:Promise.resolve({caseId:'c1'})});
+    expect(response.status).toBe(403);
+    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
+    expect(m.insertQueue).toEqual([]);
+  });
+  it('denies member assignment before opening a case transaction', async () => {
+    const { POST } = await loadRoute();
+    m.getUserRoleInOrganization.mockResolvedValueOnce('member');
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
+      method:'POST', body:JSON.stringify({assigneeId:'foreign'}),
+    }), {params:Promise.resolve({caseId:'c1'})});
+    expect(response.status).toBe(403);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+
 });
