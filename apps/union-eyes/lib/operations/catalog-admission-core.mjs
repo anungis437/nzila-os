@@ -113,9 +113,13 @@ export const admissionQueries = [
   },
   {
     name: 'definers',
-    sql: `SELECT n.nspname, p.proname
+    sql: `SELECT n.nspname, p.proname, owner.rolname AS owner, p.proconfig,
+                 has_function_privilege('union_eyes_runtime',p.oid,'EXECUTE') AS runtime_execute,
+                 has_function_privilege('union_eyes_system',p.oid,'EXECUTE') AS system_execute,
+                 has_function_privilege('public',p.oid,'EXECUTE') AS public_execute
           FROM pg_proc p
           JOIN pg_namespace n ON n.oid = p.pronamespace
+          JOIN pg_roles owner ON owner.oid = p.proowner
           WHERE p.prosecdef
             AND n.nspname NOT IN ('pg_catalog', 'information_schema')
             AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime')
@@ -360,7 +364,13 @@ export function assessCatalogAdmission(contract, snapshots, environment = 'unkno
   }
   for (const row of rows(snapshots, 'sequences')) violations.push(`public sequence ${row.relname} is granted`)
   for (const row of rows(snapshots, 'definers')) {
-    violations.push(`${row.nspname}.${row.proname} is a SECURITY DEFINER function executable by a runtime principal`)
+    const expected = (payload.approvedRuntimeDefiners ?? []).find(entry =>
+      entry.schema === row.nspname && entry.name === row.proname && entry.owner === row.owner,
+    )
+    if (!expected || !asArray(row.proconfig).includes('search_path=pg_catalog')
+      || row.runtime_execute !== true || row.system_execute !== false || row.public_execute !== false) {
+      violations.push(`${row.nspname}.${row.proname} is a SECURITY DEFINER function executable by a runtime principal`)
+    }
   }
   const approvedColumns = new Map(
     (payload.approvedColumnGrants ?? []).map((grant) => [

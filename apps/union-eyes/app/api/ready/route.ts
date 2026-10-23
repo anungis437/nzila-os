@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getBuildMetadata, isReadyFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
+import { evaluateCatalogAdmission } from '@/lib/operations/catalog-admission'
 
 const APP = 'union-eyes'
 
@@ -14,6 +15,14 @@ async function checkDatabaseReady(): Promise<boolean> {
     const { sql } = await import('drizzle-orm')
     await db.execute(sql`SELECT 1`)
     return true
+  } catch {
+    return false
+  }
+}
+
+async function checkCatalogReady(): Promise<boolean> {
+  try {
+    return (await evaluateCatalogAdmission()).ok
   } catch {
     return false
   }
@@ -106,10 +115,11 @@ function checkCalendarSchedulerReady(): boolean {
 export async function GET() {
   const requireQueue = parseBoolEnv(process.env.READY_REQUIRE_QUEUE, false)
   const requireStorage = parseBoolEnv(process.env.READY_REQUIRE_STORAGE, false)
-  const [database, queue, storage] = await Promise.all([
+  const [database, queue, storage, catalogAuthority] = await Promise.all([
     checkDatabaseReady(),
     requireQueue ? checkQueueReady() : Promise.resolve(false),
     requireStorage ? checkStorageReady() : Promise.resolve<'unknown'>('unknown'),
+    checkCatalogReady(),
   ])
   const requireCalendarIntegrations = parseBoolEnv(process.env.READY_REQUIRE_CALENDAR_INTEGRATIONS, false)
   const requireEmailDelivery = parseBoolEnv(process.env.READY_REQUIRE_EMAIL_DELIVERY, false)
@@ -122,6 +132,7 @@ export async function GET() {
   const checksInput: Record<string, boolean | 'unknown'> = {
     process: true,
     database,
+    catalogAuthority,
     storage,
     thirdParty: 'unknown',
   }
@@ -151,6 +162,7 @@ export async function GET() {
   const requiredChecks = [
     'process',
     'database',
+    'catalogAuthority',
     ...(requireStorage ? ['storage'] : []),
     ...(requireQueue ? ['queue'] : []),
     ...(requireCalendarIntegrations ? ['calendarIntegrations'] : []),
