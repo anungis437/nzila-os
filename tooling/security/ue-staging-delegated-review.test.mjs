@@ -37,7 +37,7 @@ function apiFixture(m){
  const evidenceFiles=[RECEIPT_PATH,SIGNATURE_PATH].map(filename=>({filename,status:'added'}))
  const sourceTree={truncated:false,tree:m.files.map(f=>({path:f.path,type:'blob',sha:f.blobSha}))}
  const objects={[`pulls/${m.pullRequest}`]:pr,[`git/commits/${E}`]:evidence,[`git/commits/${S}`]:source,[`git/commits/${m.baseSha}`]:base,[`git/trees/${TREE}?recursive=1`]:sourceTree,[`git/trees/${base.tree.sha}?recursive=1`]:{truncated:false,tree:[]},[`git/blobs/${BLOB}`]:{encoding:'base64',sha:BLOB,content:bytes.toString('base64')}}
- if([986,990,991,992].includes(m.pullRequest)){const key={path:KEY_PATH,type:'blob',sha:keyBlob};sourceTree.tree.push(key);objects[`git/trees/${base.tree.sha}?recursive=1`].tree.push({...key})}
+ if([986,990,991,992,993].includes(m.pullRequest)){const key={path:KEY_PATH,type:'blob',sha:keyBlob};sourceTree.tree.push(key);objects[`git/trees/${base.tree.sha}?recursive=1`].tree.push({...key})}
  objects[`git/blobs/${keyBlob}`]={encoding:'base64',sha:keyBlob,content:publicPem.toString('base64')}
  return {pr,evidence,sourceTree,allFiles,evidenceFiles,objects,get:async endpoint=>{assert(endpoint in objects,endpoint);return objects[endpoint]},pages:async(endpoint,field)=>{if(endpoint===`commits/${E}`){assert.equal(field,'files');return evidenceFiles}assert.equal(endpoint,`pulls/${m.pullRequest}/files`);return [...allFiles,...evidenceFiles]}}
 }
@@ -285,4 +285,143 @@ for(const extra of [false,true])test(`gitattributes exact key byte-preservation 
  m.files.push({path:'.gitattributes',status:'modified',previousPath:null,blobSha:newSha,sha256:sha256(newBytes),baseBlobSha:oldSha,baseSha256:sha256(baseBytes)})
  const a=apiFixture(m);a.objects[`git/trees/${'5'.repeat(40)}?recursive=1`].tree.push({path:'.gitattributes',type:'blob',sha:oldSha});a.objects[`git/blobs/${newSha}`]={encoding:'base64',sha:newSha,content:newBytes.toString('base64')};a.objects[`git/blobs/${oldSha}`]={encoding:'base64',sha:oldSha,content:baseBytes.toString('base64')}
  if(extra)await assert.rejects(verifyPullRequest(m,a),/Only exact/);else await verifyPullRequest(m,a)
+})
+
+
+function caseAuthorizationFollowup() {
+ const m=followup();m.pullRequest=993;m.branch=PR_BINDINGS[993].branch;m.baseSha=PR_BINDINGS[993].base
+ return m
+}
+test('case authorization review binds exact PR, source base, branch, author and unchanged trust',async()=>{
+ const m=caseAuthorizationFollowup();validateManifest(m,NOW)
+ assert.equal((await verifyPullRequest(m,apiFixture(m))).evidenceSha,E)
+})
+for(const [name,change]of [
+ ['another PR',m=>m.pullRequest=994],['another branch',m=>m.branch=PR_BINDINGS[992].branch],
+ ['another base',m=>m.baseSha=PR_BINDINGS[992].base],['production authorization',m=>m.productionAuthorized=true],
+ ['missing primary attribution',m=>m.reviews=m.reviews.filter(r=>r.kind!=='primary-agent-review')],
+ ['invented human attribution',m=>m.reviews[0].kind='independent-human'],
+ ['changed trust',m=>m.files.push(manifest().files[0])],
+])test(`case authorization review rejects ${name}`,()=>{const m=caseAuthorizationFollowup();change(m);assert.throws(()=>validateManifest(m,NOW))})
+for(const name of [
+ 'packages/platform-auth/src/auth-db.ts','packages/db/src/auth-storage-authority/org-session-authority.ts',
+ 'apps/union-eyes/db/migrations-platform/0009_extra.sql','apps/union-eyes/backend/auth_core/models.py',
+ 'apps/union-eyes/lib/auth/unreviewed.ts','apps/union-eyes/db/auth/unreviewed-function.ts',
+ 'apps/union-eyes/db/schema/claims-schema.ts','package.json','pnpm-lock.yaml',
+ '.github/workflows/deploy-union-eyes.yml','ops/policies/production.json',
+])test(`case authorization review cannot expand to ${name}`,()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:name});assert.throws(()=>validateManifest(m,NOW))
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/__tests__/cases-assign.route.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/__tests__/cases-assign.route.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/__tests__/cases-audit.route.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/__tests__/cases-audit.route.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/__tests__/cases-caseId-export.route.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/__tests__/cases-caseId-export.route.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/__tests__/cases-evidence.route.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/__tests__/cases-evidence.route.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/__tests__/cases-next-actions.route.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/__tests__/cases-next-actions.route.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/__tests__/cases-notes.route.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/__tests__/cases-notes.route.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/__tests__/cases-route.route.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/__tests__/cases-route.route.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/__tests__/cases-timeline.route.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/__tests__/cases-timeline.route.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/__tests__/cases-transition.route.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/__tests__/cases-transition.route.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/cases/[caseId]/assign/route.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/cases/[caseId]/assign/route.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/cases/[caseId]/audit/route.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/cases/[caseId]/audit/route.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/cases/[caseId]/evidence/route.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/cases/[caseId]/evidence/route.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/cases/[caseId]/export/route.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/cases/[caseId]/export/route.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/cases/[caseId]/next-actions/route.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/cases/[caseId]/next-actions/route.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/cases/[caseId]/notes/route.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/cases/[caseId]/notes/route.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/cases/[caseId]/route.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/cases/[caseId]/route.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/cases/[caseId]/transition/route.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/cases/[caseId]/transition/route.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/app/api/cases/route.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/app/api/cases/route.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/db/auth/case-assignee-predicate.pglite.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/db/auth/case-assignee-predicate.pglite.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/db/auth/case-assignee-predicate.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/db/auth/case-assignee-predicate.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/lib/__tests__/organization-utils.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/lib/__tests__/organization-utils.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/lib/cases/case-authorization.pglite.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/lib/cases/case-authorization.pglite.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/lib/cases/case-authorization.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/lib/cases/case-authorization.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/lib/cases/case-evidence-query.pglite.test.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/lib/cases/case-evidence-query.pglite.test.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/lib/cases/case-evidence-query.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/lib/cases/case-evidence-query.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/lib/cases/case-permissions.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/lib/cases/case-permissions.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/lib/operations/canonical-catalog-admission.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/lib/operations/canonical-catalog-admission.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/lib/organization-utils.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/lib/organization-utils.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts apps/union-eyes/scripts/rls-verify.ts",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"apps/union-eyes/scripts/rls-verify.ts"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts tooling/repo-inventory/output/inventory.json",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"tooling/repo-inventory/output/inventory.json"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts tooling/repo-inventory/output/inventory.md",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"tooling/repo-inventory/output/inventory.md"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts tooling/repo-inventory/output/repo-inventory.json",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"tooling/repo-inventory/output/repo-inventory.json"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts tooling/repo-inventory/output/repo-inventory.md",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"tooling/repo-inventory/output/repo-inventory.md"});validateManifest(m,NOW)
+})
+test("case authorization signed coverage accepts tooling/security/ue-staging-delegated-review.test.mjs",()=>{
+ const m=caseAuthorizationFollowup();m.files.push({...m.files[0],path:"tooling/security/ue-staging-delegated-review.test.mjs"});validateManifest(m,NOW)
+})
+
+for(const [name,change]of [
+ ['owner impersonation',a=>a.pr.user.login='anungis437'],
+ ['changed trust blob',a=>a.sourceTree.tree.find(t=>t.path===KEY_PATH).sha=BLOB],
+ ['unreviewed evidence edit',a=>a.evidenceFiles.push({filename:'apps/union-eyes/db/auth/case-assignee-predicate.ts',status:'modified'})],
+])test(`case authorization actual API rejects ${name}`,async()=>{
+ const m=caseAuthorizationFollowup(),a=apiFixture(m);change(a);await assert.rejects(verifyPullRequest(m,a))
 })
