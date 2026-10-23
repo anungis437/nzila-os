@@ -4,6 +4,8 @@ import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { PrioritiesConsole } from '@/components/priorities/priorities-console';
+import { requireUser } from '@/lib/api-auth-guard';
+import { getUserRole } from '@/lib/auth/rbac-server';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -18,11 +20,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default function PrioritiesPage() {
+export default async function PrioritiesPage() {
+  const user = await requireUser();
+  const role = await getUserRole(user.userId, user.organizationId);
   // Auth enforced by dashboard layout; PrioritiesConsole's API calls also gate access.
   return (
     <Suspense fallback={null}>
-      <PrioritiesConsole />
+      <PrioritiesConsole role={role} />
     </Suspense>
   );
 }

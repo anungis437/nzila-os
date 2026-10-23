@@ -20,6 +20,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ActionHint } from "@/components/onboarding/action-hint";
+import { canAccessDashboardPath, getDashboardExperience, getRoleLandingPath } from "@/lib/dashboard/role-experience";
+import { usePilotMode } from "@/contexts/pilot-mode-context";
 
 interface PriorityItem {
   id: string;
@@ -37,17 +39,21 @@ const URGENCY_STYLES: Record<string, string> = {
   normal: "bg-blue-100 text-blue-800 border-blue-200",
 };
 
-export function PrioritiesConsole() {
+export function PrioritiesConsole({ role }: { role?: string | null }) {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
   const params = useSearchParams();
+  const { isPilotMode } = usePilotMode();
+  const experience = getDashboardExperience(role);
   const isTeamView = params.get("view") === "team";
   const [items, setItems] = useState<PriorityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   const fetchPriorities = useCallback(async () => {
     setLoading(true);
+    setFailed(false);
     try {
       // Fetch claims with approaching deadlines or overdue status
       const [claimsRes, grievancesRes] = await Promise.allSettled([
@@ -56,10 +62,14 @@ export function PrioritiesConsole() {
       ]);
 
       const priorityItems: PriorityItem[] = [];
+      if ([claimsRes, grievancesRes].some(result => result.status === 'rejected' || !result.value.ok)) {
+        throw new Error('Priority source unavailable');
+      }
 
       if (claimsRes.status === "fulfilled" && claimsRes.value.ok) {
         const data = await claimsRes.value.json();
-        const claims = Array.isArray(data) ? data : data.claims || [];
+        const claims = Array.isArray(data) ? data : data.data ?? data.claims;
+        if (!Array.isArray(claims)) throw new Error('Invalid claims response');
         for (const c of claims) {
           const isOverdue = c.deadline && new Date(c.deadline) < new Date();
           priorityItems.push({
@@ -76,7 +86,8 @@ export function PrioritiesConsole() {
 
       if (grievancesRes.status === "fulfilled" && grievancesRes.value.ok) {
         const data = await grievancesRes.value.json();
-        const grievances = Array.isArray(data) ? data : data.grievances || [];
+        const grievances = Array.isArray(data) ? data : data.data ?? data.grievances;
+        if (!Array.isArray(grievances)) throw new Error('Invalid grievances response');
         for (const g of grievances) {
           const isOverdue = g.deadline && new Date(g.deadline) < new Date();
           if (g.status !== "resolved") {
@@ -99,7 +110,8 @@ export function PrioritiesConsole() {
 
       setItems(priorityItems.slice(0, 10));
     } catch {
-      // Silent — empty state
+      setItems([]);
+      setFailed(true);
     } finally {
       setLoading(false);
     }
@@ -110,7 +122,7 @@ export function PrioritiesConsole() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t("sidebar.priorities")}</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -140,9 +152,14 @@ export function PrioritiesConsole() {
 
       {/* Priority items */}
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-gray-400">
+        <div role="status" aria-label={locale.startsWith('fr') ? 'Chargement des priorités' : 'Loading priorities'} className="flex items-center justify-center py-20 text-muted-foreground">
           <Loader2 size={24} className="animate-spin" />
         </div>
+      ) : failed ? (
+        <Card><CardContent className="space-y-4 py-6" role="alert">
+          <p>{locale.startsWith('fr') ? 'Impossible de charger les priorités. Réessayez pour connaître leur état actuel.' : 'Priorities could not be loaded. Retry to see their current state.'}</p>
+          <Button variant="outline" onClick={fetchPriorities}>{locale.startsWith('fr') ? 'Réessayer' : 'Retry'}</Button>
+        </CardContent></Card>
       ) : items.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
@@ -163,13 +180,13 @@ export function PrioritiesConsole() {
                 item.urgency === "critical" ? "border-l-4 border-l-red-500" : ""
               }`}
             >
-              <CardContent className="py-3 px-4 flex items-start gap-3">
+              <CardContent className="py-3 px-4 flex flex-wrap items-start gap-3">
                 <div className="mt-0.5 shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-xs font-bold text-gray-600">
                   {idx + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-medium text-sm text-gray-900 truncate">{item.title}</span>
+                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                    <span className="font-medium text-sm text-foreground break-words">{item.title}</span>
                     <Badge variant="outline" className={`text-[10px] shrink-0 ${URGENCY_STYLES[item.urgency]}`}>
                       {item.urgency}
                     </Badge>
@@ -188,10 +205,17 @@ export function PrioritiesConsole() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-xs h-7 shrink-0"
-                  onClick={() => router.push(item.href)}
+                  className="text-xs min-h-11 shrink-0 max-w-full"
+                  onClick={() => router.push(
+                    canAccessDashboardPath(item.href.replace(`/${locale}`, ''), experience, isPilotMode)
+                      ? item.href
+                      : `/${locale}${getRoleLandingPath(role)}`
+                  )}
                 >
-                  Handle now <ArrowRight size={12} className="ml-1" />
+                  {canAccessDashboardPath(item.href.replace(`/${locale}`, ''), experience, isPilotMode)
+                    ? (locale.startsWith('fr') ? 'Ouvrir' : 'Open')
+                    : (locale.startsWith('fr') ? 'Ouvrir mon espace de travail' : 'Open my work area')}
+                  <ArrowRight size={12} className="ml-1" />
                 </Button>
               </CardContent>
             </Card>

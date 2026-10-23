@@ -230,12 +230,12 @@ describe("workspace deep-work path coherence", () => {
     });
   });
 
-  it("does not widen the staff allow-list to cases, claims, grievances, or priorities", () => {
+  it("allows the implemented priorities overview while keeping case detail routes outside staff navigation", () => {
     const staff = getAllowedPrefixesByExperience().staff;
     expect(staff).not.toContain("/dashboard/cases");
     expect(staff).not.toContain("/dashboard/claims");
     expect(staff).not.toContain("/dashboard/grievances");
-    expect(staff).not.toContain("/dashboard/priorities");
+    expect(staff).toContain("/dashboard/priorities");
     expect(canAccessDashboardPath("/dashboard/cases", "staff", false)).toBe(false);
     expect(canAccessDashboardPath("/dashboard/workbench", "staff", true)).toBe(true);
   });
@@ -266,10 +266,7 @@ describe("workspace deep-work path coherence", () => {
           "/dashboard/priorities",
           pilot,
         );
-        expect(priorities.kind).toBe("blocked");
-        if (priorities.kind !== "blocked") continue;
-        expect(priorities.recovery?.href).toBe("/dashboard/workbench");
-        expect(priorities.recovery?.labelFallback).toBe("Casework console");
+        expect(priorities.kind).toBe("reachable");
 
         expect(
           resolveWorkspaceDeepWork(role, "case-operations", "/dashboard/inbox?type=intake", pilot),
@@ -358,6 +355,7 @@ describe("workspace deep-work path coherence", () => {
       "/dashboard",
       "/dashboard/workspace",
       "/dashboard/workbench",
+      "/dashboard/priorities",
       "/dashboard/operations",
       "/dashboard/inbox",
       "/dashboard/intelligence",
@@ -377,7 +375,6 @@ describe("workspace deep-work path coherence", () => {
       "/dashboard/cases",
       "/dashboard/claims",
       "/dashboard/grievances",
-      "/dashboard/priorities",
     ];
     for (const pilot of [true, false]) {
       for (const href of deniedDoctrine) {

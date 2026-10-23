@@ -192,9 +192,9 @@ export function OrganizationSelector() {
       <div className="ue-organization-selector min-h-11 flex items-center border rounded-md px-3 py-2 bg-background">
         <Icon className="h-4 w-4 text-muted-foreground mr-2 shrink-0 self-start mt-0.5" />
         <div className="min-w-0">
-          <div className="text-sm truncate">{effectiveOrganization.name}</div>
+          <div className="text-sm whitespace-normal break-words">{effectiveOrganization.name}</div>
           {hierarchyLabel && (
-            <div className="text-[11px] text-muted-foreground truncate">{hierarchyLabel}</div>
+            <div className="text-[11px] text-muted-foreground whitespace-normal break-words">{hierarchyLabel}</div>
           )}
         </div>
       </div>
@@ -213,9 +213,9 @@ export function OrganizationSelector() {
           <span className="flex items-center gap-2 min-w-0">
             <Icon className="h-4 w-4 shrink-0 self-start mt-0.5" />
             <span className="min-w-0 text-left">
-              <span className="block truncate">{effectiveOrganization.name}</span>
+              <span className="block whitespace-normal break-words">{effectiveOrganization.name}</span>
               {hierarchyLabel && (
-                <span className="block text-[11px] text-muted-foreground truncate">{hierarchyLabel}</span>
+                <span className="block text-[11px] text-muted-foreground whitespace-normal break-words">{hierarchyLabel}</span>
               )}
             </span>
           </span>

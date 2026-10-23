@@ -571,7 +571,7 @@ html {
 }
 
 .dashboard-content > .container { padding: 0; }
-.ue-app-shell {
+.ue-app-shell, .ue-navigation-drawer {
   --color-blue-50: hsl(var(--secondary));
   --color-blue-100: hsl(var(--accent));
   --color-blue-200: hsl(var(--border));

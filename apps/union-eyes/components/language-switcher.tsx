@@ -54,7 +54,7 @@ export default function LanguageSwitcher() {
             className="flex shrink-0 items-center gap-1.5 border border-border bg-card px-3"
           >
             <Globe size={16} className="relative z-10" />
-            <span className="relative z-10 text-lg">{currentLocale.flag}</span>
+            <span className="relative z-10 sm:hidden">{locale === 'fr-CA' ? 'FR' : 'EN'}</span>
             <span className="relative z-10 hidden sm:inline">{currentLocale.label}</span>
           </Button>
       </DropdownMenuTrigger>
@@ -63,7 +63,7 @@ export default function LanguageSwitcher() {
           <DropdownMenuItem
             key={loc.code}
             onClick={() => switchLocale(loc.code)}
-            className={`flex items-center space-x-2 cursor-pointer ${
+            className={`flex min-h-11 items-center space-x-2 cursor-pointer ${
               loc.code === locale ? "bg-primary/10 text-primary" : ""
             }`}
           >

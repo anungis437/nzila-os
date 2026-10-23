@@ -387,20 +387,19 @@ export default function Sidebar({
   );
 
   const renderProfile = (showLabel: boolean) => (
-    <Link
-      href={withLocale("/dashboard/profile")}
+    <div
       className={`flex items-center gap-2 rounded-md px-2 py-2 hover:bg-gray-100 ${
         showLabel ? "" : "justify-center"
       }`}
       title={!showLabel ? identityLabel : undefined}
     >
-      <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-white">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white">
         {isMounted ? (
           <UserButton
             appearance={{
               elements: {
                 userButtonAvatarBox: "w-8 h-8",
-                userButtonTrigger: "w-8 h-8 rounded-full",
+                userButtonTrigger: "w-11 h-11 rounded-full",
               },
             }}
           />
@@ -409,14 +408,14 @@ export default function Sidebar({
         )}
       </div>
       {showLabel && (
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-gray-900">
+        <Link href={withLocale("/dashboard/profile")} onClick={() => setMobileOpen(false)} className="min-w-0 min-h-11 rounded-md">
+          <p className="break-words text-sm font-medium text-gray-900">
             {identityLabel}
           </p>
-          <p className="text-xs text-gray-500">Profile</p>
-        </div>
+          <p className="text-xs text-gray-500">{copy("Profile")}</p>
+        </Link>
       )}
-    </Link>
+    </div>
   );
 
   const desktopWidth = collapsed ? "md:w-16" : "md:w-72";
@@ -443,7 +442,7 @@ export default function Sidebar({
                 onClick={() => persistCollapsed(true)}
                 aria-label={copy("Collapse sidebar")}
                 title={copy("Collapse sidebar")}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
               >
                 <ChevronsLeft size={16} aria-hidden="true" />
               </button>
@@ -456,7 +455,7 @@ export default function Sidebar({
                 onClick={() => persistCollapsed(false)}
                 aria-label={copy("Expand sidebar")}
                 title={copy("Expand sidebar")}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
               >
                 <ChevronsRight size={16} aria-hidden="true" />
               </button>
