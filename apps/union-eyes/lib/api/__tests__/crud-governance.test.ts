@@ -88,4 +88,10 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
     expect((factory.match(/assertCrudWrite\(governance\)/g) ?? []).length).toBe(3)
     expect((factory.match(/await readScope\(userId, organizationId\)/g) ?? []).length).toBe(2)
   })
+
+  it('performs every generic write inside the audited transaction, never directly on the shared connection', () => {
+    const factory = readFileSync(join(ROOT, 'lib', 'api', 'crud-factory.ts'), 'utf8')
+    expect(factory).not.toMatch(/\bdb\s*\.\s*(insert|update|delete)\(/)
+    expect((factory.match(/await audited\(/g) ?? []).length).toBe(5)
+  })
 })

@@ -91,6 +91,9 @@ vi.mock('@/db/schema', () => ({
   },
 }));
 
+// The durable audit write is proven against real PostgreSQL elsewhere.
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
+
 vi.mock('@/db/db', () => {
   const fakeDb = {
     execute: async () => [],
