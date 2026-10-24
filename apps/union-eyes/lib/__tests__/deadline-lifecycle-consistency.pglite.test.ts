@@ -176,7 +176,7 @@ describe('deadline lifecycle: one effective due date and one status vocabulary',
   it('immediate extension moves the effective date (it used to leave due_date stale) and keeps an override in step', async () => {
     const { id, dueDate } = await create();
     const extended = new Date(dueDate.getTime() + 5 * DAY);
-    expect((await requestDeadlineExtension({ deadlineId: id, newDate: extended, reason: 'ok', requestedBy: 'u1', requiresApproval: false })).success).toBe(true);
+    expect((await requestDeadlineExtension({ organizationId: ORG, deadlineId: id, newDate: extended, reason: 'ok', requestedBy: 'u1', requiresApproval: false })).success).toBe(true);
     let r = await row(id);
     expect(r.due_date?.getTime()).toBe(extended.getTime());
     expect(r.status).toBe('extended');
@@ -185,7 +185,7 @@ describe('deadline lifecycle: one effective due date and one status vocabulary',
     const overridden = new Date(dueDate.getTime() + 6 * DAY);
     await overrideDeadline({ organizationId: ORG, deadlineId: id, actorId: 'u1', overrideDueDate: overridden, overrideReason: 'r' });
     const again = new Date(dueDate.getTime() + 9 * DAY);
-    expect((await requestDeadlineExtension({ deadlineId: id, newDate: again, reason: 'again', requestedBy: 'u1', requiresApproval: false })).success).toBe(true);
+    expect((await requestDeadlineExtension({ organizationId: ORG, deadlineId: id, newDate: again, reason: 'again', requestedBy: 'u1', requiresApproval: false })).success).toBe(true);
     r = await row(id);
     expect(r.due_date?.getTime()).toBe(again.getTime());
     expect(r.override_due_date?.getTime(), 'an override in force must move with the extension').toBe(again.getTime());
@@ -195,12 +195,12 @@ describe('deadline lifecycle: one effective due date and one status vocabulary',
   it('approval path applies the REQUESTED date (the request used to lose it and approval fell back to "now")', async () => {
     const { id, dueDate } = await create();
     const requested = new Date(dueDate.getTime() + 7 * DAY);
-    expect((await requestDeadlineExtension({ deadlineId: id, newDate: requested, reason: 'please', requestedBy: 'u1', requiresApproval: true })).success).toBe(true);
+    expect((await requestDeadlineExtension({ organizationId: ORG, deadlineId: id, newDate: requested, reason: 'please', requestedBy: 'u1', requiresApproval: true })).success).toBe(true);
     let r = await row(id);
     expect(r.due_date?.getTime(), 'a pending request must not move the date').toBe(dueDate.getTime());
     expect(r.new_deadline?.getTime()).toBe(requested.getTime());
 
-    expect((await approveDeadlineExtension(id, 'approver')).success).toBe(true);
+    expect((await approveDeadlineExtension(id, ORG, 'approver')).success).toBe(true);
     r = await row(id);
     expect(r.due_date?.getTime()).toBe(requested.getTime());
     expect(r.status).toBe('extended');
@@ -226,9 +226,9 @@ describe('deadline lifecycle: one effective due date and one status vocabulary',
   it('a terminal deadline cannot be resurrected by an extension (and the database agrees)', async () => {
     const { id, dueDate } = await create();
     await supersedeDeadline({ organizationId: ORG, deadlineId: id, actorId: 'u1' });
-    const res = await requestDeadlineExtension({ deadlineId: id, newDate: new Date(dueDate.getTime() + DAY), reason: 'x', requestedBy: 'u', requiresApproval: false });
+    const res = await requestDeadlineExtension({ organizationId: ORG, deadlineId: id, newDate: new Date(dueDate.getTime() + DAY), reason: 'x', requestedBy: 'u', requiresApproval: false });
     expect(res.success).toBe(false);
-    expect((await approveDeadlineExtension(id, 'approver')).success).toBe(false);
+    expect((await approveDeadlineExtension(id, ORG, 'approver')).success).toBe(false);
     expect((await row(id)).status).toBe('cancelled');
     await assertInvariants('terminal');
   });
@@ -328,6 +328,17 @@ describe('deadline confirmation is organization-scoped and audited in its own tr
     expect(await confirmDeadline({ organizationId: OTHER_ORG, deadlineId: id, actorId: 'x' })).toBeNull();
     expect(await row(id)).toEqual(before);
     expect((ctx.audit as ReturnType<typeof vi.fn>)).not.toHaveBeenCalled();
+  });
+
+  it('another organization cannot extend, approve, complete or escalate this deadline', async () => {
+    const { id, dueDate } = await create();
+    const before = await row(id);
+    const req = { organizationId: OTHER_ORG, deadlineId: id, newDate: new Date(dueDate.getTime() + DAY), reason: 'x', requestedBy: 'x' };
+    expect((await requestDeadlineExtension({ ...req, requiresApproval: false })).success).toBe(false);
+    expect((await requestDeadlineExtension({ ...req, requiresApproval: true })).success).toBe(false);
+    expect((await approveDeadlineExtension(id, OTHER_ORG, 'x')).success).toBe(false);
+    expect((await completeDeadline(id, OTHER_ORG, 'x')).success).toBe(false);
+    expect(await row(id)).toEqual(before);
   });
 
   it('the owning organization is audited with the change, and a failed audit rolls the change back', async () => {

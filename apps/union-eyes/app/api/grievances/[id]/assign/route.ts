@@ -72,7 +72,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       await tx
         .update(grievances)
         .set({ unionRepId: parsed.data.stewardId, updatedAt: new Date() })
-        .where(eq(grievances.id, params.id));
+        .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)));
 
       // Emit event
       await tx.insert(grievanceEvents).values({

@@ -3,10 +3,7 @@ import { grievanceDeadlines } from '@/db/schema/domains/claims/workflows';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
-// grievance_deadlines has no organization column of its own: it belongs to its grievance, so organization scope is the
-// owning grievance's. Without this predicate a deadline id from another organization could be rewritten.
-const inOrganization = (organizationId: string) =>
-  sql`${grievanceDeadlines.grievanceId} IN (SELECT id FROM grievances WHERE organization_id = ${organizationId})`;
+import { deadlineInOrganization as inOrganization } from '@/lib/deadline-engine/deadline-scope';
 
 export type DeadlineConfirmationStatus =
   | 'SYSTEM_CALCULATED'

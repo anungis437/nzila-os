@@ -113,7 +113,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       await tx
         .update(grievances)
         .set({ status: 'converted', updatedAt: new Date() })
-        .where(eq(grievances.id, params.id));
+        .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)));
 
       // Create the official case, linked back to the intake via relatedGrievanceIds
       const [officialCase] = await tx

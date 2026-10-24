@@ -5,7 +5,7 @@
  * mandates (assignee, owner, collaborator), judged with the holder's capacity, institutional issuance rules, recusal,
  * expiry and revocation. This module only translates kernel decisions into the access shape routes already consume,
  * and routes collaborator grants through the kernel's governed assignment. It never derives access from
- * `grievances.union_rep_id`, from role seniority, or from the retired `grievance_case_access_assignments` table.
+ * the legacy primary-representative column, from role seniority, or from the retired pre-kernel collaborator table.
  *
  * Fail closed: a missing case, an unloadable fact, absent kernel storage or any contradiction yields no access.
  */

@@ -636,6 +636,42 @@
       "retirement": { "disposition": "NONE" }
     },
     {
+          "id": "UE-CONV-K-006",
+          "domain": "tenant-isolation",
+          "capability": "Mutations identified only by a client-supplied id",
+          "workstream": "K",
+          "canonicalOwner": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
+          "sources": [
+                {
+                      "kind": "file",
+                      "ref": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
+                      "classification": "CANONICAL"
+                }
+          ],
+          "defect": "The grievance deadline lifecycle updated rows by deadline id alone (grievance_deadlines has no organization column), and a repository scan found 310 UPDATE or DELETE statements on tenant-scoped, parent-owned, user-scoped or multi-party relations (191 file and relation pairs) whose WHERE clause names no organization. In request context db is routed to the caller's tenant transaction, so row-level security still bounds them; in system context, cron, webhook and job code it does not. Fixed so far with the predicate in the statement itself: deadline confirm, override and supersede, extension request and approval, completion and escalation (shared predicate lib/deadline-engine/deadline-scope.ts, proven against another organization on PGlite), shared clause library update and delete, ingestion retry, and grievance assign, status and convert.",
+          "consumers": [],
+          "securityImplications": "A caller holding an id from another organization could change a row where the statement runs outside the tenant transaction.",
+          "requiredImplementation": "Convert the remaining baseline entries to explicit organization predicates, starting with code that runs in system context (webhooks, cron, jobs, platform services); the ratchet test fails on any new unscoped statement and the baseline (docs/union-eyes/convergence/register/ue-mutation-scope-baseline.json) may only shrink. The scanner is textual: it does not follow a predicate built in a helper, and it does not cover raw SQL.",
+          "evidence": [
+                {
+                      "type": "test",
+                      "ref": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts"
+                },
+                {
+                      "type": "path",
+                      "ref": "docs/union-eyes/convergence/register/ue-mutation-scope-baseline.json"
+                },
+                {
+                      "type": "path",
+                      "ref": "apps/union-eyes/lib/deadline-engine/deadline-scope.ts"
+                }
+          ],
+          "status": "IN_PROGRESS",
+          "retirement": {
+                "disposition": "NONE"
+          }
+    },
+    {
       "id": "UE-CONV-K-004",
       "domain": "controls",
       "capability": "Persona action coverage, authorization coverage, documentation supersession and cleanroom deployment proof",

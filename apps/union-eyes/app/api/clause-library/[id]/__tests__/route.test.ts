@@ -152,7 +152,10 @@ vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
   clauseLibraryTags: { id: 'clt.id', clauseId: 'clt.clauseId' },
 }));
 vi.mock('@/db/schema-organizations', () => ({ organizations: { id: 'org.id', name: 'org.name' } }));
-vi.mock('drizzle-orm', () => ({ eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })) }));
+vi.mock('drizzle-orm', () => ({
+  eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })),
+  and: vi.fn((...parts: unknown[]) => ({ op: 'and', parts })),
+}));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: h.withSystemContext,
   withRLSContext: h.withRLSContext,

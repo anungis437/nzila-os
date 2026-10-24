@@ -19,6 +19,8 @@ import { createLogger } from "@nzila/os-core/telemetry";
 import { scheduleGrievanceDeadlineReminders, cancelGrievanceDeadlineReminders } from "@/lib/deadline-engine";
 import { effectiveDueDateUpdate, isTerminalDeadlineStatus } from "@/lib/deadline-engine/deadline-semantics";
 
+import { deadlineInOrganization } from "@/lib/deadline-engine/deadline-scope";
+
 const logger = createLogger("union-eyes.deadline-tracking-system");
 
 // ============================================================================
@@ -64,6 +66,7 @@ export type DeadlineAlert = {
 };
 
 export type DeadlineExtensionRequest = {
+  organizationId: string;
   deadlineId: string;
   requestedBy: string;
   newDate: Date;
@@ -316,9 +319,7 @@ export async function completeDeadline(
         completedAt: new Date(),
         notes: completionNote,
       })
-      .where(
-        eq(grievanceDeadlines.id, deadlineId)
-      );
+      .where(and(eq(grievanceDeadlines.id, deadlineId), deadlineInOrganization(organizationId)));
 
     // Cancel any pending reminder notifications (legacy queue)
     await cancelDeadlineReminders(deadlineId);
@@ -350,7 +351,7 @@ export async function requestDeadlineExtension(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const deadline = await db.query.grievanceDeadlines.findFirst({
-      where: eq(grievanceDeadlines.id, request.deadlineId),
+      where: and(eq(grievanceDeadlines.id, request.deadlineId), deadlineInOrganization(request.organizationId)),
     });
 
     if (!deadline) {
@@ -374,7 +375,7 @@ export async function requestDeadlineExtension(
           status: "extended",
           notes: `Extended: ${request.reason}`,
         })
-        .where(eq(grievanceDeadlines.id, request.deadlineId));
+        .where(and(eq(grievanceDeadlines.id, request.deadlineId), deadlineInOrganization(request.organizationId)));
 
       // Reschedule reminders
       await scheduleReminders(
@@ -390,7 +391,7 @@ export async function requestDeadlineExtension(
           newDeadline: request.newDate,
           notes: `Extension requested by ${request.requestedBy}: ${request.reason}. New date: ${request.newDate.toISOString()}`
         })
-        .where(eq(grievanceDeadlines.id, request.deadlineId));
+        .where(and(eq(grievanceDeadlines.id, request.deadlineId), deadlineInOrganization(request.organizationId)));
     }
 
     return { success: true };
@@ -407,11 +408,12 @@ return {
  */
 export async function approveDeadlineExtension(
   deadlineId: string,
+  organizationId: string,
   approvedBy: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const deadline = await db.query.grievanceDeadlines.findFirst({
-      where: eq(grievanceDeadlines.id, deadlineId),
+      where: and(eq(grievanceDeadlines.id, deadlineId), deadlineInOrganization(organizationId)),
     });
 
     if (!deadline) {
@@ -438,7 +440,7 @@ export async function approveDeadlineExtension(
         status: "extended",
         notes: `${deadline.notes}\n\nExtension approved by ${approvedBy} on ${new Date().toISOString()}`,
       })
-      .where(eq(grievanceDeadlines.id, deadlineId));
+      .where(and(eq(grievanceDeadlines.id, deadlineId), deadlineInOrganization(organizationId)));
 
     // Reschedule reminders
     await scheduleReminders(deadlineId, newDate, deadline.reminderDays || [7, 3, 1]);
@@ -588,7 +590,7 @@ export async function escalateMissedDeadlines(organizationId: string): Promise<E
           status: "overdue",
           notes: `Escalated on ${new Date().toISOString()} - ${Math.abs(alert.daysRemaining)} days overdue`,
         })
-        .where(eq(grievanceDeadlines.id, alert.deadlineId));
+        .where(and(eq(grievanceDeadlines.id, alert.deadlineId), deadlineInOrganization(organizationId)));
 
       // Send escalation notification
       await sendEscalationNotification(alert);

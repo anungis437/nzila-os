@@ -143,7 +143,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
           ...(newStatus === "settled" ? { resolvedAt: new Date() } : {}),
           ...(newStatus === "closed" ? { closedAt: new Date() } : {}),
         })
-        .where(eq(grievances.id, params.id))
+        .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)))
         .returning();
 
       // Emit event

@@ -19,7 +19,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
 import { organizations } from '@/db/schema-organizations';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { canReadSharedClause, isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
 
@@ -151,7 +151,7 @@ export const PATCH = withApi(
       const [updated] = await db
         .update(sharedClauseLibrary)
         .set(updateData)
-        .where(eq(sharedClauseLibrary.id, id))
+        .where(and(eq(sharedClauseLibrary.id, id), eq(sharedClauseLibrary.sourceOrganizationId, organizationId)))
         .returning();
 
       if (!updated) {
@@ -180,7 +180,7 @@ export const DELETE = withApi(
 
       const [deleted] = await db
         .delete(sharedClauseLibrary)
-        .where(eq(sharedClauseLibrary.id, id))
+        .where(and(eq(sharedClauseLibrary.id, id), eq(sharedClauseLibrary.sourceOrganizationId, organizationId)))
         .returning({ id: sharedClauseLibrary.id });
 
       if (!deleted) {

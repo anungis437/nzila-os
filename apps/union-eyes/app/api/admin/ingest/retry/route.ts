@@ -10,7 +10,7 @@
 import { withApi, z, ApiError } from '@/lib/api/framework';
 import { withOrgOwnedContext as withSystemContext } from '@/lib/db/org-owned-context';
 import { db } from '@/db/db';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, sql } from 'drizzle-orm';
 import {
   ingestionBatches,
   ingestionRecords,
@@ -86,7 +86,13 @@ export const POST = withApi(
       await tx
         .update(ingestionRecords)
         .set({ status: 'pending', errorMessage: null, errorDetails: null, processedAt: null })
-        .where(inArray(ingestionRecords.id, failedRecords.map((record) => record.id)));
+        .where(
+          and(
+            eq(ingestionRecords.batchId, body.batch_id),
+            sql`${ingestionRecords.batchId} IN (SELECT id FROM ingestion_batches WHERE organization_id = ${organizationId})`,
+            inArray(ingestionRecords.id, failedRecords.map((record) => record.id)),
+          ),
+        );
       await persistAtomicAudit(tx, {
         userId: userId ?? 'system:ingest-retry',
         organizationId,
