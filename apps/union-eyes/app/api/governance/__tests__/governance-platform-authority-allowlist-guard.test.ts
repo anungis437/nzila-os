@@ -80,9 +80,18 @@ describe('council_elections requires platform-tier authority (no per-org minRole
     }
   });
 
-  it.each(ELECTION_GOVERNED_FILES)('%s executes its DB access under withSystemContext, not the ordinary tenant runtime', (relPath) => {
+  it.each(ELECTION_GOVERNED_FILES.filter((p) => !p.endsWith('/vote/route.ts')))('%s executes its DB access under withSystemContext, not the ordinary tenant runtime', (relPath) => {
     const src = readFileSync(resolve(APP_ROOT, relPath), 'utf8');
     expect(src).toMatch(/import\s*\{[^}]*withSystemContext[^}]*\}\s*from\s*['"]@\/lib\/db\/with-rls-context['"]/);
     expect(src).toMatch(/withSystemContext\(/);
+  });
+
+  // UE-OFFICER-EXECUTIVE-CANONICAL-2.1 §VI: the vote counter was removed; the
+  // route is a 501 and must not regain database access without an election engine.
+  it('app/api/elections/[id]/vote/route.ts is a 501 stub with no database access', () => {
+    const src = readFileSync(resolve(APP_ROOT, 'app/api/elections/[id]/vote/route.ts'), 'utf8');
+    expect(src).toMatch(/ApiError\.notImplemented\(/);
+    expect(src).not.toMatch(/from\s*['"]@\/db/);
+    expect(src).not.toMatch(/withSystemContext|\.update\(|\.insert\(/);
   });
 });

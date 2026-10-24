@@ -24,13 +24,13 @@ afterEach(() => {
 });
 
 describe('BottomNav', () => {
-  it('shows Operations Continuity for an executive outside pilot mode', () => {
+  it('does not show Operations Continuity to an executive outside pilot mode (frozen Officer/Executive navigation)', () => {
     mockUsePilotMode.mockReturnValue({ isPilotMode: false });
     render(<BottomNav userRole="president" />);
-    expect(screen.getByText('Operations Continuity')).toBeInTheDocument();
+    expect(screen.queryByText('Operations Continuity')).not.toBeInTheDocument();
   });
 
-  it('hides Operations Continuity for an executive in pilot mode (it targets a pilot-excluded route)', () => {
+  it('does not show Operations Continuity to an executive in pilot mode either', () => {
     mockUsePilotMode.mockReturnValue({ isPilotMode: true });
     render(<BottomNav userRole="president" />);
     expect(screen.queryByText('Operations Continuity')).not.toBeInTheDocument();

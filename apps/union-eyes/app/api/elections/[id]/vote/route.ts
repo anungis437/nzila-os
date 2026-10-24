@@ -3,88 +3,32 @@
  *
  * POST /api/elections/[id]/vote
  *
- * Body: { votes: Record<string, number> }
- *   votes is a map of candidate name → votes received (ballot count increment).
+ * NOT IMPLEMENTED (UE-OFFICER-EXECUTIVE-CANONICAL-2.1 §VI).
  *
- * Increments the `votes` field on each matching candidate in the `candidates` jsonb array
- * and updates `totalVotes` accordingly.
+ * This route used to add arbitrary per-candidate counts to a globally scoped
+ * `council_elections` record: no electorate, no voter authentication, no
+ * duplicate-vote protection, no ballot secrecy and no independent tabulation.
+ * A counter increment is not a ballot. Until a qualified election engine exists
+ * the capability answers 501 rather than silently mutating results. Use the
+ * record PATCH for administrative corrections of historical council records.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db';
-import { councilElections } from '@/db/schema/governance-schema';
-import { eq } from 'drizzle-orm';
-import { buildUnionEvidencePack } from '@/lib/evidence';
-import { logger } from '@/lib/logger';
 import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
-import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
-
-interface Candidate {
-  name: string;
-  union?: string;
-  platform?: string;
-  votes: number;
-}
 
 export const POST = withApi(
   {
     auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] },
     openapi: {
       tags: ['Governance'],
-      summary: 'Submit votes for a council election',
-      description: 'Increments candidate vote counts for the specified election.',
+      summary: 'Council election vote casting (not implemented)',
+      description: 'No qualified election engine exists; vote counts cannot be incremented through this API.',
     },
   },
-  async ({ request, params, organizationId, userId }) => {
-    const body = await request.json() as { votes?: Record<string, number> };
-    const votes = body.votes ?? {};
-
-    if (Object.keys(votes).length === 0) {
-      throw ApiError.badRequest('votes object is required and must not be empty');
-    }
-
-    // Fetch current election record
-    const [election] = await withSystemContext(async (_tx) =>
-      db
-        .select()
-        .from(councilElections)
-        .where(eq(councilElections.id, params.id))
+  async () => {
+    throw ApiError.notImplemented(
+      'Vote casting is not available: no qualified election engine (electorate, ballot integrity, independent tabulation) is provisioned.',
     );
-
-    if (!election) throw ApiError.notFound('Election not found');
-
-    const candidates = (election.candidates ?? []) as Candidate[];
-    let additionalVotes = 0;
-
-    // Apply increments
-    const updatedCandidates = candidates.map((c) => {
-      const increment = votes[c.name] ?? 0;
-      additionalVotes += increment;
-      return { ...c, votes: (c.votes ?? 0) + increment };
-    });
-
-    const newTotal = (election.totalVotes ?? 0) + additionalVotes;
-
-    const [updated] = await withSystemContext(async (_tx) =>
-      db
-        .update(councilElections)
-        .set({
-          candidates: updatedCandidates,
-          totalVotes: newTotal,
-          updatedAt: new Date(),
-        })
-        .where(eq(councilElections.id, params.id))
-        .returning()
-    );
-
-    buildUnionEvidencePack({
-      actionType: 'ELECTION_VOTE_CAST',
-      orgId: organizationId!,
-      actorId: userId!,
-      artifacts: [{ type: 'election_vote', data: { electionId: params.id, candidateCount: Object.keys(votes).length, additionalVotes } }],
-    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'ELECTION_VOTE_CAST' }));
-
-    return { data: updated };
   },
 );

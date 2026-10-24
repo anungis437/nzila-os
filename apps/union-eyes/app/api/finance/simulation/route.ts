@@ -29,7 +29,7 @@ const simulationSchema = z.object({
   })),
 });
 
-export const POST = withMinRole('officer', async (request, context: BaseAuthContext) => {
+export const POST = withMinRole('secretary_treasurer', async (request, context: BaseAuthContext) => {
   const { userId, organizationId } = context;
   if (!organizationId || !userId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');

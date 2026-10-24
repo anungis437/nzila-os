@@ -24,7 +24,7 @@ const querySchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: 'officer' },
+    auth: { minRole: 'secretary_treasurer' },
     entitlement: 'financial_intelligence_suite',
     query: querySchema,
     openapi: {

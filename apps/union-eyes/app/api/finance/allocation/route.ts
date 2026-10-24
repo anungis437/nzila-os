@@ -34,7 +34,7 @@ const createRuleSchema = z.object({
   effectiveFrom: z.string().datetime().optional(),
 });
 
-export const GET = withMinRole('officer', async (_request, context: BaseAuthContext) => {
+export const GET = withMinRole('secretary_treasurer', async (_request, context: BaseAuthContext) => {
   const { organizationId, userId } = context;
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');

@@ -1,4 +1,10 @@
 import { getRoleLevel, UserRole } from '../auth/roles';
+import {
+  EXECUTIVE_ALLOWED_PREFIXES,
+  EXECUTIVE_HOME_HREF,
+  getExecutiveNavigation,
+  meetsExecutiveDestinationRole,
+} from '../executive/executive-navigation';
 
 export type DashboardExperience = 'member' | 'staff' | 'executive' | 'governance' | 'admin';
 
@@ -26,7 +32,6 @@ const ADMIN_ROLES = new Set([
 
 const GOVERNANCE_ROLES = new Set([
   'governance',
-  'officer',
   'compliance_manager',
   'security_manager',
   'clc_executive',
@@ -41,6 +46,7 @@ const EXECUTIVE_ROLES = new Set([
   'president',
   'vice_president',
   'secretary_treasurer',
+  'officer',
   'national_officer',
 ]);
 
@@ -98,7 +104,7 @@ export const WORKSPACE_ORIENTATION_HUB_PATH = '/dashboard/workspace' as const;
 export const ROLE_EXECUTION_HOME_BY_EXPERIENCE = {
   member: WORKSPACE_ORIENTATION_HUB_PATH,
   staff: '/dashboard/workbench',
-  executive: '/dashboard/intelligence',
+  executive: EXECUTIVE_HOME_HREF,
   governance: '/dashboard/governance',
   admin: '/dashboard/admin/organizations',
 } as const satisfies Record<DashboardExperience, string>;
@@ -165,18 +171,8 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
   }
 
   if (experience === 'executive') {
-    return [
-      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
-      { label: 'OCRA Intelligence (Executive Overview)', href: '/dashboard/intelligence?scope=executive', group: 'OCRA' },
-      { label: 'OCRA Signals (Continuity Insights)', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
-      { label: 'Operations Continuity', href: '/dashboard/executive-operating-intelligence', group: 'Operations' },
-      { label: 'Governance Continuity', href: '/dashboard/governance-center', group: 'Governance Continuity' },
-      { label: 'Operations Outcomes (Member Outcomes Ledger)', href: '/dashboard/outcomes', group: 'Operations' },
-      { label: 'Onboarding Survivability (Leadership Continuity)', href: '/dashboard/leadership', group: 'Operations' },
-      { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
-      { label: 'Governance Trust & Oversight', href: '/dashboard/trust', group: 'Governance Continuity' },
-      { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
-    ];
+    // UE-OFFICER-EXECUTIVE-CANONICAL-2.1: exactly seven destinations (lib/executive).
+    return getExecutiveNavigation();
   }
 
   if (experience === 'governance') {
@@ -233,20 +229,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/settings',
     '/dashboard/profile',
   ],
-  executive: [
-    '/dashboard',
-    '/dashboard/workspace',
-    '/dashboard/intelligence',
-    '/dashboard/continuity-intelligence',
-    '/dashboard/executive-operating-intelligence',
-    '/dashboard/operations',
-    '/dashboard/governance-center',
-    '/dashboard/outcomes',
-    '/dashboard/leadership',
-    '/dashboard/trust',
-    '/dashboard/settings',
-    '/dashboard/profile',
-  ],
+  executive: [...EXECUTIVE_ALLOWED_PREFIXES],
   governance: [
     '/dashboard',
     '/dashboard/workspace',
@@ -347,6 +330,7 @@ export function getVisibleNavigationForExperience(
     const pathname = item.href.split('?')[0];
     const platformRoles = PLATFORM_NAVIGATION_ROLES[pathname];
     if (platformRoles && !platformRoles.includes(role)) return false;
+    if (experience === 'executive' && !meetsExecutiveDestinationRole(pathname, role)) return false;
     if (pathname === '/dashboard/audits' && getRoleLevel(role as UserRole) < getRoleLevel(UserRole.ADMIN)) return false;
     return canAccessDashboardPath(pathname, experience, isPilotMode);
   });

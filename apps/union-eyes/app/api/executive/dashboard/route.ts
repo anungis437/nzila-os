@@ -1,11 +1,14 @@
 /**
  * GET /api/executive/dashboard
- * Executive dashboard summary with metrics, recent grievances, and strategic goals.
- * Backed by Drizzle ORM — replaces Django proxy.
+ * Executive dashboard summary with aggregate metrics and strategic goals.
+ *
+ * Deliberately returns NO grievance rows. Executive oversight of member service
+ * is aggregate (UE-OFFICER-EXECUTIVE-CANONICAL-2.1 §IX): matter-level content
+ * needs a separate effective grant, which a `minRole` check cannot express.
  */
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { grievances, strategicGoals } from '@/db/schema';
+import { strategicGoals } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { DashboardTimeframe, getExecutiveMetrics } from '@/lib/services/dashboard-kpi-service';
 
@@ -24,13 +27,8 @@ export const GET = withApi(
     const orgId = organizationId!;
     const timeframe: DashboardTimeframe = 'monthly';
 
-    const [metrics, recentGrievances, goals] = await Promise.all([
+    const [metrics, goals] = await Promise.all([
       getExecutiveMetrics({ organizationId: orgId, timeframe }),
-      db.select()
-        .from(grievances)
-        .where(eq(grievances.organizationId, orgId))
-        .orderBy(desc(grievances.createdAt))
-        .limit(5),
       db.select()
         .from(strategicGoals)
         .where(eq(strategicGoals.organizationId, orgId))
@@ -40,7 +38,6 @@ export const GET = withApi(
 
     return {
       metrics,
-      recentGrievances,
       strategicGoals: goals,
     };
   },

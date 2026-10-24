@@ -13,7 +13,8 @@ describe('lib/dashboard/role-experience', () => {
   describe('getDashboardExperience', () => {
     it('maps roles to experiences with member default', () => {
       expect(getDashboardExperience('system_admin')).toBe('admin');
-      expect(getDashboardExperience('officer')).toBe('governance');
+      expect(getDashboardExperience('officer')).toBe('executive');
+      expect(getDashboardExperience('clc_executive')).toBe('governance');
       expect(getDashboardExperience('president')).toBe('executive');
       expect(getDashboardExperience('steward')).toBe('staff');
       expect(getDashboardExperience(undefined)).toBe('member');
@@ -25,8 +26,9 @@ describe('lib/dashboard/role-experience', () => {
     it('routes by experience', () => {
       expect(getRoleLandingPath('member')).toBe('/dashboard/workspace');
       expect(getRoleLandingPath('steward')).toBe('/dashboard/workbench');
-      expect(getRoleLandingPath('president')).toBe('/dashboard/intelligence');
-      expect(getRoleLandingPath('officer')).toBe('/dashboard/governance');
+      expect(getRoleLandingPath('president')).toBe('/dashboard/executive');
+      expect(getRoleLandingPath('officer')).toBe('/dashboard/executive');
+      expect(getRoleLandingPath('clc_executive')).toBe('/dashboard/governance');
       expect(getRoleLandingPath('system_admin')).toBe('/dashboard/admin/organizations');
     });
   });
@@ -57,36 +59,17 @@ describe('lib/dashboard/role-experience', () => {
   });
 
   describe('getVisibleNavigationForExperience', () => {
-    it('shows Operations Continuity for executives outside pilot mode', () => {
-      const nav = getVisibleNavigationForExperience('executive', false);
-      expect(nav.some((i) => i.href === '/dashboard/executive-operating-intelligence')).toBe(true);
+    it('does not advertise Operations Continuity (pilot-excluded) to executives in or out of pilot mode', () => {
+      for (const pilot of [false, true]) {
+        const nav = getVisibleNavigationForExperience('executive', pilot);
+        expect(nav.some((i) => i.href === '/dashboard/executive-operating-intelligence')).toBe(false);
+      }
     });
 
-    it('hides Operations Continuity for executives in pilot mode', () => {
-      const nav = getVisibleNavigationForExperience('executive', true);
-      expect(nav.some((i) => i.href === '/dashboard/executive-operating-intelligence')).toBe(false);
-    });
-
-    it('does not over-filter the rest of the executive nav in pilot mode', () => {
+    it('does not over-filter the frozen executive navigation in pilot mode', () => {
       const fullNav = getNavigationForExperience('executive');
       const pilotNav = getVisibleNavigationForExperience('executive', true);
-      // Only the pilot-excluded entry should be removed; every other entry
-      // from the full SOT nav must still be present.
-      const stillAllowedHrefs = fullNav
-        .map((i) => i.href)
-        .filter((href) => href !== '/dashboard/executive-operating-intelligence');
-      for (const href of stillAllowedHrefs) {
-        expect(pilotNav.some((i) => i.href === href)).toBe(true);
-      }
-      expect(pilotNav.length).toBe(fullNav.length - 1);
-    });
-
-    it('evaluates query-param routes against the correct pathname', () => {
-      // /dashboard/intelligence?scope=executive is not itself pilot-excluded
-      // (only /dashboard/executive-operating-intelligence is); it must remain
-      // visible even though its href carries a query string.
-      const nav = getVisibleNavigationForExperience('executive', true);
-      expect(nav.some((i) => i.href === '/dashboard/intelligence?scope=executive')).toBe(true);
+      expect(pilotNav).toEqual(fullNav);
     });
 
     it('leaves member and staff navigation unchanged outside pilot mode', () => {
