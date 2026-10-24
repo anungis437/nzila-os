@@ -10,6 +10,7 @@
  */
 
 import { db } from "@/db/db";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import {
   cbaClause,
 } from "@/db/schema/domains/agreements/clauses";
@@ -203,8 +204,9 @@ export async function findRelevantClauses(
 export async function linkClauseToGrievance(
   grievanceId: string,
   clauseId: string,
+  exec: RLSTx = db,
 ) {
-  const [clause] = await db
+  const [clause] = await exec
     .select({
       cbaId: cbaClause.cbaId,
       clauseNumber: cbaClause.clauseNumber,
@@ -220,7 +222,7 @@ export async function linkClauseToGrievance(
     "@/db/schema/domains/claims/grievances"
   );
 
-  await db
+  await exec
     .update(grievances)
     .set({
       cbaId: clause.cbaId,

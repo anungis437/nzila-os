@@ -7,7 +7,8 @@ import { sql } from 'drizzle-orm';
 import { getCaseActor, caseReadScope, requireCaseAction } from '@/lib/cases/case-authorization';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { putBlob, deleteBlob } from '@/lib/blob-client';
-import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { CanonicalAuditEntry } from '@/lib/audit/canonical-audit-chain';
 import { isMalwareScanError } from '@/lib/security/clamav';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 
@@ -86,14 +87,22 @@ async function resolveCaseRecord(caseId: string, organizationId: string | null, 
   return row;
 }
 
-async function persistAttachments(claimId: string, attachments: AttachmentMetadata[]): Promise<void> {
+// The attachment list and its audit record commit together.
+async function persistAttachments(
+  claimId: string,
+  attachments: AttachmentMetadata[],
+  audit: CanonicalAuditEntry,
+): Promise<void> {
   const serialized = JSON.stringify(attachments);
-  await withRLSContext(async (tx) => tx.execute(sql`
-    UPDATE claims
-    SET attachments = ${serialized}::jsonb,
-        updated_at = NOW()
-    WHERE claim_id = ${claimId}::uuid
-  `));
+  await withRLSContext(async (tx) => {
+    await tx.execute(sql`
+      UPDATE claims
+      SET attachments = ${serialized}::jsonb,
+          updated_at = NOW()
+      WHERE claim_id = ${claimId}::uuid
+    `);
+    await persistAtomicAudit(tx, audit);
+  });
 }
 
 export const dynamic = 'force-dynamic';
@@ -180,15 +189,12 @@ export const POST = withApi(
     };
 
     const nextAttachments = [...attachments, attachment];
-    await persistAttachments(claim.claimId, nextAttachments);
-
-    await auditCaseMutation({
-      event: CaseAuditEvent.CASE_ATTACHMENT_UPLOADED,
-      userId,
+    await persistAttachments(claim.claimId, nextAttachments, {
       organizationId: organizationId ?? '',
-      caseId: claim.claimId,
-      action: 'update',
-      newState: { attachments: nextAttachments },
+      userId,
+      action: 'case.attachment_uploaded',
+      resourceType: 'claims',
+      resourceId: claim.claimId,
       details: {
         fileName: attachment.fileName,
         fileType: attachment.fileType,
@@ -240,24 +246,18 @@ export const DELETE = withApi(
       });
     }
 
-    await deleteBlob(attachment.pathname || attachment.url);
-
     const nextAttachments = attachments.filter((item) => item.url !== fileUrl);
-    await persistAttachments(claim.claimId, nextAttachments);
-
-    await auditCaseMutation({
-      event: CaseAuditEvent.CASE_ATTACHMENT_DELETED,
-      userId,
+    await persistAttachments(claim.claimId, nextAttachments, {
       organizationId: organizationId ?? '',
-      caseId: claim.claimId,
-      action: 'update',
-      previousState: { attachment },
-      newState: { attachments: nextAttachments },
-      details: {
-        fileName: attachment.fileName,
-        attachmentUrl: attachment.url,
-      },
+      userId,
+      action: 'case.attachment_deleted',
+      resourceType: 'claims',
+      resourceId: claim.claimId,
+      details: { fileName: attachment.fileName, attachmentUrl: attachment.url },
     });
+
+    // The stored object goes only after the record and its audit have committed.
+    await deleteBlob(attachment.pathname || attachment.url);
 
     return { deleted: true };
   },

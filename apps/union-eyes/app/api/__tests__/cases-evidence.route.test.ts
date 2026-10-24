@@ -6,7 +6,7 @@ const m = vi.hoisted(() => ({
   withRLSContext: vi.fn(),
   putBlob: vi.fn(),
   deleteBlob: vi.fn(),
-  auditCaseMutation: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   isMalwareScanError: vi.fn(),
   executeQueue: [] as unknown[][],
 }));
@@ -28,13 +28,7 @@ vi.mock('@/lib/api/errors', () => {
 });
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/blob-client', () => ({ putBlob: m.putBlob, deleteBlob: m.deleteBlob }));
-vi.mock('@/lib/audited-case-mutations', () => ({
-  CaseAuditEvent: {
-    CASE_ATTACHMENT_UPLOADED: 'CASE_ATTACHMENT_UPLOADED',
-    CASE_ATTACHMENT_DELETED: 'CASE_ATTACHMENT_DELETED',
-  },
-  auditCaseMutation: m.auditCaseMutation,
-}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/security/clamav', () => ({ isMalwareScanError: m.isMalwareScanError }));
 
 vi.mock('@/lib/cases/case-authorization', async original => ({
@@ -58,7 +52,7 @@ describe('cases/[caseId]/evidence route', () => {
       malwareScan: { status: 'clean', scannedAt: new Date().toISOString(), engine: 'clamav' },
     });
     m.deleteBlob.mockResolvedValue(undefined);
-    m.auditCaseMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.isMalwareScanError.mockReturnValue(false);
 
     m.withRLSContext.mockImplementation(async (fn: (tx: any) => Promise<unknown>) => {
@@ -112,6 +106,7 @@ describe('cases/[caseId]/evidence route', () => {
 
     expect(result.attachment.fileName).toBe('evidence.txt');
     expect(m.putBlob).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'case.attachment_uploaded', organizationId: 'org_1', userId: 'user_1' }));
   });
 
   it('DELETE removes matching attachment and returns deleted true', async () => {
@@ -134,6 +129,23 @@ describe('cases/[caseId]/evidence route', () => {
 
     expect(result).toMatchObject({ deleted: true });
     expect(m.deleteBlob).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'case.attachment_deleted' }));
+  });
+
+  it('DELETE keeps the stored object when the audit record cannot be written', async () => {
+    const { DELETE } = await loadRoute();
+    m.executeQueue.push(
+      [{ claimId: 'claim_1', claimNumber: 'CLM-1', attachments: [{ url: 'https://blob/evidence.pdf', pathname: 'cases/claim_1/evidence.pdf', fileName: 'evidence.pdf' }] }],
+      [],
+    );
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit write failed'));
+    await expect(DELETE({
+      params: { caseId: 'CLM-1' },
+      organizationId: 'org_1',
+      userId: 'user_1',
+      request: new NextRequest('http://localhost/api/cases/CLM-1/evidence?fileUrl=https://blob/evidence.pdf', { method: 'DELETE' }),
+    } as any)).rejects.toThrow('audit write failed');
+    expect(m.deleteBlob).not.toHaveBeenCalled();
   });
 
   it('DELETE blocks evidence removal when the case is under legal hold', async () => {
@@ -158,7 +170,7 @@ describe('cases/[caseId]/evidence route', () => {
     });
 
     expect(m.deleteBlob).not.toHaveBeenCalled();
-    expect(m.auditCaseMutation).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('DELETE blocks evidence removal when the attachment is retained', async () => {
@@ -187,7 +199,7 @@ describe('cases/[caseId]/evidence route', () => {
     });
 
     expect(m.deleteBlob).not.toHaveBeenCalled();
-    expect(m.auditCaseMutation).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
   it('denies a member evidence deletion before touching storage or case data', async () => {
     const { DELETE } = await loadRoute();

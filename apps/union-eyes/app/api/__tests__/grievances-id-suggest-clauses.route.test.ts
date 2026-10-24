@@ -9,7 +9,8 @@ const m = vi.hoisted(() => ({
   getEffectiveCaseAccess: vi.fn(),
   findRelevantClauses: vi.fn(),
   linkClauseToGrievance: vi.fn(),
-  auditDataMutation: vi.fn(),
+  persistAtomicAudit: vi.fn(),
+  tx: {},
 }));
 
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
@@ -20,7 +21,8 @@ vi.mock('@/lib/services/clause-intelligence', () => ({
   findRelevantClauses: m.findRelevantClauses,
   linkClauseToGrievance: m.linkClauseToGrievance,
 }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_c: unknown, fn: (tx: unknown) => unknown) => fn(m.tx) }));
 vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: m.getEffectiveCaseAccess }));
 
 async function loadRoute() {
@@ -37,7 +39,7 @@ describe('grievances/[id]/suggest-clauses route', () => {
     m.hasMinRole.mockResolvedValue(true);
     m.findRelevantClauses.mockResolvedValue([{ id: 'c1', text: 'vacation clause' }, { id: 'c2', text: 'seniority clause' }]);
     m.linkClauseToGrievance.mockResolvedValue({ grievanceId: 'g1', clauseId: 'c1' });
-    m.auditDataMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
 
     const createSelectChain = () => {
       const chain: any = {
@@ -140,8 +142,8 @@ describe('grievances/[id]/suggest-clauses route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.data).toMatchObject({ grievanceId: 'g1', clauseId: 'c1' });
-    expect(m.linkClauseToGrievance).toHaveBeenCalledWith('g1', '11111111-1111-1111-1111-111111111111');
-    expect(m.auditDataMutation).toHaveBeenCalled();
+    expect(m.linkClauseToGrievance).toHaveBeenCalledWith('g1', '11111111-1111-1111-1111-111111111111', m.tx);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'grievance.link_clause', resourceId: 'g1' }));
   });
 
   it('handles invalid JSON gracefully', async () => {

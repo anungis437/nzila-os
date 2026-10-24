@@ -7,7 +7,8 @@
 import { z } from "zod";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation } from "@/lib/audit-logger";
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { createDispatchRequest } from "@/lib/services/dispatch-engine";
 import {
   ErrorCode,
@@ -38,24 +39,30 @@ export const POST = withOrganizationAuth(async (request, context) => {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid input", parsed.error.flatten());
     }
 
-    const row = await createDispatchRequest({
-      orgId: organizationId,
-      employerId: parsed.data.employerId,
-      jobTitle: parsed.data.jobTitle,
-      requiredSkills: parsed.data.requiredSkills ?? [],
-      requestedWorkers: parsed.data.requestedWorkers,
-      requestedDate: parsed.data.requestedDate
-        ? new Date(parsed.data.requestedDate)
-        : new Date(),
-    });
-
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: "dispatch_requests",
-      action: "create",
-      resourceId: row.id,
-      newState: row,
+    // The request and its audit record commit together.
+    const row = await withRLSContext({ organizationId }, async (tx) => {
+      const created = await createDispatchRequest(
+        {
+          orgId: organizationId,
+          employerId: parsed.data.employerId,
+          jobTitle: parsed.data.jobTitle,
+          requiredSkills: parsed.data.requiredSkills ?? [],
+          requestedWorkers: parsed.data.requestedWorkers,
+          requestedDate: parsed.data.requestedDate
+            ? new Date(parsed.data.requestedDate)
+            : new Date(),
+        },
+        tx,
+      );
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "dispatch.request_create",
+        resourceType: "dispatch_requests",
+        resourceId: created.id,
+        details: { employerId: created.employerId, jobTitle: created.jobTitle, requestedWorkers: created.requestedWorkers },
+      });
+      return created;
     });
 
     return standardSuccessResponse(row);

@@ -173,6 +173,10 @@
         "apps/union-eyes/app/api/grievances/[id]/convert",
         "apps/union-eyes/app/api/grievances/[id]/documents",
         "apps/union-eyes/app/api/workbench/assign",
+        "apps/union-eyes/app/api/dispatch/assign",
+        "apps/union-eyes/app/api/dispatch/requests",
+        "apps/union-eyes/app/api/cases/[caseId]/evidence",
+        "apps/union-eyes/app/api/grievances/[id]/suggest-clauses",
         "apps/union-eyes/lib/services/case-access-service.ts",
         "apps/union-eyes/lib/services/representation-authority-service.ts",
         "apps/union-eyes/lib/services/external-document-grant-service.ts"

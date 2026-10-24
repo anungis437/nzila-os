@@ -7,7 +7,8 @@ const m = vi.hoisted(() => ({
   db: { select: vi.fn() },
   findRelevantClauses: vi.fn(),
   linkClauseToGrievance: vi.fn(),
-  auditDataMutation: vi.fn(),
+  persistAtomicAudit: vi.fn(),
+  tx: {},
 }));
 
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
@@ -18,7 +19,8 @@ vi.mock('@/lib/services/clause-intelligence', () => ({
   findRelevantClauses: m.findRelevantClauses,
   linkClauseToGrievance: m.linkClauseToGrievance,
 }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_c: unknown, fn: (tx: unknown) => unknown) => fn(m.tx) }));
 
 async function loadRoute() {
   return import('../grievances/[id]/suggest-clauses/route');
@@ -35,7 +37,7 @@ describe('grievances/[id]/suggest-clauses route', () => {
     m.hasMinRole.mockResolvedValue(true);
     m.findRelevantClauses.mockResolvedValue([{ id: 'c1', title: 'Seniority clause' }]);
     m.linkClauseToGrievance.mockResolvedValue({ grievanceId: 'g1', clauseId: 'c1', linked: true });
-    m.auditDataMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.db.select = vi.fn(() => ({
       from: vi.fn(() => ({
         where: vi.fn(async () => [{ id: 'g1', description: 'Grievance text' }]),

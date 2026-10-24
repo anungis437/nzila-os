@@ -9,7 +9,8 @@ import { db } from "@/db/db";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation } from "@/lib/audit-logger";
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
   findRelevantClauses,
   linkClauseToGrievance,
@@ -66,15 +67,18 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       if (!relationship.isPrimaryOwner && !relationship.canDraftActions) {
         return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have permission to change this case");
       }
-      const result = await linkClauseToGrievance(params.id, body.clauseId);
-
-      await auditDataMutation({
-        userId,
-        organizationId,
-        resource: "clause_link",
-        action: "create",
-        resourceId: params.id,
-        newState: result,
+      // The CBA link and its audit record commit together.
+      const result = await withRLSContext({ organizationId }, async (tx) => {
+        const linked = await linkClauseToGrievance(params.id!, body.clauseId, tx);
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'grievance.link_clause',
+          resourceType: 'grievances',
+          resourceId: params.id!,
+          details: { clauseId: body.clauseId },
+        });
+        return linked;
       });
 
       return standardSuccessResponse(result);
