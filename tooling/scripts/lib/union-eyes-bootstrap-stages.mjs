@@ -21,6 +21,7 @@ export const SCOPED_RLS_CLOSURE_TAGS = [
   '0017_snapshot_authority_reconciliation',
   '0018_knowledge_transfer_rls_closure',
   '0019_deadline_reassignment_convergence',
+  '0020_authority_kernel_rls_closure',
 ];
 
 export const PRODUCTION_BOOTSTRAP_ORDER = [

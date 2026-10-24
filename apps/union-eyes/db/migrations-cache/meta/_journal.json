@@ -141,6 +141,13 @@
       "when": 1790160000000,
       "tag": "0019_deadline_reassignment_convergence",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790170000000,
+      "tag": "0020_authority_kernel_rls_closure",
+      "breakpoints": true
     }
   ]
 }

@@ -341,6 +341,7 @@ export async function remediateCatalogAuthority(client, { repoRoot }) {
     '0017_snapshot_authority_reconciliation.sql',
     '0018_knowledge_transfer_rls_closure.sql',
     '0019_deadline_reassignment_convergence.sql',
+    '0020_authority_kernel_rls_closure.sql',
   ]) {
     const migration = fs.readFileSync(
       path.join(repoRoot, 'apps/union-eyes/db/migrations-cache', fileName),
