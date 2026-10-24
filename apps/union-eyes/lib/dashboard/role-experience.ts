@@ -84,7 +84,7 @@ export function getDashboardExperience(role?: string | null): DashboardExperienc
 /**
  * Doctrine orientation hub (Club360 seven-tab Workspace).
  * This is not the post-login role execution home for any role. Members do not
- * have the hub at all: they start at My Cases and the hub is not in their
+ * have the hub at all: they start at their own Home (/dashboard) and the hub is not in their
  * navigation or allow-list.
  */
 export const WORKSPACE_ORIENTATION_HUB_PATH = '/dashboard/workspace' as const;
@@ -93,10 +93,10 @@ export const WORKSPACE_ORIENTATION_HUB_PATH = '/dashboard/workspace' as const;
  * Role execution homes — the routes `getRoleLandingPath` returns.
  * Staff, executive, governance, and admin land off the Workspace hub on
  * purpose. Do not silently rewrite these to the hub (that redirect belongs to
- * G-04, which is out of this slice). Members start at My Cases.
+ * G-04, which is out of this slice). Members start at their own Home.
  */
 export const ROLE_EXECUTION_HOME_BY_EXPERIENCE = {
-  member: '/dashboard/claims',
+  member: '/dashboard',
   staff: '/dashboard/workbench',
   executive: '/dashboard/intelligence',
   governance: '/dashboard/governance',
@@ -139,10 +139,16 @@ export function getRoleLandingPath(role?: string | null): string {
 export function getNavigationForExperience(experience: DashboardExperience): NavigationItem[] {
   if (experience === 'member') {
     return [
-      { label: 'My Cases', href: '/dashboard/claims' },
-      { label: 'Open Representation Case', href: '/dashboard/claims/new' },
-      { label: 'Documents', href: '/dashboard/documents' },
-      { label: 'Profile & Settings', href: '/dashboard/settings' },
+      { label: 'Home', href: '/dashboard' },
+      { label: 'My Representation', href: '/dashboard/claims' },
+      { label: 'Messages', href: '/dashboard/messages' },
+      { label: 'My Documents', href: '/dashboard/documents' },
+      { label: 'My Union', href: '/dashboard/union' },
+      { label: 'Help & Resources', href: '/dashboard/help' },
+      // Account controls are not primary destinations (UE-MEMBER-CANONICAL-2.1).
+      { label: 'Profile', href: '/dashboard/profile', group: 'Account' },
+      { label: 'Preferences', href: '/dashboard/preferences', group: 'Account' },
+      { label: 'Privacy', href: '/dashboard/privacy', group: 'Account' },
     ];
   }
 
@@ -209,9 +215,13 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/claims',
     '/dashboard/claims/new',
     '/dashboard/documents',
+    '/dashboard/messages',
+    '/dashboard/union',
+    '/dashboard/help',
     '/dashboard/settings',
     '/dashboard/profile',
-    '/dashboard/support',
+    '/dashboard/preferences',
+    '/dashboard/privacy',
   ],
   staff: [
     '/dashboard',

@@ -1,6 +1,6 @@
 {
   "memberDocuments": {
-    "title": "Documentos",
+    "title": "Os meus documentos",
     "description": "Os documentos que carregou e os que o seu sindicato partilha com os membros.",
     "emptyTitle": "Ainda sem documentos",
     "emptyBody": "Os documentos que carregar nos seus casos e os que o sindicato partilha com todos os membros aparecem aqui.",
@@ -12,12 +12,13 @@
     "sourceShared": "Partilhado pelo seu sindicato"
   },
   "memberProfile": {
+    "title": "Perfil",
     "readOnlyNotice": "As suas informações pessoais são mostradas abaixo. Para alterar o nome, o email ou o telefone, ou para pedir uma cópia dos seus dados ou alterações à sua conta, contacte o administrador do seu sindicato."
   },
   "claimsPage": {
     "metaTitle": "Casos | UnionEyes",
     "metaDescription": "Acompanhe os casos de representação e o seu andamento.",
-    "memberTitle": "Meus casos",
+    "memberTitle": "A minha representação",
     "memberSubtitle": "Acompanhe os casos que você abriu e o andamento deles",
     "memberNewAction": "Abrir caso de representação",
     "memberEmptyTitle": "Nenhum caso ainda",
@@ -11412,6 +11413,13 @@
     "close_navigation": "Close navigation",
   "workspace": "Workspace",
   "home": "Home",
+  "my_representation": "A minha representação",
+  "my_documents": "Os meus documentos",
+  "my_union": "O meu sindicato",
+  "help_resources": "Ajuda e recursos",
+  "preferences": "Preferências",
+  "privacy": "Privacidade",
+  "account": "Conta",
   "my_cases": "My Cases",
   "open_representation_case": "Open Representation Case",
   "messages": "Messages",
@@ -11498,5 +11506,169 @@
   "text29": "analytics_session - Internal analytics tracking",
   "text30": "marketing_id - Tracks marketing campaigns",
   "text31": "ad_personalization - Enables personalized ads"
-}
+},
+  "memberHome": {
+    "greeting": "Bem-vindo, {name}",
+    "greetingAnonymous": "Bem-vindo",
+    "description": "O que precisa da sua atenção e em que ponto estão os seus processos.",
+    "attentionTitle": "Precisa da sua atenção",
+    "notificationsLoadError": "Não foi possível carregar as suas notificações.",
+    "retry": "Tentar novamente",
+    "noNotifications": "Nenhuma notificação nova.",
+    "open": "Abrir",
+    "markAllRead": "Marcar tudo como lido",
+    "mattersTitle": "Os seus processos ativos",
+    "viewAllCases": "Ver todos os processos",
+    "casesLoadError": "Não foi possível carregar os seus processos.",
+    "noActiveCases": "Não tem processos ativos.",
+    "openCase": "Abrir um processo de representação",
+    "openMessages": "Ir para as mensagens"
+  },
+  "memberMessages": {
+    "title": "Mensagens",
+    "description": "Conversas seguras com o seu sindicato.",
+    "newConversation": "Nova conversa",
+    "privacyNote": "Só você e os representantes sindicais autorizados para uma conversa a podem ler. As mensagens não são monitorizadas de forma contínua: se algo não pode esperar, diga-o claramente e use o meio de contacto que o seu sindicato lhe indicou.",
+    "listLabel": "Conversas",
+    "loadError": "Não foi possível carregar as suas conversas.",
+    "retry": "Tentar novamente",
+    "emptyTitle": "Ainda não há conversas",
+    "emptyBody": "Inicie uma conversa para contactar o seu sindicato.",
+    "status": {
+      "open": "Aberta",
+      "resolved": "Resolvida",
+      "closed": "Fechada"
+    },
+    "selectPrompt": "Selecione uma conversa para a ler.",
+    "subject": "Assunto",
+    "subjectPlaceholder": "Do que se trata?",
+    "message": "Mensagem",
+    "messagePlaceholder": "Escreva a sua mensagem",
+    "attachmentsUnavailable": "Os anexos não estão disponíveis em Mensagens. Adicione antes as provas a partir do seu processo.",
+    "sendError": "A sua mensagem não foi enviada. Verifique a ligação e tente novamente.",
+    "send": "Enviar",
+    "sending": "A enviar…",
+    "cancel": "Cancelar",
+    "unavailableTitle": "Conversa indisponível",
+    "unavailableBody": "Esta conversa não existe ou não tem acesso a ela.",
+    "back": "Voltar às conversas",
+    "representativeAssigned": "Está atribuído um representante sindical",
+    "awaitingRepresentative": "A aguardar a atribuição de um representante sindical",
+    "you": "Você",
+    "union": "Sindicato",
+    "system": "Sistema",
+    "reply": "Responder",
+    "replyPlaceholder": "Escreva uma resposta",
+    "closedNotice": "Esta conversa está fechada. Inicie uma nova conversa para contactar o seu sindicato.",
+    "privacySubject": "Pedido de privacidade"
+  },
+  "myUnion": {
+    "title": "O meu sindicato",
+    "description": "A sua filiação e os serviços oferecidos pelo seu sindicato.",
+    "membershipTitle": "A sua filiação",
+    "loadError": "Não foi possível carregar a sua filiação.",
+    "retry": "Tentar novamente",
+    "missingTitle": "Não encontrámos um registo de filiação em seu nome.",
+    "missingBody": "Isto não altera o seu acesso aos seus processos. Escreva ao seu sindicato para que o seu registo seja verificado.",
+    "contactUnion": "Escrever ao seu sindicato",
+    "union": "Sindicato",
+    "statusLabel": "Estado",
+    "membershipNumber": "Número de sócio",
+    "category": "Categoria",
+    "memberSince": "Sócio desde",
+    "department": "Departamento",
+    "position": "Cargo",
+    "notRecorded": "Não registado",
+    "recordNote": "Este é o registo que o seu sindicato mantém. Se algo estiver incorreto, escreva ao seu sindicato para pedir uma correção.",
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "suspended": "Suspenso",
+      "pending": "Pendente"
+    },
+    "servicesTitle": "Serviços do sindicato",
+    "servicesIntro": "Estes serviços ainda não estão ligados a dados sindicais verificados, por isso nada é mostrado. Uma entrada vazia ou em falta nunca é uma declaração sobre a sua situação.",
+    "notAvailableYet": "Ainda não disponível",
+    "services": {
+      "agreement": {
+        "title": "Convenção coletiva",
+        "body": "A convenção aplicável e as políticas do local de trabalho."
+      },
+      "dues": {
+        "title": "Quotas e pagamentos",
+        "body": "Quotas, deduções e histórico de pagamentos. A sua situação não é mostrada e a ausência de saldo não significa que está em dia."
+      },
+      "benefits": {
+        "title": "Benefícios",
+        "body": "Benefícios e serviços ligados ao emprego oferecidos pelo seu sindicato."
+      },
+      "events": {
+        "title": "Reuniões, eventos e formação",
+        "body": "Reuniões, eventos e formações a que tem direito."
+      },
+      "participation": {
+        "title": "Inquéritos, consultas e votações",
+        "body": "Participação dos sócios, sujeita a elegibilidade verificada."
+      },
+      "credential": {
+        "title": "Cartão de sócio digital",
+        "body": "Uma credencial de filiação verificável."
+      }
+    }
+  },
+  "memberHelp": {
+    "title": "Ajuda e recursos",
+    "description": "Como obter ajuda do seu sindicato através do Union Eyes.",
+    "urgentTitle": "Se o tempo for curto",
+    "urgentBody": "O Union Eyes não calcula nem acompanha prazos legais por si. Se um prazo puder estar próximo, diga-o logo no início do processo ou da mensagem e contacte o seu sindicato pelo meio mais rápido que lhe indicou. Em caso de emergência, ligue 911.",
+    "stepsTitle": "Obter representação",
+    "steps": {
+      "open": "Abra um processo de representação e descreva o que aconteceu, quando e o resultado que pretende.",
+      "evidence": "Adicione provas ao processo: documentos, fotografias ou outros registos.",
+      "follow": "Acompanhe o seu processo em A minha representação. Verá as alterações de estado que o seu sindicato optar por partilhar.",
+      "message": "Use Mensagens para fazer perguntas ou enviar mais informação."
+    },
+    "openCase": "Abrir um processo de representação",
+    "messageUnion": "Escrever ao seu sindicato",
+    "rightsTitle": "Os seus direitos",
+    "rightsBody": "A sua convenção coletiva e os procedimentos do seu sindicato definem os passos e prazos que se aplicam a si. Pergunte ao seu sindicato quais se aplicam à sua situação.",
+    "notLegalAdvice": "Estas indicações são informação geral. Não são aconselhamento jurídico nem uma decisão sobre o seu processo.",
+    "contactTitle": "Contactar o seu sindicato",
+    "contactBody": "Mensagens é o meio suportado para contactar o seu sindicato a partir do Union Eyes.",
+    "directoryUnavailable": "Um diretório de contactos do sindicato ainda não está disponível aqui.",
+    "accessTitle": "Acessibilidade e idioma",
+    "accessBody": "O Union Eyes está disponível em inglês e francês e funciona em telemóveis e computadores. Se precisar de informação noutro formato ou de ajuda para o usar, diga-o numa mensagem e o seu sindicato tratará do que puder."
+  },
+  "memberPreferences": {
+    "title": "Preferências",
+    "description": "Escolha os avisos que recebe no Union Eyes.",
+    "loadError": "Não foi possível carregar as suas preferências.",
+    "retry": "Tentar novamente",
+    "defaultsNote": "Ainda não guardou preferências. São mostradas as definições padrão.",
+    "inApp": "Notificações na aplicação",
+    "inAppHelp": "Avisos na sua página inicial quando algo acontece, como uma nova mensagem ou uma alteração ao seu processo.",
+    "caseUpdates": "Atualizações do processo",
+    "caseUpdatesHelp": "Avisar-me quando o estado do meu processo mudar.",
+    "otherChannels": "As notificações por e-mail, SMS e push ainda não são oferecidas, por isso não há definições para elas.",
+    "saved": "Preferências guardadas.",
+    "saveError": "Não foi possível guardar as suas preferências. Tente novamente.",
+    "saving": "A guardar…",
+    "save": "Guardar preferências"
+  },
+  "memberPrivacy": {
+    "title": "Privacidade",
+    "description": "Como a sua informação é usada no Union Eyes e como fazer um pedido.",
+    "accessTitle": "Quem pode ver a sua informação",
+    "accessYou": "Pode ver os seus próprios processos, documentos e conversas.",
+    "accessRepresentatives": "Os representantes sindicais e administradores só os podem ver na medida em que o seu papel e as regras do seu sindicato o permitam.",
+    "accessNotMembers": "Os outros sócios não podem ver os seus processos, documentos ou mensagens.",
+    "yoursTitle": "A sua informação",
+    "yoursBody": "Consulte os dados que o seu sindicato mantém sobre si e escolha os avisos que recebe.",
+    "viewProfile": "Ver o seu perfil",
+    "viewPreferences": "Preferências de notificação",
+    "requestsTitle": "Pedidos de acesso, correção e consentimento",
+    "requestsBody": "Pode pedir ao seu sindicato uma cópia da sua informação, pedir uma correção ou retirar um consentimento. O pedido é tratado pelo seu sindicato.",
+    "selfServiceUnavailable": "O autosserviço online para estes pedidos ainda não está disponível. Uma mensagem segura é o meio suportado para fazer um.",
+    "sendRequest": "Enviar um pedido de privacidade"
+  }
 }

@@ -5,7 +5,7 @@ import { getNavigationForExperience, getRoleLandingPath } from './role-experienc
 
 describe('getRoleLandingPath', () => {
   it.each([
-    [UserRole.MEMBER, '/dashboard/claims'],
+    [UserRole.MEMBER, '/dashboard'],
     [UserRole.STEWARD, '/dashboard/workbench'],
     [UserRole.COO, '/dashboard/intelligence'],
     [UserRole.OFFICER, '/dashboard/governance'],

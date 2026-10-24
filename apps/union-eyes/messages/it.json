@@ -1,6 +1,6 @@
 {
   "memberDocuments": {
-    "title": "Documenti",
+    "title": "I miei documenti",
     "description": "I documenti che hai caricato e quelli che il tuo sindacato condivide con i membri.",
     "emptyTitle": "Nessun documento al momento",
     "emptyBody": "I documenti che carichi nei tuoi casi e quelli condivisi dal sindacato con tutti i membri compaiono qui.",
@@ -12,12 +12,13 @@
     "sourceShared": "Condiviso dal tuo sindacato"
   },
   "memberProfile": {
+    "title": "Profilo",
     "readOnlyNotice": "Le tue informazioni personali sono mostrate qui sotto. Per modificare nome, email o telefono, o per richiedere una copia dei tuoi dati o modifiche al tuo account, contatta l'amministratore del tuo sindacato."
   },
   "claimsPage": {
     "metaTitle": "Casi | UnionEyes",
     "metaDescription": "Segui i casi di rappresentanza e il loro stato.",
-    "memberTitle": "I miei casi",
+    "memberTitle": "La mia rappresentanza",
     "memberSubtitle": "Segui i casi che hai aperto e il loro stato",
     "memberNewAction": "Apri un caso di rappresentanza",
     "memberEmptyTitle": "Nessun caso al momento",
@@ -11412,6 +11413,13 @@
     "close_navigation": "Close navigation",
   "workspace": "Workspace",
   "home": "Home",
+  "my_representation": "La mia rappresentanza",
+  "my_documents": "I miei documenti",
+  "my_union": "Il mio sindacato",
+  "help_resources": "Aiuto e risorse",
+  "preferences": "Preferenze",
+  "privacy": "Privacy",
+  "account": "Account",
   "my_cases": "My Cases",
   "open_representation_case": "Open Representation Case",
   "messages": "Messages",
@@ -11498,5 +11506,169 @@
   "text29": "analytics_session - Internal analytics tracking",
   "text30": "marketing_id - Tracks marketing campaigns",
   "text31": "ad_personalization - Enables personalized ads"
-}
+},
+  "memberHome": {
+    "greeting": "Benvenuto, {name}",
+    "greetingAnonymous": "Benvenuto",
+    "description": "Ciò che richiede la tua attenzione e a che punto sono le tue pratiche.",
+    "attentionTitle": "Richiede la tua attenzione",
+    "notificationsLoadError": "Non è stato possibile caricare le tue notifiche.",
+    "retry": "Riprova",
+    "noNotifications": "Nessuna nuova notifica.",
+    "open": "Apri",
+    "markAllRead": "Segna tutto come letto",
+    "mattersTitle": "Le tue pratiche attive",
+    "viewAllCases": "Vedi tutte le pratiche",
+    "casesLoadError": "Non è stato possibile caricare le tue pratiche.",
+    "noActiveCases": "Non hai pratiche attive.",
+    "openCase": "Apri una pratica di rappresentanza",
+    "openMessages": "Vai ai messaggi"
+  },
+  "memberMessages": {
+    "title": "Messaggi",
+    "description": "Conversazioni protette con il tuo sindacato.",
+    "newConversation": "Nuova conversazione",
+    "privacyNote": "Solo tu e i rappresentanti sindacali autorizzati per una conversazione potete leggerla. I messaggi non sono monitorati di continuo: se qualcosa non può aspettare, dillo chiaramente e usa il canale di contatto che il tuo sindacato ti ha indicato.",
+    "listLabel": "Conversazioni",
+    "loadError": "Non è stato possibile caricare le tue conversazioni.",
+    "retry": "Riprova",
+    "emptyTitle": "Ancora nessuna conversazione",
+    "emptyBody": "Avvia una conversazione per contattare il tuo sindacato.",
+    "status": {
+      "open": "Aperta",
+      "resolved": "Risolta",
+      "closed": "Chiusa"
+    },
+    "selectPrompt": "Seleziona una conversazione per leggerla.",
+    "subject": "Oggetto",
+    "subjectPlaceholder": "Di cosa si tratta?",
+    "message": "Messaggio",
+    "messagePlaceholder": "Scrivi il tuo messaggio",
+    "attachmentsUnavailable": "Gli allegati non sono disponibili in Messaggi. Aggiungi invece le prove dalla tua pratica.",
+    "sendError": "Il messaggio non è stato inviato. Controlla la connessione e riprova.",
+    "send": "Invia",
+    "sending": "Invio…",
+    "cancel": "Annulla",
+    "unavailableTitle": "Conversazione non disponibile",
+    "unavailableBody": "Questa conversazione non esiste o non hai accesso.",
+    "back": "Torna alle conversazioni",
+    "representativeAssigned": "È assegnato un rappresentante sindacale",
+    "awaitingRepresentative": "In attesa dell’assegnazione di un rappresentante sindacale",
+    "you": "Tu",
+    "union": "Sindacato",
+    "system": "Sistema",
+    "reply": "Rispondi",
+    "replyPlaceholder": "Scrivi una risposta",
+    "closedNotice": "Questa conversazione è chiusa. Avvia una nuova conversazione per contattare il tuo sindacato.",
+    "privacySubject": "Richiesta sulla privacy"
+  },
+  "myUnion": {
+    "title": "Il mio sindacato",
+    "description": "La tua iscrizione e i servizi offerti dal tuo sindacato.",
+    "membershipTitle": "La tua iscrizione",
+    "loadError": "Non è stato possibile caricare la tua iscrizione.",
+    "retry": "Riprova",
+    "missingTitle": "Non abbiamo trovato una scheda di iscrizione a tuo nome.",
+    "missingBody": "Ciò non cambia il tuo accesso alle tue pratiche. Scrivi al tuo sindacato per far verificare la tua scheda.",
+    "contactUnion": "Scrivi al tuo sindacato",
+    "union": "Sindacato",
+    "statusLabel": "Stato",
+    "membershipNumber": "Numero di iscritto",
+    "category": "Categoria",
+    "memberSince": "Iscritto dal",
+    "department": "Reparto",
+    "position": "Posizione",
+    "notRecorded": "Non registrato",
+    "recordNote": "Questa è la scheda in possesso del tuo sindacato. Se qualcosa è errato, scrivi al tuo sindacato per chiedere una correzione.",
+    "status": {
+      "active": "Attivo",
+      "inactive": "Non attivo",
+      "suspended": "Sospeso",
+      "pending": "In attesa"
+    },
+    "servicesTitle": "Servizi sindacali",
+    "servicesIntro": "Questi servizi non sono ancora collegati a dati sindacali verificati, quindi non viene mostrato nulla. Una voce vuota o mancante non è mai una dichiarazione sulla tua posizione.",
+    "notAvailableYet": "Non ancora disponibile",
+    "services": {
+      "agreement": {
+        "title": "Contratto collettivo",
+        "body": "Il contratto applicabile e le politiche sul luogo di lavoro."
+      },
+      "dues": {
+        "title": "Quote e pagamenti",
+        "body": "Quote, trattenute e storico dei pagamenti. La tua posizione non è mostrata e l’assenza di un saldo non significa che sei in regola."
+      },
+      "benefits": {
+        "title": "Benefici",
+        "body": "Benefici e servizi legati all’impiego offerti dal tuo sindacato."
+      },
+      "events": {
+        "title": "Assemblee, eventi e formazione",
+        "body": "Assemblee, eventi e corsi a cui hai diritto."
+      },
+      "participation": {
+        "title": "Sondaggi, consultazioni e voto",
+        "body": "Partecipazione degli iscritti, previa verifica dell’idoneità."
+      },
+      "credential": {
+        "title": "Tessera digitale",
+        "body": "Una credenziale di iscrizione verificabile."
+      }
+    }
+  },
+  "memberHelp": {
+    "title": "Aiuto e risorse",
+    "description": "Come ottenere aiuto dal tuo sindacato con Union Eyes.",
+    "urgentTitle": "Se il tempo stringe",
+    "urgentBody": "Union Eyes non calcola né monitora per te le scadenze legali. Se una scadenza potrebbe essere vicina, indicalo all’inizio della pratica o nel messaggio e contatta il tuo sindacato con il mezzo più rapido che ti ha indicato. In caso di emergenza chiama il 911.",
+    "stepsTitle": "Ottenere rappresentanza",
+    "steps": {
+      "open": "Apri una pratica di rappresentanza e descrivi cosa è successo, quando e il risultato che desideri.",
+      "evidence": "Aggiungi prove alla pratica: documenti, foto o altri atti.",
+      "follow": "Segui la tua pratica in La mia rappresentanza. Vedrai i cambi di stato che il tuo sindacato sceglie di condividere.",
+      "message": "Usa Messaggi per fare domande o inviare altre informazioni."
+    },
+    "openCase": "Apri una pratica di rappresentanza",
+    "messageUnion": "Scrivi al tuo sindacato",
+    "rightsTitle": "I tuoi diritti",
+    "rightsBody": "Il tuo contratto collettivo e le procedure del tuo sindacato stabiliscono le fasi e i termini che ti riguardano. Chiedi al tuo sindacato quali si applicano alla tua situazione.",
+    "notLegalAdvice": "Queste indicazioni sono informazioni generali. Non sono una consulenza legale né una decisione sulla tua pratica.",
+    "contactTitle": "Contattare il tuo sindacato",
+    "contactBody": "Messaggi è il modo supportato per contattare il tuo sindacato da Union Eyes.",
+    "directoryUnavailable": "Un elenco dei contatti sindacali non è ancora disponibile qui.",
+    "accessTitle": "Accessibilità e lingua",
+    "accessBody": "Union Eyes è disponibile in inglese e francese e funziona su telefono e computer. Se hai bisogno di informazioni in un altro formato o di aiuto per usarlo, scrivilo in un messaggio e il tuo sindacato farà il possibile."
+  },
+  "memberPreferences": {
+    "title": "Preferenze",
+    "description": "Scegli quali avvisi ricevere in Union Eyes.",
+    "loadError": "Non è stato possibile caricare le tue preferenze.",
+    "retry": "Riprova",
+    "defaultsNote": "Non hai ancora salvato preferenze. Sono mostrate le impostazioni standard.",
+    "inApp": "Notifiche nell’app",
+    "inAppHelp": "Avvisi nella tua pagina iniziale quando accade qualcosa, come un nuovo messaggio o una modifica alla tua pratica.",
+    "caseUpdates": "Aggiornamenti della pratica",
+    "caseUpdatesHelp": "Avvisami quando lo stato della mia pratica cambia.",
+    "otherChannels": "Le notifiche via e-mail, SMS e push non sono ancora offerte, quindi non ci sono impostazioni per esse.",
+    "saved": "Preferenze salvate.",
+    "saveError": "Non è stato possibile salvare le tue preferenze. Riprova.",
+    "saving": "Salvataggio…",
+    "save": "Salva preferenze"
+  },
+  "memberPrivacy": {
+    "title": "Privacy",
+    "description": "Come vengono usate le tue informazioni in Union Eyes e come fare una richiesta.",
+    "accessTitle": "Chi può vedere le tue informazioni",
+    "accessYou": "Puoi vedere le tue pratiche, i tuoi documenti e le tue conversazioni.",
+    "accessRepresentatives": "I rappresentanti sindacali e gli amministratori possono vederli solo nei limiti consentiti dal loro ruolo e dalle regole del tuo sindacato.",
+    "accessNotMembers": "Gli altri iscritti non possono vedere le tue pratiche, i tuoi documenti o i tuoi messaggi.",
+    "yoursTitle": "Le tue informazioni",
+    "yoursBody": "Consulta i dati che il tuo sindacato conserva su di te e scegli quali avvisi ricevere.",
+    "viewProfile": "Vedi il tuo profilo",
+    "viewPreferences": "Preferenze di notifica",
+    "requestsTitle": "Richieste di accesso, correzione e consenso",
+    "requestsBody": "Puoi chiedere al tuo sindacato una copia dei tuoi dati, chiedere una correzione o revocare un consenso. La richiesta è gestita dal tuo sindacato.",
+    "selfServiceUnavailable": "Il self-service online per queste richieste non è ancora disponibile. Un messaggio protetto è il modo supportato per farne una.",
+    "sendRequest": "Invia una richiesta sulla privacy"
+  }
 }

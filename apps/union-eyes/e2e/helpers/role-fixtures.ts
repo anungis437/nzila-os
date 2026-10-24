@@ -94,10 +94,15 @@ export const STAKEHOLDER_ORDER: StakeholderRole[] = [
 // These labels intentionally validate the user-facing IA contract.
 export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
   member: [
-    'My Cases',
-    'Open Representation Case',
-    'Documents',
-    'Profile & Settings',
+    'Home',
+    'My Representation',
+    'Messages',
+    'My Documents',
+    'My Union',
+    'Help & Resources',
+    'Profile',
+    'Preferences',
+    'Privacy',
   ],
   steward: [
     'Operations (Casework Console)',

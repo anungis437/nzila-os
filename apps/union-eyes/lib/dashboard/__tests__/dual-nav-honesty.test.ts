@@ -28,7 +28,7 @@ describe('EC-G03 landing × experience', () => {
       {
         role: 'member',
         experience: 'member',
-        roleHomeHref: '/dashboard/claims',
+        roleHomeHref: '/dashboard',
         roleHomeIsOrientationHub: false,
       },
       {
@@ -74,11 +74,11 @@ describe('EC-G03 landing × experience', () => {
       expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE[row.experience]).toBe(row.roleHomeHref);
     }
 
-    expect(getRoleLandingPath(undefined)).toBe('/dashboard/claims');
-    expect(getRoleLandingPath('unknown')).toBe('/dashboard/claims');
+    expect(getRoleLandingPath(undefined)).toBe('/dashboard');
+    expect(getRoleLandingPath('unknown')).toBe('/dashboard');
   });
 
-  it('keeps Workspace first in the sidebar for non-member roles; members start at My Cases with no hub', () => {
+  it('keeps Workspace first in the sidebar for non-member roles; members start at their own Home with no hub', () => {
     for (const experience of ['staff', 'executive', 'governance', 'admin'] as const) {
       expect(getNavigationForExperience(experience)[0]).toMatchObject({
         label: 'Workspace',
@@ -87,10 +87,9 @@ describe('EC-G03 landing × experience', () => {
     }
 
     const memberNav = getNavigationForExperience('member');
-    expect(memberNav[0]).toMatchObject({ label: 'My Cases', href: '/dashboard/claims' });
+    expect(memberNav[0]).toMatchObject({ label: 'Home', href: '/dashboard' });
     expect(memberNav.map((item) => item.label)).not.toContain('Workspace');
-    expect(memberNav.map((item) => item.label)).not.toContain('Home');
-    expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.member).toBe('/dashboard/claims');
+    expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.member).toBe('/dashboard');
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.staff).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.executive).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.governance).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
@@ -202,14 +201,19 @@ describe('EC-G03 guards', () => {
 
   it('does not widen canAccessDashboardPath allow-lists', () => {
     expect(getAllowedPrefixesByExperience()).toEqual({
+      // Widened only by the frozen UE-MEMBER-CANONICAL-2.1 destinations; each has a member page.
       member: [
         '/dashboard',
         '/dashboard/claims',
         '/dashboard/claims/new',
         '/dashboard/documents',
+        '/dashboard/messages',
+        '/dashboard/union',
+        '/dashboard/help',
         '/dashboard/settings',
         '/dashboard/profile',
-        '/dashboard/support',
+        '/dashboard/preferences',
+        '/dashboard/privacy',
       ],
       staff: [
         '/dashboard',

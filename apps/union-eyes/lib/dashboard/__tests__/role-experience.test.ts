@@ -23,7 +23,7 @@ describe('lib/dashboard/role-experience', () => {
 
   describe('getRoleLandingPath', () => {
     it('routes by experience', () => {
-      expect(getRoleLandingPath('member')).toBe('/dashboard/claims');
+      expect(getRoleLandingPath('member')).toBe('/dashboard');
       expect(getRoleLandingPath('steward')).toBe('/dashboard/workbench');
       expect(getRoleLandingPath('president')).toBe('/dashboard/intelligence');
       expect(getRoleLandingPath('officer')).toBe('/dashboard/governance');

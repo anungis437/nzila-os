@@ -32,7 +32,7 @@ export function MemberProfile({ name, email, phone, organization, role, onSignOu
   return (
     <div className="p-4 md:p-8" data-testid="member-profile">
       <div className="mx-auto max-w-2xl">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">{t('profile.title')}</h1>
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">{t('memberProfile.title')}</h1>
         <p className="mb-6 text-gray-600">{t('memberProfile.readOnlyNotice')}</p>
         <Card className="p-6">
           <dl className="divide-y divide-gray-100">

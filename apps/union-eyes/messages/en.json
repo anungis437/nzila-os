@@ -1,6 +1,6 @@
 {
   "memberDocuments": {
-    "title": "Documents",
+    "title": "My Documents",
     "description": "Documents you have uploaded and documents your union shares with members.",
     "emptyTitle": "No documents yet",
     "emptyBody": "Documents you upload to your cases, and documents your union shares with all members, appear here.",
@@ -12,12 +12,13 @@
     "sourceShared": "Shared by your union"
   },
   "memberProfile": {
+    "title": "Profile",
     "readOnlyNotice": "Your personal information is shown below. To change your name, email or phone number, or to request a copy of your data or changes to your account, contact your union administrator."
   },
   "claimsPage": {
     "metaTitle": "Cases | UnionEyes",
     "metaDescription": "Track representation cases and their progress.",
-    "memberTitle": "My Cases",
+    "memberTitle": "My Representation",
     "memberSubtitle": "Track the cases you have opened and their progress",
     "memberNewAction": "Open Representation Case",
     "memberEmptyTitle": "No cases yet",
@@ -11476,6 +11477,13 @@
     "close_navigation": "Close navigation",
   "workspace": "Workspace",
   "home": "Home",
+  "my_representation": "My Representation",
+  "my_documents": "My Documents",
+  "my_union": "My Union",
+  "help_resources": "Help & Resources",
+  "preferences": "Preferences",
+  "privacy": "Privacy",
+  "account": "Account",
   "my_cases": "My Cases",
   "open_representation_case": "Open Representation Case",
   "messages": "Messages",
@@ -11562,5 +11570,169 @@
   "text29": "analytics_session - Internal analytics tracking",
   "text30": "marketing_id - Tracks marketing campaigns",
   "text31": "ad_personalization - Enables personalized ads"
-}
+},
+  "memberHome": {
+    "greeting": "Welcome, {name}",
+    "greetingAnonymous": "Welcome",
+    "description": "What needs your attention, and where your matters stand.",
+    "attentionTitle": "Needs your attention",
+    "notificationsLoadError": "Your notifications could not be loaded.",
+    "retry": "Try again",
+    "noNotifications": "No new notifications.",
+    "open": "Open",
+    "markAllRead": "Mark all as read",
+    "mattersTitle": "Your active cases",
+    "viewAllCases": "View all cases",
+    "casesLoadError": "Your cases could not be loaded.",
+    "noActiveCases": "You have no active cases.",
+    "openCase": "Open a representation case",
+    "openMessages": "Go to Messages"
+  },
+  "memberMessages": {
+    "title": "Messages",
+    "description": "Secure conversations with your union.",
+    "newConversation": "New conversation",
+    "privacyNote": "Only you and the union representatives authorised for a conversation can read it. Messages are not monitored around the clock: if something cannot wait, say so clearly and use the contact route your union gave you.",
+    "listLabel": "Conversations",
+    "loadError": "Your conversations could not be loaded.",
+    "retry": "Try again",
+    "emptyTitle": "No conversations yet",
+    "emptyBody": "Start a conversation to contact your union.",
+    "status": {
+      "open": "Open",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "selectPrompt": "Select a conversation to read it.",
+    "subject": "Subject",
+    "subjectPlaceholder": "What is this about?",
+    "message": "Message",
+    "messagePlaceholder": "Write your message",
+    "attachmentsUnavailable": "Attachments are not available in Messages. Add evidence from your case instead.",
+    "sendError": "Your message was not sent. Check your connection and try again.",
+    "send": "Send",
+    "sending": "Sending…",
+    "cancel": "Cancel",
+    "unavailableTitle": "Conversation not available",
+    "unavailableBody": "This conversation does not exist or you do not have access to it.",
+    "back": "Back to conversations",
+    "representativeAssigned": "A union representative is assigned",
+    "awaitingRepresentative": "Waiting for a union representative to be assigned",
+    "you": "You",
+    "union": "Union",
+    "system": "System",
+    "reply": "Reply",
+    "replyPlaceholder": "Write a reply",
+    "closedNotice": "This conversation is closed. Start a new conversation to contact your union.",
+    "privacySubject": "Privacy request"
+  },
+  "myUnion": {
+    "title": "My Union",
+    "description": "Your membership and the services your union offers.",
+    "membershipTitle": "Your membership",
+    "loadError": "Your membership could not be loaded.",
+    "retry": "Try again",
+    "missingTitle": "We could not find a membership record for you.",
+    "missingBody": "This does not change your access to your cases. Message your union to have your record checked.",
+    "contactUnion": "Message your union",
+    "union": "Union",
+    "statusLabel": "Status",
+    "membershipNumber": "Membership number",
+    "category": "Category",
+    "memberSince": "Member since",
+    "department": "Department",
+    "position": "Position",
+    "notRecorded": "Not recorded",
+    "recordNote": "This is the record your union holds. If something is wrong, message your union to ask for a correction.",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended",
+      "pending": "Pending"
+    },
+    "servicesTitle": "Union services",
+    "servicesIntro": "These services are not connected to verified union data yet, so nothing is shown for them. An empty or missing entry is never a statement about your standing.",
+    "notAvailableYet": "Not available yet",
+    "services": {
+      "agreement": {
+        "title": "Collective agreement",
+        "body": "Your applicable agreement and workplace policies."
+      },
+      "dues": {
+        "title": "Dues and payments",
+        "body": "Dues, deductions and payment history. Your standing is not shown, and no balance does not mean you are paid up."
+      },
+      "benefits": {
+        "title": "Benefits",
+        "body": "Benefits and employment-related services your union offers."
+      },
+      "events": {
+        "title": "Meetings, events and education",
+        "body": "Meetings, events and training you are eligible for."
+      },
+      "participation": {
+        "title": "Surveys, consultations and voting",
+        "body": "Member participation, subject to verified eligibility."
+      },
+      "credential": {
+        "title": "Digital membership card",
+        "body": "A verifiable membership credential."
+      }
+    }
+  },
+  "memberHelp": {
+    "title": "Help & Resources",
+    "description": "How to get help from your union through Union Eyes.",
+    "urgentTitle": "If time is short",
+    "urgentBody": "Union Eyes does not calculate legal deadlines or track them for you. If a deadline may be close, say so at the start of your case or message, and contact your union by the fastest route it has given you. In an emergency, call 911.",
+    "stepsTitle": "Getting representation",
+    "steps": {
+      "open": "Open a representation case and describe what happened, when, and the outcome you want.",
+      "evidence": "Add supporting evidence to the case: documents, photos or other records.",
+      "follow": "Follow your case under My Representation. You will see status changes your union chooses to share with you.",
+      "message": "Use Messages to ask questions or send further information."
+    },
+    "openCase": "Open a representation case",
+    "messageUnion": "Message your union",
+    "rightsTitle": "Your rights",
+    "rightsBody": "Your collective agreement and your union’s procedures set the steps and time limits that apply to you. Ask your union which apply to your situation.",
+    "notLegalAdvice": "This guidance is general information. It is not legal advice and it is not a decision about your case.",
+    "contactTitle": "Contacting your union",
+    "contactBody": "Messages is the supported way to reach your union from Union Eyes.",
+    "directoryUnavailable": "A directory of union contacts is not available here yet.",
+    "accessTitle": "Accessibility and language",
+    "accessBody": "Union Eyes is available in English and French and works on phones and computers. If you need information in another format or need help using it, say so in a message and your union will arrange what it can."
+  },
+  "memberPreferences": {
+    "title": "Preferences",
+    "description": "Choose which notices you receive in Union Eyes.",
+    "loadError": "Your preferences could not be loaded.",
+    "retry": "Try again",
+    "defaultsNote": "You have not saved any preferences yet. The standard settings are shown.",
+    "inApp": "In-app notifications",
+    "inAppHelp": "Notices on your Home page when something happens, such as a new message or a change to your case.",
+    "caseUpdates": "Case updates",
+    "caseUpdatesHelp": "Notify me when the status of my case changes.",
+    "otherChannels": "Email, text message and push notifications are not offered yet, so there are no settings for them.",
+    "saved": "Preferences saved.",
+    "saveError": "Your preferences could not be saved. Try again.",
+    "saving": "Saving…",
+    "save": "Save preferences"
+  },
+  "memberPrivacy": {
+    "title": "Privacy",
+    "description": "How your information is used in Union Eyes and how to make a request.",
+    "accessTitle": "Who can see your information",
+    "accessYou": "You can see your own cases, documents and conversations.",
+    "accessRepresentatives": "Union representatives and administrators can see them only as their role and your union’s rules allow.",
+    "accessNotMembers": "Other members cannot see your cases, documents or messages.",
+    "yoursTitle": "Your information",
+    "yoursBody": "Review the details your union holds about you and choose which notices you receive.",
+    "viewProfile": "View your profile",
+    "viewPreferences": "Notification preferences",
+    "requestsTitle": "Access, correction and consent requests",
+    "requestsBody": "You can ask your union for a copy of your information, ask for a correction, or withdraw a consent. Your request is handled by your union.",
+    "selfServiceUnavailable": "Online self-service for these requests is not available yet. A secure message is the supported way to make one.",
+    "sendRequest": "Send a privacy request"
+  }
 }

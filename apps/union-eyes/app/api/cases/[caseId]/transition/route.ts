@@ -25,6 +25,7 @@ import { canPerformAction } from '@/lib/action-enforcer';
 import { logger } from '@/lib/logger';
 import { getCaseActor, findReadableCase, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
+import { inAppNoticeAllowed } from '@/lib/notifications/in-app-preferences';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
@@ -165,7 +166,7 @@ export async function PATCH(
 
       // The member is told in-app when their own case moves; the same transaction guarantees the
       // notice exists only if the transition committed.
-      if (claim.memberId && claim.memberId !== userId) {
+      if (claim.memberId && claim.memberId !== userId && (await inAppNoticeAllowed(claim.memberId, actor.organizationId, 'case'))) {
         await tx.insert(inAppNotifications).values({
           userId: claim.memberId,
           organizationId: actor.organizationId,

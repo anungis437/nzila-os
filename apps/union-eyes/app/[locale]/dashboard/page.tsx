@@ -11,8 +11,10 @@ import { redirect } from "next/navigation";
 import { getUserRole } from "@/lib/auth/rbac-server";
 import { UserRole } from "@/lib/auth/roles";
 import {
+  getDashboardExperience,
   getRoleLandingPath,
 } from "@/lib/dashboard/role-experience";
+import { MemberHome } from "@/components/member/member-home";
 import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 
@@ -65,6 +67,9 @@ export default async function DashboardRootPage({ params }: DashboardRootPagePro
       error: error instanceof Error ? error.message : String(error),
     });
   }
+
+  // Members are not redirected: Home is their landing page, built from their own records only.
+  if (getDashboardExperience(userRole) === "member") return <MemberHome />;
 
   const landingPath = getRoleLandingPath(userRole);
   const destination = `/${locale}${landingPath}`;

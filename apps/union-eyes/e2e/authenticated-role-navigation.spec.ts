@@ -154,7 +154,7 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
   //
   // The member role is used because its nav items are stable and available to
   // any authenticated user, keeping the test focused on the nav mechanic.
-  // Members start at My Cases; Workspace and Home are not part of their nav.
+  // Members start at their own Home; Workspace (the staff orientation hub) is not part of their nav.
   test('member: sidebar link click navigates and updates active state', async ({ page }) => {
     const fixture = getFixture('member');
     await gotoDashboardAsRole(page, 'member');
@@ -163,9 +163,9 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
       .getByRole('complementary', { name: 'Role execution navigation', exact: true })
       .getByRole('navigation', { name: 'Role execution destinations', exact: true });
     await expect(destinations.getByRole('link', { name: 'Workspace' })).toHaveCount(0);
-    await expect(destinations.getByRole('link', { name: 'Home', exact: true })).toHaveCount(0);
+    await expect(destinations.getByRole('link', { name: 'Home', exact: true })).toHaveCount(1);
 
-    const homeLink = destinations.getByRole('link', { name: 'Documents', exact: true });
+    const homeLink = destinations.getByRole('link', { name: 'My Documents', exact: true });
     await expect(homeLink).toBeVisible({ timeout: 10_000 });
 
     const hrefBefore = await homeLink.getAttribute('href');

@@ -158,9 +158,11 @@ export default function Sidebar({
       return [{ group: { key: "__flat", label: "" }, items }];
     }
 
-    const order = Array.from(
-      new Set(items.map((i) => i.group).filter(Boolean) as string[]),
-    ).map((key) => ({ key, label: key }));
+    // Ungrouped items keep their place in encounter order rather than sinking below every group.
+    const order = Array.from(new Set(items.map((i) => i.group ?? "__ungrouped"))).map((key) => ({
+      key,
+      label: key === "__ungrouped" ? "" : key,
+    }));
 
     const orderMap = new Map(order.map((g, i) => [g.key, i]));
     const byKey = new Map<string, NavigationItem[]>();
@@ -304,7 +306,8 @@ export default function Sidebar({
                   const href = withLocale(item.href);
                   const active = isActive(item.href);
                   const showLabel = showLabels;
-                  const honesty = honestyForNavigationItem(item, homes.roleHomeHref, copy);
+                  // Members have no orientation hub, so the staff "role execution home" qualifier does not apply.
+                  const honesty = honestyForNavigationItem(item, homes.experience === "member" ? "" : homes.roleHomeHref, copy);
                   return (
                     <li key={`${item.href}-${item.label}`}>
                       <Link
