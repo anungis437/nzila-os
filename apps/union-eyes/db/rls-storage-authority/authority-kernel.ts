@@ -16,7 +16,13 @@ import type { StorageAuthorityEntry } from './types'
 
 const SUPPORT = [
   'lib/authority/store/facts.ts',
+  'lib/authority/store/identity.ts',
+  'lib/authority/store/resources.ts',
   'lib/authority/store/mutations.ts',
+  'lib/authority/store/lifecycle.ts',
+  'lib/authority/store/workflow.ts',
+  'lib/authority/store/audit.ts',
+  'lib/authority/store/idempotency.ts',
   'lib/authority/store/enforce.ts',
   'db/migrations-platform/0013_authority_kernel_storage.sql',
   'db/migrations-cache/0020_authority_kernel_rls_closure.sql',

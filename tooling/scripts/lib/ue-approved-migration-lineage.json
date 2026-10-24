@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "baselineCommit": "0c994b968aed0657cca5b702954ba87252408245",
+  "measuredFrom": "git blob bytes (LF)",
+  "scoped": [
+    {
+      "tag": "0000_outstanding_viper",
+      "sha256": "55341b8ef332ee26d226bdda7b044664a3b1c570582e1d61015f7538030862e8"
+    },
+    {
+      "tag": "0001_lean_iron_man",
+      "sha256": "9ca1fdeb3c5517124c65ff18bc52e753844d9d98533b09d4048571f2d65edda6"
+    },
+    {
+      "tag": "0002_certain_juggernaut",
+      "sha256": "c8c905a98b6ce238036328d708a119223b3544bf698b423f4f4a905a8c9d1bc8"
+    },
+    {
+      "tag": "0003_dizzy_alex_wilder",
+      "sha256": "105ea4b4710bf406f1f3a32a2704c724f39af152fdcf83701f19ad2b3de850ab"
+    },
+    {
+      "tag": "0004_hesitant_chameleon",
+      "sha256": "9777c9417af6755c30ab896273222d7e68b4e4af3032110c21dbcf572d281df0"
+    },
+    {
+      "tag": "0005_add_icra_assessment_capability_token",
+      "sha256": "9a280d5e9ccdcdcb350673b40294b5a08d401b9f53dcc950b02868298494293a"
+    },
+    {
+      "tag": "0006_external_specialist_runtime_privilege_closure",
+      "sha256": "aa9a3314fc70de80e3064e8dedbc31b12a09caa3d99632ac75ae0c0a19731003"
+    },
+    {
+      "tag": "0007_auth_bootstrap_runtime_remediation",
+      "sha256": "4b742c7a3a1a70532c9f3dc1133f3020b58246ff3663c036e92da09143751a45"
+    },
+    {
+      "tag": "0008_runtime_acceptance_closure",
+      "sha256": "821563dc03232c3530b441c8372d82642e8762e5814f733e760c33d6005b29d0"
+    },
+    {
+      "tag": "0009_baseline_runtime_role_grants",
+      "sha256": "dfb79693e7ce06ef4d078fb0eed8cd8bcde60a54bd3b29ec09e766ac49fcb53d"
+    },
+    {
+      "tag": "0010_tenant_isolation_rls_foundation",
+      "sha256": "9bfd46947d9d25539b32e72edccea1c1862c6c4f2c46bac2ae10a0a228ee75f5"
+    },
+    {
+      "tag": "0011_storage_authority_rls_completion",
+      "sha256": "fbf17ed35fb5c5efbb1c415f66ae2bb1fdf79e7ba1b8cfd8c711f40c6ea53c37"
+    },
+    {
+      "tag": "0012_storage_authority_rls_final_closure",
+      "sha256": "3891b11704a9934b0e408b6d1b0b38c9b1dd90bfcbaa71aa16e92b6e0f17c312"
+    },
+    {
+      "tag": "0013_workbook_credential_payment_authority",
+      "sha256": "7b0dcc672d3380fdcb8abb2bc3885882a9e55fea28364cb3e8855b32e58ef0d0"
+    },
+    {
+      "tag": "0014_lineage_restoration_rls_closure",
+      "sha256": "cd8a2814a0e101dd56b0a94449eda3dce6e99860b368690a5fad3b97791a64a5"
+    },
+    {
+      "tag": "0015_deadline_engine_rls_fail_closed_closure",
+      "sha256": "cdd4840d7544f0ec7e81bf9bb269cf3dd82dc2d8bec7849d926430916463bced"
+    },
+    {
+      "tag": "0016_catalog_rls_authority_closure",
+      "sha256": "230943e6c5c0c308133fca00707401de54cec05686d09cfafa403efef5e10970"
+    },
+    {
+      "tag": "0017_snapshot_authority_reconciliation",
+      "sha256": "1b383028f528daa86b079662688d072e9c60ac9e96ce607810449b9148c27f48"
+    },
+    {
+      "tag": "0018_knowledge_transfer_rls_closure",
+      "sha256": "bf846eaf394e4ce8a1b42682ac9a3d01ac209a928d97d710f074f323763615a9"
+    },
+    {
+      "tag": "0019_deadline_reassignment_convergence",
+      "sha256": "173cf69bc7d481b7e1b1971a2b678d7a2ff6c29f752d986bcdbc4700b99af964"
+    }
+  ],
+  "platform": [
+    {
+      "tag": "0001_billing_subscriptions",
+      "sha256": "309b04cb85673fdffaa6751804cc74edb4d98bef06975c085388a51e93ab7208"
+    },
+    {
+      "tag": "0002_employer_execution_and_related_a",
+      "sha256": "4cd84904709593efe477a694b5bc2851c87dbd419f9197d880e199a35fe33f1d"
+    },
+    {
+      "tag": "0003_integration_partners_and_security_posture",
+      "sha256": "83d9d41344e8f327752e4cc1a9fbb23d894f49b42e7f6282beadbe793c5ac1a0"
+    },
+    {
+      "tag": "0004_audit_gap_canonical_tables",
+      "sha256": "fd1337cb6b3e4c3066eba3123768c8055e489b78eebee686ae3b7672e0b5e6de"
+    },
+    {
+      "tag": "0005_organization_members_deleted_at",
+      "sha256": "0580d447b4d8dcc129958bffa2eaa7a2c24120f3ff2ebdc51343e88b9d2ac554"
+    },
+    {
+      "tag": "0006_documents_runtime_columns",
+      "sha256": "661f14e708303514b5a9b4b430dc8d05dfc214852f54d262d9aa0057a9d3408e"
+    },
+    {
+      "tag": "0007_claim_updates_runtime_columns",
+      "sha256": "bf015e6edf82c50e01f1bf64141d64e00f58b9da2100c4640d5e0e689beaf020"
+    },
+    {
+      "tag": "0008_strike_fund_disbursements_canonical",
+      "sha256": "2bf16c5cc01ddb118af97e227dac268a6a7fe5526e4cd7c9850324958b6d5a40"
+    },
+    {
+      "tag": "0008_strike_fund_uuid_membership_provenance",
+      "sha256": "e7ec2993af4baea640b0008e9201199aea9c645c7d68853ae59c06bfbc07c6fb"
+    },
+    {
+      "tag": "0008_dapl_enum_label_evolution",
+      "sha256": "5a7b0bae108ae645417297e7e5efd280deeb19437035e4350d05a81502c3ed2c"
+    },
+    {
+      "tag": "0008_fee_adjustment_enum_label_evolution",
+      "sha256": "4e50f60b618b744459c03c79b53a5fef7ca5c88f02a2beb4993e2829361a6217"
+    },
+    {
+      "tag": "0008_django_stub_relation_evolution",
+      "sha256": "f97714fa609b37aab53d3fd1c7fae8db1258998f74e09dcfc8973c1f6231946b"
+    },
+    {
+      "tag": "0009_canonical_lineage_relations",
+      "sha256": "a63e237c6297e6371ab780525da2f80f6059a620c9ef35be88f5ab665dd58792"
+    },
+    {
+      "tag": "0010_billing_relation_shape_authority",
+      "sha256": "c336f12451d8195aa54d96c4394e879400ac3817235338a7ea85788317ffd839"
+    },
+    {
+      "tag": "0011_strike_fund_deletion_guard",
+      "sha256": "ca909b54aaf58d4db967f9bfa1c50f6d9c89f6caf5838855a56f9ef2b38cb51c"
+    },
+    {
+      "tag": "0012_knowledge_transfer_runtime_relations",
+      "sha256": "2fe15e09922e78fd59b4e2365ea49aae421cd564d2d372d743d6d09841dd1304"
+    }
+  ],
+  "registeredAdditions": {
+    "scoped": [
+      {
+        "tag": "0020_authority_kernel_rls_closure",
+        "sha256": "45873e542964bf28c3e380835200761a6b265ff00cc64a641908f77c96475785",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-authority-kernel",
+        "note": "FORCE RLS for the 14 ue_authority_* relations created by platform 0013. Not yet applied to any clone or live database."
+      }
+    ],
+    "platform": [
+      {
+        "tag": "0013_authority_kernel_storage",
+        "sha256": "6cb84c1640fda60c3ee0a79ad235ab2c7048481652c93c36b3a027e9facb0fa8",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-authority-kernel",
+        "note": "Authority kernel storage. Revised in place before any deployment: the first local draft (3a999601b) hashed to cf53ce455254a0fc913d7e255ae2f21836564025ffb8e48f91d1c5986ac0215a. Not yet applied to any clone or live database."
+      }
+    ]
+  }
+}

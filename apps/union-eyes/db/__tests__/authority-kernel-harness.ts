@@ -42,12 +42,6 @@ const FIXTURE_SQL = `
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), provider varchar(80) NOT NULL, provider_subject varchar(512) NOT NULL,
     platform_user_id varchar(255) NOT NULL, state varchar(16) NOT NULL DEFAULT 'active', verified_at timestamptz NOT NULL DEFAULT now(),
     disabled_at timestamptz, revoked_at timestamptz, CONSTRAINT pib_uq UNIQUE (provider, provider_subject));
-  CREATE TABLE public.audit_logs (
-    id uuid PRIMARY KEY, audit_id uuid UNIQUE NOT NULL, created_at timestamptz NOT NULL, updated_at timestamptz NOT NULL,
-    organization_id uuid, action varchar(100), resource_type varchar(255), resource_id varchar(255), user_id varchar(255),
-    ip_address inet, user_agent text, correlation_id uuid, details jsonb DEFAULT '{}'::jsonb, changes jsonb DEFAULT '{}'::jsonb,
-    content_hash varchar(64), previous_hash varchar(64));
-  CREATE INDEX idx_ue_audit_logs_org_created ON public.audit_logs (organization_id, created_at);
   CREATE TABLE public.grievances (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, created_by text,
     created_at timestamptz NOT NULL DEFAULT now(), is_confidential boolean DEFAULT false, has_legal_implications boolean DEFAULT false,
@@ -71,6 +65,16 @@ const FIXTURE_SQL = `
     amount numeric(19,2) NOT NULL, currency varchar(3) NOT NULL DEFAULT 'CAD');
 `
 
+/** Mirror of the Django-created audit_logs. Skipped when the real table already exists (see the Django audit suite). */
+const AUDIT_FIXTURE_SQL = `
+  CREATE TABLE public.audit_logs (
+    id uuid PRIMARY KEY, audit_id uuid UNIQUE NOT NULL, created_at timestamptz NOT NULL, updated_at timestamptz NOT NULL,
+    organization_id uuid, action varchar(100), resource_type varchar(255), resource_id varchar(255), user_id varchar(255),
+    ip_address inet, user_agent text, correlation_id uuid, details jsonb DEFAULT '{}'::jsonb, changes jsonb DEFAULT '{}'::jsonb,
+    content_hash varchar(64), previous_hash varchar(64));
+  CREATE INDEX idx_ue_audit_logs_org_created ON public.audit_logs (organization_id, created_at);
+`
+
 const GRANTS = `
   GRANT USAGE ON SCHEMA user_management TO union_eyes_runtime;
   GRANT SELECT ON user_management.users, user_management.organization_users, public.platform_identity_bindings TO union_eyes_runtime;
@@ -78,7 +82,7 @@ const GRANTS = `
   GRANT SELECT ON public.grievances, public.grievance_case_access_assignments, public.documents, public.document_links, public.payments TO union_eyes_runtime;
 `
 
-export async function installAuthoritySchema(db: Db): Promise<void> {
+export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: boolean } = {}): Promise<void> {
   await db.exec(`
     DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime') THEN
@@ -88,6 +92,7 @@ export async function installAuthoritySchema(db: Db): Promise<void> {
     END $$;`)
   await db.exec(HELPER)
   await db.exec(FIXTURE_SQL)
+  if (!options.realAuditLogs) await db.exec(AUDIT_FIXTURE_SQL)
   await db.exec(PLATFORM_SQL)
   await db.exec(RLS_SQL)
   for (const t of ['audit_logs', 'grievances', 'grievance_case_access_assignments', 'documents', 'payments']) {
