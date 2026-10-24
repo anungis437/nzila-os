@@ -43,10 +43,45 @@ Residual and required actions:
 | Consumer of Whop `metadata.clerkUserId` | Keep dual keys until confirmed, then drop the legacy key. |
 | Do the Entra test accounts still accept the old default? | Rotation required if yes. |
 
-## Seed / replay finding (pre-existing, not caused by this branch)
+## Seed / replay finding (pre-existing, not caused by this branch) — REPAIRED in `278c0c2e8`
 
 - `db/replay.ps1` applies `db/migrations-audit/0000_familiar_silhouette.sql`, which defines `clerk_organization_id`; Django migration 0003 renamed the column only in the Django-managed schema. The two schemas differ. A rename of the seed column was attempted and **reverted** because it was wrong for the replay schema (verified on PostgreSQL 16).
-- `db/seeds/seed-master.sql` final "Final summary" SELECT (~lines 831-836) fails with `operator does not exist: text = uuid`, aborting the single transaction: no orgs or members persist. Identical at baseline. Not fixed here; fix needs a seed owner decision.
+- **Correction to an earlier diagnosis.** This record previously attributed the failure to the final "Final summary" SELECT. Reproduced on real PostgreSQL 15 and 16, the failing statement is in the Phase 9 validation `DO` block (`seed-master.sql` ~line 829): `organization_members.organization_id` is `text` while `organizations.id` is `uuid`, so `organization_id IN (SELECT id FROM organizations ...)` raised `operator does not exist: text = uuid`, aborting the single transaction (0 organizations, 0 members persisted). The final summary SELECT never ran.
+- **Fix:** one line, `SELECT id::text FROM organizations ...`. No fixture data, column name or frozen migration changed.
+- **Evidence (identical on PostgreSQL 15 and 16):** exit code 0 and the transaction commits; the validation block reports 5 core organizations and 57 members; persisted counts are 40 organizations, 57 members, 6 grievances, 3 collective agreements, 51 users. A second run also commits with the same counts (idempotent).
+- Not verified: the seed under the full Django-then-scoped production lineage. It was verified against the replay schema `db/replay.ps1` builds.
+
+## Webhook alias contract (preserved, not removed)
+
+| Item | State |
+|---|---|
+| Route | `api/auth_core/webhooks/clerk/` → `deprecated_clerk_webhook` → `auth_webhook` (logs a deprecation warning per call) |
+| Payload shape | Clerk-shaped (`email_addresses`, `organizationMembership.*`, Svix signature). Entra emits no such event |
+| Authentication | `AUTH_WEBHOOK_SECRET` (`X-Auth-Secret`). The legacy `X-Clerk-Secret-Key` header is logged and ignored, never accepted |
+| Fail-closed state in v2 | The v2 Bicep sets no `AUTH_WEBHOOK_SECRET`, so the endpoint answers 401 there |
+| In-repo callers | None |
+| Removal condition | The deprecation log shows no call in the agreed window **and** the integration owner confirms no external sender. Until then the alias stays |
+
+## Whop metadata contract
+
+`app/api/whop/create-checkout` sends `metadata.userId` **and** the legacy `metadata.clerkUserId`, both set from the same authenticated session user. The legacy key is informational only and never used for authorization on this side. No Whop webhook consumer exists in this repository, so the external consumer is unverified. Removal condition: the Whop-side consumer is confirmed to read `userId` only.
+
+## Exposed test credential — invalidation runbook (external action; NOT performed)
+
+`scripts/provision-entra-test-users.mjs` created real Entra External ID staging users (tenant default `5082b8be-b04d-4a13-b61c-b6397670177b`) with a repository-known default password. Removing it from current files does **not** make it safe: the value remains in git history and in frozen migration `0095`. Treat every account the script lists as compromised.
+
+Scope: the accounts enumerated in the script's user table (`nzila`, `clc`, `cape`, `cupe` and `zonga` groups, roughly 45 accounts). Anything signed in with the old value must be assumed accessible.
+
+Required actions (need tenant admin; none can be done from this repository):
+
+1. Enumerate the accounts from the script table, plus any created by `scripts/seed-test-auth-accounts.mjs` or `scripts/seed-zonga-auth-accounts.mjs`.
+2. For each account, either set `accountEnabled=false` (preferred for test accounts nobody uses) or reset the password to a fresh random value held only in the secret store, with `forceChangePasswordNextSignIn=true`.
+3. Revoke refresh tokens and sessions for each account (`POST /users/{id}/revokeSignInSessions`).
+4. Verify by attempting a sign-in with the OLD value from the team secret store; it must fail (expected AADSTS50126 or a disabled-account error). Record the account count and the verification date. Do not paste the value into the record.
+5. Reprovision any account that tests still need through the updated scripts, which now require `PROVISION_USER_PASSWORD` or `TEST_ACCOUNT_PASSWORD` (at least 16 characters, no default).
+6. Decide separately whether to rewrite git history. That is a maintainer-approved, repository-wide action and is not proposed here.
+
+Status: **OPEN — external.** Until step 4 is recorded, treat the staging tenant's test accounts as exposed.
 
 ## Verification
 
