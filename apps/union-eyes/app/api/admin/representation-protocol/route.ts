@@ -2,7 +2,8 @@
  * Representation Protocol Admin API
  *
  * GET  /api/admin/representation-protocol  — Read the current protocol
- * PUT  /api/admin/representation-protocol  — Save (upsert) the protocol
+ * PUT  /api/admin/representation-protocol  — Save (upsert) the protocol as pending approval
+ * POST /api/admin/representation-protocol  — Approve the pending protocol (must not be its author)
  */
 
 import { NextResponse } from "next/server";
@@ -10,8 +11,10 @@ import { z } from "zod";
 import { withAdminAuth, type BaseAuthContext } from "@/lib/api-auth-guard";
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import {
-  getRepresentationProtocol,
+  resolveRepresentationProtocol,
   saveRepresentationProtocol,
+  approveRepresentationProtocol,
+  submitLegacyRepresentationProtocolForApproval,
 } from "@/lib/representation/protocol-service";
 import {
   ErrorCode,
@@ -55,7 +58,8 @@ export const GET = withAdminAuth(async (request, context: BaseAuthContext) => {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Organization context required");
   }
 
-  const protocol = await getRepresentationProtocol(organizationId);
+  const resolution = await resolveRepresentationProtocol(organizationId);
+  const protocol = resolution.protocol;
 
   logApiAuditEvent({
     timestamp: new Date().toISOString(),
@@ -64,10 +68,19 @@ export const GET = withAdminAuth(async (request, context: BaseAuthContext) => {
     method: "GET",
     eventType: "success",
     severity: "low",
-    details: { primaryRepresentative: protocol.primaryRepresentative },
+    details: { primaryRepresentative: protocol.primaryRepresentative, executionStatus: resolution.status },
   });
 
-  return NextResponse.json({ protocol });
+  // `protocol` may be a display default; only `execution.executable` indicates institutional authority.
+  return NextResponse.json({
+    protocol,
+    execution: {
+      status: resolution.status,
+      executable: resolution.executable,
+      reason: resolution.executable ? null : resolution.reason,
+      approval: protocol.approval ?? null,
+    },
+  });
 });
 
 // ─── PUT — Save protocol ─────────────────────────────────────
@@ -109,5 +122,55 @@ export const PUT = withAdminAuth(async (request, context: BaseAuthContext) => {
     },
   });
 
-  return NextResponse.json({ ok: true, protocol: parsed.data.protocol });
+  return NextResponse.json({
+    ok: true,
+    protocol: parsed.data.protocol,
+    execution: { status: "pending_approval", executable: false },
+  });
+});
+
+// ─── POST — Independently approve the pending protocol ────────
+
+export const POST = withAdminAuth(async (request, context: BaseAuthContext) => {
+  const { userId, organizationId } = context;
+
+  if (!organizationId || !userId) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Organization and user context required");
+  }
+
+  const body = await request.json().catch(() => ({}));
+  if (body?.action === "submit_legacy") {
+    const submitted = await submitLegacyRepresentationProtocolForApproval(organizationId, userId);
+    logApiAuditEvent({
+      timestamp: new Date().toISOString(),
+      userId,
+      endpoint: "/api/admin/representation-protocol",
+      method: "POST",
+      eventType: submitted.ok ? "success" : "validation_failed",
+      severity: "medium",
+      details: { action: "submit_legacy", outcome: submitted.ok ? "pending_approval" : submitted.code },
+    });
+    if (!submitted.ok) {
+      return NextResponse.json({ error: submitted.code, message: submitted.message }, { status: 409 });
+    }
+    return NextResponse.json({ ok: true, execution: { status: "pending_approval", executable: false } });
+  }
+
+  const result = await approveRepresentationProtocol(organizationId, userId);
+
+  logApiAuditEvent({
+    timestamp: new Date().toISOString(),
+    userId,
+    endpoint: "/api/admin/representation-protocol",
+    method: "POST",
+    eventType: result.ok ? "success" : "unauthorized_access",
+    severity: "medium",
+    details: { action: "approve", outcome: result.ok ? "approved" : result.code },
+  });
+
+  if (!result.ok) {
+    const status = result.code === "NOT_FOUND" ? 404 : result.code === "SELF_APPROVAL_FORBIDDEN" ? 403 : 409;
+    return NextResponse.json({ error: result.code, message: result.message }, { status });
+  }
+  return NextResponse.json({ ok: true, approvedAt: result.approvedAt, execution: { status: "approved", executable: true } });
 });

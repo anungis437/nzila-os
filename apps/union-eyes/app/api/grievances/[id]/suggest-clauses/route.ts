@@ -21,6 +21,7 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 
 const _linkSchema = z.object({
   clauseId: z.string().uuid(),
@@ -52,10 +53,19 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
+    // Seniority does not open a case: the matter's content feeds this analysis, so a case relationship is required.
+    const relationship = await getEffectiveCaseAccess({ organizationId, grievanceId: params.id, userId });
+    if (grievance.createdBy !== userId && !relationship.canViewCase) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have access to this grievance");
+    }
+
     const body = await request.json().catch(() => ({}));
 
     // If clauseId provided, link it
     if (body?.clauseId) {
+      if (!relationship.isPrimaryOwner && !relationship.canDraftActions) {
+        return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have permission to change this case");
+      }
       const result = await linkClauseToGrievance(params.id, body.clauseId);
 
       await auditDataMutation({

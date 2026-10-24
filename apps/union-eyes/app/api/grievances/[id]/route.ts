@@ -54,17 +54,18 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
 
     await expireElapsedCaseAccessAssignments();
 
-    // Row-level access check: a case is visible to its creator, its primary owner and active explicit collaborators.
-    // Seniority alone grants no access to a case.
+    // Row-level access check: seniority grants nothing. Only the creator, the primary owner, or an
+    // active unexpired case-access assignment may read this grievance.
     const effectiveAccess = await getEffectiveCaseAccess({
       organizationId,
       grievanceId: params.id,
       userId,
     });
-    const effectiveAccessForResponse = { ...effectiveAccess };
+    // Collaborator administration is a case-management power held by the primary owner, not by role seniority.
+    const effectiveAccessForResponse = effectiveAccess;
 
     if (grievance.createdBy !== userId && !effectiveAccess.canViewCase) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "You can only view cases you created or are assigned to.");
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have access to this grievance.");
     }
 
     // Fetch related events

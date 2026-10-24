@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   hasMinRole: vi.fn(),
   db: { select: vi.fn() },
   selectQueue: [] as unknown[][],
+  getEffectiveCaseAccess: vi.fn(),
   findRelevantClauses: vi.fn(),
   linkClauseToGrievance: vi.fn(),
   auditDataMutation: vi.fn(),
@@ -20,6 +21,7 @@ vi.mock('@/lib/services/clause-intelligence', () => ({
   linkClauseToGrievance: m.linkClauseToGrievance,
 }));
 vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
+vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: m.getEffectiveCaseAccess }));
 
 async function loadRoute() {
   return import('../grievances/[id]/suggest-clauses/route');
@@ -29,6 +31,7 @@ describe('grievances/[id]/suggest-clauses route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, isPrimaryOwner: true, canDraftActions: true });
     m.withOrganizationAuth.mockImplementation((handler: any) => (request: Request, context: any = { organizationId: 'org_1', userId: 'u1' }, params: any = { id: 'g1' }) => handler(request, context, params));
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
@@ -72,6 +75,41 @@ describe('grievances/[id]/suggest-clauses route', () => {
     const response = await POST(new Request('http://localhost/api/grievances/g1/suggest-clauses'));
 
     expect(response.status).toBe(404);
+  });
+
+  it('denies a steward-level user with no case relationship before analysing or linking', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue = [[{ id: 'g1', description: 'private matter', organizationId: 'org_1', createdBy: 'other' }]];
+    m.getEffectiveCaseAccess.mockResolvedValueOnce({ canViewCase: false, isPrimaryOwner: false, canDraftActions: false });
+
+    const response = await POST(
+      new Request('http://localhost/api/grievances/g1/suggest-clauses', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ clauseId: '11111111-1111-1111-1111-111111111111' }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(m.findRelevantClauses).not.toHaveBeenCalled();
+    expect(m.linkClauseToGrievance).not.toHaveBeenCalled();
+  });
+
+  it('allows read-only collaborators to see suggestions but not link clauses', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue = [[{ id: 'g1', description: 'matter', organizationId: 'org_1', createdBy: 'other' }]];
+    m.getEffectiveCaseAccess.mockResolvedValueOnce({ canViewCase: true, isPrimaryOwner: false, canDraftActions: false });
+
+    const response = await POST(
+      new Request('http://localhost/api/grievances/g1/suggest-clauses', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ clauseId: '11111111-1111-1111-1111-111111111111' }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(m.linkClauseToGrievance).not.toHaveBeenCalled();
   });
 
   it('suggests relevant clauses for a grievance', async () => {

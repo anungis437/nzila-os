@@ -169,6 +169,10 @@ describe('documents/repository route', () => {
     expect(payload.success).toBe(true);
     expect(payload.data).toHaveLength(1);
     expect(payload.data[0]).toMatchObject({ id: 'doc-1', title: 'Doc One' });
+    // Role seniority is not an input to document visibility.
+    for (const call of m.isDocumentVisibleByPolicy.mock.calls) {
+      expect(call[1]).not.toHaveProperty('isStewardPlus');
+    }
   });
 
   it('returns forbidden on POST when caller lacks upload role', async () => {

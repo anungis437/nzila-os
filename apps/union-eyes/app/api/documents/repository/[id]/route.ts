@@ -205,6 +205,18 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
   }
 
+  // Changing a label alters who can read a case document, so it is a case-management power.
+  if (before.linkedEntityType === 'grievance' && before.linkedEntityId) {
+    const relationship = await getEffectiveCaseAccess({
+      organizationId,
+      grievanceId: before.linkedEntityId,
+      userId,
+    });
+    if (!relationship.isPrimaryOwner) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only the primary owner of the linked case can change this document label');
+    }
+  }
+
   const blockedReason = getDocumentMutabilityBlockReason({ metadata: before.metadata });
   if (blockedReason) {
     return standardErrorResponse(

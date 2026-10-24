@@ -111,10 +111,10 @@ describe('grievances/[id] route', () => {
     expect(m.trackPilotEvent).not.toHaveBeenCalled();
   });
 
-  it('returns forbidden for a caller holding a senior role but no ownership, assignment or creation of the case', async () => {
+  it('returns forbidden for a steward-level user with no ownership, grant or authorship', async () => {
     const { GET } = await loadRoute();
 
-    m.hasMinRole.mockResolvedValue(true); // every role check passes: seniority must not matter
+    // hasMinRole defaults to true for every role in this suite: seniority must not open the file.
     m.getEffectiveCaseAccess.mockResolvedValueOnce({
       canViewCase: false,
       canManageAssignments: false,
@@ -126,10 +126,13 @@ describe('grievances/[id] route', () => {
     const response = await GET(new Request('http://localhost/api/grievances/g1'));
 
     expect(response.status).toBe(403);
+    expect(m.selectQueue).toHaveLength(0);
+    expect(m.trackPilotEvent).not.toHaveBeenCalled();
   });
 
   it('returns governed documents and tracks pilot access event', async () => {
     const { GET } = await loadRoute();
+    m.hasMinRole.mockResolvedValueOnce(true);
     m.getEffectiveCaseAccess.mockResolvedValueOnce({
       canViewCase: true,
       canManageAssignments: false,

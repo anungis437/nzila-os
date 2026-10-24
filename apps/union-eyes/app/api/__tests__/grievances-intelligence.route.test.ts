@@ -72,4 +72,38 @@ describe('grievances/[id]/intelligence route', () => {
     const response = await GET(new Request('http://localhost/api/grievances/g1/intelligence'));
     expect([200, 400, 403, 404, 500]).toContain(response.status);
   });
+
+  it('denies a steward-level user who has no case relationship and computes nothing', async () => {
+    m.hasMinRole.mockResolvedValue(true);
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: false });
+    m.db.select = vi.fn(() => ({
+      from: vi.fn(() => ({
+        where: vi.fn(() => ({
+          limit: vi.fn(async () => [{ id: 'g1', createdBy: 'someone-else' }]),
+        })),
+      })),
+    }));
+    const { GET } = await loadRoute();
+    const response = await GET(new Request('http://localhost/api/grievances/g1/intelligence'));
+    expect(response.status).toBe(403);
+    expect(m.getRelatedDocuments).not.toHaveBeenCalled();
+    expect(m.findSimilarCases).not.toHaveBeenCalled();
+    expect(m.buildCaseGraph).not.toHaveBeenCalled();
+  });
+
+  it('never passes role seniority to the intelligence services', async () => {
+    m.db.select = vi.fn(() => ({
+      from: vi.fn(() => ({
+        where: vi.fn(() => ({
+          limit: vi.fn(async () => [{ id: 'g1', createdBy: 'someone-else' }]),
+        })),
+      })),
+    }));
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true });
+    const { GET } = await loadRoute();
+    await GET(new Request('http://localhost/api/grievances/g1/intelligence'));
+    for (const call of [...m.getRelatedDocuments.mock.calls, ...m.findSimilarCases.mock.calls, ...m.buildCaseGraph.mock.calls]) {
+      expect(call[0].actor).toEqual({ userId: 'u1' });
+    }
+  });
 });

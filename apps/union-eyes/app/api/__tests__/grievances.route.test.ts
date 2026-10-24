@@ -200,4 +200,28 @@ describe('grievances route', () => {
     expect(response.status).toBe(200);
     expect(payload.success).toBe(true);
   });
+
+  it('GET labels related matters as case records and unassigned intakes as triage metadata only', async () => {
+    const { GET } = await loadRoute();
+    m.dbSelectWhere
+      .mockResolvedValueOnce([{ id: 'owned_1', status: 'filed', description: 'full narrative' }])
+      .mockResolvedValueOnce([
+        { id: 'owned_1', grievanceNumber: 'GRV-1', type: 'discipline', status: 'draft', priority: 'low', createdAt: new Date() },
+        { id: 'intake_2', grievanceNumber: 'GRV-2', type: 'other', status: 'draft', priority: 'low', createdAt: new Date() },
+      ]);
+
+    const response = await GET(new NextRequest('http://localhost/api/grievances'), {
+      organizationId: 'org_1',
+      userId: 'chief_steward_1',
+    });
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(2);
+    expect(payload.data[0]).toMatchObject({ id: 'owned_1', accessScope: 'case', description: 'full narrative' });
+    expect(payload.data[1]).toMatchObject({ id: 'intake_2', accessScope: 'intake_triage' });
+    expect(payload.data[1]).not.toHaveProperty('description');
+    expect(payload.data[1]).not.toHaveProperty('grievantName');
+    expect(payload.data[1]).not.toHaveProperty('grievantEmail');
+  });
 });

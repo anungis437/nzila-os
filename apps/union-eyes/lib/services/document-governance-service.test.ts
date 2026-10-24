@@ -52,13 +52,13 @@ const actors: Record<string, LiunaActor> = {
     },
   },
   seniorOfficerWithoutCaseRelationship: {
-    name: 'senior officer with no relationship to the case',
+    name: 'senior officer with no relationship to the case, holding a stray document grant',
     context: {
       isOrgMember: true,
       isPrimaryOwner: false,
       hasCaseAccess: false,
       canViewPrivateDocuments: false,
-      hasExplicitDocumentGrant: false,
+      hasExplicitDocumentGrant: true,
     },
   },
   explicitlyGrantedReviewer: {
@@ -109,7 +109,7 @@ describe('document governance service', () => {
     expect(isDocumentVisibleByPolicy('highly_sensitive', actors.successorReviewer.context)).toBe(false);
   });
 
-  it('seniority is not a case relationship: a senior officer without one reads no case document of any label', () => {
+  it('seniority is not a case relationship: a senior officer without one reads no case document of any label, even with a stray grant', () => {
     for (const label of allLabels) {
       expect(isDocumentVisibleByPolicy(label, actors.seniorOfficerWithoutCaseRelationship.context), label).toBe(false);
     }

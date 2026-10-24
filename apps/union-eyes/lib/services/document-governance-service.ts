@@ -37,10 +37,9 @@ export function isDocumentVisibleByPolicy(
     return false;
   }
 
+  // Only the case's primary owner reads case documents without a case relationship; organization
+  // role seniority (steward, chief steward, officer) is deliberately not an input here.
   if (context.isPrimaryOwner) {
-    if (privacyLabel === 'privileged' || privacyLabel === 'highly_sensitive') {
-      return context.hasExplicitDocumentGrant || context.canViewPrivateDocuments || context.isPrimaryOwner;
-    }
     return true;
   }
 
