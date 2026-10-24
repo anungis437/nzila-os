@@ -161,6 +161,14 @@
       "mode": "zero"
     },
     {
+      "id": "COOKIE-FORWARDED-AS-DATABASE-BEARER",
+      "description": "The caller's long-lived session cookie must never be placed in a PostgreSQL setting; the binding carries a 30-second bridge token (UE-CONV-A-004)",
+      "pattern": "sessionToken: cookie",
+      "paths": ["packages/platform-auth/src/org-binding.ts"],
+      "exclude": ["**/__tests__/**", "**/*.test.*"],
+      "mode": "zero"
+    },
+    {
       "id": "DIRECT-MANDATORY-AUDIT-IMPORT",
       "description": "appendMandatoryAudit returns false outside Canonical V2 and leaves the caller unaudited. Mutations use persistAtomicAudit; the listed modules own an explicit non-canonical atomic branch",
       "pattern": "audit/mandatory-audit",

@@ -174,16 +174,11 @@ async function withResolvedOrgBinding<T>(
       if (!user || !membership) throw new AuthOrgBindingError('MEMBERSHIP_REQUIRED')
       if (options.requiredRoles && !options.requiredRoles.includes(membership.role))
         throw new AuthOrgBindingError('ROLE_REQUIRED')
-      if (session && cookie)
-        return {
-          userId,
-          organizationId: membership.organizationId,
-          role: membership.role,
-          isSystemAdmin: user.isSystemAdmin === true,
-          sessionToken: cookie,
-          expiresAt: session.expiresAt,
-          authority: 'pg-session',
-        }
+      // The caller's own session cookie is a long-lived bearer: it is validated above and then never forwarded to
+      // PostgreSQL. Every binding, whatever authenticated the principal, carries a 30-second single-purpose token that
+      // is revoked when the callback ends. `authority` records how the principal was authenticated, not what is sent.
+      const authority: AuthenticatedOrgBinding['authority'] =
+        session && cookie ? 'pg-session' : 'verified-provider-bridge'
       const token = randomBytes(32).toString('base64url')
       const hash = createHash('sha256').update(token).digest('hex')
       const [created] = await authDb
@@ -207,7 +202,7 @@ async function withResolvedOrgBinding<T>(
         isSystemAdmin: user.isSystemAdmin === true,
         sessionToken: token,
         expiresAt: created.expiresAt,
-        authority: 'verified-provider-bridge',
+        authority,
       }
     },
   )
@@ -220,7 +215,7 @@ async function withResolvedOrgBinding<T>(
     callbackError = error
     throw error
   } finally {
-    if (binding.authority === 'verified-provider-bridge') {
+    {
       const hash = createHash('sha256').update(binding.sessionToken).digest('hex')
       try {
         await withAuthContext({ phase: 'identity', userId }, () =>

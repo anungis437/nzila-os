@@ -72,11 +72,15 @@
       "workstream": "A",
       "canonicalOwner": "packages/db/src/auth-storage-authority/org-session-authority.ts",
       "sources": [{ "kind": "symbol", "ref": "app.current_session_token set_config", "classification": "CANONICAL" }],
-      "defect": "The raw server-held session bearer is placed in a transaction-local PostgreSQL setting so definer predicates can hash it in-database. Source review (UE-SESSION-BEARER-EXPOSURE-REVIEW.md): the 30-second bridge token is low risk, but the pg-session path sends the caller's long-lived cookie as a bind parameter. Server statement logging with default log_parameter_max_length would record it; deployment configuration is UNVERIFIED. No ORM SQL logger was found. NOT remediated.",
+      "defect": "The raw server-held session bearer was placed in a transaction-local PostgreSQL setting so definer predicates can hash it in-database. The pg-session path sent the caller's long-lived cookie as a bind parameter (TypeScript org-binding and the Django canonical context). REMEDIATED IN CODE: both writers now validate the cookie and forward only a 30-second single-purpose bridge token, revoked when the callback or request ends. Proven by the unit test, the native identity suite on the pinned local pgvector image (17/17, with new assertions) and all 25 bootstrap-v2 files including the Django framework native proof (636 tests). REMAINING: a bridge outlives revocation of its parent session by at most 30 seconds (no parent link in the definer predicates; closing it needs a governed predicate migration); deployment log controls (log_parameter_max_length, log_statement) are an unverified operations gate; not a staging isolation pass.",
       "consumers": ["apps/union-eyes/lib/authority/store/executor.ts", "packages/platform-auth/src/org-binding.ts"],
       "securityImplications": "A credential in a server setting can leak into logs or be read by a same-session query.",
       "requiredImplementation": "Apply the deployment log controls and stop passing the long-lived cookie (mint a short-lived bridge session or bind a derived proof) through the governed migration lineage, proven on PostgreSQL 15 and 16.",
-      "evidence": [{ "type": "path", "ref": "docs/union-eyes/convergence/UE-SESSION-BEARER-EXPOSURE-REVIEW.md" }],
+      "evidence": [
+        { "type": "path", "ref": "docs/union-eyes/convergence/UE-SESSION-BEARER-EXPOSURE-REVIEW.md" },
+        { "type": "test", "ref": "packages/platform-auth/src/__tests__/bearer-org-binding.test.ts" },
+        { "type": "test", "ref": "apps/union-eyes/scripts/bootstrap-v2/auth-native.test.ts" }
+      ],
       "status": "IN_PROGRESS",
       "retirement": { "disposition": "NONE" }
     },

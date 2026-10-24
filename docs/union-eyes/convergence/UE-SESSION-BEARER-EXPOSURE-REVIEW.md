@@ -1,6 +1,6 @@
 # UE Session Bearer Exposure Review (UE-CONV-A-004)
 
-**Status:** REVIEWED, NOT REMEDIATED. Findings below are from source inspection only. No live PostgreSQL configuration, log store or connection pool was inspected; those items are marked UNVERIFIED and are deployment gates.
+**Status:** CODE REMEDIATED (final-convergence addendum, section 6); deployment log controls remain an operations gate. The long-lived session cookie is no longer forwarded to PostgreSQL by either writer (TypeScript and Django). Sections 1 to 5 are the original source review and describe the behaviour before the change. Findings below are from source inspection only. No live PostgreSQL configuration, log store or connection pool was inspected; those items are marked UNVERIFIED and are deployment gates.
 
 ## 1. What happens today
 
@@ -46,3 +46,23 @@ The second row is the material exposure: a long-lived credential is sent to the 
 ## 5. Not claimed
 
 This review does not claim the bearer is safe in production. It claims only the source-level facts above.
+
+## 6. Remediation (final convergence)
+
+Both writers now validate the caller's long-lived credential and then mint a 30-second single-purpose bridge session row. Its token is the only value placed in `app.current_session_token`. The bridge is revoked when the callback or request ends, on success and on failure.
+
+- `packages/platform-auth/src/org-binding.ts`: `withResolvedOrgBinding` no longer returns the cookie. `authority` still records how the principal was authenticated (`pg-session` for a password session, `verified-provider-bridge` for a provider), so `canonical-organization-selection.ts` (whose `SelectionActor` is a separate type) and the identity store are unchanged.
+- `backend/auth_core/canonical_context.py`: `resolve_actor` mints a `django-canonical-session-bridge` row for session bearers, bounded by the parent session expiry, exactly as it already did for provider tokens; `revoke_bridge` now runs for every request.
+
+Evidence:
+
+- `bearer-org-binding.test.ts` (unit).
+- The native identity suite `auth-native.test.ts` on the pinned `pgvector/pgvector:0.8.1-pg16` image, which is present locally (17/17). It now asserts that the setting is not the cookie, expires within 30 seconds, is revoked after the callback, leaves the parent session untouched, and that a revoked parent session is refused on the next call.
+- All 25 files under `scripts/bootstrap-v2`, including the framework, runtime-security, organization-selection, audit-chain and manifest native proofs (636 tests).
+
+Residual, stated honestly:
+
+1. A bridge outlives revocation of its parent session by at most 30 seconds, because the definer predicates check the bridge row, not its parent. Closing that needs a parent link and a predicate change through the governed migration lineage and was not done.
+2. Each request now performs one session-row insert and one update.
+3. The deployment log controls in section 4.1 are unverified and remain an operations gate.
+4. Not a staging isolation pass.

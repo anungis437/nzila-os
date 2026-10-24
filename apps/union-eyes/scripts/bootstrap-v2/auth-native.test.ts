@@ -243,9 +243,14 @@ native('local native PostgreSQL auth execution boundary', () => {
       () => createSession({ userId: cookies.actor, organizationId: orgA }))
     cookies.token = created.token
     const options = { expectedActorUserId: cookies.actor, organizationId: orgA, requiredRoles: ['member'] }
+    let bridgeHash = ''
     await withAuthenticatedOrgBinding(options, async binding => {
       expect(binding.role).toBe('member')
       expect(binding.authority).toBe('pg-session')
+      // The long-lived cookie is never forwarded: the database setting carries a 30-second single-purpose token.
+      expect(binding.sessionToken).not.toBe(created.token)
+      expect(binding.expiresAt.getTime() - Date.now()).toBeLessThanOrEqual(30_000)
+      bridgeHash = createHash('sha256').update(binding.sessionToken).digest('hex')
       await clients.ordinary.query('BEGIN')
       try {
         for (const [key, value] of Object.entries(authBusinessContextSettings(binding)))
@@ -254,13 +259,16 @@ native('local native PostgreSQL auth execution boundary', () => {
         await clients.ordinary.query("SELECT set_config('app.current_org_id',$1,true)", [orgB])
         expect((await clients.ordinary.query('SELECT user_management.auth_business_org_authorized($1::uuid) AS allowed', [orgB])).rows[0].allowed).toBe(false)
         await clients.ordinary.query("SELECT set_config('app.current_org_id',$1,true)", [orgA])
-        await clients.owner.query('UPDATE user_management.user_sessions SET is_active=false WHERE session_id=$1', [created.session.sessionId])
+        // Revoking the binding's own authority ends it immediately.
+        await clients.owner.query('UPDATE user_management.user_sessions SET is_active=false WHERE session_token_hash=$1', [bridgeHash])
         expect((await clients.ordinary.query('SELECT user_management.auth_business_org_authorized($1::uuid) AS allowed', [orgA])).rows[0].allowed).toBe(false)
       } finally {
         await clients.ordinary.query('ROLLBACK')
-        await clients.owner.query('UPDATE user_management.user_sessions SET is_active=true WHERE session_id=$1', [created.session.sessionId])
       }
     })
+    // The bridge is revoked when the callback ends, and the cookie's own session was never altered by the binding.
+    expect((await clients.owner.query('SELECT is_active FROM user_management.user_sessions WHERE session_token_hash=$1', [bridgeHash])).rows[0].is_active).toBe(false)
+    expect((await clients.owner.query('SELECT is_active FROM user_management.user_sessions WHERE session_id=$1', [created.session.sessionId])).rows[0].is_active).toBe(true)
     await expect(withAuthenticatedOrgBinding({ ...options, organizationId: orgB }, async () => undefined)).rejects.toMatchObject({ code: 'MEMBERSHIP_REQUIRED' })
     await expect(withAuthenticatedOrgBinding({ ...options, requiredRoles: ['admin'] }, async () => undefined)).rejects.toMatchObject({ code: 'ROLE_REQUIRED' })
     await expect(withAuthenticatedOrgBinding({ ...options, expectedActorUserId: 'auth-proof-b' }, async () => undefined)).rejects.toMatchObject({ code: 'ACTOR_MISMATCH' })

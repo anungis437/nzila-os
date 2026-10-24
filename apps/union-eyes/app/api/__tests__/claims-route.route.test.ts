@@ -16,6 +16,7 @@ vi.mock('@/lib/api/crud-factory', () => ({
 vi.mock('@/lib/api/with-api', () => ({ withApi: m.withApi }));
 vi.mock('@/lib/api/errors', () => ({ ApiError: { badRequest: m.badRequest } }));
 vi.mock('@/db/schema', () => ({ claims: m.claims }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
   withSystemRLSContext: m.withSystemRLSContext,

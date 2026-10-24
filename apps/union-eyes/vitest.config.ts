@@ -1,30 +1,10 @@
 import { defineProject } from "vitest/config";
 import react from "@vitejs/plugin-react";
-import path from "node:path";
+import { heavyTests, sharedExclude, sharedResolve } from "./vitest.shared";
 
 export default defineProject({
   plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "."),
-      // Stub next-auth + platform-auth server in unit tests — next-auth
-      // tries to import next/server at load time which crashes in vitest
-      "next-auth": path.resolve(__dirname, "./__mocks__/next-auth.ts"),
-      "next-auth/providers/microsoft-entra-id": path.resolve(
-        __dirname,
-        "./__mocks__/next-auth-microsoft-entra-id.ts",
-      ),
-      "@nzila/cupe-vocabulary/types": path.resolve(
-        __dirname,
-        "../../packages/cupe-vocabulary/src/types.ts",
-      ),
-      "@nzila/cupe-vocabulary": path.resolve(
-        __dirname,
-        "../../packages/cupe-vocabulary/src/index.ts",
-      ),
-      "@nzila/platform-auth/entra/server": path.resolve(__dirname, "./__mocks__/platform-auth-server.ts"),
-    },
-  },
+  resolve: sharedResolve,
   test: {
     name: "union-eyes",
     // Route-matrix smoke and import-matrix tests dynamically import hundreds
@@ -33,6 +13,8 @@ export default defineProject({
     // per-route imports past 60s. 120s gives comfortable headroom.
     testTimeout: 120_000,
     hookTimeout: 60_000,
+    // Container and child-process suites run in the union-eyes-heavy project (vitest.heavy.config.ts).
+    sequence: { groupOrder: 1 },
     coverage: {
       provider: "v8",
       include: [
@@ -47,13 +29,6 @@ export default defineProject({
         statements: 99,
       },
     },
-    exclude: [
-      "**/node_modules/**",
-      "**/.git/**",
-      "**/.next/**",
-      "e2e/**",
-      "tests/e2e/**",
-      "services/financial-service/**",
-    ],
+    exclude: [...sharedExclude, ...heavyTests],
   },
 } as unknown as Parameters<typeof defineProject>[0]);

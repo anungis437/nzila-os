@@ -105,15 +105,16 @@ def resolve_actor(bearer, requested_org=None):
         "lookup", **{"nzila.auth_selector": "session", "nzila.auth_token_hash": digest}
     ) as cursor:
         cursor.execute(
-            "SELECT user_id,organization_id FROM user_management.user_sessions "
+            "SELECT user_id,organization_id,expires_at FROM user_management.user_sessions "
             "WHERE session_token_hash=%s AND is_active AND expires_at>statement_timestamp()",
             [digest],
         )
         sessions = cursor.fetchall()
     if len(sessions) > 1:
         raise AuthenticationFailed("Ambiguous canonical session authority")
+    session_expires = None
     if sessions:
-        user_id, session_org = sessions[0]
+        user_id, session_org, session_expires = sessions[0]
     else:
         from auth_core.authentication import OIDCAuthentication
 
@@ -191,17 +192,27 @@ def resolve_actor(bearer, requested_org=None):
         ):
             raise AuthenticationFailed("Unsupported canonical organization role")
         organization_id = str(membership[0]) if membership else None
-        if provider_payload is not None:
-            bearer = token_urlsafe(32)
-            digest = sha256(bearer.encode()).hexdigest()
-            expires = datetime.fromtimestamp(provider_payload["exp"], timezone.utc)
-            cursor.execute(
-                "INSERT INTO user_management.user_sessions"
-                "(user_id,organization_id,session_token,session_token_hash,is_active,created_at,expires_at,device_info) "
-                "VALUES (%s,%s,%s,%s,true,statement_timestamp(),LEAST(statement_timestamp()+interval '30 seconds',%s),"
-                '\'{"purpose":"django-canonical-provider-bridge"}\'::jsonb)',
-                [user_id, organization_id, digest, digest, expires],
-            )
+        # The caller's long-lived session token (or provider JWT) is validated above and never forwarded to
+        # PostgreSQL: the database setting carries a 30-second single-purpose token revoked when the request ends.
+        purpose = (
+            "django-canonical-provider-bridge"
+            if provider_payload is not None
+            else "django-canonical-session-bridge"
+        )
+        expires = (
+            datetime.fromtimestamp(provider_payload["exp"], timezone.utc)
+            if provider_payload is not None
+            else session_expires
+        )
+        bearer = token_urlsafe(32)
+        digest = sha256(bearer.encode()).hexdigest()
+        cursor.execute(
+            "INSERT INTO user_management.user_sessions"
+            "(user_id,organization_id,session_token,session_token_hash,is_active,created_at,expires_at,device_info) "
+            "VALUES (%s,%s,%s,%s,true,statement_timestamp(),LEAST(statement_timestamp()+interval '30 seconds',%s),"
+            "jsonb_build_object('purpose',%s::text))",
+            [user_id, organization_id, digest, digest, expires, purpose],
+        )
     return CanonicalActor(
         user_id,
         user[0],
@@ -209,7 +220,7 @@ def resolve_actor(bearer, requested_org=None):
         organization_id,
         membership[1] if membership else None,
         bearer,
-        provider_payload is not None,
+        True,
     )
 
 

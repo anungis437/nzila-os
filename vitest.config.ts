@@ -12,6 +12,7 @@ export default defineConfig({
       'apps/orchestrator-api',
       'apps/partners',
       'apps/union-eyes',
+      'apps/union-eyes/vitest.heavy.config.ts',
       'apps/web',
       'apps/nacp-exams',
       'apps/zonga',
