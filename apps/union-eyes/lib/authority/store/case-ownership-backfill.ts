@@ -1,5 +1,5 @@
 /**
- * Authority store — governed backfill of case ownership from the legacy `grievances.union_rep_id` column.
+ * Authority store — governed backfill of case ownership from the legacy primary-representative column on grievances.
  *
  * The legacy column is not an authority source (see case-ownership.ts). Turning its values into kernel
  * assignments is an institutional decision about which recorded owners are genuine, so this module never acts on
@@ -101,7 +101,7 @@ export async function executeOwnershipBackfill(
       assigneeUserId: c.assigneeUserId,
       permissions: ['read', 'comment', 'write'],
       effectiveAt: input.effectiveAt,
-      auditDetails: { source: 'legacy_union_rep_id_backfill', decisionReference: reference, planHash: plan.planHash },
+      auditDetails: { source: 'legacy_owner_column_backfill', decisionReference: reference, planHash: plan.planHash },
     })
     assigned.push({ caseId: c.caseId, assigneeUserId: c.assigneeUserId, relationshipId })
   }

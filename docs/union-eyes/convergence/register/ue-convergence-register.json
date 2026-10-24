@@ -209,7 +209,7 @@
       "defect": "The deployed payments relation has no amount, currency or payer; no relation anywhere carries approver or executor actors for disbursements.",
       "consumers": ["apps/union-eyes/lib/authority/store/resources.ts"],
       "securityImplications": "Money authority cannot be authorized from missing records; the kernel correctly denies.",
-      "requiredImplementation": "Decide the disbursement and approval entity; implement and deploy it with RLS; enable finance actions only where amount, currency and workflow actors exist.",
+      "requiredImplementation": "PARTLY DONE: platform 0015 adds nullable member_id, amount and currency (non-negative and ISO-shape checks, no invented values) to the payments stub, applied by the canonical bootstrap on real PostgreSQL 15 and 16 and proven as the runtime role (columns present, readiness true, existing row untouched, negative amount and malformed currency refused, cross-tenant insert refused, an unregistered or incomplete payment still denies every finance action). The workflow actors live in ue_authority_financial_steps (0013). REMAINING: the institution decides which offices hold which duties and approval thresholds (D-003), the finance routes are then moved onto the kernel, and 0013/0015 are qualified on a credentialed clone. Until a route registers payments with an amount, currency and payer, no finance action can be allowed.",
       "evidence": [
         { "type": "path", "ref": "apps/union-eyes/db/__tests__/authority-kernel-finance-sources.pglite.test.ts" }
       ],

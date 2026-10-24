@@ -181,6 +181,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Staff assignment of member conversations (message_triage_designations, message_thread_assignments, guard triggers on message_threads) and evolution of the canonical Django stubs messages and in_app_notifications plus column defaults on message_threads. RLS is scoped 0021. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0015_payments_transaction_source",
+        "sha256": "64905dc72e60c6d3c559bbbf8052de9673c635fb0a409ac684a2df077fef7fba",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Adds nullable member_id, amount and currency (non-negative and ISO-shape checks) to the Django payments stub so the kernel finance policy has an authoritative transaction source. Invents no value for existing rows. Not yet applied to any clone or live database."
       }
     ]
   }

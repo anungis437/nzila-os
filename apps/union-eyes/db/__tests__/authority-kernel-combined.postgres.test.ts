@@ -12,8 +12,8 @@
  * Findings this suite pins (each is a fail-closed behaviour, not a pass of the feature):
  *   - public.platform_identity_bindings is not in the approved lineage, so provider
  *     resolution must refuse;
- *   - public.payments is a four-column Django stub with no amount, currency or payer,
- *     so every financial decision must deny.
+ *   - public.payments gains amount, currency and payer only through platform 0015, as nullable columns that
+ *     invent no value, so an unregistered or incomplete payment still denies every financial decision.
  * Not a staging isolation pass.
  */
 import pg from 'pg'
@@ -24,6 +24,8 @@ import { daysAhead, kit, minutesAgo } from './authority-kernel-testkit'
 import { reconcileAuthorityAudit } from '../../lib/authority/store/audit'
 import { enforceAuthority, enforceDocumentRead } from '../../lib/authority/store/enforce'
 import { runAuthorityTransaction, type SqlExecutor } from '../../lib/authority/store/executor'
+import { financeSourceReadiness } from '../../lib/authority/store/resources'
+import { recordFinancialStep } from '../../lib/authority/store/workflow'
 import { canonicalMembershipSource, membershipSourceVia } from '../../lib/authority/store/identity'
 import { issueMandate, declareOwnRecusal } from '../../lib/authority/store/lifecycle'
 import type { Action } from '../../lib/authority/ontology'
@@ -163,14 +165,32 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     for (const who of [U.president, U.steward, U.stranger]) expect((await read(who, own)).effect, who).toBe('deny')
   })
 
-  it('FINDING: the deployed payments table has no amount, currency or payer, so finance denies instead of guessing', async () => {
+  it('payments carries the transaction source columns (platform 0015) without inventing values, and finance still denies an unregistered or incomplete payment', async () => {
     const cols = (await admin.query(`SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payments'`)).rows.map((r) => r.column_name)
-    expect(cols).not.toContain('amount')
+    expect(cols).toEqual(expect.arrayContaining(['amount', 'currency', 'member_id']))
+    expect(await asUser(U.treasurer, (t) => financeSourceReadiness(t))).toEqual({ ready: true, missingColumns: [] })
+    // The pre-existing row was not given an amount, currency or payer.
+    expect((await admin.query(`SELECT amount, currency, member_id FROM payments WHERE id = $1`, [PAYMENT])).rows[0]).toEqual({ amount: null, currency: null, member_id: null })
+    // Integrity: a negative amount and a malformed currency are refused by the database.
+    await expect(admin.query(`UPDATE payments SET amount = -1 WHERE id = $1`, [PAYMENT])).rejects.toThrow(/payments_amount_non_negative/)
+    await expect(admin.query(`UPDATE payments SET currency = 'cad' WHERE id = $1`, [PAYMENT])).rejects.toThrow(/payments_currency_iso_shape/)
+    // A payment with no amount cannot be registered as a finance transaction, and nobody is authorized against it.
+    await expect(
+      asUser(U.treasurer, (t) => recordFinancialStep(t, { memberships: canonicalMembershipSource }, { organizationId: ORG, actorUserId: U.treasurer, paymentId: PAYMENT, step: 'registered', accountId: newUuid(), requiredApprovals: 1 })),
+    ).rejects.toThrow()
     for (const action of ['finance:view', 'finance:prepare', 'finance:approve', 'finance:execute', 'finance:reconcile'] as Action[]) {
       for (const who of [U.president, U.treasurer, U.member]) {
         expect((await decide(who, action, 'financial_transaction', PAYMENT)).effect, `${who} ${action}`).toBe('deny')
       }
     }
+    // The runtime role writes the new columns only inside its own organization.
+    const OWN = newUuid()
+    await asUser(U.treasurer, (t) => t.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, amount, currency, member_id) VALUES ($1,$2,now(),now(),'125.50','CAD',$3)`, [OWN, ORG, U.member]))
+    await expect(
+      asUser(U.treasurer, (t) => t.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, amount, currency) VALUES ($1,$2,now(),now(),'1.00','CAD')`, [newUuid(), ORG_B])),
+    ).rejects.toThrow(/row-level security/)
+    // Unregistered, so still denied even with a complete source row.
+    expect((await decide(U.treasurer, 'finance:view', 'financial_transaction', OWN)).effect).toBe('deny')
   })
 
   it('governed issuance on deployed grants: ceremony, mandate, audit chain; forged actors refused', async () => {
