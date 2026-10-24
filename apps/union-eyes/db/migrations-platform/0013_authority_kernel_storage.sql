@@ -644,6 +644,66 @@ CREATE TABLE IF NOT EXISTS ue_authority_workaid_matters (
 CREATE UNIQUE INDEX IF NOT EXISTS ue_authority_workaid_case_uq ON ue_authority_workaid_matters (organization_id, case_id) WHERE withdrawn_at IS NULL;
 --> statement-breakpoint
 
+-- Institution-recorded appointment of counsel to ONE matter. It establishes counsel's capacity (external, or a union
+-- member acting in a separate capacity behind an information barrier). It holds references, never counsel content.
+CREATE TABLE IF NOT EXISTS ue_authority_counsel_engagements (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  organization_id uuid NOT NULL,
+  matter_id uuid NOT NULL REFERENCES ue_authority_workaid_matters (id),
+  counsel_user_id ue_authority_principal NOT NULL,
+  capacity text NOT NULL,
+  information_barrier boolean NOT NULL DEFAULT false,
+  recorded_by ue_authority_principal NOT NULL,
+  effective_at timestamptz NOT NULL,
+  expires_at timestamptz,
+  revoked_at timestamptz,
+  revoked_by ue_authority_principal,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT ue_authority_engagement_capacity_chk CHECK (capacity IN ('external_counsel', 'member_counsel')),
+  -- A member acting as counsel needs a recorded information barrier and a bounded term.
+  CONSTRAINT ue_authority_engagement_member_chk CHECK (capacity <> 'member_counsel' OR (information_barrier AND expires_at IS NOT NULL)),
+  CONSTRAINT ue_authority_engagement_term_chk CHECK (expires_at IS NULL OR expires_at > effective_at),
+  CONSTRAINT ue_authority_engagement_recorder_chk CHECK (counsel_user_id <> recorded_by),
+  CONSTRAINT ue_authority_engagement_revoked_chk CHECK ((revoked_at IS NULL) = (revoked_by IS NULL))
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS ue_authority_engagement_live_uq ON ue_authority_counsel_engagements (organization_id, matter_id, counsel_user_id) WHERE revoked_at IS NULL;
+--> statement-breakpoint
+
+CREATE OR REPLACE FUNCTION ue_authority_guard_engagement() RETURNS trigger LANGUAGE plpgsql AS $fn$
+DECLARE
+  m ue_authority_workaid_matters%ROWTYPE;
+BEGIN
+  SELECT * INTO m FROM ue_authority_workaid_matters WHERE id = NEW.matter_id;
+  IF NOT FOUND OR m.organization_id <> NEW.organization_id THEN
+    RAISE EXCEPTION 'ENGAGEMENT_MATTER_INVALID: the matter does not exist in this organization' USING ERRCODE = '23514';
+  END IF;
+  IF NEW.counsel_user_id IN (m.member_user_id, m.referred_by) OR NEW.recorded_by IN (m.member_user_id, NEW.counsel_user_id) THEN
+    RAISE EXCEPTION 'ENGAGEMENT_PARTY_CONFLICT: counsel and the recorder must be independent of the member and the referrer' USING ERRCODE = '23514';
+  END IF;
+  IF m.withdrawn_at IS NOT NULL THEN
+    RAISE EXCEPTION 'ENGAGEMENT_MATTER_INVALID: the referral was withdrawn' USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$fn$;
+--> statement-breakpoint
+
+-- Durable, single-use register of consumed counsel assertion nonces. Only a SHA-256 of the nonce is stored.
+CREATE TABLE IF NOT EXISTS ue_authority_counsel_nonces (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  organization_id uuid NOT NULL,
+  matter_id uuid NOT NULL,
+  nonce_hash text NOT NULL,
+  consumed_by ue_authority_principal NOT NULL,
+  consumed_at timestamptz NOT NULL DEFAULT now(),
+  expires_at timestamptz NOT NULL,
+  CONSTRAINT ue_authority_nonce_hash_chk CHECK (nonce_hash ~ '^[0-9a-f]{64}$')
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS ue_authority_nonce_uq ON ue_authority_counsel_nonces (organization_id, nonce_hash);
+--> statement-breakpoint
+
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ue_authority_mandates_rule_fk') THEN
@@ -864,7 +924,8 @@ DECLARE
 BEGIN
   FOREACH tbl IN ARRAY ARRAY[
     'ue_authority_issuance_rules', 'ue_authority_acceptances', 'ue_authority_requests',
-    'ue_authority_financial_steps', 'ue_authority_reviews', 'ue_authority_workaid_matters'
+    'ue_authority_financial_steps', 'ue_authority_reviews', 'ue_authority_workaid_matters',
+    'ue_authority_counsel_engagements', 'ue_authority_counsel_nonces'
   ] LOOP
     EXECUTE format('DROP TRIGGER IF EXISTS ue_authority_no_delete ON %I', tbl);
     EXECUTE format('CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON %I FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()', tbl);
@@ -909,6 +970,18 @@ CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_reviews F
 DROP TRIGGER IF EXISTS ue_authority_guard_update ON ue_authority_workaid_matters;
 --> statement-breakpoint
 CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_workaid_matters FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('withdrawn_at', 'counsel_accepted_at,counsel_accepted_by,withdrawn_at');
+--> statement-breakpoint
+DROP TRIGGER IF EXISTS ue_authority_guard_update ON ue_authority_counsel_engagements;
+--> statement-breakpoint
+CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_counsel_engagements FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('revoked_at', 'revoked_at,revoked_by');
+--> statement-breakpoint
+DROP TRIGGER IF EXISTS ue_authority_guard_insert ON ue_authority_counsel_engagements;
+--> statement-breakpoint
+CREATE TRIGGER ue_authority_guard_insert BEFORE INSERT ON ue_authority_counsel_engagements FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_engagement();
+--> statement-breakpoint
+DROP TRIGGER IF EXISTS ue_authority_guard_update ON ue_authority_counsel_nonces;
+--> statement-breakpoint
+CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_counsel_nonces FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation();
 --> statement-breakpoint
 
 -- Actor binding. Whoever a row says acted MUST be the authenticated principal of the
@@ -964,7 +1037,9 @@ BEGIN
     ARRAY['ue_authority_requests', 'actor', ''],
     ARRAY['ue_authority_financial_steps', 'actor', ''],
     ARRAY['ue_authority_reviews', 'opened_by', ''],
-    ARRAY['ue_authority_workaid_matters', 'referred_by', 'counsel_accepted_by']
+    ARRAY['ue_authority_workaid_matters', 'referred_by', 'counsel_accepted_by'],
+    ARRAY['ue_authority_counsel_engagements', 'recorded_by', 'revoked_by'],
+    ARRAY['ue_authority_counsel_nonces', 'consumed_by', '']
   ] LOOP
     EXECUTE format('DROP TRIGGER IF EXISTS ue_authority_guard_actor ON %I', spec[1]);
     EXECUTE format('CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON %I FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor(%L, %L)', spec[1], spec[2], spec[3]);

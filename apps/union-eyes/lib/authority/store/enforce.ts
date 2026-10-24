@@ -72,7 +72,7 @@ export async function requireCounselSession(
     )
   ).rows[0]
   if (!matter) {
-    if (union.length > 0) throw new AuthorityStoreError('DENIED', 'COUNSEL_CONFLICT_UNVERIFIABLE: the matter is unknown, so a member cannot be cleared to act as counsel')
+    if (union.length > 0 || deps.counsel.engagement) throw new AuthorityStoreError('DENIED', 'COUNSEL_CONFLICT_UNVERIFIABLE: the matter is unknown, so counsel cannot be cleared')
     return userId
   }
   const caseRef = { type: 'case' as const, id: matter.case_id, organizationId: input.organizationId }
@@ -81,7 +81,11 @@ export async function requireCounselSession(
     : null
   if (union.length > 0 && !loaded) throw new AuthorityStoreError('DENIED', 'COUNSEL_CONFLICT_UNVERIFIABLE: the underlying case could not be loaded')
   const adverse = loaded && loaded.resource.kind === 'case' ? [...loaded.resource.adverseUserIds] : []
-  const engagement = union.length > 0 && deps.counsel.engagement ? await deps.counsel.engagement(exec, { organizationId: input.organizationId, matterId: input.matterId, userId }) : null
+  // When an engagement register is wired in, EVERY counsel (external included) needs a live engagement for this matter.
+  const engagement = deps.counsel.engagement ? await deps.counsel.engagement(exec, { organizationId: input.organizationId, matterId: input.matterId, userId }) : null
+  if (deps.counsel.engagement && union.length === 0 && !engagement) {
+    throw new AuthorityStoreError('DENIED', 'COUNSEL_ENGAGEMENT_REQUIRED: no engagement is recorded for this counsel on this matter')
+  }
   const result = evaluateCounselCapacity(
     {
       userId,

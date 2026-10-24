@@ -46,7 +46,7 @@ Kernel-owned provider resolver removal (`UE-CONV-A-002`), internal-file scope (`
 
 ## Still open — honest list
 
-- **Counsel durable stores (`G-001`).** The engagement register and the replay-proof nonce store are ports with no durable implementation. They need a governed change to the kernel migrations (`0013`, `0020`), the pinned lineage record, the journals, the registry and the 14-relation tests. Until configured, every counsel act is refused.
+- **Counsel durable stores (`G-001`) — closed on the union side** in the follow-up commit: engagement register and nonce store added to kernel migrations `0013`/`0020` (now 16 relations; hashes `7d5ea524…989d` and `aab16d12…8125`, still UNQUALIFIED and unapplied to any live database). Proven in-process, and on real PostgreSQL 15 and 16 (combined suite 10/10, storage and Django-audit 15/15 each). The counsel-side signature verifier and key custody remain an external gate (`G-003`).
 - **Session bearer (`A-004`).** Reviewed, not remediated. The long-lived cookie is sent as a bind parameter on the `pg-session` path. Deployment log settings are unverified. Code change touches the unapplied `0041` and the registered `0017`.
 - **Case ownership (`B-001`).** `union_rep_id` has no foreign key and 27 files read it; 15 files still use `isStewardPlus` or `case_read_any`. Both are ratcheted, not migrated.
 - **Finance (`D-*`).** The deployed `payments` relation is a 4-column stub; the real approval tables exist only in the undeployed `services/financial-service`.
@@ -60,10 +60,9 @@ Webhook sender discovery and the deprecated alias; the Whop consumer of the lega
 
 ## Resume point
 
-1. `UE-CONV-G-001`: add the engagement register and nonce store to the kernel migrations; update the lineage record, journals, registry and relation-count tests; prove on PostgreSQL 15 and 16.
-2. `UE-CONV-A-004`: apply the deployment log controls and stop passing the long-lived cookie.
-3. `UE-CONV-E-001` / `B-001`: migrate the 15 rank-derived files and the `union_rep_id` readers to kernel assignments, shrinking both allowlists.
-4. Persona integration against the kernel, one persona at a time.
-5. Re-run the PostgreSQL 15/16 suites and the full required validation set before any review request.
+1. `UE-CONV-A-004`: apply the deployment log controls and stop passing the long-lived cookie.
+2. `UE-CONV-E-001` / `B-001`: migrate the 15 rank-derived files and the `union_rep_id` readers to kernel assignments, shrinking both allowlists.
+3. Persona integration against the kernel, one persona at a time.
+4. Re-run the full required validation set before any review request.
 
 Phase 3B remains blocked while `UE_SAAS_OPERATIONAL_READINESS` reads `NO_GO`.

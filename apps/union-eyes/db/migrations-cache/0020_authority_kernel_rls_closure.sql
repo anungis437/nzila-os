@@ -29,7 +29,9 @@ BEGIN
     'ue_authority_requests',
     'ue_authority_financial_steps',
     'ue_authority_reviews',
-    'ue_authority_workaid_matters'
+    'ue_authority_workaid_matters',
+    'ue_authority_counsel_engagements',
+    'ue_authority_counsel_nonces'
   ] LOOP
     IF to_regclass(format('public.%I', t)) IS NULL THEN
       RAISE EXCEPTION 'RLS 0020 fail-closed: public.% does not exist (platform 0013 not applied).', t;
@@ -84,3 +86,7 @@ SELECT ue_create_direct_org_rls_policy('ue_authority_financial_steps');
 SELECT ue_create_direct_org_rls_policy('ue_authority_reviews');
 --> statement-breakpoint
 SELECT ue_create_direct_org_rls_policy('ue_authority_workaid_matters');
+--> statement-breakpoint
+SELECT ue_create_direct_org_rls_policy('ue_authority_counsel_engagements');
+--> statement-breakpoint
+SELECT ue_create_direct_org_rls_policy('ue_authority_counsel_nonces');

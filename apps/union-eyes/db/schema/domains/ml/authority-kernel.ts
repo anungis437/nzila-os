@@ -267,3 +267,32 @@ export const ueAuthorityWorkaidMatters = pgTable('ue_authority_workaid_matters',
 }, (table) => ({
   caseUq: uniqueIndex('ue_authority_workaid_case_uq').on(table.organizationId, table.caseId).where(sql`withdrawn_at IS NULL`),
 }));
+
+export const ueAuthorityCounselEngagements = pgTable('ue_authority_counsel_engagements', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  matterId: uuid('matter_id').notNull().references(() => ueAuthorityWorkaidMatters.id),
+  counselUserId: principal('counsel_user_id').notNull(),
+  capacity: text('capacity').notNull(),
+  informationBarrier: boolean('information_barrier').notNull().default(false),
+  recordedBy: principal('recorded_by').notNull(),
+  effectiveAt: timestamp('effective_at', { withTimezone: true }).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  revokedBy: principal('revoked_by'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  liveUq: uniqueIndex('ue_authority_engagement_live_uq').on(table.organizationId, table.matterId, table.counselUserId).where(sql`revoked_at IS NULL`),
+}));
+
+export const ueAuthorityCounselNonces = pgTable('ue_authority_counsel_nonces', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  matterId: uuid('matter_id').notNull(),
+  nonceHash: text('nonce_hash').notNull(),
+  consumedBy: principal('consumed_by').notNull(),
+  consumedAt: timestamp('consumed_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+}, (table) => ({
+  nonceUq: uniqueIndex('ue_authority_nonce_uq').on(table.organizationId, table.nonceHash),
+}));

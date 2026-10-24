@@ -61,4 +61,6 @@ export const authorityKernelEntries: StorageAuthorityEntry[] = [
   tenant('ue_authority_financial_steps', 'Append-only financial workflow ledger (registered, prepared, approved, executed, reconciled, voided) with trigger-enforced ordering and segregation of duties. Snapshots the amount at registration.', ['SELECT', 'INSERT']),
   tenant('ue_authority_reviews', 'Governance review register: complainant, adverse parties, classification, remediation owner. UPDATE is limited by trigger to status and remediation owner.', ['SELECT', 'INSERT', 'UPDATE']),
   tenant('ue_authority_workaid_matters', 'Union-side WorkAid referral references only; never counsel content. UPDATE is limited by trigger to counsel acceptance and withdrawal.', ['SELECT', 'INSERT', 'UPDATE']),
+  tenant('ue_authority_counsel_engagements', 'Institution-recorded appointment of counsel to one matter: capacity, information barrier and term. References only. UPDATE is limited by trigger to revocation.', ['SELECT', 'INSERT', 'UPDATE']),
+  tenant('ue_authority_counsel_nonces', 'Durable single-use register of consumed counsel assertion nonces (SHA-256 only). Insert-only; uniqueness is the replay control.', ['SELECT', 'INSERT']),
 ]

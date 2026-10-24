@@ -311,15 +311,33 @@
         { "kind": "file", "ref": "apps/union-eyes/lib/authority/counsel-boundary.ts", "classification": "CANONICAL" },
         { "kind": "file", "ref": "docs/union-eyes/convergence/UE-WORKAID-COUNSEL-BOUNDARY-CONTRACT.md", "classification": "CANONICAL" }
       ],
-      "defect": "Implemented and tested: the verified-authentication interface (envelope, signature port, single-use nonce port) and the separate-capacity, conflict and information-barrier model that replaced the blanket union-member exclusion. NOT built: the durable engagement register and the durable shared nonce store (both need a governed kernel-storage migration), and any counsel-side verifier implementation. With those ports unconfigured every counsel act is refused.",
+      "defect": "Union-side closed: verified-authentication ports (envelope, signature port, durable single-use nonce store), the separate-capacity, conflict and information-barrier model, and a durable matter-bound engagement register (ue_authority_counsel_engagements, ue_authority_counsel_nonces in kernel migrations 0013/0020, both still UNQUALIFIED and unapplied to any live database). Proven by in-process PostgreSQL suites and by the combined-schema suite on PostgreSQL 15 and 16 (relation count and exact grants). When a register is wired in, every counsel, external included, needs a live engagement. The counsel-side signature verifier and key custody are external (UE-CONV-G-003); until supplied every counsel act is refused.",
       "consumers": ["apps/union-eyes/lib/authority/store/workflow.ts"],
       "securityImplications": "Counsel acceptance must be unforgeable by a union principal and independent of union permissions.",
-      "requiredImplementation": "Durable engagement register and replay-proof nonce store (migration), and a qualified counsel-side verifier.",
+      "requiredImplementation": "Union-side implemented. Counsel-side verifier: see UE-CONV-G-003.",
       "evidence": [
         { "type": "test", "ref": "apps/union-eyes/lib/authority/__tests__/counsel-boundary.test.ts" },
-        { "type": "test", "ref": "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts" }
+        { "type": "test", "ref": "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts" },
+        { "type": "test", "ref": "apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts" },
+        { "type": "path", "ref": "apps/union-eyes/lib/authority/store/counsel.ts" }
       ],
-      "status": "IN_PROGRESS",
+      "status": "CLOSED",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-G-003",
+      "domain": "workaid",
+      "capability": "Counsel-side signature verifier and key custody",
+      "workstream": "G",
+      "canonicalOwner": "counsel-side trust provider (external)",
+      "sources": [{ "kind": "file", "ref": "apps/union-eyes/lib/authority/counsel-boundary.ts", "classification": "CANONICAL" }],
+      "defect": "The kernel ships the CounselAssertionVerifier port only. No counsel-side system, issuer allow-list or key custody exists in this repository.",
+      "consumers": [],
+      "securityImplications": "Without it every counsel-attributed act is refused, which is the intended fail-closed state.",
+      "requiredImplementation": "A qualified verifier implementation with managed keys, the issuer allow-list and compromise procedure.",
+      "evidence": [],
+      "status": "EXTERNAL_GATE",
+      "externalGate": { "owner": "WorkAid / counsel-side operator with privacy and legal review", "missingProof": "A named counsel-side system, its issuer allow-list entry, key custody and rotation procedure, and a passing acceptance run of the contract in UE-WORKAID-COUNSEL-BOUNDARY-CONTRACT.md section 4." },
       "retirement": { "disposition": "NONE" }
     },
     {

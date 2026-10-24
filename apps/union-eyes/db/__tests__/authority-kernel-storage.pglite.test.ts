@@ -55,12 +55,12 @@ const insertMandate = (o = mandate(), holder = U.chief, issuer = U.president) =>
     o.granted === '$3' ? [ORG, holder, issuer] : [ORG, holder])
 
 describe('migration structure', () => {
-  it('registry, migration and RLS closure agree on exactly the same 14 relations', () => {
+  it('registry, migration and RLS closure agree on exactly the same 16 relations', () => {
     const created = [...PLATFORM_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g)].map((m) => m[1]).sort()
     const protectedTables = [...RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g)].map((m) => m[1]).sort()
     expect(authorityKernelEntries.map((e) => e.table).sort()).toEqual(created)
     expect(protectedTables).toEqual(created)
-    expect(created).toHaveLength(14)
+    expect(created).toHaveLength(16)
   })
 
   it('no registry entry grants DELETE, and no table is writable beyond its declared DML', async () => {

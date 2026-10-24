@@ -96,7 +96,7 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
 
   it('every authority table has FORCE RLS and the runtime role bypasses nothing', async () => {
     const r = await admin.query(`SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity FROM pg_class c WHERE c.relname LIKE 'ue_authority_%' AND c.relkind = 'r'`)
-    expect(r.rows).toHaveLength(14)
+    expect(r.rows).toHaveLength(16)
     for (const row of r.rows) expect([row.relname, row.relrowsecurity, row.relforcerowsecurity]).toEqual([row.relname, true, true])
     const role = await admin.query(`SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = 'union_eyes_runtime'`)
     expect(role.rows[0]).toEqual({ rolsuper: false, rolbypassrls: false })

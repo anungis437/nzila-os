@@ -154,19 +154,19 @@
     "scoped": [
       {
         "tag": "0020_authority_kernel_rls_closure",
-        "sha256": "45873e542964bf28c3e380835200761a6b265ff00cc64a641908f77c96475785",
+        "sha256": "aab16d12b2d968aa2d58e8d18081831ce00d371f9ea41d751e79b32260c28125",
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-authority-kernel",
-        "note": "FORCE RLS for the 14 ue_authority_* relations created by platform 0013. Not yet applied to any clone or live database."
+        "note": "FORCE RLS for the 16 ue_authority_* relations created by platform 0013 (adds ue_authority_counsel_engagements and ue_authority_counsel_nonces; previously 14, hash 45873e542964). Not yet applied to any clone or live database."
       }
     ],
     "platform": [
       {
         "tag": "0013_authority_kernel_storage",
-        "sha256": "f853a13f1bd9e5e7ed6c3b7312b7ba221b92f13bee91c5a24016d45904e26e50",
+        "sha256": "7d5ea524d54e44c89326030d8a1ec9ab5bc80807b1c34677fa270f56a3fc989d",
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-authority-kernel",
-        "note": "Authority kernel storage. Revised in place before any deployment: the first local draft (3a999601b) hashed to cf53ce455254a0fc913d7e255ae2f21836564025ffb8e48f91d1c5986ac0215a; the Phase 1 completion revision (dba0d5527) hashed to 6cb84c1640fda60c3ee0a79ad235ab2c7048481652c93c36b3a027e9facb0fa8; the actor-binding revision adds ue_authority_guard_actor, counsel_accepted_by, rule-adoption approval binding and a one-live-adoption index. Not yet applied to any clone or live database."
+        "note": "Authority kernel storage. Revised in place before any deployment: the first local draft (3a999601b) hashed to cf53ce455254a0fc913d7e255ae2f21836564025ffb8e48f91d1c5986ac0215a; the Phase 1 completion revision (dba0d5527) hashed to 6cb84c1640fda60c3ee0a79ad235ab2c7048481652c93c36b3a027e9facb0fa8; the actor-binding revision (f853a13f1bd9e5e7ed6c3b7312b7ba221b92f13bee91c5a24016d45904e26e50) adds ue_authority_guard_actor, counsel_accepted_by, rule-adoption approval binding and a one-live-adoption index; the final-convergence revision adds the counsel engagement register and the durable counsel nonce register. Not yet applied to any clone or live database."
       }
     ]
   }
