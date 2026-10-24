@@ -131,7 +131,7 @@ describe('documents/repository route', () => {
 
   it('returns only visible documents after policy checks', async () => {
     const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    m.hasMinRole.mockResolvedValueOnce(true);
     m.queueSelect([
       {
         id: 'doc-1',

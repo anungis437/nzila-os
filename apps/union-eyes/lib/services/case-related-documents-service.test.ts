@@ -109,7 +109,6 @@ describe('case-related-documents-service', () => {
       orgId: 'org-1',
       actor: {
         userId: 'user-1',
-        isStewardPlus: false,
       },
       limit: 10,
     });
@@ -179,7 +178,6 @@ describe('case-related-documents-service', () => {
       orgId: 'org-1',
       actor: {
         userId: 'user-1',
-        isStewardPlus: false,
       },
       limit: 10,
     });
@@ -251,7 +249,6 @@ describe('case-related-documents-service', () => {
       orgId: 'org-1',
       actor: {
         userId: 'user-1',
-        isStewardPlus: false,
       },
       limit: 10,
     });

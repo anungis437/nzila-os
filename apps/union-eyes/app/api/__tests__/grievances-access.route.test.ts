@@ -90,6 +90,36 @@ describe('grievances/[id]/access route', () => {
     expect(m.grantCaseAccess).toHaveBeenCalledWith(expect.objectContaining({ userId: 'ue-v2-http-admin-7c1f' }));
   });
 
+  it('a steward-level caller who is not the case owner can neither grant nor change collaborator access', async () => {
+    const { POST, PATCH } = await loadRoute();
+    m.hasMinRole.mockResolvedValue(true); // holds every role: seniority must not matter
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canManageAssignments: false, isPrimaryOwner: false });
+
+    const grant = await POST(new Request('http://localhost/api/grievances/g1/access', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ userId: 'u1', accessRole: 'reviewer', canViewPrivateDocuments: true }),
+    }));
+    expect(grant.status).toBe(403);
+
+    const patch = await PATCH(new Request('http://localhost/api/grievances/g1/access', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ assignmentId: '11111111-1111-1111-1111-111111111111', status: 'active' }),
+    }));
+    expect(patch.status).toBe(403);
+    expect(m.grantCaseAccess).not.toHaveBeenCalled();
+    expect(m.updateCaseAccessStatus).not.toHaveBeenCalled();
+  });
+
+  it('GET refuses a steward-level caller with no relationship to the case and does not promote them to a manager', async () => {
+    const { GET } = await loadRoute();
+    m.hasMinRole.mockResolvedValue(true);
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: false, canManageAssignments: false, isPrimaryOwner: false });
+    const response = await GET(new Request('http://localhost/api/grievances/g1/access'));
+    expect(response.status).toBe(403);
+  });
+
   it('PATCH updates assignment status', async () => {
     const { PATCH } = await loadRoute();
     const response = await PATCH(new Request('http://localhost/api/grievances/g1/access', {

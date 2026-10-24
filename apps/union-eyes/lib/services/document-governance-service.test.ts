@@ -13,12 +13,18 @@ const restrictedLabels: GovernancePrivacyLabel[] = [
   'highly_sensitive',
 ];
 
+const allLabels: GovernancePrivacyLabel[] = [
+  'public_internal',
+  'team_confidential',
+  'case_restricted',
+  ...restrictedLabels,
+];
+
 const actors: Record<string, LiunaActor> = {
   unaffiliatedExternal: {
     name: 'external participant without org membership',
     context: {
       isOrgMember: false,
-      isStewardPlus: false,
       isPrimaryOwner: false,
       hasCaseAccess: false,
       canViewPrivateDocuments: false,
@@ -29,7 +35,6 @@ const actors: Record<string, LiunaActor> = {
     name: 'local member without case access',
     context: {
       isOrgMember: true,
-      isStewardPlus: false,
       isPrimaryOwner: false,
       hasCaseAccess: false,
       canViewPrivateDocuments: false,
@@ -40,20 +45,18 @@ const actors: Record<string, LiunaActor> = {
     name: 'successor reviewer with case access only',
     context: {
       isOrgMember: true,
-      isStewardPlus: false,
       isPrimaryOwner: false,
       hasCaseAccess: true,
       canViewPrivateDocuments: false,
       hasExplicitDocumentGrant: false,
     },
   },
-  centralReviewerWithoutRawGrant: {
-    name: 'central reviewer without raw-document grant',
+  seniorOfficerWithoutCaseRelationship: {
+    name: 'senior officer with no relationship to the case',
     context: {
       isOrgMember: true,
-      isStewardPlus: true,
       isPrimaryOwner: false,
-      hasCaseAccess: true,
+      hasCaseAccess: false,
       canViewPrivateDocuments: false,
       hasExplicitDocumentGrant: false,
     },
@@ -62,7 +65,6 @@ const actors: Record<string, LiunaActor> = {
     name: 'reviewer with explicit document grant',
     context: {
       isOrgMember: true,
-      isStewardPlus: false,
       isPrimaryOwner: false,
       hasCaseAccess: true,
       canViewPrivateDocuments: false,
@@ -73,7 +75,6 @@ const actors: Record<string, LiunaActor> = {
     name: 'reviewer with private-document grant',
     context: {
       isOrgMember: true,
-      isStewardPlus: false,
       isPrimaryOwner: false,
       hasCaseAccess: true,
       canViewPrivateDocuments: true,
@@ -84,7 +85,6 @@ const actors: Record<string, LiunaActor> = {
     name: 'primary owner',
     context: {
       isOrgMember: true,
-      isStewardPlus: false,
       isPrimaryOwner: true,
       hasCaseAccess: true,
       canViewPrivateDocuments: false,
@@ -109,12 +109,10 @@ describe('document governance service', () => {
     expect(isDocumentVisibleByPolicy('highly_sensitive', actors.successorReviewer.context)).toBe(false);
   });
 
-  it('does not let central steward-level review imply raw privileged document access', () => {
-    expect(isDocumentVisibleByPolicy('team_confidential', actors.centralReviewerWithoutRawGrant.context)).toBe(true);
-    expect(isDocumentVisibleByPolicy('case_restricted', actors.centralReviewerWithoutRawGrant.context)).toBe(true);
-    expect(isDocumentVisibleByPolicy('lro_confidential', actors.centralReviewerWithoutRawGrant.context)).toBe(true);
-    expect(isDocumentVisibleByPolicy('privileged', actors.centralReviewerWithoutRawGrant.context)).toBe(false);
-    expect(isDocumentVisibleByPolicy('highly_sensitive', actors.centralReviewerWithoutRawGrant.context)).toBe(false);
+  it('seniority is not a case relationship: a senior officer without one reads no case document of any label', () => {
+    for (const label of allLabels) {
+      expect(isDocumentVisibleByPolicy(label, actors.seniorOfficerWithoutCaseRelationship.context), label).toBe(false);
+    }
   });
 
   it('requires explicit grant or primary ownership for privileged labels', () => {

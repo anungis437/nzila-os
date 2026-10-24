@@ -131,10 +131,11 @@ describe('grievances/[id]/documents route', () => {
     expect([400, 404, 500]).toContain(response.status);
   });
 
-  it('returns 403 when case access is restricted', async () => {
+  it('returns 403 when case access is restricted, even for a caller holding a senior role', async () => {
     const { POST } = await loadRoute();
-    m.dbSelectQueue.push([{ id: 'g1', organizationId: 'org_1' }]);
-    m.getEffectiveCaseAccess.mockResolvedValueOnce({ hasAccess: false, canModify: false });
+    m.dbSelectQueue.push([{ id: 'g1', organizationId: 'org_1', createdBy: 'someone_else' }]);
+    m.hasMinRole.mockResolvedValue(true); // seniority must not grant upload to an unrelated case
+    m.getEffectiveCaseAccess.mockResolvedValueOnce({ isPrimaryOwner: false, canUploadDocuments: false, canViewCase: false });
 
     const response = await POST(
       new Request('http://localhost/api/grievances/g1/documents', {
@@ -146,18 +147,19 @@ describe('grievances/[id]/documents route', () => {
           filename: 'doc.pdf',
           mimeType: 'application/pdf',
           documentType: 'evidence',
+          privacyLabel: 'team_confidential',
         }),
       }),
     );
 
-    expect([400, 403, 500]).toContain(response.status);
+    expect(response.status).toBe(403);
   });
 
   it('adds document to grievance with all required fields', async () => {
     const { POST } = await loadRoute();
-    m.dbSelectQueue.push([{ id: 'g1', organizationId: 'org_1' }]);
+    m.dbSelectQueue.push([{ id: 'g1', organizationId: 'org_1', createdBy: 'someone_else' }]);
     m.dbSelectQueue.push([]); // No existing docs
-    m.getEffectiveCaseAccess.mockResolvedValueOnce({ hasAccess: true, canModify: true });
+    m.getEffectiveCaseAccess.mockResolvedValueOnce({ isPrimaryOwner: false, canUploadDocuments: true, canViewCase: true });
 
     const response = await POST(
       new Request('http://localhost/api/grievances/g1/documents', {

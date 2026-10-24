@@ -58,8 +58,6 @@ export const GET = withOrganizationAuth(async (request, context) => {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Search query must be at least 2 characters');
   }
 
-  const isStewardPlus = await hasMinRole('steward');
-
   const caseRows = await db
     .select({
       id: grievances.id,
@@ -93,7 +91,7 @@ export const GET = withOrganizationAuth(async (request, context) => {
           userId,
         });
 
-        if (!isStewardPlus && !access.canViewCase) {
+        if (!access.canViewCase) {
           return null;
         }
 
@@ -185,9 +183,8 @@ export const GET = withOrganizationAuth(async (request, context) => {
           toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
           {
             isOrgMember: true,
-            isStewardPlus,
             isPrimaryOwner: caseAccess.isPrimaryOwner,
-            hasCaseAccess: isStewardPlus || caseAccess.canViewCase || !row.linkedEntityId,
+            hasCaseAccess: caseAccess.canViewCase || !row.linkedEntityId,
             canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
             hasExplicitDocumentGrant: Boolean(explicitGrant),
           },
@@ -314,7 +311,7 @@ export const GET = withOrganizationAuth(async (request, context) => {
           userId,
         });
 
-        if (!isStewardPlus && !access.canViewCase) {
+        if (!access.canViewCase) {
           return null;
         }
 

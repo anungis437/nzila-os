@@ -123,8 +123,6 @@ export const GET = withOrganizationAuth(async (request, context) => {
     .where(and(...conditions))
     .orderBy(desc(documents.updatedAt));
 
-  const isStewardPlus = await hasMinRole('steward');
-
   const visible = await Promise.all(
     rows.map(async (row) => {
       let caseAccess = {
@@ -150,9 +148,8 @@ export const GET = withOrganizationAuth(async (request, context) => {
         toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
         {
           isOrgMember: true,
-          isStewardPlus,
           isPrimaryOwner: caseAccess.isPrimaryOwner,
-          hasCaseAccess: isStewardPlus || caseAccess.canViewCase || !row.linkedEntityId,
+          hasCaseAccess: caseAccess.canViewCase || !row.linkedEntityId,
           canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
           hasExplicitDocumentGrant: false,
         },

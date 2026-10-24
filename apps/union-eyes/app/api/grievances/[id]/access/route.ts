@@ -35,12 +35,8 @@ const updateStatusSchema = z.object({
   status: z.enum(['active', 'revoked', 'expired']),
 });
 
+/** Only the case's primary owner manages its collaborator access. Seniority alone never does. */
 async function canManageAccess(organizationId: string, grievanceId: string, userId: string) {
-  const isStewardPlus = await hasMinRole('steward');
-  if (isStewardPlus) {
-    return true;
-  }
-
   const access = await getEffectiveCaseAccess({
     organizationId,
     grievanceId,
@@ -71,13 +67,9 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     userId,
   });
 
-  const isStewardPlus = await hasMinRole('steward');
-  const effectiveAccessForResponse = {
-    ...effective,
-    canManageAssignments: isStewardPlus || effective.canManageAssignments,
-  };
+  const effectiveAccessForResponse = { ...effective };
 
-  if (!isStewardPlus && !effective.canViewCase) {
+  if (!effective.canViewCase) {
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this grievance');
   }
 
@@ -109,7 +101,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
   const canManage = await canManageAccess(organizationId, params.id, userId);
   if (!canManage) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only primary LRO or steward+ can grant collaborator access');
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only the primary LRO can grant collaborator access');
   }
 
   const body = await request.json();
@@ -166,7 +158,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
 
   const canManage = await canManageAccess(organizationId, params.id, userId);
   if (!canManage) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only primary LRO or steward+ can modify collaborator access');
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only the primary LRO can modify collaborator access');
   }
 
   const body = await request.json();

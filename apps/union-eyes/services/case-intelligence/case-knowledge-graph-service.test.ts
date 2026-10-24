@@ -61,7 +61,7 @@ describe('case-intelligence case-knowledge-graph-service', () => {
     const { buildCaseGraph } = await import('./case-knowledge-graph-service');
     const result = await buildCaseGraph({
       context: { caseId: 'missing-case', orgId: 'org-1', actorId: 'user-1' },
-      actor: { userId: 'user-1', isStewardPlus: false },
+      actor: { userId: 'user-1' },
     });
 
     expect(result).toEqual({ nodes: [], edges: [] });
@@ -103,7 +103,7 @@ describe('case-intelligence case-knowledge-graph-service', () => {
     const { buildCaseGraph } = await import('./case-knowledge-graph-service');
     const result = await buildCaseGraph({
       context: { caseId: 'case-1', orgId: 'org-1', actorId: 'user-1' },
-      actor: { userId: 'user-1', isStewardPlus: false },
+      actor: { userId: 'user-1' },
     });
 
     const nodeById = new Map(result.nodes.map((node) => [node.id, node]));
@@ -154,7 +154,7 @@ describe('case-intelligence case-knowledge-graph-service', () => {
     const { buildCaseGraph } = await import('./case-knowledge-graph-service');
     const result = await buildCaseGraph({
       context: { caseId: 'case-2', orgId: 'org-1', actorId: 'user-1' },
-      actor: { userId: 'user-1', isStewardPlus: false },
+      actor: { userId: 'user-1' },
     });
 
     const nodeById = new Map(result.nodes.map((node) => [node.id, node]));

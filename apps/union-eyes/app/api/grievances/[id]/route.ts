@@ -54,23 +54,17 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
 
     await expireElapsedCaseAccessAssignments();
 
-    // Row-level access check:
-    // steward+ can view any grievance in org,
-    // creator can view own grievance,
-    // primary LRO or delegated collaborator can view by explicit assignment.
-    const isStewardPlus = await hasMinRole("steward");
+    // Row-level access check: a case is visible to its creator, its primary owner and active explicit collaborators.
+    // Seniority alone grants no access to a case.
     const effectiveAccess = await getEffectiveCaseAccess({
       organizationId,
       grievanceId: params.id,
       userId,
     });
-    const effectiveAccessForResponse = {
-      ...effectiveAccess,
-      canManageAssignments: isStewardPlus || effectiveAccess.canManageAssignments,
-    };
+    const effectiveAccessForResponse = { ...effectiveAccess };
 
-    if (!isStewardPlus && grievance.createdBy !== userId && !effectiveAccess.canViewCase) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "You can only view your own submissions.");
+    if (grievance.createdBy !== userId && !effectiveAccess.canViewCase) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "You can only view cases you created or are assigned to.");
     }
 
     // Fetch related events
@@ -126,9 +120,8 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     const governedDocuments = linkedDocuments.filter((doc) =>
       isDocumentVisibleByPolicy(toGovernanceLabel({ privacyLabel: doc.privacyLabel ?? undefined }), {
         isOrgMember: true,
-        isStewardPlus,
         isPrimaryOwner: effectiveAccessForResponse.isPrimaryOwner,
-        hasCaseAccess: isStewardPlus || grievance.createdBy === userId || effectiveAccessForResponse.canViewCase,
+        hasCaseAccess: grievance.createdBy === userId || effectiveAccessForResponse.canViewCase,
         canViewPrivateDocuments: effectiveAccessForResponse.canViewPrivateDocuments,
         hasExplicitDocumentGrant: explicitGrantIds.has(doc.id),
       }),

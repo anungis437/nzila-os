@@ -94,26 +94,14 @@
     },
     {
       "id": "RANK-DERIVED-CASE-ACCESS",
-      "description": "isStewardPlus / case_read_any derive case access from seniority; migrate the file to the authority kernel (UE-CONV-E-001)",
+      "description": "isStewardPlus / case_read_any derive case access from seniority. The grievance document, search and intelligence paths no longer do; the remaining files are the separate CUPE claims module (UE-CONV-E-001)",
       "pattern": "isStewardPlus|case_read_any",
       "paths": ["apps/union-eyes"],
       "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**"],
       "allowed": [
-        { "file": "apps/union-eyes/app/api/documents/[id]/download/route.ts", "reason": "Legacy rank check; migrate to enforceDocumentRead" },
-        { "file": "apps/union-eyes/app/api/documents/repository/[id]/route.ts", "reason": "Legacy rank check; migrate to the kernel" },
-        { "file": "apps/union-eyes/app/api/documents/repository/route.ts", "reason": "Legacy rank check; migrate to the kernel" },
-        { "file": "apps/union-eyes/app/api/grievances/[id]/access/route.ts", "reason": "Legacy rank check; migrate to the kernel" },
-        { "file": "apps/union-eyes/app/api/grievances/[id]/documents/route.ts", "reason": "Legacy rank check; migrate to the kernel" },
-        { "file": "apps/union-eyes/app/api/grievances/[id]/intelligence/route.ts", "reason": "Legacy rank check; migrate to the kernel" },
-        { "file": "apps/union-eyes/app/api/grievances/[id]/related-documents/route.ts", "reason": "Legacy rank check; migrate to the kernel" },
-        { "file": "apps/union-eyes/app/api/grievances/[id]/route.ts", "reason": "Legacy rank check; migrate to the kernel" },
-        { "file": "apps/union-eyes/app/api/search/universal/route.ts", "reason": "Legacy rank check; migrate to the kernel" },
-        { "file": "apps/union-eyes/lib/action-enforcer.ts", "reason": "Legacy rank helper; retire after its consumers migrate" },
+        { "file": "apps/union-eyes/lib/action-enforcer.ts", "reason": "CUPE claims RBAC matrix (numeric levels). The kernel case loader does not model claims yet; retire with the claims migration" },
         { "file": "apps/union-eyes/lib/authority/policies/case.ts", "reason": "Comment only: states that the kernel policy replaces these shortcuts" },
-        { "file": "apps/union-eyes/lib/cases/case-authorization.ts", "reason": "Legacy rank helper; retire after its consumers migrate" },
-        { "file": "apps/union-eyes/lib/services/document-authorization-service.ts", "reason": "Legacy rank helper; retire after its consumers migrate" },
-        { "file": "apps/union-eyes/lib/services/document-governance-service.ts", "reason": "Legacy rank check; migrate to the kernel" },
-        { "file": "apps/union-eyes/services/case-intelligence/case-pattern-detection-service.ts", "reason": "Legacy rank check; migrate to the kernel" }
+        { "file": "apps/union-eyes/lib/cases/case-authorization.ts", "reason": "caseReadScope for the claims table grants tenant-wide reads by role level; migrate with the claims module" }
       ]
     },
     {

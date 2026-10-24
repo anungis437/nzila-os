@@ -10,7 +10,6 @@ export type GovernancePrivacyLabel =
 
 export interface DocumentVisibilityContext {
   isOrgMember: boolean;
-  isStewardPlus: boolean;
   isPrimaryOwner: boolean;
   hasCaseAccess: boolean;
   canViewPrivateDocuments: boolean;
@@ -26,6 +25,9 @@ const DEFAULT_CASE_VISIBLE_LABELS = new Set<GovernancePrivacyLabel>([
 /**
  * Label policy gate used by repository listing, case detail retrieval, and universal search.
  * Results must be filtered before they are returned to the UI.
+ *
+ * Seniority never widens access: a role label is an eligibility input, not a case relationship. Reading a case's
+ * documents needs the case relationship (owner, assignee, collaborator, creator) or an explicit document grant.
  */
 export function isDocumentVisibleByPolicy(
   privacyLabel: GovernancePrivacyLabel,
@@ -35,7 +37,7 @@ export function isDocumentVisibleByPolicy(
     return false;
   }
 
-  if (context.isStewardPlus || context.isPrimaryOwner) {
+  if (context.isPrimaryOwner) {
     if (privacyLabel === 'privileged' || privacyLabel === 'highly_sensitive') {
       return context.hasExplicitDocumentGrant || context.canViewPrivateDocuments || context.isPrimaryOwner;
     }

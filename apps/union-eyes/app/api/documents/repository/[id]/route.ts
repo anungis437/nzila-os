@@ -107,7 +107,6 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
   }
 
-  const isStewardPlus = await hasMinRole('steward');
   let caseAccess = {
     isPrimaryOwner: false,
     canViewCase: false,
@@ -131,9 +130,8 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
     {
       isOrgMember: true,
-      isStewardPlus,
       isPrimaryOwner: caseAccess.isPrimaryOwner,
-      hasCaseAccess: isStewardPlus || caseAccess.canViewCase || !row.linkedEntityId,
+      hasCaseAccess: caseAccess.canViewCase || !row.linkedEntityId,
       canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
       hasExplicitDocumentGrant: Boolean(explicitGrant),
     },
