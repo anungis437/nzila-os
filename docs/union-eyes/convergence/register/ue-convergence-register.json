@@ -433,7 +433,7 @@
       "requiredImplementation": "Remove.",
       "evidence": [{ "type": "path", "ref": "docs/union-eyes/convergence/register/ue-supersession-registry.json" }],
       "status": "CLOSED",
-      "retirement": { "disposition": "REMOVE", "replacement": "the approved bootstrap", "commit": "01b7a0ecb" }
+      "retirement": { "disposition": "REMOVE", "replacement": "the approved bootstrap", "commit": "4cced851a" }
     },
     {
       "id": "UE-CONV-I-001",

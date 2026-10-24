@@ -20,21 +20,21 @@
       "artifact": "apps/union-eyes/test-analytics.cjs",
       "replacement": "none (unreferenced scratch script with hard-coded local database credentials)",
       "consumerMigration": "Zero references in package scripts, source or CI.",
-      "commit": "RETIREMENT_COMMIT",
+      "commit": "4cced851a",
       "verification": "file absent; git grep finds no reference"
     },
     {
       "artifact": "apps/union-eyes/test-analytics2.cjs",
       "replacement": "none (unreferenced scratch script with hard-coded local database credentials)",
       "consumerMigration": "Zero references in package scripts, source or CI.",
-      "commit": "RETIREMENT_COMMIT",
+      "commit": "4cced851a",
       "verification": "file absent; git grep finds no reference"
     },
     {
       "artifact": "apps/union-eyes/push-org-staging.mjs",
       "replacement": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs (the approved installation path)",
       "consumerMigration": "Zero references. It ran drizzle-kit push and auto-answered No to destructive prompts, which bypasses the migration ledger.",
-      "commit": "RETIREMENT_COMMIT",
+      "commit": "4cced851a",
       "verification": "file absent; register entry UE-CONV-H-003 tracks the remaining db:push entrypoint"
     },
     {
