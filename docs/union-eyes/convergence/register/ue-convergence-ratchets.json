@@ -20,7 +20,6 @@
         { "file": "apps/union-eyes/lib/auth/platform-org-role.ts", "reason": "Maps the Admin Clerk office role; not the identity provider" },
         { "file": "apps/union-eyes/lib/auth/roles.ts", "reason": "Defines the Admin Clerk office role; not the identity provider" },
         { "file": "apps/union-eyes/lib/dashboard/role-experience.ts", "reason": "Admin Clerk office role; not the identity provider" },
-        { "file": "apps/union-eyes/db/seeds/seed-cape-l123-buildup.sql", "reason": "Job title in synthetic seed data; not the identity provider" },
         { "file": "apps/union-eyes/app/api/whop/create-checkout/route.ts", "reason": "Whop metadata still emits the legacy clerkUserId key beside userId until the external consumer is confirmed (UE-CONV-A-007)" },
         { "file": "apps/union-eyes/backend/auth_core/authentication.py", "reason": "Detects and ignores the legacy X-Clerk-Secret-Key header with a logged warning; never accepted" },
         { "file": "apps/union-eyes/backend/auth_core/middleware.py", "reason": "Exempts the deprecated webhook alias path pending sender discovery (UE-CONV-A-007)" },
@@ -37,9 +36,7 @@
         { "file": "apps/union-eyes/db/rls-storage-authority/finance.ts", "reason": "Authority-registry rationale text names the retired provider as history" },
         { "file": "apps/union-eyes/scripts/p4-authority-state.ts", "reason": "References the migration name auth_core.0003_rename_clerk_organization_id" },
         { "file": "apps/union-eyes/scripts/rls-enforcement/generate-rls-enforcement-migration.ts", "reason": "References the historical column name when generating policies" },
-        { "file": "apps/union-eyes/scripts/rls-enforcement/p4-disposable-fixture.ts", "reason": "References the migration name auth_core.0003_rename_clerk_organization_id" },
-        { "file": "apps/union-eyes/db/replay.ps1", "reason": "Legacy replay diagnostic on clerk_organization_id; retire with the legacy entrypoints (UE-CONV-H-003)" },
-        { "file": "apps/union-eyes/db/seeds/seed-master.sql", "reason": "Job title ('City Clerk's Office') in synthetic seed data; no provider id or provider column is written any more" }
+        { "file": "apps/union-eyes/scripts/rls-enforcement/p4-disposable-fixture.ts", "reason": "References the migration name auth_core.0003_rename_clerk_organization_id" }
       ]
     },
     {
@@ -158,6 +155,14 @@
       "pattern": "auditDataMutation|auditSecurityEvent|auditLog[(]",
       "paths": ["apps/union-eyes/app/api/governance/lifecycle/policies"],
       "exclude": ["**/__tests__/**", "**/*.test.*", "**/node_modules/**"],
+      "mode": "zero"
+    },
+    {
+      "id": "RETIRED-REPLAY-SEEDS",
+      "description": "The replay script and its SQL seeds were retired; the canonical schema has no seed (UE-CONV-H-005)",
+      "pattern": "seed-master\\.sql|replay\\.ps1|seed-org-hierarchy|seed-child-orgs",
+      "paths": ["apps/union-eyes/app", "apps/union-eyes/lib", "apps/union-eyes/db", "apps/union-eyes/scripts", "apps/union-eyes/components", "tooling/scripts"],
+      "exclude": ["**/*.md", "**/node_modules/**"],
       "mode": "zero"
     },
     {

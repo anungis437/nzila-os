@@ -462,16 +462,16 @@
       "workstream": "H",
       "canonicalOwner": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs with the Django lineage",
       "sources": [
-        { "kind": "file", "ref": "apps/union-eyes/db/seeds/seed-master.sql", "classification": "RETIRE_PENDING" },
+        { "kind": "symbol", "ref": "apps/union-eyes/db/seeds (seed-master.sql and five supplementary SQL seeds, seed-org-hierarchy.ts, seed-child-orgs.ts) and apps/union-eyes/db/replay.ps1", "classification": "REMOVE" },
         { "kind": "file", "ref": "apps/union-eyes/backend/auth_core/migrations/0003_rename_clerk_organization_id.py", "classification": "HISTORICAL_EVIDENCE" }
       ],
-      "defect": "Partly fixed: seed-master.sql no longer writes organizations.clerk_organization_id or any Clerk-format provider org id (that column was renamed to auth_provider_org_id in the Django lineage, and the provider is retired). NOT fixed: the seed targets the Drizzle replay schema and does not run on the canonical Django-plus-bootstrap schema. Verified on PostgreSQL 16: the Django-created organizations table has no column defaults, so the first insert fails on a null created_at after the clc_affiliated gap (fixed) was passed. Making it run needs every organizations insert (including the hierarchy loops) and the downstream member, grievance and CBA inserts re-authored against the canonical contract.",
-      "consumers": ["apps/union-eyes/db/replay.ps1"],
-      "securityImplications": "A seed that runs only on the legacy baseline hides drift between lineages.",
-      "requiredImplementation": "Re-author the seed against the canonical organizations contract and prove it on PostgreSQL 15 and 16 after Django migrate and the approved bootstrap.",
-      "evidence": [{ "type": "path", "ref": "apps/union-eyes/db/seeds/seed-master.sql" }],
-      "status": "IN_PROGRESS",
-      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "seed authored against the canonical organizations contract" }
+      "defect": "The SQL seeds and db/replay.ps1 (hard-coded credentials, native PostgreSQL 17, frozen lineage) targeted the superseded Drizzle replay schema and could not run on the canonical Django plus platform-migration schema: verified on PostgreSQL 16 that the Django-created organizations table has no column defaults (see UE-CONV-H-007). The TypeScript seeders behind /api/admin/seed-test-data returned an empty summary while the route reported success. RETIRED: all of them are deleted, the route returns HTTP 501 and is recorded NOT_IMPLEMENTED in the capability registry, and a ratchet rejects reintroduction. Consumers were the replay script, one fake-success route with its test and a development button, and four documents; all were migrated or updated. NOT built: a canonical, schema-checked development seed; the development seed button in the union dashboard now shows the route's 501.",
+      "consumers": [],
+      "securityImplications": "A seed that runs only on the legacy baseline hides drift between lineages, and a seeder that reports success while creating nothing is fake success.",
+      "requiredImplementation": "None for the retirement. A canonical seed, if wanted, is a new capability that must be proven on PostgreSQL 15 and 16 after Django migrate and the approved bootstrap.",
+      "evidence": [{ "type": "path", "ref": "apps/union-eyes/app/api/admin/seed-test-data/route.ts" }, { "type": "test", "ref": "apps/union-eyes/app/api/__tests__/admin-seed-test-data.route.test.ts" }],
+      "status": "CLOSED",
+      "retirement": { "disposition": "REMOVE", "replacement": "None: retired. The canonical bootstrap creates schema only; no seed is supported (UE-ACTION-ORG-HIERARCHY-SEED is NOT_IMPLEMENTED).", "commit": "6241f944d" }
     },
     {
       "id": "UE-CONV-H-006",
