@@ -1,59 +1,19 @@
 /**
- * POST /api/admin/seed-test-data
+ * GET POST /api/admin/seed-test-data
  *
- * Seeds the full CLC organizational hierarchy:
- *   - CLC (congress, level 0)
- *   - 13 Provincial/Territorial Federations (federation, level 1)
- *   - 12 National/International Union Affiliates (union, level 1)
- *   - 16 Sample locals + 2 district labour councils (level 2-3)
- *   - Corresponding organization_relationships rows
- *
- * Idempotent — safe to call multiple times.
- * Requires app_owner / admin role.
+ * Retired. The seeders this route called (db/seeds/seed-org-hierarchy.ts and seed-child-orgs.ts) were empty
+ * stubs that created nothing yet reported success, and the SQL replay seed they stood in for targets the
+ * superseded Drizzle replay schema, not the canonical Django plus platform-migration schema. The route
+ * therefore answers HTTP 501 rather than claim an organization hierarchy was seeded.
  */
-import { NextResponse } from 'next/server';
-import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
-import { seedOrganizationHierarchy } from '@/db/seeds/seed-org-hierarchy';
-import { seedChildOrganizations } from '@/db/seeds/seed-child-orgs';
-import { logger } from '@/lib/logger';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withRoleAuth('admin' as MemberRole, async (_request, context) => {
-  try {
-    const hierarchy = await seedOrganizationHierarchy();
-    const children = await seedChildOrganizations();
-    logger.info('Full org seed completed (GET)', { userId: context.userId, hierarchy, children });
-    return NextResponse.json({
-      success: true,
-      message: `Seeded: CLC + ${hierarchy.federationsCreated} federations + ${hierarchy.affiliatesCreated} affiliates + ${children.localsCreated} locals + ${children.districtsCreated} districts. Skipped: ${hierarchy.skipped.length + children.skipped.length}.`,
-      data: { hierarchy, children },
-    });
-  } catch (error) {
-    logger.error('Seed org hierarchy failed', { error });
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 },
-    );
-  }
-});
+const notImplemented = () => {
+  throw ApiError.notImplemented('Organization hierarchy seeding is not implemented: nothing was seeded.');
+};
 
-export const POST = withRoleAuth('admin' as MemberRole, async (_request, context) => {
-  try {
-    const hierarchy = await seedOrganizationHierarchy();
-    const children = await seedChildOrganizations();
-    logger.info('Full org seed completed (POST)', { userId: context.userId, hierarchy, children });
-    return NextResponse.json({
-      success: true,
-      message: `Seeded: CLC + ${hierarchy.federationsCreated} federations + ${hierarchy.affiliatesCreated} affiliates + ${children.localsCreated} locals + ${children.districtsCreated} districts. Skipped: ${hierarchy.skipped.length + children.skipped.length}.`,
-      data: { hierarchy, children },
-    });
-  } catch (error) {
-    logger.error('Seed org hierarchy failed', { error });
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 },
-    );
-  }
-});
+export const GET = withApi({ auth: { required: true, minRole: 'admin' } }, async () => notImplemented());
 
+export const POST = withApi({ auth: { required: true, minRole: 'admin' } }, async () => notImplemented());

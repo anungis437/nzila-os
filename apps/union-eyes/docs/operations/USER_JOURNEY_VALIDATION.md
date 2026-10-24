@@ -10,7 +10,7 @@
 This document validates the end-to-end user journeys for each role persona in UnionEyes. Validation was performed through:
 
 1. **Code analysis** — route definitions in `app/[locale]/(dashboard)/`, role-permission mappings in `lib/auth/roles.ts`, FSM enforcement in `lib/case-fsm-enforcement.ts` and `lib/workflow/case-lifecycle.ts`, and sidebar/navigation configuration in `lib/dashboard/role-experience.ts`.
-2. **Fixture tracing** — cross-referencing `tests/fixtures/test-users.ts` against `db/seeds/seed-master.sql` to verify test accounts exist in known seed orgs.
+2. **Fixture tracing** — cross-referencing `tests/fixtures/test-users.ts` against the organizations created by the canonical bootstrap (the retired `db/seeds/seed-master.sql` no longer exists; UE-CONV-H-005) to verify test accounts exist in known orgs.
 3. **Playwright spec audit** — each e2e spec was read and each test was mapped to the journey step it covers.
 4. **Negative-path analysis** — `authenticated-role-navigation.spec.ts` leakage-attempt table was used to enumerate the permission boundary tests.
 

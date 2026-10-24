@@ -27,7 +27,7 @@ Testing is conducted on the master seed dataset. Results are recorded in [USER_T
 | **Production URL** | `https://app.unioneyes.app` |
 | **Local dev URL** | `http://localhost:3002` |
 | **Auth method** | Entra ID SSO or magic-link fallback |
-| **Seed dataset** | Master seed — `db/seeds/seed-master.sql` |
+| **Seed dataset** | None supported: `db/seeds/seed-master.sql` was retired with the replay schema (UE-CONV-H-005) |
 | **Demo data** | CAPE preset — seed via `/dashboard/pilot/onboarding` → **Seed Demo Data** |
 | **Test password** | Held in the team secret store; never recorded in the repository |
 | **Locale** | `en-CA` (all URLs prefixed `/en-CA/`) |

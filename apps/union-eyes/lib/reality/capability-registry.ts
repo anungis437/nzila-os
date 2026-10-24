@@ -166,6 +166,18 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     evidence: ['app/api/admin/alerts/executions/test/route.ts — throws ApiError.notImplemented → HTTP 501', 'rule R-9 in tooling/reality/anti-theatre-scan.ts'],
     targetWave: 5,
   },
+  {
+    id: 'UE-ACTION-ORG-HIERARCHY-SEED',
+    title: 'Organization hierarchy seeding',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/admin/seed-test-data/route.ts'],
+    evidence: [
+      'app/api/admin/seed-test-data/route.ts — throws ApiError.notImplemented → HTTP 501 on GET and POST',
+      'the former seeders were empty stubs that created nothing while the route reported success; the SQL replay seeds targeted the superseded replay schema and were retired (UE-CONV-H-005)',
+    ],
+    targetWave: 5,
+    notes: 'A canonical, schema-checked seed does not exist; the development seed button in the union dashboard reports the 501.',
+  },
 
   // ------------------------------------------------------------------------
   // Cron endpoints (Wave 0 P0 fix: 200-no-op → HTTP 501)
