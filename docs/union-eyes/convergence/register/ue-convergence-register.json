@@ -423,7 +423,7 @@
         { "kind": "file", "ref": "apps/union-eyes/lib/database/multi-db-client.ts", "classification": "RETIRE_PENDING" },
         { "kind": "file", "ref": "apps/union-eyes/db/queries/organization-queries.ts", "classification": "ACTIVE_COMPATIBILITY" }
       ],
-      "defect": "Comments describe Supabase auth and a SQL Server abstraction in a PostgreSQL-only system; db/db.ts imports the multi-database client.",
+      "defect": "Verified, not yet removed. The runtime db export in db/db.ts is a PostgreSQL-only postgres-js client; the unified client is reached only through db.ts re-exports (getDatabase, checkDatabaseConnection) that no non-test caller uses, plus lib/documents/batch-operations-service.ts. The multi-database client's 'mssql' / 'azure-sql' path is not SQL Server: it builds a drizzle node-postgres pool (drizzle-orm/node-postgres), and apps/union-eyes/package.json has no mssql or tedious dependency, so the branch is a PostgreSQL pool under a false label. Removal is blocked by the frozen bootstrap-v2 source plan: scripts/bootstrap-v2/source.ts hash-commits both db/db.ts and lib/database/multi-db-client.ts, so editing or deleting either needs a coordinated regeneration of the UE_V2 plan artifacts and their digests. The comments naming Supabase and SQL Server sit in those same committed files.",
       "consumers": ["apps/union-eyes/db/db.ts", "apps/union-eyes/lib/documents/batch-operations-service.ts"],
       "securityImplications": "Dead branches and wrong guidance obscure the real database path.",
       "requiredImplementation": "Verify non-PostgreSQL paths are unreachable, remove them, correct the comments.",
