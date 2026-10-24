@@ -25,7 +25,7 @@ export const isUuid = (value: unknown): value is string => typeof value === 'str
  * Internal principal id: the canonical `user_management.users.user_id`
  * (varchar(255), NOT necessarily a uuid). Mirrors the ue_authority_principal
  * domain. An external provider subject must never be passed here; resolve it
- * through `resolveInternalPrincipal` first.
+ * through the platform auth resolver first (see platform-identity.ts).
  */
 export const isPrincipalId = (value: unknown): value is string =>
   typeof value === 'string' &&

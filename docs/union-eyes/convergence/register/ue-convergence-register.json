@@ -1,0 +1,546 @@
+{
+  "schemaVersion": 1,
+  "mission": "UE-FINAL-CONVERGENCE-2026-10",
+  "baseline": {
+    "integrationBranch": "agents/ue-final-convergence",
+    "startedFrom": "e2103f297",
+    "authorityKernelBranch": "agents/ue-authority-kernel",
+    "commonBase": "0c994b968",
+    "note": "Entries describe verified repository state. A CLOSED entry must cite evidence that exists; an EXTERNAL_GATE entry names its owner and the exact missing proof. Nothing here is a readiness claim."
+  },
+  "entries": [
+    {
+      "id": "UE-CONV-A-001",
+      "domain": "identity",
+      "capability": "Provider subject to internal principal binding",
+      "workstream": "A",
+      "canonicalOwner": "packages/platform-auth (resolveExternalAuthIdentity) over public.platform_identity_bindings (packages/db/src/schema/platform-authorization.ts)",
+      "sources": [
+        { "kind": "file", "ref": "packages/db/drizzle/0041_platform_authorization_authority.sql", "classification": "CANONICAL" },
+        { "kind": "file", "ref": "packages/platform-auth/src/provider-identity.ts", "classification": "CANONICAL" },
+        { "kind": "file", "ref": "apps/union-eyes/backend/auth_core/canonical_context.py", "classification": "SUPPORTED_PROJECTION" }
+      ],
+      "defect": "The approved legacy Drizzle bootstrap does not create platform_identity_bindings, the nzila_auth_* roles or the reader-owned definer predicates; migration 0041 is unapplied to every durable environment, so production identity cannot run on the approved path.",
+      "consumers": ["packages/platform-auth/src/org-binding.ts", "apps/union-eyes/lib/authority/store/platform-identity.ts"],
+      "securityImplications": "Until adopted, authenticated provider sessions cannot be resolved to an internal principal by the supported path.",
+      "requiredImplementation": "Adopt 0041 (or the v2 bootstrap) through the governed migration process on a non-production clone and fold the extra membership function into the auth-storage-authority catalog verifier.",
+      "evidence": [
+        { "type": "test", "ref": "apps/union-eyes/db/__tests__/authority-kernel-identity-path.native.test.ts" }
+      ],
+      "status": "OPEN",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-A-002",
+      "domain": "identity",
+      "capability": "Kernel-owned provider resolver",
+      "workstream": "A",
+      "canonicalOwner": "packages/platform-auth",
+      "sources": [{ "kind": "symbol", "ref": "resolveInternalPrincipal, resolveAuthorityPrincipal, listActiveOrganizations", "classification": "REMOVE" }],
+      "defect": "A second provider-binding reader inside the authority kernel read a table no business role may read and enumerated memberships outside the supported organization selection.",
+      "consumers": [],
+      "securityImplications": "Duplicate identity authority; bypass of the dedicated provider execution context.",
+      "requiredImplementation": "Consume the verified binding instead.",
+      "evidence": [
+        { "type": "commit", "ref": "b6bb51acd" },
+        { "type": "path", "ref": "apps/union-eyes/lib/authority/store/platform-identity.ts" }
+      ],
+      "status": "CLOSED",
+      "retirement": { "disposition": "REMOVE", "replacement": "runBoundAuthorityTransaction / resolveProviderPrincipal", "commit": "b6bb51acd" }
+    },
+    {
+      "id": "UE-CONV-A-003",
+      "domain": "identity",
+      "capability": "Cross-principal membership reads under the v2 topology",
+      "workstream": "A",
+      "canonicalOwner": "user_management.auth_business_org_authorized family (packages/db/src/auth-storage-authority/org-session-authority.ts)",
+      "sources": [
+        { "kind": "file", "ref": "apps/union-eyes/lib/authority/store/platform-identity.ts", "classification": "ACTIVE_COMPATIBILITY" }
+      ],
+      "defect": "compileAuthorityMembershipReaderSql() exists in the kernel but is not adopted into the auth-storage-authority compiler or its catalog verifier.",
+      "consumers": ["apps/union-eyes/lib/authority/store/enforce.ts"],
+      "securityImplications": "A definer function installed outside the verifier would be an unreviewed privileged reader.",
+      "requiredImplementation": "Move the function into org-session-authority.ts, add it to AUTH_FUNCTION_EXPECTATIONS, and prove fixed search_path, ownership, grants and caller confinement in the native auth proof.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "function owned by org-session-authority.ts" }
+    },
+    {
+      "id": "UE-CONV-A-004",
+      "domain": "identity",
+      "capability": "Session bearer exposure through PostgreSQL session settings",
+      "workstream": "A",
+      "canonicalOwner": "packages/db/src/auth-storage-authority/org-session-authority.ts",
+      "sources": [{ "kind": "symbol", "ref": "app.current_session_token set_config", "classification": "CANONICAL" }],
+      "defect": "The raw server-held session bearer is placed in a transaction-local PostgreSQL setting so definer predicates can hash it in-database. Exposure paths (statement logging, pg_stat_activity parameters, pooled-connection reuse, diagnostics) have not been reviewed.",
+      "consumers": ["apps/union-eyes/lib/authority/store/executor.ts", "packages/platform-auth/src/org-binding.ts"],
+      "securityImplications": "A credential in a server setting can leak into logs or be read by a same-session query.",
+      "requiredImplementation": "Review and prove transaction-local scope and non-disclosure; where compatible, bind a derived proof instead of the raw bearer.",
+      "evidence": [],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-A-005",
+      "domain": "identity",
+      "capability": "Membership authority",
+      "workstream": "A",
+      "canonicalOwner": "platform_organization_memberships (packages/db/drizzle/0041)",
+      "sources": [
+        { "kind": "table", "ref": "user_management.organization_users", "classification": "SUPPORTED_PROJECTION" },
+        { "kind": "table", "ref": "platform_organization_memberships", "classification": "CANONICAL" },
+        { "kind": "table", "ref": "org_members", "classification": "RETIRE_PENDING" }
+      ],
+      "defect": "Three membership records coexist. The kernel and the v2 predicates read the compatibility projection; the platform resolver targets the canonical table, which needs the shared orgs table.",
+      "consumers": ["apps/union-eyes/lib/authority/store/identity.ts"],
+      "securityImplications": "Drift between projection and canonical membership can grant or deny wrongly.",
+      "requiredImplementation": "Define the migration and a reconciliation check between the projection and the canonical table; move readers once the canonical table is deployed.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "platform_organization_memberships" }
+    },
+    {
+      "id": "UE-CONV-A-006",
+      "domain": "identity",
+      "capability": "Clerk identity-provider removal",
+      "workstream": "A",
+      "canonicalOwner": "Entra via platform-auth",
+      "sources": [{ "kind": "file", "ref": "apps/union-eyes/backend/auth_core/views.py", "classification": "ACTIVE_COMPATIBILITY" }],
+      "defect": "Provider code, packages, credentials and seed were removed; remaining references are the documented webhook alias, Whop legacy metadata, legacy-env detection, historical migrations, the unrelated Admin Clerk office role, and the physical column name clerk_user_id.",
+      "consumers": ["apps/union-eyes/app/api/whop/create-checkout/route.ts"],
+      "securityImplications": "Legacy webhook header and env names are detection-only; the physical column name is cosmetic but misleading.",
+      "requiredImplementation": "Forward migration renaming clerk_user_id to auth_user_id across user_uuid_mapping consumers; retire the webhook alias and Whop key once their external consumers are confirmed.",
+      "evidence": [
+        { "type": "commit", "ref": "24ca3f9b5" },
+        { "type": "path", "ref": "docs/union-eyes/convergence/UE-IDENTITY-CLEANUP-COMPATIBILITY-AND-BLOCKERS.md" }
+      ],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "auth_user_id column; auth webhook" }
+    },
+    {
+      "id": "UE-CONV-A-007",
+      "domain": "identity",
+      "capability": "Webhook, Whop and test-credential external actions",
+      "workstream": "J",
+      "canonicalOwner": "identity operations / integration owners",
+      "sources": [{ "kind": "file", "ref": ".github/workflows/deploy-union-eyes.yml", "classification": "ACTIVE_COMPATIBILITY" }],
+      "defect": "The auth webhook secret is provisioned but no sender exists in the repository; Whop consumer unknown; roughly 45 staging accounts used a repo-known test password.",
+      "consumers": [],
+      "securityImplications": "A known password may still be accepted by staging accounts.",
+      "requiredImplementation": "External actions only.",
+      "evidence": [],
+      "status": "EXTERNAL_GATE",
+      "externalGate": {
+        "owner": "identity operations; integration owners; billing integration",
+        "missingProof": "Dated evidence that the old password is rejected or the accounts disabled; identity of the webhook sender and a delivery log; confirmation that the Whop consumer reads userId only."
+      },
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-B-001",
+      "domain": "representation",
+      "capability": "Primary representative ownership",
+      "workstream": "B",
+      "canonicalOwner": "kernel assignments (ue_authority_resource_relationships via assignCase)",
+      "sources": [
+        { "kind": "table", "ref": "grievances.union_rep_id", "classification": "RETIRE_PENDING" },
+        { "kind": "table", "ref": "grievance_case_access_assignments", "classification": "SUPPORTED_PROJECTION" },
+        { "kind": "table", "ref": "grievance_assignments", "classification": "MIGRATION_ONLY" },
+        { "kind": "table", "ref": "steward_assignments", "classification": "RETIRE_PENDING" }
+      ],
+      "defect": "union_rep_id is a mutable uuid with no foreign key, read as a principal id by 28 files; four competing assignment records exist and grievance_assignments is keyed to the legacy claims model.",
+      "consumers": ["apps/union-eyes/lib/services/case-access-service.ts", "apps/union-eyes/lib/deadline-engine/recipient-resolver.ts"],
+      "securityImplications": "Any route that updates a grievance can reassign ownership and silently change authority.",
+      "requiredImplementation": "Run reconcileCaseOwnership per organization, backfill through assignCase, migrate consumers to the kernel, then retire the column as an authority source.",
+      "evidence": [
+        { "type": "path", "ref": "apps/union-eyes/lib/authority/store/case-ownership.ts" },
+        { "type": "test", "ref": "apps/union-eyes/db/__tests__/authority-kernel-case-sources.pglite.test.ts" }
+      ],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "kernel assignments" }
+    },
+    {
+      "id": "UE-CONV-B-002",
+      "domain": "representation",
+      "capability": "Case unit, territory and respondent sources",
+      "workstream": "B",
+      "canonicalOwner": "to be decided with the grievance domain owner",
+      "sources": [{ "kind": "table", "ref": "grievances", "classification": "CANONICAL" }],
+      "defect": "grievances has no unit, territory or respondent columns (employer_id, workplace_id and cba_id are not verified bargaining units); unit- and territory-scoped supervisory mandates reach no case and no respondent is excluded as adverse.",
+      "consumers": ["apps/union-eyes/lib/authority/store/resources.ts"],
+      "securityImplications": "Conflict-of-interest exclusion cannot protect a respondent.",
+      "requiredImplementation": "Add forward-compatible unit_id, territory_id and a case_respondents relation with referential integrity and a backfill plan; load them in loadCase.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-C-001",
+      "domain": "cases",
+      "capability": "Claims versus grievances model",
+      "workstream": "C",
+      "canonicalOwner": "grievances",
+      "sources": [
+        { "kind": "table", "ref": "grievances", "classification": "CANONICAL" },
+        { "kind": "table", "ref": "claims", "classification": "RETIRE_PENDING" }
+      ],
+      "defect": "Django grievance_assignments, documents and transitions reference the legacy claims model while the case policy and document links reference grievances.",
+      "consumers": ["apps/union-eyes/backend/grievances/models.py"],
+      "securityImplications": "A bare 'case' document link may mean a claim; access cannot be derived from it.",
+      "requiredImplementation": "Choose and document the case entity, migrate or retire the competing one.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "grievances" }
+    },
+    {
+      "id": "UE-CONV-D-001",
+      "domain": "finance",
+      "capability": "Payments transaction source",
+      "workstream": "D",
+      "canonicalOwner": "to be decided with the finance domain owner",
+      "sources": [
+        { "kind": "table", "ref": "payments (Drizzle: amount, currency, member, status)", "classification": "SUPPORTED_PROJECTION" },
+        { "kind": "table", "ref": "payments (deployed Django lineage: four columns)", "classification": "MIGRATION_ONLY" }
+      ],
+      "defect": "The deployed payments relation has no amount, currency or payer; no relation anywhere carries approver or executor actors for disbursements.",
+      "consumers": ["apps/union-eyes/lib/authority/store/resources.ts"],
+      "securityImplications": "Money authority cannot be authorized from missing records; the kernel correctly denies.",
+      "requiredImplementation": "Decide the disbursement and approval entity; implement and deploy it with RLS; enable finance actions only where amount, currency and workflow actors exist.",
+      "evidence": [
+        { "type": "path", "ref": "apps/union-eyes/db/__tests__/authority-kernel-finance-sources.pglite.test.ts" }
+      ],
+      "status": "OPEN",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-D-002",
+      "domain": "finance",
+      "capability": "Expense and remittance approval workflow",
+      "workstream": "D",
+      "canonicalOwner": "to be decided with the finance domain owner",
+      "sources": [
+        { "kind": "file", "ref": "apps/union-eyes/db/rls-storage-authority/financial-service-latent.ts", "classification": "RETIRE_PENDING" },
+        { "kind": "table", "ref": "remittance_approvals (Django stub)", "classification": "MIGRATION_ONLY" }
+      ],
+      "defect": "The only real approval workflow (expense_requests, expense_approvals, vendors) lives in services/financial-service, which has no deployment path and is classified LATENT_UNREACHABLE; 11 of its tables were never migrated.",
+      "consumers": [],
+      "securityImplications": "Financial approvals cannot be audited or segregated in the deployed system.",
+      "requiredImplementation": "Either deploy financial-service under the kernel or implement approvals in the canonical owner; retire the loser.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "the finance approval entity chosen under UE-CONV-D-001" }
+    },
+    {
+      "id": "UE-CONV-E-001",
+      "domain": "authorization",
+      "capability": "Legacy case and document authorization shortcuts",
+      "workstream": "E",
+      "canonicalOwner": "apps/union-eyes/lib/authority (decide / enforceAuthority)",
+      "sources": [
+        { "kind": "file", "ref": "apps/union-eyes/lib/cases/case-authorization.ts", "classification": "RETIRE_PENDING" },
+        { "kind": "file", "ref": "apps/union-eyes/lib/services/document-authorization-service.ts", "classification": "RETIRE_PENDING" },
+        { "kind": "file", "ref": "apps/union-eyes/lib/action-enforcer.ts", "classification": "RETIRE_PENDING" }
+      ],
+      "defect": "isStewardPlus and case_read_any style rank checks remain in 15 files (9 routes and 5 services).",
+      "consumers": ["apps/union-eyes/app/api/grievances/[id]/route.ts", "apps/union-eyes/app/api/documents/[id]/download/route.ts"],
+      "securityImplications": "Cross-case access derived from seniority.",
+      "requiredImplementation": "Migrate each consumer to the kernel and delete the helpers; the ratchet forbids new uses.",
+      "evidence": [{ "type": "path", "ref": "docs/union-eyes/convergence/register/ue-convergence-ratchets.json" }],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "kernel enforceAuthority" }
+    },
+    {
+      "id": "UE-CONV-F-001",
+      "domain": "documents",
+      "capability": "Internal-file scope derived from a legacy flag",
+      "workstream": "F",
+      "canonicalOwner": "kernel explicit grants (ue_authority_resource_relationships permissions)",
+      "sources": [{ "kind": "table", "ref": "grievance_case_access_assignments.can_edit_case_notes", "classification": "SUPPORTED_PROJECTION" }],
+      "defect": "The loader derived read_internal from can_edit_case_notes, coupling reading and editing.",
+      "consumers": ["apps/union-eyes/lib/authority/store/resources.ts"],
+      "securityImplications": "Granting edit rights silently disclosed the union's working file.",
+      "requiredImplementation": "Reading, editing and disclosure are separate; the internal scope is an explicit governed grant.",
+      "evidence": [],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-F-002",
+      "domain": "documents",
+      "capability": "Document lifecycle",
+      "workstream": "F",
+      "canonicalOwner": "apps/union-eyes document services (to be consolidated)",
+      "sources": [
+        { "kind": "file", "ref": "apps/union-eyes/lib/services/document-governance-service.ts", "classification": "RETIRE_PENDING" },
+        { "kind": "file", "ref": "apps/union-eyes/lib/documents/batch-operations-service.ts", "classification": "RETIRE_PENDING" }
+      ],
+      "defect": "Versioning, access review, consent-based sharing, withdrawal, retention, export and portability, access requests and disclosure history are not implemented against the classification model.",
+      "consumers": [],
+      "securityImplications": "Disclosure cannot be audited per document.",
+      "requiredImplementation": "Implement the lifecycle on the classification and kernel contracts.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-F-003",
+      "domain": "documents",
+      "capability": "Institutional document classification policy",
+      "workstream": "F",
+      "canonicalOwner": "each institution's governance body",
+      "sources": [{ "kind": "file", "ref": "apps/union-eyes/lib/authority/document-class.ts", "classification": "CANONICAL" }],
+      "defect": "The default policy is provisional and unapproved by design.",
+      "consumers": [],
+      "securityImplications": "None: the default releases nothing to a member except their own submissions.",
+      "requiredImplementation": "A configurable, approval-gated policy adoption workflow exists in code; adoption itself is institutional.",
+      "evidence": [{ "type": "test", "ref": "apps/union-eyes/lib/authority/__tests__/kernel-third-party.test.ts" }],
+      "status": "EXTERNAL_GATE",
+      "externalGate": { "owner": "each institution's governance body", "missingProof": "An approved instrument naming member-disclosable labels and the third-party definition." },
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-G-001",
+      "domain": "workaid",
+      "capability": "Counsel engagement and verified counsel authentication",
+      "workstream": "G",
+      "canonicalOwner": "kernel counsel boundary (to be completed) with an external counsel-side verifier",
+      "sources": [
+        { "kind": "file", "ref": "apps/union-eyes/lib/authority/counsel-boundary.ts", "classification": "CANONICAL" },
+        { "kind": "file", "ref": "docs/union-eyes/convergence/UE-WORKAID-COUNSEL-BOUNDARY-CONTRACT.md", "classification": "CANONICAL" }
+      ],
+      "defect": "Only an assertion-envelope validator exists; there is no matter-specific engagement record, nonce store or verifier port, and a blanket exclusion of union members replaced a proper separate-capacity and conflict model.",
+      "consumers": ["apps/union-eyes/lib/authority/store/workflow.ts"],
+      "securityImplications": "Counsel acceptance must be unforgeable by a union principal and independent of union permissions.",
+      "requiredImplementation": "Engagement register, replay-proof nonce store, verifier port, conflict and isolation model.",
+      "evidence": [],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-G-002",
+      "domain": "workaid",
+      "capability": "WorkAid candidate integration",
+      "workstream": "G",
+      "canonicalOwner": "agents/workaid-prep-20261023 (184 changed paths, docs and tooling only)",
+      "sources": [{ "kind": "file", "ref": "docs/union-eyes/convergence/UE-AUTHORITY-SOURCE-CLOSURE-EVIDENCE.md", "classification": "HISTORICAL_EVIDENCE" }],
+      "defect": "The WorkAid candidate is analysis and synthetic reproduction only and is unmerged; its proposed tables depend on an unqualified migration journal.",
+      "consumers": [],
+      "securityImplications": "None until merged.",
+      "requiredImplementation": "Assess slices against the kernel contract and implement the legal-matter domain on it.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-H-001",
+      "domain": "legacy",
+      "capability": "Generated scaffold fake-success routes",
+      "workstream": "H",
+      "canonicalOwner": "capability registry plus anti-theatre scanner",
+      "sources": [{ "kind": "file", "ref": "apps/union-eyes/app/api/members/merge/route.ts", "classification": "REMOVE" }],
+      "defect": "Thirteen routes returned 200 { status: 'accepted' } and an empty list as a status without doing or recording work, including CLC remittance submit and member merge.",
+      "consumers": ["apps/union-eyes/components/admin/clc-remittances-dashboard.tsx", "apps/union-eyes/components/tax/T4AGenerationDashboard.tsx"],
+      "securityImplications": "A financial submission was reported as accepted when nothing was submitted.",
+      "requiredImplementation": "Honest 501s now; each underlying capability is its own implementation item.",
+      "evidence": [
+        { "type": "commit", "ref": "01b7a0ecb" },
+        { "type": "test", "ref": "tooling/reality/__tests__/anti-theatre-scan.test.ts" }
+      ],
+      "status": "CLOSED",
+      "retirement": { "disposition": "REMOVE", "replacement": "ApiError.notImplemented (HTTP 501)", "commit": "01b7a0ecb" }
+    },
+    {
+      "id": "UE-CONV-H-002",
+      "domain": "legacy",
+      "capability": "Implementation of the thirteen stubbed operations",
+      "workstream": "H",
+      "canonicalOwner": "domain owners per capability registry entries UE-ACTION-*",
+      "sources": [{ "kind": "file", "ref": "apps/union-eyes/lib/reality/capability-registry.ts", "classification": "CANONICAL" }],
+      "defect": "Member merge, bulk, exports, CLC remittance submit and export, CRA export, communications exports and alert test execution are not implemented; UI surfaces now show an honest error.",
+      "consumers": ["apps/union-eyes/components/admin/clc-approval-workflow.tsx"],
+      "securityImplications": "Several are consequential (member PII export, financial submission) and need kernel authorization and audit first.",
+      "requiredImplementation": "Implement each on the canonical contracts, or hide the surface with a recorded product decision.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-H-003",
+      "domain": "legacy",
+      "capability": "Migration and bootstrap entrypoints",
+      "workstream": "H",
+      "canonicalOwner": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs (approved) with Django migrate",
+      "sources": [
+        { "kind": "file", "ref": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs", "classification": "CANONICAL" },
+        { "kind": "file", "ref": "tooling/scripts/run-union-eyes-drizzle-migrate.mjs", "classification": "RETIRE_PENDING" },
+        { "kind": "file", "ref": "tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs", "classification": "ACTIVE_COMPATIBILITY" },
+        { "kind": "file", "ref": "apps/union-eyes/scripts/bootstrap-v2/installer.ts", "classification": "SUPPORTED_PROJECTION" }
+      ],
+      "defect": "package.json exposes db:bootstrap, db:migrate, db:migrate:legacy, db:scoped-migrate:existing and db:push (drizzle-kit push, which bypasses the migration ledger) alongside the Django lineage and the prospective v2 installer.",
+      "consumers": ["apps/union-eyes/package.json"],
+      "securityImplications": "db:push can alter a schema outside the approved lineage.",
+      "requiredImplementation": "Classify each entrypoint, retire db:push and the legacy migrate path after consumer check, and designate one installation path.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "run-union-eyes-drizzle-bootstrap.mjs" }
+    },
+    {
+      "id": "UE-CONV-H-004",
+      "domain": "legacy",
+      "capability": "Misleading architecture guidance and multi-database client",
+      "workstream": "H",
+      "canonicalOwner": "docs/union-eyes/README.md",
+      "sources": [
+        { "kind": "file", "ref": "apps/union-eyes/lib/database/multi-db-client.ts", "classification": "RETIRE_PENDING" },
+        { "kind": "file", "ref": "apps/union-eyes/db/queries/organization-queries.ts", "classification": "ACTIVE_COMPATIBILITY" }
+      ],
+      "defect": "Comments describe Supabase auth and a SQL Server abstraction in a PostgreSQL-only system; db/db.ts imports the multi-database client.",
+      "consumers": ["apps/union-eyes/db/db.ts", "apps/union-eyes/lib/documents/batch-operations-service.ts"],
+      "securityImplications": "Dead branches and wrong guidance obscure the real database path.",
+      "requiredImplementation": "Verify non-PostgreSQL paths are unreachable, remove them, correct the comments.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "the PostgreSQL client in apps/union-eyes/db/db.ts" }
+    },
+    {
+      "id": "UE-CONV-H-005",
+      "domain": "legacy",
+      "capability": "Seed data targets a column and tenant-id format the supported lineage no longer has",
+      "workstream": "H",
+      "canonicalOwner": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs with the Django lineage",
+      "sources": [
+        { "kind": "file", "ref": "apps/union-eyes/db/seeds/seed-master.sql", "classification": "RETIRE_PENDING" },
+        { "kind": "file", "ref": "apps/union-eyes/backend/auth_core/migrations/0003_rename_clerk_organization_id.py", "classification": "HISTORICAL_EVIDENCE" }
+      ],
+      "defect": "seed-master.sql writes organizations.clerk_organization_id and keys its four core tenants by Clerk-format ids, while auth_core 0003 renames that column to auth_provider_org_id in the Django lineage and the Clerk provider is retired.",
+      "consumers": [],
+      "securityImplications": "A seed that runs only on the legacy baseline hides drift between lineages; Clerk-format ids imply a provider that no longer exists.",
+      "requiredImplementation": "Re-author the seed against the canonical organizations contract and run it through the supported replay on PostgreSQL 15 and 16.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "RETIRE_PENDING", "replacement": "seed authored against the canonical organizations contract" }
+    },
+    {
+      "id": "UE-CONV-H-006",
+      "domain": "legacy",
+      "capability": "Stray root scripts",
+      "workstream": "H",
+      "canonicalOwner": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
+      "sources": [{ "kind": "symbol", "ref": "apps/union-eyes/test-analytics.cjs, test-analytics2.cjs, push-org-staging.mjs", "classification": "REMOVE" }],
+      "defect": "Two scratch scripts carried hard-coded local database credentials and a third ran drizzle-kit push, auto-answering No to destructive prompts; none had any reference.",
+      "consumers": [],
+      "securityImplications": "Credentials in source and a ledger-bypassing schema push.",
+      "requiredImplementation": "Remove.",
+      "evidence": [{ "type": "path", "ref": "docs/union-eyes/convergence/register/ue-supersession-registry.json" }],
+      "status": "CLOSED",
+      "retirement": { "disposition": "REMOVE", "replacement": "the approved bootstrap", "commit": "01b7a0ecb" }
+    },
+    {
+      "id": "UE-CONV-I-001",
+      "domain": "personas",
+      "capability": "Six frozen persona candidates and the Steward experience",
+      "workstream": "I",
+      "canonicalOwner": "integration branch against the kernel contract",
+      "sources": [
+        { "kind": "symbol", "ref": "agents/frozen-governance-officer-21-architecture 4d86c3758", "classification": "MIGRATION_ONLY" },
+        { "kind": "symbol", "ref": "agents/frozen-senior-representative-architecture 94126e853", "classification": "MIGRATION_ONLY" },
+        { "kind": "symbol", "ref": "agents/union-eyes-officer-executive-2-1-freeze 638817da2", "classification": "MIGRATION_ONLY" },
+        { "kind": "symbol", "ref": "agents/union-eyes-financial-officer-freeze 7ba993a31", "classification": "MIGRATION_ONLY" },
+        { "kind": "symbol", "ref": "agents/pasted-text-processing-7ac45129 a0e7753fd", "classification": "MIGRATION_ONLY" },
+        { "kind": "symbol", "ref": "agents/local-ue-navigation-validation a8cb15f91", "classification": "MIGRATION_ONLY" }
+      ],
+      "defect": "None of the persona branches is integrated; they encode conflicting role-hierarchy authorization (case_read_any, isStewardPlus, differing financial thresholds). Another agent is advancing fix/ue-global-experience-convergence in a separate worktree.",
+      "consumers": [],
+      "securityImplications": "Merging them as-is would reintroduce rank-derived authority.",
+      "requiredImplementation": "Integrate persona by persona against the kernel with route-level positive and negative tests; do not select by recency.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-J-001",
+      "domain": "release",
+      "capability": "Staging clone qualification of kernel migrations",
+      "workstream": "J",
+      "canonicalOwner": "release engineering",
+      "sources": [{ "kind": "file", "ref": "tooling/scripts/lib/ue-approved-migration-lineage.json", "classification": "CANONICAL" }],
+      "defect": "0013_authority_kernel_storage and 0020_authority_kernel_rls_closure are registered UNQUALIFIED and have not been applied to a staging clone.",
+      "consumers": [],
+      "securityImplications": "Unqualified schema in the deployment path.",
+      "requiredImplementation": "Run the clone-qualification gate.",
+      "evidence": [],
+      "status": "EXTERNAL_GATE",
+      "externalGate": { "owner": "release engineering", "missingProof": "Clone-qualification gate output for the registered additions." },
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-K-001",
+      "domain": "controls",
+      "capability": "Migration lineage verification",
+      "workstream": "K",
+      "canonicalOwner": "tooling/scripts/measure-ue-migration-lineage.mjs",
+      "sources": [{ "kind": "file", "ref": "tooling/scripts/lib/ue-migration-lineage-certification.mjs", "classification": "CANONICAL" }],
+      "defect": "Previously absent; the approved set was hard-coded.",
+      "consumers": [],
+      "securityImplications": "Detects unauthorised alteration, omission or reordering of approved migrations.",
+      "requiredImplementation": "Run in CI through the convergence checker.",
+      "evidence": [
+        { "type": "path", "ref": "tooling/scripts/lib/ue-approved-migration-lineage.json" },
+        { "type": "test", "ref": "tooling/scripts/lib/ue-migration-lineage-certification.test.mjs" }
+      ],
+      "status": "CLOSED",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-K-002",
+      "domain": "controls",
+      "capability": "Stub and fake-success detection",
+      "workstream": "K",
+      "canonicalOwner": "tooling/reality/anti-theatre-scan.ts",
+      "sources": [{ "kind": "file", "ref": "tooling/reality/anti-theatre-scan.ts", "classification": "CANONICAL" }],
+      "defect": "The scaffold fake-success pattern was not detected.",
+      "consumers": [],
+      "securityImplications": "Prevents recurrence of fake success.",
+      "requiredImplementation": "Rule R-9, enforced as an error.",
+      "evidence": [
+        { "type": "commit", "ref": "01b7a0ecb" },
+        { "type": "test", "ref": "tooling/reality/__tests__/anti-theatre-scan.test.ts" }
+      ],
+      "status": "CLOSED",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-K-003",
+      "domain": "controls",
+      "capability": "Register integrity and legacy-reachability ratchets",
+      "workstream": "K",
+      "canonicalOwner": "tooling/scripts/check-ue-convergence.mjs",
+      "sources": [{ "kind": "file", "ref": "tooling/scripts/lib/ue-convergence-check.mjs", "classification": "CANONICAL" }],
+      "defect": "No machine check existed that the register is truthful, that retired symbols stay retired, or that legacy shortcuts do not grow.",
+      "consumers": [],
+      "securityImplications": "Prevents reconciliation debt from silently returning.",
+      "requiredImplementation": "Checker with register validation and ratchets, run in the validation chain.",
+      "evidence": [
+        { "type": "path", "ref": "tooling/scripts/check-ue-convergence.mjs" },
+        { "type": "test", "ref": "tooling/scripts/lib/ue-convergence-check.test.mjs" }
+      ],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-K-004",
+      "domain": "controls",
+      "capability": "Persona action coverage, authorization coverage, documentation supersession and cleanroom deployment proof",
+      "workstream": "K",
+      "canonicalOwner": "to be implemented under tooling/",
+      "sources": [],
+      "defect": "No check fails qualification when a required persona action has no route, policy and persistence; no check rejects active documentation that references retired architecture; no fresh-environment install proof runs in CI.",
+      "consumers": [],
+      "securityImplications": "Fake completion remains possible for these classes.",
+      "requiredImplementation": "Build each control against the persona matrix once the matrix is machine-readable.",
+      "evidence": [],
+      "status": "OPEN",
+      "retirement": { "disposition": "NONE" }
+    }
+  ]
+}
