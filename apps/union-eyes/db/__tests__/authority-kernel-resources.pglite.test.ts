@@ -6,7 +6,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { newUuid, ORG, ORG_B, seedMembership, U } from './authority-kernel-harness'
 import { daysAhead, freshDb, kit, minutesAgo } from './authority-kernel-testkit'
-import { enforceAuthority, enforceDocumentRead } from '../../lib/authority/store/enforce'
+import { enforceAuthority, enforceDocumentRead, requireCounselSession } from '../../lib/authority/store/enforce'
 import { insertConsent, insertRelationship, revokeRelationship } from '../../lib/authority/store/mutations'
 import { decimalToMinor, derivedId } from '../../lib/authority/store/resources'
 import { recordFinancialStep, recordCounselAcceptance, referToWorkAid, registerReview } from '../../lib/authority/store/workflow'
@@ -448,6 +448,30 @@ describe('governance review register and WorkAid referral', () => {
     })).rejects.toThrow(/workaid_case_uq/)
   })
 
+  it('a plain union member may act as counsel only under a live, matter-bound member-counsel engagement with an information barrier', async () => {
+    const m = (await k.asAdmin(() => db.query<{ id: string }>(`SELECT id::text id FROM ue_authority_workaid_matters WHERE case_id = $1`, [CASE]))).rows[0].id
+    const lawyer = U.member2
+    const engagement = (over: Record<string, unknown> = {}) => ({
+      engagementId: newUuid(), organizationId: ORG, matterId: m, counselUserId: lawyer, capacity: 'member_counsel' as const,
+      informationBarrier: true, effectiveAt: minutesAgo(10), expiresAt: daysAhead(30), revokedAt: null, ...over,
+    })
+    const session = (eng: ReturnType<typeof engagement> | null) => k.as(lawyer)((t) => requireCounselSession(
+      t,
+      { memberships: k.deps.memberships, counsel: { isCounselFor: async () => true, engagement: async () => eng } },
+      { organizationId: ORG, matterId: m, claimedUserId: lawyer },
+    ))
+    await expect(session(null)).rejects.toThrow(/COUNSEL_NEEDS_SEPARATE_CAPACITY/)
+    await expect(session(engagement({ capacity: 'external_counsel' }))).rejects.toThrow(/COUNSEL_NEEDS_SEPARATE_CAPACITY/)
+    await expect(session(engagement({ matterId: newUuid() }))).rejects.toThrow(/COUNSEL_NEEDS_SEPARATE_CAPACITY/)
+    await expect(session(engagement({ expiresAt: minutesAgo(1) }))).rejects.toThrow(/COUNSEL_NEEDS_SEPARATE_CAPACITY/)
+    await expect(session(engagement({ revokedAt: minutesAgo(1) }))).rejects.toThrow(/COUNSEL_NEEDS_SEPARATE_CAPACITY/)
+    await expect(session(engagement({ informationBarrier: false }))).rejects.toThrow(/COUNSEL_NO_INFORMATION_BARRIER/)
+    expect(await session(engagement())).toBe(lawyer)
+    // A relationship to the underlying case is a conflict even under a good engagement.
+    await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: lawyer, resourceType: 'case', resourceId: CASE, relation: 'creator', origin: 'derived', effectiveAt: minutesAgo() }))
+    await expect(session(engagement())).rejects.toThrow(/COUNSEL_CASE_RELATIONSHIP/)
+  })
+
   it('after counsel accepts, privileged reads are refused for everyone and counsel material is unreachable', async () => {
     const m = (await k.asAdmin(() => db.query<{ id: string }>(`SELECT id::text id FROM ue_authority_workaid_matters WHERE case_id = $1`, [CASE]))).rows[0].id
     expect((await readCase(U.member)).effect).toBe('allow')
@@ -458,9 +482,11 @@ describe('governance review register and WorkAid referral', () => {
     await expect(accept(U.president, withCounsel)).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
     await expect(accept(U.member, withCounsel)).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
     await expect(accept('user_assignee', withCounsel)).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
-    // Even a verifier that vouches for a union principal cannot make that principal counsel: union members are excluded.
+    // A verifier that vouches for a union principal does not make that principal counsel: union roles, party status and
+    // case relationships are conflicts, and a plain member needs a separate-capacity engagement (tested below).
     const vouchesForEveryone = { memberships: k.deps.memberships, counsel: { isCounselFor: async () => true } }
-    for (const union of [U.president, U.officer, U.member, 'user_assignee']) await expect(accept(union, vouchesForEveryone)).rejects.toThrow(/COUNSEL_IS_UNION_MEMBER/)
+    const conflicts: Array<[string, RegExp]> = [[U.president, /COUNSEL_CONFLICTING_CAPACITY/], [U.officer, /COUNSEL_CONFLICTING_CAPACITY/], [U.member, /COUNSEL_IS_PARTY/], ['user_assignee', /COUNSEL_IS_PARTY/]]
+    for (const [union, code] of conflicts) await expect(accept(union, vouchesForEveryone), union).rejects.toThrow(code)
     await expect(k.as(U.counsel)((t) => recordCounselAcceptance(t, { counsel: vouchesForEveryone.counsel } as never, { organizationId: ORG, matterId: m }))).rejects.toThrow(/COUNSEL_NOT_VERIFIABLE/)
     // The database refuses the same forgery without the TypeScript layer.
     await expect(k.as(U.president)((t) => t.query(`UPDATE ue_authority_workaid_matters SET counsel_accepted_at = now(), counsel_accepted_by = $2 WHERE id = $1`, [m, U.counsel]))).rejects.toThrow(/ACTOR_NOT_SESSION/)

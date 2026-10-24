@@ -11,8 +11,9 @@ import { deny } from '../common'
 import { decide } from '../kernel'
 import type { AuthorityFacts, AuthorityRequest, Decision, ResourceFacts, ResourceRelationship } from '../ontology'
 import { AuthorityStoreError, bindSessionActor, sessionActor, type SqlExecutor } from './executor'
-import { loadApprovalRequestFacts, loadAuthorityFacts, loadRelationships, type MembershipSource } from './facts'
+import { loadApprovalRequestFacts, loadAuthorityFacts, loadHolderMandates, loadRelationships, type MembershipSource } from './facts'
 import { actionForClass, classifyDocument, DEFAULT_DOCUMENT_CLASS_POLICY, type DocumentClassPolicy } from '../document-class'
+import { evaluateCounselCapacity, type CounselEngagement } from '../counsel-boundary'
 import { createCanonicalResourceLoader, loadDocument, type ResourceLoader } from './resources'
 
 export interface EnforcementDeps {
@@ -36,16 +37,24 @@ export interface EnforcementDeps {
 export interface CounselIdentityVerifier {
   /** True only if `userId` is the separately authenticated counsel for this matter. */
   isCounselFor(exec: SqlExecutor, input: { organizationId: string; matterId: string; userId: string }): Promise<boolean>
+  /**
+   * The institution-recorded engagement that establishes counsel's capacity for this matter. Needed when the person
+   * is also a member of this organization; absent for external counsel.
+   */
+  engagement?(exec: SqlExecutor, input: { organizationId: string; matterId: string; userId: string }): Promise<CounselEngagement | null>
 }
 
 /**
  * Counsel-attributed acts (accepting a referral, issuing a counsel disclosure) need
  * counsel's OWN authenticated session AND an independent verifier's confirmation.
- * A union principal can never satisfy this, whatever actor id it supplies.
+ *
+ * A union member is not excluded by status alone, but union authority can never stand in for counsel's: a member
+ * acts as counsel only under a live, matter-bound member-counsel engagement with an information barrier, and never
+ * while a party, adverse, holding a conflicting union capacity or mandate, or related to the underlying case.
  */
 export async function requireCounselSession(
   exec: SqlExecutor,
-  deps: Pick<EnforcementDeps, 'counsel' | 'memberships'>,
+  deps: Pick<EnforcementDeps, 'counsel' | 'memberships'> & { now?: () => Date },
   input: { organizationId: string; matterId: string; claimedUserId: string },
 ): Promise<string> {
   const userId = await bindSessionActor(exec, input.claimedUserId, 'counsel')
@@ -54,12 +63,41 @@ export async function requireCounselSession(
   }
   const ok = await deps.counsel.isCounselFor(exec, { organizationId: input.organizationId, matterId: input.matterId, userId })
   if (ok !== true) throw new AuthorityStoreError('DENIED', 'COUNSEL_NOT_VERIFIED: the session principal is not verified counsel for this matter')
-  // Counsel is an EXTERNAL principal. Anyone who is (or has ever been resolved as) an active member of this union holds
-  // union authority, and union authority is exactly what must never stand in for counsel's.
+  const now = (deps.now ?? (() => new Date()))()
   const union = (await deps.memberships(exec, input.organizationId, [userId])).filter((m) => m.userId === userId && m.organizationId === input.organizationId)
-  if (union.length > 0) {
-    throw new AuthorityStoreError('DENIED', 'COUNSEL_IS_UNION_MEMBER: a principal with a membership in this organization cannot act as its external counsel')
+  const matter = (
+    await exec.query<{ member_user_id: string; referred_by: string; case_id: string }>(
+      `SELECT member_user_id, referred_by, case_id::text AS case_id FROM ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`,
+      [input.organizationId, input.matterId],
+    )
+  ).rows[0]
+  if (!matter) {
+    if (union.length > 0) throw new AuthorityStoreError('DENIED', 'COUNSEL_CONFLICT_UNVERIFIABLE: the matter is unknown, so a member cannot be cleared to act as counsel')
+    return userId
   }
+  const caseRef = { type: 'case' as const, id: matter.case_id, organizationId: input.organizationId }
+  const loaded = union.length > 0
+    ? await createCanonicalResourceLoader(DEFAULT_DOCUMENT_CLASS_POLICY)(exec, { principalUserId: userId, organizationId: input.organizationId, action: 'case:read', resource: caseRef }, now)
+    : null
+  if (union.length > 0 && !loaded) throw new AuthorityStoreError('DENIED', 'COUNSEL_CONFLICT_UNVERIFIABLE: the underlying case could not be loaded')
+  const adverse = loaded && loaded.resource.kind === 'case' ? [...loaded.resource.adverseUserIds] : []
+  const engagement = union.length > 0 && deps.counsel.engagement ? await deps.counsel.engagement(exec, { organizationId: input.organizationId, matterId: input.matterId, userId }) : null
+  const result = evaluateCounselCapacity(
+    {
+      userId,
+      memberUserId: String(matter.member_user_id),
+      referrerUserId: String(matter.referred_by),
+      adverseUserIds: adverse,
+      unionCapacities: union.flatMap((m) => [...m.capacities]),
+      holdsLiveMandate: union.length > 0 && (await loadHolderMandates(exec, input.organizationId, userId)).length > 0,
+      hasCaseRelationship: union.length > 0 && (await loadRelationships(exec, input.organizationId, userId, 'case', matter.case_id)).length > 0,
+    },
+    engagement,
+    input.organizationId,
+    input.matterId,
+    now,
+  )
+  if (!result.ok) throw new AuthorityStoreError('DENIED', `${result.code}: ${result.reason}`)
   return userId
 }
 

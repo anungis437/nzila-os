@@ -311,11 +311,14 @@
         { "kind": "file", "ref": "apps/union-eyes/lib/authority/counsel-boundary.ts", "classification": "CANONICAL" },
         { "kind": "file", "ref": "docs/union-eyes/convergence/UE-WORKAID-COUNSEL-BOUNDARY-CONTRACT.md", "classification": "CANONICAL" }
       ],
-      "defect": "Only an assertion-envelope validator exists; there is no matter-specific engagement record, nonce store or verifier port, and a blanket exclusion of union members replaced a proper separate-capacity and conflict model.",
+      "defect": "Implemented and tested: the verified-authentication interface (envelope, signature port, single-use nonce port) and the separate-capacity, conflict and information-barrier model that replaced the blanket union-member exclusion. NOT built: the durable engagement register and the durable shared nonce store (both need a governed kernel-storage migration), and any counsel-side verifier implementation. With those ports unconfigured every counsel act is refused.",
       "consumers": ["apps/union-eyes/lib/authority/store/workflow.ts"],
       "securityImplications": "Counsel acceptance must be unforgeable by a union principal and independent of union permissions.",
-      "requiredImplementation": "Engagement register, replay-proof nonce store, verifier port, conflict and isolation model.",
-      "evidence": [],
+      "requiredImplementation": "Durable engagement register and replay-proof nonce store (migration), and a qualified counsel-side verifier.",
+      "evidence": [
+        { "type": "test", "ref": "apps/union-eyes/lib/authority/__tests__/counsel-boundary.test.ts" },
+        { "type": "test", "ref": "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts" }
+      ],
       "status": "IN_PROGRESS",
       "retirement": { "disposition": "NONE" }
     },
