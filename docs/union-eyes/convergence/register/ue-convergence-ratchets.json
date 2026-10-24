@@ -157,6 +157,30 @@
       "mode": "zero"
     },
     {
+      "id": "CASE-MUTATION-BEST-EFFORT-AUDIT",
+      "description": "Case, grievance, collaborator-access, workbench, representation-authority and external-grant mutations audit inside their own transaction (lib/audit/atomic-audit). The separate-connection writers cannot roll the mutation back (UE-CONV-K-005). Denial-path auditLog calls are permitted.",
+      "pattern": "auditDataMutation|auditCaseMutation|auditSecurityEvent",
+      "paths": [
+        "apps/union-eyes/app/api/cases/[caseId]/assign",
+        "apps/union-eyes/app/api/cases/[caseId]/notes",
+        "apps/union-eyes/app/api/cases/[caseId]/transition",
+        "apps/union-eyes/app/api/cases/[caseId]/escalate",
+        "apps/union-eyes/app/api/grievances/route.ts",
+        "apps/union-eyes/app/api/grievances/import",
+        "apps/union-eyes/app/api/grievances/[id]/assign",
+        "apps/union-eyes/app/api/grievances/[id]/status",
+        "apps/union-eyes/app/api/grievances/[id]/priority-override",
+        "apps/union-eyes/app/api/grievances/[id]/convert",
+        "apps/union-eyes/app/api/grievances/[id]/documents",
+        "apps/union-eyes/app/api/workbench/assign",
+        "apps/union-eyes/lib/services/case-access-service.ts",
+        "apps/union-eyes/lib/services/representation-authority-service.ts",
+        "apps/union-eyes/lib/services/external-document-grant-service.ts"
+      ],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/node_modules/**"],
+      "mode": "zero"
+    },
+    {
       "id": "RETIRED-REPLAY-SEEDS",
       "description": "The replay script and its SQL seeds were retired; the canonical schema has no seed (UE-CONV-H-005)",
       "pattern": "seed-master\\.sql|replay\\.ps1|seed-org-hierarchy|seed-child-orgs",

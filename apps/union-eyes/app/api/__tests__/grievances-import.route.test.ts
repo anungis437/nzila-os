@@ -50,10 +50,10 @@ const m = vi.hoisted(() => {
     },
     requireEntitlement: vi.fn(),
     hasMinRole: vi.fn(),
-    auditDataMutation: vi.fn(),
+    persistAtomicAudit: vi.fn(),
     auditLog: vi.fn(),
     trackPilotEvent: vi.fn(),
-    withRLSContext: vi.fn(async (fn: () => Promise<unknown>) => fn()),
+    withRLSContext: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => fn(mockDb)),
     createSelectChain,
     createInsertChain,
     createUpdateChain,
@@ -79,8 +79,8 @@ vi.mock('@/lib/organization-middleware', () => ({
         handler(req, { organizationId: TEST_ORG_ID, userId: TEST_USER_ID })
   ),
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/audit-logger', () => ({
-  auditDataMutation: m.auditDataMutation,
   auditLog: m.auditLog,
   AuditEventType: {
     DATA_CREATE: 'data.create',
@@ -107,7 +107,7 @@ describe('grievances/import route', () => {
     m.resetQueues();
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
-    m.auditDataMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.auditLog.mockResolvedValue(undefined);
     m.trackPilotEvent.mockResolvedValue(undefined);
     mockDb.execute.mockResolvedValue([]);
@@ -218,7 +218,7 @@ describe('grievances/import route', () => {
       importedRows: 1,
       failedRows: 1,
     });
-    expect(m.auditDataMutation).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'grievance.import_row', organizationId: TEST_ORG_ID, userId: TEST_USER_ID }));
     expect(m.trackPilotEvent).toHaveBeenCalled();
     expect(m.auditLog).toHaveBeenCalled();
   });

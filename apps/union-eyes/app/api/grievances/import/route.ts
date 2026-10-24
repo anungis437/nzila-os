@@ -6,7 +6,8 @@ import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle'
 import { ingestionBatches, ingestionRecords } from '@/db/schema/ingestion-schema';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
 import { hasMinRole } from '@/lib/api-auth-guard';
-import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import { ErrorCode, standardErrorResponse, standardSuccessResponse } from '@/lib/api/standardized-responses';
@@ -344,9 +345,9 @@ export const POST = withOrganizationAuth(async (request, context) => {
     const row = validated.data;
     const mode = row.createOfficialCase ? 'official_case' : 'intake';
 
-    const [created] = await withRLSContext(async () => {
+    const [created] = await withRLSContext(async (tx) => {
       const grievanceNumber = `GRV-IMP-${Date.now()}-${randomBytes(3).toString('hex')}`;
-      const [g] = await db.insert(grievances).values({
+      const [g] = await tx.insert(grievances).values({
         grievanceNumber,
         type: row.type,
         title: row.title,
@@ -367,28 +368,24 @@ export const POST = withOrganizationAuth(async (request, context) => {
         isGroupGrievance: row.type === 'group',
       }).returning();
 
-      await db.insert(grievanceEvents).values({
+      await tx.insert(grievanceEvents).values({
         grievanceId: g.id,
         eventType: row.createOfficialCase ? 'created' : 'intake_submitted',
         actorUserId: userId,
         notes: row.createOfficialCase ? 'Case imported via governed ingestion' : 'Intake imported via governed ingestion',
       });
 
-      return [g];
-    });
+      // Each imported row commits together with its audit record.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.import_row',
+        resourceType: 'grievances',
+        resourceId: g.id,
+        details: { operation: 'bulk_import', grievanceNumber: g.grievanceNumber, status: g.status, mode },
+      });
 
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: 'grievances',
-      action: 'create',
-      resourceId: created.id,
-      details: { operation: 'bulk_import' },
-      newState: {
-        grievanceNumber: created.grievanceNumber,
-        status: created.status,
-        mode,
-      },
+      return [g];
     });
 
     await trackPilotEvent({
