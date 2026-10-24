@@ -139,10 +139,8 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
   for (const c of collaborators) {
     if (!isPrincipalId(c.user_id) || !isPrincipalId(c.granted_by)) continue
     const permissions = ['read']
-    // Access to the union's internal file needs an ACTIVE case-specific assignment AND an explicit internal-file scope
-    // (the assignment's own can_edit_case_notes flag). A role label such as secondary_lro or reviewer is not a scope, and a
-    // read-only collaborator never reads the internal file.
-    if (c.can_edit_case_notes === true && c.access_role !== 'read_only') permissions.push('read_internal')
+    // A legacy assignment flag never confers access to the union's internal file: that scope is an explicit kernel
+    // grant (`assignCase` with the `read_internal` permission) made under the case_assignment issuance rule.
     if (c.can_comment === true) permissions.push('comment')
     if (c.can_edit_case_notes === true && c.access_role !== 'read_only') permissions.push('write')
     relationships.push({

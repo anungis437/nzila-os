@@ -256,12 +256,15 @@
       "workstream": "F",
       "canonicalOwner": "kernel explicit grants (ue_authority_resource_relationships permissions)",
       "sources": [{ "kind": "table", "ref": "grievance_case_access_assignments.can_edit_case_notes", "classification": "SUPPORTED_PROJECTION" }],
-      "defect": "The loader derived read_internal from can_edit_case_notes, coupling reading and editing.",
+      "defect": "The loader derived read_internal from can_edit_case_notes, coupling reading and editing. Fixed: a legacy flag now yields read/comment/write only; read_internal is an explicit kernel grant under the case_assignment rule. The write permission still derives from the legacy flag until the assignment table itself is retired (UE-CONV-B-001).",
       "consumers": ["apps/union-eyes/lib/authority/store/resources.ts"],
       "securityImplications": "Granting edit rights silently disclosed the union's working file.",
       "requiredImplementation": "Reading, editing and disclosure are separate; the internal scope is an explicit governed grant.",
-      "evidence": [],
-      "status": "IN_PROGRESS",
+      "evidence": [
+        { "type": "test", "ref": "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts" },
+        { "type": "test", "ref": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts" }
+      ],
+      "status": "CLOSED",
       "retirement": { "disposition": "NONE" }
     },
     {

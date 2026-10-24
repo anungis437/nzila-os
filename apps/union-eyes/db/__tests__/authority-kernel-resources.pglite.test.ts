@@ -7,7 +7,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { newUuid, ORG, ORG_B, seedMembership, U } from './authority-kernel-harness'
 import { daysAhead, freshDb, kit, minutesAgo } from './authority-kernel-testkit'
 import { enforceAuthority, enforceDocumentRead } from '../../lib/authority/store/enforce'
-import { insertConsent, insertRelationship } from '../../lib/authority/store/mutations'
+import { insertConsent, insertRelationship, revokeRelationship } from '../../lib/authority/store/mutations'
 import { decimalToMinor, derivedId } from '../../lib/authority/store/resources'
 import { recordFinancialStep, recordCounselAcceptance, referToWorkAid, registerReview } from '../../lib/authority/store/workflow'
 import { auditAuthorityMutation } from '../../lib/authority/store/audit'
@@ -148,16 +148,18 @@ describe('classified document access: the case file, the member\'s own submissio
     privOwn: newUuid(), privInternal: newUuid(), orphan: newUuid(), two: newUuid(), bare: newUuid(), foreign: newUuid(),
     unlabelled: newUuid(), outsider: newUuid(), lroUpload: newUuid(), memberPii: newUuid(),
   }
-  const SCOPED = 'user_scoped_lro' // secondary_lro with an explicit internal-file scope
+  const SCOPED = 'user_scoped_lro' // secondary_lro holding an explicit kernel read_internal grant
   const REVIEWER = 'user_reviewer_noscope' // reviewer without the scope: the label alone is not enough
-  const REVIEWER_OK = 'user_reviewer_scoped'
+  const REVIEWER_OK = 'user_reviewer_scoped' // legacy can_edit_case_notes flag only: the flag is not an internal-file scope
   const READONLY = 'user_readonly_scoped' // read_only role even with the scope flag
+  const EXPIRED = 'user_expired_grant' // explicit kernel grant that has already lapsed
   const OWNER = 'user_primary_owner'
+  const grants: Record<string, string> = {}
   const read = (user: string, doc: string, org = ORG, deps = k.deps) => k.as(user, org)((t) => enforceDocumentRead(t, deps, { principalUserId: user, organizationId: org, documentId: doc, authenticated: true }))
 
   beforeAll(async () => {
     await k.asAdmin(async () => {
-      for (const u of [U.member2, SCOPED, REVIEWER, REVIEWER_OK, READONLY]) await seedMembership(db, u, ORG, u === U.member2 ? 'member' : 'steward')
+      for (const u of [U.member2, SCOPED, REVIEWER, REVIEWER_OK, READONLY, EXPIRED]) await seedMembership(db, u, ORG, u === U.member2 ? 'member' : 'steward')
       await seedMembership(db, OWNER, ORG, 'steward')
       const ins = (id: string, by: string, label: string, priv = false, org = ORG, flags = '') =>
         db.query(`INSERT INTO public.documents (id, organization_id, uploaded_by, privacy_label, contains_legal_privilege${flags ? ', ' + flags.split('=')[0] : ''}) VALUES ($1,$2,$3,$4,$5${flags ? ', ' + flags.split('=')[1] : ''})`, [id, org, by, label, priv])
@@ -194,6 +196,11 @@ describe('classified document access: the case file, the member\'s own submissio
     })
     await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: OWNER, resourceType: 'case', resourceId: CASE, relation: 'owner', origin: 'derived', effectiveAt: minutesAgo() }))
     await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: OWNER, resourceType: 'case', resourceId: CASE_PRIV, relation: 'owner', origin: 'derived', effectiveAt: minutesAgo() }))
+    const ruleId = (await k.asAdmin(() => db.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = 'issue' AND status = 'active'`, [ORG]))).rows[0].id
+    const grant = (user: string, caseId: string, extra: { privilegedAccess?: boolean; expiresAt?: Date; effectiveAt?: Date } = {}) =>
+      k.as(U.chief)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: user, resourceType: 'case', resourceId: caseId, relation: 'collaborator', permissions: ['read', 'read_internal'], origin: 'explicit', grantedBy: U.chief, issuanceRuleId: ruleId, effectiveAt: extra.effectiveAt ?? minutesAgo(), ...extra }))
+    grants.scoped = await grant(SCOPED, CASE)
+    await grant(EXPIRED, CASE, { effectiveAt: minutesAgo(120), expiresAt: minutesAgo(60) })
   })
 
   it('creating the case does not open the union\'s working, restricted or third-party records to the creator', async () => {
@@ -202,15 +209,12 @@ describe('classified document access: the case file, the member\'s own submissio
     }
   })
 
-  it('a role label is not an internal-file scope: secondary_lro and reviewer need an explicit, active, case-specific scope', async () => {
+  it('a role label or a legacy assignment flag is not an internal-file scope: only an explicit, active, case-specific kernel grant opens it', async () => {
     expect((await read(SCOPED, D.internal)).effect).toBe('allow')
-    expect((await read(REVIEWER_OK, D.internal)).effect).toBe('allow')
-    for (const who of [REVIEWER, U.steward2, READONLY]) expect((await read(who, D.internal)).effect, who).toBe('deny')
-    // Expired, revoked and cross-tenant assignments carry nothing.
-    await k.asAdmin(() => db.query(`UPDATE public.grievance_case_access_assignments SET expires_at = now() - interval '1 hour' WHERE user_id = $1`, [REVIEWER_OK]))
-    expect((await read(REVIEWER_OK, D.internal)).effect).toBe('deny')
-    await k.asAdmin(() => db.query(`UPDATE public.grievance_case_access_assignments SET expires_at = NULL WHERE user_id = $1`, [REVIEWER_OK]))
+    for (const who of [REVIEWER, REVIEWER_OK, U.steward2, READONLY, EXPIRED]) expect((await read(who, D.internal)).effect, who).toBe('deny')
+    // The grant is bound to this organization and to this case.
     expect((await read(SCOPED, D.internal, ORG_B)).effect).toBe('deny')
+    expect((await read(SCOPED, D.privInternal)).effect).toBe('deny')
   })
 
   it('public_internal is not member-disclosable by its label; the union file stays closed to the member', async () => {
@@ -248,7 +252,7 @@ describe('classified document access: the case file, the member\'s own submissio
 
   it('revoking someone\'s authority to work a case is distinct from information they supplied: the uploader keeps no access by authorship', async () => {
     expect((await read(SCOPED, D.lroUpload)).effect).toBe('allow') // while assigned
-    await k.asAdmin(() => db.query(`UPDATE public.grievance_case_access_assignments SET status = 'revoked' WHERE user_id = $1`, [SCOPED]))
+    await k.as(U.chief)((t) => revokeRelationship(t, ORG, grants.scoped, U.chief))
     expect((await read(SCOPED, D.lroUpload)).effect).toBe('deny') // authorship is not an access source
     // The kernel has no uploader-disclosure mechanism: any release of a revoked contributor's own record is a
     // governance review (institutional policy decision, recorded in the exit evidence), not an automatic right.
@@ -276,8 +280,9 @@ describe('classified document access: the case file, the member\'s own submissio
     expect((await read(U.president, D.privInternal)).effect).toBe('deny')
     expect((await read(OWNER, D.privInternal)).effect).toBe('deny') // primary owner, but no privileged-access grant on a privileged case
     expect((await read(U.steward, D.privInternal)).effect).toBe('deny') // privileged access alone is not an internal-file scope
-    await k.asAdmin(() => db.query(`INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by, access_role, can_edit_case_notes, can_view_private_documents) VALUES ($1,$2,$3,$4,'secondary_lro',true,true)`, [ORG, CASE_PRIV, SCOPED, U.chief]))
-    expect((await read(SCOPED, D.privInternal)).effect).toBe('allow') // privileged access AND an explicit internal-file scope
+    const caseRule = (await k.asAdmin(() => db.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = 'issue' AND status = 'active'`, [ORG]))).rows[0].id
+    await k.as(U.chief)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: SCOPED, resourceType: 'case', resourceId: CASE_PRIV, relation: 'collaborator', permissions: ['read', 'read_internal'], privilegedAccess: true, origin: 'explicit', grantedBy: U.chief, issuanceRuleId: caseRule, effectiveAt: minutesAgo() }))
+    expect((await read(SCOPED, D.privInternal)).effect).toBe('allow') // privileged access AND an explicit internal-file grant
   })
 
   it('a document with no authoritative case link, two links, or only a bare case link has no basis for access', async () => {

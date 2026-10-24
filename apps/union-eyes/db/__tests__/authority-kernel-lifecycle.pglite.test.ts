@@ -361,6 +361,16 @@ describe('amendment, recusal, case assignment, succession', () => {
     expect((await readCase(U.steward)).effect).toBe('allow')
   })
 
+  it('for a collaborator the internal file is a separate explicit grant: read and comment never open it, read_internal does', async () => {
+    const act = (user: string) => k.as(user)((t) => enforceAuthority(t, k.deps, { principalUserId: user, organizationId: ORG, action: 'case:read_internal', resource: { type: 'case', id: CASE, organizationId: ORG } }, { authenticated: true }))
+    const collaborate = (assignee: string, permissions: string[]) => k.as(U.officer)((t) => assignCase(t, k.deps, { organizationId: ORG, issuerUserId: U.officer, caseId: CASE, assigneeUserId: assignee, relation: 'collaborator', permissions, effectiveAt: minutesAgo() }))
+    expect((await act(U.chief)).effect).toBe('deny') // no relationship yet
+    await collaborate(U.steward2, ['read', 'comment'])
+    expect((await act(U.steward2)).effect).toBe('deny')
+    await collaborate(U.chief, ['read', 'read_internal'])
+    expect((await act(U.chief)).effect).toBe('allow')
+  })
+
   it('succession ends the outgoing holder’s office and delegations and installs the successor atomically', async () => {
     await k.grantOffice(U.officer, U.president, U.treasurer).catch(() => undefined)
     const incoming = { holderUserId: U.treasurer, powers: ['approve'], sourceInstrument: 'Election 2026 result', effectiveAt: minutesAgo(), expiresAt: daysAhead(300), id: newUuid() }
