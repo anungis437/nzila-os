@@ -24,7 +24,7 @@ import { daysAhead, kit, minutesAgo } from './authority-kernel-testkit'
 import { reconcileAuthorityAudit } from '../../lib/authority/store/audit'
 import { enforceAuthority, enforceDocumentRead } from '../../lib/authority/store/enforce'
 import { runAuthorityTransaction, type SqlExecutor } from '../../lib/authority/store/executor'
-import { canonicalMembershipSource, membershipSourceVia, resolveInternalPrincipal } from '../../lib/authority/store/identity'
+import { canonicalMembershipSource, membershipSourceVia } from '../../lib/authority/store/identity'
 import { issueMandate, declareOwnRecusal } from '../../lib/authority/store/lifecycle'
 import type { Action } from '../../lib/authority/ontology'
 
@@ -127,12 +127,13 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     expect(await membershipSourceVia(identityReader as unknown as SqlExecutor)({} as never, ORG_B, [U.president])).toEqual([])
   })
 
-  it('FINDING: the provider-binding table is not in the approved lineage, so provider resolution refuses', async () => {
+  it('FINDING: the provider-binding table is not in this lineage, and no business role could read it if it were', async () => {
     const exists = await admin.query(`SELECT to_regclass('public.platform_identity_bindings') AS t`)
     expect(exists.rows[0].t).toBeNull()
-    await expect(asUser(U.member, (t) => resolveInternalPrincipal(t, { provider: 'entra', subject: `${newUuid()}:${newUuid()}` } as never))).rejects.toThrow()
+    // The authority kernel has no provider resolver of its own: identity comes only from a verified binding.
+    const kernel = await import('../../lib/authority/store/identity')
+    expect(Object.keys(kernel)).not.toContain('resolveInternalPrincipal')
   })
-
   it('case access on the real grievances table: creator yes; a steward by rank, a stranger and another tenant no', async () => {
     expect((await decide(U.member, 'case:read', 'case', CASE)).effect).toBe('allow')
     for (const who of [U.steward, U.chief, U.stranger, U.president]) expect((await decide(who, 'case:read', 'case', CASE)).effect, who).toBe('deny')

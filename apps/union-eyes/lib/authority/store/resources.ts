@@ -207,6 +207,30 @@ export async function loadDocument(exec: SqlExecutor, organizationId: string, do
 
 // ── Financial transaction ────────────────────────────────────────────────────
 
+/**
+ * Whether the deployed public.payments relation can serve as an authoritative transaction source at all. Under the
+ * Django-first lineage it is a four-column stub (id, created_at, updated_at, organization_id); the Drizzle shape the
+ * kernel's finance policy needs adds amount, currency and the payer. Routes use this to keep finance actions
+ * UNAVAILABLE rather than simulating them, and registration refuses with the exact missing columns.
+ */
+export const PAYMENT_SOURCE_COLUMNS = ['id', 'organization_id', 'amount', 'currency', 'member_id'] as const
+
+export interface FinanceSourceReadiness {
+  ready: boolean
+  missingColumns: string[]
+}
+
+export async function financeSourceReadiness(exec: SqlExecutor): Promise<FinanceSourceReadiness> {
+  const rows = (
+    await exec.query<Row>(
+      `SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payments'`,
+    )
+  ).rows
+  const present = new Set(rows.map((r) => String(r.column_name)))
+  const missingColumns = PAYMENT_SOURCE_COLUMNS.filter((c) => !present.has(c))
+  return { ready: missingColumns.length === 0, missingColumns }
+}
+
 export async function loadFinancialTransaction(exec: SqlExecutor, req: AuthorityRequest): Promise<LoadedResource | null> {
   const org = req.resource.organizationId
   if (!isUuid(org) || !isUuid(req.resource.id)) return null

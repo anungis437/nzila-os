@@ -11,7 +11,7 @@ import { assertAllowed, enforceAuthority, requireCounselSession, type Enforcemen
 import { AuthorityStoreError, bindSessionActor, sessionActor, type SqlExecutor } from './executor'
 import { loadAuthorityFacts, loadRelationships } from './facts'
 import { requirePrincipals, requireUuids } from './mutations'
-import { decimalToMinor } from './resources'
+import { decimalToMinor, financeSourceReadiness } from './resources'
 
 type Row = Record<string, unknown>
 
@@ -48,6 +48,10 @@ export async function recordFinancialStep(exec: SqlExecutor, deps: EnforcementDe
 
   let snapshot: { amountMinor: number; currency: string } | null = null
   if (i.step === 'registered') {
+    const readiness = await financeSourceReadiness(exec)
+    if (!readiness.ready) {
+      throw new AuthorityStoreError('PRECONDITION', `FINANCE_SOURCE_UNAVAILABLE: public.payments lacks [${readiness.missingColumns.join(', ')}]; finance actions stay unavailable`)
+    }
     if (!i.accountId || !Number.isInteger(i.requiredApprovals) || (i.requiredApprovals as number) < 1) {
       throw new AuthorityStoreError('PRECONDITION', 'registration needs an account and at least one required approval')
     }

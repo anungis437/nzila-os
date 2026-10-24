@@ -26,6 +26,7 @@ import {
   requirePrincipals,
   requireUuids,
   revokeDelegation as revokeDelegationRow,
+  revokeRelationship,
 } from './mutations'
 import { loadCase } from './resources'
 
@@ -516,6 +517,79 @@ export async function assignCase(
     expiresAt: i.expiresAt ?? null,
     issuanceRuleId: rule.id,
   })
+}
+
+/**
+ * Ends an assignment immediately. Needs the same `case:assign` authority as assigning, and an active
+ * `case_assignment`/`revoke` rule. The revoked holder loses the relationship's access on the next decision;
+ * information they themselves supplied is governed by document classification, not by this revocation.
+ */
+export async function revokeCaseAssignment(
+  exec: SqlExecutor,
+  deps: EnforcementDeps,
+  i: { organizationId: string; issuerUserId: string; caseId: string; relationshipId: string },
+): Promise<void> {
+  requireUuids(i.organizationId, i.caseId, i.relationshipId)
+  await bindSessionActor(exec, i.issuerUserId, 'issuer')
+  const resource = { type: 'case' as const, id: i.caseId, organizationId: i.organizationId }
+  const row = (
+    await exec.query<Row>(
+      `SELECT principal_user_id FROM ue_authority_resource_relationships
+        WHERE organization_id = $1 AND id = $2 AND resource_type = 'case' AND resource_id = $3
+          AND relation IN ('assignee', 'owner', 'collaborator') AND revoked_at IS NULL`,
+      [i.organizationId, i.relationshipId, i.caseId],
+    )
+  ).rows[0]
+  if (!row) throw new AuthorityStoreError('NOT_FOUND', 'no live assignment with this id on this case')
+  const kernel = await enforceAuthority(exec, deps, { principalUserId: i.issuerUserId, organizationId: i.organizationId, action: 'case:assign', resource }, { authenticated: true })
+  const { decision } = await evaluateIssuance(exec, deps, {
+    organizationId: i.organizationId, issuerUserId: i.issuerUserId, holderUserId: String(row.principal_user_id),
+    domain: 'case_assignment', operation: 'revoke', request: { resource, caseAssignAllowed: kernel.effect === 'allow' },
+  })
+  if (decision.effect !== 'allow') return refuse(decision)
+  await revokeRelationship(exec, i.organizationId, i.relationshipId, i.issuerUserId)
+}
+
+/**
+ * Reassignment: the outgoing assignee's live assignments on the case end and the incoming one is installed in ONE
+ * transaction, both under the normal governance. If either step is refused, neither happens.
+ */
+export async function reassignCase(
+  exec: SqlExecutor,
+  deps: EnforcementDeps,
+  i: {
+    organizationId: string
+    issuerUserId: string
+    caseId: string
+    outgoingUserId: string
+    incomingUserId: string
+    permissions?: readonly string[]
+    effectiveAt: Date
+    expiresAt?: Date | null
+  },
+): Promise<{ revoked: string[]; relationshipId: string }> {
+  requireUuids(i.organizationId, i.caseId)
+  requirePrincipals(i.issuerUserId, i.outgoingUserId, i.incomingUserId)
+  if (i.outgoingUserId === i.incomingUserId) throw new AuthorityStoreError('PRECONDITION', 'the incoming assignee is the outgoing assignee')
+  const live = (
+    await exec.query<Row>(
+      `SELECT id::text AS id FROM ue_authority_resource_relationships
+        WHERE organization_id = $1 AND resource_type = 'case' AND resource_id = $2 AND principal_user_id = $3
+          AND relation IN ('assignee', 'owner') AND revoked_at IS NULL ORDER BY id`,
+      [i.organizationId, i.caseId, i.outgoingUserId],
+    )
+  ).rows
+  if (live.length === 0) throw new AuthorityStoreError('NOT_FOUND', 'the outgoing assignee holds no live assignment on this case')
+  const revoked: string[] = []
+  for (const r of live) {
+    await revokeCaseAssignment(exec, deps, { organizationId: i.organizationId, issuerUserId: i.issuerUserId, caseId: i.caseId, relationshipId: String(r.id) })
+    revoked.push(String(r.id))
+  }
+  const relationshipId = await assignCase(exec, deps, {
+    organizationId: i.organizationId, issuerUserId: i.issuerUserId, caseId: i.caseId, assigneeUserId: i.incomingUserId,
+    permissions: i.permissions, effectiveAt: i.effectiveAt, expiresAt: i.expiresAt,
+  })
+  return { revoked, relationshipId }
 }
 
 // ── Institutional succession ─────────────────────────────────────────────────

@@ -29,7 +29,7 @@ export const HELPER = read('db/migrations-cache/0010_tenant_isolation_rls_founda
   .match(/CREATE OR REPLACE FUNCTION ue_create_direct_org_rls_policy\([\s\S]*?\$\$ LANGUAGE plpgsql;/)?.[0] as string
 if (!HELPER) throw new Error('ue_create_direct_org_rls_policy not found')
 
-const FIXTURE_SQL = `
+const IDENTITY_FIXTURE_SQL = `
   CREATE SCHEMA IF NOT EXISTS user_management;
   CREATE TABLE user_management.users (
     user_id varchar(255) PRIMARY KEY, email varchar(255), is_active boolean DEFAULT true,
@@ -42,6 +42,9 @@ const FIXTURE_SQL = `
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), provider varchar(80) NOT NULL, provider_subject varchar(512) NOT NULL,
     platform_user_id varchar(255) NOT NULL, state varchar(16) NOT NULL DEFAULT 'active', verified_at timestamptz NOT NULL DEFAULT now(),
     disabled_at timestamptz, revoked_at timestamptz, CONSTRAINT pib_uq UNIQUE (provider, provider_subject));
+`
+
+const BUSINESS_FIXTURE_SQL = `
   CREATE TABLE public.grievances (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, created_by text,
     created_at timestamptz NOT NULL DEFAULT now(), is_confidential boolean DEFAULT false, has_legal_implications boolean DEFAULT false,
@@ -75,14 +78,17 @@ const AUDIT_FIXTURE_SQL = `
   CREATE INDEX idx_ue_audit_logs_org_created ON public.audit_logs (organization_id, created_at);
 `
 
-const GRANTS = `
+const IDENTITY_GRANTS = `
   GRANT USAGE ON SCHEMA user_management TO union_eyes_runtime;
   GRANT SELECT ON user_management.users, user_management.organization_users, public.platform_identity_bindings TO union_eyes_runtime;
+`
+
+const GRANTS = `
   GRANT SELECT, INSERT, UPDATE, DELETE ON public.audit_logs TO union_eyes_runtime;
   GRANT SELECT ON public.grievances, public.grievance_case_access_assignments, public.documents, public.document_links, public.payments TO union_eyes_runtime;
 `
 
-export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: boolean } = {}): Promise<void> {
+export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: boolean; canonicalIdentity?: boolean } = {}): Promise<void> {
   await db.exec(`
     DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime') THEN
@@ -91,13 +97,16 @@ export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: 
         CREATE ROLE union_eyes_system NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS INHERIT NOLOGIN; END IF;
     END $$;`)
   await db.exec(HELPER)
-  await db.exec(FIXTURE_SQL)
+  // With canonicalIdentity the identity relations, roles and grants come from the real auth bootstrap instead.
+  if (!options.canonicalIdentity) await db.exec(IDENTITY_FIXTURE_SQL)
+  await db.exec(BUSINESS_FIXTURE_SQL)
   if (!options.realAuditLogs) await db.exec(AUDIT_FIXTURE_SQL)
   await db.exec(PLATFORM_SQL)
   await db.exec(RLS_SQL)
   for (const t of ['audit_logs', 'grievances', 'grievance_case_access_assignments', 'documents', 'payments']) {
     await db.exec(`SELECT ue_create_direct_org_rls_policy('${t}')`)
   }
+  if (!options.canonicalIdentity) await db.exec(IDENTITY_GRANTS)
   await db.exec(GRANTS)
   for (const e of authorityKernelEntries) {
     await db.exec(`GRANT ${e.requiredRuntimePrivileges.join(', ')} ON ${e.table} TO union_eyes_runtime`)

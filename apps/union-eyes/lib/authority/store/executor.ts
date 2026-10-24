@@ -37,6 +37,12 @@ export const isPrincipalId = (value: unknown): value is string =>
 export interface AuthorityContext {
   organizationId: string
   userId: string
+  /**
+   * The raw, server-held session bearer of the authenticated actor. In the deployed (v2) topology the
+   * business predicates hash it inside the database to prove a LIVE session, so it must travel with the
+   * transaction. Never serialize or log it. Omitted only where no session authority exists (legacy lineage).
+   */
+  sessionToken?: string
 }
 
 /**
@@ -133,6 +139,12 @@ export async function runAuthorityTransaction<T>(
       `SELECT set_config('app.current_org_id', $1, true), set_config('app.current_user_id', $2, true)`,
       [ctx.organizationId, ctx.userId],
     )
+    if (ctx.sessionToken !== undefined) {
+      if (typeof ctx.sessionToken !== 'string' || ctx.sessionToken.length === 0 || ctx.sessionToken.length > 16384) {
+        throw new AuthorityStoreError('INVALID_CONTEXT', 'sessionToken must be a non-empty string')
+      }
+      await connection.query(`SELECT set_config('app.current_session_token', $1, true)`, [ctx.sessionToken])
+    }
     const result = await fn(connection)
     await connection.query('COMMIT')
     return result

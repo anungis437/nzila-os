@@ -251,6 +251,11 @@ function evaluate(
     if (req.operation !== 'revoke') return deny({ code: 'SELF_APPROVAL', detail: 'an issuer cannot confer, amend, suspend or lift authority for themselves' })
   }
 
+  // Assigning OR ending a case assignment needs the kernel's own case:assign authority on that very case.
+  if (req.domain === 'case_assignment' && req.caseAssignAllowed !== true) {
+    return deny({ code: 'NO_SOURCE_OF_AUTHORITY', detail: 'the issuer holds no case:assign authority on this case' })
+  }
+
   const confers = req.operation === 'issue' || req.operation === 'amend'
   if (!confers) {
     return result(req, now, rule, 'allow', [{ code: 'ALLOWED_BY_ISSUANCE_RULE', ref: rule.id }])
@@ -379,6 +384,7 @@ export const DEFAULT_ISSUANCE_TEMPLATES: readonly IssuanceRuleTemplate[] = [
   { domain: 'financial', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: ['view', 'prepare', 'approve', 'execute', 'reconcile', 'audit'], maxTermDays: 365, requiresAcceptance: true, requiredIndependentApprovals: 1, rationale: 'Authorized financial governing body; segregation of duties is enforced at grant time.' },
   { domain: 'governance_review', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: ['monitor', 'access_evidence', 'issue_finding', 'request_corrective_action'], maxTermDays: 365, requiresAcceptance: true, requiredIndependentApprovals: 1, rationale: 'Governed approval body; independent approvers and recusal.' },
   { domain: 'emergency_access', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: ['read'], maxTermDays: 1, requiresAcceptance: false, requiredIndependentApprovals: 1, rationale: 'Pre-authorized emergency process; time-limited, justified, independently approved.' },
+  { domain: 'case_assignment', operation: 'revoke', issuerCapacities: ['steward', 'chief_steward', 'officer'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Ends a case assignment at once; the kernel additionally requires case:assign on the case.' },
   { domain: 'supervisory', operation: 'revoke', issuerCapacities: ['officer', 'executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Revocation is immediate and does not need approval.' },
   { domain: 'executive_office', operation: 'revoke', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Succession and removal.' },
   { domain: 'delegation', operation: 'revoke', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'The delegator or an executive may revoke at once.' },
