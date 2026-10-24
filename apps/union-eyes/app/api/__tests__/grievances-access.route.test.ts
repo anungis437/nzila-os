@@ -6,7 +6,7 @@ const m = vi.hoisted(() => ({
   hasMinRole: vi.fn(),
   db: { select: vi.fn() },
   getEffectiveCaseAccess: vi.fn(),
-  expireElapsedCaseAccessAssignments: vi.fn(),
+  listCaseCollaborators: vi.fn(),
   grantCaseAccessGuarded: vi.fn(),
   revokeCaseAccessGuarded: vi.fn(),
   auditCaseMutation: vi.fn(),
@@ -16,9 +16,10 @@ vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOr
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@/db/db', () => ({ db: m.db }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_c: unknown, fn: (tx: unknown) => unknown) => fn({}) }));
 vi.mock('@/lib/services/case-access-service', () => ({
   getEffectiveCaseAccess: m.getEffectiveCaseAccess,
-  expireElapsedCaseAccessAssignments: m.expireElapsedCaseAccessAssignments,
+  listCaseCollaborators: m.listCaseCollaborators,
   grantCaseAccessGuarded: m.grantCaseAccessGuarded,
   revokeCaseAccessGuarded: m.revokeCaseAccessGuarded,
 }));
@@ -63,7 +64,6 @@ describe('grievances/[id]/access route', () => {
     m.requireEntitlement.mockResolvedValue(undefined);
     // Org-wide seniority must never be what authorizes these routes.
     m.hasMinRole.mockResolvedValue(true);
-    m.expireElapsedCaseAccessAssignments.mockResolvedValue(undefined);
     m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canManageAssignments: true, isPrimaryOwner: true });
     m.grantCaseAccessGuarded.mockResolvedValue({
       ok: true,
@@ -75,6 +75,7 @@ describe('grievances/[id]/access route', () => {
       updated: { id: 'a1', userId: 'u2', status: 'revoked' },
     });
     m.auditCaseMutation.mockResolvedValue(undefined);
+    m.listCaseCollaborators.mockResolvedValue([{ id: 'a0', userId: 'u1', relation: 'assignee' }]);
 
     m.db.select = vi.fn(() => ({
       from: vi.fn(() => ({
@@ -100,6 +101,7 @@ describe('grievances/[id]/access route', () => {
     const json = await response.json();
     expect(response.status).toBe(200);
     expect(json.data.effectiveAccess.canManageAssignments).toBe(false);
+    expect(json.data.primaryLroId).toBe('u1');
   });
 
   it('POST grants collaborator access and audits it', async () => {

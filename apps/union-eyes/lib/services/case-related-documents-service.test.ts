@@ -33,6 +33,7 @@ vi.mock('@/db/db', () => ({
   db: dbMock,
 }));
 
+vi.mock('@/lib/services/case-access-service', () => ({ assignedCaseRepresentativeIds: vi.fn(async () => ['lro-1']) }));
 vi.mock('@/lib/services/document-authorization-service', () => ({
   filterAuthorizedDocumentsForActor,
 }));

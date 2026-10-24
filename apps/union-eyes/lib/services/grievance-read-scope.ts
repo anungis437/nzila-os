@@ -1,24 +1,18 @@
 import { sql, type SQL } from 'drizzle-orm';
+const dsql = sql;
 import { grievances } from '@/db/schema/domains/claims/grievances';
+import { kernelCaseRelationshipScope } from '@/lib/authority/store/route-adapter';
 
 /**
- * Matters a user may read in full: authored, primary-owned, or covered by an active unexpired
- * case-access grant. Organization role seniority is deliberately not an input. Mirrors
- * `getEffectiveCaseAccess` + creator, for use in set-based queries. Callers must add the
- * organization predicate themselves.
+ * Pre-filter for list queries: matters a user authored or holds a LIVE, non-recused authority-kernel relationship to.
+ * Organization role seniority is deliberately not an input, and neither is the legacy primary-representative column.
+ * This only narrows what a list may enumerate; reading or changing any one matter still needs a full kernel decision.
+ * Callers must add the organization predicate themselves.
  */
 export function grievanceRelationshipScope(userId: string): SQL {
   return sql`(
     ${grievances.createdBy}::text = ${userId}
-    OR ${grievances.unionRepId}::text = ${userId}
-    OR EXISTS (
-      SELECT 1 FROM grievance_case_access_assignments a
-      WHERE a.grievance_id = ${grievances.id}
-        AND a.organization_id = ${grievances.organizationId}
-        AND a.user_id = ${userId}
-        AND a.status = 'active'
-        AND (a.expires_at IS NULL OR a.expires_at > NOW())
-    )
+    OR ${kernelCaseRelationshipScope(userId, dsql`${grievances.id}`, dsql`${grievances.organizationId}`)}
   )`;
 }
 
@@ -26,7 +20,11 @@ export function grievanceRelationshipScope(userId: string): SQL {
 export function unassignedIntakeTriageScope(): SQL {
   return sql`(
     ${grievances.status} = 'draft'
-    AND ${grievances.unionRepId} IS NULL
+    AND ${sql.raw(`NOT EXISTS (
+      SELECT 1 FROM ue_authority_resource_relationships r
+       WHERE r.resource_type = 'case' AND r.resource_id = grievances.id AND r.organization_id = grievances.organization_id
+         AND r.relation IN ('owner', 'assignee') AND r.status = 'active' AND r.revoked_at IS NULL
+         AND (r.expires_at IS NULL OR r.expires_at > now()))`)}
     AND ${grievances.isConfidential} IS NOT TRUE
   )`;
 }

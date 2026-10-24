@@ -7,7 +7,7 @@ const m = vi.hoisted(() => ({
   db: { select: vi.fn() },
   selectQueue: [] as unknown[][],
   getEffectiveCaseAccess: vi.fn(),
-  expireElapsedCaseAccessAssignments: vi.fn(),
+  listCaseCollaborators: vi.fn(),
   isDocumentVisibleByPolicy: vi.fn(),
   toGovernanceLabel: vi.fn(),
   trackPilotEvent: vi.fn(),
@@ -27,7 +27,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/services/case-access-service', () => ({
   getEffectiveCaseAccess: m.getEffectiveCaseAccess,
-  expireElapsedCaseAccessAssignments: m.expireElapsedCaseAccessAssignments,
+  listCaseCollaborators: m.listCaseCollaborators,
 }));
 vi.mock('@/lib/services/document-governance-service', () => ({
   isDocumentVisibleByPolicy: m.isDocumentVisibleByPolicy,
@@ -47,7 +47,7 @@ describe('grievances/[id] route', () => {
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
     m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canManageAssignments: true, isPrimaryOwner: true, canViewPrivateDocuments: true });
-    m.expireElapsedCaseAccessAssignments.mockResolvedValue(undefined);
+    m.listCaseCollaborators.mockResolvedValue([{ id: 'k1', userId: 'u1', relation: 'assignee' }]);
     m.isDocumentVisibleByPolicy.mockReturnValue(true);
     m.toGovernanceLabel.mockReturnValue('internal');
     m.trackPilotEvent.mockResolvedValue(undefined);
@@ -106,8 +106,8 @@ describe('grievances/[id] route', () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ id: 'g1', createdBy: 'u1', unionRepId: 'u1' });
-    expect(m.expireElapsedCaseAccessAssignments).toHaveBeenCalled();
+    expect(payload.data).toMatchObject({ id: 'g1', createdBy: 'u1', primaryLroId: 'u1' });
+    expect(m.listCaseCollaborators).toHaveBeenCalled();
     expect(m.trackPilotEvent).not.toHaveBeenCalled();
   });
 

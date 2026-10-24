@@ -30,6 +30,7 @@ const dbMock = {
 };
 
 vi.mock('@/db/db', () => ({ db: dbMock }));
+vi.mock('@/lib/services/case-access-service', () => ({ assignedCaseRepresentativeIds: vi.fn(async () => ['lro-1']) }));
 vi.mock('@/lib/services/document-authorization-service', () => ({ filterAuthorizedDocumentsForActor }));
 vi.mock('@/lib/services/feature-flags-service', () => ({ isFeatureEnabled }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));

@@ -82,6 +82,8 @@ vi.mock('@/db/schema/domains/claims/grievance-lifecycle', () => ({
 
 vi.mock('@/db/db', () => ({
   db: {
+    // The live kernel relationships are counted with one raw query; ending them is the membership disable.
+    execute: async () => (await m.caseAccessSelectWhere()).length === 0 ? [{ n: 0 }] : [{ n: (await m.caseAccessSelectWhere()).length }],
     select: () => ({ from: () => ({ where: m.caseAccessSelectWhere }) }),
     update: () => {
       m.updateCallCount.n += 1;
@@ -223,7 +225,7 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
     }), expect.any(Function));
   });
 
-  it('revokes every active case-access assignment returned for the user/org and reports the count', async () => {
+  it('reports the live kernel case relationships the membership disable ends', async () => {
     m.caseAccessSelectWhere.mockResolvedValue([{ id: 'assignment-1' }, { id: 'assignment-2' }]);
     const { revokeMemberAccess } = await loadService();
 
@@ -231,9 +233,8 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
 
     expect(result.success).toBe(true);
     expect(result.caseAccessRevokedCount).toBe(2);
-    // 2 case-access revocation updates + 1 local status update = 3 total
-    // db.update() calls, all routed through the same mocked `where`.
-    expect(m.membersUpdateWhere).toHaveBeenCalledTimes(3);
+    // Kernel relationships are not rewritten: the membership disable ends them. Only the local status update runs.
+    expect(m.membersUpdateWhere).toHaveBeenCalledTimes(1);
   });
 });
 

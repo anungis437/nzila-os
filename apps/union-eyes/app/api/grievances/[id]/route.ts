@@ -8,11 +8,10 @@ import { NextRequest as _NextRequest, NextResponse as _NextResponse } from "next
 import { db } from "@/db/db";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
-import { grievanceCaseAccessAssignments } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { documents, documentAccessGrants, documentLinks } from "@/db/schema/documents-schema";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { getEffectiveCaseAccess, expireElapsedCaseAccessAssignments } from "@/lib/services/case-access-service";
+import { getEffectiveCaseAccess, listCaseCollaborators } from "@/lib/services/case-access-service";
 import { isDocumentVisibleByPolicy, toGovernanceLabel } from "@/lib/services/document-governance-service";
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import {
@@ -51,8 +50,6 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     if (!grievance) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
-
-    await expireElapsedCaseAccessAssignments();
 
     // Row-level access check: seniority grants nothing. Only the creator, the primary owner, or an
     // active unexpired case-access assignment may read this grievance.
@@ -141,23 +138,18 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
       });
     }
 
-    const collaborators = await db
-      .select()
-      .from(grievanceCaseAccessAssignments)
-      .where(
-        and(
-          eq(grievanceCaseAccessAssignments.organizationId, organizationId),
-          eq(grievanceCaseAccessAssignments.grievanceId, params.id),
-        ),
-      )
-      .orderBy(desc(grievanceCaseAccessAssignments.grantedAt));
+    // The roster shows who holds live kernel relationships to this case; expiry is evaluated by the kernel.
+    const collaborators = effectiveAccess.canViewCase
+      ? await withRLSContext({ organizationId }, (tx) => listCaseCollaborators(tx, organizationId, params.id))
+      : [];
+    const primaryLroId = collaborators.find((c) => c.relation !== 'collaborator')?.userId ?? null;
 
     return standardSuccessResponse({
       ...grievance,
       events,
       documents: governedDocuments,
       governedDocuments,
-      primaryLroId: grievance.unionRepId,
+      primaryLroId,
       collaborators,
       effectiveAccess: effectiveAccessForResponse,
     });

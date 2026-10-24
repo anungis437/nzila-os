@@ -22,6 +22,8 @@ const matter = {
   openIntake: '00000000-0000-4000-8000-000000000008',
   confidentialIntake: '00000000-0000-4000-8000-000000000009',
   assignedIntake: '00000000-0000-4000-8000-00000000000a',
+  legacyOwnerOnly: '00000000-0000-4000-8000-00000000000b',
+  recused: '00000000-0000-4000-8000-00000000000c',
 };
 
 let pg: PGlite;
@@ -34,15 +36,23 @@ beforeAll(async () => {
       id uuid PRIMARY KEY, organization_id uuid NOT NULL, grievance_number text,
       status text NOT NULL DEFAULT 'draft', created_by text, union_rep_id uuid, is_confidential boolean DEFAULT false
     );
-    CREATE TABLE grievance_case_access_assignments (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, grievance_id uuid NOT NULL,
-      user_id text NOT NULL, status text NOT NULL DEFAULT 'active', expires_at timestamptz
+    CREATE TABLE ue_authority_resource_relationships (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, principal_user_id text NOT NULL,
+      resource_type text NOT NULL, resource_id uuid NOT NULL, relation text NOT NULL, status text NOT NULL DEFAULT 'active',
+      revoked_at timestamptz, effective_at timestamptz NOT NULL DEFAULT now() - interval '1 minute', expires_at timestamptz
+    );
+    CREATE TABLE ue_authority_recusals (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, principal_user_id text NOT NULL,
+      resource_type text NOT NULL, resource_id uuid NOT NULL, lifted_at timestamptz
     );
   `);
   db = drizzle(pg);
 
   const rows: Array<[string, string, string, string | null, string | null, boolean, string]> = [
-    [matter.owned, orgA, 'filed', 'someone', ownerUuid, false, 'G-owned'],
+    [matter.owned, orgA, 'filed', 'someone', null, false, 'G-owned'],
+    // The legacy column names ownerUuid, but no kernel relationship exists: it must grant nothing.
+    [matter.legacyOwnerOnly, orgA, 'filed', 'someone', ownerUuid, false, 'G-legacy'],
+    [matter.recused, orgA, 'filed', 'someone', null, false, 'G-recused'],
     [matter.authored, orgA, 'filed', seniorNoRelationship, null, false, 'G-authored'],
     [matter.unrelated, orgA, 'filed', 'someone', null, false, 'G-unrelated'],
     [matter.grantedActive, orgA, 'filed', 'someone', null, false, 'G-active'],
@@ -51,7 +61,7 @@ beforeAll(async () => {
     [matter.foreignOrg, orgB, 'filed', 'someone', null, false, 'G-foreign'],
     [matter.openIntake, orgA, 'draft', 'member-1', null, false, 'G-intake'],
     [matter.confidentialIntake, orgA, 'draft', 'member-2', null, true, 'G-conf-intake'],
-    [matter.assignedIntake, orgA, 'draft', 'member-3', ownerUuid, false, 'G-assigned-intake'],
+    [matter.assignedIntake, orgA, 'draft', 'member-3', null, false, 'G-assigned-intake'],
   ];
   for (const [id, org, status, createdBy, rep, conf, number] of rows) {
     await pg.query(
@@ -59,16 +69,22 @@ beforeAll(async () => {
       [id, org, status, createdBy, rep, conf, number],
     );
   }
-  const grant = (grievance: string, org: string, user: string, status: string, expires: string | null) =>
+  const relate = (grievance: string, org: string, user: string, relation: string, opts: { status?: string; expires?: string | null } = {}) =>
     pg.query(
-      'INSERT INTO grievance_case_access_assignments(organization_id, grievance_id, user_id, status, expires_at) VALUES($1,$2,$3,$4,$5)',
-      [org, grievance, user, status, expires],
+      `INSERT INTO ue_authority_resource_relationships(organization_id, principal_user_id, resource_type, resource_id, relation, status, revoked_at, expires_at)
+       VALUES($1,$2,'case',$3,$4,$5,$6,$7)`,
+      [org, user, grievance, relation, opts.status ?? 'active', opts.status === 'revoked' ? new Date() : null, opts.expires ?? null],
     );
-  await grant(matter.grantedActive, orgA, collaborator, 'active', null);
-  await grant(matter.grantedExpired, orgA, collaborator, 'active', '2000-01-01T00:00:00Z');
-  await grant(matter.grantedRevoked, orgA, collaborator, 'revoked', null);
-  // A grant row pointing at a foreign-organization matter must not widen scope inside orgA queries.
-  await grant(matter.foreignOrg, orgB, collaborator, 'active', null);
+  await relate(matter.owned, orgA, ownerUuid, 'assignee');
+  await relate(matter.assignedIntake, orgA, ownerUuid, 'assignee');
+  await relate(matter.grantedActive, orgA, collaborator, 'collaborator');
+  await relate(matter.grantedExpired, orgA, collaborator, 'collaborator', { expires: '2000-01-01T00:00:00Z' });
+  await relate(matter.grantedRevoked, orgA, collaborator, 'collaborator', { status: 'revoked' });
+  // A relationship pointing at a foreign-organization matter must not widen scope inside orgA queries.
+  await relate(matter.foreignOrg, orgB, collaborator, 'collaborator');
+  // A recused holder keeps the relationship record but loses enumeration of the case.
+  await relate(matter.recused, orgA, collaborator, 'collaborator');
+  await pg.query(`INSERT INTO ue_authority_recusals(organization_id, principal_user_id, resource_type, resource_id) VALUES($1,$2,'case',$3)`, [orgA, collaborator, matter.recused]);
 });
 
 afterAll(async () => {
@@ -96,7 +112,15 @@ describe('grievance relationship scope against PostgreSQL (cross-case read confi
     expect(await readable(ownerUuid)).toEqual(['G-assigned-intake', 'G-owned']);
   });
 
-  it('honours only active, unexpired grants and ignores expired and revoked ones', async () => {
+  it('the legacy primary-representative column grants nothing without a kernel relationship', async () => {
+    expect(await readable(ownerUuid)).not.toContain('G-legacy');
+  });
+
+  it('a recused holder does not enumerate the case they are recused from', async () => {
+    expect(await readable(collaborator)).not.toContain('G-recused');
+  });
+
+  it('honours only live, unexpired relationships and ignores expired and revoked ones', async () => {
     expect(await readable(collaborator)).toEqual(['G-active']);
   });
 
@@ -107,7 +131,7 @@ describe('grievance relationship scope against PostgreSQL (cross-case read confi
 
   it('accepts non-UUID application user ids without a cast failure', async () => {
     await expect(readable("ue-v2-http-admin-7c1f'; DROP TABLE grievances;--")).resolves.toEqual([]);
-    expect((await pg.query('SELECT count(*)::int AS n FROM grievances')).rows[0]).toEqual({ n: 10 });
+    expect((await pg.query('SELECT count(*)::int AS n FROM grievances')).rows[0]).toEqual({ n: 12 });
   });
 
   it('limits triage projection to unassigned, non-confidential intakes', async () => {
@@ -120,7 +144,7 @@ describe('grievance relationship scope against PostgreSQL (cross-case read confi
 
   it('revocation takes effect immediately for the same user', async () => {
     await pg.query(
-      `UPDATE grievance_case_access_assignments SET status = 'revoked' WHERE grievance_id = $1 AND user_id = $2`,
+      `UPDATE ue_authority_resource_relationships SET status = 'revoked', revoked_at = now() WHERE resource_id = $1 AND principal_user_id = $2`,
       [matter.grantedActive, collaborator],
     );
     expect(await readable(collaborator)).toEqual([]);

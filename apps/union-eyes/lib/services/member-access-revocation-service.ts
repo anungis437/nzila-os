@@ -1,8 +1,7 @@
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { grievanceCaseAccessAssignments } from '@/db/schema/domains/claims/grievance-lifecycle';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { authDb, withAuthContext } from '@nzila/platform-auth/auth-execution';
 
@@ -130,26 +129,18 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
     });
   }
 
-  // 3. Revoke active case-access assignments for the real auth user id.
+  // 3. Case access. Kernel case relationships are only ever effective for an ACTIVE membership: the kernel checks the
+  // membership on every decision, so disabling it above ends every relationship at once, without rewriting any
+  // governed record. This step only counts the relationships that were live, for the revocation report.
   try {
     await withSystemContext(async (_tx) => {
-      const active = await db
-        .select({ id: grievanceCaseAccessAssignments.id })
-        .from(grievanceCaseAccessAssignments)
-        .where(
-          and(
-            eq(grievanceCaseAccessAssignments.userId, input.authUserId),
-            eq(grievanceCaseAccessAssignments.organizationId, input.organizationId),
-            eq(grievanceCaseAccessAssignments.status, 'active'),
-          ),
-        );
-      for (const assignment of active) {
-        await db
-          .update(grievanceCaseAccessAssignments)
-          .set({ status: 'revoked', updatedAt: new Date() })
-          .where(eq(grievanceCaseAccessAssignments.id, assignment.id));
-      }
-      caseAccessRevokedCount = active.length;
+      const rows = await db.execute(sql`
+        SELECT count(*)::int AS n FROM ue_authority_resource_relationships
+         WHERE organization_id = ${input.organizationId}::uuid AND principal_user_id = ${input.authUserId}
+           AND resource_type = 'case' AND status = 'active' AND revoked_at IS NULL
+           AND (expires_at IS NULL OR expires_at > now())`);
+      const list = (Array.isArray(rows) ? rows : (rows as { rows?: { n: number }[] }).rows ?? []) as { n: number }[];
+      caseAccessRevokedCount = Number(list[0]?.n ?? 0);
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

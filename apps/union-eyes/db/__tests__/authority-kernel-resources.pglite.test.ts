@@ -41,10 +41,14 @@ beforeAll(async () => {
     await seedMembership(db, U.member, ORG_B, 'member')
     await db.query(`INSERT INTO public.grievances (id, organization_id, created_by, has_legal_implications, is_confidential) VALUES
       ($1,$5,$6,false,false), ($2,$5,$6,true,false), ($3,$5,$6,false,true), ($4,$7,$6,false,false)`, [CASE, CASE_PRIV, CASE_CONF, CASE_ORG_B, ORG, U.member, ORG_B])
-    await db.query(`INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by, can_comment, can_view_private_documents)
-      VALUES ($1,$2,$3,$4,true,false), ($1,$5,$3,$4,true,true)`, [ORG, CASE, U.steward, U.chief, CASE_PRIV])
   })
   await k.adoptDefaultRules()
+  // Governed collaborator grants: made by an independent issuer under the adopted case_assignment rule.
+  const rule = (await k.asAdmin(() => db.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = 'issue' AND status = 'active'`, [ORG]))).rows[0].id
+  const grant = (holder: string, caseId: string, permissions: string[], privileged = false) =>
+    k.as(U.chief)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: holder, resourceType: 'case', resourceId: caseId, relation: 'collaborator', permissions, privilegedAccess: privileged, origin: 'explicit', grantedBy: U.chief, issuanceRuleId: rule, effectiveAt: minutesAgo() }))
+  await grant(U.steward, CASE, ['read', 'comment'])
+  await grant(U.steward, CASE_PRIV, ['read', 'comment'], true)
 })
 
 describe('case loader: relationship, not rank', () => {
@@ -80,31 +84,40 @@ describe('case loader: relationship, not rank', () => {
     expect((await decide(U.steward, 'case:assign', 'case', CASE)).effect).toBe('deny')
   })
 
-  it('expired, revoked or self-granted collaborator rows grant nothing', async () => {
-    const mk = (cols: string) => k.asAdmin(() => db.query(`INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by, ${cols.split('|')[0]}) VALUES ($1,$2,$3,$4,${cols.split('|')[1]})`, [ORG, CASE, 'x', 'y']))
-    void mk
-    await k.asAdmin(async () => {
-      await db.query(`INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by, expires_at) VALUES ($1,$2,$3,$4, now() - interval '1 hour')`, [ORG, CASE, U.steward2, U.chief])
-      await db.query(`INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by, status) VALUES ($1,$2,$3,$4,'revoked')`, [ORG, CASE, U.officer, U.chief])
-      await db.query(`INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by) VALUES ($1,$2,$3,$3)`, [ORG, CASE, U.chief])
-    })
+  it('expired, revoked or self-granted collaborator relationships grant nothing', async () => {
+    const rule = (await k.asAdmin(() => db.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = 'issue' AND status = 'active'`, [ORG]))).rows[0].id
+    const grant = (holder: string, by: string, extra: { effectiveAt: Date; expiresAt?: Date }) =>
+      k.as(by)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: holder, resourceType: 'case', resourceId: CASE, relation: 'collaborator', permissions: ['read', 'comment'], origin: 'explicit', grantedBy: by, issuanceRuleId: rule, ...extra }))
+    await grant(U.steward2, U.chief, { effectiveAt: minutesAgo(120), expiresAt: minutesAgo(60) })
+    const revoked = await grant(U.officer, U.chief, { effectiveAt: minutesAgo() })
+    await k.as(U.chief)((t) => revokeRelationship(t, ORG, revoked, U.chief))
+    // A self-granted collaborator can never be stored: the database constraint refuses it before any policy runs.
+    await expect(grant(U.chief, U.chief, { effectiveAt: minutesAgo() })).rejects.toThrow(/ue_authority_rel_explicit_chk/)
     expect((await readCase(U.steward2)).effect).toBe('deny')
     expect((await readCase(U.officer)).effect).toBe('deny')
-    const self = await readCase(U.chief)
-    expect(self.effect).toBe('deny')
-    expect(codes(self)).toContain('INSTRUMENT_INVALID')
+    expect((await readCase(U.chief)).effect).toBe('deny')
+  })
+
+  it('the pre-kernel collaborator table is inert: a row there grants nothing, whatever its flags', async () => {
+    await k.asAdmin(() => db.query(`INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by, can_comment, can_view_private_documents, can_edit_case_notes) VALUES ($1,$2,$3,$4,true,true,true)`, [ORG, CASE, 'user_legacy_only', U.chief]))
+    await k.asAdmin(() => seedMembership(db, 'user_legacy_only', ORG, 'steward'))
+    for (const action of ['case:read', 'case:comment', 'case:write', 'case:read_internal'] as Action[]) {
+      expect((await decide('user_legacy_only', action, 'case', CASE)).effect, action).toBe('deny')
+    }
   })
 
   it('a collaborator who is not a representative (capacity) is refused', async () => {
-    await k.asAdmin(() => db.query(`INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by) VALUES ($1,$2,$3,$4)`, [ORG, CASE, U.clerk, U.chief]))
+    const rule = (await k.asAdmin(() => db.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = 'issue' AND status = 'active'`, [ORG]))).rows[0].id
+    await k.as(U.chief)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: U.clerk, resourceType: 'case', resourceId: CASE, relation: 'collaborator', permissions: ['read'], origin: 'explicit', grantedBy: U.chief, issuanceRuleId: rule, effectiveAt: minutesAgo() }))
     expect(codes(await readCase(U.clerk))).toContain('CAPACITY_NOT_ELIGIBLE')
   })
 
   it('legal implications make a case privileged: the creator and a plain collaborator cannot read it', async () => {
     await k.asAdmin(async () => {
       await seedMembership(db, 'user_plain_collab', ORG, 'steward')
-      await db.query(`INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by, can_view_private_documents) VALUES ($1,$2,$3,$4,false)`, [ORG, CASE_PRIV, 'user_plain_collab', U.chief])
     })
+    const rule = (await k.asAdmin(() => db.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = 'issue' AND status = 'active'`, [ORG]))).rows[0].id
+    await k.as(U.chief)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: 'user_plain_collab', resourceType: 'case', resourceId: CASE_PRIV, relation: 'collaborator', permissions: ['read'], privilegedAccess: false, origin: 'explicit', grantedBy: U.chief, issuanceRuleId: rule, effectiveAt: minutesAgo() }))
     expect((await readCase(U.member, CASE_PRIV)).effect).toBe('deny')
     expect((await readCase('user_plain_collab', CASE_PRIV)).effect).toBe('deny')
   })

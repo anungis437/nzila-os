@@ -20,8 +20,15 @@ beforeAll(async () => {
     CREATE TABLE grievances(id uuid PRIMARY KEY, organization_id uuid NOT NULL, grievance_number text, type text, title text,
       description text, status text, priority text, created_by text, union_rep_id uuid, grievant_name text, grievant_email text,
       created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());
-    CREATE TABLE grievance_case_access_assignments(id serial PRIMARY KEY, organization_id uuid, grievance_id uuid, user_id text,
-      status text, expires_at timestamptz);
+    CREATE TABLE ue_authority_resource_relationships (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, principal_user_id text NOT NULL,
+      resource_type text NOT NULL, resource_id uuid NOT NULL, relation text NOT NULL, status text NOT NULL DEFAULT 'active',
+      revoked_at timestamptz, effective_at timestamptz NOT NULL DEFAULT now() - interval '1 minute', expires_at timestamptz
+    );
+    CREATE TABLE ue_authority_recusals (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, principal_user_id text NOT NULL,
+      resource_type text NOT NULL, resource_id uuid NOT NULL, lifted_at timestamptz
+    );
   `)
   const rows: [number, string, string, string | null, string | null][] = [
     // n, org, status, createdBy, unionRep
@@ -45,12 +52,21 @@ beforeAll(async () => {
       [gid(n), o, `G-${n}`, status, createdBy, rep],
     )
   }
-  for (const [n, status, expires] of [[3, 'active', null], [4, 'active', '2000-01-01'], [5, 'revoked', null]] as const) {
-    await pg.query(
-      `INSERT INTO grievance_case_access_assignments(organization_id,grievance_id,user_id,status,expires_at) VALUES($1,$2,$3,$4,$5)`,
-      [org, gid(n), steward, status, expires],
+  const relate = (n: number, user: string, relation: string, status = 'active', expires: string | null = null, org_ = org) =>
+    pg.query(
+      `INSERT INTO ue_authority_resource_relationships(organization_id, principal_user_id, resource_type, resource_id, relation, status, revoked_at, expires_at)
+       VALUES($1,$2,'case',$3,$4,$5,$6,$7)`,
+      [org_, user, gid(n), relation, status, status === 'revoked' ? new Date() : null, expires],
     )
-  }
+  // The kernel, not the legacy column, names who handles each matter.
+  await relate(2, steward, 'assignee')
+  await relate(11, steward, 'assignee')
+  await relate(10, other, 'assignee')
+  await relate(3, steward, 'collaborator')
+  await relate(4, steward, 'collaborator', 'active', '2000-01-01')
+  await relate(5, steward, 'collaborator', 'revoked')
+  await relate(8, other, 'assignee')
+  await relate(9, steward, 'assignee', 'active', null, foreign)
   db = drizzle(pg)
 })
 afterAll(async () => { await pg?.close() })
@@ -58,7 +74,7 @@ afterAll(async () => { await pg?.close() })
 const numbers = (rows: { grievanceNumber: string | null }[]) => rows.map(r => r.grievanceNumber).sort()
 
 describe('grievance list scope against PostgreSQL', () => {
-  it('grants case authority only for created, owned and actively delegated matters in the actor organization', async () => {
+  it('grants case authority only for authored-while-unassigned matters and live kernel relationships in the actor organization', async () => {
     const rows = await db.select({ grievanceNumber: grievances.grievanceNumber }).from(grievances)
       .where(grievanceCaseAuthorityScope(org, steward))
     expect(numbers(rows)).toEqual(['G-1', 'G-11', 'G-2', 'G-3'])
@@ -75,11 +91,11 @@ describe('grievance list scope against PostgreSQL', () => {
   })
 
   it('revokes access when a collaborator assignment expires or is revoked, immediately and without a cache', async () => {
-    await pg.query(`UPDATE grievance_case_access_assignments SET status='revoked' WHERE grievance_id=$1`, [gid(3)])
+    await pg.query(`UPDATE ue_authority_resource_relationships SET status='revoked', revoked_at=now() WHERE resource_id=$1`, [gid(3)])
     const rows = await db.select({ grievanceNumber: grievances.grievanceNumber }).from(grievances)
       .where(grievanceCaseAuthorityScope(org, steward))
     expect(numbers(rows)).not.toContain('G-3')
-    await pg.query(`UPDATE grievance_case_access_assignments SET status='active' WHERE grievance_id=$1`, [gid(3)])
+    await pg.query(`UPDATE ue_authority_resource_relationships SET status='active', revoked_at=NULL WHERE resource_id=$1`, [gid(3)])
   })
 
   it('does not treat a same-user-id record in another organization as authority', async () => {

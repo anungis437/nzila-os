@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { and, desc, eq } from 'drizzle-orm';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { hasMinRole } from '@/lib/api-auth-guard';
@@ -8,14 +7,12 @@ import {
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
-import { db } from '@/db/db';
-import { grievances } from '@/db/schema/domains/claims/grievances';
-import { grievanceCaseAccessAssignments } from '@/db/schema/domains/claims/grievance-lifecycle';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import {
   grantCaseAccessGuarded,
   revokeCaseAccessGuarded,
   getEffectiveCaseAccess,
-  expireElapsedCaseAccessAssignments,
+  listCaseCollaborators,
   type CaseAccessMutationFailure,
 } from '@/lib/services/case-access-service';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
@@ -58,8 +55,6 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'Unauthorized');
   }
 
-  await expireElapsedCaseAccessAssignments();
-
   const effective = await getEffectiveCaseAccess({
     organizationId,
     grievanceId: params.id,
@@ -71,19 +66,10 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this grievance');
   }
 
-  const assignments = await db
-    .select()
-    .from(grievanceCaseAccessAssignments)
-    .where(
-      and(
-        eq(grievanceCaseAccessAssignments.organizationId, organizationId),
-        eq(grievanceCaseAccessAssignments.grievanceId, params.id),
-      ),
-    )
-    .orderBy(desc(grievanceCaseAccessAssignments.grantedAt));
+  const assignments = await withRLSContext({ organizationId }, (tx) => listCaseCollaborators(tx, organizationId, params.id!));
 
   return standardSuccessResponse({
-    primaryLroId: (await db.select({ unionRepId: grievances.unionRepId }).from(grievances).where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId))).limit(1))[0]?.unionRepId ?? null,
+    primaryLroId: assignments.find((c) => c.relation !== 'collaborator')?.userId ?? null,
     assignments,
     effectiveAccess: effective,
   });

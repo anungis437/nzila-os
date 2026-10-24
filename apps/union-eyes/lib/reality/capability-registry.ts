@@ -1000,7 +1000,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     ownedBy: ['apps/union-eyes/lib/cases/case-authorization.ts'],
     evidence: [
       'lib/cases/case-authorization.ts caseReadScope — chief_steward, business_agent, officer and admin read every case in the organization; no recusal, conflict-of-interest, territory or privileged-matter predicate exists',
-      'db/schema — no recusal, territory-mandate or temporary-delegation table for claims or grievances (document privacy labels and grievance_case_access_assignments exist but do not model these)',
+      'db/schema — no recusal, territory-mandate or temporary-delegation table for claims or grievances (document privacy labels and the retired pre-kernel collaborator table do not model these)',
     ],
     targetWave: 2,
     notes:

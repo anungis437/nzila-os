@@ -59,7 +59,7 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     await seedMembership(d, 'user_other_org', ORG_B, 'president')
     await admin.query(`INSERT INTO grievances (id, organization_id, created_by, created_at, updated_at, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, priority, status)
       VALUES ($1,$2,$3, now(), now(), false, false, false, false, 'medium', 'open') ON CONFLICT (id) DO NOTHING`, [CASE, ORG, U.member])
-    await admin.query(`INSERT INTO payments (id, organization_id, created_at, updated_at) VALUES ($1,$2,now(),now()) ON CONFLICT (id) DO NOTHING`, [PAYMENT, ORG])
+    await admin.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, type, method) VALUES ($1,$2,now(),now(),'dues','cash') ON CONFLICT (id) DO NOTHING`, [PAYMENT, ORG])
     runtime = new pg.Client({ connectionString: URL })
     await runtime.connect()
     await runtime.query('SET ROLE union_eyes_runtime')
@@ -169,8 +169,8 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     const cols = (await admin.query(`SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payments'`)).rows.map((r) => r.column_name)
     expect(cols).toEqual(expect.arrayContaining(['amount', 'currency', 'member_id']))
     expect(await asUser(U.treasurer, (t) => financeSourceReadiness(t))).toEqual({ ready: true, missingColumns: [] })
-    // The pre-existing row was not given an amount, currency or payer.
-    expect((await admin.query(`SELECT amount, currency, member_id FROM payments WHERE id = $1`, [PAYMENT])).rows[0]).toEqual({ amount: null, currency: null, member_id: null })
+    // The pre-existing row has no amount or payer; the currency is only the declared column default (platform 0018).
+    expect((await admin.query(`SELECT amount, currency, member_id FROM payments WHERE id = $1`, [PAYMENT])).rows[0]).toEqual({ amount: null, currency: 'CAD', member_id: null })
     // Integrity: a negative amount and a malformed currency are refused by the database.
     await expect(admin.query(`UPDATE payments SET amount = -1 WHERE id = $1`, [PAYMENT])).rejects.toThrow(/payments_amount_non_negative/)
     await expect(admin.query(`UPDATE payments SET currency = 'cad' WHERE id = $1`, [PAYMENT])).rejects.toThrow(/payments_currency_iso_shape/)
@@ -185,9 +185,9 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     }
     // The runtime role writes the new columns only inside its own organization.
     const OWN = newUuid()
-    await asUser(U.treasurer, (t) => t.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, amount, currency, member_id) VALUES ($1,$2,now(),now(),'125.50','CAD',$3)`, [OWN, ORG, U.member]))
+    await asUser(U.treasurer, (t) => t.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, type, method, amount, currency, member_id) VALUES ($1,$2,now(),now(),'dues','cash','125.50','CAD',$3)`, [OWN, ORG, U.member]))
     await expect(
-      asUser(U.treasurer, (t) => t.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, amount, currency) VALUES ($1,$2,now(),now(),'1.00','CAD')`, [newUuid(), ORG_B])),
+      asUser(U.treasurer, (t) => t.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, type, method, amount, currency) VALUES ($1,$2,now(),now(),'dues','cash','1.00','CAD')`, [newUuid(), ORG_B])),
     ).rejects.toThrow(/row-level security/)
     // Unregistered, so still denied even with a complete source row.
     expect((await decide(U.treasurer, 'finance:view', 'financial_transaction', OWN)).effect).toBe('deny')

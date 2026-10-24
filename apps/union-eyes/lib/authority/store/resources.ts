@@ -8,8 +8,8 @@
  * enforcement wrapper turns into a denial.
  *
  * Source coverage (see docs/union-eyes/convergence for the full matrix):
- *   case          public.grievances + public.grievance_case_access_assignments
- *                 + ue_authority_workaid_matters (counsel control)
+ *   case          public.grievances (creator, classification) + ue_authority_resource_relationships
+ *                 (governed assignments) + ue_authority_workaid_matters (counsel control)
  *   document      public.documents + public.document_links (grievance links only)
  *   financial     public.payments (amount, currency) + ue_authority_financial_steps
  *   review        ue_authority_reviews
@@ -126,39 +126,9 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
     })
   }
 
-  const collaborators = (
-    await exec.query<Row>(
-      `SELECT id::text AS id, user_id, granted_by, granted_at, expires_at,
-              can_comment, can_edit_case_notes, can_view_private_documents, access_role::text AS access_role
-         FROM public.grievance_case_access_assignments
-        WHERE organization_id = $1::uuid AND grievance_id = $2::uuid AND status::text = 'active'
-          AND (expires_at IS NULL OR expires_at > $3::timestamptz)`,
-      [org, facts.id, now],
-    )
-  ).rows
-  for (const c of collaborators) {
-    if (!isPrincipalId(c.user_id) || !isPrincipalId(c.granted_by)) continue
-    const permissions = ['read']
-    // A legacy assignment flag never confers access to the union's internal file: that scope is an explicit kernel
-    // grant (`assignCase` with the `read_internal` permission) made under the case_assignment issuance rule.
-    if (c.can_comment === true) permissions.push('comment')
-    if (c.can_edit_case_notes === true && c.access_role !== 'read_only') permissions.push('write')
-    relationships.push({
-      id: String(c.id),
-      organizationId: org,
-      principalUserId: c.user_id,
-      resource: { type: 'case', id: facts.id, organizationId: org },
-      relation: 'collaborator',
-      permissions,
-      privilegedAccess: c.can_view_private_documents === true,
-      origin: 'explicit',
-      grantedBy: c.granted_by,
-      status: 'active',
-      effectiveAt: toDate(c.granted_at),
-      expiresAt: c.expires_at ? toDate(c.expires_at) : null,
-      revokedAt: null,
-    })
-  }
+  // Only the creator relationship is derived from the case row. Every assignment, ownership and collaborator
+  // relationship is an explicit, governed kernel record loaded with the principal's facts (ue_authority_resource_relationships).
+  // The pre-kernel collaborator table is deliberately not read: it carried flags, not governed grants.
   return { resource: facts, relationships }
 }
 

@@ -116,10 +116,8 @@
       "paths": ["apps/union-eyes"],
       "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**", "apps/union-eyes/db/migrations*/**", "**/reports/**", "apps/union-eyes/backend/**/migrations/**"],
       "allowed": [
-        { "file": "apps/union-eyes/app/api/grievances/[id]/access/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/app/api/grievances/[id]/assign/route.ts", "reason": "Writes the legacy column with the deadline convergence task; migrate to assignCase" },
         { "file": "apps/union-eyes/app/api/grievances/[id]/convert/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
-        { "file": "apps/union-eyes/app/api/grievances/[id]/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/app/api/grievances/[id]/status/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/backend/grievances/models.py", "reason": "Column definition (the record being retired as an authority source)" },
         { "file": "apps/union-eyes/backend/grievances/views.py", "reason": "Legacy consumer; migrate to kernel assignments" },
@@ -135,16 +133,11 @@
         { "file": "apps/union-eyes/lib/deadline-engine/recipient-resolver.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/lib/deadline-engine/reminder-worker.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/lib/reality/capability-registry.ts", "reason": "Evidence text describing the legacy behaviour" },
-        { "file": "apps/union-eyes/lib/services/case-access-service.ts", "reason": "Legacy primary-owner check; migrate to kernel assignments" },
         { "file": "apps/union-eyes/lib/services/case-knowledge-graph-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
-        { "file": "apps/union-eyes/lib/services/case-related-documents-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
-        { "file": "apps/union-eyes/lib/services/grievance-read-scope.ts", "reason": "Set-based mirror of getEffectiveCaseAccess (Senior Representative); uses the legacy primary-owner column, migrate with the kernel assignments" },
-        { "file": "apps/union-eyes/lib/cases/grievance-list-scope.ts", "reason": "Representative 2.2 list scope; uses the legacy primary-owner column beside active assignments, migrate with the kernel assignments" },
         { "file": "apps/union-eyes/lib/cases/creator-access.ts", "reason": "Representative 2.2 creator-retains-access rule keyed on the legacy primary-owner column, migrate with the kernel assignments" },
         { "file": "apps/union-eyes/lib/services/dashboard-kpi-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/services/case-intelligence/case-knowledge-graph-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/services/case-intelligence/precedent-matching-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
-        { "file": "apps/union-eyes/services/case-intelligence/related-documents-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/services/case-intelligence/types.ts", "reason": "Legacy type carrying the column" }
       ]
     },
@@ -189,6 +182,14 @@
         "apps/union-eyes/lib/services/external-document-grant-service.ts"
       ],
       "exclude": ["**/__tests__/**", "**/*.test.*", "**/node_modules/**"],
+      "mode": "zero"
+    },
+    {
+      "id": "RETIRED-CASE-ACCESS-TABLE",
+      "description": "Case access is decided by the authority kernel's governed relationships. The pre-kernel grievance_case_access_assignments table and its Drizzle declaration must not be read or written by application code (UE-CONV-E-001, UE-CONV-B-001)",
+      "pattern": "grievanceCaseAccessAssignments|grievance_case_access_assignments",
+      "paths": ["apps/union-eyes/app", "apps/union-eyes/lib", "apps/union-eyes/services"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/node_modules/**", "apps/union-eyes/lib/operations/catalog-authority-contract.json"],
       "mode": "zero"
     },
     {
