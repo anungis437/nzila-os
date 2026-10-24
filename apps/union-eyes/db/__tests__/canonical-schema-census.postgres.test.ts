@@ -94,4 +94,44 @@ describe.skipIf(!URL)('canonical schema census against the real Django plus boot
       await client.end()
     }
   }, 120_000)
+
+  it('documents serves its declaration: the org_id mirror exists and can never name another tenant (platform 0016)', async () => {
+    const client = new pg.Client({ connectionString: URL })
+    await client.connect()
+    try {
+      const org = '00000000-0000-4000-8000-0000000000a1'
+      const other = '00000000-0000-4000-8000-0000000000a2'
+      await client.query(`INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
+        VALUES ($1,'census-doc','census-doc','local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1) ON CONFLICT (id) DO NOTHING`, [org])
+      const cols = (await client.query(`SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'documents'`)).rows.map((r) => r.column_name)
+      expect(cols).toContain('org_id')
+      // The Django stub has no defaults, so a probe row must supply every required column itself.
+      const required = (await client.query(
+        `SELECT c.column_name, c.data_type, c.udt_name FROM information_schema.columns c
+          WHERE c.table_schema = 'public' AND c.table_name = 'documents' AND c.is_nullable = 'NO' AND c.column_default IS NULL`,
+      )).rows as { column_name: string; data_type: string; udt_name: string }[]
+      const sample = async (c: { data_type: string; udt_name: string }): Promise<string> => {
+        if (c.data_type === 'USER-DEFINED') return `'${(await client.query(`SELECT enumlabel FROM pg_enum e JOIN pg_type t ON t.oid = e.enumtypid WHERE t.typname = $1 ORDER BY e.enumsortorder LIMIT 1`, [c.udt_name])).rows[0].enumlabel}'`
+        if (c.data_type === 'uuid') return 'gen_random_uuid()'
+        if (c.data_type.startsWith('timestamp') || c.data_type === 'date') return 'now()'
+        if (c.data_type === 'boolean') return 'false'
+        if (/int|numeric|double|real/.test(c.data_type)) return '0'
+        if (c.data_type === 'jsonb' || c.data_type === 'json') return "'{}'"
+        if (c.data_type === 'ARRAY') return "'{}'"
+        return "'x'"
+      }
+      const insert = async (orgId: string, mirror: string) => {
+        const values: Record<string, string> = {}
+        for (const c of required) values[c.column_name] = await sample(c)
+        values.organization_id = `'${orgId}'`
+        values.org_id = `'${mirror}'`
+        const names = Object.keys(values)
+        return client.query(`INSERT INTO documents (${names.join(', ')}) VALUES (${names.map((n) => values[n]).join(', ')})`)
+      }
+      await expect(insert(org, other)).rejects.toThrow(/documents_org_id_mirrors_organization_id/)
+      await insert(org, org)
+    } finally {
+      await client.end()
+    }
+  }, 60_000)
 })

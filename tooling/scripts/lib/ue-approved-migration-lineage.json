@@ -188,6 +188,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Adds nullable member_id, amount and currency (non-negative and ISO-shape checks) to the Django payments stub so the kernel finance policy has an authoritative transaction source. Invents no value for existing rows. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0016_documents_org_id_mirror",
+        "sha256": "9eb01ccc75eba9687a2fb91e5eba64890b4cf007467fd96706d42d687e6885a2",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Adds the nullable org_id mirror column the Drizzle documents declaration selects, constrained to equal organization_id. Not yet applied to any clone or live database."
       }
     ]
   }
