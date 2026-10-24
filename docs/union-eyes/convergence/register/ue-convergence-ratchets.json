@@ -64,6 +64,27 @@
       ]
     },
     {
+      "id": "BEARER-SETTING-CONSUMERS",
+      "description": "app.current_session_token carries a session bearer into PostgreSQL; no new consumer may be added until the exposure in UE-CONV-A-004 is remediated",
+      "pattern": "current_session_token",
+      "paths": ["apps/union-eyes", "packages", "tooling/scripts"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/*.pglite.test.ts", "**/node_modules/**", "**/docs/**"],
+      "allowed": [
+        { "file": "apps/union-eyes/backend/auth_core/canonical_context.py", "reason": "Django writer of the setting" },
+        { "file": "apps/union-eyes/db/migrations-cache/0017_snapshot_authority_reconciliation.sql", "reason": "Registered migration; predicate reads the setting" },
+        { "file": "apps/union-eyes/lib/authority/store/executor.ts", "reason": "Kernel transaction writer of the setting for a verified binding" },
+        { "file": "apps/union-eyes/scripts/bootstrap-v2/auth-org-runtime.ts", "reason": "v2 bootstrap predicate" },
+        { "file": "apps/union-eyes/scripts/bootstrap-v2/framework-runtime.ts", "reason": "v2 bootstrap predicate" },
+        { "file": "apps/union-eyes/scripts/bootstrap-v2/framework-sql.ts", "reason": "v2 bootstrap predicate" },
+        { "file": "apps/union-eyes/scripts/bootstrap-v2/framework_application.py", "reason": "v2 bootstrap predicate" },
+        { "file": "apps/union-eyes/scripts/bootstrap-v2/runtime-security.ts", "reason": "v2 bootstrap predicate" },
+        { "file": "packages/db/src/auth-storage-authority/org-session-authority.ts", "reason": "Canonical predicate source" },
+        { "file": "packages/platform-auth/README.md", "reason": "Documents the setting" },
+        { "file": "packages/platform-auth/src/org-binding.ts", "reason": "TypeScript writer of the setting" },
+        { "file": "tooling/scripts/prove-snapshot-authority-reconciliation.mjs", "reason": "Proof script exercising the predicate" }
+      ]
+    },
+    {
       "id": "RANK-DERIVED-CASE-ACCESS",
       "description": "isStewardPlus / case_read_any derive case access from seniority; migrate the file to the authority kernel (UE-CONV-E-001)",
       "pattern": "isStewardPlus|case_read_any",
