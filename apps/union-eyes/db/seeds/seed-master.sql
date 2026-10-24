@@ -808,7 +808,7 @@ DECLARE
 BEGIN
   SELECT count(*) INTO org_count FROM organizations WHERE slug IN ('default','clc','cape-acep','cupe','cupe-local-123');
   SELECT count(*) INTO mem_count FROM organization_members
-    WHERE organization_id IN (SELECT id FROM organizations WHERE slug IN ('default','clc','cape-acep','cupe','cupe-local-123'));
+    WHERE organization_id IN (SELECT id::text FROM organizations WHERE slug IN ('default','clc','cape-acep','cupe','cupe-local-123'));
   SELECT count(*) INTO grv_count FROM grievances
     WHERE organization_id IN (SELECT id FROM organizations WHERE slug IN ('clc','cupe-local-123'));
   SELECT count(*) INTO cba_count FROM collective_agreements;
