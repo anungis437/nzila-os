@@ -3,6 +3,7 @@
 **Mission:** `UE-INSTITUTIONAL-AUTHORITY-PHASE-1-EXIT`
 **Branch:** `agents/ue-authority-kernel` (base `0c994b968`). Supersedes the verdict in `UE-AUTHORITY-KERNEL-PHASE-1-EVIDENCE.md`.
 **Staging / production:** NO-GO. **Six-persona merge:** not started.
+**Superseded by:** [UE-AUTHORITY-SOURCE-CLOSURE-EVIDENCE.md](./UE-AUTHORITY-SOURCE-CLOSURE-EVIDENCE.md) (identity source, case/finance sources, revised classification, counsel boundary).
 
 ## 1. Verdict
 
