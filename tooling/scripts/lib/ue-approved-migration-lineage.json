@@ -216,6 +216,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Second generated additive evolution of 77 live stub relations to their declared shape (UE-CONV-H-007). Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0020_declared_shape_tranche_3",
+        "sha256": "b3431d3f5af966fc108a3aff3d64002ba619276695aab18b7e4d0f1390c2ded3",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Third generated additive evolution of 23 live stub relations to their declared shape (UE-CONV-H-007). Not yet applied to any clone or live database."
       }
     ]
   }
