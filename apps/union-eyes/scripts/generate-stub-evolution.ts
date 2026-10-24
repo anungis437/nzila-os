@@ -21,9 +21,13 @@ import * as declarations from '../db/schema'
 
 const dialect = new PgDialect()
 const wanted = new Set(readFileSync(process.argv[2], 'utf8').split(/\r?\n/).map((s) => s.trim()).filter(Boolean))
-const census = new Map<string, { columnsMissing: string[] }>(
-  (JSON.parse(readFileSync('../../docs/union-eyes/convergence/register/ue-canonical-schema-census.json', 'utf8')).entries as { table: string; columnsMissing: string[] }[]).map((e) => [e.table, e]),
+const census = new Map<string, { columnsMissing: string[]; requiredUndeclared: string[] }>(
+  (JSON.parse(readFileSync('../../docs/union-eyes/convergence/register/ue-canonical-schema-census.json', 'utf8')).entries as { table: string; columnsMissing: string[]; requiredUndeclared: string[] }[]).map((e) => [e.table, e]),
 )
+
+// Django's base model made these NOT NULL without a default and the declarations do not supply them, so every
+// insert through a declaration fails. A database default is the only change that keeps both sides honest.
+const DJANGO_BASE_DEFAULTS: Record<string, string> = { id: 'gen_random_uuid()', created_at: 'now()', updated_at: 'now()' }
 
 const q = (s: string) => `"${s.replace(/"/g, '""')}"`
 const lit = (v: unknown): string => {
@@ -39,7 +43,21 @@ function defaultSql(c: any): string | null {
     return null // runtime-generated ($defaultFn) defaults have no SQL form
   }
   if (c.default instanceof SQL) return dialect.sqlToQuery(c.default).sql
+  const type: string = c.getSQLType()
+  if (type.endsWith('[]') && Array.isArray(c.default)) return `ARRAY[${(c.default as unknown[]).map(lit).join(', ')}]::${type}`
   return lit(c.default)
+}
+
+// One enum name declared with different members in different tables cannot be served by one database type.
+const enumVariants = new Map<string, Set<string>>()
+for (const value of Object.values(declarations as Record<string, unknown>)) {
+  if (!is(value, PgTable)) continue
+  for (const c of getTableConfig(value).columns as any[]) {
+    const values: readonly string[] | undefined = c.enumValues?.length ? c.enumValues : c.baseColumn?.enumValues
+    if (!values?.length) continue
+    const type: string = c.getSQLType().replace(/\[\]$/, '')
+    enumVariants.set(type, new Set([...(enumVariants.get(type) ?? []), JSON.stringify([...values])]))
+  }
 }
 
 const enums = new Map<string, readonly string[]>()
@@ -59,7 +77,12 @@ for (const value of Object.values(declarations as Record<string, unknown>)) {
   for (const c of cfg.columns as any[]) {
     const type: string = c.getSQLType()
     if (type.startsWith('vector')) throw new Error(`${name}.${c.name} needs the pgvector extension; resolve that prerequisite before evolving this table`)
+    const base = type.replace(/\[\]$/, '')
+    if ((c.enumValues?.length || c.baseColumn?.enumValues?.length) && (enumVariants.get(base)?.size ?? 0) > 1) {
+      throw new Error(`${name}.${c.name} uses enum ${base}, declared with different members elsewhere; it needs an individual decision`)
+    }
     if (c.enumValues && c.enumValues.length) enums.set(type, c.enumValues)
+    else if (type.endsWith('[]') && c.baseColumn?.enumValues?.length) enums.set(type.slice(0, -2), c.baseColumn.enumValues)
     const def = defaultSql(c)
     if (missing.has(c.name)) {
       adds.push(`  ADD COLUMN IF NOT EXISTS ${q(c.name)} ${type}${def ? ` DEFAULT ${def}` : ''}`)
@@ -69,6 +92,13 @@ for (const value of Object.values(declarations as Record<string, unknown>)) {
       ALTER TABLE ${rel} ALTER COLUMN ${q(c.name)} SET DEFAULT ${def};
     END IF;`)
     }
+  }
+  for (const col of census.get(name)?.requiredUndeclared ?? []) {
+    const def = DJANGO_BASE_DEFAULTS[col]
+    if (!def) throw new Error(`${name}.${col} is NOT NULL without a default and undeclared; it needs an individual decision`)
+    defaults.push(`    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = ${lit(cfg.name)} AND column_name = ${lit(col)} AND column_default IS NULL) THEN
+      ALTER TABLE ${rel} ALTER COLUMN ${q(col)} SET DEFAULT ${def};
+    END IF;`)
   }
   const out: string[] = [`-- ${name}`]
   out.push(`DO $$ BEGIN IF to_regclass(${lit('public.' + cfg.name)}) IS NULL THEN RAISE EXCEPTION 'platform stub evolution fail-closed: public.${cfg.name} does not exist.'; END IF; END $$;`)

@@ -155,6 +155,13 @@
       "when": 1758770000000,
       "tag": "0018_declared_shape_tranche_1",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1758780000000,
+      "tag": "0019_declared_shape_tranche_2",
+      "breakpoints": true
     }
   ]
 }
