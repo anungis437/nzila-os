@@ -1989,14 +1989,14 @@ export const clauseLibraryTags = pgTable("clause_library_tags", {
 
 export const userUuidMapping = pgTable("user_uuid_mapping", {
 	userUuid: uuid("user_uuid").defaultRandom().primaryKey().notNull(),
-	clerkUserId: text("clerk_user_id").notNull(),
+	authUserId: text("clerk_user_id").notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 },
 (table) => {
 	return {
-		idxUserUuidMappingClerkId: index("idx_user_uuid_mapping_clerk_id").using("btree", table.clerkUserId.asc().nullsLast()),
-		userUuidMappingClerkUserIdKey: unique("user_uuid_mapping_clerk_user_id_key").on(table.clerkUserId),
+		idxUserUuidMappingAuthId: index("idx_user_uuid_mapping_clerk_id").using("btree", table.authUserId.asc().nullsLast()),
+		userUuidMappingAuthUserIdKey: unique("user_uuid_mapping_clerk_user_id_key").on(table.authUserId),
 	}
 });
 

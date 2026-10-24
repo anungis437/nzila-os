@@ -135,8 +135,8 @@ export async function getAdminUsers(
 
     return results.map(u => ({
       id: u.userId,
-      name: u.userId.split('_')[0] || "User", // Extract from Clerk ID
-      email: u.userId, // Temporary - need to fetch from Clerk
+      name: u.userId.split('_')[0] || "User", // Derived from the auth user ID
+      email: u.userId, // Temporary - need to fetch from the auth provider
       role: u.role as UserRole,
       organizationId: u.organizationId,
       orgName: u.orgName,

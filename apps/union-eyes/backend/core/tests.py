@@ -230,7 +230,7 @@ class AuditLogsModelTest(TestCase):
             action="create",
             resource_type="Member",
             resource_id="member-123",
-            user_id="clerk_user_1",
+            user_id="user_1",
         )
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.action, "create")
@@ -242,7 +242,7 @@ class AuditLogsModelTest(TestCase):
 
 class SecurityEventsModelTest(TestCase):
     def test_create(self):
-        obj = SecurityEvents.objects.create(user_id="clerk_user_2")
+        obj = SecurityEvents.objects.create(user_id="user_2")
         self.assertIsNotNone(obj.id)
 
     def test_str(self):

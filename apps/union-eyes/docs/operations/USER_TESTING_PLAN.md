@@ -29,7 +29,7 @@ Testing is conducted on the master seed dataset. Results are recorded in [USER_T
 | **Auth method** | Entra ID SSO or magic-link fallback |
 | **Seed dataset** | Master seed — `db/seeds/seed-master.sql` |
 | **Demo data** | CAPE preset — seed via `/dashboard/pilot/onboarding` → **Seed Demo Data** |
-| **Test password** | `NzilaTest2026!` (all test accounts unless noted) |
+| **Test password** | Held in the team secret store; never recorded in the repository |
 | **Locale** | `en-CA` (all URLs prefixed `/en-CA/`) |
 | **Health check** | `GET /api/health` → `{ status: "ok" }` before each session |
 | **Metrics check** | `GET /api/metrics/operational` → non-zero `active_grievance_count` |
@@ -70,7 +70,7 @@ Testing is conducted on the master seed dataset. Results are recorded in [USER_T
 **Test account:**
 ```
 Email:    ue.qa.executive.primary@nzila.test
-Password: NzilaTest2026!
+Password: <from the team secret store>
 User ID:  ue-qa-executive-primary
 Org:      primary (CAPE-ACEP pilot org)
 ```
@@ -102,7 +102,7 @@ Org:      primary (CAPE-ACEP pilot org)
 **Test account:**
 ```
 Email:    ue.qa.steward.primary@nzila.test
-Password: NzilaTest2026!
+Password: <from the team secret store>
 User ID:  ue-qa-steward-primary
 Org:      primary (CAPE-ACEP pilot org)
 ```
@@ -133,7 +133,7 @@ Org:      primary (CAPE-ACEP pilot org)
 **Test account:**
 ```
 Email:    ue.qa.member.primary@nzila.test
-Password: NzilaTest2026!
+Password: <from the team secret store>
 User ID:  ue-qa-member-primary
 Org:      primary (CAPE-ACEP pilot org)
 ```
@@ -165,7 +165,7 @@ Org:      primary (CAPE-ACEP pilot org)
 **Test account:**
 ```
 Email:    ue.qa.auditor.readonly@nzila.test
-Password: NzilaTest2026!
+Password: <from the team secret store>
 User ID:  ue-qa-auditor-readonly
 Org:      primary (CAPE-ACEP pilot org)
 Metadata: readOnly: true, auditPersona: true
@@ -196,7 +196,7 @@ Metadata: readOnly: true, auditPersona: true
 **Test account:**
 ```
 Email:    ue.qa.ux.tester@nzila.test
-Password: NzilaTest2026!
+Password: <from the team secret store>
 User ID:  ue-qa-ux-tester-001
 Org:      ux-tester-isolated (sandboxed org)
 Metadata: externalTester: true, monitored: true, sandboxOnly: true

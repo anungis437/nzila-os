@@ -178,9 +178,9 @@ export const deleteProfile = async (
   }
 };
 
-//AVOID USING THIS FUNCTION AS WE WILL USE THE UPDATEPROFILE FUNCTION (USING THE CLERK ID) FIRST, THIS FUNCTION BELOW IS JUST A FALLBACK!
+//AVOID USING THIS FUNCTION AS WE WILL USE THE UPDATEPROFILE FUNCTION (USING THE AUTH USER ID) FIRST, THIS FUNCTION BELOW IS JUST A FALLBACK!
 
-//AVOID USING THIS FUNCTION AS WE WILL USE THE UPDATEPROFILE FUNCTION (USING THE CLERK ID) FIRST, THIS FUNCTION BELOW IS JUST A FALLBACK!
+//AVOID USING THIS FUNCTION AS WE WILL USE THE UPDATEPROFILE FUNCTION (USING THE AUTH USER ID) FIRST, THIS FUNCTION BELOW IS JUST A FALLBACK!
 
 export const updateProfileByWhopUserId = async (
   whopUserId: string,
@@ -232,23 +232,23 @@ export const updateProfileByWhopUserId = async (
         return null;
       }
       
-      // Then update the profile - critical part: use the Clerk user ID for the actual update
-      const clerkUserId = existingProfile.userId;
-      logger.info("Found profile for Clerk user ID; updating", { clerkUserId, whopUserId });
+      // Then update the profile - critical part: use the auth user ID for the actual update
+      const authUserId = existingProfile.userId;
+      logger.info("Found profile for auth user ID; updating", { authUserId, whopUserId });
       
       const [updatedProfile] = await dbOrTx.update(profilesTable)
         .set({
           ...data,
           updatedAt: new Date()
         })
-        .where(eq(profilesTable.userId, clerkUserId))
+        .where(eq(profilesTable.userId, authUserId))
         .returning();
       
       if (!updatedProfile) {
-        logger.warn("Update completed but no profile returned", { clerkUserId, whopUserId });
+        logger.warn("Update completed but no profile returned", { authUserId, whopUserId });
         return null;
       } else {
-        logger.info("Successfully updated profile via Whop user ID", { clerkUserId, whopUserId });
+        logger.info("Successfully updated profile via Whop user ID", { authUserId, whopUserId });
       }
       
       return updatedProfile;

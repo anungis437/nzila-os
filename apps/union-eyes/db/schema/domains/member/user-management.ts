@@ -57,11 +57,11 @@ export const users = userManagementSchema.table("users", {
 }));
 
 // Organization users table - links users to organizations with roles
-// NOTE: userId uses VARCHAR to support Clerk user IDs (format: "user_xxxxx")
+// NOTE: userId uses VARCHAR to support external auth provider user IDs (format: "user_xxxxx")
 export const organizationUsers = userManagementSchema.table("organization_users", {
   organizationUserId: uuid("organization_user_id").primaryKey().defaultRandom(),
   organizationId: uuid("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-  userId: varchar("user_id", { length: 255 }).notNull(), // Changed from uuid to support Clerk IDs
+  userId: varchar("user_id", { length: 255 }).notNull(), // Changed from uuid to support external auth provider IDs
   role: varchar("role", { length: 50 }).notNull().default("member"),
   permissions: jsonb("permissions").default(sql`'[]'::jsonb`),
   isActive: boolean("is_active").default(true),

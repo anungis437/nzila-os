@@ -101,4 +101,17 @@ describe('whop/create-checkout route', () => {
       planDuration: 'yearly',
     });
   });
+
+  it('sends the authenticated principal under both the new and the legacy metadata key, never a client-supplied one', async () => {
+    const { POST } = await loadRoute();
+    await POST(new Request('http://localhost/api/whop/create-checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ planId: 'plan_yearly', userId: 'attacker', clerkUserId: 'attacker' }),
+    }));
+
+    const sent = JSON.parse((fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0][1].body);
+    expect(sent.metadata).toMatchObject({ userId: 'user_1', clerkUserId: 'user_1' });
+    expect(JSON.stringify(sent)).not.toContain('attacker');
+  });
 });

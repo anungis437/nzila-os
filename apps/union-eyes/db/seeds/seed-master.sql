@@ -1,7 +1,7 @@
 -- =============================================================================
 -- MASTER SEED — UnionEyes (Nzila OS)
 -- =============================================================================
--- THE definitive, idempotent, Clerk-aligned seed for all 4 core tenants:
+-- THE definitive, idempotent seed for all 4 core tenants:
 --   1. NZILA Ventures  (platform)  → org_3A1qYmVHWmeSbbZhlPMwVIrGHFQ
 --   2. CLC             (congress)  → org_3B3NjHnvzeSJBZQE8PGQf0nmgts
 --   3. CAPE-ACEP       (union)     → org_3B3Nj6NGSY6rT9ibI8bgFhZdMRN
@@ -10,8 +10,9 @@
 -- Also seeds the full CLC hierarchy (federations, national unions, locals)
 -- including CUPE National as the parent of CUPE Local 123.
 --
--- All member user_ids are REAL Clerk user IDs from the known-hagfish-67
--- Clerk instance. Password for all test users: NzilaTest2026!
+-- All member user_ids are the auth-provider user IDs captured from the staging
+-- environment. Test-account passwords are held in the team secret store and are
+-- never recorded in this repository.
 --
 -- Idempotent: all inserts use ON CONFLICT DO NOTHING or upsert.
 -- Safe to re-run without duplicating data.
@@ -122,9 +123,11 @@ BEGIN
 END $$;
 
 -- 1e. CUPE National (hardcoded ID for supplementary-seed compatibility)
---     NOTE: clerk_organization_id is intentionally NULL — no Clerk org exists for
---     CUPE National yet. CUPE members log in via CUPE L123's Clerk org
---     (org_3BP6K4uezEa2CLEvUNDwhnJGNFg). Create a Clerk org when CUPE National
+--     NOTE: clerk_organization_id (the physical column name in the replay schema,
+--     db/migrations-audit/0000; Django names it auth_provider_org_id) is
+--     intentionally NULL — no provider org exists for
+--     CUPE National yet. CUPE members sign in through CUPE L123's organization
+--     (org_3BP6K4uezEa2CLEvUNDwhnJGNFg). Create a provider org when CUPE National
 --     needs its own auth boundary.
 DO $$
 DECLARE v_clc_id UUID;
@@ -352,7 +355,7 @@ END $$;
 
 
 -- ╔═══════════════════════════════════════════════════════════════════════════╗
--- ║  PHASE 3: ORGANIZATION MEMBERS (Clerk user IDs)                         ║
+-- ║  PHASE 3: ORGANIZATION MEMBERS (auth user IDs)                          ║
 -- ╚═══════════════════════════════════════════════════════════════════════════╝
 
 -- 3a. NZILA Ventures members (12)
@@ -434,7 +437,7 @@ BEGIN
     status = EXCLUDED.status;
 END $$;
 
--- 3d. CUPE National members (7 — national office staff, real Clerk IDs from staging DB)
+-- 3d. CUPE National members (7 — national office staff, auth user IDs from staging DB)
 DO $$
 DECLARE v_cupe_id text;
 BEGIN
@@ -547,7 +550,7 @@ ON CONFLICT (user_id) DO UPDATE SET
   timezone   = EXCLUDED.timezone,
   is_active  = EXCLUDED.is_active;
 
--- CUPE National users (real Clerk IDs — seeded from staging DB, not cross-org Nzila users)
+-- CUPE National users (auth user IDs — seeded from staging DB, not cross-org Nzila users)
 INSERT INTO user_management.users (user_id, email, first_name, last_name, locale, timezone, is_active)
 VALUES
   ('user_3BnpKGiePftiVYeaYF24EIplB8S', 'm.hancock@cupe.ca',    'Mark',    'Hancock',   'en-CA', 'America/Toronto', true),
@@ -805,7 +808,7 @@ DECLARE
 BEGIN
   SELECT count(*) INTO org_count FROM organizations WHERE slug IN ('default','clc','cape-acep','cupe','cupe-local-123');
   SELECT count(*) INTO mem_count FROM organization_members
-    WHERE organization_id IN (SELECT id FROM organizations WHERE slug IN ('default','clc','cape-acep','cupe','cupe-local-123'));
+    WHERE organization_id IN (SELECT id::text FROM organizations WHERE slug IN ('default','clc','cape-acep','cupe','cupe-local-123'));
   SELECT count(*) INTO grv_count FROM grievances
     WHERE organization_id IN (SELECT id FROM organizations WHERE slug IN ('clc','cupe-local-123'));
   SELECT count(*) INTO cba_count FROM collective_agreements;

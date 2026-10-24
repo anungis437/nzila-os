@@ -273,7 +273,7 @@ class UserUuidMappingViewSet(viewsets.ModelViewSet):
     getOrCreateUserUuid (the only TS code touching this table in this app)
     has zero production callers anywhere (git-grep confirmed) — dead TS
     code. This generated Django ViewSet allowed full CRUD (including UPDATE
-    of the clerkUserId->userUuid mapping — an identity-reassignment /
+    of the legacy-id -> userUuid mapping — an identity-reassignment /
     account-takeover-equivalent operation) to any authenticated user, with
     no legitimate consumer of its own. Contained via DenyAllPermission.
     """
@@ -629,7 +629,7 @@ class MfaConfigurationsViewSet(viewsets.ModelViewSet):
 @csrf_exempt
 @require_POST
 def auth_webhook(request):
-    """Handle auth provider webhooks (Entra / Clerk) for user synchronization.
+    """Handle auth provider webhooks for user synchronization.
 
     Supported webhook events:
     - user.created
@@ -681,8 +681,22 @@ def auth_webhook(request):
         return JsonResponse({"error": "Internal server error"}, status=500)
 
 
-# Backward compat alias
-clerk_webhook = auth_webhook
+@csrf_exempt
+@require_POST
+def deprecated_clerk_webhook(request):
+    """Transitional alias for the pre-rename webhook URL (``webhooks/clerk/``).
+
+    A deployed provider may still be registered against the old URL, and that
+    consumer cannot be verified from this repository. The alias is kept so it is
+    not silently broken, and every hit is logged as a deprecation signal so the
+    consumer can be identified and migrated. It applies exactly the same
+    signature verification as ``auth_webhook`` — it adds no new trust.
+    """
+    logger.warning(
+        "Deprecated webhook URL 'webhooks/clerk/' was called; "
+        "migrate the sender to 'webhooks/auth/'."
+    )
+    return auth_webhook(request)
 
 
 def _verify_auth_webhook(request) -> bool:
@@ -694,9 +708,7 @@ def _verify_auth_webhook(request) -> bool:
     Returns:
         bool: True if signature is valid
     """
-    webhook_secret = getattr(settings, "AUTH_WEBHOOK_SECRET", "") or getattr(
-        settings, "CLERK_WEBHOOK_SECRET", ""
-    )
+    webhook_secret = getattr(settings, "AUTH_WEBHOOK_SECRET", "")
     if not webhook_secret:
         logger.error("AUTH_WEBHOOK_SECRET not configured")
         return False
@@ -713,7 +725,7 @@ def _verify_auth_webhook(request) -> bool:
     try:
         ts = int(svix_timestamp)
         if abs(time.time() - ts) > 300:
-            logger.warning("Clerk webhook timestamp outside tolerance (replay?)")
+            logger.warning("Auth webhook timestamp outside tolerance (replay?)")
             return False
     except (ValueError, TypeError):
         return False
@@ -721,7 +733,7 @@ def _verify_auth_webhook(request) -> bool:
     # Construct signed payload
     signed_content = f"{svix_id}.{svix_timestamp}.{request.body.decode('utf-8')}"
 
-    # Clerk/svix secrets are "whsec_<base64-encoded-bytes>".
+    # Svix webhook secrets are "whsec_<base64-encoded-bytes>".
     # Strip the prefix and base64-decode to get the raw signing key.
 
     secret_bytes: bytes
@@ -752,7 +764,7 @@ def _verify_auth_webhook(request) -> bool:
 def _handle_user_created(data: Dict[str, Any]):
     """Handle user.created webhook event.
 
-    Creates Django User when new user signs up via Clerk.
+    Creates Django User when a new user is provisioned by the auth provider.
     """
     auth_user_id = data.get("id")
     email = data.get("email_addresses", [{}])[0].get("email_address", "")
@@ -778,7 +790,7 @@ def _handle_user_created(data: Dict[str, Any]):
 def _handle_user_updated(data: Dict[str, Any]):
     """Handle user.updated webhook event.
 
-    Syncs user metadata changes from Clerk to Django.
+    Syncs user metadata changes from the auth provider to Django.
     """
     auth_user_id = data.get("id")
 
@@ -918,7 +930,7 @@ def _handle_membership_created(data: Dict[str, Any]):
 def _handle_membership_updated(data: Dict[str, Any]):
     """Handle organizationMembership.updated webhook event.
 
-    Syncs role changes from Clerk to the local OrganizationMembers record.
+    Syncs role changes from the auth provider to the local OrganizationMembers record.
     """
     auth_user_id = data.get("public_user_data", {}).get("user_id")
     auth_org_id = data.get("organization", {}).get("id")

@@ -2,13 +2,13 @@
 -- Fix: Ensure f.alrashid@clc-ctc.ca is a secretary_treasurer member of CLC
 --
 -- Problem: User appears as CAPE member instead of CLC.
--- Root cause: organization_members row may point to wrong org, or her Clerk
+-- Root cause: organization_members row may point to wrong org, or her auth
 -- user ID doesn't match the seed data user_id.
 --
 -- This script:
 -- 1. Updates any existing org_members row for her email to point to CLC
 -- 2. Sets her role to secretary_treasurer
--- 3. If no row exists, creates one (requires her Clerk user_id as parameter)
+-- 3. If no row exists, creates one (requires her auth user_id as parameter)
 -- =============================================================================
 BEGIN;
 
@@ -58,8 +58,8 @@ BEGIN
 
       RAISE NOTICE 'Updated seed user membership to CLC secretary_treasurer';
     ELSE
-      RAISE NOTICE 'No existing membership found. Insert manually with actual Clerk user_id:';
-      RAISE NOTICE 'INSERT INTO organization_members (user_id, organization_id, role, status, name, email) VALUES (''<clerk_user_id>'', ''%'', ''secretary_treasurer'', ''active'', ''Fatima Al-Rashid'', ''f.alrashid@clc-ctc.ca'');', v_clc_id;
+      RAISE NOTICE 'No existing membership found. Insert manually with the actual auth user_id:';
+      RAISE NOTICE 'INSERT INTO organization_members (user_id, organization_id, role, status, name, email) VALUES (''<auth_user_id>'', ''%'', ''secretary_treasurer'', ''active'', ''Fatima Al-Rashid'', ''f.alrashid@clc-ctc.ca'');', v_clc_id;
     END IF;
   END IF;
 END $$;

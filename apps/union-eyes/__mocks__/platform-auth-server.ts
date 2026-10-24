@@ -19,9 +19,6 @@ export function authMiddleware() {
   return async () => {}
 }
 
-/** @deprecated Use authMiddleware instead */
-export const clerkMiddleware = authMiddleware
-
 export function createRouteMatcher() {
   return () => false
 }

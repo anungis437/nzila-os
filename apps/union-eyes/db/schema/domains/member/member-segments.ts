@@ -34,7 +34,7 @@ export const memberSegments = pgTable("member_segments", {
   filters: jsonb("filters").notNull().$type<MemberSegmentFilters>(),
   
   // Metadata
-  createdBy: text("created_by").notNull(), // Clerk user ID
+  createdBy: text("created_by").notNull(), // Auth user ID
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   
@@ -107,7 +107,7 @@ export const segmentExecutions = pgTable("segment_executions", {
   segmentId: uuid("segment_id").notNull().references(() => memberSegments.id, { onDelete: "cascade" }),
   
   // Execution context
-  executedBy: text("executed_by").notNull(), // Clerk user ID
+  executedBy: text("executed_by").notNull(), // Auth user ID
   executedAt: timestamp("executed_at").defaultNow().notNull(),
   
   // Results
@@ -137,7 +137,7 @@ export const segmentExports = pgTable("segment_exports", {
   segmentId: uuid("segment_id").references(() => memberSegments.id, { onDelete: "set null" }),
   
   // Export metadata
-  exportedBy: text("exported_by").notNull(), // Clerk user ID
+  exportedBy: text("exported_by").notNull(), // Auth user ID
   exportedAt: timestamp("exported_at").defaultNow().notNull(),
   
   // Export configuration

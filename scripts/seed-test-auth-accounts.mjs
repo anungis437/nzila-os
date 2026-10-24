@@ -11,10 +11,11 @@
  *   - CLC              (congress) — h.yussuff, f.alrashid, a.varga
  *   - CUPE National    (union)    — m.hancock, f.hahn, d.bhullar
  *
- * Password for all: Test1234!
+ * The password is supplied via TEST_ACCOUNT_PASSWORD (from the team secret store).
+ * It is never stored in the repository and never printed.
  *
  * Prerequisites: seed-master.sql must be applied first.
- * Usage: node scripts/seed-test-auth-accounts.mjs
+ * Usage: TEST_ACCOUNT_PASSWORD=... node scripts/seed-test-auth-accounts.mjs
  */
 import argon2 from 'argon2'
 import postgres from 'postgres'
@@ -24,7 +25,11 @@ const DATABASE_URL =
 
 const sql = postgres(DATABASE_URL)
 
-const TEST_PASSWORD = 'Test1234!'
+const TEST_PASSWORD = process.env.TEST_ACCOUNT_PASSWORD
+if (!TEST_PASSWORD || TEST_PASSWORD.length < 16) {
+  console.error('ERROR: TEST_ACCOUNT_PASSWORD env var (min 16 characters) is required.')
+  process.exit(1)
+}
 
 // Authoritative org UUIDs from seed-master.sql
 const ORGS = {
@@ -152,7 +157,7 @@ async function main() {
   }
 
   await sql.end()
-  console.log(`\n${ACCOUNTS.length} accounts ready. Password: ${TEST_PASSWORD}`)
+  console.log(`\n${ACCOUNTS.length} accounts ready.`)
 }
 
 main().catch((err) => {

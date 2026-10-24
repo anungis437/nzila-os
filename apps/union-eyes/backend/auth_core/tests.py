@@ -188,12 +188,12 @@ class OrganizationSharingSettingsModelTest(TestCase):
 
 class CrossOrgAccessLogModelTest(TestCase):
     def test_create(self):
-        obj = CrossOrgAccessLog.objects.create(user_id="clerk_user_789")
+        obj = CrossOrgAccessLog.objects.create(user_id="user_789")
         self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.user_id, "clerk_user_789")
+        self.assertEqual(obj.user_id, "user_789")
 
     def test_str(self):
-        obj = CrossOrgAccessLog.objects.create(user_id="clerk_user_790")
+        obj = CrossOrgAccessLog.objects.create(user_id="user_790")
         self.assertIsInstance(str(obj), str)
 
 
@@ -210,16 +210,16 @@ class OrganizationSharingGrantsModelTest(TestCase):
 class UserUuidMappingModelTest(TestCase):
     def test_create(self):
         obj = UserUuidMapping.objects.create(
-            clerk_user_id="clerk_abc123",
+            clerk_user_id="user_abc123",
             created_at=timezone.now(),
         )
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.user_uuid)
-        self.assertEqual(obj.clerk_user_id, "clerk_abc123")
+        self.assertEqual(obj.clerk_user_id, "user_abc123")
 
     def test_str(self):
         obj = UserUuidMapping.objects.create(
-            clerk_user_id="clerk_xyz456",
+            clerk_user_id="user_xyz456",
             created_at=timezone.now(),
         )
         self.assertIsInstance(str(obj), str)
@@ -251,7 +251,7 @@ class PendingProfilesModelTest(TestCase):
 class ProfilesModelTest(TestCase):
     def test_create(self):
         obj = Profiles.objects.create(
-            user_id="clerk_user_001",
+            user_id="user_001",
             email="member@local1000.ca",
             membership="pro",
             payment_provider="stripe",
@@ -259,11 +259,11 @@ class ProfilesModelTest(TestCase):
         )
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.membership, "pro")
-        self.assertEqual(obj.user_id, "clerk_user_001")
+        self.assertEqual(obj.user_id, "user_001")
 
     def test_str(self):
         obj = Profiles.objects.create(
-            user_id="clerk_002",
+            user_id="user_002",
             email="p@test.ca",
             created_at=timezone.now(),
         )
@@ -272,12 +272,12 @@ class ProfilesModelTest(TestCase):
 
 class UsersModelTest(TestCase):
     def test_create(self):
-        obj = Users.objects.create(user_id="clerk_user_100")
+        obj = Users.objects.create(user_id="user_100")
         self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.user_id, "clerk_user_100")
+        self.assertEqual(obj.user_id, "user_100")
 
     def test_str(self):
-        obj = Users.objects.create(user_id="clerk_user_101")
+        obj = Users.objects.create(user_id="user_101")
         self.assertIsInstance(str(obj), str)
 
 
@@ -300,23 +300,23 @@ class OrganizationUsersModelTest(TestCase):
 
 class UserSessionsModelTest(TestCase):
     def test_create(self):
-        obj = UserSessions.objects.create(user_id="clerk_user_200")
+        obj = UserSessions.objects.create(user_id="user_200")
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.session_id)
 
     def test_str(self):
-        obj = UserSessions.objects.create(user_id="clerk_user_201")
+        obj = UserSessions.objects.create(user_id="user_201")
         self.assertIsInstance(str(obj), str)
 
 
 class OauthProvidersModelTest(TestCase):
     def test_create(self):
-        obj = OauthProviders.objects.create(user_id="clerk_user_300")
+        obj = OauthProviders.objects.create(user_id="user_300")
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.provider_id)
 
     def test_str(self):
-        obj = OauthProviders.objects.create(user_id="clerk_user_301")
+        obj = OauthProviders.objects.create(user_id="user_301")
         self.assertIsInstance(str(obj), str)
 
 
@@ -430,7 +430,7 @@ class OrganizationMembersModelTest(TestCase):
             name="OM Org", slug="test-org-members", organization_type="union"
         )
         obj = OrganizationMembers.objects.create(
-            user_id="clerk_user_500",
+            user_id="user_500",
             organization=org,
             role="member",
             status="active",
@@ -448,7 +448,7 @@ class OrganizationMembersModelTest(TestCase):
             name="OM Org 2", slug="test-org-members-str", organization_type="union"
         )
         obj = OrganizationMembers.objects.create(
-            user_id="clerk_501",
+            user_id="user_501",
             organization=org,
             role="steward",
             status="active",

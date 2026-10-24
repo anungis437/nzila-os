@@ -2,7 +2,7 @@
 Organisation-scoping mixins for DRF viewsets.
 
 These mixins automatically filter querysets to the organisation that the
-authenticated Clerk user is currently acting in, preventing data leakage
+authenticated user is currently acting in, preventing data leakage
 between organisations.
 
 Usage
@@ -14,7 +14,7 @@ Apply `OrgScopedMixin` to any ModelViewSet that has an `organization` FK
         queryset = OrganizationMembers.objects.all()
         serializer_class = OrganizationMembersSerializer
 
-The mixin reads the Clerk organisation ID from the `X-Organization-Id`
+The mixin reads the auth-provider organisation ID from the `X-Organization-Id`
 request header (forwarded by the Next.js djangoProxy utility) and resolves
 it to the local `organizations.id` UUID.
 

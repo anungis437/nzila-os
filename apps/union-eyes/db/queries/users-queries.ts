@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 
 /**
  * Get database user ID by email
- * Used to map Clerk users to database users
+ * Used to map auth provider users to database users
  */
 export const getUserByEmail = async (
   email: string,

@@ -131,7 +131,7 @@ class MessageThreadsModelTest(TestCase):
     def test_create(self):
         obj = MessageThreads.objects.create(
             subject="Benefits Question",
-            member_id="clerk_user_100",
+            member_id="user_100",
             organization_id=uuid.uuid4(),
         )
         self.assertIsNotNone(obj.id)
@@ -142,7 +142,7 @@ class MessageThreadsModelTest(TestCase):
     def test_str(self):
         obj = MessageThreads.objects.create(
             subject="Dues Inquiry",
-            member_id="clerk_user_101",
+            member_id="user_101",
             organization_id=uuid.uuid4(),
         )
         self.assertIsInstance(str(obj), str)
@@ -221,11 +221,11 @@ class MessageNotificationsModelTest(TestCase):
         )
         msg = Messages.objects.create(thread=thread)
         obj = MessageNotifications.objects.create(
-            user_id="clerk_user_200",
+            user_id="user_200",
             message=msg,
         )
         self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.user_id, "clerk_user_200")
+        self.assertEqual(obj.user_id, "user_200")
 
     def test_str(self):
         thread = MessageThreads.objects.create(
@@ -310,12 +310,12 @@ class NewsletterEngagementModelTest(TestCase):
 
 class UserNotificationPreferencesModelTest(TestCase):
     def test_create(self):
-        obj = UserNotificationPreferences.objects.create(user_id="clerk_user_300")
+        obj = UserNotificationPreferences.objects.create(user_id="user_300")
         self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.user_id, "clerk_user_300")
+        self.assertEqual(obj.user_id, "user_300")
 
     def test_str(self):
-        obj = UserNotificationPreferences.objects.create(user_id="clerk_user_301")
+        obj = UserNotificationPreferences.objects.create(user_id="user_301")
         self.assertIsInstance(str(obj), str)
 
 
@@ -342,11 +342,11 @@ class NotificationTrackingModelTest(TestCase):
 
 class InAppNotificationsModelTest(TestCase):
     def test_create(self):
-        obj = InAppNotifications.objects.create(user_id="clerk_user_400")
+        obj = InAppNotifications.objects.create(user_id="user_400")
         self.assertIsNotNone(obj.id)
 
     def test_str(self):
-        obj = InAppNotifications.objects.create(user_id="clerk_user_401")
+        obj = InAppNotifications.objects.create(user_id="user_401")
         self.assertIsInstance(str(obj), str)
 
 
@@ -605,16 +605,16 @@ class MobileAppConfigModelTest(TestCase):
 class CommunicationPreferencesPhase4ModelTest(TestCase):
     def test_create(self):
         obj = CommunicationPreferencesPhase4.objects.create(
-            user_id="clerk_user_500",
+            user_id="user_500",
             organization_id=uuid.uuid4(),
         )
         self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.user_id, "clerk_user_500")
+        self.assertEqual(obj.user_id, "user_500")
         self.assertEqual(obj.timezone, "America/Toronto")
 
     def test_str(self):
         obj = CommunicationPreferencesPhase4.objects.create(
-            user_id="clerk_user_501",
+            user_id="user_501",
             organization_id=uuid.uuid4(),
         )
         self.assertIsInstance(str(obj), str)
