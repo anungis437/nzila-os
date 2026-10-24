@@ -41,10 +41,13 @@ Each merge kept the relationship-scoped authority rule where a persona branch re
 | Check | Result |
 |---|---|
 | `tsc --noEmit` (`apps/union-eyes`) | exit 0 at the merged tree |
-| Full Union Eyes suite (excluding `*.postgres.test.ts`) | 19,371 passed, 6 failed on the last full run. Four failures (`admin-database-health`, `billing-subscriptions`, `lro-metrics`, `satisfaction-service`) passed when re-run alone and are load-related. The two real failures were stale tests left by the Member 2.1 branch (removed `messages/notifications` route, claim form moved into a component) and a stale member-sidebar expectation; all were corrected and re-run alone and pass. **The full suite was not re-run after those corrections** |
+| Full Union Eyes suite (excluding `*.postgres.test.ts`), final run after the corrections | 19,382 passed, 3 failed (`rls-storage-reachability-audit`, `rls-verify-deadline-engine-policies.pglite`, `round37-social-media-accounts-boundary`); all three pass when run alone (44/44), so they are load-related timeouts, not regressions. An earlier run showed a different set of four load-related failures that also passed alone. The two real failures found on the way (stale Member 2.1 tests and one stale member-sidebar expectation) were corrected |
+| `pnpm lint` | exit 0 (0 errors, 2,929 warnings in Union Eyes) |
+| `pnpm validate:docs` | exit 0 (0 errors) |
+| `pnpm governance:audit` | exit 0 |
 | `node tooling/scripts/check-ue-convergence.mjs` | passed (register valid, ratchets matched, migration lineage verified) |
 | Real PostgreSQL 15/16 suites | Run against the counsel-store change (combined 10/10, storage and Django audit 15/15 each). **Not re-run after the persona merges**; none of them touch the kernel migrations |
-| `pnpm lint`, `pnpm test:fast`, `pnpm validate:docs`, `pnpm governance:audit` | **Not run in this tranche** (pre-commit hooks ran gitleaks, brand leakage, link check, inventory sync, lint-staged and a typecheck on each commit) |
+| `pnpm test:fast` | **Not run in this tranche** (pre-commit hooks ran gitleaks, brand leakage, link check, inventory sync, lint-staged and a typecheck on each commit) |
 
 ## Known authority gaps carried forward
 
@@ -62,7 +65,7 @@ Webhook sender discovery, the Whop consumer of the legacy metadata key, test-cre
 
 ## Resume point
 
-1. Re-run the full Union Eyes suite, then `pnpm lint`, `pnpm test:fast`, `pnpm validate:docs` and `pnpm governance:audit`.
+1. Run `pnpm test:fast`.
 2. Add a staff-thread assignment mechanism on kernel assignments (`I-001`).
 3. `UE-CONV-E-001` / `B-001`: migrate the claims module and the `union_rep_id` readers onto kernel assignments once kernel storage is qualified.
 4. `UE-CONV-A-004`: bearer fix together with its consumers.
