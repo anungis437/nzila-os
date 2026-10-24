@@ -46,7 +46,7 @@ Each merge kept the relationship-scoped authority rule where a persona branch re
 | `pnpm validate:docs` | exit 0 (0 errors) |
 | `pnpm governance:audit` | exit 0 |
 | `node tooling/scripts/check-ue-convergence.mjs` | passed (register valid, ratchets matched, migration lineage verified) |
-| Real PostgreSQL 15/16 suites | Run against the counsel-store change (combined 10/10, storage and Django audit 15/15 each). **Not re-run after the persona merges**; none of them touch the kernel migrations |
+| Real PostgreSQL 15/16 suites (Django migrate, approved bootstrap, combined, storage and Django-audit) | Re-run on the merged tree at `6b9945530` on fresh disposable databases: 25/25 passed on PostgreSQL 15 and 25/25 on PostgreSQL 16, none skipped. Kernel migrations are unchanged by the persona merges |
 | `pnpm test:fast` | Three runs. After raising timeouts on the docker, oracle, vault and reachability suites (`6b9945530`, timeouts only), the third run passed 31,919 tests with 1 failure: `member-query-importers`, a synchronous repository scan that takes 9s alone and timed out at 120s under whole-monorepo load (passes alone, 2/2). Earlier runs failed on the suites since adjusted, which all passed alone. No single-run clean pass has been recorded; the residual failures are load starvation, not assertion failures |
 
 ## Known authority gaps carried forward
