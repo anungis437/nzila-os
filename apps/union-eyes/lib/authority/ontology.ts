@@ -309,6 +309,7 @@ export const ACTIONS = [
   'case:read',
   'case:read_own_submission',
   'case:read_internal',
+  'case:read_third_party_restricted',
   'case:read_privileged',
   'case:comment',
   'case:write',

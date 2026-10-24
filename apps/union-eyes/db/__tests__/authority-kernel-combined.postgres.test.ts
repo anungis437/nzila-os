@@ -157,7 +157,7 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     }
     const read = (user: string, doc: string) => asUser(user, (t) => enforceDocumentRead(t, { memberships: canonicalMembershipSource }, { principalUserId: user, organizationId: ORG, documentId: doc, authenticated: true }))
     expect((await read(U.member, own)).effect).toBe('allow')
-    expect((await read(U.member, publicInternal)).effect).toBe('allow')
+    expect((await read(U.member, publicInternal)).effect).toBe('deny') // a label alone never makes a record member-disclosable
     expect((await read(U.member, internal)).effect).toBe('deny')
     expect((await read(U.member, privileged)).effect).toBe('deny')
     for (const who of [U.president, U.steward, U.stranger]) expect((await read(who, own)).effect, who).toBe('deny')

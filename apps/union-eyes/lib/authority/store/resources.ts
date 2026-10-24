@@ -27,6 +27,7 @@ import type {
   ResourceRelationship,
   WorkAidMatterFacts,
 } from '../ontology'
+import { DEFAULT_DOCUMENT_CLASS_POLICY, type DocumentClassPolicy } from '../document-class'
 import { isPrincipalId, isUuid, parsePgTextArray, type SqlExecutor } from './executor'
 
 type Row = Record<string, unknown>
@@ -63,7 +64,7 @@ export function decimalToMinor(value: unknown): number {
 
 // ── Case ─────────────────────────────────────────────────────────────────────
 
-export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Date): Promise<LoadedResource | null> {
+export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Date, policy: DocumentClassPolicy = DEFAULT_DOCUMENT_CLASS_POLICY): Promise<LoadedResource | null> {
   const org = req.resource.organizationId
   if (!isUuid(org) || !isUuid(req.resource.id)) return null
   const row = (
@@ -100,7 +101,7 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
     adverseUserIds: [],
   }
   if (req.action === 'case:read_own_submission' && isUuid(req.documentId)) {
-    const doc = await loadDocument(exec, org, req.documentId)
+    const doc = await loadDocument(exec, org, req.documentId, policy)
     facts.requestedDocumentIsPrincipalsOwnSubmission =
       !!doc && !doc.privileged && doc.uploadedBy === req.principalUserId && doc.caseIds.length === 1 && doc.caseIds[0] === facts.id
   }
@@ -138,8 +139,10 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
   for (const c of collaborators) {
     if (!isPrincipalId(c.user_id) || !isPrincipalId(c.granted_by)) continue
     const permissions = ['read']
-    // A co-handling secondary LRO or a reviewer works the internal file; a read-only collaborator does not.
-    if (c.access_role === 'secondary_lro' || c.access_role === 'reviewer') permissions.push('read_internal')
+    // Access to the union's internal file needs an ACTIVE case-specific assignment AND an explicit internal-file scope
+    // (the assignment's own can_edit_case_notes flag). A role label such as secondary_lro or reviewer is not a scope, and a
+    // read-only collaborator never reads the internal file.
+    if (c.can_edit_case_notes === true && c.access_role !== 'read_only') permissions.push('read_internal')
     if (c.can_comment === true) permissions.push('comment')
     if (c.can_edit_case_notes === true && c.access_role !== 'read_only') permissions.push('write')
     relationships.push({
@@ -167,21 +170,30 @@ export interface DocumentFacts {
   id: string
   organizationId: string
   uploadedBy: string | null
+  /** Legal privilege flag or a privileged label under the policy in force. */
   privileged: boolean
-  /** documents.privacy_label; null when absent. Anything unrecognised is treated as internal. */
+  containsLegalPrivilege: boolean
+  /** Medical, disciplinary or member-PII flags: information that may concern someone other than the reader. */
+  thirdPartySensitive: boolean
+  /** documents.privacy_label; null when absent. Anything unrecognised is treated as the union's working file. */
   label: string | null
   /** Grievance ids this document is linked to. Exactly one is required to derive access. */
   caseIds: string[]
 }
 
-const PRIVILEGED_LABELS = new Set(['privileged', 'highly_sensitive'])
-
-export async function loadDocument(exec: SqlExecutor, organizationId: string, documentId: string): Promise<DocumentFacts | null> {
+export async function loadDocument(
+  exec: SqlExecutor,
+  organizationId: string,
+  documentId: string,
+  policy: DocumentClassPolicy = DEFAULT_DOCUMENT_CLASS_POLICY,
+): Promise<DocumentFacts | null> {
   if (!isUuid(organizationId) || !isUuid(documentId)) return null
   const doc = (
     await exec.query<Row>(
       `SELECT id::text AS id, organization_id::text AS organization_id, uploaded_by,
-              privacy_label::text AS privacy_label, COALESCE(contains_legal_privilege, false) AS contains_legal_privilege
+              privacy_label::text AS privacy_label, COALESCE(contains_legal_privilege, false) AS contains_legal_privilege,
+              (COALESCE(contains_medical_sensitive, false) OR COALESCE(medical_sensitive, false)
+               OR COALESCE(disciplinary_sensitive, false) OR COALESCE(member_pii, false)) AS third_party_sensitive
          FROM public.documents WHERE organization_id = $1::uuid AND id = $2::uuid`,
       [organizationId, documentId],
     )
@@ -199,7 +211,9 @@ export async function loadDocument(exec: SqlExecutor, organizationId: string, do
     id: String(doc.id),
     organizationId: String(doc.organization_id),
     uploadedBy: (doc.uploaded_by as string | null) ?? null,
-    privileged: doc.contains_legal_privilege === true || PRIVILEGED_LABELS.has(String(doc.privacy_label)),
+    privileged: doc.contains_legal_privilege === true || policy.privilegedLabels.includes(String(doc.privacy_label)),
+    containsLegalPrivilege: doc.contains_legal_privilege === true,
+    thirdPartySensitive: doc.third_party_sensitive === true,
     label: doc.privacy_label ? String(doc.privacy_label) : null,
     caseIds: links.map((l) => String(l.id)),
   }
@@ -342,10 +356,11 @@ export async function loadWorkAidMatter(exec: SqlExecutor, req: AuthorityRequest
 }
 
 /** The default loader bound to the canonical sources above. */
-export const canonicalResourceLoader: ResourceLoader = async (exec, req, now) => {
+/** The canonical loaders under the document classification policy in force (provisional default unless an institution supplies one). */
+export const createCanonicalResourceLoader = (policy: DocumentClassPolicy = DEFAULT_DOCUMENT_CLASS_POLICY): ResourceLoader => async (exec, req, now) => {
   switch (req.resource.type) {
     case 'case':
-      return loadCase(exec, req, now)
+      return loadCase(exec, req, now, policy)
     case 'financial_transaction':
       return loadFinancialTransaction(exec, req)
     case 'governance_review':
@@ -357,3 +372,5 @@ export const canonicalResourceLoader: ResourceLoader = async (exec, req, now) =>
       return null
   }
 }
+
+export const canonicalResourceLoader: ResourceLoader = createCanonicalResourceLoader()

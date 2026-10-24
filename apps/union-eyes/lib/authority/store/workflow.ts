@@ -141,7 +141,7 @@ export async function registerReview(
  * refuses. It also refuses the member and the union referrer, who cannot accept
  * their own referral.
  */
-export async function recordCounselAcceptance(exec: SqlExecutor, deps: Pick<EnforcementDeps, 'counsel'>, i: { organizationId: string; matterId: string }): Promise<void> {
+export async function recordCounselAcceptance(exec: SqlExecutor, deps: Pick<EnforcementDeps, 'counsel' | 'memberships'>, i: { organizationId: string; matterId: string }): Promise<void> {
   requireUuids(i.organizationId, i.matterId)
   const counselUserId = await requireCounselSession(exec, deps, {
     organizationId: i.organizationId,

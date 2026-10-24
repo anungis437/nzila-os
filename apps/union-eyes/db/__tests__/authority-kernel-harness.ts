@@ -60,7 +60,9 @@ const BUSINESS_FIXTURE_SQL = `
     status case_access_status NOT NULL DEFAULT 'active', updated_at timestamptz NOT NULL DEFAULT now());
   CREATE TABLE public.documents (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, uploaded_by text NOT NULL,
-    privacy_label text NOT NULL DEFAULT 'team_confidential', contains_legal_privilege boolean DEFAULT false);
+    privacy_label text NOT NULL DEFAULT 'team_confidential', contains_legal_privilege boolean DEFAULT false,
+    contains_medical_sensitive boolean DEFAULT false, medical_sensitive boolean DEFAULT false,
+    disciplinary_sensitive boolean DEFAULT false, member_pii boolean DEFAULT false);
   CREATE TABLE public.document_links (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), document_id uuid NOT NULL, linked_entity_type text NOT NULL, linked_entity_id uuid NOT NULL);
   CREATE TABLE public.payments (

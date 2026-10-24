@@ -100,7 +100,7 @@ describe('TypeScript layer: the actor is the session principal, never a paramete
     const matter = newUuid()
     // The acceptor is not a parameter: an extra `actor` is ignored, never trusted.
     await expect(k.as(U.president)((t) => recordCounselAcceptance(t, k.deps, { organizationId: ORG, matterId: matter, actor: U.counsel } as never))).rejects.toThrow(/COUNSEL_NOT_VERIFIABLE/)
-    const vouchesForCounselOnly = { counsel: { isCounselFor: async (_e: unknown, i: { userId: string }) => i.userId === U.counsel } }
+    const vouchesForCounselOnly = { memberships: k.deps.memberships, counsel: { isCounselFor: async (_e: unknown, i: { userId: string }) => i.userId === U.counsel } }
     await expect(k.as(U.president)((t) => recordCounselAcceptance(t, vouchesForCounselOnly as never, { organizationId: ORG, matterId: matter }))).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
   })
 })

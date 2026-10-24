@@ -164,7 +164,7 @@ describe('relationship, delegation, recusal and consent constraints', () => {
   it('consent shape: referral is the member’s act; counsel disclosure names a recipient and is not member-authored', async () => {
     const base = { organizationId: ORG, memberUserId: U.member, matterId: newUuid(), categories: ['status'], purpose: 'referral', grantedAt: minutesAgo(), expiresAt: daysAhead(30) }
     // The counsel check is a different layer (proven in the resources suite); here it vouches for anyone so the database shape rule is what refuses.
-    const anyone = { counsel: { isCounselFor: async () => true } }
+    const anyone = { memberships: async () => [], counsel: { isCounselFor: async () => true } }
     const ins = (o: Record<string, unknown>) => k.as(String(o.issuedBy))((t) => insertConsent(t, { ...base, ...o } as never, anyone))
     await expect(ins({ direction: 'union_to_workaid', issuer: 'member', issuedBy: U.president })).rejects.toThrow(/shape_chk/)
     await expect(ins({ direction: 'union_to_workaid', issuer: 'counsel', issuedBy: U.counsel })).rejects.toThrow(/shape_chk/)

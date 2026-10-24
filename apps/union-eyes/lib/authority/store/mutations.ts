@@ -313,10 +313,10 @@ export interface InsertConsentInput {
  * The issuer is always the authenticated session principal. A member-issued consent is the member's own act;
  * a counsel-issued one additionally needs a verified counsel session (see requireCounselSession).
  */
-export async function insertConsent(exec: SqlExecutor, i: InsertConsentInput, deps: Pick<EnforcementDeps, 'counsel'> = {}): Promise<string> {
+export async function insertConsent(exec: SqlExecutor, i: InsertConsentInput, deps?: Pick<EnforcementDeps, 'counsel' | 'memberships'>): Promise<string> {
   requireUuids(i.organizationId, i.matterId)
   requirePrincipals(i.memberUserId, i.issuedBy, i.recipientUserId)
-  if (i.issuer === 'counsel') await requireCounselSession(exec, deps, { organizationId: i.organizationId, matterId: i.matterId, claimedUserId: i.issuedBy })
+  if (i.issuer === 'counsel') await requireCounselSession(exec, deps ?? ({} as Pick<EnforcementDeps, 'counsel' | 'memberships'>), { organizationId: i.organizationId, matterId: i.matterId, claimedUserId: i.issuedBy })
   else await bindSessionActor(exec, i.issuedBy, 'consent issuer')
   const row = await one(
     exec,

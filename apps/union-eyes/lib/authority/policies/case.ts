@@ -53,7 +53,11 @@ const HANDLER_ACTIONS: readonly Action[] = [
   'case:transition',
 ]
 const MEMBER_ACTIONS: readonly Action[] = ['case:read', 'case:comment']
-const COLLABORATOR_CEILING: readonly Action[] = HANDLER_ACTIONS
+// Third-party restricted records are narrower than the internal file: only a primary owner or assignee reaches them
+// by default; a collaborator needs the permission granted explicitly and by name, and a supervisory mandate needs the
+// power named. Role, label or seniority never imply it.
+const PRIMARY_HANDLER_ACTIONS: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted']
+const COLLABORATOR_CEILING: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted']
 
 interface Candidate {
   source: AuthoritySource
@@ -294,7 +298,7 @@ function relationshipGrant(r: ResourceRelationship, capacities: readonly Capacit
     case 'owner':
     case 'assignee':
       return handler
-        ? { actions: HANDLER_ACTIONS, visibility: 'internal' }
+        ? { actions: PRIMARY_HANDLER_ACTIONS, visibility: 'internal' }
         : { actions: [], visibility: 'internal', miss: { code: 'CAPACITY_NOT_ELIGIBLE', detail: `${r.relation} requires a representation capacity` } }
     case 'collaborator': {
       // An explicit grant must be authored by someone other than its holder.
@@ -307,7 +311,7 @@ function relationshipGrant(r: ResourceRelationship, capacities: readonly Capacit
       const granted = r.permissions.map((p) => `case:${p}` as Action).filter((a) => COLLABORATOR_CEILING.includes(a))
       return {
         actions: granted,
-        visibility: granted.includes('case:read_internal') ? 'internal' : 'member_visible',
+        visibility: granted.includes('case:read_internal') || granted.includes('case:read_third_party_restricted') ? 'internal' : 'member_visible',
       }
     }
   }

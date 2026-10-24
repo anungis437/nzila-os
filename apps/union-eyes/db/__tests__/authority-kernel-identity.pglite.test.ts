@@ -7,7 +7,7 @@
  * authority-kernel-identity-path.native.test.ts. Not a staging pass.
  */
 import { beforeAll, describe, expect, it } from 'vitest'
-import { newUuid, ORG, ORG_B, seedMembership, seedUser, U } from './authority-kernel-harness'
+import { newUuid, ORG, ORG_B, seedMembership, U } from './authority-kernel-harness'
 import { freshDb, kit } from './authority-kernel-testkit'
 import { enforceAuthority } from '../../lib/authority/store/enforce'
 import { isPrincipalId, parsePgTextArray, runAuthorityTransaction, type SqlExecutor } from '../../lib/authority/store/executor'
