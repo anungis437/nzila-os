@@ -21,7 +21,7 @@ import {
   normalizeDocumentTitle,
   toGovernanceLabel,
 } from '@/lib/services/document-governance-service';
-import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
 
@@ -261,26 +261,24 @@ export const POST = withOrganizationAuth(async (request, context) => {
       });
     }
 
+    // The document, its version, its link and the audit record commit together.
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'document.upload',
+      resourceType: 'documents',
+      resourceId: insertedDocument.id,
+      details: {
+        privacyLabel: insertedDocument.privacyLabel,
+        documentType: insertedDocument.documentType,
+        ...(parsed.data.linkedEntityType && parsed.data.linkedEntityId
+          ? { linkedEntityType: parsed.data.linkedEntityType, linkedEntityId: parsed.data.linkedEntityId }
+          : {}),
+      },
+    });
+
     return insertedDocument;
   });
-
-  if (parsed.data.linkedEntityType && parsed.data.linkedEntityId) {
-
-    if (parsed.data.linkedEntityType === 'grievance') {
-      await auditCaseMutation({
-        event: CaseAuditEvent.CASE_ATTACHMENT_UPLOADED,
-        userId,
-        organizationId,
-        caseId: parsed.data.linkedEntityId,
-        action: 'create',
-        newState: { documentId: created.id },
-        details: {
-          privacyLabel: created.privacyLabel,
-          documentType: created.documentType,
-        },
-      });
-    }
-  }
 
   return standardSuccessResponse(created);
 });

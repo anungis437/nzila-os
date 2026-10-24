@@ -7,154 +7,142 @@
  * GET  /api/employers/communications             — List communications for employer
  */
 
-import { z } from "zod";
-import { db } from "@/db/db";
-import {
-  employerCommunications,
-} from "@/db/schema/domains/communications/employer-communications";
-import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation } from "@/lib/audit-logger";
-import {
-  emitCapeAuditEvent,
-  CAPE_AUDIT_EVENTS,
-} from "@/lib/audit/cape-audit-events";
+import { z } from 'zod'
+import { db } from '@/db/db'
+import { employerCommunications } from '@/db/schema/domains/communications/employer-communications'
+import { withOrganizationAuth } from '@/lib/organization-middleware'
+import { hasMinRole } from '@/lib/api-auth-guard'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { emitCapeAuditEvent, CAPE_AUDIT_EVENTS } from '@/lib/audit/cape-audit-events'
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
-} from "@/lib/api/standardized-responses";
-import { eq, desc, and } from "drizzle-orm";
+} from '@/lib/api/standardized-responses'
+import { eq, desc, and } from 'drizzle-orm'
 
 // ── Validation ──────────────────────────────────────────────────────────────
 
 const createCommunicationSchema = z.object({
   employerId: z.string().uuid(),
   grievanceId: z.string().uuid().optional(),
-  type: z.enum(["email", "phone", "meeting", "letter", "other"]),
+  type: z.enum(['email', 'phone', 'meeting', 'letter', 'other']),
   subject: z.string().min(1).max(500),
   body: z.string().min(1),
   recipientContactId: z.string().uuid().optional(),
   recipientName: z.string().optional(),
-  status: z.enum(["draft", "sent", "received", "acknowledged"]).default("draft"),
+  status: z.enum(['draft', 'sent', 'received', 'acknowledged']).default('draft'),
   templateId: z.string().uuid().optional(),
-});
+})
 
 // ── POST — Log communication ────────────────────────────────────────────────
 
 export const POST = withOrganizationAuth(async (request, context) => {
-  const { organizationId, userId } = context;
+  const { organizationId, userId } = context
 
   try {
-    const canAccess = await hasMinRole("steward");
+    const canAccess = await hasMinRole('steward')
     if (!canAccess) {
-      return standardErrorResponse(
-        ErrorCode.FORBIDDEN,
-        "Requires steward role or above"
-      );
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Requires steward role or above')
     }
 
-    const body = await request.json();
-    const parsed = createCommunicationSchema.safeParse(body);
+    const body = await request.json()
+    const parsed = createCommunicationSchema.safeParse(body)
     if (!parsed.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
-        "Invalid input",
-        parsed.error.flatten()
-      );
+        'Invalid input',
+        parsed.error.flatten(),
+      )
     }
 
-    const data = parsed.data;
+    const data = parsed.data
 
-    const [communication] = await db
-      .insert(employerCommunications)
-      .values({
+    // The communication record and its audit record commit together.
+    const communication = await withRLSContext({ organizationId }, async (tx) => {
+      const [row] = await tx
+        .insert(employerCommunications)
+        .values({
+          organizationId,
+          employerId: data.employerId,
+          grievanceId: data.grievanceId,
+          type: data.type,
+          status: data.status,
+          subject: data.subject,
+          body: data.body,
+          recipientContactId: data.recipientContactId,
+          recipientName: data.recipientName ?? 'Unknown',
+          senderName: 'System',
+          senderUserId: userId,
+          templateId: data.templateId,
+          sentAt: data.status === 'sent' ? new Date() : undefined,
+          createdBy: userId,
+        })
+        .returning()
+
+      await persistAtomicAudit(tx, {
+        userId,
         organizationId,
-        employerId: data.employerId,
-        grievanceId: data.grievanceId,
-        type: data.type,
-        status: data.status,
-        subject: data.subject,
-        body: data.body,
-        recipientContactId: data.recipientContactId,
-        recipientName: data.recipientName ?? "Unknown",
-        senderName: "System",
-        senderUserId: userId,
-        templateId: data.templateId,
-        sentAt: data.status === "sent" ? new Date() : undefined,
-        createdBy: userId,
+        resourceType: 'employer_communications',
+        action: 'employer_communication.create',
+        resourceId: row.id,
+        details: { employerId: row.employerId, type: row.type, status: row.status },
       })
-      .returning();
-
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: "employer_communications",
-      action: "create",
-      resourceId: communication.id,
-      newState: communication,
-    });
+      return row
+    })
 
     const eventType =
-      data.status === "sent"
+      data.status === 'sent'
         ? CAPE_AUDIT_EVENTS.EMPLOYER_COMMUNICATION_SENT
-        : CAPE_AUDIT_EVENTS.EMPLOYER_COMMUNICATION_LOGGED;
+        : CAPE_AUDIT_EVENTS.EMPLOYER_COMMUNICATION_LOGGED
 
     await emitCapeAuditEvent({
       eventType,
       userId,
       organizationId,
-      resource: "employer_communications",
+      resource: 'employer_communications',
       resourceId: communication.id,
       details: {
         employerId: data.employerId,
         type: data.type,
         subject: data.subject,
       },
-    });
+    })
 
-    return standardSuccessResponse(communication);
+    return standardSuccessResponse(communication)
   } catch (_error) {
-    return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      "Failed to log communication"
-    );
+    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to log communication')
   }
-});
+})
 
 // ── GET — List communications ───────────────────────────────────────────────
 
 export const GET = withOrganizationAuth(async (request, context) => {
-  const { organizationId } = context;
+  const { organizationId } = context
 
   try {
-    const canAccess = await hasMinRole("steward");
+    const canAccess = await hasMinRole('steward')
     if (!canAccess) {
-      return standardErrorResponse(
-        ErrorCode.FORBIDDEN,
-        "Requires steward role or above"
-      );
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Requires steward role or above')
     }
 
-    const { searchParams } = new URL(request.url);
-    const employerId = searchParams.get("employerId");
+    const { searchParams } = new URL(request.url)
+    const employerId = searchParams.get('employerId')
 
-    const conditions = [eq(employerCommunications.organizationId, organizationId)];
+    const conditions = [eq(employerCommunications.organizationId, organizationId)]
     if (employerId) {
-      conditions.push(eq(employerCommunications.employerId, employerId));
+      conditions.push(eq(employerCommunications.employerId, employerId))
     }
 
     const rows = await db
       .select()
       .from(employerCommunications)
       .where(and(...conditions))
-      .orderBy(desc(employerCommunications.createdAt));
+      .orderBy(desc(employerCommunications.createdAt))
 
-    return standardSuccessResponse(rows);
+    return standardSuccessResponse(rows)
   } catch (_error) {
-    return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      "Failed to list communications"
-    );
+    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to list communications')
   }
-});
+})

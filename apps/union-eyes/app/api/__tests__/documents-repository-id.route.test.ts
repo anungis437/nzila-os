@@ -9,7 +9,7 @@ const m = vi.hoisted(() => ({
   toGovernanceLabel: vi.fn(),
   getEffectiveCaseAccess: vi.fn(),
   getDocumentMutabilityBlockReason: vi.fn(),
-  auditCaseMutation: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   standardErrorResponse: vi.fn(),
   standardSuccessResponse: vi.fn(),
   selectQueue: [] as unknown[][],
@@ -44,7 +44,7 @@ vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (a: any, b?: any) => {
     const fn = typeof a === 'function' ? a : b;
-    return fn({});
+    return fn(mockDb);
   },
   withSystemContext: async (fn: any) => fn({}),
 }));
@@ -57,10 +57,7 @@ vi.mock('@/lib/services/document-governance-service', () => ({
 }));
 vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: m.getEffectiveCaseAccess }));
 vi.mock('@/lib/services/document-retention-guard', () => ({ getDocumentMutabilityBlockReason: m.getDocumentMutabilityBlockReason }));
-vi.mock('@/lib/audited-case-mutations', () => ({
-  auditCaseMutation: m.auditCaseMutation,
-  CaseAuditEvent: { DOCUMENT_LABEL_CHANGED: 'DOCUMENT_LABEL_CHANGED' },
-}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/schema/documents-schema', () => ({
   documents: { id: 'id', title: 'title', filename: 'filename', name: 'name', fileUrl: 'fileUrl', documentType: 'documentType', privacyLabel: 'privacyLabel', uploadedBy: 'uploadedBy', createdAt: 'createdAt', updatedAt: 'updatedAt', organizationId: 'organizationId', metadata: 'metadata', deletedAt: 'deletedAt' },
   documentAccessGrants: { id: 'id', organizationId: 'organizationId', documentId: 'documentId', userId: 'userId', status: 'status', canView: 'canView', revokedAt: 'revokedAt', expiresAt: 'expiresAt' },
@@ -94,7 +91,7 @@ describe('documents/repository/[id] route', () => {
     m.toGovernanceLabel.mockReturnValue('public_internal');
     m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: true, canViewCase: true, canViewPrivateDocuments: true });
     m.getDocumentMutabilityBlockReason.mockReturnValue(null);
-    m.auditCaseMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.standardErrorResponse.mockImplementation((code: string, message: string) => new Response(JSON.stringify({ code, message }), { status: code === 'FORBIDDEN' ? 403 : code === 'NOT_FOUND' ? 404 : code === 'CONFLICT' ? 409 : 400 }));
     m.standardSuccessResponse.mockImplementation((data: unknown) => new Response(JSON.stringify(data), { status: 200 }));
   });
@@ -160,6 +157,16 @@ describe('documents/repository/[id] route', () => {
     }), { organizationId: 'org_1', userId: 'u1' }, { id: 'd1' });
 
     expect(response.status).toBe(200);
-    expect(m.auditCaseMutation).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'document.label_change', organizationId: 'org_1', userId: 'u1', resourceId: 'd1' }));
+  });
+
+  it('PATCH fails when the in-transaction audit record cannot be written', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([{ id: 'd1', privacyLabel: 'public_internal', metadata: {}, linkedEntityType: null, linkedEntityId: null }]);
+    m.updateReturningQueue.push([{ id: 'd1', privacyLabel: 'team_confidential' }]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit write failed'));
+    await expect(PATCH(new Request('http://localhost/api/documents/repository/d1', {
+      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ privacyLabel: 'team_confidential' }),
+    }), { organizationId: 'org_1', userId: 'u1' }, { id: 'd1' })).rejects.toThrow('audit write failed');
   });
 });

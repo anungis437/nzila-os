@@ -9,7 +9,7 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { userNotificationPreferences } from '@/db/schema';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,7 +75,17 @@ export const PUT = withApi(
   },
   async ({ body, user, userId, organizationId }) => {
     const values = { ...body, updatedAt: new Date() };
+    // The preference change and its audit record commit together.
     const saved = await withRLSContext(async (tx) => {
+      const auditPreferences = (handle: typeof tx, id: string) =>
+        persistAtomicAudit(handle, {
+          userId: userId!,
+          organizationId: organizationId!,
+          resourceType: 'user_notification_preferences',
+          resourceId: id,
+          action: 'notification_preferences.update',
+          details: { fields: Object.keys(body) },
+        });
       const [existing] = await tx
         .select({ id: userNotificationPreferences.id })
         .from(userNotificationPreferences)
@@ -83,6 +93,7 @@ export const PUT = withApi(
         .limit(1);
       if (existing) {
         const [updated] = await tx.update(userNotificationPreferences).set(values).where(eq(userNotificationPreferences.id, existing.id)).returning();
+        await auditPreferences(tx, updated.id);
         return updated;
       }
       const email = body.email ?? user?.email;
@@ -91,15 +102,8 @@ export const PUT = withApi(
         .insert(userNotificationPreferences)
         .values({ ...values, email, userId: userId!, organizationId: organizationId! })
         .returning();
+      await auditPreferences(tx, created.id);
       return created;
-    });
-    await auditDataMutation({
-      userId: userId!,
-      organizationId: organizationId!,
-      resource: 'user_notification_preferences',
-      resourceId: saved.id,
-      action: 'update',
-      details: { fields: Object.keys(body) },
     });
     return { ...saved, saved: true };
   },

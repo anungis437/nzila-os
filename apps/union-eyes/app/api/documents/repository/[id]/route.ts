@@ -21,7 +21,7 @@ import {
   toGovernanceLabel,
 } from '@/lib/services/document-governance-service';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
-import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -236,29 +236,34 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     );
   }
 
-  const [updated] = await db
-    .update(documents)
-    .set({
-      privacyLabel: parsed.data.privacyLabel,
-      updatedAt: new Date(),
-    })
-    .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId)))
-    .returning();
-
-  if (before.linkedEntityType === 'grievance' && before.linkedEntityId) {
-    await auditCaseMutation({
-      event: CaseAuditEvent.DOCUMENT_LABEL_CHANGED,
-      userId,
-      organizationId,
-      caseId: before.linkedEntityId,
-      action: 'update',
-      previousState: { privacyLabel: before.privacyLabel },
-      newState: { privacyLabel: updated.privacyLabel },
-      details: {
-        documentId: updated.id,
-      },
-    });
-  }
+  // The label change and its audit record commit together.
+  const [updated] = await withRLSContext({ organizationId }, async (tx) => {
+    const rows = await tx
+      .update(documents)
+      .set({
+        privacyLabel: parsed.data.privacyLabel,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId)))
+      .returning();
+    if (rows[0]) {
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'document.label_change',
+        resourceType: 'documents',
+        resourceId: rows[0].id,
+        details: {
+          previousPrivacyLabel: before.privacyLabel,
+          privacyLabel: rows[0].privacyLabel,
+          ...(before.linkedEntityType && before.linkedEntityId
+            ? { linkedEntityType: before.linkedEntityType, linkedEntityId: before.linkedEntityId }
+            : {}),
+        },
+      });
+    }
+    return rows;
+  });
 
   return standardSuccessResponse(updated);
 });

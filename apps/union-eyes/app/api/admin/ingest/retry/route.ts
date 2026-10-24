@@ -15,7 +15,8 @@ import {
   ingestionBatches,
   ingestionRecords,
 } from '@/db/schema/ingestion-schema';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const retryBodySchema = z.object({
   batch_id: z.string().uuid(),
@@ -80,45 +81,23 @@ export const POST = withApi(
       };
     }
 
-    // Audit the retry attempt
-    await auditLog({
-      eventType: AuditEventType.DATA_BULK_UPDATE,
-      severity: AuditSeverity.MEDIUM,
-      userId: userId ?? undefined,
-      organizationId,
-      resource: 'ingestion_batch',
-      resourceId: body.batch_id,
-      action: 'retry',
-      details: {
-        recordCount: failedRecords.length,
-        recordIds: body.record_ids ?? 'all_failed',
-      },
-      outcome: 'success',
+    // Every reset and the audit record commit together: all failed records are re-queued or none are.
+    await withRLSContext({ organizationId }, async (tx) => {
+      await tx
+        .update(ingestionRecords)
+        .set({ status: 'pending', errorMessage: null, errorDetails: null, processedAt: null })
+        .where(inArray(ingestionRecords.id, failedRecords.map((record) => record.id)));
+      await persistAtomicAudit(tx, {
+        userId: userId ?? 'system:ingest-retry',
+        organizationId,
+        resourceType: 'ingestion_batch',
+        resourceId: body.batch_id,
+        action: 'ingest.retry',
+        details: { recordCount: failedRecords.length, recordIds: body.record_ids ?? 'all_failed' },
+      });
     });
-
-    // Mark records as pending for retry
-    let retrySucceeded = 0;
-    let retryFailed = 0;
-
-    for (const record of failedRecords) {
-      try {
-        // Reset to pending
-        await withSystemContext(async () =>
-          db
-            .update(ingestionRecords)
-            .set({
-              status: 'pending',
-              errorMessage: null,
-              errorDetails: null,
-              processedAt: null,
-            })
-            .where(eq(ingestionRecords.id, record.id)),
-        );
-        retrySucceeded++;
-      } catch {
-        retryFailed++;
-      }
-    }
+    const retrySucceeded = failedRecords.length;
+    const retryFailed = 0;
 
     return {
       retried: failedRecords.length,

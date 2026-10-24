@@ -31,7 +31,7 @@ const m = vi.hoisted(() => {
     normalizeDocumentTitle: vi.fn(),
     toGovernanceLabel: vi.fn(),
     resolveStoredBlob: vi.fn(),
-    auditCaseMutation: vi.fn(),
+    persistAtomicAudit: vi.fn(),
     withRLSContext: vi.fn(),
     queueSelect: (...results: unknown[][]) => state.selectQueue.push(...results),
     resetQueues: () => {
@@ -67,10 +67,7 @@ vi.mock('@/lib/services/document-governance-service', () => ({
 vi.mock('@/lib/services/document-blob-integrity-service', () => ({
   resolveStoredBlob: m.resolveStoredBlob,
 }));
-vi.mock('@/lib/audited-case-mutations', () => ({
-  auditCaseMutation: m.auditCaseMutation,
-  CaseAuditEvent: { CASE_ATTACHMENT_UPLOADED: 'CASE_ATTACHMENT_UPLOADED' },
-}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
 }));
@@ -98,7 +95,7 @@ describe('documents/repository route', () => {
       blobPath: 'org/documents/test.pdf',
       contentHash: 'sha256:test',
     });
-    m.auditCaseMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
 
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => {
       let insertCall = 0;
@@ -244,9 +241,10 @@ describe('documents/repository route', () => {
     expect(response.status).toBe(200);
     expect(payload.success).toBe(true);
     expect(payload.data).toMatchObject({ id: 'doc-1' });
-    expect(m.auditCaseMutation).toHaveBeenCalledWith(expect.objectContaining({
-      caseId: '00000000-0000-0000-0000-0000000000aa',
-      action: 'create',
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      action: 'document.upload',
+      resourceId: 'doc-1',
+      details: expect.objectContaining({ linkedEntityType: 'grievance', linkedEntityId: '00000000-0000-0000-0000-0000000000aa' }),
     }));
   });
 });

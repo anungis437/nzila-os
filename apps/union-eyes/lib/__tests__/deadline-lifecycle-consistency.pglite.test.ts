@@ -16,13 +16,22 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
 
-const ctx = vi.hoisted(() => ({ db: undefined as unknown }));
+const ctx = vi.hoisted(() => ({ db: undefined as unknown, audit: undefined as unknown as ReturnType<typeof vi.fn> }));
 
 vi.mock('@/db/db', () => ({
   get db() {
     return ctx.db;
   },
 }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  // A real transaction on the in-process database, so a thrown audit rolls the mutation back.
+  withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) =>
+    (ctx.db as { transaction: (f: (tx: unknown) => Promise<unknown>) => Promise<unknown> }).transaction(fn),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => {
+  ctx.audit = vi.fn(async () => undefined);
+  return { persistAtomicAudit: ctx.audit };
+});
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: vi.fn(async () => undefined),
   AuditSeverity: { MEDIUM: 'MEDIUM' },
@@ -37,7 +46,7 @@ vi.mock('@nzila/os-core/telemetry', () => ({
 
 import { grievanceDeadlines } from '@/db/schema';
 import { createDeadline, completeDeadline, requestDeadlineExtension, approveDeadlineExtension } from '@/lib/deadline-tracking-system';
-import { overrideDeadline, supersedeDeadline } from '@/lib/services/deadline-confirmation-service';
+import { confirmDeadline, overrideDeadline, supersedeDeadline } from '@/lib/services/deadline-confirmation-service';
 import { effectiveDueDateUpdate, isTerminalDeadlineStatus, TERMINAL_DEADLINE_STATUSES } from '@/lib/deadline-engine/deadline-semantics';
 
 const APP_ROOT = resolve(__dirname, '..', '..');
@@ -307,4 +316,35 @@ describe('deadline lifecycle: one effective due date and one status vocabulary',
       await db4.close();
     });
   });
+
+describe('deadline confirmation is organization-scoped and audited in its own transaction', () => {
+  const OTHER_ORG = '00000000-0000-0000-0000-0000000000cc';
+
+  it('another organization cannot confirm, override or supersede this deadline, and nothing is audited', async () => {
+    const { id, dueDate } = await create();
+    const before = await row(id);
+    expect(await overrideDeadline({ organizationId: OTHER_ORG, deadlineId: id, actorId: 'x', overrideDueDate: new Date(dueDate.getTime() + DAY), overrideReason: 'r' })).toBeNull();
+    expect(await supersedeDeadline({ organizationId: OTHER_ORG, deadlineId: id, actorId: 'x' })).toBeNull();
+    expect(await confirmDeadline({ organizationId: OTHER_ORG, deadlineId: id, actorId: 'x' })).toBeNull();
+    expect(await row(id)).toEqual(before);
+    expect((ctx.audit as ReturnType<typeof vi.fn>)).not.toHaveBeenCalled();
+  });
+
+  it('the owning organization is audited with the change, and a failed audit rolls the change back', async () => {
+    const { id, dueDate } = await create();
+    const audit = ctx.audit as ReturnType<typeof vi.fn>;
+    audit.mockClear();
+    const moved = new Date(dueDate.getTime() + 2 * DAY);
+    await overrideDeadline({ organizationId: ORG, deadlineId: id, actorId: 'u1', overrideDueDate: moved, overrideReason: 'agreed' });
+    expect(audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'deadline.overridden', organizationId: ORG, userId: 'u1', resourceId: id }));
+    expect((await row(id)).due_date?.getTime()).toBe(moved.getTime());
+
+    audit.mockRejectedValueOnce(new Error('audit write failed'));
+    await expect(overrideDeadline({ organizationId: ORG, deadlineId: id, actorId: 'u2', overrideDueDate: new Date(moved.getTime() + DAY), overrideReason: 'again' })).rejects.toThrow();
+    expect((await row(id)).due_date?.getTime()).toBe(moved.getTime());
+    audit.mockRejectedValueOnce(new Error('audit write failed'));
+    await expect(supersedeDeadline({ organizationId: ORG, deadlineId: id, actorId: 'u2' })).rejects.toThrow();
+    expect((await row(id)).superseded_at).toBeNull();
+  });
+});
 });
