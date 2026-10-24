@@ -25,23 +25,21 @@ logger = logging.getLogger(__name__)
 
 
 def _extract_org(payload: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
-    """Extract organization ID and role from OIDC JWT payload.
+    """Extract the *claimed* organization ID and role from an OIDC JWT payload.
 
-    Supports the following token formats:
-    - Entra External ID: ``org_id`` custom claim or ``tid`` (tenant ID) fallback
+    Only an explicit ``org_id`` claim is honoured. The identity-provider tenant
+    (``tid``) is deliberately NOT used as an organization: a provider tenant is
+    not a Union Eyes institution, and one person may belong to several locals,
+    councils or federations. Whatever this returns is a *claim* only — it grants
+    nothing until ``resolve_organization_context`` binds it to an active internal
+    membership.
 
     Returns:
         Tuple of (org_id, org_role), either or both may be None.
     """
-    # Entra tokens: org context may come from custom claims
     org_id = payload.get("org_id")
     if org_id:
         return org_id, payload.get("org_role")
-
-    # Entra fallback: use tenant ID as org context
-    tid = payload.get("tid")
-    if tid:
-        return tid, payload.get("org_role")
 
     return None, None
 
@@ -49,8 +47,16 @@ def _extract_org(payload: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]
 ORG_CACHE_TTL = 300  # 5 minutes
 
 
-def resolve_organization_context(org_id: Optional[str]):
-    """Resolve an external auth-provider org ID to the internal Organizations row.
+def resolve_organization_context(org_id: Optional[str], user_id: Optional[str] = None):
+    """Resolve a *claimed* provider org ID to an internal Organizations row and
+    verify the caller actually belongs to it.
+
+    A token's organization claim is not authority. The active organization is
+    accepted only if (1) it maps to a known Organizations row and (2) the
+    authenticated principal (``user_id`` = the token ``sub``) holds an ACTIVE,
+    non-deleted internal membership in that organization. The membership check
+    is never cached, so suspension and removal take effect on the next request.
+    Anything else fails closed.
 
     PR #752 round-32 correction: this logic used to live in
     auth_core.middleware.OrganizationIsolationMiddleware.process_request(),
@@ -78,31 +84,50 @@ def resolve_organization_context(org_id: Optional[str]):
     if not org_id:
         return None, None
 
-    cache_key = f"org:ctx:{org_id}"
-    organization = cache.get(cache_key)
-    if organization is not None:
-        return organization, str(organization.id)
-
-    try:
-        from auth_core.models import Organizations  # noqa: PLC0415
-    except ImportError as exc:
-        # Union Eyes is a mandatory multi-tenant app — the Organizations model
-        # must always be importable. Missing it is a deployment/config defect,
-        # not a "single-org app" case, so fail closed instead of promoting the
-        # unverified external org id into the canonical internal organization_id.
-        logger.exception("Organizations model unavailable during tenant resolution")
+    if not user_id:
         raise exceptions.AuthenticationFailed(
-            "Organization context unavailable."
-        ) from exc
-
-    organization = Organizations.objects.filter(auth_provider_org_id=org_id).first()
-    if not organization:
-        logger.warning("Unknown organization %s — no local record yet.", org_id)
-        raise exceptions.AuthenticationFailed(
-            "Organization not found. Contact support."
+            "Authenticated principal required to establish organization context."
         )
 
-    cache.set(cache_key, organization, ORG_CACHE_TTL)
+    cache_key = f"org:ctx:{org_id}"
+    organization = cache.get(cache_key)
+    if organization is None:
+        try:
+            from auth_core.models import Organizations  # noqa: PLC0415
+        except ImportError as exc:
+            # Union Eyes is a mandatory multi-tenant app — the Organizations model
+            # must always be importable. Missing it is a deployment/config defect,
+            # not a "single-org app" case, so fail closed instead of promoting the
+            # unverified external org id into the canonical internal organization_id.
+            logger.exception("Organizations model unavailable during tenant resolution")
+            raise exceptions.AuthenticationFailed(
+                "Organization context unavailable."
+            ) from exc
+
+        organization = Organizations.objects.filter(auth_provider_org_id=org_id).first()
+        if not organization:
+            logger.warning("Unknown organization %s — no local record yet.", org_id)
+            raise exceptions.AuthenticationFailed(
+                "Organization not found. Contact support."
+            )
+        cache.set(cache_key, organization, ORG_CACHE_TTL)
+
+    from auth_core.models import OrganizationMembers  # noqa: PLC0415
+
+    is_member = OrganizationMembers.objects.filter(
+        organization_id=organization.id,
+        user_id=user_id,
+        status="active",
+        deleted_at__isnull=True,
+    ).exists()
+    if not is_member:
+        logger.warning(
+            "Principal has no active membership in claimed organization %s.", org_id
+        )
+        raise exceptions.AuthenticationFailed(
+            "Active organization membership required."
+        )
+
     return organization, str(organization.id)
 
 
@@ -154,7 +179,7 @@ class OIDCAuthentication(authentication.BaseAuthentication):
             # AuthenticationFailed (fail closed) if org_id is present but
             # unresolvable.
             request.organization, request.organization_id = (
-                resolve_organization_context(org_id)
+                resolve_organization_context(org_id, payload.get("sub"))
             )
 
             return (user, payload)
@@ -333,6 +358,13 @@ class APIKeyAuthentication(authentication.BaseAuthentication):
             Tuple[None, dict]: (None, {"is_service_account": True}) or None
         """
         secret_key_header = request.META.get("HTTP_X_AUTH_SECRET", "")
+        if not secret_key_header and request.META.get("HTTP_X_CLERK_SECRET_KEY"):
+            # Detection only: the legacy header is NOT honoured. This identifies a
+            # caller that still needs migrating to X-Auth-Secret.
+            logger.warning(
+                "Legacy 'X-Clerk-Secret-Key' header presented and ignored; "
+                "send 'X-Auth-Secret' instead."
+            )
         expected_key = getattr(settings, "AUTH_SECRET", "")
 
         if not secret_key_header or not expected_key:

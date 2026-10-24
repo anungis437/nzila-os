@@ -199,7 +199,7 @@ Write-Host "[5/5] Validating..." -ForegroundColor Yellow
 $validationQuery = @"
 SELECT '--- CORE ORGANIZATIONS ---' AS section;
 SELECT slug, display_name, organization_type, hierarchy_level,
-       CASE WHEN auth_provider_org_id IS NOT NULL THEN 'YES' ELSE 'no' END AS has_auth_provider_org_id,
+       CASE WHEN clerk_organization_id IS NOT NULL THEN 'YES' ELSE 'no' END AS has_clerk_id,
        status
 FROM organizations
 WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe', 'cupe-local-123')

@@ -7767,7 +7767,7 @@
         "encryptionTitle": "Encryption",
         "encryptionDesc": "All data is encrypted in transit using TLS 1.2+ and at rest using AES-256. Database connections are encrypted end-to-end. Secrets and API keys are stored in Azure Key Vault — never in source code or environment files.",
         "accessControlTitle": "Access Control",
-        "accessControlDesc": "UnionEyes uses role-based access control (RBAC) to ensure members only see what they're authorized to see. Authentication is handled by Microsoft Entra ID with multi-factor authentication support. Database queries are scoped by organization to enforce strict data isolation between unions.",
+        "accessControlDesc": "UnionEyes uses role-based access control (RBAC) to ensure members only see what they're authorized to see. Authentication is handled by the configured identity provider, with multi-factor authentication where enabled. Database queries are scoped by organization to enforce strict data isolation between unions.",
         "infrastructureTitle": "Infrastructure",
         "infrastructureDesc": "UnionEyes is hosted on Microsoft Azure in Canadian data centres, ensuring your data stays within Canadian jurisdiction. We use container isolation, automated security scanning of dependencies and Docker images, and enforce strict Content Security Policy headers across all applications.",
         "monitoringTitle": "Monitoring & Auditing",

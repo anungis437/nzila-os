@@ -106,7 +106,12 @@ export async function POST(req: Request) {
         plan_id: planId,
         redirect_url: validRedirectUrl,
         metadata: {
+          // Informational only. Checkout metadata must never establish membership or
+          // authority; any downstream consumer has to map it to an authenticated principal.
+          // `clerkUserId` is the pre-rename key, emitted unchanged until the (out-of-repo)
+          // fulfilment consumer is confirmed to read `userId`.
           userId,
+          clerkUserId: userId,
           planDuration: planDuration
         },
         d2c: true // Direct to checkout

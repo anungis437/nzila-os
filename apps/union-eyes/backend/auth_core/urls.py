@@ -45,6 +45,12 @@ urlpatterns = [
     path("me/", views.me, name="me"),
     path("profile/", views.member_profile, name="member_profile"),
     path("webhooks/auth/", views.auth_webhook, name="auth_webhook"),
+    # Deprecated alias; logs every call so a live sender can be identified.
+    path(
+        "webhooks/clerk/",
+        views.deprecated_clerk_webhook,
+        name="deprecated_clerk_webhook",
+    ),
     path("live/", views.liveness_check, name="liveness_check"),
     path("ready/", views.readiness_check, name="readiness_check"),
     path("health/", views.health_check, name="health_check"),

@@ -681,6 +681,24 @@ def auth_webhook(request):
         return JsonResponse({"error": "Internal server error"}, status=500)
 
 
+@csrf_exempt
+@require_POST
+def deprecated_clerk_webhook(request):
+    """Transitional alias for the pre-rename webhook URL (``webhooks/clerk/``).
+
+    A deployed provider may still be registered against the old URL, and that
+    consumer cannot be verified from this repository. The alias is kept so it is
+    not silently broken, and every hit is logged as a deprecation signal so the
+    consumer can be identified and migrated. It applies exactly the same
+    signature verification as ``auth_webhook`` — it adds no new trust.
+    """
+    logger.warning(
+        "Deprecated webhook URL 'webhooks/clerk/' was called; "
+        "migrate the sender to 'webhooks/auth/'."
+    )
+    return auth_webhook(request)
+
+
 def _verify_auth_webhook(request) -> bool:
     """Verify auth webhook signature using webhook secret.
 

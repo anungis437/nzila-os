@@ -179,6 +179,24 @@ AUTH_PROVIDER_NAMESPACE = os.environ.get("AUTH_PROVIDER_NAMESPACE", "entra")
 AUTH_SECRET = os.environ.get("AUTH_SECRET")
 AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET")
 
+# Detection only — legacy CLERK_* names are NOT read. If one is still present
+# without its AUTH_* replacement, say so loudly at startup rather than silently
+# running with authentication unconfigured.
+for _legacy, _current in (
+    ("CLERK_JWKS_URL", "AUTH_JWKS_URL"),
+    ("CLERK_SECRET_KEY", "AUTH_SECRET"),
+    ("CLERK_WEBHOOK_SECRET", "AUTH_WEBHOOK_SECRET"),
+):
+    if os.environ.get(_legacy) and not os.environ.get(_current):
+        import logging as _logging
+
+        _logging.getLogger(__name__).warning(
+            "Legacy environment variable %s is set but %s is not; the legacy "
+            "name is ignored. Set %s.",
+            _legacy,
+            _current,
+            _current,
+        )
 REDIS_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")
 
 # Upstash REST credentials (optional, parallel path to native RESP). When
