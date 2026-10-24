@@ -47,7 +47,7 @@ Each merge kept the relationship-scoped authority rule where a persona branch re
 | `pnpm governance:audit` | exit 0 |
 | `node tooling/scripts/check-ue-convergence.mjs` | passed (register valid, ratchets matched, migration lineage verified) |
 | Real PostgreSQL 15/16 suites | Run against the counsel-store change (combined 10/10, storage and Django audit 15/15 each). **Not re-run after the persona merges**; none of them touch the kernel migrations |
-| `pnpm test:fast` | **Not run in this tranche** (pre-commit hooks ran gitleaks, brand leakage, link check, inventory sync, lint-staged and a typecheck on each commit) |
+| `pnpm test:fast` | Two runs, 31,860–31,882 tests passed. Failures differed between runs and were all hook or child-process timeouts under load (docker PostgreSQL startup, runtime schema oracle build, vault child process, reachability audit). Every failed file passed when re-run alone (vault 3/3; docker, oracle and reachability suites 45/45). Not a clean single-run pass |
 
 ## Known authority gaps carried forward
 
@@ -65,7 +65,7 @@ Webhook sender discovery, the Whop consumer of the legacy metadata key, test-cre
 
 ## Resume point
 
-1. Run `pnpm test:fast`.
+1. Stabilize the load-sensitive suites (docker, oracle, vault) so `test:fast` passes in a single run.
 2. Add a staff-thread assignment mechanism on kernel assignments (`I-001`).
 3. `UE-CONV-E-001` / `B-001`: migrate the claims module and the `union_rep_id` readers onto kernel assignments once kernel storage is qualified.
 4. `UE-CONV-A-004`: bearer fix together with its consumers.
