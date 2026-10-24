@@ -580,6 +580,40 @@
       "retirement": { "disposition": "NONE" }
     },
     {
+      "id": "UE-CONV-I-002",
+      "domain": "messaging",
+      "capability": "Staff assignment of member conversations",
+      "workstream": "I",
+      "canonicalOwner": "apps/union-eyes/lib/messaging/thread-assignment.ts",
+      "sources": [{ "kind": "file", "ref": "apps/union-eyes/lib/messaging/thread-assignment.ts", "classification": "CANONICAL" }],
+      "defect": "Member 2.1 removed tenant-wide thread reads but built nothing to put a new conversation in front of staff, so a member thread was unreachable by staff, and the engine had never run on the canonical schema: on the Django-created tables messages and in_app_notifications are bare stubs (no sender, content or notification columns) and message_threads has no column defaults. IMPLEMENTED: platform 0014 (designations, append-only assignment history, guard triggers that make tenant, owner and subject immutable and require a history record for any assignment change, plus additive evolution of the stubs) and RLS 0021; an explicit, expiring (90 days maximum), revocable, administrator-granted triage designation; a metadata-only queue; assign, reassign and release by the current assignee or a designation holder with a self-service exclusion, eligibility and same-tenant checks, a conditional update so exactly one of two concurrent assignments wins, an in-transaction notice and an atomic audit; notification of live triagers on a new conversation. Proven on in-process PostgreSQL (17 tests, including audit-failure rollback and concurrency) and on real PostgreSQL 15 and 16 as the runtime role with manifest grants and RLS (3 tests, in both audit modes). NOT DONE: the staff conversation surface (queue, assignment and reply screens) does not exist, so staff notices carry no link; unread state needs a governed privilege change for read receipts; escalation is modelled as reassignment, with no escalation target or timer; retention and privacy controls for threads are not implemented; the 0014 and 0021 hashes are UNQUALIFIED and applied only on disposable databases.",
+      "consumers": [],
+      "securityImplications": "Without assignment, member conversations are unreachable or, if rank is allowed to read them, exposed tenant-wide.",
+      "requiredImplementation": "Build the staff conversation surface, unread state, escalation and retention on the same contract; qualify 0014 and 0021 in the staging clone.",
+      "evidence": [
+        { "type": "path", "ref": "apps/union-eyes/db/migrations-platform/0014_message_thread_triage.sql" },
+        { "type": "test", "ref": "apps/union-eyes/lib/messaging/thread-assignment.pglite.test.ts" },
+        { "type": "test", "ref": "apps/union-eyes/lib/messaging/thread-assignment.postgres.test.ts" }
+      ],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
+      "id": "UE-CONV-H-007",
+      "domain": "schema",
+      "capability": "Django-created relations are stubs without defaults",
+      "workstream": "H",
+      "canonicalOwner": "apps/union-eyes/db/migrations-platform",
+      "sources": [{ "kind": "file", "ref": "apps/union-eyes/backend/notifications/models.py", "classification": "RETIRE_PENDING" }],
+      "defect": "Found on real PostgreSQL: relations created by the Django lineage have no column defaults (id, created_at, updated_at, status) and several are bare stubs (messages, in_app_notifications, and the 4-column payments already recorded). Drizzle inserts that rely on database defaults, and code written against the Drizzle shape, fail on the canonical schema while passing on mirrored in-process tables. Fixed for message_threads, messages and in_app_notifications in platform 0014. NOT audited: every other Django-created relation the application writes to. Each is a latent runtime failure that only a real-schema test exposes.",
+      "consumers": [],
+      "securityImplications": "Features reported as working may be unrunnable on the deployed schema; they fail closed rather than open.",
+      "requiredImplementation": "Census the canonical schema against the Drizzle projections for every relation the runtime writes, evolve them through platform migrations, and add a real-schema test per write path.",
+      "evidence": [{ "type": "path", "ref": "apps/union-eyes/db/migrations-platform/0014_message_thread_triage.sql" }],
+      "status": "OPEN",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
       "id": "UE-CONV-K-005",
       "domain": "audit",
       "capability": "Atomic audit for governed mutations",

@@ -23,6 +23,32 @@ export const messageThreads = pgTable('message_threads', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Explicit, expiring, revocable authority to triage the unassigned queue (platform 0014, RLS 0021).
+export const messageTriageDesignations = pgTable('message_triage_designations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  userId: text('user_id').notNull(),
+  grantedBy: text('granted_by').notNull(),
+  grantedAt: timestamp('granted_at', { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  revokedBy: text('revoked_by'),
+});
+
+// Append-only history of every assignment decision on a conversation (platform 0014, RLS 0021).
+export const messageThreadAssignments = pgTable('message_thread_assignments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  threadId: uuid('thread_id').notNull().references(() => messageThreads.id, { onDelete: 'restrict' }),
+  action: text('action').notNull(), // assign, reassign, release
+  fromStaffId: text('from_staff_id'),
+  toStaffId: text('to_staff_id'),
+  actedBy: text('acted_by').notNull(),
+  actedVia: text('acted_via').notNull(), // triage_designation, current_assignee
+  reason: text('reason'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 // Individual messages table
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().defaultRandom(),

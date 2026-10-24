@@ -1,6 +1,8 @@
 import { and, asc, desc, eq, or, sql, type SQL } from 'drizzle-orm'
 import { messages, messageThreads } from '@/db/schema/messages-schema'
 import { inAppNotifications } from '@/db/schema'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { notifyTriagers } from '@/lib/messaging/thread-assignment'
 import type { CaseActor } from '@/lib/cases/case-authorization'
 import { caseActionAllowed } from '@/lib/cases/case-permissions'
 import type { RLSTx } from '@/lib/db/with-rls-context'
@@ -111,6 +113,17 @@ export async function createMemberThread(tx: RLSTx, actor: CaseActor, input: { s
     content: input.body,
     metadata: input.clientRequestId ? JSON.stringify({ clientRequestId: input.clientRequestId }) : null,
   })
+  // The new conversation reaches the authorized queue: every live triager is told, without content.
+  await notifyTriagers(tx, actor.organizationId, thread.id, actor.userId)
+  // The thread, its first message and the audit commit together.
+  await persistAtomicAudit(tx, {
+    organizationId: actor.organizationId,
+    userId: actor.userId,
+    action: 'messages.thread.create',
+    resourceType: 'message_threads',
+    resourceId: thread.id,
+    details: {},
+  })
   return thread
 }
 
@@ -144,9 +157,18 @@ export async function postThreadMessage(
     .insert(messages)
     .values({ threadId: thread.id, senderId: actor.userId, senderRole: isMemberOf(actor, thread) ? 'member' : 'staff', content: input.body, metadata })
     .returning()
+  await persistAtomicAudit(tx, {
+    organizationId: actor.organizationId,
+    userId: actor.userId,
+    action: 'messages.message.create',
+    resourceType: 'messages',
+    resourceId: row.id,
+    details: { threadId: thread.id },
+  })
 
-  // The counterpart is told that a message exists, never what it says.
+  // The counterpart is told that a message exists, never what it says. Only a member has a conversation page to open.
   const recipient = isMemberOf(actor, thread) ? thread.staffId : thread.memberId
+  const recipientIsMember = recipient !== null && recipient === thread.memberId
   if (recipient && recipient !== actor.userId && (await notifyAllowed(recipient))) {
     await tx.insert(inAppNotifications).values({
       userId: recipient,
@@ -154,8 +176,7 @@ export async function postThreadMessage(
       title: 'New secure message',
       message: 'You have a new message in a secure conversation.',
       type: 'info',
-      actionLabel: 'Open conversation',
-      actionUrl: `/dashboard/messages?thread=${thread.id}`,
+      ...(recipientIsMember ? { actionLabel: 'Open conversation', actionUrl: `/dashboard/messages?thread=${thread.id}` } : {}),
       data: { event: 'thread_message', threadId: thread.id },
     })
   }

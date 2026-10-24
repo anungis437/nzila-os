@@ -225,9 +225,9 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
   {
     table: "message_threads",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "0108-baseline table (direct org policy — the parent for the message_* family below). Reachable via crudRoutes({ readRole: 'member', writeRole: 'steward' }) at app/api/messages/threads/route.ts (GET+POST) and its [threadId] item route (GET+POST), plus a read-only SELECT in lib/gdpr/consent-manager.ts (member's own GDPR data export, reached via app/api/gdpr/data-export/route.ts, withApiAuth). No UPDATE/DELETE call site found; not defaulted to FULL_DML.",
-    supportingCapability: ["app/api/messages/threads/route.ts","app/api/messages/threads/[threadId]/route.ts","lib/gdpr/consent-manager.ts"],
-    requiredRuntimePrivileges: ["SELECT","INSERT"],
+    reason: "0108-baseline table (direct org policy — the parent for the message_* family below). Reachable via crudRoutes({ readRole: 'member', writeRole: 'steward' }) at app/api/messages/threads/route.ts (GET+POST) and its [threadId] item route (GET+POST), plus a read-only SELECT in lib/gdpr/consent-manager.ts (member's own GDPR data export, reached via app/api/gdpr/data-export/route.ts, withApiAuth). UPDATE is granted only for staff assignment (lib/messaging/thread-assignment.ts); platform 0014 installs a trigger that makes tenant, owner, subject and creation immutable and requires an assignment-history record for any staff_id change. No DELETE call site.",
+    supportingCapability: ["app/api/messages/threads/route.ts","app/api/messages/threads/[threadId]/route.ts","app/api/messages/threads/[threadId]/assignment/route.ts","lib/messaging/thread-assignment.ts","lib/gdpr/consent-manager.ts"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",

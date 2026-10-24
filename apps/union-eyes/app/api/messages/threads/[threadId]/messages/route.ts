@@ -8,7 +8,6 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getCaseActor } from '@/lib/cases/case-authorization';
-import { auditDataMutation } from '@/lib/audit-logger';
 import { inAppNoticeAllowed } from '@/lib/notifications/in-app-preferences';
 import { listThreadMessages, MAX_BODY, postThreadMessage } from '@/lib/messaging/thread-access';
 
@@ -37,16 +36,6 @@ export const POST = withApi(
     if (result.kind === 'not_found') throw ApiError.notFound('Conversation');
     if (result.kind === 'closed') {
       return NextResponse.json({ error: { code: 'THREAD_CLOSED', message: 'This conversation is closed.' } }, { status: 409 });
-    }
-    if (!result.duplicate) {
-      await auditDataMutation({
-        userId: actor.userId,
-        organizationId: actor.organizationId,
-        resource: 'messages',
-        resourceId: result.message.id,
-        action: 'create',
-        details: { threadId: result.thread.id },
-      });
     }
     return NextResponse.json({ data: { message: result.message, duplicate: result.duplicate } }, { status: result.duplicate ? 200 : 201 });
   },

@@ -158,6 +158,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-authority-kernel",
         "note": "FORCE RLS for the 16 ue_authority_* relations created by platform 0013 (adds ue_authority_counsel_engagements and ue_authority_counsel_nonces; previously 14, hash 45873e542964). Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0021_message_thread_triage_rls_closure",
+        "sha256": "e6e45adeadb963099c997d2e2bafbb5ff3f0c96f034a6c150aae843c11ca0faf",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "FORCE RLS for message_triage_designations and message_thread_assignments created by platform 0014. Not yet applied to any clone or live database."
       }
     ],
     "platform": [
@@ -167,6 +174,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-authority-kernel",
         "note": "Authority kernel storage. Revised in place before any deployment: the first local draft (3a999601b) hashed to cf53ce455254a0fc913d7e255ae2f21836564025ffb8e48f91d1c5986ac0215a; the Phase 1 completion revision (dba0d5527) hashed to 6cb84c1640fda60c3ee0a79ad235ab2c7048481652c93c36b3a027e9facb0fa8; the actor-binding revision (f853a13f1bd9e5e7ed6c3b7312b7ba221b92f13bee91c5a24016d45904e26e50) adds ue_authority_guard_actor, counsel_accepted_by, rule-adoption approval binding and a one-live-adoption index; the final-convergence revision adds the counsel engagement register and the durable counsel nonce register. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0014_message_thread_triage",
+        "sha256": "a2ab36b84d78cbd689aa5f94c634d0d3ab5730e542d1baf535db33dfc48441f2",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Staff assignment of member conversations (message_triage_designations, message_thread_assignments, guard triggers on message_threads) and evolution of the canonical Django stubs messages and in_app_notifications plus column defaults on message_threads. RLS is scoped 0021. Not yet applied to any clone or live database."
       }
     ]
   }

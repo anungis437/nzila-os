@@ -8,7 +8,6 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getCaseActor } from '@/lib/cases/case-authorization';
-import { auditDataMutation } from '@/lib/audit-logger';
 import { createMemberThread, listThreads, MAX_BODY, MAX_SUBJECT } from '@/lib/messaging/thread-access';
 
 export const dynamic = 'force-dynamic';
@@ -35,13 +34,6 @@ export const POST = withApi(
     // Members start conversations about themselves; staff-initiated threads are not part of this contract.
     if (actor.role !== 'member') throw ApiError.forbidden('Only members can start a conversation here.');
     const thread = await withRLSContext(async (tx) => createMemberThread(tx, actor, body));
-    await auditDataMutation({
-      userId: actor.userId,
-      organizationId: actor.organizationId,
-      resource: 'message_threads',
-      resourceId: thread.id,
-      action: 'create',
-    });
     return NextResponse.json({ data: { id: thread.id } }, { status: 201 });
   },
 );

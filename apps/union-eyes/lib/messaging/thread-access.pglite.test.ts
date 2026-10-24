@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
 import type { CaseActor } from '@/lib/cases/case-authorization'
@@ -28,6 +30,7 @@ const actor = (userId: string, role: CaseActor['role'], organizationId = org): C
 const member1 = actor('member-1', 'member')
 
 beforeAll(async () => {
+  vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
   pg = new PGlite()
   await pg.exec(`
     CREATE TYPE message_status AS ENUM ('sent','delivered','read');
@@ -48,7 +51,23 @@ beforeAll(async () => {
       user_id text NOT NULL, organization_id uuid, title text, message text, type text NOT NULL DEFAULT 'info',
       action_label text, action_url text, data jsonb, read boolean NOT NULL DEFAULT false, read_at timestamp, expires_at timestamp);
   `)
-  await pg.exec('CREATE ROLE rt NOLOGIN; GRANT SELECT, INSERT ON message_threads, messages, in_app_notifications TO rt;')
+  // Platform 0014 adds the assignment tables; they are installed from the real migration file.
+  await pg.exec(`
+    CREATE SCHEMA audit_security;
+    CREATE TABLE audit_security.audit_logs(
+      audit_id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid, user_id varchar(255),
+      action varchar(100) NOT NULL, resource_type varchar(50) NOT NULL, resource_id uuid, old_values jsonb, new_values jsonb,
+      ip_address varchar(45), user_agent text, session_id uuid, correlation_id uuid, severity varchar(20) DEFAULT 'info',
+      outcome varchar(20) DEFAULT 'success', error_message text, metadata jsonb DEFAULT '{}'::jsonb,
+      archived boolean NOT NULL DEFAULT false, archived_at timestamptz, archived_path text, created_at timestamptz DEFAULT now());
+  `)
+  for (const statement of readFileSync(join(__dirname, '..', '..', 'db', 'migrations-platform', '0014_message_thread_triage.sql'), 'utf8').split('--> statement-breakpoint')) {
+    if (statement.replace(/--.*$/gm, '').trim()) await pg.exec(statement)
+  }
+  // These functions never update or lock a thread, so the role keeps SELECT and INSERT only on it.
+  await pg.exec(`CREATE ROLE rt NOLOGIN;
+    GRANT SELECT, INSERT ON message_threads, messages, in_app_notifications, message_triage_designations TO rt;
+    GRANT USAGE ON SCHEMA audit_security TO rt; GRANT SELECT, INSERT ON audit_security.audit_logs TO rt;`)
   tx = drizzle(pg) as unknown as RLSTx
   const rows: Array<[keyof typeof ids, string, string, string | null, string]> = [
     ['own', org, 'member-1', null, 'open'],
