@@ -102,11 +102,11 @@ describe('profiles-queries', () => {
     await expect(q.deleteProfile('u1')).rejects.toThrow('Failed to delete profile');
   });
 
-  it('updateProfileByWhopUserId updates via found Clerk id', async () => {
-    push([{ userId: 'clerk1', whopUserId: 'whop1' }]); // getProfileByWhopUserId lookup
-    push([{ userId: 'clerk1', updated: true }]); // update returning
+  it('updateProfileByWhopUserId updates via found auth user id', async () => {
+    push([{ userId: 'user1', whopUserId: 'whop1' }]); // getProfileByWhopUserId lookup
+    push([{ userId: 'user1', updated: true }]); // update returning
     const r = await q.updateProfileByWhopUserId('whop1', { membership: 'pro' } as never);
-    expect(r).toEqual({ userId: 'clerk1', updated: true });
+    expect(r).toEqual({ userId: 'user1', updated: true });
   });
 
   it('updateProfileByWhopUserId throws when whopUserId missing', async () => {

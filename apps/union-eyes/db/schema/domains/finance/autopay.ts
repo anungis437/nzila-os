@@ -15,7 +15,7 @@ export const autoPaySettings = pgTable('autopay_settings', {
   id: uuid('id').defaultRandom().primaryKey(),
   
   // Member identification
-  userId: varchar('user_id', { length: 255 }).notNull(), // Clerk user ID
+  userId: varchar('user_id', { length: 255 }).notNull(), // Auth user ID
   
   // Payment configuration
   enabled: boolean('enabled').notNull().default(false),

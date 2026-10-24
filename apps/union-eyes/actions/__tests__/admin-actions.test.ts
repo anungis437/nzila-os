@@ -106,7 +106,7 @@ describe('admin-actions', () => {
     it('returns mapped users applying all filters', async () => {
       setResults([
         {
-          userId: 'clerk_abc',
+          userId: 'user_abc',
           role: 'admin',
           organizationId: 'o1',
           orgName: 'Org One',
@@ -117,7 +117,7 @@ describe('admin-actions', () => {
       ]);
       const users = await getAdminUsers(tx, 'search', 'o1', 'admin');
       expect(users).toHaveLength(1);
-      expect(users[0]).toMatchObject({ id: 'clerk_abc', status: 'active', orgName: 'Org One' });
+      expect(users[0]).toMatchObject({ id: 'user_abc', status: 'active', orgName: 'Org One' });
     });
 
     it('handles inactive users with null timestamps', async () => {
