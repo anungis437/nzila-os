@@ -441,12 +441,12 @@
         { "kind": "file", "ref": "apps/union-eyes/db/seeds/seed-master.sql", "classification": "RETIRE_PENDING" },
         { "kind": "file", "ref": "apps/union-eyes/backend/auth_core/migrations/0003_rename_clerk_organization_id.py", "classification": "HISTORICAL_EVIDENCE" }
       ],
-      "defect": "seed-master.sql writes organizations.clerk_organization_id and keys its four core tenants by Clerk-format ids, while auth_core 0003 renames that column to auth_provider_org_id in the Django lineage and the Clerk provider is retired.",
-      "consumers": [],
-      "securityImplications": "A seed that runs only on the legacy baseline hides drift between lineages; Clerk-format ids imply a provider that no longer exists.",
-      "requiredImplementation": "Re-author the seed against the canonical organizations contract and run it through the supported replay on PostgreSQL 15 and 16.",
-      "evidence": [],
-      "status": "OPEN",
+      "defect": "Partly fixed: seed-master.sql no longer writes organizations.clerk_organization_id or any Clerk-format provider org id (that column was renamed to auth_provider_org_id in the Django lineage, and the provider is retired). NOT fixed: the seed targets the Drizzle replay schema and does not run on the canonical Django-plus-bootstrap schema. Verified on PostgreSQL 16: the Django-created organizations table has no column defaults, so the first insert fails on a null created_at after the clc_affiliated gap (fixed) was passed. Making it run needs every organizations insert (including the hierarchy loops) and the downstream member, grievance and CBA inserts re-authored against the canonical contract.",
+      "consumers": ["apps/union-eyes/db/replay.ps1"],
+      "securityImplications": "A seed that runs only on the legacy baseline hides drift between lineages.",
+      "requiredImplementation": "Re-author the seed against the canonical organizations contract and prove it on PostgreSQL 15 and 16 after Django migrate and the approved bootstrap.",
+      "evidence": [{ "type": "path", "ref": "apps/union-eyes/db/seeds/seed-master.sql" }],
+      "status": "IN_PROGRESS",
       "retirement": { "disposition": "RETIRE_PENDING", "replacement": "seed authored against the canonical organizations contract" }
     },
     {

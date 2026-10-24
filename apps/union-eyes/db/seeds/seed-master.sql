@@ -2,13 +2,18 @@
 -- MASTER SEED — UnionEyes (Nzila OS)
 -- =============================================================================
 -- THE definitive, idempotent seed for all 4 core tenants:
---   1. NZILA Ventures  (platform)  → org_3A1qYmVHWmeSbbZhlPMwVIrGHFQ
---   2. CLC             (congress)  → org_3B3NjHnvzeSJBZQE8PGQf0nmgts
---   3. CAPE-ACEP       (union)     → org_3B3Nj6NGSY6rT9ibI8bgFhZdMRN
---   4. CUPE Local 123  (local)     → org_3BP6K4uezEa2CLEvUNDwhnJGNFg
+--   1. NZILA Ventures  (platform)  slug default
+--   2. CLC             (congress)  slug clc
+--   3. CAPE-ACEP       (union)     slug cape-acep
+--   4. CUPE Local 123  (local)     slug cupe-local-123
 --
 -- Also seeds the full CLC hierarchy (federations, national unions, locals)
 -- including CUPE National as the parent of CUPE Local 123.
+--
+-- No identity-provider organization id is written. The provider-org column is
+-- named differently in the replay schema and in the supported Django lineage
+-- (auth_provider_org_id), so this seed leaves it unset on both; a tenant is
+-- bound to a provider organization through the platform identity bindings.
 --
 -- All member user_ids are the auth-provider user IDs captured from the staging
 -- environment. Test-account passwords are held in the team secret store and are
@@ -51,18 +56,17 @@ BEGIN;
 INSERT INTO organizations (
   id, name, slug, display_name, short_name, organization_type,
   hierarchy_path, hierarchy_level, sectors, member_count, active_member_count,
-  settings, features_enabled, clerk_organization_id, status
+  settings, features_enabled, status, clc_affiliated
 ) VALUES (
   '458a56cb-251a-4c91-a0b5-81bb8ac39087',
   'NZILA Ventures', 'default', 'NZILA Ventures', 'NZILA', 'platform',
   '{}', 0, '{technology,financial_services}', 12, 12,
   '{"currency":"CAD","dateFormat":"YYYY-MM-DD","defaultLanguage":"en","mfaEnforcement":"admins_only","sessionTimeout":30}'::jsonb,
   '{dashboard,members,claims,grievances,communications}',
-  'org_3A1qYmVHWmeSbbZhlPMwVIrGHFQ', 'active'
+  'active', false
 ) ON CONFLICT (slug) DO UPDATE SET
   display_name = EXCLUDED.display_name,
-  organization_type = EXCLUDED.organization_type,
-  clerk_organization_id = EXCLUDED.clerk_organization_id;
+  organization_type = EXCLUDED.organization_type;
 
 -- 1b. CLC (Congress — root of hierarchy)
 INSERT INTO organizations (
@@ -71,7 +75,7 @@ INSERT INTO organizations (
   email, phone, website, address,
   clc_affiliated, member_count, active_member_count, status,
   clc_affiliate_code, per_capita_rate, remittance_day, fiscal_year_end,
-  settings, features_enabled, clerk_organization_id
+  settings, features_enabled
 ) VALUES (
   '9588c826-a543-4d43-9c22-2e477e532649',
   'Canadian Labour Congress', 'clc', 'CLC', 'CLC',
@@ -82,10 +86,8 @@ INSERT INTO organizations (
   false, 3000000, 3000000, 'active',
   'CLC', 0.54, 15, '2024-12-31',
   '{"language":"bilingual","fiscalYearEnd":"December 31","perCapitaRate":0.54,"remittanceDay":15,"affiliateCount":56,"governanceModel":"triennial_convention","executiveCouncil":true}'::jsonb,
-  '{dues-management,member-directory,financial-reporting,per-capita-remittances,clc-integration,affiliate-management,convention-governance}',
-  'org_3B3NjHnvzeSJBZQE8PGQf0nmgts'
+  '{dues-management,member-directory,financial-reporting,per-capita-remittances,clc-integration,affiliate-management,convention-governance}'
 ) ON CONFLICT (slug) DO UPDATE SET
-  clerk_organization_id = EXCLUDED.clerk_organization_id,
   settings = EXCLUDED.settings,
   features_enabled = EXCLUDED.features_enabled;
 
@@ -101,7 +103,7 @@ BEGIN
     email, phone, website, address,
     clc_affiliated, affiliation_date, member_count, active_member_count, status,
     clc_affiliate_code, per_capita_rate, remittance_day, fiscal_year_end,
-    settings, features_enabled, clerk_organization_id
+    settings, features_enabled
   ) VALUES (
     '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6',
     'Canadian Association of Professional Employees', 'cape-acep', 'CAPE-ACEP', 'CAPE',
@@ -112,22 +114,17 @@ BEGIN
     true, '1967-01-01', 23000, 23000, 'active',
     'CAPE', 0.54, 15, '2024-12-31',
     '{"employer":"Treasury Board of Canada Secretariat","language":"bilingual","fiscalYearEnd":"December 31","perCapitaRate":0.54,"remittanceDay":15,"bargainingAgent":"CAPE-ACEP","bargainingGroups":["EC","TR","SI"]}'::jsonb,
-    '{dues-management,member-directory,grievance-tracking,collective-bargaining,financial-reporting,tax-slips,clc-integration,strike-fund}',
-    'org_3B3Nj6NGSY6rT9ibI8bgFhZdMRN'
+    '{dues-management,member-directory,grievance-tracking,collective-bargaining,financial-reporting,tax-slips,clc-integration,strike-fund}'
   ) ON CONFLICT (slug) DO UPDATE SET
     parent_id = v_clc_id,
     hierarchy_path = ARRAY[v_clc_id::text],
     hierarchy_level = 1,
-    clerk_organization_id = EXCLUDED.clerk_organization_id,
     settings = EXCLUDED.settings;
 END $$;
 
 -- 1e. CUPE National (hardcoded ID for supplementary-seed compatibility)
---     NOTE: clerk_organization_id (the physical column name in the replay schema,
---     db/migrations-audit/0000; Django names it auth_provider_org_id) is
---     intentionally NULL — no provider org exists for
---     CUPE National yet. CUPE members sign in through CUPE L123's organization
---     (org_3BP6K4uezEa2CLEvUNDwhnJGNFg). Create a provider org when CUPE National
+--     No provider organization is bound here: CUPE members sign in through the
+--     CUPE L123 tenant, and CUPE National gets its own provider binding when it
 --     needs its own auth boundary.
 DO $$
 DECLARE v_clc_id UUID;
@@ -322,7 +319,7 @@ BEGIN
     parent_id, hierarchy_path, hierarchy_level, province_territory, sectors,
     email, phone, website, address,
     member_count, active_member_count,
-    settings, features_enabled, clerk_organization_id, status
+    settings, features_enabled, status
   ) VALUES (
     '9210418f-6a4f-4dab-a7d2-4450d581dc81',
     'CUPE Local 123', 'cupe-local-123', 'CUPE Local 123', 'CUPE L123', 'local',
@@ -332,12 +329,11 @@ BEGIN
     12, 12,
     '{"language":"bilingual","fiscalYearEnd":"December 31","employer":"City of Toronto","bargainingGroups":["Inside Workers","Outside Workers","Library Workers"]}'::jsonb,
     '{dashboard,members,claims,grievances,communications,collective-bargaining,strike-fund}',
-    'org_3BP6K4uezEa2CLEvUNDwhnJGNFg', 'active'
+    'active'
   ) ON CONFLICT (slug) DO UPDATE SET
     parent_id = v_cupe_id,
     hierarchy_path = ARRAY[v_clc_id::text, v_cupe_id::text],
     hierarchy_level = 2,
-    clerk_organization_id = EXCLUDED.clerk_organization_id,
     settings = EXCLUDED.settings;
 
   -- CUPE Local 123 → CUPE relationship
@@ -830,7 +826,7 @@ END $$;
 
 -- Final summary
 SELECT slug, display_name, organization_type, hierarchy_level,
-       clerk_organization_id, member_count, status
+       member_count, status
 FROM organizations
 WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe', 'cupe-local-123')
 ORDER BY hierarchy_level, slug;

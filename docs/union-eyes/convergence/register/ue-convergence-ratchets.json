@@ -39,7 +39,7 @@
         { "file": "apps/union-eyes/scripts/rls-enforcement/generate-rls-enforcement-migration.ts", "reason": "References the historical column name when generating policies" },
         { "file": "apps/union-eyes/scripts/rls-enforcement/p4-disposable-fixture.ts", "reason": "References the migration name auth_core.0003_rename_clerk_organization_id" },
         { "file": "apps/union-eyes/db/replay.ps1", "reason": "Legacy replay diagnostic on clerk_organization_id; retire with the legacy entrypoints (UE-CONV-H-003)" },
-        { "file": "apps/union-eyes/db/seeds/seed-master.sql", "reason": "Seed writes clerk_organization_id and Clerk-format tenant ids; conflicts with the Django lineage rename (UE-CONV-H-005)" }
+        { "file": "apps/union-eyes/db/seeds/seed-master.sql", "reason": "Job title ('City Clerk's Office') in synthetic seed data; no provider id or provider column is written any more" }
       ]
     },
     {
