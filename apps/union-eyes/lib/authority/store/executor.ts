@@ -32,7 +32,6 @@ export const isPrincipalId = (value: unknown): value is string =>
   value.length >= 1 &&
   value.length <= 255 &&
   value === value.trim() &&
-  // eslint-disable-next-line no-control-regex
   !/[\u0000-\u001f\u007f]/.test(value)
 
 export interface AuthorityContext {

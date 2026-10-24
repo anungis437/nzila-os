@@ -6,7 +6,7 @@
  */
 import { beforeAll, describe, expect, it } from 'vitest'
 import { newUuid, ORG, ORG_B, U } from './authority-kernel-harness'
-import { daysAhead, freshDb, kit, minutesAgo } from './authority-kernel-testkit'
+import { freshDb, kit } from './authority-kernel-testkit'
 import { canonicalAuditContentHash } from '../../lib/audit/canonical-audit-chain'
 import { auditAuthorityMutation, reconcileAuthorityAudit } from '../../lib/authority/store/audit'
 import { runIdempotent } from '../../lib/authority/store/idempotency'
