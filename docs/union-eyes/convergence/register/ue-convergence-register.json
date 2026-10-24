@@ -630,7 +630,8 @@
       "requiredImplementation": "Convert every authority-bearing mutation to persistAtomicAudit inside its own transaction; ratchet CASE-MUTATION-BEST-EFFORT-AUDIT holds the converted routes and services at zero; extend it as the remaining callers convert.",
       "evidence": [
         { "type": "path", "ref": "apps/union-eyes/lib/audit/atomic-audit.ts" },
-        { "type": "test", "ref": "apps/union-eyes/lib/audit/__tests__/atomic-audit.pglite.test.ts" }
+        { "type": "test", "ref": "apps/union-eyes/lib/audit/__tests__/atomic-audit.pglite.test.ts" },
+        { "type": "test", "ref": "apps/union-eyes/db/__tests__/atomic-audit-fault.postgres.test.ts" }
       ],
       "status": "IN_PROGRESS",
       "retirement": { "disposition": "NONE" }
