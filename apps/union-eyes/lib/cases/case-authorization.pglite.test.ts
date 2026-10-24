@@ -88,6 +88,12 @@ describe('case record scope and history visibility against PostgreSQL',()=>{
       m.role.mockResolvedValueOnce(role)
       await expect(getCaseActor()).rejects.toMatchObject({code:'FORBIDDEN'})
     }
+    // Platform administration is not customer-organization case authority, even when stored as the membership role.
+    for(const role of ['app_owner','system_admin','platform_lead','platform_admin']){
+      m.role.mockResolvedValueOnce(role)
+      await expect(getCaseActor(), role).rejects.toMatchObject({code:'FORBIDDEN'})
+      expect(casePolicyRole(role), role).toBeNull()
+    }
     expect(casePolicyRole('unknown')).toBeNull()
     expect(casePolicyRole('system_admin')).toBeNull()
   })

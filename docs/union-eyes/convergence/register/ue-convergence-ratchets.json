@@ -93,6 +93,14 @@
       "mode": "zero"
     },
     {
+      "id": "PLATFORM-ROLE-CASE-PROMOTION",
+      "description": "Platform administration must never be promoted into customer-organization case authority (UE-CONV-E-001)",
+      "pattern": "systemAdministrator|'app_owner','system_admin','platform_lead'",
+      "paths": ["apps/union-eyes/lib/cases"],
+      "exclude": ["**/*.test.*", "**/__tests__/**"],
+      "mode": "zero"
+    },
+    {
       "id": "RANK-DERIVED-CASE-ACCESS",
       "description": "isStewardPlus / case_read_any derive case access from seniority. The grievance document, search and intelligence paths no longer do; the remaining files are the separate CUPE claims module (UE-CONV-E-001)",
       "pattern": "isStewardPlus|case_read_any",

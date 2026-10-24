@@ -3,15 +3,14 @@ import { canPerformAction, type CUPEAction, type CUPERole, type ActionContext } 
 /** Case policy aliases; unknown organizational roles never acquire a member fallback. */
 const aliases: Record<string, CUPERole> = {
   member: 'member', steward: 'steward', chief_steward: 'chief_steward',
-  business_agent: 'business_agent', officer: 'officer', admin: 'admin', platform_admin: 'platform_admin',
+  business_agent: 'business_agent', officer: 'officer', admin: 'admin',
   president: 'officer', vice_president: 'officer', secretary_treasurer: 'officer',
   national_officer: 'officer', union_rep: 'steward', staff_rep: 'steward',
   executive: 'officer', ceo: 'officer', governance: 'officer',
   union_steward: 'steward', union_staff: 'steward', union_officer: 'officer', union_admin: 'admin',
 }
 
-export function casePolicyRole(role: string, systemAdministrator = false): CUPERole | null {
-  if (systemAdministrator) return 'platform_admin'
+export function casePolicyRole(role: string): CUPERole | null {
   return aliases[role] ?? null
 }
 
