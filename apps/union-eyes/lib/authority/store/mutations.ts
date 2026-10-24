@@ -136,6 +136,8 @@ export interface InsertRelationshipInput {
   effectiveAt: Date
   expiresAt?: Date | null
   issuanceRuleId?: string | null
+  /** Extra, non-authoritative context recorded in the audit row (for example a backfill decision reference). */
+  auditDetails?: Record<string, unknown>
 }
 
 export async function insertRelationship(exec: SqlExecutor, i: InsertRelationshipInput): Promise<string> {
@@ -159,7 +161,7 @@ export async function insertRelationship(exec: SqlExecutor, i: InsertRelationshi
     action: 'relationship.grant',
     resourceType: 'ue_authority_resource_relationships',
     resourceId: id,
-    details: { relation: i.relation, holder: i.principalUserId, resourceType: i.resourceType, resourceId: i.resourceId },
+    details: { relation: i.relation, holder: i.principalUserId, resourceType: i.resourceType, resourceId: i.resourceId, ...(i.auditDetails ?? {}) },
   })
   return id
 }

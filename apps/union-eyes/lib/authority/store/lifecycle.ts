@@ -489,6 +489,7 @@ export async function assignCase(
     permissions?: readonly string[]
     effectiveAt: Date
     expiresAt?: Date | null
+    auditDetails?: Record<string, unknown>
   },
 ): Promise<string> {
   requireUuids(i.organizationId, i.caseId)
@@ -516,6 +517,7 @@ export async function assignCase(
     effectiveAt: i.effectiveAt,
     expiresAt: i.expiresAt ?? null,
     issuanceRuleId: rule.id,
+    auditDetails: i.auditDetails,
   })
 }
 
