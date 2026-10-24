@@ -43,6 +43,13 @@ export interface LowRoleScope {
   forcedOwner?: { name: string; value: string }
 }
 
+/** Own-rows scope that applies at every role, for tables whose cross-member reads belong to a dedicated authority. */
+export function ownRowsScope(mode: LowRoleMode, userId: string | null | undefined): LowRoleScope {
+  if (mode.kind !== 'own' || !userId) throw ApiError.forbidden()
+  if ((mode.column as unknown as { columnType?: string }).columnType === 'PgUUID' && !UUID.test(userId)) throw ApiError.forbidden()
+  return { condition: eq(mode.column, userId), forcedOwner: { name: mode.name, value: userId } }
+}
+
 /** Throws when the caller may not use the table at all; otherwise returns the scope to apply. */
 export async function resolveLowRoleScope(mode: LowRoleMode, userId: string | null | undefined, organizationId: string | null | undefined): Promise<LowRoleScope> {
   if (mode.kind === 'open') return {}

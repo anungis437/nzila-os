@@ -81,6 +81,8 @@ vi.mock('drizzle-orm', async (importOriginal) => {
 
 vi.mock('@/db/schema', () => ({
   userConsents: {
+    // The generic CRUD gate classifies a table by its SQL name.
+    [Symbol.for('drizzle:Name')]: 'user_consents',
     id: { name: 'id' },
     userId: { name: 'userId' },
     organizationId: { name: 'organizationId' },
