@@ -21,7 +21,10 @@ import pg from 'pg'
 import { describe, expect, it } from 'vitest'
 import { getTableConfig, PgTable } from 'drizzle-orm/pg-core'
 import { is } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/node-postgres'
 import * as declarations from '../schema'
+import { duesTransactions } from '../schema/domains/finance/dues'
+import { duesTransactions as queryDuesTransactions } from '../schema/dues-transactions-schema'
 
 const URL = process.env.UE_CENSUS_URL
 const BASELINE = path.resolve(__dirname, '../../../../docs/union-eyes/convergence/register/ue-canonical-schema-census.json')
@@ -130,6 +133,43 @@ describe.skipIf(!URL)('canonical schema census against the real Django plus boot
       }
       await expect(insert(org, other)).rejects.toThrow(/documents_org_id_mirrors_organization_id/)
       await insert(org, org)
+    } finally {
+      await client.end()
+    }
+  }, 60_000)
+
+  it('dues_transactions serves both declarations as the runtime role: defaults apply, tenant isolation holds, the period is ordered (platform 0017)', async () => {
+    const client = new pg.Client({ connectionString: URL })
+    await client.connect()
+    try {
+      const org = '00000000-0000-4000-8000-0000000000b1'
+      const other = '00000000-0000-4000-8000-0000000000b2'
+      await client.query(`INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
+        VALUES ($1,'census-dues','census-dues','local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1) ON CONFLICT (id) DO NOTHING`, [org])
+      await client.query('BEGIN')
+      try {
+        await client.query('SET LOCAL ROLE union_eyes_runtime')
+        await client.query("SELECT set_config('app.current_org_id', $1, true)", [org])
+        const db = drizzle(client)
+        const row = {
+          organizationId: org, memberId: 'member-1', transactionType: 'charge', amount: '50.00', duesAmount: '50.00', totalAmount: '50.00',
+          periodStart: '2026-10-01', periodEnd: '2026-10-31', dueDate: '2026-11-05',
+        }
+        const [created] = await db.insert(duesTransactions).values(row).returning()
+        expect(created.status).toBe('pending')
+        expect(created.copeAmount).toBe('0.00')
+        expect(created.id).toBeTruthy()
+        const [viaQueries] = await db.select().from(queryDuesTransactions)
+        expect(viaQueries.id).toBe(created.id)
+        await client.query('SAVEPOINT cross_tenant')
+        await expect(db.insert(duesTransactions).values({ ...row, organizationId: other })).rejects.toThrow()
+        await client.query('ROLLBACK TO SAVEPOINT cross_tenant')
+        await client.query('SAVEPOINT bad_period')
+        await expect(db.insert(duesTransactions).values({ ...row, periodStart: '2026-11-01', periodEnd: '2026-10-01' })).rejects.toThrow()
+        await client.query('ROLLBACK TO SAVEPOINT bad_period')
+      } finally {
+        await client.query('ROLLBACK')
+      }
     } finally {
       await client.end()
     }

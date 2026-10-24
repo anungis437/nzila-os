@@ -159,7 +159,6 @@
     {"table":"donations","defects":["COLUMNS_MISSING"],"columnsMissing":["amount","campaign_id","currency","custom_data","donor_email","donor_name","donor_phone","is_anonymous","is_recurring","message","payment_method","payment_status","receipt_sent","receipt_url","recurring_interval","stripe_customer_id","stripe_payment_intent_id","stripe_subscription_id","tax_receipt_issued_at","tax_receipt_number"],"requiredUndeclared":[]},
     {"table":"dues_policies","defects":["TABLE_ABSENT"],"columnsMissing":[],"requiredUndeclared":[]},
     {"table":"dues_rates","defects":["COLUMNS_MISSING"],"columnsMissing":["classification","created_by","effective_from","effective_to","employment_type","last_modified_by","metadata","percentage","status"],"requiredUndeclared":[]},
-    {"table":"dues_transactions","defects":["COLUMNS_MISSING"],"columnsMissing":["adjustment_amount","amount","cope_amount","due_date","dues_amount","late_fee_amount","metadata","notes","pac_amount","paid_date","payment_date","payment_method","payment_reference","period_end","period_start","processor_customer_id","processor_payment_id","processor_type","receipt_url","status","strike_fund_amount","total_amount"],"requiredUndeclared":[]},
     {"table":"dunning_cases","defects":["TABLE_ABSENT"],"columnsMissing":[],"requiredUndeclared":[]},
     {"table":"dunning_policies","defects":["TABLE_ABSENT"],"columnsMissing":[],"requiredUndeclared":[]},
     {"table":"dunning_steps","defects":["TABLE_ABSENT"],"columnsMissing":[],"requiredUndeclared":[]},

@@ -195,6 +195,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Adds the nullable org_id mirror column the Drizzle documents declaration selects, constrained to equal organization_id. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0017_dues_transactions_ledger_shape",
+        "sha256": "669694a0e8ab95b8f0a0daa8f506eb398fcada2f5ccff7b5515178596e3871c2",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Gives the dues_transactions stub the declared ledger shape with defaults and a period-order check; refuses a populated stub. Not yet applied to any clone or live database."
       }
     ]
   }
