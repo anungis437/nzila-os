@@ -45,9 +45,6 @@ urlpatterns = [
     path("me/", views.me, name="me"),
     path("profile/", views.member_profile, name="member_profile"),
     path("webhooks/auth/", views.auth_webhook, name="auth_webhook"),
-    path(
-        "webhooks/clerk/", views.auth_webhook, name="clerk_webhook"
-    ),  # backward compat
     path("live/", views.liveness_check, name="liveness_check"),
     path("ready/", views.readiness_check, name="readiness_check"),
     path("health/", views.health_check, name="health_check"),

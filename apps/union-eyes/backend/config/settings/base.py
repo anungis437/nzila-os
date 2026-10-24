@@ -72,8 +72,7 @@ REST_FRAMEWORK = {
 }
 
 # Auth
-CLERK_PUBLISHABLE_KEY = os.environ.get("CLERK_PUBLISHABLE_KEY", "")
-CLERK_SECRET_KEY = os.environ.get("CLERK_SECRET_KEY", "")
+AUTH_SECRET = os.environ.get("AUTH_SECRET", "")
 
 # Static files
 STATIC_URL = "/static/"

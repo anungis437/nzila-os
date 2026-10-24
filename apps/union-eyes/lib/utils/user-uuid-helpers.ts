@@ -11,9 +11,9 @@ import { eq } from "drizzle-orm";
  * @returns The internal UUID associated with this user ID
  */
 export async function getOrCreateUserUuid(userId: string): Promise<string> {
-  // Try to find existing mapping by clerk_user_id column (legacy column name; stores both legacy and current Entra user IDs)
+  // Try to find an existing mapping by provider user ID (physical column: clerk_user_id; stores the current Entra user ID)
   const existing = await db.query.userUuidMapping.findFirst({
-    where: eq(userUuidMapping.clerkUserId, userId),
+    where: eq(userUuidMapping.authUserId, userId),
   });
 
   if (existing) {
@@ -24,7 +24,7 @@ export async function getOrCreateUserUuid(userId: string): Promise<string> {
   const [newMapping] = await db
     .insert(userUuidMapping)
     .values({
-      clerkUserId: userId,
+      authUserId: userId,
     })
     .returning();
 

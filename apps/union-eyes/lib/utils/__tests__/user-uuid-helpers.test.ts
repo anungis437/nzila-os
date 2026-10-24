@@ -12,7 +12,7 @@ vi.mock('@/db/db', () => ({
   },
 }));
 vi.mock('@/db/schema', () => ({
-  userUuidMapping: { clerkUserId: { name: 'clerkUserId' } },
+  userUuidMapping: { authUserId: { name: 'authUserId' } },
 }));
 vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => ({})) }));
 
@@ -43,6 +43,6 @@ describe('lib/utils/user-uuid-helpers', () => {
 
     expect(result).toBe('uuid-new');
     expect(insert).toHaveBeenCalledTimes(1);
-    expect(values).toHaveBeenCalledWith({ clerkUserId: 'user-456' });
+    expect(values).toHaveBeenCalledWith({ authUserId: 'user-456' });
   });
 });

@@ -68,7 +68,7 @@ def _make_webhook_request(factory, body: bytes, headers: dict):
     pass the same bytes used with ``_build_svix_headers`` so the HMAC matches.
     """
     request = factory.post(
-        "/api/auth_core/webhooks/clerk/",
+        "/api/auth_core/webhooks/auth/",
         data=body,
         content_type="application/json",
         **headers,
@@ -82,7 +82,7 @@ def _make_webhook_request(factory, body: bytes, headers: dict):
 # ============================================================================
 
 
-@override_settings(CLERK_WEBHOOK_SECRET=TEST_WEBHOOK_SECRET)
+@override_settings(AUTH_WEBHOOK_SECRET=TEST_WEBHOOK_SECRET)
 class AuthWebhookVerificationTest(TestCase):
     """Test _verify_auth_webhook HMAC-SHA256 base64 verification."""
 
@@ -140,7 +140,7 @@ class AuthWebhookVerificationTest(TestCase):
         request = _make_webhook_request(self.factory, body, headers)
         self.assertTrue(_verify_auth_webhook(request))
 
-    @override_settings(CLERK_WEBHOOK_SECRET="")
+    @override_settings(AUTH_WEBHOOK_SECRET="")
     def test_missing_secret_rejected(self):
         body = b'{"type":"user.created","data":{}}'
         headers = _build_svix_headers(body)
@@ -169,7 +169,7 @@ class AuthWebhookVerificationTest(TestCase):
             "HTTP_SVIX_SIGNATURE": f"v1,{sig}",
         }
 
-        with self.settings(CLERK_WEBHOOK_SECRET=raw_secret):
+        with self.settings(AUTH_WEBHOOK_SECRET=raw_secret):
             request = _make_webhook_request(self.factory, body, headers)
             self.assertTrue(_verify_auth_webhook(request))
 
@@ -496,7 +496,7 @@ class AuthMembershipHandlerTest(TestCase):
 # ============================================================================
 
 
-@override_settings(CLERK_WEBHOOK_SECRET=TEST_WEBHOOK_SECRET)
+@override_settings(AUTH_WEBHOOK_SECRET=TEST_WEBHOOK_SECRET)
 class AuthWebhookEndpointTest(TestCase):
     """Test the full webhook endpoint POST → handler → DB."""
 
@@ -505,7 +505,7 @@ class AuthWebhookEndpointTest(TestCase):
         headers = _build_svix_headers(body)
         # Django test client uses HTTP_ prefix for extra headers
         return self.client.post(
-            "/api/auth_core/webhooks/clerk/",
+            "/api/auth_core/webhooks/auth/",
             data=body,
             content_type="application/json",
             **headers,
@@ -595,7 +595,7 @@ class AuthWebhookEndpointTest(TestCase):
         payload = {"type": "user.created", "data": {"id": "user_bad_sig"}}
         body = json.dumps(payload).encode()
         resp = self.client.post(
-            "/api/auth_core/webhooks/clerk/",
+            "/api/auth_core/webhooks/auth/",
             data=body,
             content_type="application/json",
             HTTP_SVIX_ID="msg_bad",
@@ -613,5 +613,5 @@ class AuthWebhookEndpointTest(TestCase):
 
     def test_get_method_rejected(self):
         """Only POST is allowed."""
-        resp = self.client.get("/api/auth_core/webhooks/clerk/")
+        resp = self.client.get("/api/auth_core/webhooks/auth/")
         self.assertEqual(resp.status_code, 405)

@@ -106,7 +106,7 @@ export async function POST(req: Request) {
         plan_id: planId,
         redirect_url: validRedirectUrl,
         metadata: {
-          clerkUserId: userId,
+          userId,
           planDuration: planDuration
         },
         d2c: true // Direct to checkout

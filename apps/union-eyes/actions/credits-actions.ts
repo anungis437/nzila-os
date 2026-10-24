@@ -19,7 +19,7 @@ const CREDIT_RENEWAL_DAYS = 28; // Credits renew every 4 weeks (28 days)
  * 1. Server-Side Validation: All checks happen in server actions (marked with "use server")
  *    that can't be manipulated by client-side code
  * 
- * 2. Authentication Gate: Every function verifies the user is logged in via Clerk auth
+ * 2. Authentication Gate: Every function verifies the user is logged in via the auth provider
  * 
  * 3. Database Verification: Membership status is checked directly from the database,
  *    not from any client-provided state that could be manipulated

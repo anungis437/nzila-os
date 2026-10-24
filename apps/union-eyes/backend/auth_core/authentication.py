@@ -7,7 +7,7 @@ Production-ready implementation with:
 - Comprehensive error handling
 - JWT key rotation support
 
-Works with Microsoft Entra External ID, Clerk, or any OIDC provider.
+Works with Microsoft Entra External ID or any OIDC provider.
 """
 
 import logging
@@ -27,10 +27,8 @@ logger = logging.getLogger(__name__)
 def _extract_org(payload: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
     """Extract organization ID and role from OIDC JWT payload.
 
-    Supports multiple token formats:
+    Supports the following token formats:
     - Entra External ID: ``org_id`` custom claim or ``tid`` (tenant ID) fallback
-    - Clerk V2: ``o`` dict with ``id`` / ``rol`` keys
-    - Clerk V1: top-level ``org_id`` / ``org_role`` keys
 
     Returns:
         Tuple of (org_id, org_role), either or both may be None.
@@ -39,11 +37,6 @@ def _extract_org(payload: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]
     org_id = payload.get("org_id")
     if org_id:
         return org_id, payload.get("org_role")
-
-    # Clerk V2 format
-    o = payload.get("o")
-    if isinstance(o, dict):
-        return o.get("id"), o.get("rol")
 
     # Entra fallback: use tenant ID as org context
     tid = payload.get("tid")
@@ -116,7 +109,7 @@ def resolve_organization_context(org_id: Optional[str]):
 class OIDCAuthentication(authentication.BaseAuthentication):
     """OIDC JWT authentication for DRF.
 
-    Works with Microsoft Entra External ID, Clerk, or any OIDC provider.
+    Works with Microsoft Entra External ID or any OIDC provider.
 
     This backend:
     1. Validates JWT signature using the provider's JWKS
@@ -204,9 +197,7 @@ class OIDCAuthentication(authentication.BaseAuthentication):
         Raises:
             jwt.InvalidTokenError: If token is invalid
         """
-        jwks_url = getattr(settings, "AUTH_JWKS_URL", None) or getattr(
-            settings, "CLERK_JWKS_URL", None
-        )
+        jwks_url = getattr(settings, "AUTH_JWKS_URL", None)
         if not jwks_url:
             raise exceptions.AuthenticationFailed(
                 "AUTH_JWKS_URL not configured in Django settings"
@@ -332,7 +323,7 @@ class APIKeyAuthentication(authentication.BaseAuthentication):
     """Authenticates service-to-service requests using API secret key.
 
     For internal API calls, webhooks, or admin operations.
-    Checks for X-Auth-Secret or X-Clerk-Secret-Key header matching AUTH_SECRET.
+    Checks for the X-Auth-Secret header matching AUTH_SECRET.
     """
 
     def authenticate(self, request):
@@ -341,14 +332,8 @@ class APIKeyAuthentication(authentication.BaseAuthentication):
         Returns:
             Tuple[None, dict]: (None, {"is_service_account": True}) or None
         """
-        secret_key_header = request.META.get(
-            "HTTP_X_AUTH_SECRET", ""
-        ) or request.META.get(
-            "HTTP_X_CLERK_SECRET_KEY", ""
-        )  # backward compat
-        expected_key = getattr(settings, "AUTH_SECRET", "") or getattr(
-            settings, "CLERK_SECRET_KEY", ""
-        )
+        secret_key_header = request.META.get("HTTP_X_AUTH_SECRET", "")
+        expected_key = getattr(settings, "AUTH_SECRET", "")
 
         if not secret_key_header or not expected_key:
             return None

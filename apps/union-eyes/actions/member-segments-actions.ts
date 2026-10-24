@@ -462,10 +462,10 @@ export async function exportMembersAction(
       };
     }
 
-    const clerkUser = await currentUser();
-    const userDisplayName = clerkUser?.fullName
-      || [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ")
-      || clerkUser?.primaryEmailAddress?.emailAddress
+    const authUser = await currentUser();
+    const userDisplayName = authUser?.fullName
+      || [authUser?.firstName, authUser?.lastName].filter(Boolean).join(" ")
+      || authUser?.primaryEmailAddress?.emailAddress
       || access.userId;
 
     const [org] = await db

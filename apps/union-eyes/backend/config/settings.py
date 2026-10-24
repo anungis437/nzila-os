@@ -171,21 +171,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Authentication — OIDC (Entra External ID / Clerk)
-AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL") or os.environ.get("CLERK_JWKS_URL")
+# Authentication — OIDC (Microsoft Entra External ID)
+AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL")
 AUTH_ISSUER = os.environ.get("AUTH_ISSUER")
 AUTH_AUDIENCE = os.environ.get("AUTH_AUDIENCE")
 AUTH_PROVIDER_NAMESPACE = os.environ.get("AUTH_PROVIDER_NAMESPACE", "entra")
-AUTH_SECRET = os.environ.get("AUTH_SECRET") or os.environ.get("CLERK_SECRET_KEY")
-AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET") or os.environ.get(
-    "CLERK_WEBHOOK_SECRET"
-)
-
-# Legacy env var names (backward compat)
-CLERK_JWKS_URL = AUTH_JWKS_URL
-CLERK_SECRET_KEY = AUTH_SECRET
-CLERK_PUBLISHABLE_KEY = os.environ.get("CLERK_PUBLISHABLE_KEY")
-CLERK_WEBHOOK_SECRET = AUTH_WEBHOOK_SECRET
+AUTH_SECRET = os.environ.get("AUTH_SECRET")
+AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET")
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")
 

@@ -33,7 +33,6 @@ class OIDCJWTMiddleware(MiddlewareMixin):
         "/api/docs/",
         "/admin/login/",
         "/api/webhooks/auth/",  # Auth provider webhooks use secret key auth
-        "/api/webhooks/clerk/",  # Backward compat
     ]
 
     def process_request(self, request):

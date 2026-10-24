@@ -62,7 +62,7 @@ export const manageWhopMembershipStatusChange = async (
 ): Promise<void> => {
   try {
     // DEPRECATION WARNING
-    logger.warn('manageWhopMembershipStatusChange is deprecated - use direct updateProfile with Clerk user ID from metadata instead');
+    logger.warn('manageWhopMembershipStatusChange is deprecated - use direct updateProfile with the auth user ID from metadata instead');
     
     if (!whopMembershipId || !whopUserId) {
       throw new Error("Missing required parameters for manageWhopMembershipStatusChange");
@@ -71,7 +71,7 @@ export const manageWhopMembershipStatusChange = async (
     const membershipStatus = getMembershipStatus(status);
     
     // Attempt to find and update the profile
-    // This uses a special lookup function that maps Whop user IDs to Clerk user IDs
+    // This uses a special lookup function that maps Whop user IDs to auth user IDs
     const updatedProfile = await updateProfileByWhopUserId(whopUserId, {
       whopMembershipId,
       membership: membershipStatus
@@ -80,7 +80,7 @@ export const manageWhopMembershipStatusChange = async (
     if (!updatedProfile) {
       logger.error('No profile found with Whop user ID - fallback method failed', undefined, { whopUserId });
     } else {
-      logger.info(`Updated membership status to ${membershipStatus}`, { clerkUserId: updatedProfile.userId, whopUserId });
+      logger.info(`Updated membership status to ${membershipStatus}`, { authUserId: updatedProfile.userId, whopUserId });
     }
 
     // Revalidate any cached data
@@ -121,7 +121,7 @@ export async function canAccessPremiumFeatures() {
  * Claim a pending profile that was created during an unauthenticated checkout
  * This connects a paid profile to a user's account after they sign up
  * 
- * @param userId The Clerk user ID of the authenticated user
+ * @param userId The auth user ID of the authenticated user
  * @param email The email address used during checkout
  * @param token Optional verification token from the checkout process
  * @returns Object with success status and error message if applicable

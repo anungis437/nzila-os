@@ -110,7 +110,7 @@ export async function withRLSContext<T>(
   }
 
   // Get authenticated user from auth provider
-  const { userId, orgId: clerkOrgId } = await auth()
+  const { userId, orgId: authOrgId } = await auth()
 
   if (!userId) {
     throw new Error(
@@ -150,7 +150,7 @@ export async function withRLSContext<T>(
   } else {
     // Resolve orgId using the same fallback chain as getCurrentUser():
     // platform JWT orgId → publicMetadata.organizationId → privateMetadata.organizationId → tenantId
-    orgId = clerkOrgId
+    orgId = authOrgId
     if (!orgId) {
       try {
         const user = await currentUser()
@@ -282,7 +282,7 @@ export async function withExplicitUserContext<T>(
  * @example
  * // auth provider webhook creating a new user
  * export async function POST(req: Request) {
- *   const event = await verifyClerkWebhook(req);
+ *   const event = await verifyAuthWebhook(req);
  *
  *   return withSystemContext(async () => {
  *     await db.insert(users).values({

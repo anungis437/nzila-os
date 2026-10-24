@@ -32,7 +32,6 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({
   currentUser: async () => null,
   getAuth: m.platformAuth,
   authMiddleware: () => async () => {},
-  clerkMiddleware: () => async () => {},
   createRouteMatcher: () => () => false,
 }));
 vi.mock('@/lib/api-auth-guard', async (importOriginal) => {

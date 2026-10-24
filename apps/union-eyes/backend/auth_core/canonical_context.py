@@ -137,8 +137,6 @@ def resolve_actor(bearer, requested_org=None):
                     "Immutable Entra tenant and object identity required"
                 )
             subject = f"{tenant}:{subject}"
-        elif provider == "clerk":
-            subject = provider_payload["sub"]
         else:
             raise AuthenticationFailed("Unsupported canonical identity provider")
         with auth_scope(

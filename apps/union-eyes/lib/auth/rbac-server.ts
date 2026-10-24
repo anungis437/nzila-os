@@ -186,10 +186,10 @@ export async function getUserRole(
     const user = await currentUser();
 
     // 3a. publicMetadata.role (union-eyes native key)
-    const fromClerk = resolveUserRole(
+    const fromPublicMetadata = resolveUserRole(
       user?.publicMetadata?.role as string | undefined,
     );
-    if (fromClerk) return fromClerk;
+    if (fromPublicMetadata) return fromPublicMetadata;
 
     // 3b. publicMetadata.nzilaRole (used by the rest of the Nzila platform —
     //     console, CFO, partners apps all write to this key)
