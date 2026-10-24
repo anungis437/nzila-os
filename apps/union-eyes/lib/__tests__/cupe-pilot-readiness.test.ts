@@ -31,8 +31,8 @@ describe('CUPE pilot readiness source audit', () => {
     expect(source).toContain('export const GET = withApi');
     expect(source).toContain('export const POST = withApi');
     expect(source).toContain('export const DELETE = withApi');
-    expect(source).toContain('CaseAuditEvent.CASE_ATTACHMENT_UPLOADED');
-    expect(source).toContain('CaseAuditEvent.CASE_ATTACHMENT_DELETED');
+    expect(source).toContain("action: 'case.attachment_uploaded'");
+    expect(source).toContain("action: 'case.attachment_deleted'");
   });
 
   it('documents that the hardened intake route exists separately and resolves org scope via getOrganizationIdForUser', () => {
