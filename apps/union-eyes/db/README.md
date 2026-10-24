@@ -156,12 +156,11 @@ UnionEyes uses **Drizzle Kit** for type-safe schema migrations:
 # Generate migration from schema changes
 pnpm db:generate
 
-# Apply migrations to database
+# Apply migrations through the approved bootstrap (db:migrate runs run-union-eyes-drizzle-bootstrap.mjs)
 pnpm db:migrate
-
-# Push schema directly (dev only)
-pnpm db:push
 ```
+
+There is no schema-push entrypoint; `drizzle-kit push` bypasses the migration ledger and was removed.
 
 ### Historical Migrations (Archived)
 

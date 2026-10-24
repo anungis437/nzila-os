@@ -297,16 +297,15 @@ See [`.env.example`](.env.example) for the full variable reference.
 ### 3. Set up the database
 
 ```bash
-# Run Drizzle migrations (TypeScript schema)
+# Run Drizzle migrations (TypeScript schema) through the approved bootstrap
 pnpm --filter @nzila/union-eyes db:migrate
-
-# Or push schema directly (development)
-pnpm --filter @nzila/union-eyes db:push
 
 # Django migrations
 cd apps/union-eyes/backend
 python manage.py migrate
 ```
+
+There is no schema-push entrypoint: `drizzle-kit push` bypasses the migration ledger and was removed.
 
 ### 4. Run
 

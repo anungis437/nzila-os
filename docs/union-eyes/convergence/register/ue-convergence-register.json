@@ -400,12 +400,12 @@
         { "kind": "file", "ref": "tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs", "classification": "ACTIVE_COMPATIBILITY" },
         { "kind": "file", "ref": "apps/union-eyes/scripts/bootstrap-v2/installer.ts", "classification": "SUPPORTED_PROJECTION" }
       ],
-      "defect": "package.json exposes db:bootstrap, db:migrate, db:migrate:legacy, db:scoped-migrate:existing and db:push (drizzle-kit push, which bypasses the migration ledger) alongside the Django lineage and the prospective v2 installer.",
+      "defect": "package.json exposes db:bootstrap, db:migrate, db:migrate:legacy and db:scoped-migrate:existing alongside the Django lineage and the prospective v2 installer. db:push (drizzle-kit push, which bypassed the migration ledger) was removed from the union-eyes package and is ratcheted at zero. db:migrate:legacy (documented forensic-only) and db:scoped-migrate:existing remain until their consumers are confirmed.",
       "consumers": ["apps/union-eyes/package.json"],
-      "securityImplications": "db:push can alter a schema outside the approved lineage.",
-      "requiredImplementation": "Classify each entrypoint, retire db:push and the legacy migrate path after consumer check, and designate one installation path.",
-      "evidence": [],
-      "status": "OPEN",
+      "securityImplications": "A schema push can alter a schema outside the approved lineage.",
+      "requiredImplementation": "Classify the remaining entrypoints, retire the legacy migrate path after a consumer check, and designate one installation path.",
+      "evidence": [{ "type": "path", "ref": "docs/union-eyes/convergence/register/ue-convergence-ratchets.json" }],
+      "status": "IN_PROGRESS",
       "retirement": { "disposition": "RETIRE_PENDING", "replacement": "run-union-eyes-drizzle-bootstrap.mjs" }
     },
     {

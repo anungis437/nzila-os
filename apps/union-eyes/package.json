@@ -29,7 +29,6 @@
     "db:migrate:legacy": "node ../../tooling/scripts/run-union-eyes-drizzle-migrate.mjs",
     "db:restore": "node ../../tooling/scripts/restore-union-eyes-snapshot.mjs",
     "db:validate": "node ../../tooling/scripts/validate-orm-legitimacy.mjs",
-    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "evidence:collect": "tsx scripts/evidence/collect.mjs",
     "evidence:seal": "tsx scripts/evidence/seal.mjs",

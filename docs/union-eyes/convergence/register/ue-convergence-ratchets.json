@@ -85,6 +85,14 @@
       ]
     },
     {
+      "id": "SCHEMA-PUSH-SCRIPT",
+      "description": "drizzle-kit push bypasses the migration ledger; the union-eyes package must not expose it (UE-CONV-H-003)",
+      "pattern": "drizzle-kit push",
+      "paths": ["apps/union-eyes/package.json"],
+      "exclude": [],
+      "mode": "zero"
+    },
+    {
       "id": "RANK-DERIVED-CASE-ACCESS",
       "description": "isStewardPlus / case_read_any derive case access from seniority; migrate the file to the authority kernel (UE-CONV-E-001)",
       "pattern": "isStewardPlus|case_read_any",
