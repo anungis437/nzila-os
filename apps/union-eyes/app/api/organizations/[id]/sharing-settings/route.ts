@@ -13,8 +13,8 @@ const { GET: rawGET, PATCH: rawPATCH, DELETE: rawDELETE } = crudRoutes({
   tags: ["Organizations"],
   orgScoped: false,
   itemRoute: true,
-  readRole: 'member',
-  writeRole: 'steward',
+  readRole: 'admin',
+  writeRole: 'admin',
 });
 
 // PR #752 round 11: orgScoped:false + itemRoute on the organizations table

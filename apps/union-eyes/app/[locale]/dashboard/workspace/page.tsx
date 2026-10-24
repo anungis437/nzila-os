@@ -5,6 +5,7 @@ import { auth } from "@nzila/platform-auth/entra/server";
 import { WorkspaceShell } from "@/components/workspace/workspace-shell";
 import { selectWorkspaceRoleInput } from "@/components/workspace/workspace-persona-availability";
 import { getUserRole } from "@/lib/auth/rbac-server";
+import { getDashboardExperience, getRoleLandingPath } from "@/lib/dashboard/role-experience";
 import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser } from "@/lib/organization-utils";
 
@@ -57,6 +58,11 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
     orgRole: session.orgRole,
     resolvedRole,
   });
+
+  // Members have no orientation hub; they start at My Cases.
+  if (getDashboardExperience(role) === "member") {
+    redirect(`/${locale}${getRoleLandingPath(role)}`);
+  }
 
   return <WorkspaceShell role={role} />;
 }

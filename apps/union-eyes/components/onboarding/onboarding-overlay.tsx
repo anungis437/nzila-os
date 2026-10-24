@@ -27,12 +27,12 @@ export interface OnboardingStep {
 export const ONBOARDING_STEPS: Record<string, OnboardingStep[]> = {
   member: [
     {
-      context: "This is your Inbox — new issues and submissions arrive here.",
-      action: "Review an item or submit a new issue to get started.",
+      context: "This is My Cases — the cases you have opened are tracked here.",
+      action: "Open a case to see its progress, or open a new representation case to get started.",
     },
     {
-      context: "Handle items here to move work forward.",
-      action: "Each item you action is tracked through the system automatically.",
+      context: "Each case moves through the process step by step.",
+      action: "Status updates appear on the case as your representative takes action.",
     },
   ],
   steward: [

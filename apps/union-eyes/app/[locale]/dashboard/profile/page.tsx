@@ -7,6 +7,8 @@ import { useUser, useAuthActions } from '@nzila/platform-auth/entra/client';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/use-toast';
 import { useOrganization } from "@/contexts/organization-context";
+import { getDashboardExperience } from "@/lib/dashboard/role-experience";
+import { MemberProfile } from "@/components/profile/member-profile";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import {
@@ -45,6 +47,7 @@ export default function ProfilePage() {
   const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
   const [showPassword, setShowPassword] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [summaryChecked, setSummaryChecked] = useState(false);
   const [serverSummary, setServerSummary] = useState<{
     user?: { name?: string; email?: string; phone?: string };
     organization?: { id?: string; name?: string } | null;
@@ -66,6 +69,8 @@ export default function ProfilePage() {
         }
       } catch {
         // Keep client-only fallbacks if summary fetch fails.
+      } finally {
+        if (!cancelled) setSummaryChecked(true);
       }
     })();
 
@@ -207,6 +212,25 @@ export default function ProfilePage() {
     setHasChanges(false);
     toast({ title: "Settings saved", description: "Your changes have been saved successfully." });
   };
+
+  // Least privilege: members, and anyone whose role cannot be resolved, get the read-only profile.
+  // Wait for the role before choosing a view so the full settings never flash for a member.
+  const resolvedRoleKey = serverSummary?.role ?? currentMembership?.role ?? null;
+  if (resolvedRoleKey === null && !summaryChecked) {
+    return <div className="p-8" role="status" aria-busy="true" />;
+  }
+  if (getDashboardExperience(resolvedRoleKey) === 'member') {
+    return (
+      <MemberProfile
+        name={resolvedProfile.name}
+        email={resolvedProfile.email}
+        phone={resolvedProfile.phone}
+        organization={resolvedProfile.local}
+        role={resolvedProfile.role}
+        onSignOut={handleSignOut}
+      />
+    );
+  }
 
   return (
     <div className="p-8">

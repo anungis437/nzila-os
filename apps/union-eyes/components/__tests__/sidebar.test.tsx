@@ -225,17 +225,17 @@ describe('Sidebar dual-nav honesty', () => {
     expectNoUndifferentiatedPrimary();
   });
 
-  it('treats the member Workspace entry as both orientation hub and role home', () => {
+  it('gives members no Workspace hub or role-home cue; their own Home is first', () => {
     renderSidebar('member');
 
-    const hub = linksNamed('Workspace, orientation hub and role home');
-    expect(hub[0]).toHaveAttribute('data-nav-role', 'hub');
-    expect(hub[0]).toHaveAttribute('href', '/en-CA/dashboard/workspace');
-    expect(
-      within(screen.getByRole('complementary', { name: ROLE_EXECUTION_CHROME_LABEL })).getByText(
-        'Orientation hub and role home',
-      ),
-    ).toBeInTheDocument();
+    const hubLinks = screen.queryAllByRole('link', {
+      name: (accessibleName) => /^Workspace, orientation hub/.test(accessibleName),
+    });
+    expect(hubLinks).toHaveLength(0);
+
+    const home = screen.getAllByRole('link', { name: /^Home$/ });
+    expect(home[0]).toHaveAttribute('href', '/en-CA/dashboard');
+    expect(screen.queryAllByRole('link', { name: 'Workspace' })).toHaveLength(0);
     expect(screen.queryByText(ROLE_HOME_HUB_CUE_MESSAGE)).not.toBeInTheDocument();
     expect(
       screen.queryByRole('link', {

@@ -28,8 +28,8 @@ describe('EC-G03 landing × experience', () => {
       {
         role: 'member',
         experience: 'member',
-        roleHomeHref: '/dashboard/workspace',
-        roleHomeIsOrientationHub: true,
+        roleHomeHref: '/dashboard',
+        roleHomeIsOrientationHub: false,
       },
       {
         role: 'steward',
@@ -80,12 +80,12 @@ describe('EC-G03 landing × experience', () => {
       expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE[row.experience]).toBe(row.roleHomeHref);
     }
 
-    expect(getRoleLandingPath(undefined)).toBe('/dashboard/workspace');
-    expect(getRoleLandingPath('unknown')).toBe('/dashboard/workspace');
+    expect(getRoleLandingPath(undefined)).toBe('/dashboard');
+    expect(getRoleLandingPath('unknown')).toBe('/dashboard');
   });
 
-  it('keeps Workspace first in the sidebar for member, governance and admin; staff and executives have no competing hub entry (frozen persona navigation)', () => {
-    for (const experience of ['member', 'governance', 'admin'] as const) {
+  it('keeps Workspace first in the sidebar for governance and admin; members start at their own Home; staff and executives have no competing hub entry (frozen persona navigation)', () => {
+    for (const experience of ['governance', 'admin'] as const) {
       expect(getNavigationForExperience(experience)[0]).toMatchObject({
         label: 'Workspace',
         href: WORKSPACE_ORIENTATION_HUB_PATH,
@@ -95,7 +95,11 @@ describe('EC-G03 landing × experience', () => {
     // Representative 2.2 freezes seven destinations; Workspace stays reachable via the hub cue.
     expect(getNavigationForExperience('staff').some((item) => item.href === WORKSPACE_ORIENTATION_HUB_PATH)).toBe(false);
     expect(roleHomeHubCue(getDualNavHomes('steward')).show).toBe(true);
-    expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.member).toBe(WORKSPACE_ORIENTATION_HUB_PATH);
+
+    const memberNav = getNavigationForExperience('member');
+    expect(memberNav[0]).toMatchObject({ label: 'Home', href: '/dashboard' });
+    expect(memberNav.map((item) => item.label)).not.toContain('Workspace');
+    expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.member).toBe('/dashboard');
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.staff).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.executive).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.governance).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
@@ -208,16 +212,19 @@ describe('EC-G03 guards', () => {
 
   it('does not widen canAccessDashboardPath allow-lists', () => {
     expect(getAllowedPrefixesByExperience()).toEqual({
+      // Widened only by the frozen UE-MEMBER-CANONICAL-2.1 destinations; each has a member page.
       member: [
         '/dashboard',
-        '/dashboard/workspace',
-        '/dashboard/inbox',
         '/dashboard/claims',
         '/dashboard/claims/new',
         '/dashboard/documents',
+        '/dashboard/messages',
+        '/dashboard/union',
+        '/dashboard/help',
         '/dashboard/settings',
         '/dashboard/profile',
-        '/dashboard/support',
+        '/dashboard/preferences',
+        '/dashboard/privacy',
       ],
       staff: [
         '/dashboard',

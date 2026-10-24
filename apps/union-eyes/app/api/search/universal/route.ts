@@ -22,6 +22,7 @@ import {
   normalizeDocumentTitle,
   toGovernanceLabel,
 } from '@/lib/services/document-governance-service';
+import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 
 function scoreText(value: string | null | undefined, query: string) {
@@ -57,6 +58,9 @@ export const GET = withOrganizationAuth(async (request, context) => {
   if (!q || q.length < 2) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Search query must be at least 2 characters');
   }
+
+  // Representative-level role: eligibility for organization-level (unlinked) documents only, never case content.
+  const isStaff = await hasMinRole('steward');
 
   const caseRows = await db
     .select({
@@ -118,6 +122,7 @@ export const GET = withOrganizationAuth(async (request, context) => {
       filename: documents.filename,
       documentType: documents.documentType,
       privacyLabel: documents.privacyLabel,
+      uploadedBy: documents.uploadedBy,
       updatedAt: documents.updatedAt,
       linkedEntityType: documentLinks.linkedEntityType,
       linkedEntityId: documentLinks.linkedEntityId,
@@ -184,7 +189,15 @@ export const GET = withOrganizationAuth(async (request, context) => {
           {
             isOrgMember: true,
             isPrimaryOwner: caseAccess.isPrimaryOwner,
-            hasCaseAccess: caseAccess.canViewCase || !row.linkedEntityId,
+            hasCaseAccess: hasDocumentContextAccess({
+              isStaff,
+              canViewCase: caseAccess.canViewCase,
+              hasExplicitGrant: Boolean(explicitGrant),
+              linkedEntityId: row.linkedEntityId,
+              privacyLabel: row.privacyLabel,
+              uploadedBy: row.uploadedBy,
+              userId,
+            }),
             canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
             hasExplicitDocumentGrant: Boolean(explicitGrant),
           },
@@ -200,8 +213,10 @@ export const GET = withOrganizationAuth(async (request, context) => {
           scoreText(row.filename, q) +
           scoreText(row.documentType, q);
 
+        const { uploadedBy: _uploadedBy, ...publicRow } = row;
+
         return {
-          ...row,
+          ...publicRow,
           title,
           score,
         };

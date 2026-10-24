@@ -24,7 +24,7 @@ describe('lib/dashboard/role-experience', () => {
 
   describe('getRoleLandingPath', () => {
     it('routes by experience', () => {
-      expect(getRoleLandingPath('member')).toBe('/dashboard/workspace');
+      expect(getRoleLandingPath('member')).toBe('/dashboard');
       expect(getRoleLandingPath('steward')).toBe('/dashboard/workbench');
       expect(getRoleLandingPath('president')).toBe('/dashboard/executive');
       expect(getRoleLandingPath('officer')).toBe('/dashboard/executive');
@@ -49,7 +49,9 @@ describe('lib/dashboard/role-experience', () => {
     });
     it('allows in-scope paths and blocks out-of-scope ones', () => {
       expect(canAccessDashboardPath('/dashboard', 'member', false)).toBe(true);
-      expect(canAccessDashboardPath('/dashboard/inbox', 'member', false)).toBe(true);
+      expect(canAccessDashboardPath('/dashboard/inbox', 'member', false)).toBe(false);
+      expect(canAccessDashboardPath('/dashboard/claims', 'member', false)).toBe(true);
+      expect(canAccessDashboardPath('/dashboard/workspace', 'member', false)).toBe(false);
       expect(canAccessDashboardPath('/dashboard/security', 'member', false)).toBe(false);
     });
     it('blocks excluded surfaces in pilot mode', () => {

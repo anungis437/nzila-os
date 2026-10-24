@@ -147,3 +147,53 @@ describe('generateSasUrl', () => {
     expect(url).toContain('sig=mock')
   })
 })
+
+describe('AZURE_STORAGE_BLOB_ENDPOINT (emulator override)', () => {
+  const mockSdk = () =>
+    vi.doMock('@azure/storage-blob', () => {
+      class MockBlobServiceClient {
+        constructor(public url: string) {}
+        getContainerClient() {
+          return {}
+        }
+      }
+      class MockStorageSharedKeyCredential {}
+      return {
+        StorageSharedKeyCredential: MockStorageSharedKeyCredential,
+        BlobServiceClient: MockBlobServiceClient,
+        generateBlobSASQueryParameters: vi.fn().mockReturnValue({ toString: () => 'sig=mock' }),
+        BlobSASPermissions: { parse: vi.fn().mockReturnValue({}) },
+        ContainerClient: vi.fn(),
+      }
+    })
+
+  beforeEach(() => {
+    vi.resetModules()
+    process.env.AZURE_STORAGE_ACCOUNT_NAME = 'devstoreaccount1'
+    process.env.AZURE_STORAGE_ACCOUNT_KEY = Buffer.from('emulatorkey').toString('base64')
+    process.env.AZURE_STORAGE_BLOB_ENDPOINT = 'http://127.0.0.1:10000/devstoreaccount1/'
+    mockSdk()
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    delete process.env.AZURE_STORAGE_ACCOUNT_NAME
+    delete process.env.AZURE_STORAGE_ACCOUNT_KEY
+    delete process.env.AZURE_STORAGE_BLOB_ENDPOINT
+  })
+
+  it('builds SAS URLs against the emulator endpoint outside production', async () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    const mod = await import('./index')
+    expect(mod.generateSasUrl('docs', 'file.pdf')).toBe(
+      'http://127.0.0.1:10000/devstoreaccount1/docs/file.pdf?sig=mock',
+    )
+  })
+
+  it('refuses the override in production', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    const mod = await import('./index')
+    expect(() => mod.generateSasUrl('docs', 'file.pdf')).toThrow('not permitted in production')
+    expect(() => mod.container('docs')).toThrow('not permitted in production')
+  })
+})

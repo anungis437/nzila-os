@@ -95,11 +95,14 @@ export const STAKEHOLDER_ORDER: StakeholderRole[] = [
 export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
   member: [
     'Home',
-    'My Cases',
-    'Open Representation Case',
+    'My Representation',
     'Messages',
-    'Documents',
-    'Profile & Settings',
+    'My Documents',
+    'My Union',
+    'Help & Resources',
+    'Profile',
+    'Preferences',
+    'Privacy',
   ],
   steward: [
     'Today',

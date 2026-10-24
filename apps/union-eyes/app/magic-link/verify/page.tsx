@@ -41,7 +41,7 @@ export default function MagicLinkVerifyPage() {
           setStatus('error');
           return;
         }
-        router.replace('/en-CA/dashboard/priorities');
+        router.replace('/en-CA/dashboard');
       } catch {
         if (cancelled) return;
         setError('Could not verify sign-in link');

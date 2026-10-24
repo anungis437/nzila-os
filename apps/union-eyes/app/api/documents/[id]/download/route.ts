@@ -21,6 +21,7 @@ import {
 } from '@/lib/services/document-governance-service';
 import { generateSasUrl } from '@/lib/blob-client';
 import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
+import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 
 const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
 
@@ -47,6 +48,7 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
         fileUrl: documents.fileUrl,
         mimeType: documents.mimeType,
         privacyLabel: documents.privacyLabel,
+        uploadedBy: documents.uploadedBy,
         linkedEntityType: documentLinks.linkedEntityType,
         linkedEntityId: documentLinks.linkedEntityId,
       })
@@ -87,6 +89,8 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
       .limit(1)
   )[0];
 
+  // Representative-level role: eligibility for organization-level (unlinked) documents only, never case content.
+  const isStaff = await hasMinRole('steward');
   let caseAccess = {
     isPrimaryOwner: false,
     canViewCase: false,
@@ -111,7 +115,15 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     {
       isOrgMember: true,
       isPrimaryOwner: caseAccess.isPrimaryOwner,
-      hasCaseAccess: caseAccess.canViewCase || !row.linkedEntityId,
+      hasCaseAccess: hasDocumentContextAccess({
+        isStaff,
+        canViewCase: caseAccess.canViewCase,
+        hasExplicitGrant: Boolean(explicitGrant),
+        linkedEntityId: row.linkedEntityId,
+        privacyLabel: row.privacyLabel,
+        uploadedBy: row.uploadedBy,
+        userId,
+      }),
       canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
       hasExplicitDocumentGrant: Boolean(explicitGrant),
     },

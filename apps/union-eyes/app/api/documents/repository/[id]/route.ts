@@ -22,6 +22,7 @@ import {
 } from '@/lib/services/document-governance-service';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 
@@ -107,6 +108,8 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
   }
 
+  // Representative-level role: eligibility for organization-level (unlinked) documents only, never case content.
+  const isStaff = await hasMinRole('steward');
   let caseAccess = {
     isPrimaryOwner: false,
     canViewCase: false,
@@ -131,7 +134,15 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     {
       isOrgMember: true,
       isPrimaryOwner: caseAccess.isPrimaryOwner,
-      hasCaseAccess: caseAccess.canViewCase || !row.linkedEntityId,
+      hasCaseAccess: hasDocumentContextAccess({
+        isStaff,
+        canViewCase: caseAccess.canViewCase,
+        hasExplicitGrant: Boolean(explicitGrant),
+        linkedEntityId: row.linkedEntityId,
+        privacyLabel: row.privacyLabel,
+        uploadedBy: row.uploadedBy,
+        userId,
+      }),
       canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
       hasExplicitDocumentGrant: Boolean(explicitGrant),
     },

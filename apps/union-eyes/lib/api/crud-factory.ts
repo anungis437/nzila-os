@@ -35,6 +35,7 @@ import { eq, and, desc, count, sql, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
 import type { UserRole } from '@/lib/api-auth-guard';
+import { lowRoleModeFor, resolveLowRoleScope } from './crud-low-role-guard';
 
 // crud-factory's readRole/writeRole accept the full canonical role hierarchy
 // (same set withApi's auth.minRole already enforces via ROLE_HIERARCHY), not
@@ -318,6 +319,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
   const orgCol = orgScoped ? getColumn(table, 'organizationId') : undefined;
   const ownerCol = opts.ownerColumn ? getColumn(table, opts.ownerColumn) : undefined;
   const orderCol = getColumn(table, orderBy);
+  const lowRoleMode = lowRoleModeFor(table, Boolean(opts.ownerColumn));
 
   if (itemRoute) {
     return buildItemHandlers();
@@ -349,6 +351,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
+        const lowRole = await resolveLowRoleScope(lowRoleMode, userId, organizationId);
+        if (lowRole.condition) conditions.push(lowRole.condition);
 
         const whereClause = conditions.length > 0
           ? and(...conditions)
@@ -414,6 +418,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           values.createdBy = userId;
         }
 
+        const lowRole = await resolveLowRoleScope(lowRoleMode, userId, organizationId);
+
         const transformed = opts.beforeCreate
           ? await opts.beforeCreate(values, { organizationId, userId })
           : values;
@@ -429,6 +435,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           hasOrgColumn: Boolean(orgScoped && orgCol),
           hasCreatedByColumn: Boolean(createdByCol),
         });
+
+        // A below-staff caller can only create rows about themselves.
+        if (lowRole.forcedOwner) finalValues[lowRole.forcedOwner.name] = lowRole.forcedOwner.value;
 
         const [row] = await db.insert(table).values(finalValues).returning();
         return { data: row };
@@ -463,6 +472,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
+        const lowRole = await resolveLowRoleScope(lowRoleMode, userId, organizationId);
+        if (lowRole.condition) conditions.push(lowRole.condition);
 
         const [row] = await db.select().from(table).where(and(...conditions));
         if (!row) throw ApiError.notFound(`${resourceName} not found`);
@@ -500,6 +511,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
+        const lowRole = await resolveLowRoleScope(lowRoleMode, userId, organizationId);
+        if (lowRole.condition) conditions.push(lowRole.condition);
 
         if (opts.beforeUpdate || mergeJsonColumns.length > 0) {
           // Locked read-then-write: the row cannot change between the hook

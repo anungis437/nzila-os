@@ -19,11 +19,13 @@ import {
 import { toLifecycleState } from '@/lib/workflow/state-bridge';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims, claimUpdates, claimStatusEnum } from '@/db/schema/claims-schema';
+import { inAppNotifications } from '@/db/schema';
 import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { canPerformAction } from '@/lib/action-enforcer';
 import { logger } from '@/lib/logger';
 import { getCaseActor, findReadableCase, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
+import { inAppNoticeAllowed } from '@/lib/notifications/in-app-preferences';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
@@ -161,6 +163,21 @@ export async function PATCH(
           reason: reason ?? null,
         },
       });
+
+      // The member is told in-app when their own case moves; the same transaction guarantees the
+      // notice exists only if the transition committed.
+      if (claim.memberId && claim.memberId !== userId && (await inAppNoticeAllowed(claim.memberId, actor.organizationId, 'case'))) {
+        await tx.insert(inAppNotifications).values({
+          userId: claim.memberId,
+          organizationId: actor.organizationId,
+          title: 'Your case status was updated',
+          message: `Your case is now ${toDbStatus.replace(/_/g, ' ')}.`,
+          type: 'info',
+          actionLabel: 'View case',
+          actionUrl: `/dashboard/claims/${claim.claimId}`,
+          data: { event: 'case_status_changed', claimId: claim.claimId, toStatus: toDbStatus },
+        });
+      }
 
       return {
         found: true as const,

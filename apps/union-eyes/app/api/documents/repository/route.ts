@@ -22,6 +22,7 @@ import {
   toGovernanceLabel,
 } from '@/lib/services/document-governance-service';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
 
 const uploadDocumentSchema = z.object({
@@ -123,6 +124,10 @@ export const GET = withOrganizationAuth(async (request, context) => {
     .where(and(...conditions))
     .orderBy(desc(documents.updatedAt));
 
+  // Representative-level role: eligibility for organization-level (unlinked) documents and the uploader
+  // projection only, never case content.
+  const isStaff = await hasMinRole('steward');
+
   const visible = await Promise.all(
     rows.map(async (row) => {
       let caseAccess = {
@@ -149,7 +154,15 @@ export const GET = withOrganizationAuth(async (request, context) => {
         {
           isOrgMember: true,
           isPrimaryOwner: caseAccess.isPrimaryOwner,
-          hasCaseAccess: caseAccess.canViewCase || !row.linkedEntityId,
+          hasCaseAccess: hasDocumentContextAccess({
+            isStaff,
+            canViewCase: caseAccess.canViewCase,
+            hasExplicitGrant: false,
+            linkedEntityId: row.linkedEntityId,
+            privacyLabel: row.privacyLabel,
+            uploadedBy: row.uploadedBy,
+            userId,
+          }),
           canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
           hasExplicitDocumentGrant: false,
         },
@@ -163,8 +176,11 @@ export const GET = withOrganizationAuth(async (request, context) => {
         return null;
       }
 
+      // Uploader identity is staff-only; members see their documents without other users' ids.
+      const { uploadedBy: uploaderId, ...withoutUploader } = row;
+
       return {
-        ...row,
+        ...(isStaff ? { ...withoutUploader, uploadedBy: uploaderId } : withoutUploader),
         title: normalizeDocumentTitle(row),
       };
     }),

@@ -17,7 +17,7 @@ describe('Microsoft sign-in from the Union Eyes login form', () => {
   it('starts the existing Entra client action with the normal destination', async () => {
     render(<LoginForm />);
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Microsoft' }));
-    await waitFor(() => expect(signInWithEntra).toHaveBeenCalledWith('/en-CA/dashboard/priorities'));
+    await waitFor(() => expect(signInWithEntra).toHaveBeenCalledWith('/en-CA/dashboard'));
     expect(signInWithEntra).toHaveBeenCalledTimes(1);
   });
 

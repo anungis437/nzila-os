@@ -22,6 +22,8 @@ export async function getCaseActor(): Promise<CaseActor> {
   const { userId } = await auth()
   if (!userId) throw ApiError.unauthorized()
   const organizationId = await getOrganizationIdForUser(userId)
+  // Missing organization context must never reach a query scope.
+  if (!organizationId) throw ApiError.forbidden()
   const resolvedRole = await getUserRoleInOrganization(userId, organizationId)
   // Platform administration never confers customer-organization case authority: platform roles resolve to no case role.
   const role = resolvedRole && casePolicyRole(resolvedRole)

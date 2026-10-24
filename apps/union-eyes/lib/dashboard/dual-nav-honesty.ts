@@ -135,7 +135,7 @@ export function honestyForNavigationItem(
 }
 
 export type RoleHomeHubCue = {
-  /** False when the role execution home is already the orientation hub (member). */
+  /** False for member, who has no orientation hub. */
   show: boolean;
   message: string;
   linkLabel: string;
@@ -146,8 +146,9 @@ export type RoleHomeHubCue = {
 
 /** Explicit link copy. Callers must render an anchor, not a redirect. */
 export function roleHomeHubCue(homes: DualNavHomes, translate: (text: string) => string = text => text): RoleHomeHubCue {
-  // Never advertise a hub link the experience's own allow-list would bounce.
+  // Never advertise a hub link the experience's own allow-list would bounce; members start at their own Home.
   const show = !homes.roleHomeIsOrientationHub
+    && homes.experience !== 'member'
     && canAccessDashboardPath(WORKSPACE_ORIENTATION_HUB_PATH, homes.experience, false);
   return {
     show,

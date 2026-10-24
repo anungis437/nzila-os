@@ -95,11 +95,10 @@ test.describe('Empty states', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: emptyList() });
     });
 
-    // Navigate directly to the member's actual landing surface
-    // (`getRoleLandingPath('member') === '/dashboard/inbox'`). Going via
-    // `/dashboard` would force the role-router redirect chain which is
+    // Navigate directly to the member's landing surface (`getRoleLandingPath('member') === '/dashboard/claims'`).
+    // Going via `/dashboard` would force the role-router redirect chain which is
     // environment-sensitive and unrelated to empty-state rendering.
-    await page.goto('/en-CA/dashboard/inbox', { waitUntil: 'domcontentloaded' });
+    await page.goto('/en-CA/dashboard/claims', { waitUntil: 'domcontentloaded' });
 
     // Ensure the page body renders something meaningful.
     await expect(page.locator('body')).toBeVisible();

@@ -45,6 +45,8 @@ describe('BottomNav', () => {
   it('does not filter member navigation (no member entries are pilot-excluded)', () => {
     mockUsePilotMode.mockReturnValue({ isPilotMode: true });
     render(<BottomNav userRole="member" />);
+    expect(screen.getByText('My Representation')).toBeInTheDocument();
     expect(screen.getByText('Home')).toBeInTheDocument();
+    expect(screen.queryByText('Workspace')).not.toBeInTheDocument();
   });
 });
