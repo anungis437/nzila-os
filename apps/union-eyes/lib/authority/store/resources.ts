@@ -99,6 +99,11 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
     counselControlled: counsel,
     adverseUserIds: [],
   }
+  if (req.action === 'case:read_own_submission' && isUuid(req.documentId)) {
+    const doc = await loadDocument(exec, org, req.documentId)
+    facts.requestedDocumentIsPrincipalsOwnSubmission =
+      !!doc && !doc.privileged && doc.uploadedBy === req.principalUserId && doc.caseIds.length === 1 && doc.caseIds[0] === facts.id
+  }
 
   const relationships: ResourceRelationship[] = []
   const creator = row.created_by as string | null
@@ -133,6 +138,8 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
   for (const c of collaborators) {
     if (!isPrincipalId(c.user_id) || !isPrincipalId(c.granted_by)) continue
     const permissions = ['read']
+    // A co-handling secondary LRO or a reviewer works the internal file; a read-only collaborator does not.
+    if (c.access_role === 'secondary_lro' || c.access_role === 'reviewer') permissions.push('read_internal')
     if (c.can_comment === true) permissions.push('comment')
     if (c.can_edit_case_notes === true && c.access_role !== 'read_only') permissions.push('write')
     relationships.push({
@@ -161,6 +168,8 @@ export interface DocumentFacts {
   organizationId: string
   uploadedBy: string | null
   privileged: boolean
+  /** documents.privacy_label; null when absent. Anything unrecognised is treated as internal. */
+  label: string | null
   /** Grievance ids this document is linked to. Exactly one is required to derive access. */
   caseIds: string[]
 }
@@ -191,6 +200,7 @@ export async function loadDocument(exec: SqlExecutor, organizationId: string, do
     organizationId: String(doc.organization_id),
     uploadedBy: (doc.uploaded_by as string | null) ?? null,
     privileged: doc.contains_legal_privilege === true || PRIVILEGED_LABELS.has(String(doc.privacy_label)),
+    label: doc.privacy_label ? String(doc.privacy_label) : null,
     caseIds: links.map((l) => String(l.id)),
   }
 }

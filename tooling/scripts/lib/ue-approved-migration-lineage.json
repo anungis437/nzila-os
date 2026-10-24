@@ -163,10 +163,10 @@
     "platform": [
       {
         "tag": "0013_authority_kernel_storage",
-        "sha256": "6cb84c1640fda60c3ee0a79ad235ab2c7048481652c93c36b3a027e9facb0fa8",
+        "sha256": "f853a13f1bd9e5e7ed6c3b7312b7ba221b92f13bee91c5a24016d45904e26e50",
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-authority-kernel",
-        "note": "Authority kernel storage. Revised in place before any deployment: the first local draft (3a999601b) hashed to cf53ce455254a0fc913d7e255ae2f21836564025ffb8e48f91d1c5986ac0215a. Not yet applied to any clone or live database."
+        "note": "Authority kernel storage. Revised in place before any deployment: the first local draft (3a999601b) hashed to cf53ce455254a0fc913d7e255ae2f21836564025ffb8e48f91d1c5986ac0215a; the Phase 1 completion revision (dba0d5527) hashed to 6cb84c1640fda60c3ee0a79ad235ab2c7048481652c93c36b3a027e9facb0fa8; the actor-binding revision adds ue_authority_guard_actor, counsel_accepted_by, rule-adoption approval binding and a one-live-adoption index. Not yet applied to any clone or live database."
       }
     ]
   }

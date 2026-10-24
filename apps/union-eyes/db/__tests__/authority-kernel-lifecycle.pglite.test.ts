@@ -11,6 +11,7 @@ import { enforceAuthority } from '../../lib/authority/store/enforce'
 import {
   acceptInstrument,
   activateIssuanceRule,
+  requestRuleAdoption,
   amendMandate,
   assignCase,
   changeMandate,
@@ -67,27 +68,60 @@ describe('issuance rules: no rule, no authority', () => {
     expect(r.rows).toEqual([{ status: 'draft', source_instrument: 'PENDING_INSTITUTIONAL_SOURCE' }])
   })
 
-  it('activation needs a real source, two distinct approvers, none the drafter, all adopters', async () => {
+  it('activation needs a real source, a satisfied adoption approval by two adopters, none the drafter', async () => {
     const [id] = await k.as(U.president)((t) => draftDefaultIssuanceRules(t, k.deps, ORG, U.president))
-    const act = (over: Record<string, unknown>) => k.as(U.vp)((t) => activateIssuanceRule(t, k.deps, {
-      organizationId: ORG, ruleId: id, actorUserId: U.vp, approverUserIds: [U.vp, U.treasurer], sourceInstrument: 'Bylaw 1', ...over }))
-    await expect(act({ sourceInstrument: 'PENDING_INSTITUTIONAL_SOURCE' })).rejects.toThrow(/real institutional source/)
-    await expect(act({ sourceInstrument: '  ' })).rejects.toThrow(/real institutional source/)
-    await expect(act({ approverUserIds: [U.vp] })).rejects.toThrow(/two or more distinct/)
-    await expect(act({ approverUserIds: [U.vp, U.vp] })).rejects.toThrow(/two or more distinct/)
-    await expect(act({ approverUserIds: [U.vp, U.president] })).rejects.toThrow(/drafter/)
-    await expect(act({ approverUserIds: [U.vp, U.steward] })).rejects.toThrow(/adoption capacity/)
+    const request = (over: Record<string, unknown> = {}) => k.as(U.president)((t) => requestRuleAdoption(t, k.deps, { organizationId: ORG, ruleId: id, actorUserId: U.president, sourceInstrument: 'Bylaw 1', namedApproverIds: [U.vp, U.treasurer], ...over }))
+    await expect(request({ sourceInstrument: 'PENDING_INSTITUTIONAL_SOURCE' })).rejects.toThrow(/real institutional source/)
+    await expect(request({ sourceInstrument: '  ' })).rejects.toThrow(/real institutional source/)
+    await expect(k.as(U.steward)((t) => requestRuleAdoption(t, k.deps, { organizationId: ORG, ruleId: id, actorUserId: U.steward, sourceInstrument: 'Bylaw 1', namedApproverIds: [U.vp, U.treasurer] }))).rejects.toThrow(/adoption capacity/)
+    await expect(request({ namedApproverIds: [U.vp] })).rejects.toThrow(/two or more distinct named approvers/)
+    await expect(request({ namedApproverIds: [U.vp, U.vp] })).rejects.toThrow(/two or more distinct named approvers/)
+    await expect(request({ namedApproverIds: [U.vp, U.president] })).rejects.toThrow(/requester cannot be a named approver/)
+    await expect(request({ namedApproverIds: [U.vp, U.steward] })).rejects.toThrow(/adoption capacity/)
+
+    const req = await request()
+    const activate = () => k.as(U.vp)((t) => activateIssuanceRule(t, k.deps, { organizationId: ORG, ruleId: id, actorUserId: U.vp, approvalRequestId: req }))
+    await expect(activate()).rejects.toThrow(/satisfied rule_adoption approval/) // nobody has voted
+    await expect(request()).rejects.toThrow(/already has a live adoption request/)
+    const vote = (user: string) => k.as(user)((t) => recordApprovalDecision(t, k.deps, { organizationId: ORG, approvalRequestId: req, approverUserId: user, decision: 'approved' }))
+    await expect(vote(U.president)).rejects.toThrow(/SELF_APPROVAL/) // the requester is the drafter
+    await expect(vote(U.steward)).rejects.toThrow(/NOT_ELIGIBLE_APPROVER/)
+    await vote(U.vp)
+    await expect(activate()).rejects.toThrow(/satisfied rule_adoption approval/) // one of two
+    await vote(U.treasurer)
+    await activate()
+    const live = await k.as(U.vp)((t) => t.query<{ approved_by: string; source_instrument: string }>(`SELECT approved_by::text, source_instrument FROM ue_authority_issuance_rules WHERE id = $1 AND status = 'active'`, [id]))
+    expect(live.rows).toHaveLength(1)
+    expect(live.rows[0].source_instrument).toBe('Bylaw 1')
+    expect(live.rows[0].approved_by).toMatch(/user_vice_president/)
+    expect(live.rows[0].approved_by).toMatch(/user_secretary_treasurer/)
+  })
+
+  it('an activator cannot name approvers who did not approve, nor activate on another rule’s approval', async () => {
+    const [a, b] = await k.as(U.president)((t) => draftDefaultIssuanceRules(t, k.deps, ORG, U.president))
+    const reqA = await k.as(U.president)((t) => requestRuleAdoption(t, k.deps, { organizationId: ORG, ruleId: a, actorUserId: U.president, sourceInstrument: 'Bylaw A', namedApproverIds: [U.vp, U.treasurer] }))
+    await k.as(U.vp)((t) => recordApprovalDecision(t, k.deps, { organizationId: ORG, approvalRequestId: reqA, approverUserId: U.vp, decision: 'approved' }))
+    // Raw activation naming two approvers who never voted (the previous design's hole) is refused by the database.
+    await expect(
+      k.as(U.vp)((t) => t.query(`UPDATE ue_authority_issuance_rules SET status = 'active', activated_at = now(), approved_by = ARRAY['user_vice_president','user_secretary_treasurer'] WHERE id = $1`, [a])),
+    ).rejects.toThrow(/RULE_ADOPTION_NOT_APPROVED/)
+    await k.as(U.treasurer)((t) => recordApprovalDecision(t, k.deps, { organizationId: ORG, approvalRequestId: reqA, approverUserId: U.treasurer, decision: 'approved' }))
+    // A satisfied approval for rule A cannot activate rule B.
+    await expect(k.as(U.vp)((t) => activateIssuanceRule(t, k.deps, { organizationId: ORG, ruleId: b, actorUserId: U.vp, approvalRequestId: reqA }))).rejects.toThrow(/satisfied rule_adoption approval bound to this rule/)
+    // And the database refuses an approved_by that is not exactly the recorded approvers.
+    await expect(
+      k.as(U.vp)((t) => t.query(`UPDATE ue_authority_issuance_rules SET status = 'active', activated_at = now(), approved_by = ARRAY['user_vice_president','user_president'] WHERE id = $1`, [a])),
+    ).rejects.toThrow(/RULE_ADOPTION_NOT_APPROVED|activation_chk/)
   })
 
   it('the database alone refuses to activate a rule without provenance or independent approval', async () => {
     const [id] = await k.as(U.president)((t) => draftDefaultIssuanceRules(t, k.deps, ORG, U.president))
     const upd = (sets: string) => k.as(U.vp)((t) => t.query(`UPDATE ue_authority_issuance_rules SET status = 'active', activated_at = now(), ${sets} WHERE id = $1`, [id]))
-    await expect(upd(`approved_by = ARRAY['user_vice_president','user_secretary_treasurer']`)).rejects.toThrow(/activation_chk/) // still the placeholder
-    await expect(upd(`source_instrument = 'Bylaw', approved_by = ARRAY['user_president','user_vice_president']`)).rejects.toThrow(/activation_chk/) // drafter approves
-    await expect(upd(`source_instrument = 'Bylaw', approved_by = ARRAY['user_vice_president']`)).rejects.toThrow(/activation_chk/)
-    await expect(upd(`source_instrument = 'Bylaw', approved_by = ARRAY['user_vice_president','user_vice_president']`)).rejects.toThrow(/approvers_chk/)
+    await expect(upd(`approved_by = ARRAY['user_vice_president','user_secretary_treasurer']`)).rejects.toThrow(/RULE_ADOPTION_NOT_APPROVED/) // still the placeholder
+    await expect(upd(`source_instrument = 'Bylaw', approved_by = ARRAY['user_president','user_vice_president']`)).rejects.toThrow(/RULE_ADOPTION_NOT_APPROVED/) // drafter approves
+    await expect(upd(`source_instrument = 'Bylaw', approved_by = ARRAY['user_vice_president']`)).rejects.toThrow(/RULE_ADOPTION_NOT_APPROVED/)
+    await expect(upd(`source_instrument = 'Bylaw', approved_by = ARRAY['user_vice_president','user_vice_president']`)).rejects.toThrow(/RULE_ADOPTION_NOT_APPROVED/)
   })
-
   it('rule content is immutable once active, and an active rule can only be retired', async () => {
     await k.adoptDefaultRules()
     const r = (await k.as(U.vp)((t) => t.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE status='active' AND domain='delegation' AND operation='issue'`))).rows[0]
@@ -114,14 +148,14 @@ describe('issuance rules: no rule, no authority', () => {
   it('a newer version replaces the active one; a retired rule stops authorising', async () => {
     const before = (await k.as(U.vp)((t) => t.query<{ id: string; version: number }>(`SELECT id::text id, version FROM ue_authority_issuance_rules WHERE status='active' AND domain='recusal' AND operation='lift'`))).rows[0]
     const v2 = await k.as(U.president)((t) => draftIssuanceRule(t, k.deps, { domain: 'recusal', operation: 'lift', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, organizationId: ORG, draftedBy: U.president }))
-    await k.as(U.vp)((t) => activateIssuanceRule(t, k.deps, { organizationId: ORG, ruleId: v2, actorUserId: U.vp, approverUserIds: [U.vp, U.treasurer], sourceInstrument: 'Bylaw 99' }))
+    await k.adoptRule(v2, 'Bylaw 99')
     const rows = (await k.as(U.vp)((t) => t.query<{ id: string; status: string; version: number }>(`SELECT id::text id, status, version FROM ue_authority_issuance_rules WHERE domain='recusal' AND operation='lift' ORDER BY version`))).rows
     expect(rows.at(-1)?.status).toBe('active')
     expect(rows.slice(0, -1).every((r) => r.status === 'retired')).toBe(true)
     expect(rows.at(-1)?.version).toBe(before.version + 1)
     // Retiring a rule leaves no active rule for that act: the policy fails closed again.
     const ex = await k.as(U.president)((t) => draftIssuanceRule(t, k.deps, { domain: 'case_assignment', operation: 'revoke', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, organizationId: ORG, draftedBy: U.president }))
-    await k.as(U.vp)((t) => activateIssuanceRule(t, k.deps, { organizationId: ORG, ruleId: ex, actorUserId: U.vp, approverUserIds: [U.vp, U.treasurer], sourceInstrument: 'Bylaw 100' }))
+    await k.adoptRule(ex, 'Bylaw 100')
     expect(await k.as(U.vp)((t) => loadActiveIssuanceRule(t, ORG, 'case_assignment', 'revoke'))).not.toBeNull()
     await k.as(U.vp)((t) => retireIssuanceRule(t, k.deps, ORG, ex, U.vp))
     expect(await k.as(U.vp)((t) => loadActiveIssuanceRule(t, ORG, 'case_assignment', 'revoke'))).toBeNull()
@@ -272,6 +306,7 @@ describe('delegation', () => {
   it('the database refuses non-delegable actions in any delegation, independent of any rule', async () => {
     await k.asAdmin(async () => {
       await db.exec('ALTER TABLE ue_authority_delegations DISABLE TRIGGER ue_authority_guard_issuance')
+      await db.exec('ALTER TABLE ue_authority_delegations DISABLE TRIGGER ue_authority_guard_actor')
       try {
         for (const a of NON_DELEGABLE_ACTIONS) {
           await expect(db.query(
@@ -280,6 +315,7 @@ describe('delegation', () => {
         }
       } finally {
         await db.exec('ALTER TABLE ue_authority_delegations ENABLE TRIGGER ue_authority_guard_issuance')
+        await db.exec('ALTER TABLE ue_authority_delegations ENABLE TRIGGER ue_authority_guard_actor')
       }
     })
   })
@@ -298,7 +334,7 @@ describe('amendment, recusal, case assignment, succession', () => {
     await expect(k.as(U.president)((t) => amendMandate(t, k.deps, change))).rejects.toThrow(/NO_ACTIVE_ISSUANCE_RULE/) // no 'amend' rule by default
     await k.as(U.president)((t) => draftIssuanceRule(t, k.deps, { domain: 'supervisory', operation: 'amend', issuerCapacities: ['executive'], allowedPowers: ['read', 'assign', 'monitor'], maxTermDays: 365, requiresAcceptance: true, requiredIndependentApprovals: 1, organizationId: ORG, draftedBy: U.president }))
     const draft = (await k.as(U.president)((t) => t.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE status='draft' AND domain='supervisory' AND operation='amend'`))).rows[0].id
-    await k.as(U.vp)((t) => activateIssuanceRule(t, k.deps, { organizationId: ORG, ruleId: draft, actorUserId: U.vp, approverUserIds: [U.vp, U.treasurer], sourceInstrument: 'Bylaw 14' }))
+    await k.adoptRule(draft, 'Bylaw 14')
     // Amendment also re-issues under the 'issue' rule, which needs its own bound approval: plain amend without one is refused.
     await expect(k.as(U.president)((t) => amendMandate(t, k.deps, change))).rejects.toThrow(/APPROVAL_NOT_SATISFIED/)
     // The failed attempt rolled back: the original is still live.

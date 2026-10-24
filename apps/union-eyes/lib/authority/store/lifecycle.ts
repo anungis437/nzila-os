@@ -12,7 +12,7 @@ import { decideIssuance, DEFAULT_ISSUANCE_TEMPLATES, PLACEHOLDER_INSTRUMENT, typ
 import type { Capacity, Mandate, MandateKind, MandateScope, Membership, ResourceType } from '../ontology'
 import { auditAuthorityMutation } from './audit'
 import { enforceAuthority, type EnforcementDeps } from './enforce'
-import { AuthorityStoreError, type SqlExecutor } from './executor'
+import { AuthorityStoreError, bindSessionActor, type SqlExecutor } from './executor'
 import { loadActiveIssuanceRule, loadAuthorityFacts, loadHolderMandates, loadIssuanceApproval, mapMandate } from './facts'
 import {
   changeMandateState,
@@ -55,6 +55,7 @@ interface Evaluate {
 }
 
 async function evaluateIssuance(exec: SqlExecutor, deps: EnforcementDeps, e: Evaluate): Promise<{ decision: IssuanceDecision; rule: IssuanceRule | null }> {
+  await bindSessionActor(exec, e.issuerUserId, 'issuer')
   const now = (deps.now ?? (() => new Date()))()
   const rule = await loadActiveIssuanceRule(exec, e.organizationId, e.domain, e.operation)
   const facts = await loadAuthorityFacts(exec, deps.memberships, {
@@ -111,6 +112,7 @@ export interface DraftRuleInput extends Omit<IssuanceRuleTemplate, 'rationale'> 
 export async function draftIssuanceRule(exec: SqlExecutor, deps: EnforcementDeps, i: DraftRuleInput): Promise<string> {
   requireUuids(i.organizationId)
   requirePrincipals(i.draftedBy)
+  await bindSessionActor(exec, i.draftedBy, 'rule drafter')
   await requireAdopter(exec, deps, i.organizationId, i.draftedBy)
   const row = (
     await exec.query<Row>(
@@ -142,30 +144,86 @@ export async function draftDefaultIssuanceRules(exec: SqlExecutor, deps: Enforce
   return ids
 }
 
+export interface RequestRuleAdoptionInput {
+  organizationId: string
+  ruleId: string
+  actorUserId: string
+  /** The bylaw, constitution clause or resolution that authorises this rule. Required; fixed here so approvers approve the exact citation. */
+  sourceInstrument: string
+  /** The adopters who must vote (at least two, distinct, neither the drafter nor the requester). No office mandates exist yet when rules are first adopted, so approvers are named. */
+  namedApproverIds: readonly string[]
+}
+
+/**
+ * Opens the independent approval a rule's adoption needs (two approvers, none the
+ * drafter or the requester) and pins the real source instrument. The approvers vote
+ * themselves, each in their own authenticated session; activation never accepts a list
+ * of names from the activator.
+ */
+export async function requestRuleAdoption(exec: SqlExecutor, deps: EnforcementDeps, i: RequestRuleAdoptionInput): Promise<string> {
+  requireUuids(i.organizationId, i.ruleId)
+  requirePrincipals(i.actorUserId, ...(i.namedApproverIds ?? []))
+  await bindSessionActor(exec, i.actorUserId, 'adoption requester')
+  if (!i.sourceInstrument || i.sourceInstrument.trim() === '' || i.sourceInstrument === PLACEHOLDER_INSTRUMENT) {
+    throw new AuthorityStoreError('PRECONDITION', 'a real institutional source instrument is required to adopt a rule')
+  }
+  const named = [...new Set(i.namedApproverIds)]
+  if (named.length !== i.namedApproverIds.length || named.length < 2) {
+    throw new AuthorityStoreError('PRECONDITION', 'two or more distinct named approvers are required')
+  }
+  if (named.includes(i.actorUserId)) throw new AuthorityStoreError('DENIED', 'the requester cannot be a named approver')
+  await requireAdopter(exec, deps, i.organizationId, i.actorUserId)
+  for (const u of named) await requireAdopter(exec, deps, i.organizationId, u)
+  const rule = (await exec.query<Row>(`SELECT status, drafted_by FROM ue_authority_issuance_rules WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.ruleId])).rows[0]
+  if (!rule || rule.status !== 'draft') throw new AuthorityStoreError('NOT_FOUND', 'no draft rule with this id')
+  if (named.includes(String(rule.drafted_by))) throw new AuthorityStoreError('DENIED', 'a rule cannot be approved by its drafter')
+  const live = await exec.query(`SELECT 1 FROM ue_authority_approval_requests WHERE organization_id = $1 AND subject_type = 'rule_adoption' AND subject_id = $2 AND status IN ('open', 'satisfied')`, [i.organizationId, i.ruleId])
+  if (live.rows.length > 0) throw new AuthorityStoreError('PRECONDITION', 'this rule already has a live adoption request')
+  const set = await exec.query(
+    `UPDATE ue_authority_issuance_rules SET source_instrument = $3 WHERE organization_id = $1 AND id = $2 AND status = 'draft' RETURNING id`,
+    [i.organizationId, i.ruleId, i.sourceInstrument],
+  )
+  if (set.rows.length !== 1) throw new AuthorityStoreError('NOT_FOUND', 'no draft rule with this id')
+  await auditAuthorityMutation(exec, { organizationId: i.organizationId, action: 'rule.pin_instrument', resourceType: 'ue_authority_issuance_rules', resourceId: i.ruleId, details: { sourceInstrument: i.sourceInstrument } })
+  return openApprovalRequest(exec, {
+    organizationId: i.organizationId,
+    subjectType: 'rule_adoption',
+    subjectId: i.ruleId,
+    proposedBy: i.actorUserId,
+    requiredApprovals: 2,
+    riskClass: 'high',
+    namedApproverIds: named,
+    eligibleCapacities: [...RULE_ADOPTION_CAPACITIES],
+  })
+}
+
 export interface ActivateRuleInput {
   organizationId: string
   ruleId: string
   actorUserId: string
-  /** At least two, distinct, none of them the drafter. */
-  approverUserIds: readonly string[]
-  /** The bylaw, constitution clause or resolution that authorises this rule. Required. */
-  sourceInstrument: string
+  /** A satisfied rule_adoption approval request bound to this rule. */
+  approvalRequestId: string
 }
 
 export async function activateIssuanceRule(exec: SqlExecutor, deps: EnforcementDeps, i: ActivateRuleInput): Promise<void> {
-  requireUuids(i.organizationId, i.ruleId)
-  requirePrincipals(i.actorUserId, ...i.approverUserIds)
-  if (!i.sourceInstrument || i.sourceInstrument.trim() === '' || i.sourceInstrument === PLACEHOLDER_INSTRUMENT) {
+  requireUuids(i.organizationId, i.ruleId, i.approvalRequestId)
+  requirePrincipals(i.actorUserId)
+  await bindSessionActor(exec, i.actorUserId, 'rule activator')
+  const rule = (await exec.query<Row>(`SELECT domain, operation, status, drafted_by, source_instrument FROM ue_authority_issuance_rules WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.ruleId])).rows[0]
+  if (!rule || rule.status !== 'draft') throw new AuthorityStoreError('NOT_FOUND', 'no draft rule with this id')
+  const approval = await loadIssuanceApproval(exec, i.organizationId, i.approvalRequestId)
+  if (!approval || approval.status !== 'satisfied' || approval.subjectType !== 'rule_adoption' || approval.subjectId !== i.ruleId) {
+    throw new AuthorityStoreError('PRECONDITION', 'a satisfied rule_adoption approval bound to this rule is required')
+  }
+  const sourceInstrument = String(rule.source_instrument)
+  if (!sourceInstrument.trim() || sourceInstrument === PLACEHOLDER_INSTRUMENT) {
     throw new AuthorityStoreError('PRECONDITION', 'a real institutional source instrument is required to activate a rule')
   }
-  const approvers = [...new Set(i.approverUserIds)]
-  if (approvers.length !== i.approverUserIds.length || approvers.length < 2) {
-    throw new AuthorityStoreError('PRECONDITION', 'two or more distinct approvers are required')
-  }
-  const rule = (await exec.query<Row>(`SELECT domain, operation, status, drafted_by FROM ue_authority_issuance_rules WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.ruleId])).rows[0]
-  if (!rule || rule.status !== 'draft') throw new AuthorityStoreError('NOT_FOUND', 'no draft rule with this id')
+  const approvers = [...new Set(approval.approvingLines)]
+  if (approvers.length < 2) throw new AuthorityStoreError('PRECONDITION', 'two or more distinct approvers are required')
   if (approvers.includes(String(rule.drafted_by))) throw new AuthorityStoreError('DENIED', 'a rule cannot be approved by its drafter')
-  for (const u of [i.actorUserId, ...approvers]) await requireAdopter(exec, deps, i.organizationId, u)
+  await requireAdopter(exec, deps, i.organizationId, i.actorUserId)
+  for (const u of approvers) await requireAdopter(exec, deps, i.organizationId, u)
 
   // A newer version replaces the active one in the same transaction.
   const retired = await exec.query<Row>(
@@ -175,22 +233,22 @@ export async function activateIssuanceRule(exec: SqlExecutor, deps: EnforcementD
   )
   await exec.query(
     `UPDATE ue_authority_issuance_rules
-        SET status = 'active', approved_by = $3::text[], activated_at = now(), source_instrument = $4
+        SET status = 'active', approved_by = $3::text[], activated_at = now()
       WHERE organization_id = $1 AND id = $2 AND status = 'draft'`,
-    [i.organizationId, i.ruleId, approvers, i.sourceInstrument],
+    [i.organizationId, i.ruleId, approvers],
   )
   await auditAuthorityMutation(exec, {
     organizationId: i.organizationId,
     action: 'rule.activate',
     resourceType: 'ue_authority_issuance_rules',
     resourceId: i.ruleId,
-    details: { actor: i.actorUserId, approvers, sourceInstrument: i.sourceInstrument, retired: retired.rows.map((r) => r.id) },
+    details: { actor: i.actorUserId, approvalRequestId: i.approvalRequestId, approvers, sourceInstrument, retired: retired.rows.map((r) => r.id) },
   })
 }
-
 export async function retireIssuanceRule(exec: SqlExecutor, deps: EnforcementDeps, organizationId: string, ruleId: string, actorUserId: string): Promise<void> {
   requireUuids(organizationId, ruleId)
   requirePrincipals(actorUserId)
+  await bindSessionActor(exec, actorUserId, 'rule retirer')
   await requireAdopter(exec, deps, organizationId, actorUserId)
   const r = await exec.query(`UPDATE ue_authority_issuance_rules SET status = 'retired', retired_at = now() WHERE organization_id = $1 AND id = $2 AND status <> 'retired' RETURNING id`, [organizationId, ruleId])
   if (r.rows.length !== 1) throw new AuthorityStoreError('NOT_FOUND', 'no live rule with this id')
@@ -305,6 +363,7 @@ export async function changeMandate(
 ): Promise<IssuanceDecision> {
   requireUuids(i.organizationId, i.mandateId)
   requirePrincipals(i.issuerUserId)
+  await bindSessionActor(exec, i.issuerUserId, 'issuer')
   const m = await loadMandateRow(exec, i.organizationId, i.mandateId)
   const { decision } = await evaluateIssuance(exec, deps, {
     organizationId: i.organizationId, issuerUserId: i.issuerUserId, holderUserId: m.principalUserId,
@@ -322,6 +381,7 @@ export async function amendMandate(
   i: Omit<IssueMandateInput, 'kind' | 'holderUserId' | 'supersedesId'> & { mandateId: string },
 ): Promise<{ mandateId: string; supersedes: string }> {
   requireUuids(i.organizationId, i.mandateId)
+  await bindSessionActor(exec, i.issuerUserId, 'issuer')
   const old = await loadMandateRow(exec, i.organizationId, i.mandateId)
   const authority = await evaluateIssuance(exec, deps, {
     organizationId: i.organizationId, issuerUserId: i.issuerUserId, holderUserId: old.principalUserId,
@@ -375,6 +435,7 @@ export async function revokeDelegationGoverned(
   i: { organizationId: string; issuerUserId: string; delegationId: string },
 ): Promise<void> {
   requireUuids(i.organizationId, i.delegationId)
+  await bindSessionActor(exec, i.issuerUserId, 'issuer')
   const d = (await exec.query<Row>(`SELECT delegate_user_id FROM ue_authority_delegations WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.delegationId])).rows[0]
   if (!d) throw new AuthorityStoreError('NOT_FOUND', 'delegation not found in this organization')
   const { decision } = await evaluateIssuance(exec, deps, {
@@ -401,6 +462,7 @@ export async function liftRecusal(
   i: { organizationId: string; issuerUserId: string; recusalId: string },
 ): Promise<void> {
   requireUuids(i.organizationId, i.recusalId)
+  await bindSessionActor(exec, i.issuerUserId, 'issuer')
   const r = (await exec.query<Row>(`SELECT principal_user_id, resource_type, resource_id::text AS resource_id FROM ue_authority_recusals WHERE organization_id = $1 AND id = $2 AND lifted_at IS NULL`, [i.organizationId, i.recusalId])).rows[0]
   if (!r) throw new AuthorityStoreError('NOT_FOUND', 'no active recusal with this id')
   const { decision } = await evaluateIssuance(exec, deps, {

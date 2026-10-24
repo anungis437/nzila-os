@@ -3,12 +3,14 @@ import { ORG, U, installAuthoritySchema, newUuid, seedCast, type Db } from './au
 import { runAuthorityTransaction, type SqlExecutor } from '../../lib/authority/store/executor'
 import { canonicalMembershipSource } from '../../lib/authority/store/identity'
 import type { EnforcementDeps } from '../../lib/authority/store/enforce'
+import type { MembershipSource } from '../../lib/authority/store/facts'
 import {
   acceptInstrument,
   activateIssuanceRule,
   draftDefaultIssuanceRules,
   issueMandate,
   requestIssuanceApproval,
+  requestRuleAdoption,
 } from '../../lib/authority/store/lifecycle'
 import { recordApprovalDecision } from '../../lib/authority/store/mutations'
 import type { MandateKind, MandateScope } from '../../lib/authority/ontology'
@@ -25,22 +27,30 @@ export async function freshDb(): Promise<PGlite> {
   return db
 }
 
-export function kit(db: Db) {
-  const deps: EnforcementDeps = { memberships: canonicalMembershipSource }
+export function kit(db: Db, memberships: MembershipSource = canonicalMembershipSource) {
+  const deps: EnforcementDeps = { memberships }
   const as = (user: string, org = ORG) => <T>(fn: (t: SqlExecutor) => Promise<T>): Promise<T> =>
     runAuthorityTransaction(db as unknown as SqlExecutor, { organizationId: org, userId: user }, fn)
+
+  /** The real adoption ceremony: the drafter requests, two other executives vote in their own sessions, then a third activates. */
+  async function adoptRule(ruleId: string, instrument: string, org = ORG, drafter = U.president): Promise<void> {
+    const req = await as(drafter, org)((t) => requestRuleAdoption(t, deps, { organizationId: org, ruleId, actorUserId: drafter, sourceInstrument: instrument, namedApproverIds: [U.vp, U.treasurer] }))
+    for (const a of [U.vp, U.treasurer]) {
+      await as(a, org)((t) => recordApprovalDecision(t, deps, { organizationId: org, approvalRequestId: req, approverUserId: a, decision: 'approved' }))
+    }
+    await as(U.vp, org)((t) => activateIssuanceRule(t, deps, { organizationId: org, ruleId, actorUserId: U.vp, approvalRequestId: req }))
+  }
 
   /** Drafts every default rule as the president, then activates them with two other executives and a real instrument. */
   async function adoptDefaultRules(org = ORG, only?: (d: string, o: string) => boolean): Promise<void> {
     await as(U.president, org)((t) => draftDefaultIssuanceRules(t, deps, org, U.president))
     const drafts = await as(U.president, org)((t) => t.query<{ id: string; domain: string; operation: string }>(
-      `SELECT id::text id, domain, operation FROM ue_authority_issuance_rules WHERE organization_id = $1 AND status = 'draft'`, [org]))
+      `SELECT id::text id, domain, operation FROM ue_authority_issuance_rules WHERE organization_id = $1 AND status = 'draft'
+         AND NOT EXISTS (SELECT 1 FROM ue_authority_approval_requests r WHERE r.organization_id = $1 AND r.subject_type = 'rule_adoption' AND r.subject_id = ue_authority_issuance_rules.id)`, [org]))
     let n = 0
     for (const d of drafts.rows) {
       if (only && !only(d.domain, d.operation)) continue
-      await as(U.vp, org)((t) => activateIssuanceRule(t, deps, {
-        organizationId: org, ruleId: d.id, actorUserId: U.vp, approverUserIds: [U.vp, U.treasurer], sourceInstrument: `Bylaw 12.${++n} (${d.domain}/${d.operation})`,
-      }))
+      await adoptRule(d.id, `Bylaw 12.${++n} (${d.domain}/${d.operation})`, org)
     }
   }
 
@@ -94,5 +104,5 @@ export function kit(db: Db) {
     }
   }
 
-  return { deps, as, adoptDefaultRules, grantOffice, grantMandate, asAdmin }
+  return { deps, as, adoptRule, adoptDefaultRules, grantOffice, grantMandate, asAdmin }
 }

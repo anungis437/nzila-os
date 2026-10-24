@@ -19,17 +19,22 @@ let db: PGlite
 let k: ReturnType<typeof kit>
 
 const INSTRUMENT_GUARDED = ['ue_authority_mandates', 'ue_authority_delegations', 'ue_authority_resource_relationships']
+// Actor binding is disabled here, as an administrator, ONLY so a deliberately malformed row reaches the CHECK behind it;
+// the binding itself is proven by authority-kernel-actor.pglite.test.ts.
+const ACTOR_GUARDED = [...authorityKernelEntries.map((e) => e.table)].filter((t) => t !== 'ue_authority_events')
 
 beforeAll(async () => {
   db = await freshDb()
   k = kit(db)
   await k.asAdmin(async () => {
     for (const t of INSTRUMENT_GUARDED) await db.exec(`ALTER TABLE ${t} DISABLE TRIGGER ue_authority_guard_issuance`)
+    for (const t of ACTOR_GUARDED) await db.exec(`ALTER TABLE ${t} DISABLE TRIGGER ue_authority_guard_actor`)
   })
 })
 afterAll(async () => {
   await k.asAdmin(async () => {
     for (const t of INSTRUMENT_GUARDED) await db.exec(`ALTER TABLE ${t} ENABLE TRIGGER ue_authority_guard_issuance`)
+    for (const t of ACTOR_GUARDED) await db.exec(`ALTER TABLE ${t} ENABLE TRIGGER ue_authority_guard_actor`)
   })
 })
 
@@ -133,7 +138,7 @@ describe('mandate constraints', () => {
 describe('relationship, delegation, recusal and consent constraints', () => {
   it('a collaborator or privileged grant must be explicit, named and granted by someone else', async () => {
     const base = { organizationId: ORG, principalUserId: U.member, resourceType: 'case' as const, resourceId: newUuid(), effectiveAt: minutesAgo() }
-    const ins = (o: Record<string, unknown>) => k.as(U.president)((t) => insertRelationship(t, { ...base, ...o } as never))
+    const ins = (o: Record<string, unknown>) => k.as(String(o.grantedBy ?? U.president))((t) => insertRelationship(t, { ...base, ...o } as never))
     await expect(ins({ relation: 'collaborator', origin: 'derived' })).rejects.toThrow(/explicit_chk/)
     await expect(ins({ relation: 'owner', origin: 'derived', privilegedAccess: true })).rejects.toThrow(/explicit_chk/)
     await expect(ins({ relation: 'collaborator', origin: 'explicit', grantedBy: U.member })).rejects.toThrow(/explicit_chk/)
@@ -158,7 +163,9 @@ describe('relationship, delegation, recusal and consent constraints', () => {
 
   it('consent shape: referral is the member’s act; counsel disclosure names a recipient and is not member-authored', async () => {
     const base = { organizationId: ORG, memberUserId: U.member, matterId: newUuid(), categories: ['status'], purpose: 'referral', grantedAt: minutesAgo(), expiresAt: daysAhead(30) }
-    const ins = (o: Record<string, unknown>) => k.as(U.president)((t) => insertConsent(t, { ...base, ...o } as never))
+    // The counsel check is a different layer (proven in the resources suite); here it vouches for anyone so the database shape rule is what refuses.
+    const anyone = { counsel: { isCounselFor: async () => true } }
+    const ins = (o: Record<string, unknown>) => k.as(String(o.issuedBy))((t) => insertConsent(t, { ...base, ...o } as never, anyone))
     await expect(ins({ direction: 'union_to_workaid', issuer: 'member', issuedBy: U.president })).rejects.toThrow(/shape_chk/)
     await expect(ins({ direction: 'union_to_workaid', issuer: 'counsel', issuedBy: U.counsel })).rejects.toThrow(/shape_chk/)
     await expect(ins({ direction: 'workaid_to_union', issuer: 'counsel', issuedBy: U.counsel })).rejects.toThrow(/shape_chk/)
@@ -169,7 +176,7 @@ describe('relationship, delegation, recusal and consent constraints', () => {
 })
 
 describe('approvals: one person, one vote, segregation, recusal', () => {
-  const open = (over: Record<string, unknown> = {}) => k.as(U.officer)((t) => openApprovalRequest(t, {
+  const open = (over: Record<string, unknown> = {}) => k.as(String(over.proposedBy ?? U.officer))((t) => openApprovalRequest(t, {
     organizationId: ORG, subjectType: 'bylaw_amendment', subjectId: newUuid(), proposedBy: U.officer, requiredApprovals: 2, riskClass: 'medium', namedApproverIds: [U.president, U.vp, U.treasurer], ...over }))
   const vote = (rid: string, who: string, decision: 'approved' | 'rejected' = 'approved') =>
     k.as(who)((t) => recordApprovalDecision(t, k.deps, { organizationId: ORG, approvalRequestId: rid, approverUserId: who, decision }))
@@ -265,7 +272,7 @@ describe('records are append-only and cannot be forged; tenants are isolated', (
     expect(await seen(ORG)).toBeGreaterThan(0)
     expect(await seen(ORG_B)).toBe(0)
     await expect(k.as(U.president, ORG_B)((t) => t.query(
-      `INSERT INTO ue_authority_recusals (organization_id, principal_user_id, resource_type, resource_id, reason) VALUES ($1,$2,'case',$3,'x')`, [ORG, U.member, newUuid()]))).rejects.toThrow(/row-level security/)
+      `INSERT INTO ue_authority_recusals (organization_id, principal_user_id, resource_type, resource_id, reason) VALUES ($1,$2,'case',$3,'x')`, [ORG, U.president, newUuid()]))).rejects.toThrow(/row-level security/)
   })
 
   it('with no tenant context nothing is visible', async () => {

@@ -7,8 +7,8 @@ import { randomUUID } from 'node:crypto'
 import { decide } from '../kernel'
 import type { Action, AuthorityRequest, FinancialTransactionFacts, WorkAidMatterFacts } from '../ontology'
 import { auditAuthorityMutation } from './audit'
-import { assertAllowed, enforceAuthority, type EnforcementDeps } from './enforce'
-import { AuthorityStoreError, type SqlExecutor } from './executor'
+import { assertAllowed, enforceAuthority, requireCounselSession, type EnforcementDeps } from './enforce'
+import { AuthorityStoreError, bindSessionActor, sessionActor, type SqlExecutor } from './executor'
 import { loadAuthorityFacts, loadRelationships } from './facts'
 import { requirePrincipals, requireUuids } from './mutations'
 import { decimalToMinor } from './resources'
@@ -42,6 +42,7 @@ export interface RecordFinancialStepInput {
 export async function recordFinancialStep(exec: SqlExecutor, deps: EnforcementDeps, i: RecordFinancialStepInput): Promise<string> {
   requireUuids(i.organizationId, i.paymentId, i.accountId)
   requirePrincipals(i.actorUserId)
+  await bindSessionActor(exec, i.actorUserId, 'financial actor')
   const now = (deps.now ?? (() => new Date()))()
   const resource = { type: 'financial_transaction' as const, id: i.paymentId, organizationId: i.organizationId }
 
@@ -109,6 +110,7 @@ export async function registerReview(
 ): Promise<string> {
   requireUuids(i.organizationId)
   requirePrincipals(i.openedBy, i.complainantUserId, ...(i.adverseUserIds ?? []))
+  await bindSessionActor(exec, i.openedBy, 'review opener')
   const m = (await deps.memberships(exec, i.organizationId, [i.openedBy])).filter((x) => x.userId === i.openedBy && x.organizationId === i.organizationId)
   if (m.length !== 1 || m[0].status !== 'active') throw new AuthorityStoreError('DENIED', 'only an active member may open a review')
   const row = (
@@ -126,23 +128,37 @@ export async function registerReview(
 // ── WorkAid referral (union side) ────────────────────────────────────────────
 
 /**
- * Hook for the counsel-side interface (NOT built on this branch): records that counsel
- * accepted a referral, after which the case is counsel-controlled and the union loses
- * all authority over its content. This writer records the fact; it does not decide who
- * may call it, so it must only be reachable from the counsel-side boundary.
+ * Records that counsel accepted a referral, after which the case is counsel-controlled
+ * and the union loses all authority over its content.
+ *
+ * The acceptor is NEVER a parameter: it is the authenticated principal of this
+ * transaction, and it must be vouched for by the counsel-side identity verifier
+ * (`deps.counsel`). With no verifier configured, or for any union principal, this
+ * refuses. It also refuses the member and the union referrer, who cannot accept
+ * their own referral.
  */
-export async function recordCounselAcceptance(exec: SqlExecutor, i: { organizationId: string; matterId: string; actor: string }): Promise<void> {
+export async function recordCounselAcceptance(exec: SqlExecutor, deps: Pick<EnforcementDeps, 'counsel'>, i: { organizationId: string; matterId: string }): Promise<void> {
   requireUuids(i.organizationId, i.matterId)
-  requirePrincipals(i.actor)
+  const counselUserId = await requireCounselSession(exec, deps, {
+    organizationId: i.organizationId,
+    matterId: i.matterId,
+    claimedUserId: (await sessionActorOrThrow(exec)),
+  })
   const r = await exec.query(
-    `UPDATE ue_authority_workaid_matters SET counsel_accepted_at = now()
-      WHERE organization_id = $1 AND id = $2 AND counsel_accepted_at IS NULL AND withdrawn_at IS NULL RETURNING id`,
-    [i.organizationId, i.matterId],
+    `UPDATE ue_authority_workaid_matters SET counsel_accepted_at = now(), counsel_accepted_by = $3
+      WHERE organization_id = $1 AND id = $2 AND counsel_accepted_at IS NULL AND withdrawn_at IS NULL
+        AND member_user_id <> $3 AND referred_by <> $3 RETURNING id`,
+    [i.organizationId, i.matterId, counselUserId],
   )
-  if (r.rows.length !== 1) throw new AuthorityStoreError('NOT_FOUND', 'no un-accepted, un-withdrawn referral with this id')
-  await auditAuthorityMutation(exec, { organizationId: i.organizationId, action: 'workaid.counsel_accept', resourceType: 'ue_authority_workaid_matters', resourceId: i.matterId, details: { actor: i.actor } })
+  if (r.rows.length !== 1) throw new AuthorityStoreError('NOT_FOUND', 'no un-accepted, un-withdrawn referral with this id that this principal may accept')
+  await auditAuthorityMutation(exec, { organizationId: i.organizationId, action: 'workaid.counsel_accept', resourceType: 'ue_authority_workaid_matters', resourceId: i.matterId, details: { counsel: counselUserId } })
 }
 
+async function sessionActorOrThrow(exec: SqlExecutor): Promise<string> {
+  const s = await sessionActor(exec)
+  if (!s) throw new AuthorityStoreError('DENIED', 'no authenticated session: the counsel cannot be established')
+  return s
+}
 /**
  * Registers the union-side referral reference once the kernel allows
  * `workaid:refer`: a live owner/assignee relationship to the case AND live
@@ -156,6 +172,7 @@ export async function referToWorkAid(
 ): Promise<string> {
   requireUuids(i.organizationId, i.caseId, i.matterId)
   requirePrincipals(i.referrerUserId, i.memberUserId)
+  await bindSessionActor(exec, i.referrerUserId, 'referrer')
   const now = (deps.now ?? (() => new Date()))()
   const matterId = i.matterId ?? randomUUID()
   const resource = { type: 'workaid_matter' as const, id: matterId, organizationId: i.organizationId }

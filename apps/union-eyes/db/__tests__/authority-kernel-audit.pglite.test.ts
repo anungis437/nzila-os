@@ -74,6 +74,8 @@ describe('mutation and canonical audit are one unit', () => {
     const [r0, e0] = [await recusals(), await events()]
     await expect(k.as(U.member)((t) => t.query(`INSERT INTO ue_authority_recusals (organization_id, principal_user_id, resource_type, resource_id, reason) VALUES ($1,$2,'case',$3,'sneaky')`, [ORG, U.member, newUuid()]))).rejects.toThrow(/AUDIT_LINK_MISSING/)
     await k.asAdmin(async () => {
+      // An administrator still needs an authenticated principal and a canonical audit record.
+      await db.query(`SELECT set_config('app.current_user_id', $1, false)`, [U.member])
       await expect(db.query(`UPDATE ue_authority_recusals SET reason = reason WHERE false`)).resolves.toBeTruthy()
       await expect(db.query(`INSERT INTO ue_authority_recusals (organization_id, principal_user_id, resource_type, resource_id, reason) VALUES ($1,$2,'case',$3,'admin')`, [ORG, U.member, newUuid()])).rejects.toThrow(/AUDIT_LINK_MISSING/)
     })

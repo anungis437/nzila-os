@@ -99,6 +99,34 @@ export function decideCase(
     })
   }
 
+  // A member's OWN submission is a separate information domain from the case file: it needs no privileged
+  // access and survives a privileged classification of the case, but it reaches nothing the member did not
+  // author, and only the creator or represented member (a live, derived relationship) can use it.
+  if (action === 'case:read_own_submission') {
+    const own = facts.relationships.find(
+      (r) =>
+        r.principalUserId === principalId &&
+        r.organizationId === orgId &&
+        r.resource.type === 'case' &&
+        r.resource.id === c.id &&
+        (r.relation === 'creator' || r.relation === 'represented_member') &&
+        isLive(r, now),
+    )
+    if (!own) return deny(req, now, { code: 'NO_SOURCE_OF_AUTHORITY', detail: 'no live creator or represented-member relationship to this case' })
+    if (c.requestedDocumentIsPrincipalsOwnSubmission !== true) {
+      return deny(req, now, { code: 'NO_SOURCE_OF_AUTHORITY', detail: "the requested document is not verified as this principal's own non-privileged submission to this case" })
+    }
+    return build({
+      req,
+      now,
+      effect: 'allow',
+      reasons: [{ code: 'ALLOWED_AS_SUBJECT', ref: own.id }],
+      authority: [{ kind: 'subject', id: own.id, instrument: `own submission to case ${c.id}` }],
+      scope: { visibility: 'member_visible' },
+      obligations: ['read_only'],
+    })
+  }
+
   const candidates: Candidate[] = []
   const misses: Reason[] = []
 

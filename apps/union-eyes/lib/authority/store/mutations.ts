@@ -16,8 +16,8 @@
 import { randomUUID } from 'node:crypto'
 import type { AuthorityRequest, Decision, MandateKind, MandateScope, ResourceType } from '../ontology'
 import { auditAuthorityMutation } from './audit'
-import { assertAllowed, enforceAuthority, type EnforcementDeps } from './enforce'
-import { AuthorityStoreError, isPrincipalId, isUuid, type SqlExecutor } from './executor'
+import { assertAllowed, enforceAuthority, requireCounselSession, type EnforcementDeps } from './enforce'
+import { AuthorityStoreError, bindSessionActor, isPrincipalId, isUuid, type SqlExecutor } from './executor'
 
 type Row = Record<string, unknown>
 
@@ -64,6 +64,7 @@ export interface InsertMandateInput {
 export async function insertMandate(exec: SqlExecutor, i: InsertMandateInput): Promise<string> {
   requireUuids(i.organizationId, i.id, i.issuanceRuleId, i.approvalRequestId, i.supersedesId)
   requirePrincipals(i.principalUserId, i.grantedBy, i.approvedBy)
+  await bindSessionActor(exec, i.grantedBy, 'mandate issuer')
   const id = i.id ?? randomUUID()
   await one(
     exec,
@@ -100,6 +101,7 @@ export async function changeMandateState(
 ): Promise<void> {
   requireUuids(organizationId, id)
   requirePrincipals(actorUserId)
+  await bindSessionActor(exec, actorUserId, 'mandate actor')
   const sql =
     change === 'revoke'
       ? `UPDATE ue_authority_mandates SET status = 'revoked', revoked_at = now(), revoked_by = $3
@@ -139,6 +141,7 @@ export interface InsertRelationshipInput {
 export async function insertRelationship(exec: SqlExecutor, i: InsertRelationshipInput): Promise<string> {
   requireUuids(i.organizationId, i.resourceId, i.issuanceRuleId)
   requirePrincipals(i.principalUserId, i.grantedBy)
+  if (i.grantedBy) await bindSessionActor(exec, i.grantedBy, 'relationship grantor')
   const row = await one(
     exec,
     `INSERT INTO ue_authority_resource_relationships
@@ -164,6 +167,7 @@ export async function insertRelationship(exec: SqlExecutor, i: InsertRelationshi
 export async function revokeRelationship(exec: SqlExecutor, organizationId: string, id: string, revokedBy: string): Promise<void> {
   requireUuids(organizationId, id)
   requirePrincipals(revokedBy)
+  await bindSessionActor(exec, revokedBy, 'revoker')
   await one(
     exec,
     `UPDATE ue_authority_resource_relationships SET status = 'revoked', revoked_at = now(), revoked_by = $3
@@ -192,6 +196,7 @@ export interface InsertDelegationInput {
 export async function insertDelegation(exec: SqlExecutor, i: InsertDelegationInput): Promise<string> {
   requireUuids(i.organizationId, i.id, i.issuanceRuleId, i.approvalRequestId)
   requirePrincipals(i.delegatorUserId, i.delegateUserId)
+  await bindSessionActor(exec, i.delegatorUserId, 'delegator')
   const id = i.id ?? randomUUID()
   await one(
     exec,
@@ -214,6 +219,7 @@ export async function insertDelegation(exec: SqlExecutor, i: InsertDelegationInp
 export async function revokeDelegation(exec: SqlExecutor, organizationId: string, id: string, revokedBy: string): Promise<void> {
   requireUuids(organizationId, id)
   requirePrincipals(revokedBy)
+  await bindSessionActor(exec, revokedBy, 'revoker')
   await one(
     exec,
     `UPDATE ue_authority_delegations SET status = 'revoked', revoked_at = now(), revoked_by = $3
@@ -231,6 +237,7 @@ export async function insertAcceptance(
 ): Promise<string> {
   requireUuids(i.organizationId, i.instrumentId)
   requirePrincipals(i.acceptedBy)
+  await bindSessionActor(exec, i.acceptedBy, 'accepting holder')
   const row = await one(
     exec,
     `INSERT INTO ue_authority_acceptances (organization_id, instrument_type, instrument_id, accepted_by) VALUES ($1,$2,$3,$4) RETURNING id`,
@@ -255,6 +262,7 @@ export async function insertRecusal(
 ): Promise<string> {
   requireUuids(i.organizationId, i.resourceId)
   requirePrincipals(i.principalUserId)
+  await bindSessionActor(exec, i.principalUserId, 'recusing principal')
   const row = await one(
     exec,
     `INSERT INTO ue_authority_recusals (organization_id, principal_user_id, resource_type, resource_id, reason)
@@ -275,6 +283,7 @@ export async function insertRecusal(
 export async function liftRecusalRow(exec: SqlExecutor, organizationId: string, id: string, liftedBy: string): Promise<void> {
   requireUuids(organizationId, id)
   requirePrincipals(liftedBy)
+  await bindSessionActor(exec, liftedBy, 'recusal lifter')
   await one(
     exec,
     `UPDATE ue_authority_recusals SET lifted_at = now(), lifted_by = $3
@@ -300,9 +309,15 @@ export interface InsertConsentInput {
   expiresAt: Date
 }
 
-export async function insertConsent(exec: SqlExecutor, i: InsertConsentInput): Promise<string> {
+/**
+ * The issuer is always the authenticated session principal. A member-issued consent is the member's own act;
+ * a counsel-issued one additionally needs a verified counsel session (see requireCounselSession).
+ */
+export async function insertConsent(exec: SqlExecutor, i: InsertConsentInput, deps: Pick<EnforcementDeps, 'counsel'> = {}): Promise<string> {
   requireUuids(i.organizationId, i.matterId)
   requirePrincipals(i.memberUserId, i.issuedBy, i.recipientUserId)
+  if (i.issuer === 'counsel') await requireCounselSession(exec, deps, { organizationId: i.organizationId, matterId: i.matterId, claimedUserId: i.issuedBy })
+  else await bindSessionActor(exec, i.issuedBy, 'consent issuer')
   const row = await one(
     exec,
     `INSERT INTO ue_authority_disclosure_consents
@@ -325,6 +340,7 @@ export async function insertConsent(exec: SqlExecutor, i: InsertConsentInput): P
 export async function revokeConsent(exec: SqlExecutor, organizationId: string, id: string, revokedBy: string): Promise<void> {
   requireUuids(organizationId, id)
   requirePrincipals(revokedBy)
+  await bindSessionActor(exec, revokedBy, 'revoker')
   await one(
     exec,
     `UPDATE ue_authority_disclosure_consents SET revoked_at = now(), revoked_by = $3
@@ -353,6 +369,7 @@ export interface OpenApprovalInput {
 export async function openApprovalRequest(exec: SqlExecutor, i: OpenApprovalInput): Promise<string> {
   requireUuids(i.organizationId, i.subjectId, i.id)
   requirePrincipals(i.proposedBy, i.subjectAuthorId, ...(i.namedApproverIds ?? []), ...(i.adverseUserIds ?? []))
+  await bindSessionActor(exec, i.proposedBy, 'proposer')
   const id = i.id ?? randomUUID()
   await one(
     exec,
@@ -395,6 +412,7 @@ export async function recordApprovalDecision(
 ): Promise<{ decisionId: string; kernel: Decision }> {
   requireUuids(i.organizationId, i.approvalRequestId, i.delegationId)
   requirePrincipals(i.approverUserId)
+  await bindSessionActor(exec, i.approverUserId, 'approver')
   const req: AuthorityRequest = {
     principalUserId: i.approverUserId,
     organizationId: i.organizationId,

@@ -92,6 +92,30 @@ export class AuthorityStoreError extends Error {
 }
 
 /**
+ * The authenticated principal of the enclosing `runAuthorityTransaction`, or null
+ * outside one. This is the ONLY source of "who is acting"; any actor id a caller
+ * supplies is a claim that must equal it.
+ */
+export async function sessionActor(exec: SqlExecutor): Promise<string | null> {
+  const row = (await exec.query<{ u: string | null }>(`SELECT nullif(current_setting('app.current_user_id', true), '') AS u`)).rows[0]
+  return row?.u ?? null
+}
+
+/**
+ * Refuses an actor claim that is not the transaction's authenticated principal.
+ * Fails closed when there is no authenticated session at all, so an authorised
+ * officer can never record an act as another person (including external counsel).
+ */
+export async function bindSessionActor(exec: SqlExecutor, claimed: string | null | undefined, role = 'actor'): Promise<string> {
+  const session = await sessionActor(exec)
+  if (!session) throw new AuthorityStoreError('DENIED', `no authenticated session: the ${role} cannot be established`)
+  if (claimed !== session) {
+    throw new AuthorityStoreError('DENIED', `ACTOR_NOT_SESSION: the ${role} must be the authenticated principal of this transaction`)
+  }
+  return session
+}
+
+/**
  * Runs `fn` in one transaction on a DEDICATED connection (never a pool handle
  * shared across requests). Any thrown error rolls everything back.
  */

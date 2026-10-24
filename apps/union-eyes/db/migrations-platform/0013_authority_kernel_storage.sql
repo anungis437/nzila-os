@@ -298,6 +298,9 @@ CREATE TABLE IF NOT EXISTS ue_authority_approval_requests (
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS ue_authority_req_subject_idx ON ue_authority_approval_requests (organization_id, subject_type, subject_id);
 --> statement-breakpoint
+-- One live adoption ceremony per rule, so the approvers saw the exact instrument pinned for it.
+CREATE UNIQUE INDEX IF NOT EXISTS ue_authority_req_rule_adoption_uq ON ue_authority_approval_requests (organization_id, subject_id) WHERE subject_type = 'rule_adoption' AND status IN ('open', 'satisfied');
+--> statement-breakpoint
 
 CREATE TABLE IF NOT EXISTS ue_authority_approval_decisions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -628,8 +631,14 @@ CREATE TABLE IF NOT EXISTS ue_authority_workaid_matters (
   referred_by ue_authority_principal NOT NULL,
   referred_at timestamptz NOT NULL DEFAULT now(),
   counsel_accepted_at timestamptz,
+  counsel_accepted_by ue_authority_principal,
   withdrawn_at timestamptz,
-  created_at timestamptz NOT NULL DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now(),
+  -- Counsel's acceptance names counsel, who is neither the member nor the union referrer.
+  CONSTRAINT ue_authority_workaid_acceptor_chk CHECK (
+    (counsel_accepted_at IS NULL) = (counsel_accepted_by IS NULL)
+    AND (counsel_accepted_by IS NULL OR (counsel_accepted_by <> member_user_id AND counsel_accepted_by <> referred_by))
+  )
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS ue_authority_workaid_case_uq ON ue_authority_workaid_matters (organization_id, case_id) WHERE withdrawn_at IS NULL;
@@ -735,6 +744,26 @@ BEGIN
   END IF;
   IF OLD.status = 'active' AND (NEW.status <> 'retired' OR NEW.approved_by IS DISTINCT FROM OLD.approved_by OR NEW.activated_at IS DISTINCT FROM OLD.activated_at) THEN
     RAISE EXCEPTION 'an active issuance rule may only be retired' USING ERRCODE = '42501';
+  END IF;
+  -- Adoption is the approvers' act, not the activator's claim: approved_by must be exactly the
+  -- authority lines that APPROVED a satisfied rule_adoption request bound to this rule.
+  IF OLD.status = 'draft' AND NEW.status = 'active' THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM ue_authority_approval_requests r
+      WHERE r.organization_id = NEW.organization_id AND r.subject_type = 'rule_adoption' AND r.subject_id = NEW.id
+        AND r.status = 'satisfied' AND r.required_approvals >= 2
+    ) THEN
+      RAISE EXCEPTION 'RULE_ADOPTION_NOT_APPROVED: activation needs a satisfied rule_adoption approval bound to this rule' USING ERRCODE = '42501';
+    END IF;
+    IF (
+      SELECT coalesce(array_agg(d.authority_line_user_id::text ORDER BY d.authority_line_user_id::text), ARRAY[]::text[])
+        FROM ue_authority_approval_decisions d
+        JOIN ue_authority_approval_requests r ON r.id = d.approval_request_id
+       WHERE r.organization_id = NEW.organization_id AND r.subject_type = 'rule_adoption' AND r.subject_id = NEW.id
+         AND r.status = 'satisfied' AND d.decision = 'approved'
+    ) IS DISTINCT FROM (SELECT coalesce(array_agg(a ORDER BY a), ARRAY[]::text[]) FROM unnest(NEW.approved_by::text[]) a) THEN
+      RAISE EXCEPTION 'RULE_ADOPTION_NOT_APPROVED: approved_by must equal the recorded approvers' USING ERRCODE = '42501';
+    END IF;
   END IF;
   RETURN NEW;
 END;
@@ -879,7 +908,68 @@ CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_reviews F
 --> statement-breakpoint
 DROP TRIGGER IF EXISTS ue_authority_guard_update ON ue_authority_workaid_matters;
 --> statement-breakpoint
-CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_workaid_matters FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('withdrawn_at', 'counsel_accepted_at,withdrawn_at');
+CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_workaid_matters FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('withdrawn_at', 'counsel_accepted_at,counsel_accepted_by,withdrawn_at');
+--> statement-breakpoint
+
+-- Actor binding. Whoever a row says acted MUST be the authenticated principal of the
+-- transaction (app.current_user_id). TG_ARGV[0]: columns bound on INSERT; TG_ARGV[1]:
+-- columns bound when set or changed by an UPDATE. With no authenticated principal it refuses.
+CREATE OR REPLACE FUNCTION ue_authority_guard_actor() RETURNS trigger LANGUAGE plpgsql AS $fn$
+DECLARE
+  actor text := nullif(current_setting('app.current_user_id', true), '');
+  cols text;
+  col text;
+  new_j jsonb := to_jsonb(NEW);
+  old_j jsonb;
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    cols := TG_ARGV[0];
+  ELSE
+    cols := TG_ARGV[1];
+    old_j := to_jsonb(OLD);
+  END IF;
+  IF cols IS NULL OR cols = '' THEN
+    RETURN NEW;
+  END IF;
+  FOREACH col IN ARRAY string_to_array(cols, ',') LOOP
+    IF (new_j ->> col) IS NULL THEN
+      CONTINUE;
+    END IF;
+    IF TG_OP = 'UPDATE' AND (new_j ->> col) IS NOT DISTINCT FROM (old_j ->> col) THEN
+      CONTINUE;
+    END IF;
+    IF actor IS NULL OR (new_j ->> col) <> actor THEN
+      RAISE EXCEPTION 'ACTOR_NOT_SESSION: % on % must be the authenticated principal of this transaction', col, TG_TABLE_NAME USING ERRCODE = '42501';
+    END IF;
+  END LOOP;
+  RETURN NEW;
+END;
+$fn$;
+--> statement-breakpoint
+
+DO $$
+DECLARE
+  spec text[];
+BEGIN
+  FOREACH spec SLICE 1 IN ARRAY ARRAY[
+    ARRAY['ue_authority_issuance_rules', 'drafted_by', ''],
+    ARRAY['ue_authority_mandates', 'granted_by', 'revoked_by'],
+    ARRAY['ue_authority_resource_relationships', 'granted_by', 'revoked_by'],
+    ARRAY['ue_authority_delegations', 'delegator_user_id', 'revoked_by'],
+    ARRAY['ue_authority_recusals', 'principal_user_id', 'lifted_by'],
+    ARRAY['ue_authority_disclosure_consents', 'issued_by', 'revoked_by'],
+    ARRAY['ue_authority_approval_requests', 'proposed_by', ''],
+    ARRAY['ue_authority_approval_decisions', 'approver_user_id', ''],
+    ARRAY['ue_authority_acceptances', 'accepted_by', ''],
+    ARRAY['ue_authority_requests', 'actor', ''],
+    ARRAY['ue_authority_financial_steps', 'actor', ''],
+    ARRAY['ue_authority_reviews', 'opened_by', ''],
+    ARRAY['ue_authority_workaid_matters', 'referred_by', 'counsel_accepted_by']
+  ] LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS ue_authority_guard_actor ON %I', spec[1]);
+    EXECUTE format('CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON %I FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor(%L, %L)', spec[1], spec[2], spec[3]);
+  END LOOP;
+END $$;
 --> statement-breakpoint
 
 DO $$

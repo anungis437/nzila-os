@@ -135,6 +135,25 @@ export const canonicalMembershipSource: MembershipSource = async (exec, organiza
   )
 }
 
+/**
+ * Membership source that reads through a SEPARATE, read-only identity executor.
+ *
+ * Why: in the deployed schema the runtime role sees only ITS OWN row of
+ * user_management.users / organization_users (self-select RLS), and the catalog
+ * remediation revokes runtime EXECUTE on SECURITY DEFINER helpers. So deciding anything
+ * about ANOTHER principal (an approver, a holder, an assignee) cannot be answered on the
+ * runtime connection, and with the plain canonical source it fails closed. The deployed
+ * convention for cross-principal identity reads is the bounded `union_eyes_system` role
+ * (SELECT-only on exactly these tables); pass an executor connected as that role.
+ *
+ * The reader must be a pool-style executor (each query on its own connection): it is
+ * never part of the authority transaction and must not be shared with a transaction.
+ * It only ever runs the fixed canonical SELECT, scoped to the explicit organization.
+ */
+export function membershipSourceVia(reader: SqlExecutor): MembershipSource {
+  return (_transaction, organizationId, userIds) => canonicalMembershipSource(reader, organizationId, userIds)
+}
+
 export interface AuthorityPrincipal {
   binding: PrincipalBinding
   organizationId: string

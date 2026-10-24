@@ -217,6 +217,11 @@ export interface CaseFacts {
   counselControlled: boolean
   /** Respondents / persons the matter is about. Absolutely conflicted. */
   adverseUserIds: readonly Uuid[]
+  /**
+   * Loader-verified: the requested document (req.documentId) was uploaded by the requesting principal,
+   * is linked to exactly this case and is not privileged. Absent unless the loader proved all three.
+   */
+  requestedDocumentIsPrincipalsOwnSubmission?: boolean
 }
 
 export interface FinancialTransactionFacts {
@@ -302,6 +307,7 @@ export type ResourceFacts =
 
 export const ACTIONS = [
   'case:read',
+  'case:read_own_submission',
   'case:read_internal',
   'case:read_privileged',
   'case:comment',
@@ -336,6 +342,8 @@ export interface AuthorityRequest {
   resource: ResourceRef
   /** When acting under a delegation, its id. The delegation is validated, never trusted. */
   delegationId?: Uuid | null
+  /** For case:read_own_submission: the document asked for. Never trusted; the loader verifies authorship. */
+  documentId?: Uuid | null
   /** For finance:*, the amount the action concerns, in minor units. */
   amountMinor?: number
   currency?: string
