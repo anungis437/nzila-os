@@ -161,7 +161,7 @@
       },
       {
         "tag": "0021_message_thread_triage_rls_closure",
-        "sha256": "e6e45adeadb963099c997d2e2bafbb5ff3f0c96f034a6c150aae843c11ca0faf",
+        "sha256": "eca225a6a6cba2084a92045e4e5c09c29587a220fbddf51b4efad23b5a33aef2",
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "FORCE RLS for message_triage_designations and message_thread_assignments created by platform 0014. Not yet applied to any clone or live database."
@@ -177,7 +177,7 @@
       },
       {
         "tag": "0014_message_thread_triage",
-        "sha256": "a2ab36b84d78cbd689aa5f94c634d0d3ab5730e542d1baf535db33dfc48441f2",
+        "sha256": "e0ce68952b193b373a65072455c6897941969fce79b244462e96d22f46521d6a",
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Staff assignment of member conversations (message_triage_designations, message_thread_assignments, guard triggers on message_threads) and evolution of the canonical Django stubs messages and in_app_notifications plus column defaults on message_threads. RLS is scoped 0021. Not yet applied to any clone or live database."

@@ -14,7 +14,8 @@ import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { seedMembership, seedUser, type Db } from '../../db/__tests__/authority-kernel-harness'
 import type { RLSTx } from '@/lib/db/with-rls-context'
-import { assignThread, grantTriageDesignation, listTriageQueue, revokeTriageDesignation } from './thread-assignment'
+import { assignThread, listTriageQueue } from './thread-assignment'
+import { grantDesignation, revokeDesignation } from '@/lib/triage/designations'
 import { createMemberThread, findReadableThread, listThreads } from './thread-access'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
@@ -81,7 +82,7 @@ describe.skipIf(!URL)('conversation assignment on the combined deployed schema, 
   })
 
   it('delivers a new member conversation to a designated triager and lets assigned staff act on it', async () => {
-    const granted = await inOrg(ORG_A, U.admin, (tx) => grantTriageDesignation(tx, actor(U.admin, 'admin'), { userId: U.triager, expiresAt: new Date(Date.now() + 30 * 86_400_000) }, deps))
+    const granted = await inOrg(ORG_A, U.admin, (tx) => grantDesignation(tx, actor(U.admin, 'admin'), { scope: 'messages', userId: U.triager, expiresAt: new Date(Date.now() + 30 * 86_400_000) }, deps))
     expect(granted.kind).toBe('ok')
 
     const thread = await inOrg(ORG_A, U.member, (tx) => createMemberThread(tx, actor(U.member, 'member'), { subject: 'Schedule change', body: 'PRIVATE-BODY-TEXT' }))
@@ -116,14 +117,14 @@ describe.skipIf(!URL)('conversation assignment on the combined deployed schema, 
     await rejectsWith(inOrg(ORG_A, U.admin, (tx) => tx.execute(sql`UPDATE message_threads SET staff_id = ${U.steward} WHERE id = ${thread.id}`)), /requires its history record|commit/)
     await rejectsWith(inOrg(ORG_A, U.admin, (tx) => tx.execute(sql`UPDATE message_threads SET member_id = ${U.other} WHERE id = ${thread.id}`)), /immutable/)
     await rejectsWith(inOrg(ORG_A, U.admin, (tx) => tx.execute(sql`UPDATE message_thread_assignments SET reason = 'x'`)), /append-only|permission denied/)
-    await rejectsWith(inOrg(ORG_A, U.admin, (tx) => tx.execute(sql`DELETE FROM message_triage_designations`)), /permission denied|append-only/)
+    await rejectsWith(inOrg(ORG_A, U.admin, (tx) => tx.execute(sql`DELETE FROM triage_designations`)), /permission denied|append-only/)
     expect(await count(`SELECT count(*) AS n FROM message_threads WHERE id=$1 AND staff_id IS NULL`, [thread.id])).toBe(1)
   })
 
   it('stops the queue as soon as a designation is revoked', async () => {
-    const live = (await admin.query(`SELECT id FROM message_triage_designations WHERE organization_id=$1 AND user_id=$2 AND revoked_at IS NULL`, [ORG_A, U.triager])).rows[0].id
-    expect(await inOrg(ORG_A, U.admin, (tx) => revokeTriageDesignation(tx, actor(U.admin, 'admin'), live))).toEqual({ kind: 'ok' })
+    const live = (await admin.query(`SELECT id FROM triage_designations WHERE organization_id=$1 AND scope='messages' AND user_id=$2 AND revoked_at IS NULL`, [ORG_A, U.triager])).rows[0].id
+    expect(await inOrg(ORG_A, U.admin, (tx) => revokeDesignation(tx, actor(U.admin, 'admin'), live))).toEqual({ kind: 'ok' })
     expect(await inOrg(ORG_A, U.triager, (tx) => listTriageQueue(tx, actor(U.triager)))).toBeNull()
-    expect(await audits('messages.triage_designation.revoke')).toBe(1)
+    expect(await audits('triage.designation.revoke')).toBe(1)
   })
 })

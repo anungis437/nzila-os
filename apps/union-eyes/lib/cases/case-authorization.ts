@@ -11,6 +11,7 @@ import { getOrganizationIdForUser, getUserRoleInOrganization } from '@/lib/organ
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
 import { caseActionAllowed, casePolicyRole } from './case-permissions'
+import { liveDesignationExists } from '@/lib/triage/designations'
 
 export interface CaseActor {
   userId: string
@@ -46,16 +47,24 @@ export async function requireCaseAction(actor: CaseActor, action: CUPEAction, ca
   if (!result.allowed) await denyCaseAction(actor,action,caseId,result.reason)
 }
 
-/** Staff may read assigned cases; broader reads require the existing case_read_any gate. */
+/**
+ * Read scope for cases. Seniority never confers a tenant-wide read: a member reads their own cases, staff read the
+ * cases assigned to them, and a holder of a live `cases` triage designation additionally sees UNASSIGNED cases so they
+ * can be assigned. A supervisory read across other staff's cases requires a kernel mandate, which is not issued by
+ * this module (UE-CONV-E-001).
+ */
 export function caseReadScope(actor: CaseActor, alias?: 'c'): SQL {
   const organizationId=alias ? sql`c.organization_id` : sql`${claims.organizationId}`
   const memberId=alias ? sql`c.member_id` : sql`${claims.memberId}`
   const assignedTo=alias ? sql`c.assigned_to` : sql`${claims.assignedTo}`
   const tenant=eq(organizationId,actor.organizationId)
-  if (caseActionAllowed('case_read_any',actor.role)) return tenant
   const own=eq(memberId,actor.userId)
-  return and(tenant,caseActionAllowed('note_add_internal',actor.role)
-    ? or(own,eq(assignedTo,actor.userId)) : own)!
+  if (!caseActionAllowed('note_add_internal',actor.role)) return and(tenant,own)!
+  return and(tenant,or(
+    own,
+    eq(assignedTo,actor.userId),
+    and(sql`${assignedTo} IS NULL`,liveDesignationExists(actor,'cases')),
+  ))!
 }
 
 export async function findReadableCase(tx: RLSTx, actor: CaseActor, reference: string, lock=false) {

@@ -1,7 +1,8 @@
 /**
- * Triage designations: the explicit, expiring, revocable authority to see and work the unassigned conversation
- * queue. An organization administrator grants and revokes; the grant is never implied by rank and never exposes
- * message content. Every decision is audited in the same transaction.
+ * Triage designations: the explicit, expiring, revocable authority to see and work the unassigned queue of one
+ * scope (member conversations, or cases). An organization administrator grants and revokes; the grant is never
+ * implied by rank and never exposes content beyond that scope's unassigned queue. Every decision is audited in
+ * the same transaction.
  */
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -9,38 +10,35 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { caseAssigneeEligible, getCaseActor } from '@/lib/cases/case-authorization';
-import {
-  grantTriageDesignation,
-  listTriageDesignations,
-  revokeTriageDesignation,
-} from '@/lib/messaging/thread-assignment';
+import { grantDesignation, listDesignations, revokeDesignation } from '@/lib/triage/designations';
 
 export const dynamic = 'force-dynamic';
 
 const grantSchema = z.object({
+  scope: z.enum(['messages', 'cases']),
   userId: z.string().trim().min(1).max(255),
   expiresAt: z.string().datetime(),
 });
 const revokeSchema = z.object({ designationId: z.string().uuid() });
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' }, openapi: { tags: ['Messages'], summary: 'List triage designations' } },
+  { auth: { required: true, minRole: 'admin' }, openapi: { tags: ['Triage'], summary: 'List triage designations' } },
   async () => {
     const actor = await getCaseActor();
-    const designations = await withRLSContext(async (tx) => listTriageDesignations(tx, actor));
+    const designations = await withRLSContext(async (tx) => listDesignations(tx, actor));
     return { designations };
   },
 );
 
 export const POST = withApi(
-  { auth: { required: true, minRole: 'admin' }, body: grantSchema, openapi: { tags: ['Messages'], summary: 'Grant a triage designation' } },
+  { auth: { required: true, minRole: 'admin' }, body: grantSchema, openapi: { tags: ['Triage'], summary: 'Grant a triage designation' } },
   async ({ body }) => {
     const actor = await getCaseActor();
     const result = await withRLSContext(async (tx) =>
-      grantTriageDesignation(
+      grantDesignation(
         tx,
         actor,
-        { userId: body.userId, expiresAt: new Date(body.expiresAt) },
+        { scope: body.scope, userId: body.userId, expiresAt: new Date(body.expiresAt) },
         { assigneeEligible: (userId) => caseAssigneeEligible(tx, actor, userId) },
       ),
     );
@@ -60,10 +58,10 @@ export const POST = withApi(
 );
 
 export const DELETE = withApi(
-  { auth: { required: true, minRole: 'admin' }, body: revokeSchema, openapi: { tags: ['Messages'], summary: 'Revoke a triage designation' } },
+  { auth: { required: true, minRole: 'admin' }, body: revokeSchema, openapi: { tags: ['Triage'], summary: 'Revoke a triage designation' } },
   async ({ body }) => {
     const actor = await getCaseActor();
-    const result = await withRLSContext(async (tx) => revokeTriageDesignation(tx, actor, body.designationId));
+    const result = await withRLSContext(async (tx) => revokeDesignation(tx, actor, body.designationId));
     if (result.kind === 'not_found') throw ApiError.notFound('Designation');
     return { revoked: true };
   },

@@ -5,6 +5,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
 import { sql } from 'drizzle-orm'
 import { claims } from '@/db/schema/claims-schema'
+import { TRIAGE_DESIGNATIONS_DDL, designate } from '@/lib/triage/__tests__/fixture'
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: vi.fn() }))
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: vi.fn(), getUserRoleInOrganization: vi.fn() }))
@@ -22,6 +23,7 @@ let db: ReturnType<typeof drizzle>
 beforeAll(async () => {
   pg = new PGlite()
   await pg.exec(fs.readFileSync(new URL('../../db/queries/__tests__/fixtures/canonical-claim-write.sql', import.meta.url), 'utf8'))
+  await pg.exec(TRIAGE_DESIGNATIONS_DDL)
   db = drizzle(pg)
   await pg.query(`INSERT INTO claims(id,claim_id,claim_number,created_at,updated_at,organization_id,member_id,assigned_to,
     is_anonymous,previously_reported,witnesses_present,priority,progress,status)
@@ -62,7 +64,12 @@ describe('mandate changes take effect on the very next read (PostgreSQL)', () =>
     await pg.query(`UPDATE claims SET assigned_to=NULL WHERE claim_id=$1`, [caseId])
     expect(await readable(actor('steward-a', 'steward'))).toEqual([])
     expect(await readable(actor('steward-b', 'steward'))).toEqual([])
+    // Seniority does not change that: a chief steward without a designation sees nothing.
     const supervised = await db.execute(sql`SELECT count(*)::int AS n FROM claims c WHERE ${caseReadScope(actor('chief-1', 'chief_steward'), 'c')}`)
-    expect(supervised.rows[0].n).toBe(1)
+    expect(supervised.rows[0].n).toBe(0)
+    // An explicit, live cases designation is what lets a person see unassigned matters in order to assign them.
+    await designate(pg, { organizationId: org, scope: 'cases', userId: 'chief-1' })
+    expect(await readable(actor('chief-1', 'chief_steward'))).toEqual([caseId])
+    expect(await readable(actor('chief-1', 'chief_steward', otherOrg))).toEqual([])
   })
 })

@@ -24,9 +24,10 @@ export const messageThreads = pgTable('message_threads', {
 });
 
 // Explicit, expiring, revocable authority to triage the unassigned queue (platform 0014, RLS 0021).
-export const messageTriageDesignations = pgTable('message_triage_designations', {
+export const triageDesignations = pgTable('triage_designations', {
   id: uuid('id').primaryKey().defaultRandom(),
   organizationId: uuid('organization_id').notNull(),
+  scope: text('scope').notNull(), // messages, cases
   userId: text('user_id').notNull(),
   grantedBy: text('granted_by').notNull(),
   grantedAt: timestamp('granted_at', { withTimezone: true }).defaultNow().notNull(),

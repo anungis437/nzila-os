@@ -104,9 +104,8 @@
       "paths": ["apps/union-eyes"],
       "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**"],
       "allowed": [
-        { "file": "apps/union-eyes/lib/action-enforcer.ts", "reason": "CUPE claims RBAC matrix (numeric levels). The kernel case loader does not model claims yet; retire with the claims migration" },
+        { "file": "apps/union-eyes/lib/action-enforcer.ts", "reason": "CUPE claims RBAC matrix (numeric levels) still defines the case_read_any action; it no longer scopes any case read and is used only by the member-directory scope. Retire with the claims migration" },
         { "file": "apps/union-eyes/lib/authority/policies/case.ts", "reason": "Comment only: states that the kernel policy replaces these shortcuts" },
-        { "file": "apps/union-eyes/lib/cases/case-authorization.ts", "reason": "caseReadScope for the claims table grants tenant-wide reads by role level; migrate with the claims module" },
         { "file": "apps/union-eyes/lib/members/directory-access.ts", "reason": "Member-directory scope (names, contacts; sensitive attributes only for officer and above) uses the claims policy level matrix; exposes no case content, platform roles receive nothing. Replace with a membership-administration mandate" }
       ]
     },

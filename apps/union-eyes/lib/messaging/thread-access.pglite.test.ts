@@ -66,7 +66,7 @@ beforeAll(async () => {
   }
   // These functions never update or lock a thread, so the role keeps SELECT and INSERT only on it.
   await pg.exec(`CREATE ROLE rt NOLOGIN;
-    GRANT SELECT, INSERT ON message_threads, messages, in_app_notifications, message_triage_designations TO rt;
+    GRANT SELECT, INSERT ON message_threads, messages, in_app_notifications, triage_designations TO rt;
     GRANT USAGE ON SCHEMA audit_security TO rt; GRANT SELECT, INSERT ON audit_security.audit_logs TO rt;`)
   tx = drizzle(pg) as unknown as RLSTx
   const rows: Array<[keyof typeof ids, string, string, string | null, string]> = [

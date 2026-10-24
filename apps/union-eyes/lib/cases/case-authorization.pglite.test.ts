@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { TRIAGE_DESIGNATIONS_DDL, designate } from '@/lib/triage/__tests__/fixture'
 import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
 import { and, eq, sql } from 'drizzle-orm'
@@ -24,6 +25,7 @@ let db:ReturnType<typeof drizzle>
 beforeAll(async()=>{
   pg=new PGlite()
   await pg.exec(fs.readFileSync(new URL('../../db/queries/__tests__/fixtures/canonical-claim-write.sql',import.meta.url),'utf8'))
+  await pg.exec(TRIAGE_DESIGNATIONS_DDL)
   db=drizzle(pg)
   for(const [name,id] of Object.entries(ids)){
     await pg.query(`INSERT INTO claims(id,claim_id,claim_number,created_at,updated_at,organization_id,member_id,assigned_to,
@@ -55,8 +57,38 @@ describe('case record scope and history visibility against PostgreSQL',()=>{
   it('restricts stewards to their own or assigned cases',async()=>{
     expect(await visibleCases('steward')).toEqual([ids.own,ids.assigned].sort())
   })
-  it.each(['chief_steward','officer','admin','platform_admin'] as const)('permits %s broader tenant scope while denying foreign cases',async role=>{
-    expect(await visibleCases(role)).toEqual([ids.own,ids.other,ids.assigned].sort())
+  // Seniority never confers a tenant-wide read: the same own-or-assigned scope applies to every staff role.
+  it.each(['chief_steward','officer','admin','platform_admin'] as const)('gives %s no tenant-wide scope: own and assigned cases only',async role=>{
+    expect(await visibleCases(role)).toEqual([ids.own,ids.assigned].sort())
+  })
+  describe('triage designation (cases scope)',()=>{
+    const org2=org
+    beforeEach(async()=>{await pg.exec('TRUNCATE triage_designations')})
+    it('lets a live cases designation holder see unassigned cases in their own organization, and nothing else',async()=>{
+      await designate(pg,{organizationId:org2,scope:'cases',userId:'actor'})
+      expect(await visibleCases('steward')).toEqual([ids.own,ids.other,ids.assigned].sort())
+      expect(await visibleCases('chief_steward')).toEqual([ids.own,ids.other,ids.assigned].sort())
+    })
+    it('does not widen a member, and ignores a messages-scope designation',async()=>{
+      await designate(pg,{organizationId:org2,scope:'cases',userId:'actor'})
+      expect(await visibleCases('member')).toEqual([ids.own])
+      await pg.exec('TRUNCATE triage_designations')
+      await designate(pg,{organizationId:org2,scope:'messages',userId:'actor'})
+      expect(await visibleCases('steward')).toEqual([ids.own,ids.assigned].sort())
+    })
+    it('ignores expired, revoked and other-organization designations, and another person\'s designation',async()=>{
+      await designate(pg,{organizationId:org2,scope:'cases',userId:'actor',expiresInDays:-1})
+      expect(await visibleCases('steward')).toEqual([ids.own,ids.assigned].sort())
+      await pg.exec('TRUNCATE triage_designations')
+      await designate(pg,{organizationId:org2,scope:'cases',userId:'actor',revoked:true})
+      expect(await visibleCases('steward')).toEqual([ids.own,ids.assigned].sort())
+      await pg.exec('TRUNCATE triage_designations')
+      await designate(pg,{organizationId:foreign,scope:'cases',userId:'actor'})
+      expect(await visibleCases('steward')).toEqual([ids.own,ids.assigned].sort())
+      await pg.exec('TRUNCATE triage_designations')
+      await designate(pg,{organizationId:org2,scope:'cases',userId:'someone-else'})
+      expect(await visibleCases('steward')).toEqual([ids.own,ids.assigned].sort())
+    })
   })
   it('applies identical scope when a collection query uses its c alias',async()=>{
     const rows=await db.execute(sql`SELECT c.claim_id FROM claims c WHERE ${caseReadScope(actor,'c')}`)

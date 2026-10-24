@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { TRIAGE_DESIGNATIONS_DDL, designate } from '@/lib/triage/__tests__/fixture'
 import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
 import { claimDetailQuery } from './claim-detail-query'
@@ -19,6 +20,7 @@ let db: ReturnType<typeof drizzle>
 beforeAll(async () => {
   pg = new PGlite()
   await pg.exec(fs.readFileSync(new URL('../../db/queries/__tests__/fixtures/canonical-claim-write.sql', import.meta.url), 'utf8'))
+  await pg.exec(TRIAGE_DESIGNATIONS_DDL)
   await pg.exec('CREATE TABLE organization_members (user_id text, organization_id uuid, name text, email text, phone text)')
   db = drizzle(pg)
   const rows: Array<[keyof typeof ids, string, string, string | null]> = [
@@ -77,12 +79,22 @@ describe('claim detail read scope against PostgreSQL', () => {
     }
   })
 
-  it.each(['chief_steward', 'officer', 'admin', 'platform_admin'] as const)('grants %s tenant-wide reads inside their organization only', async role => {
+  it.each(['chief_steward', 'officer', 'admin', 'platform_admin'] as const)('gives %s no tenant-wide read: seniority is not a case relationship', async role => {
     const staff = actor('staff-1', role)
     for (const name of ['own', 'other', 'assigned', 'unassigned'] as const) {
-      expect((await read(staff, number(name)))[0]?.claimId).toBe(ids[name])
+      expect(await read(staff, number(name))).toEqual([])
     }
     expect(await read(staff, number('foreign'))).toEqual([])
+  })
+
+  it('lets a live cases designation holder read an unassigned case only, in their own organization', async () => {
+    await designate(pg, { organizationId: org, scope: 'cases', userId: 'triager-1' })
+    const triager = actor('triager-1', 'chief_steward')
+    for (const name of ['own', 'other', 'unassigned'] as const) expect((await read(triager, number(name)))[0]?.claimId).toBe(ids[name])
+    // A case that already has an assignee is not part of the unassigned queue, and a foreign case never is.
+    expect(await read(triager, number('assigned'))).toEqual([])
+    expect(await read(triager, number('foreign'))).toEqual([])
+    expect(await read(actor('triager-1', 'chief_steward', foreignOrg), number('unassigned'))).toEqual([])
   })
 
   it('never returns a row for an empty or unmatched reference', async () => {

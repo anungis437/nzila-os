@@ -111,7 +111,8 @@ describe('cases/[caseId]/escalate route', () => {
     const condition=new PgDialect().sqlToQuery(m.where.mock.calls[0][0] as SQL);
     expect(condition.sql).toContain('"claims"."member_id"');
     expect(condition.sql).toContain('"claims"."assigned_to"');
-    expect(condition.params).toEqual(['c1','org_1','u1','u1']);
+    // Reference, tenant, own, assigned, then the live cases-designation predicate (organization, scope, user).
+    expect(condition.params).toEqual(['c1','org_1','u1','u1','org_1','cases','u1']);
   });
 
   it('denies member escalation before querying a case or creating a proof', async () => {

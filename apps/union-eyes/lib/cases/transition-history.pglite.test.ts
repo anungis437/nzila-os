@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { TRIAGE_DESIGNATIONS_DDL, designate } from '@/lib/triage/__tests__/fixture'
 import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
 import type { CaseActor } from './case-authorization'
@@ -23,6 +24,7 @@ let tx: RLSTx
 beforeAll(async () => {
   pg = new PGlite()
   await pg.exec(fs.readFileSync(new URL('../../db/queries/__tests__/fixtures/canonical-claim-write.sql', import.meta.url), 'utf8'))
+  await pg.exec(TRIAGE_DESIGNATIONS_DDL)
   await pg.exec(`
     CREATE TABLE grievance_transitions (
       id uuid PRIMARY KEY, organization_id uuid NOT NULL, claim_id uuid NOT NULL,
@@ -89,9 +91,12 @@ describe('case status history against PostgreSQL', () => {
     await expect(readTransitionHistory(tx, steward, number('other'))).rejects.toMatchObject({ code: 'NOT_FOUND' })
   })
 
-  it('gives a chief steward tenant-wide reads inside the organization only', async () => {
+  it('gives a chief steward no tenant-wide read: an unassigned case is invisible without a cases designation', async () => {
     const chief = actor('chief-1', 'chief_steward')
+    await expect(readTransitionHistory(tx, chief, number('other'))).rejects.toMatchObject({ code: 'NOT_FOUND' })
+    await designate(pg, { organizationId: org, scope: 'cases', userId: 'chief-1' })
     expect(await readTransitionHistory(tx, chief, number('other'))).toHaveLength(3)
+    await expect(readTransitionHistory(tx, chief, number('assigned'))).rejects.toMatchObject({ code: 'NOT_FOUND' })
     await expect(readTransitionHistory(tx, chief, number('foreign'))).rejects.toMatchObject({ code: 'NOT_FOUND' })
   })
 })

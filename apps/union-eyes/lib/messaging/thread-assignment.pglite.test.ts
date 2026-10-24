@@ -7,12 +7,9 @@ import { drizzle } from 'drizzle-orm/pglite'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import {
   assignThread,
-  grantTriageDesignation,
-  listTriageDesignations,
   listTriageQueue,
-  revokeTriageDesignation,
-  TRIAGE_MAX_DAYS,
 } from './thread-assignment'
+import { grantDesignation, listDesignations, revokeDesignation, TRIAGE_MAX_DAYS } from '@/lib/triage/designations'
 import { createMemberThread, findReadableThread, listThreadMessages, listThreads } from './thread-access'
 
 // Runs the real platform 0014 migration (tables, constraints and guard triggers) on PostgreSQL, then exercises the
@@ -46,7 +43,7 @@ const nthread = async (memberId: string, opts: { org?: string; staffId?: string 
 }
 
 const designate = (userId: string, days = 30, organizationId = org) =>
-  pg.query(`INSERT INTO message_triage_designations(organization_id,user_id,granted_by,granted_at,expires_at) VALUES($1,$2,'admin-1',$3,$4)`, [
+  pg.query(`INSERT INTO triage_designations(organization_id,scope,user_id,granted_by,granted_at,expires_at) VALUES($1,'messages',$2,'admin-1',$3,$4)`, [
     organizationId,
     userId,
     new Date(NOW.getTime() - DAY).toISOString(),
@@ -93,7 +90,7 @@ beforeAll(async () => {
     GRANT USAGE ON SCHEMA audit_security TO rt;
     GRANT SELECT, INSERT, UPDATE ON message_threads TO rt;
     GRANT SELECT, INSERT ON messages, in_app_notifications, message_thread_assignments TO rt;
-    GRANT SELECT, INSERT, UPDATE ON message_triage_designations TO rt;
+    GRANT SELECT, INSERT, UPDATE ON triage_designations TO rt;
     GRANT SELECT, INSERT ON audit_security.audit_logs TO rt;
     SET ROLE rt;
   `)
@@ -107,12 +104,12 @@ beforeEach(async () => {
   await pg.exec('RESET ROLE')
   // Test data resets run as the owner; the role is restored for the assertions.
   await pg.exec(`
-    ALTER TABLE message_triage_designations DISABLE TRIGGER USER;
+    ALTER TABLE triage_designations DISABLE TRIGGER USER;
     ALTER TABLE message_thread_assignments DISABLE TRIGGER USER;
     ALTER TABLE message_threads DISABLE TRIGGER USER;
-    TRUNCATE message_thread_assignments, message_triage_designations, messages, in_app_notifications, message_threads CASCADE;
+    TRUNCATE message_thread_assignments, triage_designations, messages, in_app_notifications, message_threads CASCADE;
     TRUNCATE audit_security.audit_logs;
-    ALTER TABLE message_triage_designations ENABLE TRIGGER USER;
+    ALTER TABLE triage_designations ENABLE TRIGGER USER;
     ALTER TABLE message_thread_assignments ENABLE TRIGGER USER;
     ALTER TABLE message_threads ENABLE TRIGGER USER;
     GRANT INSERT ON audit_security.audit_logs TO rt;
@@ -162,8 +159,8 @@ describe('triage queue visibility', () => {
     expect(await listTriageQueue(tx(), who('triager-1'), later(4))).not.toBeNull()
     expect(await listTriageQueue(tx(), who('triager-1'), later(6))).toBeNull()
 
-    const live = (await pg.query<{ id: string }>(`SELECT id FROM message_triage_designations WHERE user_id='triager-2'`)).rows[0]
-    expect(await inTx((t) => revokeTriageDesignation(t, who('admin-1'), live.id, { now: () => later(1) }))).toEqual({ kind: 'ok' })
+    const live = (await pg.query<{ id: string }>(`SELECT id FROM triage_designations WHERE user_id='triager-2'`)).rows[0]
+    expect(await inTx((t) => revokeDesignation(t, who('admin-1'), live.id, { now: () => later(1) }))).toEqual({ kind: 'ok' })
     expect(await listTriageQueue(tx(), who('triager-2'), later(1))).toBeNull()
   })
 
@@ -293,26 +290,26 @@ describe('assignment', () => {
 describe('designations', () => {
   it('grants an expiring designation to eligible staff, audited, and refuses self-grants, long terms and duplicates', async () => {
     const admin = who('admin-1')
-    const granted = await inTx((t) => grantTriageDesignation(t, admin, { userId: 'triager-1', expiresAt: later(30) }, deps))
+    const granted = await inTx((t) => grantDesignation(t, admin, { scope: 'messages', userId: 'triager-1', expiresAt: later(30) }, deps))
     expect(granted).toMatchObject({ kind: 'ok', designation: { userId: 'triager-1', grantedBy: 'admin-1', revokedAt: null } })
-    expect(await count(`SELECT count(*) AS n FROM audit_security.audit_logs WHERE action='messages.triage_designation.grant'`)).toBe(1)
+    expect(await count(`SELECT count(*) AS n FROM audit_security.audit_logs WHERE action='triage.designation.grant'`)).toBe(1)
 
-    expect(await inTx((t) => grantTriageDesignation(t, admin, { userId: 'triager-1', expiresAt: later(30) }, deps))).toEqual({ kind: 'conflict' })
-    expect(await inTx((t) => grantTriageDesignation(t, admin, { userId: 'admin-1', expiresAt: later(30) }, deps))).toEqual({ kind: 'self_grant' })
-    expect(await inTx((t) => grantTriageDesignation(t, admin, { userId: 'triager-2', expiresAt: later(TRIAGE_MAX_DAYS + 1) }, deps))).toEqual({ kind: 'invalid_expiry' })
-    expect(await inTx((t) => grantTriageDesignation(t, admin, { userId: 'triager-2', expiresAt: later(-1) }, deps))).toEqual({ kind: 'invalid_expiry' })
-    expect(await inTx((t) => grantTriageDesignation(t, admin, { userId: 'a-member', expiresAt: later(30) }, deps))).toEqual({ kind: 'ineligible' })
-    expect((await listTriageDesignations(tx(), admin)).map((d) => d.userId)).toEqual(['triager-1'])
-    expect(await listTriageDesignations(tx(), who('admin-1', foreignOrg))).toEqual([])
+    expect(await inTx((t) => grantDesignation(t, admin, { scope: 'messages', userId: 'triager-1', expiresAt: later(30) }, deps))).toEqual({ kind: 'conflict' })
+    expect(await inTx((t) => grantDesignation(t, admin, { scope: 'messages', userId: 'admin-1', expiresAt: later(30) }, deps))).toEqual({ kind: 'self_grant' })
+    expect(await inTx((t) => grantDesignation(t, admin, { scope: 'messages', userId: 'triager-2', expiresAt: later(TRIAGE_MAX_DAYS + 1) }, deps))).toEqual({ kind: 'invalid_expiry' })
+    expect(await inTx((t) => grantDesignation(t, admin, { scope: 'messages', userId: 'triager-2', expiresAt: later(-1) }, deps))).toEqual({ kind: 'invalid_expiry' })
+    expect(await inTx((t) => grantDesignation(t, admin, { scope: 'messages', userId: 'a-member', expiresAt: later(30) }, deps))).toEqual({ kind: 'ineligible' })
+    expect((await listDesignations(tx(), admin)).map((d) => d.userId)).toEqual(['triager-1'])
+    expect(await listDesignations(tx(), who('admin-1', foreignOrg))).toEqual([])
   })
 
   it('allows a fresh grant once a previous designation has lapsed, recording the lapse', async () => {
     await asOwner(async () => {
       await designate('triager-1', 5)
     })
-    const result = await inTx((t) => grantTriageDesignation(t, who('admin-1'), { userId: 'triager-1', expiresAt: later(40) }, { ...deps, now: () => later(10) }))
+    const result = await inTx((t) => grantDesignation(t, who('admin-1'), { scope: 'messages', userId: 'triager-1', expiresAt: later(40) }, { ...deps, now: () => later(10) }))
     expect(result.kind).toBe('ok')
-    const rows = (await pg.query<{ revoked_by: string | null }>(`SELECT revoked_by FROM message_triage_designations ORDER BY granted_at`)).rows
+    const rows = (await pg.query<{ revoked_by: string | null }>(`SELECT revoked_by FROM triage_designations ORDER BY granted_at`)).rows
     expect(rows.map((r) => r.revoked_by)).toEqual(['system:expiry', null])
   })
 })
@@ -347,18 +344,18 @@ describe('database integrity (guard triggers)', () => {
     const id = await asOwner(() => nthread('member-1'))
     await inTx((t) => assignThread(t, who('triager-1'), { threadId: id, action: 'assign', toStaffId: 'steward-1' }, deps))
     await expect(pg.query(`UPDATE message_thread_assignments SET reason='edited'`)).rejects.toThrow(/permission denied|append-only/)
-    await expect(pg.query(`DELETE FROM message_triage_designations`)).rejects.toThrow(/permission denied|append-only/)
+    await expect(pg.query(`DELETE FROM triage_designations`)).rejects.toThrow(/permission denied|append-only/)
     await asOwner(async () => {
       await expect(pg.query(`UPDATE message_thread_assignments SET reason='edited'`)).rejects.toThrow(/append-only/)
-      await expect(pg.query(`DELETE FROM message_triage_designations`)).rejects.toThrow(/append-only/)
-      await expect(pg.query(`UPDATE message_triage_designations SET expires_at = expires_at + interval '1 year'`)).rejects.toThrow(/only revocation/)
+      await expect(pg.query(`DELETE FROM triage_designations`)).rejects.toThrow(/append-only/)
+      await expect(pg.query(`UPDATE triage_designations SET expires_at = expires_at + interval '1 year'`)).rejects.toThrow(/only revocation/)
     })
   })
 
   it('refuses a self-granted designation and an expiry that precedes the grant', async () => {
     await asOwner(async () => {
-      await expect(pg.query(`INSERT INTO message_triage_designations(organization_id,user_id,granted_by,expires_at) VALUES($1,'x','x',now()+interval '1 day')`, [org])).rejects.toThrow(/no_self_grant/)
-      await expect(pg.query(`INSERT INTO message_triage_designations(organization_id,user_id,granted_by,expires_at) VALUES($1,'x','y',now()-interval '1 day')`, [org])).rejects.toThrow(/expiry_after_grant/)
+      await expect(pg.query(`INSERT INTO triage_designations(organization_id,scope,user_id,granted_by,expires_at) VALUES($1,'messages','x','x',now()+interval '1 day')`, [org])).rejects.toThrow(/no_self_grant/)
+      await expect(pg.query(`INSERT INTO triage_designations(organization_id,scope,user_id,granted_by,expires_at) VALUES($1,'messages','x','y',now()-interval '1 day')`, [org])).rejects.toThrow(/expiry_after_grant/)
     })
   })
 })

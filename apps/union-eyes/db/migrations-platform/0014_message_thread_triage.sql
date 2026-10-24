@@ -1,12 +1,11 @@
 -- PLATFORM_SQL 0014_message_thread_triage
 --
--- Staff assignment for member conversations. A conversation is created by a member and
--- starts unassigned. Visibility to staff is never derived from rank: a person sees a thread
--- as its assignee, or sees the unassigned queue metadata only while holding a live,
--- expiring triage designation granted by an administrator.
+-- Staff assignment for member conversations and cases. A conversation or case starts unassigned. Visibility to
+-- staff is never derived from rank: a person sees a thread or claim as its assignee, or sees the unassigned
+-- queue only while holding a live, expiring triage designation for that scope, granted by an administrator.
 --
---   message_triage_designations   explicit, expiring, revocable authority to triage
---   message_thread_assignments    append-only history of every assignment decision
+--   triage_designations           explicit, expiring, revocable authority to triage one scope (messages or cases)
+--   message_thread_assignments    append-only history of every conversation assignment decision
 --
 -- message_threads itself gains a guard trigger so that the runtime, which receives UPDATE
 -- only for assignment and lifecycle, can never alter ownership, tenant, subject or creation.
@@ -94,22 +93,24 @@ BEGIN
   ALTER TABLE public.in_app_notifications ALTER COLUMN message SET NOT NULL;
 END $$;
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS public.message_triage_designations (
+CREATE TABLE IF NOT EXISTS public.triage_designations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL,
+  scope text NOT NULL,
   user_id text NOT NULL,
   granted_by text NOT NULL,
   granted_at timestamptz NOT NULL DEFAULT now(),
   expires_at timestamptz NOT NULL,
   revoked_at timestamptz,
   revoked_by text,
-  CONSTRAINT message_triage_no_self_grant CHECK (granted_by <> user_id),
-  CONSTRAINT message_triage_expiry_after_grant CHECK (expires_at > granted_at),
-  CONSTRAINT message_triage_revocation_pair CHECK ((revoked_at IS NULL) = (revoked_by IS NULL))
+  CONSTRAINT triage_scope_valid CHECK (scope IN ('messages', 'cases')),
+  CONSTRAINT triage_no_self_grant CHECK (granted_by <> user_id),
+  CONSTRAINT triage_expiry_after_grant CHECK (expires_at > granted_at),
+  CONSTRAINT triage_revocation_pair CHECK ((revoked_at IS NULL) = (revoked_by IS NULL))
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS message_triage_designations_live_uq
-  ON public.message_triage_designations (organization_id, user_id)
+CREATE UNIQUE INDEX IF NOT EXISTS triage_designations_live_uq
+  ON public.triage_designations (organization_id, scope, user_id)
   WHERE revoked_at IS NULL;
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS public.message_thread_assignments (
@@ -132,39 +133,40 @@ CREATE TABLE IF NOT EXISTS public.message_thread_assignments (
 CREATE INDEX IF NOT EXISTS message_thread_assignments_thread_idx
   ON public.message_thread_assignments (organization_id, thread_id, created_at);
 --> statement-breakpoint
-CREATE OR REPLACE FUNCTION public.message_triage_guard()
+CREATE OR REPLACE FUNCTION public.triage_guard()
 RETURNS trigger
 LANGUAGE plpgsql
 SET search_path = pg_catalog, public
 AS $$
 BEGIN
   IF TG_OP = 'DELETE' OR TG_OP = 'TRUNCATE' THEN
-    RAISE EXCEPTION 'message_triage_designations is append-only: % refused', TG_OP USING ERRCODE = 'restrict_violation';
+    RAISE EXCEPTION 'triage_designations is append-only: % refused', TG_OP USING ERRCODE = 'restrict_violation';
   END IF;
   IF OLD.revoked_at IS NOT NULL THEN
-    RAISE EXCEPTION 'message_triage_designations: a revoked designation is final' USING ERRCODE = 'restrict_violation';
+    RAISE EXCEPTION 'triage_designations: a revoked designation is final' USING ERRCODE = 'restrict_violation';
   END IF;
   IF NEW.id IS DISTINCT FROM OLD.id
      OR NEW.organization_id IS DISTINCT FROM OLD.organization_id
+     OR NEW.scope IS DISTINCT FROM OLD.scope
      OR NEW.user_id IS DISTINCT FROM OLD.user_id
      OR NEW.granted_by IS DISTINCT FROM OLD.granted_by
      OR NEW.granted_at IS DISTINCT FROM OLD.granted_at
      OR NEW.expires_at IS DISTINCT FROM OLD.expires_at THEN
-    RAISE EXCEPTION 'message_triage_designations: only revocation may be recorded' USING ERRCODE = 'restrict_violation';
+    RAISE EXCEPTION 'triage_designations: only revocation may be recorded' USING ERRCODE = 'restrict_violation';
   END IF;
   RETURN NEW;
 END;
 $$;
 --> statement-breakpoint
-DROP TRIGGER IF EXISTS message_triage_guard_update ON public.message_triage_designations;
+DROP TRIGGER IF EXISTS triage_guard_update ON public.triage_designations;
 --> statement-breakpoint
-CREATE TRIGGER message_triage_guard_update BEFORE UPDATE ON public.message_triage_designations
-  FOR EACH ROW EXECUTE FUNCTION public.message_triage_guard();
+CREATE TRIGGER triage_guard_update BEFORE UPDATE ON public.triage_designations
+  FOR EACH ROW EXECUTE FUNCTION public.triage_guard();
 --> statement-breakpoint
-DROP TRIGGER IF EXISTS message_triage_guard_delete ON public.message_triage_designations;
+DROP TRIGGER IF EXISTS triage_guard_delete ON public.triage_designations;
 --> statement-breakpoint
-CREATE TRIGGER message_triage_guard_delete BEFORE DELETE ON public.message_triage_designations
-  FOR EACH ROW EXECUTE FUNCTION public.message_triage_guard();
+CREATE TRIGGER triage_guard_delete BEFORE DELETE ON public.triage_designations
+  FOR EACH ROW EXECUTE FUNCTION public.triage_guard();
 --> statement-breakpoint
 CREATE OR REPLACE FUNCTION public.message_assignment_guard()
 RETURNS trigger

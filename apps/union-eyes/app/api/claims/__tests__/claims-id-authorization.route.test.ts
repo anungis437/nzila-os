@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
+import { TRIAGE_DESIGNATIONS_DDL, designate } from '@/lib/triage/__tests__/fixture'
 
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
@@ -40,6 +41,7 @@ let pg: PGlite
 beforeAll(async () => {
   pg = new PGlite()
   await pg.exec(fs.readFileSync(new URL('../../../../db/queries/__tests__/fixtures/canonical-claim-write.sql', import.meta.url), 'utf8'))
+  await pg.exec(TRIAGE_DESIGNATIONS_DDL)
   await pg.exec('CREATE TABLE organization_members (user_id text, organization_id uuid, name text, email text, phone text)')
   m.db = drizzle(pg) as unknown as typeof m.db
   const rows: Array<[keyof typeof ids, string, string, string | null, string]> = [
@@ -152,9 +154,13 @@ describe('GET /api/claims/[id] authorization', () => {
     expect((await call('CASE-OWN')).status).toBe(404)
   })
 
-  it('gives a chief steward tenant-wide read inside the organization only', async () => {
+  it('gives a chief steward no tenant-wide read; only a live cases designation exposes unassigned cases', async () => {
     signIn('chief-1', 'chief_steward')
+    expect((await call('CASE-OTHER')).status).toBe(404)
+    expect((await call('CASE-ASSIGNED')).status).toBe(404)
+    await designate(pg, { organizationId: org, scope: 'cases', userId: 'chief-1' })
     expect((await call('CASE-OTHER')).status).toBe(200)
+    expect((await call('CASE-ASSIGNED')).status).toBe(404)
     expect((await call('CASE-FOREIGN')).status).toBe(404)
   })
 })

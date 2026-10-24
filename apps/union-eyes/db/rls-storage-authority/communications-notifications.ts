@@ -565,10 +565,10 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     reviewPriority: "NONE",
   },
   {
-    table: "message_triage_designations",
+    table: "triage_designations",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "Explicit, expiring, revocable authority to triage the unassigned member-conversation queue (platform 0014, RLS 0021). Granted and revoked by an organization administrator through app/api/messages/triage-designations/route.ts; read by lib/messaging/thread-assignment.ts to decide queue visibility. UPDATE is limited by trigger to recording revocation; rows are never deleted.",
-    supportingCapability: ["app/api/messages/triage-designations/route.ts","lib/messaging/thread-assignment.ts","db/migrations-platform/0014_message_thread_triage.sql","db/migrations-cache/0021_message_thread_triage_rls_closure.sql"],
+    reason: "Explicit, expiring, revocable authority to triage the unassigned queue of one scope, messages or cases (platform 0014, RLS 0021). Granted and revoked by an organization administrator through app/api/triage-designations/route.ts; read by lib/triage/designations.ts, lib/messaging/thread-assignment.ts and, as a predicate, by lib/cases/case-authorization.ts to decide queue visibility. UPDATE is limited by trigger to recording revocation; rows are never deleted.",
+    supportingCapability: ["app/api/triage-designations/route.ts","lib/triage/designations.ts","lib/messaging/thread-assignment.ts","lib/cases/case-authorization.ts","db/migrations-platform/0014_message_thread_triage.sql","db/migrations-cache/0021_message_thread_triage_rls_closure.sql"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",

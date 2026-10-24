@@ -13,7 +13,7 @@ BEGIN
   IF to_regprocedure('ue_create_direct_org_rls_policy(text,text,boolean)') IS NULL THEN
     RAISE EXCEPTION 'RLS 0021 fail-closed: ue_create_direct_org_rls_policy() is not installed (0010 not applied).';
   END IF;
-  FOREACH t IN ARRAY ARRAY['message_triage_designations', 'message_thread_assignments'] LOOP
+  FOREACH t IN ARRAY ARRAY['triage_designations', 'message_thread_assignments'] LOOP
     IF to_regclass(format('public.%I', t)) IS NULL THEN
       RAISE EXCEPTION 'RLS 0021 fail-closed: public.% does not exist (platform 0014 not applied).', t;
     END IF;
@@ -40,6 +40,6 @@ BEGIN
   END LOOP;
 END $$;
 --> statement-breakpoint
-SELECT ue_create_direct_org_rls_policy('message_triage_designations');
+SELECT ue_create_direct_org_rls_policy('triage_designations');
 --> statement-breakpoint
 SELECT ue_create_direct_org_rls_policy('message_thread_assignments');
