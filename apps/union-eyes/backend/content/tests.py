@@ -354,7 +354,7 @@ class MemberDocumentsModelTest(TestCase):
     def test_create(self):
         now = timezone.now()
         obj = MemberDocuments.objects.create(
-            user_id="clerk_user_1",
+            user_id="user_1",
             file_name="resume.pdf",
             file_url="https://storage.example.com/resume.pdf",
             file_size=102400,
@@ -369,7 +369,7 @@ class MemberDocumentsModelTest(TestCase):
     def test_str(self):
         now = timezone.now()
         obj = MemberDocuments.objects.create(
-            user_id="clerk_user_2",
+            user_id="user_2",
             file_name="doc.pdf",
             file_url="https://storage.example.com/doc.pdf",
             file_size=5000,

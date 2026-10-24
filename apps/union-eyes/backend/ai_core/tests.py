@@ -199,12 +199,12 @@ class ChatSessionsModelTest(TestCase):
     """Test ChatSessions model."""
 
     def test_create_chat_sessions(self):
-        obj = ChatSessions.objects.create(user_id="clerk_user_123")
+        obj = ChatSessions.objects.create(user_id="user_123")
         self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.user_id, "clerk_user_123")
+        self.assertEqual(obj.user_id, "user_123")
 
     def test_chat_sessions_str(self):
-        obj = ChatSessions.objects.create(user_id="clerk_user_456")
+        obj = ChatSessions.objects.create(user_id="user_456")
         self.assertIsInstance(str(obj), str)
 
 

@@ -1,7 +1,7 @@
 -- =============================================================================
 -- MASTER SEED — UnionEyes (Nzila OS)
 -- =============================================================================
--- THE definitive, idempotent, Clerk-aligned seed for all 4 core tenants:
+-- THE definitive, idempotent seed for all 4 core tenants:
 --   1. NZILA Ventures  (platform)  → org_3A1qYmVHWmeSbbZhlPMwVIrGHFQ
 --   2. CLC             (congress)  → org_3B3NjHnvzeSJBZQE8PGQf0nmgts
 --   3. CAPE-ACEP       (union)     → org_3B3Nj6NGSY6rT9ibI8bgFhZdMRN
@@ -10,8 +10,8 @@
 -- Also seeds the full CLC hierarchy (federations, national unions, locals)
 -- including CUPE National as the parent of CUPE Local 123.
 --
--- All member user_ids are REAL Clerk user IDs from the known-hagfish-67
--- Clerk instance. Password for all test users: NzilaTest2026!
+-- All member user_ids are the auth-provider user IDs captured from the staging
+-- environment. Password for all test users: NzilaTest2026!
 --
 -- Idempotent: all inserts use ON CONFLICT DO NOTHING or upsert.
 -- Safe to re-run without duplicating data.
@@ -50,7 +50,7 @@ BEGIN;
 INSERT INTO organizations (
   id, name, slug, display_name, short_name, organization_type,
   hierarchy_path, hierarchy_level, sectors, member_count, active_member_count,
-  settings, features_enabled, clerk_organization_id, status
+  settings, features_enabled, auth_provider_org_id, status
 ) VALUES (
   '458a56cb-251a-4c91-a0b5-81bb8ac39087',
   'NZILA Ventures', 'default', 'NZILA Ventures', 'NZILA', 'platform',
@@ -61,7 +61,7 @@ INSERT INTO organizations (
 ) ON CONFLICT (slug) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   organization_type = EXCLUDED.organization_type,
-  clerk_organization_id = EXCLUDED.clerk_organization_id;
+  auth_provider_org_id = EXCLUDED.auth_provider_org_id;
 
 -- 1b. CLC (Congress — root of hierarchy)
 INSERT INTO organizations (
@@ -70,7 +70,7 @@ INSERT INTO organizations (
   email, phone, website, address,
   clc_affiliated, member_count, active_member_count, status,
   clc_affiliate_code, per_capita_rate, remittance_day, fiscal_year_end,
-  settings, features_enabled, clerk_organization_id
+  settings, features_enabled, auth_provider_org_id
 ) VALUES (
   '9588c826-a543-4d43-9c22-2e477e532649',
   'Canadian Labour Congress', 'clc', 'CLC', 'CLC',
@@ -84,7 +84,7 @@ INSERT INTO organizations (
   '{dues-management,member-directory,financial-reporting,per-capita-remittances,clc-integration,affiliate-management,convention-governance}',
   'org_3B3NjHnvzeSJBZQE8PGQf0nmgts'
 ) ON CONFLICT (slug) DO UPDATE SET
-  clerk_organization_id = EXCLUDED.clerk_organization_id,
+  auth_provider_org_id = EXCLUDED.auth_provider_org_id,
   settings = EXCLUDED.settings,
   features_enabled = EXCLUDED.features_enabled;
 
@@ -100,7 +100,7 @@ BEGIN
     email, phone, website, address,
     clc_affiliated, affiliation_date, member_count, active_member_count, status,
     clc_affiliate_code, per_capita_rate, remittance_day, fiscal_year_end,
-    settings, features_enabled, clerk_organization_id
+    settings, features_enabled, auth_provider_org_id
   ) VALUES (
     '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6',
     'Canadian Association of Professional Employees', 'cape-acep', 'CAPE-ACEP', 'CAPE',
@@ -117,14 +117,14 @@ BEGIN
     parent_id = v_clc_id,
     hierarchy_path = ARRAY[v_clc_id::text],
     hierarchy_level = 1,
-    clerk_organization_id = EXCLUDED.clerk_organization_id,
+    auth_provider_org_id = EXCLUDED.auth_provider_org_id,
     settings = EXCLUDED.settings;
 END $$;
 
 -- 1e. CUPE National (hardcoded ID for supplementary-seed compatibility)
---     NOTE: clerk_organization_id is intentionally NULL — no Clerk org exists for
---     CUPE National yet. CUPE members log in via CUPE L123's Clerk org
---     (org_3BP6K4uezEa2CLEvUNDwhnJGNFg). Create a Clerk org when CUPE National
+--     NOTE: auth_provider_org_id is intentionally NULL — no provider org exists for
+--     CUPE National yet. CUPE members sign in through CUPE L123's organization
+--     (org_3BP6K4uezEa2CLEvUNDwhnJGNFg). Create a provider org when CUPE National
 --     needs its own auth boundary.
 DO $$
 DECLARE v_clc_id UUID;
@@ -319,7 +319,7 @@ BEGIN
     parent_id, hierarchy_path, hierarchy_level, province_territory, sectors,
     email, phone, website, address,
     member_count, active_member_count,
-    settings, features_enabled, clerk_organization_id, status
+    settings, features_enabled, auth_provider_org_id, status
   ) VALUES (
     '9210418f-6a4f-4dab-a7d2-4450d581dc81',
     'CUPE Local 123', 'cupe-local-123', 'CUPE Local 123', 'CUPE L123', 'local',
@@ -334,7 +334,7 @@ BEGIN
     parent_id = v_cupe_id,
     hierarchy_path = ARRAY[v_clc_id::text, v_cupe_id::text],
     hierarchy_level = 2,
-    clerk_organization_id = EXCLUDED.clerk_organization_id,
+    auth_provider_org_id = EXCLUDED.auth_provider_org_id,
     settings = EXCLUDED.settings;
 
   -- CUPE Local 123 → CUPE relationship
@@ -352,7 +352,7 @@ END $$;
 
 
 -- ╔═══════════════════════════════════════════════════════════════════════════╗
--- ║  PHASE 3: ORGANIZATION MEMBERS (Clerk user IDs)                         ║
+-- ║  PHASE 3: ORGANIZATION MEMBERS (auth user IDs)                          ║
 -- ╚═══════════════════════════════════════════════════════════════════════════╝
 
 -- 3a. NZILA Ventures members (12)
@@ -434,7 +434,7 @@ BEGIN
     status = EXCLUDED.status;
 END $$;
 
--- 3d. CUPE National members (7 — national office staff, real Clerk IDs from staging DB)
+-- 3d. CUPE National members (7 — national office staff, auth user IDs from staging DB)
 DO $$
 DECLARE v_cupe_id text;
 BEGIN
@@ -547,7 +547,7 @@ ON CONFLICT (user_id) DO UPDATE SET
   timezone   = EXCLUDED.timezone,
   is_active  = EXCLUDED.is_active;
 
--- CUPE National users (real Clerk IDs — seeded from staging DB, not cross-org Nzila users)
+-- CUPE National users (auth user IDs — seeded from staging DB, not cross-org Nzila users)
 INSERT INTO user_management.users (user_id, email, first_name, last_name, locale, timezone, is_active)
 VALUES
   ('user_3BnpKGiePftiVYeaYF24EIplB8S', 'm.hancock@cupe.ca',    'Mark',    'Hancock',   'en-CA', 'America/Toronto', true),
@@ -827,7 +827,7 @@ END $$;
 
 -- Final summary
 SELECT slug, display_name, organization_type, hierarchy_level,
-       clerk_organization_id, member_count, status
+       auth_provider_org_id, member_count, status
 FROM organizations
 WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe', 'cupe-local-123')
 ORDER BY hierarchy_level, slug;

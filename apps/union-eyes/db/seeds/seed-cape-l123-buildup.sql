@@ -271,7 +271,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5. Steward Assignments (DISABLED — steward_assignments.steward_id FK→profiles.user_id
---    requires real Clerk profiles; steward table rows are seeded above)
+--    requires real auth-provider profiles; steward table rows are seeded above)
 -- ─────────────────────────────────────────────────────────────────────────────
 -- INSERT INTO steward_assignments (id, organization_id, steward_id, steward_type, status, department, start_date, members_covered, training_completed, training_completion_date, certification_date, certification_expiry, preferred_contact_method, notes, created_at, updated_at)
 -- VALUES
