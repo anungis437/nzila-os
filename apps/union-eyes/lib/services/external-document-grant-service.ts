@@ -1,10 +1,10 @@
 import { and, eq } from 'drizzle-orm';
-import { db } from '@/db/db';
 import {
   externalDocumentAccessGrants,
   type NewExternalDocumentAccessGrant,
 } from '@/db/schema/representation-authority-schema';
-import { auditLog, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export interface CreateExternalDocumentGrantInput extends NewExternalDocumentAccessGrant {
   grantorCanViewDocument: boolean;
@@ -26,9 +26,12 @@ export async function createExternalDocumentGrant(input: CreateExternalDocumentG
   void grantorCanViewDocument;
   void grantorCanShareDocument;
 
-  const [created] = await db.insert(externalDocumentAccessGrants).values(grant).returning();
-  await auditExternalDocumentGrant('external_document_grant.created', created.id, grant);
-  return created;
+  // The grant and its audit record commit together.
+  return withRLSContext({ organizationId: grant.organizationId }, async (tx) => {
+    const [created] = await tx.insert(externalDocumentAccessGrants).values(grant).returning();
+    await auditExternalDocumentGrant(tx, 'external_document_grant.created', created.id, grant);
+    return created;
+  });
 }
 
 export async function revokeExternalDocumentGrant(params: {
@@ -37,37 +40,39 @@ export async function revokeExternalDocumentGrant(params: {
   actorId: string;
 }) {
   const now = new Date();
-  const [updated] = await db
-    .update(externalDocumentAccessGrants)
-    .set({
-      status: 'revoked',
-      revokedAt: now,
-      revokedBy: params.actorId,
-      updatedAt: now,
-    })
-    .where(
-      and(
-        eq(externalDocumentAccessGrants.id, params.grantId),
-        eq(externalDocumentAccessGrants.organizationId, params.organizationId),
-      ),
-    )
-    .returning();
+  return withRLSContext({ organizationId: params.organizationId }, async (tx) => {
+    const [updated] = await tx
+      .update(externalDocumentAccessGrants)
+      .set({
+        status: 'revoked',
+        revokedAt: now,
+        revokedBy: params.actorId,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(externalDocumentAccessGrants.id, params.grantId),
+          eq(externalDocumentAccessGrants.organizationId, params.organizationId),
+        ),
+      )
+      .returning();
 
-  if (updated) {
-    await auditExternalDocumentGrant('external_document_grant.revoked', updated.id, {
-      organizationId: updated.organizationId,
-      userId: updated.userId,
-      grantedBy: params.actorId,
-      matterId: updated.matterId,
-      documentId: updated.documentId,
-      authorityId: updated.authorityId,
-      matterGrantId: updated.matterGrantId,
-      representativeOrganizationId: updated.representativeOrganizationId,
-      matterType: updated.matterType,
-    });
-  }
+    if (updated) {
+      await auditExternalDocumentGrant(tx, 'external_document_grant.revoked', updated.id, {
+        organizationId: updated.organizationId,
+        userId: updated.userId,
+        grantedBy: params.actorId,
+        matterId: updated.matterId,
+        documentId: updated.documentId,
+        authorityId: updated.authorityId,
+        matterGrantId: updated.matterGrantId,
+        representativeOrganizationId: updated.representativeOrganizationId,
+        matterType: updated.matterType,
+      });
+    }
 
-  return updated ?? null;
+    return updated ?? null;
+  });
 }
 
 export async function expireExternalDocumentGrant(params: {
@@ -75,35 +80,38 @@ export async function expireExternalDocumentGrant(params: {
   organizationId: string;
   actorId: string;
 }) {
-  const [updated] = await db
-    .update(externalDocumentAccessGrants)
-    .set({ status: 'expired', updatedAt: new Date() })
-    .where(
-      and(
-        eq(externalDocumentAccessGrants.id, params.grantId),
-        eq(externalDocumentAccessGrants.organizationId, params.organizationId),
-      ),
-    )
-    .returning();
+  return withRLSContext({ organizationId: params.organizationId }, async (tx) => {
+    const [updated] = await tx
+      .update(externalDocumentAccessGrants)
+      .set({ status: 'expired', updatedAt: new Date() })
+      .where(
+        and(
+          eq(externalDocumentAccessGrants.id, params.grantId),
+          eq(externalDocumentAccessGrants.organizationId, params.organizationId),
+        ),
+      )
+      .returning();
 
-  if (updated) {
-    await auditExternalDocumentGrant('external_document_grant.expired', updated.id, {
-      organizationId: updated.organizationId,
-      userId: updated.userId,
-      grantedBy: params.actorId,
-      matterId: updated.matterId,
-      documentId: updated.documentId,
-      authorityId: updated.authorityId,
-      matterGrantId: updated.matterGrantId,
-      representativeOrganizationId: updated.representativeOrganizationId,
-      matterType: updated.matterType,
-    });
-  }
+    if (updated) {
+      await auditExternalDocumentGrant(tx, 'external_document_grant.expired', updated.id, {
+        organizationId: updated.organizationId,
+        userId: updated.userId,
+        grantedBy: params.actorId,
+        matterId: updated.matterId,
+        documentId: updated.documentId,
+        authorityId: updated.authorityId,
+        matterGrantId: updated.matterGrantId,
+        representativeOrganizationId: updated.representativeOrganizationId,
+        matterType: updated.matterType,
+      });
+    }
 
-  return updated ?? null;
+    return updated ?? null;
+  });
 }
 
 async function auditExternalDocumentGrant(
+  tx: RLSTx,
   eventType: string,
   grantId: string,
   details: Pick<
@@ -119,12 +127,10 @@ async function auditExternalDocumentGrant(
     | 'matterType'
   >,
 ) {
-  return auditLog({
-    eventType,
-    severity: AuditSeverity.MEDIUM,
+  return persistAtomicAudit(tx, {
     userId: details.grantedBy,
     organizationId: details.organizationId,
-    resource: 'external_document_access_grants',
+    resourceType: 'external_document_access_grants',
     resourceId: grantId,
     action: eventType,
     details: {
@@ -136,6 +142,5 @@ async function auditExternalDocumentGrant(
       documentId: details.documentId,
       representativeOrganizationId: details.representativeOrganizationId,
     },
-    outcome: 'success',
   });
 }

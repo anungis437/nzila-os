@@ -135,27 +135,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
   }
   const access = granted.access;
 
-  await auditCaseMutation({
-    event: CaseAuditEvent.CASE_ACCESS_GRANTED,
-    userId,
-    organizationId,
-    caseId: params.id,
-    action: 'update',
-    newState: { assignmentId: access.id, status: access.status },
-    details: {
-      targetUserId: access.userId,
-      accessRole: access.accessRole,
-      scope: {
-        canComment: access.canComment,
-        canUploadDocuments: access.canUploadDocuments,
-        canEditCaseNotes: access.canEditCaseNotes,
-        canDraftActions: access.canDraftActions,
-        canViewPrivateDocuments: access.canViewPrivateDocuments,
-      },
-      expiresAt: access.expiresAt,
-    },
-  });
-
   return standardSuccessResponse(access);
 });
 
@@ -195,30 +174,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     });
     return accessMutationFailure(revoked);
   }
-  const { before, updated } = revoked;
-
-  const event = CaseAuditEvent.CASE_ACCESS_REVOKED;
-
-  await auditCaseMutation({
-    event,
-    userId,
-    organizationId,
-    caseId: params.id,
-    action: 'update',
-    previousState: { status: before.status },
-    newState: { status: updated.status },
-    details: {
-      assignmentId: updated.id,
-      targetUserId: updated.userId,
-      scope: {
-        canComment: updated.canComment,
-        canUploadDocuments: updated.canUploadDocuments,
-        canEditCaseNotes: updated.canEditCaseNotes,
-        canDraftActions: updated.canDraftActions,
-        canViewPrivateDocuments: updated.canViewPrivateDocuments,
-      },
-    },
-  });
+  const { updated } = revoked;
 
   return standardSuccessResponse(updated);
 });

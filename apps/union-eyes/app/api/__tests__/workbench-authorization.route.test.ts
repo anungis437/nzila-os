@@ -10,6 +10,7 @@ const m = vi.hoisted(() => ({
   denyCaseAction: vi.fn(),
   withRLSContext: vi.fn(),
   auditLog: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   execute: vi.fn(),
 }));
 
@@ -33,6 +34,7 @@ vi.mock('@/lib/cases/case-authorization', () => ({
   caseAuthorizationResponse: () => null,
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: m.auditLog,
   AuditEventType: { DATA_UPDATE: 'DATA_UPDATE' },
@@ -100,7 +102,7 @@ describe('POST /api/workbench/assign', () => {
     }));
     m.findReadableCase.mockResolvedValue({ claimId, assignedTo: null });
     m.caseAssigneeEligible.mockResolvedValue(true);
-    m.auditLog.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
   it('denies self-assignment when the case_assign policy denies the actor', async () => {
@@ -108,7 +110,7 @@ describe('POST /api/workbench/assign', () => {
     const { POST } = await import('../workbench/assign/route');
     await expect(POST(ctx({ claimId }))).rejects.toMatchObject({ status: 403 });
     expect(m.withRLSContext).not.toHaveBeenCalled();
-    expect(m.auditLog).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('returns 404 for a claim outside the actor read scope (e.g. another organization)', async () => {
@@ -117,7 +119,7 @@ describe('POST /api/workbench/assign', () => {
     const { POST } = await import('../workbench/assign/route');
     const res = await POST(ctx({ claimId, assignTo: 'steward-2' })) as Response;
     expect(res.status).toBe(404);
-    expect(m.auditLog).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('refuses an ineligible assignee', async () => {
@@ -126,7 +128,7 @@ describe('POST /api/workbench/assign', () => {
     m.denyCaseAction.mockRejectedValue(TestApiError.forbidden());
     const { POST } = await import('../workbench/assign/route');
     await expect(POST(ctx({ claimId, assignTo: 'member-1' }))).rejects.toMatchObject({ status: 403 });
-    expect(m.auditLog).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('assigns and audits with the authenticated organization', async () => {
@@ -134,6 +136,13 @@ describe('POST /api/workbench/assign', () => {
     const { POST } = await import('../workbench/assign/route');
     const result = await POST(ctx({ claimId, assignTo: 'steward-2' })) as any;
     expect(result.claim).toEqual({ claimId, assignedTo: 'steward-2' });
-    expect(m.auditLog).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org-1', userId: 'chief-1' }));
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'case.assign', organizationId: 'org-1', userId: 'chief-1', resourceId: claimId }));
+  });
+
+  it('fails the assignment when the in-transaction audit cannot be written', async () => {
+    m.getCaseActor.mockResolvedValue(chief);
+    m.persistAtomicAudit.mockRejectedValue(new Error('audit write failed'));
+    const { POST } = await import('../workbench/assign/route');
+    await expect(POST(ctx({ claimId, assignTo: 'steward-2' }))).rejects.toThrow('audit write failed');
   });
 });

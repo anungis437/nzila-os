@@ -8,7 +8,7 @@ import { withApi } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims, claimUpdates } from '@/db/schema/claims-schema';
 import { eq } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
 import {
   getCaseActor,
@@ -65,7 +65,16 @@ export const POST = withApi(
           isInternal: true,
           visibilityScope: 'staff',
         });
-        return { denied: false as const, claimId: claim.claimId, previousAssignee: claim.assignedTo };
+        // The assignment, its history row and its audit record commit together.
+        await persistAtomicAudit(tx, {
+          organizationId: actor.organizationId,
+          userId: actor.userId,
+          action: 'case.assign',
+          resourceType: 'claims',
+          resourceId: claim.claimId,
+          details: { assignedTo: assigneeId, previousAssignee: claim.assignedTo, via: 'workbench' },
+        });
+        return { denied: false as const, claimId: claim.claimId };
       });
 
       if (!result) {
@@ -74,18 +83,6 @@ export const POST = withApi(
       if (result.denied) {
         return await denyCaseAction(actor, 'case_assign', result.claimId, 'Assignee is not an active canonical representative in this organization');
       }
-
-      await auditLog({
-        eventType: AuditEventType.DATA_UPDATE,
-        severity: AuditSeverity.MEDIUM,
-        userId: actor.userId,
-        organizationId: actor.organizationId,
-        resource: 'claims',
-        action: 'assign',
-        resourceId: result.claimId,
-        details: { assignedTo: assigneeId, previousAssignee: result.previousAssignee },
-        outcome: 'success',
-      });
 
       return { claim: { claimId: result.claimId, assignedTo: assigneeId } };
     } catch (error) {

@@ -8,7 +8,7 @@ const m = vi.hoisted(() => ({
   dbInsertReturning: vi.fn(),
   dbInsertValues: vi.fn(),
   dbSelectWhere: vi.fn(),
-  auditDataMutation: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   auditLog: vi.fn(),
   emitCapeAuditEvent: vi.fn(),
   buildUnionEvidencePack: vi.fn(),
@@ -43,6 +43,7 @@ vi.mock('@/lib/organization-middleware', () => ({
 }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/audit-logger', () => ({
   AuditEventType: {
     AUTHORITY_VIOLATION: 'AUTHORITY_VIOLATION',
@@ -50,7 +51,6 @@ vi.mock('@/lib/audit-logger', () => ({
     INTAKE_SUBMITTED: 'INTAKE_SUBMITTED',
     CASE_PRIORITY_SET: 'CASE_PRIORITY_SET',
   },
-  auditDataMutation: m.auditDataMutation,
   auditLog: m.auditLog,
 }));
 vi.mock('@/lib/audit/cape-audit-events', () => ({
@@ -73,11 +73,11 @@ describe('grievances route', () => {
     m.hasMinRole.mockResolvedValue(true);
     m.withRLSContext.mockImplementation(async (a: unknown, b?: unknown) => {
       const fn = (typeof a === 'function' ? a : b) as (tx?: unknown) => Promise<unknown>;
-      return fn({});
+      return fn(mockDb);
     });
     m.dbInsertReturning.mockResolvedValue([{ id: 'grv_1', grievanceNumber: 'GRV-1', priority: 'medium' }]);
     m.dbSelectWhere.mockResolvedValue([{ id: 'grv_1', status: 'filed' }]);
-    m.auditDataMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.auditLog.mockResolvedValue(undefined);
     m.emitCapeAuditEvent.mockResolvedValue(undefined);
     m.trackPilotEvent.mockResolvedValue(undefined);
@@ -138,6 +138,22 @@ describe('grievances route', () => {
 
     expect(response.status).toBe(200);
     expect(m.dbInsertReturning).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'grievance.submit_intake', organizationId: 'org_1', userId: 'user_1', resourceId: 'grv_1' }));
+  });
+
+  it('POST fails when the in-transaction audit record cannot be written', async () => {
+    m.persistAtomicAudit.mockRejectedValue(new Error('audit write failed'));
+    const { POST } = await loadRoute();
+    const response = await POST(
+      new NextRequest('http://localhost/api/grievances', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ type: 'individual', title: 'Unsafe workplace condition', description: 'Detailed incident description with enough length.' }),
+      }),
+      { organizationId: 'org_1', userId: 'user_1' },
+    );
+    expect(response.status).toBe(500);
+    expect(m.trackPilotEvent).not.toHaveBeenCalled();
   });
 
   it('POST creates an official case and records downstream events', async () => {
@@ -160,7 +176,7 @@ describe('grievances route', () => {
 
     expect(response.status).toBe(200);
     expect(m.hasMinRole).toHaveBeenCalledWith('steward');
-    expect(m.auditLog).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'grievance.create_official_case' }));
     expect(m.trackPilotEvent).toHaveBeenCalledTimes(2);
     expect(m.recordUsage).toHaveBeenCalled();
   });

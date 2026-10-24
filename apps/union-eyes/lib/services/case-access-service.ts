@@ -1,6 +1,7 @@
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { caseAssigneeEligible } from '@/lib/cases/case-authorization';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import {
@@ -45,8 +46,8 @@ export interface EffectiveCaseAccess {
   };
 }
 
-export async function grantCaseAccess(input: GrantCaseAccessInput) {
-  const [existing] = await db
+export async function grantCaseAccess(input: GrantCaseAccessInput, exec: RLSTx = db) {
+  const [existing] = await exec
     .select()
     .from(grievanceCaseAccessAssignments)
     .where(
@@ -59,7 +60,7 @@ export async function grantCaseAccess(input: GrantCaseAccessInput) {
     .limit(1);
 
   if (existing) {
-    const [updated] = await db
+    const [updated] = await exec
       .update(grievanceCaseAccessAssignments)
       .set({
         accessRole: input.accessRole,
@@ -80,7 +81,7 @@ export async function grantCaseAccess(input: GrantCaseAccessInput) {
     return updated;
   }
 
-  const [created] = await db
+  const [created] = await exec
     .insert(grievanceCaseAccessAssignments)
     .values({
       organizationId: input.organizationId,
@@ -101,8 +102,8 @@ export async function grantCaseAccess(input: GrantCaseAccessInput) {
   return created;
 }
 
-export async function updateCaseAccessStatus(id: string, status: CaseAccessStatus) {
-  const [updated] = await db
+export async function updateCaseAccessStatus(id: string, status: CaseAccessStatus, exec: RLSTx = db) {
+  const [updated] = await exec
     .update(grievanceCaseAccessAssignments)
     .set({ status, updatedAt: new Date() })
     .where(eq(grievanceCaseAccessAssignments.id, id))
@@ -153,8 +154,8 @@ export function validateCaseAccessGrantTerms(
   return null;
 }
 
-async function loadCaseOwner(organizationId: string, grievanceId: string) {
-  const [grievance] = await db
+async function loadCaseOwner(exec: RLSTx, organizationId: string, grievanceId: string) {
+  const [grievance] = await exec
     .select({ unionRepId: grievances.unionRepId })
     .from(grievances)
     .where(and(eq(grievances.organizationId, organizationId), eq(grievances.id, grievanceId)))
@@ -169,28 +170,52 @@ async function loadCaseOwner(organizationId: string, grievanceId: string) {
 export async function grantCaseAccessGuarded(
   input: GrantCaseAccessInput,
 ): Promise<{ ok: true; access: Awaited<ReturnType<typeof grantCaseAccess>> } | CaseAccessMutationFailure> {
-  const grievance = await loadCaseOwner(input.organizationId, input.grievanceId);
-  if (!grievance) return { ok: false, status: 404, code: 'CASE_NOT_FOUND', message: 'Grievance not found.' };
-  if (grievance.unionRepId !== input.grantedBy) {
-    return { ok: false, status: 403, code: 'CASE_MANAGEMENT_AUTHORITY_REQUIRED', message: 'Only the primary owner of this case may grant collaborator access.' };
-  }
-  if (input.userId === input.grantedBy) {
-    return { ok: false, status: 403, code: 'SELF_GRANT_FORBIDDEN', message: 'A case access grant cannot target the grantor.' };
-  }
-  if (grievance.unionRepId === input.userId) {
-    return { ok: false, status: 400, code: 'PRIMARY_OWNER_GRANT_FORBIDDEN', message: 'The primary owner already holds full access.' };
-  }
-  const terms = validateCaseAccessGrantTerms(input);
-  if (terms) return terms;
+  // The owner check, the grant and its audit record share one transaction, so a grant can neither
+  // commit unaudited nor be decided against an owner who changed in between.
+  return withRLSContext({ organizationId: input.organizationId }, async (tx) => {
+    const grievance = await loadCaseOwner(tx, input.organizationId, input.grievanceId);
+    if (!grievance) return { ok: false as const, status: 404 as const, code: 'CASE_NOT_FOUND' as const, message: 'Grievance not found.' };
+    if (grievance.unionRepId !== input.grantedBy) {
+      return { ok: false as const, status: 403 as const, code: 'CASE_MANAGEMENT_AUTHORITY_REQUIRED' as const, message: 'Only the primary owner of this case may grant collaborator access.' };
+    }
+    if (input.userId === input.grantedBy) {
+      return { ok: false as const, status: 403 as const, code: 'SELF_GRANT_FORBIDDEN' as const, message: 'A case access grant cannot target the grantor.' };
+    }
+    if (grievance.unionRepId === input.userId) {
+      return { ok: false as const, status: 400 as const, code: 'PRIMARY_OWNER_GRANT_FORBIDDEN' as const, message: 'The primary owner already holds full access.' };
+    }
+    const terms = validateCaseAccessGrantTerms(input);
+    if (terms) return terms;
 
-  const eligible = await withRLSContext({ organizationId: input.organizationId }, (tx) =>
-    caseAssigneeEligible(tx, { userId: input.grantedBy, organizationId: input.organizationId, role: 'steward' }, input.userId),
-  );
-  if (!eligible) {
-    return { ok: false, status: 400, code: 'GRANTEE_INELIGIBLE', message: 'Grantee is not an active representative in this organization.' };
-  }
+    const eligible = await caseAssigneeEligible(tx, { userId: input.grantedBy, organizationId: input.organizationId, role: 'steward' }, input.userId);
+    if (!eligible) {
+      return { ok: false as const, status: 400 as const, code: 'GRANTEE_INELIGIBLE' as const, message: 'Grantee is not an active representative in this organization.' };
+    }
 
-  return { ok: true, access: await grantCaseAccess(input) };
+    const access = await grantCaseAccess(input, tx);
+    await persistAtomicAudit(tx, {
+      organizationId: input.organizationId,
+      userId: input.grantedBy,
+      action: 'case.access_granted',
+      resourceType: 'grievance_case_access_assignments',
+      resourceId: access.id,
+      details: {
+        grievanceId: input.grievanceId,
+        targetUserId: access.userId,
+        accessRole: access.accessRole,
+        status: access.status,
+        scope: {
+          canComment: access.canComment,
+          canUploadDocuments: access.canUploadDocuments,
+          canEditCaseNotes: access.canEditCaseNotes,
+          canDraftActions: access.canDraftActions,
+          canViewPrivateDocuments: access.canViewPrivateDocuments,
+        },
+        expiresAt: access.expiresAt,
+      },
+    });
+    return { ok: true as const, access };
+  });
 }
 
 export async function revokeCaseAccessGuarded(params: {
@@ -202,27 +227,43 @@ export async function revokeCaseAccessGuarded(params: {
   | { ok: true; before: typeof grievanceCaseAccessAssignments.$inferSelect; updated: typeof grievanceCaseAccessAssignments.$inferSelect }
   | CaseAccessMutationFailure
 > {
-  const grievance = await loadCaseOwner(params.organizationId, params.grievanceId);
-  if (!grievance) return { ok: false, status: 404, code: 'CASE_NOT_FOUND', message: 'Grievance not found.' };
-  if (grievance.unionRepId !== params.actorId) {
-    return { ok: false, status: 403, code: 'CASE_MANAGEMENT_AUTHORITY_REQUIRED', message: 'Only the primary owner of this case may revoke collaborator access.' };
-  }
-  const [before] = await db
-    .select()
-    .from(grievanceCaseAccessAssignments)
-    .where(
-      and(
-        eq(grievanceCaseAccessAssignments.id, params.assignmentId),
-        eq(grievanceCaseAccessAssignments.organizationId, params.organizationId),
-        eq(grievanceCaseAccessAssignments.grievanceId, params.grievanceId),
-      ),
-    )
-    .limit(1);
-  if (!before) return { ok: false, status: 404, code: 'ASSIGNMENT_NOT_FOUND', message: 'Access assignment not found.' };
+  return withRLSContext({ organizationId: params.organizationId }, async (tx) => {
+    const grievance = await loadCaseOwner(tx, params.organizationId, params.grievanceId);
+    if (!grievance) return { ok: false as const, status: 404 as const, code: 'CASE_NOT_FOUND' as const, message: 'Grievance not found.' };
+    if (grievance.unionRepId !== params.actorId) {
+      return { ok: false as const, status: 403 as const, code: 'CASE_MANAGEMENT_AUTHORITY_REQUIRED' as const, message: 'Only the primary owner of this case may revoke collaborator access.' };
+    }
+    const [before] = await tx
+      .select()
+      .from(grievanceCaseAccessAssignments)
+      .where(
+        and(
+          eq(grievanceCaseAccessAssignments.id, params.assignmentId),
+          eq(grievanceCaseAccessAssignments.organizationId, params.organizationId),
+          eq(grievanceCaseAccessAssignments.grievanceId, params.grievanceId),
+        ),
+      )
+      .limit(1);
+    if (!before) return { ok: false as const, status: 404 as const, code: 'ASSIGNMENT_NOT_FOUND' as const, message: 'Access assignment not found.' };
 
-  const updated = await updateCaseAccessStatus(before.id, 'revoked');
-  if (!updated) return { ok: false, status: 404, code: 'ASSIGNMENT_NOT_FOUND', message: 'Access assignment not found.' };
-  return { ok: true, before, updated };
+    const updated = await updateCaseAccessStatus(before.id, 'revoked', tx);
+    if (!updated) return { ok: false as const, status: 404 as const, code: 'ASSIGNMENT_NOT_FOUND' as const, message: 'Access assignment not found.' };
+
+    await persistAtomicAudit(tx, {
+      organizationId: params.organizationId,
+      userId: params.actorId,
+      action: 'case.access_revoked',
+      resourceType: 'grievance_case_access_assignments',
+      resourceId: updated.id,
+      details: {
+        grievanceId: params.grievanceId,
+        targetUserId: updated.userId,
+        previousStatus: before.status,
+        status: updated.status,
+      },
+    });
+    return { ok: true as const, before, updated };
+  });
 }
 
 export async function expireElapsedCaseAccessAssignments() {

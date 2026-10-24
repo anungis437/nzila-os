@@ -13,7 +13,8 @@ import { grievances, GrievanceStatus } from "@/db/schema/domains/claims/grievanc
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation, auditLog, AuditEventType } from "@/lib/audit-logger";
+import { auditLog, AuditEventType } from "@/lib/audit-logger";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { emitCapeAuditEvent, CAPE_AUDIT_EVENTS } from "@/lib/audit/cape-audit-events";
 import {
   ErrorCode,
@@ -123,7 +124,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
     const initialStatus = isOfficialCase ? "filed" : "draft";
 
-    const grievance = await withRLSContext(async () => {
+    const grievance = await withRLSContext(async (tx) => {
       // Collision-safe grievance number: timestamp + 6-char random hex
       const grievanceNumber = `GRV-${Date.now()}-${randomBytes(3).toString('hex')}`;
 
@@ -131,7 +132,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
       const isGroupGrievance = data.type === "group";
       const isConfidential = !!(data.harassmentFlag || data.discriminationFlag);
 
-      const [g] = await db
+      const [g] = await tx
         .insert(grievances)
         .values({
           grievanceNumber,
@@ -176,40 +177,29 @@ export const POST = withOrganizationAuth(async (request, context) => {
         ? `Official case created: ${data.title}`
         : `Intake submitted by member: ${data.title}`;
 
-      await db.insert(grievanceEvents).values({
+      await tx.insert(grievanceEvents).values({
         grievanceId: g.id,
         eventType,
         actorUserId: userId,
         notes,
       });
 
-      return g;
-    });
+      // The case or intake, its first event and its audit record commit together.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: isOfficialCase ? 'grievance.create_official_case' : 'grievance.submit_intake',
+        resourceType: 'grievances',
+        resourceId: g.id,
+        details: {
+          grievanceNumber: g.grievanceNumber,
+          type: data.type,
+          priority: g.priority,
+          sourceIntakeId: data.sourceIntakeId,
+        },
+      });
 
-    // Audit
-    const auditEventType = isOfficialCase
-      ? AuditEventType.CASE_CREATED
-      : AuditEventType.INTAKE_SUBMITTED;
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: "grievances",
-      action: 'create',
-      resourceId: grievance.id,
-      newState: grievance,
-    });
-    await auditLog({
-      eventType: auditEventType,
-      userId,
-      organizationId,
-      resource: "grievances",
-      action: isOfficialCase ? "create_official_case" : "submit_intake",
-      resourceId: grievance.id,
-      details: {
-        grievanceNumber: grievance.grievanceNumber,
-        type: data.type,
-        sourceIntakeId: data.sourceIntakeId,
-      },
+      return g;
     });
 
     // CAPE audit event
@@ -221,19 +211,6 @@ export const POST = withOrganizationAuth(async (request, context) => {
       resourceId: grievance.id,
       details: { grievanceNumber: grievance.grievanceNumber, type: data.type },
     });
-
-    // Audit: initial priority assignment on official case
-    if (isOfficialCase && grievance.priority) {
-      await auditLog({
-        eventType: AuditEventType.CASE_PRIORITY_SET,
-        userId,
-        organizationId,
-        resource: "grievances",
-        action: "set_initial_priority",
-        resourceId: grievance.id,
-        details: { priority: grievance.priority },
-      });
-    }
 
     // Evidence: tamper-proof filing trail
     buildUnionEvidencePack({

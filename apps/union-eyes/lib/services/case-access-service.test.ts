@@ -18,6 +18,7 @@ const m = vi.hoisted(() => {
   return {
     selectQueue,
     caseAssigneeEligible: vi.fn(async () => true),
+    persistAtomicAudit: vi.fn(async () => undefined),
     db: {
       select: vi.fn(() => createSelectChain()),
       insert: vi.fn(),
@@ -28,8 +29,9 @@ const m = vi.hoisted(() => {
 
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: (_ctx: unknown, fn: (tx: unknown) => unknown) => fn({}),
+  withRLSContext: (_ctx: unknown, fn: (tx: unknown) => unknown) => fn(m.db),
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/cases/case-authorization', () => ({ caseAssigneeEligible: m.caseAssigneeEligible }));
 
 describe('case-access-service', () => {
@@ -180,5 +182,35 @@ describe('case-access grant authority (P0-B)', () => {
     expect(await revokeCaseAccessGuarded({ organizationId: 'org-1', grievanceId: 'matter-1', assignmentId: 'a-other', actorId: 'owner' }))
       .toMatchObject({ ok: false, status: 404, code: 'ASSIGNMENT_NOT_FOUND' });
     expect(m.db.update).not.toHaveBeenCalled();
+  });
+
+  it('grants access and writes the audit record inside the same transaction', async () => {
+    m.selectQueue.push([{ unionRepId: 'owner' }], []);
+    const created = { id: 'asg1', userId: 'grantee', accessRole: 'reviewer', status: 'active', canComment: true, canUploadDocuments: false, canEditCaseNotes: false, canDraftActions: false, canViewPrivateDocuments: false, expiresAt: null };
+    m.db.insert.mockReturnValue({ values: vi.fn(() => ({ returning: vi.fn(async () => [created]) })) });
+    const { grantCaseAccessGuarded } = await import('./case-access-service');
+    const result = await grantCaseAccessGuarded({ ...baseGrant, expiresAt: inDays(5) });
+    expect(result).toMatchObject({ ok: true });
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({
+      action: 'case.access_granted', organizationId: 'org-1', userId: 'owner', resourceId: 'asg1',
+    }));
+  });
+
+  it('does not return a grant when its audit record cannot be written', async () => {
+    m.selectQueue.push([{ unionRepId: 'owner' }], []);
+    m.db.insert.mockReturnValue({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'asg1', userId: 'grantee' }]) })) });
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit write failed'));
+    const { grantCaseAccessGuarded } = await import('./case-access-service');
+    await expect(grantCaseAccessGuarded({ ...baseGrant, expiresAt: inDays(5) })).rejects.toThrow('audit write failed');
+  });
+
+  it('revokes access and audits inside the same transaction', async () => {
+    const before = { id: 'asg1', userId: 'grantee', status: 'active' };
+    m.selectQueue.push([{ unionRepId: 'owner' }], [before]);
+    m.db.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(async () => [{ ...before, status: 'revoked' }]) })) })) });
+    const { revokeCaseAccessGuarded } = await import('./case-access-service');
+    const result = await revokeCaseAccessGuarded({ organizationId: 'org-1', grievanceId: 'matter-1', assignmentId: 'asg1', actorId: 'owner' });
+    expect(result).toMatchObject({ ok: true });
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'case.access_revoked', resourceId: 'asg1' }));
   });
 });

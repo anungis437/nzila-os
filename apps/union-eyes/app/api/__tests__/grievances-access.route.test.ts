@@ -109,7 +109,8 @@ describe('grievances/[id]/access route', () => {
     expect(m.grantCaseAccessGuarded).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 'ue-v2-http-admin-7c1f', grantedBy: 'u1', organizationId: 'org_1', grievanceId: 'g1' }),
     );
-    expect(m.auditCaseMutation).toHaveBeenCalledWith(expect.objectContaining({ event: 'CASE_ACCESS_GRANTED' }));
+    // The grant and its audit record are written by the service inside one transaction.
+    expect(m.auditCaseMutation).not.toHaveBeenCalled();
   });
 
   it('POST by a steward+ who does not own the case is forbidden and audited as denied', async () => {
@@ -143,7 +144,7 @@ describe('grievances/[id]/access route', () => {
     const { PATCH } = await loadRoute();
     const response = await PATCH(revokeRequest());
     expect(response.status).toBe(200);
-    expect(m.auditCaseMutation).toHaveBeenCalledWith(expect.objectContaining({ event: 'CASE_ACCESS_REVOKED' }));
+    expect(m.auditCaseMutation).not.toHaveBeenCalled();
   });
 
   it('PATCH cannot reactivate a grant', async () => {
