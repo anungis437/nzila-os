@@ -26,6 +26,7 @@ import {
   type ApprovalChain,
   type ApprovalPolicy,
   type Decision,
+  resolveAuditOrganization,
 } from '@/lib/governance/policy-approval-authority'
 
 export const dynamic = 'force-dynamic'
@@ -134,7 +135,10 @@ export const POST = withApi(
     const outcome = await withSystemContext(async () => {
       // Row lock serialises concurrent approvals on the same policy version.
       const policy = await loadScopedPolicy(id, actor, true)
-      const auditOrg = policy.orgId ?? organizationId ?? 'platform'
+      // Audit is tenant-scoped and fail-closed: without a real organization the
+      // mutation is refused rather than written unaudited.
+      const auditOrg = resolveAuditOrganization(policy, organizationId)
+      if (!auditOrg) throw ApiError.forbidden('An audit scope is required to record governance actions.')
 
       const denyWith = async (decision: Denial, details: Record<string, unknown>) => {
         await auditSecurityEvent({
@@ -143,7 +147,7 @@ export const POST = withApi(
           organizationId: auditOrg,
           outcome: 'failure',
           details: { policyId: id, code: decision.code, reason: decision.reason, ...details },
-        }).catch(() => undefined)
+        })
         return { denied: decision } as const
       }
 
@@ -187,7 +191,7 @@ export const POST = withApi(
           resourceId: chain?.id,
           action: 'create',
           details: { policyId: id, actorRole: actor.role },
-        }).catch(() => undefined)
+        })
         return { chain }
       }
 
@@ -244,7 +248,7 @@ export const POST = withApi(
         resourceId: action?.id,
         action: 'create',
         details: { policyId: id, chainId: chain.id, decision: body.action, actorRole: actor.role },
-      }).catch(() => undefined)
+      })
 
       const satisfied = isChainSatisfied(chain, [
         ...history,

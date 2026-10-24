@@ -21,6 +21,7 @@ import { asc, eq } from 'drizzle-orm'
 import {
   actorOwnsPolicyScope,
   isChainSatisfied,
+  resolveAuditOrganization,
   type ApprovalActionRecord,
   type ApprovalActor,
   type ApprovalChain,
@@ -116,6 +117,9 @@ export const PATCH = withApi(
         }
       }
 
+      const auditOrg = resolveAuditOrganization(current, organizationId)
+      if (!auditOrg) throw ApiError.forbidden('An audit scope is required to record governance actions.')
+
       const [updated] = await db
         .update(governedPolicies)
         .set({
@@ -127,14 +131,15 @@ export const PATCH = withApi(
         .where(eq(governedPolicies.id, id))
         .returning()
 
+      // Fail-closed: if the audit record cannot be written the transition is rolled back.
       await auditDataMutation({
         userId: actor.id,
-        organizationId: current.orgId ?? organizationId ?? 'platform',
+        organizationId: auditOrg,
         resource: 'governed_policies',
         resourceId: id,
         action: 'update',
         details: { from: current.lifecycleStatus, to: targetState, actorRole: actor.role },
-      }).catch(() => undefined)
+      })
 
       return { policy: updated }
     })

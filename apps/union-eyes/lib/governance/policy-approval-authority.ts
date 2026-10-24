@@ -261,3 +261,15 @@ export function mayTransitionToApprovedState(
 ): boolean {
   return chains.some((c) => isChainSatisfied(c, actionsByChain.get(c.id) ?? []))
 }
+
+/**
+ * Tenant audit scope for a governance mutation. Org policies audit under their
+ * own organization; platform policies under the acting platform principal's
+ * organization. Returns null (caller must refuse) rather than inventing a scope.
+ */
+export function resolveAuditOrganization(
+  policy: Pick<ApprovalPolicy, 'orgId'>,
+  actorOrganizationId: string | null,
+): string | null {
+  return policy.orgId ?? actorOrganizationId ?? null
+}

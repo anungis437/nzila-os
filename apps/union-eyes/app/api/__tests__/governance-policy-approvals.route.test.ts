@@ -225,6 +225,34 @@ describe('governance/lifecycle/policies/[id]/approvals route (server-owned autho
       expect(m.insertedValues).toHaveLength(0);
     });
 
+    it('fails closed when the approval cannot be audited', async () => {
+      const { POST } = await loadRoute();
+      m.selectQueue.push([policyRow()], [chainRow()], []);
+      m.insertReturningQueue.push([{ id: 'action_new' }]);
+      m.auditDataMutation.mockRejectedValueOnce(new Error('audit store down'));
+      await expect(
+        call(POST as any, { op: 'record_action', chainId: CHAIN_ID, action: 'approved' }, { id: 'u1', role: 'president' }),
+      ).rejects.toThrow('audit store down');
+    });
+
+    it('fails closed when a denial cannot be audited (no silent 403)', async () => {
+      const { POST } = await loadRoute();
+      m.selectQueue.push([policyRow()], [chainRow()], []);
+      m.auditSecurityEvent.mockRejectedValueOnce(new Error('audit store down'));
+      await expect(
+        call(POST as any, { op: 'record_action', chainId: CHAIN_ID, action: 'approved' }, { id: 'u1', role: 'admin' }),
+      ).rejects.toThrow('audit store down');
+    });
+
+    it('refuses platform-policy actions that have no audit scope', async () => {
+      const { POST } = await loadRoute();
+      m.selectQueue.push([policyRow({ orgId: null })]);
+      await expect(
+        call(POST as any, { op: 'create_chain', approverRoles: ['system_admin'] }, { id: 'u1', role: 'system_admin' }, null),
+      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      expect(m.insertedValues).toHaveLength(0);
+    });
+
     it('rejects a chain that does not belong to the policy in the URL', async () => {
       const { POST } = await loadRoute();
       m.selectQueue.push([policyRow()], []);

@@ -70,4 +70,16 @@ describe('governance/reserved-matters/[id]/class-b-vote route', () => {
     const { POST } = await loadRoute();
     await expect((POST as any)(ctx({ vote: 'approve' }, null))).rejects.toMatchObject({ code: 'AUTH_REQUIRED' });
   });
+
+  it('fails closed when the decision cannot be audited (error propagates out of the transaction)', async () => {
+    m.auditDataMutation.mockRejectedValueOnce(new Error('audit store down'));
+    const { POST } = await loadRoute();
+    await expect((POST as any)(ctx({ vote: 'approve' }))).rejects.toThrow('audit store down');
+  });
+
+  it('refuses to record a decision without an audit scope', async () => {
+    const { POST } = await loadRoute();
+    await expect((POST as any)({ ...ctx({ vote: 'approve' }), organizationId: null })).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(m.db.execute).not.toHaveBeenCalled();
+  });
 });

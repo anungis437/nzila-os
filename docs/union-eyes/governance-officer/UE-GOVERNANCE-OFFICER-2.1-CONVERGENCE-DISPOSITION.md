@@ -138,4 +138,6 @@ EN/FR strings added for the audits states only. No browser, mobile, keyboard or 
 
 ## Validation executed
 
-`npx tsc --noEmit` (apps/union-eyes): clean. `vitest run app/api`: 360 files / 3995 tests passed. `vitest run lib/reality lib/governance lib/governance-officer lib/dashboard app/api/governance app/api/privacy app/api/voting db/__tests__`: 76 files passed, 6 skipped. ESLint on touched trees: 0 errors (10 pre-existing warnings in untouched files). Not run: browser acceptance, `pnpm governance:audit`, repo-wide `pnpm test:fast`. `pnpm validate:docs`: 0 errors (generated report files reverted).
+`npx tsc --noEmit` (apps/union-eyes): clean. `vitest run app/api`: 360 files / 3995 tests passed. `vitest run lib/reality lib/governance lib/governance-officer lib/dashboard app/api/governance app/api/privacy app/api/voting db/__tests__`: 76 files passed, 6 skipped. ESLint on touched trees: 0 errors (10 pre-existing warnings in untouched files). Post-report correction (Phase 0 of UE-INSTITUTIONAL-CONVERGENCE-2.1): governance audit calls are now fail-closed (no suppressed catches), the class-B vote audit runs inside the decision transaction, and a missing audit scope is refused. Atomicity between audit and mutation remains NOT_PROVEN. See `../convergence/UE-INSTITUTIONAL-CONVERGENCE-2.1-PHASE-0-REGISTER.md` §6.
+
+Not run: browser acceptance, `pnpm governance:audit`, repo-wide `pnpm test:fast`. `pnpm validate:docs`: 0 errors (generated report files reverted).

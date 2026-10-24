@@ -27,10 +27,11 @@ export const POST = withApi(
   },
   async ({ body, params, userId, organizationId }) => {
     if (!userId) throw ApiError.unauthorized('Authenticated user required');
+    if (!organizationId) throw ApiError.forbidden('An audit scope is required to record governance actions.');
     const id = params.id;
     const newStatus = body.vote === 'veto' ? 'vetoed' : 'approved';
 
-    const result = await withSystemContext(async () => {
+    return withSystemContext(async () => {
       const rows = await db.execute(sql`
         SELECT status, class_b_vote FROM reserved_matter_votes
         WHERE id = ${id}::uuid FOR UPDATE
@@ -51,18 +52,18 @@ export const POST = withApi(
             updated_at = NOW()
         WHERE id = ${id}::uuid
       `);
+
+      // Fail-closed: an unauditable decision is rolled back with the transaction.
+      await auditDataMutation({
+        userId,
+        organizationId,
+        resource: 'reserved_matter_votes',
+        resourceId: id,
+        action: 'update',
+        details: { classBVote: body.vote, scope: 'platform_corporate_governance' },
+      });
       return { updated: true, status: newStatus };
     });
-
-    await auditDataMutation({
-      userId,
-      organizationId: organizationId ?? 'platform',
-      resource: 'reserved_matter_votes',
-      resourceId: id,
-      action: 'update',
-      details: { classBVote: body.vote, scope: 'platform_corporate_governance' },
-    }).catch(() => undefined);
-    return result;
   },
 );
 

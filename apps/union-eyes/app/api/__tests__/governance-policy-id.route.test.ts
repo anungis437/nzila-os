@@ -108,6 +108,21 @@ describe('governance/lifecycle/policies/[id] route', () => {
     expect(m.updateValues[0]).toHaveProperty('publishedAt');
   });
 
+  it('fails closed when the transition cannot be audited', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([policyRow()]);
+    m.auditDataMutation.mockRejectedValueOnce(new Error('audit store down'));
+    await expect((PATCH as any)(patch('review_pending'))).rejects.toThrow('audit store down');
+  });
+
+  it('refuses a platform-policy transition that has no audit scope', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([policyRow({ orgId: null })]);
+    await expect((PATCH as any)({ ...patch('review_pending', { user: { id: 'u1', role: 'system_admin' } }), organizationId: null }))
+      .rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(m.updateValues).toHaveLength(0);
+  });
+
   it('cannot transition a policy owned by another organization', async () => {
     const { PATCH } = await loadRoute();
     m.selectQueue.push([policyRow({ orgId: 'org-b' })]);
