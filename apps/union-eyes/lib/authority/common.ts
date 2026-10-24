@@ -107,6 +107,9 @@ export function assessMandate(m: Mandate, orgId: string, now: Date): InstrumentV
     reasons.push({ code: 'INSTRUMENT_EXPIRED_OR_REVOKED', detail: lv, ref: m.id })
   }
   if (!m.sourceInstrument || m.sourceInstrument.trim() === '') bad('no source instrument recorded')
+  if (m.requiresAcceptance === true && !(m.acceptedAt && m.acceptedAt.getTime() <= now.getTime())) {
+    reasons.push({ code: 'NOT_ACCEPTED', detail: 'the holder has not accepted this mandate', ref: m.id })
+  }
   if (m.powers.length === 0) bad('no powers granted')
   if (m.grantedBy === m.principalUserId) bad('self-granted mandate')
   // Every mandate is time-bound; renewal is an affirmative act.
@@ -169,6 +172,9 @@ export function assessDelegation(
   if (d.delegatorUserId === d.delegateUserId) bad('self-delegation')
   if (d.actions.length === 0) bad('delegation names no actions')
   if (d.expiresAt === null) bad('delegation has no term')
+  if (d.requiresAcceptance === true && !(d.acceptedAt && d.acceptedAt.getTime() <= now.getTime())) {
+    reasons.push({ code: 'NOT_ACCEPTED', detail: 'the delegate has not accepted this delegation', ref: d.id })
+  }
   return { effective: reasons.length === 0, reasons }
 }
 

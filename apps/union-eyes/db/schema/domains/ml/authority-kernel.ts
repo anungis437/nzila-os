@@ -4,53 +4,88 @@
  * Created by platform migration 0013 and protected by scoped migration 0020.
  * Application code must not issue DDL for these relations. They are written only
  * through lib/authority/store inside runAuthorityTransaction; database triggers
- * enforce append-only semantics, terminal revocation, one-person-one-vote and
- * in-transaction recording in ue_authority_events.
+ * enforce append-only semantics, terminal revocation, one-person-one-vote,
+ * issuance-rule ceilings, financial segregation of duties, in-transaction
+ * recording in ue_authority_events, and a deferred link to the canonical audit
+ * chain. Principals are the canonical INTERNAL user id (varchar(255), not a uuid).
  */
 
-import { pgTable, uuid, text, integer, bigint, boolean, jsonb, timestamp, index, uniqueIndex, unique } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, varchar, integer, bigint, boolean, jsonb, timestamp, index, uniqueIndex, unique } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
+
+const principal = (name: string) => varchar(name, { length: 255 });
+
+export const ueAuthorityIssuanceRules = pgTable('ue_authority_issuance_rules', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  domain: text('domain').notNull(),
+  operation: text('operation').notNull(),
+  issuerCapacities: text('issuer_capacities').array().notNull().default(sql`'{}'::text[]`),
+  issuerMandateKind: text('issuer_mandate_kind'),
+  issuerMandatePower: text('issuer_mandate_power'),
+  allowedPowers: text('allowed_powers').array().notNull().default(sql`'{}'::text[]`),
+  maxTermDays: integer('max_term_days'),
+  requiresAcceptance: boolean('requires_acceptance').notNull().default(false),
+  requiredIndependentApprovals: integer('required_independent_approvals').notNull().default(0),
+  version: integer('version').notNull(),
+  status: text('status').notNull().default('draft'),
+  sourceInstrument: text('source_instrument').notNull(),
+  draftedBy: principal('drafted_by').notNull(),
+  approvedBy: principal('approved_by').array().notNull().default(sql`'{}'::text[]`),
+  activatedAt: timestamp('activated_at', { withTimezone: true }),
+  retiredAt: timestamp('retired_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  versionUq: unique('ue_authority_rule_version_uq').on(table.organizationId, table.domain, table.operation, table.version),
+  activeUq: uniqueIndex('ue_authority_rule_active_uq').on(table.organizationId, table.domain, table.operation).where(sql`status = 'active'`),
+}));
 
 export const ueAuthorityMandates = pgTable('ue_authority_mandates', {
   id: uuid('id').primaryKey().defaultRandom(),
   organizationId: uuid('organization_id').notNull(),
-  principalUserId: uuid('principal_user_id').notNull(),
+  principalUserId: principal('principal_user_id').notNull(),
   kind: text('kind').notNull(),
   powers: text('powers').array().notNull(),
   scope: jsonb('scope').notNull().default({}),
   monetaryLimitMinor: bigint('monetary_limit_minor', { mode: 'number' }),
   currency: text('currency'),
   sourceInstrument: text('source_instrument').notNull(),
-  grantedBy: uuid('granted_by').notNull(),
-  approvedBy: uuid('approved_by'),
+  grantedBy: principal('granted_by').notNull(),
+  approvedBy: principal('approved_by'),
   justification: text('justification'),
   status: text('status').notNull().default('active'),
   effectiveAt: timestamp('effective_at', { withTimezone: true }).notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
-  revokedBy: uuid('revoked_by'),
+  revokedBy: principal('revoked_by'),
+  issuanceRuleId: uuid('issuance_rule_id'),
+  approvalRequestId: uuid('approval_request_id'),
+  supersedesId: uuid('supersedes_id'),
+  requiresAcceptance: boolean('requires_acceptance').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   principalIdx: index('ue_authority_mandates_principal_idx').on(table.organizationId, table.principalUserId, table.kind).where(sql`status = 'active'`),
   activeUq: uniqueIndex('ue_authority_mandates_active_uq').on(table.organizationId, table.principalUserId, table.kind, table.sourceInstrument).where(sql`status = 'active'`),
+  requestUq: uniqueIndex('ue_authority_mandates_request_uq').on(table.approvalRequestId).where(sql`approval_request_id IS NOT NULL`),
 }));
 
 export const ueAuthorityResourceRelationships = pgTable('ue_authority_resource_relationships', {
   id: uuid('id').primaryKey().defaultRandom(),
   organizationId: uuid('organization_id').notNull(),
-  principalUserId: uuid('principal_user_id').notNull(),
+  principalUserId: principal('principal_user_id').notNull(),
   resourceType: text('resource_type').notNull(),
   resourceId: uuid('resource_id').notNull(),
   relation: text('relation').notNull(),
   permissions: text('permissions').array().notNull().default(sql`'{}'::text[]`),
   privilegedAccess: boolean('privileged_access').notNull().default(false),
   origin: text('origin').notNull(),
-  grantedBy: uuid('granted_by'),
+  grantedBy: principal('granted_by'),
   status: text('status').notNull().default('active'),
   effectiveAt: timestamp('effective_at', { withTimezone: true }).notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
-  revokedBy: uuid('revoked_by'),
+  revokedBy: principal('revoked_by'),
+  issuanceRuleId: uuid('issuance_rule_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   resourceIdx: index('ue_authority_rel_resource_idx').on(table.organizationId, table.resourceType, table.resourceId).where(sql`status = 'active'`),
@@ -60,8 +95,8 @@ export const ueAuthorityResourceRelationships = pgTable('ue_authority_resource_r
 export const ueAuthorityDelegations = pgTable('ue_authority_delegations', {
   id: uuid('id').primaryKey().defaultRandom(),
   organizationId: uuid('organization_id').notNull(),
-  delegatorUserId: uuid('delegator_user_id').notNull(),
-  delegateUserId: uuid('delegate_user_id').notNull(),
+  delegatorUserId: principal('delegator_user_id').notNull(),
+  delegateUserId: principal('delegate_user_id').notNull(),
   office: text('office').notNull(),
   actions: text('actions').array().notNull(),
   resourceTypes: text('resource_types').array().notNull(),
@@ -69,22 +104,26 @@ export const ueAuthorityDelegations = pgTable('ue_authority_delegations', {
   effectiveAt: timestamp('effective_at', { withTimezone: true }).notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
-  revokedBy: uuid('revoked_by'),
+  revokedBy: principal('revoked_by'),
+  issuanceRuleId: uuid('issuance_rule_id'),
+  approvalRequestId: uuid('approval_request_id'),
+  requiresAcceptance: boolean('requires_acceptance').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   delegateIdx: index('ue_authority_deleg_delegate_idx').on(table.organizationId, table.delegateUserId).where(sql`status = 'active'`),
+  requestUq: uniqueIndex('ue_authority_deleg_request_uq').on(table.approvalRequestId).where(sql`approval_request_id IS NOT NULL`),
 }));
 
 export const ueAuthorityRecusals = pgTable('ue_authority_recusals', {
   id: uuid('id').primaryKey().defaultRandom(),
   organizationId: uuid('organization_id').notNull(),
-  principalUserId: uuid('principal_user_id').notNull(),
+  principalUserId: principal('principal_user_id').notNull(),
   resourceType: text('resource_type').notNull(),
   resourceId: uuid('resource_id').notNull(),
   reason: text('reason').notNull(),
   declaredAt: timestamp('declared_at', { withTimezone: true }).notNull().defaultNow(),
   liftedAt: timestamp('lifted_at', { withTimezone: true }),
-  liftedBy: uuid('lifted_by'),
+  liftedBy: principal('lifted_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   resourceIdx: index('ue_authority_recusal_resource_idx').on(table.organizationId, table.resourceType, table.resourceId).where(sql`lifted_at IS NULL`),
@@ -93,18 +132,18 @@ export const ueAuthorityRecusals = pgTable('ue_authority_recusals', {
 export const ueAuthorityDisclosureConsents = pgTable('ue_authority_disclosure_consents', {
   id: uuid('id').primaryKey().defaultRandom(),
   organizationId: uuid('organization_id').notNull(),
-  memberUserId: uuid('member_user_id').notNull(),
+  memberUserId: principal('member_user_id').notNull(),
   matterId: uuid('matter_id').notNull(),
   direction: text('direction').notNull(),
   issuer: text('issuer').notNull(),
-  issuedBy: uuid('issued_by').notNull(),
+  issuedBy: principal('issued_by').notNull(),
   categories: text('categories').array().notNull(),
-  recipientUserId: uuid('recipient_user_id'),
+  recipientUserId: principal('recipient_user_id'),
   purpose: text('purpose').notNull(),
   grantedAt: timestamp('granted_at', { withTimezone: true }).notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
-  revokedBy: uuid('revoked_by'),
+  revokedBy: principal('revoked_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   matterIdx: index('ue_authority_consent_matter_idx').on(table.organizationId, table.matterId).where(sql`revoked_at IS NULL`),
@@ -115,13 +154,13 @@ export const ueAuthorityApprovalRequests = pgTable('ue_authority_approval_reques
   organizationId: uuid('organization_id').notNull(),
   subjectType: text('subject_type').notNull(),
   subjectId: uuid('subject_id').notNull(),
-  proposedBy: uuid('proposed_by').notNull(),
-  subjectAuthorId: uuid('subject_author_id'),
+  proposedBy: principal('proposed_by').notNull(),
+  subjectAuthorId: principal('subject_author_id'),
   requiredApprovals: integer('required_approvals').notNull(),
   riskClass: text('risk_class').notNull(),
-  namedApproverIds: uuid('named_approver_ids').array().notNull().default(sql`'{}'::uuid[]`),
+  namedApproverIds: principal('named_approver_ids').array().notNull().default(sql`'{}'::text[]`),
   eligibleCapacities: text('eligible_capacities').array().notNull().default(sql`'{}'::text[]`),
-  adverseUserIds: uuid('adverse_user_ids').array().notNull().default(sql`'{}'::uuid[]`),
+  adverseUserIds: principal('adverse_user_ids').array().notNull().default(sql`'{}'::text[]`),
   status: text('status').notNull().default('open'),
   decidedAt: timestamp('decided_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -133,8 +172,8 @@ export const ueAuthorityApprovalDecisions = pgTable('ue_authority_approval_decis
   id: uuid('id').primaryKey().defaultRandom(),
   organizationId: uuid('organization_id').notNull(),
   approvalRequestId: uuid('approval_request_id').notNull().references(() => ueAuthorityApprovalRequests.id),
-  approverUserId: uuid('approver_user_id').notNull(),
-  authorityLineUserId: uuid('authority_line_user_id').notNull(),
+  approverUserId: principal('approver_user_id').notNull(),
+  authorityLineUserId: principal('authority_line_user_id').notNull(),
   delegationId: uuid('delegation_id').references(() => ueAuthorityDelegations.id),
   decision: text('decision').notNull(),
   rationale: text('rationale'),
@@ -158,4 +197,73 @@ export const ueAuthorityEvents = pgTable('ue_authority_events', {
   occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().default(sql`clock_timestamp()`),
 }, (table) => ({
   sourceIdx: index('ue_authority_events_source_idx').on(table.organizationId, table.sourceTable, table.sourceId),
+}));
+
+export const ueAuthorityAcceptances = pgTable('ue_authority_acceptances', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  instrumentType: text('instrument_type').notNull(),
+  instrumentId: uuid('instrument_id').notNull(),
+  acceptedBy: principal('accepted_by').notNull(),
+  acceptedAt: timestamp('accepted_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  once: unique('ue_authority_accept_once_uq').on(table.organizationId, table.instrumentType, table.instrumentId),
+}));
+
+export const ueAuthorityRequests = pgTable('ue_authority_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  idempotencyKey: text('idempotency_key').notNull(),
+  operation: text('operation').notNull(),
+  requestHash: text('request_hash').notNull(),
+  actor: principal('actor').notNull(),
+  result: jsonb('result'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  keyUq: unique('ue_authority_req_key_uq').on(table.organizationId, table.idempotencyKey),
+}));
+
+export const ueAuthorityFinancialSteps = pgTable('ue_authority_financial_steps', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  subjectType: text('subject_type').notNull().default('payment'),
+  subjectId: uuid('subject_id').notNull(),
+  step: text('step').notNull(),
+  actor: principal('actor').notNull(),
+  accountId: uuid('account_id'),
+  requiredApprovals: integer('required_approvals'),
+  amountMinor: bigint('amount_minor', { mode: 'number' }),
+  currency: text('currency'),
+  at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  stepUq: uniqueIndex('ue_authority_fin_step_uq').on(table.organizationId, table.subjectType, table.subjectId, table.step).where(sql`step <> 'approved'`),
+  approverUq: uniqueIndex('ue_authority_fin_approver_uq').on(table.organizationId, table.subjectType, table.subjectId, table.actor).where(sql`step = 'approved'`),
+}));
+
+export const ueAuthorityReviews = pgTable('ue_authority_reviews', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  reviewType: text('review_type').notNull(),
+  complainantUserId: principal('complainant_user_id'),
+  adverseUserIds: principal('adverse_user_ids').array().notNull().default(sql`'{}'::text[]`),
+  classification: text('classification').notNull().default('standard'),
+  remediationOwnerUserId: principal('remediation_owner_user_id'),
+  openedBy: principal('opened_by').notNull(),
+  status: text('status').notNull().default('open'),
+  closedAt: timestamp('closed_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const ueAuthorityWorkaidMatters = pgTable('ue_authority_workaid_matters', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  memberUserId: principal('member_user_id').notNull(),
+  caseId: uuid('case_id').notNull(),
+  referredBy: principal('referred_by').notNull(),
+  referredAt: timestamp('referred_at', { withTimezone: true }).notNull().defaultNow(),
+  counselAcceptedAt: timestamp('counsel_accepted_at', { withTimezone: true }),
+  withdrawnAt: timestamp('withdrawn_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  caseUq: uniqueIndex('ue_authority_workaid_case_uq').on(table.organizationId, table.caseId).where(sql`withdrawn_at IS NULL`),
 }));

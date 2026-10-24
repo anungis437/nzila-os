@@ -113,6 +113,9 @@ export interface Mandate {
   effectiveAt: Date
   expiresAt: Date | null
   revokedAt: Date | null
+  /** The issuance rule required the holder to accept before the mandate takes effect. */
+  requiresAcceptance?: boolean
+  acceptedAt?: Date | null
 }
 
 export type RelationKind = 'creator' | 'owner' | 'assignee' | 'collaborator' | 'represented_member'
@@ -149,6 +152,8 @@ export interface Delegation {
   effectiveAt: Date
   expiresAt: Date | null
   revokedAt: Date | null
+  requiresAcceptance?: boolean
+  acceptedAt?: Date | null
 }
 
 export interface Recusal {
@@ -202,6 +207,12 @@ export interface CaseFacts {
   unitId?: Uuid | null
   territoryId?: Uuid | null
   classification: Classification
+  /**
+   * Restricted within the union (grievances.is_confidential). Distinct from privilege: it does not
+   * lock out the people with a relationship to the case, but a supervisory mandate must carry a
+   * `confidential` classification ceiling to reach it.
+   */
+  confidential?: boolean
   /** Held by external counsel (WorkAid). The union has no authority over content. */
   counselControlled: boolean
   /** Respondents / persons the matter is about. Absolutely conflicted. */
@@ -352,6 +363,10 @@ export type ReasonCode =
   | 'OUT_OF_SCOPE'
   | 'INSTRUMENT_INVALID'
   | 'INSTRUMENT_EXPIRED_OR_REVOKED'
+  | 'NOT_ACCEPTED'
+  | 'NO_ACTIVE_ISSUANCE_RULE'
+  | 'EXCEEDS_RULE_CEILING'
+  | 'APPROVAL_NOT_SATISFIED'
   // restrictions
   | 'RECUSED'
   | 'ADVERSE_PARTY'
@@ -378,6 +393,7 @@ export type ReasonCode =
   | 'ALLOWED_BY_EMERGENCY_GRANT'
   | 'ALLOWED_BY_CONSENT'
   | 'ALLOWED_AS_SUBJECT'
+  | 'ALLOWED_BY_ISSUANCE_RULE'
 
 export interface Reason {
   code: ReasonCode

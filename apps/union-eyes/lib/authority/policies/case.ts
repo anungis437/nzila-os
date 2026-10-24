@@ -160,6 +160,10 @@ export function decideCase(
         misses.push({ code: 'CAPACITY_NOT_ELIGIBLE', ref: m.id })
         continue
       }
+      if (c.confidential === true && m.scope.classificationCeiling !== 'confidential') {
+        misses.push({ code: 'CLASSIFICATION_EXCEEDS_MANDATE', ref: m.id, detail: 'the case is confidential and the mandate has no confidential ceiling' })
+        continue
+      }
       if (!scopeCoversCase(m.scope, c)) {
         misses.push({ code: 'OUT_OF_SCOPE', ref: m.id, detail: 'case is outside the mandate unit/territory' })
         continue

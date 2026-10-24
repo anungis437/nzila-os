@@ -48,5 +48,11 @@ export const authorityKernelEntries: StorageAuthorityEntry[] = [
   tenant('ue_authority_disclosure_consents', 'Member-issued referral consents and counsel-issued disclosure records. UPDATE is limited by trigger to revocation.', ['SELECT', 'INSERT', 'UPDATE']),
   tenant('ue_authority_approval_requests', 'Governance approval requests. Status resolves only as a consequence of a decision row, enforced by trigger.', ['SELECT', 'INSERT', 'UPDATE']),
   tenant('ue_authority_approval_decisions', 'One-person-one-vote approval decisions, validated by trigger under a row lock on the request. Immutable after insert.', ['SELECT', 'INSERT']),
-  tenant('ue_authority_events', 'In-transaction record of every authority mutation, written by trigger. Immutable.', ['SELECT', 'INSERT']),
+  tenant('ue_authority_events', 'In-transaction record of every authority mutation, written by trigger. Immutable. A deferred constraint trigger refuses commit unless the canonical audit chain names the event.', ['SELECT', 'INSERT']),
+  tenant('ue_authority_issuance_rules', 'Versioned, provenance-backed issuance policy. Inactive until activated with a real source instrument and two approvers other than the drafter. UPDATE is limited by trigger to activation and retirement.', ['SELECT', 'INSERT', 'UPDATE']),
+  tenant('ue_authority_acceptances', 'Holder acceptance of a mandate or delegation that requires it. Insert-only, one per instrument, holder only.', ['SELECT', 'INSERT']),
+  tenant('ue_authority_requests', 'Idempotency records for authority operations. The result may be written once.', ['SELECT', 'INSERT', 'UPDATE']),
+  tenant('ue_authority_financial_steps', 'Append-only financial workflow ledger (registered, prepared, approved, executed, reconciled, voided) with trigger-enforced ordering and segregation of duties. Snapshots the amount at registration.', ['SELECT', 'INSERT']),
+  tenant('ue_authority_reviews', 'Governance review register: complainant, adverse parties, classification, remediation owner. UPDATE is limited by trigger to status and remediation owner.', ['SELECT', 'INSERT', 'UPDATE']),
+  tenant('ue_authority_workaid_matters', 'Union-side WorkAid referral references only; never counsel content. UPDATE is limited by trigger to counsel acceptance and withdrawal.', ['SELECT', 'INSERT', 'UPDATE']),
 ]

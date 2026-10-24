@@ -251,6 +251,17 @@ describe('case policy — supervisory mandates (case_read_any replacement)', () 
     expect(decide(readCase(U.chief), chief({ status: 'suspended' }), caseFacts(), NOW).effect).toBe('deny')
   })
 
+  it('a confidential case needs a mandate with a confidential classification ceiling', () => {
+    const conf = caseFacts({ confidential: true })
+    expect(codes(decide(readCase(U.chief), chief(), conf, NOW))).toContain('CLASSIFICATION_EXCEEDS_MANDATE')
+    const ceiling = chief({ scope: { unitIds: [UNIT_ID], classificationCeiling: 'standard' } })
+    expect(decide(readCase(U.chief), ceiling, conf, NOW).effect).toBe('deny')
+    const ok = chief({ scope: { unitIds: [UNIT_ID], classificationCeiling: 'confidential' } })
+    expect(decide(readCase(U.chief), ok, conf, NOW).effect).toBe('allow')
+    // Confidential is not privileged: a non-confidential case is unaffected.
+    expect(decide(readCase(U.chief), chief(), caseFacts(), NOW).effect).toBe('allow')
+  })
+
   it('a mandate with no expiry is rejected: renewal must be affirmative', () => {
     expect(codes(decide(readCase(U.chief), chief({ expiresAt: null }), caseFacts(), NOW))).toContain('INSTRUMENT_INVALID')
   })
