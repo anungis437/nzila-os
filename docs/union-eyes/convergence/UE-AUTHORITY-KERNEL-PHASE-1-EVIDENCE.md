@@ -3,6 +3,7 @@
 **Mission:** `UE-AUTHORITY-KERNEL-PHASE-1-COMPLETION` (items A–G)
 **Kernel branch:** `agents/ue-authority-kernel` (base `0c994b968`)
 **Supersedes:** the earlier Phase 1 evidence record (8 relations, uuid principals), which is obsolete.
+**Superseded by:** [UE-AUTHORITY-KERNEL-PHASE-1-EXIT-EVIDENCE.md](./UE-AUTHORITY-KERNEL-PHASE-1-EXIT-EVIDENCE.md) for the Phase 1 exit verdict (FAIL), actor binding, classified access and combined-schema qualification.
 **Staging / production:** NO-GO. **Phase 2 and the six-persona merge:** BLOCKED pending review of this package.
 
 ## 1. Verdict
