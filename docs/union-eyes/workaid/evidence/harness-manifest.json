@@ -1,0 +1,546 @@
+{
+  "schema": "workaid-harness-manifest/1",
+  "files": 108,
+  "entries": [
+    {
+      "path": "docs/union-eyes/workaid/00_MISSION_STATE.md",
+      "bytes": 6328,
+      "sha256": "af6515a52f8f4752dd67b7a18648504ce689e098fb6f22901e1d1a41dfb3f79e"
+    },
+    {
+      "path": "docs/union-eyes/workaid/01_WORKAID_REALITY_BASELINE.md",
+      "bytes": 8657,
+      "sha256": "05db5d2d5bc029496622e9b8001facbc73319c16a3206a06746a4ea14627ac1e"
+    },
+    {
+      "path": "docs/union-eyes/workaid/02_REQUIREMENTS_TRACEABILITY.md",
+      "bytes": 16767,
+      "sha256": "2ffe8c16cc27d13a2f189cc42262063f45cb2b0e49f23485e63853d56913cd37"
+    },
+    {
+      "path": "docs/union-eyes/workaid/03_DOMAIN_MODEL_AND_STATES.md",
+      "bytes": 7451,
+      "sha256": "156ca838af6042fbd60e4d4c22726a39bca1575e8abba6e03e510c3391351afa"
+    },
+    {
+      "path": "docs/union-eyes/workaid/04_AUTHORITY_AND_DISCLOSURE_MATRIX.md",
+      "bytes": 5597,
+      "sha256": "4925980a8b5e01e38635e1ca73fab01689b6e90d0f79061a00064d3f3c066c25"
+    },
+    {
+      "path": "docs/union-eyes/workaid/05_WSIB_WORKFLOW_CONTRACTS.md",
+      "bytes": 7561,
+      "sha256": "288a9c277975674980377b932c60793456755eef6633ed9d8acd06fa9859e736"
+    },
+    {
+      "path": "docs/union-eyes/workaid/06_TASK_REMINDER_AND_RECEIPT_CONTRACTS.md",
+      "bytes": 5460,
+      "sha256": "4626050d7f0ebedfb1cc18fe8c8bd042aad85fee7aafb9b5b622bc3da8f79919"
+    },
+    {
+      "path": "docs/union-eyes/workaid/07_CLIO_COEXISTENCE_ARCHITECTURE.md",
+      "bytes": 4979,
+      "sha256": "f6961d78cd0b5dd604f67ac79ccc8e701376230ad6f00ec2a5551c10d64b12d3"
+    },
+    {
+      "path": "docs/union-eyes/workaid/08_SYNTHETIC_TEST_REPORT.md",
+      "bytes": 11756,
+      "sha256": "f3dba87f8d22c7ea5e4f45e95398ba1c8c2ec4ec10e82f45c1053e7973feb6e2"
+    },
+    {
+      "path": "docs/union-eyes/workaid/09_ADVERSARIAL_FINDINGS_REGISTER.md",
+      "bytes": 26395,
+      "sha256": "13f6129e3bb2f45e2575eb86d46c5f3d64edb84b01a72c8a2017325c9e3dcf6e"
+    },
+    {
+      "path": "docs/union-eyes/workaid/10_GROK_FINDINGS_RECONCILIATION.md",
+      "bytes": 8049,
+      "sha256": "4dda7a3dd72a371350eccd19245e091fd2fa40ed64c637a30716f4a1b837ca1f"
+    },
+    {
+      "path": "docs/union-eyes/workaid/11_WORKAID_VALIDATION_DECISIONS.md",
+      "bytes": 8656,
+      "sha256": "249de76400da67f50789921c3cefbf93bf84593f59e244aad411941852c8e946"
+    },
+    {
+      "path": "docs/union-eyes/workaid/12_IMPLEMENTATION_SLICES_AND_DEPENDENCIES.md",
+      "bytes": 4452,
+      "sha256": "cc9301c7497f47aecc6f8fbcc433a308333dd8374aac13700de9c497ab3bae3d"
+    },
+    {
+      "path": "docs/union-eyes/workaid/13_INTEGRATION_HANDOFF_CONTRACT.md",
+      "bytes": 13015,
+      "sha256": "6a97adc1a39e5745add1e2f2ec6ee533b3bec89fe714106e9f7107a352a8766f"
+    },
+    {
+      "path": "docs/union-eyes/workaid/14_PERSONA_JOURNEY_CONTRACTS.md",
+      "bytes": 10961,
+      "sha256": "35e3c698c9ef70a9bffbf67998da59eaa27e6af47cb91b7b6450103aae2f630c"
+    },
+    {
+      "path": "docs/union-eyes/workaid/15_CROSS_PERSONA_CONSISTENCY.md",
+      "bytes": 9140,
+      "sha256": "5ddd8e4a27a7caa9341fe8adc315f03eff2b03b1db4ceb6a1345d5db4dce20ff"
+    },
+    {
+      "path": "docs/union-eyes/workaid/16_MEMBER_PORTAL_REUSE_ASSESSMENT.md",
+      "bytes": 6673,
+      "sha256": "7368b40798f9a31a0ee0246e2721b79240e4936f14b200cf6fefeb2dfffb62b7"
+    },
+    {
+      "path": "docs/union-eyes/workaid/17_RECEIPT_VS_FILING_AUTHORITY.md",
+      "bytes": 11154,
+      "sha256": "ce74569db8e858ffcc33bcf96078689d2f008cc2172a49e14d6c6b82f6d8340b"
+    },
+    {
+      "path": "docs/union-eyes/workaid/18_SLICE_C_TEST_REPORT.md",
+      "bytes": 49008,
+      "sha256": "59b195bab2ade01ebecb6ece59b4e58d14c15ddef477f2aa34c3d997cd4688e8"
+    },
+    {
+      "path": "docs/union-eyes/workaid/19_R7_ADVERSARIAL_HANDOFF.md",
+      "bytes": 11086,
+      "sha256": "7863cb368c055a6380c361361ef0034f5a1f28c20a4bde9bfdcae461742f085f"
+    },
+    {
+      "path": "docs/union-eyes/workaid/CHANGED_SOURCE_INVENTORY.md",
+      "bytes": 8559,
+      "sha256": "4e9d9151b0c29324883206eecb4ea1df31e799e7836a4110537ac10e7c4c54ed"
+    },
+    {
+      "path": "docs/union-eyes/workaid/DECISION_LOG.md",
+      "bytes": 9264,
+      "sha256": "a811ec83760e15d04372279b0c25cc40bb3b45aec1cdf247235fbcad2bc1e540"
+    },
+    {
+      "path": "docs/union-eyes/workaid/WORKAID_PRODUCT_SPEC_v0.2.md",
+      "bytes": 6614,
+      "sha256": "6c039c3005fd8996f631a27b7f9295849368e584993b39e25354e7d03a21af90"
+    },
+    {
+      "path": "docs/union-eyes/workaid/WORKAID_PRODUCT_SPEC_v0.3.md",
+      "bytes": 7496,
+      "sha256": "f0970e6bebd1dadc6c6e586ad6bee571c57ef54049df655f5d218108e8fef4bb"
+    },
+    {
+      "path": "docs/union-eyes/workaid/baseline-pack-v0.1/MANIFEST.json",
+      "bytes": 1448,
+      "sha256": "ce9d5082fb23d688fd15b6c73f48889d98838475abe0c0665f4007adeaa48f66"
+    },
+    {
+      "path": "docs/union-eyes/workaid/baseline-pack-v0.1/README.md",
+      "bytes": 2190,
+      "sha256": "e722c8647c78104565be7778852c22fb34f655dc7f19bb5b16484e067c9d6305"
+    },
+    {
+      "path": "docs/union-eyes/workaid/baseline-pack-v0.1/WORKAID_ACCEPTANCE_MATRIX.csv",
+      "bytes": 17516,
+      "sha256": "b80444591b8b07de0c3dd23f6c504c4666aa0b650c39be750a64a3d73a5a2a3a"
+    },
+    {
+      "path": "docs/union-eyes/workaid/baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "bytes": 12165,
+      "sha256": "bc3cbadad7ab1a219616448742cdaa87521fe6a289c6bf69bb625a9f0ae38558"
+    },
+    {
+      "path": "docs/union-eyes/workaid/baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "bytes": 6720,
+      "sha256": "eed997fc47ad5f1e76817e5275a17994ea9d13fc442f5f589a1184af684a5b91"
+    },
+    {
+      "path": "docs/union-eyes/workaid/baseline-pack-v0.1/WORKAID_PRODUCT_SPEC_v0.1.md",
+      "bytes": 24897,
+      "sha256": "e8285ea8d33dcde84db2410ce207805111b338e4cd34d1094a86cc1218a7fc8f"
+    },
+    {
+      "path": "docs/union-eyes/workaid/baseline-pack-v0.1/WORKAID_SYNTHETIC_SCENARIOS.json",
+      "bytes": 6684,
+      "sha256": "51576f802d1b8105c2ff384505213903569b928f6407cbb315517a2dae8f2836"
+    },
+    {
+      "path": "docs/union-eyes/workaid/baseline-pack-v0.1/WORKAID_VSCODE_AGENT_MISSION.md",
+      "bytes": 4526,
+      "sha256": "8337594e4b4fe55e1ec29f81fff40aed51197fd068ec14e05966ee2c19cd9f2e"
+    },
+    {
+      "path": "docs/union-eyes/workaid/data/WORKAID_ACCEPTANCE_MATRIX_v0.2.csv",
+      "bytes": 42369,
+      "sha256": "7188c5ad8345e6176e59b95f61ee0141f90144fec1b698e9a9e0d6b41ef62e8d"
+    },
+    {
+      "path": "docs/union-eyes/workaid/data/WORKAID_ACCEPTANCE_MATRIX_v0.3.csv",
+      "bytes": 56305,
+      "sha256": "46f55bbc30ad66315a6b19d168e390e54a2c3daeb62f3daa601deab57abdc127"
+    },
+    {
+      "path": "docs/union-eyes/workaid/data/findings-register.json",
+      "bytes": 88230,
+      "sha256": "2f4f6d922b8c4de2a8ee7015ee1e096da11e4a786cb4aa7ee6dd255d15970b2b"
+    },
+    {
+      "path": "docs/union-eyes/workaid/evidence/journey-trace.json",
+      "bytes": 112335,
+      "sha256": "bcd10c4ef5c619f0a3fa8e533ba1fd024697fee0dc67e9b2943395ae09647420"
+    },
+    {
+      "path": "docs/union-eyes/workaid/evidence/test-results.json",
+      "bytes": 51545,
+      "sha256": "fcfeab7b1195ae06b72df5953dba6173495416113e14ecac4a788f2275125dad"
+    },
+    {
+      "path": "docs/union-eyes/workaid/grok-redteam-01/WA_GROK_ACCEPTANCE_DELTA.csv",
+      "bytes": 4956,
+      "sha256": "75ac35c62ee95e7bd43bd3c481c8742ace4018f0d4487a28904c2ec5f131ccff"
+    },
+    {
+      "path": "docs/union-eyes/workaid/grok-redteam-01/WA_GROK_ARCHITECTURE_CHALLENGE.md",
+      "bytes": 7125,
+      "sha256": "c8e051003d0aa05742215cabd16adab8dc3ef1a57ba1bae9ba16c841329686ee"
+    },
+    {
+      "path": "docs/union-eyes/workaid/grok-redteam-01/WA_GROK_EXECUTIVE_VERDICT.md",
+      "bytes": 10225,
+      "sha256": "4ed80a6eea241f4374aa3102e249c65002a1c6a680c6219ef3dff9beccff1722"
+    },
+    {
+      "path": "docs/union-eyes/workaid/grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "bytes": 24694,
+      "sha256": "d5dcc7513200669c541850f50426462fb46e31990e33ffec5e98a5fdfa2f5922"
+    },
+    {
+      "path": "docs/union-eyes/workaid/grok-redteam-01/WA_GROK_REALITY_BASELINE.md",
+      "bytes": 10652,
+      "sha256": "8f41bee3757ec87c82ea1dfe873f65b897c62bde3a33a194e9d048b87af60b9d"
+    },
+    {
+      "path": "docs/union-eyes/workaid/grok-redteam-01/WA_GROK_REQUIREMENTS_DELTA.md",
+      "bytes": 5468,
+      "sha256": "16794630ba4b3bbf8e1e3105caf94693a8cf814bd9d462e44185718294be64f9"
+    },
+    {
+      "path": "docs/union-eyes/workaid/grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "bytes": 12882,
+      "sha256": "7180a6efd29f4e9fea4f07d132264ed48d4c27acafd41bfbbed23ead983b86b1"
+    },
+    {
+      "path": "docs/union-eyes/workaid/grok-redteam-01/WA_GROK_SOURCE_REGISTER.md",
+      "bytes": 15521,
+      "sha256": "374d6e402c214a80cc89c2e3294e5549860ce79a09b7451ef749aaf6efcb55f3"
+    },
+    {
+      "path": "docs/union-eyes/workaid/grok-redteam-01/WA_GROK_THREAT_MODEL.md",
+      "bytes": 6618,
+      "sha256": "8eb49c50b2e522f9eeaee342f98c0dd8a0a64affe25bda1ced97ea45ea684d7f"
+    },
+    {
+      "path": "docs/union-eyes/workaid/grok-redteam-01/WorkAid_Grok_R3-R6_Triage_2026-10-23.md",
+      "bytes": 9383,
+      "sha256": "5909e1042e0761cfb50b6f817a2cef7979d6d7ee9e315046b12a02327a547611"
+    },
+    {
+      "path": "tooling/workaid-prep/README.md",
+      "bytes": 3696,
+      "sha256": "1dba8614cfb13b78221dec8eaf2576ac64f37908fd1b0c50f854febf2f4f5b55"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/build-baseline.ts",
+      "bytes": 29987,
+      "sha256": "cc7c79ead8b1736b49c1eca727de65db8b391a924c8f4747c04b64d28260034b"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/guard.ts",
+      "bytes": 5074,
+      "sha256": "0ff65c274c989bca285515fd48615365cba7deac9836dae735e0d1bc26ff553b"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/inventory.ts",
+      "bytes": 4209,
+      "sha256": "43f541ae27203a5231e7f10e1243a41bb1403c1016192b186484de078ae4caf3"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/manifest.ts",
+      "bytes": 2010,
+      "sha256": "b45e0e72be55742633dea862e1583b046db6a27af754c2178914470cae28692e"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/platform-tripwire.ts",
+      "bytes": 3298,
+      "sha256": "20cc5e58dab9191a69b015e02949e62ee014d16ce12d9a9eea78bdd87db973b9"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/r7-manifest.ts",
+      "bytes": 1806,
+      "sha256": "cfc96f444902fb33c92dc93e48a202dc800e6a472dd5094a726c0cfb57d782eb"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/requirements.ts",
+      "bytes": 16698,
+      "sha256": "e40bbe8c58a016ea4c1f565b444141b3a2dc3b073170a08e73e6aad191196315"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/run-tests.ts",
+      "bytes": 3502,
+      "sha256": "ced8a16e7212c7c77729f783845be7e22383cb67a10b963e9defec92e3fce6b9"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/slice-c-cases.ts",
+      "bytes": 5748,
+      "sha256": "6b6fad328051645c793187ef1be8dd43be486e72d058e305771a58ca3bcf771a"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/sources.ts",
+      "bytes": 8417,
+      "sha256": "a1e4c393d49a510dadb5522f0a831661a624f70a8f336aff0998a0bb5fcb5a69"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/triage-overlay.ts",
+      "bytes": 30875,
+      "sha256": "02968ac30958be0a7b09c37858c22a79b58e66ef79b6b89352100f9143272ca6"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/typecheck.ts",
+      "bytes": 2053,
+      "sha256": "2f4faf210dc02f64571fda69503695a423f91413e1331295b97d9443a965d2ec"
+    },
+    {
+      "path": "tooling/workaid-prep/scripts/validate-docs-sandboxed.ts",
+      "bytes": 3800,
+      "sha256": "326109beaaed183ed05c7712262f7d153b9c989af205ea12c98c34da8b07edfe"
+    },
+    {
+      "path": "tooling/workaid-prep/src/audit.ts",
+      "bytes": 1955,
+      "sha256": "7dfde0a803928870a9352f52d93c4d29fdc3113006fc89223ae0c4332eee72e4"
+    },
+    {
+      "path": "tooling/workaid-prep/src/authorization.ts",
+      "bytes": 18193,
+      "sha256": "91c02469e8a82d3c0668812a1cf2f221a0ad267e5723bc6aaed1d2016e13d73d"
+    },
+    {
+      "path": "tooling/workaid-prep/src/claims.ts",
+      "bytes": 10815,
+      "sha256": "da324a0f4ecd99c669f5ba69db42b44b1aedc8e1c5b02de56013c324aa85b87b"
+    },
+    {
+      "path": "tooling/workaid-prep/src/clio.ts",
+      "bytes": 4933,
+      "sha256": "9550d452f708a890447263b59cd06837ab9e1619094d775bda63f493c4fc6610"
+    },
+    {
+      "path": "tooling/workaid-prep/src/deadlines.ts",
+      "bytes": 7181,
+      "sha256": "d2f65a78301aac252f73e861197c12b56b42d2ea8e381889912f5d1de1c6e4d7"
+    },
+    {
+      "path": "tooling/workaid-prep/src/dependency.ts",
+      "bytes": 3138,
+      "sha256": "4ec1e9cef454da0e33079b2559e62e5eefd8e52af46adf057b238494687dfd2a"
+    },
+    {
+      "path": "tooling/workaid-prep/src/filing.ts",
+      "bytes": 14348,
+      "sha256": "630520c2c39221c4f213d99caaff2ea1c9f1b490237351041aad999129bd2db2"
+    },
+    {
+      "path": "tooling/workaid-prep/src/followup.ts",
+      "bytes": 16508,
+      "sha256": "4d38bd83aa6d2ef807e227d63aab0bfcc60c5f17acb8628fe754408b9b12dcbe"
+    },
+    {
+      "path": "tooling/workaid-prep/src/ids.ts",
+      "bytes": 2909,
+      "sha256": "03586ddcf4ce468add34bf460f43f067137daaab200fe39684680309ff83508b"
+    },
+    {
+      "path": "tooling/workaid-prep/src/index.ts",
+      "bytes": 616,
+      "sha256": "48ee5ebebb30419ef312102b1a9a302b3c5d8b38805d06a29a88f10e866e3b35"
+    },
+    {
+      "path": "tooling/workaid-prep/src/journey-views.ts",
+      "bytes": 10626,
+      "sha256": "0b4fd1d104ca4702cfa100790a5115595f3a0032031a674e852ace0cc544bfde"
+    },
+    {
+      "path": "tooling/workaid-prep/src/journey.ts",
+      "bytes": 56463,
+      "sha256": "b555c9b0e53968af900cd6c66003056d9ffb14419459821d3fc15cf8efed0048"
+    },
+    {
+      "path": "tooling/workaid-prep/src/platform-repro/search-authorization.ts",
+      "bytes": 1732,
+      "sha256": "5849769063c08c5c2bfc3320d626ac61e9d0b75ce253dc716e1269b9410dc0ef"
+    },
+    {
+      "path": "tooling/workaid-prep/src/platform-repro/server-action-detector.ts",
+      "bytes": 2835,
+      "sha256": "f509996a4c3585831922f96a2e09280c1a64763f9dda2e082a200c8bb877d029"
+    },
+    {
+      "path": "tooling/workaid-prep/src/platform-repro/storage-policy.ts",
+      "bytes": 4861,
+      "sha256": "7fe9a52744d0d6098b33e173e51b73b9d20b4758a0d249c8837e4e1dd6d00f11"
+    },
+    {
+      "path": "tooling/workaid-prep/src/principal.ts",
+      "bytes": 1333,
+      "sha256": "4c855c7b78035a2ad4bbce8ea65d62b225559fa276d239c6ce258a96b42b4b0f"
+    },
+    {
+      "path": "tooling/workaid-prep/src/publication.ts",
+      "bytes": 9565,
+      "sha256": "87100d32d7dac0836ed04628456a5fbf7a7fc29254220008241bbb36776053ea"
+    },
+    {
+      "path": "tooling/workaid-prep/src/referral.ts",
+      "bytes": 13966,
+      "sha256": "926028935ca31874209c40dd748344906f4d4db03226edfbc1a36dd0c6d2ea8e"
+    },
+    {
+      "path": "tooling/workaid-prep/src/result.ts",
+      "bytes": 474,
+      "sha256": "852d1f3f0692561a2555b3fa74dd92e4a2a967e3e32411fe927def0f8c15dcfa"
+    },
+    {
+      "path": "tooling/workaid-prep/src/revocation.ts",
+      "bytes": 4700,
+      "sha256": "4a4b60d7336305d6883a483a92d92c2a160bd988dd73e9668d3c6e276313530f"
+    },
+    {
+      "path": "tooling/workaid-prep/src/submission.ts",
+      "bytes": 16956,
+      "sha256": "bb7aef1fe407b59718b1f7340286f8db9ab70277ee9bac3af94eb69b637ea75a"
+    },
+    {
+      "path": "tooling/workaid-prep/src/time.ts",
+      "bytes": 3613,
+      "sha256": "4e5eaada23710146f5474705fe9a11441fde83a5d00654e2897d043f1db4a10a"
+    },
+    {
+      "path": "tooling/workaid-prep/src/tribunal.ts",
+      "bytes": 4352,
+      "sha256": "296fac44733dd56c215865d15e698de6d9bec4546704b6d3e06c9aec07333945"
+    },
+    {
+      "path": "tooling/workaid-prep/src/upload.ts",
+      "bytes": 3950,
+      "sha256": "593d6c30f9e8c3d2ffa2fa4e7533f9e0d206023a5f12630ac43e99c9f133a338"
+    },
+    {
+      "path": "tooling/workaid-prep/test/authorization.test.ts",
+      "bytes": 16027,
+      "sha256": "f885ab339ed0e45b180d0417634852c95a1b2e9eb084642b83937442c8f60185"
+    },
+    {
+      "path": "tooling/workaid-prep/test/claims.test.ts",
+      "bytes": 10172,
+      "sha256": "b7620bf3792d419bc77497be66c7b15b0d124767ef26911053cd79f097bae1ad"
+    },
+    {
+      "path": "tooling/workaid-prep/test/cross-persona.test.ts",
+      "bytes": 33194,
+      "sha256": "86caf5b5ea8a06ec19f67bcd06458859f967c72aecc3c8473401a56e9c609661"
+    },
+    {
+      "path": "tooling/workaid-prep/test/deadlines.test.ts",
+      "bytes": 9044,
+      "sha256": "74379dcbe7dba77ddfdcb98b105614caddd60c9617e5ef020d2446640f83ab03"
+    },
+    {
+      "path": "tooling/workaid-prep/test/filing.test.ts",
+      "bytes": 17619,
+      "sha256": "7353d5d83ff0a716c195cf7849a490158b892fff2446675e36c63a9433f67495"
+    },
+    {
+      "path": "tooling/workaid-prep/test/followup.test.ts",
+      "bytes": 16716,
+      "sha256": "eb2ec5222fcbbbb7ddf9177e28dfd31da64a9c6fa5cd864ade1d4f80bb0b22a2"
+    },
+    {
+      "path": "tooling/workaid-prep/test/helpers.ts",
+      "bytes": 9605,
+      "sha256": "9eb7dfe09e95c6e79a9f2e8a080cea3762d2a42dd4404d356cbfef01a3cf5ab6"
+    },
+    {
+      "path": "tooling/workaid-prep/test/integration-contracts.test.ts",
+      "bytes": 7869,
+      "sha256": "bd263bae7ea94cfd6c45f9530cd0261dd1ed6342f80abcc6bdd0a56e26064b11"
+    },
+    {
+      "path": "tooling/workaid-prep/test/isolation.test.ts",
+      "bytes": 1885,
+      "sha256": "671c7d4d863a823e9fbdf00c67f299b5d07ed01839bed0fbc635e17b2ed8e5d8"
+    },
+    {
+      "path": "tooling/workaid-prep/test/journey-a-domenic.test.ts",
+      "bytes": 18739,
+      "sha256": "1ec0ab8fdb902418305a0773aa94c2c1658674c17157bb21ed6007b76e02e3e6"
+    },
+    {
+      "path": "tooling/workaid-prep/test/journey-b-angelo.test.ts",
+      "bytes": 16289,
+      "sha256": "cc7e2be6abf9b30755f10c2cdb68196e991eea4c815f02a479e511c1e0eff29f"
+    },
+    {
+      "path": "tooling/workaid-prep/test/journey-c-union.test.ts",
+      "bytes": 10665,
+      "sha256": "cc7bbb251078c6214ea2ab5c549a351094619206dc7b394688b013c75a50f01c"
+    },
+    {
+      "path": "tooling/workaid-prep/test/journey-d-member.test.ts",
+      "bytes": 16033,
+      "sha256": "a9995fb486e516a5f1ed4fc299abe18c644436d13b2520e7d6cbbad60a018342"
+    },
+    {
+      "path": "tooling/workaid-prep/test/pack-integrity.test.ts",
+      "bytes": 7287,
+      "sha256": "f08b1a15f1cc1b6047e23aaafd73beacfc084c4fc2c2297edae885e15cd29cb0"
+    },
+    {
+      "path": "tooling/workaid-prep/test/platform-repro.test.ts",
+      "bytes": 14871,
+      "sha256": "a7bde9bd981bfbbd28eb1e67a9c977d3bcd6f10d9f0e55371858299074ecaafe"
+    },
+    {
+      "path": "tooling/workaid-prep/test/publication-revocation.test.ts",
+      "bytes": 10473,
+      "sha256": "fa8c4f673ff870484afa8c5d850843b258a2766146dffd4c28577e4ed4533193"
+    },
+    {
+      "path": "tooling/workaid-prep/test/referral.test.ts",
+      "bytes": 11342,
+      "sha256": "504ed09b358b0edf9ce74435245f31aa91a2598d53fad2470b210b47ce0b3e5b"
+    },
+    {
+      "path": "tooling/workaid-prep/test/scenario.ts",
+      "bytes": 8310,
+      "sha256": "2bc2439a04143556a58089c9b7def899cee6372945b524040905f9899181e479"
+    },
+    {
+      "path": "tooling/workaid-prep/test/slice-c-contracts.test.ts",
+      "bytes": 12487,
+      "sha256": "bbfd62d51bc9ab265a28b24887063324363315b420051bb155889f6485f01efe"
+    },
+    {
+      "path": "tooling/workaid-prep/test/submission.test.ts",
+      "bytes": 20572,
+      "sha256": "6fcf13155b41494c8b881dcd8021d4b3423385f0bbb294ff0042cef2aaf61859"
+    },
+    {
+      "path": "tooling/workaid-prep/test/trace.ts",
+      "bytes": 4761,
+      "sha256": "a26e7747206323c209b29b83ee5be047dbc599736460f271095d0f0d4a6a402e"
+    },
+    {
+      "path": "tooling/workaid-prep/test/write-isolation.test.ts",
+      "bytes": 8174,
+      "sha256": "b0a655df0dd6a4d15d8723caa7aa654a724f51752a210e35536b78cfa8b9ed96"
+    },
+    {
+      "path": "tooling/workaid-prep/tsconfig.json",
+      "bytes": 434,
+      "sha256": "faaedd3e9848f39436c7d159e3df5a1940417ece86d4a2aca5c3fe9a04eebe75"
+    }
+  ]
+}

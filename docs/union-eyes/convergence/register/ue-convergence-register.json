@@ -370,12 +370,14 @@
       "workstream": "G",
       "canonicalOwner": "agents/workaid-prep-20261023 (184 changed paths, docs and tooling only)",
       "sources": [{ "kind": "file", "ref": "docs/union-eyes/convergence/UE-AUTHORITY-SOURCE-CLOSURE-EVIDENCE.md", "classification": "HISTORICAL_EVIDENCE" }],
-      "defect": "The WorkAid candidate is analysis and synthetic reproduction only and is unmerged; its proposed tables depend on an unqualified migration journal.",
+      "defect": "The WorkAid candidate (agents/workaid-prep-20261023 541effda5, four commits on 38a824918) is merged as docs and an isolated synthetic harness only: 111 paths under docs/union-eyes/workaid and tooling/workaid-prep, no application, migration, workspace or lockfile change, no database, network or Clio access, no counsel-side authority, and no status overclaim (the only 'delivered' hits are about reminder delivery). 259 of its 264 synthetic tests pass; its five branch-provenance checks (branch name, diff confined to its folders, sandboxed validator preflight) are skipped unless the checkout is on an agents/workaid-prep* branch because they cannot hold after integration. A passing synthetic test closes no runtime gate. NOT done: none of its proposed tables, routes or contracts are implemented on the kernel; its legal-matter domain and its information-sharing requirements still have to be expressed as kernel authority rules and checked against the counsel boundary contract, and its proposed tables depend on an unqualified migration journal.",
       "consumers": [],
-      "securityImplications": "None until merged.",
-      "requiredImplementation": "Assess slices against the kernel contract and implement the legal-matter domain on it.",
-      "evidence": [],
-      "status": "OPEN",
+      "securityImplications": "None while it remains docs and synthetic tooling; any implementation must go through the counsel boundary contract (separate capacity, conflict screen, consent-governed exchange).",
+      "requiredImplementation": "Express the WorkAid legal-matter and information-sharing requirements as kernel authority rules and implement them on kernel storage once it is qualified.",
+      "evidence": [
+        { "type": "path", "ref": "tooling/workaid-prep/README.md" }
+      ],
+      "status": "IN_PROGRESS",
       "retirement": { "disposition": "NONE" }
     },
     {

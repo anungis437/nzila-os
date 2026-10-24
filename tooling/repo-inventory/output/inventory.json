@@ -5,7 +5,7 @@
   "workspacePackageCount": 260,
   "workflowCount": 60,
   "contractTestCount": 300,
-  "tsTestFileCount": 2909,
+  "tsTestFileCount": 2928,
   "pythonTestFileCount": 43,
   "apps": [
     {
