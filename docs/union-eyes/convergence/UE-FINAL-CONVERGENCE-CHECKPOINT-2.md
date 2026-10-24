@@ -69,6 +69,6 @@ Webhook sender discovery, the Whop consumer of the legacy metadata key, test-cre
 2. Add a staff-thread assignment mechanism on kernel assignments (`I-001`).
 3. `UE-CONV-E-001` / `B-001`: migrate the claims module and the `union_rep_id` readers onto kernel assignments once kernel storage is qualified.
 4. `UE-CONV-A-004`: bearer fix together with its consumers.
-5. WorkAid candidate (`G-002`) assessment.
+5. WorkAid (`G-002`): merged as isolated docs and a synthetic harness at `d8110e9ee` (259 synthetic tests pass, 5 branch-provenance checks skipped off its branch). Still to do: express its legal-matter and information-sharing requirements as kernel rules under the counsel boundary contract, once kernel storage is qualified.
 
 Phase 3B remains blocked while `UE_SAAS_OPERATIONAL_READINESS` reads `NO_GO`.
