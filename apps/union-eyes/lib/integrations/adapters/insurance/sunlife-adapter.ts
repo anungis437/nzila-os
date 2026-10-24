@@ -257,7 +257,7 @@ export class SunLifeAdapter extends BaseIntegration {
             await db
               .update(externalBenefitPlans)
               .set(planData)
-              .where(eq(externalBenefitPlans.id, existing.id));
+              .where(and(eq(externalBenefitPlans.id, existing.id), eq(externalBenefitPlans.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalBenefitPlans).values({
@@ -328,7 +328,7 @@ export class SunLifeAdapter extends BaseIntegration {
             await db
               .update(externalBenefitEnrollments)
               .set(enrollmentData)
-              .where(eq(externalBenefitEnrollments.id, existing.id));
+              .where(and(eq(externalBenefitEnrollments.id, existing.id), eq(externalBenefitEnrollments.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalBenefitEnrollments).values({
@@ -393,7 +393,7 @@ export class SunLifeAdapter extends BaseIntegration {
             await db
               .update(externalBenefitDependents)
               .set(dependentData)
-              .where(eq(externalBenefitDependents.id, existing.id));
+              .where(and(eq(externalBenefitDependents.id, existing.id), eq(externalBenefitDependents.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalBenefitDependents).values({
@@ -461,7 +461,7 @@ export class SunLifeAdapter extends BaseIntegration {
             await db
               .update(externalBenefitCoverage)
               .set(coverageData)
-              .where(eq(externalBenefitCoverage.id, existing.id));
+              .where(and(eq(externalBenefitCoverage.id, existing.id), eq(externalBenefitCoverage.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalBenefitCoverage).values({

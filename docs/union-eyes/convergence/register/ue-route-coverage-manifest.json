@@ -36,18 +36,18 @@
    "WITH_API": 184
   },
   "mutatingByAudit": {
-   "ATOMIC": 36,
+   "ATOMIC": 39,
    "ATOMIC_SERVICE": 8,
    "BEST_EFFORT": 13,
    "CRUD_ATOMIC": 312,
-   "NONE": 326
+   "NONE": 323
   },
   "mutatingByData": {
    "AMBIENT_DB": 54,
    "CRUD_TENANT_TX": 312,
-   "NONE": 214,
+   "NONE": 213,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 62
+   "TENANT_TX": 63
   }
  },
  "routes": [
@@ -5256,7 +5256,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "elections/[id]/vote/route.ts",
@@ -5279,7 +5279,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "emergency/activate/route.ts",
@@ -11083,8 +11083,8 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "voting/sessions/[id]/vote/route.ts",

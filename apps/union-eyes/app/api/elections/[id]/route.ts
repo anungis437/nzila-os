@@ -11,7 +11,9 @@ import { eq } from 'drizzle-orm';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { checkElectionUpdate } from '@/lib/voting/election-certification';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,15 +70,23 @@ export const PATCH = withApi(
 
     updates.updatedAt = new Date();
 
-    const [updated] = await withSystemContext(async (_tx) =>
-      db
-        .update(councilElections)
-        .set(updates)
-        .where(eq(councilElections.id, params.id))
-        .returning()
-    );
-
-    if (!updated) throw ApiError.notFound('Election not found');
+    // Read, decide, write and audit in one system transaction under a row lock.
+    const updated = await withSystemContext(async () => {
+      const [existing] = await db.select().from(councilElections).where(eq(councilElections.id, params.id)).limit(1).for('update');
+      if (!existing) throw ApiError.notFound('Election not found');
+      const decision = checkElectionUpdate(existing, updates);
+      if (!decision.ok) throw ApiError.conflict(decision.message);
+      const [row] = await db.update(councilElections).set(updates).where(eq(councilElections.id, params.id)).returning();
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'governance.council_election.update',
+        resourceType: 'council_elections',
+        resourceId: params.id,
+        details: { fields: Object.keys(updates).filter((f) => f !== 'updatedAt'), certified: Boolean(existing.verificationDate || existing.verifiedBy), route: '/api/elections/[id]' },
+      });
+      return row;
+    });
 
     buildUnionEvidencePack({
       actionType: 'ELECTION_UPDATED',

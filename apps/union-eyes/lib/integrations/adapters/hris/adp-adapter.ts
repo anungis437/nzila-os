@@ -243,7 +243,7 @@ export class ADPAdapter extends BaseIntegration {
                 lastSyncedAt: new Date(),
                 updatedAt: new Date(),
               })
-              .where(eq(externalEmployees.id, existing.id));
+              .where(and(eq(externalEmployees.id, existing.id), eq(externalEmployees.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             // Create new employee
@@ -326,7 +326,7 @@ export class ADPAdapter extends BaseIntegration {
                 lastSyncedAt: new Date(),
                 updatedAt: new Date(),
               })
-              .where(eq(externalDepartments.id, existing.id));
+              .where(and(eq(externalDepartments.id, existing.id), eq(externalDepartments.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalDepartments).values({

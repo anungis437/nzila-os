@@ -1,0 +1,91 @@
+{
+  "mode": "accepted",
+  "nodeEnvironment": "production",
+  "sourceDigest": "0e7d048a2c0ccbe801210531a126e0913a5f368d93a8c23179f71715440c4847",
+  "exitCode": 0,
+  "sdkMocked": false,
+  "certificateValidationDisabled": false,
+  "fallbackKeyPresent": false,
+  "productionCustodyProvisioning": "NOT_QUALIFIED_BY_LOCAL_FIXTURE",
+  "observations": {
+    "identityAccepted": 2,
+    "identityDenied": 0,
+    "challenges": 10,
+    "keysAccepted": 19,
+    "keysDenied": 0,
+    "wrapsAccepted": 2,
+    "unwrapsAccepted": 6,
+    "rotationsAccepted": 1
+  },
+  "networkObservations": [
+    {
+      "pid": 51984,
+      "transport": "PIPE",
+      "targetDigest": "2b2293151ea0745c31df276bed151726b7b5db60f05dcf49e52278ea206c4b75",
+      "targetClass": "NON_LOOPBACK",
+      "port": null,
+      "allowed": false
+    },
+    {
+      "pid": 51984,
+      "transport": "TCP",
+      "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
+      "targetClass": "LOOPBACK",
+      "port": 49695,
+      "allowed": true
+    },
+    {
+      "pid": 51984,
+      "transport": "DNS_LOOKUP",
+      "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
+      "targetClass": "LOOPBACK",
+      "port": null,
+      "allowed": true
+    },
+    {
+      "pid": 51984,
+      "transport": "TCP",
+      "targetDigest": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
+      "targetClass": "LOOPBACK",
+      "port": 49694,
+      "allowed": true
+    },
+    {
+      "pid": 48428,
+      "transport": "PIPE",
+      "targetDigest": "2b2293151ea0745c31df276bed151726b7b5db60f05dcf49e52278ea206c4b75",
+      "targetClass": "NON_LOOPBACK",
+      "port": null,
+      "allowed": false
+    },
+    {
+      "pid": 48428,
+      "transport": "TCP",
+      "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
+      "targetClass": "LOOPBACK",
+      "port": 49695,
+      "allowed": true
+    },
+    {
+      "pid": 48428,
+      "transport": "DNS_LOOKUP",
+      "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
+      "targetClass": "LOOPBACK",
+      "port": null,
+      "allowed": true
+    },
+    {
+      "pid": 48428,
+      "transport": "TCP",
+      "targetDigest": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
+      "targetClass": "LOOPBACK",
+      "port": 49694,
+      "allowed": true
+    }
+  ],
+  "cleanup": {
+    "ownedIdentityExited": true,
+    "ownedVaultExited": true,
+    "ownedStateRemoved": true
+  }
+}

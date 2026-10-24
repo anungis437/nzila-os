@@ -710,6 +710,29 @@
       "retirement": { "disposition": "NONE" }
     },
     {
+      "id": "UE-CONV-K-009",
+      "domain": "democratic-integrity",
+      "capability": "Voting-session and council-election integrity",
+      "workstream": "K",
+      "canonicalOwner": "apps/union-eyes/lib/voting/session-lifecycle.ts",
+      "sources": [
+        { "kind": "file", "ref": "apps/union-eyes/lib/voting/session-lifecycle.ts", "classification": "CANONICAL" },
+        { "kind": "file", "ref": "apps/union-eyes/lib/voting/election-certification.ts", "classification": "CANONICAL" }
+      ],
+      "defect": "A steward could PATCH a voting session to any status (reopening a closed election), rewrite its title and dates after it opened, and DELETE it in any state, including after ballots were cast; the service updated and deleted by session id alone, and the evidence pack was best-effort. The council-election item route let a governance-role caller rewrite candidates, winners, totals and the verifying auditor of a certified result with no audit. Now: a status lifecycle (closed and cancelled are terminal), terms locked once a session opens, deletion only of an empty draft, organization predicates on the session writes, and update and audit committed in one tenant transaction; certified election results are locked except for recording a dispute, and creation and update are audited in the same system transaction. INSTITUTIONAL DECISIONS OPEN: whether an election officer may extend an open session's closing time, and what independent procedure may correct a certified result. REMAINING: voting options, voter eligibility and proxy changes on an opened session, ballot casting and session creation audit, and the elections vote route.",
+      "consumers": [],
+      "securityImplications": "An election's lifecycle, terms, ballots or certified results could be changed or destroyed by a role floor.",
+      "requiredImplementation": "Apply the same lifecycle lock to options, eligibility and proxy routes; add atomic audit to ballot casting and session creation; adopt an institutional procedure for extension and correction.",
+      "evidence": [
+        { "type": "test", "ref": "apps/union-eyes/lib/voting/__tests__/session-lifecycle.test.ts" },
+        { "type": "test", "ref": "apps/union-eyes/lib/voting/__tests__/election-certification.test.ts" },
+        { "type": "test", "ref": "apps/union-eyes/app/api/__tests__/voting-session-lifecycle.route.test.ts" },
+        { "type": "test", "ref": "apps/union-eyes/app/api/__tests__/elections-certification.route.test.ts" }
+      ],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
       "id": "UE-CONV-K-004",
       "domain": "controls",
       "capability": "Persona action coverage, authorization coverage, documentation supersession and cleanroom deployment proof",

@@ -265,30 +265,30 @@ describe('VotingService', () => {
     it('updates and returns session', async () => {
       const updated = { ...baseSession, title: 'New Title' };
       mocks.mockUpdateReturning.mockResolvedValue([updated]);
-      const r = await updateVotingSession('session-1', { title: 'New Title' } as never);
+      const r = await updateVotingSession('session-1', 'org-1', { title: 'New Title' } as never);
       expect(r?.title).toBe('New Title');
     });
 
     it('returns null when not found', async () => {
       mocks.mockUpdateReturning.mockResolvedValue([undefined]);
-      expect(await updateVotingSession('x', {} as never)).toBeNull();
+      expect(await updateVotingSession('x', 'org-1', {} as never)).toBeNull();
     });
 
     it('throws on error', async () => {
       mocks.mockUpdateReturning.mockRejectedValue(new Error('DB'));
-      await expect(updateVotingSession('x', {} as never)).rejects.toThrow('Failed to update');
+      await expect(updateVotingSession('x', 'org-1', {} as never)).rejects.toThrow('Failed to update');
     });
   });
 
   // ── deleteVotingSession ───────────────────────────────────────────
   describe('deleteVotingSession', () => {
     it('deletes and returns true', async () => {
-      expect(await deleteVotingSession('session-1')).toBe(true);
+      expect(await deleteVotingSession('session-1', 'org-1')).toBe(true);
     });
 
     it('throws on error', async () => {
       mocks.mockDeleteWhere.mockRejectedValue(new Error('DB'));
-      await expect(deleteVotingSession('x')).rejects.toThrow('Failed to delete');
+      await expect(deleteVotingSession('x', 'org-1')).rejects.toThrow('Failed to delete');
     });
   });
 

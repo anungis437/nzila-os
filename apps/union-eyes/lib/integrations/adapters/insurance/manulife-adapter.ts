@@ -265,7 +265,7 @@ export class ManulifeAdapter extends BaseIntegration {
             await db
               .update(externalInsuranceClaims)
               .set(claimData)
-              .where(eq(externalInsuranceClaims.id, existing.id));
+              .where(and(eq(externalInsuranceClaims.id, existing.id), eq(externalInsuranceClaims.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalInsuranceClaims).values({
@@ -332,7 +332,7 @@ export class ManulifeAdapter extends BaseIntegration {
             await db
               .update(externalInsurancePolicies)
               .set(policyData)
-              .where(eq(externalInsurancePolicies.id, existing.id));
+              .where(and(eq(externalInsurancePolicies.id, existing.id), eq(externalInsurancePolicies.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalInsurancePolicies).values({
@@ -399,7 +399,7 @@ export class ManulifeAdapter extends BaseIntegration {
             await db
               .update(externalInsuranceBeneficiaries)
               .set(beneficiaryData)
-              .where(eq(externalInsuranceBeneficiaries.id, existing.id));
+              .where(and(eq(externalInsuranceBeneficiaries.id, existing.id), eq(externalInsuranceBeneficiaries.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalInsuranceBeneficiaries).values({
@@ -466,7 +466,7 @@ export class ManulifeAdapter extends BaseIntegration {
             await db
               .update(externalBenefitUtilization)
               .set(utilizationData)
-              .where(eq(externalBenefitUtilization.id, existing.id));
+              .where(and(eq(externalBenefitUtilization.id, existing.id), eq(externalBenefitUtilization.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalBenefitUtilization).values({

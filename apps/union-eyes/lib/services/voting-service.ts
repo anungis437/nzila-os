@@ -201,6 +201,7 @@ export async function createVotingSession(
  */
 export async function updateVotingSession(
   id: string,
+  organizationId: string,
   data: Partial<NewVotingSession>
 ): Promise<VotingSession | null> {
   try {
@@ -210,7 +211,7 @@ export async function updateVotingSession(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(votingSessions.id, id))
+      .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -223,11 +224,11 @@ export async function updateVotingSession(
 /**
  * Delete voting session
  */
-export async function deleteVotingSession(id: string): Promise<boolean> {
+export async function deleteVotingSession(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(votingSessions)
-      .where(eq(votingSessions.id, id));
+      .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)));
 
     return true;
   } catch (error) {
