@@ -3,6 +3,7 @@
  */
 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { runReconciliation } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +15,7 @@ const reconcileSchema = z.object({
 
 export const POST = withApi(
   {
-    auth: { minRole: 'admin' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     body: reconcileSchema,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,

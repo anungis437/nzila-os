@@ -6,6 +6,7 @@
  * Sends a dues arrears reminder notification to the member.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { memberArrears } from '@/db/schema/dues-finance-schema';
 import { organizationMembers } from '@/db/schema-organizations';
@@ -17,7 +18,7 @@ export const dynamic = 'force-dynamic';
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Send arrears reminder to a member' },
   },

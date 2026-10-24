@@ -49,6 +49,8 @@ export const GET = withMinRole('secretary_treasurer', async (request, context: B
     );
 
     return standardSuccessResponse({
+      domain: 'NZILA_PLATFORM_BILLING',
+      notUnionFinancialRecords: true,
       billingAccount,
       ledgerSummary,
       recentInvoices,

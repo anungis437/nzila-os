@@ -5,6 +5,7 @@
  * for pending remittance line items using employee number and name heuristics.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { remittanceLineItems } from '@/db/schema/dues-finance-schema';
 import { eq, and, isNull, sql } from 'drizzle-orm';
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Run automatic remittance line-item matching' },
   },

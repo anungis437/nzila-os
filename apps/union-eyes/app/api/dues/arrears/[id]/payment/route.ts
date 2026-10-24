@@ -8,6 +8,7 @@
  * Creates a payment ledger entry and updates the member's arrears record.
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';
 import { memberArrears, memberDuesLedger } from '@/db/schema/dues-finance-schema';
@@ -23,7 +24,7 @@ const schema = z.object({
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Record a payment for a member in arrears' },
   },

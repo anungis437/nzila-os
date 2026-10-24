@@ -1,34 +1,15 @@
 /**
- * export action endpoint for organizationMembers
+ * CLC / affiliate remittance export — NOT_IMPLEMENTED. This stub answered
+ * 'accepted' and an empty list without exporting anything. Answers HTTP 501.
  */
-import { withApi, ApiError } from '@/lib/api/framework';
+import { retiredFinancialRoute } from '@/lib/finance/retired-financial-route';
 
 export const dynamic = 'force-dynamic';
 
-export const POST = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ["Members"],
-      summary: 'export action',
-      description: 'Performs the export action.',
-    },
-  },
-  async () => {
-    throw ApiError.notImplemented('CLC remittance export is not implemented: no export was produced.');
-  },
+const handler = retiredFinancialRoute(
+  '/api/admin/clc/remittances/export',
+  'affiliate-remittance-export',
+  'No qualified affiliate remittance export exists; nothing was exported.',
 );
-
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ["Members"],
-      summary: 'export status',
-      description: 'Returns export status.',
-    },
-  },
-  async () => {
-    throw ApiError.notImplemented('CLC remittance export is not implemented: there is no export status to report.');
-  },
-);
+export const GET = handler;
+export const POST = handler;

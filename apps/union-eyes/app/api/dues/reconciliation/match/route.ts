@@ -6,6 +6,7 @@
  * Body: { remittanceId: string; memberId: string }
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { remittanceLineItems } from '@/db/schema/dues-finance-schema';
 import { eq, and } from 'drizzle-orm';
@@ -19,7 +20,7 @@ const schema = z.object({
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Manually match a line item to a member' },
   },

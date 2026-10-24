@@ -1,17 +1,17 @@
 /**
- * CRUD collection route for organizationMembers
+ * CLC / affiliate remittances — NOT_IMPLEMENTED. This route was bound to
+ * organizationMembers, exposing and mutating membership records under a
+ * remittance name. No qualified affiliate-remittance model exists. Answers
+ * HTTP 501.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { organizationMembers } from '@/db/schema';
+import { retiredFinancialRoute } from '@/lib/finance/retired-financial-route';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: organizationMembers,
-  pk: 'id',
-  tags: ["Members"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
-});
-export { GET, POST };
+const handler = retiredFinancialRoute(
+  '/api/admin/clc/remittances',
+  'affiliate-remittances',
+  'No qualified affiliate (per-capita) remittance record store is bound to this route. It no longer reads or writes membership records.',
+);
+export const GET = handler;
+export const POST = handler;

@@ -4,6 +4,7 @@
  * GET /api/dues/reconciliation/queue — List remittance line items needing review
  */
 import { withApi, ApiError } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { remittanceLineItems, employerRemittances } from '@/db/schema/dues-finance-schema';
 import { eq, and, sql } from 'drizzle-orm';
@@ -12,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'List remittance line items pending reconciliation' },
   },

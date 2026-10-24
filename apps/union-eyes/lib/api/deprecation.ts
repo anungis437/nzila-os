@@ -65,12 +65,12 @@ export const DEPRECATED_ROUTE_MAP: DeprecatedRouteMapping[] = [
   { deprecated: '/api/v2/*', canonical: '/api/*', reason: 'v2 mirror — identical copy of root API', phase: 9 },
 
   // ── Stub Cleanup: Tables Never Created ────────────────────────────────────
-  { deprecated: '/api/financial/vendors', canonical: '/api/billing/reports', reason: 'Vendors table never created', phase: 9 },
-  { deprecated: '/api/financial/vendors/[id]', canonical: '/api/billing/reports', reason: 'Vendors table never created', phase: 9 },
-  { deprecated: '/api/financial/expenses', canonical: '/api/billing/reports', reason: 'Expenses table never created', phase: 9 },
-  { deprecated: '/api/financial/expenses/[id]', canonical: '/api/billing/reports', reason: 'Expenses table never created', phase: 9 },
-  { deprecated: '/api/financial/budgets', canonical: '/api/billing/reports', reason: 'Budgets table never created', phase: 9 },
-  { deprecated: '/api/financial/budgets/[id]', canonical: '/api/billing/reports', reason: 'Budgets table never created', phase: 9 },
+  { deprecated: '/api/financial/vendors', canonical: 'REMOVED', reason: 'Vendors table never created; Nzila billing reports are not a union vendor record', phase: 9 },
+  { deprecated: '/api/financial/vendors/[id]', canonical: 'REMOVED', reason: 'Vendors table never created; Nzila billing reports are not a union vendor record', phase: 9 },
+  { deprecated: '/api/financial/expenses', canonical: 'REMOVED', reason: 'Expenses table never created; Nzila billing reports are not a union expense record', phase: 9 },
+  { deprecated: '/api/financial/expenses/[id]', canonical: 'REMOVED', reason: 'Expenses table never created; Nzila billing reports are not a union expense record', phase: 9 },
+  { deprecated: '/api/financial/budgets', canonical: 'REMOVED', reason: 'Budgets table never created; Nzila billing reports are not a union budget', phase: 9 },
+  { deprecated: '/api/financial/budgets/[id]', canonical: 'REMOVED', reason: 'Budgets table never created; Nzila billing reports are not a union budget', phase: 9 },
 ];
 
 /**

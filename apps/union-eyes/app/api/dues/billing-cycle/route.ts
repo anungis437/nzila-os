@@ -3,6 +3,7 @@
  */
 
 import { withApi, ApiError } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { billingPeriods, billingSubscriptions } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'officer' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: {
       tags: ['Dues'],

@@ -5269,8 +5269,18 @@
     "complianceRisk": "Compliance Risk",
     "medium": "Medium"
   },
+  "financialCapabilityUnavailable": {
+    "state": "Not available",
+    "explanation": "This capability does not yet have a qualified, authoritative union financial record behind it, so no information is shown and no action can be taken here. Nothing you do on this page is recorded.",
+    "budgets": "Budgets",
+    "expenses": "Expenses and approvals",
+    "vendors": "Vendors",
+    "strikeFunds": "Strike funds",
+    "affiliateRemittances": "Affiliate (CLC / National / federation) remittances"
+  },
   "financeDashboardPage": {
-    "title": "Finance Dashboard",
+    "title": "Platform Billing (Nzila subscription)",
+    "platformBillingNotice": "This page shows your Nzila Union Eyes subscription billing only. It is not your union's general ledger, bank balance, dues or remittance records.",
     "retry": "Retry",
     "noDataAvailable": "No data available",
     "exports": "Exports",

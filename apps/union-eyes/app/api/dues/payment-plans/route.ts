@@ -4,6 +4,7 @@
  */
 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { paymentPlans } from '@/db/schema/dues-finance-schema';
 import { eq, desc } from 'drizzle-orm';
@@ -23,7 +24,7 @@ const createPlanSchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: 'officer' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: {
       tags: ['Dues'],
@@ -43,7 +44,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     body: createPlanSchema,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,

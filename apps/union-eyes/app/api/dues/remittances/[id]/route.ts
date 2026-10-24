@@ -5,6 +5,7 @@
  * PATCH /api/dues/remittances/:id — Update remittance status/notes/reconciliation
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
 import { eq, and } from 'drizzle-orm';
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Get an employer remittance by ID' },
   },
@@ -34,24 +35,19 @@ export const GET = withApi(
   },
 );
 
-const patchSchema = z.object({
-  processingStatus: z.enum(['pending', 'processing', 'completed', 'failed', 'requires_review']).optional(),
-  notes: z.string().optional(),
-  isReconciled: z.boolean().optional(),
-  reconciledAt: z.coerce.date().optional(),
-  reconciledBy: z.string().optional(),
-  expectedAmount: z.string().optional(),
-  variance: z.string().optional(),
-  recordsTotal: z.number().int().optional(),
-  recordsProcessed: z.number().int().optional(),
-  recordsMatched: z.number().int().optional(),
-  recordsException: z.number().int().optional(),
-  metadata: z.record(z.unknown()).optional(),
-});
+// Reconciliation, totals and result counters are outputs of a processing engine, never caller input.
+// Unknown keys (isReconciled, reconciledAt/By, variance, expectedAmount, records*) are rejected.
+const patchSchema = z
+  .object({
+    processingStatus: z.enum(['requires_review', 'failed']).optional(),
+    notes: z.string().optional(),
+    metadata: z.record(z.unknown()).optional(),
+  })
+  .strict();
 
 export const PATCH = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     openapi: { tags: ['Dues'], summary: 'Update an employer remittance' },
   },
   async ({ organizationId, userId, params, request }) => {
