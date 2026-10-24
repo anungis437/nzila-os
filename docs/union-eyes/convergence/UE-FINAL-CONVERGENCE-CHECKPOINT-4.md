@@ -41,7 +41,7 @@ Not re-run in this checkpoint: the heavy project as a whole after 0020 (the four
 - **Audit:** the supplementary summary audits in case intake and bulk import, and denial-path audits, remain best-effort. No real-PostgreSQL fault-injection proof exists yet for the converted routes (mocked and PGlite only).
 - **Identity bridge:** the 30-second parent-revocation window is unchanged.
 - **Finance duties, WorkAid union-side referral and consent, the staff conversation surface, persona journeys, the `union_rep_id` backfill run and reader migration, legacy elimination (H-003/H-004):** not done in this checkpoint.
-- **`grievances/[id]/assign` still writes the legacy primary-representative column** and requests assignment convergence; it must move to kernel assignment before that column can be retired.
+- **`grievances/[id]/assign` now assigns through the kernel** (follow-up commit after the checkpoint evidence above). It still writes the legacy primary-representative column as a compatibility mirror for the readers that are not migrated; that column cannot be retired until those readers move. The post-checkpoint change was verified with `tsc`, `app/api`, `lib`, `services` and `db` unit tests; `test:fast` was not re-run after it.
 
 ## External gates (unchanged)
 
@@ -60,7 +60,7 @@ Institutional adoption of the issuance rules and document class policy; a creden
 
 ## Resume order
 
-1. Move `grievances/[id]/assign` and the claims/cases routes onto kernel assignment and `decideCase`; retire `caseReadScope` and the CUPE case helpers once their consumers are migrated.
+1. Move the claims/cases routes onto kernel assignment and `decideCase`; retire `caseReadScope` and the CUPE case helpers once their consumers are migrated.
 2. Convert the system-context entries in the mutation-scope baseline first (webhooks, cron, jobs, platform services).
 3. Real-PostgreSQL fault injection for audit rollback on the converted routes.
 4. Rework the schema folder so the 103 `RETIRE_DECLARATION` entries can be deleted; prove the 59 `VERIFY_UNREACHABLE_THEN_RETIRE` ones unreachable; create the 10 absent relations.

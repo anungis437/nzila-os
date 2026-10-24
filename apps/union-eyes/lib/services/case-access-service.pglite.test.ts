@@ -29,6 +29,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }))
 
 import {
+  assignPrimaryRepresentative,
   getEffectiveCaseAccess,
   grantCaseAccessGuarded,
   listCaseCollaborators,
@@ -129,6 +130,61 @@ describe('collaborator grants are governed case assignments', () => {
   })
 
   it('every kernel mutation is audited in the canonical chain in the same transaction', async () => {
+    const orphan = await k.asAdmin(() => pg.query<{ n: string }>(
+      `SELECT count(*)::text n FROM ue_authority_events e WHERE NOT EXISTS (SELECT 1 FROM public.audit_logs a WHERE (a.details -> 'authorityEventIds') ? e.id::text)`,
+    ))
+    expect(orphan.rows[0].n).toBe('0')
+  })
+})
+
+describe('the primary representative is assigned through the kernel', () => {
+  const NEW_CASE = newUuid()
+  const assignAs = (issuer: string, assignee: string, id = NEW_CASE) =>
+    as(issuer, () => import('@/lib/db/with-rls-context').then((m) => m.withRLSContext({ organizationId: ORG }, (tx) =>
+      assignPrimaryRepresentative(tx as never, { organizationId: ORG, grievanceId: id, issuerUserId: issuer, assigneeUserId: assignee }))))
+
+  beforeAll(async () => {
+    await k.asAdmin(async () => {
+      await pg.query(`INSERT INTO public.grievances (id, organization_id, created_by) VALUES ($1,$2,$3)`, [NEW_CASE, ORG, U.member])
+    })
+    await k.grantMandate('supervisory', U.chief, ['read', 'assign'], { scope: { resourceIds: [NEW_CASE] } })
+  })
+
+  it('refuses an officer who holds no case:assign authority, and writes nothing', async () => {
+    const before = await live()
+    await expect(assignAs(U.president, U.steward)).rejects.toThrow()
+    expect(await live()).toBe(before)
+    expect((await access(U.steward, NEW_CASE)).canViewCase).toBe(false)
+  })
+
+  it('refuses an assignee who is not an eligible representative', async () => {
+    await expect(assignAs(U.chief, U.member)).rejects.toThrow()
+    expect((await access(U.member, NEW_CASE)).isPrimaryOwner).toBe(false)
+  })
+
+  it('a first assignment makes the assignee the primary representative', async () => {
+    expect(await assignAs(U.chief, U.steward)).toEqual({ previousUserId: null })
+    expect(await access(U.steward, NEW_CASE)).toMatchObject({ canViewCase: true, isPrimaryOwner: true })
+  })
+
+  it('assigning the same person again changes nothing', async () => {
+    const before = await live()
+    expect(await assignAs(U.chief, U.steward)).toEqual({ previousUserId: U.steward })
+    expect(await live()).toBe(before)
+  })
+
+  it('a reassignment ends the outgoing representative and starts the incoming one in one step', async () => {
+    expect(await assignAs(U.chief, 'user_steward_c')).toEqual({ previousUserId: U.steward })
+    expect((await access(U.steward, NEW_CASE)).canViewCase).toBe(false)
+    expect(await access('user_steward_c', NEW_CASE)).toMatchObject({ canViewCase: true, isPrimaryOwner: true })
+  })
+
+  it('a refused reassignment leaves the current representative in place', async () => {
+    await expect(assignAs(U.president, U.steward)).rejects.toThrow()
+    expect((await access('user_steward_c', NEW_CASE)).isPrimaryOwner).toBe(true)
+  })
+
+  it('every assignment is audited in the canonical chain in the same transaction', async () => {
     const orphan = await k.asAdmin(() => pg.query<{ n: string }>(
       `SELECT count(*)::text n FROM ue_authority_events e WHERE NOT EXISTS (SELECT 1 FROM public.audit_logs a WHERE (a.details -> 'authorityEventIds') ? e.id::text)`,
     ))

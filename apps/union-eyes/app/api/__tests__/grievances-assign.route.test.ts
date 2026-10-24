@@ -15,6 +15,7 @@ const m = vi.hoisted(() => ({
   logger: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() },
   requestAssignmentConvergence: vi.fn(),
   processAssignmentConvergence: vi.fn(),
+  assignPrimaryRepresentative: vi.fn(),
 }));
 
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
@@ -25,6 +26,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
   withSystemContext: m.withSystemContext,
 }));
+vi.mock('@/lib/services/case-access-service', () => ({ assignPrimaryRepresentative: m.assignPrimaryRepresentative }));
 vi.mock('@/lib/services/steward-assignment', () => ({ assignSteward: m.assignSteward }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('@/lib/audit-logger', () => ({
@@ -65,6 +67,7 @@ describe('grievances/[id]/assign route', () => {
     // with the assignment update.
     m.withRLSContext.mockImplementation(async (fn: any) => fn(m.tx));
     m.withSystemContext.mockImplementation(async (fn: any) => fn());
+    m.assignPrimaryRepresentative.mockResolvedValue({ previousUserId: 'officer-A' });
     m.requestAssignmentConvergence.mockResolvedValue({ taskId: 'task-1' });
     m.processAssignmentConvergence.mockResolvedValue({
       taskId: 'task-1',
@@ -136,10 +139,11 @@ describe('grievances/[id]/assign route', () => {
     expect(m.withSystemContext).toHaveBeenCalledTimes(1);
   });
 
-  it('reads the OUTGOING representative from the pre-update grievance row (proves continuity, not a stale snapshot)', async () => {
+  it('takes the OUTGOING representative from the kernel, not from the legacy column (a stale legacy value is ignored)', async () => {
     m.db.select = vi.fn(() => ({
-      from: vi.fn(() => ({ where: vi.fn(async () => [{ id: 'g1', unionRepId: 'officer-OLD' }]) })),
+      from: vi.fn(() => ({ where: vi.fn(async () => [{ id: 'g1', unionRepId: 'stale-legacy-value' }]) })),
     }));
+    m.assignPrimaryRepresentative.mockResolvedValue({ previousUserId: 'officer-OLD' });
     const { PATCH } = await loadRoute();
     await PATCH(assignRequest());
 
@@ -170,9 +174,7 @@ describe('grievances/[id]/assign route', () => {
   });
 
   it('handles a grievance with no prior representative (previousAssigneeId is null)', async () => {
-    m.db.select = vi.fn(() => ({
-      from: vi.fn(() => ({ where: vi.fn(async () => [{ id: 'g1', unionRepId: null }]) })),
-    }));
+    m.assignPrimaryRepresentative.mockResolvedValue({ previousUserId: null });
     const { PATCH } = await loadRoute();
     const response = await PATCH(assignRequest());
     expect(response.status).toBe(200);
@@ -180,5 +182,24 @@ describe('grievances/[id]/assign route', () => {
       m.tx,
       expect.objectContaining({ previousAssigneeId: null, newAssigneeId: NEW_STEWARD }),
     );
+  });
+
+  it('asks the kernel to assign as the authenticated officer, inside the same transaction', async () => {
+    const { PATCH } = await loadRoute();
+    await PATCH(assignRequest());
+    expect(m.assignPrimaryRepresentative).toHaveBeenCalledWith(m.tx, {
+      organizationId: 'org_1', grievanceId: 'g1', issuerUserId: 'u1', assigneeUserId: NEW_STEWARD,
+    });
+  });
+
+  it('is refused with 403 when the kernel does not authorize it, and nothing is written', async () => {
+    const { AuthorityStoreError } = await import('@/lib/authority/store/executor');
+    m.assignPrimaryRepresentative.mockRejectedValueOnce(new AuthorityStoreError('DENIED', 'NO_SOURCE_OF_AUTHORITY'));
+    const { PATCH } = await loadRoute();
+    const response = await PATCH(assignRequest());
+    expect(response.status).toBe(403);
+    expect(m.tx.update).not.toHaveBeenCalled();
+    expect(m.requestAssignmentConvergence).not.toHaveBeenCalled();
+    expect(m.processAssignmentConvergence).not.toHaveBeenCalled();
   });
 });

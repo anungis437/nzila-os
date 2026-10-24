@@ -14,7 +14,7 @@ import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context'
 import { grievances } from '@/db/schema/domains/claims/grievances'
 import type { CaseAccessRole } from '@/db/schema/domains/claims/grievance-lifecycle'
 import { AuthorityStoreError } from '@/lib/authority/store/executor'
-import { assignCase, revokeCaseAssignment } from '@/lib/authority/store/lifecycle'
+import { assignCase, reassignCase, revokeCaseAssignment } from '@/lib/authority/store/lifecycle'
 import { decideCase, drizzleExecutor, kernelDeps } from '@/lib/authority/store/route-adapter'
 import type { Action } from '@/lib/authority/ontology'
 
@@ -334,4 +334,40 @@ export async function revokeCaseAccessGuarded(params: {
     if (mapped) return mapped
     throw error
   }
+}
+
+/**
+ * Makes `assigneeUserId` the case's primary representative through the kernel: a first assignment is `assignCase`, a
+ * change is `reassignCase` (the outgoing relationships end and the incoming one starts in the same transaction), and
+ * every step needs the issuer's `case:assign` authority under an adopted issuance rule. Returns the previous primary
+ * representative, if any. Throws `AuthorityStoreError` when the kernel refuses; nothing is written in that case.
+ */
+export async function assignPrimaryRepresentative(
+  tx: RLSTx,
+  params: { organizationId: string; grievanceId: string; issuerUserId: string; assigneeUserId: string },
+): Promise<{ previousUserId: string | null }> {
+  const exec = drizzleExecutor(tx)
+  const current = (await listCaseCollaborators(tx, params.organizationId, params.grievanceId)).filter((c) => c.relation !== 'collaborator')
+  const holders = [...new Set(current.map((c) => c.userId))]
+  if (holders.length === 1 && holders[0] === params.assigneeUserId) return { previousUserId: params.assigneeUserId }
+  const effectiveAt = new Date(Date.now() - 1000)
+  const permissions = ['read', 'read_internal', 'comment', 'write']
+  if (holders.length === 0) {
+    await assignCase(exec, kernelDeps, {
+      organizationId: params.organizationId, issuerUserId: params.issuerUserId, caseId: params.grievanceId,
+      assigneeUserId: params.assigneeUserId, permissions, effectiveAt,
+    })
+    return { previousUserId: null }
+  }
+  const [first, ...others] = holders
+  await reassignCase(exec, kernelDeps, {
+    organizationId: params.organizationId, issuerUserId: params.issuerUserId, caseId: params.grievanceId,
+    outgoingUserId: first, incomingUserId: params.assigneeUserId, permissions, effectiveAt,
+  })
+  for (const other of others.filter((u) => u !== params.assigneeUserId)) {
+    for (const rel of current.filter((c) => c.userId === other)) {
+      await revokeCaseAssignment(exec, kernelDeps, { organizationId: params.organizationId, issuerUserId: params.issuerUserId, caseId: params.grievanceId, relationshipId: rel.id })
+    }
+  }
+  return { previousUserId: first }
 }

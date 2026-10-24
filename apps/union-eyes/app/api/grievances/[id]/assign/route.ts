@@ -16,6 +16,8 @@ import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { assignSteward } from "@/lib/services/steward-assignment";
+import { assignPrimaryRepresentative } from "@/lib/services/case-access-service";
+import { AuthorityStoreError } from "@/lib/authority/store/executor";
 import { requestAssignmentConvergence, processAssignmentConvergence } from "@/lib/deadline-engine";
 import {
   ErrorCode,
@@ -62,13 +64,24 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     }
 
     const assignment = await assignSteward(organizationId, params.id, parsed.data.stewardId);
-    const previousUnionRepId = grievance.unionRepId ?? null;
     const continuityCorrelationId = randomUUID();
 
     // Update grievance assigned rep AND record a durable convergence task in
     // the SAME transaction, so the assignment can never commit without a
     // retryable record that reminders still need to converge to it.
-    const { taskId: convergenceTaskId } = await withRLSContext(async (tx) => {
+    const { taskId: convergenceTaskId, previousUnionRepId } = await withRLSContext(async (tx) => {
+      // The kernel decides: the officer needs case:assign authority under an adopted rule and the assignee must be an
+      // eligible, conflict-free representative. A refusal throws before anything below is written.
+      const { previousUserId } = await assignPrimaryRepresentative(tx, {
+        organizationId,
+        grievanceId: params.id!,
+        issuerUserId: userId,
+        assigneeUserId: parsed.data.stewardId,
+      });
+      const previousUnionRepId = previousUserId;
+
+      // The legacy primary-representative column is kept as a compatibility mirror for readers not yet migrated to the
+      // kernel. It is never an authority source.
       await tx
         .update(grievances)
         .set({ unionRepId: parsed.data.stewardId, updatedAt: new Date() })
@@ -92,13 +105,14 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
         details: { stewardId: parsed.data.stewardId, previousUnionRepId },
       });
 
-      return requestAssignmentConvergence(tx, {
+      const { taskId } = await requestAssignmentConvergence(tx, {
         organizationId,
-        grievanceId: params.id,
+        grievanceId: params.id!,
         correlationId: continuityCorrelationId,
         previousAssigneeId: previousUnionRepId,
         newAssigneeId: parsed.data.stewardId,
       });
+      return { taskId, previousUnionRepId };
     });
 
     // The insert above committed under the tenant role. The follow-up read and
@@ -118,7 +132,10 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_ASSIGNED' }));
 
     return standardSuccessResponse(assignment);
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof AuthorityStoreError && (error.code === 'DENIED' || error.code === 'PRECONDITION' || error.code === 'NOT_FOUND')) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "The authority kernel did not authorize this assignment");
+    }
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to assign representative");
   }
 });
