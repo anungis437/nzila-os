@@ -23,7 +23,10 @@ describe('case-access grant terms', () => {
   it('maps a role and scope to kernel permissions without exceeding the role', () => {
     expect(collaboratorPermissions({ accessRole: 'read_only' })).toEqual(['read', 'read_internal']);
     expect(collaboratorPermissions({ accessRole: 'reviewer' })).toEqual(['read', 'read_internal', 'comment']);
-    expect(collaboratorPermissions({ accessRole: 'reviewer', canEditCaseNotes: true })).not.toContain('write');
-    expect(collaboratorPermissions({ accessRole: 'secondary_lro', canEditCaseNotes: true, canViewPrivateDocuments: true })).toEqual(['read', 'read_internal', 'comment', 'write', 'read_third_party_restricted']);
+    expect(collaboratorPermissions({ accessRole: 'reviewer', canEditCaseNotes: true })).not.toContain('write_notes');
+    expect(collaboratorPermissions({ accessRole: 'secondary_lro', canEditCaseNotes: true, canViewPrivateDocuments: true })).toEqual(['read', 'read_internal', 'comment', 'write_notes', 'read_third_party_restricted']);
+    // Each editing capability is its own permission; naming one grants only that one.
+    expect(collaboratorPermissions({ accessRole: 'secondary_lro', canUploadDocuments: true })).toEqual(['read', 'read_internal', 'comment', 'upload_evidence']);
+    expect(collaboratorPermissions({ accessRole: 'secondary_lro', canDraftActions: true, canModifyDocuments: true })).toEqual(['read', 'read_internal', 'comment', 'draft_action', 'modify_document']);
   });
 });

@@ -52,6 +52,9 @@ export const NON_DELEGABLE_ACTIONS: readonly string[] = [
   'finance:reconcile',
   'finance:audit',
   'case:read_privileged',
+  'case:disclose_to_member',
+  'case:export_sealed_evidence',
+  'case:close',
   'review:monitor',
   'review:access_evidence',
   'review:issue_finding',
@@ -377,7 +380,7 @@ export interface IssuanceRuleTemplate {
 }
 
 export const DEFAULT_ISSUANCE_TEMPLATES: readonly IssuanceRuleTemplate[] = [
-  { domain: 'case_assignment', operation: 'issue', issuerCapacities: ['steward', 'chief_steward', 'officer'], allowedPowers: ['read', 'read_internal', 'comment', 'write'], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Authorized case owner or designated supervisor; the kernel additionally requires case:assign and conflict checks. read_internal is the explicit grant of the union\'s internal file.' },
+  { domain: 'case_assignment', operation: 'issue', issuerCapacities: ['steward', 'chief_steward', 'officer'], allowedPowers: ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document', 'read_third_party_restricted'], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Authorized case owner or designated supervisor; the kernel additionally requires case:assign and conflict checks. read_internal is the explicit grant of the union\'s internal file; each editing capability and third-party-restricted access is named separately, and disclosure, sealed export and closing are never grantable to a collaborator.' },
   { domain: 'supervisory', operation: 'issue', issuerCapacities: ['officer', 'executive'], allowedPowers: ['read', 'assign', 'monitor'], maxTermDays: 365, requiresAcceptance: true, requiredIndependentApprovals: 1, rationale: 'Authorized institutional officer; defined jurisdiction, term and powers.' },
   { domain: 'executive_office', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: ['approve'], maxTermDays: 1095, requiresAcceptance: true, requiredIndependentApprovals: 1, rationale: 'Authorized executive body; office terms are bounded.' },
   { domain: 'delegation', operation: 'issue', issuerCapacities: ['executive'], issuerMandateKind: 'executive_office', issuerMandatePower: 'approve', allowedPowers: ['case:read', 'case:comment', 'governance:approve'], maxTermDays: 90, requiresAcceptance: true, requiredIndependentApprovals: 0, rationale: 'Office holder; limited, expiring, action-specific.' },

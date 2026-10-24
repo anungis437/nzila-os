@@ -9,6 +9,7 @@ import type { PGlite } from '@electric-sql/pglite'
 import { newUuid, ORG, ORG_B, seedMembership, U } from '../../db/__tests__/authority-kernel-harness'
 import { freshDb, kit, minutesAgo, daysAhead } from '../../db/__tests__/authority-kernel-testkit'
 import { assignCase } from '../authority/store/lifecycle'
+import { insertRelationship } from '../authority/store/mutations'
 
 const ctx = vi.hoisted(() => ({ pg: undefined as unknown, user: 'none' }))
 
@@ -58,7 +59,7 @@ beforeAll(async () => {
   })
   await k.adoptDefaultRules()
   await k.grantMandate('supervisory', U.officer, ['read', 'assign'], { scope: { resourceIds: [CASE, OTHER_CASE] } })
-  await k.as(U.officer)((t) => assignCase(t, k.deps, { organizationId: ORG, issuerUserId: U.officer, caseId: CASE, assigneeUserId: U.steward, permissions: ['read', 'comment', 'write'], effectiveAt: minutesAgo() }))
+  await k.as(U.officer)((t) => assignCase(t, k.deps, { organizationId: ORG, issuerUserId: U.officer, caseId: CASE, assigneeUserId: U.steward, permissions: ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document'], effectiveAt: minutesAgo() }))
 })
 afterAll(async () => { await pg?.close() })
 
@@ -134,6 +135,71 @@ describe('collaborator grants are governed case assignments', () => {
       `SELECT count(*)::text n FROM ue_authority_events e WHERE NOT EXISTS (SELECT 1 FROM public.audit_logs a WHERE (a.details -> 'authorityEventIds') ? e.id::text)`,
     ))
     expect(orphan.rows[0].n).toBe('0')
+  })
+})
+
+describe('capabilities are separate: no permission implies another', () => {
+  const GCASE = newUuid()
+  const decideCaseAction = (user: string, action: string, id = GCASE) =>
+    as(user, () => import('@/lib/db/with-rls-context').then((m) => m.withRLSContext({ organizationId: ORG }, async (tx) => {
+      const { decideCase } = await import('../authority/store/route-adapter')
+      return (await decideCase(tx as never, { userId: user, organizationId: ORG, caseId: id, action: action as never })).effect
+    })))
+  const grantTo = (grantee: string, over: Record<string, unknown>) =>
+    as(U.officer, () => grantCaseAccessGuarded({ organizationId: ORG, grievanceId: GCASE, userId: grantee, grantedBy: U.officer, accessRole: 'secondary_lro', expiresAt: daysAhead(5), ...over }))
+  const UPLOADER = 'user_uploader_only'
+  const EDITOR = 'user_all_editing'
+
+  beforeAll(async () => {
+    await k.asAdmin(async () => {
+      await seedMembership(pg, UPLOADER, ORG, 'steward')
+      await seedMembership(pg, EDITOR, ORG, 'steward')
+      await pg.query(`INSERT INTO public.grievances (id, organization_id, created_by) VALUES ($1,$2,$3)`, [GCASE, ORG, U.member])
+    })
+    await k.grantMandate('supervisory', U.officer, ['read', 'assign'], { scope: { resourceIds: [GCASE] } })
+    await k.as(U.officer)((t) => assignCase(t, k.deps, { organizationId: ORG, issuerUserId: U.officer, caseId: GCASE, assigneeUserId: U.steward, permissions: ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document'], effectiveAt: minutesAgo() }))
+  })
+
+  it('a grant that names only evidence upload allows exactly that', async () => {
+    expect(await grantTo(UPLOADER, { canUploadDocuments: true })).toMatchObject({ ok: true })
+    const a = await access(UPLOADER, GCASE)
+    expect(a).toMatchObject({ canViewCase: true, canUploadDocuments: true, canEditCaseNotes: false, canDraftActions: false, canModifyDocuments: false, canViewPrivateDocuments: false })
+    expect(await decideCaseAction(UPLOADER, 'case:upload_evidence')).toBe('allow')
+    for (const action of ['case:write_notes', 'case:draft_action', 'case:modify_document', 'case:disclose_to_member', 'case:close', 'case:export_sealed_evidence', 'case:assign', 'case:read_third_party_restricted']) {
+      expect(await decideCaseAction(UPLOADER, action), action).toBe('deny')
+    }
+  })
+
+  it('even a collaborator holding every editing permission cannot disclose, close or export sealed evidence', async () => {
+    expect(await grantTo(EDITOR, { canEditCaseNotes: true, canDraftActions: true, canUploadDocuments: true, canModifyDocuments: true, canViewPrivateDocuments: true })).toMatchObject({ ok: true })
+    for (const action of ['case:write_notes', 'case:draft_action', 'case:upload_evidence', 'case:modify_document', 'case:read_third_party_restricted']) {
+      expect(await decideCaseAction(EDITOR, action), action).toBe('allow')
+    }
+    for (const action of ['case:disclose_to_member', 'case:close', 'case:export_sealed_evidence', 'case:assign']) {
+      expect(await decideCaseAction(EDITOR, action), action).toBe('deny')
+    }
+    const a = await access(EDITOR, GCASE)
+    expect(a.canDiscloseToMember).toBe(false)
+    expect(a.ownerOnly).toEqual({ canReassignPrimary: false, canCloseCase: false, canRemovePrimaryAccess: false, canExportSealedEvidence: false })
+  })
+
+  it('the primary representative holds the primary-only capabilities and the editing ones', async () => {
+    for (const action of ['case:disclose_to_member', 'case:close', 'case:export_sealed_evidence', 'case:write_notes', 'case:modify_document']) {
+      expect(await decideCaseAction(U.steward, action), action).toBe('allow')
+    }
+    expect((await access(U.steward, GCASE)).ownerOnly).toMatchObject({ canCloseCase: true, canExportSealedEvidence: true })
+  })
+
+  it('the retired generic write permission and the primary-only names cannot be stored on a collaborator grant', async () => {
+    const rule = (await k.asAdmin(() => pg.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = 'issue' AND status = 'active'`, [ORG]))).rows[0].id
+    const store = (permissions: string[]) => k.as(U.officer)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: 'user_steward_c', resourceType: 'case', resourceId: GCASE, relation: 'collaborator', permissions, origin: 'explicit', grantedBy: U.officer, issuanceRuleId: rule, effectiveAt: minutesAgo() }))
+    for (const bad of [['read', 'write'], ['read', 'close'], ['read', 'disclose_to_member'], ['read', 'export_sealed_evidence']]) {
+      await expect(store(bad), bad.join()).rejects.toThrow(/POWERS_EXCEED_RULE/)
+    }
+  })
+
+  it('the service refuses to widen scope: an editing flag on a non-LRO role is rejected', async () => {
+    expect(await grantTo('user_steward_c', { accessRole: 'reviewer', canModifyDocuments: true })).toMatchObject({ ok: false, code: 'SCOPE_EXCEEDS_ROLE' })
   })
 })
 

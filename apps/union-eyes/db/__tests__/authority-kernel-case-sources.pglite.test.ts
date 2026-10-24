@@ -23,7 +23,7 @@ const decide = (who: string, action: Action = 'case:read_internal', id = CASE, o
   k.as(who, org)((t) => enforceAuthority(t, deps, { principalUserId: who, organizationId: org, action, resource: { type: 'case', id, organizationId: org } }, { authenticated: true }))
 const codes = (d: { reasons: readonly { code: string }[] }) => d.reasons.map((r) => r.code)
 const assign = (issuer: string, assignee: string, id = CASE, org = ORG, extra: Record<string, unknown> = {}) =>
-  k.as(issuer, org)((t) => assignCase(t, k.deps, { organizationId: org, issuerUserId: issuer, caseId: id, assigneeUserId: assignee, permissions: ['read', 'comment', 'write'], effectiveAt: minutesAgo(), ...extra }))
+  k.as(issuer, org)((t) => assignCase(t, k.deps, { organizationId: org, issuerUserId: issuer, caseId: id, assigneeUserId: assignee, permissions: ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document'], effectiveAt: minutesAgo(), ...extra }))
 
 beforeAll(async () => {
   db = await freshDb()
@@ -44,7 +44,7 @@ describe('explicit assignment is the only way to become a case owner', () => {
     const d = await decide(U.steward, 'case:read_internal')
     expect(d.effect).toBe('allow')
     expect(d.authority[0].kind).toBe('relationship')
-    expect((await decide(U.steward, 'case:write')).effect).toBe('allow')
+    expect((await decide(U.steward, 'case:write_notes')).effect).toBe('allow')
   })
 
   it('rank, role title and the legacy union_rep_id column grant nothing', async () => {

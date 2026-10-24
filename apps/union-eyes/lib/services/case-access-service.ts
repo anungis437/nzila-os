@@ -23,6 +23,7 @@ export interface CaseAccessScopeInput {
   canUploadDocuments?: boolean
   canEditCaseNotes?: boolean
   canDraftActions?: boolean
+  canModifyDocuments?: boolean
   canViewPrivateDocuments?: boolean
 }
 
@@ -45,6 +46,8 @@ export interface EffectiveCaseAccess {
   canUploadDocuments: boolean
   canEditCaseNotes: boolean
   canDraftActions: boolean
+  canModifyDocuments: boolean
+  canDiscloseToMember: boolean
   canViewPrivateDocuments: boolean
   ownerOnly: {
     canReassignPrimary: boolean
@@ -82,6 +85,7 @@ export interface CaseCollaborator {
   canUploadDocuments: boolean
   canEditCaseNotes: boolean
   canDraftActions: boolean
+  canModifyDocuments: boolean
   canViewPrivateDocuments: boolean
   status: 'active' | 'revoked'
   grantedBy: string | null
@@ -99,6 +103,8 @@ const NO_ACCESS: EffectiveCaseAccess = {
   canUploadDocuments: false,
   canEditCaseNotes: false,
   canDraftActions: false,
+  canModifyDocuments: false,
+  canDiscloseToMember: false,
   canViewPrivateDocuments: false,
   ownerOnly: { canReassignPrimary: false, canCloseCase: false, canRemovePrimaryAccess: false, canExportSealedEvidence: false },
 }
@@ -126,8 +132,10 @@ async function liveRelationships(tx: RLSTx, organizationId: string, caseId: stri
 const permissionList = (value: unknown): string[] =>
   Array.isArray(value) ? value.map(String) : typeof value === 'string' ? value.replace(/^\{|\}$/g, '').split(',').filter(Boolean) : []
 
+const EDITING_PERMISSIONS = ['write_notes', 'draft_action', 'upload_evidence', 'modify_document'] as const
+
 function roleFor(permissions: readonly string[]): CaseAccessRole {
-  if (permissions.includes('write')) return 'secondary_lro'
+  if (EDITING_PERMISSIONS.some((p) => permissions.includes(p))) return 'secondary_lro'
   return permissions.includes('comment') ? 'reviewer' : 'read_only'
 }
 
@@ -140,21 +148,32 @@ export async function kernelCaseAccess(
     (await decideCase(tx, { userId: params.userId, organizationId: params.organizationId, caseId: params.grievanceId, action })).effect === 'allow'
 
   if (!(await allowed('case:read_internal'))) return NO_ACCESS
-  const canComment = await allowed('case:comment')
-  const canWrite = await allowed('case:write')
-  const canRestricted = await allowed('case:read_third_party_restricted')
-  const canAssign = await allowed('case:assign')
+  // Each capability is its own kernel decision; none is inferred from another.
+  const can = {
+    comment: await allowed('case:comment'),
+    notes: await allowed('case:write_notes'),
+    draft: await allowed('case:draft_action'),
+    upload: await allowed('case:upload_evidence'),
+    modify: await allowed('case:modify_document'),
+    disclose: await allowed('case:disclose_to_member'),
+    close: await allowed('case:close'),
+    sealed: await allowed('case:export_sealed_evidence'),
+    restricted: await allowed('case:read_third_party_restricted'),
+    assign: await allowed('case:assign'),
+  }
   const mine = await liveRelationships(tx, params.organizationId, params.grievanceId, params.userId)
   const isPrimaryOwner = mine.some((r) => r.relation === 'owner' || r.relation === 'assignee')
   const collaborator = mine.find((r) => r.relation === 'collaborator')
   const common = {
     canViewCase: true,
-    canManageAssignments: canAssign,
-    canComment,
-    canUploadDocuments: canWrite,
-    canEditCaseNotes: canWrite,
-    canDraftActions: canWrite,
-    canViewPrivateDocuments: canRestricted,
+    canManageAssignments: can.assign,
+    canComment: can.comment,
+    canUploadDocuments: can.upload,
+    canEditCaseNotes: can.notes,
+    canDraftActions: can.draft,
+    canModifyDocuments: can.modify,
+    canDiscloseToMember: can.disclose,
+    canViewPrivateDocuments: can.restricted,
   }
   if (isPrimaryOwner) {
     return {
@@ -162,7 +181,7 @@ export async function kernelCaseAccess(
       isPrimaryOwner: true,
       isSecondaryCollaborator: false,
       accessRole: 'primary_owner',
-      ownerOnly: { canReassignPrimary: canAssign, canCloseCase: true, canRemovePrimaryAccess: canAssign, canExportSealedEvidence: true },
+      ownerOnly: { canReassignPrimary: can.assign, canCloseCase: can.close, canRemovePrimaryAccess: can.assign, canExportSealedEvidence: can.sealed },
     }
   }
   return {
@@ -170,7 +189,7 @@ export async function kernelCaseAccess(
     isPrimaryOwner: false,
     isSecondaryCollaborator: Boolean(collaborator),
     accessRole: collaborator ? roleFor(permissionList(collaborator.permissions)) : null,
-    ownerOnly: { canReassignPrimary: false, canCloseCase: false, canRemovePrimaryAccess: false, canExportSealedEvidence: false },
+    ownerOnly: { canReassignPrimary: false, canCloseCase: can.close, canRemovePrimaryAccess: false, canExportSealedEvidence: can.sealed },
   }
 }
 
@@ -196,9 +215,10 @@ function toCollaborator(r: Row): CaseCollaborator {
     accessRole: primary ? 'primary_owner' : roleFor(permissions),
     permissions,
     canComment: primary || permissions.includes('comment'),
-    canUploadDocuments: primary || permissions.includes('write'),
-    canEditCaseNotes: primary || permissions.includes('write'),
-    canDraftActions: primary || permissions.includes('write'),
+    canUploadDocuments: primary || permissions.includes('upload_evidence'),
+    canEditCaseNotes: primary || permissions.includes('write_notes'),
+    canDraftActions: primary || permissions.includes('draft_action'),
+    canModifyDocuments: primary || permissions.includes('modify_document'),
     canViewPrivateDocuments: primary || permissions.includes('read_third_party_restricted'),
     status: 'active',
     grantedBy: (r.granted_by as string | null) ?? null,
@@ -219,10 +239,10 @@ export async function assignedCaseRepresentativeIds(organizationId: string, case
 
 /** Validates grant terms independent of who is asking. Pure so the policy can be exercised without a database. */
 export function validateCaseAccessGrantTerms(
-  input: Pick<GrantCaseAccessInput, 'accessRole' | 'expiresAt' | 'canViewPrivateDocuments' | 'canUploadDocuments' | 'canEditCaseNotes' | 'canDraftActions'>,
+  input: Pick<GrantCaseAccessInput, 'accessRole' | 'expiresAt' | 'canViewPrivateDocuments' | 'canUploadDocuments' | 'canEditCaseNotes' | 'canDraftActions' | 'canModifyDocuments'>,
   now: Date = new Date(),
 ): CaseAccessMutationFailure | null {
-  if (input.accessRole !== 'secondary_lro' && (input.canEditCaseNotes || input.canDraftActions || input.canUploadDocuments)) {
+  if (input.accessRole !== 'secondary_lro' && (input.canEditCaseNotes || input.canDraftActions || input.canUploadDocuments || input.canModifyDocuments)) {
     return { ok: false, status: 400, code: 'SCOPE_EXCEEDS_ROLE', message: 'Only a secondary LRO grant may carry editing, drafting or upload rights.' }
   }
   const requiresExpiry = input.accessRole !== 'secondary_lro' || input.canViewPrivateDocuments === true
@@ -240,11 +260,17 @@ export function validateCaseAccessGrantTerms(
 
 /** The kernel permissions a collaborator grant carries; the kernel intersects them with its own ceiling. */
 export function collaboratorPermissions(
-  input: Pick<GrantCaseAccessInput, 'accessRole' | 'canComment' | 'canUploadDocuments' | 'canEditCaseNotes' | 'canDraftActions' | 'canViewPrivateDocuments'>,
+  input: Pick<GrantCaseAccessInput, 'accessRole' | 'canComment' | 'canUploadDocuments' | 'canEditCaseNotes' | 'canDraftActions' | 'canModifyDocuments' | 'canViewPrivateDocuments'>,
 ): string[] {
   const permissions = ['read', 'read_internal']
   if (input.accessRole !== 'read_only' && input.canComment !== false) permissions.push('comment')
-  if (input.accessRole === 'secondary_lro' && (input.canEditCaseNotes || input.canDraftActions || input.canUploadDocuments)) permissions.push('write')
+  // Each editing capability is granted only when asked for by name, and only on a secondary LRO grant.
+  if (input.accessRole === 'secondary_lro') {
+    if (input.canEditCaseNotes) permissions.push('write_notes')
+    if (input.canDraftActions) permissions.push('draft_action')
+    if (input.canUploadDocuments) permissions.push('upload_evidence')
+    if (input.canModifyDocuments) permissions.push('modify_document')
+  }
   if (input.canViewPrivateDocuments) permissions.push('read_third_party_restricted')
   return permissions
 }
@@ -351,7 +377,7 @@ export async function assignPrimaryRepresentative(
   const holders = [...new Set(current.map((c) => c.userId))]
   if (holders.length === 1 && holders[0] === params.assigneeUserId) return { previousUserId: params.assigneeUserId }
   const effectiveAt = new Date(Date.now() - 1000)
-  const permissions = ['read', 'read_internal', 'comment', 'write']
+  const permissions = ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document']
   if (holders.length === 0) {
     await assignCase(exec, kernelDeps, {
       organizationId: params.organizationId, issuerUserId: params.issuerUserId, caseId: params.grievanceId,

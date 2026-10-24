@@ -80,7 +80,7 @@ describe('case loader: relationship, not rank', () => {
   it('an explicit collaborator row grants exactly the flags it carries', async () => {
     expect((await readCase(U.steward)).effect).toBe('allow')
     expect((await decide(U.steward, 'case:comment', 'case', CASE)).effect).toBe('allow')
-    expect((await decide(U.steward, 'case:write', 'case', CASE)).effect).toBe('deny')
+    expect((await decide(U.steward, 'case:write_notes', 'case', CASE)).effect).toBe('deny')
     expect((await decide(U.steward, 'case:assign', 'case', CASE)).effect).toBe('deny')
   })
 
@@ -101,7 +101,7 @@ describe('case loader: relationship, not rank', () => {
   it('the pre-kernel collaborator table is inert: a row there grants nothing, whatever its flags', async () => {
     await k.asAdmin(() => db.query(`INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by, can_comment, can_view_private_documents, can_edit_case_notes) VALUES ($1,$2,$3,$4,true,true,true)`, [ORG, CASE, 'user_legacy_only', U.chief]))
     await k.asAdmin(() => seedMembership(db, 'user_legacy_only', ORG, 'steward'))
-    for (const action of ['case:read', 'case:comment', 'case:write', 'case:read_internal'] as Action[]) {
+    for (const action of ['case:read', 'case:comment', 'case:write_notes', 'case:read_internal'] as Action[]) {
       expect((await decide('user_legacy_only', action, 'case', CASE)).effect, action).toBe('deny')
     }
   })

@@ -49,14 +49,20 @@ const HANDLER_ACTIONS: readonly Action[] = [
   'case:read',
   'case:read_internal',
   'case:comment',
-  'case:write',
+  'case:write_notes',
+  'case:draft_action',
+  'case:upload_evidence',
+  'case:modify_document',
   'case:transition',
 ]
 const MEMBER_ACTIONS: readonly Action[] = ['case:read', 'case:comment']
 // Third-party restricted records are narrower than the internal file: only a primary owner or assignee reaches them
 // by default; a collaborator needs the permission granted explicitly and by name, and a supervisory mandate needs the
 // power named. Role, label or seniority never imply it.
-const PRIMARY_HANDLER_ACTIONS: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted']
+// Disclosing to a member, exporting sealed evidence and closing the case belong to the primary handler alone: a
+// collaborator grant can never carry them, whatever permission names it lists.
+const PRIMARY_ONLY_ACTIONS: readonly Action[] = ['case:disclose_to_member', 'case:export_sealed_evidence', 'case:close']
+const PRIMARY_HANDLER_ACTIONS: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted', ...PRIMARY_ONLY_ACTIONS]
 const COLLABORATOR_CEILING: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted']
 
 interface Candidate {

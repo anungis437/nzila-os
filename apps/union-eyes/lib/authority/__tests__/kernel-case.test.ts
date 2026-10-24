@@ -194,7 +194,7 @@ describe('case policy — relationships', () => {
 
   it('an assignee may write and transition but not assign', () => {
     const f = facts(U.steward, ['steward'], { relationships: [relationship()] })
-    for (const a of ['case:write', 'case:transition', 'case:comment'] as const) {
+    for (const a of ['case:write_notes', 'case:transition', 'case:comment'] as const) {
       expect(decide(request(U.steward, a, ref('case', CASE_ID)), f, caseFacts(), NOW).effect).toBe('allow')
     }
     expect(decide(request(U.steward, 'case:assign', ref('case', CASE_ID)), f, caseFacts(), NOW).effect).toBe('deny')
@@ -204,7 +204,7 @@ describe('case policy — relationships', () => {
     const grant = relationship({ relation: 'collaborator', origin: 'explicit', grantedBy: U.chief, permissions: ['read'] })
     const f = facts(U.steward, ['steward'], { relationships: [grant] })
     expect(decide(readCase(U.steward), f, caseFacts(), NOW).effect).toBe('allow')
-    expect(decide(request(U.steward, 'case:write', ref('case', CASE_ID)), f, caseFacts(), NOW).effect).toBe('deny')
+    expect(decide(request(U.steward, 'case:write_notes', ref('case', CASE_ID)), f, caseFacts(), NOW).effect).toBe('deny')
     const selfGrant = relationship({ relation: 'collaborator', origin: 'explicit', grantedBy: U.steward, permissions: ['read'] })
     expect(codes(decide(readCase(U.steward), facts(U.steward, ['steward'], { relationships: [selfGrant] }), caseFacts(), NOW))).toContain('INSTRUMENT_INVALID')
   })
@@ -390,7 +390,7 @@ describe('case policy — emergency access (explicit, justified, time-boxed, rea
     ['self-approval', { approvedBy: U.chief }],
     ['a window over 24 hours', { effectiveAt: ago(HOUR), expiresAt: ahead(25 * HOUR) }],
     ['no named resource', { scope: {} }],
-    ['write power', { powers: ['read', 'write'] }],
+    ['write power', { powers: ['read', 'write_notes'] }],
     ['expiry', { expiresAt: ago(1) }],
   ])('is void with %s', (_n, over) => {
     expect(decide(readCase(U.chief), f(over), caseFacts(), NOW).effect).toBe('deny')
@@ -406,7 +406,7 @@ describe('case policy — emergency access (explicit, justified, time-boxed, rea
   })
 
   it('cannot write even if requested', () => {
-    expect(decide(request(U.chief, 'case:write', ref('case', CASE_ID)), f(), caseFacts(), NOW).effect).toBe('deny')
+    expect(decide(request(U.chief, 'case:write_notes', ref('case', CASE_ID)), f(), caseFacts(), NOW).effect).toBe('deny')
   })
 })
 
@@ -429,7 +429,7 @@ describe('case policy — executive delegation', () => {
   it('refuses when the delegation is revoked, expired, or names other actions', () => {
     expect(decide(r(), base({ delegations: [{ ...dlg, status: 'revoked', revokedAt: ago(1) }] }), caseFacts(), NOW).effect).toBe('deny')
     expect(decide(r(), base({ delegations: [{ ...dlg, expiresAt: ago(1) }] }), caseFacts(), NOW).effect).toBe('deny')
-    expect(decide(r(), base({ delegations: [{ ...dlg, actions: ['case:write'] }] }), caseFacts(), NOW).effect).toBe('deny')
+    expect(decide(r(), base({ delegations: [{ ...dlg, actions: ['case:write_notes'] }] }), caseFacts(), NOW).effect).toBe('deny')
   })
 
   it('refuses when the delegator\'s office mandate has lapsed (office term ended)', () => {

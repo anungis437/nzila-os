@@ -17,7 +17,7 @@ describe('case:read_third_party_restricted — narrower than the internal file',
 
   it('the internal-file scope does not reach it: a collaborator needs the permission granted explicitly and by name', () => {
     const rel = (permissions: string[]) => relationship({ relation: 'collaborator', origin: 'explicit', grantedBy: U.chief, permissions })
-    for (const permissions of [['read'], ['read', 'read_internal'], ['read', 'read_internal', 'write']]) {
+    for (const permissions of [['read'], ['read', 'read_internal'], ['read', 'read_internal', 'write_notes']]) {
       const f = facts(U.steward, ['steward'], { relationships: [rel(permissions)] })
       expect(decide(askThirdParty(U.steward), f, caseFacts(), NOW).effect, permissions.join(',')).toBe('deny')
     }

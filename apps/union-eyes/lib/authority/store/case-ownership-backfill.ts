@@ -99,7 +99,7 @@ export async function executeOwnershipBackfill(
       issuerUserId: input.issuerUserId,
       caseId: c.caseId,
       assigneeUserId: c.assigneeUserId,
-      permissions: ['read', 'comment', 'write'],
+      permissions: ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document'],
       effectiveAt: input.effectiveAt,
       auditDetails: { source: 'legacy_owner_column_backfill', decisionReference: reference, planHash: plan.planHash },
     })

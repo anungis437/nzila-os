@@ -210,7 +210,7 @@ CREATE TABLE IF NOT EXISTS ue_authority_delegations (
   -- Financial duties, oversight powers and counsel material are never delegable.
   CONSTRAINT ue_authority_deleg_nondelegable_chk CHECK (NOT (actions && ARRAY[
     'finance:view', 'finance:prepare', 'finance:approve', 'finance:execute', 'finance:reconcile', 'finance:audit',
-    'case:read_privileged', 'review:monitor', 'review:access_evidence', 'review:issue_finding',
+    'case:read_privileged', 'case:disclose_to_member', 'case:export_sealed_evidence', 'case:close', 'review:monitor', 'review:access_evidence', 'review:issue_finding',
     'review:request_corrective_action', 'review:enforce', 'review:verify_remediation',
     'workaid:refer', 'workaid:receive_disclosure', 'workaid:read_counsel_material'
   ]::text[])),
