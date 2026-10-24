@@ -95,6 +95,79 @@ export interface Capability {
  */
 export const CAPABILITY_REGISTRY: readonly Capability[] = [
   // ------------------------------------------------------------------------
+  // Generated scaffold actions (UE-FINAL-CONVERGENCE-2026-10: 200 "accepted" → HTTP 501)
+  //
+  // These handlers read the request body and returned { status: 'accepted' } (and an empty list as a "status")
+  // without performing or recording any work. They are now honest 501s. Implementing each is tracked in
+  // docs/union-eyes/convergence/register/ue-convergence-register.json (UE-CONV-STUB-*). Anti-theatre rule R-9
+  // fails the build if the scaffold shape reappears.
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-ACTION-MEMBERS-MERGE-BULK-EXPORT',
+    title: 'Member merge, bulk and export actions',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/members/merge/route.ts', 'app/api/members/bulk/route.ts', 'app/api/members/export/route.ts', 'app/api/admin/members/export/route.ts'],
+    evidence: [
+      'each route.ts throws ApiError.notImplemented → HTTP 501 on both POST and the status GET',
+      'tooling/reality/anti-theatre-scan.ts — rule R-9 rejects the previous 200 { status: "accepted" } scaffold',
+    ],
+    targetWave: 5,
+    notes: 'Member export and merge are consequential (member PII, record integrity) and need kernel authorization, classification and audit before implementation.',
+  },
+  {
+    id: 'UE-ACTION-CLAIMS-BULK',
+    title: 'Bulk claim actions',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/claims/bulk/route.ts'],
+    evidence: ['app/api/claims/bulk/route.ts — throws ApiError.notImplemented → HTTP 501', 'rule R-9 in tooling/reality/anti-theatre-scan.ts'],
+    targetWave: 5,
+  },
+  {
+    id: 'UE-ACTION-CLC-REMITTANCE-SUBMIT-EXPORT',
+    title: 'CLC remittance submission and export',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'app/api/admin/clc/remittances/[id]/submit/route.ts',
+      'app/api/admin/clc/remittances/[id]/export/route.ts',
+      'app/api/admin/clc/remittances/export/route.ts',
+    ],
+    evidence: [
+      'each route.ts throws ApiError.notImplemented → HTTP 501',
+      'previously POST .../submit returned 200 { status: "accepted" } and submitted nothing to the CLC',
+    ],
+    targetWave: 5,
+    notes: 'Financial submission: requires a governed remittance approval record (see the finance source findings) and an external acknowledgement before it may report success.',
+  },
+  {
+    id: 'UE-ACTION-TAX-CRA-EXPORT',
+    title: 'CRA tax export',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/tax/cra/export/route.ts'],
+    evidence: ['app/api/tax/cra/export/route.ts — throws ApiError.notImplemented → HTTP 501', 'rule R-9 in tooling/reality/anti-theatre-scan.ts'],
+    targetWave: 5,
+  },
+  {
+    id: 'UE-ACTION-COMMUNICATIONS-EXPORTS',
+    title: 'Campaign, distribution-list and survey exports',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'app/api/communications/campaigns/[id]/analytics/export/route.ts',
+      'app/api/communications/distribution-lists/[id]/export/route.ts',
+      'app/api/communications/surveys/[surveyId]/export/route.ts',
+    ],
+    evidence: ['each route.ts throws ApiError.notImplemented → HTTP 501', 'rule R-9 in tooling/reality/anti-theatre-scan.ts'],
+    targetWave: 5,
+  },
+  {
+    id: 'UE-ACTION-ALERT-TEST-EXECUTION',
+    title: 'Alert test execution',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/admin/alerts/executions/test/route.ts'],
+    evidence: ['app/api/admin/alerts/executions/test/route.ts — throws ApiError.notImplemented → HTTP 501', 'rule R-9 in tooling/reality/anti-theatre-scan.ts'],
+    targetWave: 5,
+  },
+
+  // ------------------------------------------------------------------------
   // Cron endpoints (Wave 0 P0 fix: 200-no-op → HTTP 501)
   // ------------------------------------------------------------------------
   {

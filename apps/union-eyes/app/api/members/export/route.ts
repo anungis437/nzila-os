@@ -1,7 +1,7 @@
 /**
  * export action endpoint for organizationMembers
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,9 +14,8 @@ export const POST = withApi(
       description: 'Performs the export action.',
     },
   },
-  async ({ request }) => {
-    await request.json().catch(() => ({}));
-    return { action: 'export', status: 'accepted' };
+  async () => {
+    throw ApiError.notImplemented('Member export is not implemented: no export was produced.');
   },
 );
 
@@ -30,6 +29,6 @@ export const GET = withApi(
     },
   },
   async () => {
-    return [];
+    throw ApiError.notImplemented('Member export is not implemented: there is no export status to report.');
   },
 );

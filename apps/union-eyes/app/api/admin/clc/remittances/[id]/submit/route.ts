@@ -1,7 +1,7 @@
 /**
  * submit action endpoint for organizationMembers
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,9 +14,8 @@ export const POST = withApi(
       description: 'Performs the submit action.',
     },
   },
-  async ({ request }) => {
-    await request.json().catch(() => ({}));
-    return { action: 'submit', status: 'accepted' };
+  async () => {
+    throw ApiError.notImplemented('CLC remittance submission is not implemented: nothing was submitted to the CLC.');
   },
 );
 
@@ -30,7 +29,7 @@ export const GET = withApi(
     },
   },
   async () => {
-    return [];
+    throw ApiError.notImplemented('CLC remittance submission is not implemented: there is no submission status to report.');
   },
 );
 
