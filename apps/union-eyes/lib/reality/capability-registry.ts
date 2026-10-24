@@ -864,6 +864,21 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'The route only acknowledges reported facts. It makes no legal determination, persists nothing and dispatches no notification.',
   },
   {
+    id: 'UE-EMERGENCY-DECLARATION',
+    title: 'Emergency declaration, break-glass activation, recovery and preparedness reporting',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/emergency/activate/route.ts', 'app/api/emergency/recovery/route.ts', 'app/api/emergency/dashboard/route.ts'],
+    evidence: [
+      'app/api/emergency/{activate,recovery,dashboard}/route.ts — return HTTP 501 through lib/emergency/not-implemented.ts',
+      'app/api/__tests__/emergency-not-implemented.route.test.ts',
+    ],
+    targetWave: 9,
+    notes:
+      'The routes previously returned 200 with an invented declaration, an "activated" break-glass state, audit and notification ' +
+      'claims and fabricated preparedness and compliance figures, with nothing persisted. Emergency access in the authority kernel ' +
+      'requires explicit, time-bound, justified and audited grants; no emergency route may exist before that lifecycle does.',
+  },
+  {
     id: 'UE-GOV-INDEPENDENT-REVIEW',
     title: 'Independent governance review workflow (intake → finding → verified remediation)',
     state: 'NOT_IMPLEMENTED',

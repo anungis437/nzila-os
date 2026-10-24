@@ -691,6 +691,25 @@
       "retirement": { "disposition": "NONE" }
     },
     {
+      "id": "UE-CONV-K-008",
+      "domain": "controls",
+      "capability": "Route-coverage manifest and adoption ratchets",
+      "workstream": "K",
+      "canonicalOwner": "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
+      "sources": [{ "kind": "file", "ref": "apps/union-eyes/scripts/lib/route-coverage-scan.ts", "classification": "CANONICAL" }],
+      "defect": "No artifact recorded, for each of the 968 app/api routes, how it authenticates, what bounds its data, whether its writes are audited atomically or whether the authority kernel decides it. The manifest now does (textual classification, with one import hop followed for audit evidence), and three ratchets hold it: a mutating route with no authentication mechanism must be in a documented public allowlist (8 today, two of them, staging-proof and workbook/start, recorded for review because they write rows without a session); the route-level audit gap may not grow (baseline shrinks as routes convert); and the kernel-adoption backlog for case, claim, document and message mutations may not grow. The scan found the emergency routes returning 200 with an invented declaration, an activated break-glass state, audit and notification claims and fabricated preparedness and compliance figures, persisting nothing, with recovery callable by any authenticated user; activate, recovery and dashboard now return 501 (capability UE-EMERGENCY-DECLARATION). REMAINING: the audit-gap and kernel-adoption baselines are the open work list; the legacy documents API (flag-gated, role-based, used by several components) needs a retire-or-migrate decision; the manifest is a textual classification, not proof of authorization.",
+      "consumers": [],
+      "securityImplications": "Routes with no recorded authority basis, and routes that assert operational facts that are not true.",
+      "requiredImplementation": "Shrink apps/union-eyes baselines in docs/union-eyes/convergence/register/ue-route-coverage-baselines.json to zero by converting each listed route; regenerate the manifest with scripts/generate-route-manifest.ts.",
+      "evidence": [
+        { "type": "test", "ref": "apps/union-eyes/lib/__tests__/route-coverage-manifest.test.ts" },
+        { "type": "path", "ref": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json" },
+        { "type": "test", "ref": "apps/union-eyes/app/api/__tests__/emergency-not-implemented.route.test.ts" }
+      ],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
       "id": "UE-CONV-K-004",
       "domain": "controls",
       "capability": "Persona action coverage, authorization coverage, documentation supersession and cleanroom deployment proof",
