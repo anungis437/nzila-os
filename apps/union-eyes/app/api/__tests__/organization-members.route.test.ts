@@ -9,13 +9,15 @@ const m = vi.hoisted(() => ({
   eq: vi.fn(),
   and: vi.fn(),
   isNull: vi.fn(),
+  or: vi.fn(),
+  sql: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/db/schema-organizations', () => ({ organizationMembers: m.organizationMembers }));
-vi.mock('drizzle-orm', () => ({ eq: m.eq, and: m.and, isNull: m.isNull }));
+vi.mock('drizzle-orm', () => ({ eq: m.eq, and: m.and, isNull: m.isNull, or: m.or, sql: m.sql }));
 
 async function loadRoute() {
   return import('../organization/members/route');
@@ -25,13 +27,39 @@ describe('organization/members route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation(
-      (_cfg: unknown, handler: any) => (request: NextRequest) =>
-        handler({ request, organizationId: new URL(request.url).searchParams.get('__test_org_id') }),
+      (_cfg: unknown, handler: any) => (request: NextRequest) => {
+        const params = new URL(request.url).searchParams;
+        return handler({
+          request,
+          organizationId: params.get('__test_org_id'),
+          userId: 'caller-1',
+          user: { role: params.get('__test_role') ?? 'officer' },
+        });
+      },
     );
     m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.eq.mockImplementation((a: unknown, b: unknown) => ({ a, b }));
     m.isNull.mockImplementation((a: unknown) => ({ isNull: a }));
     m.and.mockImplementation((...args: unknown[]) => args);
+    m.or.mockImplementation((...args: unknown[]) => ({ or: args }));
+    m.sql.mockImplementation((parts: TemplateStringsArray, ...values: unknown[]) => ({ sql: parts.join('?'), values }));
+  });
+
+  it('denies a plain member and does not query the directory', async () => {
+    const { GET } = await loadRoute();
+    const res = await GET(new NextRequest('http://localhost/api/organization/members?__test_org_id=org_1&__test_role=member')) as Response;
+    expect(res.status).toBe(403);
+    expect(m.db.select).not.toHaveBeenCalled();
+  });
+
+  it('restricts a steward to case-context members of the active organization', async () => {
+    const where = vi.fn().mockResolvedValue([]);
+    m.db.select.mockReturnValue({ from: vi.fn().mockReturnValue({ where }) });
+    const { GET } = await loadRoute();
+    await GET(new NextRequest('http://localhost/api/organization/members?__test_org_id=org_1&__test_role=steward'));
+    const condition = JSON.stringify(where.mock.calls[0][0]);
+    expect(condition).toContain('claims c');
+    expect(condition).toContain('caller-1');
   });
 
   it('returns empty result when the session has no resolved organization', async () => {

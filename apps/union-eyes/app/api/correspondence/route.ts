@@ -5,6 +5,7 @@
 
 import { z } from "zod";
 import { withApi } from "@/lib/api/with-api";
+import { ApiError } from "@/lib/api/errors";
 import { logger } from "@/lib/logger";
 import {
   createCorrespondence,
@@ -46,6 +47,7 @@ export const GET = withApi(
     openapi: { tags: ["Correspondence"], summary: "List correspondence" },
   },
   async ({ organizationId, userId: _userId, request }) => {
+    if (!organizationId) throw ApiError.forbidden("Organization context required");
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get("status") ?? undefined;
     const draftedBy = searchParams.get("draftedBy") ?? undefined;
@@ -57,10 +59,10 @@ export const GET = withApi(
     const limit = Number.isFinite(parsedLimit) ? parsedLimit : undefined;
     const offset = Number.isFinite(parsedOffset) ? parsedOffset : undefined;
 
-    let items: Awaited<ReturnType<typeof listCorrespondence>> = [];
+    let items: Awaited<ReturnType<typeof listCorrespondence>>;
     try {
       items = await listCorrespondence({
-        organizationId: organizationId!,
+        organizationId,
         status: status as Parameters<typeof listCorrespondence>[0]["status"],
         draftedBy,
         assignedSignerId,
@@ -68,13 +70,11 @@ export const GET = withApi(
         offset,
       });
     } catch (error) {
-      // Do not fail the correspondence dashboard if the backing schema is missing
-      // or temporarily unavailable in dev/staging.
-      logger.warn("[correspondence] listCorrespondence failed, returning empty list", {
-        error: error instanceof Error ? error.message : String(error),
+      // A failed read must surface as a failure, never as an empty correspondence queue.
+      logger.error("[correspondence] listCorrespondence failed", error instanceof Error ? error : new Error(String(error)), {
         organizationId,
       });
-      items = [];
+      throw ApiError.database("Correspondence is temporarily unavailable");
     }
 
     return { data: items, count: items.length };
@@ -88,13 +88,14 @@ export const POST = withApi(
     openapi: { tags: ["Correspondence"], summary: "Create new correspondence" },
   },
   async ({ organizationId, userId, body, user, request }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden("Organization context required");
     const created = await createCorrespondence({
-      organizationId: organizationId!,
+      organizationId,
       subject: body.subject,
       body: body.body,
       type: body.type,
       priority: body.priority,
-      draftedBy: userId!,
+      draftedBy: userId,
       assignedSignerId: body.assignedSignerId,
       templateId: body.templateId,
       templateVariables: body.templateVariables,

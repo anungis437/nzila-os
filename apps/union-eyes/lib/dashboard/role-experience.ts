@@ -156,16 +156,16 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
   }
 
   if (experience === 'staff') {
+    // UE-REPRESENTATIVE-CANONICAL-2.2: seven invariant destinations. Each maps to an existing
+    // route; legacy routes (notifications, intake queue, workspace hub) stay reachable by deep link.
     return [
-      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
-      { label: 'Operations (Casework Console)', href: '/dashboard/workbench', group: 'Operations' },
-      { label: 'Operations Queue (Representation Cases)', href: '/dashboard/inbox?type=intake', group: 'Operations' },
-      { label: 'Operations Priorities (Commitments & Deadlines)', href: '/dashboard/priorities', group: 'Operations' },
-      { label: 'Members', href: '/dashboard/members', group: 'Operations' },
-      { label: 'Documents', href: '/dashboard/documents', group: 'Operations' },
-      { label: 'Operations Communications', href: '/dashboard/correspondence', group: 'Operations' },
-      { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
-      { label: 'Notifications', href: '/dashboard/notifications', group: 'Operations' },
+      { label: 'Today', href: '/dashboard/inbox', group: 'Operations' },
+      { label: 'Representation', href: '/dashboard/workbench', group: 'Operations' },
+      { label: 'Members & Workplaces', href: '/dashboard/members', group: 'Operations' },
+      { label: 'Communications', href: '/dashboard/correspondence', group: 'Operations' },
+      { label: 'Documents & Evidence', href: '/dashboard/documents', group: 'Operations' },
+      { label: 'Tasks & Deadlines', href: '/dashboard/priorities', group: 'Operations' },
+      { label: 'Knowledge & Guidance', href: '/dashboard/clause-library', group: 'Operations' },
       { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
   }
@@ -225,6 +225,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/members',
     '/dashboard/documents',
     '/dashboard/correspondence',
+    '/dashboard/clause-library',
     '/dashboard/notifications',
     '/dashboard/settings',
     '/dashboard/profile',
@@ -332,6 +333,8 @@ export function getVisibleNavigationForExperience(
     if (platformRoles && !platformRoles.includes(role)) return false;
     if (experience === 'executive' && !meetsExecutiveDestinationRole(pathname, role)) return false;
     if (pathname === '/dashboard/audits' && getRoleLevel(role as UserRole) < getRoleLevel(UserRole.ADMIN)) return false;
+    // The clause library page redirects below steward; do not advertise it to those roles.
+    if (pathname === '/dashboard/clause-library' && getRoleLevel(role as UserRole) < getRoleLevel(UserRole.STEWARD)) return false;
     return canAccessDashboardPath(pathname, experience, isPilotMode);
   });
 }

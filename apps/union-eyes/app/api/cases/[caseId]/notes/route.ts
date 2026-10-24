@@ -18,6 +18,7 @@ import { buildUnionEvidencePack } from '@/lib/evidence'
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial'
 import { getCaseActor, findReadableCase, caseHistoryVisibility, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
+import { resolveNoteInternal } from '@/lib/cases/note-visibility'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,7 @@ const AddNoteSchema = z.object({
     .string()
     .min(1, 'Note text is required')
     .max(10000, 'Note must be at most 10,000 characters'),
-  isInternal: z.boolean().optional().default(false),
+  isInternal: z.boolean().optional(),
 })
 
 /**
@@ -109,7 +110,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
       )
     }
 
-    const { text, isInternal } = parsed.data
+    const { text } = parsed.data
+    const isInternal = resolveNoteInternal(parsed.data.isInternal, actor.role)
     await requireCaseAction(actor, isInternal ? 'note_add_internal' : 'note_add', caseId)
 
     const note = await withRLSContext(async (tx) => {

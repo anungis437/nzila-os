@@ -39,6 +39,31 @@ describe('workbench inline case access', () => {
     await waitFor(() => expect(screen.queryByText('Synthetic authorized note')).not.toBeInTheDocument());
   });
 
+  it('shows triage-only matters without contact data and offers assignment only when the server allows it', async () => {
+    const triageClaim = {
+      access: 'triage', claimId: 'triage-case', claimNumber: 'CASE-TR', claimType: 'grievance_pay', status: 'submitted',
+      priority: 'medium', createdAt: '2026-10-22T12:00:00Z', updatedAt: '2026-10-22T12:00:00Z', assignedTo: null,
+    };
+    const respond = (canAssign: boolean) => vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true,
+      json: async () => ({ data: { claims: [triageClaim], capabilities: { canAssign } } }) }));
+
+    respond(false);
+    const first = render(<WorkbenchConsole />);
+    const expand = await screen.findByRole('button', { name: 'workbench.expand CASE-TR' });
+    await userEvent.click(expand);
+    expect(screen.getByRole('note')).toHaveTextContent('workbench.restrictedMatterNotice');
+    expect(screen.queryByText('workbench.memberContact')).not.toBeInTheDocument();
+    expect(screen.queryByRole('textbox', { name: 'workbench.addNotePlaceholder' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /workbench\.assignToMe/ })).not.toBeInTheDocument();
+    first.unmount();
+
+    respond(true);
+    render(<WorkbenchConsole />);
+    await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-TR' }));
+    expect(screen.getByRole('button', { name: /workbench\.assignToMe/ })).toBeEnabled();
+    expect(screen.queryByText('workbench.memberContact')).not.toBeInTheDocument();
+  });
+
   it('reports malformed data rather than presenting an empty case queue', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ unexpected: [] }) }));
     render(<WorkbenchConsole />);

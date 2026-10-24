@@ -9,6 +9,12 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth-guard'
+import {
+  caseAuthorizationResponse,
+  caseReadScope,
+  getCaseActor,
+  requireCaseAction,
+} from '@/lib/cases/case-authorization'
 import { updateClaimStatus } from '@/lib/workflow-engine'
 import { getAllowedTransitions } from '@/lib/workflow/case-lifecycle'
 import { toLifecycleState, toLegacyClaimStatus } from '@/lib/workflow/state-bridge'
@@ -49,7 +55,7 @@ function statusForAuthError(message: string): number {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, organizationId } = await requireApiAuth({
+    const { userId } = await requireApiAuth({
       orgScoped: true,
       roles: ['steward', 'admin'],
     })
@@ -60,6 +66,11 @@ export async function POST(request: NextRequest) {
         { status: 401 },
       )
     }
+
+    // Organization and case authority are derived server-side from the verified membership.
+    const actor = await getCaseActor()
+    const organizationId = actor.organizationId
+    await requireCaseAction(actor, 'case_transition', 'workflow-transition')
 
     const rawBody = await request.json()
     const parsed = transitionSchema.safeParse(rawBody)
@@ -75,10 +86,8 @@ export async function POST(request: NextRequest) {
 
     // Fetch claim for pre-flight validation (org-scoped via RLS context, row-locked)
     return await withRLSContext(async (tx) => {
-      const claimConditions = [eq(claims.claimNumber, claimNumber)];
-      if (organizationId) {
-        claimConditions.push(eq(claims.organizationId, organizationId));
-      }
+      // Always tenant- and assignment-scoped: an actor can only lock and move cases they may read.
+      const claimConditions = [eq(claims.claimNumber, claimNumber), caseReadScope(actor)];
 
       const [claim] = await wrapSchemaQuery(
         async () => await tx
@@ -200,6 +209,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, claim: result.claim })
     })
   } catch (err) {
+    const denied = caseAuthorizationResponse(err)
+    if (denied) return denied
     logger.error('Workflow transition failed', { error: String(err) })
     const message = err instanceof Error ? err.message : 'Internal error'
     const exposeDetails = process.env.QA_TEST_ENV === 'true' || process.env.NODE_ENV !== 'production'

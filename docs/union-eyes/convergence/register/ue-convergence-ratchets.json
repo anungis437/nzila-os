@@ -109,7 +109,8 @@
       "allowed": [
         { "file": "apps/union-eyes/lib/action-enforcer.ts", "reason": "CUPE claims RBAC matrix (numeric levels). The kernel case loader does not model claims yet; retire with the claims migration" },
         { "file": "apps/union-eyes/lib/authority/policies/case.ts", "reason": "Comment only: states that the kernel policy replaces these shortcuts" },
-        { "file": "apps/union-eyes/lib/cases/case-authorization.ts", "reason": "caseReadScope for the claims table grants tenant-wide reads by role level; migrate with the claims module" }
+        { "file": "apps/union-eyes/lib/cases/case-authorization.ts", "reason": "caseReadScope for the claims table grants tenant-wide reads by role level; migrate with the claims module" },
+        { "file": "apps/union-eyes/lib/members/directory-access.ts", "reason": "Member-directory scope (names, contacts; sensitive attributes only for officer and above) uses the claims policy level matrix; exposes no case content, platform roles receive nothing. Replace with a membership-administration mandate" }
       ]
     },
     {
@@ -142,6 +143,8 @@
         { "file": "apps/union-eyes/lib/services/case-knowledge-graph-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/lib/services/case-related-documents-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/lib/services/grievance-read-scope.ts", "reason": "Set-based mirror of getEffectiveCaseAccess (Senior Representative); uses the legacy primary-owner column, migrate with the kernel assignments" },
+        { "file": "apps/union-eyes/lib/cases/grievance-list-scope.ts", "reason": "Representative 2.2 list scope; uses the legacy primary-owner column beside active assignments, migrate with the kernel assignments" },
+        { "file": "apps/union-eyes/lib/cases/creator-access.ts", "reason": "Representative 2.2 creator-retains-access rule keyed on the legacy primary-owner column, migrate with the kernel assignments" },
         { "file": "apps/union-eyes/lib/services/dashboard-kpi-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/services/case-intelligence/case-knowledge-graph-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/services/case-intelligence/precedent-matching-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },

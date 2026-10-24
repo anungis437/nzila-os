@@ -2,10 +2,11 @@
  * GET /api/workbench/assigned
  * Returns claims from the database for the LRO workbench case queue.
  */
-import { withApi } from '@/lib/api/framework';
-import { db } from '@/db/db';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { getCaseActor, caseReadScope } from '@/lib/cases/case-authorization';
+import { projectWorkbenchRow, workbenchCapabilities } from '@/lib/cases/workbench-projection';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,27 +16,30 @@ export const GET = withApi(
     openapi: {
       tags: ['Workbench'],
       summary: 'GET assigned cases',
-      description: 'Returns claims from the database for the LRO case queue.',
+      description:
+        'Returns the actor-scoped case queue. Organization and role are derived server-side; ' +
+        'matters without case-resource authority are reduced to triage metadata.',
     },
   },
   async ({ request }) => {
+    const actor = await getCaseActor();
     const url = new URL(request.url);
-    const organizationId = url.searchParams.get('organizationId');
+    const requestedOrganizationId = url.searchParams.get('organizationId');
     const status = url.searchParams.get('status');
 
-    const conditions: ReturnType<typeof sql>[] = [];
-    if (organizationId) {
-      conditions.push(sql`c.organization_id = ${organizationId}`);
+    // The query string is a hint, never authority.
+    if (requestedOrganizationId && requestedOrganizationId !== actor.organizationId) {
+      throw ApiError.forbidden('Organization scope is not permitted for this actor.');
     }
+
+    const conditions: ReturnType<typeof sql>[] = [caseReadScope(actor, 'c')];
     if (status) {
       conditions.push(sql`c.status = ${status}`);
     }
 
-    const where = conditions.length > 0
-      ? sql`WHERE ${sql.join(conditions, sql` AND `)}`
-      : sql``;
+    const where = sql`WHERE ${sql.join(conditions, sql` AND `)}`;
 
-    const rows = await withRLSContext(async () => db.execute(
+    const rows = await withRLSContext(async (tx) => tx.execute(
       sql`SELECT
             c.claim_id AS "claimId",
             c.claim_number AS "claimNumber",
@@ -80,7 +84,10 @@ export const GET = withApi(
           LIMIT 200`
     ));
 
-    return { claims: Array.from(rows) };
+    return {
+      claims: Array.from(rows as Iterable<Record<string, unknown>>).map((row) => projectWorkbenchRow(actor, row)),
+      capabilities: workbenchCapabilities(actor),
+    };
   },
 );
 

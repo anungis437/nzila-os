@@ -953,6 +953,70 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'reconciliation, completion or result fields (strict schema), so no remittance can become reconciled until ' +
       'an engine-driven transition exists.',
   },
+
+  // ------------------------------------------------------------------------
+  // Representative 2.2 convergence (UE-REP-2.2-CONVERGENCE). Source- and
+  // test-level state only; none of this has runtime acceptance evidence.
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-REP-CASE-AUTHORITY-SCOPING',
+    title: 'Representative case, member-directory and document authority scoping',
+    state: 'LIMITED',
+    ownedBy: [
+      'apps/union-eyes/lib/cases/grievance-list-scope.ts',
+      'apps/union-eyes/lib/cases/workbench-projection.ts',
+      'apps/union-eyes/lib/members/directory-access.ts',
+    ],
+    evidence: [
+      'lib/cases/grievance-list-scope.pglite.test.ts and lib/cases/case-mandate-changes.pglite.test.ts — assignment, reassignment, expiry/revocation, demotion and cross-organization scoping asserted against PostgreSQL semantics (PGlite)',
+      'app/api/__tests__/grievances-access.route.test.ts, grievances-status.route.test.ts, workbench-authorization.route.test.ts, members-directory-authorization.route.test.ts, claims-evidence-authorization.route.test.ts — route-level negative and positive authorization with mocked persistence',
+    ],
+    targetWave: 1,
+    notes:
+      'LIMITED, not REAL: an ordinary steward holds case-resource authority only through assignment, ownership, ' +
+      'creation, or an explicit collaborator grant. Representative 2.2 also gave chief steward and above a ' +
+      'role-derived supervisory read over every grievance; that cross-case read was deliberately NOT ' +
+      'integrated (a supervisory scope needs an issued mandate with territory and expiry, UE-CONV-E-001). Proven ' +
+      'only at source, unit and PGlite level — no deployed RLS probe, no native browser ' +
+      'acceptance. Intake conversion still makes the converting steward the owner (an implicit self-assignment ' +
+      'whose protocol per operating model needs stakeholder validation).',
+  },
+  {
+    id: 'UE-REP-MANDATE-RECUSAL-DELEGATION',
+    title: 'Representative mandate model: recusal, territory, privileged-matter restriction, temporary delegation',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['apps/union-eyes/lib/cases/case-authorization.ts'],
+    evidence: [
+      'lib/cases/case-authorization.ts caseReadScope — chief_steward, business_agent, officer and admin read every case in the organization; no recusal, conflict-of-interest, territory or privileged-matter predicate exists',
+      'db/schema — no recusal, territory-mandate or temporary-delegation table for claims or grievances (document privacy labels and grievance_case_access_assignments exist but do not model these)',
+    ],
+    targetWave: 2,
+    notes:
+      'A business agent territory or a chief steward oversight mandate currently implies read access to every ' +
+      'confidential matter in the organization. A recusal and territory model needs a schema decision and ' +
+      'stakeholder-validated policy per operating model (CAPE, CUPE, LIUNA); it is deliberately not simulated.',
+  },
+  {
+    id: 'UE-WORKAID-SPECIALIST-REFERRAL',
+    title: 'WorkAid specialist referral, acknowledgement and milestone integration',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [],
+    evidence: [
+      'Repo search of apps/union-eyes found no WorkAid, WSIB/WSIAT filing or Clio code (only unrelated WCB-board reference data and substring matches)',
+      'No navigation entry, route or component presents WorkAid progress; the representative experience shows no specialist status feed',
+    ],
+    targetWave: 3,
+    readinessImpact: 'non_blocking',
+    disposition: 'OPTIONAL_NATIVE_CAPABILITY',
+    notes:
+      'WorkAid is an independent professional service with its own engagement, acceptance and filing authority. ' +
+      'Prerequisites before any live progress is shown: an operational connector, referral authorization and ' +
+      'member sharing consent, secure transmission with actual acknowledgement, WorkAid acceptance or rejection, ' +
+      'purpose-limited document exchange, revocation and closure. Direct WorkAid engagement must not be ' +
+      'visible to the union by membership alone. No Clio record, professional note or filing validity may be ' +
+      'invented. Design reference only: the WorkAid v0.3 contracts under docs/union-eyes/workaid on the ' +
+      'agents/workaid-prep-20261023 branch.',
+  },
 ] as const;
 
 /**

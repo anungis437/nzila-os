@@ -6,7 +6,7 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
-import { eq } from 'drizzle-orm';
+import { grievanceCaseAuthorityScope } from '@/lib/cases/grievance-list-scope';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,8 +16,8 @@ export const GET = withApi(
     entitlement: 'grievance_case_suite',
     openapi: { tags: ['Grievances'], summary: 'Steward workload stats' },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -26,10 +26,14 @@ export const GET = withApi(
 
     const ACTIVE_STATUSES = ['filed', 'step_1', 'step_2', 'step_3', 'arbitration', 'mediation'];
 
+    // Caseload is scope-limited for everyone: the card counts the matters the caller holds authority over.
+    // Seniority does not widen it to the organization-wide figure.
+    const scope = grievanceCaseAuthorityScope(organizationId, userId);
+
     const rows = await db
       .select()
       .from(grievances)
-      .where(eq(grievances.organizationId, organizationId));
+      .where(scope);
 
     const activeCases = rows.filter(g => ACTIVE_STATUSES.includes(g.status)).length;
 
