@@ -202,6 +202,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Gives the dues_transactions stub the declared ledger shape with defaults and a period-order check; refuses a populated stub. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0018_declared_shape_tranche_1",
+        "sha256": "ffc5c627b11bc0eb5f1a873c4a4dfa0285ae564309d395fba8b878d7c764ddfc",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Generated additive evolution of 47 live stub relations to their declared shape (UE-CONV-H-007). Not yet applied to any clone or live database."
       }
     ]
   }

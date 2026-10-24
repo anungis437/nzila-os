@@ -15,7 +15,7 @@
  * The committed baseline is a ratchet: a table may leave it, never join it or gain a new defect. Regenerate with
  * UE_CENSUS_WRITE=1 only after fixing defects, so the baseline can only shrink.
  */
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import pg from 'pg'
 import { describe, expect, it } from 'vitest'
@@ -174,4 +174,45 @@ describe.skipIf(!URL)('canonical schema census against the real Django plus boot
       await client.end()
     }
   }, 60_000)
+
+  it('every relation evolved by a declared-shape migration can be selected through its declaration as the runtime role', async () => {
+    const migrationDir = path.resolve(__dirname, '../migrations-platform')
+    const evolved = readdirSync(migrationDir)
+      .filter((f) => /^\d{4}_declared_shape_tranche_\d+\.sql$/.test(f))
+      .flatMap((f) => [...readFileSync(path.join(migrationDir, f), 'utf8').matchAll(/^-- ([a-z0-9_]+)\s*$/gm)].map((m) => m[1]))
+      .filter((n) => !['PLATFORM_SQL'].includes(n))
+    expect(evolved.length).toBeGreaterThan(0)
+    const byName = new Map<string, any>()
+    for (const value of Object.values(declarations as Record<string, unknown>)) {
+      if (is(value, PgTable)) {
+        const cfg = getTableConfig(value)
+        if (!cfg.schema || cfg.schema === 'public') if (!byName.has(cfg.name)) byName.set(cfg.name, value)
+      }
+    }
+    const org = '00000000-0000-4000-8000-0000000000c1'
+    const client = new pg.Client({ connectionString: URL })
+    await client.connect()
+    const failures: string[] = []
+    try {
+      await client.query('BEGIN')
+      await client.query('SET LOCAL ROLE union_eyes_runtime')
+      await client.query("SELECT set_config('app.current_org_id', $1, true)", [org])
+      const db = drizzle(client)
+      for (const name of evolved) {
+        const table = byName.get(name)
+        if (!table) { failures.push(`${name}: no declaration`); continue }
+        await client.query('SAVEPOINT s')
+        try {
+          await db.select().from(table).limit(1)
+        } catch (error) {
+          failures.push(`${name}: ${(error as Error).cause ? String(((error as Error).cause as Error).message) : (error as Error).message}`)
+          await client.query('ROLLBACK TO SAVEPOINT s')
+        }
+      }
+    } finally {
+      await client.query('ROLLBACK').catch(() => undefined)
+      await client.end()
+    }
+    expect(failures).toEqual([])
+  }, 120_000)
 })

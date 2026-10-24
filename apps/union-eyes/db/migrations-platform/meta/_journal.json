@@ -148,6 +148,13 @@
       "when": 1758760000000,
       "tag": "0017_dues_transactions_ledger_shape",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1758770000000,
+      "tag": "0018_declared_shape_tranche_1",
+      "breakpoints": true
     }
   ]
 }
