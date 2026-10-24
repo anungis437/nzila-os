@@ -6,7 +6,7 @@ const m = vi.hoisted(() => ({
   getUserRoleInOrganization: vi.fn(),
   requireEntitlement: vi.fn(),
   withRLSContext: vi.fn(),
-  auditDataMutation: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   buildUnionEvidencePack: vi.fn(),
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
   claimQueue: [] as unknown[][],
@@ -18,7 +18,8 @@ const m = vi.hoisted(() => ({
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser, getUserRoleInOrganization: m.getUserRoleInOrganization }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation, auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/audit-logger', () => ({ auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
@@ -47,7 +48,7 @@ describe('cases/[caseId]/notes route', () => {
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
     m.getUserRoleInOrganization.mockResolvedValue('steward');
     m.requireEntitlement.mockResolvedValue(undefined);
-    m.auditDataMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: any) => {
       const tx = {
@@ -129,7 +130,7 @@ describe('cases/[caseId]/notes route', () => {
     expect(response.status).toBe(201);
     const json = await response.json();
     expect(json.success).toBe(true);
-    expect(m.auditDataMutation).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalled();
   });
   it('keeps a representative note internal unless member visibility is chosen explicitly', async () => {
     const { POST } = await loadRoute();
@@ -168,7 +169,7 @@ describe('cases/[caseId]/notes route', () => {
     }), {params:Promise.resolve({caseId:'c1'})});
     expect(response.status).toBe(403);
     expect(m.withRLSContext).not.toHaveBeenCalled();
-    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
 });

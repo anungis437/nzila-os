@@ -12,7 +12,7 @@ import { and, eq, desc } from 'drizzle-orm'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { claimUpdates } from '@/db/schema/claims-schema'
 import { claimHistoryReference, publicClaimHistory } from '@/lib/cases/claim-history-reference'
-import { auditDataMutation } from '@/lib/audit-logger'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { logger } from '@/lib/logger'
 import { buildUnionEvidencePack } from '@/lib/evidence'
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
@@ -131,6 +131,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
         })
         .returning()
 
+      // The note and its audit record commit together; the audit carries the length, never the text.
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId,
+        action: 'case.note.add',
+        resourceType: 'claim_updates',
+        resourceId: newNote.updateId ?? null,
+        details: { event: 'CASE_NOTE_ADDED', caseId, isInternal, contentLength: text.length },
+      })
+
       return publicClaimHistory(newNote, claim.claimId)
     })
 
@@ -140,21 +150,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
         { status: 404 },
       )
     }
-
-    // Audit trail — log note ID + content hash (not full text for privacy)
-    await auditDataMutation({
-      userId,
-      organizationId: orgId,
-      resource: 'claim_updates',
-      resourceId: note.updateId ?? undefined,
-      action: 'create',
-      details: {
-        event: 'CASE_NOTE_ADDED',
-        caseId,
-        isInternal,
-        contentLength: text.length,
-      },
-    })
 
     logger.info('Case note added', {
       caseId,

@@ -5,8 +5,8 @@ const m = vi.hoisted(() => ({
   hasMinRole: vi.fn(),
   requireEntitlement: vi.fn(),
   auditLog: vi.fn(),
-  getAuditedDb: vi.fn(),
-  db: { select: vi.fn(), update: vi.fn() },
+  persistAtomicAudit: vi.fn(),
+  db: { select: vi.fn(), update: vi.fn(), insert: vi.fn() },
   withRLSContext: vi.fn(),
 }));
 
@@ -14,7 +14,7 @@ vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOr
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/audit-logger', () => ({ auditLog: m.auditLog, AuditEventType: {}, AuditSeverity: {} }));
-vi.mock('@/lib/api-guards', () => ({ getAuditedDb: m.getAuditedDb }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 
@@ -29,10 +29,16 @@ describe('grievances/[id]/priority-override route', () => {
     m.hasMinRole.mockResolvedValue(true);
     m.requireEntitlement.mockResolvedValue(undefined);
     m.auditLog.mockResolvedValue(undefined);
-    m.getAuditedDb.mockResolvedValue({ ok: true, db: {}, response: null });
+    m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.db.insert = vi.fn(() => ({ values: vi.fn(async () => null) }));
     m.db.select = vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => [{ id: 'g1', priority: 'medium' }]) }) )}));
     m.db.update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'g1', priority: 'high' }]) })) })) }));
-    m.withRLSContext.mockImplementation((fn: any) => fn());
+    m.withRLSContext.mockImplementation((fn: any) => fn(m.db));
+  });
+
+  const request = () => new Request('http://localhost/api/grievances/g1/priority-override', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ newPriority: 'high', reason: 'escalating critical case' }),
   });
 
   it('returns 403 when lacking chief_steward role', async () => {
@@ -45,12 +51,20 @@ describe('grievances/[id]/priority-override route', () => {
     expect([200, 403]).toContain(response.status);
   });
 
-  it('overrides grievance priority', async () => {
+  it('overrides grievance priority and audits inside the same transaction', async () => {
     const { POST } = await loadRoute();
-    const response = await POST(new Request('http://localhost/api/grievances/g1/priority-override', {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ newPriority: 'high', reason: 'escalating critical case' }),
-    }), { userId: 'u1', organizationId: 'org_1' }, { id: 'g1' });
-    expect([200, 400, 403, 500]).toContain(response.status);
+    const response = await POST(request(), { userId: 'u1', organizationId: 'org_1' }, { id: 'g1' });
+    expect(response.status).toBe(200);
+    expect(m.db.update).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({
+      action: 'grievance.priority_override', organizationId: 'org_1', userId: 'u1', resourceId: 'g1',
+    }));
+  });
+
+  it('fails the override when the audit record cannot be written', async () => {
+    m.persistAtomicAudit.mockRejectedValue(new Error('audit write failed'));
+    const { POST } = await loadRoute();
+    const response = await POST(request(), { userId: 'u1', organizationId: 'org_1' }, { id: 'g1' });
+    expect(response.status).toBe(500);
   });
 });

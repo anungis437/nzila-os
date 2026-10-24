@@ -12,7 +12,7 @@ import { claims } from '@/db/schema';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
 import { eq, and } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { updateClaimStatusById } from '@/lib/workflow-engine';
 import { enforceDecision } from '@nzila/decision-core';
@@ -253,6 +253,20 @@ export const POST = withApi(
         })
         .where(eq(claims.claimId, caseId));
 
+      // The grievance, the claim's resolution and the audit record commit together.
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId: ctx.userId ?? 'system',
+        action: 'case.escalate_to_grievance',
+        resourceType: 'claims',
+        resourceId: caseId,
+        details: {
+          claimNumber: claim.claimNumber,
+          grievanceId: g.id,
+          grievanceNumber: g.grievanceNumber,
+        },
+      });
+
       return { success: true as const, grievance: g };
     });
 
@@ -264,23 +278,6 @@ export const POST = withApi(
     }
 
     const grievance = escalationResult.grievance;
-
-    // Audit
-    await auditLog({
-      eventType: AuditEventType.DATA_CREATE,
-      severity: AuditSeverity.HIGH,
-      userId: ctx.userId ?? '',
-      organizationId: orgId,
-      resource: 'claims',
-      action: 'escalate_to_grievance',
-      resourceId: caseId,
-      details: {
-        claimNumber: claim.claimNumber,
-        grievanceId: grievance.id,
-        grievanceNumber: grievance.grievanceNumber,
-      },
-      outcome: 'success',
-    });
 
     const recordedDecision = await enforceDecision({
       decisionType: 'union.case.escalated',

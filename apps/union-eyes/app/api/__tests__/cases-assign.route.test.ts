@@ -6,29 +6,23 @@ const m = vi.hoisted(() => ({
   getUserRoleInOrganization: vi.fn(),
   requireEntitlement: vi.fn(),
   withRLSContext: vi.fn(),
-  auditDataMutation: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   buildUnionEvidencePack: vi.fn(),
   recordUnionEyesCaseAssigned: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   claimQueue: [] as unknown[][],
   assigneeEligible: vi.fn(),
   insertQueue: [] as unknown[][],
-  canonical: { enabled: false },
-  appendCanonicalAuditLog: vi.fn(),
   updateReturning: vi.fn(),
 }));
 
-vi.mock('@/lib/auth/canonical-bootstrap', async (original) => ({
-  ...(await original<typeof import('@/lib/auth/canonical-bootstrap')>()),
-  currentStateContextEnabled: () => m.canonical.enabled,
-}));
-vi.mock('@/lib/audit/canonical-audit-chain', () => ({ appendCanonicalAuditLog: m.appendCanonicalAuditLog }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser, getUserRoleInOrganization: m.getUserRoleInOrganization }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation, auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
+vi.mock('@/lib/audit-logger', () => ({ auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/pilot-metrics', () => ({ recordUnionEyesCaseAssigned: m.recordUnionEyesCaseAssigned }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
@@ -54,14 +48,12 @@ describe('cases/[caseId]/assign route', () => {
     m.claimQueue = [];
     m.assigneeEligible.mockResolvedValue(true);
     m.insertQueue = [];
-    m.canonical.enabled = false;
-    m.appendCanonicalAuditLog.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.updateReturning.mockResolvedValue([{ claimId: 'c1' }]);
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
     m.getUserRoleInOrganization.mockResolvedValue('chief_steward');
     m.requireEntitlement.mockResolvedValue(undefined);
-    m.auditDataMutation.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
     m.recordUnionEyesCaseAssigned.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: any) => {
@@ -120,7 +112,7 @@ describe('cases/[caseId]/assign route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.assignedTo).toBe('u2');
-    expect(m.auditDataMutation).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalled();
   });
   it('denies an ineligible foreign or inactive assignee before any mutation', async () => {
     const { POST } = await loadRoute();
@@ -130,7 +122,7 @@ describe('cases/[caseId]/assign route', () => {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({assigneeId:'foreign'}),
     }), {params:Promise.resolve({caseId:'c1'})});
     expect(response.status).toBe(403);
-    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
     expect(m.insertQueue).toEqual([]);
   });
@@ -146,7 +138,7 @@ describe('cases/[caseId]/assign route', () => {
     m.claimQueue.push([{ claimId: 'c1', memberId: 'u2', assignedTo: 'u0', status: 'filed' }]);
     expect((await post('u2')).status).toBe(403);
 
-    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.insertQueue).toEqual([]);
   });
 
@@ -160,8 +152,8 @@ describe('cases/[caseId]/assign route', () => {
     expect(response.status).toBe(200);
     expect(json).toMatchObject({ success: true, transferred: false, assignedTo: 'u2' });
     expect(m.updateReturning).not.toHaveBeenCalled();
-    expect(m.auditDataMutation).not.toHaveBeenCalled();
-    expect(m.appendCanonicalAuditLog).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
   });
 
@@ -174,63 +166,41 @@ describe('cases/[caseId]/assign route', () => {
     }), { params: Promise.resolve({ caseId: 'c1' }) });
     expect(response.status).toBe(409);
     expect((await response.json()).error).toBe('ASSIGNMENT_CONFLICT');
-    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
     expect(m.recordUnionEyesCaseAssigned).not.toHaveBeenCalled();
   });
 
-  it('writes the canonical audit inside the assignment transaction and skips the post-commit audit', async () => {
+  it('writes the audit inside the assignment transaction, in every deployment mode', async () => {
     const { POST } = await loadRoute();
-    m.canonical.enabled = true;
     m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u0', status: 'filed' }]);
     m.insertQueue.push([{ updateId: 'up1' }]);
     const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2', reason: 'coverage' }),
     }), { params: Promise.resolve({ caseId: 'c1' }) });
     expect(response.status).toBe(200);
-    expect(m.appendCanonicalAuditLog).toHaveBeenCalledTimes(1);
-    expect(m.appendCanonicalAuditLog.mock.calls[0][1]).toMatchObject({
-      organizationId: 'org_1', resourceType: 'claims', resourceId: 'c1',
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit.mock.calls[0][1]).toMatchObject({
+      organizationId: 'org_1', action: 'case.assign', resourceType: 'claims', resourceId: 'c1',
       details: { event: 'CASE_ASSIGNED', fromAssignee: 'u0', toAssignee: 'u2' },
     });
-    expect(m.auditDataMutation).not.toHaveBeenCalled();
   });
 
   it('fails the whole request, with no success body or downstream effects, when the in-transaction audit cannot be written', async () => {
     const { POST } = await loadRoute();
-    m.canonical.enabled = true;
     m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u0', status: 'filed' }]);
     m.insertQueue.push([{ updateId: 'up1' }]);
-    m.appendCanonicalAuditLog.mockRejectedValueOnce(new Error('audit chain unavailable'));
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit chain unavailable'));
     const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2' }),
     }), { params: Promise.resolve({ caseId: 'c1' }) });
     const json = await response.json();
     expect(response.status).toBe(500);
     expect(json.success).toBeUndefined();
+    // There is no committed-but-unaudited state to expose: the assignment, its history and its audit are one transaction.
+    expect(json.error).not.toBe('ASSIGNMENT_COMMITTED_AUDIT_FAILED');
     expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
     expect(m.recordUnionEyesCaseAssigned).not.toHaveBeenCalled();
-  });
-
-  it('exposes committed state when only the non-canonical post-commit audit fails, and a retry is a safe no-op', async () => {
-    const { POST } = await loadRoute();
-    m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u0', status: 'filed' }]);
-    m.insertQueue.push([{ updateId: 'up1' }]);
-    m.auditDataMutation.mockRejectedValueOnce(new Error('audit down'));
-    const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2' }),
-    }), { params: Promise.resolve({ caseId: 'c1' }) });
-    const json = await response.json();
-    expect(response.status).toBe(500);
-    expect(json).toMatchObject({ error: 'ASSIGNMENT_COMMITTED_AUDIT_FAILED', assignedTo: 'u2', previousAssignee: 'u0', historyRecordId: 'up1' });
-    expect(json.success).toBeUndefined();
-
-    m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u2', status: 'filed' }]);
-    const retry = await POST(new Request('http://localhost/api/cases/c1/assign', {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2' }),
-    }), { params: Promise.resolve({ caseId: 'c1' }) });
-    expect(retry.status).toBe(200);
-    expect((await retry.json()).transferred).toBe(false);
   });
 
   it('denies member assignment before opening a case transaction', async () => {

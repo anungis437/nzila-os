@@ -7,10 +7,11 @@ const m = vi.hoisted(() => ({
   db: { select: vi.fn(), update: vi.fn(), insert: vi.fn() },
   withRLSContext: vi.fn(),
   auditLog: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   validateTransition: vi.fn(),
   toLifecycleState: vi.fn(),
   buildUnionEvidencePack: vi.fn(),
-  logger: { warn: vi.fn() },
+  logger: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() },
 }));
 
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
@@ -18,6 +19,7 @@ vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntit
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: m.auditLog,
   AuditEventType: {
@@ -69,7 +71,8 @@ describe('grievances/[id]/convert route', () => {
       values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'g2', grievanceNumber: 'GRV-2', priority: 'medium' }]) })),
     }));
 
-    m.withRLSContext.mockImplementation((fn: any) => fn());
+    m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.withRLSContext.mockImplementation((fn: any) => fn(m.db));
     m.toLifecycleState.mockImplementation((_domain: string, status: string) => (status === 'draft' ? 'draft' : 'submitted'));
     m.validateTransition.mockReturnValue({ allowed: true });
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
@@ -107,6 +110,20 @@ describe('grievances/[id]/convert route', () => {
       body: JSON.stringify({ priority: 'urgent', notes: 'Convert now' }),
     }));
 
-    expect([200, 201, 400, 403, 404, 500]).toContain(response.status);
+    expect(response.status).toBe(200);
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(2);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'grievance.convert_intake', resourceId: 'g1' }));
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'grievance.create_official_case', resourceId: 'g2' }));
+  });
+
+  it('fails the conversion when an audit record cannot be written', async () => {
+    m.persistAtomicAudit.mockRejectedValue(new Error('audit write failed'));
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/grievances/g1/convert', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ priority: 'urgent' }),
+    }));
+    expect(response.status).toBe(500);
   });
 });

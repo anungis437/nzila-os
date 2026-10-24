@@ -9,11 +9,11 @@ const m = vi.hoisted(() => ({
   withRLSContext: vi.fn(),
   validateTransition: vi.fn(),
   toLifecycleState: vi.fn(),
-  auditDataMutation: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   auditLog: vi.fn(),
   buildUnionEvidencePack: vi.fn(),
   trackPilotEvent: vi.fn(),
-  logger: { warn: vi.fn() },
+  logger: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() },
 }));
 
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
@@ -24,8 +24,8 @@ vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/workflow/case-lifecycle', () => ({ validateTransition: m.validateTransition }));
 vi.mock('@/lib/workflow/state-bridge', () => ({ toLifecycleState: m.toLifecycleState }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/audit-logger', () => ({
-  auditDataMutation: m.auditDataMutation,
   auditLog: m.auditLog,
   AuditEventType: { INTAKE_CLOSED: 'INTAKE_CLOSED', INTAKE_REVIEWED: 'INTAKE_REVIEWED', AUTHORITY_VIOLATION: 'AUTHORITY_VIOLATION' },
   AuditSeverity: { MEDIUM: 'MEDIUM', HIGH: 'HIGH' },
@@ -58,11 +58,11 @@ describe('grievances/[id]/status route', () => {
     m.getEffectiveCaseAccess.mockResolvedValue(noAccess);
     m.toLifecycleState.mockReturnValue('submitted');
     m.validateTransition.mockReturnValue({ allowed: true });
-    m.auditDataMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.auditLog.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
     m.trackPilotEvent.mockResolvedValue(undefined);
-    m.withRLSContext.mockImplementation(async (fn: any) => fn());
+    m.withRLSContext.mockImplementation(async (fn: any) => fn(m.db));
 
     stubGrievance({ id: 'g1', status: 'filed', unionRepId: 'u2' });
     m.db.update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'g1', status: 'investigating' }]) })) })) }));
@@ -105,6 +105,17 @@ describe('grievances/[id]/status route', () => {
     expect((await PATCH(patch('investigating'))).status).toBe(200);
     expect(m.validateTransition).toHaveBeenCalled();
     expect(m.db.update).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({
+      action: 'grievance.status_change', organizationId: 'org_1', userId: 'u1', resourceId: 'g1',
+    }));
+  });
+
+  it('fails the transition when the in-transaction audit cannot be written', async () => {
+    m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: true, isSecondaryCollaborator: false, accessRole: 'primary_owner' });
+    m.persistAtomicAudit.mockRejectedValue(new Error('audit write failed'));
+    const { PATCH } = await loadRoute();
+    const response = await PATCH(patch('investigating'));
+    expect(response.status).toBeGreaterThanOrEqual(500);
   });
 
   it('lets an active secondary LRO advance the case', async () => {

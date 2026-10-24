@@ -17,7 +17,7 @@ const m = vi.hoisted(() => {
     getAllowedTransitions: vi.fn(),
     toLifecycleState: vi.fn(),
     wrapSchemaQuery: vi.fn(),
-    auditDataMutation: vi.fn(),
+    persistAtomicAudit: vi.fn(),
     buildUnionEvidencePack: vi.fn(),
     logger: {
       info: vi.fn(),
@@ -45,7 +45,8 @@ vi.mock('@/lib/workflow/case-lifecycle', () => ({
 }));
 vi.mock('@/lib/workflow/state-bridge', () => ({ toLifecycleState: m.toLifecycleState }));
 vi.mock('@/lib/schema-error', () => ({ wrapSchemaQuery: m.wrapSchemaQuery }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation, auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/audit-logger', () => ({ auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
@@ -109,7 +110,7 @@ describe('cases/[caseId]/transition route', () => {
     });
     m.validateTransition.mockReturnValue({ allowed: true });
     m.getAllowedTransitions.mockReturnValue(['resolved']);
-    m.auditDataMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: (tx: any) => Promise<unknown>) => {
       const tx = makeTx(m.state.claimRows);
@@ -182,7 +183,7 @@ describe('cases/[caseId]/transition route', () => {
 
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ success: true, claimId: 'case_1', toStatus: 'settled' });
-    expect(m.auditDataMutation).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalled();
     expect(m.validateTransition).toHaveBeenCalledWith(expect.objectContaining({ assignedTo: 'agent_1', actorRole: 'steward' }));
   });
 

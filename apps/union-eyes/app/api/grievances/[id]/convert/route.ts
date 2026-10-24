@@ -12,6 +12,7 @@ import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle"
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import {
@@ -107,15 +108,15 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
     const { priority, notes } = parsed.data;
 
-    const result = await withRLSContext(async () => {
+    const result = await withRLSContext(async (tx) => {
       // Mark the intake as converted
-      await db
+      await tx
         .update(grievances)
         .set({ status: 'converted', updatedAt: new Date() })
         .where(eq(grievances.id, params.id));
 
       // Create the official case, linked back to the intake via relatedGrievanceIds
-      const [officialCase] = await db
+      const [officialCase] = await tx
         .insert(grievances)
         .values({
           grievanceNumber: `GRV-${Date.now()}-${randomBytes(3).toString('hex')}`,
@@ -135,7 +136,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         .returning();
 
       // Emit lifecycle events
-      await db.insert(grievanceEvents).values([
+      await tx.insert(grievanceEvents).values([
         {
           grievanceId: params.id,
           eventType: 'converted_to_case',
@@ -150,57 +151,31 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         },
       ]);
 
+      // Conversion, the new case and both audit records commit together.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.convert_intake',
+        resourceType: 'grievances',
+        resourceId: params.id,
+        details: { intakeId: params.id, newCaseId: officialCase.id, newCaseNumber: officialCase.grievanceNumber },
+      });
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.create_official_case',
+        resourceType: 'grievances',
+        resourceId: officialCase.id,
+        details: {
+          caseNumber: officialCase.grievanceNumber,
+          sourceIntakeId: params.id,
+          sourceIntakeNumber: intake.grievanceNumber,
+          initialPriority: officialCase.priority ?? null,
+        },
+      });
+
       return officialCase;
     });
-
-    // Audit: intake converted
-    await auditLog({
-      eventType: AuditEventType.INTAKE_CONVERTED,
-      severity: AuditSeverity.HIGH,
-      userId,
-      organizationId,
-      resource: 'grievances',
-      action: 'convert_intake',
-      resourceId: params.id,
-      details: {
-        intakeId: params.id,
-        newCaseId: result.id,
-        newCaseNumber: result.grievanceNumber,
-      },
-      outcome: 'success',
-    });
-
-    // Audit: official case created
-    await auditLog({
-      eventType: AuditEventType.CASE_CREATED,
-      severity: AuditSeverity.HIGH,
-      userId,
-      organizationId,
-      resource: 'grievances',
-      action: 'create_official_case',
-      resourceId: result.id,
-      details: {
-        caseNumber: result.grievanceNumber,
-        sourceIntakeId: params.id,
-        sourceIntakeNumber: intake.grievanceNumber,
-      },
-      outcome: 'success',
-    });
-
-    // Audit: initial priority on new case
-    if (result.priority) {
-      await auditLog({
-        eventType: AuditEventType.CASE_PRIORITY_SET,
-        severity: AuditSeverity.LOW,
-        userId,
-        organizationId,
-        resource: 'grievances',
-        action: 'set_initial_priority',
-        resourceId: result.id,
-        details: { priority: result.priority },
-        outcome: 'success',
-      });
-    }
 
     // Evidence pack
     buildUnionEvidencePack({

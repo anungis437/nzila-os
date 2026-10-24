@@ -10,11 +10,9 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { eq, and, isNull } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
-import { appendCanonicalAuditLog } from '@/lib/audit/canonical-audit-chain';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { claims, claimUpdates } from '@/db/schema/claims-schema';
 import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
-import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
@@ -113,27 +111,25 @@ export async function POST(
         })
         .returning();
 
-      // Canonical audit shares this transaction: if the audit row cannot be written the assignment rolls back.
-      const auditInTransaction = currentStateContextEnabled();
-      if (auditInTransaction) {
-        await appendCanonicalAuditLog(tx, {
-          organizationId: orgId,
-          action: 'update',
-          resourceType: 'claims',
-          resourceId: claim.claimId,
-          userId,
-          details: {
-            event: 'CASE_ASSIGNED',
-            caseId: claim.claimId,
-            fromAssignee: previousAssignee,
-            toAssignee: assigneeId,
-            reason: reason ?? null,
-            updatedBy: userId,
-          },
-        });
-      }
+      // The audit record shares this transaction in every deployment mode: if it cannot be written the assignment
+      // rolls back, so a transfer never commits unaudited.
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        action: 'case.assign',
+        resourceType: 'claims',
+        resourceId: claim.claimId,
+        userId,
+        details: {
+          event: 'CASE_ASSIGNED',
+          caseId: claim.claimId,
+          fromAssignee: previousAssignee,
+          toAssignee: assigneeId,
+          reason: reason ?? null,
+          updatedBy: userId,
+        },
+      });
 
-      return { denied:false as const,claimId:claim.claimId,previousAssignee, updateId: update.updateId, auditInTransaction };
+      return { denied:false as const,claimId:claim.claimId,previousAssignee, updateId: update.updateId };
     });
 
     if (!result) {
@@ -157,40 +153,6 @@ export async function POST(
     }
     if(result.denied) return await denyCaseAction(actor,'case_assign',result.claimId,
       'conflict' in result ? 'Case parties cannot assign or receive their own case' : 'Assignee is not an active canonical representative in this organization');
-
-    if (!result.auditInTransaction) {
-      try {
-        await auditDataMutation({
-          userId,
-          organizationId: orgId,
-          resource: 'claims',
-          resourceId: result.claimId,
-          action: 'update',
-          details: {
-            event: 'CASE_ASSIGNED',
-            caseId: result.claimId,
-            fromAssignee: result.previousAssignee,
-            toAssignee: assigneeId,
-            reason: reason ?? null,
-            updatedBy: userId,
-          },
-        });
-      } catch (auditError) {
-        // Non-canonical audit is a separate write after commit. Expose the committed state; a retry is a safe no-op.
-        logger.error('Case assignment committed but audit failed', auditError as Error);
-        return NextResponse.json(
-          {
-            error: 'ASSIGNMENT_COMMITTED_AUDIT_FAILED',
-            message: 'The assignment was recorded but its audit record could not be written. Retrying the same request will not repeat the transfer.',
-            caseId: result.claimId,
-            assignedTo: assigneeId,
-            previousAssignee: result.previousAssignee,
-            historyRecordId: result.updateId,
-          },
-          { status: 500 },
-        );
-      }
-    }
 
     logger.info('Case assigned', {
       caseId: result.claimId,

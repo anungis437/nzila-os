@@ -26,6 +26,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
 }));
 vi.mock('@/lib/services/steward-assignment', () => ({ assignSteward: m.assignSteward }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('@/lib/audit-logger', () => ({
   auditDataMutation: m.auditDataMutation,
   auditLog: m.auditLog,

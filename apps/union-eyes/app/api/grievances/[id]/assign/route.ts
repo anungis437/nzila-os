@@ -12,7 +12,7 @@ import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { assignSteward } from "@/lib/services/steward-assignment";
@@ -82,6 +82,16 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
         notes: `Steward ${parsed.data.stewardId} assigned`,
       });
 
+      // The assignment, its event, its convergence task and its audit record commit together.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.assign_steward',
+        resourceType: 'grievances',
+        resourceId: params.id,
+        details: { stewardId: parsed.data.stewardId, previousUnionRepId },
+      });
+
       return requestAssignmentConvergence(tx, {
         organizationId,
         grievanceId: params.id,
@@ -99,28 +109,6 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     await withSystemContext(() =>
       processAssignmentConvergence(convergenceTaskId, { type: 'user', id: userId }),
     );
-
-    // Audit
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: "grievances",
-      action: "update",
-      resourceId: params.id,
-      newState: { assignedStewardId: parsed.data.stewardId },
-    });
-
-    await auditLog({
-      eventType: AuditEventType.CASE_ASSIGNED,
-      severity: AuditSeverity.MEDIUM,
-      userId,
-      organizationId,
-      resource: 'grievances',
-      action: 'assign_steward',
-      resourceId: params.id,
-      details: { stewardId: parsed.data.stewardId },
-      outcome: 'success',
-    });
 
     buildUnionEvidencePack({
       actionType: 'GRIEVANCE_ASSIGNED',

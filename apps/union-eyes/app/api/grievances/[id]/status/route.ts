@@ -13,7 +13,8 @@ import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { canTransitionGrievance } from "@/lib/cases/grievance-transition-authority";
 import { getEffectiveCaseAccess } from "@/lib/services/case-access-service";
-import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
+import { auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
@@ -133,8 +134,8 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     const previousState = { status: grievance.status };
 
     // Apply update
-    const [updated] = await withRLSContext(async () => {
-      const [u] = await db
+    const [updated] = await withRLSContext(async (tx) => {
+      const [u] = await tx
         .update(grievances)
         .set({
           status: newStatus,
@@ -146,53 +147,28 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
         .returning();
 
       // Emit event
-      await db.insert(grievanceEvents).values({
+      await tx.insert(grievanceEvents).values({
         grievanceId: params.id,
         eventType: "status_changed",
         actorUserId: userId,
         notes: notes ?? `Status changed: ${currentStatus} → ${newStatus}`,
       });
 
+      // The status change, its event and its audit record commit together.
+      const intakeAction = newStatus === 'closed_no_case'
+        ? 'close_intake_no_case'
+        : currentStatus === 'draft' && newStatus !== 'draft' ? 'review_intake' : null;
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.status_change',
+        resourceType: 'grievances',
+        resourceId: params.id,
+        details: { previousState, newState: { status: newStatus }, ...(intakeAction ? { intakeAction } : {}) },
+      });
+
       return [u];
     });
-
-    // Audit
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: "grievances",
-      action: "update",
-      resourceId: params.id,
-      previousState,
-      newState: { status: newStatus },
-    });
-
-    // Emit specific audit events for intake/case lifecycle transitions
-    if (newStatus === 'closed_no_case') {
-      await auditLog({
-        eventType: AuditEventType.INTAKE_CLOSED,
-        severity: AuditSeverity.MEDIUM,
-        userId,
-        organizationId,
-        resource: 'grievances',
-        action: 'close_intake_no_case',
-        resourceId: params.id,
-        details: { previousStatus: currentStatus },
-        outcome: 'success',
-      });
-    } else if (currentStatus === 'draft' && newStatus !== 'draft') {
-      await auditLog({
-        eventType: AuditEventType.INTAKE_REVIEWED,
-        severity: AuditSeverity.MEDIUM,
-        userId,
-        organizationId,
-        resource: 'grievances',
-        action: 'review_intake',
-        resourceId: params.id,
-        details: { newStatus },
-        outcome: 'success',
-      });
-    }
 
     buildUnionEvidencePack({
       actionType: 'GRIEVANCE_STATUS_CHANGED',

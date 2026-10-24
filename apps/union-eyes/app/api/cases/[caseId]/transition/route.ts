@@ -20,7 +20,8 @@ import { toLifecycleState } from '@/lib/workflow/state-bridge';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims, claimUpdates, claimStatusEnum } from '@/db/schema/claims-schema';
 import { inAppNotifications } from '@/db/schema';
-import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canPerformAction } from '@/lib/action-enforcer';
 import { logger } from '@/lib/logger';
 import { getCaseActor, findReadableCase, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
@@ -179,6 +180,23 @@ export async function PATCH(
         });
       }
 
+      // The transition, its history, the member's notice and its audit record commit together.
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId,
+        action: 'case.transition',
+        resourceType: 'claims',
+        resourceId: claim.claimId,
+        details: {
+          event: 'CASE_TRANSITIONED',
+          from: fromStatus,
+          to: toDbStatus,
+          cupeFrom: cupeCurrentStatus,
+          cupeTo: targetStatus,
+          reason: reason ?? null,
+        },
+      });
+
       return {
         found: true as const,
         allowed: true as const,
@@ -214,23 +232,6 @@ export async function PATCH(
         { status: 403 },
       );
     }
-
-    // 7. Audit trail (outside RLS context — audit logger has its own)
-    await auditDataMutation({
-      userId,
-      organizationId: orgId,
-      resource: 'claims',
-      resourceId: result.claimId,
-      action: 'update',
-      details: {
-        event: 'CASE_TRANSITIONED',
-        from: result.fromStatus,
-        to: result.toStatus,
-        cupeFrom: result.cupeFromStatus,
-        cupeTo: result.cupeToStatus,
-        reason: reason ?? null,
-      },
-    });
 
     logger.info('Case transitioned', {
       claimId: result.claimId,

@@ -23,6 +23,7 @@ vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.organization, getUserRoleInOrganization: m.role }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: m.auditLog,
   AuditEventType: { CASE_ESCALATED: 'CASE_ESCALATED', AUTH_FAILED:'AUTH_FAILED' },

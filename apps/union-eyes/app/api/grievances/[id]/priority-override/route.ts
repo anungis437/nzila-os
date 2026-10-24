@@ -19,7 +19,7 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
-import { getAuditedDb } from '@/lib/api-guards';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const overrideSchema = z.object({
   newPriority: z.enum(["low", "medium", "high", "urgent"]),
@@ -79,46 +79,32 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "New priority must differ from current priority");
     }
 
-    const auditedDbResult = await getAuditedDb(organizationId);
-    if (!auditedDbResult.ok) {
-      return auditedDbResult.response;
-    }
-
-    // Apply the override
-    const [updated] = await withRLSContext(async () => {
-      const [u] = await db
+    // The override, its event and its audit record commit together.
+    const [updated] = await withRLSContext(async (tx) => {
+      const [u] = await tx
         .update(grievances)
         .set({ priority: newPriority, updatedAt: new Date() })
-        .where(eq(grievances.id, params.id))
+        .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)))
         .returning();
 
-      await auditedDbResult.db.insert(grievanceEvents, {
+      await tx.insert(grievanceEvents).values({
         grievanceId: params.id,
         eventType: 'priority_overridden',
         actorUserId: userId,
         notes: `Priority overridden: ${previousPriority} → ${newPriority}. Reason: ${reason}`,
       });
 
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.priority_override',
+        resourceType: 'grievances',
+        resourceId: params.id,
+        details: { previousPriority, newPriority, reason },
+      });
+
       return [u];
     });
-
-    // Audit: priority overridden
-    await auditLog({
-      eventType: AuditEventType.CASE_PRIORITY_OVERRIDDEN,
-      severity: AuditSeverity.HIGH,
-      userId,
-      organizationId,
-      resource: 'grievances',
-      action: 'priority_override',
-      resourceId: params.id,
-      details: {
-        previousPriority,
-        newPriority,
-        reason,
-      },
-      outcome: 'success',
-    });
-
     return standardSuccessResponse(updated);
   } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to override priority");
