@@ -24,6 +24,7 @@ The continuation directive rejected several blockers as engineering-owned. They 
 | `f51b5a7fe` | **Staff message assignment** (I-002): expiring, revocable, administrator-granted triage designation; metadata-only queue; assign, reassign and release by the current assignee or a designation holder; exactly one of two concurrent assignments wins; history, notice and audit in one transaction; stub evolution. |
 | `27d15c321` | **Session bearer** (A-004): both the TypeScript org binding and the Django canonical context forward only a 30-second bridge token, never the cookie. Test projects split so container, child-process and repository-scan suites run serially after the main project. |
 | `6241f944d`, `abaaf8b60` | **Replay seeds and fake seeder retired** (H-005 CLOSED): `db/replay.ps1`, six SQL seeds and two empty TypeScript seeders deleted; `/api/admin/seed-test-data` returns 501; ratchet added. |
+| `d36634665`, `c25d4f4eb`, `09ef28f2f` | **Atomic audit, second pass** (K-005). Case assign, notes, transition and escalate; grievance create, import rows, steward assignment, status, priority override, conversion and document upload; workbench assignment; the representation-authority and external-document-grant lifecycles; and collaborator access grant and revoke (ownership check, mutation and audit now in one transaction, which also closes a read-then-write race on the owner check). Each route test asserts the in-transaction audit and failure when the audit write fails. Ratchet `CASE-MUTATION-BEST-EFFORT-AUDIT` holds those files at zero and was shown to detect a reintroduced writer. Verified on this tree: `tsc` exit 0, 29 case and grievance route test files (169 tests) plus the service tests pass, convergence checker passes. The full `test:fast`, lint and the fresh-database PG15/16 runs above pre-date these commits and were not repeated. |
 | `556a08d56` | **Seniority-derived tenant-wide case read removed.** `caseReadScope` gives a member their own cases, staff the cases assigned to them, and a live `cases` triage designation holder the unassigned cases. Designations generalized to a `messages` or `cases` scope. |
 
 ## Evidence (this tree)
@@ -50,7 +51,7 @@ Test orchestration: the project split (`vitest.heavy.config.ts`, `vitest.shared.
 - **`union_rep_id`** (B-001): 30 readers, no canonical mapping or backfill rehearsal.
 - **Finance** (D-001, D-003): still a numeric hierarchy plus an exact allow-list; no duty model; the deployed `payments` relation is a 4-column stub.
 - **WorkAid** (G-002): the synthetic harness only; no union-side referral, consent or counsel adapter on the kernel (G-003 external).
-- **Audit** (K-005): about 60 best-effort call sites remain, including case and grievance assignment, transition, escalation, notes, documents, dispatch and representation-authority.
+- **Audit** (K-005): about 45 best-effort call sites remain: case evidence, dispatch assignment and requests, recommend-steward, suggest-clauses and others outside the case and grievance mutation set. The two representation-authority and external-grant services have no route consumer; their atomicity is proven by mocked-transaction tests only, not on PostgreSQL.
 - **Canonical-schema census** (H-007): every other Django-created relation the runtime writes is unaudited for missing defaults or columns.
 - **Bridge window**: a bridge can outlive revocation of its parent session by at most 30 seconds; closing it needs a parent link and a definer-predicate migration.
 - **Persona journeys** (workstream I/11): no end-to-end journey through real routes and persistence per persona was built.
@@ -73,7 +74,7 @@ Institutional adoption of the issuance rules and document class policy; a creden
 
 ## Resume order
 
-1. Convert the authority-bearing best-effort audit sites (case and grievance assignment, transition, escalation, notes; representation-authority; external-document-grant) to `persistAtomicAudit` and ratchet K-005 to zero.
+1. Convert the remaining best-effort audit sites (case evidence, dispatch, others) to `persistAtomicAudit`, extend `CASE-MUTATION-BEST-EFFORT-AUDIT`, and add a real-PostgreSQL rollback proof for case-access grant and grievance creation.
 2. Build the staff conversation surface and unread state on the existing contract.
 3. Route one domain end to end through `enforceAuthority` (case read) with a dedicated authority connection, then retire `caseReadScope`.
 4. `union_rep_id` mapping and backfill rehearsal on a disposable database; migrate readers.
