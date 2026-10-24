@@ -6,7 +6,8 @@ import { withApi, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,7 @@ export const POST = withApi(
     }),
   },
   async ({ body, userId, organizationId }) => {
+    // The election record and its audit record commit together in one system transaction.
     const id = await withSystemContext(async () => {
       const id = crypto.randomUUID();
       await db.execute(sql`
@@ -55,15 +57,15 @@ export const POST = withApi(
           ${body.totalVotes}, ${body.participationRate ?? 0}, false
         )
       `);
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'governance.council_election.create',
+        resourceType: 'council_elections',
+        resourceId: id,
+        details: { electionYear: body.electionYear, positionsAvailable: body.positionsAvailable, totalVotes: body.totalVotes },
+      });
       return id;
-    });
-    await auditDataMutation({
-      userId: userId!,
-      organizationId: organizationId!,
-      resource: 'council_elections',
-      resourceId: id,
-      action: 'create',
-      details: { electionYear: body.electionYear, positionsAvailable: body.positionsAvailable, totalVotes: body.totalVotes },
     });
     return { id };
   },

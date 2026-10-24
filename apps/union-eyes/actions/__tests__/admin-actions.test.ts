@@ -44,6 +44,7 @@ vi.mock('drizzle-orm', () => ({
   sql: (..._a: unknown[]) => ({}),
 }));
 vi.mock('@/lib/auth/rbac-server', () => ({ requireAdmin: mocks.requireAdmin }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('@/lib/logger', () => ({ logger: { info: mocks.loggerInfo, error: mocks.loggerError } }));
 vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidatePath }));
 

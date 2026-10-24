@@ -12,7 +12,8 @@ import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,13 +54,13 @@ export const POST = withApi(
         WHERE id = ${id}::uuid
       `);
 
-      // Fail-closed: an unauditable decision is rolled back with the transaction.
-      await auditDataMutation({
+      // The decision and its audit record commit together: an unauditable decision is rolled back.
+      await persistAtomicAudit(db as unknown as RLSTx, {
         userId,
         organizationId,
-        resource: 'reserved_matter_votes',
+        action: 'governance.reserved_matter.class_b_vote',
+        resourceType: 'reserved_matter_votes',
         resourceId: id,
-        action: 'update',
         details: { classBVote: body.vote, scope: 'platform_corporate_governance' },
       });
       return { updated: true, status: newStatus };

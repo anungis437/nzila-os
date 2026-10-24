@@ -5,7 +5,7 @@ const dialect = new PgDialect()
 const statements: { sql: string; params: unknown[] }[] = []
 let balance = '25.00'
 
-vi.mock('@/lib/audit/mandatory-audit', () => ({ appendMandatoryAudit: vi.fn(async () => true) }))
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }))
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_context: unknown, operation: (tx: unknown) => Promise<unknown>) =>
     operation({

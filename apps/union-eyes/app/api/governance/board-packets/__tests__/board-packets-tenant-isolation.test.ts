@@ -102,8 +102,8 @@ vi.mock('@/lib/services/board-packet-generator', () => ({
   boardPacketGenerator: { distributePacket: m.distributePacket },
 }));
 
-vi.mock('@/lib/audit-logger', () => ({
-  auditDataMutation: m.auditDataMutation,
+vi.mock('@/lib/audit/atomic-audit', () => ({
+  persistAtomicAudit: m.auditDataMutation,
 }));
 
 const ORG_A = 'org-a-uuid';
@@ -159,6 +159,7 @@ describe('POST /api/governance/board-packets (create) — tenant isolation', () 
 
     expect(m.insertReturning).toHaveBeenCalled();
     expect(m.auditDataMutation).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({ organizationId: ORG_A }),
     );
   });

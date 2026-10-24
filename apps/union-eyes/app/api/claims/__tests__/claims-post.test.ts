@@ -42,6 +42,8 @@ vi.mock('@/db/schema', () => ({
   claims: { name: 'claims' },
 }));
 
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
+
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: vi.fn().mockImplementation((fn: () => Promise<any>) => fn()),
   withSystemRLSContext: vi.fn(),

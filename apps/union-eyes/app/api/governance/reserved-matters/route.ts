@@ -6,7 +6,8 @@ import { withApi, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
@@ -57,15 +58,15 @@ export const POST = withApi(
           'pending'
         )
       `);
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        userId: userId!,
+        organizationId: organizationId!,
+        action: 'governance.reserved_matter.create',
+        resourceType: 'reserved_matter_votes',
+        resourceId: id,
+        details: { matterType: body.matterType, title: body.title, proposedBy: userId },
+      });
       return id;
-    });
-    await auditDataMutation({
-      userId: userId!,
-      organizationId: organizationId!,
-      resource: 'reserved_matter_votes',
-      resourceId: id,
-      action: 'create',
-      details: { matterType: body.matterType, title: body.title, proposedBy: userId },
     });
     return { id };
   },

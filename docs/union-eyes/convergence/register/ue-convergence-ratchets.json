@@ -151,6 +151,29 @@
         { "file": "apps/union-eyes/services/case-intelligence/related-documents-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/services/case-intelligence/types.ts", "reason": "Legacy type carrying the column" }
       ]
+    },
+    {
+      "id": "GOVERNANCE-APPROVAL-BEST-EFFORT-AUDIT",
+      "description": "Governance approvals must audit inside the mutation transaction (lib/audit/atomic-audit). The separate-connection writers are best-effort and not atomic (UE-CONV-I-001)",
+      "pattern": "auditDataMutation|auditSecurityEvent|auditLog[(]",
+      "paths": ["apps/union-eyes/app/api/governance/lifecycle/policies"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/node_modules/**"],
+      "mode": "zero"
+    },
+    {
+      "id": "DIRECT-MANDATORY-AUDIT-IMPORT",
+      "description": "appendMandatoryAudit returns false outside Canonical V2 and leaves the caller unaudited. Mutations use persistAtomicAudit; the listed modules own an explicit non-canonical atomic branch",
+      "pattern": "audit/mandatory-audit",
+      "paths": ["apps/union-eyes"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**"],
+      "allowed": [
+        { "file": "apps/union-eyes/lib/audit/atomic-audit.ts", "reason": "The atomic helper: appends canonically, otherwise inserts into audit_logs in the same transaction" },
+        { "file": "apps/union-eyes/lib/data-export-import.ts", "reason": "Branches explicitly: canonical ledger, else its own in-transaction audit_logs insert" },
+        { "file": "apps/union-eyes/lib/deadline-engine/audit.ts", "reason": "Writes deadline_audit_events on the caller executor, then the canonical record; failure is rethrown" },
+        { "file": "apps/union-eyes/lib/member-employment/durable-employment-audit.ts", "reason": "Branches explicitly: canonical ledger, else in-transaction audit_logs insert" },
+        { "file": "apps/union-eyes/lib/member-integrity/durable-member-audit.ts", "reason": "Branches explicitly: canonical ledger, else in-transaction audit_logs insert" },
+        { "file": "apps/union-eyes/lib/member-segments/durable-segment-audit.ts", "reason": "Branches explicitly: canonical ledger, else in-transaction audit_logs insert" }
+      ]
     }
   ]
 }

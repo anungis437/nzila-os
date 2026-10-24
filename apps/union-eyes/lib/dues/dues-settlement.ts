@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import type { RLSTx } from '@/lib/db/with-rls-context'
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { toCents } from '@/lib/decimal-safe'
 import { DUES_CURRENCY, DUES_PAYMENT_KIND } from './dues-payment-service'
 
@@ -141,7 +141,7 @@ export async function settleDuesPaymentIntent(
         RETURNING id::text AS id`,
   )) as unknown as { id: string }[]
 
-  await appendMandatoryAudit(tx, {
+  await persistAtomicAudit(tx, {
     organizationId: row.organization_id,
     action: 'dues.settle',
     resourceType: 'dues_transactions',
@@ -172,7 +172,7 @@ export async function recordDuesPaymentProviderOutcome(
     sql`UPDATE dues_transactions SET status = ${status}, updated_at = now()
         WHERE id = ${row.id}::uuid AND status = 'pending'`,
   )
-  await appendMandatoryAudit(tx, {
+  await persistAtomicAudit(tx, {
     organizationId: row.organization_id,
     action: `dues.payment_${status}`,
     resourceType: 'dues_transactions',
@@ -189,7 +189,7 @@ export async function recordDuesSettlementDenial(
   eventId: string,
 ): Promise<void> {
   if (!error.organizationId) return
-  await appendMandatoryAudit(tx, {
+  await persistAtomicAudit(tx, {
     organizationId: error.organizationId,
     action: 'dues.settlement_denied',
     resourceType: 'dues_transactions',

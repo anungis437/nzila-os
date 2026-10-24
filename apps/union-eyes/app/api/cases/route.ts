@@ -8,11 +8,10 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { NextResponse } from 'next/server';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { recordUnionEyesCaseCreated } from '@/lib/pilot-metrics';
 import { z } from 'zod';
 import { getCaseActor, caseReadScope } from '@/lib/cases/case-authorization';
@@ -141,7 +140,6 @@ export const POST = withApi(
       sourceIntakeId,
     } = parsed.data;
 
-    let audited = false;
     const rows = await withRLSContext(async (tx) => {
       const result = await tx.execute(sql`
         INSERT INTO claims (
@@ -172,36 +170,25 @@ export const POST = withApi(
                   created_at AS "createdAt"
       `);
       const created = result[0] as Record<string, unknown> | undefined;
-      // Mandatory canonical audit shares this transaction: an audit failure rolls the case back.
-      audited = await appendMandatoryAudit(tx, {
+      // The audit record shares this transaction in every deployment mode: an audit failure rolls the case back.
+      await persistAtomicAudit(tx, {
         organizationId,
         action: 'claim.create',
         resourceType: 'claims',
         resourceId: created?.claimId as string | undefined,
         userId,
-        details: { route: '/api/cases', claimType, priority, claimNumber: created?.claimNumber ?? null },
+        details: {
+          route: '/api/cases',
+          claimType,
+          priority,
+          claimNumber: created?.claimNumber ?? null,
+          sourceIntakeId: sourceIntakeId ?? null,
+        },
       });
       return result;
     });
 
     const inserted = rows[0];
-
-    // Audit: log case creation with intake provenance (legacy best-effort writer outside V2)
-    if (!audited) await auditLog({
-      eventType: AuditEventType.CASE_CREATED,
-      severity: AuditSeverity.MEDIUM,
-      userId: userId ?? 'unknown',
-      organizationId,
-      resource: 'cases',
-      action: 'create_official_case',
-      resourceId: (inserted as Record<string, unknown>)?.claimId as string,
-      details: {
-        claimType,
-        priority,
-        sourceIntakeId: sourceIntakeId ?? null,
-      },
-      outcome: 'success',
-    });
 
     // Evidence: tamper-proof audit trail for case creation
     buildUnionEvidencePack({
@@ -217,21 +204,6 @@ export const POST = withApi(
       recordUnionEyesCaseCreated(organizationId, createdClaimId, userId ?? 'system:ue-case-create', traceId).catch((err) =>
         logger.warn('Pilot metric emit failed', { error: String(err), metric: 'cases_created' }),
       );
-    }
-
-    // Audit: initial priority set on case creation
-    if (priority) {
-      await auditLog({
-        eventType: AuditEventType.CASE_PRIORITY_SET,
-        severity: AuditSeverity.LOW,
-        userId: userId ?? 'unknown',
-        organizationId,
-        resource: 'cases',
-        action: 'set_initial_priority',
-        resourceId: (inserted as Record<string, unknown>)?.claimId as string,
-        details: { priority },
-        outcome: 'success',
-      });
     }
 
     return NextResponse.json({ data: inserted }, { status: 201 });

@@ -20,7 +20,8 @@ import {
   toGovernanceLabel,
 } from '@/lib/services/document-governance-service';
 import { generateSasUrl } from '@/lib/blob-client';
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 
 const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
@@ -156,7 +157,7 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     : row.fileUrl;
 
   // Access evidence is mandatory: no download URL is issued without its canonical audit record.
-  await appendMandatoryAudit(db, {
+  await persistAtomicAudit(db as unknown as RLSTx, {
     organizationId,
     action: 'document.download',
     resourceType: 'documents',

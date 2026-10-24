@@ -12,7 +12,7 @@ import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from "@/lib/rate-
 import { putBlob, deleteBlob } from "@/lib/blob-client";
 import { db } from "@/db/db";
 import { documents } from "@/db/schema";
-import { appendMandatoryAudit } from "@/lib/audit/mandatory-audit";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import type { RLSTx } from "@/lib/db/with-rls-context";
 import { withOrgOwnedContext } from "@/lib/db/org-owned-context";
 import { logger } from "@/lib/logger";
@@ -290,7 +290,7 @@ export const POST = withRoleAuth('member', async (request, context) => {
             malwareScan: blob.malwareScan,
           },
         }).returning();
-        await appendMandatoryAudit(tx as unknown as RLSTx, {
+        await persistAtomicAudit(tx as unknown as RLSTx, {
           organizationId,
           action: 'document.upload',
           resourceType: 'documents',

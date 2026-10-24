@@ -13,8 +13,7 @@ import { ApiError } from '@/lib/api/errors'
 import { db } from '@/db/db'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { normalizeRole } from '@/lib/api-auth-guard'
-import { auditDataMutation, auditSecurityEvent } from '@/lib/audit-logger'
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import type { CanonicalAuditEntry } from '@/lib/audit/canonical-audit-chain'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { policyApprovalChains, policyApprovalActions, governedPolicies } from '@nzila/db/schema'
@@ -84,14 +83,12 @@ async function loadScopedPolicy(id: string, actor: ApprovalActor, lock: boolean)
 }
 
 /**
- * Records the audit for a governance mutation INSIDE the active transaction when the canonical audit chain is in
- * force, so a failed audit rolls the mutation back with it. Outside canonical mode the legacy writer runs, which is
- * best-effort and not atomic; that gap is tracked in the convergence register.
+ * Governance mutations and their denials are audited INSIDE the active transaction in every deployment mode
+ * (canonical ledger, or `audit_logs` otherwise). There is no separate-connection fallback: a failed audit write
+ * rolls the approval back.
  */
-async function auditInTransaction(entry: CanonicalAuditEntry, legacy: () => Promise<unknown>): Promise<void> {
-  const inTransaction = await appendMandatoryAudit(db as unknown as RLSTx, entry)
-  if (!inTransaction) await legacy()
-}
+const auditInTransaction = (entry: CanonicalAuditEntry, outcome: 'success' | 'failure' = 'success') =>
+  persistAtomicAudit(db as unknown as RLSTx, entry, outcome)
 
 function resolveActor(user: { id?: string; role?: string | null } | null, organizationId: string | null): ApprovalActor {
   if (!user?.id) {
@@ -154,13 +151,17 @@ export const POST = withApi(
       if (!auditOrg) throw ApiError.forbidden('An audit scope is required to record governance actions.')
 
       const denyWith = async (decision: Denial, details: Record<string, unknown>) => {
-        await auditSecurityEvent({
-          eventType: 'governance.policy_approval.denied',
-          userId: actor.id,
-          organizationId: auditOrg,
-          outcome: 'failure',
-          details: { policyId: id, code: decision.code, reason: decision.reason, ...details },
-        })
+        await auditInTransaction(
+          {
+            organizationId: auditOrg,
+            userId: actor.id,
+            action: 'governance.policy_approval.denied',
+            resourceType: 'governed_policies',
+            resourceId: id,
+            details: { policyId: id, code: decision.code, reason: decision.reason, ...details },
+          },
+          'failure',
+        )
         return { denied: decision } as const
       }
 
@@ -197,25 +198,14 @@ export const POST = withApi(
             createdBy: actor.id,
           })
           .returning()
-        await auditInTransaction(
-          {
-            organizationId: auditOrg,
-            userId: actor.id,
-            action: 'governance.policy_approval_chain.create',
-            resourceType: 'policy_approval_chains',
-            resourceId: chain?.id,
-            details: { policyId: id, actorRole: actor.role },
-          },
-          () =>
-            auditDataMutation({
-              userId: actor.id,
-              organizationId: auditOrg,
-              resource: 'policy_approval_chains',
-              resourceId: chain?.id,
-              action: 'create',
-              details: { policyId: id, actorRole: actor.role },
-            }),
-        )
+        await auditInTransaction({
+          organizationId: auditOrg,
+          userId: actor.id,
+          action: 'governance.policy_approval_chain.create',
+          resourceType: 'policy_approval_chains',
+          resourceId: chain?.id,
+          details: { policyId: id, actorRole: actor.role },
+        })
         return { chain }
       }
 
@@ -265,25 +255,14 @@ export const POST = withApi(
           delegatedToUserId: body.action === 'delegated' ? body.delegatedToUserId : undefined,
         })
         .returning()
-      await auditInTransaction(
-        {
-          organizationId: auditOrg,
-          userId: actor.id,
-          action: 'governance.policy_approval_action.create',
-          resourceType: 'policy_approval_actions',
-          resourceId: action?.id,
-          details: { policyId: id, chainId: chain.id, decision: body.action, actorRole: actor.role },
-        },
-        () =>
-          auditDataMutation({
-            userId: actor.id,
-            organizationId: auditOrg,
-            resource: 'policy_approval_actions',
-            resourceId: action?.id,
-            action: 'create',
-            details: { policyId: id, chainId: chain.id, decision: body.action, actorRole: actor.role },
-          }),
-      )
+      await auditInTransaction({
+        organizationId: auditOrg,
+        userId: actor.id,
+        action: 'governance.policy_approval_action.create',
+        resourceType: 'policy_approval_actions',
+        resourceId: action?.id,
+        details: { policyId: id, chainId: chain.id, decision: body.action, actorRole: actor.role },
+      })
 
       const satisfied = isChainSatisfied(chain, [
         ...history,

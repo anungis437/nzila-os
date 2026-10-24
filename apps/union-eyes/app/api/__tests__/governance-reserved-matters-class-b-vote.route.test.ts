@@ -10,7 +10,7 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, z: require('zod') }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.auditDataMutation }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, sql: Object.assign(vi.fn((...args: unknown[]) => args), { mapWith: vi.fn() }) };
@@ -35,7 +35,7 @@ describe('governance/reserved-matters/[id]/class-b-vote route', () => {
   it('records an approve vote and audits the session actor', async () => {
     const { POST } = await loadRoute();
     expect(await (POST as any)(ctx({ vote: 'approve' }))).toEqual({ updated: true, status: 'approved' });
-    expect(m.auditDataMutation).toHaveBeenCalledWith(expect.objectContaining({ userId: 'platform-user', resourceId: 'uuid-1' }));
+    expect(m.auditDataMutation).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ userId: 'platform-user', resourceId: 'uuid-1' }));
   });
 
   it('records a veto vote', async () => {

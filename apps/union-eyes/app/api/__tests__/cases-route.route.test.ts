@@ -16,11 +16,7 @@ vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badReque
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
-vi.mock('@/lib/audit-logger', () => ({
-  auditLog: m.auditLog,
-  AuditEventType: { CASE_CREATED: 'CASE_CREATED' },
-  AuditSeverity: { HIGH: 'HIGH', MEDIUM: 'MEDIUM' },
-}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.auditLog }));
 vi.mock('@/lib/pilot-metrics', () => ({ recordUnionEyesCaseCreated: m.recordUnionEyesCaseCreated }));
 vi.mock('drizzle-orm', () => ({ sql: m.sql }));
 
@@ -112,7 +108,10 @@ describe('cases route', () => {
 
     expect(response.status).toBe(201);
     expect(payload.data.claimId).toBe('c1');
-    expect(m.auditLog).toHaveBeenCalled();
+    expect(m.auditLog).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'claim.create', userId: 'u1', organizationId: 'org_1' }),
+    );
     expect(m.buildUnionEvidencePack).toHaveBeenCalled();
     expect(m.recordUnionEyesCaseCreated).toHaveBeenCalled();
   });

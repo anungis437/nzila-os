@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context'
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { fromCents, toCents } from '@/lib/decimal-safe'
 
 /**
@@ -79,7 +79,7 @@ export async function initiateDuesPayment(input: {
           RETURNING id::text AS id`,
     )) as unknown as { id: string }[]
     const paymentId = created[0].id
-    await appendMandatoryAudit(tx, {
+    await persistAtomicAudit(tx, {
       organizationId,
       action: 'dues.payment_initiated',
       resourceType: 'dues_transactions',

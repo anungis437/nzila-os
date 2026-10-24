@@ -9,9 +9,7 @@ const m = vi.hoisted(() => ({
   selectQueue: [] as unknown[][],
   insertReturningQueue: [] as unknown[][],
   insertedValues: [] as Record<string, unknown>[],
-  auditSecurityEvent: vi.fn(async () => undefined),
-  auditDataMutation: vi.fn(async () => undefined),
-  appendMandatoryAudit: vi.fn(async () => false),
+  persistAtomicAudit: vi.fn(async () => undefined),
 }));
 
 function makeSelectChain(rows: unknown[]) {
@@ -42,11 +40,7 @@ const mockDb = {
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
-vi.mock('@/lib/audit-logger', () => ({
-  auditSecurityEvent: m.auditSecurityEvent,
-  auditDataMutation: m.auditDataMutation,
-}));
-vi.mock('@/lib/audit/mandatory-audit', () => ({ appendMandatoryAudit: m.appendMandatoryAudit }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), desc: vi.fn(() => 'desc'), asc: vi.fn(() => 'asc') };
@@ -100,7 +94,7 @@ describe('governance/lifecycle/policies/[id]/approvals route (server-owned autho
     m.selectQueue = [];
     m.insertReturningQueue = [];
     m.insertedValues = [];
-    m.appendMandatoryAudit.mockResolvedValue(false);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.withApi.mockImplementation(
       (_config: unknown, handler: (ctx: any) => Promise<unknown>) =>
@@ -155,7 +149,11 @@ describe('governance/lifecycle/policies/[id]/approvals route (server-owned autho
       const json = await res.json();
       expect(json.chain.id).toBe('chain_new');
       expect(m.insertedValues[0]).toMatchObject({ createdBy: 'u1', governedPolicyId: 'pol_1' });
-      expect(m.auditDataMutation).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u1', resource: 'policy_approval_chains' }));
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+        mockDb,
+        expect.objectContaining({ userId: 'u1', resourceType: 'policy_approval_chains', resourceId: 'chain_new' }),
+        'success',
+      );
     });
 
     it('refuses an empty permissive chain and audits the denial', async () => {
@@ -163,7 +161,11 @@ describe('governance/lifecycle/policies/[id]/approvals route (server-owned autho
       m.selectQueue.push([policyRow()], []);
       await expect(call(POST as any, { op: 'create_chain' }, { id: 'u1', role: 'admin' })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
       expect(m.insertedValues).toHaveLength(0);
-      expect(m.auditSecurityEvent).toHaveBeenCalledWith(expect.objectContaining({ eventType: 'governance.policy_approval.denied' }));
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+        mockDb,
+        expect.objectContaining({ action: 'governance.policy_approval.denied' }),
+        'failure',
+      );
     });
 
     it('refuses a second chain on the same policy version', async () => {
@@ -205,8 +207,10 @@ describe('governance/lifecycle/policies/[id]/approvals route (server-owned autho
         call(POST as any, { op: 'record_action', chainId: CHAIN_ID, action: 'approved', actorRole: 'president' }, { id: 'u1', role: 'admin' }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
       expect(m.insertedValues).toHaveLength(0);
-      expect(m.auditSecurityEvent).toHaveBeenCalledWith(
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+        mockDb,
         expect.objectContaining({ details: expect.objectContaining({ code: 'NOT_AN_ELIGIBLE_APPROVER' }) }),
+        'failure',
       );
     });
 
@@ -232,40 +236,28 @@ describe('governance/lifecycle/policies/[id]/approvals route (server-owned autho
       const { POST } = await loadRoute();
       m.selectQueue.push([policyRow()], [chainRow()], []);
       m.insertReturningQueue.push([{ id: 'action_new' }]);
-      m.auditDataMutation.mockRejectedValueOnce(new Error('audit store down'));
+      m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit store down'));
       await expect(
         call(POST as any, { op: 'record_action', chainId: CHAIN_ID, action: 'approved' }, { id: 'u1', role: 'president' }),
       ).rejects.toThrow('audit store down');
     });
 
-    it('in canonical mode the approval is audited inside the transaction and the legacy writer is not used', async () => {
+    it('audits the approval inside the transaction with the approval action and its resource', async () => {
       const { POST } = await loadRoute();
       m.selectQueue.push([policyRow()], [chainRow()], []);
       m.insertReturningQueue.push([{ id: 'action_new' }]);
-      m.appendMandatoryAudit.mockResolvedValueOnce(true);
       await call(POST as any, { op: 'record_action', chainId: CHAIN_ID, action: 'approved' }, { id: 'u1', role: 'president' });
-      expect(m.appendMandatoryAudit).toHaveBeenCalledWith(
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith(
         mockDb,
         expect.objectContaining({ organizationId: ORG, userId: 'u1', action: 'governance.policy_approval_action.create', resourceId: 'action_new' }),
+        'success',
       );
-      expect(m.auditDataMutation).not.toHaveBeenCalled();
     });
 
-    it('in canonical mode a failed in-transaction audit fails the approval instead of reporting success', async () => {
+    it('fails when a denial cannot be audited (no silent 403)', async () => {
       const { POST } = await loadRoute();
       m.selectQueue.push([policyRow()], [chainRow()], []);
-      m.insertReturningQueue.push([{ id: 'action_new' }]);
-      m.appendMandatoryAudit.mockRejectedValueOnce(new Error('canonical audit chain unavailable'));
-      await expect(
-        call(POST as any, { op: 'record_action', chainId: CHAIN_ID, action: 'approved' }, { id: 'u1', role: 'president' }),
-      ).rejects.toThrow('canonical audit chain unavailable');
-      expect(m.auditDataMutation).not.toHaveBeenCalled();
-    });
-
-    it('fails closed when a denial cannot be audited (no silent 403)', async () => {
-      const { POST } = await loadRoute();
-      m.selectQueue.push([policyRow()], [chainRow()], []);
-      m.auditSecurityEvent.mockRejectedValueOnce(new Error('audit store down'));
+      m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit store down'));
       await expect(
         call(POST as any, { op: 'record_action', chainId: CHAIN_ID, action: 'approved' }, { id: 'u1', role: 'admin' }),
       ).rejects.toThrow('audit store down');

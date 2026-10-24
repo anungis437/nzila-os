@@ -13,7 +13,7 @@ import { claims } from '@/db/schema'
 import { sql } from 'drizzle-orm'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { allocateClaimNumber } from '@/lib/claims/claim-number'
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { z } from 'zod'
 
 const claimCreateSchema = z
@@ -126,7 +126,7 @@ export const POST = withApi(
 
       const [row] = await tx.insert(claims).values(values).returning()
       // Mandatory canonical audit shares this transaction: an audit failure rolls the claim back.
-      await appendMandatoryAudit(tx, {
+      await persistAtomicAudit(tx, {
         organizationId,
         action: 'claim.create',
         resourceType: 'claims',

@@ -15,7 +15,8 @@ import { ApiError } from '@/lib/api/errors'
 import { db } from '@/db/db'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { normalizeRole } from '@/lib/api-auth-guard'
-import { auditDataMutation } from '@/lib/audit-logger'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import type { RLSTx } from '@/lib/db/with-rls-context'
 import { governedPolicies, policyApprovalChains, policyApprovalActions } from '@nzila/db/schema'
 import { asc, eq } from 'drizzle-orm'
 import {
@@ -131,13 +132,13 @@ export const PATCH = withApi(
         .where(eq(governedPolicies.id, id))
         .returning()
 
-      // Fail-closed: if the audit record cannot be written the transition is rolled back.
-      await auditDataMutation({
+      // The transition and its audit record commit together: a failed audit write rolls the transition back.
+      await persistAtomicAudit(db as unknown as RLSTx, {
         userId: actor.id,
         organizationId: auditOrg,
-        resource: 'governed_policies',
+        action: 'governance.policy_lifecycle.transition',
+        resourceType: 'governed_policies',
         resourceId: id,
-        action: 'update',
         details: { from: current.lifecycleStatus, to: targetState, actorRole: actor.role },
       })
 

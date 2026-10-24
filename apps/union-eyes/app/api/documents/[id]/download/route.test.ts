@@ -31,6 +31,7 @@ const mocks = vi.hoisted(() => {
     getEffectiveCaseAccess: vi.fn(),
     isDocumentVisibleByPolicy: vi.fn(),
     generateSasUrl: vi.fn(),
+    persistAtomicAudit: vi.fn(async () => undefined),
   };
 });
 
@@ -62,6 +63,8 @@ vi.mock('@/lib/services/document-governance-service', () => ({
 vi.mock('@/lib/blob-client', () => ({
   generateSasUrl: mocks.generateSasUrl,
 }));
+
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.persistAtomicAudit }));
 
 const { GET } = await import('@/app/api/documents/[id]/download/route');
 

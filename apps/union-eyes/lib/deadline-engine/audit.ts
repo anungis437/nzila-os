@@ -26,10 +26,8 @@ export interface WriteAuditEventInput {
 }
 
 /**
- * Append an audit event. Never throws in the caller — audit failures are
- * logged but must not break the primary operation. This preserves the
- * invariant that the operation completes even if the audit writer is
- * temporarily unreachable.
+ * Append an audit event. A failure is logged and rethrown: the append-only event and the canonical record
+ * are part of the caller's operation and must not be lost silently.
  *
  * `tx` is optional and should be passed explicitly by callers running
  * under `withSystemContext((tx) => ...)` (e.g. cron jobs) so this INSERT
