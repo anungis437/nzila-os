@@ -804,6 +804,66 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'app/api/reports/scheduled/route.ts (the non-v2 path the OTHER, live page calls) is itself backed by ' +
       'real cron delivery depends on UE-CRON-SCHEDULED-REPORTS above, which remains NOT_IMPLEMENTED.',
   },
+
+  // ------------------------------------------------------------------------
+  // Governance Officer 2.1 (UE-GOVERNANCE-OFFICER-CANONICAL-2.1) — containment
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-PRIVACY-INCIDENT-WORKFLOW',
+    title: 'Privacy incident (breach) management',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/privacy/breach/route.ts'],
+    evidence: [
+      'app/api/privacy/breach/route.ts — throws ApiError.notImplemented → HTTP 501 (previously generic CRUD over dataClassificationPolicy)',
+      'app/api/privacy/__tests__/data-classification-policy-writerole.test.ts — asserts the route no longer imports the CRUD factory or the policy table',
+    ],
+    targetWave: 9,
+    notes:
+      'Platform classification doctrine now lives at app/api/compliance/data-classification-policy/route.ts. A real incident ' +
+      'workflow needs dedicated storage, jurisdiction determination, human legal review and a separate dispatch step.',
+  },
+  {
+    id: 'UE-PRIVACY-DSAR-WORKFLOW',
+    title: 'Information-rights (DSAR) request handling',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/privacy/dsar/route.ts'],
+    evidence: ['app/api/privacy/dsar/route.ts — throws ApiError.notImplemented → HTTP 501'],
+    targetWave: 9,
+  },
+  {
+    id: 'UE-PRIVACY-PROVINCIAL-CASES',
+    title: 'Provincial / jurisdictional privacy cases',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/privacy/provincial/route.ts'],
+    evidence: ['app/api/privacy/provincial/route.ts — throws ApiError.notImplemented → HTTP 501'],
+    targetWave: 9,
+  },
+  {
+    id: 'UE-PRIVACY-BREACH-ASSESSMENT',
+    title: 'Breach notification determination (PIPEDA / provincial)',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/emergency/pipeda/route.ts'],
+    evidence: [
+      'app/api/emergency/pipeda/route.ts — returns LEGAL_REVIEW_REQUIRED / legalDetermination NOT_MADE; no threshold, deadline or channel is computed',
+      'app/api/__tests__/emergency-pipeda-legal-review.route.test.ts',
+    ],
+    targetWave: 9,
+    notes:
+      'The route only acknowledges reported facts. It makes no legal determination, persists nothing and dispatches no notification.',
+  },
+  {
+    id: 'UE-GOV-INDEPENDENT-REVIEW',
+    title: 'Independent governance review workflow (intake → finding → verified remediation)',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['lib/governance-officer/review-engine.ts'],
+    evidence: [
+      'lib/governance-officer/__tests__/review-engine.test.ts — pure domain core only (TEST_PROVEN); no persistence, HTTP surface or UI',
+    ],
+    targetWave: 9,
+    notes:
+      'Domain decision core exists; the capability is not operational until persisted state, server routes, audit trail and ' +
+      'native acceptance exist (UE-GOVERNANCE-OFFICER-CANONICAL-2.1 §XV).',
+  },
 ] as const;
 
 /**

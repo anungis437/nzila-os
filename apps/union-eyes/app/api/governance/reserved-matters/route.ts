@@ -35,7 +35,7 @@ export const POST = withApi(
       matterType: z.string().min(1),
       title: z.string().min(1),
       description: z.string().min(1),
-      proposedBy: z.string().min(1),
+      proposedBy: z.string().optional(), // ignored: the proposer is always the session user
       votingDeadline: z.string().optional(),
       classATotalVotes: z.number().int().optional(),
       matterDetails: z.record(z.unknown()).optional(),
@@ -50,7 +50,7 @@ export const POST = withApi(
           proposed_by, voting_deadline, class_a_total_votes, matter_details, status
         ) VALUES (
           ${id}::uuid, NOW(), NOW(), ${body.matterType}, ${body.title},
-          ${body.description}, ${body.proposedBy},
+          ${body.description}, ${userId!},
           ${body.votingDeadline ? body.votingDeadline : null}::timestamptz,
           ${body.classATotalVotes ?? 0},
           ${JSON.stringify(body.matterDetails ?? {})}::jsonb,
@@ -65,7 +65,7 @@ export const POST = withApi(
       resource: 'reserved_matter_votes',
       resourceId: id,
       action: 'create',
-      details: { matterType: body.matterType, title: body.title, proposedBy: body.proposedBy },
+      details: { matterType: body.matterType, title: body.title, proposedBy: userId },
     });
     return { id };
   },
