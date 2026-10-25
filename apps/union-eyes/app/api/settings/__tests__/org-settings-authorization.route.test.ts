@@ -5,6 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const captured = vi.hoisted(() => ({ withApi: [] as Array<Record<string, any>>, crud: [] as Array<Record<string, any>> }))
 
 vi.mock('@/db/db', () => ({ db: {} }))
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: vi.fn() }))
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn() }))
 vi.mock('@/db/schema-organizations', () => ({ organizations: {} }))
 vi.mock('@/db/schema', () => ({ organizationMembers: {}, organizations: {} }))
 vi.mock('drizzle-orm', () => ({ eq: vi.fn(), sql: vi.fn(), count: vi.fn() }))
