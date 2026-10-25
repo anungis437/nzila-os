@@ -14,6 +14,7 @@ import {
   documentVersions,
 } from '@/db/schema/documents-schema';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { grievances } from '@/db/schema/domains/claims/grievances';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import {
@@ -220,6 +221,18 @@ export const POST = withOrganizationAuth(async (request, context) => {
   if ((parsed.data.linkedEntityType === 'grievance' || parsed.data.linkedEntityType === 'case') && parsed.data.linkedEntityId) {
     const access = await getEffectiveCaseAccess({ organizationId, grievanceId: parsed.data.linkedEntityId, userId });
     if (!access.canViewCase || !access.canUploadDocuments) return standardErrorResponse(ErrorCode.NOT_FOUND, 'Case not found');
+  } else if (parsed.data.linkedEntityId) {
+    // A different link type must not be a way around the case check: an id that names a case of this organization is
+    // filed against that case, so the same kernel decision applies. Any other id is a non-case target.
+    const [namedCase] = await db
+      .select({ id: grievances.id })
+      .from(grievances)
+      .where(and(eq(grievances.id, parsed.data.linkedEntityId), eq(grievances.organizationId, organizationId)))
+      .limit(1);
+    if (namedCase) {
+      const access = await getEffectiveCaseAccess({ organizationId, grievanceId: namedCase.id, userId });
+      if (!access.canViewCase || !access.canUploadDocuments) return standardErrorResponse(ErrorCode.NOT_FOUND, 'Case not found');
+    }
   }
 
   let intakeId: string | null = null;

@@ -18,6 +18,7 @@ const m = vi.hoisted(() => {
       leftJoin: vi.fn(() => chain),
       where: vi.fn(() => chain),
       orderBy: vi.fn(() => chain),
+      limit: vi.fn(() => chain),
       then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
     };
     return chain;
@@ -300,5 +301,39 @@ describe('documents/repository route', () => {
     expect(response.status).toBe(404);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.resolveStoredBlob).not.toHaveBeenCalled();
+  });
+
+  const CASE_ID = '00000000-0000-0000-0000-0000000000aa';
+  const filed = (linkedEntityType: string, linkedEntityId: string) =>
+    new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', fileUrl: 'https://blob.example/doc1.pdf', documentType: 'policy', mimeType: 'application/pdf',
+        privacyLabel: 'team_confidential', linkedEntityType, linkedEntityId,
+      }),
+    });
+
+  it('applies the case decision when another link type names a case of the organization', async () => {
+    const { POST } = await loadRoute();
+    m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false, canUploadDocuments: false });
+    for (const type of ['member', 'other', 'policy_library', 'template_library', 'collective_agreement']) {
+      m.queueSelect([{ id: CASE_ID }]);
+      const response = await POST(filed(type, CASE_ID));
+      expect(response.status, type).toBe(404);
+    }
+    expect(m.getEffectiveCaseAccess).toHaveBeenCalledWith({ organizationId: TEST_ORG_ID, grievanceId: CASE_ID, userId: TEST_USER_ID });
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
+  });
+
+  it('files under another link type when the id is not a case, or when the principal may add evidence to the case', async () => {
+    const { POST } = await loadRoute();
+    m.queueSelect([]);
+    expect((await POST(filed('policy_library', '00000000-0000-0000-0000-0000000000bb'))).status).toBe(200);
+    expect(m.getEffectiveCaseAccess).not.toHaveBeenCalled();
+    m.queueSelect([{ id: CASE_ID }]);
+    expect((await POST(filed('other', CASE_ID))).status).toBe(200);
+    expect(m.getEffectiveCaseAccess).toHaveBeenCalledTimes(1);
   });
 });

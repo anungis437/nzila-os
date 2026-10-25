@@ -16,11 +16,11 @@ import { readTransitionHistory } from './transition-history'
 import { claimDetailQuery } from './claim-detail-query'
 import { randomUUID } from 'node:crypto'
 
-const m = vi.hoisted(() => ({ audit: vi.fn() }))
+const m = vi.hoisted(() => ({ audit: vi.fn(), v2: { on: true } }))
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: vi.fn() }))
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: vi.fn(), getUserRoleInOrganization: vi.fn() }))
 vi.mock('@/lib/audit-logger', () => ({ auditLog: m.audit, AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }))
-vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => true }))
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => m.v2.on }))
 
 import { caseReadScope, caseTriageQueueScope, findReadableCase, type CaseActor } from './case-authorization'
 
@@ -64,8 +64,14 @@ beforeAll(async () => {
       CREATE TABLE public.grievance_transitions (
         id uuid PRIMARY KEY, organization_id uuid NOT NULL, claim_id uuid NOT NULL, from_stage_id uuid, to_stage_id uuid NOT NULL,
         reason text, notes text, transitioned_by text, transitioned_at timestamptz DEFAULT now(), visibility_scope text NOT NULL DEFAULT 'staff');
-      CREATE TABLE public.organization_members (user_id text, organization_id uuid, name text, email text, phone text);
-      GRANT SELECT ON public.grievance_transitions, public.organization_members TO union_eyes_runtime;`)
+      CREATE TABLE public.organization_members (user_id text, organization_id uuid, name text, email text, phone text, role text, status text, deleted_at timestamptz);
+      GRANT SELECT ON public.grievance_transitions, public.organization_members TO union_eyes_runtime;
+      INSERT INTO public.organization_members (user_id, organization_id, role, status) VALUES ('${NEW_STEWARD}', '${ORG}', 'steward', 'active');
+      -- TEST DOUBLE of the Canonical V2 predicate (db/auth/case-assignee-predicate.ts is not installed on PGlite): it
+      -- answers from the same compatibility projection so both membership paths can be exercised here.
+      CREATE FUNCTION public.ue_case_assignee_authorized(u text, o uuid) RETURNS boolean LANGUAGE sql STABLE AS $f$
+        SELECT EXISTS (SELECT 1 FROM public.organization_members m WHERE m.user_id = u AND m.organization_id = o
+          AND m.status = 'active' AND m.deleted_at IS NULL AND m.role IN ('steward', 'chief_steward', 'officer', 'admin')) $f$;`)
     await pg.query(
       `INSERT INTO public.claims (claim_id, claim_number, organization_id, member_id) VALUES
          ($1,'CASE-own',$5,$6), ($2,'CASE-unassigned',$5,'someone_else'), ($3,'CASE-assigned',$5,'someone_else'), ($4,'CASE-foreign',$7,$6)`,
@@ -207,6 +213,26 @@ describe('list pre-filters narrow, and a triage designation exposes only the una
   it('no designation lists nothing', async () => {
     await k.asAdmin(() => pg.exec('TRUNCATE triage_designations'))
     expect(await ids(caseTriageQueueScope(actorOf(NEW_STEWARD), 'c'), NEW_STEWARD)).toEqual([])
+  })
+
+  it.each([
+    ['a removed member', `status = 'inactive'`],
+    ['a suspended member', `status = 'suspended'`],
+    ['a deleted membership', `deleted_at = now()`],
+    ['a member demoted to ordinary membership', `role = 'member'`],
+  ])('a live designation does not outlive membership: %s lists nothing, in both membership lineages', async (_name, change) => {
+    await designateOnly({})
+    for (const v2 of [true, false]) {
+      m.v2.on = v2
+      try {
+        expect(await ids(caseTriageQueueScope(actorOf(NEW_STEWARD), 'c'), NEW_STEWARD), `v2=${v2} before`).toContain(UNASSIGNED)
+        await k.asAdmin(() => pg.exec(`UPDATE public.organization_members SET ${change} WHERE user_id = '${NEW_STEWARD}'`))
+        expect(await ids(caseTriageQueueScope(actorOf(NEW_STEWARD), 'c'), NEW_STEWARD), `v2=${v2} after`).toEqual([])
+      } finally {
+        m.v2.on = true
+        await k.asAdmin(() => pg.exec(`UPDATE public.organization_members SET status = 'active', role = 'steward', deleted_at = NULL WHERE user_id = '${NEW_STEWARD}'`))
+      }
+    }
   })
 })
 

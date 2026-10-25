@@ -29,7 +29,7 @@ Residual 26 mutation sites: 7 latent financial-service, 2 platform-global workbo
 - **Fixed (genuine defect):** `intakes/[id]/cancel` triggered a system-wide reap. `finalizeIntakeObjects` now takes `only:{organizationId,intakeId}`; the cancel route uses it (new PGlite test; 40/40 intake tests).
 - **Migration ordering 0022/0023:** the bootstrap applies cleanly on fresh PG15 and PG16.
 - **Signature provider:** the repository has no inbound provider webhook receiver (status is polled through `getDocumentStatus`), so no unsigned provider event can be accepted. A receiver, if added later, must carry verified provenance, replay protection and provider event time. This is an external prerequisite (provider credentials), not an engineering gap in the current code.
-- **Residual (pre-existing, P1, open):** `POST /api/documents/repository` with a non-case `linkedEntityType` (for example `member`) has no kernel check.
+- **Residual (pre-existing, P1) — closed after the main checkpoint (commit following `46e0b6c3a`):** `POST /api/documents/repository` with a non-case `linkedEntityType` (for example `member`, `other`, a library type) skipped the kernel case check even when the id named a case of the organization. The route now resolves such an id against the organization's grievances and applies the same kernel decision (`getEffectiveCaseAccess`); a non-case id files as before. Library-type uploads (`policy_library`, `template_library`, `collective_agreement`) are still open to any member role: restricting them is an institutional policy decision and is listed below as policy-dependent.
 - No required document control was disabled without a canonical replacement.
 
 Also found and fixed while qualifying: migration 0025's lifecycle guard allowed a second `close` or `archive` record for the same thread (caught by the native runtime-role test; guard now refuses it).
@@ -71,7 +71,7 @@ The vitest worker-start timeout (`documents-console.journey.test.tsx`) did not r
 ## Policy-dependent functionality (not engineering gaps)
 
 - Finance mandates, thresholds and duty holders; reclassifying "post to arrears" as a duty.
-- Member OCR policy adoption; document sharing and retention disclosure policy.
+- Member OCR policy adoption; document sharing and retention disclosure policy; who may upload into the institutional library link types.
 - Message retention-policy adoption and legal-hold authority (the UI honestly shows `policy_not_adopted`; no default period, no deletion job).
 - WorkAid consent wording (capture is refused until an institution records approved wording; the test wording is a labelled fixture).
 
@@ -83,6 +83,6 @@ Credentialed signed-in browser journeys; OCR processor with real bytes; signatur
 
 - **Finance:** remittances, payroll runs and finance reads stay role-gated (no payment subject to attach a duty to).
 - **Messaging:** no staff directory (assignee typed as id); no admin UI for retention adoption and holds; no unread counts or escalation; staff page is not linked from the staff navigation; a campaign page calls a nonexistent `/api/messages/threads/:id/send`.
-- **Identity:** triage designations in the case path, invite tokens after inviter removal, the legacy guard outside V2, external counsel auth, and the session bridge outliving a revoked parent by up to 30 s.
+- **Identity:** invite tokens after inviter removal (needs a governed change to the `inviteLive` predicate in `packages/db/src/auth-storage-authority/bootstrap-sql.ts`, proven on the native auth suite), the legacy guard outside V2, external counsel auth, and the session bridge outliving a revoked parent by up to 30 s. *Closed after the main checkpoint:* triage designations in the case path and the designation notification recipients now require the holder's live eligible staff membership (PGlite both lineages; native PG15 and PG16 for the legacy lineage; the V2 predicate against a designation is not proved natively).
 - **`union_rep_id`:** the deadline recipient resolver still reads it; migrating it needs a system SELECT manifest grant on `ue_authority_resource_relationships` plus native proof.
-- Schema census 235 remaining; mutation residuals 26; document linking P1 above; governance and voting routes are not kernel-decided; WorkAid has no counsel-side UI and no native counsel-read proof.
+- Schema census 235 remaining; mutation residuals 26; governance and voting routes are not kernel-decided; WorkAid has no counsel-side UI and no native counsel-read proof.

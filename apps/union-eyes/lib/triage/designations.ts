@@ -1,6 +1,8 @@
 import { and, desc, eq, gt, isNull, lte, sql, type SQL } from 'drizzle-orm'
 import { triageDesignations } from '@/db/schema/messages-schema'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
+import { CASE_ASSIGNEE_MEMBERSHIP_ROLES } from '@/lib/cases/case-permissions'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 
 /**
@@ -54,6 +56,22 @@ export async function hasLiveDesignation(tx: RLSTx, actor: TriageActor, scope: T
   return Boolean(row)
 }
 
+/**
+ * The designation holder must still hold a live staff membership. A designation is a grant on top of membership, never
+ * a substitute for it: a removed, suspended or demoted holder loses the queue at once, without waiting for the
+ * designation to be revoked. Canonical V2 asks the deployed predicate; the legacy lineage reads the compatibility
+ * projection with the same eligible roles the assignment path uses.
+ */
+function membershipStillEligible(organizationId: SQL | string, userId: SQL | string): SQL {
+  if (currentStateContextEnabled()) return sql`public.ue_case_assignee_authorized(${userId}, ${organizationId}::uuid) IS TRUE`
+  return sql`EXISTS (
+    SELECT 1 FROM public.organization_members om
+    WHERE om.organization_id = ${organizationId}::uuid AND om.user_id = ${userId}
+      AND om.status = 'active' AND om.deleted_at IS NULL
+      AND om.role IN (${sql.join(CASE_ASSIGNEE_MEMBERSHIP_ROLES.map((role) => sql`${role}`), sql`, `)})
+  )`
+}
+
 /** The caller's live designation, as a predicate for use inside another query (no round trip, no rank). */
 export function liveDesignationExists(actor: TriageActor, scope: TriageScope): SQL {
   return sql`EXISTS (
@@ -63,7 +81,7 @@ export function liveDesignationExists(actor: TriageActor, scope: TriageScope): S
       AND td.user_id = ${actor.userId}
       AND td.revoked_at IS NULL
       AND td.expires_at > now()
-  )`
+  ) AND ${membershipStillEligible(actor.organizationId, actor.userId)}`
 }
 
 /** Live designation holders of a scope, excluding one user. */
@@ -77,6 +95,7 @@ export async function liveDesignees(tx: RLSTx, organizationId: string, scope: Tr
         eq(triageDesignations.scope, scope),
         isNull(triageDesignations.revokedAt),
         gt(triageDesignations.expiresAt, now),
+        membershipStillEligible(organizationId, sql`${triageDesignations.userId}`),
       ),
     )
     .limit(50)

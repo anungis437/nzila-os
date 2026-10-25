@@ -127,11 +127,11 @@ export const SUBORDINATE_AUTHORITY_REGISTER: readonly SubordinateAuthorityRecord
     record: 'Triage designations (messages and cases)',
     storage: ['triage_designations'],
     consumers: ['apps/union-eyes/lib/triage/designations.ts', 'apps/union-eyes/lib/messaging/thread-assignment.ts', 'apps/union-eyes/lib/cases/case-authorization.ts'],
-    gate: 'A designation is only ever consulted for the AUTHENTICATED actor (td.user_id = actor.userId), and that actor exists only if the route guard produced a binding (live session + active membership + active lifecycle).',
+    gate: 'A designation is only ever consulted for the AUTHENTICATED actor (td.user_id = actor.userId), and that actor exists only if the route guard produced a binding (live session + active membership + active lifecycle). The designation predicates themselves also require the holder\'s live eligible staff membership (Canonical V2: public.ue_case_assignee_authorized; legacy lineage: the organization_members compatibility projection with the assignment-eligible roles), so a removed, suspended, deleted or demoted holder loses the queue and the notifications at once.',
     status: 'LAYERED',
     proof: BINDING_PROOF,
     residual:
-      'The designation queries do not themselves join membership, so in the legacy lineage (UE_CANONICAL_BOOTSTRAP_V2 != 1) a removed member keeps the designation until their sessions are revoked at offboarding. liveDesignees() (notification recipients) is not authority. The messaging lane is adding a per-request staffMembershipLive() join for threads (lib/messaging/staff-liveness.ts); the case triage scope (case-authorization.ts caseTriageQueueScope) still needs the same join.',
+      'Proved on PGlite for both membership lineages (lib/cases/kernel-claims.pglite.test.ts, with a labelled test double of the V2 predicate) and on native PostgreSQL 15 and 16 for the legacy lineage as the runtime role (thread-assignment, message-lifecycle). The V2 predicate itself is not proved natively against a designation here: the combined test database does not install the Canonical V2 topology.',
   },
   {
     id: 'external-representation',
