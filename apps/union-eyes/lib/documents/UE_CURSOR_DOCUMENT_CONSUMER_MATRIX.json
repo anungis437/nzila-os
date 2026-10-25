@@ -132,16 +132,16 @@
       "methods": [
         "POST"
       ],
-      "operation": "Authorized OCR extraction. Text is returned for review and is not written onto the document.",
+      "operation": "Authorized OCR extraction. Text is returned for review only after a durable audit write and is not written onto the document.",
       "consumers": [
         "components/documents/ocr-upload.tsx"
       ],
-      "authorization": "withRoleAuth steward, then isDocumentVisibleByPolicy, explicit view grant, and case access.",
+      "authorization": "withRoleAuth steward is the member floor. Case access comes from getEffectiveCaseAccess with isStewardPlus false. A view grant is not processing authority.",
       "canonicalReplacement": "Consume repository visibility. Do not persist OCR into contentText.",
       "kernelAction": "isDocumentVisibleByPolicy and processDocumentOCR persistExtractedText false",
       "classificationRules": "Privileged and highly sensitive documents require a grant, primary ownership, or private-document access.",
       "storage": "The processor reads the stored blob. The response omits blob paths.",
-      "audit": "appendMandatoryAudit action document.ocr.extract. A throw returns 503 and no text. Details omit the text.",
+      "audit": "appendMandatoryAudit action document.ocr.extract. A throw or a false result returns 503 and no text. Details omit the text.",
       "migrationStatus": "tranche_2_complete",
       "regressionTests": [
         "apps/union-eyes/app/api/documents/[id]/ocr/route.test.ts",
@@ -263,7 +263,7 @@
       "methods": [
         "POST"
       ],
-      "operation": "Multipart upload. canonicalIntake=1 stores an organization-prefixed blob and does not insert a document. discardBlobPath deletes only that prefix.",
+      "operation": "Multipart upload. canonicalIntake=1 stores an organization-prefixed blob and does not insert a document. discardBlobPath is refused and does not delete.",
       "consumers": [
         "components/documents/ocr-upload.tsx",
         "scripts/production/go-live-smoke.ts"
@@ -506,7 +506,7 @@
     {
       "path": "apps/union-eyes/app/api/__tests__/documents-upload.route.test.ts",
       "methods": [],
-      "operation": "Upload route tests, including canonical intake and organization-scoped discard.",
+      "operation": "Upload route tests, including canonical intake and refused client discard.",
       "consumers": [
         "vitest"
       ],
@@ -801,7 +801,7 @@
       "canonicalReplacement": "POST /api/documents/repository after organization-scoped blob intake",
       "kernelAction": "repository create and processDocumentOCR persistExtractedText false",
       "classificationRules": "The user selects a privacy label. OCR text is not evidence and cannot be saved.",
-      "storage": "canonicalIntake returns blobPath only. Repository refusal discards that path.",
+      "storage": "canonicalIntake returns blobPath only. Repository refusal does not delete that object.",
       "audit": "Create audit for unlinked rows is an integrator gap. Extract audit is on the OCR route.",
       "migrationStatus": "tranche_2_complete",
       "regressionTests": [
@@ -964,7 +964,7 @@
     {
       "path": "apps/union-eyes/lib/services/document-service.ts",
       "methods": [],
-      "operation": "Legacy document service. processDocumentOCR now returns unpersisted text and rejects unsupported types instead of writing empty success.",
+      "operation": "Legacy document service. processDocumentOCR returns unpersisted text, checks the organization blob prefix, and dispatches from file bytes.",
       "consumers": [
         "app/api/documents/route.ts",
         "folders",
@@ -1002,8 +1002,8 @@
     {
       "id": "ocr-transcript-persistence",
       "owner": "integrator",
-      "behavior": "Add a governed write for reviewed OCR text that stores it separately from the original bytes, document metadata, and grievance evidence.",
-      "security": "The write must repeat document visibility, organization scope, and mandatory audit. It must not treat OCR text as a legal fact or copy it into contentText searched by the repository keyword filter.",
+      "behavior": "Add a governed transcript write that keeps six records distinct: immutable original bytes, raw machine text, human-reviewed transcription, reviewer identity and timestamp, transcription revisions, and published evidence. The write needs explicit authority, optimistic concurrency, provenance, classification at least as strong as the source, and a mandatory audit in the same transaction.",
+      "security": "Reject unauthorized corrections, cross-document ids, stale revisions, and audit failure without changing the document. Do not copy OCR text into contentText or grievance evidence. No shadow table. The upload screen stays fail-closed until this contract exists.",
       "files": [
         "apps/union-eyes/app/api/documents/repository/[id]/route.ts"
       ],
@@ -1026,26 +1026,52 @@
     {
       "id": "ocr-audit-when-canonical-v2-disabled",
       "owner": "integrator",
-      "behavior": "appendMandatoryAudit returns false when UE_CANONICAL_BOOTSTRAP_V2 is not 1. The OCR route withholds text when that call throws and still returns text when the helper returns false.",
-      "security": "Same published helper contract as document download. Cursor does not change the helper.",
+      "behavior": "appendMandatoryAudit returns false when UE_CANONICAL_BOOTSTRAP_V2 is not 1. The OCR route now withholds extracted text when the helper throws or returns false. The helper is unchanged.",
+      "security": "OCR text is unavailable until canonical audit is enabled and the insert succeeds. Document download keeps its existing helper contract. Cursor does not fork the helper.",
       "files": [
         "apps/union-eyes/lib/audit/mandatory-audit.ts"
       ],
       "tests": [
-        "V2 enabled writes document.ocr.extract without the extracted text; a thrown audit write returns 503 and no text"
+        "V2 enabled writes document.ocr.extract without the extracted text; V2 disabled and a thrown audit write each return 503 and no text under the doc_runtime role"
       ]
     },
     {
       "id": "ocr-processor-and-blob-activation",
       "owner": "operations",
-      "behavior": "Image and PDF extraction call processImageOCR or processPDFOCR after downloadBuffer. Unsupported types return 501. Processor and storage failures return 502 and no text.",
-      "security": "No successful OCR result is manufactured when the processor, blob credentials, or callback is unavailable. Temporary artifacts must stay inside the organization blob prefix.",
+      "behavior": "Image and PDF extraction call processImageOCR or processPDFOCR after an organization-prefixed downloadBuffer. Byte signatures override a lying MIME. Unsupported containers return 501. Processor and storage failures return 502 and no text.",
+      "security": "No successful OCR result is manufactured when the processor, blob credentials, or callback is unavailable. Temporary text is not written to contentText. Live tesseract and blob credentials are still an operations dependency.",
       "files": [
         "apps/union-eyes/lib/services/ocr-service.ts",
         "apps/union-eyes/lib/blob-client.ts"
       ],
       "tests": [
         "live processor fixture with organization-scoped blob bytes; provider failure returns 502 and writes no contentText"
+      ]
+    },
+    {
+      "id": "temporary-intake-lifecycle",
+      "owner": "integrator",
+      "behavior": "Add an authoritative intake record with a server-generated unpredictable id bound to the principal, organization, exact object key, checksum, content type, size, createdAt, expiresAt, and state open|accepted|expired|cancelled. Cancellation is limited to that principal or a cleanup service. Refuse a key referenced by a document or document version. Flip state in the same transaction before deleteBlob of the stored key only. Record create, accept, expire, and delete audits. A cleanup job expires abandoned open intakes. Replay is idempotent.",
+      "security": "Until that table exists, POST /api/documents/upload returns 403 for any discardBlobPath and does not call deleteBlob. Legacy upload without the field still inserts. canonicalIntake still stores an object. A failed repository create can leave an orphan. Cursor must not add a shadow table or migration.",
+      "files": [
+        "apps/union-eyes/db/schema/documents-schema.ts",
+        "apps/union-eyes/app/api/documents/upload/route.ts"
+      ],
+      "tests": [
+        "same-organization cross-user deletion, attached objects, forged identifiers, replay, parallel races, expired intake, foreign tenants, and cleanup failure against the intake table"
+      ]
+    },
+    {
+      "id": "ocr-case-processing-authority",
+      "owner": "integrator",
+      "behavior": "getEffectiveCaseAccess must return relationship status active|revoked|expired|recused even when unionRepId matches the actor, plus canProcessOcr distinct from canViewCase, canUploadDocuments, and a document view grant. Viewing, downloading, OCR extraction, transcript correction, and evidence publication stay separate decisions.",
+      "security": "The OCR route does not treat steward seniority as case access. Linked extraction currently requires primary ownership or canUploadDocuments because canProcessOcr does not exist. Revoked and expired assignments are denied because the kernel returns canViewCase false. Recusal of a primary owner cannot be represented until the kernel reports it. Do not add the enum in this tranche.",
+      "files": [
+        "apps/union-eyes/lib/services/case-access-service.ts",
+        "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts"
+      ],
+      "tests": [
+        "unassigned, revoked, expired, recused primary owner, foreign organization, member, view-only assignment, and privileged document without classification authority"
       ]
     }
   ]
