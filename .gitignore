@@ -108,6 +108,8 @@ proof-artifacts/*
 .Python
 develop-eggs/
 downloads/
+# Python packaging output only: Next.js API route folders named downloads are source and must stay tracked.
+!apps/**/app/api/**/downloads/
 eggs/
 .eggs/
 lib64/

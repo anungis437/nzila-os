@@ -123,6 +123,12 @@ jobs:
           fi
           echo "Staged $(find "$STANDALONE_APP/.next/static" -type f | wc -l) static files into standalone output"
 
+      - name: Set up Python (Django-owned schema prerequisites)
+        if: matrix.app == 'union-eyes'
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
       - name: Bootstrap Union Eyes E2E database (synthetic)
         if: matrix.app == 'union-eyes'
         run: |
@@ -161,6 +167,11 @@ jobs:
           GRANT ALL ON DATABASE ci_e2e TO union_eyes_runtime, union_eyes_system;
           GRANT ALL ON SCHEMA public TO union_eyes_runtime, union_eyes_system;
           SQL
+
+          # The platform SQL (0013 onward) extends tables that the Django backend owns (message_threads, payments,
+          # documents, ...), so Django migrates first, as in production. Synthetic, credential-free database only.
+          python -m pip install --disable-pip-version-check -r apps/union-eyes/backend/requirements.txt
+          (cd apps/union-eyes/backend && PGHOST=localhost PGPORT=5432 PGUSER=ci PGPASSWORD=ci PGDATABASE=ci_e2e python manage.py migrate --noinput)
 
           # QA_TEST_ENV selects the credential-free baseline inside db:migrate.
           # UE_DB_RESTORE_SNAPSHOT_URL stays unset, so no canonical snapshot is restored.
