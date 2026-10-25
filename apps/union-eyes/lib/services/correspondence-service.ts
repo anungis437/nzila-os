@@ -15,7 +15,9 @@ import crypto from "crypto";
 import { db } from "@/db";
 import { eq, and, desc, asc, sql } from "drizzle-orm";
 import { logger } from "@/lib/logger";
-import { createAuditLog } from "@/lib/services/audit-service";
+import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { ApiError } from "@/lib/api/errors";
 import {
   correspondence,
   correspondenceRecipients,
@@ -57,6 +59,8 @@ const STATE_TRANSITIONS: Record<CorrespondenceStatus, CorrespondenceStatus[]> = 
 // ============================================================================
 
 async function appendAuditEntry(params: {
+  /** The transaction that changes the correspondence; the trail entry must commit with it. */
+  exec: RLSTx;
   correspondenceId: string;
   eventType: typeof correspondenceAuditTrail.$inferInsert["eventType"];
   actorUserId: string;
@@ -68,7 +72,7 @@ async function appendAuditEntry(params: {
   userAgent?: string;
 }) {
   // Build hash chain — SHA-256(prev_hash + event_data)
-  const prev = await db
+  const prev = await params.exec
     .select({ hashChain: correspondenceAuditTrail.hashChain })
     .from(correspondenceAuditTrail)
     .where(eq(correspondenceAuditTrail.correspondenceId, params.correspondenceId))
@@ -87,7 +91,7 @@ async function appendAuditEntry(params: {
     .update(prevHash + eventPayload)
     .digest("hex");
 
-  await db.insert(correspondenceAuditTrail).values({
+  await params.exec.insert(correspondenceAuditTrail).values({
     correspondenceId: params.correspondenceId,
     eventType: params.eventType,
     eventDescription: params.description,
@@ -152,75 +156,75 @@ export async function createCorrespondence(params: CreateCorrespondenceParams) {
     userAgent,
   } = params;
 
-  // Generate reference number: LTR-YYYY-NNNN
-  const year = new Date().getFullYear();
-  const countResult = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(correspondence)
-    .where(eq(correspondence.organizationId, organizationId));
-  const seq = (countResult[0]?.count ?? 0) + 1;
-  const referenceNumber = `LTR-${year}-${String(seq).padStart(4, "0")}`;
+  // The letter, its recipients, its trail entry and the platform audit commit together.
+  const created = await withRLSContext({ organizationId }, async (tx) => {
+    // Generate reference number: LTR-YYYY-NNNN
+    const year = new Date().getFullYear();
+    const countResult = await tx
+      .select({ count: sql<number>`count(*)::int` })
+      .from(correspondence)
+      .where(eq(correspondence.organizationId, organizationId));
+    const seq = (countResult[0]?.count ?? 0) + 1;
+    const referenceNumber = `LTR-${year}-${String(seq).padStart(4, "0")}`;
 
-  const [created] = await db
-    .insert(correspondence)
-    .values({
+    const [row] = await tx
+      .insert(correspondence)
+      .values({
+        organizationId,
+        referenceNumber,
+        subject,
+        body,
+        type: type ?? "letter",
+        priority: priority ?? "normal",
+        status: "draft",
+        draftedBy,
+        assignedSignerId,
+        templateId,
+        templateVariables: templateVariables as Record<string, unknown>,
+        grievanceId,
+      })
+      .returning();
+
+    if (recipients?.length) {
+      await tx.insert(correspondenceRecipients).values(
+        recipients.map((r) => ({
+          correspondenceId: row.id,
+          recipientType: r.recipientType ?? "to",
+          name: r.name,
+          email: r.email,
+          mailingAddress: r.mailingAddress,
+          organization: r.organization,
+          title: r.title,
+        })),
+      );
+    }
+
+    await appendAuditEntry({
+      exec: tx,
+      correspondenceId: row.id,
+      eventType: "created",
+      actorUserId: draftedBy,
+      actorName,
+      actorRole,
+      description: `Correspondence "${subject}" created as draft`,
+      ipAddress,
+      userAgent,
+    });
+
+    await persistAtomicAudit(tx, {
       organizationId,
-      referenceNumber,
-      subject,
-      body,
-      type: type ?? "letter",
-      priority: priority ?? "normal",
-      status: "draft",
-      draftedBy,
-      assignedSignerId,
-      templateId,
-      templateVariables: templateVariables as Record<string, unknown>,
-      grievanceId,
-    })
-    .returning();
-
-  // Insert recipients
-  if (recipients?.length) {
-    await db.insert(correspondenceRecipients).values(
-      recipients.map((r) => ({
-        correspondenceId: created.id,
-        recipientType: r.recipientType ?? "to",
-        name: r.name,
-        email: r.email,
-        mailingAddress: r.mailingAddress,
-        organization: r.organization,
-        title: r.title,
-      })),
-    );
-  }
-
-  // Audit trail
-  await appendAuditEntry({
-    correspondenceId: created.id,
-    eventType: "created",
-    actorUserId: draftedBy,
-    actorName,
-    actorRole,
-    description: `Correspondence "${subject}" created as draft`,
-    ipAddress,
-    userAgent,
-  });
-
-  // Platform audit
-  await createAuditLog({
-    organizationId,
-    userId: draftedBy,
-    action: "CORRESPONDENCE_CREATED",
-    resourceType: "correspondence",
-    resourceId: created.id,
-    description: `Created correspondence ${referenceNumber}: ${subject}`,
-    ipAddress,
-    userAgent,
+      userId: draftedBy,
+      action: "CORRESPONDENCE_CREATED",
+      resourceType: "correspondence",
+      resourceId: row.id,
+      details: { referenceNumber, subject },
+    });
+    return row;
   });
 
   logger.info("Correspondence created", {
     id: created.id,
-    referenceNumber,
+    referenceNumber: created.referenceNumber,
     organizationId,
   });
 
@@ -328,26 +332,39 @@ export async function updateCorrespondence(params: UpdateCorrespondenceParams) {
   if (params.priority !== undefined) updates.priority = params.priority;
   if (params.assignedSignerId !== undefined) updates.assignedSignerId = params.assignedSignerId;
   if (params.internalNotes !== undefined) updates.internalNotes = params.internalNotes;
+  const fields = Object.keys(updates).filter((k) => k !== "updatedAt");
 
-  const [updated] = await db
-    .update(correspondence)
-    .set(updates)
-    .where(eq(correspondence.id, params.id))
-    .returning();
+  return withRLSContext({ organizationId: existing.organizationId }, async (tx) => {
+    // Only a draft is editable: the status in the predicate keeps an edit from landing on a letter that moved on.
+    const [updated] = await tx
+      .update(correspondence)
+      .set(updates)
+      .where(and(eq(correspondence.id, params.id), eq(correspondence.status, "draft")))
+      .returning();
+    if (!updated) throw ApiError.conflict("The correspondence is no longer a draft");
 
-  await appendAuditEntry({
-    correspondenceId: params.id,
-    eventType: "edited",
-    actorUserId: params.actorUserId,
-    actorName: params.actorName,
-    actorRole: params.actorRole,
-    description: "Correspondence edited",
-    metadata: { updatedFields: Object.keys(updates).filter((k) => k !== "updatedAt") },
-    ipAddress: params.ipAddress,
-    userAgent: params.userAgent,
+    await appendAuditEntry({
+      exec: tx,
+      correspondenceId: params.id,
+      eventType: "edited",
+      actorUserId: params.actorUserId,
+      actorName: params.actorName,
+      actorRole: params.actorRole,
+      description: "Correspondence edited",
+      metadata: { updatedFields: fields },
+      ipAddress: params.ipAddress,
+      userAgent: params.userAgent,
+    });
+    await persistAtomicAudit(tx, {
+      organizationId: existing.organizationId,
+      userId: params.actorUserId,
+      action: "CORRESPONDENCE_EDITED",
+      resourceType: "correspondence",
+      resourceId: params.id,
+      details: { fields },
+    });
+    return updated;
   });
-
-  return updated;
 }
 
 // ============================================================================
@@ -374,128 +391,105 @@ interface TransitionContext {
   userAgent?: string;
 }
 
-// ── Submit for Review ──────────────────────────────────────────────────────
+type CorrespondenceRow = typeof correspondence.$inferSelect;
 
-export async function submitForReview(
-  id: string,
-  ctx: TransitionContext,
-) {
+interface TransitionSpec {
+  target: CorrespondenceStatus;
+  event: typeof correspondenceAuditTrail.$inferInsert["eventType"];
+  /** Platform audit action. */
+  action: string;
+  description: string;
+  metadata?: Record<string, unknown>;
+  /** Extra columns the transition sets. */
+  set?: Record<string, unknown>;
+  /** Refuses the transition (throws) on the transaction that will perform it. */
+  guard?: (existing: CorrespondenceRow, tx: RLSTx) => void | Promise<void>;
+}
+
+/**
+ * One state transition: the status change, the hash-chained trail entry and the platform audit commit together, and
+ * the change only lands if the letter is still in the status the decision was made against.
+ */
+async function transition(id: string, ctx: TransitionContext, spec: TransitionSpec) {
   const existing = await getCorrespondenceById(id);
   if (!existing) throw new Error("Correspondence not found");
-  validateTransition(existing.status as CorrespondenceStatus, "pending_review");
+  validateTransition(existing.status as CorrespondenceStatus, spec.target);
 
-  if (!existing.assignedSignerId) {
-    throw new Error("Cannot submit for review without an assigned signer");
-  }
+  return withRLSContext({ organizationId: existing.organizationId }, async (tx) => {
+    await spec.guard?.(existing, tx);
+    const [updated] = await tx
+      .update(correspondence)
+      .set({ ...spec.set, status: spec.target, updatedAt: new Date() })
+      .where(and(eq(correspondence.id, id), eq(correspondence.status, existing.status)))
+      .returning();
+    if (!updated) throw ApiError.conflict("The correspondence changed state while this action was in progress");
 
-  const [updated] = await db
-    .update(correspondence)
-    .set({ status: "pending_review", updatedAt: new Date() })
-    .where(eq(correspondence.id, id))
-    .returning();
-
-  await appendAuditEntry({
-    correspondenceId: id,
-    eventType: "submitted_for_review",
-    actorUserId: ctx.actorUserId,
-    actorName: ctx.actorName,
-    actorRole: ctx.actorRole,
-    description: `Submitted for review by ${existing.assignedSignerId}`,
-    ipAddress: ctx.ipAddress,
-    userAgent: ctx.userAgent,
+    await appendAuditEntry({
+      exec: tx,
+      correspondenceId: id,
+      eventType: spec.event,
+      actorUserId: ctx.actorUserId,
+      actorName: ctx.actorName,
+      actorRole: ctx.actorRole,
+      description: spec.description,
+      metadata: spec.metadata,
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    });
+    await persistAtomicAudit(tx, {
+      organizationId: existing.organizationId,
+      userId: ctx.actorUserId,
+      action: spec.action,
+      resourceType: "correspondence",
+      resourceId: id,
+      details: { from: existing.status, to: spec.target, referenceNumber: existing.referenceNumber, ...spec.metadata },
+    });
+    return updated;
   });
+}
 
-  await createAuditLog({
-    organizationId: existing.organizationId,
-    userId: ctx.actorUserId,
+// ── Submit for Review ──────────────────────────────────────────────────────
+
+export async function submitForReview(id: string, ctx: TransitionContext) {
+  return transition(id, ctx, {
+    target: "pending_review",
+    event: "submitted_for_review",
     action: "CORRESPONDENCE_SUBMITTED_FOR_REVIEW",
-    resourceType: "correspondence",
-    resourceId: id,
-    description: `Submitted ${existing.referenceNumber} for review`,
-    ipAddress: ctx.ipAddress,
-    userAgent: ctx.userAgent,
+    description: "Submitted for review",
+    guard: (existing) => {
+      if (!existing.assignedSignerId) throw new Error("Cannot submit for review without an assigned signer");
+    },
   });
-
-  return updated;
 }
 
 // ── Approve ────────────────────────────────────────────────────────────────
 
-export async function approveCorrespondence(
-  id: string,
-  ctx: TransitionContext,
-) {
-  const existing = await getCorrespondenceById(id);
-  if (!existing) throw new Error("Correspondence not found");
-  validateTransition(existing.status as CorrespondenceStatus, "approved");
-
-  const [updated] = await db
-    .update(correspondence)
-    .set({
-      status: "approved",
-      approvedBy: ctx.actorUserId,
-      approvedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(correspondence.id, id))
-    .returning();
-
-  await appendAuditEntry({
-    correspondenceId: id,
-    eventType: "approved",
-    actorUserId: ctx.actorUserId,
-    actorName: ctx.actorName,
-    actorRole: ctx.actorRole,
-    description: "Correspondence approved for signing",
-    ipAddress: ctx.ipAddress,
-    userAgent: ctx.userAgent,
-  });
-
-  await createAuditLog({
-    organizationId: existing.organizationId,
-    userId: ctx.actorUserId,
+export async function approveCorrespondence(id: string, ctx: TransitionContext) {
+  return transition(id, ctx, {
+    target: "approved",
+    event: "approved",
     action: "CORRESPONDENCE_APPROVED",
-    resourceType: "correspondence",
-    resourceId: id,
-    description: `Approved ${existing.referenceNumber}`,
-    ipAddress: ctx.ipAddress,
-    userAgent: ctx.userAgent,
+    description: "Correspondence approved for signing",
+    set: { approvedBy: ctx.actorUserId, approvedAt: new Date() },
+    // Approval is an independent review: whoever drafted the letter cannot approve it.
+    guard: (existing) => {
+      if (existing.draftedBy && existing.draftedBy === ctx.actorUserId) {
+        throw ApiError.forbidden("The drafter of a correspondence cannot approve it");
+      }
+    },
   });
-
-  return updated;
 }
 
 // ── Request Revision ───────────────────────────────────────────────────────
 
-export async function requestRevision(
-  id: string,
-  reason: string,
-  ctx: TransitionContext,
-) {
-  const existing = await getCorrespondenceById(id);
-  if (!existing) throw new Error("Correspondence not found");
-  // Reviewer can send it back to draft from pending_review or approved
-  validateTransition(existing.status as CorrespondenceStatus, "draft");
-
-  const [updated] = await db
-    .update(correspondence)
-    .set({ status: "draft", updatedAt: new Date() })
-    .where(eq(correspondence.id, id))
-    .returning();
-
-  await appendAuditEntry({
-    correspondenceId: id,
-    eventType: "revision_requested",
-    actorUserId: ctx.actorUserId,
-    actorName: ctx.actorName,
-    actorRole: ctx.actorRole,
+export async function requestRevision(id: string, reason: string, ctx: TransitionContext) {
+  return transition(id, ctx, {
+    target: "draft",
+    event: "revision_requested",
+    action: "CORRESPONDENCE_REVISION_REQUESTED",
     description: `Revision requested: ${reason}`,
     metadata: { reason },
-    ipAddress: ctx.ipAddress,
-    userAgent: ctx.userAgent,
   });
-
-  return updated;
 }
 
 // ── Sign ───────────────────────────────────────────────────────────────────
@@ -509,72 +503,32 @@ export interface SignCorrespondenceParams extends TransitionContext {
  * Affix a stored signature to the correspondence.
  * Only the assigned signer can sign. The correspondence must be approved.
  */
-export async function signCorrespondence(
-  id: string,
-  params: SignCorrespondenceParams,
-) {
-  const existing = await getCorrespondenceById(id);
-  if (!existing) throw new Error("Correspondence not found");
-  validateTransition(existing.status as CorrespondenceStatus, "signed");
-
-  // Verify the signer is the assigned signer
-  if (existing.assignedSignerId && existing.assignedSignerId !== params.actorUserId) {
-    throw new Error("Only the assigned signer can sign this correspondence");
-  }
-
-  // Verify the signature belongs to the actor
-  const sig = await db
-    .select()
-    .from(userSignatures)
-    .where(
-      and(
-        eq(userSignatures.id, params.signatureId),
-        eq(userSignatures.userId, params.actorUserId),
-        eq(userSignatures.isActive, true),
-      ),
-    )
-    .limit(1);
-
-  if (!sig[0]) {
-    throw new Error("Signature not found or does not belong to this user");
-  }
-
-  const [updated] = await db
-    .update(correspondence)
-    .set({
-      status: "signed",
-      signatureId: params.signatureId,
-      signedBy: params.actorUserId,
-      signedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(correspondence.id, id))
-    .returning();
-
-  await appendAuditEntry({
-    correspondenceId: id,
-    eventType: "signed",
-    actorUserId: params.actorUserId,
-    actorName: params.actorName,
-    actorRole: params.actorRole,
+export async function signCorrespondence(id: string, params: SignCorrespondenceParams) {
+  return transition(id, params, {
+    target: "signed",
+    event: "signed",
+    action: "CORRESPONDENCE_SIGNED",
     description: "Correspondence signed",
     metadata: { signatureId: params.signatureId },
-    ipAddress: params.ipAddress,
-    userAgent: params.userAgent,
+    set: { signatureId: params.signatureId, signedBy: params.actorUserId, signedAt: new Date() },
+    guard: async (existing, tx) => {
+      if (existing.assignedSignerId && existing.assignedSignerId !== params.actorUserId) {
+        throw new Error("Only the assigned signer can sign this correspondence");
+      }
+      const sig = await tx
+        .select()
+        .from(userSignatures)
+        .where(
+          and(
+            eq(userSignatures.id, params.signatureId),
+            eq(userSignatures.userId, params.actorUserId),
+            eq(userSignatures.isActive, true),
+          ),
+        )
+        .limit(1);
+      if (!sig[0]) throw new Error("Signature not found or does not belong to this user");
+    },
   });
-
-  await createAuditLog({
-    organizationId: existing.organizationId,
-    userId: params.actorUserId,
-    action: "CORRESPONDENCE_SIGNED",
-    resourceType: "correspondence",
-    resourceId: id,
-    description: `Signed ${existing.referenceNumber}`,
-    ipAddress: params.ipAddress,
-    userAgent: params.userAgent,
-  });
-
-  return updated;
 }
 
 // ── Dispatch ───────────────────────────────────────────────────────────────
@@ -588,114 +542,44 @@ export interface DispatchCorrespondenceParams extends TransitionContext {
 /**
  * Mark correspondence as dispatched to recipients.
  */
-export async function dispatchCorrespondence(
-  id: string,
-  params: DispatchCorrespondenceParams,
-) {
-  const existing = await getCorrespondenceById(id);
-  if (!existing) throw new Error("Correspondence not found");
-  validateTransition(existing.status as CorrespondenceStatus, "dispatched");
-
-  const [updated] = await db
-    .update(correspondence)
-    .set({
-      status: "dispatched",
+export async function dispatchCorrespondence(id: string, params: DispatchCorrespondenceParams) {
+  return transition(id, params, {
+    target: "dispatched",
+    event: "dispatched",
+    action: "CORRESPONDENCE_DISPATCHED",
+    description: `Dispatched via ${params.dispatchMethod}`,
+    metadata: { dispatchMethod: params.dispatchMethod },
+    set: {
       dispatchedAt: new Date(),
       dispatchedBy: params.actorUserId,
       dispatchMethod: params.dispatchMethod,
       signedPdfUrl: params.signedPdfUrl,
       signedPdfHash: params.signedPdfHash,
-      updatedAt: new Date(),
-    })
-    .where(eq(correspondence.id, id))
-    .returning();
-
-  await appendAuditEntry({
-    correspondenceId: id,
-    eventType: "dispatched",
-    actorUserId: params.actorUserId,
-    actorName: params.actorName,
-    actorRole: params.actorRole,
-    description: `Dispatched via ${params.dispatchMethod}`,
-    metadata: { dispatchMethod: params.dispatchMethod },
-    ipAddress: params.ipAddress,
-    userAgent: params.userAgent,
+    },
   });
-
-  await createAuditLog({
-    organizationId: existing.organizationId,
-    userId: params.actorUserId,
-    action: "CORRESPONDENCE_DISPATCHED",
-    resourceType: "correspondence",
-    resourceId: id,
-    description: `Dispatched ${existing.referenceNumber} via ${params.dispatchMethod}`,
-    ipAddress: params.ipAddress,
-    userAgent: params.userAgent,
-  });
-
-  return updated;
 }
 
 // ── Confirm Delivery ───────────────────────────────────────────────────────
 
-export async function confirmDelivery(
-  id: string,
-  ctx: TransitionContext,
-) {
-  const existing = await getCorrespondenceById(id);
-  if (!existing) throw new Error("Correspondence not found");
-  validateTransition(existing.status as CorrespondenceStatus, "delivered");
-
-  const [updated] = await db
-    .update(correspondence)
-    .set({ status: "delivered", updatedAt: new Date() })
-    .where(eq(correspondence.id, id))
-    .returning();
-
-  await appendAuditEntry({
-    correspondenceId: id,
-    eventType: "delivered",
-    actorUserId: ctx.actorUserId,
-    actorName: ctx.actorName,
-    actorRole: ctx.actorRole,
+export async function confirmDelivery(id: string, ctx: TransitionContext) {
+  return transition(id, ctx, {
+    target: "delivered",
+    event: "delivered",
+    action: "CORRESPONDENCE_DELIVERED",
     description: "Delivery confirmed",
-    ipAddress: ctx.ipAddress,
-    userAgent: ctx.userAgent,
   });
-
-  return updated;
 }
 
 // ── Cancel ─────────────────────────────────────────────────────────────────
 
-export async function cancelCorrespondence(
-  id: string,
-  reason: string,
-  ctx: TransitionContext,
-) {
-  const existing = await getCorrespondenceById(id);
-  if (!existing) throw new Error("Correspondence not found");
-  validateTransition(existing.status as CorrespondenceStatus, "cancelled");
-
-  const [updated] = await db
-    .update(correspondence)
-    .set({ status: "cancelled", updatedAt: new Date() })
-    .where(eq(correspondence.id, id))
-    .returning();
-
-  await appendAuditEntry({
-    correspondenceId: id,
-    eventType: "cancelled",
-    actorUserId: ctx.actorUserId,
-    actorName: ctx.actorName,
-    actorRole: ctx.actorRole,
+export async function cancelCorrespondence(id: string, reason: string, ctx: TransitionContext) {
+  return transition(id, ctx, {
+    target: "cancelled",
+    event: "cancelled",
+    action: "CORRESPONDENCE_CANCELLED",
     description: `Cancelled: ${reason}`,
     metadata: { reason },
-    ipAddress: ctx.ipAddress,
-    userAgent: ctx.userAgent,
   });
-
-  return updated;
 }
 
 // ============================================================================
@@ -717,32 +601,45 @@ export interface SaveUserSignatureParams {
  * Deactivates any previous default signature.
  */
 export async function saveUserSignature(params: SaveUserSignatureParams) {
-  // Deactivate existing default signatures for this user in this org
-  await db
-    .update(userSignatures)
-    .set({ isDefault: false, updatedAt: new Date() })
-    .where(
-      and(
-        eq(userSignatures.userId, params.userId),
-        eq(userSignatures.organizationId, params.organizationId),
-        eq(userSignatures.isDefault, true),
-      ),
-    );
+  // A stored signature is what later signs official correspondence in this person's name, so replacing the default
+  // and recording who did it commit together.
+  const created = await withRLSContext({ organizationId: params.organizationId }, async (tx) => {
+    await tx
+      .update(userSignatures)
+      .set({ isDefault: false, updatedAt: new Date() })
+      .where(
+        and(
+          eq(userSignatures.userId, params.userId),
+          eq(userSignatures.organizationId, params.organizationId),
+          eq(userSignatures.isDefault, true),
+        ),
+      );
 
-  const [created] = await db
-    .insert(userSignatures)
-    .values({
+    const [row] = await tx
+      .insert(userSignatures)
+      .values({
+        organizationId: params.organizationId,
+        userId: params.userId,
+        displayName: params.displayName,
+        displayTitle: params.displayTitle,
+        source: params.source,
+        imageUrl: params.imageUrl,
+        imageHash: params.imageHash,
+        isDefault: true,
+        isActive: true,
+      })
+      .returning();
+
+    await persistAtomicAudit(tx, {
       organizationId: params.organizationId,
       userId: params.userId,
-      displayName: params.displayName,
-      displayTitle: params.displayTitle,
-      source: params.source,
-      imageUrl: params.imageUrl,
-      imageHash: params.imageHash,
-      isDefault: true,
-      isActive: true,
-    })
-    .returning();
+      action: "USER_SIGNATURE_SAVED",
+      resourceType: "user_signatures",
+      resourceId: row.id,
+      details: { source: params.source, imageHash: params.imageHash },
+    });
+    return row;
+  });
 
   logger.info("User signature saved", {
     signatureId: created.id,
