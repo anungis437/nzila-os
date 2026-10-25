@@ -4,12 +4,29 @@
   "cursorBranch": "agents/ue-cursor-documents-convergence",
   "gitMergeBaseAgainstMainSha": "0c994b968aed0657cca5b702954ba87252408245",
   "cursorDevelopmentBaselineSha": "fde81a81a088a1c8c4aa6d498b2b3a52e0dea298",
-  "integratedCursorCommits": [],
-  "lastIntegrationCheckpointSha": null,
+  "integratedCursorCommits": [
+    "38e002e54ae2866a567b4d48d00d386dfe149091",
+    "74aed8ec9bc44d6306918c0056c5a4c788b64b7f"
+  ],
+  "lastIntegrationCheckpointSha": "b56f71bd095bb8f91b6146b97fbd20665451ab28",
   "semanticCompatibility": "A conflict-free textual merge does not establish semantic compatibility. Each integrated Cursor commit is validated on a fresh checkpoint before it is recorded here.",
   "deployment": {
     "UE_SAAS_OPERATIONAL_READINESS": "NO_GO",
     "PRODUCTION_DEPLOYMENT_AUTHORIZED": "NO",
     "STAGING_EXECUTION_AUTHORIZED": "NO"
+  },
+  "integratedCursorCommitProvenance": [
+    {
+      "sourceSha": "38e002e54ae2866a567b4d48d00d386dfe149091",
+      "integrationSha": "34c1222bf6daec9579e788f1c1b8093420650962"
+    },
+    {
+      "sourceSha": "74aed8ec9bc44d6306918c0056c5a4c788b64b7f",
+      "integrationSha": "146da419fa88e4203e488cdcabfd19c0ae161888"
+    }
+  ],
+  "trancheTwo": {
+    "status": "IN_PROGRESS",
+    "integrated": false
   }
 }

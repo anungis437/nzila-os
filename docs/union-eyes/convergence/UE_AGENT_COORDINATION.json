@@ -19,7 +19,10 @@
     "STAGING_EXECUTION_AUTHORIZED": "NO",
     "CUSTOMER_DATA_EXECUTION_AUTHORIZED": "NO"
   },
-  "integratedCursorCommits": [],
+  "integratedCursorCommits": [
+    "38e002e54ae2866a567b4d48d00d386dfe149091",
+    "74aed8ec9bc44d6306918c0056c5a4c788b64b7f"
+  ],
   "cursorMayEdit": [
     "apps/union-eyes/app/[locale]/dashboard/documents/layout.tsx",
     "apps/union-eyes/app/[locale]/dashboard/documents/page.tsx",
@@ -68,7 +71,14 @@
     "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-client.ts",
     "apps/union-eyes/lib/services/cba-intelligence/document-service.ts",
     "apps/union-eyes/lib/services/cba-intelligence/__tests__/document-service.test.ts",
-    "apps/union-eyes/lib/services/document-service.ts"
+    "apps/union-eyes/lib/services/document-service.ts",
+    "apps/union-eyes/app/api/documents/[id]/download/route.pglite.test.ts",
+    "apps/union-eyes/components/documents/documents-console.journey.test.tsx",
+    "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json",
+    "apps/union-eyes/lib/documents/canonical-journey.test.ts",
+    "apps/union-eyes/lib/documents/canonical-journey.ts",
+    "apps/union-eyes/lib/documents/document-repository-client.test.ts",
+    "apps/union-eyes/lib/documents/document-repository-client.ts"
   ],
   "cursorMustConsumeWithoutEditing": [
     "apps/union-eyes/app/api/documents/repository/route.ts",
@@ -106,7 +116,13 @@
     "apps/union-eyes/lib/reality/capability-registry.ts",
     "apps/union-eyes/config/continuity-ontology-matrix.json",
     "docs/union-eyes/convergence/UE_CONVERGENCE_DECISION_LEDGER.json",
-    "docs/union-eyes/convergence/UE_CONVERGENCE_REGISTER.json"
+    "docs/union-eyes/convergence/UE_CONVERGENCE_REGISTER.json",
+    "apps/union-eyes/lib/documents/download-issuance.ts",
+    "apps/union-eyes/lib/documents/legacy-storage-backfill.ts",
+    "apps/union-eyes/app/api/documents/repository/downloads/route.ts",
+    "apps/union-eyes/app/api/admin/documents/legacy-backfill/route.ts",
+    "apps/union-eyes/lib/services/document-blob-reference.test.ts",
+    "apps/union-eyes/app/api/__tests__/documents-download-version-contract.pglite.test.ts"
   ],
   "integratorReservedCaseDocumentRoutes": [
     "apps/union-eyes/app/api/arbitration/precedents/[id]/documents/route.ts",
@@ -140,5 +156,97 @@
     "method": "Conflict-free cherry-pick or a controlled merge. Do not overwrite either side blindly.",
     "validation": "Affected tests, kernel authorization proofs, route ratchets, schema validation, and the relevant database suite run after integration.",
     "register": "docs/union-eyes/convergence/UE_CONVERGENCE_REGISTER.json records each integrated Cursor commit ID."
-  }
+  },
+  "integratedCursorCommitProvenance": [
+    {
+      "tranche": 1,
+      "sourceSha": "38e002e54ae2866a567b4d48d00d386dfe149091",
+      "integrationSha": "34c1222bf6daec9579e788f1c1b8093420650962",
+      "method": "cherry-pick",
+      "note": "Clean apart from generated inventory outputs, which are integration-owned and regenerated."
+    },
+    {
+      "tranche": 1,
+      "sourceSha": "74aed8ec9bc44d6306918c0056c5a4c788b64b7f",
+      "integrationSha": "146da419fa88e4203e488cdcabfd19c0ae161888",
+      "method": "cherry-pick with integrator conflict resolution",
+      "note": "Conflicts in the dashboard documents page (kept the member surface, added the console for staff), the download route and its test (kept persistAtomicAudit), and generated inventory outputs."
+    }
+  ],
+  "integratorCorrections": [
+    {
+      "tranche": 1,
+      "integrationSha": "b56f71bd095bb8f91b6146b97fbd20665451ab28",
+      "findings": [
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B5"
+      ],
+      "note": "Integrator-owned corrections applied after the cherry-picks. Cursor must rebase onto this commit before editing integratorCorrectedPaths."
+    }
+  ],
+  "integratorCorrectedPaths": [
+    "apps/union-eyes/components/documents/documents-console.tsx",
+    "apps/union-eyes/components/documents/document-retention-policy.tsx",
+    "apps/union-eyes/lib/documents/canonical-journey.ts",
+    "apps/union-eyes/lib/documents/document-repository-client.ts",
+    "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json",
+    "apps/union-eyes/app/api/documents/[id]/download/route.ts"
+  ],
+  "trancheOneQualification": {
+    "status": "QUALIFIED_LOCAL",
+    "proven": [
+      "download access recorded before any url, canonical V2 on and off, with injected audit faults (PostgreSQL semantics)",
+      "legacy and external file URLs never returned",
+      "bulk per-document authorization, audit and partial-success report",
+      "server-verified storage reference, hash, blob reuse, stale and concurrent version updates",
+      "legal hold and retention unavailable rather than derived"
+    ],
+    "incomplete": [
+      "signed-in browser journey (credentialed environment required; jsdom evidence is not a substitute)",
+      "real PostgreSQL server run of the document suites (PGlite only)",
+      "legacy backfill has not been run against any customer data"
+    ]
+  },
+  "trancheTwo": {
+    "status": "IN_PROGRESS",
+    "integrated": false,
+    "isolation": "Remains isolated on the Cursor branch. Not recorded in integratedCursorCommits.",
+    "p0FindingsOpenOnCursorBranch": [
+      "upload route: a client-controlled discardBlobPath can delete an organization-prefixed blob without proving ownership of that specific object",
+      "OCR route: hasCaseAccess is passed as true instead of a verified kernel case-access decision"
+    ]
+  },
+  "reservedCanonicalContracts": [
+    {
+      "id": "intake-cleanup",
+      "owner": "integrator",
+      "status": "RESERVED",
+      "contract": "Short-lived, ownership-bound intake cleanup. A stored-but-unattached upload is described by an intake record bound to organization, uploader, the exact blob path, a content hash and an expiry measured in minutes. Cleanup may remove only a blob with a live, unconsumed intake record owned by the caller; creating the document consumes the record. A client-supplied path, or a path that merely carries the organization prefix, is never deletion authority. Expired records are reaped by a governed job, with an audit entry per deletion.",
+      "cursorMustNot": "Delete a blob from a client-supplied path, or from an organization prefix match."
+    },
+    {
+      "id": "ocr-processing-authority",
+      "owner": "integrator",
+      "status": "RESERVED",
+      "contract": "OCR processing authority. Processing a document or uploaded file is an action decided by the kernel for the linked case (read or upload_evidence as the integrator specifies), on the transaction that does the work. A caller-asserted hasCaseAccess flag is not an input. Unlinked documents follow the document-level rule (uploader, explicit download grant, organization-level documents only for the document authority). The decision and the extracted-text hash are audited.",
+      "cursorMustNot": "Pass hasCaseAccess: true, or derive case access from a role or a label."
+    },
+    {
+      "id": "unlinked-document-create-audit",
+      "owner": "integrator",
+      "status": "RESERVED",
+      "contract": "Durable audit of document creation without a case link. The document, its first version and its audit record commit together under persistAtomicAudit; a refused create (denied, hash mismatch, storage reuse) is recorded on the denial path without a document existing. No create path may skip the audit because it has no linked entity.",
+      "cursorMustNot": "Add a second create path, or create a document row outside the repository route."
+    },
+    {
+      "id": "reviewed-transcript-writes",
+      "owner": "integrator",
+      "status": "RESERVED",
+      "contract": "Governed reviewed-transcript writes. OCR or transcription output is a candidate until a named human reviews it. A reviewed transcript is a new, hash-bound artifact linked to the source document version, written under the kernel document-modification decision (or the uploader rule for unlinked documents), versioned, and audited with reviewer, source version and text hash. Unreviewed output is never stored as document content or as a document version.",
+      "cursorMustNot": "Write OCR output into documents, document_versions or metadata without the reviewed-transcript contract."
+    }
+  ]
 }

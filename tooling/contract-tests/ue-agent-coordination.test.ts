@@ -16,6 +16,9 @@ const coordination = JSON.parse(
   integratorReservedCaseDocumentRoutes: string[]
   cursorForbiddenPathPrefixes: string[]
   integratedCursorCommits: string[]
+  integratedCursorCommitProvenance: Array<{ sourceSha: string; integrationSha: string }>
+  reservedCanonicalContracts: Array<{ id: string; owner: string; status: string }>
+  trancheTwo: { status: string; integrated: boolean }
   deployment: { UE_SAAS_OPERATIONAL_READINESS: string; PRODUCTION_DEPLOYMENT_AUTHORIZED: string }
 }
 
@@ -42,7 +45,10 @@ describe('Union Eyes agent coordination lanes', () => {
     expect(ancestor(CURSOR_BASELINE)).toBe(true)
     expect(coordination.deployment.UE_SAAS_OPERATIONAL_READINESS).toBe('NO_GO')
     expect(coordination.deployment.PRODUCTION_DEPLOYMENT_AUTHORIZED).toBe('NO')
-    expect(coordination.integratedCursorCommits).toEqual([])
+    expect(coordination.integratedCursorCommits).toEqual([
+      '38e002e54ae2866a567b4d48d00d386dfe149091',
+      '74aed8ec9bc44d6306918c0056c5a4c788b64b7f',
+    ])
   })
 
   it('gives Cursor only existing document retirement and UI files', () => {
@@ -62,6 +68,26 @@ describe('Union Eyes agent coordination lanes', () => {
     ]) {
       expect(existsSync(join(ROOT, path)), path).toBe(true)
       expect(editable.has(path), path).toBe(false)
+    }
+  })
+
+  it('records tranche 1 with source provenance and keeps tranche 2 out', () => {
+    expect(coordination.integratedCursorCommitProvenance.map((p) => p.sourceSha)).toEqual(coordination.integratedCursorCommits)
+    for (const { integrationSha } of coordination.integratedCursorCommitProvenance) {
+      expect(ancestor(integrationSha), integrationSha).toBe(true)
+    }
+    expect(coordination.trancheTwo).toMatchObject({ status: 'IN_PROGRESS', integrated: false })
+  })
+
+  it('reserves the tranche 2 canonical contracts for the integrator', () => {
+    expect(coordination.reservedCanonicalContracts.map((c) => c.id).sort()).toEqual([
+      'intake-cleanup',
+      'ocr-processing-authority',
+      'reviewed-transcript-writes',
+      'unlinked-document-create-audit',
+    ])
+    for (const contract of coordination.reservedCanonicalContracts) {
+      expect(contract).toMatchObject({ owner: 'integrator', status: 'RESERVED' })
     }
   })
 })
