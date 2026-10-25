@@ -36,19 +36,19 @@
    "WITH_API": 167
   },
   "mutatingByAudit": {
-   "ATOMIC": 56,
+   "ATOMIC": 59,
    "ATOMIC_SERVICE": 19,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
    "NO_WRITES_FOUND": 14,
-   "NONE": 297
+   "NONE": 294
   },
   "mutatingByData": {
-   "AMBIENT_DB": 52,
+   "AMBIENT_DB": 51,
    "CRUD_TENANT_TX": 299,
    "NONE": 221,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 70
+   "TENANT_TX": 71
   }
  },
  "routes": [
@@ -9870,7 +9870,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "organizations/[id]/sharing-settings/route.ts",
@@ -9933,7 +9933,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "organizations/search/route.ts",
@@ -11257,8 +11257,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "signatures/audit/[documentId]/route.ts",

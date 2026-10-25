@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   requireSystemAdmin: vi.fn(),
+  audit: vi.fn(),
   withRLSContext: vi.fn(),
   withSystemContext: vi.fn(),
   rowsQueue: [] as unknown[][],
@@ -26,6 +27,7 @@ const mockDb: any = {
 };
 
 vi.mock('@/lib/api-auth-guard', () => ({ auth: m.auth, requireSystemAdmin: m.requireSystemAdmin }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/db/schema', () => ({ organizations: { id: 'id', parentId: 'parentId', status: 'status', hierarchyPath: 'hierarchyPath', hierarchyLevel: 'hierarchyLevel' } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext, withSystemContext: m.withSystemContext }));
@@ -55,6 +57,7 @@ describe('organizations route', () => {
     m.executeQueue = [];
     m.inserted = { ...orgRow };
     m.auth.mockResolvedValue({ userId: 'u1' });
+    m.audit.mockResolvedValue(undefined);
     m.requireSystemAdmin.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
@@ -113,6 +116,7 @@ describe('organizations route', () => {
     expect(response.status).toBe(201);
     const json = await response.json();
     expect(json.data.id).toBe('org_1');
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'organization.create', userId: 'u1', organizationId: 'org_1' }));
   });
 
   it('POST returns 400 for an invalid organization type', async () => {

@@ -4,6 +4,8 @@ import { db } from '@/db/db';
 import { organizations } from '@/db/schema';
 import { eq, and, sql, type SQL } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { MAX_HIERARCHY_DEPTH } from '@/lib/utils/hierarchy-validation';
 
 export const dynamic = 'force-dynamic';
@@ -174,7 +176,7 @@ export async function POST(req: NextRequest) {
 
   let created: Record<string, unknown>;
   try {
-    created = await withSystemContext(async (_tx) => {
+    created = await withSystemContext(async (tx) => {
       let hierarchyPath: string[] = [];
       let hierarchyLevel = 0;
       if (parentId) {
@@ -217,6 +219,14 @@ export async function POST(req: NextRequest) {
           featuresEnabled: body.features_enabled ?? [],
         })
         .returning();
+      await persistAtomicAudit(tx as RLSTx, {
+        organizationId: row.id,
+        userId,
+        action: 'organization.create',
+        resourceType: 'organizations',
+        resourceId: row.id,
+        details: { organizationType: requestedType, parentId },
+      });
       return row;
     });
   } catch (err) {

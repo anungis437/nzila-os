@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   db: { select: vi.fn(), update: vi.fn() },
+  audit: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -10,6 +11,8 @@ vi.mock('@/lib/api/framework', () => ({
   ApiError: { badRequest: () => new Error('bad') },
 }));
 vi.mock('@/db/db', () => ({ db: m.db }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(m.db) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/db/schema-organizations', () => ({ organizations: {} }));
 vi.mock('@/db/schema', () => ({ organizationMembers: {} }));
 
@@ -28,6 +31,7 @@ describe('settings/organization route', () => {
         ]),
       })),
     }));
+    m.audit.mockResolvedValue(undefined);
     m.db.update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(async () => []) })) }));
   });
 
@@ -49,8 +53,10 @@ describe('settings/organization route', () => {
     const { PUT } = await loadRoute();
     const result = await PUT({
       organizationId: 'org_1',
+      userId: 'u1',
       body: { name: 'Updated Org', settings: { theme: 'light' } },
     });
-    expect([true, false]).toContain(result.updated);
+    expect(result.updated).toBe(true);
+    expect(m.audit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'organization.settings_update', userId: 'u1' }));
   });
 });
