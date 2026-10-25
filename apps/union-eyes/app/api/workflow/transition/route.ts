@@ -11,9 +11,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth-guard'
 import {
   caseAuthorizationResponse,
-  caseReadScope,
+  findReadableCase,
   getCaseActor,
-  requireCaseAction,
 } from '@/lib/cases/case-authorization'
 import { updateClaimStatus } from '@/lib/workflow-engine'
 import { getAllowedTransitions } from '@/lib/workflow/case-lifecycle'
@@ -70,7 +69,6 @@ export async function POST(request: NextRequest) {
     // Organization and case authority are derived server-side from the verified membership.
     const actor = await getCaseActor()
     const organizationId = actor.organizationId
-    await requireCaseAction(actor, 'case_transition', 'workflow-transition')
 
     const rawBody = await request.json()
     const parsed = transitionSchema.safeParse(rawBody)
@@ -86,8 +84,13 @@ export async function POST(request: NextRequest) {
 
     // Fetch claim for pre-flight validation (org-scoped via RLS context, row-locked)
     return await withRLSContext(async (tx) => {
-      // Always tenant- and assignment-scoped: an actor can only lock and move cases they may read.
-      const claimConditions = [eq(claims.claimNumber, claimNumber), caseReadScope(actor)];
+      // The kernel decides the actor may move this case (and close it, when the target closes it) before it is locked.
+      const mayMove = await findReadableCase(tx, actor, claimNumber, true, 'case:transition');
+      if (!mayMove) return NextResponse.json({ success: false, error: 'Claim not found' }, { status: 404 });
+      if (['closed', 'resolved'].includes(targetStatus) && !(await findReadableCase(tx, actor, claimNumber, true, 'case:close'))) {
+        return NextResponse.json({ success: false, error: 'Claim not found' }, { status: 404 });
+      }
+      const claimConditions = [eq(claims.claimNumber, claimNumber), eq(claims.organizationId, actor.organizationId)];
 
       const [claim] = await wrapSchemaQuery(
         async () => await tx

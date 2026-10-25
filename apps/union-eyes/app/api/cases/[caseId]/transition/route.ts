@@ -22,9 +22,8 @@ import { claims, claimUpdates, claimStatusEnum } from '@/db/schema/claims-schema
 import { inAppNotifications } from '@/db/schema';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { canPerformAction } from '@/lib/action-enforcer';
 import { logger } from '@/lib/logger';
-import { getCaseActor, findReadableCase, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
+import { getCaseActor, findReadableCase, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
 import { inAppNoticeAllowed } from '@/lib/notifications/in-app-preferences';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
@@ -48,7 +47,6 @@ export async function PATCH(
     // 1. Auth
     const actor = await getCaseActor();
     const { userId, organizationId: orgId } = actor;
-    await requireCaseAction(actor, 'case_transition', caseId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     // 2. Parse + validate body
@@ -81,7 +79,8 @@ export async function PATCH(
 
     // 3. Load claim in RLS context (with row lock to prevent TOCTOU race)
     const result = await withRLSContext(async (tx) => {
-      const claim = await findReadableCase(tx, actor, caseId, true);
+      // The kernel decides this actor may transition this case; closing or reopening is a separate, narrower decision.
+      const claim = await findReadableCase(tx, actor, caseId, true, 'case:transition');
 
       if (!claim) {
         return { found: false as const };
@@ -101,14 +100,12 @@ export async function PATCH(
         };
       }
 
+      if (targetLifecycleState === 'closed' || currentLifecycleState === 'closed') {
+        const closer = await findReadableCase(tx, actor, caseId, true, 'case:close');
+        if (!closer) return { found: false as const };
+      }
+
       const normalizedRole = normalizeActorRole(actor.role);
-      const action = targetLifecycleState === 'closed' ? 'case_close'
-        : currentLifecycleState === 'closed' ? 'case_reopen' : 'case_transition';
-      const permission = canPerformAction(action, actor.role, { caseStatus: claim.status });
-      if (!permission.allowed) return {
-        found: true as const, allowed: false as const,
-        reason: permission.reason, nextAllowedStatuses: [] as string[],
-      };
       const validation = validateTransition({
         caseId,
         currentState: currentLifecycleState,

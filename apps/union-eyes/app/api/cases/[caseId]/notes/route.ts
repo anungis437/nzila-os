@@ -17,8 +17,7 @@ import { logger } from '@/lib/logger'
 import { buildUnionEvidencePack } from '@/lib/evidence'
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial'
-import { getCaseActor, findReadableCase, caseHistoryVisibility, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
-import { resolveNoteInternal } from '@/lib/cases/note-visibility'
+import { getCaseActor, findReadableCase, caseHistoryVisibility, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,7 +48,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
       const rows = await tx
         .select()
         .from(claimUpdates)
-        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(actor)))
+        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(claim.visibility)))
         .orderBy(desc(claimUpdates.createdAt))
       return { claimId: claim.claimId, rows }
     })
@@ -111,13 +110,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
     }
 
     const { text } = parsed.data
-    const isInternal = resolveNoteInternal(parsed.data.isInternal, actor.role)
-    await requireCaseAction(actor, isInternal ? 'note_add_internal' : 'note_add', caseId)
+    const wanted = parsed.data.isInternal
 
-    const note = await withRLSContext(async (tx) => {
-      const claim = await findReadableCase(tx, actor, caseId, true)
+    const written = await withRLSContext(async (tx) => {
+      // Anyone the kernel lets comment may add a member-visible note; an internal note is a separate decision.
+      const claim = await findReadableCase(tx, actor, caseId, true, 'case:comment')
 
       if (!claim) return null
+      const isInternal = wanted ?? claim.visibility === 'internal'
+      if (isInternal && !(await findReadableCase(tx, actor, caseId, true, 'case:write_notes'))) return null
 
       const [newNote] = await tx
         .insert(claimUpdates)
@@ -141,15 +142,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
         details: { event: 'CASE_NOTE_ADDED', caseId, isInternal, contentLength: text.length },
       })
 
-      return publicClaimHistory(newNote, claim.claimId)
+      return { note: publicClaimHistory(newNote, claim.claimId), isInternal }
     })
 
-    if (!note) {
+    if (!written) {
       return NextResponse.json(
         { error: 'NOT_FOUND', message: `Case '${caseId}' not found.` },
         { status: 404 },
       )
     }
+
+    const { note, isInternal } = written
 
     logger.info('Case note added', {
       caseId,

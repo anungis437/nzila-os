@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
   withOrganizationAuth: vi.fn(),
   requireEntitlement: vi.fn(),
-  hasMinRole: vi.fn(),
+  requireKernelCaseAction: vi.fn(),
   db: { select: vi.fn(), update: vi.fn(), insert: vi.fn() },
   withRLSContext: vi.fn(),
   auditLog: vi.fn(),
@@ -16,7 +16,7 @@ const m = vi.hoisted(() => ({
 
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
-vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/cases/case-authorization', () => ({ requireKernelCaseAction: m.requireKernelCaseAction }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
@@ -49,7 +49,7 @@ describe('grievances/[id]/convert route', () => {
     });
 
     m.requireEntitlement.mockResolvedValue(undefined);
-    m.hasMinRole.mockResolvedValue(true);
+    m.requireKernelCaseAction.mockResolvedValue(undefined);
 
     m.db.select = vi.fn(() => ({
       from: vi.fn(() => ({
@@ -89,8 +89,9 @@ describe('grievances/[id]/convert route', () => {
     expect([200, 400, 403, 404, 500]).toContain(response.status);
   });
 
-  it('returns forbidden for non-steward user', async () => {
-    m.hasMinRole.mockResolvedValueOnce(false);
+  it('answers 403 and writes nothing when the kernel denies case:transition, after recording the violation', async () => {
+    const { ApiError } = await import('@/lib/api/errors');
+    m.requireKernelCaseAction.mockRejectedValueOnce(ApiError.forbidden());
 
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/grievances/g1/convert', {
@@ -99,7 +100,13 @@ describe('grievances/[id]/convert route', () => {
       body: JSON.stringify({ priority: 'high' }),
     }));
 
-    expect([200, 403, 500]).toContain(response.status);
+    expect(response.status).toBe(403);
+    expect(m.requireKernelCaseAction).toHaveBeenCalledWith(m.db, { userId: 'u1', organizationId: 'org_1' }, 'g1', 'case:transition');
+    expect(m.auditLog).toHaveBeenCalledWith(expect.objectContaining({ eventType: 'AUTHORITY_VIOLATION', action: 'convert_intake', resourceId: 'g1' }));
+    expect(m.db.update).not.toHaveBeenCalled();
+    expect(m.db.insert).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
   });
 
   it('converts intake into an official case', async () => {
@@ -111,6 +118,10 @@ describe('grievances/[id]/convert route', () => {
     }));
 
     expect(response.status).toBe(200);
+    expect(m.requireKernelCaseAction).toHaveBeenCalledWith(m.db, { userId: 'u1', organizationId: 'org_1' }, 'g1', 'case:transition');
+    const inserted = (m.db.insert.mock.results[0].value.values as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(inserted).not.toHaveProperty('unionRepId');
+    expect(inserted).toMatchObject({ createdBy: 'u1', relatedGrievanceIds: ['g1'], status: 'filed' });
     expect(m.persistAtomicAudit).toHaveBeenCalledTimes(2);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'grievance.convert_intake', resourceId: 'g1' }));
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'grievance.create_official_case', resourceId: 'g2' }));

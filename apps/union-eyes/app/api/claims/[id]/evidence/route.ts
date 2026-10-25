@@ -20,7 +20,6 @@ import {
   caseHistoryVisibility,
   findReadableCase,
   getCaseActor,
-  requireCaseAction,
 } from '@/lib/cases/case-authorization'
 
 export const dynamic = 'force-dynamic'
@@ -30,14 +29,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    // Organization, role and case authority are derived server-side; evidence is staff-level only
-    // and limited to cases the actor may read (assigned, own, or the organization-queue read of the claims policy).
+    // Organization and case authority are derived server-side; evidence is the internal file, so it needs the kernel's
+    // internal-read decision for this case.
     const actor = await getCaseActor()
     const { id: claimId } = await params
-    await requireCaseAction(actor, 'note_add_internal', claimId)
 
     const evidence = await withRLSContext(async (tx) => {
-      const readable = await findReadableCase(tx, actor, claimId)
+      const readable = await findReadableCase(tx, actor, claimId, false, 'case:read_internal')
       if (!readable) return null
 
       const [claim] = await tx
@@ -50,7 +48,7 @@ export async function GET(
       const updates = await tx
         .select()
         .from(claimUpdates)
-        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(actor)))
+        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(readable.visibility)))
         .orderBy(claimUpdates.createdAt)
 
       const [pack] = await tx

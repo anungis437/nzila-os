@@ -14,7 +14,7 @@ import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { recordUnionEyesCaseCreated } from '@/lib/pilot-metrics';
 import { z } from 'zod';
-import { getCaseActor, caseReadScope } from '@/lib/cases/case-authorization';
+import { getCaseActor, caseReadScope, caseTriageQueueScope, requireCaseFilingCapacity } from '@/lib/cases/case-authorization';
 
 const caseCreateSchema = z.object({
   claimType: z.enum([
@@ -103,7 +103,22 @@ export const GET = withApi(
       `),
     );
 
-    return { data: Array.from(rows) };
+    // A live `cases` triage designation adds the unassigned queue as metadata only (never the description, analysis,
+    // evidence or amounts), and only for cases the caller cannot already read in full.
+    const queue = await withRLSContext(async (tx) =>
+      tx.execute(sql`
+        SELECT c.claim_id AS "claimId", c.claim_number AS "claimNumber", c.claim_type AS "claimType", c.status, c.priority,
+               c.created_at AS "createdAt", c.filed_date AS "filedDate", true AS "triageOnly"
+        FROM claims c
+        WHERE ${caseTriageQueueScope(actor, 'c')}
+          ${statusFilter} ${typeFilter} ${priorityFilter}
+        ORDER BY c.created_at DESC
+        LIMIT 200
+      `),
+    );
+    const full = Array.from(rows) as Array<{ claimId: string }>;
+    const seen = new Set(full.map((r) => r.claimId));
+    return { data: [...full, ...(Array.from(queue) as Array<{ claimId: string }>).filter((r) => !seen.has(r.claimId))] };
   },
 );
 
@@ -141,6 +156,8 @@ export const POST = withApi(
     } = parsed.data;
 
     const rows = await withRLSContext(async (tx) => {
+      // Opening a case is a capacity (staff), checked on the canonical membership, not a role rank.
+      await requireCaseFilingCapacity(tx, { userId: userId!, organizationId }, 'handler');
       const result = await tx.execute(sql`
         INSERT INTO claims (
           organization_id, member_id, claim_type, description,

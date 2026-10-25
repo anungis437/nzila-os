@@ -4,8 +4,8 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   getCaseActor: vi.fn(),
   caseReadScope: vi.fn(() => 'READ_SCOPE'),
-  requireCaseAction: vi.fn(),
   findReadableCase: vi.fn(),
+  assignPrimaryRepresentative: vi.fn(),
   caseAssigneeEligible: vi.fn(),
   denyCaseAction: vi.fn(),
   withRLSContext: vi.fn(),
@@ -20,6 +20,13 @@ class TestApiError extends Error {
   static forbidden(message = 'forbidden') { return new TestApiError(message, 403); }
 }
 
+class TestAuthorityStoreError extends Error {
+  code: string;
+  constructor(code: string, message: string) { super(message); this.code = code; }
+}
+
+vi.mock('@/lib/services/case-access-service', () => ({ assignPrimaryRepresentative: m.assignPrimaryRepresentative }));
+vi.mock('@/lib/authority/store/executor', () => ({ AuthorityStoreError: TestAuthorityStoreError }));
 vi.mock('@/lib/api/framework', () => ({
   withApi: (_cfg: unknown, handler: (ctx: unknown) => unknown) => (ctx: unknown) => handler(ctx),
   ApiError: TestApiError,
@@ -27,7 +34,6 @@ vi.mock('@/lib/api/framework', () => ({
 vi.mock('@/lib/cases/case-authorization', () => ({
   getCaseActor: m.getCaseActor,
   caseReadScope: m.caseReadScope,
-  requireCaseAction: m.requireCaseAction,
   findReadableCase: m.findReadableCase,
   caseAssigneeEligible: m.caseAssigneeEligible,
   denyCaseAction: m.denyCaseAction,
@@ -46,7 +52,7 @@ vi.mock('drizzle-orm', () => {
   const sql = Object.assign((parts: TemplateStringsArray, ...values: unknown[]) => ({ parts, values }), {
     join: (items: unknown[]) => ({ joined: items }),
   });
-  return { sql, eq: vi.fn() };
+  return { sql, eq: vi.fn(), and: vi.fn() };
 });
 
 const steward = { userId: 'steward-1', organizationId: 'org-1', role: 'steward' };
@@ -95,21 +101,31 @@ describe('POST /api/workbench/assign', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.getCaseActor.mockResolvedValue(steward);
-    m.requireCaseAction.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: (tx: unknown) => unknown) => fn({
       update: () => ({ set: () => ({ where: vi.fn() }) }),
       insert: () => ({ values: vi.fn() }),
     }));
-    m.findReadableCase.mockResolvedValue({ claimId, assignedTo: null });
+    m.findReadableCase.mockResolvedValue({ claimId, assignedTo: null, visibility: 'internal' });
+    m.assignPrimaryRepresentative.mockResolvedValue({ previousUserId: null });
     m.caseAssigneeEligible.mockResolvedValue(true);
     m.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
-  it('denies self-assignment when the case_assign policy denies the actor', async () => {
-    m.requireCaseAction.mockRejectedValue(TestApiError.forbidden());
+  it('denies self-assignment when the kernel denies the actor case:assign', async () => {
+    m.findReadableCase.mockRejectedValue(TestApiError.forbidden());
     const { POST } = await import('../workbench/assign/route');
     await expect(POST(ctx({ claimId }))).rejects.toMatchObject({ status: 403 });
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), steward, claimId, true, 'case:assign');
+    expect(m.assignPrimaryRepresentative).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('answers 403 when the authority kernel refuses the assignment', async () => {
+    m.getCaseActor.mockResolvedValue(chief);
+    m.assignPrimaryRepresentative.mockRejectedValue(new TestAuthorityStoreError('DENIED', 'no mandate'));
+    const { POST } = await import('../workbench/assign/route');
+    const res = await POST(ctx({ claimId, assignTo: 'steward-2' })) as Response;
+    expect(res.status).toBe(403);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
@@ -136,6 +152,7 @@ describe('POST /api/workbench/assign', () => {
     const { POST } = await import('../workbench/assign/route');
     const result = await POST(ctx({ claimId, assignTo: 'steward-2' })) as any;
     expect(result.claim).toEqual({ claimId, assignedTo: 'steward-2' });
+    expect(m.assignPrimaryRepresentative).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ organizationId: 'org-1', grievanceId: claimId, issuerUserId: 'chief-1', assigneeUserId: 'steward-2' }));
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'case.assign', organizationId: 'org-1', userId: 'chief-1', resourceId: claimId }));
   });
 

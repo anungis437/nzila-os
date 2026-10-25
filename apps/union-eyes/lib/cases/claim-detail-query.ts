@@ -1,9 +1,9 @@
 import { sql, type SQL } from 'drizzle-orm'
-import { caseReadScope, type CaseActor } from './case-authorization'
+import type { CaseActor } from './case-authorization'
 
 /**
- * Single-case read for the claims detail endpoint. The WHERE clause always includes the
- * canonical case read scope, so a row is returned only when the actor may read that case.
+ * Single-case projection for the claims detail endpoint. It is tenant-bound, but it is NOT the authorization: the
+ * caller must already hold a kernel `case:read` decision for this exact case (see findReadableCase) and pass its id.
  */
 export function claimDetailQuery(actor: CaseActor, reference: string): SQL {
   return sql`
@@ -46,8 +46,8 @@ export function claimDetailQuery(actor: CaseActor, reference: string): SQL {
       LEFT JOIN organization_members m
         ON m.user_id = c.member_id
        AND m.organization_id::text = c.organization_id::text
-      WHERE (c.claim_number = ${reference} OR c.claim_id::text = ${reference})
-        AND ${caseReadScope(actor, 'c')}
+      WHERE c.claim_id::text = ${reference}
+        AND c.organization_id = ${actor.organizationId}::uuid
       LIMIT 1
     `
 }

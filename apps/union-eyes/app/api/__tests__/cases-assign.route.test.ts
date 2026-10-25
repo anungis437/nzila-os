@@ -14,8 +14,11 @@ const m = vi.hoisted(() => ({
   assigneeEligible: vi.fn(),
   insertQueue: [] as unknown[][],
   updateReturning: vi.fn(),
+  findReadableCase: vi.fn(),
+  assignPrimaryRepresentative: vi.fn(),
 }));
 
+vi.mock('@/lib/services/case-access-service', () => ({ assignPrimaryRepresentative: m.assignPrimaryRepresentative }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
@@ -34,7 +37,7 @@ vi.mock('drizzle-orm', async (importOriginal) => {
 
 vi.mock('@/lib/cases/case-authorization', async (original) => ({
   ...(await original<typeof import('@/lib/cases/case-authorization')>()),
-  findReadableCase: vi.fn(async () => (m.claimQueue.shift() ?? [])[0] ?? null),
+  findReadableCase: m.findReadableCase,
   caseAssigneeEligible: m.assigneeEligible,
 }));
 
@@ -46,6 +49,13 @@ describe('cases/[caseId]/assign route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.claimQueue = [];
+    m.findReadableCase.mockImplementation(async () => {
+      const claim = (m.claimQueue.shift() ?? [])[0] as { assignedTo?: string | null } | undefined;
+      // The kernel records the previous holder; the claims mirror is only used to seed it here.
+      m.assignPrimaryRepresentative.mockResolvedValue({ previousUserId: claim?.assignedTo ?? null });
+      return claim ?? null;
+    });
+    m.assignPrimaryRepresentative.mockResolvedValue({ previousUserId: null });
     m.assigneeEligible.mockResolvedValue(true);
     m.insertQueue = [];
     m.persistAtomicAudit.mockResolvedValue(undefined);
@@ -203,14 +213,31 @@ describe('cases/[caseId]/assign route', () => {
     expect(m.recordUnionEyesCaseAssigned).not.toHaveBeenCalled();
   });
 
-  it('denies member assignment before opening a case transaction', async () => {
+  it('denies member assignment on the kernel decision before any mutation', async () => {
     const { POST } = await loadRoute();
-    m.getUserRoleInOrganization.mockResolvedValueOnce('member');
+    const { ApiError } = await import('@/lib/api/errors');
+    m.findReadableCase.mockRejectedValueOnce(ApiError.forbidden('This action is not permitted for this case.'));
     const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
-      method:'POST', body:JSON.stringify({assigneeId:'foreign'}),
+      method:'POST', headers: { 'content-type': 'application/json' }, body:JSON.stringify({assigneeId:'foreign'}),
     }), {params:Promise.resolve({caseId:'c1'})});
     expect(response.status).toBe(403);
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ userId: 'u1' }), 'c1', true, 'case:assign');
+    expect(m.assignPrimaryRepresentative).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.insertQueue).toEqual([]);
+  });
+
+  it('answers 403 when the authority kernel refuses the assignment', async () => {
+    const { POST } = await loadRoute();
+    const { AuthorityStoreError } = await import('@/lib/authority/store/executor');
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'm9', assignedTo: 'u0', status: 'filed' }]);
+    m.assignPrimaryRepresentative.mockRejectedValueOnce(new AuthorityStoreError('DENIED', 'no mandate'));
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assigneeId: 'u2' }),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
+    expect(response.status).toBe(403);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
   });
 
 });

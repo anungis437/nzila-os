@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
 import { externalDocumentAccessGrants } from '@/db/schema/representation-authority-schema';
-import { withExplicitUserContext } from '@/lib/db/with-rls-context';
+import { withExplicitUserContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
 import { resolveExternalGrievanceResource } from '@/lib/external-resource-route-utils';
 import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
@@ -113,6 +114,17 @@ export const POST = withExternalMatterResourceAuth(
         canDownload: true,
         canShare: false,
         grantedBy: context.actor.userId,
+      });
+
+      // The document, its version, its link, the external grant and this record commit together; the external
+      // representative's authority was verified by the matter middleware (a live grant naming upload_documents).
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        organizationId: context.organizationId,
+        userId: context.actor.userId,
+        action: 'document.external_upload',
+        resourceType: 'documents',
+        resourceId: insertedDocument.id,
+        details: { matterType, matterId: context.matterId, authorityId: context.authorityId, privacyLabel: parsed.data.privacyLabel },
       });
 
       return insertedDocument;

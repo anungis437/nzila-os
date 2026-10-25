@@ -12,7 +12,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances, GrievanceStatus } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
+import { hasCaseFilingCapacity } from "@/lib/cases/case-authorization";
 import { auditLog, AuditEventType } from "@/lib/audit-logger";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { emitCapeAuditEvent, CAPE_AUDIT_EVENTS } from "@/lib/audit/cape-audit-events";
@@ -105,7 +105,8 @@ export const POST = withOrganizationAuth(async (request, context) => {
     // Only steward+ can create official cases.
     // Members can only submit intakes (status = "draft").
     if (isOfficialCase) {
-      const isSteward = await hasMinRole("steward");
+      // Opening an official case is a staff capacity on the canonical membership, not a role rank.
+      const isSteward = await hasCaseFilingCapacity({ userId, organizationId }, "handler");
       if (!isSteward) {
         await auditLog({
           eventType: AuditEventType.AUTHORITY_VIOLATION,
@@ -267,7 +268,7 @@ export const GET = withOrganizationAuth(async (request, context) => {
   await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
-    const canAccess = await hasMinRole("steward");
+    const canAccess = await hasCaseFilingCapacity({ userId, organizationId }, "handler");
     if (!canAccess) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, "Requires steward role or above");
     }

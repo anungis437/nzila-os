@@ -17,7 +17,7 @@ import { auditCaseExport } from '@/lib/audited-case-mutations'
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial'
 import { recordUnionEyesEvidenceExport } from '@/lib/pilot-metrics'
-import { getCaseActor, findReadableCase, caseHistoryVisibility, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
+import { getCaseActor, findReadableCase, caseHistoryVisibility, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
 import { readCanonicalCaseAudit } from '@/lib/cases/case-evidence-query'
 import { claimHistoryReference, publicClaimHistory } from '@/lib/cases/claim-history-reference'
@@ -32,10 +32,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
   try {
     const actor = await getCaseActor()
     const { userId, organizationId: orgId } = actor
-    await requireCaseAction(actor, 'case_export', reference)
     await requireEntitlement(orgId, 'grievance_case_suite')
     const records = await withRLSContext(async (tx) => {
-      const readable = await findReadableCase(tx, actor, reference)
+      // Exporting the case file, its internal notes and its audit trail is the primary handler's sealed-evidence power.
+      const readable = await findReadableCase(tx, actor, reference, false, 'case:export_sealed_evidence')
       if (!readable) return null
       const caseId = readable.claimId
       const [caseRows, noteRows] = await Promise.all([
@@ -43,7 +43,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
         tx
           .select()
           .from(claimUpdates)
-          .where(and(eq(claimUpdates.claimId, claimHistoryReference(caseId)), caseHistoryVisibility(actor)))
+          .where(and(eq(claimUpdates.claimId, claimHistoryReference(caseId)), caseHistoryVisibility(readable.visibility)))
           .orderBy(desc(claimUpdates.createdAt)),
       ])
       // V2 writes hash-chained public records; the legacy audit_security table

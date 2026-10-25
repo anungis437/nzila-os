@@ -8,6 +8,7 @@ const m = vi.hoisted(() => ({
   requireEntitlement: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   getUserRoleInOrganization: vi.fn(),
+  findReadableCase: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
@@ -20,7 +21,7 @@ vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrga
 
 vi.mock('@/lib/cases/case-authorization', async original => ({
   ...(await original<typeof import('@/lib/cases/case-authorization')>()),
-  findReadableCase:vi.fn().mockResolvedValue({claimId:'c1'}),
+  findReadableCase:m.findReadableCase,
 }));
 
 async function loadRoute() {
@@ -30,6 +31,7 @@ async function loadRoute() {
 describe('cases/[caseId]/audit route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.findReadableCase.mockResolvedValue({claimId:'c1',visibility:'internal'});
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
     m.getUserRoleInOrganization.mockResolvedValue('officer');
@@ -82,10 +84,19 @@ describe('cases/[caseId]/audit route', () => {
   });
   it('does not disclose internal audit metadata to a member', async () => {
     const { GET } = await loadRoute();
-    m.getUserRoleInOrganization.mockResolvedValueOnce('member');
+    const { ApiError } = await import('@/lib/api/errors');
+    m.findReadableCase.mockRejectedValueOnce(ApiError.forbidden('This action is not permitted for this case.'));
     const response=await GET(new Request('http://localhost/api/cases/c1/audit'),{params:Promise.resolve({caseId:'c1'})});
     expect(response.status).toBe(403);
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ userId: 'u1' }), 'c1', false, 'case:read_internal');
+    expect(m.auditDataAccess).not.toHaveBeenCalled();
+  });
+
+  it('answers 404 when the caller cannot read the case at all', async () => {
+    const { GET } = await loadRoute();
+    m.findReadableCase.mockResolvedValueOnce(null);
+    const response=await GET(new Request('http://localhost/api/cases/c1/audit'),{params:Promise.resolve({caseId:'c1'})});
+    expect(response.status).toBe(404);
     expect(m.auditDataAccess).not.toHaveBeenCalled();
   });
 

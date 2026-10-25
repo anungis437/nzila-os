@@ -4,7 +4,7 @@
 import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { sql } from 'drizzle-orm';
-import { getCaseActor, caseReadScope, requireCaseAction } from '@/lib/cases/case-authorization';
+import { getCaseActor, findReadableCase, type CaseKernelAction } from '@/lib/cases/case-authorization';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { putBlob, deleteBlob } from '@/lib/blob-client';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -66,20 +66,22 @@ function sanitizeFilename(fileName: string): string {
   return fileName.replace(/[^a-zA-Z0-9._-]/g, '-');
 }
 
-async function resolveCaseRecord(caseId: string, organizationId: string | null, userId: string | null): Promise<CaseRecord> {
+/** Resolves the case and decides `action` on it through the authority kernel, in one transaction. */
+async function resolveCaseRecord(caseId: string, organizationId: string | null, userId: string | null, action: CaseKernelAction): Promise<CaseRecord> {
   const actor = await getCaseActor();
   if (actor.userId !== userId || actor.organizationId !== organizationId) throw ApiError.forbidden();
-  const orgFilter = sql`AND ${caseReadScope(actor, 'c')}`;
 
-  const rows = await withRLSContext(async (tx) => tx.execute(sql`
-    SELECT c.claim_id AS "claimId", c.claim_number AS "claimNumber", c.attachments, c.metadata
-    FROM claims c
-    WHERE (c.claim_number = ${caseId} OR c.claim_id::text = ${caseId})
-      ${orgFilter}
-    LIMIT 1
-  `));
-
-  const row = rows[0] as any as CaseRecord | undefined;
+  const row = await withRLSContext(async (tx) => {
+    const readable = await findReadableCase(tx, actor, caseId, false, action);
+    if (!readable) return undefined;
+    const rows = await tx.execute(sql`
+      SELECT c.claim_id AS "claimId", c.claim_number AS "claimNumber", c.attachments, c.metadata
+      FROM claims c
+      WHERE c.claim_id = ${readable.claimId}::uuid AND c.organization_id = ${actor.organizationId}::uuid
+      LIMIT 1
+    `);
+    return rows[0] as any as CaseRecord | undefined;
+  });
   if (!row) {
     throw ApiError.notFound('Case', caseId);
   }
@@ -117,7 +119,7 @@ export const GET = withApi(
     },
   },
   async ({ params, organizationId, userId }) => {
-    const claim = await resolveCaseRecord(params.caseId, organizationId, userId);
+    const claim = await resolveCaseRecord(params.caseId, organizationId, userId, 'case:read_internal');
     const attachments = normalizeAttachments(claim.attachments);
     return attachments;
   },
@@ -137,7 +139,8 @@ export const POST = withApi(
       throw ApiError.unauthorized();
     }
 
-    await requireCaseAction(await getCaseActor(), 'attachment_upload', params.caseId);
+    // Decided before the upload body is read.
+    const claim = await resolveCaseRecord(params.caseId, organizationId, userId, 'case:upload_evidence');
     const fileForm = await request.formData();
     const file = fileForm.get('file');
 
@@ -153,7 +156,6 @@ export const POST = withApi(
       throw ApiError.badRequest(`File type ${file.type || 'unknown'} is not allowed`);
     }
 
-    const claim = await resolveCaseRecord(params.caseId, organizationId, userId);
     const attachments = normalizeAttachments(claim.attachments);
 
     let blob;
@@ -223,13 +225,12 @@ export const DELETE = withApi(
       throw ApiError.unauthorized();
     }
 
-    await requireCaseAction(await getCaseActor(), 'attachment_delete', params.caseId);
+    const claim = await resolveCaseRecord(params.caseId, organizationId, userId, 'case:modify_document');
     const fileUrl = request.nextUrl.searchParams.get('fileUrl');
     if (!fileUrl) {
       throw ApiError.badRequest('fileUrl query parameter is required');
     }
 
-    const claim = await resolveCaseRecord(params.caseId, organizationId, userId);
     const attachments = normalizeAttachments(claim.attachments);
     const attachment = attachments.find((item) => item.url === fileUrl);
 

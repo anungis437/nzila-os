@@ -3,13 +3,13 @@ import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
-import { TRIAGE_DESIGNATIONS_DDL, designate } from '@/lib/triage/__tests__/fixture'
 
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   organization: vi.fn(),
   role: vi.fn(),
   audit: vi.fn(),
+  findReadableCase: vi.fn(),
   db: null as null | { execute: (query: unknown) => Promise<{ rows: unknown[] }> },
 }))
 
@@ -17,6 +17,11 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }))
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.organization, getUserRoleInOrganization: m.role }))
 vi.mock('@/lib/audit-logger', () => ({ auditLog: m.audit, AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }))
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => true }))
+// The kernel decision itself is proven in lib/cases/kernel-claims.pglite.test.ts; this file proves how the route uses it.
+vi.mock('@/lib/cases/case-authorization', async (original) => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  findReadableCase: m.findReadableCase,
+}))
 vi.mock('@/db/schema', () => ({ claims: {} }))
 vi.mock('@/lib/api/crud-factory', () => ({ crudRoutes: () => ({ PATCH: vi.fn(), DELETE: vi.fn() }) }))
 // The route handler runs directly; authentication is supplied by the mocked platform session above.
@@ -41,7 +46,6 @@ let pg: PGlite
 beforeAll(async () => {
   pg = new PGlite()
   await pg.exec(fs.readFileSync(new URL('../../../../db/queries/__tests__/fixtures/canonical-claim-write.sql', import.meta.url), 'utf8'))
-  await pg.exec(TRIAGE_DESIGNATIONS_DDL)
   await pg.exec('CREATE TABLE organization_members (user_id text, organization_id uuid, name text, email text, phone text)')
   m.db = drizzle(pg) as unknown as typeof m.db
   const rows: Array<[keyof typeof ids, string, string, string | null, string]> = [
@@ -53,8 +57,8 @@ beforeAll(async () => {
   for (const [name, orgId, member, assignee, description] of rows) {
     await pg.query(
       `INSERT INTO claims(id,claim_id,claim_number,created_at,updated_at,organization_id,member_id,assigned_to,description,
-        is_anonymous,previously_reported,witnesses_present,priority,progress,status)
-       VALUES($1,$2,$3,now(),now(),$4,$5,$6,$7,false,false,false,'medium',0,'submitted')`,
+        is_anonymous,previously_reported,witnesses_present,priority,progress,status,ai_score,ai_analysis,legal_costs)
+       VALUES($1,$2,$3,now(),now(),$4,$5,$6,$7,false,false,false,'medium',0,'submitted',80,'{"risk":"high"}'::jsonb,'1500')`,
       [randomUUID(), ids[name], `CASE-${name.toUpperCase()}`, orgId, member, assignee, description],
     )
   }
@@ -82,17 +86,37 @@ async function call(reference: string) {
 beforeEach(() => { vi.clearAllMocks(); m.audit.mockResolvedValue(undefined) })
 
 describe('GET /api/claims/[id] authorization', () => {
-  it('returns a member their own case by claimId and by case number', async () => {
+  it('resolves the case through the kernel read decision, then returns the member their own case by claimId and by case number', async () => {
     asMember()
     for (const reference of [ids.own, 'CASE-OWN']) {
+      m.findReadableCase.mockResolvedValueOnce({ claimId: ids.own, visibility: 'member_visible' })
       const result = await call(reference)
       expect(result.status).toBe(200)
       expect((result.body as { data: { claimId: string } }).data.claimId).toBe(ids.own)
+      expect(m.findReadableCase).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ userId: 'member-1', organizationId: org }), reference, false, 'case:read')
     }
   })
 
-  it('denies another member\'s case by both identifiers without disclosing anything about it', async () => {
+  it('removes the internal assessment fields from a member-visible decision but keeps the case the member filed', async () => {
     asMember()
+    m.findReadableCase.mockResolvedValueOnce({ claimId: ids.own, visibility: 'member_visible' })
+    const { data } = (await call(ids.own)).body as { data: Record<string, unknown> }
+    for (const field of ['aiScore', 'aiAnalysis', 'meritConfidence', 'precedentMatch', 'complexityScore', 'legalCosts', 'courtCosts']) {
+      expect(data).not.toHaveProperty(field)
+    }
+    expect(data).toMatchObject({ claimId: ids.own, claimNumber: 'CASE-OWN', description: 'own case' })
+  })
+
+  it('keeps the internal assessment fields for an internal decision', async () => {
+    signIn('steward-1', 'steward')
+    m.findReadableCase.mockResolvedValueOnce({ claimId: ids.own, visibility: 'internal' })
+    const { data } = (await call(ids.own)).body as { data: Record<string, unknown> }
+    expect(data).toMatchObject({ claimId: ids.own, aiScore: 80, aiAnalysis: { risk: 'high' }, legalCosts: '1500' })
+  })
+
+  it('answers 404 for an unreadable case by both identifiers without disclosing anything about it', async () => {
+    asMember()
+    m.findReadableCase.mockResolvedValue(null)
     for (const reference of [ids.other, 'CASE-OTHER']) {
       const result = await call(reference)
       expect(result.status).toBe(404)
@@ -104,19 +128,26 @@ describe('GET /api/claims/[id] authorization', () => {
     }
   })
 
-  it('answers a nonexistent case exactly like an unreadable one', async () => {
+  it('answers a nonexistent, unreadable and foreign-organization case identically, running no detail query', async () => {
     asMember()
+    m.findReadableCase.mockResolvedValue(null)
+    const spy = vi.spyOn(m.db!, 'execute')
     const unreadable = await call('CASE-OTHER')
     const missing = await call('CASE-NOT-THERE')
+    const foreign = await call(ids.foreign)
+    expect(unreadable.status).toBe(404)
     expect(missing).toEqual(unreadable)
+    expect(foreign).toEqual(unreadable)
+    expect(spy).not.toHaveBeenCalled()
+    spy.mockRestore()
   })
 
-  it('denies cross-organization cases even for the owning user id', async () => {
+  it('binds the detail row to the caller organization even if a decision named another organization\'s case', async () => {
     asMember()
-    expect((await call(ids.foreign)).status).toBe(404)
-    expect((await call('CASE-FOREIGN')).status).toBe(404)
-    signIn('officer-1', 'officer')
-    expect((await call('CASE-FOREIGN')).status).toBe(404)
+    m.findReadableCase.mockResolvedValueOnce({ claimId: ids.foreign, visibility: 'internal' })
+    const result = await call(ids.foreign)
+    expect(result.status).toBe(404)
+    expect(JSON.stringify(result.body)).not.toContain('foreign case')
   })
 
   it.each([
@@ -129,6 +160,7 @@ describe('GET /api/claims/[id] authorization', () => {
     const result = await call('CASE-OWN')
     expect(result.status).toBe(403)
     expect(spy).not.toHaveBeenCalled()
+    expect(m.findReadableCase).not.toHaveBeenCalled()
     expect(JSON.stringify(result.body)).not.toContain('CASE-OWN')
     spy.mockRestore()
   })
@@ -138,29 +170,13 @@ describe('GET /api/claims/[id] authorization', () => {
     const spy = vi.spyOn(m.db!, 'execute')
     expect((await call('CASE-OWN')).status).toBe(403)
     expect(spy).not.toHaveBeenCalled()
+    expect(m.findReadableCase).not.toHaveBeenCalled()
     spy.mockRestore()
   })
 
   it('requires an authenticated user', async () => {
     signIn(null, null)
     expect((await call('CASE-OWN')).status).toBe(401)
-  })
-
-  it('limits a steward to assigned cases rather than every case in the organization', async () => {
-    signIn('steward-1', 'steward')
-    expect((await call('CASE-ASSIGNED')).status).toBe(200)
-    expect((await call(ids.assigned)).status).toBe(200)
-    expect((await call('CASE-OTHER')).status).toBe(404)
-    expect((await call('CASE-OWN')).status).toBe(404)
-  })
-
-  it('gives a chief steward no tenant-wide read; only a live cases designation exposes unassigned cases', async () => {
-    signIn('chief-1', 'chief_steward')
-    expect((await call('CASE-OTHER')).status).toBe(404)
-    expect((await call('CASE-ASSIGNED')).status).toBe(404)
-    await designate(pg, { organizationId: org, scope: 'cases', userId: 'chief-1' })
-    expect((await call('CASE-OTHER')).status).toBe(200)
-    expect((await call('CASE-ASSIGNED')).status).toBe(404)
-    expect((await call('CASE-FOREIGN')).status).toBe(404)
+    expect(m.findReadableCase).not.toHaveBeenCalled()
   })
 })

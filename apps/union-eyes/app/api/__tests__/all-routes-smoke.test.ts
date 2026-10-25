@@ -310,8 +310,8 @@ beforeEach(() => {
   m.requireEntitlement.mockResolvedValue(undefined);
   m.checkEntitlement.mockResolvedValue(true);
   m.withRLSContext.mockImplementation(
-    (fn: (tx: unknown) => Promise<unknown>) =>
-      fn(mockDb)
+    (a: unknown, b?: unknown) =>
+      ((typeof a === 'function' ? a : b) as (tx: unknown) => Promise<unknown>)(mockDb)
   );
   m.evaluateRoutePolicy.mockResolvedValue({ allow: true, directives: {} });
 });

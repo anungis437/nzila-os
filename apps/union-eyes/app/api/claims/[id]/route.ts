@@ -7,17 +7,14 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { claims } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { getCaseActor } from '@/lib/cases/case-authorization';
+import { getCaseActor, findReadableCase, redactCaseRow } from '@/lib/cases/case-authorization';
 import { claimDetailQuery } from '@/lib/cases/claim-detail-query';
 
 export const dynamic = 'force-dynamic';
 
-// Custom GET with member JOIN. Read authority is the canonical case contract
-// (lib/cases/case-authorization): members read their own cases, staff their own or
-// assigned cases, and only the claims-module tenant-wide role tier reads tenant-wide
-// (a known role-matrix gap, UE-CONV-E-001). Unreadable and
-// nonexistent cases are indistinguishable (404), and an unresolved role or
-// organization fails closed before any query runs.
+// Custom GET with member JOIN. Read authority is a kernel decision (lib/cases/case-authorization): the member who
+// filed the case, and those holding a live governed relationship to it. Unreadable and nonexistent cases are
+// indistinguishable (404), and an unresolved role or organization fails closed before any query runs.
 const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
@@ -32,10 +29,14 @@ const GET = withApi(
 
     const actor = await getCaseActor();
 
-    const rows = await withRLSContext(async (tx) => tx.execute(claimDetailQuery(actor, id)));
-    const row = rows[0];
-    if (!row) throw ApiError.notFound('Claim not found');
-    return { data: row };
+    const found = await withRLSContext(async (tx) => {
+      const readable = await findReadableCase(tx, actor, id, false, 'case:read');
+      if (!readable) return null;
+      const rows = await tx.execute(claimDetailQuery(actor, readable.claimId));
+      return rows[0] ? { row: rows[0], visibility: readable.visibility } : null;
+    });
+    if (!found) throw ApiError.notFound('Claim not found');
+    return { data: redactCaseRow(found.row, found.visibility) };
   },
 );
 

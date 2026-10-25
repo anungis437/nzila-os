@@ -20,7 +20,7 @@ import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
 import { platformDb } from '@nzila/db/platform';
 import { auditRecords } from '@nzila/db/schema';
 import { desc } from 'drizzle-orm';
-import { getCaseActor, caseReadScope, requireCaseAction } from '@/lib/cases/case-authorization';
+import { getCaseActor, findReadableCase } from '@/lib/cases/case-authorization';
 
 export const dynamic = 'force-dynamic';
 
@@ -132,16 +132,17 @@ export const POST = withApi(
     }
 
     const actor = await getCaseActor();
-    await requireCaseAction(actor, 'case_transition', caseId);
-
-    // Apply the same ownership/assignment scope before any decision proof or write.
-    const [claim] = await withRLSContext(async (tx) =>
-      tx
+    // The kernel decides the caller may move this case before any decision proof or write.
+    const claim = await withRLSContext(async (tx) => {
+      const readable = await findReadableCase(tx, actor, caseId, false, 'case:transition');
+      if (!readable) return null;
+      const [row] = await tx
         .select()
         .from(claims)
-        .where(and(eq(claims.claimId, caseId), caseReadScope(actor)))
-        .limit(1)
-    );
+        .where(and(eq(claims.claimId, readable.claimId), eq(claims.organizationId, actor.organizationId)))
+        .limit(1);
+      return row ?? null;
+    });
 
     if (!claim) {
       return NextResponse.json(

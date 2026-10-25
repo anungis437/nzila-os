@@ -2,17 +2,15 @@ import { and, desc, eq, or, type SQL } from 'drizzle-orm'
 import { grievanceTransitions } from '@/db/schema/domains/claims/workflows'
 import { ApiError } from '@/lib/api/errors'
 import type { RLSTx } from '@/lib/db/with-rls-context'
-import { caseActionAllowed } from '@/lib/cases/case-permissions'
-import { findReadableCase, type CaseActor } from '@/lib/cases/case-authorization'
+import { findReadableCase, type CaseActor, type CaseVisibility } from '@/lib/cases/case-authorization'
 
 /**
  * Transition rows default to staff visibility, so an unmarked row is never an affirmative grant to a
  * member. Mirrors `caseHistoryVisibility` for the case-update timeline.
  */
-export function transitionHistoryVisibility(actor: CaseActor): SQL | undefined {
-  if (actor.role === 'admin' || actor.role === 'platform_admin') return undefined
-  if (caseActionAllowed('note_add_internal', actor.role)) {
-    return or(eq(grievanceTransitions.visibilityScope, 'member'), eq(grievanceTransitions.visibilityScope, 'staff'))
+export function transitionHistoryVisibility(visibility: CaseVisibility): SQL {
+  if (visibility === 'internal') {
+    return or(eq(grievanceTransitions.visibilityScope, 'member'), eq(grievanceTransitions.visibilityScope, 'staff'))!
   }
   return eq(grievanceTransitions.visibilityScope, 'member')
 }
@@ -33,7 +31,7 @@ export async function readTransitionHistory(
   actor: CaseActor,
   reference: string,
 ): Promise<TransitionHistoryEntry[]> {
-  const claim = await findReadableCase(tx, actor, reference)
+  const claim = await findReadableCase(tx, actor, reference, false, 'case:read')
   if (!claim) throw ApiError.notFound('Case')
 
   const rows = await tx
@@ -47,7 +45,7 @@ export async function readTransitionHistory(
     .where(and(
       eq(grievanceTransitions.claimId, claim.claimId),
       eq(grievanceTransitions.organizationId, actor.organizationId),
-      transitionHistoryVisibility(actor),
+      transitionHistoryVisibility(claim.visibility),
     ))
     .orderBy(desc(grievanceTransitions.transitionedAt))
 

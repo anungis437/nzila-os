@@ -3,51 +3,52 @@
  "summary": {
   "routes": 968,
   "mutating": 695,
-  "kernel": 13,
+  "kernel": 39,
   "byGuard": {
    "ADMIN_AUTH": 6,
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 3,
-   "CRUD_FACTORY": 308,
-   "DELEGATED": 25,
-   "NONE": 53,
+   "CRUD_FACTORY": 297,
+   "DELEGATED": 22,
+   "NONE": 51,
    "ORG_AUTH": 46,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 16,
-   "ROLE_AUTH": 134,
-   "SESSION_AUTH": 52,
+   "RETIRED": 58,
+   "ROLE_AUTH": 130,
+   "SESSION_AUTH": 54,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 298,
+   "WITH_API": 274,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
    "ADMIN_AUTH": 6,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 2,
-   "CRUD_FACTORY": 308,
-   "DELEGATED": 18,
+   "CRUD_FACTORY": 297,
+   "DELEGATED": 15,
    "NONE": 8,
    "ORG_AUTH": 26,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 16,
-   "ROLE_AUTH": 83,
+   "RETIRED": 51,
+   "ROLE_AUTH": 79,
    "SESSION_AUTH": 25,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 184
+   "WITH_API": 167
   },
   "mutatingByAudit": {
-   "ATOMIC": 39,
-   "ATOMIC_SERVICE": 8,
-   "BEST_EFFORT": 13,
-   "CRUD_ATOMIC": 312,
-   "NONE": 323
+   "ATOMIC": 42,
+   "ATOMIC_SERVICE": 18,
+   "BEST_EFFORT": 10,
+   "CRUD_ATOMIC": 299,
+   "NO_WRITES_FOUND": 33,
+   "NONE": 293
   },
   "mutatingByData": {
-   "AMBIENT_DB": 54,
-   "CRUD_TENANT_TX": 312,
-   "NONE": 213,
+   "AMBIENT_DB": 52,
+   "CRUD_TENANT_TX": 299,
+   "NONE": 226,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 63
+   "TENANT_TX": 65
   }
  },
  "routes": [
@@ -59,6 +60,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -70,6 +72,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -83,6 +86,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -95,6 +99,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -107,6 +112,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -117,8 +123,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -132,6 +139,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -144,6 +152,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -157,6 +166,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -169,6 +179,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -180,6 +191,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -192,6 +204,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -203,6 +216,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -214,6 +228,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -226,6 +241,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -237,6 +253,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -248,6 +265,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -260,6 +278,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -272,6 +291,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -283,6 +303,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -295,6 +316,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -308,6 +330,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -320,6 +343,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -332,6 +356,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -344,6 +369,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -355,6 +381,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -366,6 +393,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -377,6 +405,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -390,6 +419,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -402,6 +432,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -413,6 +444,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -425,6 +457,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
@@ -438,6 +471,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -450,6 +484,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -462,6 +497,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -474,6 +510,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -486,6 +523,7 @@
    "mutating": true,
    "guard": "ADMIN_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -498,6 +536,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -509,6 +548,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -520,6 +560,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -531,6 +572,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
@@ -542,6 +584,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -555,6 +598,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -567,6 +611,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -578,6 +623,7 @@
    "mutating": true,
    "guard": "ADMIN_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -589,6 +635,7 @@
    "mutating": true,
    "guard": "ADMIN_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -601,6 +648,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -614,6 +662,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -626,6 +675,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -638,6 +688,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -650,6 +701,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -660,8 +712,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -673,6 +726,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -686,6 +740,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -698,6 +753,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -709,6 +765,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -720,6 +777,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -731,6 +789,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -744,6 +803,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -756,6 +816,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -767,6 +828,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -778,6 +840,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -790,6 +853,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -803,6 +867,7 @@
    "mutating": true,
    "guard": "ADMIN_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -815,6 +880,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -828,6 +894,7 @@
    "mutating": true,
    "guard": "ADMIN_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -840,6 +907,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -851,6 +919,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -861,8 +930,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -876,6 +946,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -889,6 +960,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -901,6 +973,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -912,6 +985,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -923,6 +997,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -934,6 +1009,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -946,6 +1022,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -958,6 +1035,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -970,6 +1048,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -981,6 +1060,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -993,6 +1073,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -1005,6 +1086,7 @@
    "mutating": true,
    "guard": "ADMIN_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1016,6 +1098,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1028,6 +1111,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1039,6 +1123,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1050,6 +1135,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1061,6 +1147,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1073,6 +1160,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -1084,6 +1172,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1095,6 +1184,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1106,6 +1196,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1117,6 +1208,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1129,6 +1221,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1140,6 +1233,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1151,6 +1245,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1163,6 +1258,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1174,6 +1270,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1185,6 +1282,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1196,6 +1294,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1207,6 +1306,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1219,6 +1319,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -1231,6 +1332,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -1242,6 +1344,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -1253,6 +1356,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1265,6 +1369,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1277,6 +1382,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1289,6 +1395,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1301,6 +1408,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1313,6 +1421,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1325,6 +1434,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1336,6 +1446,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -1348,6 +1459,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1360,6 +1472,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1372,6 +1485,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1384,6 +1498,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1396,6 +1511,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1408,6 +1524,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1420,6 +1537,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1432,6 +1550,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1444,6 +1563,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1456,6 +1576,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1467,6 +1588,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "BEST_EFFORT"
   },
@@ -1479,6 +1601,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1491,6 +1614,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1503,6 +1627,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1515,6 +1640,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1527,6 +1653,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1539,6 +1666,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1551,6 +1679,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1562,6 +1691,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -1574,6 +1704,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1586,6 +1717,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1598,6 +1730,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1610,6 +1743,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1622,6 +1756,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1634,6 +1769,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1646,6 +1782,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1658,6 +1795,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1670,6 +1808,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1683,6 +1822,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1696,6 +1836,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1709,6 +1850,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1721,6 +1863,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1733,6 +1876,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1746,6 +1890,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1758,6 +1903,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1770,6 +1916,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1782,6 +1929,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1794,6 +1942,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1806,6 +1955,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1818,6 +1968,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1830,6 +1981,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -1841,6 +1993,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -1852,6 +2005,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -1863,6 +2017,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1872,6 +2027,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1883,8 +2039,9 @@
    "mutating": true,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "auth/invite/accept/route.ts",
@@ -1894,8 +2051,9 @@
    "mutating": true,
    "guard": "PLATFORM_AUTH_HANDLER",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "auth/invite/create/route.ts",
@@ -1905,6 +2063,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -1916,8 +2075,9 @@
    "mutating": true,
    "guard": "PLATFORM_AUTH_HANDLER",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "auth/logout/route.ts",
@@ -1927,8 +2087,9 @@
    "mutating": true,
    "guard": "PLATFORM_AUTH_HANDLER",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "auth/magic-link/request/route.ts",
@@ -1938,8 +2099,9 @@
    "mutating": true,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "auth/magic-link/verify/route.ts",
@@ -1950,8 +2112,9 @@
    "mutating": true,
    "guard": "PLATFORM_AUTH_HANDLER",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "auth/me/route.ts",
@@ -1961,6 +2124,7 @@
    "mutating": false,
    "guard": "PLATFORM_AUTH_HANDLER",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1972,6 +2136,7 @@
    "mutating": false,
    "guard": "PLATFORM_AUTH_HANDLER",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -1983,8 +2148,9 @@
    "mutating": true,
    "guard": "PLATFORM_AUTH_HANDLER",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "auth/mfa/disable/route.ts",
@@ -1994,6 +2160,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2005,6 +2172,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2016,6 +2184,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2027,6 +2196,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2039,6 +2209,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2050,8 +2221,9 @@
    "mutating": true,
    "guard": "PLATFORM_AUTH_HANDLER",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "auth/role/route.ts",
@@ -2062,6 +2234,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2073,8 +2246,9 @@
    "mutating": true,
    "guard": "PLATFORM_AUTH_HANDLER",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "auth/user-role/route.ts",
@@ -2084,6 +2258,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2097,6 +2272,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2109,6 +2285,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2122,6 +2299,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2134,6 +2312,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2147,6 +2326,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2159,6 +2339,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2171,6 +2352,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -2182,6 +2364,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2193,6 +2376,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2205,6 +2389,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2216,6 +2401,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "BEST_EFFORT"
   },
@@ -2227,6 +2413,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2238,6 +2425,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2251,6 +2439,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2263,6 +2452,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2274,6 +2464,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2287,6 +2478,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2298,6 +2490,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -2311,6 +2504,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2323,6 +2517,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2335,6 +2530,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2347,6 +2543,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2360,6 +2557,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2371,6 +2569,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -2383,6 +2582,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2394,6 +2594,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2405,6 +2606,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -2416,6 +2618,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2427,6 +2630,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -2440,6 +2644,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2452,6 +2657,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2463,6 +2669,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -2476,6 +2683,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2488,6 +2696,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2499,6 +2708,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2510,6 +2720,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2522,6 +2733,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2535,6 +2747,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2547,6 +2760,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -2557,7 +2771,8 @@
    ],
    "mutating": true,
    "guard": "SESSION_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -2568,7 +2783,8 @@
    ],
    "mutating": false,
    "guard": "SESSION_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -2579,7 +2795,8 @@
    ],
    "mutating": true,
    "guard": "WITH_API",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -2592,7 +2809,8 @@
    ],
    "mutating": true,
    "guard": "WITH_API",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -2603,7 +2821,8 @@
    ],
    "mutating": false,
    "guard": "SESSION_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -2613,8 +2832,9 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
-   "kernel": false,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -2626,7 +2846,8 @@
    ],
    "mutating": true,
    "guard": "SESSION_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -2638,9 +2859,10 @@
    ],
    "mutating": true,
    "guard": "WITH_API",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "cases/[caseId]/timeline/route.ts",
@@ -2649,7 +2871,8 @@
    ],
    "mutating": false,
    "guard": "WITH_API",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -2660,7 +2883,8 @@
    ],
    "mutating": true,
    "guard": "SESSION_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -2671,9 +2895,10 @@
    ],
    "mutating": true,
    "guard": "SESSION_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "BEST_EFFORT"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cases/evidence/route.ts",
@@ -2682,10 +2907,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "cases/intake/route.ts",
@@ -2694,9 +2920,10 @@
    ],
    "mutating": true,
    "guard": "SESSION_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "BEST_EFFORT"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cases/meetings/route.ts",
@@ -2705,10 +2932,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "cases/outcomes/route.ts",
@@ -2717,10 +2945,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "cases/route.ts",
@@ -2730,7 +2959,8 @@
    ],
    "mutating": true,
    "guard": "WITH_API",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -2741,10 +2971,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "cases/templates/route.ts",
@@ -2753,10 +2984,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "cases/timeline/route.ts",
@@ -2765,10 +2997,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "cba-intelligence/agreements/[id]/route.ts",
@@ -2778,6 +3011,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2789,6 +3023,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2800,6 +3035,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2811,6 +3047,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2822,6 +3059,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2833,6 +3071,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2844,6 +3083,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2855,6 +3095,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2867,6 +3108,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2878,6 +3120,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2889,6 +3132,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2901,6 +3145,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2913,6 +3158,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2925,6 +3171,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -2938,6 +3185,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2950,6 +3198,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -2961,6 +3210,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2972,6 +3222,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -2984,6 +3235,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -2995,10 +3247,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "claims/[id]/evidence/route.ts",
@@ -3007,7 +3260,8 @@
    ],
    "mutating": false,
    "guard": "SESSION_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -3020,7 +3274,8 @@
    ],
    "mutating": true,
    "guard": "CRUD_FACTORY",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3032,10 +3287,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "claims/[id]/updates/route.ts",
@@ -3045,10 +3301,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "claims/[id]/workflow/history/route.ts",
@@ -3056,8 +3313,9 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -3069,10 +3327,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "claims/bulk/route.ts",
@@ -3081,8 +3340,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3094,7 +3354,8 @@
    ],
    "mutating": true,
    "guard": "CRUD_FACTORY",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3108,6 +3369,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -3120,6 +3382,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -3133,6 +3396,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -3145,6 +3409,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -3157,6 +3422,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -3169,6 +3435,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -3182,6 +3449,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3193,6 +3461,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3205,6 +3474,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3217,6 +3487,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3229,6 +3500,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3241,6 +3513,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3253,6 +3526,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3266,6 +3540,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3278,6 +3553,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3291,6 +3567,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3303,6 +3580,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3316,6 +3594,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3328,6 +3607,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3341,6 +3621,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3353,6 +3634,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3366,6 +3648,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3378,6 +3661,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3391,6 +3675,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3403,6 +3688,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3414,6 +3700,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -3425,6 +3712,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -3436,6 +3724,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -3447,6 +3736,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -3458,6 +3748,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -3469,6 +3760,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "BEST_EFFORT"
   },
@@ -3480,6 +3772,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -3491,6 +3784,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3503,6 +3797,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3515,6 +3810,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3527,6 +3823,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3539,6 +3836,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3551,6 +3849,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3563,6 +3862,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3575,6 +3875,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3588,6 +3889,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3600,6 +3902,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3610,8 +3913,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3625,6 +3929,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3638,6 +3943,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3651,6 +3957,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3664,6 +3971,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3676,6 +3984,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3686,8 +3995,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3701,6 +4011,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3712,6 +4023,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -3723,6 +4035,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -3735,6 +4048,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3747,6 +4061,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3759,6 +4074,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3771,6 +4087,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3783,6 +4100,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3795,6 +4113,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3807,6 +4126,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3819,6 +4139,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3829,8 +4150,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -3843,6 +4165,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3854,6 +4177,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -3867,6 +4191,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3879,6 +4204,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3892,6 +4218,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3905,6 +4232,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3917,6 +4245,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -3928,6 +4257,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -3939,6 +4269,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -3950,6 +4281,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -3961,6 +4293,7 @@
    "mutating": true,
    "guard": "WEBHOOK_SIGNATURE",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -3972,6 +4305,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -3984,6 +4318,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "BEST_EFFORT"
   },
@@ -3996,6 +4331,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4007,6 +4343,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -4018,6 +4355,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4030,6 +4368,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4041,8 +4380,9 @@
    "mutating": true,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "content/stats/route.ts",
@@ -4052,6 +4392,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -4063,6 +4404,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -4074,6 +4416,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -4085,6 +4428,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -4097,6 +4441,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -4107,10 +4452,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "DELEGATED",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "continuity/inheritance/route.ts",
@@ -4121,6 +4467,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4132,6 +4479,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4144,6 +4492,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4156,6 +4505,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4168,6 +4518,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4180,6 +4531,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4191,6 +4543,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4202,6 +4555,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4213,6 +4567,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4224,6 +4579,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4236,6 +4592,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4247,6 +4604,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4258,6 +4616,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4270,6 +4629,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4282,6 +4642,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4291,8 +4652,9 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4302,8 +4664,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4315,6 +4678,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -4326,6 +4690,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -4337,6 +4702,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -4348,6 +4714,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -4360,6 +4727,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4369,8 +4737,9 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4383,6 +4752,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4394,6 +4764,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "BEST_EFFORT"
   },
@@ -4403,8 +4774,9 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4414,8 +4786,9 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4425,8 +4798,9 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4436,8 +4810,9 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4449,6 +4824,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -4461,6 +4837,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4472,6 +4849,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4483,6 +4861,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4494,6 +4873,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -4507,6 +4887,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4520,6 +4901,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4532,6 +4914,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4543,6 +4926,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4555,6 +4939,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4567,6 +4952,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4579,6 +4965,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4591,6 +4978,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -4602,6 +4990,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4613,6 +5002,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -4624,6 +5014,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4635,6 +5026,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -4646,6 +5038,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4657,6 +5050,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4668,6 +5062,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4679,6 +5074,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -4688,10 +5084,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "documents/[id]/route.ts",
@@ -4701,10 +5098,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "documents/bulk/route.ts",
@@ -4712,10 +5110,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "documents/categories/route.ts",
@@ -4724,10 +5123,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "documents/folders/route.ts",
@@ -4736,10 +5136,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "documents/repository/[id]/route.ts",
@@ -4750,6 +5151,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -4760,9 +5162,10 @@
    ],
    "mutating": true,
    "guard": "ORG_AUTH",
-   "kernel": false,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "documents/repository/route.ts",
@@ -4773,6 +5176,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -4783,10 +5187,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "documents/upload/route.ts",
@@ -4795,7 +5200,8 @@
    ],
    "mutating": true,
    "guard": "ROLE_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "ATOMIC"
   },
@@ -4807,6 +5213,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -4818,6 +5225,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4830,6 +5238,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4841,6 +5250,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -4852,6 +5262,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -4863,6 +5274,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4874,6 +5286,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4885,6 +5298,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
@@ -4896,6 +5310,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4907,6 +5322,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4918,6 +5334,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4929,6 +5346,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4940,6 +5358,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4951,6 +5370,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4962,6 +5382,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4973,6 +5394,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -4985,6 +5407,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -4996,6 +5419,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5007,6 +5431,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5018,6 +5443,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -5029,6 +5455,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5040,6 +5467,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5051,6 +5479,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5063,6 +5492,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5075,6 +5505,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5086,6 +5517,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5097,6 +5529,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5109,6 +5542,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5121,6 +5555,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5133,6 +5568,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5145,6 +5581,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5157,6 +5594,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5169,6 +5607,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5181,6 +5620,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5194,6 +5634,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5206,6 +5647,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5218,6 +5660,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5231,6 +5674,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5243,6 +5687,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5255,6 +5700,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
@@ -5264,8 +5710,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5278,6 +5725,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
@@ -5289,6 +5737,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5300,6 +5749,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5312,6 +5762,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5323,6 +5774,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5335,6 +5787,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5347,6 +5800,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -5359,6 +5813,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -5370,6 +5825,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5382,6 +5838,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -5393,6 +5850,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -5405,6 +5863,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -5418,6 +5877,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5430,6 +5890,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -5442,6 +5903,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -5454,6 +5916,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5466,6 +5929,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5478,6 +5942,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5490,6 +5955,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -5501,6 +5967,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -5513,6 +5980,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5525,6 +5993,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5537,6 +6006,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5550,6 +6020,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5563,6 +6034,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -5574,6 +6046,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5585,6 +6058,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -5596,6 +6070,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5608,6 +6083,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -5619,6 +6095,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -5630,6 +6107,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -5641,6 +6119,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -5652,6 +6131,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -5664,6 +6144,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -5675,6 +6156,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -5686,6 +6168,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -5697,6 +6180,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5708,6 +6192,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -5719,6 +6204,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5730,6 +6216,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5742,6 +6229,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5753,6 +6241,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5765,6 +6254,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5776,6 +6266,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5787,6 +6278,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5798,6 +6290,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -5809,6 +6302,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5820,6 +6314,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5831,6 +6326,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5842,6 +6338,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5853,6 +6350,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5864,6 +6362,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5875,6 +6374,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -5886,6 +6386,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5897,6 +6398,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5908,6 +6410,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5919,6 +6422,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5930,6 +6434,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5941,6 +6446,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5952,6 +6458,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5963,6 +6470,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5974,6 +6482,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -5985,6 +6494,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -5996,6 +6506,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6007,6 +6518,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6018,6 +6530,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6029,6 +6542,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6040,6 +6554,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6051,6 +6566,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6062,6 +6578,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6073,6 +6590,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6084,6 +6602,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6095,6 +6614,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6107,6 +6627,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6118,6 +6639,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6129,6 +6651,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6140,6 +6663,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6151,6 +6675,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6163,6 +6688,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -6174,6 +6700,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6185,6 +6712,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6196,6 +6724,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6207,6 +6736,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6218,6 +6748,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6229,6 +6760,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6240,6 +6772,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6253,6 +6786,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6265,6 +6799,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6277,6 +6812,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6289,6 +6825,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6301,6 +6838,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6314,6 +6852,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -6326,6 +6865,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6338,6 +6878,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6349,6 +6890,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": "EXTERNAL_AUTHORITY",
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -6360,6 +6902,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": "EXTERNAL_AUTHORITY",
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -6371,6 +6914,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": "EXTERNAL_AUTHORITY",
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -6382,8 +6926,9 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": "EXTERNAL_AUTHORITY",
    "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "external/grievances/[id]/route.ts",
@@ -6393,6 +6938,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": "EXTERNAL_AUTHORITY",
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -6404,6 +6950,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6417,6 +6964,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6430,6 +6978,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6443,6 +6992,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6456,6 +7006,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6469,6 +7020,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6481,6 +7033,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6493,6 +7046,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6505,6 +7059,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6516,6 +7071,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6529,6 +7085,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6540,6 +7097,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6551,6 +7109,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6562,6 +7121,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6574,6 +7134,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6585,6 +7146,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -6597,6 +7159,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6608,6 +7171,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -6619,6 +7183,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6630,6 +7195,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6641,6 +7207,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6652,6 +7219,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -6665,6 +7233,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6677,6 +7246,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6690,6 +7260,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6702,6 +7273,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6715,6 +7287,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6727,6 +7300,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6739,6 +7313,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6751,6 +7326,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6763,6 +7339,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6775,6 +7352,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -6787,6 +7365,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -6798,6 +7377,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -6811,6 +7391,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -6823,6 +7404,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -6834,6 +7416,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -6846,6 +7429,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
@@ -6857,6 +7441,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -6868,6 +7453,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -6881,6 +7467,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -6893,6 +7480,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -6905,6 +7493,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -6916,6 +7505,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -6928,6 +7518,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -6939,6 +7530,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -6950,6 +7542,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -6961,6 +7554,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -6973,6 +7567,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
@@ -6984,6 +7579,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -6995,6 +7591,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7007,6 +7604,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7019,6 +7617,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
@@ -7030,6 +7629,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7042,6 +7642,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7053,6 +7654,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7064,6 +7666,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7076,6 +7679,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7088,6 +7692,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7099,6 +7704,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7111,6 +7717,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -7123,6 +7730,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -7134,6 +7742,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
@@ -7145,6 +7754,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7157,6 +7767,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
@@ -7168,6 +7779,7 @@
    "mutating": false,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7179,6 +7791,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -7190,6 +7803,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7202,6 +7816,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7213,6 +7828,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
@@ -7226,6 +7842,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -7237,6 +7854,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
@@ -7247,7 +7865,8 @@
    ],
    "mutating": true,
    "guard": "ORG_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -7259,6 +7878,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -7270,6 +7890,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -7280,7 +7901,8 @@
    ],
    "mutating": true,
    "guard": "ORG_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -7291,9 +7913,10 @@
    ],
    "mutating": true,
    "guard": "ORG_AUTH",
-   "kernel": false,
-   "data": "NONE",
-   "audit": "BEST_EFFORT"
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "grievances/[id]/related-documents/route.ts",
@@ -7303,6 +7926,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -7314,6 +7938,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -7325,6 +7950,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -7336,6 +7962,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -7347,7 +7974,8 @@
    ],
    "mutating": true,
    "guard": "ORG_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -7359,7 +7987,8 @@
    ],
    "mutating": true,
    "guard": "ORG_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -7371,6 +8000,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -7382,6 +8012,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -7395,6 +8026,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7407,6 +8039,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7418,6 +8051,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -7431,6 +8065,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7443,6 +8078,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7454,6 +8090,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -7465,6 +8102,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -7478,6 +8116,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7489,6 +8128,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -7501,6 +8141,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7512,6 +8153,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -7524,6 +8166,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7535,6 +8178,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -7546,6 +8190,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -7557,6 +8202,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -7569,6 +8215,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7580,6 +8227,7 @@
    "mutating": true,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7591,6 +8239,7 @@
    "mutating": true,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7602,6 +8251,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7613,6 +8263,7 @@
    "mutating": false,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7624,6 +8275,7 @@
    "mutating": true,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7635,6 +8287,7 @@
    "mutating": true,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7646,6 +8299,7 @@
    "mutating": true,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7657,6 +8311,7 @@
    "mutating": true,
    "guard": "CRON_SECRET",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7668,6 +8323,7 @@
    "mutating": false,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7679,6 +8335,7 @@
    "mutating": false,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7691,6 +8348,7 @@
    "mutating": true,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7702,6 +8360,7 @@
    "mutating": true,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -7713,6 +8372,7 @@
    "mutating": true,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7725,6 +8385,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7736,6 +8397,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7747,6 +8409,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7759,6 +8422,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7771,6 +8435,7 @@
    "mutating": true,
    "guard": "WEBHOOK_SIGNATURE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7783,6 +8448,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7794,6 +8460,7 @@
    "mutating": false,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -7804,10 +8471,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "DELEGATED",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "investigations/route.ts",
@@ -7817,7 +8485,8 @@
    ],
    "mutating": true,
    "guard": "DELEGATED",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -7828,10 +8497,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "DELEGATED",
+   "guard": "RETIRED",
    "kernel": false,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "jurisdiction-rules/route.ts",
@@ -7841,6 +8511,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -7853,6 +8524,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7865,6 +8537,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7876,6 +8549,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7887,6 +8561,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -7898,6 +8573,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7909,6 +8585,7 @@
    "mutating": false,
    "guard": "WITH_API_PUBLIC",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -7920,6 +8597,7 @@
    "mutating": false,
    "guard": "WITH_API_PUBLIC",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -7933,6 +8611,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7945,6 +8624,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -7958,6 +8638,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7970,6 +8651,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7981,6 +8663,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -7994,6 +8677,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8006,6 +8690,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8018,6 +8703,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8029,6 +8715,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -8041,6 +8728,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8054,6 +8742,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8067,6 +8756,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8080,6 +8770,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -8093,6 +8784,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8106,6 +8798,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8119,6 +8812,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8131,6 +8825,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8141,8 +8836,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -8155,6 +8851,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8165,8 +8862,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -8178,6 +8876,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -8189,6 +8888,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -8199,8 +8899,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -8212,6 +8913,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -8224,6 +8926,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8237,6 +8940,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -8248,6 +8952,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -8260,6 +8965,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8271,6 +8977,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": "THREAD_POLICY",
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -8282,6 +8989,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": "THREAD_POLICY",
    "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
@@ -8294,6 +9002,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": "THREAD_POLICY",
    "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
@@ -8305,6 +9014,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": "THREAD_POLICY",
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -8317,6 +9027,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": "THREAD_POLICY",
    "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
@@ -8329,6 +9040,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8341,6 +9053,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8354,6 +9067,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8366,6 +9080,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8377,6 +9092,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -8389,6 +9105,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8401,6 +9118,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -8413,6 +9131,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8424,6 +9143,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -8436,6 +9156,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8448,6 +9169,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -8460,6 +9182,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8472,6 +9195,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "BEST_EFFORT"
   },
@@ -8484,6 +9208,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "BEST_EFFORT"
   },
@@ -8496,6 +9221,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8508,6 +9234,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8519,6 +9246,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -8531,6 +9259,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8543,6 +9272,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8555,6 +9285,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8567,6 +9298,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8579,6 +9311,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8591,6 +9324,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -8603,6 +9337,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8615,6 +9350,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8628,6 +9364,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -8639,6 +9376,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -8651,6 +9389,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -8662,6 +9401,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -8674,6 +9414,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -8686,6 +9427,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -8697,6 +9439,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -8708,8 +9451,9 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "oci/intake/route.ts",
@@ -8720,8 +9464,9 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "oci/report/[assessmentId]/route.ts",
@@ -8731,6 +9476,7 @@
    "mutating": false,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -8742,6 +9488,7 @@
    "mutating": false,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -8753,6 +9500,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -8764,6 +9512,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -8775,6 +9524,7 @@
    "mutating": false,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -8786,6 +9536,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -8797,6 +9548,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -8808,6 +9560,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -8819,6 +9572,7 @@
    "mutating": false,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -8830,6 +9584,7 @@
    "mutating": false,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -8842,6 +9597,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -8853,6 +9609,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -8864,6 +9621,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -8875,8 +9633,9 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "onboarding/events/route.ts",
@@ -8886,6 +9645,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "BEST_EFFORT"
   },
@@ -8897,6 +9657,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -8909,6 +9670,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8921,6 +9683,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -8932,6 +9695,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -8943,8 +9707,9 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "onboarding/transfers/route.ts",
@@ -8954,6 +9719,7 @@
    "mutating": true,
    "guard": "DELEGATED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "BEST_EFFORT"
   },
@@ -8965,6 +9731,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -8976,6 +9743,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -8987,6 +9755,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -8998,6 +9767,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -9011,6 +9781,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9022,6 +9793,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9033,6 +9805,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9044,6 +9817,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9055,6 +9829,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9067,6 +9842,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -9078,6 +9854,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -9091,6 +9868,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -9104,6 +9882,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9115,6 +9894,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -9126,6 +9906,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9137,6 +9918,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -9149,6 +9931,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -9160,6 +9943,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9171,6 +9955,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9182,6 +9967,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -9194,6 +9980,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9207,6 +9994,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9219,6 +10007,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9231,6 +10020,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9243,6 +10033,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9255,6 +10046,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9267,6 +10059,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9279,6 +10072,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9291,6 +10085,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9304,6 +10099,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9316,6 +10112,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9329,6 +10126,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9342,6 +10140,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9354,6 +10153,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9366,6 +10166,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9378,6 +10179,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9389,6 +10191,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -9400,6 +10203,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -9411,6 +10215,7 @@
    "mutating": true,
    "guard": "WEBHOOK_SIGNATURE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -9422,6 +10227,7 @@
    "mutating": true,
    "guard": "WEBHOOK_SIGNATURE",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC_SERVICE"
   },
@@ -9434,6 +10240,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9446,6 +10253,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9458,6 +10266,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9471,6 +10280,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9483,6 +10293,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9494,6 +10305,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -9506,6 +10318,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9519,6 +10332,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9531,6 +10345,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9544,6 +10359,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9556,6 +10372,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9567,6 +10384,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -9579,8 +10397,9 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "pilot/apply/[id]/commercial-transition/route.ts",
@@ -9590,6 +10409,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -9601,6 +10421,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9613,8 +10434,9 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "pilot/apply/[id]/package-export/route.ts",
@@ -9624,6 +10446,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9635,6 +10458,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9646,6 +10470,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -9658,8 +10483,9 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "pilot/apply/[id]/route.ts",
@@ -9670,6 +10496,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9681,6 +10508,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -9693,6 +10521,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9704,6 +10533,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "BEST_EFFORT"
   },
@@ -9715,6 +10545,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -9726,6 +10557,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9738,6 +10570,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -9749,6 +10582,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -9761,6 +10595,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -9772,6 +10607,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -9783,6 +10619,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -9795,6 +10632,7 @@
    "mutating": true,
    "guard": "ORG_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -9806,6 +10644,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -9817,6 +10656,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -9828,6 +10668,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -9839,6 +10680,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -9850,6 +10692,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -9861,6 +10704,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -9873,6 +10717,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9885,6 +10730,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9896,6 +10742,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -9908,6 +10755,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
@@ -9921,6 +10769,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -9933,6 +10782,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -9945,6 +10795,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -9956,6 +10807,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -9966,8 +10818,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -9981,6 +10834,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -9991,8 +10845,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10003,8 +10858,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10016,6 +10872,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10028,6 +10885,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10039,6 +10897,7 @@
    "mutating": false,
    "guard": "CRON_SECRET",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -10050,6 +10909,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10062,6 +10922,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10073,6 +10934,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10084,6 +10946,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10097,6 +10960,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10110,6 +10974,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10123,6 +10988,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10136,6 +11002,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10148,6 +11015,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10159,6 +11027,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10171,6 +11040,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10182,6 +11052,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10194,6 +11065,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10207,6 +11079,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10219,6 +11092,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10231,6 +11105,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10243,6 +11118,7 @@
    "mutating": true,
    "guard": "CRON_SECRET",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -10254,6 +11130,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
@@ -10266,6 +11143,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10277,6 +11155,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10289,6 +11168,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10300,6 +11180,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10311,6 +11192,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10323,6 +11205,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10335,6 +11218,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -10346,6 +11230,7 @@
    "mutating": false,
    "guard": "ORG_AUTH",
    "kernel": true,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -10358,6 +11243,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10370,6 +11256,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -10381,6 +11268,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10393,6 +11281,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10405,6 +11294,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10416,6 +11306,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10427,6 +11318,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -10441,6 +11333,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -10455,6 +11348,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10469,6 +11363,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "NONE"
   },
@@ -10481,6 +11376,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10494,6 +11390,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10505,8 +11402,9 @@
    "mutating": true,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "status/route.ts",
@@ -10516,6 +11414,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10529,6 +11428,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10541,6 +11441,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10553,6 +11454,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10565,6 +11467,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10574,8 +11477,9 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10588,6 +11492,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10600,6 +11505,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10612,6 +11518,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10624,6 +11531,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10636,6 +11544,7 @@
    "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10648,6 +11557,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10660,6 +11570,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10673,6 +11584,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10686,6 +11598,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10699,6 +11612,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10711,6 +11625,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10722,6 +11637,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -10733,6 +11649,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -10744,6 +11661,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -10756,6 +11674,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10766,8 +11685,9 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10780,6 +11700,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10792,6 +11713,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10804,6 +11726,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10816,6 +11739,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -10827,6 +11751,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10838,6 +11763,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10849,6 +11775,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10862,6 +11789,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10875,6 +11803,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
@@ -10886,6 +11815,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10899,6 +11829,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10911,6 +11842,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10923,6 +11855,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -10934,6 +11867,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -10945,6 +11879,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
@@ -10960,6 +11895,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -10971,6 +11907,7 @@
    "mutating": false,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10982,6 +11919,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -10993,6 +11931,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -11004,6 +11943,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -11015,6 +11955,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -11026,6 +11967,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -11037,6 +11979,7 @@
    "mutating": false,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -11048,6 +11991,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -11059,6 +12003,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -11070,6 +12015,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -11083,6 +12029,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -11095,6 +12042,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -11107,6 +12055,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -11118,6 +12067,7 @@
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "AMBIENT_DB",
    "audit": "NONE"
   },
@@ -11131,6 +12081,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -11143,6 +12094,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -11156,6 +12108,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -11168,6 +12121,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -11179,6 +12133,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -11190,8 +12145,9 @@
    "mutating": true,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "workbench/assign/route.ts",
@@ -11200,7 +12156,8 @@
    ],
    "mutating": true,
    "guard": "WITH_API",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
@@ -11212,6 +12169,7 @@
    "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
+   "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
@@ -11223,6 +12181,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "NONE"
   },
@@ -11234,6 +12193,7 @@
    "mutating": false,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -11246,6 +12206,7 @@
    "mutating": true,
    "guard": "CAPABILITY_TOKEN",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -11258,6 +12219,7 @@
    "mutating": true,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -11269,8 +12231,9 @@
    "mutating": true,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "workbook/start/route.ts",
@@ -11280,6 +12243,7 @@
    "mutating": true,
    "guard": "NONE",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   },
@@ -11291,6 +12255,7 @@
    "mutating": false,
    "guard": "SESSION_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
   },
@@ -11301,9 +12266,10 @@
    ],
    "mutating": true,
    "guard": "SESSION_AUTH",
-   "kernel": false,
+   "kernel": true,
+   "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "worksites/[id]/route.ts",
@@ -11315,6 +12281,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -11327,6 +12294,7 @@
    "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
+   "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
   },
@@ -11338,6 +12306,7 @@
    "mutating": true,
    "guard": "ROLE_AUTH",
    "kernel": false,
+   "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
   }

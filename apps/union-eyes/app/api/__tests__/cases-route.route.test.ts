@@ -10,6 +10,7 @@ const m = vi.hoisted(() => ({
   recordUnionEyesCaseCreated: vi.fn(),
   sql: vi.fn(),
   badRequest: vi.fn(),
+  requireCaseFilingCapacity: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: m.badRequest } }));
@@ -23,6 +24,8 @@ vi.mock('drizzle-orm', () => ({ sql: m.sql }));
 vi.mock('@/lib/cases/case-authorization', () => ({
   getCaseActor: vi.fn().mockResolvedValue({ userId: 'u1', organizationId: 'org_1', role: 'member' }),
   caseReadScope: vi.fn(() => 'owned-case-scope'),
+  caseTriageQueueScope: vi.fn(() => 'triage-queue-scope'),
+  requireCaseFilingCapacity: m.requireCaseFilingCapacity,
 }));
 
 async function loadRoute() {
@@ -41,6 +44,7 @@ describe('cases route', () => {
     m.sql.mockImplementation((parts: TemplateStringsArray, ...values: unknown[]) => ({ parts, values }));
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
     m.auditLog.mockResolvedValue(undefined);
+    m.requireCaseFilingCapacity.mockResolvedValue(undefined);
     m.recordUnionEyesCaseCreated.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: any) => {
       const tx = { execute: vi.fn(async () => [{ claimId: 'c1', claimNumber: 'CLM-20260101-0001', status: 'open' }]) };
@@ -56,8 +60,22 @@ describe('cases route', () => {
       userId: 'u1',
     });
     expect(Array.isArray(result.data)).toBe(true);
-    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
+    // One query for the relationship-scoped cases, one for the triage queue.
+    expect(m.withRLSContext).toHaveBeenCalledTimes(2);
     expect(m.sql).toHaveBeenCalled();
+  });
+
+  it('GET merges the triage queue after readable cases without duplicating a case', async () => {
+    const { GET } = await loadRoute();
+    const executes = [
+      vi.fn(async () => [{ claimId: 'c1', description: 'full' }]),
+      vi.fn(async () => [{ claimId: 'c1', triageOnly: true }, { claimId: 'c2', triageOnly: true }]),
+    ];
+    m.withRLSContext
+      .mockImplementationOnce(async (fn: any) => fn({ execute: executes[0] }))
+      .mockImplementationOnce(async (fn: any) => fn({ execute: executes[1] }));
+    const result = await GET({ request: new NextRequest('http://localhost/api/cases'), organizationId: 'org_1', userId: 'u1' });
+    expect(result.data).toEqual([{ claimId: 'c1', description: 'full' }, { claimId: 'c2', triageOnly: true }]);
   });
 
   it('GET uses authenticated canonical scope without a public membership fallback', async () => {
@@ -68,7 +86,7 @@ describe('cases route', () => {
     });
 
     expect(Array.isArray(result.data)).toBe(true);
-    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext).toHaveBeenCalledTimes(2);
   });
 
   it('POST returns 400 for invalid payload', async () => {
@@ -114,5 +132,28 @@ describe('cases route', () => {
     );
     expect(m.buildUnionEvidencePack).toHaveBeenCalled();
     expect(m.recordUnionEyesCaseCreated).toHaveBeenCalled();
+    expect(m.requireCaseFilingCapacity).toHaveBeenCalledWith(expect.anything(), { userId: 'u1', organizationId: 'org_1' }, 'handler');
+  });
+
+  it('POST answers 403 and writes nothing when the canonical membership lacks handler filing capacity', async () => {
+    const { POST } = await loadRoute();
+    const execute = vi.fn(async () => [{ claimId: 'c1' }]);
+    const { ApiError } = await import('@/lib/api/errors');
+    m.requireCaseFilingCapacity.mockRejectedValueOnce(ApiError.forbidden());
+    m.withRLSContext.mockImplementationOnce(async (fn: any) => fn({ execute }));
+
+    await expect(POST({
+      request: {
+        headers: { get: vi.fn(() => 'trace-123') },
+        json: vi.fn(async () => ({ claimType: 'other', description: 'A valid claim description' })),
+      },
+      organizationId: 'org_1',
+      userId: 'u1',
+    })).rejects.toMatchObject({ code: 'FORBIDDEN' });
+
+    expect(execute).not.toHaveBeenCalled();
+    expect(m.auditLog).not.toHaveBeenCalled();
+    expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
+    expect(m.recordUnionEyesCaseCreated).not.toHaveBeenCalled();
   });
 });

@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
   auditLog: vi.fn(),
   updateClaimStatusById: vi.fn(),
   enforceDecision: vi.fn(),
+  findReadableCase: vi.fn(),
   createNarProofAdapter: vi.fn(),
   platformDb: {
     select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ orderBy: vi.fn(() => ({ limit: vi.fn(async () => []) })) })) })) })),
@@ -36,6 +37,10 @@ vi.mock('@nzila/nar', () => ({
   getNarSigningSecret: vi.fn(),
 }));
 vi.mock('@nzila/db/platform', () => ({ platformDb: m.platformDb }));
+vi.mock('@/lib/cases/case-authorization', async (original) => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  findReadableCase: m.findReadableCase,
+}));
 
 async function loadRoute() {
   return import('../cases/[caseId]/escalate/route');
@@ -47,6 +52,7 @@ describe('cases/[caseId]/escalate route', () => {
     m.auth.mockResolvedValue({userId:'u1'});
     m.organization.mockResolvedValue('org_1');
     m.role.mockResolvedValue('steward');
+    m.findReadableCase.mockResolvedValue({ claimId: 'c1', organizationId: 'org_1', visibility: 'internal' });
 
     m.withApi.mockImplementation((_cfg: unknown, handler: any) => {
       return (request: Request, ctx: any = {}) =>
@@ -84,12 +90,7 @@ describe('cases/[caseId]/escalate route', () => {
   });
 
   it('returns 404 before any proof or write when the case is unreadable or missing', async () => {
-    m.withRLSContext.mockImplementationOnce(async (fn: any) => {
-      const tx = {
-        select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => []) })) })) })),
-      };
-      return fn(tx);
-    });
+    m.findReadableCase.mockResolvedValueOnce(null);
 
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/cases/c1/escalate', {
@@ -109,20 +110,20 @@ describe('cases/[caseId]/escalate route', () => {
       body: JSON.stringify({ priority: 'high', notes: 'Escalating' }),
     }));
     expect(response).toMatchObject({claim:{claimId:'c1'},grievance:{id:'g1'}});
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ userId: 'u1', organizationId: 'org_1' }), 'c1', false, 'case:transition');
     const condition=new PgDialect().sqlToQuery(m.where.mock.calls[0][0] as SQL);
-    expect(condition.sql).toContain('"claims"."member_id"');
-    expect(condition.sql).toContain('"claims"."assigned_to"');
-    // Reference, tenant, own, assigned, then the live cases-designation predicate (organization, scope, user).
-    expect(condition.params).toEqual(['c1','org_1','u1','u1','org_1','cases','u1']);
+    // The kernel decision resolved the case; the row is then re-read by its id within the tenant only.
+    expect(condition.params).toEqual(['c1','org_1']);
   });
 
-  it('denies member escalation before querying a case or creating a proof', async () => {
+  it('denies member escalation on the kernel decision before querying a case or creating a proof', async () => {
     const { POST } = await loadRoute();
-    m.role.mockResolvedValueOnce('member');
+    const { ApiError } = await import('@/lib/api/errors');
+    m.findReadableCase.mockRejectedValueOnce(ApiError.forbidden('This action is not permitted for this case.'));
     await expect(POST(new Request('http://localhost/api/cases/c1/escalate', {
       method:'POST',body:JSON.stringify({notes:'unauthorized'}),
     }))).rejects.toMatchObject({code:'FORBIDDEN'});
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.where).not.toHaveBeenCalled();
     expect(m.enforceDecision).not.toHaveBeenCalled();
   });
 });

@@ -8,6 +8,7 @@
  *   public.platform_identity_bindings            packages/db/src/schema/platform-authorization.ts
  *   public.audit_logs                            backend/core/models.py AuditLogs (Django), 0011 direct-org RLS
  *   public.grievances                            db/schema/domains/claims/grievances.ts
+ *   public.claims                                db/schema/claims-schema.ts (claim_id is the kernel case id)
  *   public.grievance_case_access_assignments     db/migrations-platform/0009_canonical_lineage_relations.sql
  *   public.documents / document_links            db/schema/documents-schema.ts
  *   public.payments                              db/schema/domains/finance/payments.ts
@@ -49,6 +50,15 @@ const BUSINESS_FIXTURE_SQL = `
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, created_by text,
     created_at timestamptz NOT NULL DEFAULT now(), is_confidential boolean DEFAULT false, has_legal_implications boolean DEFAULT false,
     union_rep_id uuid);
+  CREATE TABLE public.claims (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(), claim_id uuid NOT NULL UNIQUE DEFAULT gen_random_uuid(), claim_number varchar(50),
+    organization_id uuid NOT NULL, member_id varchar(255), assigned_to varchar(255), status text NOT NULL DEFAULT 'submitted',
+    priority text NOT NULL DEFAULT 'medium', created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(),
+    is_anonymous boolean DEFAULT false, claim_type text, incident_date timestamptz, location text, description text, desired_outcome text,
+    attachments jsonb DEFAULT '[]', witnesses_present boolean DEFAULT false, witness_details text, filed_date timestamptz, assigned_at timestamptz,
+    ai_score integer, ai_analysis jsonb, merit_confidence integer, precedent_match integer, complexity_score integer,
+    claim_amount numeric DEFAULT 0, settlement_amount numeric DEFAULT 0, legal_costs numeric DEFAULT 0, court_costs numeric DEFAULT 0,
+    resolution_outcome text, resolved_at timestamptz, progress integer DEFAULT 0);
   CREATE TYPE case_access_role AS ENUM ('secondary_lro','reviewer','read_only');
   CREATE TYPE case_access_status AS ENUM ('active','revoked','expired');
   CREATE TABLE public.grievance_case_access_assignments (
@@ -87,6 +97,7 @@ const IDENTITY_GRANTS = `
 
 const GRANTS = `
   GRANT SELECT, INSERT, UPDATE, DELETE ON public.audit_logs TO union_eyes_runtime;
+  GRANT SELECT ON public.claims TO union_eyes_runtime;
   GRANT SELECT ON public.grievances, public.grievance_case_access_assignments, public.documents, public.document_links, public.payments TO union_eyes_runtime;
 `
 
@@ -105,7 +116,7 @@ export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: 
   if (!options.realAuditLogs) await db.exec(AUDIT_FIXTURE_SQL)
   await db.exec(PLATFORM_SQL)
   await db.exec(RLS_SQL)
-  for (const t of ['audit_logs', 'grievances', 'grievance_case_access_assignments', 'documents', 'payments']) {
+  for (const t of ['audit_logs', 'grievances', 'claims', 'grievance_case_access_assignments', 'documents', 'payments']) {
     await db.exec(`SELECT ue_create_direct_org_rls_policy('${t}')`)
   }
   if (!options.canonicalIdentity) await db.exec(IDENTITY_GRANTS)

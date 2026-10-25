@@ -8,7 +8,11 @@ const m = vi.hoisted(() => ({
   withSystemRLSContext: vi.fn(),
   claims: { table: 'claims' },
   sql: vi.fn(),
+  requireCaseFilingCapacity: vi.fn(),
+  persistAtomicAudit: vi.fn(),
 }));
+
+vi.mock('@/lib/cases/case-authorization', () => ({ requireCaseFilingCapacity: m.requireCaseFilingCapacity }));
 
 vi.mock('@/lib/api/crud-factory', () => ({
   crudRoutes: m.crudRoutes,
@@ -16,7 +20,7 @@ vi.mock('@/lib/api/crud-factory', () => ({
 vi.mock('@/lib/api/with-api', () => ({ withApi: m.withApi }));
 vi.mock('@/lib/api/errors', () => ({ ApiError: { badRequest: m.badRequest } }));
 vi.mock('@/db/schema', () => ({ claims: m.claims }));
-vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
   withSystemRLSContext: m.withSystemRLSContext,
@@ -30,6 +34,8 @@ async function loadRoute() {
 describe('claims route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.requireCaseFilingCapacity.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.crudRoutes.mockReturnValue({
       GET: vi.fn(async () => ({ data: [] })),
       POST: vi.fn(async () => ({ data: { claimId: 'c1' } })),
@@ -83,5 +89,24 @@ describe('claims route', () => {
     expect(result).toEqual({ data: { claimId: 'claim_1' } });
     expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
     expect(m.withSystemRLSContext).not.toHaveBeenCalled();
+    expect(m.requireCaseFilingCapacity).toHaveBeenCalledWith(expect.anything(), { userId: 'u1', organizationId: 'org_1' }, 'handler');
+  });
+
+  it('POST answers 403 and writes nothing when the canonical membership lacks handler filing capacity', async () => {
+    const { POST } = await loadRoute();
+    const insert = vi.fn();
+    const execute = vi.fn();
+    m.requireCaseFilingCapacity.mockRejectedValueOnce(Object.assign(new Error('Insufficient permissions'), { status: 403 }));
+    m.withRLSContext.mockImplementationOnce(async (_context: { organizationId: string }, fn: (tx: any) => Promise<unknown>) => fn({ execute, insert }));
+
+    await expect(POST({
+      body: { description: 'A valid description for a claim', claimType: 'other' },
+      organizationId: 'org_1',
+      userId: 'u1',
+    })).rejects.toMatchObject({ status: 403 });
+
+    expect(execute).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 });

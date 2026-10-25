@@ -72,6 +72,11 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     expect(current.filter((r) => !baselines.kernelPending.includes(r))).toEqual([])
   })
 
+  it('has closed the kernel-adoption backlog: every case, claim, document and message mutation has a decision path', () => {
+    expect(baselines.kernelPending).toEqual([]);
+    expect(fresh.filter(kernelPending).map((e) => e.route)).toEqual([]);
+  });
+
   it('removes a baseline entry when its route is fixed, so the ratchet only shrinks', () => {
     expect(baselines.auditGap.filter((r) => !fresh.some((e) => e.route === r && auditGap(e)))).toEqual([])
     expect(baselines.kernelPending.filter((r) => !fresh.some((e) => e.route === r && kernelPending(e)))).toEqual([])
@@ -80,7 +85,7 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
   it('treats a route as kernel-decided only when it imports the kernel or the kernel-backed case access service', () => {
     for (const e of fresh.filter((r) => r.kernel && r.guard !== 'DELEGATED')) {
       const source = readFileSync(join(ROOT, 'app', 'api', e.route), 'utf8')
-      expect(source).toMatch(/lib\/authority|case-access-service|route-adapter/)
+      expect(source).toMatch(/lib\/authority|case-access-service|route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/)
     }
   })
 })

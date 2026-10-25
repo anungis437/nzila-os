@@ -10,7 +10,11 @@ const m = vi.hoisted(() => ({
   putBlob: vi.fn(),
   deleteBlob: vi.fn(),
   isMalwareScanError: vi.fn(),
+  requireCaseFilingCapacity: vi.fn(),
+  hasCaseFilingCapacity: vi.fn(),
 }));
+
+vi.mock('@/lib/cases/case-authorization', () => ({ requireCaseFilingCapacity: m.requireCaseFilingCapacity, hasCaseFilingCapacity: m.hasCaseFilingCapacity }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth }));
 vi.mock('@/lib/rate-limiter', () => ({
@@ -51,6 +55,8 @@ describe('documents/upload route', () => {
     m.appendMandatoryAudit.mockResolvedValue(undefined);
     m.deleteBlob.mockResolvedValue(undefined);
     m.isMalwareScanError.mockReturnValue(false);
+    m.requireCaseFilingCapacity.mockResolvedValue(undefined);
+    m.hasCaseFilingCapacity.mockResolvedValue(true);
   });
 
   it('returns error when file is missing', async () => {
@@ -124,6 +130,48 @@ describe('documents/upload route', () => {
       organizationId: 'org_1',
     });
     expect(response.status).toBeGreaterThanOrEqual(500);
+    expect(m.deleteBlob).toHaveBeenCalledWith('https://blob.test/doc');
+  });
+
+  it('answers 403 before reading the form or storing any blob, and files and audits nothing, when member filing capacity is refused', async () => {
+    const { POST } = await loadRoute();
+    m.hasCaseFilingCapacity.mockResolvedValueOnce(false);
+    const file = new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' });
+    const form = new FormData();
+    form.set('file', file);
+    form.set('organizationId', 'org_1');
+
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
+      userId: 'u1',
+      organizationId: 'org_1',
+    });
+    expect(response.status).toBe(403);
+    expect((await response.json()).error).toBe('FORBIDDEN');
+    expect(m.hasCaseFilingCapacity).toHaveBeenCalledWith({ userId: 'u1', organizationId: 'org_1' }, 'member');
+    expect(m.putBlob).not.toHaveBeenCalled();
+    expect(m.deleteBlob).not.toHaveBeenCalled();
+    expect(m.insertDocument).not.toHaveBeenCalled();
+    expect(m.appendMandatoryAudit).not.toHaveBeenCalled();
+  });
+
+  it('removes the stored blob and files nothing when the in-transaction capacity guard refuses', async () => {
+    const { POST } = await loadRoute();
+    const { ApiError } = await import('@/lib/api/errors');
+    m.requireCaseFilingCapacity.mockRejectedValueOnce(ApiError.forbidden());
+    const file = new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' });
+    const form = new FormData();
+    form.set('file', file);
+    form.set('organizationId', 'org_1');
+
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
+      userId: 'u1',
+      organizationId: 'org_1',
+    });
+    expect(response.status).toBeGreaterThanOrEqual(400);
+    expect(response.status).not.toBe(201);
+    expect(m.requireCaseFilingCapacity).toHaveBeenCalledWith(expect.anything(), { userId: 'u1', organizationId: 'org_1' }, 'member');
+    expect(m.insertDocument).not.toHaveBeenCalled();
+    expect(m.appendMandatoryAudit).not.toHaveBeenCalled();
     expect(m.deleteBlob).toHaveBeenCalledWith('https://blob.test/doc');
   });
   it('returns 429 when rate-limited', async () => {

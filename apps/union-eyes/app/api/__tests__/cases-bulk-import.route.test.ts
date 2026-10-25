@@ -4,7 +4,7 @@ const m = vi.hoisted(() => ({
   auth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   requireEntitlement: vi.fn(),
-  hasMinRole: vi.fn(),
+  requireCaseFilingCapacity: vi.fn(),
   withRLSContext: vi.fn(),
   createClaim: vi.fn(),
   auditDataMutation: vi.fn(),
@@ -15,7 +15,10 @@ const m = vi.hoisted(() => ({
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
-vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/cases/case-authorization', async (original) => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  requireCaseFilingCapacity: m.requireCaseFilingCapacity,
+}));
 vi.mock('@/db/queries/claims-queries', () => ({ createClaim: m.createClaim }));
 vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
@@ -36,7 +39,7 @@ describe('cases/bulk-import route', () => {
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
     m.requireEntitlement.mockResolvedValue(undefined);
-    m.hasMinRole.mockResolvedValue(true);
+    m.requireCaseFilingCapacity.mockResolvedValue(undefined);
     m.createClaim.mockResolvedValue({ claimId: 'c1', claimNumber: 'CLM-1' });
     m.auditDataMutation.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: any) => {
@@ -63,15 +66,20 @@ describe('cases/bulk-import route', () => {
     expect(response.status).toBe(401);
   });
 
-  it('returns 403 when user lacks admin role', async () => {
+  it('returns 403 and imports nothing when the canonical membership lacks bulk filing capacity', async () => {
     const { POST } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
+    const { ApiError } = await import('@/lib/api/errors');
+    m.requireCaseFilingCapacity.mockRejectedValueOnce(ApiError.forbidden());
 
     const response = await POST(new Request('http://localhost/api/cases/bulk-import', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ cases: [{ memberId: 'm1', caseType: 'discipline', title: 'A title', description: 'Long enough desc', incidentDate: '2026-01-01' }] }),
     }));
 
     expect(response.status).toBe(403);
+    expect((await response.json()).error).toBe('FORBIDDEN');
+    expect(m.requireCaseFilingCapacity).toHaveBeenCalledWith(expect.anything(), { userId: 'u1', organizationId: 'org_1' }, 'bulk');
+    expect(m.createClaim).not.toHaveBeenCalled();
+    expect(m.auditDataMutation).not.toHaveBeenCalled();
   });
 
   it('returns 400 for invalid json body', async () => {

@@ -38,7 +38,7 @@ describe('GET /api/claims/[id]/evidence', () => {
     vi.clearAllMocks();
     m.queue = [];
     m.actor.mockResolvedValue({ userId: 'steward-1', organizationId: 'org-1', role: 'steward' });
-    m.findReadableCase.mockResolvedValue({ claimId: 'c1' });
+    m.findReadableCase.mockResolvedValue({ claimId: 'c1', visibility: 'internal' });
     m.audit.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: (tx: unknown) => unknown) => {
       const chain: any = {
@@ -53,12 +53,16 @@ describe('GET /api/claims/[id]/evidence', () => {
     });
   });
 
-  it('denies a plain member before touching any record', async () => {
+  it('denies a plain member on the kernel decision before touching any record', async () => {
     m.actor.mockResolvedValue({ userId: 'member-1', organizationId: 'org-1', role: 'member' });
+    const { denyCaseAction } = await vi.importActual<typeof import('@/lib/cases/case-authorization')>('@/lib/cases/case-authorization');
+    // The real refusal path: records the denial, then throws the 403.
+    m.findReadableCase.mockImplementationOnce(async (_tx: unknown, actor: any) => denyCaseAction(actor, 'case:read_internal', 'c1', 'DENIED'));
     const { GET } = await loadRoute();
     const response = await GET(request(), params);
     expect(response.status).toBe(403);
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ userId: 'member-1' }), 'c1', false, 'case:read_internal');
+    expect(m.queue).toEqual([]);
     expect(m.audit).toHaveBeenCalledWith(expect.objectContaining({ outcome: 'failure', organizationId: 'org-1' }));
   });
 
@@ -67,7 +71,7 @@ describe('GET /api/claims/[id]/evidence', () => {
     const { GET } = await loadRoute();
     const response = await GET(request(), params);
     expect(response.status).toBe(404);
-    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ organizationId: 'org-1' }), 'c1');
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ organizationId: 'org-1' }), 'c1', false, 'case:read_internal');
   });
 
   it('uses the visibility-filtered history and exposes only the authorized case', async () => {
@@ -80,7 +84,7 @@ describe('GET /api/claims/[id]/evidence', () => {
     const response = await GET(request(), params);
     const body = await response.json();
     expect(response.status).toBe(200);
-    expect(m.caseHistoryVisibility).toHaveBeenCalledWith(expect.objectContaining({ role: 'steward' }));
+    expect(m.caseHistoryVisibility).toHaveBeenCalledWith('internal');
     expect(body.claim.claimId).toBe('c1');
     expect(body.events).toHaveLength(1);
     expect(body.audit_log).toHaveLength(1);

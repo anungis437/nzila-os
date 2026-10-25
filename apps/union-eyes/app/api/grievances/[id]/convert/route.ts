@@ -10,7 +10,8 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
+import { requireKernelCaseAction } from '@/lib/cases/case-authorization';
+import { ApiError } from '@/lib/api/errors';
 import { auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
@@ -40,23 +41,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
   try {
     if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");
-
-    // Only steward+ can convert intakes to official cases
-    const isSteward = await hasMinRole("steward");
-    if (!isSteward) {
-      await auditLog({
-        eventType: AuditEventType.AUTHORITY_VIOLATION,
-        severity: AuditSeverity.HIGH,
-        userId,
-        organizationId,
-        resource: 'grievances',
-        action: 'convert_intake',
-        resourceId: params.id,
-        details: { reason: 'Member attempted to convert intake to case' },
-        outcome: 'failure',
-      });
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "Only a steward or LRO can convert an intake to an official case.");
-    }
 
     const body = await request.json();
     const parsed = convertSchema.safeParse(body);
@@ -109,6 +93,8 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     const { priority, notes } = parsed.data;
 
     const result = await withRLSContext(async (tx) => {
+      // The kernel decides this actor may move this intake: a live assignment or mandate, never a role rank.
+      await requireKernelCaseAction(tx, { userId, organizationId }, params.id, 'case:transition');
       // Mark the intake as converted
       await tx
         .update(grievances)
@@ -129,7 +115,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
           cbaId: intake.cbaId ?? null,
           organizationId,
           createdBy: userId,
-          unionRepId: userId,
           filedDate: new Date(),
           relatedGrievanceIds: [params.id],
         })
@@ -188,7 +173,11 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'INTAKE_CONVERTED' }));
 
     return standardSuccessResponse(result);
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'FORBIDDEN') {
+      await auditLog({ eventType: AuditEventType.AUTHORITY_VIOLATION, severity: AuditSeverity.HIGH, userId, organizationId, resource: 'grievances', action: 'convert_intake', resourceId: params?.id ?? '', details: { reason: 'The authority kernel did not authorize this conversion' }, outcome: 'failure' });
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "The authority kernel did not authorize this conversion.");
+    }
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to convert intake");
   }
 });

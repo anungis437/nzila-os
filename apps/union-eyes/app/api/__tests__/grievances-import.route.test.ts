@@ -49,7 +49,7 @@ const m = vi.hoisted(() => {
       state.executeQueue = [];
     },
     requireEntitlement: vi.fn(),
-    hasMinRole: vi.fn(),
+    hasCaseFilingCapacity: vi.fn(),
     persistAtomicAudit: vi.fn(),
     auditLog: vi.fn(),
     trackPilotEvent: vi.fn(),
@@ -71,7 +71,7 @@ vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({
   requireEntitlement: m.requireEntitlement,
 }));
-vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/cases/case-authorization', () => ({ hasCaseFilingCapacity: m.hasCaseFilingCapacity }));
 vi.mock('@/lib/organization-middleware', () => ({
   withOrganizationAuth: vi.fn(
     (handler: (req: NextRequest, ctx: { organizationId: string; userId: string }) => Promise<Response>) =>
@@ -106,16 +106,16 @@ describe('grievances/import route', () => {
     vi.clearAllMocks();
     m.resetQueues();
     m.requireEntitlement.mockResolvedValue(undefined);
-    m.hasMinRole.mockResolvedValue(true);
+    m.hasCaseFilingCapacity.mockResolvedValue(true);
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.auditLog.mockResolvedValue(undefined);
     m.trackPilotEvent.mockResolvedValue(undefined);
     mockDb.execute.mockResolvedValue([]);
   });
 
-  it('returns forbidden when caller lacks steward role', async () => {
+  it('returns forbidden and writes nothing when the membership lacks bulk filing capacity', async () => {
     const { POST } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
+    m.hasCaseFilingCapacity.mockResolvedValueOnce(false);
 
     const response = await POST(new NextRequest('http://localhost/api/grievances/import', {
       method: 'POST',
@@ -124,8 +124,23 @@ describe('grievances/import route', () => {
     }));
 
     expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
+    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN', message: 'Importing cases requires an officer or executive capacity' });
+    expect(m.hasCaseFilingCapacity).toHaveBeenCalledWith({ userId: TEST_USER_ID, organizationId: TEST_ORG_ID }, 'bulk');
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   }, 60000);
+
+  it('GET returns forbidden when the membership lacks bulk filing capacity', async () => {
+    const { GET } = await loadRoute();
+    m.hasCaseFilingCapacity.mockResolvedValueOnce(false);
+
+    const response = await GET(new NextRequest('http://localhost/api/grievances/import'));
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN', message: 'Viewing import sessions requires an officer or executive capacity' });
+    expect(m.hasCaseFilingCapacity).toHaveBeenCalledWith({ userId: TEST_USER_ID, organizationId: TEST_ORG_ID }, 'bulk');
+    expect(mockDb.select).not.toHaveBeenCalled();
+  });
 
   it('returns validation error for malformed JSON payloads', async () => {
     const { POST } = await loadRoute();

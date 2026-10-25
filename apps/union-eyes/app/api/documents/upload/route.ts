@@ -13,6 +13,7 @@ import { putBlob, deleteBlob } from "@/lib/blob-client";
 import { db } from "@/db/db";
 import { documents } from "@/db/schema";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { requireCaseFilingCapacity, hasCaseFilingCapacity } from "@/lib/cases/case-authorization";
 import type { RLSTx } from "@/lib/db/with-rls-context";
 import { withOrgOwnedContext } from "@/lib/db/org-owned-context";
 import { logger } from "@/lib/logger";
@@ -115,6 +116,11 @@ export const POST = withRoleAuth('member', async (request, context) => {
           headers: createRateLimitHeaders(rateLimitResult)
         }
       );
+    }
+
+    // Refused before any bytes are read or stored: filing needs an active canonical membership.
+    if (!(await hasCaseFilingCapacity({ userId, organizationId }, 'member'))) {
+      return NextResponse.json({ error: 'FORBIDDEN', message: 'Uploading a document requires an active membership.' }, { status: 403 });
     }
 
     // Parse form data
@@ -267,6 +273,9 @@ export const POST = withRoleAuth('member', async (request, context) => {
     try {
       // The document row and its mandatory canonical audit record commit together.
       document = await withOrgOwnedContext(() => db.transaction(async (tx) => {
+        // Filing a document into the organization's repository needs an active canonical membership; it grants no
+        // access to anyone else's document, and its label is the canonical default (team_confidential) until governed.
+        await requireCaseFilingCapacity(tx as unknown as RLSTx, { userId, organizationId }, 'member');
         const [created] = await tx.insert(documents).values({
           organizationId,
           folderId: folderId || null,

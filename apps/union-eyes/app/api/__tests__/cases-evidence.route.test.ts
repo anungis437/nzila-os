@@ -9,6 +9,7 @@ const m = vi.hoisted(() => ({
   persistAtomicAudit: vi.fn(),
   isMalwareScanError: vi.fn(),
   executeQueue: [] as unknown[][],
+  findReadableCase: vi.fn(),
 }));
 
 vi.mock('@/lib/api/with-api', () => ({
@@ -33,7 +34,7 @@ vi.mock('@/lib/security/clamav', () => ({ isMalwareScanError: m.isMalwareScanErr
 
 vi.mock('@/lib/cases/case-authorization', async original => ({
   ...(await original<typeof import('@/lib/cases/case-authorization')>()),
-  getCaseActor: m.actor, caseReadScope: vi.fn(() => undefined),
+  getCaseActor: m.actor, caseReadScope: vi.fn(() => undefined), findReadableCase: m.findReadableCase,
 }));
 vi.mock('@/lib/audit-logger', () => ({auditLog:vi.fn().mockResolvedValue(undefined),AuditEventType:{AUTH_FAILED:'AUTH_FAILED'},AuditSeverity:{HIGH:'HIGH'}}));
 
@@ -46,6 +47,7 @@ describe('cases/[caseId]/evidence route', () => {
     vi.clearAllMocks();
     m.actor.mockResolvedValue({userId:'user_1',organizationId:'org_1',role:'admin'});
     m.executeQueue = [];
+    m.findReadableCase.mockResolvedValue({ claimId: 'claim_1', visibility: 'internal' });
     m.putBlob.mockResolvedValue({
       url: 'https://blob/evidence.pdf',
       pathname: 'cases/claim_1/evidence.pdf',
@@ -75,6 +77,7 @@ describe('cases/[caseId]/evidence route', () => {
 
   it('POST rejects request without file', async () => {
     const { POST } = await loadRoute();
+    m.executeQueue.push([{ claimId: 'claim_1', claimNumber: 'CLM-1', attachments: [] }]);
     const form = new FormData();
 
     await expect(
@@ -201,12 +204,22 @@ describe('cases/[caseId]/evidence route', () => {
     expect(m.deleteBlob).not.toHaveBeenCalled();
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
-  it('denies a member evidence deletion before touching storage or case data', async () => {
+  it('denies a member evidence deletion on the kernel decision before touching storage or case data', async () => {
     const { DELETE } = await loadRoute();
-    m.actor.mockResolvedValueOnce({userId:'user_1',organizationId:'org_1',role:'member'});
+    const { ApiError } = await import('@/lib/api/errors');
+    m.findReadableCase.mockRejectedValueOnce(ApiError.forbidden());
     await expect(DELETE({params:{caseId:'claim_1'},organizationId:'org_1',userId:'user_1',request:new NextRequest('http://localhost/api/cases/claim_1/evidence?fileUrl=https://x')} as any)).rejects.toMatchObject({status:403});
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ userId: 'user_1' }), 'claim_1', false, 'case:modify_document');
     expect(m.deleteBlob).not.toHaveBeenCalled();
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.executeQueue).toEqual([]);
+  });
+
+  it('answers 404 when the caller cannot read the case at all', async () => {
+    const { GET } = await loadRoute();
+    m.findReadableCase.mockResolvedValueOnce(null);
+    await expect(GET({ params: { caseId: 'CLM-1' }, organizationId: 'org_1', userId: 'user_1' } as any)).rejects.toMatchObject({ status: 404 });
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'CLM-1', false, 'case:read_internal');
   });
 
 });

@@ -8,7 +8,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { claims, claimUpdates } from '@/db/schema/claims-schema';
@@ -17,8 +17,10 @@ import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { recordUnionEyesCaseAssigned } from '@/lib/pilot-metrics';
-import { getCaseActor, requireCaseAction, findReadableCase, caseAssigneeEligible, denyCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
+import { getCaseActor, findReadableCase, caseAssigneeEligible, denyCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
+import { assignPrimaryRepresentative } from '@/lib/services/case-access-service';
+import { AuthorityStoreError } from '@/lib/authority/store/executor';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +41,6 @@ export async function POST(
 
     const actor = await getCaseActor();
     const {userId,organizationId:orgId} = actor;
-    await requireCaseAction(actor,'case_assign',caseId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     let body: any;
@@ -70,19 +71,25 @@ export async function POST(
     const { assigneeId, reason } = parsed.data;
 
     const result = await withRLSContext(async (tx) => {
-      const claim = await findReadableCase(tx,actor,caseId,true);
+      // The kernel decides the caller may assign this case (a mandate or delegation naming assignment).
+      const claim = await findReadableCase(tx,actor,caseId,true,'case:assign');
 
       if (!claim) return null;
       if (!(await caseAssigneeEligible(tx,actor,assigneeId)))
         return {denied:true as const,claimId:claim.claimId};
 
-      const previousAssignee = claim.assignedTo;
+      // The kernel owns the assignment: it re-decides the issuer's authority, the assignee's capacity and conflicts, and
+      // records the governed relationship. The claims column below is only a compatibility mirror.
+      let previousAssignee = claim.assignedTo;
 
       // A person cannot route their own matter, or give a member their own matter.
       if (claim.memberId === userId || claim.memberId === assigneeId)
         return {denied:true as const,conflict:true as const,claimId:claim.claimId};
-      if (previousAssignee === assigneeId)
-        return {unchanged:true as const,claimId:claim.claimId,assignedTo:assigneeId};
+
+      const kernel = await assignPrimaryRepresentative(tx, { organizationId: orgId, grievanceId: claim.claimId, issuerUserId: userId, assigneeUserId: assigneeId });
+      // The kernel is the record of who holds the case; the mirror may be stale or empty.
+      previousAssignee = kernel.previousUserId;
+      if (previousAssignee === assigneeId) return {unchanged:true as const,claimId:claim.claimId,assignedTo:assigneeId};
 
       // Compare-and-set against the row locked above, so a concurrent reassignment cannot be overwritten silently.
       const [changed] = await tx
@@ -92,7 +99,7 @@ export async function POST(
           assignedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(and(eq(claims.claimId, claim.claimId), previousAssignee === null ? isNull(claims.assignedTo) : eq(claims.assignedTo, previousAssignee)))
+        .where(eq(claims.claimId, claim.claimId))
         .returning({ claimId: claims.claimId });
       if (!changed) return {conflicted:true as const,claimId:claim.claimId};
 
@@ -184,6 +191,9 @@ export async function POST(
       { status: 200 },
     );
   } catch (error) {
+    if (error instanceof AuthorityStoreError && (error.code === 'DENIED' || error.code === 'PRECONDITION' || error.code === 'NOT_FOUND')) {
+      return NextResponse.json({ error: 'FORBIDDEN', message: 'The authority kernel did not authorize this assignment.' }, { status: 403 });
+    }
     const denied=caseAuthorizationResponse(error)??authorizationDenialResponse(error);
     if(denied) return denied;
     logger.error('Failed to assign case', error as Error);

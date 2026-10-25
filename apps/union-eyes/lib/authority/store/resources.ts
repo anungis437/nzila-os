@@ -8,7 +8,7 @@
  * enforcement wrapper turns into a denial.
  *
  * Source coverage (see docs/union-eyes/convergence for the full matrix):
- *   case          public.grievances (creator, classification) + ue_authority_resource_relationships
+ *   case          public.grievances, else public.claims (creator, classification) + ue_authority_resource_relationships
  *                 (governed assignments) + ue_authority_workaid_matters (counsel control)
  *   document      public.documents + public.document_links (grievance links only)
  *   financial     public.payments (amount, currency) + ue_authority_financial_steps
@@ -67,7 +67,7 @@ export function decimalToMinor(value: unknown): number {
 export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Date, policy: DocumentClassPolicy = DEFAULT_DOCUMENT_CLASS_POLICY): Promise<LoadedResource | null> {
   const org = req.resource.organizationId
   if (!isUuid(org) || !isUuid(req.resource.id)) return null
-  const row = (
+  let row = (
     await exec.query<Row>(
       `SELECT id::text AS id, organization_id::text AS organization_id, created_by, created_at,
               COALESCE(is_confidential, false) AS is_confidential,
@@ -76,6 +76,19 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
       [org, req.resource.id],
     )
   ).rows[0]
+  // A claim is a case too: its kernel id is its public claim_id, and the member who filed it is its creator. A claim
+  // carries no confidentiality or legal-implications column, so it is a standard, non-confidential case until a
+  // governed source says otherwise. The two id spaces are both uuids; a grievance match always wins.
+  if (!row) {
+    row = (
+      await exec.query<Row>(
+        `SELECT claim_id::text AS id, organization_id::text AS organization_id, member_id AS created_by, created_at,
+                false AS is_confidential, false AS has_legal_implications
+           FROM public.claims WHERE organization_id = $1::uuid AND claim_id = $2::uuid`,
+        [org, req.resource.id],
+      )
+    ).rows[0]
+  }
   if (!row) return null
 
   // Counsel control comes only from an accepted, unwithdrawn WorkAid referral.

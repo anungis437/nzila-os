@@ -17,9 +17,9 @@ import { canonicalMembershipSource } from './identity'
 import type { SqlExecutor } from './executor'
 
 /** A JS array travels as one Postgres array literal; drizzle would otherwise expand it into a parameter list. */
-function bind(value: unknown): unknown {
+export function bind(value: unknown): unknown {
   if (!Array.isArray(value)) return value
-  return `{${value.map((v) => (v === null ? 'NULL' : `"${String(v).replace(/["\\]/g, '\\/** Adapts the transaction')}"`)).join(',')}}`
+  return `{${value.map((v) => (v === null ? 'NULL' : `"${String(v).replace(/["\\]/g, (c) => `\\${c}`)}"`)).join(',')}}`
 }
 
 /** Adapts the transaction `withRLSContext` hands out to the kernel's executor port, keeping bound parameters. */

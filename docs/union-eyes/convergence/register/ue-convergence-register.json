@@ -733,6 +733,28 @@
       "retirement": { "disposition": "NONE" }
     },
     {
+      "id": "UE-CONV-K-010",
+      "domain": "authorization",
+      "capability": "Claims, cases, documents and grievance mutations decided by the authority kernel",
+      "workstream": "K",
+      "canonicalOwner": "apps/union-eyes/lib/cases/case-authorization.ts",
+      "sources": [
+        { "kind": "file", "ref": "apps/union-eyes/lib/cases/case-authorization.ts", "classification": "CANONICAL" },
+        { "kind": "file", "ref": "apps/union-eyes/lib/authority/store/resources.ts", "classification": "CANONICAL" }
+      ],
+      "defect": "The claims model (the cases API) authorised by role rank: requireCaseAction asked a CUPE role matrix, caseReadScope read own, assigned_to (a mutable mirror column) or, for any staff role, a triage designation, and history visibility followed role (admin saw everything). The kernel loader now resolves a claim by claim_id (creator = the member who filed it), findReadableCase decides one kernel action per operation on the transaction that does the work (read, read_internal, comment, write_notes, transition, close, assign, upload_evidence, modify_document, export_sealed_evidence), returns null (404) when the caller cannot read the case and a recorded 403 when they can read but not act, and carries the decision's visibility (internal or member_visible) into history filtering and the redaction of internal assessments. Case and workbench assignment record the governed kernel assignment (assignPrimaryRepresentative) and keep assigned_to only as a compatibility mirror; self-assignment is refused by the kernel. Opening a case is a capacity on the canonical membership (member, handler, bulk), not a rank. A triage designation lists the unassigned queue as metadata only (claim id and number, type, status, priority, dates). Grievance convert, priority override and steward recommendation are kernel decisions inside their transactions; grievance create and import use capacity. Document version append now needs the uploader or the kernel's modify-document decision on the linked grievance, and commits with its audit; external document upload is audited atomically. Ten generic-CRUD stub routes over claims and grievances and six legacy documents routes (role-ranked, behind LEGACY_DOCUMENT_API_ENABLED) are retired to 501. Message routes are governed by the thread-participant and thread-assignment policy (the kernel has no message resource) and external matter routes by the external representation authority; both are recorded as subordinate policies with their own proofs. Intake now always files for the authenticated member in every deployment mode. Proven on PGlite with the real kernel storage and real findReadableCase (lib/cases/kernel-claims.pglite.test.ts, 21 tests): creator, assignment, reassignment, revocation, recusal, mandate scope, rank, foreign tenant, designation, history and detail projection. REMAINING: no kernel action exists for creating a case, so creation is a membership capacity; triage designation holders cannot yet route a case (kernel assignment needs an issuance source for designations, an institutional adoption); the kernel grants nothing in production until issuance rules are adopted and storage 0013 and 0020 are qualified; claims carry no unit or territory fact, so scoped supervisory mandates cannot match a claim; real-PostgreSQL qualification of the claims path (the earlier case-read-scope suite was retired with the role model); UI components for status and workflow still call retired stubs and OCR upload has no canonical equivalent.",
+      "consumers": [],
+      "securityImplications": "Seniority, a mutable column or a triage designation could read or change another member's case.",
+      "requiredImplementation": "Add the real-PostgreSQL claims proof; adopt an issuance source for triage routing; migrate the status, workflow and OCR UI to the canonical routes.",
+      "evidence": [
+        { "type": "test", "ref": "apps/union-eyes/lib/cases/kernel-claims.pglite.test.ts" },
+        { "type": "path", "ref": "apps/union-eyes/lib/cases/case-authorization.ts" },
+        { "type": "test", "ref": "apps/union-eyes/lib/__tests__/route-coverage-manifest.test.ts" }
+      ],
+      "status": "IN_PROGRESS",
+      "retirement": { "disposition": "NONE" }
+    },
+    {
       "id": "UE-CONV-K-004",
       "domain": "controls",
       "capability": "Persona action coverage, authorization coverage, documentation supersession and cleanroom deployment proof",

@@ -5,7 +5,9 @@
  */
 
 import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { requireKernelCaseAction } from '@/lib/cases/case-authorization';
+import { ApiError } from '@/lib/api/errors';
 import { recommendSteward } from "@/lib/services/steward-assignment";
 import { auditDataMutation } from "@/lib/audit-logger";
 import {
@@ -21,10 +23,9 @@ export const POST = withOrganizationAuth(async (_request, context, params?: { id
 
   try {
     if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");
-    const canRecommend = await hasMinRole("steward");
-    if (!canRecommend) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "Requires steward role or above");
-    }
+    // Recommending who should take a case is part of assigning it: it needs the kernel's assignment authority.
+    const caseId = params.id;
+    await withRLSContext({ organizationId }, (tx) => requireKernelCaseAction(tx, { userId, organizationId }, caseId, 'case:assign'));
 
     const candidates = await recommendSteward(organizationId, params.id);
 
@@ -38,7 +39,10 @@ export const POST = withOrganizationAuth(async (_request, context, params?: { id
     });
 
     return standardSuccessResponse(candidates);
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'FORBIDDEN') {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "The authority kernel did not authorize this recommendation.");
+    }
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to recommend steward");
   }
 });

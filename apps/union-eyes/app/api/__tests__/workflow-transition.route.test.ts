@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   requireApiAuth: vi.fn(),
   getCaseActor: vi.fn(),
   caseReadScope: vi.fn(() => 'CASE_READ_SCOPE'),
+  findReadableCase: vi.fn(),
   updateClaimStatus: vi.fn(),
   getAllowedTransitions: vi.fn(),
   toLifecycleState: vi.fn(),
@@ -39,6 +40,7 @@ vi.mock('@/lib/cases/case-authorization', async (original) => ({
   ...(await original<typeof import('@/lib/cases/case-authorization')>()),
   getCaseActor: m.getCaseActor,
   caseReadScope: m.caseReadScope,
+  findReadableCase: m.findReadableCase,
 }));
 vi.mock('@/lib/workflow-engine', () => ({ updateClaimStatus: m.updateClaimStatus }));
 vi.mock('@/lib/workflow/case-lifecycle', () => ({ getAllowedTransitions: m.getAllowedTransitions }));
@@ -100,6 +102,7 @@ describe('workflow/transition route', () => {
     vi.clearAllMocks();
     m.requireApiAuth.mockResolvedValue({ userId: 'user_1', organizationId: 'org_1' });
     m.getCaseActor.mockResolvedValue({ userId: 'user_1', organizationId: 'org_1', role: 'steward' });
+    m.findReadableCase.mockResolvedValue({ claimId: 'claim_1', visibility: 'internal' });
     m.transitionSchemaSafeParse.mockReturnValue({
       success: true,
       data: { claimNumber: 'CLM-1', targetStatus: 'resolved', notes: 'done' },
@@ -204,9 +207,24 @@ describe('workflow/transition route', () => {
     expect(m.recordUnionEyesWorkflowTransition).toHaveBeenCalled();
   });
 
-  it('returns 403 for a caller without transition authority and never opens a transaction', async () => {
+  it('returns 404 when the caller cannot even read the case', async () => {
     const { POST } = await loadRoute();
-    m.getCaseActor.mockResolvedValueOnce({ userId: 'member_1', organizationId: 'org_1', role: 'member' });
+    m.findReadableCase.mockResolvedValueOnce(null);
+
+    const response = await POST(new NextRequest('http://localhost/api/workflow/transition', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ claimNumber: 'CLM-1', targetStatus: 'resolved' }),
+    }));
+
+    expect(response.status).toBe(404);
+    expect(m.updateClaimStatus).not.toHaveBeenCalled();
+  });
+
+  it('returns 403 on the kernel decision for a caller without transition authority, before any lock or write', async () => {
+    const { POST } = await loadRoute();
+    const { ApiError } = await import('@/lib/api/errors');
+    m.findReadableCase.mockRejectedValueOnce(ApiError.forbidden('This action is not permitted for this case.'));
 
     const response = await POST(new NextRequest('http://localhost/api/workflow/transition', {
       method: 'POST',
@@ -215,13 +233,32 @@ describe('workflow/transition route', () => {
     }));
 
     expect(response.status).toBe(403);
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ userId: 'user_1' }), 'CLM-1', true, 'case:transition');
     expect(m.updateClaimStatus).not.toHaveBeenCalled();
   });
 
-  it('locks and moves only a case inside the actor read scope, never via an unscoped lookup', async () => {
+  it('returns 403 when the caller may transition but the kernel denies closing the case', async () => {
     const { POST } = await loadRoute();
-    // Even when the auth guard reports no organization, the actor organization governs the scope.
+    const { ApiError } = await import('@/lib/api/errors');
+    m.findReadableCase.mockImplementation(async (_tx: unknown, _actor: unknown, _ref: string, _lock: boolean, action: string) => {
+      if (action === 'case:close') throw ApiError.forbidden('This action is not permitted for this case.');
+      return { claimId: 'claim_1', visibility: 'internal' };
+    });
+
+    const response = await POST(new NextRequest('http://localhost/api/workflow/transition', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ claimNumber: 'CLM-1', targetStatus: 'resolved' }),
+    }));
+
+    expect(response.status).toBe(403);
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'CLM-1', true, 'case:close');
+    expect(m.updateClaimStatus).not.toHaveBeenCalled();
+  });
+
+  it('decides with the actor organization, never the auth guard organization, before locking the case', async () => {
+    const { POST } = await loadRoute();
+    // Even when the auth guard reports no organization, the actor organization governs the decision.
     m.requireApiAuth.mockResolvedValueOnce({ userId: 'user_1', organizationId: undefined });
 
     await POST(new NextRequest('http://localhost/api/workflow/transition', {
@@ -230,7 +267,7 @@ describe('workflow/transition route', () => {
       body: JSON.stringify({ claimNumber: 'CLM-1', targetStatus: 'resolved' }),
     }));
 
-    expect(m.caseReadScope).toHaveBeenCalledWith(expect.objectContaining({ userId: 'user_1', organizationId: 'org_1' }));
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ userId: 'user_1', organizationId: 'org_1' }), 'CLM-1', true, 'case:transition');
   });
 
   it('returns 500 when unexpected errors occur', async () => {

@@ -5,7 +5,7 @@ import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
 import { ingestionBatches, ingestionRecords } from '@/db/schema/ingestion-schema';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { hasCaseFilingCapacity } from '@/lib/cases/case-authorization';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
@@ -150,9 +150,10 @@ export const POST = withOrganizationAuth(async (request, context) => {
   const { organizationId, userId } = context;
   await requireEntitlement(organizationId, 'grievance_case_suite');
 
-  const canImport = await hasMinRole('steward');
+  // Importing many cases is an office-bearer capacity on the canonical membership, not a role rank.
+  const canImport = await hasCaseFilingCapacity({ userId, organizationId }, 'bulk');
   if (!canImport) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only steward or above can import cases');
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Importing cases requires an officer or executive capacity');
   }
 
   let rawBody: any;
@@ -481,12 +482,12 @@ export const POST = withOrganizationAuth(async (request, context) => {
 });
 
 export const GET = withOrganizationAuth(async (request, context) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
   await requireEntitlement(organizationId, 'grievance_case_suite');
 
-  const canImport = await hasMinRole('steward');
+  const canImport = await hasCaseFilingCapacity({ userId, organizationId }, 'bulk');
   if (!canImport) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only steward or above can view import sessions');
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Viewing import sessions requires an officer or executive capacity');
   }
 
   const sessionId = new URL(request.url).searchParams.get('importSessionId');
