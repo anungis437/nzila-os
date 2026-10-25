@@ -26,9 +26,10 @@
     {
       "path": "apps/union-eyes/app/[locale]/dashboard/documents/layout.tsx",
       "methods": [],
-      "operation": "Authenticated session gate for /dashboard/documents. Does not grant document permissions.",
+      "operation": "Authenticated session gate for /dashboard/documents. Links the staff library and the portal document page. Does not grant document permissions.",
       "consumers": [
-        "app/[locale]/dashboard/documents/page.tsx"
+        "app/[locale]/dashboard/documents/page.tsx",
+        "app/[locale]/dashboard/documents/portal/page.tsx"
       ],
       "authorization": "requireUser(); redirect to /login. Organization and document checks stay on the API.",
       "canonicalReplacement": "none — session gate only",
@@ -78,7 +79,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_retained",
       "regressionTests": [],
       "retirementDisposition": "Distinct from the case-document repository. Do not fold it into grievance documents.",
       "disposition": "RETAIN_CANONICAL"
@@ -168,7 +169,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_blocked_legacy_flag",
       "regressionTests": [],
       "retirementDisposition": "ocr-upload no longer patches this route. Other callers may remain. Do not switch it to a new 501 from this tranche.",
       "disposition": "MIGRATE"
@@ -188,7 +189,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_blocked_legacy_flag",
       "regressionTests": [],
       "retirementDisposition": "No product caller found. Keep the existing 501 gate. Deletion waits on the flag and its tests.",
       "disposition": "RETIRE_UNUSED"
@@ -207,7 +208,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_blocked_canonical_contract",
       "regressionTests": [],
       "retirementDisposition": "No in-repo caller. Do not delete until the integrator confirms the generated CRUD surface can close.",
       "disposition": "BLOCKED_CANONICAL_CONTRACT"
@@ -229,7 +230,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_blocked_legacy_flag",
       "regressionTests": [],
       "retirementDisposition": "No product HTTP caller found. Do not delete while the flag and batch service still describe folders.",
       "disposition": "RETIRE_UNUSED"
@@ -253,7 +254,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_blocked_unowned_caller",
       "regressionTests": [],
       "retirementDisposition": "Still has supported callers. Do not switch it to a new 501.",
       "disposition": "MIGRATE"
@@ -296,7 +297,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_sas_without_file_url",
       "regressionTests": [],
       "retirementDisposition": "Leave the external route intact this tranche.",
       "disposition": "BLOCKED_CANONICAL_CONTRACT"
@@ -316,7 +317,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_metadata_only",
       "regressionTests": [],
       "retirementDisposition": "Do not weaken external download permission into a case-read grant.",
       "disposition": "BLOCKED_CANONICAL_CONTRACT"
@@ -335,7 +336,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_cms_retained",
       "regressionTests": [],
       "retirementDisposition": "No in-repo caller. Misnamed CMS CRUD. Do not retarget it at documents and do not delete this tranche.",
       "disposition": "RETIRE_UNUSED"
@@ -354,7 +355,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_cms_retained",
       "regressionTests": [],
       "retirementDisposition": "No in-repo caller. Do not delete this tranche.",
       "disposition": "RETIRE_UNUSED"
@@ -376,7 +377,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_projection",
       "regressionTests": [],
       "retirementDisposition": "Keep the IDOR checks. Out of tranche 1.",
       "disposition": "RETAIN_CANONICAL"
@@ -398,7 +399,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_projection",
       "regressionTests": [],
       "retirementDisposition": "Signature workflow is not the repository journey. Do not merge the two.",
       "disposition": "RETAIN_CANONICAL"
@@ -416,7 +417,7 @@
       "classificationRules": "n/a",
       "storage": "n/a",
       "audit": "n/a",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_retained",
       "regressionTests": [
         "apps/union-eyes/app/api/__tests__/cba-intelligence-documents.route.test.ts"
       ],
@@ -436,7 +437,7 @@
       "classificationRules": "n/a",
       "storage": "n/a",
       "audit": "n/a",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_blocked_legacy_flag",
       "regressionTests": [
         "apps/union-eyes/app/api/__tests__/documents-bulk.route.test.ts"
       ],
@@ -456,7 +457,7 @@
       "classificationRules": "n/a",
       "storage": "n/a",
       "audit": "n/a",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_blocked_legacy_flag",
       "regressionTests": [
         "apps/union-eyes/app/api/__tests__/documents-folders.route.test.ts"
       ],
@@ -476,7 +477,7 @@
       "classificationRules": "n/a",
       "storage": "n/a",
       "audit": "n/a",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_blocked_legacy_flag",
       "regressionTests": [
         "apps/union-eyes/app/api/__tests__/documents-id.route.test.ts"
       ],
@@ -496,7 +497,7 @@
       "classificationRules": "n/a",
       "storage": "n/a",
       "audit": "n/a",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_blocked_unowned_caller",
       "regressionTests": [
         "apps/union-eyes/app/api/__tests__/documents-legacy.route.test.ts"
       ],
@@ -536,7 +537,7 @@
       "classificationRules": "n/a",
       "storage": "n/a",
       "audit": "n/a",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_blocked_unowned_caller",
       "regressionTests": [
         "apps/union-eyes/app/api/__tests__/documents.route.test.ts"
       ],
@@ -556,7 +557,7 @@
       "classificationRules": "n/a",
       "storage": "n/a",
       "audit": "n/a",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_projection",
       "regressionTests": [
         "apps/union-eyes/app/api/__tests__/signatures-documents.route.test.ts"
       ],
@@ -577,7 +578,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_fail_closed",
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "MIGRATE"
@@ -595,7 +596,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_internal_review",
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "MIGRATE"
@@ -603,7 +604,7 @@
     {
       "path": "apps/union-eyes/components/documents/document-browser.tsx",
       "methods": [],
-      "operation": "Canonical document browser. Lists and previews repository metadata, downloads through the audited route, and hosts OCR intake.",
+      "operation": "Canonical repository browser. Bulk download authorizes every selected id and reports permitted, denied, and failed counts. A partial batch is not a complete success.",
       "consumers": [
         "GET /api/documents/repository",
         "GET /api/documents/[id]/download",
@@ -636,7 +637,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_callback_only",
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "MIGRATE"
@@ -654,7 +655,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_callback_only",
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "MIGRATE"
@@ -672,7 +673,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_fail_closed",
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "MIGRATE"
@@ -690,7 +691,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_callback_only",
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "MIGRATE"
@@ -708,7 +709,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_callback_only",
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "MIGRATE"
@@ -726,7 +727,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_fail_closed",
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "BLOCKED_CANONICAL_CONTRACT"
@@ -744,7 +745,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_callback_only",
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "MIGRATE"
@@ -762,7 +763,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_callback_only",
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "MIGRATE"
@@ -824,7 +825,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_fail_closed",
       "regressionTests": [],
       "retirementDisposition": "No tranche-1 caller. Do not delete until a repo-wide import check is repeated in a later tranche.",
       "disposition": "RETIRE_UNUSED"
@@ -862,7 +863,7 @@
       "classificationRules": "n/a",
       "storage": "n/a",
       "audit": "n/a",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_external_pending",
       "regressionTests": [
         "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-client.test.ts"
       ],
@@ -918,7 +919,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "blocked_external_import",
+      "migrationStatus": "tranche_3_external_pending",
       "regressionTests": [],
       "retirementDisposition": "Do not delete. factory.ts is outside this lane and still imports the adapter.",
       "disposition": "RETIRE_UNUSED"
@@ -936,7 +937,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_3_retained",
       "regressionTests": [],
       "retirementDisposition": "Do not merge with the grievance repository.",
       "disposition": "RETAIN_CANONICAL"
@@ -1072,6 +1073,85 @@
       ],
       "tests": [
         "unassigned, revoked, expired, recused primary owner, foreign organization, member, view-only assignment, and privileged document without classification authority"
+      ]
+    }
+  ],
+  "tranche3ContractGaps": [
+    {
+      "id": "legacy-list-unowned-callers",
+      "owner": "integrator",
+      "behavior": "GET and POST /api/documents stay 501 unless LEGACY_DOCUMENT_API_ENABLED is true. Unowned callers still target that route: components/pension/pension-member-console.tsx, lib/mobile/background-sync.ts, and scripts/bootstrap-v2/next-http-smoke.ts which expects 501.",
+      "security": "Do not enable the legacy flag. The enabled handler returns full rows, including fileUrl, and uses role seniority for confidential documents.",
+      "files": [
+        "apps/union-eyes/app/api/documents/route.ts",
+        "apps/union-eyes/components/pension/pension-member-console.tsx",
+        "apps/union-eyes/lib/mobile/background-sync.ts"
+      ]
+    },
+    {
+      "id": "document-folders",
+      "owner": "integrator",
+      "behavior": "No canonical folder route. /api/documents/folders remains behind LEGACY_DOCUMENT_API_ENABLED because RLS evidence cites it as the live document_folders path.",
+      "security": "Do not delete the route or answer 501 while the flag is off beyond the existing gate. Do not infer folder visibility from role seniority.",
+      "files": [
+        "apps/union-eyes/app/api/documents/folders/route.ts"
+      ]
+    },
+    {
+      "id": "document-categories",
+      "owner": "integrator",
+      "behavior": "The categories route is generated CRUD on the documents table. No canonical category action exists.",
+      "security": "Do not retarget the route at repository documents and do not delete it to shrink the inventory.",
+      "files": [
+        "apps/union-eyes/app/api/documents/categories/route.ts"
+      ]
+    },
+    {
+      "id": "portal-cms-routes-are-not-the-document-repository",
+      "owner": "integrator",
+      "behavior": "app/api/portal/documents and its upload route are cmsPages CRUD. The member and staff document journey is /[locale]/dashboard/documents/portal, which reads the canonical repository.",
+      "security": "Do not retarget the CMS routes at case documents. RLS evidence cites them as the live CMS path.",
+      "files": [
+        "apps/union-eyes/app/api/portal/documents/route.ts",
+        "apps/union-eyes/app/[locale]/dashboard/documents/portal/page.tsx"
+      ]
+    },
+    {
+      "id": "signature-provider-activation",
+      "owner": "operations",
+      "behavior": "Signature list and detail responses drop storage locations and extracted text. Historical status fields remain. No provider completion, signatory, or acknowledgment is created here.",
+      "security": "Do not fabricate DocuSign or HelloSign events. A view of a historical signed document stays a view.",
+      "files": [
+        "apps/union-eyes/app/api/signatures/documents/route.ts",
+        "apps/union-eyes/lib/signature/signature-service.ts"
+      ]
+    },
+    {
+      "id": "sharepoint-credentials",
+      "owner": "operations",
+      "behavior": "SharePoint healthCheck returns an error before any network call when client id, secret, or tenant id is missing. Live Graph sync is not activated.",
+      "security": "Do not report a successful sync without credentials and a recorded provider response.",
+      "files": [
+        "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-client.ts"
+      ]
+    },
+    {
+      "id": "staff-console-bulk-download",
+      "owner": "cursor-frozen-tranche-1",
+      "behavior": "DocumentsConsole.handleBulkDownload still opens permitted URLs before a later denial and returns. That file is tranche 1 and was not edited. The portal DocumentBrowser uses authorizeBulkDownload and reports partial outcomes.",
+      "security": "Do not describe the staff console bulk action as an atomic batch. Do not rewrite the tranche 1 console in this tranche.",
+      "files": [
+        "apps/union-eyes/components/documents/documents-console.tsx",
+        "apps/union-eyes/components/documents/document-browser.tsx"
+      ]
+    },
+    {
+      "id": "external-download-sas-activation",
+      "owner": "operations",
+      "behavior": "External download no longer returns documents.fileUrl. A missing version storage key returns 404. A present key still calls generateSasUrl. Live blob credentials were not exercised.",
+      "security": "The SAS URL is an authorized retrieval reference, not a list-field leak. Provider failure must not fall back to the stored file address.",
+      "files": [
+        "apps/union-eyes/app/api/external/documents/[id]/download/route.ts"
       ]
     }
   ]
