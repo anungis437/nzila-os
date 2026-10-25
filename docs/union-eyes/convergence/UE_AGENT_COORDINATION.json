@@ -21,7 +21,21 @@
   },
   "integratedCursorCommits": [
     "38e002e54ae2866a567b4d48d00d386dfe149091",
-    "74aed8ec9bc44d6306918c0056c5a4c788b64b7f"
+    "74aed8ec9bc44d6306918c0056c5a4c788b64b7f",
+    "3e4a9733ffd0c0f50249111a761e42133e4dc6e2",
+    "fcab5609612777c85b17a33152e886243361ccac",
+    "1af25ce6279e5a7072f9eb8ef8d44de0c5d1a379",
+    "79617383443a0a5bed742d9dd5cf39bf282140ee",
+    "7e88b3e56015b0dbe69f21d20b0075c6aedd889f",
+    "1b8337a0958aa5479fe915db4ba42bdd326f6511",
+    "6c0c07ae8c03b5c5b5df6d2294da76025e2fdddb",
+    "911358c741e03a468705d2ea38a4d6ca1e564e0f",
+    "ca7f4d23ce19fd54780c268abc949efb8d2c1b9c",
+    "f32c2ba26a830f543e88b09210aeb69568d55931",
+    "45c7bb5d7e6ad646ae0ced543cc042bb322fc1a3",
+    "e913eab4d7800a98f77ed57f8ff6ca968edd4bd0",
+    "baad35639440f9bbe9dfd4afe1753c5259f1d0f7",
+    "7c17ecf7a597cbcdbc332308b24b95b3349384b0"
   ],
   "cursorMayEdit": [
     "apps/union-eyes/app/[locale]/dashboard/documents/layout.tsx",
@@ -78,7 +92,28 @@
     "apps/union-eyes/lib/documents/canonical-journey.test.ts",
     "apps/union-eyes/lib/documents/canonical-journey.ts",
     "apps/union-eyes/lib/documents/document-repository-client.test.ts",
-    "apps/union-eyes/lib/documents/document-repository-client.ts"
+    "apps/union-eyes/lib/documents/document-repository-client.ts",
+    "apps/union-eyes/app/[locale]/dashboard/documents/portal/page.tsx",
+    "apps/union-eyes/app/api/external/documents/[id]/download/projection.test.ts",
+    "apps/union-eyes/components/documents/document-browser.journey.test.tsx",
+    "apps/union-eyes/components/documents/ocr-upload.journey.test.tsx",
+    "apps/union-eyes/components/documents/portal-documents.journey.test.tsx",
+    "apps/union-eyes/components/documents/portal-documents.tsx",
+    "apps/union-eyes/lib/documents/batch-operations-service.test.ts",
+    "apps/union-eyes/lib/documents/browser-repository.test.ts",
+    "apps/union-eyes/lib/documents/browser-repository.ts",
+    "apps/union-eyes/lib/documents/bulk-download.test.ts",
+    "apps/union-eyes/lib/documents/bulk-download.ts",
+    "apps/union-eyes/lib/documents/ocr-bytes.test.ts",
+    "apps/union-eyes/lib/documents/ocr-bytes.ts",
+    "apps/union-eyes/lib/documents/ocr-intake.test.ts",
+    "apps/union-eyes/lib/documents/ocr-intake.ts",
+    "apps/union-eyes/lib/documents/ocr-processing.test.ts",
+    "apps/union-eyes/lib/documents/qualification-matrix.test.ts",
+    "apps/union-eyes/lib/documents/signature-projection.test.ts",
+    "apps/union-eyes/lib/documents/signature-projection.ts",
+    "apps/union-eyes/lib/documents/tranche2-contract.test.ts",
+    "apps/union-eyes/lib/documents/tranche3-contract.test.ts"
   ],
   "cursorMustConsumeWithoutEditing": [
     "apps/union-eyes/app/api/documents/repository/route.ts",
@@ -122,7 +157,29 @@
     "apps/union-eyes/app/api/documents/repository/downloads/route.ts",
     "apps/union-eyes/app/api/admin/documents/legacy-backfill/route.ts",
     "apps/union-eyes/lib/services/document-blob-reference.test.ts",
-    "apps/union-eyes/app/api/__tests__/documents-download-version-contract.pglite.test.ts"
+    "apps/union-eyes/app/api/__tests__/documents-download-version-contract.pglite.test.ts",
+    "apps/union-eyes/lib/documents/intake-lifecycle.ts",
+    "apps/union-eyes/lib/documents/intake-storage.ts",
+    "apps/union-eyes/lib/documents/intake-acceptance.ts",
+    "apps/union-eyes/lib/documents/ocr-authority.ts",
+    "apps/union-eyes/lib/documents/ocr-authority.test.ts",
+    "apps/union-eyes/lib/documents/ocr-extract.ts",
+    "apps/union-eyes/lib/documents/transcripts.ts",
+    "apps/union-eyes/lib/documents/transcripts.pglite.test.ts",
+    "apps/union-eyes/lib/documents/document-intake.pglite.test.ts",
+    "apps/union-eyes/lib/documents/test-support/pglite-document-database.ts",
+    "apps/union-eyes/app/api/documents/intakes/route.ts",
+    "apps/union-eyes/app/api/documents/intakes/[id]/route.ts",
+    "apps/union-eyes/app/api/documents/intakes/[id]/cancel/route.ts",
+    "apps/union-eyes/app/api/documents/[id]/transcript/route.ts",
+    "apps/union-eyes/app/api/documents/[id]/transcript/publish/route.ts",
+    "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
+    "apps/union-eyes/app/api/cron/document-intake-reaper/route.ts",
+    "apps/union-eyes/app/api/external/documents/[id]/download/route.pglite.test.ts",
+    "apps/union-eyes/lib/signature/provider-sync.ts",
+    "apps/union-eyes/lib/signature/provider-sync.test.ts",
+    "apps/union-eyes/lib/signature/signature-sync.pglite.test.ts",
+    "apps/union-eyes/db/__tests__/document-intake.postgres.test.ts"
   ],
   "integratorReservedCaseDocumentRoutes": [
     "apps/union-eyes/app/api/arbitration/precedents/[id]/documents/route.ts",
@@ -171,6 +228,90 @@
       "integrationSha": "146da419fa88e4203e488cdcabfd19c0ae161888",
       "method": "cherry-pick with integrator conflict resolution",
       "note": "Conflicts in the dashboard documents page (kept the member surface, added the console for staff), the download route and its test (kept persistAtomicAudit), and generated inventory outputs."
+    },
+    {
+      "tranche": 2,
+      "sourceSha": "3e4a9733ffd0c0f50249111a761e42133e4dc6e2",
+      "integrationSha": "018a3a0c5690d5e379a6fbd8611813c3a9c26e8e",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": 2,
+      "sourceSha": "fcab5609612777c85b17a33152e886243361ccac",
+      "integrationSha": "1a70c38ea8b9ede52de5cdd1d5798860a5bf72cb",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": 2,
+      "sourceSha": "1af25ce6279e5a7072f9eb8ef8d44de0c5d1a379",
+      "integrationSha": "bb2c626c60b0ba526619bcd6a0c96d0c4b0be264",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": 2,
+      "sourceSha": "79617383443a0a5bed742d9dd5cf39bf282140ee",
+      "integrationSha": "fe12a9066412f37e9991a21287942967fdeb83b4",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": 2,
+      "sourceSha": "7e88b3e56015b0dbe69f21d20b0075c6aedd889f",
+      "integrationSha": "78eadb37cfeb8a7a1e56a5488d7829de9f8e8611",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": 2,
+      "sourceSha": "1b8337a0958aa5479fe915db4ba42bdd326f6511",
+      "integrationSha": "720f3573317bb7743fb43e8d453cbb435eb15d43",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": 2,
+      "sourceSha": "6c0c07ae8c03b5c5b5df6d2294da76025e2fdddb",
+      "integrationSha": "939f03a11bf036b2af06cfe116d3bd6c15bb08cb",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": 2,
+      "sourceSha": "911358c741e03a468705d2ea38a4d6ca1e564e0f",
+      "integrationSha": "8540f47f70330199c383e4802b20f88a6b271e29",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": 2,
+      "sourceSha": "ca7f4d23ce19fd54780c268abc949efb8d2c1b9c",
+      "integrationSha": "69d5749262d8cb6512aee800f41ee1fb0a955c79",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": "3-implementation",
+      "sourceSha": "f32c2ba26a830f543e88b09210aeb69568d55931",
+      "integrationSha": "4c82602d47df1e6df56382bcb261098e225fe961",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": "3-implementation",
+      "sourceSha": "45c7bb5d7e6ad646ae0ced543cc042bb322fc1a3",
+      "integrationSha": "a45fc1e3347e12bace47526eff7cf2f875151798",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": "3-implementation",
+      "sourceSha": "e913eab4d7800a98f77ed57f8ff6ca968edd4bd0",
+      "integrationSha": "295e64864249f2d6fc6fe6a7dd6c32a52fe454f2",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": "3-qualification",
+      "sourceSha": "baad35639440f9bbe9dfd4afe1753c5259f1d0f7",
+      "integrationSha": "801f93d1121806b1e74e84d688baf3d2123db716",
+      "method": "cherry-pick -C (author and message preserved)"
+    },
+    {
+      "tranche": "3-qualification",
+      "sourceSha": "7c17ecf7a597cbcdbc332308b24b95b3349384b0",
+      "integrationSha": "c1aa3999617a4d3fbbcc7c710ccedc65d33b6e72",
+      "method": "cherry-pick -C (author and message preserved)"
     }
   ],
   "integratorCorrections": [
@@ -185,6 +326,20 @@
         "B5"
       ],
       "note": "Integrator-owned corrections applied after the cherry-picks. Cursor must rebase onto this commit before editing integratorCorrectedPaths."
+    },
+    {
+      "tranche": "2-and-3",
+      "integrationSha": "756abaea161a0f15787da53ccaf320b9ae462573",
+      "findings": [
+        "canonical intake lifecycle",
+        "repository create audit",
+        "governed OCR authority",
+        "reviewed transcription",
+        "external SAS audit",
+        "signature provider acknowledgment",
+        "retained consumer migration"
+      ],
+      "note": "Integrator-owned canonical contracts and corrections applied after the tranche 2 and 3 cherry-picks. Cursor rebases onto this commit before editing integratorCorrectedPaths."
     }
   ],
   "integratorCorrectedPaths": [
@@ -193,7 +348,17 @@
     "apps/union-eyes/lib/documents/canonical-journey.ts",
     "apps/union-eyes/lib/documents/document-repository-client.ts",
     "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json",
-    "apps/union-eyes/app/api/documents/[id]/download/route.ts"
+    "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+    "apps/union-eyes/app/api/documents/upload/route.ts",
+    "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+    "apps/union-eyes/app/api/documents/[id]/ocr/route.ts",
+    "apps/union-eyes/lib/documents/ocr-intake.ts",
+    "apps/union-eyes/lib/documents/ocr-intake.test.ts",
+    "apps/union-eyes/components/documents/ocr-upload.tsx",
+    "apps/union-eyes/components/documents/ocr-upload.journey.test.tsx",
+    "apps/union-eyes/lib/documents/canonical-journey.test.ts",
+    "apps/union-eyes/components/pension/pension-member-console.tsx",
+    "apps/union-eyes/lib/mobile/background-sync.ts"
   ],
   "trancheOneQualification": {
     "status": "QUALIFIED_LOCAL",
@@ -211,42 +376,75 @@
     ]
   },
   "trancheTwo": {
-    "status": "IN_PROGRESS",
-    "integrated": false,
-    "isolation": "Remains isolated on the Cursor branch. Not recorded in integratedCursorCommits.",
-    "p0FindingsOpenOnCursorBranch": [
-      "upload route: a client-controlled discardBlobPath can delete an organization-prefixed blob without proving ownership of that specific object",
-      "OCR route: hasCaseAccess is passed as true instead of a verified kernel case-access decision"
-    ]
+    "status": "INTEGRATED_QUALIFIED_ENGINEERING",
+    "integrated": true,
+    "sourceRange": "74aed8ec9bc44d6306918c0056c5a4c788b64b7f..ca7f4d23ce19fd54780c268abc949efb8d2c1b9c",
+    "integrationSha": "756abaea161a0f15787da53ccaf320b9ae462573"
   },
   "reservedCanonicalContracts": [
     {
       "id": "intake-cleanup",
       "owner": "integrator",
-      "status": "RESERVED",
+      "status": "DELIVERED",
       "contract": "Short-lived, ownership-bound intake cleanup. A stored-but-unattached upload is described by an intake record bound to organization, uploader, the exact blob path, a content hash and an expiry measured in minutes. Cleanup may remove only a blob with a live, unconsumed intake record owned by the caller; creating the document consumes the record. A client-supplied path, or a path that merely carries the organization prefix, is never deletion authority. Expired records are reaped by a governed job, with an audit entry per deletion.",
-      "cursorMustNot": "Delete a blob from a client-supplied path, or from an organization prefix match."
+      "cursorMustNot": "Delete a blob from a client-supplied path, or from an organization prefix match.",
+      "deliveredBy": "756abaea161a0f15787da53ccaf320b9ae462573"
     },
     {
       "id": "ocr-processing-authority",
       "owner": "integrator",
-      "status": "RESERVED",
+      "status": "DELIVERED",
       "contract": "OCR processing authority. Processing a document or uploaded file is an action decided by the kernel for the linked case (read or upload_evidence as the integrator specifies), on the transaction that does the work. A caller-asserted hasCaseAccess flag is not an input. Unlinked documents follow the document-level rule (uploader, explicit download grant, organization-level documents only for the document authority). The decision and the extracted-text hash are audited.",
-      "cursorMustNot": "Pass hasCaseAccess: true, or derive case access from a role or a label."
+      "cursorMustNot": "Pass hasCaseAccess: true, or derive case access from a role or a label.",
+      "deliveredBy": "756abaea161a0f15787da53ccaf320b9ae462573"
     },
     {
       "id": "unlinked-document-create-audit",
       "owner": "integrator",
-      "status": "RESERVED",
+      "status": "DELIVERED",
       "contract": "Durable audit of document creation without a case link. The document, its first version and its audit record commit together under persistAtomicAudit; a refused create (denied, hash mismatch, storage reuse) is recorded on the denial path without a document existing. No create path may skip the audit because it has no linked entity.",
-      "cursorMustNot": "Add a second create path, or create a document row outside the repository route."
+      "cursorMustNot": "Add a second create path, or create a document row outside the repository route.",
+      "deliveredBy": "756abaea161a0f15787da53ccaf320b9ae462573"
     },
     {
       "id": "reviewed-transcript-writes",
       "owner": "integrator",
-      "status": "RESERVED",
+      "status": "DELIVERED",
       "contract": "Governed reviewed-transcript writes. OCR or transcription output is a candidate until a named human reviews it. A reviewed transcript is a new, hash-bound artifact linked to the source document version, written under the kernel document-modification decision (or the uploader rule for unlinked documents), versioned, and audited with reviewer, source version and text hash. Unreviewed output is never stored as document content or as a document version.",
-      "cursorMustNot": "Write OCR output into documents, document_versions or metadata without the reviewed-transcript contract."
+      "cursorMustNot": "Write OCR output into documents, document_versions or metadata without the reviewed-transcript contract.",
+      "deliveredBy": "756abaea161a0f15787da53ccaf320b9ae462573"
     }
-  ]
+  ],
+  "trancheThree": {
+    "status": "INTEGRATED_QUALIFIED_ENGINEERING",
+    "integrated": true,
+    "implementationRange": "ca7f4d23ce19fd54780c268abc949efb8d2c1b9c..e913eab4d7800a98f77ed57f8ff6ca968edd4bd0",
+    "qualificationRange": "e913eab4d7800a98f77ed57f8ff6ca968edd4bd0..7c17ecf7a597cbcdbc332308b24b95b3349384b0",
+    "integrationSha": "756abaea161a0f15787da53ccaf320b9ae462573"
+  },
+  "trancheTwoThreeQualification": {
+    "status": "QUALIFIED_ENGINEERING",
+    "proven": [
+      "temporary intake lifecycle open to accepted, expired or cancelled: server-issued key, checksum and principal binding, atomic acceptance with the document or version and its audit, replay, concurrent acceptance (two real connections), cancel and accept races, expiry, abandoned-upload reconciliation, failed storage deletion with bounded retry, accepted objects never deletable (database triggers and manifest privileges)",
+      "every repository create and version append audits in the same transaction; a failed audit commits nothing and leaves the intake open (PGlite and PostgreSQL 15.19 and 16.15, runtime and system roles, forced RLS)",
+      "canonical OCR processing authority (case:process_ocr, explicit grant, adopted member policy) as a pure decision matrix; the OCR route against real constraints with the audit fault injected",
+      "machine extraction, human draft, human-reviewed and published-as-evidence transcript records: contiguous immutable revisions, stale-write refusal, independent review, once-only publication, tenant isolation as the runtime role",
+      "external matter document download records principal, organization, authority, matter, document and version durably before the link; the link is never recorded; withheld on audit or signing failure",
+      "signature provider status sync: provider event time versus local receipt time, terminal finality, forward-only, replay and concurrent-sync idempotency, immutable acknowledgment (database constraint and trigger), audit rollback",
+      "platform 0022 and 0023 and RLS 0022 applied by the approved bootstrap on fresh Django-migrated PostgreSQL 15.19 and 16.15 databases; storage-authority grants verified; canonical schema census unchanged",
+      "repository-wide contract tests (10,255 passed; 4 failures are 2 environmental and 2 fixed in this change) and the full union-eyes suite"
+    ],
+    "incomplete": [
+      "signed-in member, representative and staff browser journeys on an authorized non-production candidate (credentialed environment required; jsdom journeys are not a substitute)",
+      "real OCR bytes against a live processor and object store (processor and blob credentials required)",
+      "signature provider acceptance (sandbox provider accounts, signed webhook secrets and an approved envelope set required; none was contacted)",
+      "SharePoint acceptance (tenant, client id and secret for a non-production site required)",
+      "live external SAS issuance against real blob credentials",
+      "adopted institutional member OCR processing policy (an institutional decision; none is adopted, so members who are not case participants cannot process documents)",
+      "sharing, disclosure, export, retention execution and hold release remain unimplemented and fail closed (they need institutional disclosure and retention policy)",
+      "legacy backfill has not been run against any customer data"
+    ]
+  },
+  "UE_CURSOR_DOCUMENT_INTEGRATION": "PASS",
+  "UE_CURSOR_DOCUMENT_INTEGRATION_SCOPE": "Engineering integration of the Cursor document lane (tranches 1, 2 and 3) and delivery of the canonical contracts it depends on. It is not credentialed acceptance, institutional adoption, staging or production readiness; those remain NO_GO and the incomplete list above is the exact set of outstanding activation prerequisites."
 }

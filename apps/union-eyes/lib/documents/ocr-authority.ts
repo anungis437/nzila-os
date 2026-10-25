@@ -11,7 +11,7 @@
  *     processing policy (default: not adopted, so nothing is opened until the institution adopts it).
  *   - Every document also passes the classification policy (isDocumentVisibleByPolicy). Processing never widens
  *     what a principal may see.
- *   - The old unionRepId column, a steward role and a view or download grant are not inputs.
+ *   - The old representative-identifier column, a steward role and a view or download grant are not inputs.
  *
  * The decision is pure; resolveOcrAuthority loads the facts from the kernel and the document tables.
  */

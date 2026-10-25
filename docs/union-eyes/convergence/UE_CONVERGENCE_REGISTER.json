@@ -6,9 +6,23 @@
   "cursorDevelopmentBaselineSha": "fde81a81a088a1c8c4aa6d498b2b3a52e0dea298",
   "integratedCursorCommits": [
     "38e002e54ae2866a567b4d48d00d386dfe149091",
-    "74aed8ec9bc44d6306918c0056c5a4c788b64b7f"
+    "74aed8ec9bc44d6306918c0056c5a4c788b64b7f",
+    "3e4a9733ffd0c0f50249111a761e42133e4dc6e2",
+    "fcab5609612777c85b17a33152e886243361ccac",
+    "1af25ce6279e5a7072f9eb8ef8d44de0c5d1a379",
+    "79617383443a0a5bed742d9dd5cf39bf282140ee",
+    "7e88b3e56015b0dbe69f21d20b0075c6aedd889f",
+    "1b8337a0958aa5479fe915db4ba42bdd326f6511",
+    "6c0c07ae8c03b5c5b5df6d2294da76025e2fdddb",
+    "911358c741e03a468705d2ea38a4d6ca1e564e0f",
+    "ca7f4d23ce19fd54780c268abc949efb8d2c1b9c",
+    "f32c2ba26a830f543e88b09210aeb69568d55931",
+    "45c7bb5d7e6ad646ae0ced543cc042bb322fc1a3",
+    "e913eab4d7800a98f77ed57f8ff6ca968edd4bd0",
+    "baad35639440f9bbe9dfd4afe1753c5259f1d0f7",
+    "7c17ecf7a597cbcdbc332308b24b95b3349384b0"
   ],
-  "lastIntegrationCheckpointSha": "b56f71bd095bb8f91b6146b97fbd20665451ab28",
+  "lastIntegrationCheckpointSha": "756abaea161a0f15787da53ccaf320b9ae462573",
   "semanticCompatibility": "A conflict-free textual merge does not establish semantic compatibility. Each integrated Cursor commit is validated on a fresh checkpoint before it is recorded here.",
   "deployment": {
     "UE_SAAS_OPERATIONAL_READINESS": "NO_GO",
@@ -23,10 +37,84 @@
     {
       "sourceSha": "74aed8ec9bc44d6306918c0056c5a4c788b64b7f",
       "integrationSha": "146da419fa88e4203e488cdcabfd19c0ae161888"
+    },
+    {
+      "sourceSha": "3e4a9733ffd0c0f50249111a761e42133e4dc6e2",
+      "integrationSha": "018a3a0c5690d5e379a6fbd8611813c3a9c26e8e"
+    },
+    {
+      "sourceSha": "fcab5609612777c85b17a33152e886243361ccac",
+      "integrationSha": "1a70c38ea8b9ede52de5cdd1d5798860a5bf72cb"
+    },
+    {
+      "sourceSha": "1af25ce6279e5a7072f9eb8ef8d44de0c5d1a379",
+      "integrationSha": "bb2c626c60b0ba526619bcd6a0c96d0c4b0be264"
+    },
+    {
+      "sourceSha": "79617383443a0a5bed742d9dd5cf39bf282140ee",
+      "integrationSha": "fe12a9066412f37e9991a21287942967fdeb83b4"
+    },
+    {
+      "sourceSha": "7e88b3e56015b0dbe69f21d20b0075c6aedd889f",
+      "integrationSha": "78eadb37cfeb8a7a1e56a5488d7829de9f8e8611"
+    },
+    {
+      "sourceSha": "1b8337a0958aa5479fe915db4ba42bdd326f6511",
+      "integrationSha": "720f3573317bb7743fb43e8d453cbb435eb15d43"
+    },
+    {
+      "sourceSha": "6c0c07ae8c03b5c5b5df6d2294da76025e2fdddb",
+      "integrationSha": "939f03a11bf036b2af06cfe116d3bd6c15bb08cb"
+    },
+    {
+      "sourceSha": "911358c741e03a468705d2ea38a4d6ca1e564e0f",
+      "integrationSha": "8540f47f70330199c383e4802b20f88a6b271e29"
+    },
+    {
+      "sourceSha": "ca7f4d23ce19fd54780c268abc949efb8d2c1b9c",
+      "integrationSha": "69d5749262d8cb6512aee800f41ee1fb0a955c79"
+    },
+    {
+      "sourceSha": "f32c2ba26a830f543e88b09210aeb69568d55931",
+      "integrationSha": "4c82602d47df1e6df56382bcb261098e225fe961"
+    },
+    {
+      "sourceSha": "45c7bb5d7e6ad646ae0ced543cc042bb322fc1a3",
+      "integrationSha": "a45fc1e3347e12bace47526eff7cf2f875151798"
+    },
+    {
+      "sourceSha": "e913eab4d7800a98f77ed57f8ff6ca968edd4bd0",
+      "integrationSha": "295e64864249f2d6fc6fe6a7dd6c32a52fe454f2"
+    },
+    {
+      "sourceSha": "baad35639440f9bbe9dfd4afe1753c5259f1d0f7",
+      "integrationSha": "801f93d1121806b1e74e84d688baf3d2123db716"
+    },
+    {
+      "sourceSha": "7c17ecf7a597cbcdbc332308b24b95b3349384b0",
+      "integrationSha": "c1aa3999617a4d3fbbcc7c710ccedc65d33b6e72"
     }
   ],
   "trancheTwo": {
-    "status": "IN_PROGRESS",
-    "integrated": false
-  }
+    "status": "INTEGRATED_QUALIFIED_ENGINEERING",
+    "integrated": true
+  },
+  "trancheThree": {
+    "status": "INTEGRATED_QUALIFIED_ENGINEERING",
+    "integrated": true
+  },
+  "UE_CURSOR_DOCUMENT_INTEGRATION": "PASS",
+  "residualEngineeringIssues": [
+    "document sharing, disclosure, export, retention execution and hold release (fail closed; need institutional policy)",
+    "document folders and categories have no canonical contract (retained, retired to 501)"
+  ],
+  "externalActivationRequirements": [
+    "signed-in member, representative and staff browser journeys on an authorized non-production candidate (credentialed environment required; jsdom journeys are not a substitute)",
+    "real OCR bytes against a live processor and object store (processor and blob credentials required)",
+    "signature provider acceptance (sandbox provider accounts, signed webhook secrets and an approved envelope set required; none was contacted)",
+    "SharePoint acceptance (tenant, client id and secret for a non-production site required)",
+    "live external SAS issuance against real blob credentials",
+    "adopted institutional member OCR processing policy (an institutional decision; none is adopted, so members who are not case participants cannot process documents)",
+    "legacy backfill has not been run against any customer data"
+  ]
 }

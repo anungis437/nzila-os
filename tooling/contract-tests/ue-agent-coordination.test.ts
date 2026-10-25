@@ -17,8 +17,10 @@ const coordination = JSON.parse(
   cursorForbiddenPathPrefixes: string[]
   integratedCursorCommits: string[]
   integratedCursorCommitProvenance: Array<{ sourceSha: string; integrationSha: string }>
-  reservedCanonicalContracts: Array<{ id: string; owner: string; status: string }>
+  reservedCanonicalContracts: Array<{ id: string; owner: string; status: string; deliveredBy?: string }>
   trancheTwo: { status: string; integrated: boolean }
+  trancheThree: { status: string; integrated: boolean }
+  UE_CURSOR_DOCUMENT_INTEGRATION: string
   deployment: { UE_SAAS_OPERATIONAL_READINESS: string; PRODUCTION_DEPLOYMENT_AUTHORIZED: string }
 }
 
@@ -45,9 +47,24 @@ describe('Union Eyes agent coordination lanes', () => {
     expect(ancestor(CURSOR_BASELINE)).toBe(true)
     expect(coordination.deployment.UE_SAAS_OPERATIONAL_READINESS).toBe('NO_GO')
     expect(coordination.deployment.PRODUCTION_DEPLOYMENT_AUTHORIZED).toBe('NO')
+    // The 16 commits of the Cursor range fde81a81a..7c17ecf7a, in order: tranche 1 (2), tranche 2 (9), tranche 3 (5).
     expect(coordination.integratedCursorCommits).toEqual([
       '38e002e54ae2866a567b4d48d00d386dfe149091',
       '74aed8ec9bc44d6306918c0056c5a4c788b64b7f',
+      '3e4a9733ffd0c0f50249111a761e42133e4dc6e2',
+      'fcab5609612777c85b17a33152e886243361ccac',
+      '1af25ce6279e5a7072f9eb8ef8d44de0c5d1a379',
+      '79617383443a0a5bed742d9dd5cf39bf282140ee',
+      '7e88b3e56015b0dbe69f21d20b0075c6aedd889f',
+      '1b8337a0958aa5479fe915db4ba42bdd326f6511',
+      '6c0c07ae8c03b5c5b5df6d2294da76025e2fdddb',
+      '911358c741e03a468705d2ea38a4d6ca1e564e0f',
+      'ca7f4d23ce19fd54780c268abc949efb8d2c1b9c',
+      'f32c2ba26a830f543e88b09210aeb69568d55931',
+      '45c7bb5d7e6ad646ae0ced543cc042bb322fc1a3',
+      'e913eab4d7800a98f77ed57f8ff6ca968edd4bd0',
+      'baad35639440f9bbe9dfd4afe1753c5259f1d0f7',
+      '7c17ecf7a597cbcdbc332308b24b95b3349384b0',
     ])
   })
 
@@ -71,15 +88,20 @@ describe('Union Eyes agent coordination lanes', () => {
     }
   })
 
-  it('records tranche 1 with source provenance and keeps tranche 2 out', () => {
+  it('records every integrated tranche with source provenance and an integration commit reachable from HEAD', () => {
     expect(coordination.integratedCursorCommitProvenance.map((p) => p.sourceSha)).toEqual(coordination.integratedCursorCommits)
     for (const { integrationSha } of coordination.integratedCursorCommitProvenance) {
       expect(ancestor(integrationSha), integrationSha).toBe(true)
     }
-    expect(coordination.trancheTwo).toMatchObject({ status: 'IN_PROGRESS', integrated: false })
+    expect(coordination.integratedCursorCommitProvenance).toHaveLength(16)
+    expect(new Set(coordination.integratedCursorCommitProvenance.map((p) => p.integrationSha)).size).toBe(16)
+    expect(coordination.trancheTwo).toMatchObject({ status: 'INTEGRATED_QUALIFIED_ENGINEERING', integrated: true })
+    expect(coordination.trancheThree).toMatchObject({ status: 'INTEGRATED_QUALIFIED_ENGINEERING', integrated: true })
+    // Engineering integration only: activation and release gates are unchanged.
+    expect(coordination.UE_CURSOR_DOCUMENT_INTEGRATION).toBe('PASS')
   })
 
-  it('reserves the tranche 2 canonical contracts for the integrator', () => {
+  it('delivered the tranche 2 canonical contracts as the integrator', () => {
     expect(coordination.reservedCanonicalContracts.map((c) => c.id).sort()).toEqual([
       'intake-cleanup',
       'ocr-processing-authority',
@@ -87,7 +109,8 @@ describe('Union Eyes agent coordination lanes', () => {
       'unlinked-document-create-audit',
     ])
     for (const contract of coordination.reservedCanonicalContracts) {
-      expect(contract).toMatchObject({ owner: 'integrator', status: 'RESERVED' })
+      expect(contract).toMatchObject({ owner: 'integrator', status: 'DELIVERED' })
+      expect(ancestor((contract as { deliveredBy: string }).deliveredBy)).toBe(true)
     }
   })
 })
